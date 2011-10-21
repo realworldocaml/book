@@ -1,0 +1,8 @@
+#!/usr/bin/env osh
+
+FILES = $(glob *_exercises.tex)
+
+foreach(x, $(FILES))
+   sed -f answers.sed < $x > $x.tmp
+   mv $x.tmp $x
+   

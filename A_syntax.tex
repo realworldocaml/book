@@ -1,0 +1,980 @@
+%
+%
+%
+\labelchapter{syntax}{Syntax}
+
+Whenever learning a new language it is useful to have a guide to the language's syntax.  The OCaml
+reference manual describes the syntax using a context-free grammar.  The syntax we give here uses
+the same format, and it also serves as an index into the book, listing the pages where specific
+syntactical features are introduced.  The OCaml language is still evolving; you should consider the
+reference manual to be the authoritative definition.  However, it is likely that the syntax here will
+be very similar to the one you are using.
+
+\section{Notation}
+
+The grammar is specified in standard notation called Backus-Naur Form (BNF), where a grammar
+consists of a start symbol, a set of nonterminal symbols, a set of terminal symbols, and a set of
+productions.  The terminal symbols represent the basic words of input, like keywords, numbers,
+special symbols, \emph{etc}.  A production the form $s \mathrel{\hbox{::=}} s_1 s_2 \cdots s_n$,
+where $s$ is a nonterminal, and $s_1 s_2 \cdots s_n$ is a sequence of symbols.  For example, the
+following production says, informally, that an expression can be a conditional that starts with the
+keyword \hbox{\lstinline/if/}, following by an expression, followed by the keyword \hbox{\lstinline/then/},
+\emph{etc}.
+
+\begin{ocaml}
+$\nt{expression}$ ::= if $\nt{expression}$ then $\nt{expression}$ else $\nt{expression}$
+\end{ocaml}
+%
+We write terminal symbols in a fixed-width font \hbox{\lstinline/if/}, and nonterminals in a slanted font
+$\nt{expression}$.
+
+By convention, a vertical bar on the right hand side of a production is shorthand for multiple
+productions.  The following two grammars are equivalent.
+
+\begin{center}
+\begin{tabular}{l|l}
+Short form & Meaning\\
+\hline
+\begin{tabular}[t]{rcl}
+$\nt{d}$ & ::= & 0 | 1
+\end{tabular}
+&
+\begin{tabular}[t]{rcl}
+$\nt{d}$ & ::= & 0\\
+$\nt{d}$ & ::= & 1
+\end{tabular}
+\end{tabular}
+\end{center}
+%
+For brevity, we'll also use meta-notation for some kinds of repetition.  We use Greek letters for
+sequences of symbols.
+
+\begin{center}
+\begin{tabular}{ll}
+Description & Meta-notation\\
+\hline
+Optional (zero or one) & $\optleft \beta \optright$\\
+Repetition (zero or more) & $\repleft \beta \repzero$\\
+Repetition (one or more) & $\repleft \beta \repone$\\
+Repetition with separator & $\repleft \beta \repzero\separator{\alpha}$\\
+Repetition with separator and optional terminator & $\repleft \beta \repzero\sepinator{\alpha}$\\
+Repetition with separator and optional prefix & $\repleft \beta \repzero\sepprefix{\alpha}$\\
+Choice & \hbox{\lstinline/$\repleft \alpha | \beta \repright$/}\\
+Character choice & \hbox{\lstinline/$\repleft$a$|$b$|$c$\repright$/}\\
+Inverted character choice & \hbox{\lstinline/$\repleftminus$a$|$b$|$c$\repright$/}\\
+Character range & \hbox{\lstinline/$\repleft$0..9$\repright$/}
+\end{tabular}
+\end{center}
+%
+When the meta-brackets enclose a single symbol \hbox{\lstinline/$\repleft s \repone$/}, we will often omit
+them, writing $s\supone$ instead.
+
+To summarize the repetition forms, a superscript $\cdot^*$ means zero or more repetitions, a
+superscript $\cdot^+$ means zero or more, and a superscript $\cdot^?$ means zero or one.  A
+subscript $\cdot\separator{s}$ means that the repetitions are separated by a symbol $s$.  The 
+subscript $\cdot\sepinator{s}$ means that the final element is optionally followed by the separator;
+and $\cdot\sepprefix{s}$ means that separator can also be used as a prefix to each element.
+
+Choice is allowed, in \hbox{\lstinline/$\repleft \alpha | \beta \repright$/} the alternatives are $\alpha$
+and $\beta$.  When used with characters, a leading ``hat''
+\hbox{\lstinline/$\repleftminus$a$|$b$|$c$\repright$/} means any character in the ASCII character set
+\emph{except} \hbox{\lstinline/a/}, \hbox{\lstinline/b/}, or \hbox{\lstinline/c/}.  A character range
+\hbox{\lstinline/$\repleft c_1$..$c_2 \repright$/} includes all characters with ASCII codes between $c_1$
+and $c_2$, inclusive.
+
+For some examples, consider the following hypothetical grammar.
+
+\begin{center}
+\begin{tabular}{rcl}
+$\nt{e}$ & ::= & \hbox{\lstinline/$\repleft$0..9$|$_$\repone$/}\\
+& | & \hbox{\lstinline/( $\repleft$ $\nt{e}$ $\repone\separator{,}$ )/}\\
+& | & \hbox{\lstinline/[ $\repleft$ $\nt{e}$ $\repzero\sepinator{;}$ ]/}
+\end{tabular}
+\end{center}
+%
+The following table lists some sentences, where we use the term ``legal'' to mean that the
+sentence is in the language of this hypothetical grammar.
+
+\begin{center}
+\begin{tabular}{l|l}
+Legal sentences & Illegal sentences\\
+\hline
+\hbox{\lstinline/( 0, 1, 72_134 )/} & \hbox{\lstinline/( )/}\\
+\hbox{\lstinline/[ ]/}             & \hbox{\lstinline/[;]/}\\
+\hbox{\lstinline/[ 3; 2; 6 ]/}     & \hbox{\lstinline/[3 2; 6]/}\\
+\hbox{\lstinline/[ 14; 55; 237; ]/}
+\end{tabular}
+\end{center}
+%
+The syntax of OCaml can be placed into several categories: expressions, type expressions, structure
+expressions, structure types, module expressions and types, and class expressions and types.
+We'll cover each of these, but first it is useful to describe the terminal symbols.
+
+\section{Terminal symbols (lexemes)}
+
+The terminal symbols are the ``words'' that make up a program, including keywords, numbers, special
+symbols, and other things.
+
+\subsection{Whitespace and comments}
+
+Whitespace includes the following characters: space, tab, carriage return, newline, and form feed.
+When it occurs outside of character and string literals, whitespace is used to separate the terminal
+symbols, but is otherwise ignored.  Whitespace within character and string literals is treated as a
+constant.
+
+Comments begin with the two-character sequence \verb/(*/ and end with the two-character
+sequence \verb/*)/.  Comments are treated as whitespace.  The text within a comment is mostly
+unrestricted.  However, comments may be nested, and comment delimiters that occur within text that
+appears like a string or character literal are ignored.  The reason for this is to allow arbitrary
+OCaml code to be commented simply by enclosing it in comment delimiters without requiring additional editing.
+
+The following comments are properly delimited.
+
+\begin{ocaml}
+(* This is (* a nested *) comment *)
+(* let a = (* b in *) c *)
+(* let a = "a delimiter (* in a string" in b *)
+\end{ocaml}
+%
+The following lines are not properly terminated comments.
+
+\begin{ocaml}
+(* This is not a (* nested comment *)
+(* let a = "a delimiter" (* "in a string" in b *)
+\end{ocaml}
+
+\subsection{Keywords}
+
+The following table lists the keywords in OCaml.
+%
+\begin{center}
+\begin{tabular}{lll}
+\begin{tabular}[t]{ll}
+Keyword & Page\\
+\hline
+\hbox{\lstinline/and/} & \pageref{keyword:and}\\
+\hbox{\lstinline/as/}  & \pageref{keyword:as(patterns)}, \pageref{keyword:as(types)}\\
+\hbox{\lstinline/assert/} & \pageref{keyword:assert}\\
+\hbox{\lstinline/asr/} & \pageref{keyword:asr}\\
+\hbox{\lstinline/begin/} & \pageref{keyword:begin}\\
+\hbox{\lstinline/class/} & \pageref{keyword:class}\\
+\hbox{\lstinline/constraint/} & \pageref{keyword:constraint}\\
+\hbox{\lstinline/do/} & \pageref{keyword:do}\\
+\hbox{\lstinline/done/} & \pageref{keyword:done}\\
+\hbox{\lstinline/downto/} & \pageref{keyword:downto}\\
+\hbox{\lstinline/else/} & \pageref{keyword:else}\\
+\hbox{\lstinline/end/} & \pageref{keyword:begin}\\
+\hbox{\lstinline/exception/} & \pageref{keyword:exception}\\
+\hbox{\lstinline/external/} &\\
+\hbox{\lstinline/false/} & \pageref{keyword:false}\\
+\hbox{\lstinline/for/} & \pageref{keyword:for}\\
+\hbox{\lstinline/fun/} & \pageref{keyword:fun}\\
+\hbox{\lstinline/function/} & \pageref{keyword:function}\\
+\hbox{\lstinline/functor/} & \pageref{keyword:functor}\\
+\end{tabular}
+&
+\begin{tabular}[t]{ll}
+Keyword & Page\\
+\hline
+\hbox{\lstinline/if/} & \pageref{keyword:if}\\
+\hbox{\lstinline/in/} & \pageref{keyword:in}\\
+\hbox{\lstinline/include/} & \pageref{keyword:include}\\
+\hbox{\lstinline/inherit/} & \pageref{keyword:inherit}\\
+\hbox{\lstinline/initializer/} & \pageref{keyword:initializer}\\
+\hbox{\lstinline/land/} & \pageref{keyword:land}\\
+\hbox{\lstinline/lazy/} & \pageref{keyword:lazy}\\
+\hbox{\lstinline/let/} & \pageref{keyword:let}\\
+\hbox{\lstinline/lor/} & \pageref{keyword:lor}\\
+\hbox{\lstinline/lsl/} & \pageref{keyword:lsl}\\
+\hbox{\lstinline/lsr/} & \pageref{keyword:lsr}\\
+\hbox{\lstinline/lxor/} & \pageref{keyword:lxor}\\
+\hbox{\lstinline/match/} & \pageref{keyword:match}\\
+\hbox{\lstinline/method/} & \pageref{keyword:method}\\
+\hbox{\lstinline/mod/} & \pageref{keyword:mod}\\
+\hbox{\lstinline/module/} & \pageref{keyword:module}\\
+\hbox{\lstinline/mutable/} & \pageref{keyword:mutable(records)}, \pageref{keyword:mutable(objects)}\\
+\hbox{\lstinline/new/} & \pageref{keyword:new}\\
+\hbox{\lstinline/object/} & \pageref{keyword:object}
+\end{tabular}
+&
+\begin{tabular}[t]{ll}
+Keyword & Page\\
+\hline
+\hbox{\lstinline/of/} & \pageref{keyword:of}\\
+\hbox{\lstinline/open/} & \pageref{keyword:open}\\
+\hbox{\lstinline/or/} & \pageref{keyword:or}\\
+\hbox{\lstinline/private/} & \pageref{keyword:private}\\
+\hbox{\lstinline/rec/} & \pageref{keyword:rec}\\
+\hbox{\lstinline/sig/} & \pageref{keyword:sig}\\
+\hbox{\lstinline/struct/} & \pageref{keyword:struct}\\
+\hbox{\lstinline/then/} & \pageref{keyword:then}\\
+\hbox{\lstinline/to/} & \pageref{keyword:to}\\
+\hbox{\lstinline/true/} & \pageref{keyword:true}\\
+\hbox{\lstinline/try/} & \pageref{keyword:try}\\
+\hbox{\lstinline/type/} & \pageref{keyword:type}\\
+\hbox{\lstinline/val/} & \pageref{keyword:val(signatures)}, \pageref{keyword:val(objects)}\\
+\hbox{\lstinline/virtual/} & \pageref{keyword:virtual}\\
+\hbox{\lstinline/when/} & \pageref{keyword:when}\\
+\hbox{\lstinline/while/} & \pageref{keyword:while}\\
+\hbox{\lstinline/with/} & \pageref{keyword:with}
+\end{tabular}
+\end{tabular}
+\end{center}
+%
+The following symbols are also keywords.
+%
+\begin{center}
+\begin{tabular}{lll}
+\begin{tabular}[t]{ll}
+Keyword & Page\\
+\hline
+\hbox{\lstinline/!=/} & \pageref{keyword:!=}\\
+\hbox{\lstinline/#/}  & \pageref{keyword:hash}\\
+\hbox{\lstinline/&/}  & \pageref{keyword:conjunction}\\
+\hbox{\lstinline/&&/} & \pageref{keyword:conjunction}\\
+\hbox{\lstinline/'/}  & \pageref{keyword:'}\\
+\hbox{\lstinline/(/}  & \pageref{keyword:paren}\\
+\hbox{\lstinline/)/}  & \pageref{keyword:paren}\\
+\hbox{\lstinline/*/}  & \pageref{keyword:*}\\
+\hbox{\lstinline/+/}  & \pageref{keyword:+}\\
+\hbox{\lstinline/,/}  & \pageref{keyword:,}\\
+\hbox{\lstinline/-/}  & \pageref{keyword:-}\\
+\hbox{\lstinline/-./} & \pageref{keyword:-.}\\
+\hbox{\lstinline/->/} & \pageref{keyword:->}\\
+\hbox{\lstinline/./}  & \pageref{keyword:.}\\
+\end{tabular}
+&
+\begin{tabular}[t]{ll}
+Keyword & Page\\
+\hline
+\hbox{\lstinline/../} & \pageref{keyword:..}\\
+\hbox{\lstinline/:/}  & \pageref{keyword::}\\
+\hbox{\lstinline/::/} & \pageref{keyword:::}\\
+\hbox{\lstinline/:=/} & \pageref{keyword::=}\\
+\hbox{\lstinline/:>/} & \pageref{keyword::>}\\
+\hbox{\lstinline/;/}  & \pageref{keyword:;(lists)}, \pageref{keyword:;(sequencing)}\\
+\hbox{\lstinline/;;/} & \pageref{keyword:;;}\\
+\hbox{\lstinline/</}  & \pageref{keyword:<}\\
+\hbox{\lstinline/<-/} & \pageref{keyword:<-(string-assignment)},
+\pageref{keyword:<-(record-field-assignment)},
+\pageref{keyword:<-(array-field-assignment)},
+\pageref{keyword:<-(object-field-assignment)}\\
+\hbox{\lstinline/=/}  & \pageref{keyword:=}\\
+\hbox{\lstinline/>/}  & \pageref{keyword:>}\\
+\hbox{\lstinline/>]/} &\\
+\hbox{\lstinline/>}/} & \pageref{keyword:functional-object-update}\\
+\hbox{\lstinline/?/}  & \pageref{keyword:?}\\
+\end{tabular}
+&
+\begin{tabular}[t]{ll}
+Keyword & Page\\
+\hline
+\hbox{\lstinline/??/} &\\
+\hbox{\lstinline/[/}  & \pageref{keyword:lists}\\
+\hbox{\lstinline/[</} & \pageref{keyword:polymorphic-variants}\\
+\hbox{\lstinline/[>/} & \pageref{keyword:polymorphic-variants}\\
+\hbox{\lstinline/[|/} & \pageref{keyword:arrays}\\
+\hbox{\lstinline/]/}  & \pageref{keyword:lists}\\
+\hbox{\lstinline/_/}  & \pageref{keyword:_}\\
+\hbox{\lstinline/`/}  & \pageref{keyword:polymorphic-variants}\\
+\hbox{\lstinline/{/}  & \pageref{keyword:records}\\
+\hbox{\lstinline/{</} & \pageref{keyword:functional-object-update}\\
+\hbox{\lstinline/|/}  & \pageref{keyword:|}\\
+\hbox{\lstinline/|]/} & \pageref{keyword:arrays}\\
+\hbox{\lstinline/~/}  & \pageref{keyword:polymorphic-variants}
+\end{tabular}
+\end{tabular}
+\end{center}
+
+\subsection{Prefix and infix symbols}
+
+Prefix and infix symbols are special identifiers that start with a special character,
+and include a sequence of operator characters.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{infixSymbol}$ & ::= & \lstinline~$\repleft$=$|$<$|$>$|$@$|$^$|$|$|$&$|$+$|$-$|$*$|$/$|$$\$$$|$%$\repright\nt{operatorChar}\supzero$~\\
+$\nt{prefixSymbol}$ & ::= & \hbox{\lstinline/$\repleft$!$|$?$|$~$\repright\nt{operatorChar}\supzero$/}\\
+$\nt{operatorChar}$ & ::= & \lstinline`$\repleft$!$|$$\$$$|$%$|$&$|$*$|$+$|$-$|$.$|$/$|$:$|$<$|$=$|$>$|$?$|$@$|$^$|$|$|$~$\repright$`
+\end{tabular}
+\end{center}
+
+\subsection{Integer literals}
+
+Integers can be specified in several radixes and sizes.  An integer has four possible parts:
+\begin{enumerate}
+\item an optional leading minus sign (default nonnegative);
+\item an optional radix specifier: \hbox{\lstinline/0x/} for hexadecimal, \hbox{\lstinline/0o/} for octal, or \hbox{\lstinline/0b/} for binary (default decimal);
+\item a sequence of digits that may contain optional non-leading underscores \hbox{\lstinline/_/} (the underscores are ignored);
+\item an optional size specifier: \hbox{\lstinline/l/} for \hbox{\lstinline/int32/}, \hbox{\lstinline/L/} for \hbox{\lstinline/int64/}, or \hbox{\lstinline/n/} for \hbox{\lstinline/nativeint/} (default \hbox{\lstinline/int/}).
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{integerLiteral}$ ::=} & (page~\pageref{literal:integer})\\
+& | & \hbox{\lstinline/-$\supopt$ $\repleft$0..9$\repright\repleft$0..9$|$_$\repzero\optleft$l$|$L$|$n$\optright$/}\\
+& | & \hbox{\lstinline/-$\supopt$ 0$\repleft$x$|$X$\repright\repleft$0..9$|$a..f$|$A..F$\repright\repleft$0..9$|$a..f$|$A..F$|$_$\repzero\optleft$l$|$L$|$n$\optright$/}\\
+& | & \hbox{\lstinline/-$\supopt$ 0$\repleft$o$|$O$\repright\repleft$0..7$\repright\repleft$0..7$|$_$\repzero\optleft$l$|$L$|$n$\optright$/}\\
+& | & \hbox{\lstinline/-$\supopt$ 0$\repleft$b$|$B$\repright\repleft$0..1$\repright\repleft$0..1$|$_$\repzero\optleft$l$|$L$|$n$\optright$/}
+\end{tabular}
+\end{center}
+
+\subsection{Floating-point literals}
+
+Floating-point numbers are written in decimal.  A floating-point literal has four possible parts.
+\begin{enumerate}
+\item an optional leading minus sign (default nonnegative);
+\item a non-empty sequence of decimal digits;
+\item a decimal point followed by an optional sequence of decimal digits;
+\item an exponent \hbox{\lstinline/e/} followed by a sequence of decimal digits.
+\end{enumerate}
+%
+A decimal point or exponent is required, but both are not necessary.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{floatLiteral}$ & ::= & \hbox{\lstinline/-$\supopt$ $\nt{decimal}$ . $\nt{\_decimal}\supopt$ $\nt{exponent}$/} & (page~\pageref{literal:float})\\
+& | & \hbox{\lstinline/-$\supopt$ $\nt{decimal}$ $\nt{exponent}$/}\\
+& | & \hbox{\lstinline/-$\supopt$ $\nt{decimal}$ . $\nt{\_decimal}\supopt$/}\\
+$\nt{\_decimal}$ & ::= & \hbox{\lstinline/$\repleft$0..9$|$_$\repone$/}\\
+$\nt{decimal}$ & ::= & \hbox{\lstinline/$\repleft$0..9$\repright\repleft$0..9$|$_$\repzero$/}\\
+$\nt{exponent}$ & ::= & \hbox{\lstinline/$\repleft$e$|$E$\repright\optleft$-$|$+$\optright\nt{decimal}$/}
+\end{tabular}
+\end{center}
+
+\subsection{Character literals}
+
+Characters are delimited by single quotes.  A literal can be a single ASCII character, or it can be
+an escape sequence.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{charLiteral}$ & ::= & \hbox{\lstinline/'$\nt{normalChar}$'/} & (page~\pageref{literal:char})\\
+& | & \hbox{\lstinline/'$\nt{escapeChar}$'/}\\
+$\nt{normalChar}$ & ::= & \hbox{\lstinline/$\repleftminus$'$|$\$\repright$/}\\%$
+$\nt{escapeChar}$ & ::= & \hbox{\lstinline/\n/} & (newline)\\
+& | & \hbox{\lstinline/\r/} & (carriage return)\\
+& | & \hbox{\lstinline/\t/} & (tab)\\
+& | & \hbox{\lstinline/\b/} & (backspace)\\
+& | & \hbox{\lstinline/\ $\nt{space}$/} & (space)\\
+& | & \hbox{\lstinline/\\/} & (backslash)\\
+& | & \hbox{\lstinline/\'/} & (single quote)\\
+& | & \hbox{\lstinline/\"/} & (double quote)\\
+& | & \hbox{\lstinline/\$ddd$/} & (decimal code $ddd$)\\%$
+& | & \hbox{\lstinline/\x$hh$/}  & (hexadecimal code $hh$)\\
+$\nt{d}$ & ::= & \hbox{\lstinline/$\repleft$0..9$\repright$/}\\
+$\nt{h}$ & ::= & \hbox{\lstinline/$\repleft$0..9$|$a..f$|$A..F$\repright$/}
+\end{tabular}
+\end{center}
+
+\subsection{String literals}
+
+A string is a sequence of characters delimited by double quotes.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{stringLiteral}$ & ::= & \hbox{\lstinline/"$\nt{stringChar}\supzero$"/} & (page~\pageref{literal:string})\\
+$\nt{stringChar}$ & ::= & $\nt{normalStringChar}$ | $\nt{escapeChar}$\\
+$\nt{normalStringChar}$ & ::= & \hbox{\lstinline/$\repleftminus$'$|$"$|$\$\repright$/}%$
+\end{tabular}
+\end{center}
+%
+There is no practical limit on the length of string literals.
+
+\subsection{Identifiers}
+
+Identifiers come in two kinds, distinguished by the case of the first letter: a $\nt{lident}$ is an
+identifier that starts with a lowercase letter or an underscore \hbox{\lstinline/_/}, and $\nt{Uident}$ is
+an identifier starting with an uppercase letter.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{lident}$ & ::= & \hbox{\lstinline/$\repleft$a..z$|$_$\repright\repleft$a..z$|$A..Z$|$0..9$|$_$|$'$\repzero$/} & (page~\pageref{literal:lident})\\
+$\nt{Uident}$ & ::= & \hbox{\lstinline/$\repleft$A..Z$\repright\repleft$a..z$|$A..Z$|$0..9$|$_$|$'$\repzero$/}
+\end{tabular}
+\end{center}
+%
+Accented letters from the ISO Latin 1 set are also allowed (not shown in this grammar).  There is no
+practical limit on identifier length.
+
+\subsection{Labels}
+
+Labels are used for labeled parameters and arguments.  A label starts with a tilde \hbox{\lstinline/~/}
+(for a required argument), or a question mark \hbox{\lstinline/?/} (for an optional argument), followed
+by a lowercase identifier, followed by a colon.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{label}$ & ::= & \hbox{\lstinline/~$\nt{lident}$:/} & (page~\pageref{literal:label})\\
+$\nt{optlabel}$ & ::= & \hbox{\lstinline/?$\nt{lident}$:/}
+\end{tabular}
+\end{center}
+
+\subsection{Miscellaneous}
+
+The program may also contain line number directives in C-preprocessor style.
+
+\begin{center}
+\begin{tabular}{rcl}
+$\nt{lineNumber}$ & ::= & \hbox{\lstinline/#$\repleft$0..9$\repone \nt{stringLiteral}\supopt$/}
+\end{tabular}
+\end{center}
+%
+Line number directives affect the reporting of warnings and errors, but otherwise they behave as
+whitespace.
+
+\section{Names}
+
+The reference manual uses the term \emph{identifier} to refer to the string of characters that
+spells out a name.  A \emph{name} is used to refer to some construct in the language, like a value,
+a constructor, \emph{etc}.  There are two kinds of identifiers, those that begin with a lowercase
+letter, and those that begin in uppercase.  There are many kinds of names, classified by what they
+refer to.
+
+\subsection{Simple names}
+
+A \emph{value} is the result of evaluating an expression.  The values include numbers, characters,
+strings, functions, tuples of values, variant values (elements of a union), and objects.  A
+$\nt{valueName}$ is the name that can occur in a let-expression
+%
+\hbox{\lstinline/let $\nt{valueName}$ = $\nt{expression}$/}.  A value name is a $\nt{lident}$ or
+an operator name enclosed in parentheses.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{valueName}$ & ::= & $\nt{lident}$ & (page~\pageref{keyword:let})\\
+& | & \hbox{\lstinline/( $\repleft \nt{prefixSymbol} | \nt{infixSymbol} | \nt{infixOther} \repright$ )/} & (page~\pageref{name:value-name})\\
+$\nt{infixOther}$ & ::= & \hbox{\lstinline/* | = | or | & | := | mod | land/}\\
+& | & \hbox{\lstinline/lor | lxor | lsl | lsr | asr/}\\
+\end{tabular}
+\end{center}
+%
+There are several other kinds of names, all of them are either lowercase or uppercase identifiers.
+The capitalization of the nonterminal names corresponds to the capitalization of the name.
+
+\begin{center}
+\begin{tabular}{llcl}
+Language construct & nonterminal & & case\\
+\hline
+Constructor          & $\nt{ConstructorName}$ & ::= & $\nt{Uident}$\\
+Polymorphic variants & $\nt{VariantName}$ & ::= & $\nt{Uident}$\\
+Exceptions           & $\nt{ExceptionName}$ & ::= & $\nt{Uident}$\\
+\\
+Type constructors    & $\nt{typeName}$ & ::= & $\nt{lident}$\\
+Labels               & $\nt{labelName}$ & ::= & $\nt{lident}$\\
+Record fields        & $\nt{fieldName}$ & ::= & $\nt{lident}$\\
+\\
+Classes              & $\nt{className}$ & ::= & $\nt{lident}$\\
+Methods              & $\nt{methodName}$ & ::= & $\nt{lident}$\\
+Object fields        & $\nt{objectFieldName}$ & ::= & $\nt{lident}$\\
+\\
+Modules              & $\nt{ModuleName}$ & ::= & $\nt{Uident}$\\
+Module types         & $\nt{ModuleTypeName}$ & ::= & $\nt{Uident} | \nt{lident}$\\
+\end{tabular}
+\end{center}
+
+\subsection{Path names}
+
+Certain kinds of names can be qualified using module path prefix.  For example, the name
+\hbox{\lstinline/List.map/} is the name of the function \hbox{\lstinline/map/} in the \hbox{\lstinline/List/} module.
+A module path is simply a list of module names separated by a period.  We'll also use a form
+$\nt{OptModulePathPrefix}$ where the final module is followed by a period.
+
+\begin{center}
+\begin{tabular}{rcl}
+$\nt{modulePath}$ & ::= & $\repleft\nt{ModuleName}\repone\separator{\texttt{.}}$\\
+$\nt{optModulePathPrefix}$ & ::= & \hbox{\lstinline/$\repleft\nt{ModuleName}$.$\repzero$/}
+\end{tabular}
+\end{center}
+%
+The qualified names are as follows.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{valuePath}$ & ::= & $\nt{optModulePathPrefix}$ & $\nt{valueName}$\\
+$\nt{ConstructorPath}$ & ::= & $\nt{optModulePathPrefix}$ & $\nt{ConstructorName}$\\
+$\nt{field}$ & ::= & $\nt{optModulePathPrefix}$ & $\nt{fieldName}$\\
+$\nt{classPath}$ & ::= & $\nt{optModulePathPrefix}$ & $\nt{className}$
+\end{tabular}
+\end{center}
+%
+When a type is named, the module path may also contain functor applications.
+
+\begin{center}
+\begin{tabular}{l}
+\begin{tabular}{rcl}
+\multicolumn{3}{l}{$\nt{extendedModulePath}$ ::=}\\
+&   & $\nt{ModuleName}$\\
+& | & \hbox{\lstinline/$\nt{extendedModulePath}$.$\nt{ModuleName}$/}\\
+& | & \hbox{\lstinline/$\nt{extendedModulePath}$($\nt{extendedModulePath}$)/}
+\end{tabular}
+\\
+\\
+\begin{tabular}{rcl}
+$\nt{optExtendedModulePathPrefix}$ & ::= & \hbox{\lstinline/$\optleft\nt{extendedModulePath}$.$\optright$/}
+\end{tabular}
+\end{tabular}
+\end{center}
+%
+Types can use an extended prefix.
+
+\begin{center}
+\begin{tabular}{rcl}
+\multicolumn{3}{l}{$\nt{typePath}$ ::=}\\
+& & $\nt{optExtendedModulePathPrefix}$ $\nt{typeName}$\\
+\multicolumn{3}{l}{$\nt{moduleTypePath}$ ::=}\\
+& & $\nt{optExtendedModulePathPrefix}$ $\nt{ModuleTypeName}$
+\end{tabular}
+\end{center}
+
+\newpage
+\section{Expressions}
+
+There are many kind of expressions in the language.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{expression}$ ::=}\\
+& & $\nt{valuePath}$\\
+& | & $\nt{constant}$\\
+& | & \hbox{\lstinline/( $\nt{expression}$ )/} & (page~\pageref{keyword:begin})\\
+& | & \hbox{\lstinline/begin $\nt{expression}$ end/} & (page~\pageref{keyword:begin})\\
+& | & \hbox{\lstinline/($\nt{expression}$ : $\nt{typeExpression}$)/} & (page~\pageref{keyword::})\\
+& | & \hbox{\lstinline/$\repleft \nt{expression} \repone\separator{,}$/} & (page~\pageref{keyword:,})\\
+& | & \hbox{\lstinline/$\nt{ConstructorName}$ $\nt{expression}$/} & (page~\pageref{chapter:unions})\\
+& | & \hbox{\lstinline/`$\nt{VariantName}$ $\nt{expression}$/} & (page~\pageref{keyword:polymorphic-variants})\\
+& | & \hbox{\lstinline/$\nt{expression}$ :: $\nt{expression}$/} & (page~\pageref{keyword:::})\\
+& | & \hbox{\lstinline/[ $\repleft \nt{expression} \repzero\sepinator{;}$ ]/} & (page~\pageref{keyword:lists})\\
+& | & \hbox{\lstinline/[| $\repleft \nt{expression} \repzero\sepinator{;}$ |]/} & (page~\pageref{keyword:arrays})\\
+& | & \hbox{\lstinline/{ $\repleft\nt{fieldName}$ = $\nt{expression}\repone\sepinator{;}$ }/} & (page~\pageref{keyword:records})\\
+& | & \hbox{\lstinline/{ $\nt{expression}$ with $\repleft\nt{fieldName}$ = $\nt{expression}\repone\sepinator{;}$ }/} & (page~\pageref{records:record-update})\\
+& | & \hbox{\lstinline/$\nt{expression}$ $\repleft \nt{argument} \repone$/} & (page~\pageref{application})\\
+& | & \hbox{\lstinline/$\nt{prefixSymbol}$ $\nt{expression}$/} & (page~\pageref{keyword:-})\\
+& | & \hbox{\lstinline/$\nt{expression}$ $\nt{infixSymbol}$ $\nt{expression}$/} & (page~\pageref{keyword:+})\\
+& | & \hbox{\lstinline/$\nt{expression}$ . $\nt{fieldPath}$/} & (page~\pageref{keyword:.})\\
+& | & \hbox{\lstinline/$\nt{expression}$ . $\nt{fieldPath}$ <- $\nt{expression}$/} & (page~\pageref{keyword:<-(record-field-assignment)})\\
+& | & \hbox{\lstinline/$\nt{expression}$ .( $\nt{expression}$ )/} & (page~\pageref{keyword:.(})\\
+& | & \hbox{\lstinline/$\nt{expression}$ .( $\nt{expression}$ ) <- $\nt{expression}$/} & (page~\pageref{keyword:<-(array-field-assignment)})\\
+& | & \hbox{\lstinline/$\nt{expression}$ .[ $\nt{expression}$ ]/} & (page~\pageref{keyword:string-subscript})\\
+& | & \hbox{\lstinline/$\nt{expression}$ .[ $\nt{expression}$ ] <- $\nt{expression}$/} & (page~\pageref{keyword:<-(string-assignment)})\\
+& | & \hbox{\lstinline/$\nt{expression}$; $\nt{expression}$/} & (page~\pageref{keyword:;(sequencing)})\\
+& | & \hbox{\lstinline/if $\nt{expression}$ then $\nt{expression}$ else $\nt{expression}$/} & (page~\pageref{keyword:if})\\
+& | & \hbox{\lstinline/while $\nt{expression}$ do $\nt{expression}$ done/} & (page~\pageref{keyword:while})\\
+& | & \hbox{\lstinline/for $\nt{valueName}$ = $\nt{expression}$ $\repleft$to$|$downto$\repright$ $\nt{expression}$/} & (page~\pageref{keyword:for})\\
+&   & \hbox{\lstinline/do $\nt{expression}$ done/}\\
+& | & \hbox{\lstinline/match $\nt{expression}$ with $\nt{patternMatching}$/} & (page~\pageref{keyword:match})\\
+& | & \hbox{\lstinline/try $\nt{expression}$ with $\nt{patternMatching}$/} & (page~\pageref{keyword:try})\\
+& | & \hbox{\lstinline/function $\nt{patternMatching}$/} & (page~\pageref{keyword:function})\\
+& | & \hbox{\lstinline/fun $\nt{multipleMatching}$/} & (page~\pageref{keyword:fun})\\
+& | & \hbox{\lstinline/let rec$\supopt$ $\repleft \nt{letBinding} \repone\separator{\texttt{and}}$ in $\nt{expression}$/} & (page~\pageref{keyword:let})
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{expression}$ ::= $\cdots$}\\
+& | & \hbox{\lstinline/new $\nt{classPath}$/} & (page~\pageref{keyword:new})\\
+& | & \hbox{\lstinline/object $\nt{classBody}$ end/} & (page~\pageref{keyword:object})\\
+& | & \hbox{\lstinline/$\nt{expression}$ # $\nt{methodName}$/} & (page~\pageref{keyword:hash})\\
+& | & \hbox{\lstinline/$\nt{objectFieldName}$/} & (page~\pageref{keyword:object})\\
+& | & \hbox{\lstinline/$\nt{objectFieldName}$ <- $\nt{expression}$/} & (page~\pageref{keyword:<-(object-field-assignment)})\\
+& | & \hbox{\lstinline/($\nt{expression}$ :> $\nt{typeExpression}$)/} & (page~\pageref{keyword::>})\\
+& | & \hbox{\lstinline/($\nt{expression}$ : $\nt{typeExpression}$ :> $\nt{typeExpression}$)/} & (page~\pageref{keyword::>})\\
+& | & \hbox{\lstinline/{< $\repleft\nt{objectFieldName}$ = $\nt{expression}\repone\sepinator{;}$ >}/} & (page~\pageref{keyword:functional-object-update})\\
+& | & \hbox{\lstinline/assert $\nt{expression}$/} & (page~\pageref{keyword:assert})\\
+& | & \hbox{\lstinline/lazy $\nt{expression}$/} & (page~\pageref{keyword:lazy})
+\end{tabular}
+\end{center}
+%
+An argument to an application can be labeled.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{argument}$ & ::= & $\nt{expression}$\\
+& | & \hbox{\lstinline/~$\nt{labelName}$/} & (page~\pageref{literal:label})\\
+& | & \hbox{\lstinline/~$\nt{labelName}$: $\nt{expression}$/}\\
+& | & \hbox{\lstinline/?$\nt{labelName}$/} & (page~\pageref{literal:label})\\
+& | & \hbox{\lstinline/?$\nt{labelName}$: $\nt{expression}$/}\
+\end{tabular}
+\end{center}
+%
+A pattern-matching is a list of cases separated by vertical bars.  A leading vertical bar is optional.
+Each case can be conditioned on a predicate \hbox{\lstinline/when $\nt{expression}$/}.
+
+\begin{center}
+\begin{tabular}{rcl}
+$\nt{patternMatching}$ & ::= & \hbox{\lstinline/$\repleft$ $\nt{pattern}$ $\optleft$ when $\nt{expression}$ $\optright$ -> $\nt{expression}$ $\repone\sepprefix{\texttt{|}}$/}
+\end{tabular}
+\end{center}
+%
+A $\nt{multipleMatching}$ is used for \hbox{\lstinline/fun/} and \hbox{\lstinline/let/} expressions, which allow
+multiple parameters. 
+
+\begin{center}
+\begin{tabular}{l}
+\begin{tabular}{rcl}
+$\nt{multipleMatching}$ & ::= & \hbox{\lstinline/$\nt{parameter}\supone$ $\optleft$ when $\nt{expression}$ $\optright$ -> $\nt{expression}$/}
+\end{tabular}
+\\
+\begin{tabular}{rcl}
+$\nt{letBinding}$ & ::= & \hbox{\lstinline/$\nt{pattern}$ = $\nt{expression}$/}\\
+& | & \hbox{\lstinline/$\nt{valueName}$ $\nt{parameter}\supzero$ $\optleft$: $\nt{typeExpression} \optright$ = $\nt{expression}$/}
+\end{tabular}
+\end{tabular}
+\end{center}
+%
+Parameters can be labeled, and they allow only limited pattern matching, not a full case analysis.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{4}{l}{$\nt{parameter}$ ::=}\\
+&   & $\nt{pattern}$\\
+& | & \hbox{\lstinline/~$\nt{labelName}$/} & (page~\pageref{literal:label})\\
+& | & \hbox{\lstinline/~($\nt{labelName}$ $\optleft$: $\nt{typeExpression}\optright$)/}\\
+& | & \hbox{\lstinline/~$\nt{labelName}$: $\nt{pattern}$/}\\
+& | & \hbox{\lstinline/?$\nt{labelName}$/} & (page~\pageref{literal:label})\\
+& | & \hbox{\lstinline/?($\nt{labelName}$ $\optleft$: $\nt{typeExpression}\optright$ $\optleft$= $\nt{expression}\optright$)/}\\
+& | & \hbox{\lstinline/?$\nt{labelName}$: $\nt{pattern}$/}\\
+& | & \hbox{\lstinline/?$\nt{labelName}$: ($\nt{pattern}$ $\optleft$: $\nt{typeExpression}\optright$ $\optleft$= $\nt{expression}\optright$)/}
+\end{tabular}
+\end{center}
+
+\subsection{Patterns}
+
+A pattern is a template that is used for matching.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{pattern}$ ::=} & (page~\pageref{keyword:match})\\
+&   & \hbox{\lstinline/_/} & (page~\pageref{patterns:wildcard})\\
+& | & $\nt{valueName}$\\
+& | & $\nt{constant}$\\
+& | & \hbox{\lstinline/$\nt{pattern}$ as $\nt{valueName}$/} & (page~\pageref{keyword:as(patterns)})\\
+& | & \hbox{\lstinline/($\nt{pattern}$ : $\nt{typeExpression}$)/}\\
+& | & \hbox{\lstinline/$\nt{pattern}$ | $\nt{pattern}$/} & (page~\pageref{patterns:choice})\\
+& | & \hbox{\lstinline/$\nt{ConstructorPath}$ $\nt{pattern}\supopt$/} & (page~\pageref{constructor-patterns}\\
+& | & \hbox{\lstinline/`$\nt{VariantName}$ $\nt{pattern}\supopt$/} & (page~\pageref{patterns:variants})\\
+& | & \hbox{\lstinline/#$\nt{typeName}$/}\\
+& | & \hbox{\lstinline/$\repleft \nt{pattern} \repone\separator{\texttt{,}}$/} & (page~\pageref{patterns:tuples})\\
+& | & \hbox{\lstinline/{ $\repleft\nt{fieldPath}$ = $\nt{pattern}\repone\sepinator{\texttt{;}}$ }/} & (page~\pageref{patterns:record})\\
+& | & \hbox{\lstinline/[ $\repleft\nt{pattern}\repone\sepinator{\texttt{;}}$ ]/} & (page~\pageref{patterns:lists})\\
+& | & \hbox{\lstinline/$\nt{pattern}$ :: $\nt{pattern}$/} & (page~\pageref{patterns:lists})\\
+& | & \hbox{\lstinline/[| $\repleft\nt{pattern}\repone\sepinator{\texttt{;}}$ |]/} & (page~\pageref{patterns:arrays})
+\end{tabular}
+\end{center}
+
+\subsection{Constants}
+
+The constant expressions include literals and simple constructors.
+
+\begin{center}
+\begin{tabular}{rcl}
+$\nt{constantExpression}$ & ::= & $\nt{integerLiteral}$\\
+& | & $\nt{floatLiteral}$\\
+& | & $\nt{charLiteral}$\\
+& | & $\nt{stringLiteral}$\\
+& | & $\nt{ConstructorPath}$\\
+& | & \hbox{\lstinline/`$\nt{VariantName}$/}\\
+& | & \hbox{\lstinline/true/}\\
+& | & \hbox{\lstinline/false/}\\
+& | & \hbox{\lstinline/[]/}\\
+& | & \hbox{\lstinline/()/}
+\end{tabular}
+\end{center}
+
+\subsection{Precedence of operators}
+
+The following table lists the operator precedences from highest to lowest.
+The precedence of operator symbols is determined the longest prefix in the following table.
+For example, an operator \hbox{\lstinline/**@@/} would have the precedence of \hbox{\lstinline/**/},
+but an operator \hbox{\lstinline/*@@/} would have the precedence of \hbox{\lstinline/*/}.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Operator & Associativity\\
+\hline
+\hbox{\lstinline/~/}, \hbox{\lstinline/?/}, \hbox{\lstinline/!/} & none\\
+\hbox{\lstinline/./}, \hbox{\lstinline/.[/}, \hbox{\lstinline/.(/} & none\\
+function and constructor application, \hbox{\lstinline/assert/}, \hbox{\lstinline/lazy/} & left\\
+\hbox{\lstinline/-/}, \hbox{\lstinline/-./} (when used as a unary operator) & none\\
+\hbox{\lstinline/**/}, \hbox{\lstinline/lsl/}, \hbox{\lstinline/lsr/}, \hbox{\lstinline/asr/} & left\\
+\hbox{\lstinline/*/}, \lstinline|/|, \hbox{\lstinline/%/}, \hbox{\lstinline/mod/}, \hbox{\lstinline/land/}, \hbox{\lstinline/lor/}, \hbox{\lstinline/lxor/} & left\\
+\hbox{\lstinline/+/}, \hbox{\lstinline/-/} & left\\
+\hbox{\lstinline/::/} & right\\
+\hbox{\lstinline/@/}, \hbox{\lstinline/^/} & right\\
+\hbox{\lstinline/</}, \hbox{\lstinline/<=/}, \hbox{\lstinline/=/}, \hbox{\lstinline/==/}, \hbox{\lstinline/!=/}, \hbox{\lstinline/<>/}, \hbox{\lstinline/>=/}, \hbox{\lstinline/>/} and other $\nt{infixSymbol}$ not listed & left\\
+\hbox{\lstinline/&/}, \hbox{\lstinline/&&/} & left\\
+\hbox{\lstinline/or/}, \hbox{\lstinline/||/} & left\\
+\hbox{\lstinline/,/} & none\\
+\hbox{\lstinline/<-/}, \hbox{\lstinline/:=/} & right\\
+\hbox{\lstinline/if/} & none\\
+\hbox{\lstinline/;/} & right\\
+\hbox{\lstinline/fun/}, \hbox{\lstinline/function/}, \hbox{\lstinline/let/}, \hbox{\lstinline/match/}, \hbox{\lstinline/try/} & none\\
+\hline
+\end{tabular}
+\end{center}
+
+\newpage
+\section{Type expressions}
+
+Type expressions have the following grammar.  Note that there are no type expressions for records
+and disjoint unions; those types must be named in a type definition before they can be used.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{typeExpression}$ ::=}\\
+&   & \hbox{\lstinline/_/}\\
+& | & \hbox{\lstinline/'$\nt{lident}$/} & (page~\pageref{keyword:'})\\
+& | & \hbox{\lstinline/( $\nt{typeExpression}$ )/}\\
+& | & \hbox{\lstinline/$\optleft$ ?$\supopt$ $\nt{labelName}$: $\optright$ $\nt{typeExpression}$ -> $\nt{typeExpression}$/} & (page~\pageref{keyword:->})\\
+& | & \hbox{\lstinline/$\repleft \nt{typeExpression} \repone\separator{\texttt{*}}$/}\\
+& | & \hbox{\lstinline/$\nt{typePath}$/}\\
+& | & \hbox{\lstinline/$\nt{typeExpression}$ $\nt{typePath}$/} & (page~\pageref{keyword:'})\\
+& | & \hbox{\lstinline/( $\repleft\nt{typeExpression}\repone\separator{\texttt{,}}$ ) $\nt{typePath}$/} & (page~\pageref{keyword:'})\\
+& | & \hbox{\lstinline/$\nt{typeExpression}$ as '$\nt{lident}$/} & (pages~\pageref{keyword:as(types)}, \pageref{keyword:as(object-types)})\\
+& | & $\nt{variantType}$\\
+& | & \hbox{\lstinline/< $\repleft\nt{methodType}\repzero\sepinator{\texttt{;}}$ >/} & (page~\pageref{object-types})\\
+& | & \hbox{\lstinline/< $\repleft\nt{methodType}\repzero\separator{\texttt{;}}$; .. >/} & (page~\pageref{keyword:..})\\
+& | & \hbox{\lstinline/# $\nt{classPath}$/} & (page~\pageref{keyword:hash-class})\\
+& | & \hbox{\lstinline/$\nt{typeExpression}$ # $\nt{classPath}$/} & (page~\pageref{chapter:polyclasses})\\
+& | & \hbox{\lstinline/( $\repleft\nt{typeExpression}\repone\separator{\texttt{,}}$ ) # $\nt{classPath}$/}
+\end{tabular}
+\end{center}
+%
+Methods (and record fields) can have polymorphic type.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{methodType}$ & ::= & \hbox{\lstinline/$\nt{methodName}$ : $\nt{polyTypeExpression}$/} & (page~\pageref{types:polymorphic-methods})\\
+$\nt{polyTypeExpression}$ & ::= & \hbox{\lstinline/$\optleft \repleft$ '$\nt{lident}\repone$ . $\optright$ $\nt{typeExpression}$/}
+\end{tabular}
+\end{center}
+%
+Types for polymorphic variants have several form that depending whether the type is exact, open, or closed.
+
+\begin{center}
+\begin{tabular}{rcl}
+$\nt{variantType}$ & ::= & \hfill(page~\pageref{keyword:polymorphic-variants})\\
+&   & \hbox{\lstinline/[ $\repleft \nt{variantTagType} \repone\sepprefix{\texttt{|}}$ ]/}\\
+& | & \hbox{\lstinline/[> $\repleft \nt{variantTagType} \repzero\sepprefix{\texttt{|}}$ ]/}\\
+& | & \hbox{\lstinline/[< $\repleft \nt{variantTagIntersectionType} \repzero\sepprefix{\texttt{|}}$ ]/}\\
+\\
+$\nt{variantTagType}$ & ::= & $\nt{typeExpression}$\\
+& | &\hbox{\lstinline/`$\nt{variantName}$ $\optleft$of $\nt{typeExpression} \optright$/}\\
+$\nt{variantTagIntersectionType}$ & ::= & $\nt{typeExpression}$\\
+& | &\hbox{\lstinline/`$\nt{variantName}$ $\optleft$of $\repleft \nt{typeExpression} \repone\separator{\texttt{\&}} \optright$/}
+\end{tabular}
+\end{center}
+%
+The precedences of the type operators is given in the following table, from highest precedence to lowest.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Operator & Associativity\\
+\hline
+Application \hbox{\lstinline/$\nt{typeExpression}$ $\nt{typePath}$/} & none\\
+\hbox{\lstinline/*/} & none\\
+\hbox{\lstinline/->/} & right\\
+\hbox{\lstinline/as/} & none\\
+\hline
+\end{tabular}
+\end{center}
+
+\newpage
+\section{Type definitions}
+
+A type definition associates a type name with a type expression, forming an abbreviation; or it
+defines a record type or disjoint union; or it does both.  Type definitions can be recursive;
+the type name being defined is always bound within its own definition.  Mutually recursive types
+are separated with the keyword \hbox{\lstinline/and/}.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{typeDefinition}$ & ::= & \hbox{\lstinline/type $\repleft \nt{typeDef}\repone\separator{\texttt{and}}$/}\\
+\\
+$\nt{typeDef}$ & ::= & $\nt{typeParameters}\supopt$ $\nt{typeName}$\\
+&   & \hbox{\lstinline/$\optleft$= $\nt{typeExpression}\optright$/}\\
+&   & \hbox{\lstinline/$\optleft$= $\nt{typeRepresentation}\optright$/}\\
+&   & $\nt{typeConstraint}\supzero$\\
+\\
+$\nt{typeParameters}$ & ::= & $\nt{typeParameter}$\\
+& | & \hbox{\lstinline/( $\repleft \nt{typeParameter} \repone\separator{\texttt{,}}$ )/}\\
+\\
+$\nt{typeParameter}$ & ::= & \hbox{\lstinline/'$\nt{lident}$/} & (page~\pageref{keyword:'})\\
+& | & \hbox{\lstinline/+ '$\nt{lident}$/} & (page~\pageref{section:variance-annotations})\\
+& | & \hbox{\lstinline/- '$\nt{lident}$/} & (page~\pageref{section:variance-annotations})
+\end{tabular}
+\end{center}
+%
+A $\nt{typeRepresentation}$ is the definition of a record type or a disjoint union.
+
+\begin{center}
+\begin{tabular}{l}
+\begin{tabular}{rcll}
+$\nt{typeRepresentation}$ & ::= & \hbox{\lstinline/$\repleft \nt{constructorDecl}\repone\sepprefix{\texttt{|}}$/} & (page~\pageref{keyword:of})\\
+& | & \hbox{\lstinline/{ $\repleft\nt{fieldDecl}\repone\sepinator{\texttt{;}}$ }/} & (page~\pageref{keyword:records})
+\end{tabular}
+\\
+\begin{tabular}{rcl}
+$\nt{constructorDecl}$ & ::= & \hbox{\lstinline/$\nt{constructorName}$ $\optleft$ of $\repleft \nt{typeExpression} \repone\separator{\texttt{*}} \optright$/}\\
+$\nt{fieldDecl}$ & ::= & \hbox{\lstinline/mutable$\supopt$ $\nt{fieldName}$ : $\nt{polyTypeExpression}$/}
+\end{tabular}
+\end{tabular}
+\end{center}
+%
+A type definition can include any number of type constraints.
+
+\begin{center}
+\begin{tabular}{rcll}
+$\nt{typeConstraint}$ & ::= & \hbox{\lstinline/constraint '$\nt{lident}$ = $\nt{typeExpression}$/} & (page~\pageref{keyword:constraint})
+\end{tabular}
+\end{center}
+
+\newpage
+\section{Structure items and module expressions}
+
+A $\nt{structItem}$ is an item that can occur in a module definition (within a 
+\hbox{\lstinline/struct $\cdots$ end/} block), or in an implementation file.  A $\nt{moduleExpression}$
+represents a module.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{structItem}$ ::=}\\
+&   & \hbox{\lstinline/let rec$\supopt$ $\repleft\nt{letBinding}\repone\separator{\texttt{and{}}}$/} & (page~\pageref{keyword:let})\\
+& | & \hbox{\lstinline/external $\nt{valueName}$ : $\nt{typeExpression}$ = $\nt{stringLiteral}\supone$/}\\
+& | & $\nt{typeDefinition}$\\
+& | & $\nt{exceptionDefinition}$ & (page~\pageref{keyword:exception})\\
+& | & $\nt{classDefinition}$ & (page~\pageref{keyword:class})\\
+& | & $\nt{classTypeDefinition}$ & (page~\pageref{classes:types})\\
+& | & \hbox{\lstinline/module $\nt{ModuleName}$ $\nt{moduleParameter}\supzero$/} & (page~\pageref{keyword:module})\\
+&   & \hbox{\lstinline/$\optleft$: $\nt{moduleType} \optright$ = $\nt{moduleExpression}$/}\\
+& | & \hbox{\lstinline/module type $\nt{ModuleTypeName}$ = $\nt{moduleType}$/} & (page~\pageref{keyword:sig})\\
+& | & \hbox{\lstinline/open $\nt{modulePath}$/} & (page~\pageref{keyword:open})\\
+& | & \hbox{\lstinline/include $\nt{moduleExpression}$/} & (page~\pageref{keyword:include})\\
+\\
+\multicolumn{3}{l}{$\nt{moduleExpression}$ ::=}\\
+&   & \hbox{\lstinline/struct $\repleft$ $\nt{structItem}$ ;;$\supopt\repzero$ end/} & (page~\pageref{keyword:struct})\\
+& | & \hbox{\lstinline/functor $\nt{moduleParameter}$ -> $\nt{moduleExpression}$/} & (page~\pageref{keyword:functor})\\
+& | & \hbox{\lstinline/$\nt{moduleExpression}$ ($\nt{moduleExpression}$)/} & (page~\pageref{modules:application})\\
+& | & \hbox{\lstinline/( $\nt{moduleExpression}$ )/}\\
+& | & \hbox{\lstinline/( $\nt{moduleExpression}$ : $\nt{moduleType}$ )/}\\
+\\
+\multicolumn{3}{l}{$\nt{moduleParameter}$ ::=}\\
+&   & \hbox{\lstinline/( $\nt{ModuleName}$ : $\nt{moduleType}$ )/} & (page~\pageref{modules:application})
+\end{tabular}
+\end{center}
+%
+Exceptions definitions are similar to disjoint unions.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{exceptionDefinition}$ ::=} & (page~\pageref{keyword:exception})\\
+&   & \hbox{\lstinline/exception $\nt{constructorName}$ $\optleft$of $\repleft \nt{typeExpression} \repone\separator{\texttt{*}} \optright$/}\\
+& | & \hbox{\lstinline/exception $\nt{constructorName}$ = $\nt{constructorPath}$/}
+\end{tabular}
+\end{center}
+
+\newpage
+\section{Signature items and module types}
+
+A $\nt{sigItem}$ is an item that can occur in a module type definition (within a
+\hbox{\lstinline/sig $\cdots$ end/} block), or in an interface file.  A $\nt{moduleTypeExpression}$ represents
+the type of a module.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{sigItem}$ ::=}\\
+&   & \hbox{\lstinline/val $\nt{valueName}$ : $\nt{typeExpression}$/} & (page~\pageref{keyword:val(signatures)})\\
+& | & \hbox{\lstinline/external $\nt{valueName}$ : $\nt{typeExpression}$ = $\nt{stringLiteral}\supone$/}\\
+& | & $\nt{typeDefinition}$\\
+& | & \hbox{\lstinline/exception $\nt{constructorDecl}$/} & (page~\pageref{keyword:exception})\\
+& | & $\nt{classSpecification}$ & (page~\pageref{classes:types})\\
+& | & $\nt{classTypeDefinition}$ & (page~\pageref{classes:types})\\
+& | & \hbox{\lstinline/module $\nt{ModuleName}$ $\nt{moduleParameter}\supzero$ : $\nt{moduleType}$/} & (page~\pageref{keyword:module})\\
+& | & \hbox{\lstinline/module type $\nt{ModuleTypeName}$ $\optleft$= $\nt{moduleType}\optright$/} & (page~\pageref{keyword:sig})\\
+& | & \hbox{\lstinline/open $\nt{modulePath}$/} & (page~\pageref{keyword:open})\\
+& | & \hbox{\lstinline/include $\nt{moduleExpression}$/} & (page~\pageref{keyword:include})\\
+\\
+\multicolumn{3}{l}{$\nt{moduleType}$ ::=}\\
+&   & $\nt{moduleTypePath}$\\
+& | & \hbox{\lstinline/sig $\repleft \nt{sigItem}$ ;;$\supopt\repzero$ end/} & (page~\pageref{keyword:sig})\\
+& | & \hbox{\lstinline/functor $\nt{moduleParameter}$ -> $\nt{moduleType}$/} & (page~\pageref{keyword:functor})\\
+& | & \hbox{\lstinline/$\nt{moduleType}$ with $\repleft\nt{moduleConstraint}\repone\separator{\texttt{and}}$/} & (page~\pageref{section:sharing-constraints})\\
+& | & \hbox{\lstinline/( $\nt{moduleType}$ )/}\\
+\\
+\multicolumn{3}{l}{$\nt{moduleConstraint}$ ::=} & (page~\pageref{section:sharing-constraints})\\
+&   & \hbox{\lstinline/type $\nt{typeParameters}\supopt$ $\nt{typePath}$ = $\nt{typeExpression}$/}\\
+& | & \hbox{\lstinline/module $\nt{modulePath}$ = $\nt{extendedModulePath}$/}
+\end{tabular}
+\end{center}
+
+\newpage
+\section{Class expressions and types}
+
+Objects, class expressions, and class types are discussed in
+chapters~\ref{chapter:objects1}--\ref{chapter:polyclasses}.
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{classExpression}$ ::=}\\
+&   & $\nt{classPath}$\\
+& | & \hbox{\lstinline/[ $\repleft \nt{typeExpression} \repone\separator{\texttt{,}}$ ] $\nt{classPath}$/} & (page~\pageref{classes:polymorphic})\\
+& | & \hbox{\lstinline/( $\nt{classExpression}$ )/}\\
+& | & \hbox{\lstinline/( $\nt{classExpression}$ : $\nt{classType}$ )/}\\
+& | & \hbox{\lstinline/$\nt{classExpression}$ $\nt{argument}\supone$/} & (page~\pageref{classes:parameterized})\\
+& | & \hbox{\lstinline/fun $\nt{parameter}\supone$ -> $\nt{classExpression}$/} & (page~\pageref{classes:parameterized})\\
+& | & \hbox{\lstinline/let rec$\supopt$ $\repleft\nt{letBinding}\repone\separator{\texttt{and}}$ in $\nt{classExpression}$/} & (page~\pageref{classes:let})\\
+& | & \hbox{\lstinline/object $\nt{selfBinder}\supopt$ $\nt{classField}\supzero$ end/} & (page~\pageref{keyword:object})\\
+\\
+\multicolumn{3}{l}{$\nt{classField}$ ::=}\\
+&   & \hbox{\lstinline/inherit $\nt{classExpression}$ $\optleft$as $\nt{valueName}\optright$/} & (page~\pageref{keyword:inherit})\\
+& | & \hbox{\lstinline/val mutable$\supopt$ $\nt{objectFieldName}$/}\\
+&   & \hbox{\lstinline/$\optleft$: $\nt{typeExpression}\optright$ = $\nt{expression}$/} & (page~\pageref{keyword:val(objects)})\\
+& | & \hbox{\lstinline/val mutable$\supopt$ virtual $\nt{objectFieldName}$ : $\nt{typeExpression}$/} & (page~\pageref{keyword:virtual})\\
+& | & \hbox{\lstinline/method private$\supopt$ $\nt{methodName}$/} & (page~\pageref{keyword:private})\\
+&   & \hbox{\lstinline/$\nt{parameter}\supzero$ $\optleft$: $\nt{typeExpression}\optright$ = $\nt{expression}$/}\\
+& | & \hbox{\lstinline/method private$\supopt$ $\nt{methodName}$/}\\
+&   & \hbox{\lstinline/: $\nt{polyTypeExpression}$ = $\nt{expression}$/}\\
+& | & \hbox{\lstinline/method private$\supopt$ $\nt{methodName}$ : $\nt{polyTypeExpression}$/}\\
+& | & \hbox{\lstinline/constraint $\nt{typeExpression}$ = $\nt{typeExpression}$/} & (page~\pageref{keyword:constraint})\\
+& | & \hbox{\lstinline/initializer $\nt{expression}$/} & (page~\pageref{keyword:initializer})\\
+\\
+\multicolumn{3}{l}{$\nt{selfBinder}$ ::=}\\
+&   & \hbox{\lstinline/($\nt{pattern}$ $\optleft$: $\nt{typeExpression}\optright$)/} & (page~\pageref{objects:self})
+\end{tabular}
+\end{center}
+
+\subsection{Class types}
+
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{l}{$\nt{classType}$ ::=}\\
+&   & \hbox{\lstinline/$\repleft\optleft$ ?$\supopt$ $\nt{labelName}$:$\optright$ $\nt{typeExpression}$ ->$\repzero$ $\nt{classBodyType}$/}\\
+\\
+\multicolumn{3}{l}{$\nt{classBodyType}$ ::=}\\
+&   & $\nt{classPath}$\\
+& | & \hbox{\lstinline/[ $\repleft \nt{typeExpression} \repone\separator{\texttt{,}}$ ] $\nt{classPath}$/}\\
+& | & \hbox{\lstinline/object $\nt{selfType}\supopt$ $\nt{classItemType}\supzero$ end/}\\
+\\
+\multicolumn{3}{l}{$\nt{classItemType}$ ::=}\\
+&   & \hbox{\lstinline/inherit $\nt{classType}$/} & (page~\pageref{classes:type-inherit})\\
+& | & \hbox{\lstinline/val mutable$\supopt$ virtual$\supopt$ $\nt{objectFieldName}$ : $\nt{typeExpression}$/} & (page~\pageref{keyword:val(objects)})\\
+& | & \hbox{\lstinline/method private$\supopt$ virtual$\supopt$ $\nt{methodName}$ : $\nt{polyTypeExpression}$/} & (page~\pageref{classes:type-quantifier})\\
+& | & \hbox{\lstinline/constraint $\nt{typeExpression}$ = $\nt{typeExpression}$/} & (page~\pageref{keyword:constraint})\\
+\\
+\multicolumn{3}{l}{$\nt{selfType}$ ::=}\\
+&   & \hbox{\lstinline/( $\nt{typeExpression}$ )/}
+\end{tabular}
+\end{center}
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:

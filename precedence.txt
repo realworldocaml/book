@@ -1,0 +1,22 @@
+         non   : in
+         non   : ;
+         non   : let
+         non   : fun function with
+         non   : and
+         non   : then
+         non   : <-
+         right : :=
+         non   : as
+         left  : |
+         right : ,
+         right : ->
+         right : ||
+         right : &&
+INFIXOP0 left  : != = < > <= >= || &&
+INFIXOP1 right : @ ^
+         right : ::
+INFIXOP2 left  : + -
+INFIXOP3 left  : mod land lor lxor * / %
+INFIXOP4 right : lsl lsr asr **
+         non   : - (unary)
+PREFIXOP non   : !* ~* ?*

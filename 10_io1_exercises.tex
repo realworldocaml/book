@@ -1,0 +1,493 @@
+%
+%
+%
+
+\exercises
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{helloworld}
+Write a ``Hello world'' program, which prints the
+line \hbox{\lstinline+Hello world!+} to the standard output.
+
+\begin{answer}\ifanswers
+The \hbox{\lstinline+output_string+} function can be used to print the
+line.
+
+\begin{ocaml}
+# output_string stdout "Hello world!\n";;
+@
+\begin{topoutput}
+Hello world
+\end{topoutput}
+@
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{ioexn1}
+The input functions raise the \hbox{\lstinline+End_of_file+} exception
+when the end of file is reached, which dictates a style where input
+functions are always enclosed in exception handlers.  The following
+function is not tail-recursive (see
+Section~\reflabelsection{tail-recursion}), which means the stack may
+overflow if the file is big.
+
+\begin{ocaml}
+let read_lines chan =
+   let rec loop lines =
+      try loop (input_line chan :: lines) with
+         End_of_file -> List.rev lines
+   in
+   loop []
+\end{ocaml}
+%
+\begin{enumerate}
+\item Why isn't the function \lstinline$read_lines$ tail-recursive?
+\item How can it be fixed?
+\end{enumerate}
+
+\begin{answer}\ifanswers
+\begin{enumerate}
+\item
+
+The function \lstinline$loop$ is not tail-recursive because the
+recursive call is enclosed in the \lstinline$try$ block.
+
+\item
+
+One solution that keeps the general style is to introduce
+a function \lstinline$maybe_input_line$ that produces a string
+option instead of raising an exception.
+
+\begin{ocaml}
+let maybe_input_line chan =
+   try Some (input_line chan) with
+      End_of_file -> None
+
+let read_lines chan =
+   let rec loop lines =
+      match maybe_input_line chan with
+         Some line -> loop (line :: lines)
+       | None -> List.rev lines
+   in
+   loop []
+\end{ocaml}
+\end{enumerate}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{iofinally}
+Exceptions can have adverse interactions with input/output.  In
+particular, unexpected exceptions may lead to situations where files
+are not closed.  This isn't just bad style, on systems where the
+number of open files is limited, this may lead to program failure.
+Write a function
+%
+\hbox{\lstinline+with_in_file : string -> (in_channel -> 'a) -> 'a+}
+%
+to handle this problem.  When the
+expression \hbox{\lstinline+with_in_file filename f+} is evaluated,
+the file with the given \hbox{\lstinline+filename+} should be opened,
+and the function \hbox{\lstinline+f+} called with the
+resulting \hbox{\lstinline+in_channel+}.  The channel should be closed
+when \hbox{\lstinline+f+} completes, even if it raises an exception.
+
+\begin{answer}\ifanswers
+If the function raises an exception, the exception can be caught with a wildcard exception handler,
+the channel closed, and the exception re-raised.
+\begin{ocaml}
+let with_in_file filename f =
+   let in_chan = open_in filename in
+   try
+      let x = f in_chan in
+      close_in in_chan;
+      x
+   with exn ->
+      close_in in_chan;
+      raise exn
+\end{ocaml}
+\fi\end{answer}       
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{ioexchange}
+You are given two files \hbox{\lstinline+a.txt+}
+and \hbox{\lstinline+b.txt+}, each containing a single character.
+Write a function \hbox{\lstinline+exchange+} to exchange the values in
+the two files.  Your function should be robust to errors (for example,
+if one of the files doesn't exist, or can't be opened).
+
+Is it possible to make the \hbox{\lstinline+exchange+} operation
+atomic?  That is, if the operation is successful the contents are
+exchanged, but if the operation is unsuccessful the files are left
+unchanged?
+
+\begin{answer}\ifanswers
+A sensible approach is to read the characters, swap them, and write the results back.
+If an error occurs before the values are written, the operation can simply be aborted.
+
+However, once the first file is modified, the second file must be modified as well.  In the
+following code, if an error occurs while writing the second file (line 7), the error is caught and
+an attempt is made to write character \hbox{\lstinline/c1/} back to the first file.  An error on line 10 is
+fatal.  In general is it not possible to make the \hbox{\lstinline/exchange/} operation atomic.
+
+\begin{ocamlnum}
+let exchange file1 file2 =
+   let c1 = with_in_file file1 input_char in
+   let c2 = with_in_file file2 input_char in
+   with_out_file file1 (fun chan -> output_char chan c2);
+   (* Errors after this line must be handled *)
+   try
+      with_out_file file2 (fun chan -> output_char chan c1)
+   with exn ->
+      (* Try to write back c1 to file1 *)
+      with_out_file file1 (fun chan -> output_char chan c1);
+      raise exn
+\end{ocamlnum}
+\fi\end{answer}   
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{format}
+Suppose you are given a value of the following type, and you want to
+produce a string representation of the value.
+
+\begin{ocaml}
+type exp =
+   Int of int
+ | Id of string
+ | List of exp list
+\end{ocaml}
+%
+The representation is as follows.
+\begin{itemize}
+\item \lstinline+Int+ and \hbox{\lstinline+Id+} values print as themselves.
+\item
+
+\lstinline+List+
+values are enclosed in parentheses, and the elements in the list are
+separated by a single space character.
+\end{itemize}
+%
+Write a function \lstinline$print_exp$ to produce the string representation for a value of
+type \hbox{\lstinline+exp+}.  The following gives an example.
+
+\begin{ocaml}
+# print_exp (List [Int 2; Id "foo"]);;
+(2 foo)
+\end{ocaml}
+
+\begin{answer}\ifanswers
+Here is one version.
+\begin{ocaml}
+let rec print_exp = function
+   Int i -> print_int i
+ | String s -> printf "\"%s\"" s
+ | List el -> print_char '('; print_exp_list el; print_char ')'
+
+and print_exp_list = function
+   [] -> ()
+ | [e] -> print_exp e
+ | e :: el ->
+     print_exp e;
+     print_char ' ';
+     print_exp_list el
+\end{ocaml}
+%
+The \hbox{\lstinline/printf/}-style functions provide a slightly more concise implementation.
+
+\begin{ocaml}
+let rec print_exp out_chan = function
+   Int i -> output_int out_chan i
+ | String s -> fprintf out "\"%s\"" s
+ | List el -> fprintf out "(%a)" print_exp_list el
+
+and print_exp_list out_chan = function
+   [] -> ()
+ | [e] -> print_exp out_chan e
+ | e :: el -> fprintf out_chan "%a %a" print_exp e print_exp_list el
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{deinterleave-file}
+You are given an input file \hbox{\lstinline+data.txt+} containing
+lines that begin with a single digit \hbox{\lstinline+1+}
+or \hbox{\lstinline+2+}.  Write a function using
+the \hbox{\lstinline+Buffer+} module to print the file, without
+leading digits, in de-interleaved form.
+
+\begin{center}
+\begin{tabular}{lcl}
+\hbox{\lstinline+data.txt+} & $\longrightarrow$ & output\\
+\hline\\
+\begin{minipage}{2in}
+\begin{ocamllisting}
+2Is
+1This
+2File
+1A
+\end{ocamllisting}
+\end{minipage}
+&
+&
+\begin{minipage}{2in}
+\begin{ocamllisting}
+This
+Is
+A
+File
+\end{ocamllisting}
+\end{minipage}
+\end{tabular}
+\end{center}
+%
+For example, given the input on the left, your program should produce
+the output on the right.
+
+\begin{answer}\ifanswers
+The lines that begin with the digit \hbox{\lstinline+1+} can be
+printed immediately, so we need only buffer the lines beginning with
+the digit \hbox{\lstinline+2+}.
+
+\begin{ocaml}
+let deinterleave () =
+   let inc = open_in "data.txt" in
+   let buf = Buffer.create 256 in
+   try
+      while true do
+         let line = input_line inc in
+         let len = String.length line - 1 in
+         if line.[0] = '1' then begin
+            output stdout line 1 len;
+            output_char stdout '\n'
+         end
+         else begin
+            Buffer.add_substring buf line 1 len;
+            Buffer.add_char buf '\n'
+         end
+   with End_of_file ->
+      output_string stdout (Buffer.contents buf)
+\end{ocaml}
+%
+This code is a bit sloppy.  It doesn't deal gracefully with blank
+lines, and it assumes that any line not beginning with the
+digit \hbox{\lstinline+1+} must begin with a \hbox{\lstinline+2+}.
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{printf1}
+Suppose you are given three values
+\hbox{\lstinline+(x, y, z) : string * int * string+}.
+Using \hbox{\lstinline+printf+}, print a single line in the following
+format.
+
+\begin{itemize}
+\item
+
+The string \hbox{\lstinline+x+} should be printed left-justified, with
+a minimum column width of 5 characters.
+\item
+
+The integer \hbox{\lstinline+y+} should be printed in hex with the
+prefix \hbox{\lstinline+0x+}, followed by 8 hexadecimal digits,
+followed by a single space.
+\item
+
+The third word should be printed right-justified, with a minimum
+column width of 3 characters.
+\item
+
+The line should be terminated with a newline \hbox{\lstinline+\n+}.
+\end{itemize}
+
+\begin{answer}\ifanswers
+\begin{ocaml}
+let printline (x, y, z) =
+   printf "%-5s 0x%08x %3s\n" x y z
+\end{ocaml}
+
+Here are some examples.
+\begin{ocaml}
+# printline ("A", 10, "B");;
+@
+\begin{topoutput}
+A     0x0000000a   B
+\end{topoutput}
+@
+# printline ("abcdefg", 255, "hijk");;
+@
+\begin{topoutput}
+abcdefg 0x000000ff hijk
+\end{topoutput}
+@
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{printf2}
+Suppose you are given a list of pairs of strings (of
+type \hbox{\lstinline+(string * string) list+}.  Write a program to
+print out the pairs, separated by white space, in justified columns,
+where the width of the first column is equal to the width of the
+longest string in the column.  For example, given the
+input \hbox{\lstinline+[("a", "b"); ("ab", "cdef")]+} the width of the
+first column would be 2.  Can you use \hbox{\lstinline+printf+} to
+perform the formatting?
+
+\begin{ocaml}
+# print_cols ["a", "b"; "abc", "def"];;
+@
+\begin{topoutput}
+a   b
+abc def
+\end{topoutput}
+@
+\end{ocaml}
+
+\begin{answer}\ifanswers
+This seems like it would be straightforward
+with \hbox{\lstinline+printf+}, we would just calculate the width of
+the first column, and produce the right format string.  For example,
+if the variable \hbox{\lstinline+words+} contains the word list, and
+the width of the first column is computed to be 20 characters, we
+would use the following printer.
+
+\begin{ocaml}
+List.iter (fun (w1, w2) ->
+   printf "%-20s %s\n" w1 w2) words
+\end{ocaml}
+%
+However, this doesn't work in general because the format string must
+be computed, and \hbox{\lstinline+printf+} requires a literal string.
+
+\begin{ocaml}
+# let fmt = sprintf "%%-%ds %%s\n" 20;;
+@
+\begin{topoutput}
+val fmt : string = "%-20s %s\n"
+\end{topoutput}
+@
+# List.iter (fun (w1, w2) ->
+     printf fmt w1 w2) words;;
+@
+\begin{toperror}
+Characters 37-40:
+     printf fmt w1 w2) words;;
+%           ^^^
+This expression has type string but is here used with type
+  ('a -> 'b -> 'c, out_channel, unit) format
+\end{toperror}
+@
+\end{ocaml}
+%
+Instead, we can define a ``padding'' function,
+and use it to justify the output, using the \hbox{\lstinline+%a+}
+format specifier.
+
+\begin{ocaml}
+let pad ochan i =
+   for j = 1 to i do
+      output_char ochan ' '
+   done
+
+let print_cols l =
+   let width =
+      List.fold_left (fun width (s, _) ->
+          max width (String.length s)) 0 l
+   in
+      List.iter (fun (s1, s2) ->
+         printf "%s%a %s\n" s1
+            print_pad (width - String.length s1) s2) l
+\end{ocaml}
+%
+As it turns out, there \emph{is} a way to
+use \hbox{\lstinline+printf+} directly.  If the width specifier is the
+character \hbox{\lstinline+*+}, then \hbox{\lstinline+printf+} expects
+the width specifier to be passed as an argument.
+
+\begin{ocaml}
+let print_cols l =
+   let width =
+      List.fold_left (fun width (s, _) ->
+          max width (String.length s)) 0 l
+   in
+      List.iter (fun (s1, s2) ->
+         printf "%-*s %s\n" width s1 s2) l
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercise
+%
+\begin{exercise}{scanf1}
+Consider the following program.  The
+exception \hbox{\lstinline+Scan_failure+} is raised when the input
+cannot be scanned because it doesn't match the format specification.
+
+\begin{ocaml}
+try scanf "A%s" (fun s -> s) with
+   Scan_failure _ ->
+      scanf "B%s" (fun s -> s)
+\end{ocaml}
+%
+What is the behavior of the this program when presented with the
+following input?
+\begin{enumerate}
+\item \lstinline+AA\n+
+\item \lstinline+B\n+
+\item \lstinline+AB\n+
+\item \lstinline+C\n+
+\item \lstinline+ABC\n+
+\end{enumerate}
+
+\begin{answer}\ifanswers
+\begin{enumerate}
+\item The program returns the string \hbox{\lstinline+"A"+}.
+\item The program returns the empty string.
+\item The program returns the string \hbox{\lstinline+"B"+}.
+\item The program raises the \hbox{\lstinline+Scan_failure+} exception, removing
+the \hbox{\lstinline+C+} from the input channel.
+\item
+
+The program returns the string \hbox{\lstinline+"C"+}.  The
+first \hbox{\lstinline+scanf+} fails, but removes
+the \hbox{\lstinline+A+} from the input stream.  The
+second \hbox{\lstinline+scanf+} matches the \hbox{\lstinline+B+}, and
+returns the string \hbox{\lstinline+"C"+}.
+\end{enumerate}
+\fi\end{answer}
+\end{exercise}
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:

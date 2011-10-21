@@ -1,0 +1,115 @@
+open parse/LaTeX/Macros
+open parse/LaTeX/Spell
+
+load-dictionaries()
+
+MACROS. +=
+    $|ocaml|            = $(Arity.new ~verbatim = true)
+    $|ocamlx|           = $(Arity.new ~verbatim = true)
+    $|ocamlnum|         = $(Arity.new ~verbatim = true)
+    $|ocamllisting|     = $(Arity.new ~verbatim = true)
+    $|ocamllistingx|    = $(Arity.new ~verbatim = true)
+    $|ocamllistingy|    = $(Arity.new ~verbatim = true)
+    $|ocamldebug|       = $(Arity.new ~verbatim = true)
+    $|lstlisting|       = $(Arity.new ~verbatim = true)
+    $|ccode|            = $(Arity.new ~verbatim = true)
+    $|\misspelled|      = $(Arity.new ~arity = 1, ~mask = 0)
+    $|exercise|         = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\reflabelsection| = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\refsection|      = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\reffigure|       = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\label|           = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\labelfigure|     = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\labelchapter|    = $(Arity.new ~arity = 2, ~mask = 0b10)
+    $|\labelsection|    = $(Arity.new ~arity = 2, ~mask = 0b10)
+    $|\labelsubsection| = $(Arity.new ~arity = 2, ~mask = 0b10)
+    $|\ref|             = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\nt|              = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\comment|         = $(Arity.new ~arity = 1, ~mask = 0)
+    $|\nocomment|       = $(Arity.new ~arity = 1, ~mask = 0)
+
+TEXINPUTS[] += $(dir ../inputs)
+
+EXERCISES[] =
+    02_expr1_exercises
+    03_var1_exercises
+    04_patt1_exercises
+    05_expr2_exercises
+    06_expr3_exercises
+    07_refcells_exercises
+    08_expr4_exercises
+    09_exn1_exercises
+    10_io1_exercises
+    11_mod1_exercises
+    12_mod2_exercises
+    13_mod3_exercises
+    14_objects1_exercises
+    15_objects2_exercises
+    16_objects3_exercises
+    17_polyclasses_exercises
+
+SOURCE_FILES[] =
+    preface
+    01_intro
+    02_expr1
+    03_var1
+    04_patt1
+    05_expr2
+    06_expr3
+    07_refcells
+    08_expr4
+    09_exn1
+    10_io1
+    11_mod1
+    12_mod2
+    13_mod3
+    14_objects1
+    15_objects2
+    16_objects3
+    17_polyclasses
+    A_syntax
+    $(EXERCISES)
+
+FILES[] =
+    defs-book
+    defs-metaprl
+    defs-listings
+    $(SOURCE_FILES)
+
+.SUBDIRS: images
+    include OMakefile
+    export EPS_FILES
+
+EXERCISES[] = $(file $(addsuffix .tex, $(EXERCISES)))
+
+SPELLING[] = $(addsuffix .spell, $(SOURCE_FILES))
+
+FILES[] =
+    $(file $(addsuffix .tex, $(FILES)))
+    $(EPS_FILES)
+
+%.spell: %.tex
+    spell $<
+    touch $@
+
+book.dvi: $(FILES) $(SPELLING)
+book.ps: $(FILES) $(SPELLING)
+book.pdf: $(FILES) $(SPELLING)
+
+LaTeXDocument(book, book)
+
+answers.dvi: $(EXERCISES)
+answers.ps: $(EXERCISES)
+answers.pdf: $(EXERCISES)
+
+LaTeXDocument(answers, answers)
+
+%-tmp.pdf: %.pdf
+    cp $< $@.tmp
+    mv $@.tmp $@
+
+%-tmp.ps: %.ps
+    cp $< $@.tmp
+    mv $@.tmp $@
+
+.DEFAULT: book-tmp.pdf answers-tmp.pdf

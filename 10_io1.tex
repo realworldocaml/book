@@ -1,0 +1,549 @@
+%
+%
+%
+
+\labelchapter{io}{Input and Output}
+
+The I/O library in OCaml is fairly expressive, including a library (the \hbox{\lstinline$Unix$}
+library) that implements a set of system calls that are portable across the platforms on which OCaml
+runs. In this chapter, we'll cover many of the standard built-in I/O functions.
+
+\index{in\_channel@\lstinline$in_channel$}
+\index{out\_channel@\lstinline$out_channel$}
+The I/O library starts by defining two data types: the type \hbox{\lstinline/in_channel/} specifies
+an I/O channel from which characters can be read, and the type \hbox{\lstinline/out_channel/}
+specifies an I/O channel to which characters can be written.  I/O channels may represent files,
+communication channels, or some other device; the exact operation depends on the context.
+
+At program startup, there are three channels open, corresponding to the standard file descriptors in
+Unix; \hbox{\lstinline/stdin/} is the standard input stream, \hbox{\lstinline/stdout/} is the standard output
+stream, and \hbox{\lstinline/stderr/} is the standard output stream for error messages.
+
+\misspelled{%
+\index{stdin@\lstinline$stdin$}
+\index{stdout@\lstinline$stdout$}
+\index{stderr@\lstinline$stderr$}}
+
+\begin{ocaml}
+val stdin  : in_channel
+val stdout : out_channel
+val stderr : out_channel
+\end{ocaml}
+
+\labelsection{file-opening}{File opening and closing}
+\index{open\_in@\lstinline$open_in$}
+\index{open\_out@\lstinline$open_out$}
+\misspelled{\index{exceptions!Sys\_error@\lstinline$Sys_error$}}
+
+There are two functions to open an output file: the function \hbox{\lstinline/open_out/} opens a
+file for writing text data, and the function \hbox{\lstinline/open_out_bin/} opens a file for
+writing binary data. These two functions are identical on a Unix system.  On some Macintosh and Microsoft Windows
+systems, the \hbox{\lstinline/open_out/} function performs line termination
+translation, while the \hbox{\lstinline/open_out_bin/} function writes the data exactly as
+written.  These functions raise the exception \hbox{\lstinline/Sys_error/} if the file can't be
+opened; otherwise they return an \hbox{\lstinline/out_channel/}.
+
+A file can be opened for reading with the functions \hbox{\lstinline/open_in/} and
+\hbox{\lstinline/open_in_bin/}.
+
+\begin{ocaml}
+val open_out : string -> out_channel
+val open_out_bin : string -> out_channel
+val open_in : string -> in_channel
+val open_in_bin : string -> in_channel
+\end{ocaml}
+%
+\index{open\_in\_gen@\lstinline$open_in_gen$} \index{open\_out\_gen@\lstinline$open_out_gen$} The
+\hbox{\lstinline/open_out_gen/} and \hbox{\lstinline/open_in_gen/} functions can be used to perform
+more kinds of file opening. The function requires an argument of type
+\hbox{\lstinline/open_flag list/}
+%
+that describes how to open the file.  The flags mimic the \hbox{\lstinline/oflags/} \misspelled{bitmask} given to
+the \hbox{\lstinline/int open(const char *path, int oflags, ...)/} system call in Unix; on other
+platforms the behavior is similar.
+
+\begin{ocaml}
+type open_flag =
+    Open_rdonly | Open_wronly | Open_append
+  | Open_creat  | Open_trunc  | Open_excl
+  | Open_binary | Open_text   | Open_nonblock
+\end{ocaml}
+%
+These opening modes have the following interpretation.
+
+\begin{itemize}
+\item \lstinline/Open_rdonly/ open for reading
+\item \lstinline/Open_wronly/ open for writing
+\item \lstinline/Open_append/ open for appending
+\item \lstinline/Open_creat/ create the file if it does not exist
+\item \lstinline/Open_trunc/ empty the file if it already exists
+\item \lstinline/Open_excl/ fail if the file already exists
+\item \lstinline/Open_binary/ open in binary mode (no conversion)
+\item \lstinline/Open_text/ open in text mode (may perform conversions)
+\item \lstinline/Open_nonblock/ open in non-blocking mode
+\end{itemize}
+%
+The functions \hbox{\lstinline$open_in_gen$} and \hbox{\lstinline$open_out_gen$} have
+the following types.
+%
+\begin{ocaml}
+val open_in_gen  : open_flag list -> int -> string -> in_channel
+val open_out_gen : open_flag list -> int -> string -> out_channel
+\end{ocaml}
+%
+The \hbox{\lstinline/open_flag list/} describe how to open the file, the \hbox{\lstinline$int$}
+argument describes the Unix permissions mode to apply to the file if the file is created, and
+the \hbox{\lstinline/string/} argument is the name of the file.
+
+\index{close\_in@\lstinline$close_in$}
+\index{close\_out@\lstinline$close_out$}
+Channels are not closed automatically.  The closing operations \hbox{\lstinline/close_out/}
+and \hbox{\lstinline/close_in/} are used for explicitly closing the channels.
+
+\begin{ocaml}
+val close_out : out_channel -> unit
+val close_in : in_channel -> unit
+\end{ocaml}
+
+\labelsection{io-values}{Writing and reading values on a channel}
+\index{output}
+\index{input}
+
+There are several functions for writing values to
+an \hbox{\lstinline/out_channel/}. The \hbox{\lstinline/output_char/} writes a single character to
+the channel, and the \hbox{\lstinline/output_string/} writes all the characters in a string to the
+channel. The \hbox{\lstinline/output/} function can be used to write part of a string to the
+channel; the \hbox{\lstinline$int$} arguments are the offset into the string, and the length of the
+substring.
+
+\begin{ocaml}
+val output_char : out_channel -> char -> unit
+val output_string : out_channel -> string -> unit
+val output : out_channel -> string -> int -> int -> unit
+\end{ocaml}
+%
+The input functions are slightly different. The \hbox{\lstinline/input_char/} function reads a
+single character, and the \hbox{\lstinline/input_line/} function reads an entire line, discarding
+the line terminator. The \hbox{\lstinline$input$} functions raise the
+exception \hbox{\lstinline/End_of_file/} if the end of the file is reached before the entire value
+could be read.
+
+\begin{ocaml}
+val input_char : in_channel -> char
+val input_line : in_channel -> string
+val input : in_channel -> string -> int -> int -> int
+\end{ocaml}
+%
+There are also several functions for passing arbitrary OCaml values on a channel opened in binary
+mode. The format of these values is implementation specific, but it is portable across all standard
+implementations of OCaml. The \hbox{\lstinline/output_byte/} and \hbox{\lstinline/input_byte/}
+functions write/read a single byte value. The \hbox{\lstinline/output_binary_int/}
+and \hbox{\lstinline$input_binary_int$} functions write/read a single integer value.
+
+The \hbox{\lstinline/output_value/} and \hbox{\lstinline/input_value/} functions write/read
+arbitrary OCaml values.  These functions are unsafe!  Note that the \hbox{\lstinline/input_value/}
+function returns a value of arbitrary type \hbox{\lstinline/'a/}. OCaml makes no effort to check the
+type of the value read with \hbox{\lstinline/input_value/} against the type of the value that was
+written with \hbox{\lstinline/output_value/}. If these differ, the compiler will not know, and most
+likely your program will fail unpredictably.
+
+\begin{ocaml}
+val output_byte : out_channel -> int -> unit
+val output_binary_int : out_channel -> int -> unit
+val output_value : out_channel -> 'a -> unit
+val input_byte : in_channel -> int
+val input_binary_int : in_channel -> int
+val input_value : in_channel -> 'a
+\end{ocaml}
+
+\labelsection{channel-manip}{Channel manipulation}
+\index{seek (file operation)}
+
+If the channel is a normal file, there are several functions that can modify the position in the
+file. The \hbox{\lstinline/seek_out/} and \hbox{\lstinline/seek_in/} function change the file
+position. The \hbox{\lstinline/pos_out/} and \hbox{\lstinline/pos_in/} function return the current
+position in the file. The \hbox{\lstinline/out_channel_length/}
+and \hbox{\lstinline/in_channel_length/} return the total number of characters in the file.
+
+\begin{ocaml}
+val seek_out : out_channel -> int -> unit
+val pos_out : out_channel -> int
+val out_channel_length : out_channel -> int
+val seek_in : in_channel -> int -> unit
+val pos_in : in_channel -> int
+val in_channel_length : in_channel -> int
+\end{ocaml}
+%
+If a file may contain both text and binary values, or if the mode of the the file is not known when
+it is opened, the \hbox{\lstinline/set_binary_mode_out/} and \hbox{\lstinline/set_binary_mode_in/}
+functions can be used to change the file mode.
+
+\begin{ocaml}
+val set_binary_mode_out : out_channel -> bool -> unit
+val set_binary_mode_in : in_channel -> bool -> unit
+\end{ocaml}
+%
+The channels perform \emph{buffered} I/O.  The characters on an \hbox{\lstinline/out_channel/} may
+not be completely written until the channel is closed. To force the writing on the buffer, use the
+\hbox{\lstinline/flush/} function.
+%
+\index{flush@\lstinline$flush$ (file operation)}
+
+\begin{ocaml}
+val flush : out_channel -> unit
+\end{ocaml}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section
+%
+\labelsection{buffer}{String buffers}
+\index{Buffer@\lstinline$Buffer$ module}
+
+The \hbox{\lstinline$Buffer$} library module provides string buffers that can, in some cases, be
+significantly more efficient that using the native string operations. String buffers have
+type \hbox{\lstinline/Buffer.t/}. The type is abstract, meaning that the specific
+implementation of the buffer is not specified.  Buffers are created with
+the \hbox{\lstinline/Buffer.create/} function.
+
+\begin{ocaml}
+val create : unit -> Buffer.t
+\end{ocaml}
+%
+There are several functions to examine the state of the buffer. The \hbox{\lstinline$contents$}
+function returns the current contents of the buffer as a string. The \hbox{\lstinline$length$}
+function returns the total number of characters stored in the buffer. The \hbox{\lstinline$clear$}
+and \hbox{\lstinline$reset$} function remove the buffer contents; the difference is
+that \hbox{\lstinline$reset$} also deallocates internal storage used by the buffer.
+
+\begin{ocaml}
+val contents : Buffer.t -> string
+val length : Buffer.t -> int
+val clear : Buffer.t -> unit
+val reset : Buffer.t -> unit
+\end{ocaml}
+%
+There are also several functions to add values to the buffer. The \hbox{\lstinline/add_char/}
+function appends a character to the buffer contents. The \hbox{\lstinline/add_string/} function
+appends a string to the contents; there is also an \hbox{\lstinline/add_substring/} function to
+append part of a string. The \hbox{\lstinline/add_buffer/} function appends the contents of another
+buffer, and the \hbox{\lstinline/add_channel/} reads input from a channel and appends it to the
+buffer.
+
+\begin{ocaml}
+val add_char : Buffer.t -> char -> unit
+val add_string : Buffer.t -> string -> unit
+val add_substring : Buffer.t -> string -> int -> int -> unit
+val add_buffer : Buffer.t -> Buffer.t -> unit
+val add_channel : Buffer.t -> in_channel -> int -> unit
+\end{ocaml}
+%
+For example, the following code sequence produces the string
+\hbox{\lstinline+"Hello world!\n"+}
+%
+\begin{ocaml}
+# let buf = Buffer.create 20;;
+@
+\begin{topoutput}
+val buf : Buffer.t = <abstr>
+\end{topoutput}
+@
+# Buffer.add_string buf "Hello";;
+# Buffer.add_char buf ' ';;
+# Buffer.add_string buf "world!\n";;
+# Buffer.contents buf;;
+@
+\begin{topoutput}
+- : string = "Hello world!\n"
+\end{topoutput}
+@
+\end{ocaml}
+%
+The \hbox{\lstinline/output_buffer/} function can be used to write the
+contents of the buffer to an \hbox{\lstinline/out_channel/}.
+
+\begin{ocaml}
+val output_buffer : out_channel -> Buffer.t -> unit
+\end{ocaml}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section
+%
+\labelsection{printf}{Formatted output with \misspelled{Printf}}
+\misspelled{\index{printf@\lstinline$printf$}}
+
+The regular functions for I/O are fairly low-level, and they can be awkward to use.  OCaml also
+implements a \hbox{\lstinline$printf$} function similar to the \hbox{\lstinline$printf$} in the
+standard library for the C programming language.  These functions are defined in the library
+module \hbox{\lstinline/Printf/}.  The general form is given by the
+function \hbox{\lstinline/fprintf/}.
+
+\begin{ocaml}
+val fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
+\end{ocaml}
+%
+Don't be worried if you don't understand this type definition.  The \hbox{\lstinline/format/} type is
+a built-in type intended to match a \misspelled{Printf} format string.  For example, the following statement
+prints a line containing an integer \hbox{\lstinline+i+} and a string \hbox{\lstinline+s+}.
+
+\begin{ocaml}
+fprintf stdout "Number = %d, String = %s\n" i s
+\end{ocaml}
+%
+The strange typing of the \hbox{\lstinline+fprintf+} function is because the
+OCaml \hbox{\lstinline+fprintf+} function is type-safe.  The OCaml compiler analyzes the the format
+string to determine the type of the arguments.  For example, the following format string specifies
+that the \hbox{\lstinline/fprintf/} function takes
+a \hbox{\lstinline$float$}, \hbox{\lstinline$int$}, and \hbox{\lstinline$string$} argument.
+
+\begin{ocaml}
+# let f = fprintf stdout "Float = %g, Int = %d, String = %s\n";;
+@
+\begin{topoutput}
+val f : float -> int -> string -> unit = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+The OCaml format specification is similar to format specifications in ANSI C.  Normal characters (not
+\lstinline/%/)
+are copied verbatim from the input to the output.  Conversions are introduced by the character
+\lstinline/%/,
+which is followed in sequence by optional width and length specifiers, and a conversion specifier.
+The conversion specifiers include the following.
+
+\begin{indent}
+\begin{itemize}
+\item \lstinline/d/ or \lstinline/i/:
+print an integer argument as a signed decimal value.
+\item \lstinline/u/:
+print an integer argument as an unsigned decimal value.
+\item \lstinline/o/:
+print an integer argument as an unsigned octal value.
+\item \lstinline/x/:
+print an integer argument as an unsigned hexadecimal value, using
+lowercase letters.
+\item \lstinline/X/:
+print an integer argument as an unsigned hexadecimal value, using
+uppercase letters.
+\item \lstinline/s/:
+print a string argument.
+\item \lstinline/c/:
+print a character argument.
+\item \lstinline/f/:
+print a floating-point argument using decimal notation, in the
+style \misspelled{\emph{dddd.ddd}}.
+\item \lstinline/e/ or \lstinline/E/:
+print a floating-point argument using decimal notation, in the
+style \misspelled{\emph{d.ddd e+-dd}} (mantissa and exponent).
+\item \lstinline/g/ or \lstinline/G/:
+print a floating-point argument using decimal notation, in the
+style \emph{f}, \emph{e}, or \emph{E}, whichever is more compact.
+\item \lstinline/b/:
+print a Boolean argument as the string \hbox{\lstinline$true$}
+or \hbox{\lstinline$false$}.
+\item \lstinline/a/:
+%
+The argument should be a user-defined printer that takes two arguments, applying the first one to
+the current output channel and to the second argument. The first argument must therefore have type
+\hbox{\lstinline/out_channel -> 'b -> unit/}
+and the second one has type \hbox{\lstinline/'b/}. The output produced
+by the function is inserted into the output
+of \hbox{\lstinline$fprintf$} at the current point.
+
+\item \lstinline/t/:
+%
+This is mostly the same as \hbox{\lstinline+a+}, but takes only one argument (with
+type \hbox{\lstinline/out_channel -> unit/}) and applies it to the
+current \hbox{\lstinline/out_channel/}.
+\item \lstinline/!/:
+takes no argument, and flushes the output channel.
+\item \lstinline/%/:
+takes no argument and outputs one \hbox{\lstinline+%+} character.
+\end{itemize}
+\end{indent}
+%
+There may be more format conversions in your version of OCaml; see the
+reference manual for additional cases.
+
+Most format specifications accept width and precision specifiers with the following
+syntax, where the square brackets indicate that the field is optional.
+%
+\begin{ocaml}
+% [-] [$\ms{width}$] [.$\ms{precision}$] specifier
+\end{ocaml}
+%
+If specified, the $\ms{width}$ indicates the minimum number of characters to output.  If the format
+contains a leading minus sign \hbox{\lstinline+-+}, the output is left-justified; otherwise it is
+right-justified.  For numeric arguments, if the width specifier begins with a zero, the output is
+padded to fit with width by adding leading zeros.  The $\ms{precision}$ is used for floating-points
+values to specify how many fractional digits to print after the decimal point.  Here are some
+examples.
+
+\begin{ocaml}
+# open Printf;;
+# printf "///%8.3f///" 3.1415926;;
+@
+\begin{topoutput}
+///   3.142///
+\end{topoutput}
+@
+# printf "///%-8.3f///" 3.1415926;;
+@
+\begin{topoutput}
+///3.142   ///
+\end{topoutput}
+@
+# printf "///%8s///" "abc";;
+@
+\begin{topoutput}
+///     abc///
+\end{topoutput}
+@
+# printf "///%8s///" "abcdefghijk";;
+@
+\begin{topoutput}
+///abcdefghijk///
+\end{topoutput}
+@
+# printf "///%x///" 65534;;
+@
+\begin{topoutput}
+///fffe///
+\end{topoutput}
+@
+# printf "///0x%08x///\n" 65534;;
+@
+\begin{topoutput}
+///0x0000fffe///
+
+\end{topoutput}
+@
+# printf "///%a///" (fun buf (x, y) ->
+     fprintf buf "x = %d, y = %g" x y) (17, 231.7);;
+@
+\begin{topoutput}
+///x = 17, y = 231.7///
+\end{topoutput}
+@
+# printf "x = %d, y = %g" 17 231.7e35;;
+@
+\begin{topoutput}
+x = 17, y = 2.317e+37
+\end{topoutput}
+@
+\end{ocaml}
+%
+The \hbox{\lstinline$Printf$} module also provides several additional functions for printing on the
+standard channels. The \hbox{\lstinline$printf$} function prints on the standard output
+channel \hbox{\lstinline$stdout$}, and \hbox{\lstinline$eprintf$} prints
+on the standard error channel \hbox{\lstinline$stderr$}.
+
+\begin{ocaml}
+let printf = fprintf stdout
+let eprintf = fprintf stderr
+\end{ocaml}
+%
+The \hbox{\lstinline$sprintf$} function has the same format specification
+as \hbox{\lstinline$printf$}, but it prints the output to a string and returns the result.
+
+\begin{ocaml}
+val sprintf : ('a, unit, string) format -> 'a
+\end{ocaml}
+%
+The \hbox{\lstinline$Printf$} module also provides formatted output to a string
+buffer. The \hbox{\lstinline$bprintf$} function takes a \hbox{\lstinline$printf$}-style format
+string, and formats output to a buffer.
+
+\begin{ocaml}
+val bprintf : Buffer.t -> ('a, Buffer.t, unit) format -> 'a
+\end{ocaml}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section
+%
+\labelsection{scanf}{Formatted input with \misspelled{Scanf}}
+\misspelled{\index{scanf@\lstinline$scanf$}}
+
+The \hbox{\lstinline+Scanf+} module is similar to \hbox{\lstinline+Printf+}, but for input instead
+of output.  The types are as follows.
+
+\begin{ocaml}
+val fscanf : in_channel -> ('a, Scanning.scanbuf, 'b) format -> 'a -> 'b
+val sscanf : string -> ('a, Scanning.scanbuf, 'b) format -> 'a -> 'b
+val scanf  : ('a, Scanning.scanbuf, 'b) format -> 'a -> 'b
+\end{ocaml}
+%
+The \hbox{\lstinline+fscanf+} function reads from an input channel; the
+\hbox{\lstinline+sscanf+} function reads from a string; and the \hbox{\lstinline+scanf+}
+function reads from the standard input.
+
+Once again, the types are somewhat cryptic.  In actual use, the \hbox{\lstinline+scanf+} functions
+take a format string and a function to process the values that are scanned.  The format specifier
+uses a syntax similar to the \hbox{\lstinline+printf+} format specification.  For \hbox{\lstinline+scanf+},
+there are two main kinds of scanning actions.
+
+\begin{itemize}
+\item 
+
+A plain character matches the same literal character on the input.  There is one exception, a single
+space character matches any amount of whitespace in the input, including tabs, spaces, newlines, and
+carriage returns.
+
+\item
+
+A conversion specifies the format of a value in the input streams.
+For example, the conversion \hbox{\lstinline+%d+} specifies that
+a decimal integer is to be read from the input channel.
+
+\end{itemize}
+%
+Here are some examples.
+
+\begin{ocaml}
+# open Scanf;;
+# sscanf "ABC   345" "%s %d" (fun s i -> s, i);;
+@
+\begin{topoutput}
+- : string * int = ("ABC", 345)
+\end{topoutput}
+@
+# sscanf "ABC 345" "%s%d" (fun s i -> s, i);;
+@
+\begin{toperror}
+Exception: Scanf.Scan_failure "scanf: bad input at char number 4:  ".
+\end{toperror}
+@
+# sscanf "ABC 345" "%4s %d" (fun s i -> s, i);;
+@
+\begin{topoutput}
+- : string * int = ("ABC", 345)
+\end{topoutput}
+@
+# sscanf "ABC DEF 345" "%s %_s %f" (fun s x -> s, x);;
+@
+\begin{topoutput}
+- : string * float = ("ABC", 345.)
+\end{topoutput}
+@
+# sscanf "123456" "%3d%3d" (fun i1 i2 -> i1 + i2);;
+@
+\begin{topoutput}
+- : int = 579
+\end{topoutput}
+@
+# sscanf "0x123 -0b111" "%i %i" (fun i1 i2 -> i1, i2);;
+@
+\begin{topoutput}
+- : int * int = (291, -7)
+\end{topoutput}
+@
+\end{ocaml}
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-

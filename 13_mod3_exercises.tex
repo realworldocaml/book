@@ -1,0 +1,666 @@
+%
+%
+%
+\exercises
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercises
+%
+\begin{exercise}{functor1}
+Which of the following are legal programs?  Explain your answers.
+
+\begin{enumerate}
+\item
+
+\begin{ocamllisting}
+module type XSig = sig val i : int end
+module F (X : XSig) = X
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module type S = sig end
+module Apply (F : functor (A : S) -> S) (A : S) = F (A)
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module type ISig = sig val i : int end
+module F (I : ISig) : ISig = struct let i = I.i + 1 end
+let j = F(struct let i = 1 end).i
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module X = struct type t = int end
+module F (X) = struct type t = X.t end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module F (X : sig type t = A | B end) : sig type t = A | B end = X
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module F (X : sig type t = A | B end) : sig type t = A | B end =
+struct type t = A | B end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module F (X : sig type t = A | B end) : sig type t = A | B end =
+struct type t = X.t end
+\end{ocamllisting}
+
+\end{enumerate}
+
+\begin{answer}\ifanswers
+\begin{enumerate}
+\item
+
+Legal; the functor \hbox{\lstinline$F$} is the identity functor.
+\item
+
+Legal; the module expression \hbox{\lstinline$Apply (F) (A)$} is
+equivalent to \hbox{\lstinline$F (A)$}.
+\item
+
+Not legal; the module expression
+\hbox{\lstinline$F(struct let i = 1 end)$}
+is not an expression.
+\item
+
+Not legal; the module parameter \hbox{\lstinline$X$} must have a
+signature (as in $F (X : XSig)$).
+\item
+
+Legal; the module \hbox{\lstinline$X$} has the specified
+signature \hbox{\lstinline$sig type t = A | B end$}.
+\item
+
+Legal; the structure \hbox{\lstinline$struct type t = A | B end$} has
+signature \hbox{\lstinline$sig type t = A | B end$}.
+\item
+
+Not legal; the types \hbox{\lstinline$X.t$} and
+\hbox{\lstinline$type t = X.t$}
+are different types.
+\end{enumerate}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%
+\begin{exercise}{functor2}
+Consider the following well-typed program.
+
+\begin{ocaml}
+module type T = sig type t val x : t end
+module A = struct type t = int let x = 0 end
+module B = struct type t = int let x = 0 end
+module C = A
+module F (X : T) = X
+module G (X : T) : T = X
+module D1 = F (A)
+module D2 = F (B)
+module D3 = F (C)
+module E1 = G (A)
+module E2 = G (B)
+module E3 = G (C)
+\end{ocaml}
+%
+Which of the following expressions are legal?  Which have type errors?
+
+\begin{enumerate}
+\item
+
+\begin{ocamllisting}
+D1.x + 1
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+D1.x = D2.x
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+D1.x = D3.x
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+E1.x + 1
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+E1.x = E2.x
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+E1.x = E3.x
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+D1.x = E1.x
+\end{ocamllisting}
+\end{enumerate}
+
+\begin{answer}\ifanswers
+The first three expressions are legal because, in each of
+the \hbox{\lstinline$D$} modules, the type \hbox{\lstinline$t$}
+is \hbox{\lstinline$int$}.  For the remaining four expressions, the
+functor \hbox{\lstinline$G$} produces a module with
+signature \hbox{\lstinline$T$}, where the type \hbox{\lstinline$t$} is
+abstract.  In part 6, the expressions have types
+%
+\hbox{\lstinline$E1.x : G(A).t$} and \hbox{\lstinline$E3.x : G(C).x$}.
+%
+The types \hbox{\lstinline$G(A).t$} and $G(C).t$ are different, even
+though modules \hbox{\lstinline$A$} and \hbox{\lstinline$C$} are
+equal.
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+\begin{exercise}{functor3}
+How many lines of output does the following program produce?
+
+\begin{ocaml}
+module type S = sig val x : bool ref end
+
+module F (A : S) =
+struct
+   let x = ref true;;
+   if !A.x then begin
+       print_string "A.x is true\n";
+       A.x := false
+   end
+end
+
+module G = F (F (F (struct let x = ref true end)))
+\end{ocaml}
+
+\begin{answer}\ifanswers
+The body of a functor is not evaluated until the functor is applied.
+Thus, the program prints one line of output for each functor
+application (so there are three lines of output).
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+\begin{exercise}{functor4}
+\index{modules!vs records@\textit{vs.}~records}
+It is sometimes better to define a data structure as a record instead
+of a module.  For example, the record type for the finite sets in this
+chapter might be defined as follows, where the
+type \hbox{\lstinline$'elt t$} is the set representation for sets with
+elements of type \hbox{\lstinline$'elt$}.
+
+\begin{ocaml}
+type 'elt t = $\cdots$
+type 'elt set =
+   { empty : 'elt t;
+     add   : 'elt -> 'elt t -> 'elt t;
+     mem   : 'elt -> 'elt t -> bool;
+     find  : 'elt -> 'elt t -> 'elt
+   }
+\end{ocaml}
+%
+\begin{enumerate}
+\item
+
+Write a function
+%
+\hbox{\lstinline$make_set : ('elt -> 'elt -> bool) -> 'elt set$}
+%
+that corresponds to the \hbox{\lstinline$MakeSet$} functor on
+page~\pageref{page:mset1} (the argument to \hbox{\lstinline$make_set$}
+is the equality function).  Can you hide the definition of the type
+%
+\hbox{\lstinline$'elt t$}
+%
+from the rest of the program?
+
+\item
+
+Is it possible to implement sets two different ways such that both
+implementations use the same \hbox{\lstinline$'elt set$} type, but
+different \hbox{\lstinline$'elt t$} representations?
+
+\item
+
+Consider an alternative definition for sets, where the record type is
+also parameterized by the set representation.
+
+\begin{ocaml}
+type ('elt, 't) set =
+   { empty : 't;
+     add   : 'elt -> 't -> 'elt;
+     mem   : 'elt -> 't -> bool;
+     find  : 'elt -> 't -> 'elt
+   }
+\end{ocaml}
+%
+Write the function \hbox{\lstinline$make_set$} for this new type.  What is
+the type of the \hbox{\lstinline$make_set$} function?
+
+\item
+
+What are some advantages of using the record representation?  What are
+some advantages of using the functor representation?
+\end{enumerate}
+
+\begin{answer}\ifanswers
+\begin{enumerate}
+\item
+
+The definition is a direct translation of the
+functor \hbox{\lstinline$MakeSet$}.
+
+\begin{ocaml}
+type 'elt t = 'elt list
+let make_set equal =
+   { empty = [];
+     add = (::);
+     mem = (fun x s -> List.mem (equal x) s);
+     find = (fun x s -> List.find (equal x) s)
+   }
+\end{ocaml}
+%
+To keep the type \hbox{\lstinline$'elt t$} abstract, we must enclose the
+definition in a module.
+
+\begin{ocaml}
+module Set : sig
+   type 'elt t
+   type 'elt set = $\cdots$
+   val make_set : ('elt -> 'elt -> bool) -> 'elt set
+end = struct
+   type 'elt t = 'elt list
+   type 'elt set = $\cdots$
+   let make_set equal = $\cdots$
+end
+\end{ocaml}
+
+\item
+
+No.  The type \hbox{\lstinline$'elt t$} is fixed for all sets (of
+type \hbox{\lstinline$'elt set$}).
+
+\item
+
+The implementation of the function \hbox{\lstinline$make_set$} is
+unchanged.  It has the following type.
+
+\begin{ocaml}
+type 'elt set_repr = 'elt list
+$\cdots$
+val make_set : ('elt -> 'elt -> bool) -> ('elt, 'elt set_repr) set
+\end{ocaml}
+%
+The type \hbox{\lstinline$set_repr$} is the representation for sets; the type
+definition can be hidden the usual way.
+
+\item
+
+The main advantage of the record representation is that it
+is \emph{first class}, meaning that values of
+type \hbox{\lstinline$'elt set$} can be passed as arguments, stored in
+data structures, etc.  There are several disadvantages.  Among them,
+type expressions are larger.  In the worst case, the type definition
+requires a parameter for each type that would be abstract in the
+module.  In addition, there is a slight performance penalty for
+calling a function in the \hbox{\lstinline$set$} record; the functor
+does not have this penalty penalty because references are resolved at
+compile time.
+
+\end{enumerate}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+\begin{exercise}{functor5}
+Suppose you wish to write a program that defines two
+mutually-recursive functions \hbox{\lstinline$f : int -> int$}
+and \hbox{\lstinline$g : int -> int$}.  To keep the design modular,
+you wish to write the code for the two functions in separate
+files \hbox{\lstinline$f.ml$} and \hbox{\lstinline$g.ml$}.  Describe
+how to use recursive modules to accomplish the task.
+
+\begin{answer}\ifanswers
+Each function can be defined in its own file using a functor, where the
+functor argument defines both functions.
+
+\begin{ocaml}
+module type RSig = sig
+   val f : int -> int
+   val g : int -> int
+end
+
+module FFun (R : RSig) = struct
+   open R
+   let rec f i = $\cdots$
+end
+\end{ocaml}
+%
+The glue code can be placed in a third file, using recursive modules
+to ``tie the knot.''
+
+\begin{ocaml}
+module rec F : sig val f : int -> int end = FFun (R)
+and F : sig val g : int -> int end = GFun (R)
+and R : RSig = struct
+   let f = F.f
+   let g = G.g
+end
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+\begin{exercise}{functor6}
+\index{pipelines}
+In Unix-style systems\footnote{UNIX\textregistered{} is a registered
+trademark of The Open Group.} a \emph{pipeline} is a series of
+processes \hbox{\lstinline/$p_1$ | $p_2$ | $\cdots$ | $p_n$/} that
+interact through communication channels, where the input of process
+$p_{i + 1}$ is the output of process $p_i$.
+
+We can use a similar architecture within a program to connect modules,
+which we will call \emph{filters}, giving them the
+signature \hbox{\lstinline$Filter$}.  The pipeline itself is given the
+signature \hbox{\lstinline$Pipeline$}, where the type of elements
+passed into the pipeline have type \hbox{\lstinline$Pipeline.t$}.
+
+\begin{ocaml}
+module type Pipeline = sig
+   type t
+   val f : t -> unit
+end
+
+module type Filter = functor (P : Pipeline) -> Pipeline
+\end{ocaml}
+%
+For example, the following pipeline \hbox{\lstinline$CatFile$}
+prints the contents of a file to the terminal, one line at a time.
+
+\begin{ocaml}
+module Print = struct
+   type t = string
+   let f s = print_string s; print_char '\n'
+end
+
+module Cat (Stdout : Pipeline with type t = string) =
+struct
+   type t = string
+
+   let f filename =
+      let fin = open_in filename in
+      try
+         while true do Stdout.f (input_line fin) done
+      with End_of_file -> close_in fin
+end
+
+module CatFile = Cat (Print)
+\end{ocaml}
+
+\begin{enumerate}
+\item
+
+Write a \hbox{\lstinline$Uniq$} filter that, given a sequence of input
+lines, discards lines that are equal to their immediate predecessors.
+All other lines should be passed to the output.
+
+\item
+
+Write a \hbox{\lstinline$Grep$} filter that, given a regular
+expression and a sequence of input lines, outputs only those lines
+that match the regular expression.  For regular expression matching,
+you can use the \hbox{\lstinline$Str$} library.  The function
+\hbox{\lstinline$Str.regexp : string -> regexp$}
+compiles a regular expression presented as a string; the
+expression \hbox{\lstinline$Str.string_match r s 0$} tests whether a
+string $s$ matches a regular expression $r$.
+
+\item
+
+Write a function \hbox{\lstinline$grep : string -> string -> unit$},
+where the expression \hbox{\lstinline$grep regex filename$} prints the
+lines of the file \hbox{\lstinline/filename/} that match the pattern specified by
+the string \hbox{\lstinline/regex/}, using the pipeline construction and the
+module \hbox{\lstinline$Grep$} from the previous part.
+
+\item
+
+Sometimes it is more convenient for filters to operate over individual
+characters instead of strings.  For example, the following filter
+translates a character stream to lowercase.
+
+\begin{ocaml}
+module Lowercase (Stdout with type t = char) =
+struct
+   type t = char
+   let f c = Stdout.f (Char.lowercase c)
+end
+\end{ocaml}
+%
+Write a filter \hbox{\lstinline$StringOfChar$} that converts a
+character-based pipeline to a string-based pipeline.
+%
+\begin{ocaml}
+StringOfChar : functor (P : Pipeline with type t = char) ->
+   Pipeline with type t = string
+\end{ocaml}
+
+\item
+
+The pipeline signatures, as defined, seem to require that pipelines be
+constructed from the end toward the beginning, as a module expression
+of the form \hbox{\lstinline/P1 (P2 $\cdots$ (Pn) $\cdots$)/}.  Write
+a functor \hbox{\lstinline$Compose$} that takes two filters and
+produces a new one that passes the output of the first to the second.
+What is the signature of the \hbox{\lstinline$Compose$} functor?
+(Hint: consider redefining the signature for filters.)
+\end{enumerate}
+
+\begin{answer}\ifanswers
+\begin{enumerate}
+\item
+
+For the \hbox{\lstinline$Uniq$} filter, we can use a reference cell to
+keep track of lines as they are read.  We ``cheat'' in this
+solution---since we know the input never contains a newline, we
+initialize the \misspelled{refcell} to an impossible value.  A better solution
+would be for the cell to be initialized to \hbox{\lstinline$None$}
+(and thus be of type \hbox{\lstinline$string option$}).
+
+\begin{ocaml}
+module Uniq (Stdout : Pipeline with type t = string)
+ : Pipeline with type t = string =
+struct
+   type t = string
+   let last_line = ref "\n"
+   let f s =
+      if s <> !last_line then
+         Stdout.f s;
+      last_line := s
+end
+\end{ocaml}
+
+\item
+
+The main problem in defining the \hbox{\lstinline$Grep$} filter is
+that it takes a regular expression as an argument.  It is possible to
+pass the regular expression in its own module, but this will mean that
+the \hbox{\lstinline$Grep$} module works for only one regular
+expression.  (The next part illustrates another solution to this
+problem.)
+
+\begin{ocaml}
+module Grep
+ (R : sig val regex : string end)
+ (P : Pipeline with type t = string) =
+struct
+   type t = string
+   let regexp = Str.regexp R.regex
+   let f s =
+      if Str.string_match regexp s 0 then
+         P.f s
+end
+\end{ocaml}
+
+\item
+
+One easy way to define the \hbox{\lstinline$grep$} function is to use
+a \hbox{\lstinline$let module$} construction to define the pipeline
+within the function body.
+
+\begin{ocaml}
+let grep regex filename =
+   let module P = Cat (Grep (struct let regex = regex end) (Print)) in
+   P.f filename
+\end{ocaml}
+
+\item
+
+The \hbox{\lstinline$StringOfChar$} module simply iterates through each
+character of the input string.
+
+\begin{ocaml}
+module StringOfChar (P : Pipeline with type t = char)
+ : Pipeline with type t = string =
+struct
+   type t = string
+   let f s = String.iter P.f s
+end
+\end{ocaml}
+
+\item
+
+The \hbox{\lstinline$Compose$} functor takes three arguments, the
+first filter \hbox{\lstinline$F1$}, the second
+filter \hbox{\lstinline$F2$}, and the rest of the
+pipeline \hbox{\lstinline$P3$}, where 
+\hbox{\lstinline$Compose (F1) (F2) (P3) = F1 (F2 (P3))$}.
+Thus, a partial application \hbox{\lstinline$Compose (F1) (F2)$} will
+yield a filter.
+
+The main issue with constructing the filter is with the constraints
+about compatibility of the filters' types.  These sharing constraints
+are not obvious.  Suppose filter \hbox{\lstinline$F1$} takes values of
+type $t_1$, filter \hbox{\lstinline$F2$} takes values of type $t_2$,
+and the rest of the pipeline \hbox{\lstinline$P3$} takes values of
+type $t_3$.  For illustration, we would have the following
+constraints.
+
+\begin{ocaml}
+module Compose
+ (F1 : (P : Pipeline with type t = $t_2$) -> Pipeline with type t = $t_1$)
+ (F2 : (P : Pipeline with type t = $t_3$) -> Pipeline with type t = $t_2$)
+ (P3 : Pipeline with type t = $t_3$) = F1 (F2 (P3))
+\end{ocaml}
+%
+The proper types are then as follows $t_3
+= \hbox{\hbox{\lstinline/P3.t/}}$, $t_2
+= \hbox{\lstinline{F2(P3).t}}$, and $t_1
+= \hbox{\lstinline{F1(F2(P3)).t}}$.  However, using these definitions
+directly is not possible because it would create forward references in
+the type definition.  For example, the signature
+for \hbox{\lstinline$F1$} would refer forward to the
+modules \hbox{\lstinline$F2$} and \hbox{\lstinline$P3$}.  We could
+reorder the arguments to eliminate the forward references, but then
+the partial application would not work as we wish.
+
+Arguably, the best solution is to redefine the signature for filters so
+that they specify the types for both input and output.
+
+\begin{ocaml}
+module type Filter = sig
+   type t_in
+   type t_out
+   module F : functor (P : Pipeline with type t = t_out) ->
+      Pipeline with type t = t_in
+end
+\end{ocaml}
+%
+The filters themselves are not much different.  For example, here is
+the filter \hbox{\lstinline$StringOfChar$}.
+
+\begin{ocaml}
+module StringOfChar
+ : Filter with type t_in = string and type t_out = char =
+struct
+   type t_in = string
+   type t_out = char
+   module F (X : Pipeline with type t = char) = struct
+      type t = string
+      let f s = String.iter X.f s
+   end
+end
+\end{ocaml}
+%
+The sharing constraints for the \hbox{\lstinline$Compose$} functor are
+now easy to express.
+
+\begin{ocaml}
+module Compose
+ (F1 : Filter)
+ (F2 : Filter with type t_in = F1.t_out)
+ : Filter with type t_in = F1.t_in and type t_out = F2.t_out =
+struct
+   type t_in = F1.t_in
+   type t_out = F2.t_out
+   module F (P3 : Pipeline with type t = t_out) = struct
+      module Pipe = F1.F (F2.F (P3))
+      type t = t_in
+      let f = Pipe.f
+   end
+end
+\end{ocaml}
+%
+The signature can be represented as follows.
+
+\begin{ocaml}
+Compose : functor (F1 : Filter) ->
+  functor (F2 : Filter with type t_in = F1.t_out) ->
+  Filter with type t_in = F1.t_in and type t_out = F2.t_out
+\end{ocaml}
+\end{enumerate}
+\fi\end{answer}
+\end{exercise}
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:

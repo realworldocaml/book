@@ -1,0 +1,123 @@
+\documentclass{book}
+
+%
+% Use Times font
+%
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{times}
+%\usepackage{mathtime}
+\usepackage[scaled=0.8]{luximono}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\usepackage{makeidx}
+\usepackage{proof}
+\usepackage{graphicx}
+\usepackage{setspace}
+%\doublespacing
+
+\pagestyle{fancy}
+\lfoot[Copyright \copyright{} Jason Hickey]{Copyright \copyright{} Jason Hickey}
+\rfoot[\textbf{Draft. Do not redistribute.}]{\textbf{Draft.  Do not redistribute.}}
+
+\input{defs-metaprl}
+\input{defs-book}
+\input{defs-listings}
+
+%
+% Hyperlinks
+%
+\usepackage{url}
+\usepackage[dvipdfm]{hyperref}
+
+\newcommand\email[1]{\texttt{#1}}
+
+%
+% Index
+%
+\usepackage{makeidx}
+\makeindex
+
+%
+% Book title
+%
+\title{Introduction to Objective Caml}
+
+
+\author{Jason Hickey\\
+\\
+{\Large\textbf{DRAFT.  DO NOT REDISTRIBUTE.}}
+\\
+\\
+Copyright \copyright{} Jason Hickey, 2008.\\
+\lstinline/jyh@cs.caltech.edu/\\
+\url{http://www.cs.caltech.edu/~jyh/}\\
+\\
+This book is under contract for publication by Cambridge University Press.\\
+This draft may be used until the time the book appears in print.}
+
+\begin{document}
+
+\sloppy
+\raggedbottom
+
+\maketitle
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Text
+%
+\frontmatter
+\include{preface}
+
+\mainmatter
+\include{01_intro}
+\include{02_expr1}
+\include{02_expr1_exercises}
+\include{03_var1}
+\include{03_var1_exercises}
+\include{04_patt1}
+\include{04_patt1_exercises}
+\include{05_expr2}
+\include{05_expr2_exercises}
+\include{06_expr3}
+\include{06_expr3_exercises}
+\include{07_refcells}
+\include{07_refcells_exercises}
+\include{08_expr4}
+\include{08_expr4_exercises}
+\include{09_exn1}
+\include{09_exn1_exercises}
+\include{10_io1}
+\include{10_io1_exercises}
+\include{11_mod1}
+\include{11_mod1_exercises}
+\include{12_mod2}
+\include{12_mod2_exercises}
+\include{13_mod3}
+\include{13_mod3_exercises}
+\include{14_objects1}
+\include{14_objects1_exercises}
+\include{15_objects2}
+\include{15_objects2_exercises}
+\include{16_objects3}
+\include{16_objects3_exercises}
+\include{17_polyclasses}
+\include{17_polyclasses_exercises}
+
+\backmatter
+\appendix
+\include{A_syntax}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+%
+\sloppy
+
+\bibliographystyle{plain}
+\bibliography{rc}
+
+\printindex
+
+\end{document}

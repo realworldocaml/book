@@ -1,0 +1,408 @@
+%
+%
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Exercises
+%
+\exercises
+
+\begin{exercise}{struct1}
+Which of the following are legal programs?  Explain your answers.
+\begin{enumerate}
+\item
+
+\begin{ocamllisting}
+module A : sig
+   val x : string
+end = struct
+   let x = 1
+   let x = "x"
+end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module A : sig
+   val x : string
+   val x : string
+end = struct
+   let x = "x"
+end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module a = struct
+   let x = 1
+end;;
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module M : sig
+   val f : int -> int
+   val g : string -> string
+end = struct
+   let g x = x
+   let f x = g x
+end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+let module X = struct let x = 1 end in X.x
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module M = struct
+   let g x = h x
+   let f x = g x
+   let h x = x + 1
+end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module rec M : sig
+   val f : int -> int
+   val h : int -> int
+end = struct
+   open M
+   let g x = h x
+   let f x = g x
+   let h x = x + 1
+end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module rec M : sig
+   val f : int -> int
+end = struct
+   let f = M.f
+end
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+type 'a t = { set : 'a -> unit; get : unit -> 'a }
+let f x =
+   let cell = ref x in
+   let module M = struct
+      let s i = cell := i
+      let g () = !cell
+      let r = { set = s; get = g }
+   end
+   in
+      M.r
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+let f x =
+   let cell = ref x in
+   let module M = struct
+      type 'a t = { set : 'a -> unit; get : unit -> 'a }
+      let s i = cell := i
+      let g () = !cell
+      let r = { set = s; get = g }
+   end
+   in
+      M.r
+\end{ocamllisting}
+
+\item
+
+\begin{ocamllisting}
+module type ASig = sig type s  val f : int -> s end
+module type BSig = sig type t  val g : t -> int end
+module C : sig
+   module A : ASig
+   module B : BSig with type t = A.s
+end = struct
+   type u = string
+   module A = struct type s = u  let f = string_of_int end
+   module B = struct type t = u  let g = int_of_string end
+end
+include C
+let i = B.g (A.f ())
+\end{ocamllisting}   
+
+\item
+
+\begin{ocamllisting}
+module type ASig = sig type t end
+module type BSig = sig val x : int end
+module A : ASig with type t = int
+   = struct type t = int end
+module B : BSig = struct let x = 1 end
+module C : sig
+   include ASig
+   val x : t
+end = struct
+   include A
+   include B
+end
+\end{ocamllisting}
+\end{enumerate}
+
+\begin{answer}\ifanswers
+\begin{enumerate}
+\item
+
+Legal; the value associated with a variable is specified by the last
+definition in the module.
+\item 
+
+Legal; the duplicate type definition is legal.  What would happen if
+the type definitions differ?
+\item 
+
+Not legal; the module name must begin with an uppercase letter.
+\item 
+
+Legal; within the structure body the function \hbox{\lstinline/g/} has
+type \hbox{\lstinline$'a -> 'a$}.  The type constraint is
+applied \emph{after} the structure is formed.
+\item 
+
+Legal; the value is \hbox{\lstinline$1$}.
+\item 
+
+Not legal; the function \hbox{\lstinline/h/} must be defined before \hbox{\lstinline/g/}.
+\item 
+
+Legal; the forward reference to \hbox{\lstinline$h x$} is allowed
+because the module is recursive.
+\item 
+
+Legal; however a application of the function \hbox{\lstinline/f/} will fail at
+runtime because the value cannot be resolved.
+\item 
+
+Legal; \hbox{\lstinline/f/} has type \hbox{\lstinline$f : 'a -> 'a t$}.
+\item
+
+Not legal; OCaml produces the error message ``In this type, the
+locally bound module name M escapes its scope.''  This is because the
+the function \hbox{\lstinline/f/} produces a value of type \hbox{\lstinline$M.t$},
+but \hbox{\lstinline$M$} is defined only in the body of \hbox{\lstinline/f/}.
+
+\item
+
+Legal; the modules \hbox{\lstinline/A/} and \hbox{\lstinline/B/} share a common (abstract) type,
+so it is legal to pass the result of \lstinline $A.f$
+t \hbox{\lstinline$B.g$}.
+
+\item
+
+Legal; the \hbox{\lstinline$include$} directive is like textual inclusion,
+subject to signature constraints.  After expansion, the module \hbox{\lstinline/C/}
+has the following form.
+
+\begin{ocaml}
+module C : sig
+   type t
+   val x : t
+end = struct
+   type t = int (* sig type t = int *)
+   let x = 1    (* sig val x : int *)
+end
+\end{ocaml}
+%
+This is a legal module definition.
+\end{enumerate}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+\begin{exercise}{struct1}
+In OCaml, programs are usually written ``bottom-up,'' meaning that
+programs are constructed piece-by-piece, and the last function is a
+file is likely to be the most important.  Many programmers prefer a
+top-down style, where the most important functions are defined first
+in a file, and supporting definitions are placed later in the file.
+Can you use the module system to allow top-down programming?
+
+\begin{answer}\ifanswers
+Recursive modules can be used for the top-down programming style.  The
+code is wrapped in a module, and all forward references must be
+declared in the module signature.  To illustrate, suppose we have a
+function \hbox{\lstinline$main$} that calls
+functions \hbox{\lstinline$f$} and \hbox{\lstinline$g$}, using an
+intermediate type \hbox{\lstinline$t$}.
+
+\begin{ocaml}
+module rec Body : sig
+   type t = V of int
+   val main : int -> int
+   val f : int -> t
+   val g : t -> int
+end = struct
+   open Body
+
+   let main i = g (f i)
+   let f i = V i
+   let g (V i) = i
+   type t = V of int
+end
+\end{ocaml}
+%
+This approach has the usual disadvantage that types must be defined
+twice, once in the signature and once in the structure.  However, the
+type definition can be defined before the module.  This is common
+style even in top-down programming.
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%
+\begin{exercise}{struct2}
+One could argue that sharing constraints are never necessary for
+unparameterized modules like the ones in this chapter. In the example
+of Figure~\reffigure{xmset8}, there are at least two other solutions
+that allow the \hbox{\lstinline/Set2/} and \hbox{\lstinline/Set/}
+modules to share values, without having to use sharing
+constraints. Present two alternate solutions without sharing
+constraints.
+\end{exercise}
+
+\begin{exercise}{struct3}
+In OCaml, signatures can apparently contain multiple declarations for the same value.
+
+\begin{ocaml}
+# module type ASig = sig
+   val f : 'a -> 'a
+   val f : int -> int
+  end;;
+@
+\begin{topoutput}
+module type ASig = sig val f : 'a -> 'a val f : int -> int end
+\end{topoutput}
+@
+\end{ocaml}
+%
+In any structure that is given this signature, the
+function \hbox{\lstinline$f$} must have \emph{all} the types listed.
+If \hbox{\lstinline$f$} is not allowed to raise an exception, what is
+the only sensible definition for it?
+
+\begin{answer}\ifanswers
+Instead of using a sharing constraint, we can add the type definition
+directly in the signature.
+
+\begin{ocaml}
+module type Set2Sig = sig
+   type 'a set = 'a Set.set
+   val empty : 'a set
+   ...
+end
+\end{ocaml}
+%
+In fact, we don't even need to define a separate type.
+
+\begin{ocaml}
+module type Set2Sig = sig
+   val empty : 'a Set.set
+   val add : 'a Set.set -> 'a -> 'a Set.set
+   val mem : 'a -> 'a Set.set -> bool
+end
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%
+\begin{exercise}{struct4}
+Unlike \hbox{\lstinline/val/} declarations, \hbox{\lstinline/type/}
+declarations must have distinct names in any structure or signature.
+
+\begin{ocaml}
+# module type ASig = sig
+     type t = int
+     type t = bool
+  end;;
+@
+\begin{toperror}
+Multiple definition of the type name t.
+Names must be unique in a given structure or signature.
+\end{toperror}
+@
+\end{ocaml}
+%
+While this particular example may seem silly, the real problem is that
+all modules included with \lstinline$include$ must have disjoint type
+names.
+
+\begin{ocaml}
+# module type XSig = sig
+     type t
+     val x : t
+  end;;
+# module A : XSig = struct
+     type t = int
+     let x = 0
+  end;;
+# module B : XSig = struct
+     type t = int
+     let x = 1
+  end;;
+# module C = struct
+     include A
+     include B
+  end;;
+@
+\begin{toperror}
+Multiple definition of the type name t.
+Names must be unique in a given structure or signature.
+\end{toperror}
+@
+\end{ocaml}
+%
+Is this a problem?  If it is not, argue that conflicting includes
+should not be allowed in practice.  If it is, propose a possible
+solution to the problem (possibly by changing the language).
+
+\begin{answer}\ifanswers
+The type \hbox{\lstinline$'a -> 'a$} is more general than the
+type \hbox{\lstinline$int -> int$}.  That is, any value with the
+former type can also be given the latter type; the inverse does not
+hold.  This means that the value must have
+\hbox{\lstinline$'a -> 'a$}.
+The only sensible value with this type is the identity function.
+
+\begin{ocaml}
+module A : ASig = struct
+   let f x = x
+end
+\end{ocaml}
+\end{answer}
+
+\begin{answer}{struct4}
+\fi\end{answer}
+\end{exercise}
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:

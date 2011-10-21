@@ -1,0 +1,1762 @@
+%
+%
+%
+
+\labelchapter{polyclasses}{Polymorphic Classes}
+\index{classes!polymorphic}
+
+So far, we have seen many kinds of class and class type definitions.  Classes can be fixed, or they
+can be parameterized by ordinary values.  In addition, classes and class types can be
+\emph{polymorphic}, meaning that they can be parameterized by types, just like other expressions and
+types in the language (except for module types).
+
+This kind of generic object-oriented programming appears in other
+programming languages in various forms.  The Eiffel programming
+language supports \emph{genericity}; C++ has a construct
+called \emph{templates}; Java has type-parameterized classes
+called \emph{generics}.
+
+In OCaml, polymorphism is not a new concept when applied to classes.
+It is the \emph{same} concept that appears throughout the language,
+and it works the same way for classes and class types as it does for
+other constructs.
+
+\labelsection{poly-map}{Polymorphic dictionaries}
+\label{page:poly-map}
+\label{classes:polymorphic}
+
+Let's start with an example based on the ``map'' data structure that
+we developed in Section~\reflabelsection{module-reuse}
+using functors.  A map is a
+dictionary containing key-value pairs, parameterized by a
+function \hbox{\lstinline$compare$} that defines a total order on keys.  For
+brevity, we'll implement the map using association lists.
+
+\begin{ocaml}
+# type ordering = Smaller | Equal | Larger
+@
+\begin{topoutput}
+type ordering = Smaller | Equal | Larger
+\end{topoutput}
+@
+# class ['key, 'value] map (compare : 'key -> 'key -> ordering) =
+     let equal key1 (key2, _) = compare key1 key2 = Equal in
+     object (self : 'self)
+        val elements : ('key * 'value) list = []
+        method add key value = {< elements = (key, value) :: elements >}
+        method find key = snd (List.find (equal key) elements)
+     end;;
+@
+\begin{topoutput}
+class ['a, 'b] map : ('a -> 'a -> ordering) ->
+  object ('self)
+    val elements : ('a * 'b) list
+    method add : 'a -> 'b -> 'self
+    method find : 'a -> 'b
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+The result type has been edited slightly for readability.
+
+The class definition is parameterized by two types, \hbox{\lstinline$'key$}
+and \hbox{\lstinline$'value$}, written within square brackets before the
+class name as \hbox{\lstinline$['key, 'value]$}.  The square brackets are
+required even if there is only one type parameter to a class definition.
+
+The entries of the map are stored in the list \hbox{\lstinline$elements$}, of
+type \hbox{\lstinline$('key * 'value) list$}, and the map's methods examine
+the list.  This implementation of a map is pure, the
+method \hbox{\lstinline$add$} produces a new object with the new entry added
+to the list, leaving the \hbox{\lstinline$self$} object unchanged.
+
+\labelsubsection{polyclasses-type-constraints}{Free type variables in polymorphic classes}
+\index{classes!free type variables}
+
+The type constraints, besides being good documentation, are required.
+Class definitions are not allowed to have free type variables, meaning
+that every type variable must be a parameter, or it must be bound
+somewhere else in the class definition.  The following definition
+fails.
+
+\begin{ocaml}
+# class ['a] is_x x =   (* Does not work! *)
+     object (self : 'self)
+        method test y = (x = y)
+     end;;
+@
+\begin{toperror}
+Some type variables are unbound in this type:
+  class ['a] is_x : 'b -> object method test : 'b -> bool end
+The method test has type 'a -> bool where 'a is unbound
+\end{toperror}
+@
+\end{ocaml}
+%
+The reason for the failure is that the type of the
+argument \hbox{\lstinline$x$} is not specifically written as being of
+type \hbox{\lstinline$'a$}, hence the method \hbox{\lstinline$test$} has some
+type \hbox{\lstinline$'b -> bool$}, where the type variable \hbox{\lstinline$'b$} is
+not a parameter of the class.  The solution is to constrain the types
+so that the method \hbox{\lstinline$test$} has type \hbox{\lstinline$'a -> bool$}.
+
+\begin{ocaml}
+# class ['a] is_x (x : 'a) =
+     object (self : 'self)
+        method test y = (x = y)
+     end;;
+@
+\begin{topoutput}
+class ['a] is_x : 'a -> object method test : 'a -> bool end
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsubsection{poly-instantiation}{Instantiating a polymorphic class}
+
+Instantiating a class (to get an object), works the same it does with
+non-polymorphic classes.  The \hbox{\lstinline$new$} operator is used to
+instantiate the class.  For example, here is how we might construct an
+actual map object where the keys are integers.
+
+\begin{ocaml}
+# let compare_int (i : int) (j : int) =
+     if i < j then Smaller
+     else if i > j then Larger
+     else Equal;;
+@
+\begin{topoutput}
+val compare_int : int -> int -> ordering = <fun>
+\end{topoutput}
+@
+# let empty_int_map = new map compare_int;;
+@
+\begin{topoutput}
+val empty_int_map : (int, '_a) map = <obj>
+\end{topoutput}
+@
+# let one = empty_int_map#add 1 "One";;
+@
+\begin{topoutput}
+val one : (int, string) map = <obj>
+\end{topoutput}
+@
+# empty_int_map;;
+@
+\begin{topoutput}
+- : (int, string) map = <obj>
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note that the type for the empty map is
+\hbox{\lstinline$empty_int_map : (int, '_a) map$}.
+That is, it does not have polymorphic type, hence it can be used only
+at one type.  This is due to the \emph{value
+restriction} (Section \reflabelsection{value-restriction})---the
+expression \hbox{\lstinline$new map compare_int$} is an application, so it
+is not a value, and so it is not polymorphic.
+For the most part, the practical consequences of the value restriction
+are minimal, it simply means that a new empty map must be created for
+each type of map value that is to be used in a program.
+
+One additional step we might take is to define a class specifically for
+the case when the keys are integers.  The new class is polymorphic
+over just one type, the type of values.
+
+\begin{ocaml}
+# class ['value] int_map = [int, 'value] map compare_int;;
+@
+\begin{topoutput}
+class ['a] int_map : [int, 'a] map
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note that the type arguments are required on the right as part of the
+definition (in addition to the normal value
+argument \hbox{\lstinline$compare_int$}).  The syntax for type arguments is a
+sequence of comma-separated type expressions between square brackets,
+placed before the class name.  We could, if we wish, further constrain
+the type.
+
+\begin{ocaml}
+# class int_map2 = [int, string * float] map compare_int;;
+@
+\begin{topoutput}
+class int_map2 : [int, string * float] map
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsubsection{poly-inheritance}{Inheriting from a polymorphic class}
+
+Inheriting from a polymorphic class works as usual, except that type arguments
+to polymorphic superclasses must be supplied explicitly.  Let's define
+a new kind of map that supports a method \hbox{\lstinline$iter$} that applies a function
+once to each entry in the map.
+
+\begin{ocaml}
+# class ['key, 'value] iter_map compare =
+    object
+      inherit ['key, 'value] map compare
+      method iter f = List.iter (fun (key, value) -> f key value) elements
+    end;;
+@
+\begin{topoutput}
+class ['a, 'b] iter_map : ('a -> 'a -> ordering) ->
+  object ('c)
+    ...
+    method iter : ('a -> 'b -> unit) -> unit
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+The directive \hbox{\lstinline$inherit$} takes the type arguments in addition
+to any normal arguments, but otherwise the directive works as
+expected.
+
+Next, let's consider a new method \hbox{\lstinline$map$} that applies a
+function to each of the values in the dictionary, returning a new map.  Given
+a function \hbox{\lstinline$f : 'value -> 'value2$}, what should be the type
+of the method \hbox{\lstinline$map$}?  Let's write the code.
+
+\begin{ocaml}
+# class ['key, 'value] map_map compare =
+  object (self : 'self)
+    inherit ['key, 'value] map compare
+    method map f =
+      {< elements = List.map (fun (key, value) -> key, f value) elements >}
+  end;;
+@
+\begin{topoutput}
+class ['a, 'b] map_map : ('a -> 'a -> ordering) ->
+  object ('self)
+    ...
+    method map : ('b -> 'b) -> 'self
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note the type of the method \hbox{\lstinline$map$}, which requires that the
+function argument have type \hbox{\lstinline$'b -> 'b$}.  We might have
+expected a more general typing where, given an object of
+type \hbox{\lstinline$obj : ['key, 'value1] map_map$} and a
+function \hbox{\lstinline$f : 'value1 -> 'value2$}, that the
+expression \hbox{\lstinline$obj#map f$} would have type
+\hbox{\lstinline$['key, 'value2] map_map$}.  
+
+There is a good reason for the more restrictive typing.  Suppose we
+decide to build a variation on a map where, instead of the
+method \hbox{\lstinline$find$} raising an exception when an entry is not
+found, it returns some default value.  The new class is easy to
+define.
+
+\begin{ocaml}
+class ['key, 'value] default_map compare (default : 'value) =
+  object (self : 'self)
+     inherit ['key, 'value] map_map compare as super
+     method find key =
+        try super#find key with
+           Not_found -> default
+  end;;
+\end{ocaml}
+%
+Objects of the class \hbox{\lstinline$default_map$} have two places
+where values of type \hbox{\lstinline$'value$} appear: in the list
+of \hbox{\lstinline$elements$}, and the \hbox{\lstinline$default$}
+value.  It is not safe to change the type
+of \hbox{\lstinline$elements$} without also changing
+the \hbox{\lstinline$default$} value in the same way.  In this case,
+the more general typing for the method \lstinline$map$ would be unsafe
+because it doesn't also change the \lstinline$default$ value.
+
+Of course, OCaml does not try to predict how subclasses will be
+created.  The only safe approach is for the object type to be
+invariant.
+
+\labelsection{polymorphic-class-types}{Polymorphic class types}
+
+Polymorphic classes have polymorphic class types, using the usual
+syntax where the type parameters are enclosed in square brackets.
+
+\begin{ocaml}
+# class type ['key, 'value] map_type =
+    object ('self)
+      method add  : 'key -> 'value -> 'self
+      method find : 'key -> 'value
+    end;;
+@
+\begin{topoutput}
+class type ['a, 'b] map_type =
+  object ('c) method add : 'a -> 'b -> 'c method find : 'a -> 'b end
+\end{topoutput}
+@
+# class ['key, 'value] map2 (compare : 'key -> 'key -> ordering)
+  : ['key, 'value] map_type =
+    let equal key1 (key2, _) = compare key1 key2 = Equal in
+    object $\cdots$ end
+@
+\begin{topoutput}
+class ['a, 'b] map2 : ('a -> 'a -> ordering) -> ['a, 'b] map_type
+\end{topoutput}
+@
+\end{ocaml}
+%
+This implementation of the class \hbox{\lstinline$map2$} is entirely
+self-contained.  Let's look at an example of a recursive definition,
+based on the implementation of binary search trees in
+Section~\reflabelsection{union-binary-trees}.  In that section, we defined
+the binary tree with the following polymorphic union type.
+
+\begin{ocaml}
+type 'a tree =
+   Node of 'a * 'a tree * 'a tree
+ | Leaf;;
+\end{ocaml}
+%
+If we wish to take an object-oriented approach, we can implement each
+case of the union as a class that has a class type
+\hbox{\lstinline$['a] tree$}, where the type \hbox{\lstinline$['a] tree$}
+specifies the operations on a tree, but not its implementation.  For
+our purposes, a tree supports a functional \hbox{\lstinline$add$} operation
+to add an element to the tree, and a \hbox{\lstinline$mem$} function to test
+for membership in the tree.
+
+\begin{ocaml}
+class type ['a] tree =
+  object ('self)
+    method add : 'a -> 'a tree
+    method mem : 'a -> bool
+  end;;
+\end{ocaml}
+%
+\label{page:poly-tree}
+There are then two classes that implement a tree: a 
+class \hbox{\lstinline$['a] leaf$} 
+that represents the empty tree, and a
+class \hbox{\lstinline$['a] node$}
+that represents an internal node.  Let's start with the internal
+node.
+
+\begin{ocaml}
+class ['a] node (compare : 'a -> 'a -> ordering)
+    (x : 'a) (l : 'a tree) (r : 'a tree) =
+  object (self : 'self)
+    val label = x
+    val left = l
+    val right = r
+    method mem y =
+      match compare y label with
+         Smaller -> left#mem y
+       | Larger -> right#mem y
+       | Equal -> true
+    method add y =
+      match compare y label with
+         Smaller -> {< left = left#add y >}
+       | Larger -> {< right = right#add y >}
+       | Equal -> self
+  end;;
+\end{ocaml}
+%
+An internal node has three fields: a label and two children, where the
+children have type \hbox{\lstinline$'a tree$}.  The method \hbox{\lstinline$mem$}
+performs a binary search, and the method \hbox{\lstinline$add$} performs a
+functional update, returning a new tree.
+
+The class \hbox{\lstinline$['a] leaf$} is simpler, the method \hbox{\lstinline$mem$}
+always returns \hbox{\lstinline$false$}, and the method \hbox{\lstinline$add$}
+produces a new internal node.
+
+\begin{ocaml}
+class ['a] leaf (compare : 'a -> 'a -> ordering) =
+  object (self : 'self)
+    method mem (_ : 'a) = false
+    method add x =
+      new node compare x (new leaf compare) (new leaf compare)
+  end;;
+\end{ocaml}
+%
+This implementation is adequate, but it is slightly inefficient because
+the method \hbox{\lstinline$add$} creates entirely new leaves.  Since all
+leaves are the same, we might consider using \hbox{\lstinline$self$} instead,
+but we run into a type error because the type \hbox{\lstinline$'self$} is not
+equivalent to \hbox{\lstinline$'a tree$}.
+
+\begin{ocaml}
+# class ['a] leaf (compare : 'a -> 'a -> ordering) =
+    object (self : 'self)
+      method mem (_ : 'a) = false
+      method add x = new node compare x self self
+    end;;
+@
+\begin{toperror}
+Characters 151-155:
+        new node compare x self self
+                           ^^^^
+This expression has type < add : 'a -> 'b; mem : 'a -> bool; .. >
+but is here used with type 'a tree
+Self type cannot be unified with a closed object type
+\end{toperror}
+@
+\end{ocaml}
+%
+The problem is that, in general, the type \hbox{\lstinline$'self$} is a
+subtype of \hbox{\lstinline$'a leaf$}, but the class \hbox{\lstinline$node$} takes
+arguments of the exact type \hbox{\lstinline$'a tree$}.  One solution is to
+coerce \hbox{\lstinline$self$} to have the appropriate type.
+
+\begin{ocaml}
+class ['a] leaf (compare : 'a -> 'a -> ordering) =
+  object (self : 'self)
+    method mem (_ : 'a) = false
+    method add x =
+      new node compare x (self :> 'a tree) (self :> 'a tree)
+  end;;
+\end{ocaml}
+%
+The coercion works as we expect, and the definition is accepted.
+We investigate polymorphic coercions more in the following section.
+
+\labelsubsection{polyclasses-coercions}{Coercing polymorphic classes}
+
+\index{objects!coercions}
+Objects having polymorphic class types can be coerced just like those
+with non-polymorphic types, but the process requires more preparation
+when the type arguments also change during the coercion.
+
+Before we begin the discussion, let's define an example that is
+smaller and easier to work with.  We define a polymorphic
+class \hbox{\lstinline$mut_pair$} that is like a mutable arity-2 tuple.
+
+\begin{ocaml}
+# class ['a, 'b] mut_pair (x0 : 'a) (y0 : 'b) =
+    object (self : 'self)
+      val mutable x = x0
+      val mutable y = y0
+      method set_fst x' = x <- x'
+      method set_snd y' = y <- y'
+      method value = x, y
+    end;;
+@
+\begin{topoutput}
+class ['a, 'b] mut_pair : 'a -> 'b ->
+  object
+    val mutable x : 'a
+    val mutable y : 'b
+    method set_fst : 'a -> unit
+    method set_snd : 'b -> unit
+    method value : 'a * 'b
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+To test it, let's use the animal example.
+Each kind of animal should have its own class derived from a
+common super-class \hbox{\lstinline$animal$} that characterizes all animals.
+Here are some example definitions.
+
+\begin{ocaml}
+# class virtual animal (name : string) =
+    object (self : 'self)
+      method eat = Printf.printf "%s eats.\n" name
+    end;;
+@
+\begin{topoutput}
+class virtual animal : string -> object method eat : unit end
+\end{topoutput}
+@
+# class dog (name : string) =
+    object (self : 'self)
+      inherit animal name
+      method bark = Printf.printf "%s barks!\n" name
+    end;;
+@
+\begin{topoutput}
+class dog : string -> object method bark : unit method eat : unit end
+\end{topoutput}
+@
+# let dogs = new mut_pair (new dog "Spot") (new dog "Rover");;
+@
+\begin{topoutput}
+val dogs : (dog, dog) mut_pair = <obj>
+\end{topoutput}
+@
+\end{ocaml}
+%
+According to our definition, every animal has a name, all animals eat, and
+dogs also bark.  The final value \hbox{\lstinline$dogs$} is a pair of dogs,
+named Spot and Rover.
+
+The class \hbox{\lstinline$animal$} is marked as \hbox{\lstinline$virtual$} only
+because we intend that every animal should belong to a particular
+class; there are no generic animals.  Some operations, however,
+should work for animals generically.  For example, let's build a
+function \hbox{\lstinline$eat2$} that, given a pair of animals, calls
+the method \hbox{\lstinline$eat$} for the two animals.
+
+\begin{ocaml}
+# let eat2 animals =
+     let x, y = animals#value in x#eat; y#eat
+@
+\begin{topoutput}
+val eat2 :
+  < value : < eat : 'a; .. > * < eat : 'b; .. >; .. > -> 'b = <fun>
+\end{topoutput}
+@
+# eat2 dogs;;
+@
+\begin{topoutput}
+Spot eats.
+Rover eats.
+\end{topoutput}
+\end{ocaml}
+%
+Note the strange type for the function \hbox{\lstinline$eat2$}; it takes
+an object with a method \hbox{\lstinline$value$} that produces a pair of
+objects with methods \hbox{\lstinline$eat$}.  We might want to
+give it a simpler type by specifically stating that it takes a pair
+of animals.
+
+\begin{ocaml}
+# let eat2_both (animals : (animal, animal) mut_pair) =
+     let x, y = animals#value in x#eat2; y#eat2;;
+@
+\begin{topoutput}
+val eat2 : (animal, animal) mut_pair -> unit = <fun>
+\end{topoutput}
+@
+# eat2 dogs;;
+@
+\begin{toperror}
+Characters 15-19:
+  eat2 dogs;;
+                 ^^^^
+This expression has type
+  (dog, dog) pair = ...
+but is here used with type
+  (animal, animal) mut_pair = ...
+Type dog = < bark : unit; eat : unit > is not compatible with type
+  animal = < eat : unit > 
+Only the first object type has a method bark
+\end{toperror}
+@
+\end{ocaml}
+%
+Here, we run into a problem---the function \hbox{\lstinline$eat2$}
+expects a pair of animals, but we passed it a pair of dogs.  Of
+course, every dog is an animal, so perhaps we just need to perform a
+type coercion to convert the pair to the right type.
+
+\begin{ocaml}
+# let animals = (dogs : (dog, dog) mut_pair :> (animal, animal) mut_pair);;
+@
+\begin{toperror}
+Characters 14-71:
+  let animals = (dogs : (dog, dog) mut_pair :> (animal, animal) mut_pair);;
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+Type animal = < eat : unit > is not a subtype of type
+  dog = < bark : unit; eat : unit > 
+\end{toperror}
+@
+\end{ocaml}
+%
+Here we run into more trouble.  The error message states
+that \hbox{\lstinline$animal$} is not a subtype
+of \hbox{\lstinline$dog$}.  Given a single dog object
+like \hbox{\lstinline$spot$}, we can coerce it explicitly with the expression
+\hbox{\lstinline$(spot : dog :> animal)$}. 
+However, for the pair \hbox{\lstinline$dogs$} it seems that we need
+would to coerce the dog objects individually, which would not only be
+annoying, but possibly incorrect because a new copy of the pair must
+be created.
+
+OCaml does provide a solution, but to understand it we need to look at \emph{variance annotations},
+which describe what coercions are legal for polymorphic classes.
+
+\labelsubsection{variance-annotations}{Variance annotations}
+\index{types!variance annotations}
+\index{variance annotations}
+
+OCaml uses \emph{variance annotations} on the parameters of a type
+definition to specify its subtyping properties.  A parameter
+annotation \hbox{\lstinline$+'a$} means that the definition is
+covariant in \hbox{\lstinline$'a$}; an
+annotation \hbox{\lstinline$-'a$} means that the definition is
+contravariant in \hbox{\lstinline$'a$}; and the plain
+parameter \hbox{\lstinline$'a$} means the definition is invariant
+in \hbox{\lstinline$'a$}.  When a type is defined, the compiler checks
+that the annotations are legal.
+
+\begin{ocaml}
+# type (+'a, +'b) pair' = 'a * 'b;;
+@
+\begin{topoutput}
+type ('a, 'b) pair' = 'a * 'b
+\end{topoutput}
+@
+# type (+'a, +'b) func = 'a -> 'b;;
+@
+\begin{toperror}
+Characters 5-31:
+  type (+'a, +'b) func = 'a -> 'b;;
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+In this definition, expected parameter variances are not satisfied.
+The 1st type parameter was expected to be covariant,
+but it is contravariant
+\end{toperror}
+@
+# type (-'a, +'b) func = 'a -> 'b;;
+@
+\begin{topoutput}
+type ('a, 'b) func = 'a -> 'b
+\end{topoutput}
+@
+\end{ocaml}
+%
+The toploop is erasing the annotations in the displayed output, but it
+is still checking that the annotations are legal.
+
+Let's look at how this works in the context of classes and class
+types.  Consider a class definition of an immutable pair.
+
+\begin{ocaml}
+# class [+'a, +'b] pair (x0 : 'a) (y0 : 'b) =
+    object (self : 'self)
+      val mutable x = x0
+      val mutable y = y0
+      method value : 'a * 'b = x, y
+    end;;
+@
+\begin{topoutput}
+class ['a, 'b] pair : 'a -> 'b -> object ... method value : 'a * 'b end
+\end{topoutput}
+@
+# let p = new pair (new dog "Spot") (new dog "Rover");;
+@
+\begin{topoutput}
+val p : (dog, dog) pair = <obj>
+\end{topoutput}
+@
+\end{ocaml}
+%
+As before, we might wish to coerce the pair of dogs to a pair of
+animals.  This time the coercion works as expected.
+
+\begin{ocaml}
+# (p :> (animal, animal) pair);;
+@
+\begin{topoutput}
+- : (animal, animal) pair = <obj>
+\end{topoutput}
+@
+\end{ocaml}
+%
+The reason this works is because the class type
+for \hbox{\lstinline$pair$} is covariant in
+the component types.  Since \hbox{\lstinline$dog$} is a subtype
+of \hbox{\lstinline$animal$}, the type \hbox{\lstinline$(dog, dog) pair$} is a
+subtype of \hbox{\lstinline$(animal, animal) pair$}.
+
+Let's try to specify similar annotations for the class of mutable
+pairs, \hbox{\lstinline$mut_pair$}.
+
+\begin{ocaml}
+# class [+'a, +'b] mut_pair (x0 : 'a) (y0 : 'b) =
+    object (self : 'self)
+      val mutable x = x0
+      val mutable y = y0
+      method set_fst x' = x <- x'
+      method set_snd y' = y <- y'
+      method value = x, y
+    end;;
+@
+\begin{toperror}
+Characters 5-185: .....
+In this definition, expected parameter variances are not satisfied.
+The 1st type parameter was expected to be covariant,
+but it is invariant
+\end{toperror}
+@
+\end{ocaml}
+%
+Why isn't the new definition allowed?  If we look back to the
+method types in the unannotated class, we find the following
+types for the \hbox{\lstinline$set_xxx$} methods.
+
+\begin{ocaml}
+# class ['a, 'b] mut_pair (x0 : 'a) (y0 : 'b) = $\cdots$
+@
+\begin{topoutput}
+class ['a, 'b] pair : 'a -> 'b ->
+  object
+    ...
+    method set_fst : 'a -> unit
+    method set_snd : 'b -> unit
+    method value : 'a * 'b
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+The problem is that the 
+type parameters \hbox{\lstinline$'a$} and \hbox{\lstinline$'b$} occur to the left of an
+arrow, so the occurrences are contravariant.  The other significant
+occurrences are in the type \hbox{\lstinline$'a * 'b$}, where they are covariant.
+Since the variables have both contravariant and covariant occurrences,
+they must be invariant.
+
+For some intuition, imagine that the covariant definition were
+allowed.  Consider the following sequence of actions, where for
+illustration we refer to a subclass \hbox{\lstinline$cat$} that inherits
+from \hbox{\lstinline$animal$}, but is not a dog.
+
+\begin{ocaml}
+# let dogs = new mut_pair (new dog "Spot") (new dog "Rover");;
+@
+\begin{topoutput}
+dogs : (dog, dog) mut_pair
+\end{topoutput}
+@
+  (* Imagine if this were legal *)
+# let animals = (dogs :> (animal, animal) mut_pair);;
+@
+\begin{topoutput}
+animals : (animal, animal) mut_pair
+\end{topoutput}
+@
+# let fifi = new cat "Fifi";;
+@
+\begin{topoutput}
+fifi : cat
+\end{topoutput}
+@
+# animals#set_fst (fifi :> animal);;
+# let fifi' = fst dogs#value;;
+@
+\begin{topoutput}
+fifi' : dog
+\end{topoutput}
+@
+# fifi'#bark;;
+@
+\begin{toperror}
+????
+\end{toperror}
+@
+\end{ocaml}
+%
+The steps 1) create a pair of dogs, 2) coerce it to a pair of animals,
+and 3) replace one of the dogs with a cat (which is also an animal).
+Since the modification is done in-place, the original dog pair now
+contains a cat.  This is wrong because, among other things, cats do
+not bark.
+
+\labelsubsection{positive-occurrences}{Positive and negative occurrences}
+\index{types!positive occurrences}
+
+Mechanically speaking, the restrictions on variance annotations are
+not determined by whether a class has mutable fields or contains
+side-effects, it is purely based on the non-private method types.
+
+Consider the following slightly different definition of a
+class \hbox{\lstinline$get_pair$}.
+
+\begin{ocaml}
+# class [+'a, +'b] get_pair (x0 : 'a) (y0 : 'b) =
+    object (self : 'self)
+      val mutable x = x0
+      val mutable y = y0
+      method get_fst : ('a -> unit) -> unit = fun f -> f x
+      method value = x, y
+    end;;
+@
+\begin{topoutput}
+class ['a, 'b] get_pair : 'a -> 'b ->
+  object
+    val mutable x : 'a
+    val mutable y : 'b
+    method get_fst : ('a -> unit) -> unit
+    method value : 'a * 'b
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+This class is accepted, with the covariant annotation \hbox{\lstinline$+'a$}, even
+though \hbox{\lstinline$'a$} occurs to the left of an arrow in the
+method \hbox{\lstinline$get_fst : ('a -> unit) -> unit$}.  How does this work?
+
+\index{left-nesting depth}
+There is a straightforward calculation for determining the variance of
+a variable in a type.  First, for some occurrence of the type
+variable in question, we define a \emph{left-nesting depth} with
+respect to the arrows in the type definition, where the left-nesting
+depth increases by one each time the type variable occurs to the left
+of an arrow in the fully-parenthesized type.  Covariant constructors,
+like \hbox{\lstinline$*$}, do not affect the depth.  Type
+constructors, like \hbox{\lstinline$ref$}, that specify mutable values
+require that the variable be invariant.
+
+Here are some examples for the nesting depth of a type
+variable \hbox{\lstinline$'a$}, where ``*'' indicates that the type is
+invariant.
+
+\begin{center}
+\begin{tabular}{l|l|c}
+Type & Fully-parenthesized type & Depth\\
+\hline
+\hbox{\lstinline/$t_1$ -> $t_2$ -> 'a/} & \hbox{\lstinline/$t_1$ -> ($t_2$ -> 'a)/} & 0\\
+\hbox{\lstinline/$t_1$ -> 'a -> $t_2$ -> $t_3$/} & \hbox{\lstinline/$t_1$ -> ('a -> ($t_2$ -> $t_3$))/} & 1\\
+\hbox{\lstinline/($t_1$ -> 'a -> $t_2$) -> $t_3$/} & \hbox{\lstinline/($t_1$ -> ('a -> $t_2$)) -> $t_3$/} & 2\\
+\hbox{\lstinline/($t_1$ -> $t_2$ -> 'a) -> $t_3$/} & \hbox{\lstinline/($t_1$ -> ($t_2$ -> 'a)) -> $t_3$/} & 1\\
+\hbox{\lstinline/((('a * $t_1$) -> $t_2$) -> $t_3$) -> $t_4$/} & same & 3\\
+\hbox{\lstinline/'a ref/} & same & *\\
+\hbox{\lstinline/('a -> $t_1$) ref -> $t_2$/} & same & *
+\end{tabular}
+\end{center}
+%
+\index{positive occurrences}
+\index{negative occurrences}
+Next, consider the type variables that are not invariant.  If the
+nesting depth is even, the occurrence is called \emph{positive}; if it
+is odd, the occurrence is \emph{negative}.  Positive occurrences are
+covariant, negative occurrences are contravariant.  For the method
+\hbox{\lstinline$get_fst : ('a -> unit) -> unit$},
+the nesting depth of \hbox{\lstinline$'a$} is 2, which means that the
+occurrence is positive and covariant.
+
+\labelsubsection{hiding-coercions}{Coercing by hiding}
+
+Let's return to the class of mutable pairs \hbox{\lstinline$mut_pair$}.
+Suppose we have pair of dogs, and we still wish to coerce the
+object to a pair of animals.  The methods
+\hbox{\lstinline$set_fst : 'a -> unit$} and \hbox{\lstinline$set_snd : 'b -> unit$}
+prevent this, because of the negative occurrence of the type
+variables \hbox{\lstinline$'a$} and \hbox{\lstinline$'b$}.  However, it is still
+possible to coerce the class, \emph{provided} that
+the these methods are omitted.
+
+\begin{ocaml}
+# let dogs = new mut_pair (new dog "Spot") (new dog "Rover");;
+@
+\begin{topoutput}
+val dogs : (dog, dog) mut_pair = <obj>
+\end{topoutput}
+@
+# (dogs :> (animal, animal) pair);;
+@
+\begin{topoutput}
+- : (animal, animal) pair = <obj>
+\end{topoutput}
+@
+# (dogs : (dog, dog) mut_pair :> (animal, animal) mut_pair);;
+@
+\begin{toperror}
+...
+Type animal = < eat : unit > is not a subtype of type
+  dog = < bark : unit; eat : unit >
+\end{toperror}
+@
+\end{ocaml}
+%
+We can think of the the coercion to \hbox{\lstinline$(animal, animal) pair$}
+as two steps: the first step coerces the object to type \hbox{\lstinline$(dog, dog) pair$},
+which simply means omitting the methods \hbox{\lstinline$set_fst$}
+and \hbox{\lstinline$set_snd$}; the next step coerces to 
+\hbox{\lstinline$(animal, animal) pair$},
+which is legal because the class \hbox{\lstinline$pair$} is covariant in its
+type parameters.
+
+There are other examples where it may be useful to view the same
+object with different types.  For example, suppose we have an
+object that behaves like a reference cell.
+
+\begin{ocaml}
+# class ['a] refcell (x0 : 'a) =
+    object (self : 'self)
+       val mutable x = x0
+       method set y = x <- y
+       method get = x
+    end;;
+@
+\begin{topoutput}
+class ['a] refcell : 'a ->
+  object val mutable x : 'a method get : 'a method set : 'a -> unit end
+\end{topoutput}
+@
+\end{ocaml}
+%
+We can give an object of this class two types, one covariant type with
+just the method \hbox{\lstinline$get$}, and another with contravariant type
+having just the method \hbox{\lstinline$set$}.
+
+\begin{ocaml}
+# class type [+'a] getcell = object method get : 'a end;;
+@
+\begin{topoutput}
+class type ['a] getcell = object method get : 'a end
+\end{topoutput}
+@
+# class type [-'a] setcell = object method set : 'a -> unit end;;
+@
+\begin{topoutput}
+class type ['a] setcell = object method set : 'a -> unit end
+\end{topoutput}
+@
+\end{ocaml}
+%
+To test it, let's introduce a new class for guard dogs.
+
+\begin{ocaml}
+# class guard_dog name =
+    object (self : 'self)
+      inherit dog name
+      method growl = Printf.printf "%s growls!\n" name
+    end;;
+@
+\begin{topoutput}
+class guard_dog : string ->
+  object method bark : unit method growl : unit method eat : unit end
+\end{topoutput}
+@
+# let cell = new refcell (new dog "Spot");;
+@
+\begin{topoutput}
+val cell : dog refcell = <obj>
+\end{topoutput}
+@
+# let read = (cell : (dog) refcell :> (animal) getcell);;
+@
+\begin{topoutput}
+val read : animal getcell = <obj>
+\end{topoutput}
+@
+# let write = (cell : (dog) refcell :> (guard_dog) setcell);;
+@
+\begin{topoutput}
+val write : guard_dog setcell = <obj>
+\end{topoutput}
+@
+# write#set (new guard_dog "Spike");;
+@
+\begin{topoutput}
+- : unit = ()
+\end{topoutput}
+@
+# let spike = read#get;;
+@
+\begin{topoutput}
+val spike : animal = <obj>
+\end{topoutput}
+@
+# spike#eat;;
+@
+\begin{topoutput}
+Spike eats.
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{polyclasses-constraints}{Type constraints}
+
+\index{types!constraints}
+%
+Previously, we defined a function \hbox{\lstinline$eat2$} that called the \hbox{\lstinline$eat$}
+methods for a pair of animals.  Another way to do this is to define a class
+\hbox{\lstinline$animal_pair$} specifically for pairs of animals.  We would like to inherit from the
+class \hbox{\lstinline$pair$}, but how can we specify that the components of the pair are animals?
+The solution is to use type constraints, previously introduced in
+Section~\ref{section:object-constraint}.  To keep our example small, we require that the two animals
+have the same type.
+
+\begin{ocaml}
+# class [+'a] animal_pair (x0 : 'a) (y0 : 'a) =
+    object (self : 'self)
+      inherit ['a, 'a] pair x0 y0
+      constraint 'a = #animal
+      method eat = x#eat; y#eat
+    end;;
+@
+\begin{topoutput}
+class [+'a] animal_pair : 'a -> 'a ->
+  object
+    constraint 'a = #animal
+    method eat : unit
+    ...
+  end
+\end{topoutput}
+@
+# let dogs = new animal_pair (new dog "Spot") (new dog "Rover");;
+@
+\begin{topoutput}
+val dogs : dog animal_pair = <obj>
+\end{topoutput}
+@
+# dogs#eat;;
+@
+\begin{topoutput}
+Spot eats.
+Rover eats.
+\end{topoutput}
+@
+\end{ocaml}
+%
+The constraint \hbox{\lstinline$constraint 'a = #animal$} means that the
+type \hbox{\lstinline$'a$} must be a subtype of animals.  We could have
+written an exact constraint instead, written
+\hbox{\lstinline$constraint 'a = animal$}.
+The exact constraint would mean that the elements of the pair must
+exactly be \hbox{\lstinline$animal$}, not any of its subtypes.  Exact
+constraints may be appropriate in some places, but they would make
+this example much less useful.  For example, suppose we wish to define
+a pair for dogs.
+
+\begin{ocaml}
+# class [+'a] dog_pair x0 y0 =
+    object (self : 'self)
+      inherit ['a] animal_pair x0 y0
+      constraint 'a = #dog
+      method bark = x#bark; y#bark
+    end;;
+@
+\begin{topoutput}
+class [+'a] dog_pair : 'a -> 'a ->
+  object
+    constraint 'a = #dog
+    method bark : unit
+    method eat : unit
+    ...
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+The constraint \hbox{\lstinline$#dog$} is compatible with the
+constraint \hbox{\lstinline$#animal$}, and the two together simplify to the
+single constraint \hbox{\lstinline$#dog$}.  Exact constraints wouldn't
+be compatible.
+
+Next, to illustrate classes that contain polymorphic fields, let's
+define a class that represents a list of animal pairs.
+
+\begin{ocaml}
+# class ['a] animal_pairs =
+  object (self : 'self)
+    val mutable pairs : 'a animal_pair list = []
+    method insert x0 y0 =
+      pairs <- new animal_pair x0 y0 :: pairs
+    method eat = List.iter (fun p -> p#eat) pairs
+  end;;
+@
+\begin{topoutput}
+class ['a] animal_pairs :
+  object
+    constraint 'a = #animal
+    val mutable pairs : 'a animal_pair list
+    method insert : 'a -> 'a -> unit
+    method eat : unit
+  end
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note that the toploop infers the constraint \hbox{\lstinline$'a = #animal$}.
+
+If a class contains type constraints, the constraints must also be
+included in the class type.  It is of course legal to coerce objects
+to remove the type constraint because the type of the object has
+already been fixed, and the constraint has already been satisfied.
+
+\begin{ocaml}
+# class type [+'a] read_only_animal_pairs_type =
+    object method eat : unit end;;
+# let dogs = new animal_pairs;;
+@
+\begin{topoutput}
+val dogs : _#animal animal_pairs = <obj>
+\end{topoutput}
+@
+# dogs#insert (new dog "Spot") (new dog "Fifi");;
+# dogs#insert (new dog "Rover") (new dog "Muffin");;
+# let animals = (dogs : dog animal_pairs :> animal read_only_animal_pairs_type);;
+@
+\begin{topoutput}
+val animals : animal read_only_animal_pairs_type = <obj>
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{comparing-objects-and-modules}{Comparing objects and modules}
+
+OCaml provides two significant tools for abstraction and re-use: the
+module system and the object system.  Many tasks are supported equally
+well by both systems, but there are differences that will determine
+whether you use one system or the other.  To finish this chapter,
+we'll explore these differences.
+
+\labelsubsection{menagerie}{Late binding}
+
+Let's start with our example of animals, coding it in both systems.
+The example is very simple, but should illustrate some of the
+differences.  In the example, we define a dog to be a thing that can
+bark and eat, shown in Figure~\reffigure{dogs-modules-objects1}.
+
+The module defines an abstract data type: there is a type of
+dogs \hbox{\lstinline$Dog.t$} (which is just a string for the name of the
+dog), and functions for creating a new instance of a dog, plus
+functions for having it bark and eat.  The object definition is
+similar, except that dog creation is performed with the
+operator \hbox{\lstinline$new$}; there is no need for a separate method.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c|c}
+Modules & Objects\\
+\hline\hline
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+module type DogSig = sig
+   type t
+   val create     : string -> t
+   val name       : t -> string
+   val eat        : t -> unit
+   val bark       : t -> unit
+   val bark_eat   : t -> unit
+end;;
+\end{ocamllisting}
+\end{minipage}
+&
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+class type dog_type =
+  object ('self)
+    method name       : string
+    method eat        : unit
+    method bark       : unit
+    method bark_eat   : unit
+  end;;
+\end{ocamllisting}
+\end{minipage}
+\\
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+module Dog : DogSig = struct
+   type t = string
+   let create name = name
+   let name dog = dog
+   let eat dog =
+      printf "%s eats.\n" (name dog)
+   let bark dog =
+      printf "%s barks!\n" (name dog)
+   let bark_eat dog =
+      bark dog; eat dog
+end;;
+\end{ocamllisting}
+\end{minipage}
+&
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+class dog name : dog_type =
+  object (self : 'self)
+    method name = name
+    method eat =
+      printf "%s eats.\n" self#name
+    method bark =
+      printf "%s barks!\n" self#name
+    method bark_eat =
+      self#bark; self#eat
+  end;;
+\end{ocamllisting}
+\end{minipage}
+\end{tabular}
+\end{center}
+\caption{Implementations of dogs, using modules and objects.}
+\labelfigure{dogs-modules-objects1}
+\end{figure}
+
+So far, there is very little difference; which implementation to use
+is mainly a matter of preference.
+
+Next, let's consider what will happen should we wish to create a new
+kind of dog.  We'll define a new implementation for hounds, which
+usually howl instead of barking.  What we would like to do is replace
+the function/method \hbox{\lstinline$bark$} with a new implementation that
+prints the appropriate message.  The new implementations are shown in
+Figure~\reffigure{dogs-modules-objects2}, where the module definition
+uses \hbox{\lstinline$include$} to include the \hbox{\lstinline$Dog$}
+implementation.  The object definition uses \hbox{\lstinline$inherit$}.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c|c}
+Modules & Objects\\
+\hline\hline
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+module Hound : DogSig = struct
+   include Dog
+   let bark dog =
+     printf "%s howls!\n" (name dog)
+end;;
+\end{ocamllisting}
+\end{minipage}
+&
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+class hound n : dog_type =
+  object (self : 'self)
+    inherit dog n
+    method bark =
+      printf "%s howls!\n" self#name
+  end;;
+\end{ocamllisting}
+\end{minipage}
+\\
+\begin{minipage}[t]{2in}
+\begin{ocamllistingx}
+# let sam = Hound.create "Sam";;
+@
+\begin{topoutput}
+val sam : string = "Sam"
+\end{topoutput}
+@
+# Hound.bark sam;;
+@
+\begin{topoutput}
+Sam howls!
+\end{topoutput}
+@
+# Hound.bark_eat sam;;
+@
+\begin{topoutput}
+Sam barks!
+Sam eats.
+\end{topoutput}
+@
+\end{ocamllistingx}
+\end{minipage}
+&
+\begin{minipage}[t]{2in}
+\begin{ocamllistingx}
+# let sam = new hound "Sam";;
+@
+\begin{topoutput}
+val sam : hound = <obj>
+\end{topoutput}
+@
+# sam#bark;;
+@
+\begin{topoutput}
+Sam howls!
+\end{topoutput}
+@
+# sam#bark_eat;;
+@
+\begin{topoutput}
+Sam howls!
+Sam eats.
+\end{topoutput}
+@
+\end{ocamllistingx}
+\end{minipage}
+\end{tabular}
+\end{center}
+\caption{Defining a subtype of dogs.}
+\labelfigure{dogs-modules-objects2}
+\end{figure}
+
+The behavior of the two implementations differ.  When the
+function \hbox{\lstinline$Hound.bark$} is called, the dog howls as expected.
+However, when the function \hbox{\lstinline$Hound.bark_eat$} is called, the
+hound barks (not howls), and then eats.  The reason is that the
+function \hbox{\lstinline$bark_eat$} was defined in the \hbox{\lstinline$Dog$}
+module, and so it refers to the definition of \hbox{\lstinline$Dog.bark$}.
+This is simply static scoping: an identifier refers to the nearest
+previous definition in the program text that is in scope.
+
+In contrast, in the object definition, the method
+call \hbox{\lstinline$self#bark$} refers to the \emph{latest} definition of
+the \hbox{\lstinline$bark$} method in the class.  The latest definition is in
+the \hbox{\lstinline$hound$} object, and so the dog always howls.
+
+\index{classes!late binding}
+There are several names for this behavior.  For objects it is
+called \emph{late binding}, \emph{dynamic method dispatch},
+or \emph{open recursion}.  For modules it is called \emph{early
+binding}, \emph{static scoping}, or \emph{closed recursion}.
+When late binding is desired, as it probably is in this example,
+objects are the preferred solution.
+
+Another point to notice is that in the module implementation, the data
+is decoupled from the functions that use the data.  In other words,
+the programmer must be sure to use the functions from
+the \hbox{\lstinline$Hound$} module when dealing with hounds.  This is
+enforced by the type checker because the type \hbox{\lstinline$Hound.t$} is
+different from \hbox{\lstinline$Dog.t$}.  We could, if we wish, define a
+sharing constraint
+\hbox{\lstinline$Hound : DogSig with type t = Dog.t$}.
+However, this would allow any of the functions from the
+module \hbox{\lstinline$Dog$} to be applied to hounds, which may not be what
+we wish.  In contrast, the class \hbox{\lstinline$hound$} encapsulates the
+data with its methods; the programmer need not be concerned about
+whether the appropriate methods are being used.
+
+\labelsubsection{extending-definitions}{Extending the definitions}
+
+It is frequently believed that object-oriented programs are easier to
+modify and extend than ``normal'' functional programs.  In fact, this
+is not the always the case---the two styles are different and not
+exactly comparable.  Let's consider an example where we define a
+calculator-style language with variables, together with an evaluator.
+In the functional approach, we'll define the language using a union
+type, and in the object-oriented approach we'll define a class of
+expressions.  To handle variables, we'll use a version of
+the \hbox{\lstinline$Map$} data structure that we developed earlier in this
+chapter, where we specifically represent variables as strings.
+
+\begin{center}
+\begin{tabular}{c|c}
+Modules & Objects\\
+\hline\hline
+\begin{minipage}[t]{2.2in}
+\begin{ocamllistingy}
+module type EnvSig = sig
+   type 'a t
+   val empty : 'a t
+   val add : 'a t -> string -> 'a -> 'a t
+   val find : 'a t -> string -> 'a
+end;;
+
+module Env : EnvSig = struct
+   type 'a t = (string * 'a) list
+   let empty = []
+   let add env v x = (v, x) :: env
+   let find env v = List.assoc v env
+end;;
+\end{ocamllistingy}
+\end{minipage}
+&
+\begin{minipage}[t]{2.2in}
+\begin{ocamllistingy}
+class type ['a] env_sig =
+  object ('self)
+    method add : string -> 'a -> 'self
+    method find : string -> 'a
+  end;;
+
+class ['a] env : ['a] env_sig =
+  object (self : 'self)
+    val env : (string * 'a) list = []
+    method add v x =
+      {< env = (v, x) :: env >}
+    method find v = List.assoc v env
+  end;;
+\end{ocamllistingy}
+\end{minipage}
+\end{tabular}
+\label{page:polyclasses-env}
+\end{center}
+
+An ``environment'' is a map from variables to values.  The
+implementations, as the module \hbox{\lstinline$Env$} and the
+class \hbox{\lstinline$env$} are very similar.  Again, the choice is mainly
+stylistic.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c|c}
+Unions & Objects\\
+\hline\hline
+\begin{minipage}[t]{2.2in}
+\begin{ocamllistingy}
+type exp =
+   Int of int
+ | Var of string
+ | Add of exp * exp
+ | If  of exp * exp * exp
+ | Let of string * exp * exp
+
+let rec eval env = function
+   Int i -> i
+ | Var v -> Env.find env v
+ | Add (e1, e2) ->
+    eval env e1 + eval env e2
+ | If (e1, e2, e3) ->
+    if eval env e1 <> 0
+    then eval env e2
+    else eval env e3
+ | Let (v, e1, e2) ->
+    let i = eval env e1 in
+    let env' = Env.add env v i in
+       eval env' e2
+@\hrule@
+(* let x = 3 in x + 4 *)
+# let e = Let ("x", Int 3,
+     Add (Var "x", Int 4));;
+@
+\begin{topoutput}
+val e : exp = Let ("x", Int 3,
+   Add (Var "x", Int 4))
+\end{topoutput}
+@
+# let i = eval Env.empty e;;
+@
+\begin{topoutput}
+val i : int = 7
+\end{topoutput}
+@
+
+(* Evaluation: objects *)
+# let e =
+    new let_exp "x" (new int_exp 3)
+      (new add_exp (new var_exp "x")
+        (new int_exp 4));;
+@
+\begin{topoutput}
+val e : let_exp = <obj>
+\end{topoutput}
+@
+# let i = e#eval (new env);;
+@
+\begin{topoutput}
+val i : int = 7
+\end{topoutput}
+@
+\end{ocamllistingy}
+\end{minipage}
+&
+\begin{minipage}[t]{2.2in}
+\begin{ocamllistingy}
+class type exp =
+  object ('self)
+    method eval : int env -> int
+  end
+
+class int_exp (i : int) =
+  object (self : 'self)
+    method eval (_ : int env) = i
+  end
+
+class var_exp v =
+  object (self : 'self)
+    method eval (env : int env) =
+      env#find v
+  end
+
+class add_exp (e1 : #exp) (e2 : #exp) =
+  object (self : 'self)
+    method eval env =
+      e1#eval env + e2#eval env
+  end
+
+class if_exp
+  (e1 : #exp) (e2 : #exp) (e3 : #exp) =
+  object (self : 'self)
+    method eval env =
+      if e1#eval env <> 0
+      then e2#eval env
+      else e3#eval env
+  end
+
+class let_exp
+  (v : string) (e1 : #exp) (e2 : #exp) =
+  object (self : 'self)
+    method eval env =
+      let i = e1#eval env in
+      let env' = env#add v i in
+        e2#eval env'
+  end;;
+\end{ocamllistingy}
+\end{minipage}
+\end{tabular}
+\end{center}
+\caption{Implementing an evaluator}
+\labelfigure{implementing-evaluator}
+\end{figure}
+
+Next, we define the language itself.  We'll include constants,
+variables, some basic arithmetic, and a ``let'' binding construct,
+shown in Figure~\reffigure{implementing-evaluator}.  On the left, we
+show a ``standard'' definition where expressions are specified with a
+disjoint union type.  The evaluator is a single function, defined by
+pattern matching, that computes the value associated with each kind of
+expression.
+
+On the right, we show a similar object-oriented implementation, where
+the class type \hbox{\lstinline$exp$} describes a generic expression that
+has a method \hbox{\lstinline$eval$} that produces a value given an
+environment.  Each kind of expression is defined as a specific
+implementation of a class that has class type \hbox{\lstinline$exp$}.  Since
+there are five kinds of expressions in the language, there are five
+different classes.
+
+The implementation using unions is somewhat smaller than the
+implementation using objects, but otherwise the implementations are
+much the same.  The main reason for the object-oriented program being larger is that each
+of the classes must be named, and there is some overhead for each
+definition.  In larger programs, it is likely that this overhead would
+be insignificant.
+
+\labelsubsubsection{adding-a-function}{Adding a function}
+
+One way in which the implementations differ has to do with how they
+can be extended.  Suppose we wish to add a new
+function \hbox{\lstinline$print$} that prints out an expression.  Again,
+the implementations are fairly straightforward.  For the
+implementation with unions, we simply add a new function, defined by
+pattern matching, that describes how to print each of the kinds of
+expressions.
+
+\begin{ocaml}
+let rec print chan = function
+   Int i -> fprintf chan "%d" i
+ | Var v -> fprintf chan "%s" v
+ | Add (e1, e2) ->
+     fprintf chan "(%a + %a)" print e1 print e2
+ $\cdots$
+\end{ocaml}
+%
+The object version is somewhat different.  In this case, we must add a
+new method to each of the classes for each of the kinds of
+expressions.  This means that either 1) we have to modify the source
+code for each class definition, or 2) we have to define new classes by
+inheritance that provide the new implementations---and then be sure to
+use the new definitions in all the places where we construct new
+expressions.  Fortunately, the type checker will help us find all the
+code that needs to be changed.  Let's use the latter form.
+
+\begin{ocaml}
+class type printable_exp =
+  object ('self)
+    inherit exp
+    method print : out_channel -> unit
+  end
+
+class printable_add_exp
+  (e1 : #printable_exp) (e2 : #printable_exp) =
+  object (self : 'self)
+    inherit add_exp e1 e2
+    method print chan =
+      fprintf chan "(%t + %t)" e1#print e2#print
+  end
+$\cdots$
+\end{ocaml}
+%
+Updating the union implementation is clearly easier than updating the
+object implementation.  To add a new function to the union
+implementation, we simply add it---none of the original code must be
+modified.
+
+With objects, we have two options.  If we have access to the original
+class definitions, each of the classes can (and must) be updated.
+Otherwise, we define new updated classes by inheritance, and each
+object creation with \hbox{\lstinline$new$} must be updated to refer to the
+new classes.  The updates may be scattered throughout the program, and
+it may take some time to find them.
+
+\labelsubsubsection{adding-an-expression}{Adding a new kind of expression}
+
+For another kind of example, let's consider what must be done if we
+add a new kind of expression.  For example, suppose we wish to add an
+expression that represents the product of two expressions.  This time,
+the object-oriented approach is easy, we just add a new object for products.
+
+\begin{ocaml}
+class printable_mul_exp (e1 : #printable_exp) (e2 : #printable_exp) =
+  object (self : 'self)
+    method eval env = e1#eval env * e2#eval env
+    method print chan = fprintf chan "(%t + %t)" e1#print e2#print
+  end;;
+\end{ocaml}
+%
+Here, none of the original code need be modified.  Objects of
+type \hbox{\lstinline$printable_mul_exp$} can be used anyplace where an
+expression is needed.
+
+In contrast, updating the union definition is much more difficult.
+We \emph{must} be able to update the original type definition to
+include the new case, and in addition, each of the functions
+must be updated to handle the new kind of expression.
+
+\begin{ocaml}
+type exp =
+   $\cdots$
+ | Mul of exp * exp
+
+let rec eval env = function
+   $\cdots$
+ | Mul (e1, e2) ->
+     eval env e1 * eval env e2
+
+let rec print chan = function
+   $\cdots$
+ | Mul (e1, e2) ->
+     fprintf chan "(%a * %a)" print e1 print e2
+\end{ocaml}
+%
+This problem is the dual of adding a new method in
+the object implementation.  When a new kind of expression is added to
+the union, each of the functions must be updated, leading to a
+scattering of updates throughout the program.  Fortunately, the type
+checker will help find each of the functions---each function to be
+updated will likely cause an ``incomplete pattern match'' warning.
+
+We can summarize the differences in the following table.
+
+\begin{center}
+\begin{tabular}{|l|p{1.5in}|p{1.5in}|}
+\hline
+& Unions & Objects\\
+\hline
+& One type definition, with a case for each kind of thing;
+  one function for each operation.
+& One class for each kind of thing, one method for each operation.\\
+& & \\
+Adding a function
+& Define the new function, the original code is unchanged.
+& Update \emph{each} class definition. (However, see Exercise~\ref{exercise:visitor-pattern}.)\\
+& & \\
+Adding a case
+& Modify the type definition.  Update \emph{each} function.  (However, see Exercise~\ref{exercise:variants1}.)
+& Define the new class, the original code is unchanged.\\
+\hline
+\end{tabular}
+\end{center}
+%
+There is no single good solution; modifications that are easy in one
+style may be difficult in the other style.  The choice of which style
+to use should be based on what the desired properties are.
+
+\labelsubsubsection{objects-pattern-matching}{Pattern matching}
+
+Let's turn to a different kind of issue.  One advantage of the
+disjoint union specification is that pattern matching is
+well-supported.  Suppose we wish to write an ``optimizer'' for
+expressions based on the distributive law.  We'll specifically use the
+following equivalences.
+
+\begin{ocaml}
+$e_1$ * $e_2$ + $e_1$ * $e_3$ = $e_1$ * ($e_2$ + $e_3$)
+$e_2$ * $e_1$ + $e_3$ * $e_1$ = $e_1$ * ($e_2$ + $e_3$)
+\end{ocaml}
+%
+Evaluating the expression on the right is likely to be more efficient
+than evaluating the left expression because $e_1$ is computed only once.
+
+The optimizer is a function from expressions to expressions that is
+intended to preserve the result of evaluation.  Here is how we might
+implement it.
+
+\begin{ocaml}
+let rec optimize = function
+   Add (e1, e2) ->
+      (match optimize e1, optimize e2 with
+          Mul (a, b), Mul (c, d)
+        | Mul (b, a), Mul (d, c) when a = c ->
+             Mul (a, Add (b, d))
+        | e1, e2 ->
+             Add (e1, e2))
+ | If (e1, e2, e3) ->
+     If (optimize e1, optimize e2, optimize e3)
+ | $\cdots$
+\end{ocaml}
+%
+\index{classes!narrowing}
+Implementing a similar operation with objects is more difficult.  We
+specifically wish to consider cases where the subexpressions of an
+object of type \hbox{\lstinline$add_exp$} have type \hbox{\lstinline$mul_exp$}.
+However, the class \hbox{\lstinline$add_exp$} is defined so that its
+subexpressions are of type \hbox{\lstinline$exp$}, and otherwise there is no
+way to determine what they are.  The general problem is an instance of
+narrowing, discussed previously in
+Section~\ref{section:narrowing}.
+
+One solution is to define an explicit type of descriptions for the
+various kinds of objects.  For example, the description of
+a \hbox{\lstinline$mul_exp$} might be \hbox{\lstinline$Mul (e1, e2)$},
+where \hbox{\lstinline$e1$} and \hbox{\lstinline$e2$} are the subexpressions.  In
+addition, we must add a \hbox{\lstinline$describe$} method to each of the
+different expression classes.
+
+\begin{ocaml}
+type 'a description =
+   Mul of 'a * 'a
+ | Other
+
+class virtual exp =
+  object ('self)
+    method virtual eval : int env -> int
+    method virtual optimize : exp
+    method describe : exp description = Other
+  end
+
+class add_exp (e1 : #exp) (e2 : #exp) =
+  object (self : 'self)
+    inherit exp
+    method eval env = e1#eval env + e2#eval env
+    method optimize =
+      let e1 = e1#optimize in
+      let e2 = e2#optimize in
+        match e1#describe, e2#describe with
+           Mul (a, b), Mul (c, d)
+         | Mul (b, a), Mul (d, c) when a = c ->
+             new mul_exp a (new add_exp b d)
+         | _ ->
+             new add_exp e1 e2
+  end;;
+
+class mul_exp (e1 : #exp) (e2 : #exp) =
+  object (self : 'self)
+    method eval env = e1#eval env * e2#eval env
+    method optimize = new mul_exp e1#optimize e2#optimize
+    method describe = Mul (e1, e2)
+  end
+\end{ocaml}
+%
+The type definitions in this example reflect the fact that we want
+only to implement the specifications based on the distributive law.
+If we expect to do general optimizations, it may be useful to describe
+all of the different kinds of expressions, so that the
+type \hbox{\lstinline$'a description$} contains a case for each of the
+different kinds of expressions.
+
+Of course, if we did, we would find that the type
+\hbox{\lstinline$'a description$}
+would be nearly equivalent to the union type \hbox{\lstinline$exp$}, and we
+would find that the object-oriented implementation contains a fragment
+of the alternative implementation.
+
+One might argue that the object-oriented style of implementation is
+pointless because, in the end, it might still require implementing a
+fragment based on the ``standard'' functional representation.
+However, this is not the case.  There are many good reasons to use
+objects, and the choice of style is based on the needs of the specific
+project.
+
+One of the principal reasons why functional constructs appear in
+object-oriented programs is because OCaml is a functional programming
+language.  Regardless of stylistic preferences, proficient OCaml
+programmers use the best tools possible, and this means using the
+constructs that are appropriate to the problem at hand.  In some
+cases, this may mean traditional functional programming; in others, it
+may require extreme object-oriented programming.  The beauty of OCaml
+is that one is not forced into a particular methodology, be it
+imperative, functional, object-oriented, or something else.  Nearly
+any approach you might take in another language, you can take in
+OCaml---and, most likely, do it better.
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:

@@ -1,0 +1,867 @@
+\labelchapter{var1}{Variables and Functions}
+
+So far, we have considered only simple expressions not involving
+variables.  In ML, variables are \emph{names} for values.
+Variable bindings are introduced with the \hbox{\hbox{\lstinline/let/}} keyword.
+The syntax of a simple top-level definition is as follows.
+\index{variables}
+\index{let definition@\lstinline/let/ definition}
+\label{keyword:let}
+\label{literal:lident}
+
+\begin{center}
+\lstinline!let $\nt{identifier}$ = $\nt{expression}$!
+\end{center}
+%
+For example, the following code defines two variables \hbox{\lstinline/x/}
+and \hbox{\lstinline/y/} and adds them together to get a value
+for \hbox{\lstinline/z/}.
+
+\begin{ocaml}
+# let x = 1;;
+@
+\begin{topoutput}
+val x : int = 1
+\end{topoutput}
+@
+# let y = 2;;
+@
+\begin{topoutput}
+val y : int = 2
+\end{topoutput}
+@
+# let z = x + y;;
+@
+\begin{topoutput}
+val z : int = 3
+\end{topoutput}
+@
+\end{ocaml}
+%
+Definitions using \hbox{\lstinline/let/} can also be nested using the
+\hbox{\lstinline/in/} form.
+\label{keyword:in}
+
+\begin{center}
+\lstinline/let $\nt{identifier}$ = $\nt{expression}_1$ in $\nt{expression}_2$/
+\end{center}
+%
+The expression $\nt{expression}_2$ is called the \emph{body} of the
+\hbox{\hbox{\lstinline/let/}}.  The variable named \nt{identifier} is
+defined as the value of $\nt{expression}_1$ within the body.  The
+\nt{identifier} is defined only in the body $\nt{expression}_2$ and
+not $\nt{expression}_1$.
+
+A \hbox{\lstinline/let/} with a body is an expression; the value of a \hbox{\lstinline/let/}
+expression is the value of the body.
+
+\begin{ocaml}
+# let x = 1 in
+  let y = 2 in
+     x + y;;
+@
+\begin{topoutput}
+- : int = 3
+\end{topoutput}
+@
+# let z =
+     let x = 1 in
+     let y = 2 in
+        x + y;;
+@
+\begin{topoutput}
+val z : int = 3
+\end{topoutput}
+@
+\end{ocaml}
+%
+\index{scoping (lexical)}
+Binding is static (lexical scoping), meaning that the value associated
+with a variable is determined by the nearest enclosing definition in
+the program text.  For example, when a variable is defined in a
+\hbox{\lstinline/let/} expression, the defined value is used within the body of
+the let (or the rest of the file for toplevel \hbox{\lstinline/let/} definitions).
+If the variable was defined previously, the previous definition is shadowed,
+meaning that the previous definition becomes inaccessible while the new definition is in effect.
+
+For example, consider the following program, where the variable
+\hbox{\lstinline/x/} is initially defined to be \hbox{\lstinline/7/}.  Within the definition for
+\hbox{\lstinline/y/}, the variable \hbox{\lstinline/x/} is redefined to be \hbox{\lstinline/2/}.  The value of
+\hbox{\lstinline/x/} in the final expression \hbox{\lstinline/x + y/} is still \hbox{\lstinline/7/}, and the
+final result is \hbox{\lstinline/10/}.
+
+\begin{ocaml}
+# let x = 7 in
+  let y =
+     let x = 2 in
+        x + 1
+  in
+     x + y;;
+@
+\begin{topoutput}
+- : int = 10
+\end{topoutput}
+@
+\end{ocaml}
+%
+Similarly, the value of \hbox{\lstinline/z/} in the following program is 8,
+because of the definitions that double the value of \hbox{\lstinline/x/}.
+
+\begin{ocaml}
+# let x = 1;;
+@
+\begin{topoutput}
+val x : int = 1
+\end{topoutput}
+@
+# let z =
+     let x = x + x in
+     let x = x + x in
+        x + x;;
+@
+\begin{topoutput}
+val z : int = 8
+\end{topoutput}
+@
+# x;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{ocaml-doc-functions}{Functions}
+\label{keyword:fun}
+\index{functions!definitions}
+\index{fun@\lstinline/fun/ functions}
+
+Functions are defined with the keyword \texttt{fun}.
+
+\label{keyword:->}
+\index{->@\lstinline/->/ in functions}
+\begin{center}
+\lstinline!fun $v_1$ $v_2$ $\cdots$ $v_n$ -> $\nt{expression}$!
+\end{center}
+%
+The \hbox{\lstinline/fun/} is followed by a sequence of variables that define the
+formal parameters of the function, the \hbox{\lstinline/->/} separator, and then
+the body of the function \nt{expression}.  By default, functions are
+anonymous, meaning they are not named.  In ML, functions
+are values like any other.  Functions may be constructed, passed as
+arguments, and applied to arguments, and, like any other value, they
+may be named by using a \hbox{\lstinline/let/}.
+
+\begin{ocaml}
+# let increment = fun i -> i + 1;;
+@
+\begin{topoutput}
+val increment : int -> int = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note the type \hbox{\lstinline/int -> int/} for the function.  The arrow \hbox{\lstinline/->/}
+stands for a \emph{function type}.  The type before the arrow is the
+type of the function's argument, and the type after the arrow is the
+type of the result.  The \texttt{increment} function takes an argument of
+type \texttt{int}, and returns a result of type \texttt{int}.
+
+The syntax for function application (function call) is concatenation:
+the function is followed by its arguments.  The precedence of function
+application is higher than most operators.  Parentheses are required
+only for arguments that are not simple expressions.
+
+\label{application}
+\label{keyword:paren}
+\begin{ocaml}
+# increment 2;;
+@
+\begin{topoutput}
+- : int = 3
+\end{topoutput}
+@
+# increment 2 * 3;;
+@
+\begin{topoutput}
+- : int = 9
+\end{topoutput}
+@
+# increment (2 * 3);;
+@
+\begin{topoutput}
+- : int = 7
+\end{topoutput}
+@
+\end{ocaml}
+%
+\index{begin@\lstinline/begin/}
+\label{keyword:begin}
+\label{keyword:end}
+The keywords \hbox{\lstinline/begin $\cdots$ end/} are equivalent to parentheses.
+%
+\begin{ocaml}
+# increment begin 2 * 3 end;;
+@
+\begin{topoutput}
+- : int = 7
+\end{topoutput}
+@
+\end{ocaml}
+%
+Functions may also be defined with multiple arguments.  For example,
+a function to compute the sum of two integers might be defined as follows.
+
+\begin{ocaml}
+# let sum = fun i j -> i + j;;
+@
+\begin{topoutput}
+val sum : int -> int -> int = <fun>
+\end{topoutput}
+@
+# sum 3 4;;
+@
+\begin{topoutput}
+- : int = 7
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note the type for \hbox{\lstinline/sum/}: \hbox{\lstinline/int -> int -> int/}.  The arrow
+associates to the right, so this type is the same as
+\hbox{\hbox{\lstinline/int -> (int -> int)/}}.
+That is, \hbox{\lstinline/sum/} is a function that takes a single integer
+argument, and returns a function that takes another integer argument
+and returns an integer.  Strictly speaking, all functions in ML take a
+single argument; multiple-argument functions are treated as
+\emph{nested} functions (this is called ``Currying,'' after Haskell
+Curry, a famous logician who had a significant impact on the design
+and interpretation of programming languages).  The definition of
+\hbox{\lstinline/sum/} above is equivalent to the following explicitly-curried
+definition.
+
+\begin{ocaml}
+# let sum = (fun i -> (fun j -> i + j));;
+@
+\begin{topoutput}
+val sum : int -> int -> int = <fun>
+\end{topoutput}
+@
+# sum 4 5;;
+@
+\begin{topoutput}
+- : int = 9
+\end{topoutput}
+@
+\end{ocaml}
+%
+The application of a multi-argument function to only one
+argument is called a \emph{partial application}.
+
+\begin{ocaml}
+# let incr = sum 1;;
+@
+\begin{topoutput}
+val incr : int -> int = <fun>
+\end{topoutput}
+@
+# incr 5;;
+@
+\begin{topoutput}
+- : int = 6
+\end{topoutput}
+@
+\end{ocaml}
+%
+Since named functions are so common, OCaml provides an alternative
+syntax for functions using a \hbox{\lstinline/let/} definition.  The formal
+parameters of the function are listed in a let-definition after to the function name,
+before the equality symbol.
+
+\begin{center}
+\lstinline!let $\nt{identifier}$ $v_1$ $v_2$ $\cdots$ $v_n$ = $\nt{expression}$!
+\end{center}
+%
+For example, the following definition of the \hbox{\lstinline/sum/} function
+is equivalent to the ones above.
+
+\begin{ocaml}
+# let sum i j = i + j;;
+@
+\begin{topoutput}
+val sum : int -> int -> int = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsubsection{ocaml-doc-scoping}{Scoping and nested functions}
+
+Functions may be arbitrarily nested.  They may also be
+passed as arguments.  The rule for scoping uses static binding: the
+value of a variable is determined by the code in which a function is
+defined---not by the code in which a function is evaluated.  For
+example, another way to define \hbox{\lstinline/sum/} is as follows.
+
+\begin{ocaml}
+# let sum i =
+     let sum2 j =
+        i + j
+     in
+        sum2;;
+@
+\begin{topoutput}
+val sum : int -> int -> int = <fun>
+\end{topoutput}
+@
+# sum 3 4;;
+@
+\begin{topoutput}
+- : int = 7
+\end{topoutput}
+@
+\end{ocaml}
+%
+To illustrate the scoping rules, let's consider the following
+definition.
+
+\begin{ocaml}
+# let i = 5;;
+@
+\begin{topoutput}
+val i : int = 5
+\end{topoutput}
+@
+# let addi j =
+     i + j;;
+@
+\begin{topoutput}
+val addi : int -> int = <fun>
+\end{topoutput}
+@
+# let i = 7;;
+@
+\begin{topoutput}
+val i : int = 7
+\end{topoutput}
+@
+# addi 3;;
+@
+\begin{topoutput}
+- : val = 8
+\end{topoutput}
+@
+\end{ocaml}
+%
+In the \hbox{\lstinline/addi/} function, the previous binding defines
+\hbox{\lstinline/i/} as \hbox{\lstinline/5/}.  The second definition
+of \hbox{\lstinline/i/} has no effect on the definition used for
+\hbox{\lstinline/addi/}, and the application of
+\hbox{\lstinline/addi/} to the argument \hbox{\lstinline/3/} results
+in \hbox{\lstinline/3 + 5 $=$ 8/}.
+
+\labelsubsection{ocaml-doc-recursive-functions}{Recursive functions}
+\label{keyword:rec}
+\index{functions!recursive}
+\index{rec!for recursive functions}
+
+Suppose we want to define a recursive function: that is, a function
+that is used in its own definition.  In functional languages,
+recursion is used to express repetition or looping.  For example, the
+``power'' function that computes $x^i$ might be defined as follows.
+
+\begin{ocaml}
+# let rec power i x =
+     if i = 0 then
+        1.0
+     else
+        x *. (power (i - 1) x);;
+@
+\begin{topoutput}
+val power : int -> float -> float = <fun>
+\end{topoutput}
+@
+# power 5 2.0;;
+@
+\begin{topoutput}
+- : float = 32
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note the use of the \hbox{\lstinline/rec/} modifier after the \hbox{\lstinline/let/} keyword.
+Normally, the function is not defined in its own body.  The
+following definition is rejected.
+
+\begin{ocaml}
+# let power_broken i x =
+     if i = 0 then
+        1.0
+     else
+        x *. (power_broken (i - 1) x);;
+@
+\begin{toperror}
+Characters 70-82:
+        x *. (power_broken (i - 1) x);;
+              ^^^^^^^^^^^^
+Unbound value power_broken
+\end{toperror}
+@
+\end{ocaml}
+%
+\index{functions!mutually recursive}
+\index{and!in \hbox{\lstinline/let/} definitions}
+\label{keyword:and}
+Mutually recursive definitions (functions that call one another) can
+be defined using the \texttt{and} keyword to connect several \texttt{let}
+definitions.
+
+\begin{ocaml}
+# let rec f i j =
+     if i = 0 then
+        j
+     else
+        g (j - 1)
+  and g j =
+     if j mod 3 = 0 then
+        j
+     else
+        f (j - 1) j;;
+@
+\begin{topoutput}
+val f : int -> int -> int = <fun>
+val g : int -> int = <fun>
+\end{topoutput}
+@
+# g 5;;
+@
+\begin{topoutput}
+- : int = 3
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsubsection{ocaml-doc-hof}{Higher order functions}
+\index{functions!higher order}
+\index{functions!first class}
+
+Let's consider a definition where a function is passed as an
+argument, and another function is returned as a result.  Given an arbitrary
+function \hbox{\lstinline/f/} on the real numbers, an approximate numerical derivative can be defined
+as follows.
+
+\begin{ocaml}
+# let dx = 1e-10;;
+@
+\begin{topoutput}
+val dx : float = 1e-10
+\end{topoutput}
+@
+# let deriv f =
+     (fun x -> (f (x +. dx) -. f x) /. dx);;
+@
+\begin{topoutput}
+val deriv : (float -> float) -> float -> float = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+Remember, the arrow associates to the right, so another way to write
+the type is \hbox{\lstinline/(float -> float) -> (float -> float)/}.  That is, the
+derivative is a function that takes a function as an argument, and
+returns another function.
+
+Let's apply the \hbox{\lstinline/deriv/} function to the \texttt{power} function defined above, partially
+applied to the argument 3.
+
+\begin{ocaml}
+# let f = power 3;;
+@
+\begin{topoutput}
+val f : float -> float = <fun>
+\end{topoutput}
+@
+# f 10.0;;
+@
+\begin{topoutput}
+- : float = 1000
+\end{topoutput}
+@
+# let f' = deriv f;;
+@
+\begin{topoutput}
+val f' : float -> float = <fun>
+\end{topoutput}
+@
+# f' 10.0;;
+@
+\begin{topoutput}
+- : float = 300.000237985
+\end{topoutput}
+@
+# f' 5.0;;
+@
+\begin{topoutput}
+- : float = 75.0000594962
+\end{topoutput}
+@
+# f' 1.0;;
+@
+\begin{topoutput}
+- : float = 3.00000024822
+\end{topoutput}
+@
+\end{ocaml}
+%
+As we would expect, the derivative of $x^3$ is approximately $3x^2$.
+To get the second derivative, we apply the \hbox{\lstinline/deriv/} function to
+\hbox{\lstinline/f'/}.
+
+\begin{ocaml}
+# let f'' = deriv f';;
+@
+\begin{topoutput}
+val f'' : float -> float = <fun>
+\end{topoutput}
+@
+# f'' 0.0;;
+@
+\begin{topoutput}
+- : float = 6e-10
+\end{topoutput}
+@
+# f'' 1.0;;
+@
+\begin{topoutput}
+- : float = 0
+\end{topoutput}
+@
+# f'' 10.0;;
+@
+\begin{topoutput}
+- : float = 0
+\end{topoutput}
+@
+\end{ocaml}
+%
+The second derivative, which we would expect to be $6x$, is way off!
+Ok, there are some numerical errors here.
+
+\begin{ocaml}
+# let g x = 3.0 *. x *. x;;
+@
+\begin{topoutput}
+val g : float -> float = <fun>
+\end{topoutput}
+@
+# let g' = deriv g;;
+@
+\begin{topoutput}
+val g' : float -> float = <fun>
+\end{topoutput}
+@
+# g' 1.0;;
+@
+\begin{topoutput}
+- : float = 6.00000049644
+\end{topoutput}
+@
+# g' 10.0;;
+@
+\begin{topoutput}
+- : float = 59.9999339101
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{ocaml-doc-naming}{Variable names}
+
+As you may have noticed in the previous section, the single quote symbol (\hbox{\lstinline/'/})
+is a valid character in a variable name.  In general, a variable name
+may contain letters (lower and upper case), digits, and the \hbox{\lstinline/'/} and
+\hbox{\lstinline/_/} characters, but it must begin with a lowercase letter or
+the underscore character, and it may not be an underscore \hbox{\lstinline/_/} all by itself.
+
+\label{name:value-name}
+In OCaml, sequences of characters from the infix operators, like
+\lstinline$+$, \hbox{\lstinline/-/}, \hbox{\lstinline/*/}, \lstinline!/!, $\ldots$
+are also valid names.  The normal prefix version is obtained by
+enclosing them in parentheses.  For example, the following code is a
+starting point for an Obfuscated ML contest.  Don't use this style in
+your code.
+
+\begin{ocaml}
+# let (+) = ( * )
+  and (-) = (+)
+  and ( * ) = (/)
+  and (/) = (-);;
+@
+\begin{topoutput}
+val + : int -> int -> int = <fun>
+val - : int -> int -> int = <fun>
+val * : int -> int -> int = <fun>
+val / : int -> int -> int = <fun>
+\end{topoutput}
+@
+# 5 + 4 / 1;;
+@
+\begin{topoutput}
+- : int = 15
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note that the \hbox{\lstinline/*/} operator requires space within the parenthesis.
+This is because of comment conventions---comments start with
+\verb/(*/ and end with \verb/*)/.
+
+The redefinition of infix operators may make sense in some contexts.
+For example, a program module that defines arithmetic over complex
+numbers may wish to redefine the arithmetic operators.  It is also
+sensible to add new infix operators.  For example, we may wish to have
+an infix operator for the \texttt{power} construction.
+
+\begin{ocaml}
+# let ( ** ) x i = power i x;;
+@
+\begin{topoutput}
+val ** : float -> int -> float = <fun>
+\end{topoutput}
+@
+# 10.0 ** 5;;
+@
+\begin{topoutput}
+- : float = 100000
+\end{topoutput}
+@
+\end{ocaml}
+%
+The precedence and associativity of new infix operators is determined
+by its first character in the operator name.  For example an operator
+named \lstinline$+/-$ would have the same precedence and associativity as
+the \hbox{\lstinline/+/} operator.
+
+\labelsection{labeled-parameters}{Labeled parameters and arguments}
+\index{labeled parameters}
+\label{literal:label}
+
+OCaml allows functions to have labeled and optional parameters and
+arguments.  Labeled parameters are specified with the
+syntax \hbox{\lstinline/~$\nt{label}$: $\nt{pattern}$/}.  Labeled arguments
+are similar, \hbox{\lstinline/~$\nt{label}$: $\nt{expression}$/}.  Labels
+have the same syntactic conventions as variables: the label must begin
+with a lowercase letter or an underscore \hbox{\lstinline/_/}.
+
+\begin{ocaml}
+# let f ~x:i ~y:j = i - j;;
+@
+\begin{topoutput}
+val f : x:int -> y:int -> int = <fun>
+\end{topoutput}
+@
+# f ~y:1 ~x:2;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+# f ~y:1;;
+@
+\begin{topoutput}
+- : x:int -> int = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+Within the type, a type expression of the
+form \hbox{\lstinline/$\nt{label}$: $\nt{type}$/} specifies a labeled
+function parameter.
+
+When all parameters are labeled, the order of the
+arguments does not matter, so the expression \hbox{\lstinline/f ~y:1/}
+applies the function \hbox{\lstinline/f/} to the argument
+labeled \hbox{\lstinline/~y/} (the second argument), returning a function
+that expects an argument labeled \hbox{\lstinline/~x/}.
+
+Since labels are frequently the same as the parameter names, OCaml
+provides a shorthand where a parameter \hbox{\lstinline/~$\nt{label}$/}
+specifies both the parameter and label.  Similarly, an
+argument \hbox{\lstinline/~$\nt{label}$/} represents both the label and the
+argument (a variable with the same name).
+
+\begin{ocaml}
+# let f ~x ~y = x - y;;
+@
+\begin{topoutput}
+val f : x:int -> y:int -> int = <fun>
+\end{topoutput}
+@
+# let y = 1 in
+  let x = 2 in
+  f ~y ~x;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+\end{ocaml}
+%
+\label{keyword:?}
+Optional parameters are like labeled parameters, using
+question mark \hbox{\lstinline/?/} instead of a tilde \hbox{\lstinline/~/}
+and specifying an optional value with the syntax
+%
+\hbox{\lstinline/?($\nt{label}$ = $\nt{expression}$)/}.
+Optional arguments are specified the same way as labeled arguments, or
+they may be omitted entirely.
+
+\begin{ocaml}
+# let g ?(x = 1) y = x - y;;
+@
+\begin{topoutput}
+val g : ?x:int -> int -> int = <fun>
+\end{topoutput}
+@
+# g 1;;
+@
+\begin{topoutput}
+- : int = 0
+\end{topoutput}
+@
+# g ~x:3 4;;
+@
+\begin{topoutput}
+- : int = -1
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsubsection{hybrid-arguments}{Rules of thumb}
+
+Labeled, unlabeled, and optional arguments can be mixed in many different combinations.
+However, there are some rules of thumb to follow.
+
+\begin{itemize}
+\item An optional parameter should always be followed by a non-optional parameter (usually unlabeled).
+\item The order of labeled arguments does not matter, except when a label occurs more than once.
+\item Labeled and optional arguments should be specified explicitly for higher-order functions.
+\end{itemize}
+%
+The reason for following an optional parameter with an unlabeled one
+is that, otherwise, it isn't possible to know when an optional argument has
+been omitted.  The compiler produces a warning for function
+definitions with a final optional parameter.
+
+\begin{ocaml}
+# let f ~x ?(y = 1) = x - y;;
+@
+\begin{topoutput}
+Characters 15-16:
+Warning X: this optional argument cannot be erased.
+  let f ~x ?(y = 1) = x - y;;
+                 ^
+val f : x:int -> ?y:int -> int = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+There is a slight difference between labeled and unlabeled arguments
+with respect to optional arguments.  When an optional argument is
+followed only by labeled arguments, then it is no longer possible to
+omit the argument.  In contrast, an unlabeled argument ``forces'' the
+omission.
+
+\begin{ocaml}
+# let add1 ?(x = 1) ~y ~z = x + y + z;;
+@
+\begin{topoutput}
+val add1 : ?x:int -> y:int -> z:int -> int = <fun>
+\end{topoutput}
+@
+# add1 ~y:2 ~z:3;;
+@
+\begin{topoutput}
+- : ?x:int -> int = <fun>
+\end{topoutput}
+@
+# let add2 ?(x = 1) ~y z = x + y + z;;
+@
+\begin{topoutput}
+val add2 : ?x:int -> y:int -> int -> int = <fun>
+\end{topoutput}
+@
+# add2 ~y:2 3;;
+@
+\begin{topoutput}
+- : int = 6
+\end{topoutput}
+@
+\end{ocaml}
+%
+It is legal for a label to occur more than once in an argument list.
+If it does, then the arguments with that label are bound in the same
+order as the corresponding parameters.
+
+\begin{ocaml}
+# let h ~x:i ~x:j ?(y = 1) ~z =
+     i * 1000 + j * 100 + y * 10 + z;;
+@
+\begin{topoutput}
+val h : x:int -> x:int -> ?y:int -> z:int -> int = <fun>
+\end{topoutput}
+@
+# h ~z:3 ~x:4 ~y:5 ~x:6;;
+@
+\begin{topoutput}
+- : int = 4653
+\end{topoutput}
+@
+\end{ocaml}
+%
+For the final rule, explicit annotation for higher-order functions,
+consider the following definition of a function \hbox{\lstinline/apply/}.
+
+\begin{ocaml}
+# let apply g = g ~x:1 2 + 3;;
+@
+\begin{topoutput}
+val apply : (x:int -> int -> int) -> int = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note that the compiler infers that the function \hbox{\lstinline/~g/} has a
+labeled, not an optional argument.  The syntax \hbox{\lstinline/g ~x:1/} is
+the same, regardless of whether the label \hbox{\lstinline/x/} is labeled or
+optional, but the two are not the same.
+
+\begin{ocaml}
+# apply (fun ?(x = 0) y -> x + y);;
+@
+\begin{topoutput}
+Characters 6-31:
+  apply (fun ?(x = 0) y -> x + y);;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+This function should have type x:int -> int -> int
+but its first argument is labeled ~?x
+\end{topoutput}
+@
+\end{ocaml}
+%
+The compiler will always prefer to infer that an argument is labeled,
+not optional.  If you want the other behavior, you can specify the
+type explicitly.
+
+\begin{ocaml}
+# let apply (g : ?x:int -> int -> int) = g ~x:1 2 + 3;;
+@
+\begin{topoutput}
+val apply : (?x:int -> int -> int) -> int = <fun>
+\end{topoutput}
+@
+# apply (fun ?(x = 0) y -> x + y);;
+@
+\begin{topoutput}
+- : int = 6
+\end{topoutput}
+@
+\end{ocaml}

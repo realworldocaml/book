@@ -1,0 +1,814 @@
+\labelchapter{tuples}{Tuples, lists, and polymorphism}
+
+So far, we have seen simple
+expressions involving numbers, characters, strings, functions and
+variables.  This language is already Turing complete---we can code
+arbitrary data types using numbers, functions, and strings.  Of course,
+in practice, this would not only be inefficient, it would also make it
+very hard to understand our programs.  For efficient and readable data
+structure implementations we need to be able to organized and compose
+data in structured ways.
+
+OCaml provides a rich set of types for defining data structures,
+including tuples, lists, disjoint unions (also called tagged unions,
+or variant records), records, and arrays.  In this chapter, we'll look
+at the simplest part of these---tuples and lists.  We'll discuss unions in
+Chapter~\refchapter{unions}, and we'll leave the remaining types for
+Chapter~\refchapter{records}, when we introduce side-effects.
+
+\labelsection{polymorphism}{Polymorphism}
+\index{polymorphism}
+
+As we explore the type system, polymorphism will be one of the first
+concepts that we encounter.  The ML languages provide \emph{parametric
+polymorphism}.  That is, types and expressions may be parameterized by
+type variables.  For example, the identity function (the function that
+returns its argument) can be expressed in OCaml with a single function.
+
+\begin{ocaml}
+# let identity x = x;;
+@
+\begin{topoutput}
+val identity : 'a -> 'a = <fun>
+\end{topoutput}
+@
+# identity 1;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+# identity "Hello";;
+@
+\begin{topoutput}
+- : string = "Hello"
+\end{topoutput}
+@
+\end{ocaml}
+%
+\label{keyword:'}
+\index{types!variables}
+\emph{Type variables} are lowercase identifiers preceded by a single
+quote \hbox{\hbox{\lstinline/'/}}.  A type variable represents an arbitrary
+type.  The typing \hbox{\hbox{\lstinline/identity : 'a -> 'a/}} says that the
+\hbox{\hbox{\lstinline/identity/}} function takes an argument of some arbitrary type
+\hbox{\hbox{\lstinline/'a/}} and returns a value of the same type \hbox{\lstinline/'a/}.  If the
+\hbox{\hbox{\lstinline/identity/}} function is applied to a value with type \hbox{\lstinline/int/}, then
+it returns a value of type \hbox{\hbox{\lstinline/int/}}; if it is applied to a
+\hbox{\hbox{\lstinline/string/}}, then it returns a \hbox{\lstinline/string/}.  The \hbox{\lstinline/identity/}
+function can even be applied to function arguments.
+
+\begin{ocaml}
+# let succ i = i + 1;;
+@
+\begin{topoutput}
+val succ : int -> int = <fun>
+\end{topoutput}
+@
+# identity succ;;
+@
+\begin{topoutput}
+- : int -> int = <fun>
+\end{topoutput}
+@
+# (identity succ) 2;;
+@
+\begin{topoutput}
+- : int = 3
+\end{topoutput}
+@
+\end{ocaml}
+%
+In this case, the \hbox{\hbox{\lstinline/(identity succ)/}} expression returns the
+\hbox{\hbox{\lstinline/succ/}} function itself, which can be applied to \hbox{\lstinline/2/} to
+return \hbox{\hbox{\lstinline/3/}}.
+
+\label{keyword::}
+There may be times when the compiler infers a polymorphic type where one wasn't intended.
+In this case, the type can be constrained with the syntax \hbox{\lstinline/($s$ : $\nt{type}$)/},
+where $s$ can be a pattern or expression.
+
+\begin{ocaml}
+# let identity_int (i : int) = i;;
+@
+\begin{topoutput}
+val identity_int : int -> int = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+If the constraint is for the return type of the function, it can be
+placed after the final parameter.
+
+\begin{ocaml}
+# let do_if b i j = if b then i else j;;
+@
+\begin{topoutput}
+val do_if : bool -> 'a -> 'a -> 'a = <fun>
+\end{topoutput}
+@
+# let do_if_int b i j : int = if b then i else j;;
+@
+\begin{topoutput}
+val do_if_int : bool -> int -> int -> int = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsubsection{value-restriction}{Value restriction}
+\index{types!value restriction}
+
+What happens if we apply the
+polymorphic \hbox{\hbox{\lstinline/identity/}} to a value with a
+polymorphic function type?
+
+\begin{ocaml}
+# let identity' = identity identity;;
+@
+\begin{topoutput}
+val identity' : '_a -> '_a = <fun>
+\end{topoutput}
+@
+# identity' 1;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+# identity';;
+@
+\begin{topoutput}
+- : int -> int = <fun>
+\end{topoutput}
+@
+# identity' "Hello";;
+@
+\begin{toperror}
+Characters 10-17:
+This expression has type string
+but is here used with type int
+\end{toperror}
+@
+\end{ocaml}
+%
+This doesn't quite work as we might expect.  Note the type assignment
+\hbox{\hbox{\lstinline/identity' : '_a -> '_a/}}.  The type variables \hbox{\lstinline/'_a/} are now
+preceded by an underscore.  These type variables specify that the
+\hbox{\hbox{\lstinline/identity'/}} function takes an argument of \emph{some} (as yet
+unknown) type, and returns a value of the same type.  The
+\hbox{\hbox{\lstinline/identity'/}} function is not truly polymorphic, because it can be
+used with values of only one type.  When we apply the \hbox{\hbox{\lstinline/identity'/}}
+function to a number, the type of the \hbox{\hbox{\lstinline/identity'/}} function becomes
+\hbox{\hbox{\lstinline/int -> int/}}, and it is no longer possible to apply it to a
+string.
+
+This behavior is due to the \emph{value restriction}: for an
+expression to be truly polymorphic, it must be an immutable value,
+which means 1) it is already fully evaluated, and 2) it can't be modified by assignment.  For
+example, numbers and character constants are values.  Functions are
+also values.  Function applications, like
+%
+\hbox{\hbox{\lstinline/identity identity/}} are \emph{not} values,
+because they can be simplified (the
+%
+\hbox{\lstinline/identity identity/} expression evaluates to
+\hbox{\hbox{\lstinline/identity/}}).  Furthermore, mutable expressions
+like arrays and reference cells
+(Chapters~\ref{chapter:refcells}--\ref{chapter:records}) are not
+polymorphic.\footnote{In the literature, the term \emph{value} is
+  usually restricted to immutable expressions, so the phrase
+  ``immutable value'' is redundant.  We prefer the redundant form,
+  because it emphasizes the reason behind the restriction---that
+  mutable data is not polymorphic.}
+
+Why does OCaml have this restriction?  It probably seems silly, but
+the value restriction is a simple way to maintain correct typing in
+the presence of side-effects.  For example, suppose we had two
+functions \hbox{\hbox{\lstinline/set : 'a -> unit/}} and \hbox{\lstinline/get : unit -> 'a/} that
+share a storage location.  The intent is that the function \hbox{\hbox{\lstinline/get/}}
+should return the last value that was saved with \hbox{\hbox{\lstinline/set/}}.  That is,
+if we call \hbox{\hbox{\lstinline/set 10/}}, then \hbox{\lstinline/get ()/} should return the
+\hbox{\hbox{\lstinline/10/}} (of type \hbox{\lstinline/int/}).  However, the type 
+\lstinline$get : unit -> 'a$
+is clearly too permissive.  It states that \hbox{\hbox{\lstinline/get/}} returns a
+value of arbitrary type, no matter what value was saved with
+\hbox{\hbox{\lstinline/set/}}.
+
+The solution here is to use the restricted types
+\lstinline$set : '_a -> unit$
+and \hbox{\hbox{\lstinline/get : unit -> '_a/}}.  In this case, the \hbox{\lstinline/set/} and
+\hbox{\hbox{\lstinline/get/}} functions can be used only with values of a single type.
+Now, if we call \hbox{\hbox{\lstinline/set 10/}}, the type variable \hbox{\lstinline/'_a/} becomes
+\hbox{\hbox{\lstinline/int/}}, and the type of the \hbox{\lstinline/get/} function becomes
+\lstinline$unit -> int$.
+
+The general point of the value restriction is that mutable values
+are not polymorphic.  In addition, function applications are not polymorphic
+because evaluating the function might create a mutable value or perform an
+assignment.  The policy is used even for simple applications like
+\hbox{\hbox{\lstinline/identity identity/}} where it is obvious that no assignments are
+being performed.
+
+It is usually easy to get around the value restriction by
+using a technique called \emph{eta-expansion}.  Suppose we have an
+expression \hbox{\hbox{\lstinline/e/}} of function type.  The expression
+\hbox{\lstinline$(fun x -> e x)$}
+is nearly equivalent---in fact, it is equivalent if \hbox{\hbox{\lstinline/e/}}
+does not contain side-effects.  The expression \hbox{\hbox{\lstinline/(fun x -> e x)/}}
+is a function, so it is a value, and it may be polymorphic.  Consider
+this redefinition of the \hbox{\hbox{\lstinline/identity'/}} function.
+
+\begin{ocaml}
+# let identity' = (fun x -> (identity identity) x);;
+@
+\begin{topoutput}
+val identity' : 'a -> 'a = <fun>
+\end{topoutput}
+@
+# identity' 1;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+# identity' "Hello";;
+@
+\begin{topoutput}
+- : string = "Hello"
+\end{topoutput}
+@
+\end{ocaml}
+
+The new version of \hbox{\hbox{\lstinline/identity'/}} computes the same value as the
+previous definition of \hbox{\hbox{\lstinline/identity'/}}, but now it is properly
+polymorphic.
+
+\labelsubsection{poly-comparison}{Other kinds of polymorphism}
+
+Polymorphism can be a powerful tool.  In ML, a single identity
+function can be defined that works on values of any type.  In a non-polymorphic
+language like C, a separate identity function would have to be defined
+for each type (unless the coercions are used to bypass the type
+system), in a style like the following.
+
+\begin{ccode}
+int int_identity(int i) { return i; }
+
+struct complex { float real; float imag; };
+struct complex complex_identity(struct complex x) { return x; }
+\end{ccode}
+
+\labelsubsubsection{poly-overloading}{Overloading}
+
+Another kind of polymorphism present in some languages is
+\emph{overloading} (also called \emph{ad-hoc} polymorphism).
+Overloading allows function definitions to have the same name if they
+have different parameter types.  When a function application is encountered,
+the compiler selects the appropriate function by comparing the
+available functions against the type of the arguments.  For example,
+in Java we could define a class that includes several definitions of
+addition for different types (note that the \hbox{\hbox{\lstinline/+/}} operator is
+already overloaded).
+
+\begin{ocaml}
+class Adder {
+    static float Add(float x, int i) { return x + i; }
+    static int Add(int i, float x) { return i + (int) x; }
+    static String Add(String s1, String s2) { return s1 + s2; }
+}
+\end{ocaml}
+%
+The expression \hbox{\hbox{\lstinline/Adder.Add(5.5f, 7)/}} evaluates to \hbox{\lstinline/12.5/}, the
+expression \hbox{\hbox{\lstinline/Adder.Add("Hello ", "world")/}} evaluates to the string
+\hbox{\hbox{\lstinline/"Hello world"/}}, and the expression \hbox{\lstinline/Adder.Add(5, 6)/} is an
+error because of ambiguous overloading.
+
+OCaml does not provide overloading.  There are probably two
+main reasons.  One has to do with a technical difficulty.  It is hard
+to provide both type inference and overloading at the same
+time.  For example, suppose the \hbox{\hbox{\lstinline/+/}} function were overloaded to
+work both on integers and floating-point values.  What would be the
+type of the following \hbox{\hbox{\lstinline/add/}} function?  Would it be
+\lstinline$int -> int -> int$, or \hbox{\hbox{\lstinline/float -> float -> float/}}?
+
+\begin{ocaml}
+let add x y = x + y;;
+\end{ocaml}
+
+The best solution would probably to have the compiler produce
+\emph{two} instances of the \hbox{\hbox{\lstinline/add/}} function, one for integers and
+another for floating point values.  This complicates the compiler, and
+with a sufficiently rich type system, type inference would become
+uncomputable.  \emph{That} would be a problem.
+
+Another possible reason for not providing overloading is that programs can
+become more difficult to understand.  It may not be obvious by
+looking at the program text which one of a function's definitions
+is being called, and there is no way for a compiler to check if all
+the function's definitions do ``similar'' things.
+
+\labelsubsubsection{poly-subtyping}{Subtype polymorphism and dynamic method dispatch}
+
+Subtype polymorphism and dynamic method dispatch are concepts used extensively
+in object-oriented programs.  Both kinds of polymorphism are fully supported in
+OCaml.  We discuss the object system in Chapter~\refchapter{objects1}.
+
+\labelsection{tuples}{Tuples}
+\index{types!tuple}
+
+Tuples are the simplest aggregate data type.  They correspond to the
+ordered tuples you have seen in mathematics, or in set theory.  A
+tuple is a collection of values of arbitrary types.  The syntax for a
+tuple is a sequence of expressions separated by commas.  For example,
+the following tuple is a pair containing a number and a string.
+
+\label{keyword:,}
+\index{,@\lstinline/,/ (for tuples)}
+\begin{ocaml}
+# let p = 1, "Hello";;
+@
+\begin{topoutput}
+val p : int * string = 1, "Hello"
+\end{topoutput}
+@
+\end{ocaml}
+%
+The syntax for the type of a tuple is a \hbox{\hbox{\lstinline/*/}}-separated list of the
+types of the components.  In this case, the type of the pair is
+\hbox{\hbox{\lstinline/int * string/}}.
+
+\label{patterns:tuples}
+Tuples can be \emph{deconstructed} by pattern matching with any of
+the pattern matching constructs like \hbox{\hbox{\lstinline/let/}}, \hbox{\lstinline/match/}, \hbox{\lstinline/fun/},
+or \hbox{\hbox{\lstinline/function/}}.  For example, to recover the parts of the pair in
+the variables \hbox{\hbox{\lstinline/x/}} and \hbox{\lstinline/y/}, we might use a \hbox{\lstinline/let/} form.
+
+\begin{ocaml}
+# let x, y = p;;
+@
+\begin{topoutput}
+val x : int = 1
+val y : string = "Hello"
+\end{topoutput}
+@
+\end{ocaml}
+%
+\misspelled{\index{fst function@\lstinline/fst/ function}}
+\misspelled{\index{snd function@\lstinline/snd/ function}}
+The built-in functions \hbox{\hbox{\lstinline/fst/}} and \hbox{\lstinline/snd/} return the components of
+a pair, defined as follows.
+
+\begin{ocaml}
+# let fst (x, _) = x;;
+@
+\begin{topoutput}
+val fst : 'a * 'b -> 'a = <fun>
+\end{topoutput}
+@
+# let snd (_, y) = y;;
+@
+\begin{topoutput}
+val snd : 'a * 'b -> 'b = <fun>
+\end{topoutput}
+@
+# fst p;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+# snd p;;
+@
+\begin{topoutput}
+- : string = "Hello"
+\end{topoutput}
+@
+\end{ocaml}
+%
+Tuple patterns in a function parameter must be enclosed in parentheses.
+Note that the \hbox{\hbox{\lstinline/fst/}} and \hbox{\lstinline/snd/} functions are polymorphic.
+They can be applied to a pair of any type \hbox{\hbox{\lstinline/'a * 'b/}}; \hbox{\lstinline/fst/}
+returns a value of type \hbox{\hbox{\lstinline/'a/}}, and \hbox{\lstinline/snd/} returns a value of
+type \hbox{\hbox{\lstinline/'b/}}.
+There are no similar built-in functions for tuples with more than two
+elements, but they can be defined easily.
+
+\begin{ocaml}
+# let t = 1, "Hello", 2.7;;
+@
+\begin{topoutput}
+val t : int * string * float = 1, "Hello", 2.7
+\end{topoutput}
+@
+# let fst3 (x, _, _) = x;;
+@
+\begin{topoutput}
+val fst3 : 'a * 'b * 'c -> 'a = <fun>
+\end{topoutput}
+@
+# fst3 t;;
+@
+\begin{topoutput}
+- : int = 1
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note also that the pattern assignment is simultaneous.  The
+following expression swaps the values of \hbox{\hbox{\lstinline/x/}} and \hbox{\lstinline/y/}.
+
+\begin{ocaml}
+# let x = 1;;
+@
+\begin{topoutput}
+val x : int = 1
+\end{topoutput}
+@
+# let y = "Hello";;
+@
+\begin{topoutput}
+val y : string = "Hello"
+\end{topoutput}
+@
+# let x, y = y, x;;
+@
+\begin{topoutput}
+val x : string = "Hello"
+val y : int = 1
+\end{topoutput}
+@
+\end{ocaml}
+%
+Since the components of a tuple are unnamed, tuples are most
+appropriate if they have a small number of well-defined components.
+For example, tuples would be an appropriate way of defining Cartesian
+coordinates.
+
+\begin{ocaml}
+# let make_coord x y = x, y;;
+@
+\begin{topoutput}
+val make_coord : 'a -> 'b -> 'a * 'b = <fun>
+\end{topoutput}
+@
+# let x_of_coord = fst;;
+@
+\begin{topoutput}
+val x_of_coord : 'a * 'b -> 'a = <fun>
+\end{topoutput}
+@
+# let y_of_coord = snd;;
+@
+\begin{topoutput}
+val y_of_coord : 'a * 'b -> 'b = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+However, it would be awkward to use tuples for defining database
+entries, like the following.  For that purpose, records would be more
+appropriate.  Records are defined in Chapter~\refchapter{records}.
+
+\begin{ocaml}
+# (* Name, Height, Phone, Salary *)
+  let jason = ("Jason", 6.25, "626-395-6568", 50.0);;
+@
+\begin{topoutput}
+val jason : string * float * string * float =
+  "Jason", 6.25, "626-395-6568", 50
+\end{topoutput}
+@
+# let name_of_entry (name, _, _, _) = name;;
+@
+\begin{topoutput}
+val name_of_entry : 'a * 'b * 'c * 'd -> 'a = <fun>
+\end{topoutput}
+@
+# name_of_entry jason;;
+@
+\begin{topoutput}
+- : string = "Jason"
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{lists}{Lists}
+\label{keyword:::}
+\label{keyword:;(lists)}
+\label{keyword:lists}
+\index{types!list@\lstinline/list/}
+\index{list type@\lstinline/list/ type}
+\index{[]@\lstinline/[]/ nil}
+\index{::@\lstinline/::/ cons}
+\index{;!list element separator}
+
+Lists are also used extensively in OCaml programs.  A list is a
+sequence of values of the same type.  There are two constructors: the
+\hbox{\hbox{\lstinline/[]/}} expression is the empty list, and the \hbox{\lstinline/$e_1$ :: $e_2$/}
+expression, called a \emph{cons} operation, creates a \emph{cons
+cell}---a new list where the first element is $e_1$ and the rest of
+the list is $e_2$.  The shorthand notation
+\hbox{\hbox{\lstinline/[$e_1$; $e_2$; $\cdots$; $e_n$]/}}
+is identical to \hbox{\hbox{\lstinline/$e_1$ :: $e_2$ :: $\cdots$ :: []/}}.
+
+\begin{ocaml}
+# let l = "Hello" :: "World" :: [];;
+@
+\begin{topoutput}
+val l : string list = ["Hello"; "World"]
+\end{topoutput}
+@
+\end{ocaml}
+%
+The syntax for the type of a list with elements of type \hbox{\hbox{\lstinline/t/}} is \hbox{\lstinline/t list/}.
+The type \hbox{\hbox{\lstinline/list/}} is an example of a \emph{parametrized} type.  An
+\hbox{\hbox{\lstinline/int list/}} is a list containing integers, a \hbox{\lstinline/string list/} is
+a list containing strings, and an \hbox{\hbox{\lstinline/'a list/}} is a list containing
+elements of some type \hbox{\hbox{\lstinline/'a/}} (but all the elements have the
+same type).
+
+\label{patterns:lists}
+Lists can be deconstructed using pattern matching.  For example, here is
+a function that adds up all the numbers in an \hbox{\hbox{\lstinline/int list/}}.
+
+\begin{ocaml}
+# let rec sum = function
+     [] -> 0
+   | i :: l -> i + sum l;;
+@
+\begin{topoutput}
+val sum : int list -> int = <fun>
+\end{topoutput}
+@
+# sum [1; 2; 3; 4];;
+@
+\begin{topoutput}
+- : int = 10
+\end{topoutput}
+@
+\end{ocaml}
+%
+Functions on lists can also be polymorphic.  The function to check if a
+value \hbox{\hbox{\lstinline/x/}} is in a list \hbox{\lstinline/l/} might be defined as follows.
+
+\begin{ocaml}
+# let rec mem x l =
+     match l with
+        [] -> false
+      | y :: l -> x = y || mem x l;;
+@
+\begin{topoutput}
+val mem : 'a -> 'a list -> bool = <fun>
+\end{topoutput}
+@
+# mem 5 [1; 7; 3];;
+@
+\begin{topoutput}
+- : bool = false
+\end{topoutput}
+@
+# mem "do" ["I'm"; "afraid"; "I"; "can't"; "do"; "that"; "Dave"];;
+@
+\begin{topoutput}
+- : bool = true
+\end{topoutput}
+@
+\end{ocaml}
+%
+The function \hbox{\hbox{\lstinline/mem/}} shown above takes an
+argument \hbox{\hbox{\lstinline/x/}} of any type \hbox{\lstinline/'a/}, and
+checks if the element is in the list \hbox{\hbox{\lstinline/l/}}, which must
+have type \hbox{\hbox{\lstinline/'a list/}}.
+
+\index{List module!map}
+Similarly, the map operation applies a function \lstinline/f/ to each
+element of a list \lstinline/l/ might be defined as follows (the
+\lstinline/map/ function is also defined in the standard library as
+\hbox{\hbox{\lstinline/List.map/}}).
+
+\begin{ocaml}
+# let rec map f = function
+   [] -> []
+ | x :: l -> f x :: map f l;;
+@
+\begin{topoutput}
+val map : ('a -> 'b) -> 'a list -> 'b list = <fun>
+\end{topoutput}
+@
+# map (fun i -> (float_of_int i) +. 0.5) [1; 2; 3; 4];;
+@
+\begin{topoutput}
+- : int list = [1.5; 2.5; 3.5; 4.5]
+\end{topoutput}
+@
+\end{ocaml}
+%
+The function \hbox{\hbox{\lstinline/map/}} takes a
+function \hbox{\hbox{\lstinline/f/}} of type \hbox{\lstinline/'a -> 'b/}
+(meaning the function takes a value of type \hbox{\hbox{\lstinline/'a/}}
+and returns a value of type \hbox{\hbox{\lstinline/'b/}}), and a list
+containing elements of type
+\hbox{\hbox{\lstinline/'a/}}, and it returns a list containing elements of
+type \hbox{\hbox{\lstinline/'b/}}.
+
+\index{List module!assoc}
+Lists are also combined with tuple to represent sets of values, or a
+key-value relationships like the dictionaries in
+Exercise~\ref{exercise:dict1}.  The \hbox{\hbox{\lstinline/List/}} library
+contains many list functions.  For example,
+the \hbox{\hbox{\lstinline/List.assoc/}} function returns the value
+associated with a key in a list of key-value pairs.  This function
+might be defined as follows.
+
+\begin{ocaml}
+# let rec assoc key = function
+     (key2, value) :: l ->
+        if key2 = key then
+           value
+        else
+           assoc x l
+   | [] ->
+        raise Not_found;;
+\end{ocaml}
+%
+Here we see a combination of list and tuple pattern matching.  The
+pattern \hbox{\hbox{\lstinline/(key2, value) :: l/}} should be read from the outside-in.
+The outermost operator is \hbox{\hbox{\lstinline/::/}}, so this pattern matches a
+nonempty list, where the first element should be a pair 
+\lstinline$(key2, value)$
+and the rest of the list is \hbox{\hbox{\lstinline/l/}}.  If this pattern
+matches, and if the \hbox{\hbox{\lstinline/key2/}} is equal to the argument \hbox{\lstinline/key/},
+then the \hbox{\hbox{\lstinline/value/}} is returned as a result.  Otherwise, the search
+continues.  If the search bottoms out with the empty list, the default
+action is to raise an exception.  According to convention in the
+\hbox{\hbox{\lstinline/List/}} library, the \hbox{\lstinline/Not_found/} exception is normally used
+by functions that search through a list and terminates unsuccessfully.
+
+Association lists can be used to represent a variety of data
+structures, with the restriction that all values must have the same
+type.  Here is a simple example.
+
+\begin{ocaml}
+# let entry =
+     [("name", "Jason");
+      ("height", "6' 3''");
+      ("phone", "626-555-1212");
+      ("salary", "50")];;
+@
+\begin{topoutput}
+val entry : (string * string) list =
+  ["name", "Jason"; "height", "6' 3''";
+   "phone", "626-555-1212"; "salary", "50"]
+\end{topoutput}
+@
+# List.assoc "phone" entry;;
+@
+\begin{topoutput}
+- : string = "626-555-1212"
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note that commas (\hbox{\lstinline/,/}) separate the elements of the pairs in the list,
+and semicolons (\hbox{\lstinline/;/}) separate the items of the list.
+
+\labelsection{tail-recursion}{Tail recursion}
+\index{tail recursion}
+
+We have seen several examples of recursive functions so far.  A
+function is \emph{recursive} if it calls itself.  Recursion is the
+primary means for specifying looping and iteration, making it one of
+the most important concepts in functional programming.
+
+\emph{Tail recursion}
+is a specific kind of recursion where the value produced by a
+recursive call is returned directly by the caller without further
+computation.  For example, consider the two implementations of a
+factorial function shown in Figure~\reffigure{factorial-recursive}.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+(* Non-tail-recursive *)
+let rec fact1 i =
+   if i = 0 then
+      1
+   else
+      i * fact1 (i - 1)
+\end{ocamllisting}
+\end{minipage}
+&
+\begin{minipage}[t]{2in}
+\begin{ocamllisting}
+(* Tail recursive *)
+let fact2 i =
+   let rec loop accum i =
+      if i = 0 then
+         accum
+      else
+         loop (i * accum) (i - 1)
+   in
+      loop 1
+\end{ocamllisting}
+\end{minipage}
+\end{tabular}
+\end{center}
+\caption{Two versions of a factorial function.  The version on the right is tail-recursive.  The version on the left is not.}
+\label{figure:factorial-recursive}
+\end{figure}
+
+The factorial implementation \hbox{\lstinline/fact1/} is not tail-recursive
+because value produced by the recursive call \hbox{\lstinline/fact1 (i - 1)/}
+must be multiplied by \hbox{\lstinline/i/} before it is returned by the
+caller.
+
+The implementation \hbox{\lstinline/fact2/} illustrates a standard ``trick,''
+where an extra argument, often called an \emph{accumulator}, is used
+to collect the result of the computation.  The
+function \hbox{\lstinline/loop/} is tail-recursive because the result of the
+recursive call is returned directly by the caller.
+
+\labelsubsection{opt-tail-recursion}{Optimization of tail-recursion}
+
+Tail-recursion is important because it can be optimized effectively by
+the compiler.  Consider the evaluation of a normal non-tail recursive
+call \hbox{\lstinline/i * fact1 (i - 1)/} on a stack-based machine.  First,
+the argument \hbox{\lstinline/(i - 1)/} is evaluated and pushed on the stack
+together with the return address, and the function is called.  When it
+returns, the argument and return address are removed from the stack,
+and the result of the call is multiplied by \hbox{\lstinline/i/}.  In
+general, a non-tail-recursive function will require stack space linear
+in the number of recursive calls.
+
+Now, consider the mechanics of a tail-call like
+%
+\hbox{\lstinline/loop (i * accum) (i - 1)/}.
+The result is to be returned directly by the caller, so instead of
+allocating stack space for the arguments, it is sufficient to
+overwrite the caller's state.  That is, using $\leftarrow$ to
+represent assignment, the compiler can translate the code as follows.
+
+\begin{ocaml}
+let rec loop accum i =
+   if i = 0 then
+      accum
+   else
+      accum <- i * accum;
+      i <- i - 1;
+      @\textit{goto loop}@
+\end{ocaml}
+%
+By \textit{goto loop} we mean that the function
+\hbox{\lstinline/loop/} is restarted with the new values for its
+arguments---there is no \lstinline/goto/ instruction in OCaml.
+
+The optimized function computes the same result as the original
+definition, but it requires only a constant amount of stack space, and
+it is usually much faster than the original.
+
+\labelsubsection{lists-tail-recursion}{Lists and tail recursion}
+
+Tail-recursion is especially important when programming with lists,
+because otherwise functions would usually take stack space linear in
+the length of the list.  Not only would that be slow, but it would
+also mean that the list length is limited by the maximum stack size.
+
+Fortunately, there are some standard techniques for writing
+tail-recursive functions.  If the function is to return a list, one
+standard approach is to use an accumulator that collects the result in
+reverse order.  For example, consider the following implementation of
+a function \hbox{\lstinline/map/}.
+
+\begin{ocaml}
+let rec map f = function
+   h :: t -> f h :: map f t
+ | [] -> []
+\end{ocaml}
+%
+The function definition is simple, but it is not tail-recursive.  To
+obtain a tail recursive version, we collect the result in an argument
+\hbox{\lstinline/accum/}.
+
+\begin{ocaml}
+let rec rev accum = function
+   h :: t -> rev (h :: accum) t
+ | [] -> accum
+
+let rec rev_map f accum = function
+   h :: t -> rev_map f (f h :: accum) t
+ | [] -> accum
+
+let map f l = rev [] (rev_map f [] l)
+\end{ocaml}
+%
+\index{List module!rev@\lstinline/rev/ list reversal}
+Note that the result is collected in \hbox{\lstinline/accum/}
+in \emph{reverse} order, so it must be reversed (with the
+function \hbox{\lstinline/rev/}) at the end of the computation.  Still,
+traversing the list twice, once with \hbox{\lstinline/rev_map/} and once
+with \hbox{\lstinline/rev/}, is often faster than the non-tail-recursive
+implementation.  For clarity, we listed the \hbox{\lstinline/rev/} function
+here.  Normally, one would use the standard
+implementation \hbox{\lstinline/List.rev/}.

@@ -1,0 +1,520 @@
+%
+%
+%
+\exercises
+
+\begin{exercise}{var1}
+Which of the following let-expressions is legal? 
+For each expression that is legal, give its type and the value that it evaluates to.
+Otherwise, explain why the expression is not legal.
+
+\begin{enumerate}
+\item \lstinline!let x = 1 in x!
+
+\begin{answer}\ifanswers
+Legal.  The value is \hbox{\lstinline/1 : int/}.
+\fi\end{answer}
+
+\item \lstinline!let x = 1 in let y = x in y!
+
+\begin{answer}\ifanswers
+Legal.  The value is \hbox{\lstinline/1 : int/}.
+\fi\end{answer}
+
+\item \lstinline!let x = 1 and y = x in y!
+
+\begin{answer}\ifanswers
+Illegal.  The variable \hbox{\lstinline/x/} is undefined in the definition \hbox{\lstinline/y = x/}.
+\fi\end{answer}
+
+\item \lstinline!let x = 1 and x = 2 in x!
+
+\begin{answer}\ifanswers
+Illegal.  The variable \hbox{\lstinline/x/} is defined twice.
+\fi\end{answer}
+
+\item \lstinline!let x = 1 in let x = x in x!
+
+\begin{answer}\ifanswers
+Legal.  The value is \hbox{\lstinline/1 : int/}.
+\fi\end{answer}
+
+\item \lstinline!let a' = 1 in a' + 1!
+
+\begin{answer}\ifanswers
+Legal.  The value is \hbox{\lstinline/2 : int/}.
+\fi\end{answer}
+
+\item \lstinline!let 'a = 1 in 'a + 1!
+
+\begin{answer}\ifanswers
+Illegal.  Identifiers may not begin with a single quote \hbox{\lstinline/'/}.
+\fi\end{answer}
+
+\item \lstinline!let a'b'c = 1 in a'b'c!
+
+\begin{answer}\ifanswers
+Legal.  The value is \hbox{\lstinline/1 : int/}.
+\fi\end{answer}
+
+\item \lstinline!let x x = x + 1 in x 2!
+
+\begin{answer}\ifanswers
+Legal.  The identifier \hbox{\lstinline/x/} represents the argument in the function body
+  \hbox{\lstinline/x + 1/} and the function itself in \hbox{\lstinline/x 2/}.  The value is \hbox{\lstinline/3 : int/}.
+\fi\end{answer}
+
+\item \lstinline!let rec x x = x + x in x 2!
+
+\begin{answer}\ifanswers
+Legal.  The \hbox{\lstinline/rec/} modifier has no effect here.  The value is \hbox{\lstinline/4 : int/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllistinge}
+let (++) f g x = f (g x) in
+let f x = x + 1 in
+let g x = x * 2 in
+(f ++ g) 1
+\end{ocamllistinge}
+
+\begin{answer}\ifanswers
+Legal.  The identifier \hbox{\lstinline/++/} represents function composition, so the value is
+\hbox{\lstinline/(1 * 2) + 1/} (\hbox{\lstinline/3 : int/}).
+\fi\end{answer}
+
+\item \lstinline!let (-) x y = y - x in 1 - 2 - 3!
+
+\begin{answer}\ifanswers
+Legal.  The value is \hbox{\lstinline/3 - (2 - 1)/} (\hbox{\lstinline/1/}).
+\fi\end{answer}
+
+\item \lstinline!let rec (-) x y = y - x in 1 - 2 - 3!
+
+\begin{answer}\ifanswers
+Legal.  Evaluation does not terminate because the operator \hbox{\lstinline/-/} is defined in terms of
+itself.
+\fi\end{answer}
+
+\item \lstinline!let (+) x y z = x + y + z in 5 + 6 7!
+
+\begin{answer}\ifanswers
+Illegal.  Application has higher precedence
+  than \hbox{\lstinline/+/}, so the expression in the body is
+  really \hbox{\lstinline/5 + (6 7)/}, which is ill-typed.
+\fi\end{answer}
+
+\item \lstinline!let (++) x = x + 1 in ++x!
+
+\begin{answer}\ifanswers
+Illegal.  All operators starting with a \hbox{\lstinline/+/} sign are binary operators.
+\fi\end{answer}
+
+\end{enumerate}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Scoping
+%
+\begin{exercise}{scope1}
+What are the values of the following expressions?
+
+\begin{enumerate}
+\item \lstinline!let x = 1 in let x = x + 1 in x!
+
+\begin{answer}\ifanswers
+The value is \hbox{\lstinline/2 : int/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllistinge}
+let x = 1 in
+let f y = x in
+let x = 2 in
+f 0
+\end{ocamllistinge}
+
+\begin{answer}\ifanswers
+The value of \hbox{\lstinline/x/} in the function \hbox{\lstinline/f/} is \hbox{\lstinline/1/}, so the result is \hbox{\lstinline/2 : int/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllistinge}
+let f x = x - 1 in
+let f x = f (x - 1) in
+f 2
+\end{ocamllistinge}
+
+\begin{answer}\ifanswers
+The expression \hbox{\lstinline/f (x - 1)/} refers to the first definition of \hbox{\lstinline/f/}, so the result is \hbox{\lstinline/0 : int/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllistinge}
+let y = 2 in
+let f x = x + y in
+let f x = let y = 3 in f y in
+f 5
+\end{ocamllistinge}
+
+\begin{answer}\ifanswers
+The second definition \hbox{\lstinline/let y = 3/} does not affect the first, so the result is \hbox{\lstinline/3 + 2 = 5/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllistinge}
+let rec factorial i =
+   if i = 0 then 1 else i * factorial (i - 1)
+in
+   factorial 5
+\end{ocamllistinge}
+
+\begin{answer}\ifanswers
+The value is $5!$ or $60$.
+\fi\end{answer}
+\end{enumerate}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sum
+%
+\begin{exercise}{sum1}
+Write a function \hbox{\lstinline/sum/} that, given two integer bounds \hbox{\lstinline/n/} and \hbox{\lstinline/m/} and
+a function \hbox{\lstinline/f/}, computes a summation.
+
+\begin{center}
+\lstinline!sum n m f = $\sum_{i = n}^m f(i)$!.
+\end{center}
+%
+\begin{answer}\ifanswers
+The easiest way to write this function is as a simple recursive definition.
+
+\begin{ocaml}
+let rec sum n m f =
+   if n > m then
+      0
+   else
+      f n + sum (n + 1) m f
+\end{ocaml}
+%
+This function is not tail-recursive.  A simple way to fix it is to define an auxiliary function
+\hbox{\lstinline/loop/} that collects the intermediate result \hbox{\lstinline/x/} in an
+\emph{accumulator}.
+
+\begin{ocaml}
+let sum n m f =
+   let rec loop i x =
+      if i > m then
+         x
+      else
+         loop (i + 1) (f i + x)
+   in
+      loop n
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GCD
+%
+\begin{exercise}{gcd1}
+Euclid's algorithm computes the greatest common divisor (GCD) of two integers.  It is one of the
+oldest known algorithms, appearing in Euclid's \emph{Elements} in roughly 300 BC.  It can be defined in
+pseudo-code as follows, where $\leftarrow$ represents assignment.
+
+\begin{ocaml}
+gcd($n$, $m$) =
+   while $m \neq 0$
+      if $n > m$
+         $n \leftarrow n - m$
+      else
+         $m \leftarrow m - n$
+   return $n$
+\end{ocaml}
+%
+Write an OCaml function
+%
+\hbox{\lstinline/%%/}
+%
+that computes the GCD using Euclid's algorithm (so 
+%
+\hbox{\hbox{\lstinline/n %% m/}}
+%
+is the GCD of the integers \hbox{\lstinline/n/} and \hbox{\lstinline/m/}).  You should define it without
+assignment, as a recursive function.  [Note, this is Euclid's original definition of the
+  algorithm.  More modern versions usually use a modulus operation instead of subtraction.]
+
+\begin{answer}\ifanswers
+The simplest translation of the GCD function is as follows.
+
+\begin{ocaml}
+let rec (%%) n m =
+   if m = 0 then
+      n
+   else if n > m then
+      (n - m) %% m
+   else
+      n %% (m - n)
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Search
+%
+\begin{exercise}{search1}
+Suppose you have a function on integers \hbox{\lstinline/f : int -> int/} that is monotonically increasing
+over some range of arguments from \hbox{\lstinline/0/} up to \hbox{\lstinline/n/}.  That is,
+\hbox{\hbox{\lstinline/f i < f (i + 1)/}}
+for any \hbox{\lstinline/0 $\le$ i $<$ n/}.  In addition \hbox{\lstinline/f 0 < 0/} and \hbox{\lstinline/f n > 0/}.
+%
+Write a function \hbox{\lstinline/search f n/} that finds the smallest argument \hbox{\lstinline/i/} where
+\hbox{\hbox{\lstinline/f i $\ge$ 0/}}.
+
+\begin{answer}\ifanswers
+A simple solution is to search for the first positive value starting from 0,
+taking $O(n)$ iterations to find the answer.
+
+\begin{ocaml}
+let search f n =
+   let rec loop i =
+      if f i >= 0 then
+         i
+      else
+         loop (i + 1)
+   in
+      loop 0
+\end{ocaml}
+%
+However, it is easy to write a more efficient implementation.  An algorithm to find the answer in
+$O(\log n)$ iterations using a binary search can be defined as follows.
+
+\begin{ocaml}
+let search f n =
+   let rec loop i j =
+      if i < j - 1 then
+         let k = (i + j) / 2 in
+            if f k >= 0 then
+               loop i k
+            else
+               loop k j
+      else
+         j
+   in
+      loop 0 n
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Dictionary
+%
+\begin{exercise}{dict1}
+A \emph{dictionary} is a data structure that represents a map from keys to values.  A dictionary has
+three operations.
+
+\begin{itemize}
+\item \lstinline!empty : dictionary!
+\item \lstinline!add   : dictionary -> key -> value -> dictionary!
+\item \lstinline!find  : dictionary -> key -> value!
+\end{itemize}
+%
+The value \hbox{\lstinline/empty/} is an empty dictionary; the expression \hbox{\lstinline/add dict key value/}
+takes an existing dictionary \hbox{\lstinline/dict/} and augments it with a new binding
+%
+\hbox{\lstinline/key -> value/}; and the expression \hbox{\lstinline/find dict key/} fetches the value in the
+dictionary \hbox{\lstinline/dict/} associated with the \hbox{\lstinline/key/}.
+
+One way to implement a dictionary is to represent it as a function from keys to values.  Let's
+assume we are building a dictionary where the key type is \hbox{\lstinline/string/}, the value type is
+\hbox{\lstinline/int/}, and the empty dictionary maps every key to zero.  This dictionary can be implemented
+abstractly as follows, where we write $\mapsto$ for the map from keys to values.
+
+\begin{eqnarray*}
+\ms{empty} & = & \ms{key} \mapsto 0\\
+\ms{add}(\ms{dict}, \ms{key}, v) & = & \ms{key}' \mapsto \cases{v & if $\ms{key}' = \ms{key}$\cr
+\ms{dict}(\ms{key}) & otherwise}\\
+\ms{find}(\ms{dict}, \ms{key}) & = & \ms{dict}(\ms{key})
+\end{eqnarray*}
+
+\begin{enumerate}
+\item Implement the dictionary in OCaml.
+
+\begin{answer}\ifanswers
+Answer
+\begin{ocaml}
+let empty = fun key -> 0
+let add dict key v = fun key' -> if key' = key then v else dict key
+let find dict key = dict key
+\end{ocaml}
+\fi\end{answer}
+
+\item
+%
+Suppose we have constructed several dictionaries as follows.
+
+\begin{ocaml}
+let dict1 = add empty "x" 1
+let dict2 = add dict1 "y" 2
+let dict3 = add dict2 "x" 3
+let dict4 = add dict3 "y" 4
+\end{ocaml}
+
+What are the values associated with \hbox{\lstinline/"x"/} and \hbox{\lstinline/"y"/} in each of the four dictionaries?
+
+\begin{answer}\ifanswers
+Answer
+\begin{center}
+\begin{tabular}{rcl}
+\hbox{\lstinline/dict1 "x"/} & = & \hbox{\lstinline/1/}\\
+\hbox{\lstinline/dict2 "x"/} & = & \hbox{\lstinline/1/}\\
+\hbox{\lstinline/dict3 "x"/} & = & \hbox{\lstinline/3/}\\
+\hbox{\lstinline/dict4 "x"/} & = & \hbox{\lstinline/3/}\\
+\hbox{\lstinline/dict1 "y"/} & = & \hbox{\lstinline/0/}\\
+\hbox{\lstinline/dict2 "y"/} & = & \hbox{\lstinline/2/}\\
+\hbox{\lstinline/dict3 "y"/} & = & \hbox{\lstinline/2/}\\
+\hbox{\lstinline/dict4 "y"/} & = & \hbox{\lstinline/4/}
+\end{tabular}
+\end{center}
+\fi\end{answer}
+\end{enumerate}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Partial application
+%
+\begin{exercise}{partial-application1}
+Partial application is sometimes used to improve the performance of a multi-argument function when
+the function is to be called repeatedly with one or more of its arguments fixed.  Consider a
+function $f(x, y)$ that is to be called multiple times with $x$ fixed.  First, the function must be
+written in a form $f(x, y) = h(g(x), y)$ from some functions $g$ and $h$, where $g$ represents the
+part of the computation that uses only the value $x$.  We then write it in OCaml as follows.
+
+\begin{ocaml}
+let f x =
+   let z = $g(x)$ in
+      fun y -> $h(z, y)$
+\end{ocaml}
+%
+Calling $f$ on its first argument computes $g(x)$ and returns a function that uses the value
+(without re-computing it).
+
+Consider one root of a quadratic equation $a x^2 + b x + c = 0$ specified by the quadratic formula
+$\ms{r}(a, b, c) = {-b + \sqrt{b^2 - 4 a c} \over 2a}$.  Suppose we wish to to evaluate the
+quadratic formula for multiple values of $a$ with $b$ and $c$ fixed.  Write a function to compute
+the formula efficiently.
+
+\begin{answer}\ifanswers
+For efficiency, we should precompute as much as possible.
+
+\begin{ocaml}
+let r b c =
+   let minusb = -. b in
+   let bsquared = b *. b in
+   let fourc = -4.0 *. c in
+      fun a -> (minusb +. sqrt (bsquared -. fourc *. a)) /. (2.0 *. a)
+\end{ocaml}
+\fi\end{answer}         
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Streams
+%
+\begin{exercise}{streams}
+A \emph{stream} is an infinite sequence of values supporting an operation \hbox{\lstinline/hd($s$)/} that
+returns the first value in the stream $s$, and \hbox{\lstinline/tl($s$)/} that returns a new stream with
+the first element removed.
+
+One way to implement a stream is to represent it as a function over the nonnegative integers.  Given
+a stream \hbox{\lstinline/s : int -> int/}, the first element is \hbox{\lstinline/(s 0)/}, the second
+is \hbox{\lstinline/(s 1)/}, \emph{etc}.  The operations are defined as follows.
+
+\begin{ocaml}
+let hd s = s 0
+let tl s = (fun i -> s (i + 1))
+\end{ocaml}
+%
+For this exercise, we'll assume that we're working with streams of integers, so the
+type \hbox{\lstinline/stream/} is \hbox{\lstinline/int -> int/}.  We'll write a stream as a sequence $(x_0, x_1,
+x_2, \ldots)$.
+
+\begin{enumerate}
+\item Define the following stream functions.
+\begin{itemize}
+\item \lstinline!(+:) : stream -> int -> stream!. Add a constant to a stream.
+
+\lstinline!$(x_0, x_1, x_2, \ldots)$ +: $c$ = $(x_0 + c, x_1 + c, x_2 + c, \ldots)$!.
+
+\begin{answer}\ifanswers
+Answer.
+\begin{ocaml}
+let (+:) s c = (fun i -> s i + c)
+\end{ocaml}
+\fi\end{answer}
+
+\item \lstinline!(-|) : stream -> stream -> stream!.
+
+Subtract two streams pointwise.
+
+\lstinline!$(x_0, x_1, x_2, \ldots)$ -| $(y_0, y_1, y_2, \ldots)$ = $(x_0 - y_0, x_1 - y_1, x_2 - y_2. \ldots)$!.
+
+\begin{answer}\ifanswers
+Answer.
+\begin{ocaml}
+let (-|) s1 s2 = (fun i -> s1 i - s2 i)
+\end{ocaml}
+\fi\end{answer}
+
+\item \lstinline!map : (int -> int) -> stream -> stream!.
+
+Apply a function to each element of the stream.
+
+\lstinline!map $f$ $(x_0, x_1, x_2, \ldots)$ = $(f\ x_0, f\ x_1, f\ x_2, \ldots)$!.
+
+\begin{answer}\ifanswers
+Answer.
+\begin{ocaml}
+let map f s = (fun i -> f (s i))
+\end{ocaml}
+\fi\end{answer}
+
+\end{itemize}
+
+\item A ``derivative'' function can be defined as follows.
+\begin{ocaml}
+let derivative s = tl s -| s
+\end{ocaml}
+%
+Define a function \hbox{\lstinline/integral : stream -> stream/} such that, for any stream $s$,
+\hbox{\lstinline/integral (derivative $s$) = $s$ +: $c$/} for some constant $c$.
+
+\begin{answer}\ifanswers
+Answer.
+\begin{ocaml}
+let integral s i =
+   let rec loop sum j =
+      if j = i then
+         sum
+      else
+         loop (sum + s j) (j + 1)
+   in
+      loop 0
+\end{ocaml}
+\fi\end{answer}
+\end{enumerate}
+\end{exercise}
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:

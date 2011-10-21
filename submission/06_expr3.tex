@@ -1,0 +1,745 @@
+\labelchapter{unions}{Unions}
+\index{types!union}
+\index{algebraic data type|see{type!union}}
+\index{variant record|see{type!union}}
+Disjoint unions, also called \emph{tagged unions}, \emph{variant records}, or
+\emph{algebraic data types}, are an important part of the OCaml type system.
+A disjoint union, or union for short, represents the union of several
+different types, where each of the parts is given an unique, explicit
+name.
+
+OCaml allows the definition of \emph{exact} and \emph{open} union
+types.  The following syntax is used for an exact union type; we
+discuss open types later in Section~\refsection{open-union-types}.
+
+\index{of@\lstinline/of/ (in union types)}
+\label{keyword:of}
+\label{keyword:type}
+\begin{ocaml}
+type $\nt{typename}$ =
+ | $\nt{Identifier}_1$ of $\nt{type}_1$
+ | $\nt{Identifier}_2$ of $\nt{type}_2$
+ $\vdots$
+ | $\nt{Identifier}_n$ of $\nt{type}_n$
+\end{ocaml}
+%
+\index{constructor}
+The union type is defined by a set of cases separated by the vertical
+bar \hbox{\lstinline/|/} character; the first vertical bar is optional.  Each case $i$ has an explicit name
+$\emph{Identifier}_i$, called a \emph{constructor} name; and it has an optional
+value of type $\emph{type}_i$.  The constructor name must be
+capitalized.  The definition \hbox{\lstinline/of $\nt{type}_i$/} is optional; if
+omitted there is no explicit value associated with the constructor.
+
+Let's look at a simple example using unions, where we wish to define a
+numeric type that is either a value of type \hbox{\lstinline/int/} or \hbox{\lstinline/float/}
+or a canonical value \hbox{\lstinline/Zero/}.  We can define this type as follows.
+
+\begin{ocaml}
+# type number =
+     Zero
+   | Integer of int
+   | Real of float;;
+@
+\begin{topoutput}
+type number = Zero | Integer of int | Real of float
+\end{topoutput}
+@
+\end{ocaml}
+%
+Values in a disjoint union are formed by applying a constructor to
+an expression of the appropriate type.
+
+\begin{ocaml}
+# let zero = Zero;;
+@
+\begin{topoutput}
+val zero : number = Zero
+\end{topoutput}
+@
+# let i = Integer 1;;
+@
+\begin{topoutput}
+val i : number = Integer 1
+\end{topoutput}
+@
+# let x = Real 3.2;;
+@
+\begin{topoutput}
+val x : number = Real 3.2
+\end{topoutput}
+@
+\end{ocaml}
+%
+\label{constructor-patterns}
+Patterns also use the constructor name.  For example, we can define a function
+that returns a floating-point representation of a number as follows.  In this program,
+each pattern specifies a constructor name as well as a variable for the constructors
+that have values.
+
+\begin{ocaml}
+# let float_of_number = function
+     Zero -> 0.0
+   | Integer i -> float_of_int i
+   | Real x -> x
+\end{ocaml}
+%
+Patterns can be arbitrarily nested.  The following
+function represents one way that we might perform addition of values
+in the \hbox{\lstinline/number/} type.
+
+\begin{ocaml}
+# let add n1 n2 =
+     match n1, n2 with
+        Zero, n
+      | n, Zero ->
+          n
+      | Integer i1, Integer i2 ->
+          Integer (i1 + i2)
+      | Integer i, Real x
+      | Real x, Integer i ->
+          Real (x +. float_of_int i)
+      | Real x1, Real x2 ->
+          Real (x1 +. x2);;
+@
+\begin{topoutput}
+val add : number -> number -> number = <fun>
+\end{topoutput}
+@
+# add x i;;
+@
+\begin{topoutput}
+- : number = Real 4.2
+\end{topoutput}
+@
+\end{ocaml}
+%
+There are a few things to note in this pattern matching.  First, we
+are matching against the pair \hbox{\lstinline/(n1, n2)/} of the numbers \hbox{\lstinline/n1/}
+and \hbox{\lstinline/n2/} being added.  The patterns are then pair patterns.  The
+first clause specifies that if the first number is \hbox{\lstinline/Zero/} and the
+second is \hbox{\lstinline/n/}, or if the second number is \hbox{\lstinline/Zero/} and the
+first is \hbox{\lstinline/n/}, then the sum is \hbox{\lstinline/n/}.
+
+\begin{ocaml}
+        Zero, n
+      | n, Zero ->
+          n
+\end{ocaml}
+%
+The second thing to note is that we are able to collapse some of the
+cases that have similar patterns.  For example, the code for adding
+\hbox{\lstinline/Integer/} and \hbox{\lstinline/Real/} values is the same, whether the first
+number is an \hbox{\lstinline/Integer/} or \hbox{\lstinline/Real/}.  In both cases, the
+variable \hbox{\lstinline/i/} is bound to the \hbox{\lstinline/Integer/} value, and \hbox{\lstinline/x/}
+to the \hbox{\lstinline/Real/} value.
+
+OCaml allows two patterns $p_1$ and $p_2$ to be combined into a choice
+pattern \hbox{\lstinline/$p_1$ | $p_2$/} under two conditions: both patterns must define
+the same variables; and, the value being matched by multiple occurrences of
+a variable must have the same types.  Otherwise, the placement of
+variables in $p_1$ and $p_2$ is unrestricted.
+
+In the remainder of this chapter we will describe the the disjoint union
+type more completely, using a running example for building balanced binary trees,
+a frequently-used data structure in functional programs.
+
+\labelsection{union-binary-trees}{Binary trees}
+\index{binary trees}
+
+Binary trees are often used for representing
+collections of data.  For our purposes, a binary tree is an acyclic graph,
+where each node (vertex) has either zero or two nodes called
+\emph{children}.  If node $n_2$ is a child of $n_1$, then $n_1$ is
+called the \emph{parent} of $n_2$.  One node, called the \emph{root},
+has no parents; all other nodes have exactly one parent.
+
+One way to represent this data structure is by defining a disjoint
+union for the type of a node and its children.  Since each node has
+either zero or two children, we need two cases.  The following
+definition defines the type for a labeled tree: the type variable \hbox{\lstinline/'a/}
+represents the type of labels; the constructor \hbox{\lstinline/Node/}
+represents a node with two children; and the constructor \hbox{\lstinline/Leaf/}
+represents a node with no children.  Note that the type \hbox{\lstinline/'a tree/}
+is defined with a type parameter \hbox{\lstinline/'a/} for the type of labels.
+This type definition is recursive---the type \hbox{\lstinline/'a tree/}
+is mentioned in its own definition.
+
+\begin{ocaml}
+# type 'a tree =
+     Node of 'a * 'a tree * 'a tree
+   | Leaf;;
+@
+\begin{topoutput}
+type 'a tree = | Node of 'a * 'a tree * 'a tree | Leaf
+\end{topoutput}
+@
+\end{ocaml}
+%
+The use of tuple types in a constructor definition (for example,
+\hbox{\lstinline/Node of 'a * 'a tree * 'a tree/}) is quite common, and has an
+efficient implementation.  When applying a constructor, parentheses
+are required around the elements of the tuple.  In addition, even
+though constructors that take arguments are similar to functions, they are
+not functions, and may not be used as values.
+
+\begin{ocaml}
+# Leaf;;
+@
+\begin{topoutput}
+- : 'a btree = Leaf
+\end{topoutput}
+@
+# Node (1, Leaf, Leaf);;
+@
+\begin{topoutput}
+- : int btree = Node (1, Leaf, Leaf)
+\end{topoutput}
+@
+# Node;;
+@
+\begin{toperror}
+The constructor Node expects 3 argument(s),
+but is here applied to 0 argument(s)
+\end{toperror}
+@
+\end{ocaml}
+%
+Since the type definition for \hbox{\lstinline/'a tree/} is recursive, many of the functions
+defined on the tree will also be recursive.  For example, the following function
+defines one way to count the number of non-leaf nodes in the tree.
+
+\begin{ocaml}
+# let rec cardinality = function
+     Leaf -> 0
+   | Node (_, left, right) ->
+        cardinality left + cardinality right + 1;;
+@
+\begin{topoutput}
+val cardinality : 'a btree -> int = <fun>
+\end{topoutput}
+@
+# cardinality (Node (1, Node (2, Leaf, Leaf), Leaf));;
+@
+\begin{topoutput}
+- : int = 2
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{unbalanced-btree}{Unbalanced binary trees}
+
+Now that we have defined the type of binary trees, lets build a simple
+data structure for representing sets of values of type \hbox{\lstinline/'a/}.
+
+The empty set is just a \hbox{\lstinline/Leaf/}.  To add an element to a set \hbox{\lstinline/s/}, we
+create a new \hbox{\lstinline/Node/} with a \hbox{\lstinline/Leaf/} as a left-child, and
+\hbox{\lstinline/s/} as the right child.
+
+\begin{ocaml}
+# let empty = Leaf;;
+@
+\begin{topoutput}
+val empty : 'a btree = Leaf
+\end{topoutput}
+@
+# let insert x s = Node (x, Leaf, s);;
+@
+\begin{topoutput}
+val insert : 'a -> 'a btree -> 'a btree = <fun>
+\end{topoutput}
+@
+# let rec set_of_list = function
+     [] -> empty
+   | x :: l -> insert x (set_of_list l);;
+@
+\begin{topoutput}
+val set_of_list : 'a list -> 'a btree = <fun>
+\end{topoutput}
+@
+# let s = set_of_list [3; 5; 7; 11; 13];;
+@
+\begin{topoutput}
+val s : int btree =
+  Node
+   (3, Leaf,
+    Node (5, Leaf,
+      Node (7, Leaf,
+        Node (11, Leaf, Node (13, Leaf, Leaf)))))
+\end{topoutput}
+@
+\end{ocaml}
+%
+The membership function is defined recursively: an
+element $x$ is a member of a tree iff the tree is a \hbox{\lstinline/Node/} and $x$
+is the label, or $x$ is in the left or right subtrees.
+
+\begin{ocaml}
+# let rec mem x = function
+     Leaf -> false
+   | Node (y, left, right) ->
+       x = y || mem x left || mem x right;;
+@
+\begin{topoutput}
+val mem : 'a -> 'a btree -> bool = <fun>
+\end{topoutput}
+@
+# mem 11 s;;
+@
+\begin{topoutput}
+- : bool = true
+\end{topoutput}
+@
+# mem 12 s;;
+@
+\begin{topoutput}
+- : bool = false
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{ordered-btree}{Unbalanced, ordered, binary trees}
+
+One problem with the unbalanced tree defined here is that the
+complexity of the membership operation is $O(n)$, where $n$ is
+cardinality of the set.
+
+We can can begin to address the performance by ordering the nodes in
+the tree.  The invariant we would like to maintain is the following:
+for any interior node \hbox{\lstinline/Node (x, left, right)/}, all the labels in
+the left child are smaller than \hbox{\lstinline/x/}, and all the labels in the
+right child are larger than \hbox{\lstinline/x/}.  To maintain this invariant, we
+must modify the insertion function.
+
+\begin{ocaml}
+# let rec insert x = function
+     Leaf -> Node (x, Leaf, Leaf)
+   | Node (y, left, right) as node ->
+      if x < y then
+         Node (y, insert x left, right)
+      else if x > y then
+         Node (y, left, insert x right)
+      else
+         node;;
+@
+\begin{topoutput}
+val insert : 'a -> 'a btree -> 'a btree = <fun>
+\end{topoutput}
+@
+# let rec set_of_list = function
+     [] -> empty
+   | x :: l -> insert x (set_of_list l);;
+@
+\begin{topoutput}
+val set_of_list : 'a list -> 'a btree = <fun>
+\end{topoutput}
+@
+# let s = set_of_list [7; 5; 9; 11; 3];;
+@
+\begin{topoutput}
+val s : int btree =
+  Node
+   (3, Leaf,
+    Node (11,
+      Node (9,
+        Node (5, Leaf, Node (7, Leaf, Leaf)), Leaf), Leaf))
+\end{topoutput}
+@
+\end{ocaml}
+%
+Note that this insertion function still does not build balanced trees.
+For example, if elements are inserted in increasing order, the tree
+will be completely unbalanced, with all the elements inserted along
+the right branch.
+
+For the membership function, we can take advantage of
+the set ordering to speed up the search.
+
+\begin{ocaml}
+# let rec mem x = function
+     Leaf -> false
+   | Node (y, left, right) ->
+        x = y || (x < y && mem x left) || (x > y && mem y right);;
+@
+\begin{topoutput}
+val mem : 'a -> 'a btree -> bool = <fun>
+\end{topoutput}
+@
+# mem 5 s;;
+@
+\begin{topoutput}
+- : bool = true
+\end{topoutput}
+@
+# mem 9 s;;
+@
+\begin{topoutput}
+- : bool = true
+\end{topoutput}
+@
+# mem 12 s;;
+@
+\begin{topoutput}
+- : bool = false
+\end{topoutput}
+@
+\end{ocaml}
+%
+The complexity of this membership function is $O(l)$ where $l$ is the
+maximal depth of the tree.  Since the \hbox{\lstinline/insert/} function does not
+guarantee balancing, the complexity is still $O(n)$, worst case.
+
+\labelsection{balanced-red-black-trees}{Balanced red-black trees}
+\index{red-black trees}
+
+In order to address the performance problem, we turn to an
+implementation of balanced binary trees.  We'll use a functional
+implementation of red-black trees due to Chris Okasaki \cite{Oka99}.
+Red-black trees add a label, either \hbox{\lstinline/Red/} or \hbox{\lstinline/Black/}, to each
+non-leaf node.  We will establish several new invariants.
+
+\begin{enumerate}
+\item{Every leaf is colored black.}
+\item{All children of every red node are black.}
+\item{Every path from the root to a leaf has the same number of black
+nodes as every other path.}
+\item{The root is always black.}
+\end{enumerate}
+%
+These invariants guarantee the balancing.  Since all the children of a
+red node are black, and each path from the root to a leaf has the same
+number of black nodes, the longest path is at most twice as long as
+the shortest path.
+
+The type definitions are similar to the unbalanced binary tree; we
+just need to add a red/black label.
+
+\begin{ocaml}
+type color =
+   Red
+ | Black
+
+type 'a rbtree =
+   Node of color * 'a * 'a rbtree * 'a rbtree
+ | Leaf
+\end{ocaml}
+%
+The membership function also has to be redefined for the new type.
+
+\begin{ocaml}
+let rec mem x = function
+   Leaf -> false
+ | Node (_, y, left, right) ->
+      x = y || (x < y && mem x left) || (x > y && mem x right)
+\end{ocaml}
+%
+The difficult part of the data structure is maintaining the invariants
+when a value is added to the tree with the \hbox{\lstinline/insert/} function.
+This can be done in two parts.  First find the location where
+the node is to be inserted.  If possible, add the new node with a
+\hbox{\lstinline/Red/} label because this would preserve invariant 3.  This may,
+however, violate invariant 2 because the new \hbox{\lstinline/Red/} node may have a
+\hbox{\lstinline/Red/} parent.
+
+In order to preserve the invariant, we implement the \hbox{\lstinline/balance/}
+function, which considers all the cases where a \hbox{\lstinline/Red/} node has a
+\hbox{\lstinline/Red/} child and rearranges the tree.
+
+\begin{ocaml}
+# let balance = function
+     Black, z, Node (Red, y, Node (Red, x, a, b), c), d
+   | Black, z, Node (Red, x, a, Node (Red, y, b, c)), d
+   | Black, x, a, Node (Red, z, Node (Red, y, b, c), d)
+   | Black, x, a, Node (Red, y, b, Node (Red, z, c, d)) ->
+        Node (Red, y, Node (Black, x, a, b), Node (Black, z, c, d))
+   | a, b, c, d ->
+        Node (a, b, c, d)
+
+  let insert x s =
+     let rec ins = function
+        Leaf -> Node (Red, x, Leaf, Leaf)
+      | Node (color, y, a, b) as s ->
+           if x < y then balance (color, y, ins a, b)
+           else if x > y then balance (color, y, a, ins b)
+           else s
+     in
+        match ins s with  (* guaranteed to be non-empty *)
+           Node (_, y, a, b) -> Node (Black, y, a, b)
+         | Leaf -> raise (Invalid_argument "insert");;
+@
+\begin{topoutput}
+val balance : color * 'a * 'a rbtree * 'a rbtree -> 'a rbtree = <fun>
+val insert : 'a -> 'a rbtree -> 'a rbtree = <fun>
+\end{topoutput}
+@
+\end{ocaml}
+\label{page:ref-black-insert}
+%
+Note the use of nested patterns in the \hbox{\lstinline/balance/} function.  The
+\hbox{\lstinline/balance/} function takes a 4-tuple, with a \hbox{\lstinline/color/}, two
+\hbox{\lstinline/btree/}s, and an element, and it splits the analysis into five
+cases: four of the cases are for the situation where invariant 2 needs
+to be re-established because \hbox{\lstinline/Red/} nodes are nested, and the final
+case is the case where the tree does not need rebalancing.
+
+Since the longest path from the root is at most twice as long as the
+shortest path, the depth of the tree is $O(log~ n)$.  The
+\hbox{\lstinline/balance/} function takes $O(1)$ (constant) time.  This means that the
+\hbox{\lstinline/insert/} and \hbox{\lstinline/mem/} functions each take time $O(log~ n)$.
+
+\begin{ocaml}
+# let empty = Leaf;;
+@
+\begin{topoutput}
+val empty : 'a rbtree = Leaf
+\end{topoutput}
+@
+# let rec set_of_list = function
+       [] -> empty
+     | x :: l -> insert x (set_of_list l);;
+@
+\begin{topoutput}
+val set_of_list : 'a list -> 'a rbtree = <fun>
+\end{topoutput}
+@
+# let s = set_of_list [3; 9; 5; 7; 11];;
+@
+\begin{topoutput}
+val s : int rbtree =
+  Node (Black, 7, Node (Black, 5, Node (Red, 3, Leaf, Leaf), Leaf),
+   Node (Black, 11, Node (Red, 9, Leaf, Leaf), Leaf))
+\end{topoutput}
+@
+# mem 5 s;;
+@
+\begin{topoutput}
+- : bool = true
+\end{topoutput}
+@
+# mem 6 s;;
+@
+\begin{topoutput}
+- : bool = false
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{open-union-types}{Open union types (polymorphic variants)}
+\index{types!open union}
+\index{types!polymorphic variants}
+\label{keyword:polymorphic-variants}
+
+OCaml defines a second kind of union type where the type is
+open---that is, subsequent definitions may add more cases to the type.
+The syntax is similar to the exact definition discussed previously,
+but the constructor names are prefixed with a back-quote
+(\hbox{\lstinline/`/}) symbol, and the type definition is enclosed in
+\hbox{\lstinline/[> $\ldots$ ]/} brackets.
+
+\label{patterns:variants}
+For example, let build an extensible version of the numbers from the first
+example in this chapter.  Initially, we might define the implementation
+for \hbox{\lstinline/`Integer/} values.
+
+\begin{ocaml}
+# let string_of_number1 n =
+     match n with
+        `Integer i -> string_of_int i
+      | _ -> raise (Invalid_argument "unknown number");;
+@
+\begin{topoutput}
+val string_of_number1 : [> `Integer of int ] -> string = <fun>
+\end{topoutput}
+@
+# string_of_number1 (`Integer 17);;
+@
+\begin{topoutput}
+- : string = "17"
+\end{topoutput}
+@
+\end{ocaml}
+%
+The type \hbox{\lstinline/[> `Integer of int ]/} specifies that the function takes
+an argument having an open union type, where one of the constructors
+is \hbox{\lstinline/`Integer/} (with a value of type \hbox{\lstinline/int/}).
+
+Later, we might want extend the definition to include
+a constructor \hbox{\lstinline/`Real/} for floating-point values.
+
+\begin{ocaml}
+# let string_of_number2 n =
+     match n with
+        `Real x -> string_of_float x
+      | _ -> string_of_number1 n;;
+@
+\begin{topoutput}
+val string_of_number2 : [> `Integer of int | `Real of float ] -> string =
+  <fun>
+\end{topoutput}
+@
+\end{ocaml}
+%
+If passed a floating-point number with the \hbox{\lstinline/`Real/} constructor,
+the string is created with \hbox{\lstinline/string_of_float/} function.
+Otherwise, the original function \hbox{\lstinline/string_of_number1/} is used.
+
+The type \hbox{\lstinline/[> `Integer of int | `Real of float ]/} specifies that
+the function takes an argument in an open union type, and handles at least the
+constructors \hbox{\lstinline/`Integer/} with a value of type \hbox{\lstinline/int/}, and
+\hbox{\lstinline/`Real/} with a value of type \hbox{\lstinline/float/}.  Unlike the exact
+union, the constructors may still be used with expressions of other types.
+However, application to a value of the wrong type remains disallowed.
+
+\begin{ocaml}
+# let n = `Real 1;;
+@
+\begin{topoutput}
+val n : [> `Real of int ] = `Real 1
+\end{topoutput}
+@
+# string_of_number2 n;;
+@
+\begin{topoutput}
+Characters 18-19:
+  string_of_number2 n;;
+                    ^
+This expression has type [> `Real of int ] but is here used with type
+  [> `Integer of int | `Real of float ]
+Types for tag `Real are incompatible
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsubsection{open-union-definition}{Type definitions for open types}
+
+Something strange comes up when we try to write a type definition
+using an open union type.
+
+\label{keyword:as(types)}
+\begin{ocaml}
+# type number = [> `Integer of int | `Real of float];;
+@
+\begin{toperror}
+Characters 4-50:
+  type number = [> `Integer of int | `Real of float];;
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A type variable is unbound in this type declaration.
+In definition [> `Integer of int | `Real of float ] as 'a
+the variable 'a is unbound
+\end{toperror}
+@
+\end{ocaml}
+%
+One way to think of the open type is that it contains the specified
+cases (\hbox{\lstinline/`Integer of int/} and \hbox{\lstinline/`Real of float/}) and
+potentially \emph{more}---it also contains values like \hbox{\lstinline/`Zero/},
+\hbox{\lstinline/`Natural 17/}, \emph{etc}.  In fact, any type constructor
+not explicitly mentioned in the definition is also part of the type.
+
+Type theoretically then, any function defined over an open type must
+be polymorphic over the unspecified cases.  Technically, this amounts
+to the same thing as saying that an open type is some type
+\hbox{\lstinline/'a/} that includes at least the cases specified in
+the definition (and more).  In order for the type definition to be
+accepted, we must write the type variable explicitly.
+
+\begin{ocaml}
+# type 'a number = [> `Integer of int | `Real of float] as 'a;;
+@
+\begin{topoutput}
+type 'a number = 'a constraint 'a = [> `Integer of int | `Real of float ]
+\end{topoutput}
+@
+# let (zero : 'a number) = `Zero;;
+@
+\begin{topoutput}
+val zero : [> `Integer of int | `Real of float | `Zero ] number = `Zero
+\end{topoutput}
+@
+\end{ocaml}
+%
+The \hbox{\lstinline/as/} form and the \hbox{\lstinline/constraint/} form are two
+different ways of writing the same thing.  In both cases, the type
+that is being defined is the type \hbox{\lstinline/'a/} with an additional
+constraint that it includes at least the cases
+%
+\hbox{\lstinline/`Integer of int | `Real of float/}.  For example, it also
+includes the value \hbox{\lstinline/`Zero/}.
+
+\labelsubsection{closed-union-types}{Closed union types}
+
+The notation \hbox{\lstinline/[> $\cdots$ ]/} (with a \hbox{\lstinline/>/}) is meant
+to suggest that the actual type includes the specified cases, and
+more.  In OCaml, one can also write a closed type as
+%
+\hbox{\lstinline/[< $\cdots$]/} to mean that the type includes the specified
+values \emph{and no more}.
+
+\begin{ocaml}
+# let string_of_number = function
+     `Integer i -> string_of_int i
+   | `Real x -> string_of_float x;;
+@
+\begin{topoutput}
+val string_of_number : [< `Integer of int | `Real of float ] -> string = <fun>
+\end{topoutput}
+@
+# string_of_number `Zero;;
+@
+\begin{topoutput}
+Characters 17-22:
+  string_of_number `Zero;;
+                   ^^^^^
+This expression has type [> `Zero ] but is here used with type
+  [< `Integer of int | `Real of float ]
+The second variant type does not allow tag(s) `Zero
+\end{topoutput}
+@
+\end{ocaml}
+
+\labelsection{common-unions}{Some common built-in unions}
+
+A few of the types we have already seen are unions.  The built-in
+Boolean type \hbox{\lstinline/bool/} is defined as a union.  Normally, the
+constructor names in a union must be capitalized.  OCaml defines an
+exception in this case by treating \hbox{\lstinline/true/} and \hbox{\lstinline/false/}
+as capitalized identifiers.
+
+\begin{ocaml}
+# type bool =
+     true
+   | false
+@
+\begin{topoutput}
+type bool = | true | false
+\end{topoutput}
+@
+\end{ocaml}
+%
+The list type is similar, having the following effective definition.
+However, the \hbox{\lstinline/'a list/} type is primitive in this case because
+\hbox{\lstinline/[]/} is not considered a legal constructor name.
+
+\begin{ocaml}
+type 'a list =
+   []
+ | :: of 'a * 'a list;;
+\end{ocaml}
+%
+Although it is periodically requested on the OCaml mailing list, OCaml
+does not have a \lstinline/NIL/ (or \lstinline/NULL/) value that can be assigned to a variable of
+any type.  Instead, the built-in type \hbox{\lstinline/'a option/} is used.
+
+\begin{ocaml}
+# type 'a option =
+     None
+   | Some of 'a;;
+@
+\begin{topoutput}
+type 'a option = | None | Some of 'a
+\end{topoutput}
+@
+\end{ocaml}
+%
+The \hbox{\lstinline/None/} case is intended to represent a \lstinline/NIL/ value, while the
+\hbox{\lstinline/Some/} case handles non-\lstinline/NIL/ values.

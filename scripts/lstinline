@@ -1,0 +1,7 @@
+#!/usr/bin/env osh
+
+FILES[] = $(file $*)
+
+foreach(x, $(FILES))
+   cp $x $x.bak
+   sed -f scripts/lstinline.sed < $x.bak > $x

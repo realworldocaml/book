@@ -1,0 +1,510 @@
+%
+%
+%
+\exercises
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reference cells.
+%
+\begin{exercise}{ref1}
+What is the value of the following expressions?
+
+\begin{enumerate}
+\item \lstinline|let x = ref 1 in let y = x in y := 2; !x|
+
+\begin{answer}\ifanswers
+The variables \hbox{\lstinline/x/} and \hbox{\lstinline/y/} refer to the same reference cell, so the result is \hbox{\lstinline/2/}.
+\fi\end{answer}
+
+\item \lstinline|let x = ref 1 in let y = ref 1 in y := 2|
+
+\begin{answer}\ifanswers
+The variables \hbox{\lstinline/x/} and \hbox{\lstinline/y/} refer to different reference cells, so the result is \hbox{\lstinline/1/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllisting}
+let x = ref 1 in
+let y = ref x in
+!y := 2;
+!x
+\end{ocamllisting}
+
+\begin{answer}\ifanswers
+Since \hbox{\lstinline/y/} refers to \hbox{\lstinline/x/}, assigning to \hbox{\lstinline/!y/} is the same as assigning to \hbox{\lstinline/x/}.
+The final value \hbox{\lstinline/!x/} is \hbox{\lstinline/2/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllisting}
+let fst (x, _) = x in
+let snd (_, x) = x in
+let y = ref 1 in
+let x = (y, y) in
+fst x := 2;
+!(snd x)
+\end{ocamllisting}
+
+\begin{answer}\ifanswers
+Both elements of the pair \hbox{\lstinline/(y, y)/} refer to the same cell, so the assignment \hbox{\lstinline/fst x := 2/}
+effects both parts; the value \hbox{\lstinline/!(snd x)/} is \hbox{\lstinline/2/}.
+\fi\end{answer}
+
+\item
+
+\begin{ocamllisting}
+let x = ref 0 in
+let y = ref [5; 7; 2; 6] in
+while !y <> [] do
+   x := !x + 1;
+   y := List.tl !y
+done;
+!x
+\end{ocamllisting}
+
+\begin{answer}\ifanswers
+The variable \hbox{\lstinline/x/} is incremented for each element of the list \hbox{\lstinline/y/}, so the final
+value \hbox{\lstinline/!x/} is \hbox{\lstinline/4/}.
+\fi\end{answer}
+
+\end{enumerate}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Lazy values
+%
+\begin{exercise}{lazy}
+\label{keyword:lazy}
+\index{lazy value}
+A \emph{lazy} value is a computation that is deferred until it is needed; we say that it is
+\emph{forced}.  A forced value is memoized, so that subsequent forcings do not reevaluate the
+computation.  The OCaml standard library already provides an implementation of lazy values in the
+\hbox{\lstinline/Lazy/} module, but we can also construct them ourselves using reference cells and
+functions.
+
+\begin{ocaml}
+type 'a deferred
+val defer : (unit -> 'a) -> 'a deferred
+val force : 'a deferred -> 'a
+\end{ocaml}
+%
+Implement the type \hbox{\lstinline/'a deferred/} and the functions \hbox{\lstinline/defer/} and \hbox{\lstinline/force/}.
+
+\begin{answer}\ifanswers
+The important part is that the forcing is memoized.  We can use a reference cell to save to computation.
+
+\begin{ocaml}
+type 'a deferred_value =
+   Deferred of (unit -> 'a)
+ | Forced of 'a
+
+type 'a deferred = 'a deferred_value ref
+
+let defer f = ref (Deferred f)
+
+let force cell =
+   match !cell with
+      Deferred f ->
+         let result = f () in
+         cell := Forced result;
+         result
+    | Forced result ->
+         result
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Lazy lists
+%
+\begin{exercise}{lazy-list}
+\index{lazy list}
+A lazy list is a list where the tail of the list is a deferred computation (a lazy list is also
+called a \emph{stream}).  The type can be defined as follows, where the type \hbox{\lstinline/deferred/} is
+defined as in Exercise~\ref{exercise:lazy}.
+
+\begin{ocaml}
+type 'a lazy_list =
+   Nil
+ | Cons of 'a * 'a lazy_list
+ | LazyCons of 'a * 'a lazy_list deferred
+\end{ocaml}
+%
+Define the following functions on lazy lists.
+
+\begin{ocamlx}
+val nil       : 'a lazy_list
+val cons      : 'a -> 'a lazy_list -> 'a lazy_list
+val lazy_cons : 'a -> (unit -> 'a lazy_list) -> 'a lazy_list
+val is_nil    : 'a lazy_list -> bool
+val head      : 'a lazy_list -> 'a
+val tail      : 'a lazy_list -> 'a lazy_list
+val (@@)      : 'a lazy_list -> 'a lazy_list -> 'a lazy_list
+\end{ocamlx}
+%
+The expression \hbox{\lstinline/$l_1$ @@ $l_2$/} appends two lazy lists in constant time.
+
+\begin{answer}\ifanswers
+The implementations are as follows.
+
+\begin{ocamlx}
+let nil = Nil
+let cons h t = Cons (h, t)
+let lazy_cons h f = LazyCons (h, defer f)
+
+let is_nil = function
+   Nil -> true
+ | Cons _ | LazyCons _ -> false
+
+let head = function
+   Nil -> raise (Invalid_argument "head")
+ | Cons (h, _)
+ | LazyCons (h, _) -> h
+
+let tail = function
+   Nil -> raise (Invalid_argument "tail")
+ | Cons (_, t) -> t
+ | LazyCons (_, f) -> force f
+
+let rec (@@) l1 l2 =
+   match l1, l2 with
+      Nil, l | l, Nil -> l
+    | _ -> lazy_cons (head l1) (fun () -> tail l1 @@ l2)
+\end{ocamlx}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Queues.
+%
+\begin{exercise}{fun-queue}
+\index{queue!functional}
+The FIFO queues described in Section~\ref{section:queues} are imperative; whenever a value is added to
+or taken from the queue, the queue is modified by side-effect.  Implement a \emph{persistent} queue
+with the following operations.
+
+\begin{ocaml}
+val empty : 'a queue
+val add   : 'a queue -> 'a -> 'a queue
+val take  : 'a queue -> 'a * 'a queue
+\end{ocaml}
+%
+The expression \hbox{\lstinline/add queue e/} produces a new queue, without affecting the contents of the
+original queue \hbox{\lstinline/queue/}.  The expression \hbox{\lstinline/take queue/} returns an element of the
+queue \hbox{\lstinline/queue/} and a new queue; again, the contents of the original queue \hbox{\lstinline/queue/}
+are unaffected.
+
+$\star$ Can you implement the queue so that any sequence of $n$ \hbox{\lstinline/add/} and \hbox{\lstinline/take/}
+operations, in any order, take $O(n)$ time?  Hint: consider using lazy lists
+(Exercise~\ref{exercise:lazy-list}) to represent the queue, shifting the queue whenever the
+$\ms{front}$ is longer than the $\ms{back}$.  See Okasaki~\cite{Oka95}.
+
+\begin{answer}\ifanswers
+The queue could simply be represented as a list, but then one of the operations \hbox{\lstinline/add/} or
+\hbox{\lstinline/take/} would take time $O(m)$ where $m$ is the length of the queue.
+
+The two list \hbox{\lstinline/($\ms{front}$, $\ms{back}$)/} representation is a little better.  To make the
+data structure persistent, the functions \hbox{\lstinline/add/} and \hbox{\lstinline/take/} produce new queues.
+
+\begin{ocamlnum}
+type 'a queue = ('a list * 'a list) ref
+
+let empty = ref ([], [])
+
+let add queue x =
+   let (front, back) = !queue in
+   ref (x :: front, back)
+
+let rec take queue =
+   match !queue with
+      [], [] -> raise (Invalid_argument "queue")
+    | front, x :: back ->
+        x, ref (front, back)
+    | front, [] ->
+        queue := ([], List.rev front);
+        take queue
+\end{ocamlnum}
+%
+The side effect on line 15 does not affect persistence because the queue membership is preserved.
+However, efficiency is still not optimal.  Consider a sequence of $m$ \hbox{\lstinline/add/}s, followed by $m$ \hbox{\lstinline/take/}s.
+
+\begin{ocaml}
+let $q_1$ = add empty 1
+let $q_2$ = add $q_1$ 2
+...
+let $q_m$ = add $q_{m - 1}$ $m$
+let $x_m$, _ = take $q_m$
+let $x_{m - 1}$, _ = take $q_{m - 1}$
+...
+let $x_1$, _ = take $q_1$
+\end{ocaml}
+%
+Each operation \hbox{\lstinline/take $q_i$/} shifts $i$ elements of the queue, so the total time is $O(m^2)$.
+
+Okasaki gives an efficient implementation, summarized below in OCaml.  A function
+\hbox{\lstinline/maybe_shift/} is used to shift the queue whenever the front becomes longer than the back.
+The list lengths are needed, so the queue is a 4-tuple
+%
+\hbox{\lstinline/($\ms{front}$, $|\ms{front}|$, $\ms{back}$, $|\ms{back}|$)/}.
+
+\begin{ocaml}
+type 'a queue = 'a lazy_list * int * 'a lazy_list * int
+
+let empty = (Nil, 0, Nil, 0)
+
+let insert (front, flen, back, blen) x =
+   maybe_shift (cons x front) (flen + 1) back blen
+
+let remove (front, flen, back, blen) =
+   head back, maybe_shift front flen (tail back) (blen - 1)
+
+let maybe_shift front flen back blen =
+   if flen <= blen then
+      (front, flen, back, blen)
+   else
+      (Nil, 0, shift front back [], flen + blen)
+
+let shift front back l =
+   if is_nil back then
+      cons (head front) l
+   else
+      lazy_cons (head back) (fun () ->
+         shift (tail front) (tail back) (cons (head front) l))
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Memoization
+%
+\begin{exercise}{memoization}
+\index{memoization!of recursive functions}
+One problem with the memoization function \hbox{\lstinline/memo : ('a -> 'b) -> ('a -> 'b)/} in
+Section~\ref{section:memoization} is that it ignores recursive definitions.  For example,
+the expression \hbox{\lstinline/memo fib $i$/} still takes exponential time in $i$ to compute.
+
+To solve this, we'll need to modify the recursive definition for \hbox{\lstinline/fib/} and perform an
+explicit memoization.  Implement the following types and functions, where
+%
+\hbox{\lstinline/fib = memo_fib (create_memo ())/}.  How fast is the Fibonacci function now?
+
+\begin{ocaml}
+type ('a, 'b) memo
+val create_memo : unit -> ('a, 'b) memo
+val memo_find   : ('a, 'b) memo -> 'a -> 'b option
+val memo_add    : ('a, 'b) memo -> 'a -> 'b -> unit
+val memo_fib    : (int, int) memo -> int -> int
+
+let fib = memo_fib (create_memo ())
+\end{ocaml}
+
+\begin{answer}\ifanswers
+The main task here is to separate the parts of the memoization.  We'll use a simple association list
+for the memo table.  The expression \hbox{\lstinline/fib $n$/} is computed in quadratic time $O(n^2)$.  A
+more efficient implementation of the dictionary would reduct this to no more than $O(n \log n)$
+time.
+
+\begin{ocaml}
+type ('a, 'b) memo = ('a * 'b) list
+
+let create_memo () = []
+
+let rec memo_find table x =
+   match table with
+      (x', y) :: _ when x' = x -> Some y
+    | _ :: table -> memo_find table x
+    | [] -> None
+
+let memo_fib table i =
+   match memo_find table i with
+      Some j -> j
+    | None -> 
+        match i with
+           0 | 1 -> i
+         | _ ->
+            let j = memo_fib table (i - 1) + memo_fib table (i - 2) in
+            memo_add table i j;
+            j
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Directed graphs
+%
+\begin{exercise}{dfs}
+\index{depth-first search}
+One way to represent a directed graph is with an adjacency list stored directly in each vertex.
+Each vertex has a label and a list of out-edges; we also include a ``mark'' flag and an integer to
+be used by a depth-first-search.
+
+\begin{ocaml}
+type 'a vertex =
+   (* Vertex (label, out-edges, dfs-mark, dfs-index) *)
+   Vertex of 'a * 'a vertex list ref * bool ref * int option ref
+
+type 'a directed_graph = 'a vertex list
+\end{ocaml}
+%
+Depth-first search and breadth-first search are two highly useful graph algorithms.
+A depth-first search (DFS) traverses the graph, assigning to each vertex a DFS index and
+marking a vertex $v$ when all out-edges of $v$ have been explored.  The DFS search is performed as follows.
+
+Choose an unmarked vertex $u$ in the graph, push out-edges $(u, v)$ onto a stack.  Assign $u$ DFS index 0, set
+the DFS counter $c$ to 1, and then repeat the following until the stack is empty.
+
+\begin{enumerate}
+\item Pop an edge $(u, v)$ from the stack, and classify it according to the following
+table.
+
+\begin{center}
+\begin{tabular}{l|l}
+Condition & Edge type for $(u, v)$\\
+\hline
+$v$ does not have a DFS index & tree edge\\
+$\ms{DFS}(u) < \ms{DFS}(v)$ & forward edge\\
+$\ms{DFS}(u) > \ms{DFS}(v)$ and $v$ not marked & back edge\\
+$\ms{DFS}(u) > \ms{DFS}(v)$ and $v$ marked & cross edge
+\end{tabular}
+\end{center}
+%
+\item
+If $(u, v)$ is a tree edge, assign $v$ the current DFS index $c$, increment $c$, and push all edges
+$(v, w)$ onto the stack.
+\item
+When all edges $(u, v)$ have been considered, mark the vertex $u$.
+\end{enumerate}
+%
+Repeat until all vertices have been marked.
+A graph is \emph{cyclic} iff the DFS search found any back-edges.
+
+Implement a DFS search.  You can assume that all vertices are initially unmarked and their DFS index
+is \hbox{\lstinline/None/}.
+
+\begin{answer}\ifanswers
+We'll keep a flag \hbox{\lstinline/cyclic/} to indicate whether the graph is cyclic.  First, all the mark
+bits and DFS counters are cleared, then the function \hbox{\lstinline/search/} is called to perform the DFS
+search.  It isn't necessary to keep an explicit stack of edges---in effect, the OCaml runtime stack
+is serving as the edge stack.
+
+\begin{ocaml}
+let rec dfs graph =
+   let cyclic = ref false in
+   let dfs_counter = ref 0 in
+
+   (* The main DFS search *)
+   let rec search (Vertex (_, u_edges, u_mark, u_index)) =
+      if not !u_mark then begin
+         let c = !dfs_counter in
+         u_index := Some c;
+         dfs_counter := c + 1;
+         List.iter (fun (Vertex (_, _, v_mark, v_index) as v) ->
+            match !v_index with
+               Some index ->
+                  if index < c && not !v_mark then
+                     cyclic := true
+             | None ->
+                  search v) !u_edges;
+         u_mark := true
+      end
+   in
+
+   (* Reset the graph state *)
+   List.iter (fun (Vertex (_, _, mark, index)) ->
+      mark := false;
+      index := None) graph;
+
+   (* DFS over all the vertices in the graph *)
+   List.iter search graph
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copying
+%
+\begin{exercise}{graph-map}
+One issue with graph data structures is that some familiar operations are hard to implement.  For
+example, consider the following representation (similar to the previous exercise) for a directed graph.
+
+\begin{ocaml}
+(* Vertex (label, out-edges) *)
+type 'a vertex = Vertex of 'a * 'a vertex list ref
+type 'a directed_graph = 'a vertex list
+\end{ocaml}
+%
+Suppose we want to define a polymorphic map function on graphs.
+
+\begin{ocaml}
+val graph_map : ('a -> 'b) -> 'a directed_graph -> 'b directed_graph
+\end{ocaml}
+%
+Given an arbitrary function \hbox{\lstinline/f : 'a -> 'b/} and a graph \hbox{\lstinline/g/}, the expression
+\hbox{\lstinline/graph_map f g/} should produce a graph isomorphic to \hbox{\lstinline/g/}, but where
+\hbox{\lstinline/f/} has been applied to each label.  Is the function \hbox{\lstinline/graph_map/} definable?  If
+so, describe the implementation.  If not, explain why not.  Is there another implementation of
+graphs where \hbox{\lstinline/graph_map/} can be implemented efficiently?
+
+\begin{answer}\ifanswers
+The function \hbox{\lstinline/graph_map/} is definable, but it is difficult to implement it efficiently.
+The central issue is that, in order to preserve the structure of the graph, the function
+\hbox{\lstinline/graph_map/} must be memoized using physical equality.  The following code gives a simple,
+but inefficient, implementation.
+
+\begin{ocamlnum}
+let graph_map f graph =
+   let memo = ref [] in
+   let rec map u = function
+      (u', v) :: table when u' == u -> v
+    | _ :: table -> map u table
+    | [] ->
+       let (label, out_edges) = u in
+       let new_out_edges = ref [] in
+       let new_u = (f label, new_out_edges) in
+       memo := (u, new_u) :: !memo;
+       new_out_edges := map_list !out_edges
+   and map_list edges =
+      List.map (fun v -> map v !memo) edges
+   in
+   map_list graph
+\end{ocamlnum}
+%
+The function \hbox{\lstinline/map/} searches through the memo table in linear order, looking for an entry
+that matches with physical equality (\hbox{\lstinline/==/}).  If so, the previous result is returned.
+Otherwise, a new vertex is created and added to the memo table.  Note that the new vertex
+\hbox{\lstinline/new_u/} is added before following the out-edges recursively, preventing infinite looping
+on cyclic graphs.
+
+Given a graph with $n$ vertices and $m$ edges, the function \hbox{\lstinline/map/} examines $n$ vertices worst case, so the total time complexity is of \hbox{\lstinline/graph_map/} is $O(nm)$.
+
+An alternative representation that would support an efficient map is to give vertices unique names,
+and refer to them by name rather than referring to them directly.  The penalty is that edge
+traversal takes time $O(\log n)$ rather than constant time because of the dictionary lookup.
+
+\begin{ocaml}
+(* A name for a vertex *)
+type name = int
+
+(* A vertex is (label, out-edges) *)
+type 'a vertex = 'a * name list ref
+
+(* A graph is (vertices, vertex dictionary) *)
+type 'a graph = name list * (name, 'a vertex) dictionary
+
+let graph_map f (vertices, dict) =
+   vertices, dictionary_map f dict
+\end{ocaml}
+\fi\end{answer}
+\end{exercise}
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:
