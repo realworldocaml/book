@@ -1,10 +1,10 @@
-# Title: Real World OCaml
+# Proposal for Real World OCaml
 
 [yminsky: can we really call it “Real World OCaml”?  It would be a
 good name, I think.  Another name that I was thinking of using was
 “Core OCaml”, which has the pun going for it.]
 
-# Outline
+## Outline
 
 > Chapter titles and a paragraph on each chapter are great.
 
@@ -21,7 +21,7 @@ printed copy looks like).  Installation: common mechanisms to install
 OCaml on Linux, Windows and MacOS X, as well as editor setup (Emacs,
 Vim) and the interactive REPL.
 
-## Part I : Language and Libraries
+### Part I : Language and Libraries
 
 1. **Expressions, Variables and Functions**: introduce the basic OCaml
    types and syntax via expressions. Then discuss let bindings and
@@ -68,7 +68,7 @@ Vim) and the interactive REPL.
    classes. this is a beefy chapter, so I wonder about space
    constraints.
 
-## Part II: Tools and Internals
+### Part II: Tools and Internals
 
 This section is now about the internals of OCaml and helper tools:
 
@@ -81,7 +81,7 @@ This section is now about the internals of OCaml and helper tools:
    here).
 1. **Ocamlbuild**
 
-# About
+## About
 
 > What the book is about, who needs to read it, and why. This should
 > be a couple of paragraphs.
@@ -101,7 +101,7 @@ OCaml blends imperative, functional and object-oriented programming
 styles in one language, making it a pragmatic and fun choice for
 writing fast, succinct and readable systems code.
 
-# Competition
+## Competition
 
 > Competing books: what are they, and why is this better? This should
 > be rather easy.
@@ -110,6 +110,6 @@ writing fast, succinct and readable systems code.
 - Developing Application with Objective Caml
 - [OCaml for Scientists](http://www.ffconsultancy.com/products/ocaml_for_scientists/index.html)
 
-# Schedule
+## Schedule
 
 > Schedule: Doesn't need to be that fine grained, and I'll add some slush factor to it.

@@ -1,3 +1,5 @@
+# Prologue
+
 ## Why OCaml?
 
 Programming languages matter.

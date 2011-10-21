@@ -27,8 +27,8 @@ $ rlwrap ocaml
 - : int = 7
 # 8 / 3;;
 - : int = 2
-# 3.5 ** 6.;;
-- : float = 1838.265625
+# 3.5 +. 6.;;
+- : float = 9.5
 # sqrt 9.;;
 - : float = 3.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,6 +44,12 @@ some differences worth discussing:
 - Function application in OCaml is syntactically different than you
   might expect from most other languages.  In particular, parens and
   commas are not needed to designate the arguments to a functions.
+- OCaml separates strictly between `float`, the type for floating
+  point numbers and `int`.  They have different literals (_e.g._, `6.`
+  instead of `6`) and different infix operators (_e.g._, `+.` instead
+  of `+`).  This can be a bit of a nuisance, but it has its benefits,
+  since it makes it prevents some classes of bugs that arise from
+  confusion between the semantics of `int` and `float`.
 
 Another thing to be aware of is that infix operators like `+` can also
 be used in ordinary prefix style by wrapping the operator in parens.
@@ -181,14 +187,13 @@ function is called _parametric polymorphism_ in OCaml, and is very
 similar to generics in C# and Java, except that generics are far more
 natural and lightweight in OCaml.
 
-## Tuples, Lists and Pattern-matching
+## Lists, Tuples and Pattern-matching
 
 So far, we've only encountered a handful of types: `int`, `float`,
 `string`, along with function types.  But in order to see more
 meaningful examples, we need ways of building up compound datatypes.
 One fundamental example is that of a tuple.  Consider the following
-simple function that takes two integers and computes the quotient and
-remainder as a tuple.
+simple function that 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let quot_and_rem x y =
@@ -196,8 +201,7 @@ remainder as a tuple.
 val quot_and_rem : int -> int -> int * int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The return type, `int * int`, representsx the set of 2-tuples of
+The return type, `int * int`, represents the set of 2-tuples of
 `int`s.  (For the mathematically inclined, the `*` character is used
 because the space of all 2-tuples is effectively the Cartesian product
 of the constituent types)
-
