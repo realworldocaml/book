@@ -189,19 +189,45 @@ natural and lightweight in OCaml.
 
 ## Lists, Tuples and Pattern-matching
 
-So far, we've only encountered a handful of types: `int`, `float`,
-`string`, along with function types.  But in order to see more
-meaningful examples, we need ways of building up compound datatypes.
-One fundamental example is that of a tuple.  Consider the following
-simple function that 
+So far, we've encountered a handful of basic types like `int`, `float`
+and `string`.  We've also encountered function types, where function
+types like `int -> string` are built up out of other types.
+
+One thing we haven't yet talked about is datastructures.  The simplest
+datastructure in OCaml is the tuple.  Tuples are easy to create:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# let quot_and_rem x y =
-     (x / y, x mod y) ;;
-val quot_and_rem : int -> int -> int * int = <fun>
+# let tup = (3,"three")
+val tup : int * string = (3, "three")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The return type, `int * int`, represents the set of 2-tuples of
-`int`s.  (For the mathematically inclined, the `*` character is used
-because the space of all 2-tuples is effectively the Cartesian product
-of the constituent types)
+The return type, `int * string` corresponds the set of pairs of `int`s
+and `string`s.  (For the mathematically inclined, the `*` character is
+used because the space of all 2-tuples of type `t * s` effectively
+corresponds to the Cartesian product of `t` and `s`.)
+
+You can extract the components of tuple using OCaml's pattern-matching
+syntax Here's a function for computing the square difference between
+two points on the plane, each point represented as a pair floats.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let distance p1 p2 =
+    let (x1,y1) = p1 in
+    let (x2,y2) = p2 in
+    let sqr x = x *. x in
+    sqrt (sqr (x1 -. x2) +. sqr (y1 -. y2))
+;;
+val distance : float * float -> float * float -> float = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pattern matching in OCaml can be done in lots of different places.
+Indeed, we can shorten the code above my doing the pattern matching on
+the arguments to the function directly:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let distance (x1,y1) (x2,y2) =
+    let sqr x = x *. x in
+    sqrt (sqr (x1 -. x2) +. sqr (y1 -. y2))
+;;
+val distance : float * float -> float * float -> float = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

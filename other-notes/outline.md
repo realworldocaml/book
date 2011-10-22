@@ -23,47 +23,80 @@ Vim) and the interactive REPL.
 
 ### Part I : Language and Libraries
 
-1. **Expressions, Variables and Functions**: introduce the basic OCaml
-   types and syntax via expressions. Then discuss let bindings and
-   functions, along with a demonstration of type inference in the
-   REPL. Finally, show higher-order functions and labelled/optional
-   arguments. [yminsky: I’ve been playing around with text for just
-   such a section.  One thing to notice is that it’s pretty limiting
-   to talk about functions, expressions and variables without even a
-   list type.  You can get a few pages in that way, but at some point,
-   you need something more interesting to work with.  I wonder if we
-   could have an “OCaml walkthrough” section that takes you up through
-   a bunch of the basics, including simple versions of all the
-   material in 2-4, as a kind of broad overview, and then we could go
-   into more detail in something like the order you suggest.]
-1. **Pattern Matching**: the function and match operators, along with
-   examples of exhaustiveness checking.
-1. **Tuples, Lists, and Polymorphism**: show how to build up sets of
-   values using tuples, and lists, as well as how to write generic
-   functions that operate over them using the built-in operators.
-1. **Algebraic Data Types**: define how unions can be defined with the
-   example of a binary tree and an R/B tree. Then show how polymorphic
-   variants can be used for even more open types.
-1. **Mutable Data Structures**: OCaml code can be purely functional, or
-   use side-effects and global variables. Introduce references and
-   mutable structures such as the Queue built using them. Then discuss
-   records, arrays, strings, and the built-in hashtable.
-1. **Exceptions**: show how exceptions are defined and caught. XXX this
-   interacts badly with Async/Lwt, so need to consider how those are
-   introduced.
-1. **I/O**: currently uses channels, but should we talk about this via
-   Core/Async only? [yminsky: my inclination is to think that async
-   should be presented when we get to network programming, but that
-   ordinary file I/O at least should be covered without Async.  That
-   said, there should be a chapter on Async.]
-1. **Files and Compilation Units**: how to invoke the compiler and the
-   role ml/mli files. This should possibly go earlier.
-1. **Module System**: basic modules, example of Map. Then functors,
-   first-class modules and recursive modules, along with uses for them
-   (e.g. a plugin system).
-1. **Objects**: the structurally typed object system. Two good examples of
-   object usage are lablgtk and js_of_ocaml where they interop
-   nicely. Perhaps do a simple windowing system using lablgtk here?
+1. **Introduction to OCaml**: A guided tour through the OCaml
+   language, all done using the OCaml toplevel.  We'd cover all the
+   basic language features in brief, including:
+      - basic arithmetic expressions
+      - defining variables
+      - functions, including simple higher-order functions
+      - basic type inference
+      - basic pattern matching
+      - lists and tuples
+      - records and variants
+1. **Expressions, Variables and Functions**: 
+      - Discuss the idea that OCaml is an expression-oriented
+        language.  Explain the basic syntactic constructs and how they
+        work.
+      - Discuss how let binding and variable definitions work.
+        Include
+      - Discuss function definitions in more detail, explaining what
+        labelled and optional arguments are and when you should use
+        them, anonymous functions, and recursive functions.
+1. **Tuples and Lists**: show how to build up sets of values using
+   tuples, and lists, as well as how to write generic functions that
+   operate over them using the built-in operators.
+1. **Algebraic Data Types and Pattern Matching**:
+      - Explain the interplay between record types (a bunch of things
+        together) and variant types (a bunch of different
+        possibilites)
+      - define how unions can be defined with the example of a binary
+        tree and an R/B tree.  Show how pattern matching can be used
+        to work with algebraic data types. [yminsky: I'm a little
+        concerned baout using binary trees as the motivating example.
+        Variants are far more useful than the example suggests.  Maybe
+        a more prosaic example is in order.]
+      - Explain the option list types in terms of variants types.
+      - Introduce polymorphic variants, show how they can be used to
+        give you more flexibility (and explain the downsides)
+1. **Mutable Programming**: 
+      - OCaml code can be purely functional, or use side-effects and
+        global variables. 
+      - Introduce references and show how to use.  Explain how to
+        write imperative code, including for and while loops and
+        sequencing operations with semi-colons.  
+      - Discuss the various mutable datastructures including records,
+        arrays, strings, and hashtables.
+1. **Exceptions**: 
+      - Explain the exceptions system, show how exceptions are defined
+        and caught.
+      - Explain the downsides of exceptions, and how and when to use
+        them.
+1. **THe Module System**:
+      - Basic modules and interfaces (Map as an example?)
+      - Tips for designing good module interfaces.
+      - Effective use of modules, including interface components (like
+        Comparable, Hashable, Sexpable in Core) and functors
+      - First-class modules, using a plug-in system as the motivating
+        example.
+      - recursive modules [yminsky: Do we want to cover this?  I've
+        personally never used recursive modules.]
+1. **I/O**:
+      - Basic input and output.  Printf, and in/out channels.
+      - reading and writing values using s-expressions, bin-prot and
+        marshal.
+1. **Concurrent Programming**
+      - Covers LWT or Async.  We still need to figure out which system
+        to cover.  I'm pretty torn on this one.
+1. **Files and Compilation Units**: 
+      - How to organize a small realistic project, including
+      - the role of ml/mli files
+      - direct invocation of the compiler
+      - setting up a simple build with ocamlbuild.
+      - how to include packages using ocamlfind
+1. **Objects**: the structurally typed object system. Two good
+   examples of object usage are lablgtk and js_of_ocaml where they
+   interop nicely. Perhaps do a simple windowing system using lablgtk
+   here?
 1. **Classes and Inheritance**: multiple inheritance and polymorphic
    classes. this is a beefy chapter, so I wonder about space
    constraints.
@@ -112,4 +145,5 @@ writing fast, succinct and readable systems code.
 
 ## Schedule
 
-> Schedule: Doesn't need to be that fine grained, and I'll add some slush factor to it.
+> Schedule: Doesn't need to be that fine grained, and I'll add some
+> slush factor to it.
