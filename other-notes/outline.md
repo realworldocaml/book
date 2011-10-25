@@ -1,8 +1,9 @@
 # Proposal for Real World OCaml
 
 [yminsky: can we really call it “Real World OCaml”?  It would be a
-good name, I think.  Another name that I was thinking of using was
-“Core OCaml”, which has the pun going for it.]
+good name, but I don't know whose permission we'd need for it.
+Another name that I was thinking of using was “Core OCaml”, which has
+the pun going for it.]
 
 ## Outline
 
@@ -28,7 +29,8 @@ Vim) and the interactive REPL.
    basic language features in brief, including:
       - basic arithmetic expressions
       - defining variables
-      - functions, including simple higher-order functions
+      - definint functions
+      - simple higher-order functions
       - basic type inference
       - basic pattern matching
       - lists and tuples
@@ -42,13 +44,14 @@ Vim) and the interactive REPL.
       - Discuss function definitions in more detail, explaining what
         labelled and optional arguments are and when you should use
         them, anonymous functions, and recursive functions.
-1. **Tuples and Lists**: show how to build up sets of values using
-   tuples, and lists, as well as how to write generic functions that
-   operate over them using the built-in operators.
+1. **Tuples, Lists and Polymorphism**:
+      - Explain polymorphism in more detail, both in terms of
+        functions and datatypes.
+      - This section will also give us an opportunity to explain lists
+        in more detail, including the special syntax for Cons.
+      - The value restriction
 1. **Algebraic Data Types and Pattern Matching**:
-      - Explain the interplay between record types (a bunch of things
-        together) and variant types (a bunch of different
-        possibilites)
+      - Explain the interplay between product types and sum types.
       - define how unions can be defined with the example of a binary
         tree and an R/B tree.  Show how pattern matching can be used
         to work with algebraic data types. [yminsky: I'm a little
@@ -63,7 +66,10 @@ Vim) and the interactive REPL.
         global variables. 
       - Introduce references and show how to use.  Explain how to
         write imperative code, including for and while loops and
-        sequencing operations with semi-colons.  
+        sequencing operations with semi-colons.
+      - Discuss records in more detail, including an explanation of
+        mutable record fields.  Mention that references are just an
+        instance of this.
       - Discuss the various mutable datastructures including records,
         arrays, strings, and hashtables.
 1. **Exceptions**: 
@@ -71,28 +77,31 @@ Vim) and the interactive REPL.
         and caught.
       - Explain the downsides of exceptions, and how and when to use
         them.
-1. **THe Module System**:
-      - Basic modules and interfaces (Map as an example?)
+1. **Module Basics**:
+      - A basic introduction to modules, how they show up in the file
+        system, how and why you should use interfaces.
       - Tips for designing good module interfaces.
       - Effective use of modules, including interface components (like
-        Comparable, Hashable, Sexpable in Core) and functors
+        Comparable, Hashable, Sexpable in Core)
+1. **Advanced Modules**:
+      - Functors
       - First-class modules, using a plug-in system as the motivating
         example.
       - recursive modules [yminsky: Do we want to cover this?  I've
         personally never used recursive modules.]
+1. **Files and Compilation Units**: [yminsky: maybe this section
+   should be unified with "Module Basics" section somehow?]
+      - How to organize a small realistic project, including
+      - the role of ml/mli files
+      - direct invocation of the compiler
+      - setting up a simple build with ocamlbuild.
 1. **I/O**:
       - Basic input and output.  Printf, and in/out channels.
       - reading and writing values using s-expressions, bin-prot and
         marshal.
 1. **Concurrent Programming**
-      - Covers LWT or Async.  We still need to figure out which system
+      - Covers Lwt or Async.  We still need to figure out which system
         to cover.  I'm pretty torn on this one.
-1. **Files and Compilation Units**: 
-      - How to organize a small realistic project, including
-      - the role of ml/mli files
-      - direct invocation of the compiler
-      - setting up a simple build with ocamlbuild.
-      - how to include packages using ocamlfind
 1. **Objects**: the structurally typed object system. Two good
    examples of object usage are lablgtk and js_of_ocaml where they
    interop nicely. Perhaps do a simple windowing system using lablgtk
@@ -112,7 +121,11 @@ This section is now about the internals of OCaml and helper tools:
 1. **Camlp4**: a few examples of camlp4 tools and
    quotations/antiquotations (the XML parser might be quite a good one
    here).
-1. **Ocamlbuild**
+1. **Ocamlbuild**:
+   [yminsky: I wonder if this is something we should cover to some
+   degree early on.  It would be nice to get people to set up a
+   trivial ocamlbuild setup in the very beginning, to do their
+   building with.]
 
 ## About
 
