@@ -187,7 +187,7 @@ could be any type, it has to be the same type in all of the different
 places it appears.  This kind of genericity is called _parametric
 polymorphism_, and is very similar to generics in C# and Java.
 
-## Lists, Tuples and Pattern-matching
+## Tuples, Options, Lists and Pattern-matching
 
 ### Tuples
 
@@ -237,16 +237,87 @@ This is just a first taste of pattern matching.  As you'll see,
 pattern matching shows up in many contexts, and turns out to be a
 surprisingly powerful tool.
 
+### Options
+
+Another very common datastructure in OCaml is the `option`.  An
+`option` is used to express that a value that might or might not be
+present.  For example,
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let divide x y =
+    if y = 0 then None else Some (x/y)
+val divide : int -> int -> int option = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, `Some` and `None` are explicit tags that are used to distinguish
+whether there is a substantive value.  As we'll see in Chapter {???},
+this is not a built-in language construct, and is instead just an
+example of the more general concept of a variant type.
+
+But so far, we've only shown how to construct an option, not how to
+get a value out of an option.  
+
+[examples: mandelbrot set?]
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let rec repeat_until_done f x =
+    match f x with
+    | None -> x
+    | Some x' -> repeat_until_done f x'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ### Lists
 
 Tuples let you combine a fixed number of items, potentially of
 different types, together in one datastructure.  Lists let you hold
-any number of items of the same type in one datastructure.  For example:
+any number of items of the same type in one datastructure.  For
+example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let languages = ["Perl";"OCaml";"French";"C"];;
 val languages : string list = ["Perl"; "OCaml"; "French"; "C"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now we see how to construct a list, but how do we get access to the
+elements of a list?  As with tuples, we can do this by
+pattern-matching.  Here's a function which returns the first element
+of a list, or zero, if the list is empty:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let first_or_zero x =
+    match x with
+    | [] -> 0
+    | hd :: tl -> hd
+  ;;
+val first_or_zero : int list -> int
+# first_or_zero [5;4;6];;
+- : int = 5
+# first_or_zero [];;
+- : int = 0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The two key components of a list pattern are `[]` for the empty-list,
+and `::` for the operator that connects an element of the list to the
+remainder of the list.  Using these along with a recursive function
+call, we can do things like define a function for computing the length
+of a list:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let rec length l =
+    match l with
+    | [] -> 0
+    | head :: tail -> 1 + length tl;;
+val length : 'a list -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that we had to add the `rec` keyword to allow the function
+`length` to call itself.
+
+
+Here, we've introduced a new syntax, the match statement, for doing
+complex pattern matching.  
+
+
 
 The `List` module has a large number of combinators that can be used
 for dealing with lists.  `List.map` for example, can be used to
@@ -259,7 +330,9 @@ transform the elements of a list, thus producing a new list.
 
 Here, map is a function that takes a list and a function for
 transforming elements of that list, and returns to us a new list with
-the elements transformed.
+the elements transformed.  In practice, you'll usually end up using
+functions like `map` rather than defining them yourself.  But we can
+learn a bit more about the language if we do the deisgn
 
 There's a new piece of syntax to learn here: labeled arguments.  The
 argument `double` is passed with a label, `~f`.  Labeled arguments can
