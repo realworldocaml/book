@@ -1,35 +1,44 @@
 # Proposal for Real World OCaml
 
-[yminsky: can we really call it “Real World OCaml”?  It would be a
-good name, but I don't know whose permission we'd need for it.
-Another name that I was thinking of using was “Core OCaml”, which has
-the pun going for it.]
-
 ## Outline
 
-> Chapter titles and a paragraph on each chapter are great.
+### Examples
 
-Some thoughts on structure: the current draft is based around
-exercises, whereas O’Reilly books are usually more practical and
-“recipe” oriented. So we should probably have sections on parsing
-(e.g. JSON is a good one), network programming (likely with Async),
-and GUI programming (a good example of objects too).  Ideally, we
-could talk about the basics early, and introduce more advanced
-concepts such as modules, objects and the FFI along with some of these
-recipes.  In Real World Haskell, the appendices are reserved for
-installation details on the online version (need to check what the
-printed copy looks like).  Installation: common mechanisms to install
-OCaml on Linux, Windows and MacOS X, as well as editor setup (Emacs,
-Vim) and the interactive REPL.
+Some ideas for examples to integrate into the text.
 
-### Part I : Language and Libraries
+- A log-file parser, maybe for Apache log files, or somesuch? it's a
+  simple and common task, and could be done with a small amount of
+  code.
+- The JSON library from Real World Haskell is a nice kind of example.
+  Instead of implementing a parser, he only implements a datatype for
+  JSON values and some pretty printers.  That all seems far more
+  tractable than implementing a parser.  Doing that for JSON or
+  another format would be nice.
+- An SNTP client.  I have one of these that I wrote a while back.
+  It's dead simple, and I think could make a nice example.  That said,
+  it does require some networking-foo.
+- An ASCII pretty-printer for tabular data.  It's a nice example of
+  how to design a clean OCaml library.
 
-1. **Introduction to OCaml**: A guided tour through the OCaml
-   language, all done using the OCaml toplevel.  We'd cover all the
-   basic language features in brief, including:
+Another thing that might be fun to point people at is Bench.  It's a
+simple benchmarking library, with much of its ideas cribbed from
+Criterion.  
+
+I'd like to have some example sections where we work through a
+complete design.  In the first of those sections, we should do a basic
+ocamlbuild setup so we can get people building complete, compiling
+programs.
+
+We should evenutally delete this section, and integrate the ideas we
+want to keep into the outline below.
+
+### Part I : Core OCaml
+
+1. **A Guided Tour**: A guided tour through the language, all done
+   using the interactive toplevel.  We'd cover all the basic language
+   features in brief, including:
       - basic arithmetic expressions
-      - defining variables
-      - definint functions
+      - defining variables and functions
       - simple higher-order functions
       - basic type inference
       - basic pattern matching
@@ -39,93 +48,101 @@ Vim) and the interactive REPL.
       - Discuss the idea that OCaml is an expression-oriented
         language.  Explain the basic syntactic constructs and how they
         work.
-      - Discuss how let binding and variable definitions work.
-        Include
-      - Discuss function definitions in more detail, explaining what
-        labelled and optional arguments are and when you should use
-        them, anonymous functions, and recursive functions.
-1. **Tuples, Lists and Polymorphism**:
-      - Explain polymorphism in more detail, both in terms of
-        functions and datatypes.
-      - This section will also give us an opportunity to explain lists
-        in more detail, including the special syntax for Cons.
-      - The value restriction
-1. **Algebraic Data Types and Pattern Matching**:
+      - Explain let binding and variable definitions
+      - A more detailed discussion of functions, covering:
+          - anonymous functions
+          - labelled and optional arguments are and when you should use
+            them
+          - recursive and mutually recursive functions.
+1. **Lists, Options and Pattern-matching**:
+      - Lists and Options are important datatypes in OCaml, and this
+        chapter will explain them in detail.
+      - Lists are a great way of understanding pattern-matching, and
+        we can implement a number of simple algorithms on lists as a
+        way of showing off the pattern-matching system, and the
+        correctness checks it provides.
+1. **Algebraic Data Types**:
       - Explain the interplay between product types and sum types.
-      - define how unions can be defined with the example of a binary
-        tree and an R/B tree.  Show how pattern matching can be used
-        to work with algebraic data types. [yminsky: I'm a little
-        concerned baout using binary trees as the motivating example.
-        Variants are far more useful than the example suggests.  Maybe
-        a more prosaic example is in order.]
-      - Explain the option list types in terms of variants types.
+      - Explain the option and list types as variants.
+      - Describe a somewhat more complex example using a recursive
+        datatype, like a binary expression tree with a simple
+        simplifier.
       - Introduce polymorphic variants, show how they can be used to
-        give you more flexibility (and explain the downsides)
-1. **Mutable Programming**: 
-      - OCaml code can be purely functional, or use side-effects and
-        global variables. 
-      - Introduce references and show how to use.  Explain how to
-        write imperative code, including for and while loops and
-        sequencing operations with semi-colons.
-      - Discuss records in more detail, including an explanation of
-        mutable record fields.  Mention that references are just an
-        instance of this.
-      - Discuss the various mutable datastructures including records,
-        arrays, strings, and hashtables.
-1. **Exceptions**: 
-      - Explain the exceptions system, show how exceptions are defined
-        and caught.
+        give you more flexibility.
+1. **Error Handling**: 
+      - Explain the exceptions system, show how exceptions are
+        defined, thrown and caught.
       - Explain the downsides of exceptions, and how and when to use
         them.
-1. **Module Basics**:
+      - Explain how to do error handling with values Option and
+        Result.
+1. **Programming with Mutation**:
+      - OCaml code can be purely functional, or use side-effects.
+        This chapter will be about how to program with side-effects in
+        OCaml.
+      - Introduce references and show how to use them.  Describe
+        OCaml's support for imperative code, including for and while
+        loops and sequencing operations with semicolons.
+      - Discuss records in more detail, including an explanation of
+        mutable record fields.
+      - Discuss OCaml's other mutable datastructures including arrays,
+        strings, and hashtables.
+1. **Modules**:
       - A basic introduction to modules, how they show up in the file
         system, how and why you should use interfaces.
       - Tips for designing good module interfaces.
       - Effective use of modules, including interface components (like
         Comparable, Hashable, Sexpable in Core)
-1. **Advanced Modules**:
-      - Functors
-      - First-class modules, using a plug-in system as the motivating
-        example.
-      - recursive modules [yminsky: Do we want to cover this?  I've
-        personally never used recursive modules.]
-1. **Files and Compilation Units**: [yminsky: maybe this section
-   should be unified with "Module Basics" section somehow?]
-      - How to organize a small realistic project, including
-      - the role of ml/mli files
-      - direct invocation of the compiler
-      - setting up a simple build with ocamlbuild.
+      - How modules connect to files, the role of ml/mli files.
 1. **I/O**:
       - Basic input and output.  Printf, and in/out channels.
       - reading and writing values using s-expressions, bin-prot and
         marshal.
+
+### Part II: Advanced Topics
+
+1. **Advanced Modules**:
+      - Functors
+      - First-class modules, using a plug-in system as the motivating
+        example.
+      - recursive modules *[yminsky: Do we want to cover this?  I've
+        personally never used recursive modules.]*
 1. **Concurrent Programming**
       - Covers Lwt or Async.  We still need to figure out which system
         to cover.  I'm pretty torn on this one.
+1. **Syntax Extensions**
+      - The syntax extensions that come with Core, and how to use
+        them.  
+      - The key ones to cover are: sexplib, fieldslib, variantslib.
+      - Maybe also, bin-prot and pa_compare
 1. **Objects**: the structurally typed object system. Two good
    examples of object usage are lablgtk and js_of_ocaml where they
    interop nicely. Perhaps do a simple windowing system using lablgtk
    here?
 1. **Classes and Inheritance**: multiple inheritance and polymorphic
-   classes. this is a beefy chapter, so I wonder about space
-   constraints.
+   classes. *[anil: this is a beefy chapter, so I wonder about space
+   constraints.]*
 
-### Part II: Tools and Internals
+### Part III: Tools and Internals
 
 This section is now about the internals of OCaml and helper tools:
 
-1. **Foreign Function Interface**: example of how to bind a library, and
-   common pitfalls.
 1. **Tuning the Runtime**: brief description of the heap representation of
    values, and GC profiling and tuning.
+1. **Foreign Function Interface**: example of how to bind a library, and
+   common pitfalls.
 1. **Camlp4**: a few examples of camlp4 tools and
    quotations/antiquotations (the XML parser might be quite a good one
    here).
-1. **Ocamlbuild**:
-   [yminsky: I wonder if this is something we should cover to some
-   degree early on.  It would be nice to get people to set up a
-   trivial ocamlbuild setup in the very beginning, to do their
-   building with.]
+1. **Ocamlbuild**: Cover more in depth how to set up a project with
+   ocamlbuild, including the writing of ocamlbuild plugins.
+
+### Appendix: Installation and Configuration
+
+This section will cover how to set up OCaml and Core on UNIX, MacOS
+and Windows.  There will be a link to an on-line version of this data
+that can be kept up-to-date.  Also, information will be given on how
+to set up an editor and a the interactive toplevel.
 
 ## About
 
@@ -152,9 +169,21 @@ writing fast, succinct and readable systems code.
 > Competing books: what are they, and why is this better? This should
 > be rather easy.
 
-- Practical OCaml
-- Developing Application with Objective Caml
-- [OCaml for Scientists](http://www.ffconsultancy.com/products/ocaml_for_scientists/index.html)
+### Practical OCaml
+
+This book has a great title that goes along with a brand that includes
+other good books like Practical Common Lisp.  Sadly, Practical OCaml
+is a disaster.  The author was not particularly adept at OCaml and it
+shows.  The book is packed full of bad advice, unidiomatic examples,
+and poor writing.  One of our motivations for writing this book is so
+that people interested in OCaml don't end up finding and reading
+Practical OCaml, and ending up with a bad taste in their mouths.
+
+###  Developing Application with Objective Caml
+
+
+
+### [OCaml for Scientists](http://www.ffconsultancy.com/products/ocaml_for_scientists/index.html)
 
 ## Schedule
 
