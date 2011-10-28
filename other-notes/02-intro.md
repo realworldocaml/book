@@ -12,21 +12,15 @@ evaluate them immediately.  When you get to the point of running real
 programs, you'll want to leave the toplevel behind; but it's a great
 tool for getting to know the language.
 
-The very first thing we'll do is to spin up the toplevel and open up
-`Core.Std`, which gives us access to the libraries and calling
-conventions of Core.
+Let's to spin up the toplevel and open the `Core.Std` module, which
+gives us access to Core's libraries.  Then we can take the toplevel
+out for a spin as a simple calculator.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ rlwrap ocaml
         Objective Caml version 3.12.1
 
 # open Core.Std;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The simplest thing we can do now is use the toplevel as a simple
-calculator.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 3 + 4;;
 - : int = 7
 # 8 / 3;;
@@ -38,7 +32,7 @@ calculator.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This looks a lot what you'd expect from any language, but there are a
-few differences that jump right out at us.
+few differences that jump right out at you.
 
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  Note that this is a pecularity of the
@@ -111,19 +105,30 @@ at first, but we'll explain where it comes from when we get to
 function currying in Chapter {???}.  For the moment, think of the
 arrows as separating different arguments of the function, with the
 type after the final arrow being the return value of the function.
-Thus, `int -> int -> int` describes a function that takes two `int`
-arguments and returns an `int`, while `(int -> int) -> int -> int`
+Thus, 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~
+int -> int -> int
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+describes a function that takes two `int` arguments and returns an
+`int`, while 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~
+(int -> int) -> int -> int
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
 describes a function of two arguments where the first argument is
-itself a funciton.
+itself a function.
 
 The types are quickly getting more complicated, and you might at this
 point ask yourself how OCaml determines the types of a function.
-Type-inference is the answer.  Roughly speaking, OCaml determines the
-type of an expression by leveraging what it knows about the elements
-of the expression, and using those to infer a type for the overall
-expression.  For example, in `abs_change`, the fact that `abs_diff`
-takes two integer arguments lets us infer that `x` is an `int`, and
-that `f` returns an `int`.
+Roughly speaking, OCaml determines the type of an expression by
+leveraging what it knows about the elements of the expression, and
+using those to infer a type for the overall expression.  This process
+is called _type-inference_.  As an example, in `abs_change`, the fact
+that `abs_diff` takes two integer arguments lets us infer that `x` is
+an `int`, and that `f` returns an `int`.
 
 Sometimes, the type-inference system doesn't have enough information
 to fully determine the concrete type of a given value.  Consider this
@@ -140,9 +145,8 @@ otherwise.  So what's the type of the function?  There are no obvious
 clues such as arithmetic operators to tell you what the type of `x`
 and `y` are.  Indeed, it seems like one could use this `first_if_true`
 on values of different types.  In other words, it seems like this
-function should be _generic_.
-
-If we look at the type returned by the toplevel:
+function should be _generic_.  Indeed, if we look at the type returned
+by the toplevel:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
@@ -151,7 +155,7 @@ val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 we see that rather than choose a particular type for the value being
 tested, OCaml has introduced a _type variable_ `'a`.  This is how you
 express in the type system that the value in question is generic, and
-can be used with any type substituted in for `'a`.  Thus, we can
+can be used with any type substituted in for `'a`.  So, we can
 write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,7 +170,7 @@ And we can also write:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let big_number x = x > 3;;
 val big_number : int -> bool = <fun>
-# first_if_true big_number 3 4;;
+# first_if_true big_number 4 3;;
 - : int = 4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -192,11 +196,10 @@ polymorphism_, and is very similar to generics in C# and Java.
 ### Tuples
 
 So far, we've encountered a handful of basic types like `int`, `float`
-and `string`.  We've also encountered function types, where function
-types like `int -> string` are built up out of other types.
-
-One thing we haven't yet talked about is datastructures.  The simplest
-datastructure in OCaml is the tuple.  Tuples are easy to create:
+and `string`.  We've also encountered function types, like `string ->
+int`.  But we haven't yet talked about any types for datastructure.
+We'll start by looking at a particularly simple example, the tuple.
+Tuples are easy to create:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let tup = (3,"three")
@@ -239,9 +242,9 @@ surprisingly powerful tool.
 
 ### Options
 
-Another very common datastructure in OCaml is the `option`.  An
-`option` is used to express that a value that might or might not be
-present.  For example,
+Another common datastructure in OCaml is the `option`.  An `option` is
+used to express that a value that might or might not be present.  For
+example,
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let divide x y =
@@ -249,22 +252,31 @@ present.  For example,
 val divide : int -> int -> int option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, `Some` and `None` are explicit tags that are used to distinguish
-whether there is a substantive value.  As we'll see in Chapter {???},
-this is not a built-in language construct, and is instead just an
-example of the more general concept of a variant type.
+Here, `Some` and `None` are explicit tags that determine whether or
+not there is a meaningful return value for `divide`.  
 
-But so far, we've only shown how to construct an option, not how to
-get a value out of an option.  
+So far, we've only shown how to construct an option, not how to get a
+value out of an option.  As was the case with tuples, we can do this
+with pattern matching, but the pattern matching is going to need to be
+a little more sophisticated.  
 
-[examples: mandelbrot set?]
+As an example, consider the following simple function for printing a
+log entry given an option time and a message.  If no time is provided,
+the current time is computed.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# let rec repeat_until_done f x =
-    match f x with
-    | None -> x
-    | Some x' -> repeat_until_done f x'
+# let print_log_entry maybe_time message =
+    let time =
+      match maybe_time with
+      | Some x -> x
+      | None -> Time.now ()
+    in
+    printf "%s: %s\n" (Time.to_string_sec time) message
+val print_log_entry : Time.t option -> string -> unit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, the pattern matching was done using the `match` syntax.
+_[yminsky: More here]_
 
 ### Lists
 
