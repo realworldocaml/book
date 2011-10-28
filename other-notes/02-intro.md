@@ -4,7 +4,7 @@
 
 (Here we should give pointers to setting up OCaml, Core and rlwrap)
 
-## Preliminaries
+## OCaml as a calculator
 
 We're going to start off by introducing you to OCaml using the OCaml
 toplevel, an interactive shell that lets you type in expressions and
@@ -197,8 +197,8 @@ polymorphism_, and is very similar to generics in C# and Java.
 
 So far, we've encountered a handful of basic types like `int`, `float`
 and `string`.  We've also encountered function types, like `string ->
-int`.  But we haven't yet talked about any types for datastructure.
-We'll start by looking at a particularly simple example, the tuple.
+int`.  But we haven't yet talked about any datastructures.  We'll
+start by looking at a particularly simple datastructure, the tuple.
 Tuples are easy to create:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -252,17 +252,12 @@ example,
 val divide : int -> int -> int option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, `Some` and `None` are explicit tags that determine whether or
-not there is a meaningful return value for `divide`.  
-
-So far, we've only shown how to construct an option, not how to get a
-value out of an option.  As was the case with tuples, we can do this
-with pattern matching, but the pattern matching is going to need to be
-a little more sophisticated.  
-
-As an example, consider the following simple function for printing a
-log entry given an option time and a message.  If no time is provided,
-the current time is computed.
+Here, `Some` and `None` are explicit tags that are used to construct
+an optional value.  To get a value out of an option, we use pattern
+matching, as we did with tuples.  Consider the following simple
+function for printing a log entry given an optional time and a
+message.  If no time is provided (_i.e._, if the time is `None`), the
+current time is computed and used in its place.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let print_log_entry maybe_time message =
@@ -275,8 +270,32 @@ the current time is computed.
 val print_log_entry : Time.t option -> string -> unit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, the pattern matching was done using the `match` syntax.
-_[yminsky: More here]_
+Here, we use a new piece of syntax, the `match` statement, to do the
+pattern matching.  The `match` statement allows you to match a pattern
+that has different possible structures that can be matched by multiple
+different patterns.  The basic structure of a match statement is:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+match <expr> with
+| <pattern1> -> <expr1>
+| <pattern2> -> <expr2>
+| ...
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A `match` statement lets you do a case analysis driven by the shape of
+a datastructure, and it can be used for many different datastructres
+in OCaml, as we'll see later.
+
+Core also has a whole module full of useful functions for dealing with
+options.  For example, we could rewrite `print_log_entry` using
+`Option.value`, which returns the content of an option, or a default
+value if the option is `None`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let print_log_entry maybe_time message =
+    let time = Option.value ~default:(Time.now ()) maybe_time in
+    printf "%s: %s\n" (Time.to_string time) message
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Lists
 
@@ -286,69 +305,86 @@ any number of items of the same type in one datastructure.  For
 example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# let languages = ["Perl";"OCaml";"French";"C"];;
+# let languages = ["OCaml";"Perl";"French";"C"];;
 val languages : string list = ["Perl"; "OCaml"; "French"; "C"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now we see how to construct a list, but how do we get access to the
-elements of a list?  As with tuples, we can do this by
-pattern-matching.  Here's a function which returns the first element
-of a list, or zero, if the list is empty:
+We can access the elements of a list using pattern-matching.  List
+patterns have two key components: `[]`, which represents the
+empty-list, and `::`, which connects an element at the head of a list
+to the remainder of the list.  Using these along with a recursive
+function call, we can do things like define a function for summing the
+elements of a list.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# let first_or_zero x =
-    match x with
-    | [] -> 0
-    | hd :: tl -> hd
-  ;;
-val first_or_zero : int list -> int
-# first_or_zero [5;4;6];;
-- : int = 5
-# first_or_zero [];;
-- : int = 0
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The two key components of a list pattern are `[]` for the empty-list,
-and `::` for the operator that connects an element of the list to the
-remainder of the list.  Using these along with a recursive function
-call, we can do things like define a function for computing the length
-of a list:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# let rec length l =
+# let rec sum l =
     match l with
     | [] -> 0
-    | head :: tail -> 1 + length tl;;
-val length : 'a list -> int = <fun>
+    | hd :: tl -> hd + sum tl
+  ;;
+val first : int list -> int
+# sum [1;2;3;4;5];;
+- : int = 15
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that we had to add the `rec` keyword to allow the function
-`length` to call itself.
+We had to add the `rec` keyword in the definition of `sum` to allow
+for the recursive call.  We can introduce more complicated list
+patterns as well.  Here's a function for destuttering a list, _i.e._,
+for removing sequential duplicates.
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let rec destutter list =
+    match list with
+    | [] -> []
+    | hd1 :: (hd2 :: tl) ->
+      if hd1 = hd2 then destutter (hd2 :: tl)
+      else hd1 :: destutter (hd2 :: tl)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, we've introduced a new syntax, the match statement, for doing
-complex pattern matching.  
+Actually, the code above has a problem.  If you type it into
+the top-level, you'll see this error:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::[]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+this is warning you that you missed a case, in particular, the case of
+a list with one element.  That's easy enough to fix by adding another
+case:
 
-The `List` module has a large number of combinators that can be used
-for dealing with lists.  `List.map` for example, can be used to
-transform the elements of a list, thus producing a new list.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let rec destutter list =
+    match list with
+    | [] -> []
+    | [hd] -> [hd]
+    | hd1 :: (hd2 :: tl) ->
+      if hd1 = hd2 then destutter (hd2 :: tl)
+      else hd1 :: destutter (hd2 :: tl)
+val destutter : 'a list -> 'a list = <fun>
+# destutter ["hey";"hey";"hey";"man!"];;
+- : string list = ["hey"; "man!"]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+But we don't have to build all of these functions ourselves using
+pattern matching and recursion.  Just like there's an `Option` module
+which contians useful functions for dealing with options, there's a
+`List` module with useful functions for dealing with lists.  For
+example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # List.map ~f:String.length languages;;
-- : int list = [4; 5; 6; 1]
+- : int list = [5; 4; 6; 1]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, map is a function that takes a list and a function for
+`List.map` is a function that takes a list and a function for
 transforming elements of that list, and returns to us a new list with
-the elements transformed.  In practice, you'll usually end up using
-functions like `map` rather than defining them yourself.  But we can
-learn a bit more about the language if we do the deisgn
+the elements transformed.
 
 There's a new piece of syntax to learn here: labeled arguments.  The
 argument `double` is passed with a label, `~f`.  Labeled arguments can
 be put anywhere on the argument list, so we could just as well have
-written `List.map ~f:double some_primes` instead of `List.map
-some_primes ~f:double`
+written `List.map ~f:String.length languages` instead of `List.map
+languages ~f:String.length`
 
