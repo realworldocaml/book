@@ -206,8 +206,8 @@ Tuples are easy to create:
 val tup : int * string = (3, "three")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The return type, `int * string` corresponds the set of pairs of `int`s
-and `string`s.  (For the mathematically inclined, the `*` character is
+The type, `int * string` corresponds to set of pairs of `int`s and
+`string`s.  (For the mathematically inclined, the `*` character is
 used because the space of all 2-tuples of type `t * s` effectively
 corresponds to the Cartesian product of `t` and `s`.)
 
@@ -220,8 +220,7 @@ pair of `float`s.
 # let distance p1 p2 =
     let (x1,y1) = p1 in
     let (x2,y2) = p2 in
-    let sqr x = x *. x in
-    sqrt (sqr (x1 -. x2) +. sqr (y1 -. y2))
+    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2)
 ;;
 val distance : float * float -> float * float -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -231,14 +230,13 @@ the arguments to the function directly:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let distance (x1,y1) (x2,y2) =
-    let sqr x = x *. x in
-    sqrt (sqr (x1 -. x2) +. sqr (y1 -. y2))
+    sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
 ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is just a first taste of pattern matching.  As you'll see,
-pattern matching shows up in many contexts, and turns out to be a
-surprisingly powerful tool.
+This is just a first taste of pattern matching.  Pattern matching
+shows up in many contexts, and turns out to be a surprisingly powerful
+tool.
 
 ### Options
 
@@ -253,11 +251,11 @@ val divide : int -> int -> int option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here, `Some` and `None` are explicit tags that are used to construct
-an optional value.  To get a value out of an option, we use pattern
-matching, as we did with tuples.  Consider the following simple
-function for printing a log entry given an optional time and a
-message.  If no time is provided (_i.e._, if the time is `None`), the
-current time is computed and used in its place.
+an optional value.  To get a value out of an option, we again use
+pattern matching.  Consider the following simple function for printing
+a log entry given an optional time and a message.  If no time is
+provided (_i.e._, if the time is `None`), the current time is computed
+and used in its place.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let print_log_entry maybe_time message =
@@ -271,9 +269,9 @@ val print_log_entry : Time.t option -> string -> unit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here, we use a new piece of syntax, the `match` statement, to do the
-pattern matching.  The `match` statement allows you to match a pattern
-that has different possible structures that can be matched by multiple
-different patterns.  The basic structure of a match statement is:
+pattern matching.  A `match` statement lets you do a case analysis
+driven by the shape of a datastructure, and it can be used for many
+different datastructres in OCaml, 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 match <expr> with
@@ -282,9 +280,6 @@ match <expr> with
 | ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `match` statement lets you do a case analysis driven by the shape of
-a datastructure, and it can be used for many different datastructres
-in OCaml, as we'll see later.
 
 Core also has a whole module full of useful functions for dealing with
 options.  For example, we could rewrite `print_log_entry` using
