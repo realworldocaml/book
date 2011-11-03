@@ -42,27 +42,22 @@ want to keep into the outline below.
       - simple higher-order functions
       - basic type inference
       - basic pattern matching
-      - lists and tuples
+      - tuples, options and lists
       - records and variants
-1. **Expressions, Variables and Functions**: 
-      - Discuss the idea that OCaml is an expression-oriented
-        language.  Explain the basic syntactic constructs and how they
-        work.
-      - Explain let binding and variable definitions
-      - A more detailed discussion of functions, covering:
-          - anonymous functions
-          - labelled and optional arguments are and when you should use
-            them
-          - recursive and mutually recursive functions.
-1. **Lists, Options and Pattern-matching**:
-      - Lists and Options are important datatypes in OCaml, and this
-        chapter will explain them in detail.
-      - Lists are a great way of understanding pattern-matching, and
-        we can implement a number of simple algorithms on lists as a
-        way of showing off the pattern-matching system, and the
-        correctness checks it provides.
-1. **Algebraic Data Types**:
-      - Explain the interplay between product types and sum types.
+1. **Variables and Functions**: 
+      - Let binding in more detail
+        - explain that every let binding introduces a scope
+        - Discuss scoping rules
+        - syntactic distinction between inner-let and module-level let
+        - let ... and syntax
+      - Functions in more details, including
+        - anonymous functions
+        - labelled and optional arguments are and when you should use
+          them
+        - recursive and mutually recursive functions.
+1. **Practicum: Pretty-printing tables**
+      - A small library for pretty-printing tables in ascii.
+1. **Variants**:
       - Explain the option and list types as variants.
       - Describe a somewhat more complex example using a recursive
         datatype, like a binary expression tree with a simple
@@ -94,7 +89,7 @@ want to keep into the outline below.
       - Effective use of modules, including interface components (like
         Comparable, Hashable, Sexpable in Core)
       - How modules connect to files, the role of ml/mli files.
-1. **I/O**:
+1. **Synchronous I/O**:
       - Basic input and output.  Printf, and in/out channels.
       - reading and writing values using s-expressions, bin-prot and
         marshal.
