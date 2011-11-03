@@ -9,7 +9,7 @@
 We're going to start off by introducing you to OCaml using the OCaml
 toplevel, an interactive shell that lets you type in expressions and
 evaluate them immediately.  When you get to the point of running real
-programs, you'll want to leave the toplevel behind; but it's a great
+programs, you'll want to leave the toplevel behind, but it's a great
 tool for getting to know the language.
 
 Let's to spin up the toplevel and open the `Core.Std` module, which
@@ -271,7 +271,9 @@ val print_log_entry : Time.t option -> string -> unit
 Here, we use a new piece of syntax, the `match` statement, to do the
 pattern matching.  A `match` statement lets you do a case analysis
 driven by the shape of a datastructure, and it can be used for many
-different datastructres in OCaml, 
+different datastructres in OCaml.
+
+This is the basic shape of a match statement.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 match <expr> with
@@ -280,6 +282,12 @@ match <expr> with
 | ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The first pattern that matches the structure of the expression between
+the `match` and the `with` is chosen, and the right-hand side of the
+`->` is evaluated, which is the value of the entire expression.  As is
+shown in the `peint_log_entry` example, the pattern can also bind new
+variables, giving a name to sub-components of the datastructure being
+matched.
 
 Core also has a whole module full of useful functions for dealing with
 options.  For example, we could rewrite `print_log_entry` using
@@ -383,3 +391,9 @@ be put anywhere on the argument list, so we could just as well have
 written `List.map ~f:String.length languages` instead of `List.map
 languages ~f:String.length`
 
+## Records and Variants
+
+So far, we've only looked at datastructures that were pre-defined in
+the language, like lists and tuples.  But OCaml also allows us to
+define our own datatypes from scratch.  Imagine, for example, that you
+wanted a datatype to represent a
