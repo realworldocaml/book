@@ -44,21 +44,27 @@ want to keep into the outline below.
       - basic pattern matching
       - tuples, options and lists
       - records and variants
-1. **Variables and Functions**: 
-      - Let binding in more detail
-        - explain that every let binding introduces a scope
-        - Discuss scoping rules
-        - syntactic distinction between inner-let and module-level let
-        - let ... and syntax
-      - Functions in more details, including
-        - anonymous functions
-        - labelled and optional arguments are and when you should use
-          them
-        - recursive and mutually recursive functions.
-1. **Practicum: Pretty-printing tables**
-      - A small library for pretty-printing tables in ascii.
-1. **Variants**:
-      - Explain the option and list types as variants.
+1. **Expressions, Variables and Functions**: 
+      - Discuss the idea that OCaml is an expression-oriented
+        language.  Explain the basic syntactic constructs and how they
+        work.
+      - Explain let binding and variable definitions
+      - A more detailed discussion of functions, covering:
+          - anonymous functions
+          - labelled and optional arguments are and when you should use
+            them
+          - recursive and mutually recursive functions.
+          - lexical scoping.
+1. **Lists, Options and Pattern-matching**:
+      - Lists and Options are important datatypes in OCaml, and this
+        chapter will explain them in detail.
+      - Lists are a great way of understanding pattern-matching, and
+        we can implement a number of simple algorithms on lists as a
+        way of showing off the pattern-matching system, and the
+        correctness checks it provides.
+1. **Algebraic Data Types**:
+      - Explain the interplay between product types and sum types.
+      - Explain the option and list types and bool as variants.
       - Describe a somewhat more complex example using a recursive
         datatype, like a binary expression tree with a simple
         simplifier.
@@ -82,6 +88,7 @@ want to keep into the outline below.
         mutable record fields.
       - Discuss OCaml's other mutable datastructures including arrays,
         strings, and hashtables.
+      - Eager evaluation, and <lazy>.
 1. **Modules**:
       - A basic introduction to modules, how they show up in the file
         system, how and why you should use interfaces.
@@ -100,8 +107,12 @@ want to keep into the outline below.
       - Functors
       - First-class modules, using a plug-in system as the motivating
         example.
+      - Sharing constraints. *[jyh: This is pretty important, we might want
+        it in basic modules.]*
       - recursive modules *[yminsky: Do we want to cover this?  I've
-        personally never used recursive modules.]*
+        personally never used recursive modules.  jyh: I think so, they
+        come up when making recursive type definitions involving abstract
+        types. ]*
 1. **Concurrent Programming**
       - Covers Lwt or Async.  We still need to figure out which system
         to cover.  I'm pretty torn on this one.
@@ -113,10 +124,12 @@ want to keep into the outline below.
 1. **Objects**: the structurally typed object system. Two good
    examples of object usage are lablgtk and js_of_ocaml where they
    interop nicely. Perhaps do a simple windowing system using lablgtk
-   here?
+   here? 
 1. **Classes and Inheritance**: multiple inheritance and polymorphic
    classes. *[anil: this is a beefy chapter, so I wonder about space
    constraints.]*
+     - Design difference between classes and ADTs (adding a new variant vs.
+       adding a new method).
 
 ### Part III: Tools and Internals
 
@@ -174,7 +187,7 @@ and poor writing.  One of our motivations for writing this book is so
 that people interested in OCaml don't end up finding and reading
 Practical OCaml, and ending up with a bad taste in their mouths.
 
-###  Developing Application with Objective Caml
+###  Developing Applications with Objective Caml
 
 
 
