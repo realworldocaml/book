@@ -395,5 +395,58 @@ languages ~f:String.length`
 
 So far, we've only looked at datastructures that were pre-defined in
 the language, like lists and tuples.  But OCaml also allows us to
-define our own datatypes from scratch.  Imagine, for example, that you
-wanted a datatype to represent a
+define our own datatypes from scratch.  Suppose you wanted to define a
+type to represent an body in a 2-dimensional n-body gravitational
+simulation.  Here's one way of doing it:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# type vec2d = { x: float; y: float };;
+type vec2d = { x : float; y : float; }
+# type body = { mass: float; pos: vec2d; vel: vec2d };;
+type body = { mass : float; pos : vec2d; vel : vec2d; }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The types `vec2d` and `body` are _record_ types, where `vec2d` is used
+to represent a 2-dimensional vector, and `body` is the full
+description of a body in the simulation, including its position,
+velocity and mass.
+
+We can construct values of these types: 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# { x = 3.; y = -4. };;
+- : vec2d = {x = 3.; y = -4.}
+# { mass = 34.;
+    pos = { x = 7.5; y = 2.3 };
+    vel = { x = 0.34; y = 0.22 };
+  };;
+- : body = {mass = 34.; pos = {x = 7.5; y = 2.3};
+            vel = {x = 0.34; y = 0.22}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+And we can get access to the contents of these types using pattern
+matching:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+# let mag { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
+val mag : vec2d -> float = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+In the case where the name of the variables we want to bind are the
+same as the record names, we can make this even terser:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+# let mag { x; y } = sqrt (x ** 2. +. y ** 2.);;
+val mag : vec2d -> float = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+We can also use OCaml's record-field access syntax:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+# let mag vec = sqrt (vec.x ** 2. +. vec.y ** 2.);;
+val mag : vec2d -> float = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+
+
+     
