@@ -1,37 +1,5 @@
 # Proposal for Real World OCaml
 
-## Outline
-
-### Examples
-
-Some ideas for examples to integrate into the text.
-
-- A log-file parser, maybe for Apache log files, or somesuch? it's a
-  simple and common task, and could be done with a small amount of
-  code.
-- The JSON library from Real World Haskell is a nice kind of example.
-  Instead of implementing a parser, he only implements a datatype for
-  JSON values and some pretty printers.  That all seems far more
-  tractable than implementing a parser.  Doing that for JSON or
-  another format would be nice.
-- An SNTP client.  I have one of these that I wrote a while back.
-  It's dead simple, and I think could make a nice example.  That said,
-  it does require some networking-foo.
-- An ASCII pretty-printer for tabular data.  It's a nice example of
-  how to design a clean OCaml library.
-
-Another thing that might be fun to point people at is Bench.  It's a
-simple benchmarking library, with much of its ideas cribbed from
-Criterion.  
-
-I'd like to have some example sections where we work through a
-complete design.  In the first of those sections, we should do a basic
-ocamlbuild setup so we can get people building complete, compiling
-programs.
-
-We should evenutally delete this section, and integrate the ideas we
-want to keep into the outline below.
-
 ### Part I : Core OCaml
 
 1. **A Guided Tour**: A guided tour through the language, all done
@@ -62,6 +30,8 @@ want to keep into the outline below.
         we can implement a number of simple algorithms on lists as a
         way of showing off the pattern-matching system, and the
         correctness checks it provides.
+      - *Example*: an ASCII pretty printer for tabular data, using
+        lists and pattern matching.
 1. **Algebraic Data Types**:
       - Explain the interplay between product types and sum types.
       - Explain the option and list types and bool as variants.
@@ -70,6 +40,12 @@ want to keep into the outline below.
         simplifier.
       - Introduce polymorphic variants, show how they can be used to
         give you more flexibility.
+      - *Example*: define a full JSON definition and pretty printer
+        using pattern matching.
+      - Explain how to parsing text into tokens and types using
+        the `ocamllex` and `ocamlyacc` tools. Also mention useful 
+        alternatives such as Menhir.
+      - *Example*: write a JSON parser.
 1. **Error Handling**: 
       - Explain the exceptions system, show how exceptions are
         defined, thrown and caught.
@@ -82,64 +58,104 @@ want to keep into the outline below.
         This chapter will be about how to program with side-effects in
         OCaml.
       - Introduce references and show how to use them.  Describe
-        OCaml's support for imperative code, including for and while
+        OCaml's support for imperative code, including `for` and `while`
         loops and sequencing operations with semicolons.
       - Discuss records in more detail, including an explanation of
         mutable record fields.
       - Discuss OCaml's other mutable datastructures including arrays,
         strings, and hashtables.
-      - Eager evaluation, and <lazy>.
+      - Eager evaluation, and the `lazy` keyword.
 1. **Modules**:
       - A basic introduction to modules, how they show up in the file
         system, how and why you should use interfaces.
+      - *Example*: define a module type for partial ordering and vector
+        clocks, and a driver to run it from the top-level.
       - Tips for designing good module interfaces.
       - Effective use of modules, including interface components (like
-        Comparable, Hashable, Sexpable in Core)
+        `Comparable`, `Hashable`, `Sexpable` in Core)
       - How modules connect to files, the role of ml/mli files.
+      - *Example*: use `Sexpable` to convert a vector clock into a wire
+        representation.
 1. **Synchronous I/O**:
-      - Basic input and output.  Printf, and in/out channels.
-      - reading and writing values using s-expressions, bin-prot and
-        marshal.
+      - Basic input and output.  `Printf`, and in/out channels.
+      - Explain reading and writing values using s-expressions, bin-prot 
+        and marshal.
+      - Introduce the `Unix` module (which also works on Windows), and
+        use it to create a network echo server.
+      - *Example*: build an SNTP time synchronisation client using the
+        `Unix` module and the `bitstring` library.
+1. **Syntax Extensions**
+      - The syntax extensions that come with Core, and how to use them
+        and inspect the intermediate code that they generate.
+      - The key ones to cover are: `sexplib` for serialising a value to 
+        an s-expression string, and `fieldslib` and `variantslib` for
+        iterating over the fields of a record and variant respectively.
+      - Maybe also, `bin-prot` for binary protocols and `pa_compare`
+        for efficient comparison.
 
 ### Part II: Advanced Topics
 
 1. **Advanced Modules**:
-      - Functors
+      - Using functors to reuse module code and improve abstraction.
+      - *Example*: implement a heap module type, and binomial and leftist
+        implementations of that type.
       - First-class modules, using a plug-in system as the motivating
         example.
       - Sharing constraints. *[jyh: This is pretty important, we might want
-        it in basic modules.]*
+        it in basic modules.]* *[avsm: it does need functors or first-class
+        modules to be explained first, so might be best left here?]*
       - recursive modules *[yminsky: Do we want to cover this?  I've
         personally never used recursive modules.  jyh: I think so, they
         come up when making recursive type definitions involving abstract
         types. ]*
+      - How to define generalised algebraic data types (GADTs), and some
+        example uses for them (e.g. a type-safe interpreter).
 1. **Concurrent Programming**
-      - Covers Lwt or Async.  We still need to figure out which system
-        to cover.  I'm pretty torn on this one.
-1. **Syntax Extensions**
-      - The syntax extensions that come with Core, and how to use
-        them.  
-      - The key ones to cover are: sexplib, fieldslib, variantslib.
-      - Maybe also, bin-prot and pa_compare
-1. **Objects**: the structurally typed object system. Two good
-   examples of object usage are lablgtk and js_of_ocaml where they
-   interop nicely. Perhaps do a simple windowing system using lablgtk
-   here? 
-1. **Classes and Inheritance**: multiple inheritance and polymorphic
-   classes. *[anil: this is a beefy chapter, so I wonder about space
-   constraints.]*
-     - Design difference between classes and ADTs (adding a new variant vs.
-       adding a new method).
+      - Describe lightweight cooperative threads and their use for building
+        event-driven systems. Introduce `Lwt` and basic primitives such
+        as `bind` and `join`. Explain how to use the syntax extension.
+      - *Example*: cooperative coin flipping with *n* threads.
+      - Communicating between threads via `MVar`, a cooperative `Mutex`,
+        and the `Stream` module.
+      - *Example*: implement binomial options pricing via a cooperative 
+        computation pipeline; an example of dynamic programming.
+      - The `Lwt_unix` bindings for building cooperative network servers.
+      - *Example*: port the earlier SNTP time client to be cooperatively
+        threaded.
+      - Explain the implications for debugging, backtraces and exceptions 
+        when using cooperative threading.
+      - *Example*: build a distributed in-memory key/value object cache 
+        that stores JSON or s-expressions. Show how the Postgresql bindings
+        can make this into a persistent store.
+1. **Objects**:
+      - Explain the basics of the structurally typed object system, and
+        how object signatures and subtyping work. Objects use dynamic
+        dispatch, and hence can be more flexible in some situations than 
+        modules.
+      - Show how classes and inheritance work, and their interaction with
+        structural typing.
+      - *Example*: use the `camlgraphics` package to build a object-oriented
+        graphing module for tabular data.
+      - Discuss the design difference between classes and ADTs (adding a
+        new variant vs. adding a new method).
+      - Objects are a powerful way to bridge to other languages such as 
+        Javascript. Describe how `js_of_ocaml` works.
+      - *Example*: use `js_of_ocaml` to build a Canvas version of the earlier
+        graphing library.
 
 ### Part III: Tools and Internals
 
 This section is now about the internals of OCaml and helper tools:
 
-1. **Tuning the Runtime**: brief description of the heap representation of
-   values, and GC profiling and tuning.
+1. **Tuning the Runtime**:
+      - brief description of the heap representation of values
+      - the `GC` and `Weak` modules for tuning and creating GC-friendly
+        data structures.
+      - profiling and tuning performance via `ocamlprof`, `gprof` 
+        and `oprofile`.
 1. **Foreign Function Interface**: example of how to bind a library, and
    common pitfalls.
-1. **Camlp4**: a few examples of camlp4 tools and
+1. **Camlp4**: a few examples of `camlp4` tools and
    quotations/antiquotations (the XML parser might be quite a good one
    here).
 1. **Ocamlbuild**: Cover more in depth how to set up a project with
@@ -174,9 +190,6 @@ writing fast, succinct and readable systems code.
 
 ## Competition
 
-> Competing books: what are they, and why is this better? This should
-> be rather easy.
-
 ### Practical OCaml
 
 This book has a great title that goes along with a brand that includes
@@ -189,11 +202,78 @@ Practical OCaml, and ending up with a bad taste in their mouths.
 
 ###  Developing Applications with Objective Caml
 
-
+This book was originally written in French, and translated to English by the
+community in 2007. It is the best available introduction to OCaml at present,
+but is a little dated. It does not include many of the modern language features
+features and a standard library such as Core. 
 
 ### [OCaml for Scientists](http://www.ffconsultancy.com/products/ocaml_for_scientists/index.html)
 
+This book is written in 2005 for a scientific programmer seeking relief from
+FORTRAN and C++, and includes examples on building numerical code and
+OpenGL-based visualisation using OCaml. The book is self-published and
+expensive (£85), and is also not as well-rounded as our proposed ``Real World
+OCaml''. We also describe how to build scalable concurrent network services,
+use database bindings, build foreign-function interfaces, and use the Core
+standard library for rapid development.
+
 ## Schedule
 
-> Schedule: Doesn't need to be that fine grained, and I'll add some
-> slush factor to it.
+We plan to develop Real World OCaml using an open development model, with feedback
+from the community via a website where they can leave comments on each chapter
+of the book. This is on the advice from the authors of Real World Haskell, who 
+were very satisfied with the success of that method.
+
+We have therefore registered `realworldocaml.org`, and the schedule below leaves
+time for us to regularly update the website with chapter drafts and parse the
+feedback.
+
+- *March 2012*: website infrastructure live for `realworldocaml.org`, with the
+  authors using it privately to upload drafts and collaborate on writing.
+- *June 2012*: complete outline of all the chapters, with some text in place
+  to clarify book flow. Give our advisory group private access to the website
+  to deliver early private comments.
+- *November 2012*: early draft chapters of the introduction and tools chapters,
+  and open the website to the community for feedback.
+- *March 2013*: completed draft content of all chapters including examples.
+- *June 2013*: finished book for first-edition publication.
+
+# People
+
+## About the Authors
+
+### Yaron Minsky
+### Jason Hickey
+### Anil Madhavapeddy
+
+Dr. Anil Madhavapeddy is a Senior Research Fellow at the University of
+Cambridge, based in the Systems Research Group. He was on the original team at
+Cambridge that developed the Xen hypervisor, and helped develop an
+industry-leading cloud management toolstack written entirely in OCaml. This
+XenServer product has been deployed on hundreds of thousands of physical hosts,
+and drives critical infrastructure for many Fortune 500 companies.
+
+Prior to obtaining his PhD in 2006 from the University of Cambridge, Dr.
+Madhavapeddy had a diverse background in industry at Network Appliance, NASA
+and Internet Vision.  In addition to professional and academic activities, Dr.
+Madhavapeddy is an active member of the open-source development community with
+the OpenBSD operating system, is co-chair of the Commercial Uses of Functional
+Programming workshop, and serves on the boards of startup companies such as
+Ashima Arts where OCaml is extensively used.
+
+## Advisers
+
+We will also invite a group of prominent OCaml users to deliver early private
+feedback on the book drafts. These include:
+
+- Xavier Leroy (primary architect of OCaml)
+- Damien Doligez (primary developer)
+- Fabrice Le Fessant (OCamlPro, commercial support)
+- Marius Eriksen (Twitter, Inc.)
+- David Scott (Citrix Systems)
+- Jake Donham (Twitter, Inc.)
+- Bryan O'Sullivan (author of Real World Haskell)
+- Martin Jambon (Wink)
+- Vincent Balat (author of js_of_ocaml and the Ocsigen framework)
+- Markus Mottl (author of many portions of the standard library)
+- Prashanth Mundkur (Nokia, author of Disco big data)
