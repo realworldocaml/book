@@ -25,6 +25,7 @@
             them
           - recursive and mutually recursive functions.
           - lexical scoping.
+      - Eager evaluation, and the `lazy` keyword.
 1. **Lists, Options and Pattern-matching**:
       - Lists and Options are important datatypes in OCaml, and this
         chapter will explain them in detail.
@@ -62,8 +63,6 @@
         mutable record fields.
       - Discuss OCaml's other mutable datastructures including arrays,
         strings, and hashtables.
-      - Eager evaluation, and the `lazy` keyword. _[yminsky: this
-        seems out of place, no?]_
 1. **Modules**:
       - A basic introduction to modules, how they show up in the file
         system, how and why you should use interfaces.
