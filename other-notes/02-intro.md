@@ -6,11 +6,11 @@
 
 ## OCaml as a calculator
 
-We're going to start off by introducing you to OCaml using the OCaml
-toplevel, an interactive shell that lets you type in expressions and
-evaluate them immediately.  When you get to the point of running real
-programs, you'll want to leave the toplevel behind, but it's a great
-tool for getting to know the language.
+We'll start our introduction to OCaml with the OCaml toplevel, an
+interactive shell that lets you type in expressions and evaluate them
+immediately.  When you get to the point of running real programs,
+you'll want to leave the toplevel behind, but it's a great tool for
+getting to know the language.
 
 Let's to spin up the toplevel and open the `Core.Std` module, which
 gives us access to Core's libraries.  Then we can take the toplevel
@@ -122,13 +122,13 @@ describes a function of two arguments where the first argument is
 itself a function.
 
 The types are quickly getting more complicated, and you might at this
-point ask yourself how OCaml determines the types of a function.
-Roughly speaking, OCaml determines the type of an expression by
-leveraging what it knows about the elements of the expression, and
-using those to infer a type for the overall expression.  This process
-is called _type-inference_.  As an example, in `abs_change`, the fact
-that `abs_diff` takes two integer arguments lets us infer that `x` is
-an `int`, and that `f` returns an `int`.
+point ask yourself how OCaml determines these types in the first
+place.  Roughly speaking, OCaml infers the type of an expression from
+what it already knows about the types of the elements of that
+expression through a process called _type-inference_.  As an example,
+in `abs_change`, the fact that `abs_diff` takes two integer arguments
+lets the compiler infer that `x` is an `int` and that `f` returns an
+`int`.
 
 Sometimes, the type-inference system doesn't have enough information
 to fully determine the concrete type of a given value.  Consider this
@@ -141,12 +141,12 @@ example.
 
 This function takes a function called `test`, and two values, `x` and
 `y`, where `x` is to be returned if `test x` is `true`, and `y`
-otherwise.  So what's the type of the function?  There are no obvious
-clues such as arithmetic operators to tell you what the type of `x`
-and `y` are.  Indeed, it seems like one could use this `first_if_true`
-on values of different types.  In other words, it seems like this
-function should be _generic_.  Indeed, if we look at the type returned
-by the toplevel:
+otherwise.  So what's the type of `first_if_true`?  There are no
+obvious clues such as arithmetic operators to tell you what the type
+of `x` and `y` are.  Indeed, it seems like one could use this
+`first_if_true` on values of any type, as long as `test` was able to
+operate on that type.  Indeed, if we look at the type returned by the
+toplevel:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
@@ -264,7 +264,7 @@ and used in its place.
       | Some x -> x
       | None -> Time.now ()
     in
-    printf "%s: %s\n" (Time.to_string_sec time) message
+    printf "%s: %s\n" (Time.to_string time) message
 val print_log_entry : Time.t option -> string -> unit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -284,12 +284,12 @@ match <expr> with
 
 The first pattern that matches the structure of the expression between
 the `match` and the `with` is chosen, and the right-hand side of the
-`->` is evaluated, which is the value of the entire expression.  As is
-shown in the `peint_log_entry` example, the pattern can also bind new
-variables, giving a name to sub-components of the datastructure being
-matched.
+`->` is evaluated, and is the result of evaluating the entire
+expression.  As with `print_log_entry`, the pattern can also create
+new variables, giving a name to sub-components of the datastructure
+being matched.
 
-Core also has a whole module full of useful functions for dealing with
+Core has a whole module full of useful functions for dealing with
 options.  For example, we could rewrite `print_log_entry` using
 `Option.value`, which returns the content of an option, or a default
 value if the option is `None`.
@@ -325,13 +325,13 @@ elements of a list.
     | [] -> 0
     | hd :: tl -> hd + sum tl
   ;;
-val first : int list -> int
+val sum : int list -> int
 # sum [1;2;3;4;5];;
 - : int = 15
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We had to add the `rec` keyword in the definition of `sum` to allow
-for the recursive call.  We can introduce more complicated list
+for `sum` to refer to itself.  We can introduce more complicated list
 patterns as well.  Here's a function for destuttering a list, _i.e._,
 for removing sequential duplicates.
 
@@ -370,11 +370,17 @@ val destutter : 'a list -> 'a list = <fun>
 - : string list = ["hey"; "man!"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But we don't have to build all of these functions ourselves using
-pattern matching and recursion.  Just like there's an `Option` module
-which contians useful functions for dealing with options, there's a
-`List` module with useful functions for dealing with lists.  For
-example:
+Note that in the above, we used another variant of the list pattern,
+`[hd]`, to match a list with a single element.  We can do this to
+match a list with any fixed number of elements, _e.g._, `[x;y;z]` will
+match any list with exactly three elements, and will bind those
+elements to the variables `x`, `y` and `z`.
+
+So far, we've built up all of our list functions using pattern
+matching and recursion.  But in practice, this isn't usually
+necessary.  Just like there's an `Option` module with useful functions
+for dealing with options, there's a `List` module with useful
+functions for dealing with lists.  For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # List.map ~f:String.length languages;;
@@ -385,11 +391,11 @@ example:
 transforming elements of that list, and returns to us a new list with
 the elements transformed.
 
-There's a new piece of syntax to learn here: labeled arguments.  The
-argument `double` is passed with a label, `~f`.  Labeled arguments can
-be put anywhere on the argument list, so we could just as well have
-written `List.map ~f:String.length languages` instead of `List.map
-languages ~f:String.length`
+There's another new piece of syntax to learn here: labeled arguments.
+The argument `double` is passed with a label, `~f`.  Labeled arguments
+can be put anywhere on the argument list, so we could just as well
+have written `List.map ~f:String.length languages` instead of
+`List.map languages ~f:String.length`
 
 ## Records and Variants
 
@@ -400,9 +406,9 @@ type to represent an body in a 2-dimensional n-body gravitational
 simulation.  Here's one way of doing it:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# type vec2d = { x: float; y: float };;
+# type vec2d = { x : float; y : float };;
 type vec2d = { x : float; y : float; }
-# type body = { mass: float; pos: vec2d; vel: vec2d };;
+# type body = { mass : float; pos : vec2d; vel : vec2d };;
 type body = { mass : float; pos : vec2d; vel : vec2d; }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
