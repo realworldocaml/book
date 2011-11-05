@@ -246,23 +246,6 @@ feedback.
 
 ## About the Authors
 
-### Yaron Minsky
-
-Yaron Minsky heads the Technology group at Jane Street, a proprietary
-trading firm that is the largest industrial user of OCaml.  He was
-responsible for introducing OCaml to the company and for managing the
-company's transition to using OCaml for all of its core
-infrastructure.  Today, billions of dollars worth of securities
-transactions flow each day through those systems.
-
-Yaron obtained his PhD in Computer Science from Cornell University,
-where he studied distributed systems.  Yaron has lectured, blogged and
-written about OCaml for years, with articles published in
-Communications of the ACM and the Journal of Functional Programming.
-He chairs the steering committee of the Commercial Users of Functional
-Programming, and is a member of the steering committee for the
-International Conference on Functional Programming.
-
 ### Jason Hickey
 
 Dr. Jason Hickey is a Software Engineer at Google Inc. in Mountain
@@ -299,6 +282,23 @@ Madhavapeddy is an active member of the open-source development community with
 the OpenBSD operating system, is co-chair of the Commercial Uses of Functional
 Programming workshop, and serves on the boards of startup companies such as
 Ashima Arts where OCaml is extensively used.
+
+### Yaron Minsky
+
+Yaron Minsky heads the Technology group at Jane Street, a proprietary
+trading firm that is the largest industrial user of OCaml.  He was
+responsible for introducing OCaml to the company and for managing the
+company's transition to using OCaml for all of its core
+infrastructure.  Today, billions of dollars worth of securities
+transactions flow each day through those systems.
+
+Yaron obtained his PhD in Computer Science from Cornell University,
+where he studied distributed systems.  Yaron has lectured, blogged and
+written about OCaml for years, with articles published in
+Communications of the ACM and the Journal of Functional Programming.
+He chairs the steering committee of the Commercial Users of Functional
+Programming, and is a member of the steering committee for the
+International Conference on Functional Programming.
 
 ## Advisers
 
