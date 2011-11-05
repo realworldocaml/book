@@ -243,23 +243,22 @@ feedback.
 
 ### Jason Hickey
 
-Dr. Jason Hickey is a Software Engineer at Google Inc. in Mountain
+Jason Hickey is a Software Engineer at Google Inc. in Mountain
 View, California.  He is part of the team that designs and develops
 the global computing infrastructure used to support Google services,
 including the software systems for managing and scheduling massively
 distributed computing resources.
 
-Prior to joining Google, Dr. Hickey was an Assistant Professor of
-Computer Science at Caltech.  He received the B.S. in Electrical
-Engineering from Caltech; the M.S. in Electrical Engineering from
-Cornell University; and the Ph.D. in Computer Science from Cornell
-University.  His research at Caltech was in reliable and
+Prior to joining Google, Jason was an Assistant Professor of Computer
+Science at Caltech, where his research was in reliable and
 fault-tolerant computing systems, including programming language
-design, formal methods, and new models of distributed computation.  He
-is the author of the MetaPRL system, a logical framework for design
-and analysis of large software systems; OMake, an advanced build
-system for large software projects.  He is the author of the textbook,
-An Introduction to Objective Caml (unpublished).
+design, formal methods, compilers, and new models of distributed
+computation.  He obtained his PhD in Computer Science from Cornell
+University, where he studied programming languages.  He is the author
+of the MetaPRL system, a logical framework for design and analysis of
+large software systems; OMake, an advanced build system for large
+software projects.  He is the author of the textbook, An Introduction
+to Objective Caml (unpublished).
 
 ### Anil Madhavapeddy
 
