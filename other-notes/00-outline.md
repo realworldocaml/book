@@ -1,4 +1,22 @@
-# Proposal for Real World OCaml
+# Proposal for ``Real World OCaml''
+
+## About the Book
+
+OCaml is a modern functional programming language with strong typing,
+fast native code output, automatic type inference and a wide array of
+mature libraries. This book introduces the basics of the language and
+how to set up a development environment, and includes recipes for many
+real-world tasks using the Core standard library. It also covers more
+advanced topics such as the module system, foreign-function interface,
+macro language and the ocamlbuild system.
+
+The book is aimed at the working programmer interested in using OCaml
+to solve day-to-day problems such as data processing, numerical
+computation, system scripting, or database-driven web applications.
+OCaml blends imperative, functional and object-oriented programming
+styles in one language, making it a pragmatic and fun choice for
+writing fast, succinct and readable systems code.
+
 
 ## Outline
 
@@ -168,26 +186,6 @@ This section will cover how to set up OCaml and Core on UNIX, MacOS
 and Windows.  There will be a link to an on-line version of this data
 that can be kept up-to-date.  Also, information will be given on how
 to set up an editor and a the interactive toplevel.
-
-## About
-
-> What the book is about, who needs to read it, and why. This should
-> be a couple of paragraphs.
-
-OCaml is a modern functional programming language with strong typing,
-fast native code output, automatic type inference and a wide array of
-mature libraries. This book introduces the basics of the language and
-how to set up a development environment, and includes recipes for many
-real-world tasks using the Core standard library. It also covers more
-advanced topics such as the module system, foreign-function interface,
-macro language and the ocamlbuild system.
-
-The book is aimed at the working programmer interested in using OCaml
-to solve day-to-day problems such as data processing, numerical
-computation, system scripting, or database-driven web applications.
-OCaml blends imperative, functional and object-oriented programming
-styles in one language, making it a pragmatic and fun choice for
-writing fast, succinct and readable systems code.
 
 ## Competition
 
