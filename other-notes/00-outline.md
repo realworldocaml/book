@@ -263,20 +263,21 @@ An Introduction to Objective Caml (unpublished).
 
 ### Anil Madhavapeddy
 
-Dr. Anil Madhavapeddy is a Senior Research Fellow at the University of
-Cambridge, based in the Systems Research Group. He was on the original team at
-Cambridge that developed the Xen hypervisor, and helped develop an
-industry-leading cloud management toolstack written entirely in OCaml. This
-XenServer product has been deployed on hundreds of thousands of physical hosts,
-and drives critical infrastructure for many Fortune 500 companies.
 
-Prior to obtaining his PhD in 2006 from the University of Cambridge, Dr.
-Madhavapeddy had a diverse background in industry at Network Appliance, NASA
-and Internet Vision.  In addition to professional and academic activities, Dr.
-Madhavapeddy is an active member of the open-source development community with
-the OpenBSD operating system, is co-chair of the Commercial Uses of Functional
-Programming workshop, and serves on the boards of startup companies such as
-Ashima Arts where OCaml is extensively used.
+Anil Madhavapeddy is a Senior Research Fellow at the University of
+Cambridge, based in the Systems Research Group. He was on the original team
+that developed the Xen hypervisor, and helped develop an industry-leading cloud
+management toolstack written entirely in OCaml. This XenServer product has been
+deployed on hundreds of thousands of physical hosts, and drives critical
+infrastructure for many Fortune 500 companies.
+
+Prior to obtaining his PhD in 2006 from the University of Cambridge, Anil had a
+diverse background in industry at Network Appliance, NASA and Internet Vision.
+In addition to professional and academic activities, he is an active member of
+the open-source development community with the OpenBSD operating system, is
+co-chair of the Commercial Uses of Functional Programming workshop, and serves
+on the boards of startup companies such as Ashima Arts where OCaml is
+extensively used.
 
 ### Yaron Minsky
 
