@@ -1,5 +1,7 @@
 # Proposal for Real World OCaml
 
+## Outline
+
 ### Part I : Core OCaml
 
 1. **A Guided Tour**: A guided tour through the language, all done
@@ -42,29 +44,26 @@
         give you more flexibility.
       - *Example*: define a full JSON definition and pretty printer
         using pattern matching.
-      - Explain how to parsing text into tokens and types using
-        the `ocamllex` and `ocamlyacc` tools. Also mention useful 
-        alternatives such as Menhir.
-      - *Example*: write a JSON parser.
 1. **Error Handling**: 
       - Explain the exceptions system, show how exceptions are
         defined, thrown and caught.
       - Explain the downsides of exceptions, and how and when to use
         them.
-      - Explain how to do error handling with values Option and
-        Result.
+      - Explain how to do more explicit error handling using the
+        `Option` and `Result` types.
 1. **Programming with Mutation**:
       - OCaml code can be purely functional, or use side-effects.
         This chapter will be about how to program with side-effects in
         OCaml.
-      - Introduce references and show how to use them.  Describe
-        OCaml's support for imperative code, including `for` and `while`
-        loops and sequencing operations with semicolons.
+      - Introduce references.  Describe OCaml's support for imperative
+        code, including `for` and `while` loops and sequencing
+        operations with semicolons.
       - Discuss records in more detail, including an explanation of
         mutable record fields.
       - Discuss OCaml's other mutable datastructures including arrays,
         strings, and hashtables.
-      - Eager evaluation, and the `lazy` keyword.
+      - Eager evaluation, and the `lazy` keyword. _[yminsky: this
+        seems out of place, no?]_
 1. **Modules**:
       - A basic introduction to modules, how they show up in the file
         system, how and why you should use interfaces.
@@ -87,11 +86,13 @@
 1. **Syntax Extensions**
       - The syntax extensions that come with Core, and how to use them
         and inspect the intermediate code that they generate.
-      - The key ones to cover are: `sexplib` for serialising a value to 
-        an s-expression string, and `fieldslib` and `variantslib` for
-        iterating over the fields of a record and variant respectively.
-      - Maybe also, `bin-prot` for binary protocols and `pa_compare`
-        for efficient comparison.
+      - The ones to cover are:
+         - `sexplib` for serialising a value to an s-expression string
+         - `fieldslib` and `variantslib` for providing first-class
+           values for interacting with record fields and variant
+           constructors and for iterating over them.
+         - `bin-prot` for efficient binary serialization
+         - `pa_compare` for efficient type-specific comparison
 
 ### Part II: Advanced Topics
 
@@ -104,10 +105,7 @@
       - Sharing constraints. *[jyh: This is pretty important, we might want
         it in basic modules.]* *[avsm: it does need functors or first-class
         modules to be explained first, so might be best left here?]*
-      - recursive modules *[yminsky: Do we want to cover this?  I've
-        personally never used recursive modules.  jyh: I think so, they
-        come up when making recursive type definitions involving abstract
-        types. ]*
+      - recursive modules
       - How to define generalised algebraic data types (GADTs), and some
         example uses for them (e.g. a type-safe interpreter).
 1. **Concurrent Programming**
@@ -156,10 +154,16 @@ This section is now about the internals of OCaml and helper tools:
 1. **Foreign Function Interface**: example of how to bind a library, and
    common pitfalls.
 1. **Camlp4**: a few examples of `camlp4` tools and
-   quotations/antiquotations (the XML parser might be quite a good one
-   here).
-1. **Ocamlbuild**: Cover more in depth how to set up a project with
+   quotations/antiquotations 
+    - *Example*: an embedded XML syntax.
+1. **OCamlbuild**: Cover more in depth how to set up a project with
    ocamlbuild, including the writing of ocamlbuild plugins.
+1. **ocamllex/ocamlyacc**
+    - Explain how to parsing text into tokens and types using
+      the `ocamllex` and `ocamlyacc` tools. Also mention useful 
+      alternatives such as Menhir.
+    - *Example*: write a JSON parser.
+
 
 ### Appendix: Installation and Configuration
 
@@ -243,6 +247,22 @@ feedback.
 ## About the Authors
 
 ### Yaron Minsky
+
+Yaron Minsky heads the Technology group at Jane Street, a proprietary
+trading firm that is the largest industrial user of OCaml.  He was
+responsible for introducing OCaml to the company and for managing the
+company's transition to using OCaml for all of its core
+infrastructure.  Today, billions of dollars worth of securities
+transactions flow each day through those systems.
+
+Yaron obtained his PhD in Computer Science from Cornell University,
+where he studied distributed systems.  Yaron has lectured, blogged and
+written about OCaml for years, with articles published in
+Communications of the ACM and the Journal of Functional Programming.
+He chairs the steering committee of the Commercial Users of Functional
+Programming, and is a member of the steering committee for the
+International Conference on Functional Programming.
+
 ### Jason Hickey
 ### Anil Madhavapeddy
 
@@ -275,5 +295,5 @@ feedback on the book drafts. These include:
 - Bryan O'Sullivan (author of Real World Haskell)
 - Martin Jambon (Wink)
 - Vincent Balat (author of js_of_ocaml and the Ocsigen framework)
-- Markus Mottl (author of many portions of the standard library)
+- Markus Mottl (author of many critical OCaml libraries)
 - Prashanth Mundkur (Nokia, author of Disco big data)
