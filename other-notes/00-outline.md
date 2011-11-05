@@ -208,9 +208,9 @@ features and a standard library such as Core.
 
 ### [OCaml for Scientists](http://www.ffconsultancy.com/products/ocaml_for_scientists/index.html)
 
-This book is written in 2005 for a scientific programmer seeking relief from
-FORTRAN and C++, and includes examples on building numerical code and
-OpenGL-based visualisation using OCaml. The book is self-published and
+This book was written in 2005 by a scientific computing programmer seeking
+relief from FORTRAN and C++, and includes examples on building numerical code
+and OpenGL-based visualisation using OCaml. The book is self-published and
 expensive (£85), and is also not as well-rounded as our proposed ``Real World
 OCaml''. We also describe how to build scalable concurrent network services,
 use database bindings, build foreign-function interfaces, and use the Core
