@@ -230,7 +230,7 @@ feedback.
 - *March 2012*: website infrastructure live for `realworldocaml.org`, with the
   authors using it privately to upload drafts and collaborate on writing.
 - *June 2012*: complete outline of all the chapters, with some text in place
-  to clarify book flow. Give our advisory group private access to the website
+  to clarify book flow. Give our advisory group access to the website
   to deliver early private comments.
 - *November 2012*: early draft chapters of the introduction and tools chapters,
   and open the website to the community for feedback.
