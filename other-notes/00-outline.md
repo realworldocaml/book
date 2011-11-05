@@ -70,7 +70,8 @@
         clocks, and a driver to run it from the top-level.
       - Tips for designing good module interfaces.
       - Effective use of modules, including interface components (like
-        `Comparable`, `Hashable`, `Sexpable` in Core)
+        `Comparable`, `Hashable`, `Sexpable` in Core), and how to use
+        sharing constraints.
       - How modules connect to files, the role of ml/mli files.
       - *Example*: use `Sexpable` to convert a vector clock into a wire
         representation.
@@ -101,10 +102,7 @@
         implementations of that type.
       - First-class modules, using a plug-in system as the motivating
         example.
-      - Sharing constraints. *[jyh: This is pretty important, we might want
-        it in basic modules.]* *[avsm: it does need functors or first-class
-        modules to be explained first, so might be best left here?]*
-      - recursive modules
+      - Recursive modules
       - How to define generalised algebraic data types (GADTs), and some
         example uses for them (e.g. a type-safe interpreter).
 1. **Concurrent Programming**
