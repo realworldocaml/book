@@ -1,2 +1,5 @@
 *~
 *.pdf
+*.native
+_build
+
