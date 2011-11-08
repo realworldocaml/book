@@ -7,14 +7,14 @@
 ## OCaml as a calculator
 
 We'll start our introduction to OCaml with the OCaml toplevel, an
-interactive shell that lets you type in expressions and evaluate them
-immediately.  When you get to the point of running real programs,
+interactive shell that lets you type in expressions and then evaluates
+them immediately.  When you get to the point of running real programs,
 you'll want to leave the toplevel behind, but it's a great tool for
 getting to know the language.
 
-Let's to spin up the toplevel and open the `Core.Std` module, which
-gives us access to Core's libraries.  Then we can take the toplevel
-out for a spin as a simple calculator.
+Let's spin up the toplevel and open the `Core.Std` module, which gives
+us access to Core's libraries.  Then we can take the toplevel out for
+a spin as a simple calculator.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ rlwrap ocaml
@@ -35,28 +35,19 @@ This looks a lot what you'd expect from any language, but there are a
 few differences that jump right out at you.
 
 - We needed to type `;;` in order to tell the toplevel that it should
-  evaluate an expression.  Note that this is a pecularity of the
-  toplevel, and is not required in compiled code.
-- After evaluating the expression, the toplevel spits out the type of
-  the value that was returned and a representation of the value
-  itself.
+  evaluate an expression.  This is a pecularity of the toplevel that
+  is not required in compiled code.
+- After evaluating an expression, the toplevel spits out both the type
+  of the result and a the result itself.
 - Function application in OCaml is syntactically unusual, in that
-  parens and commas are not needed to mark the arguments to a
-  functions.
-- OCaml separates strictly between `float`, the type for floating
-  point numbers and `int`.  They have different literals (_e.g._, `6.`
-  instead of `6`) and different infix operators (_e.g._, `+.` instead
-  of `+`).  This can be a bit of a nuisance, but it has its benefits,
-  since it makes it prevents some classes of bugs that arise from
-  confusion between the semantics of `int` and `float`.
-
-Another thing to be aware of is that infix operators like `+` can also
-be used in ordinary prefix style by wrapping the operator in parens.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# (+) 3 4;;
-- : int = 7
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  function arguments are written out separated by spaces, rather than
+  being demarcated by parens and commas.
+- OCaml carefully distinguishes between `float`, the type for floating
+  point numbers and `int`.  The types have different literals (_e.g._,
+  `6.` instead of `6`) and different infix operators (_e.g._, `+.`
+  instead of `+`).  This can be a bit of a nuisance, but it has its
+  benefits, since it makes it prevents some classes of bugs that arise
+  from confusion between the semantics of `int` and `float`.
 
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
@@ -79,6 +70,8 @@ The `let` syntax can also be used for creating functions:
 # let square x =
     x * x ;;
 val square : int -> int = <fun>
+# square (square 2);;
+- : int = 16
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now that we're creating more interesting values, the types have gotten
@@ -174,7 +167,7 @@ val big_number : int -> bool = <fun>
 - : int = 4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But, we can't mix and match two different types for `'a` in the same
+But we can't mix and match two different types for `'a` in the same
 use of `first_if_true`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,7 +179,7 @@ Error: This expression has type string but
     an expression was expected of type int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is because, even though the `'a` in the type of `first_if_true`
+We see an error because, while the `'a` in the type of `first_if_true`
 could be any type, it has to be the same type in all of the different
 places it appears.  This kind of genericity is called _parametric
 polymorphism_, and is very similar to generics in C# and Java.
@@ -195,11 +188,11 @@ polymorphism_, and is very similar to generics in C# and Java.
 
 ### Tuples
 
-So far, we've encountered a handful of basic types like `int`, `float`
-and `string`.  We've also encountered function types, like `string ->
-int`.  But we haven't yet talked about any datastructures.  We'll
-start by looking at a particularly simple datastructure, the tuple.
-Tuples are easy to create:
+So far we've encountered a handful of basic types like `int`, `float`
+and `string` as well as function types like `string -> int`.  But we
+haven't yet talked about any datastructures.  We'll start by looking
+at a particularly simple datastructure, the tuple.  Tuples are easy to
+create:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let tup = (3,"three")
@@ -251,7 +244,10 @@ val divide : int -> int -> int option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here, `Some` and `None` are explicit tags that are used to construct
-an optional value.  To get a value out of an option, we again use
+an optional value.  Note that this takes the place of null values in
+many languages.  [... explain about nullable values ...]
+
+To get a value out of an option, we again use
 pattern matching.  Consider the following simple function for printing
 a log entry given an optional time and a message.  If no time is
 provided (_i.e._, if the time is `None`), the current time is computed
@@ -453,6 +449,3 @@ We can also use OCaml's record-field access syntax:
 val mag : vec2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-
-
-     
