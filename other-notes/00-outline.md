@@ -111,9 +111,6 @@ writing fast, succinct and readable systems code.
            constructors and for iterating over them.
          - `bin-prot` for efficient binary serialization
          - `pa_compare` for efficient type-specific comparison
-
-### Part II: Advanced Topics
-
 1. **Advanced Modules**:
       - Using functors to reuse module code and improve abstraction.
       - *Example*: implement a heap module type, and binomial and leftist
@@ -156,7 +153,7 @@ writing fast, succinct and readable systems code.
       - *Example*: use `js_of_ocaml` to build a Canvas version of the earlier
         graphing library.
 
-### Part III: Tools and Internals
+### Part II: Tools and Internals
 
 This section is now about the internals of OCaml and helper tools:
 
