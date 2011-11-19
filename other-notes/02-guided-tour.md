@@ -397,55 +397,56 @@ have written `List.map ~f:String.length languages` instead of
 
 So far, we've only looked at datastructures that were pre-defined in
 the language, like lists and tuples.  But OCaml also allows us to
-define our own datatypes from scratch.  Suppose you wanted to define a
-type to represent an body in a 2-dimensional n-body gravitational
-simulation.  Here's one way of doing it:
+define our own datatypes from scratch.  Here's a toy example of a
+datatype representing a point in 2-dimensional space:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # type vec2d = { x : float; y : float };;
 type vec2d = { x : float; y : float; }
-# type body = { mass : float; pos : vec2d; vel : vec2d };;
-type body = { mass : float; pos : vec2d; vel : vec2d; }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The types `vec2d` and `body` are _record_ types, where `vec2d` is used
-to represent a 2-dimensional vector, and `body` is the full
-description of a body in the simulation, including its position,
-velocity and mass.
-
-We can construct values of these types: 
+`vec2d` is a _record_ type, which you can think of as a tuple where
+the individual fields are named, rather than being defined
+positionally.  Record types are easy enough to construct:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# { x = 3.; y = -4. };;
-- : vec2d = {x = 3.; y = -4.}
-# { mass = 34.;
-    pos = { x = 7.5; y = 2.3 };
-    vel = { x = 0.34; y = 0.22 };
-  };;
-- : body = {mass = 34.; pos = {x = 7.5; y = 2.3};
-            vel = {x = 0.34; y = 0.22}}
+# let v = { x = 3.; y = -4. };;
+val v : vec2d = {x = 3.; y = -4.}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 And we can get access to the contents of these types using pattern
 matching:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-# let mag { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
-val mag : vec2d -> float = <fun>
+# let magnitude { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
+val magnitude : vec2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-In the case where the name of the variables we want to bind are the
-same as the record names, we can make this even terser:
+In the case where we're happy to name the pieces of the record after
+the field names, we can use an even terser form of pattern matching,
+where we omit the `= x`, as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-# let mag { x; y } = sqrt (x ** 2. +. y ** 2.);;
-val mag : vec2d -> float = <fun>
+# let rot90 { x; y } = { x = -. y; y = x }
+val rot90 : vec2d -> vec2d = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-We can also use OCaml's record-field access syntax:
+We can also use dot-syntax for accessing record fields, as we do
+below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-# let mag vec = sqrt (vec.x ** 2. +. vec.y ** 2.);;
-val mag : vec2d -> float = <fun>
+# let dot_product v1 v2 = v1.x *. v2.x +. v1.y *. v2.y;;
+val dot_product : vec2d -> vec2d -> float = <fun>
+# dot_product v (rot90 v);;
+- : float = 0.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+And we can of course include our newly defined types as components in
+larger types, for example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# type circle = { center: vec2d; radius: float } ;;
+# type rect = { lower_left: vec2d; width: float; height:float } ;;
+# type segment = { endpoint1: vec2d; endpoint2: vec2d } ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
