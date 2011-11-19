@@ -67,8 +67,7 @@ variable, in addition to its type and value.
 The `let` syntax can also be used for creating functions:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# let square x =
-    x * x ;;
+# let square x = x * x ;;
 val square : int -> int = <fun>
 # square (square 2);;
 - : int = 16
