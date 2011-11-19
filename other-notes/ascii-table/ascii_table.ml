@@ -12,9 +12,6 @@ let render_separator widths =
   in
   "|" ^ String.concat ~sep:"+" pieces ^ "|"
 
-
-
-
 let add_separators ~inner row =
   String.concat ["|";String.concat ~sep:inner row;"|"]
 
@@ -39,7 +36,7 @@ let check_input header rows =
         i (List.length row) num_columns ()
   )
 
-let render_table header rows =
+let render header rows =
   check_input header rows;
   let widths = compute_max_widths header rows in
   String.concat ~sep:"\n"
@@ -51,10 +48,10 @@ let render_table header rows =
 type 'a column = string * ('a -> string)
 let column header to_string = (header,to_string)
 
-let render_columns columns rows =
+let column_render columns rows =
   let header = List.map columns ~f:fst in
   let rows = List.map rows ~f:(fun row ->
     List.map columns ~f:(fun (_,to_string) -> to_string row))
   in
-  render_table header rows
+  render header rows
 

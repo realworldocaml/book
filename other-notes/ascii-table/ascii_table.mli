@@ -13,5 +13,5 @@ val render_table
 type 'a column
 val column : string -> ('a -> string) -> 'a column
 
-val render_columns :
+val column_render :
   'a column list -> 'a list -> string

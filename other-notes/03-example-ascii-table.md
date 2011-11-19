@@ -3,9 +3,8 @@
 One common programming task is displaying tabular data.  In this
 example, will go over the design of a simple library to do just that.
 
-The right way to design an OCaml library is to start with the
-interface.  Here's a first cut for the interface to our new module,
-`Text_table`, which contains a single function, `render`.
+We'll start with the interface.  We'll put this code in a new module
+called `Text_table`, and that module will have a single function that
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (* [render headers rows] returns a string containing a formatted
@@ -21,11 +20,12 @@ If you invoke `render` as follows:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 let () =
   print_string (Text_table.render
-     ["language";"architect";"style"]
-     [ ["simula";"who?";"object-oriented"]
-       ["ocaml";"Xavier Leroy";"functional"];
-       ["scala";"Martin Odersky";"OO/functional"];
-      ])
+     ["language";"architect";"first release"]
+     [ ["Lisp";"John McCarthy";"1958"] ;
+       ["C"; "Dennis Ritchie"; "1969" ] ;
+       ["ML";"Robin Milner";"1973"] ;
+       ["OCaml";"Xavier Leroy";"1996"] ;
+     ])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You'll get string output that looks like this:
@@ -33,23 +33,23 @@ You'll get string output that looks like this:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | language | architect      | first release |
 |----------+----------------+---------------|
-| Lisp     | John McCarthy  | 1962          |
-| C        | Who?           | 1973          |
-| ML       | Robin Milner   | 1976          |
-| OCaml    | Xavier Leroy   | 1992          |
-| Scala    | Martin Odersky | 1998          |
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now that we know how it's supposed t work, let's dive into the
+Now that we know what `render` is supposed to do, let's dive into the
 implementation.
 
 ### Computing the widths
 
-In order to render a table, we first need to compute the width of the
-widest entry in each column.  The following function does just that.
+To render the rows of the table, we'll first need the width of the
+widest entry in each column.  The following function computes just
+that.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-let compute_max_widths header rows =
+let max_widths header rows =
   let to_lengths l = List.map ~f:String.length l in
   List.fold rows
     ~init:(to_lengths header)
@@ -57,7 +57,7 @@ let compute_max_widths header rows =
       List.map2_exn ~f:Int.max acc (to_lengths row))
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First, we define a helper function, `to_lengths`, which uses
+In the above we define a helper function, `to_lengths` which uses
 `List.map` and `String.length` to convert a list of strings to a list
 of string lengths.  Then, starting with the lengths of the headers, we
 use `List.fold` to join in the lengths of the elements of each row by
@@ -99,30 +99,27 @@ We need the extra two-characters for each entry to account for the one
 character of padding on each side of a string in the table.
 
 #### Note: Performance of `String.concat` and `^`
-_[yminsky: need some way of segmenting the following out nicely]_
 
-In the above, we're using two different ways of concatenating strings,
-`String.concat`, which operates on lists of strings, and `^`, which is
-a pairwise operator.  Note that for long collections of strings to be
-joined, you should avoid `^`, since, it allocates new strings every
-time it's run.  Thus, the following code:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
-code:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-let s = String.concat [".";".";".";".";".";".";"."]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-allocates one string of size 7, as well as a list of length 7.  At
-these small sizes, the differences don't amount ot much, but for
-assembling of large strings, it can be a very serious issue.
-
-_[yminsky: end the note here]_
+> In the above, we're using two different ways of concatenating strings,
+> `String.concat`, which operates on lists of strings, and `^`, which is
+> a pairwise operator.  Note that for long collections of strings to be
+> joined, you should avoid `^`, since, it allocates new strings every
+> time it's run.  Thus, the following code:
+>
+> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
+> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>
+> will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
+> code:
+>
+> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> let s = String.concat [".";".";".";".";".";".";"."]
+> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>
+> allocates one string of size 7, as well as a list of length 7.  At
+> these small sizes, the differences don't amount ot much, but for
+> assembling of large strings, it can be a serious performance issue.
 
 We can write a very similar piece of code for rendering the data in a
 an ordinary row.
@@ -139,3 +136,133 @@ let render_row row widths =
   "|" ^ String.concat ~sep:"|" pieces ^ "|"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+You might note that `render_row` and `render_separator` share a bit of
+structure in that last line.  We can improve the code a bit by
+factoring that repeated structure out:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let decorate_row ~sep row = "|" ^ String.concat ~sep row ^ "|"
+
+let render_row widths row =
+  decorate_row ~sep:"|"
+    (List.map2_exn row widths ~f:(fun s w -> " " ^ pad s w ^ " "))
+
+let render_separator widths =
+  decorate_row ~sep:"+"
+    (List.map widths ~f:(fun width -> String.make (width + 2) '-'))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Bringing it all together
+
+And now we can write the function for rendering a full table.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let render header rows =
+  let widths = max_widths header rows in
+  String.concat ~sep:"\n"
+    (render_row widths header
+     :: render_separator widths
+     :: List.map rows ~f:(fun row -> render_row widths row)
+    )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, let's think about how you might actually use this interface in
+practice.  Usually, when you have data to render in a table, that data
+comes in the form of a list of objects of some sort, where you need to
+extract data from each record for each of the columns.  So, imagine
+that you start off with a record type for representing information
+about a given programming language:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+type style =
+    Object_oriented | Functional | Imperative | Logic
+type prog_lang = { name: string;
+                   architect: string;
+                   year_released: int;
+                   style: style list;
+                 }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If we then wanted to render a table from a list of languages, we might
+write something like this:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let print_langs langs =
+   let headers = ["name";"architect";"year released"] in
+   let to_row lang =
+     [lang.name; lang.architect; Int.to_string lang.year_released ]
+   in
+   print_string (Text_table.render headers (List.map ~f:to_row langs))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This works fine, but as you consider more complicated tables with more
+columns, it becomes easier to make the mistake of having a mismatch
+between `headers` and `to_row`.  Also, reordering columns or rendering
+with a subset of the columns becomes awkward, because changes need to
+be made in two places.
+
+We can improve the table API by adding a type which is a first-class
+representative for a column.  We'd add the following to the interface
+of `Text_table`:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(** An ['a column] is a specification of a column for rending a table
+    of values of type ['a] *)
+type 'a column
+
+(** [column header to_entry] returns a new column given a header and a
+    function for extracting the text entry from the data associated
+    with a row *)
+val column : string -> ('a -> string) -> 'a column
+
+(** [column_render columns rows] Renders a table with the specified
+    columns and rows *)
+val column_render :
+  'a column list -> 'a list -> string
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, the `column` functions creates a column from the header and from
+a function for extracting the text entry for that column from the row
+data.  The implementation of this is quite simple, given what we have
+so far.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+type 'a column = string * ('a -> string)
+let column header to_string = (header,to_string)
+
+let column_render columns rows =
+  let header = List.map columns ~f:fst in
+  let rows = List.map rows ~f:(fun row ->
+    List.map columns ~f:(fun (_,to_string) -> to_string row))
+  in
+  render header rows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And we can now use this interface for rewriting `print_langs` in a way
+that solves the problems I mentioned earlier.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let print_langs langs =
+  let colums =
+    [ Text_table.column "Name"      (fun x -> x.name);
+      Text_table.column "Architect" (fun x -> x.architect);
+      Text_table.column "Year Released"
+         (fun x -> Int.to_string x.year_released);
+    ]
+  in
+  print_string (Text_table.column_render columns langs)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The code is a bit longer, but it's now less error prone.  In
+particular, several errors that might be made by the user are now
+ruled out by the type system.  For example, it's no longer possible
+for the lengths of the headers and the lengths of the rows to be
+mismatched.
+
+Also, if you want a richer interface where different columns can be
+specialized to have different formatting and alignment rules, this
+becomes easier and more natural when you have a type that explicitly
+represents a column.  Indeed, `Core_extended` contains a library
+called `Ascii_table` which is based on the basic design shown here,
+and has more formatting options that can be built into the column
+type.
