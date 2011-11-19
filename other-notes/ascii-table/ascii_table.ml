@@ -6,6 +6,15 @@ let compute_max_widths header rows =
     ~init:(to_lengths header)
     ~f:(fun acc row -> List.map2_exn ~f:Int.max acc (to_lengths row))
 
+let render_separator widths =
+  let pieces = List.map widths
+    ~f:(fun width -> String.make (width + 2) '-')
+  in
+  "|" ^ String.concat ~sep:"+" pieces ^ "|"
+
+
+
+
 let add_separators ~inner row =
   String.concat ["|";String.concat ~sep:inner row;"|"]
 
