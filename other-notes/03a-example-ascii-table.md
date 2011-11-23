@@ -3,8 +3,8 @@
 One common programming task is displaying tabular data.  In this
 example, will go over the design of a simple library to do just that.
 
-We'll start with the interface.  We'll put this code in a new module
-called `Text_table`, and that module will have a single function that
+We'll start with the interface.  The code will go in a new module
+called `Text_table` whose mli contains just the following function:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (* [render headers rows] returns a string containing a formatted
@@ -21,14 +21,14 @@ If you invoke `render` as follows:
 let () =
   print_string (Text_table.render
      ["language";"architect";"first release"]
-     [ ["Lisp";"John McCarthy";"1958"] ;
-       ["C"; "Dennis Ritchie"; "1969" ] ;
-       ["ML";"Robin Milner";"1973"] ;
-       ["OCaml";"Xavier Leroy";"1996"] ;
+     [ ["Lisp" ;"John McCarthy" ;"1958"] ;
+       ["C"    ;"Dennis Ritchie";"1969"] ;
+       ["ML"   ;"Robin Milner"  ;"1973"] ;
+       ["OCaml";"Xavier Leroy"  ;"1996"] ;
      ])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You'll get string output that looks like this:
+you'll get the following output:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | language | architect      | first release |
@@ -45,8 +45,7 @@ implementation.
 ### Computing the widths
 
 To render the rows of the table, we'll first need the width of the
-widest entry in each column.  The following function computes just
-that.
+widest entry in each column.  The following function does just that.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 let max_widths header rows =
@@ -90,7 +89,7 @@ Let's start with the separator row, which we can generate as follows:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 let render_separator widths =
   let pieces = List.map widths
-    ~f:(fun width -> String.make (width + 2) '-')
+    ~f:(fun w -> String.make (w + 2) '-')
   in
   "|" ^ String.concat ~sep:"+" pieces ^ "|"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,11 +99,11 @@ character of padding on each side of a string in the table.
 
 #### Note: Performance of `String.concat` and `^`
 
-> In the above, we're using two different ways of concatenating strings,
-> `String.concat`, which operates on lists of strings, and `^`, which is
-> a pairwise operator.  Note that for long collections of strings to be
-> joined, you should avoid `^`, since, it allocates new strings every
-> time it's run.  Thus, the following code:
+> In the above, we're using two different ways of concatenating
+> strings, `String.concat`, which operates on lists of strings, and
+> `^`, which is a pairwise operator.  You should avoid `^` for joining
+> long numbers of strings, since, it allocates a new string every time
+> it runs.  Thus, the following code:
 >
 > ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 > let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
@@ -137,8 +136,8 @@ let render_row row widths =
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You might note that `render_row` and `render_separator` share a bit of
-structure in that last line.  We can improve the code a bit by
-factoring that repeated structure out:
+structure.  We can improve the code a bit by factoring that repeated
+structure out:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 let decorate_row ~sep row = "|" ^ String.concat ~sep row ^ "|"
@@ -221,10 +220,9 @@ val column_render :
   'a column list -> 'a list -> string
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, the `column` functions creates a column from the header and from
-a function for extracting the text entry for that column from the row
-data.  The implementation of this is quite simple, given what we have
-so far.
+Thus, the `column` functions creates a `column` from a header string
+and a function for extracting the text for that column associated with
+a given row.  Implementing this interface is quite simple:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 type 'a column = string * ('a -> string)
@@ -238,8 +236,7 @@ let column_render columns rows =
   render header rows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And we can now use this interface for rewriting `print_langs` in a way
-that solves the problems I mentioned earlier.
+And we can rewrite `print_langs` to use this new interface as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 let print_langs langs =
@@ -253,16 +250,14 @@ let print_langs langs =
   print_string (Text_table.column_render columns langs)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The code is a bit longer, but it's now less error prone.  In
+The code is a bit longer, but it's also less error prone.  In
 particular, several errors that might be made by the user are now
 ruled out by the type system.  For example, it's no longer possible
-for the lengths of the headers and the lengths of the rows to be
+for the length of the header and the lengths of the rows to be
 mismatched.
 
-Also, if you want a richer interface where different columns can be
-specialized to have different formatting and alignment rules, this
-becomes easier and more natural when you have a type that explicitly
-represents a column.  Indeed, `Core_extended` contains a library
-called `Ascii_table` which is based on the basic design shown here,
-and has more formatting options that can be built into the column
-type.
+The simple column-based interface described here is a good starting
+for building a richer API.  You could for example build specialized
+colums with different formatting and alignment rules, which is easier
+to do with this interface than with the original one based on passing
+in lists-of-lists.
