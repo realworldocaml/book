@@ -441,11 +441,34 @@ val dot_product : vec2d -> vec2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 And we can of course include our newly defined types as components in
-larger types, for example:
+larger types, as in the following types that represent different
+shapes.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # type circle = { center: vec2d; radius: float } ;;
-# type rect = { lower_left: vec2d; width: float; height:float } ;;
+# type rect = { lower_left: vec2d; width: float; height: float } ;;
 # type segment = { endpoint1: vec2d; endpoint2: vec2d } ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, imagine that you wanted a more complex data structure that needs
+to combine multiple of these scene objects together, such as a
+description of a scene containing multiple objects.  You need some
+unified way of representing these objects together in a unified type.
+One way of doing this is using a _variant_ type:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+type shape = | Circle of circle
+             | Rect of rect
+             | Segment of segment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Record types and tuples are ways of combining multiple different types
+together into a single value.  Variants are a way of combining
+different types as different possibilities.  Instead of having a
+circle _and_ a rectangle _and_ a line segment, we have a circle _or_ a
+rectangle _or_ a line segment.  Here's some simple code for
+determining whether a given `vec2d` is contained in a given shape.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
