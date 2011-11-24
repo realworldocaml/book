@@ -1,6 +1,6 @@
 | Chapter                              | Author |
 |--------------------------------------+--------|
-| A Guided Tour                        | !yaron |
+| A Guided Tour                        | yaron |
 | Expressions, Variables and Functions |        |
 | Lists, Options and Pattern-matching  |        |
 | Algebraic Data Types                 |        |
