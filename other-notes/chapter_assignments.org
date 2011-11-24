@@ -1,0 +1,19 @@
+| Chapter                              | Author |
+|--------------------------------------+--------|
+| A Guided Tour                        | !yaron |
+| Expressions, Variables and Functions |        |
+| Lists, Options and Pattern-matching  |        |
+| Algebraic Data Types                 |        |
+| Error Handling                       |        |
+| Programming with Mutation            |        |
+| Modules                              |        |
+| Advanced Modules                     |        |
+| Synchronous I/O                      |        |
+| Syntax Extensions                    | yaron  |
+| Concurrent Programming               |        |
+| Objects                              | jason  |
+| Tuning the Runtime                   | anil   |
+| Foreign Function Interface           | anil   |
+| Camlp4                               | anil   |
+| OCamlbuild                           | anil   |
+| ocamllex/ocamlyacc                   | anil   |
