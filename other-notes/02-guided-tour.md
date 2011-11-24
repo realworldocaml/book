@@ -117,7 +117,7 @@ The types are quickly getting more complicated, and you might at this
 point ask yourself how OCaml determines these types in the first
 place.  Roughly speaking, OCaml infers the type of an expression from
 what it already knows about the types of the elements of that
-expression through a process called _type-inference_.  As an example,
+expression.  This process is called _type-inference_.  As an example,
 in `abs_change`, the fact that `abs_diff` takes two integer arguments
 lets the compiler infer that `x` is an `int` and that `f` returns an
 `int`.
@@ -137,18 +137,18 @@ otherwise.  So what's the type of `first_if_true`?  There are no
 obvious clues such as arithmetic operators to tell you what the type
 of `x` and `y` are.  Indeed, it seems like one could use this
 `first_if_true` on values of any type, as long as `test` was able to
-operate on that type.  Indeed, if we look at the type returned by the
-toplevel:
+take that type as an input.  Indeed, if we look at the type returned
+by the toplevel:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 we see that rather than choose a particular type for the value being
-tested, OCaml has introduced a _type variable_ `'a`.  This is how you
-express in the type system that the value in question is generic, and
-can be used with any type substituted in for `'a`.  So, we can
-write:
+tested, OCaml has introduced a _type variable_ `'a`.  Type variables
+are used to express that a type is generic.  So, a type containing a
+type variable `'a` can be used in a context where `'a` is replaced
+with any concrete type.  So, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let long_string s = String.length s > 3;;
@@ -166,8 +166,8 @@ val big_number : int -> bool = <fun>
 - : int = 4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But we can't mix and match two different types for `'a` in the same
-use of `first_if_true`:
+But we can't mix and match two different concrete types for `'a` in
+the same use of `first_if_true`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # first_if_true big_number "foo" "bar";;
@@ -178,10 +178,11 @@ Error: This expression has type string but
     an expression was expected of type int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We see an error because, while the `'a` in the type of `first_if_true`
-could be any type, it has to be the same type in all of the different
-places it appears.  This kind of genericity is called _parametric
-polymorphism_, and is very similar to generics in C# and Java.
+While the `'a` in the type of `first_if_true` can be instantiated as
+any concrete type, it has to be the same concrete type in all of the
+different places it appears.  This kind of genericity is called
+_parametric polymorphism_, and is very similar to generics in C# and
+Java.
 
 ## Tuples, Options, Lists and Pattern-matching
 
@@ -190,8 +191,8 @@ polymorphism_, and is very similar to generics in C# and Java.
 So far we've encountered a handful of basic types like `int`, `float`
 and `string` as well as function types like `string -> int`.  But we
 haven't yet talked about any datastructures.  We'll start by looking
-at a particularly simple datastructure, the tuple.  Tuples are easy to
-create:
+at a particularly simple datastructure, the tuple.  You can create a
+tuple by joining values together with a comma:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let tup = (3,"three")
@@ -218,7 +219,7 @@ val distance : float * float -> float * float -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can make this code more concise by doing the pattern matching on
-the arguments to the function directly:
+the arguments to the function directly.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let distance (x1,y1) (x2,y2) =
@@ -243,12 +244,24 @@ val divide : int -> int -> int option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here, `Some` and `None` are explicit tags that are used to construct
-an optional value.  Note that this takes the place of null values in
-many languages.  [... explain about nullable values ...]
+an optional value.  
 
-To get a value out of an option, we again use
-pattern matching.  Consider the following simple function for printing
-a log entry given an optional time and a message.  If no time is
+Options are important because they are the standard way in OCaml to
+encode a value that might not be there.  By default, values in OCaml
+are non-nullable, so if you have a function that takes an argument of
+type `string`, it's guaranteed to actually get a well-defined value of
+type `string` when it is invoked.  This is different from most other
+languages, including Java and C#, where objects are by default
+nullable, and as a result, the type system does little to defend you
+from null pointer exceptions at runtime.
+
+Given that in OCaml ordinary values are not nullable, you need some
+other way of representing values that might not be there, and the
+`option` type is the most common solution.
+
+To get a value out of an option, we use pattern matching, as we did
+with tuples.  Consider the following simple function for printing a
+log entry given an optional time and a message.  If no time is
 provided (_i.e._, if the time is `None`), the current time is computed
 and used in its place.
 
@@ -284,8 +297,9 @@ expression.  As with `print_log_entry`, the pattern can also create
 new variables, giving a name to sub-components of the datastructure
 being matched.
 
-Core has a whole module full of useful functions for dealing with
-options.  For example, we could rewrite `print_log_entry` using
+But we don't necessarily need to use the `match` statement in this
+case.  Core has a whole module full of useful functions for dealing
+with options.  For example, we could rewrite `print_log_entry` using
 `Option.value`, which returns the content of an option, or a default
 value if the option is `None`.
 
@@ -348,9 +362,9 @@ Here is an example of a value that is not matched:
 _::[]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-this is warning you that you missed a case, in particular, the case of
-a list with one element.  That's easy enough to fix by adding another
-case:
+This is warning you that we've missed something, in particular that
+our code doesn't handle one-element lists.  That's easy enough to fix
+by adding another case to the match:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # let rec destutter list =
@@ -384,20 +398,22 @@ functions for dealing with lists.  For example:
 
 `List.map` is a function that takes a list and a function for
 transforming elements of that list, and returns to us a new list with
-the elements transformed.
+the transformed elements.
 
 There's another new piece of syntax to learn here: labeled arguments.
-The argument `double` is passed with a label, `~f`.  Labeled arguments
-can be put anywhere on the argument list, so we could just as well
-have written `List.map ~f:String.length languages` instead of
-`List.map languages ~f:String.length`
+`String.length` is passed with the label, `~f`.  Labeled arguments are
+arguments that are specified by name rather than position, which means
+they can be passed in any order.  Thus, we could have written
+`List.map ~f:String.length languages` instead of `List.map languages
+~f:String.length`.  We'll see why labels are important in Chapter
+_{??Functions??}_.
 
 ## Records and Variants
 
 So far, we've only looked at datastructures that were pre-defined in
 the language, like lists and tuples.  But OCaml also allows us to
-define our own datatypes from scratch.  Here's a toy example of a
-datatype representing a point in 2-dimensional space:
+define new datatypes.  Here's a toy example of a datatype representing
+a point in 2-dimensional space:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # type vec2d = { x : float; y : float };;
@@ -421,28 +437,27 @@ matching:
 val magnitude : vec2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-In the case where we're happy to name the pieces of the record after
-the field names, we can use an even terser form of pattern matching,
-where we omit the `= x`, as follows.
+In the case where we want to name the value in a record field after
+the name of that field, we can write the pattern match even more
+tersely.  Instead of writing `{ x = x }` to name a variable `x` for
+the value of field `x`, we can write `{ x }`.  Using this, we can
+rewrite the magnitude function as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-# let rot90 { x; y } = { x = -. y; y = x }
-val rot90 : vec2d -> vec2d = <fun>
+# let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-We can also use dot-syntax for accessing record fields, as we do
-below.
+We can also use dot-syntax for accessing record fields:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-# let dot_product v1 v2 = v1.x *. v2.x +. v1.y *. v2.y;;
-val dot_product : vec2d -> vec2d -> float = <fun>
-# dot_product v (rot90 v);;
-- : float = 0.
+# let distance v1 v2 =
+     magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
+val distance : vec2d -> vec2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 And we can of course include our newly defined types as components in
-larger types, as in the following types that represent different
-shapes.
+larger types, as in the following types, each of which representing a
+different geometric object.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # type circle = { center: vec2d; radius: float } ;;
@@ -450,25 +465,42 @@ shapes.
 # type segment = { endpoint1: vec2d; endpoint2: vec2d } ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now, imagine that you wanted a more complex data structure that needs
-to combine multiple of these scene objects together, such as a
-description of a scene containing multiple objects.  You need some
-unified way of representing these objects together in a unified type.
-One way of doing this is using a _variant_ type:
+Now, imagine that you want to combine multiple of these scene objects
+together, say as a description scene containing multiple objects.  You
+need some unified way of representing these objects together in a
+single type.  One way of doing this is using a _variant_ type:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-type shape = | Circle of circle
-             | Rect of rect
-             | Segment of segment
+# type shape = | Circle of circle
+               | Rect of rect
+               | Segment of segment;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Record types and tuples are ways of combining multiple different types
-together into a single value.  Variants are a way of combining
-different types as different possibilities.  Instead of having a
-circle _and_ a rectangle _and_ a line segment, we have a circle _or_ a
-rectangle _or_ a line segment.  Here's some simple code for
-determining whether a given `vec2d` is contained in a given shape.
+You can think of a variant as a way of combining different types as
+different possibilities.  The `|` character separates the different
+cases of the variant, and each case has a tag (like `Circle`, `Rect`
+and `Segment`) to distinguish each case from the other.  Here's how we
+might write a function for testing whether a point is in the interior
+of one of a list of `shape`s.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# let is_inside_shape vec shape =
+     match shape with
+     | Circle { center; radius } ->
+       distance center vec < radius
+     | Rect { lower_left; width; height } ->
+       vec.x > lower_left.x && vec.x < lower_left.x +. width
+       && vec.y > lower_left.y && vec.y < lower_left.y +. height
+     | Segment _ -> false
+     ;;
+val is_inside_shape : vec2d -> shape -> bool = <fun>
+# let is_inside_shapes vec shapes =
+     List.for_all shapes ~f:(fun shape -> is_inside_shape vec shape)
+val is_inside_shapes : vec2d -> shape list -> bool = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+You might at this point notice that the use of `match` here is
+reminiscent of how we used `match` with `option` and `list`.  This is
+no accident: `option` and `list` are really just examples of variant
+types that happen to be important enough to be defined in the standard
+library (and in the case of lists, to have some special syntax).
