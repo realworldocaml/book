@@ -6,6 +6,7 @@ example, will go over the design of a simple library to do just that.
 We'll start with the interface.  The code will go in a new module
 called `Text_table` whose mli contains just the following function:
 
+[source,ocaml]
 -----------------------------------------------------------
 (* [render headers rows] returns a string containing a formatted
    text table, using unix-style newlines as separators *)
@@ -17,6 +18,7 @@ val render
 
 If you invoke `render` as follows:
 
+[source]
 -----------------------------------------------------------
 let () =
   print_string (Text_table.render
@@ -30,14 +32,14 @@ let () =
 
 you'll get the following output:
 
------------------------------------------------------------
+........................................................
 | language | architect      | first release |
 |----------+----------------+---------------|
 | Lisp     | John McCarthy  | 1958          |
 | C        | Dennis Ritchie | 1969          |
 | ML       | Robin Milner   | 1973          |
 | OCaml    | Xavier Leroy   | 1996          |
------------------------------------------------------------
+........................................................
 
 Now that we know what `render` is supposed to do, let's dive into the
 implementation.
@@ -47,6 +49,7 @@ implementation.
 To render the rows of the table, we'll first need the width of the
 widest entry in each column.  The following function does just that.
 
+[source]
 -----------------------------------------------------------
 let max_widths header rows =
   let to_lengths l = List.map ~f:String.length l in
@@ -74,18 +77,20 @@ Now we need to write the code to render a single row.  There are
 really two different kinds of rows that need to be rendered: an
 ordinary row:
 
------------------------------------------------------------
+......................................................
 | Lisp     | John McCarthy  | 1962          |
------------------------------------------------------------
+......................................................
 
 and a separator row:
 
------------------------------------------------------------
+......................................................
 |----------+----------------+---------------|
------------------------------------------------------------
+......................................................
+
 
 Let's start with the separator row, which we can generate as follows:
 
+[source]
 -----------------------------------------------------------
 let render_separator widths =
   let pieces = List.map widths
@@ -105,6 +110,7 @@ strings, `String.concat`, which operates on lists of strings, and
 long numbers of strings, since, it allocates a new string every time
 it runs.  Thus, the following code:
 
+[source]
 -----------------------------------------------------------
 let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
 -----------------------------------------------------------
@@ -112,6 +118,7 @@ let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
 will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
 code:
 
+[source]
 -----------------------------------------------------------
 let s = String.concat [".";".";".";".";".";".";"."]
 -----------------------------------------------------------
@@ -124,6 +131,7 @@ assembling of large strings, it can be a serious performance issue.
 We can write a very similar piece of code for rendering the data in a
 an ordinary row.
 
+[source]
 -----------------------------------------------------------
 let pad s length =
   if String.length s >= length then s
@@ -140,6 +148,7 @@ You might note that `render_row` and `render_separator` share a bit of
 structure.  We can improve the code a bit by factoring that repeated
 structure out:
 
+[source]
 -----------------------------------------------------------
 let decorate_row ~sep row = "|" ^ String.concat ~sep row ^ "|"
 
@@ -156,6 +165,7 @@ let render_separator widths =
 
 And now we can write the function for rendering a full table.
 
+[source]
 -----------------------------------------------------------
 let render header rows =
   let widths = max_widths header rows in
@@ -173,6 +183,7 @@ extract data from each record for each of the columns.  So, imagine
 that you start off with a record type for representing information
 about a given programming language:
 
+[source]
 -----------------------------------------------------------
 type style =
     Object_oriented | Functional | Imperative | Logic
@@ -186,6 +197,7 @@ type prog_lang = { name: string;
 If we then wanted to render a table from a list of languages, we might
 write something like this:
 
+[source]
 -----------------------------------------------------------
 let print_langs langs =
    let headers = ["name";"architect";"year released"] in
@@ -205,6 +217,7 @@ We can improve the table API by adding a type which is a first-class
 representative for a column.  We'd add the following to the interface
 of `Text_table`:
 
+[source]
 -----------------------------------------------------------
 (** An ['a column] is a specification of a column for rending a table
     of values of type ['a] *)
