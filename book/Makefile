@@ -17,5 +17,8 @@ all.tmp: 00-outline.adoc \
           04a-example-ascii-table.adoc
 	cat $^ > all.tmp
 
-all.html: all.tmp
+all-sh.html: all.tmp
 	asciidoc -b xhtml11 $^
+
+all.html: all.tmp
+	a2x -f xhtml $^
