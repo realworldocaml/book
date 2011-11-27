@@ -6,7 +6,7 @@ example, will go over the design of a simple library to do just that.
 We'll start with the interface.  The code will go in a new module
 called `Text_table` whose mli contains just the following function:
 
-[source,ocaml]
+[source]
 -----------------------------------------------------------
 (* [render headers rows] returns a string containing a formatted
    text table, using unix-style newlines as separators *)
