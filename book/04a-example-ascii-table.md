@@ -194,11 +194,11 @@ let print_langs langs =
    print_string (Text_table.render headers (List.map ~f:to_row langs))
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This works fine, but as you consider more complicated tables with more
-columns, it becomes easier to make the mistake of having a mismatch
-between `headers` and `to_row`.  Also, reordering columns or rendering
-with a subset of the columns becomes awkward, because changes need to
-be made in two places.
+This is OK, but as you consider more complicated tables with more
+columns, it becomes easier to make the mistake of having a mismatch in
+between `headers` and `to_row`.  Also, adding, removing and reording
+columns becomes awkward, because changes need to be made in two
+places.
 
 We can improve the table API by adding a type which is a first-class
 representative for a column.  We'd add the following to the interface
@@ -239,14 +239,14 @@ let column_render columns rows =
 And we can rewrite `print_langs` to use this new interface as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let columns =
+  [ Text_table.column "Name"      (fun x -> x.name);
+    Text_table.column "Architect" (fun x -> x.architect);
+    Text_table.column "Year Released"
+       (fun x -> Int.to_string x.year_released);
+  ]
+
 let print_langs langs =
-  let colums =
-    [ Text_table.column "Name"      (fun x -> x.name);
-      Text_table.column "Architect" (fun x -> x.architect);
-      Text_table.column "Year Released"
-         (fun x -> Int.to_string x.year_released);
-    ]
-  in
   print_string (Text_table.column_render columns langs)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -256,8 +256,8 @@ ruled out by the type system.  For example, it's no longer possible
 for the length of the header and the lengths of the rows to be
 mismatched.
 
-The simple column-based interface described here is a good starting
-for building a richer API.  You could for example build specialized
-colums with different formatting and alignment rules, which is easier
-to do with this interface than with the original one based on passing
-in lists-of-lists.
+The simple column-based interface described here is also a good
+starting for building a richer API.  You could for example build
+specialized colums with different formatting and alignment rules,
+which is easier to do with this interface than with the original one
+based on passing in lists-of-lists.

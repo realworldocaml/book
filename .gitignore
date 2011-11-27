@@ -2,4 +2,7 @@
 *.pdf
 *.native
 _build
-
+book/*.html
+*.omc
+*.omakedb.lock
+*.tmp

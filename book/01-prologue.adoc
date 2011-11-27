@@ -1,6 +1,6 @@
-# Prologue
+== Prologue ==
 
-## Why OCaml?
+=== Why OCaml? ===
 
 Programming languages matter.
 
@@ -43,7 +43,7 @@ understand.  It is this that makes OCaml a great choice for
 programmers who want to step up to a better programming language, and
 at the same time want to get practical work done.
 
-## Why Core?
+=== Why Core? ===
 
 A language on its own isn't enough.  You also need a rich set of
 libraries to base your applications on.  A common source of

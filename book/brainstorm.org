@@ -1,0 +1,16 @@
+* Record ideas
+** vector
+** personnel record
+** Encryption key / PGP packet
+** Order message
+** Timestamped event
+** DNS entry
+** Host/Service database
+** Bibliography entry
+** higher-order record
+*** ASCII Column
+** Geometric transformations
+** Circle/Square/Point/Scene
+** Contact database
+** interval
+

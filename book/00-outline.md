@@ -1,6 +1,13 @@
-# Proposal for ``Real World OCaml''
+Real World OCaml
+================
+:author: Jason_Hickey,_Anil_Madhavapeddy,_and_Yaron_Minsky
+v0.1
+:doctype: book
 
-## About the Book
+
+[about]
+About the Book
+---------------
 
 OCaml is a modern functional programming language with strong typing,
 fast native code output, automatic type inference and a wide array of
@@ -18,7 +25,8 @@ styles in one language, making it a pragmatic and fun choice for
 writing fast, succinct and readable systems code.
 
 
-## Outline
+Outline
+-------
 
 ### Part I : Core OCaml
 
