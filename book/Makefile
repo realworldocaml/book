@@ -18,4 +18,4 @@ all.tmp: 00-outline.adoc \
 	cat $^ > all.tmp
 
 all.html: all.tmp
-	a2x -v -f xhtml $^
+	a2x -a pygments -f xhtml $^

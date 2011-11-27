@@ -1,6 +1,7 @@
 = Real World OCaml =
 :author: Jason_Hickey,_Anil_Madhavapeddy,_and_Yaron_Minsky
 :doctype: book
+:language: ocaml
 
 == About the Book ==
 
