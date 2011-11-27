@@ -3,6 +3,7 @@
 *.native
 _build
 book/*.html
+book/*.css
 *.omc
 *.omakedb.lock
 *.tmp
