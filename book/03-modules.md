@@ -7,17 +7,15 @@ functions like `List.map`.  Modules are more than just places to file
 away your code; they also serve as abstraction boundaries that divide
 a program into conceptual units.  
 
-We discuss how modules work as abstraction
-boundaries, let's describe how OCaml works with files as compilation
-units.
+We will discuss how modules work as abstraction boundaries, but first
+let's describe how OCaml works with files as compilation units.
 
 ## Files as compilation units
 
-The simplest way of organizing an OCaml program is to have a program
-live within a single file.  We'll consider the example a one-file
-program that removes duplicate lines from an input file. That is, the
-program should read its input a line at a time, printing the line only
-if it hasn't seen it before.
+The simplest way of organizing an OCaml program is to have a program live
+within a single file. Consider the example of a one-file program that removes
+duplicate lines from an input file. That is, the program should read its input
+a line at a time, printing the line only if it hasn't seen it before.
 
 In this implementation, we'll use a list to keep track of which lines
 have been read. The program can then be as a single recursive function
