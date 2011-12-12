@@ -1,0 +1,85 @@
+<!-- -*- html -*- -->
+{% extends "boilerplate.html" %}
+
+{% block bodycontent %}
+<div class="navheader"><h1 class="booktitle">Mercurial: The Definitive Guide<div class="authors">by Bryan O'Sullivan</div></h1></div>
+
+<div class="book">
+  <h2>Welcome to Mercurial: The Definitive Guide</h2>
+
+  <p>This is the online home of the book &#8220;Mercurial: The
+    Definitive Guide&#8221;.  
+    It was published in 2009 by O'Reilly Media.</p>
+
+  <p><a href="http://www.selenic.com/mercurial">Mercurial</a> is a
+    fast, lightweight source control management system
+    designed for easy and efficient handling of very large distributed
+    projects.  My book tells you what it is, why you should care, and
+    how you can use it effectively.</p>
+
+  <h2>Read it online</h2>
+
+  <p>I make the content freely available online: you
+    can <a href="/read/"><i>read it here</i></a>.  If you like it,
+    please <a href="#buy">buy a copy</a>!</p>
+
+  <p>For news updates, please
+    visit <a href="http://www.serpentine.com/blog/">my blog</a>.  You
+    should follow me on
+    Twitter <a href="http://twitter.com/bos31337">here</a>.</p>
+
+  <h2><a name="#buy">How</a> to buy</h2>
+
+  <p>If you like the book, please support the work of the Software
+    Freedom Conservancy (<a href="#sfc">see below</a>) by buying a
+    copy.</p>
+
+  <ul>
+    <li><a href="http://www.amazon.com/gp/product/0596800673?ie=UTF8&tag=reaworhas-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596800673">Amazon.com</a><img src="http://www.assoc-amazon.com/e/ir?t=reaworhas-20&l=as2&o=1&a=0596800673" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /></li>
+    <li><a href="http://oreilly.com/catalog/9780596800673/">O'Reilly Media</a></li>
+  </ul>
+
+  <h2>You should contribute!</h2>
+
+  <p>I publish the source code for this book
+    as <a href="http://bitbucket.org/bos/hgbook">a
+      Mercurial repository</a>.  Please feel
+    welcome to clone it, make modifications to your copy, and send me
+    changes.  Getting a copy of the source takes just a few seconds if
+    you have Mercurial installed:</p>
+
+  <pre class="screen">hg clone http://bitbucket.org/bos/hgbook</pre>
+
+  <p>The online version of the book includes a comment system
+    that you can use to send feedback involving errors, omissions, and
+    suggestions.</p>
+
+  <p>(If you would like to adapt the comment system for a
+    publishing project of your own, the source for the web application
+    is included with the book source at the link above.)</p>
+
+  <h2><a name="sfc">How</a> I help Mercurial and free software, and
+    you can too</h2>
+
+  <p>Mercurial is a member of the <a href="http://conservancy.softwarefreedom.org/">Software Freedom Conservancy</a>, a
+    wonderful non-profit organisation that offers its member projects
+    legal and administrative advice.</p>
+
+  <p>I donate my royalties from the sales of this book to the
+    Software Freedom Conservancy, and I encourage you to support their
+    work, too.</p>
+
+  <p>The SFC can
+    accept <a href="http://conservancy.softwarefreedom.org/?donate">accept
+    donations</a> (tax-free under IRS 501(c)(3), within the United
+    States) on behalf of its member projects. If you would like to
+    support Mercurial directly, please consider making a donation to
+    the SFC on its behalf.</p>
+
+  <p>If you would like to help free software developers to provide
+    their important public services without being impeded by legal
+    issues, please consider donating to the SFC's sister organisation,
+    the <a href="http://www.softwarefreedom.org/">Software Freedom Law
+    Center</a>.</p>
+</div>
+{% endblock %}

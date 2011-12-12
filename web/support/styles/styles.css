@@ -1,0 +1,293 @@
+body {
+  background: #F2F1F0;
+  font-family: verdana,sans-serif;
+}
+
+.navheader, .book, .preface, .chapter, .appendix, .bibliography, .navfooter, .basetemplate {
+  width: 50em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+a.commenttoggle:hover, a.commenttoggle:active {
+  opacity: 0.7;
+}
+
+.book, .preface, .chapter, .appendix, .bibliography, .basetemplate {
+  background: white;
+  padding: 2em;
+}
+
+h1 {
+  margin-top: 1.5em;
+}
+
+span.beta {
+  font-size: 80%;
+  font-style: italic;
+  opacity: 0.4;
+}
+
+h2, h3 {
+  margin-top: 2em;
+}
+
+h1, h2, h3 {
+  font-family: georgia,serif;
+  font-weight: normal;
+  margin-bottom: 0.5em;
+}
+
+h1.booktitle {
+  margin-bottom: 0px;
+}
+
+h2.booktitle {
+  text-align: center;
+}
+
+h2.booktitle > a {
+  color: black;
+}
+
+.authors {
+  font-size: 80%;
+  opacity: 0.55;
+  padding-left: 0.5em;
+}
+
+div.note th, div.tip th, div.warning th {
+  font-family: georgia,serif;
+  font-weight: normal;
+  font-size: 110%;
+}
+
+div.navheader th, div.navfooter td {
+  font-family: georgia,serif;
+}
+
+div.navheader th {
+  opacity: 0;
+  font-size: 0;
+}
+
+pre.screen {
+  background-image: url(/support/icons/shell.png);
+}
+
+pre.programlisting {
+  background-image: url(/support/icons/source.png);
+}
+
+pre.programlisting, pre.screen, p.remark {
+  border-style: solid;
+  border-width: 1px;
+  font-size: medium;
+  padding: 1em;
+  background-repeat: no-repeat;
+  background-position: 10px 10px;
+  padding-left: 70px;
+}
+
+strong.command, code, pre, span.type {
+  font-family: monospace;
+  font-weight: normal;
+}
+
+strong.userinput > code {
+  font-weight: bolder;
+  color: #303030;
+}
+
+div.toc > p {
+  opacity: 0.35;
+  font-family: georgia,serif;
+  cursor: pointer;
+}
+
+div.toc b {
+  font-weight: normal;
+  font-size: large;
+}
+
+ul.booktoc {
+  padding-left: 0px;
+  list-style-type: none;
+}
+
+.booktoc > li {
+  padding: 0.5em;
+}
+
+.chapinfo {
+  float: right;
+  color: #a0a0a0;
+}
+
+.unpublished {
+  color: #a0a0a0;
+}
+
+.chapinfo img {
+  vertical-align: -35%;
+  border: 0px;
+}
+
+.zebra_b {
+  background: #f4f4f4;
+}
+
+.book .titlepage {
+  display: none;
+}
+
+.chapter div.toc > dl {
+  display: none;
+}
+
+pre.programlisting, pre.screen, p.remark {
+  overflow: hidden;
+}
+
+p.remark {
+  background-image: url(/support/icons/remark.png);
+}
+
+div.warning, p.remark {
+  background-color: #FFEFE8;
+  border-color: #e0a8a0;
+}
+
+span.remark {
+  font-style: normal;
+  color: #707070;
+}
+
+.screen {
+  background: #e7ffc7 none repeat scroll 0% 50%;
+  border-color: #94DA3A;
+}
+
+.programlisting {
+  background: #F0F4FF none repeat scroll 0% 50%;
+  border-color: #B4BAEA;
+}
+
+.prompt {
+  color: #448844;
+}
+
+div.note, div.tip {
+  background: #ffffc9;
+  border-color: #B4BAEA;
+}
+
+div.note, div.warning, div.tip {
+  border-style: solid;
+  border-width: 1px;
+  padding: 1em;
+}
+
+.note .title {
+  font-size: 90%;
+}
+
+.comment {
+  font-size: 80%;
+}
+
+div.comment, div.new_comment {
+  padding: 0.5em;
+  margin: 0.5em;
+  margin-left: 2em;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #aaaaff;
+}
+
+div.comment {
+  background: #eeeeff;
+}
+
+div.new_comment {
+  background: #d0d0ff;
+}
+
+.commenttoggle {
+  opacity: 0.35;
+}
+
+.comment_help {
+  font-size: 80%;
+}
+
+.comment_header {
+  opacity: 0.75;
+}
+
+.comment_id {
+  float: right;
+  opacity: 0.3;
+  font-size: 60%;
+}
+
+.comment_name {
+  font-weight: bolder;
+}
+
+.comment_reviewed {
+  color: darkgreen;
+  margin-left: 1em;
+  font-style: italic;
+}
+
+.comment_date {
+  opacity: 0.75;
+}
+
+.comment_thanks {
+  color: darkblue;
+  margin-left: 1em;
+  font-style: italic;
+  font-weight: bolder;
+}
+
+.comment_error {
+  padding-left: 1em;
+  font-weight: bolder;
+  font-size: 80%;
+  color: darkred;
+}
+
+.hgbookfooter {
+  width: 60em;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2em;
+  padding: 2em;
+  margin-bottom: 2em;
+  font-size: 80%;
+  color: #727272;
+  border-top: 1px solid grey;
+}
+
+.hgbookfooter a {
+  color: #5555ff;
+}
+
+.hgbookfooter a:visited {
+  opacity: 0.7;
+}
+
+.hgbookfooter img {
+  vertical-align: -45%;
+}
+
+table.equation a.commenttoggle {
+  text-align: right;
+  display: block;
+}
+
+div.comment, div.new_comment, form.comment {
+  text-align: left;
+}
