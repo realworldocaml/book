@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vim: set filetype=docbkxml shiftwidth=2 autoindent expandtab tw=77 : -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+<!-- Below are references to files in this directory. -->
+
+<!-- Chapters. -->
+
+<!ENTITY ch00     SYSTEM "ch00-preface.xml">
+<!ENTITY ch01     SYSTEM "ch01-intro.xml">
+]>
+
+<book id="ocaml">
+  <title>Real World OCaml</title>
+  
+  <subtitle>Compiled from $rev_id$</subtitle>
+  <bookinfo>
+    <edition>1</edition>
+    <isbn>isbn</isbn>
+    <authorgroup>
+      <author>
+        <firstname>Jason</firstname>
+        <surname>Hickey</surname>
+      </author>
+      <author>
+        <firstname>Anil</firstname>
+        <surname>Madhavapeddy</surname>
+      </author>
+      <author>
+        <firstname>Yaron</firstname>
+        <surname>Minsky</surname>
+      </author>
+    </authorgroup>
+
+    <editor>
+      <firstname>Mike</firstname>
+      <surname>Loukides</surname>
+    </editor>
+
+    <copyright>
+      <year>2011</year>
+      <year>2012</year>
+      <holder>The Authors</holder>
+    </copyright>
+  </bookinfo>
+
+  <!-- BEGIN ch00 -->
+  &ch00;
+  &ch01;
+</book>

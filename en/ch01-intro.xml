@@ -1,0 +1,993 @@
+<section id="a-guided-tour">
+  <title>A Guided Tour</title>
+  <para>
+    We'll start our introduction to OCaml with the OCaml toplevel, an
+    interactive shell that lets you type in expressions and then
+    evaluates them immediately. When you get to the point of running
+    real programs, you'll want to leave the toplevel behind, but it's a
+    great tool for getting to know the language.
+  </para>
+  <para>
+    You should have a working toplevel as you go through this chapter,
+    so you can try out the examples as you go. There is a
+    zero-configuration browser-based toplevel that you can use for this,
+    which you can find here:
+  </para>
+  <programlisting>
+ http://realworldocaml.org/core-top
+</programlisting>
+  <para>
+    Or you can install OCaml and Core on your computer directly.
+    Instructions for this are found in Appendix {???}.
+  </para>
+  <section id="ocaml-as-a-calculator">
+    <title>OCaml as a calculator</title>
+    <para>
+      Let's spin up the toplevel and open the
+      <literal>Core.Std</literal> module, which gives us access to
+      Core's libraries, and then try out a few simple numerical
+      calculations.
+    </para>
+    <programlisting>
+        Objective Caml version 3.12.1
+
+# open Core.Std;;
+# 3 + 4;;
+- : int = 7
+# 8 / 3;;
+- : int = 2
+# 3.5 +. 6.;;
+- : float = 9.5
+# sqrt 9.;;
+- : float = 3.
+</programlisting>
+    <para>
+      This looks a lot what you'd expect from any language, but there
+      are a few differences that jump right out at you.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          We needed to type <literal>;;</literal> in order to tell the
+          toplevel that it should evaluate an expression. This is a
+          pecularity of the toplevel that is not required in compiled
+          code.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          After evaluating an expression, the toplevel spits out both
+          the type of the result and a the result itself.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Function application in OCaml is syntactically unusual, in
+          that function arguments are written out separated by spaces,
+          rather than being demarcated by parens and commas.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          OCaml carefully distinguishes between
+          <literal>float</literal>, the type for floating point numbers
+          and <literal>int</literal>. The types have different literals
+          (<emphasis>e.g.</emphasis>, <literal>6.</literal> instead of
+          <literal>6</literal>) and different infix operators
+          (<emphasis>e.g.</emphasis>, <literal>+.</literal> instead of
+          <literal>+</literal>). This can be a bit of a nuisance, but it
+          has its benefits, since it makes it prevents some classes of
+          bugs that arise from confusion between the semantics of
+          <literal>int</literal> and <literal>float</literal>.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      We can also create variables to name the value of a given
+      expression, using the <literal>let</literal> syntax.
+    </para>
+    <programlisting>
+# let x = 3 + 4;;
+val x : int = 7
+# let y = x + x;;
+val y : int = 14
+</programlisting>
+    <para>
+      After a new variable is created, the toplevel tells us the name of
+      the variable, in addition to its type and value.
+    </para>
+  </section>
+  <section id="functions-and-type-inference">
+    <title>Functions and Type Inference</title>
+    <para>
+      The <literal>let</literal> syntax can also be used for creating
+      functions:
+    </para>
+    <programlisting>
+# let square x = x * x ;;
+val square : int -&gt; int = &lt;fun&gt;
+# square (square 2);;
+- : int = 16
+</programlisting>
+    <para>
+      Now that we're creating more interesting values, the types have
+      gotten more interesting too. <literal>int -&gt; int</literal> is a
+      function type, in this case indicating a function that takes an
+      <literal>int</literal> and returns an <literal>int</literal>. We
+      can also write functions that take multiple arguments:
+    </para>
+    <programlisting>
+# let abs_diff x y =
+    abs (x - y) ;;
+val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
+</programlisting>
+    <para>
+      and even functions that take other functions as arguments:
+    </para>
+    <programlisting>
+# let abs_change f x =
+    abs_diff (f x) x ;;
+val abs_change : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
+</programlisting>
+    <para>
+      This notation for multi-argument functions may be a little
+      surprising at first, but we'll explain where it comes from when we
+      get to function currying in Chapter {???}. For the moment, think
+      of the arrows as separating different arguments of the function,
+      with the type after the final arrow being the return value of the
+      function. Thus,
+    </para>
+    <programlisting>
+int -&gt; int -&gt; int
+</programlisting>
+    <para>
+      describes a function that takes two <literal>int</literal>
+      arguments and returns an <literal>int</literal>, while
+    </para>
+    <programlisting>
+(int -&gt; int) -&gt; int -&gt; int
+</programlisting>
+    <para>
+      describes a function of two arguments where the first argument is
+      itself a function.
+    </para>
+    <para>
+      The types are quickly getting more complicated, and you might at
+      this point ask yourself how OCaml determines these types in the
+      first place. Roughly speaking, OCaml infers the type of an
+      expression from what it already knows about the types of the
+      elements of that expression. This process is called
+      <emphasis>type-inference</emphasis>. As an example, in
+      <literal>abs_change</literal>, the fact that
+      <literal>abs_diff</literal> takes two integer arguments lets the
+      compiler infer that <literal>x</literal> is an
+      <literal>int</literal> and that <literal>f</literal> returns an
+      <literal>int</literal>.
+    </para>
+    <para>
+      Sometimes, the type-inference system doesn't have enough
+      information to fully determine the concrete type of a given value.
+      Consider this example.
+    </para>
+    <programlisting>
+# let first_if_true test x y =
+    if test x then x else y;;
+</programlisting>
+    <para>
+      This function takes a function called <literal>test</literal>, and
+      two values, <literal>x</literal> and <literal>y</literal>, where
+      <literal>x</literal> is to be returned if
+      <literal>test x</literal> is <literal>true</literal>, and
+      <literal>y</literal> otherwise. So what's the type of
+      <literal>first_if_true</literal>? There are no obvious clues such
+      as arithmetic operators to tell you what the type of
+      <literal>x</literal> and <literal>y</literal> are. Indeed, it
+      seems like one could use this <literal>first_if_true</literal> on
+      values of any type, as long as <literal>test</literal> was able to
+      take that type as an input. Indeed, if we look at the type
+      returned by the toplevel:
+    </para>
+    <programlisting>
+val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
+</programlisting>
+    <para>
+      we see that rather than choose a particular type for the value
+      being tested, OCaml has introduced a <emphasis>type
+      variable</emphasis> <literal>'a</literal>. Type variables are used
+      to express that a type is generic. So, a type containing a type
+      variable <literal>'a</literal> can be used in a context where
+      <literal>'a</literal> is replaced with any concrete type. So, we
+      can write:
+    </para>
+    <programlisting>
+# let long_string s = String.length s &gt; 3;;
+val long_string : string -&gt; bool = &lt;fun&gt;
+# first_if_true long_string &quot;foo&quot; &quot;bar&quot;;;
+- : string = &quot;bar&quot;
+</programlisting>
+    <para>
+      And we can also write:
+    </para>
+    <programlisting>
+# let big_number x = x &gt; 3;;
+val big_number : int -&gt; bool = &lt;fun&gt;
+# first_if_true big_number 4 3;;
+- : int = 4
+</programlisting>
+    <para>
+      But we can't mix and match two different concrete types for
+      <literal>'a</literal> in the same use of
+      <literal>first_if_true</literal>:
+    </para>
+    <programlisting>
+# first_if_true big_number &quot;foo&quot; &quot;bar&quot;;;
+Characters 25-30:
+  first_if_true big_number &quot;foo&quot; &quot;bar&quot;;;
+                           ^^^^^
+Error: This expression has type string but
+    an expression was expected of type int
+</programlisting>
+    <para>
+      While the <literal>'a</literal> in the type of
+      <literal>first_if_true</literal> can be instantiated as any
+      concrete type, it has to be the same concrete type in all of the
+      different places it appears. This kind of genericity is called
+      <emphasis>parametric polymorphism</emphasis>, and is very similar
+      to generics in C# and Java.
+    </para>
+  </section>
+  <section id="tuples-options-lists-and-pattern-matching">
+    <title>Tuples, Options, Lists and Pattern-matching</title>
+    <section id="tuples">
+      <title>Tuples</title>
+      <para>
+        So far we've encountered a handful of basic types like
+        <literal>int</literal>, <literal>float</literal> and
+        <literal>string</literal> as well as function types like
+        <literal>string -&gt; int</literal>. But we haven't yet talked
+        about any datastructures. We'll start by looking at a
+        particularly simple datastructure, the tuple. You can create a
+        tuple by joining values together with a comma:
+      </para>
+      <programlisting>
+# let tup = (3,&quot;three&quot;)
+val tup : int * string = (3, &quot;three&quot;)
+</programlisting>
+      <para>
+        The type, <literal>int * string</literal> corresponds to set of
+        pairs of <literal>int</literal>s and <literal>string</literal>s.
+        (For the mathematically inclined, the <literal>*</literal>
+        character is used because the space of all 2-tuples of type
+        <literal>t * s</literal> effectively corresponds to the
+        Cartesian product of <literal>t</literal> and
+        <literal>s</literal>.)
+      </para>
+      <para>
+        You can extract the components of a tuple using OCaml's
+        pattern-matching syntax Here's a function for computing the
+        distance between two points on the plane, where each point is
+        represented as a pair of <literal>float</literal>s.
+      </para>
+      <programlisting>
+# let distance p1 p2 =
+    let (x1,y1) = p1 in
+    let (x2,y2) = p2 in
+    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2)
+;;
+val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
+</programlisting>
+      <para>
+        We can make this code more concise by doing the pattern matching
+        on the arguments to the function directly.
+      </para>
+      <programlisting>
+# let distance (x1,y1) (x2,y2) =
+    sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
+;;
+</programlisting>
+      <para>
+        This is just a first taste of pattern matching. Pattern matching
+        shows up in many contexts, and turns out to be a surprisingly
+        powerful tool.
+      </para>
+    </section>
+    <section id="options">
+      <title>Options</title>
+      <para>
+        Another common datastructure in OCaml is the
+        <literal>option</literal>. An <literal>option</literal> is used
+        to express that a value that might or might not be present. For
+        example,
+      </para>
+      <programlisting>
+# let divide x y =
+    if y = 0 then None else Some (x/y)
+val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
+</programlisting>
+      <para>
+        Here, <literal>Some</literal> and <literal>None</literal> are
+        explicit tags that are used to construct an optional value.
+      </para>
+      <para>
+        Options are important because they are the standard way in OCaml
+        to encode a value that might not be there. By default, values in
+        OCaml are non-nullable, so if you have a function that takes an
+        argument of type <literal>string</literal>, it's guaranteed to
+        actually get a well-defined value of type
+        <literal>string</literal> when it is invoked. This is different
+        from most other languages, including Java and C#, where objects
+        are by default nullable, and as a result, the type system does
+        little to defend you from null pointer exceptions at runtime.
+      </para>
+      <para>
+        Given that in OCaml ordinary values are not nullable, you need
+        some other way of representing values that might not be there,
+        and the <literal>option</literal> type is the most common
+        solution.
+      </para>
+      <para>
+        To get a value out of an option, we use pattern matching, as we
+        did with tuples. Consider the following simple function for
+        printing a log entry given an optional time and a message. If no
+        time is provided (<emphasis>i.e.</emphasis>, if the time is
+        <literal>None</literal>), the current time is computed and used
+        in its place.
+      </para>
+      <programlisting>
+# let print_log_entry maybe_time message =
+    let time =
+      match maybe_time with
+      | Some x -&gt; x
+      | None -&gt; Time.now ()
+    in
+    printf &quot;%s: %s\n&quot; (Time.to_string time) message
+val print_log_entry : Time.t option -&gt; string -&gt; unit
+</programlisting>
+      <para>
+        Here, we use a new piece of syntax, the <literal>match</literal>
+        statement, to do the pattern matching. A
+        <literal>match</literal> statement lets you do a case analysis
+        driven by the shape of a datastructure, and it can be used for
+        many different datastructres in OCaml.
+      </para>
+      <para>
+        This is the basic shape of a match statement.
+      </para>
+      <programlisting>
+match &lt;expr&gt; with
+| &lt;pattern1&gt; -&gt; &lt;expr1&gt;
+| &lt;pattern2&gt; -&gt; &lt;expr2&gt;
+| ...
+</programlisting>
+      <para>
+        The first pattern that matches the structure of the expression
+        between the <literal>match</literal> and the
+        <literal>with</literal> is chosen, and the right-hand side of
+        the <literal>-&gt;</literal> is evaluated, and is the result of
+        evaluating the entire expression. As with
+        <literal>print_log_entry</literal>, the pattern can also create
+        new variables, giving a name to sub-components of the
+        datastructure being matched.
+      </para>
+      <para>
+        But we don't necessarily need to use the
+        <literal>match</literal> statement in this case. Core has a
+        whole module full of useful functions for dealing with options.
+        For example, we could rewrite <literal>print_log_entry</literal>
+        using <literal>Option.value</literal>, which returns the content
+        of an option, or a default value if the option is
+        <literal>None</literal>.
+      </para>
+      <programlisting>
+# let print_log_entry maybe_time message =
+    let time = Option.value ~default:(Time.now ()) maybe_time in
+    printf &quot;%s: %s\n&quot; (Time.to_string time) message
+</programlisting>
+    </section>
+    <section id="lists">
+      <title>Lists</title>
+      <para>
+        Tuples let you combine a fixed number of items, potentially of
+        different types, together in one datastructure. Lists let you
+        hold any number of items of the same type in one datastructure.
+        For example:
+      </para>
+      <programlisting>
+# let languages = [&quot;OCaml&quot;;&quot;Perl&quot;;&quot;French&quot;;&quot;C&quot;];;
+val languages : string list = [&quot;Perl&quot;; &quot;OCaml&quot;; &quot;French&quot;; &quot;C&quot;]
+</programlisting>
+      <para>
+        We can access the elements of a list using pattern-matching.
+        List patterns have two key components: <literal>[]</literal>,
+        which represents the empty-list, and <literal>::</literal>,
+        which connects an element at the head of a list to the remainder
+        of the list. Using these along with a recursive function call,
+        we can do things like define a function for summing the elements
+        of a list.
+      </para>
+      <programlisting>
+# let rec sum l =
+    match l with
+    | [] -&gt; 0
+    | hd :: tl -&gt; hd + sum tl
+  ;;
+val sum : int list -&gt; int
+# sum [1;2;3;4;5];;
+- : int = 15
+</programlisting>
+      <para>
+        We had to add the <literal>rec</literal> keyword in the
+        definition of <literal>sum</literal> to allow for
+        <literal>sum</literal> to refer to itself. We can introduce more
+        complicated list patterns as well. Here's a function for
+        destuttering a list, <emphasis>i.e.</emphasis>, for removing
+        sequential duplicates.
+      </para>
+      <programlisting>
+# let rec destutter list =
+    match list with
+    | [] -&gt; []
+    | hd1 :: (hd2 :: tl) -&gt;
+      if hd1 = hd2 then destutter (hd2 :: tl)
+      else hd1 :: destutter (hd2 :: tl)
+</programlisting>
+      <para>
+        Actually, the code above has a problem. If you type it into the
+        top-level, you'll see this error:
+      </para>
+      <programlisting>
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::[]
+</programlisting>
+      <para>
+        This is warning you that we've missed something, in particular
+        that our code doesn't handle one-element lists. That's easy
+        enough to fix by adding another case to the match:
+      </para>
+      <programlisting>
+# let rec destutter list =
+    match list with
+    | [] -&gt; []
+    | [hd] -&gt; [hd]
+    | hd1 :: (hd2 :: tl) -&gt;
+      if hd1 = hd2 then destutter (hd2 :: tl)
+      else hd1 :: destutter (hd2 :: tl)
+val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
+# destutter [&quot;hey&quot;;&quot;hey&quot;;&quot;hey&quot;;&quot;man!&quot;];;
+- : string list = [&quot;hey&quot;; &quot;man!&quot;]
+</programlisting>
+      <para>
+        Note that in the above, we used another variant of the list
+        pattern, <literal>[hd]</literal>, to match a list with a single
+        element. We can do this to match a list with any fixed number of
+        elements, <emphasis>e.g.</emphasis>, <literal>[x;y;z]</literal>
+        will match any list with exactly three elements, and will bind
+        those elements to the variables <literal>x</literal>,
+        <literal>y</literal> and <literal>z</literal>.
+      </para>
+      <para>
+        So far, we've built up all of our list functions using pattern
+        matching and recursion. But in practice, this isn't usually
+        necessary. Just like there's an <literal>Option</literal> module
+        with useful functions for dealing with options, there's a
+        <literal>List</literal> module with useful functions for dealing
+        with lists. For example:
+      </para>
+      <programlisting>
+# List.map ~f:String.length languages;;
+- : int list = [5; 4; 6; 1]
+</programlisting>
+      <para>
+        <literal>List.map</literal> is a function that takes a list and
+        a function for transforming elements of that list, and returns
+        to us a new list with the transformed elements.
+      </para>
+      <para>
+        There's another new piece of syntax to learn here: labeled
+        arguments. <literal>String.length</literal> is passed with the
+        label, <literal>~f</literal>. Labeled arguments are arguments
+        that are specified by name rather than position, which means
+        they can be passed in any order. Thus, we could have written
+        <literal>List.map ~f:String.length languages</literal> instead
+        of <literal>List.map languages ~f:String.length</literal>. We'll
+        see why labels are important in Chapter
+        <emphasis>{??Functions??}</emphasis>.
+      </para>
+    </section>
+  </section>
+  <section id="records-and-variants">
+    <title>Records and Variants</title>
+    <para>
+      So far, we've only looked at datastructures that were pre-defined
+      in the language, like lists and tuples. But OCaml also allows us
+      to define new datatypes. Here's a toy example of a datatype
+      representing a point in 2-dimensional space:
+    </para>
+    <programlisting>
+# type vec2d = { x : float; y : float };;
+type vec2d = { x : float; y : float; }
+</programlisting>
+    <para>
+      <literal>vec2d</literal> is a <emphasis>record</emphasis> type,
+      which you can think of as a tuple where the individual fields are
+      named, rather than being defined positionally. Record types are
+      easy enough to construct:
+    </para>
+    <programlisting>
+# let v = { x = 3.; y = -4. };;
+val v : vec2d = {x = 3.; y = -4.}
+</programlisting>
+    <para>
+      And we can get access to the contents of these types using pattern
+      matching:
+    </para>
+    <programlisting>
+# let magnitude { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
+val magnitude : vec2d -&gt; float = &lt;fun&gt;
+</programlisting>
+    <para>
+      In the case where we want to name the value in a record field
+      after the name of that field, we can write the pattern match even
+      more tersely. Instead of writing <literal>{ x = x }</literal> to
+      name a variable <literal>x</literal> for the value of field
+      <literal>x</literal>, we can write <literal>{ x }</literal>. Using
+      this, we can rewrite the magnitude function as follows.
+    </para>
+    <programlisting>
+# let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
+</programlisting>
+    <para>
+      We can also use dot-syntax for accessing record fields:
+    </para>
+    <programlisting>
+# let distance v1 v2 =
+     magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
+val distance : vec2d -&gt; vec2d -&gt; float = &lt;fun&gt;
+</programlisting>
+    <para>
+      And we can of course include our newly defined types as components
+      in larger types, as in the following types, each of which
+      representing a different geometric object.
+    </para>
+    <programlisting>
+# type circle = { center: vec2d; radius: float } ;;
+# type rect = { lower_left: vec2d; width: float; height: float } ;;
+# type segment = { endpoint1: vec2d; endpoint2: vec2d } ;;
+</programlisting>
+    <para>
+      Now, imagine that you want to combine multiple of these scene
+      objects together, say as a description scene containing multiple
+      objects. You need some unified way of representing these objects
+      together in a single type. One way of doing this is using a
+      <emphasis>variant</emphasis> type:
+    </para>
+    <programlisting>
+# type shape = | Circle of circle
+               | Rect of rect
+               | Segment of segment;;
+</programlisting>
+    <para>
+      You can think of a variant as a way of combining different types
+      as different possibilities. The <literal>|</literal> character
+      separates the different cases of the variant, and each case has a
+      tag (like <literal>Circle</literal>, <literal>Rect</literal> and
+      <literal>Segment</literal>) to distinguish each case from the
+      other. Here's how we might write a function for testing whether a
+      point is in the interior of one of a list of
+      <literal>shape</literal>s.
+    </para>
+    <programlisting>
+# let is_inside_shape vec shape =
+     match shape with
+     | Circle { center; radius } -&gt;
+       distance center vec &lt; radius
+     | Rect { lower_left; width; height } -&gt;
+       vec.x &gt; lower_left.x &amp;&amp; vec.x &lt; lower_left.x +. width
+       &amp;&amp; vec.y &gt; lower_left.y &amp;&amp; vec.y &lt; lower_left.y +. height
+     | Segment _ -&gt; false
+     ;;
+val is_inside_shape : vec2d -&gt; shape -&gt; bool = &lt;fun&gt;
+# let is_inside_shapes vec shapes =
+     List.for_all shapes ~f:(fun shape -&gt; is_inside_shape vec shape)
+val is_inside_shapes : vec2d -&gt; shape list -&gt; bool = &lt;fun&gt;
+</programlisting>
+    <para>
+      You might at this point notice that the use of
+      <literal>match</literal> here is reminiscent of how we used
+      <literal>match</literal> with <literal>option</literal> and
+      <literal>list</literal>. This is no accident:
+      <literal>option</literal> and <literal>list</literal> are really
+      just examples of variant types that happen to be important enough
+      to be defined in the standard library (and in the case of lists,
+      to have some special syntax).
+    </para>
+  </section>
+</section>
+<section id="modules">
+  <title>Modules</title>
+  <para>
+    This chapter will focus on OCaml's module system, which we've
+    already seen in action in small ways in the preceding chapters. For
+    example, the <literal>List</literal> module has shown up repeatedly
+    as a place to find useful functions like
+    <literal>List.map</literal>. Modules are more than just places to
+    file away your code; they also serve as abstraction boundaries that
+    divide a program into conceptual units.
+  </para>
+  <para>
+    We will discuss how modules work as abstraction boundaries, but
+    first let's describe how OCaml works with files as compilation
+    units.
+  </para>
+  <section id="files-as-compilation-units">
+    <title>Files as compilation units</title>
+    <para>
+      The simplest way of organizing an OCaml program is to have a
+      program live within a single file. Consider the example of a
+      one-file program that removes duplicate lines from an input file.
+      That is, the program should read its input a line at a time,
+      printing the line only if it hasn't seen it before.
+    </para>
+    <para>
+      In this implementation, we'll use a list to keep track of which
+      lines have been read. The program can then be as a single
+      recursive function that reads a line of input, compares it with
+      lines that have been previously read, and outputs the line if it
+      has not been read. The entire program is implemented in the single
+      file <literal>unique.ml</literal>, whose contents are shown below:
+    </para>
+    <programlisting>
+open Core.Std
+
+let rec unique already_read =
+   output_string stdout &quot;&gt; &quot;;
+   flush stdout;
+   let line = input_line stdin in
+   if not (List.mem line already_read) then begin
+      output_string stdout line;
+      output_char stdout '\n';
+      unique (line :: already_read)
+   end else
+     unique already_read
+
+(* &quot;Main program&quot; *)
+let () =
+  try unique [] with End_of_file -&gt; ()
+</programlisting>
+    <para>
+      In this case, we can compile the entire program in a single step
+      with the command
+    </para>
+    <programlisting>
+% ocamlc -o unique unique.ml
+</programlisting>
+    <para>
+      where <literal>ocamlc</literal> is the OCaml compiler,
+      <literal>unique.ml</literal> is the program file, and the
+      <literal>-o</literal> option is used to specify
+      <literal>unique</literal> as the name of the generated executable.
+    </para>
+    <para>
+      We can now run the program as follows:
+    </para>
+    <programlisting>
+% ./unique
+&gt; Great Expectations
+Great Expectations
+&gt; Vanity Fair
+Vanity Fair
+&gt; Great Expectations
+&gt; Paradise Lost
+Paradise Lost
+</programlisting>
+    <section id="where-is-the-main-function">
+      <title>Where is the main function?</title>
+      <para>
+        Unlike C programs, OCaml program do not have a ``'' function.
+        When an OCaml program is evaluated, all the statements in the
+        implementation files are evaluated in order. In general,
+        implementation files can contain arbitrary expressions, not just
+        function definitions. For this example, the main program is the
+      </para>
+    </section>
+  </section>
+</section>
+<section id="lists-options-and-pattern-matching">
+  <title>Lists, Options and Pattern Matching</title>
+  <section id="example-pretty-printing-a-table">
+    <title>Example: pretty-printing a table</title>
+    <para>
+      One common programming task is displaying tabular data. In this
+      example, will go over the design of a simple library to do just
+      that.
+    </para>
+    <para>
+      We'll start with the interface. The code will go in a new module
+      called <literal>Text_table</literal> whose <literal>.mli</literal>
+      contains just the following function:
+    </para>
+    <programlisting>
+(* [render headers rows] returns a string containing a formatted
+   text table, using unix-style newlines as separators *)
+val render
+   :  string list         (* header *)
+   -&gt; string list list    (* data *)
+   -&gt; string
+</programlisting>
+    <para>
+      If you invoke <literal>render</literal> as follows:
+    </para>
+    <programlisting>
+let () =
+  print_string (Text_table.render
+     [&quot;language&quot;;&quot;architect&quot;;&quot;first release&quot;]
+     [ [&quot;Lisp&quot; ;&quot;John McCarthy&quot; ;&quot;1958&quot;] ;
+       [&quot;C&quot;    ;&quot;Dennis Ritchie&quot;;&quot;1969&quot;] ;
+       [&quot;ML&quot;   ;&quot;Robin Milner&quot;  ;&quot;1973&quot;] ;
+       [&quot;OCaml&quot;;&quot;Xavier Leroy&quot;  ;&quot;1996&quot;] ;
+     ])
+</programlisting>
+    <para>
+      you'll get the following output:
+    </para>
+    <programlisting>
+| language | architect      | first release |
+|----------+----------------+---------------|
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
+</programlisting>
+    <para>
+      Now that we know what <literal>render</literal> is supposed to do,
+      let's dive into the implementation.
+    </para>
+    <section id="computing-the-widths">
+      <title>Computing the widths</title>
+      <para>
+        To render the rows of the table, we'll first need the width of
+        the widest entry in each column. The following function does
+        just that.
+      </para>
+      <programlisting>
+let max_widths header rows =
+  let to_lengths l = List.map ~f:String.length l in
+  List.fold rows
+    ~init:(to_lengths header)
+    ~f:(fun acc row -&gt;
+      List.map2_exn ~f:Int.max acc (to_lengths row))
+</programlisting>
+      <para>
+        In the above we define a helper function,
+        <literal>to_lengths</literal> which uses
+        <literal>List.map</literal> and <literal>String.length</literal>
+        to convert a list of strings to a list of string lengths. Then,
+        starting with the lengths of the headers, we use
+        <literal>List.fold</literal> to join in the lengths of the
+        elements of each row by <literal>max</literal>'ing them together
+        elementwise.
+      </para>
+      <para>
+        Note that this code will throw an exception if any of the rows
+        has a different number of entries than the header. In
+        particular, <literal>List.map2_exn</literal> throws an exception
+        when its arguments have mismatched lengths.
+      </para>
+    </section>
+    <section id="rendering-the-rows">
+      <title>Rendering the rows</title>
+      <para>
+        Now we need to write the code to render a single row. There are
+        really two different kinds of rows that need to be rendered; an
+        ordinary row:
+      </para>
+      <programlisting>
+| Lisp     | John McCarthy  | 1962          |
+</programlisting>
+      <para>
+        and a separator row:
+      </para>
+      <programlisting>
+|----------+----------------+---------------|
+</programlisting>
+      <para>
+        Let's start with the separator row, which we can generate as
+        follows:
+      </para>
+      <programlisting>
+let render_separator widths =
+  let pieces = List.map widths
+    ~f:(fun w -&gt; String.make (w + 2) '-')
+  in
+  &quot;|&quot; ^ String.concat ~sep:&quot;+&quot; pieces ^ &quot;|&quot;
+</programlisting>
+      <para>
+        We need the extra two-characters for each entry to account for
+        the one character of padding on each side of a string in the
+        table.
+      </para>
+      <section id="note-performance-of-string.concat-and">
+        <title>Note: Performance of <literal>String.concat</literal> and
+        <literal>^</literal></title>
+        <blockquote>
+          <para>
+            In the above, we're using two different ways of
+            concatenating strings, <literal>String.concat</literal>,
+            which operates on lists of strings, and
+            <literal>^</literal>, which is a pairwise operator. You
+            should avoid <literal>^</literal> for joining long numbers
+            of strings, since, it allocates a new string every time it
+            runs. Thus, the following code:
+          </para>
+          <programlisting>
+let s = &quot;.&quot; ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;
+</programlisting>
+          <para>
+            will allocate a string of length 2, 3, 4, 5, 6 and 7,
+            whereas this code:
+          </para>
+          <programlisting>
+let s = String.concat [&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;]
+</programlisting>
+          <para>
+            allocates one string of size 7, as well as a list of length
+            7. At these small sizes, the differences don't amount to
+            much, but for assembling of large strings, it can be a
+            serious performance issue.
+          </para>
+        </blockquote>
+        <para>
+          We can write a very similar piece of code for rendering the
+          data in an ordinary row.
+        </para>
+        <programlisting>
+let pad s length =
+  if String.length s &gt;= length then s
+  else s ^ String.make (length - String.length s) ' '
+
+let render_row row widths =
+  let pieces = List.map2 row widths
+    ~f:(fun s width -&gt; &quot; &quot; ^ pad s width ^ &quot; &quot;)
+  in
+  &quot;|&quot; ^ String.concat ~sep:&quot;|&quot; pieces ^ &quot;|&quot;
+</programlisting>
+        <para>
+          You might note that <literal>render_row</literal> and
+          <literal>render_separator</literal> share a bit of structure.
+          We can improve the code a bit by factoring that repeated
+          structure out:
+        </para>
+        <programlisting>
+let decorate_row ~sep row = &quot;|&quot; ^ String.concat ~sep row ^ &quot;|&quot;
+
+let render_row widths row =
+  decorate_row ~sep:&quot;|&quot;
+    (List.map2_exn row widths ~f:(fun s w -&gt; &quot; &quot; ^ pad s w ^ &quot; &quot;))
+
+let render_separator widths =
+  decorate_row ~sep:&quot;+&quot;
+    (List.map widths ~f:(fun width -&gt; String.make (width + 2) '-'))
+</programlisting>
+      </section>
+    </section>
+    <section id="bringing-it-all-together">
+      <title>Bringing it all together</title>
+      <para>
+        And now we can write the function for rendering a full table.
+      </para>
+      <programlisting>
+let render header rows =
+  let widths = max_widths header rows in
+  String.concat ~sep:&quot;\n&quot;
+    (render_row widths header
+     :: render_separator widths
+     :: List.map rows ~f:(fun row -&gt; render_row widths row)
+    )
+</programlisting>
+      <para>
+        Now, let's think about how you might actually use this interface
+        in practice. Usually, when you have data to render in a table,
+        that data comes in the form of a list of objects of some sort,
+        where you need to extract data from each record for each of the
+        columns. So, imagine that you start off with a record type for
+        representing information about a given programming language:
+      </para>
+      <programlisting>
+type style =
+    Object_oriented | Functional | Imperative | Logic
+type prog_lang = { name: string;
+                   architect: string;
+                   year_released: int;
+                   style: style list;
+                 }
+</programlisting>
+      <para>
+        If we then wanted to render a table from a list of languages, we
+        might write something like this:
+      </para>
+      <programlisting>
+let print_langs langs =
+   let headers = [&quot;name&quot;;&quot;architect&quot;;&quot;year released&quot;] in
+   let to_row lang =
+     [lang.name; lang.architect; Int.to_string lang.year_released ]
+   in
+   print_string (Text_table.render headers (List.map ~f:to_row langs))
+</programlisting>
+      <para>
+        This is OK, but as you consider more complicated tables with
+        more columns, it becomes easier to make the mistake of having a
+        mismatch in between <literal>headers</literal> and
+        <literal>to_row</literal>. Also, adding, removing and reordering
+        columns becomes awkward, because changes need to be made in two
+        places.
+      </para>
+      <para>
+        We can improve the table API by adding a type which is a
+        first-class representative for a column. We'd add the following
+        to the interface of <literal>Text_table</literal>:
+      </para>
+      <programlisting>
+(** An ['a column] is a specification of a column for rending a table
+    of values of type ['a] *)
+type 'a column
+
+(** [column header to_entry] returns a new column given a header and a
+    function for extracting the text entry from the data associated
+    with a row *)
+val column : string -&gt; ('a -&gt; string) -&gt; 'a column
+
+(** [column_render columns rows] Renders a table with the specified
+    columns and rows *)
+val column_render :
+  'a column list -&gt; 'a list -&gt; string
+</programlisting>
+      <para>
+        Thus, the <literal>column</literal> functions creates a
+        <literal>column</literal> from a header string and a function
+        for extracting the text for that column associated with a given
+        row. Implementing this interface is quite simple:
+      </para>
+      <programlisting>
+type 'a column = string * ('a -&gt; string)
+let column header to_string = (header,to_string)
+
+let column_render columns rows =
+  let header = List.map columns ~f:fst in
+  let rows = List.map rows ~f:(fun row -&gt;
+    List.map columns ~f:(fun (_,to_string) -&gt; to_string row))
+  in
+  render header rows
+</programlisting>
+      <para>
+        And we can rewrite <literal>print_langs</literal> to use this
+        new interface as follows.
+      </para>
+      <programlisting>
+let columns =
+  [ Text_table.column &quot;Name&quot;      (fun x -&gt; x.name);
+    Text_table.column &quot;Architect&quot; (fun x -&gt; x.architect);
+    Text_table.column &quot;Year Released&quot;
+       (fun x -&gt; Int.to_string x.year_released);
+  ]
+
+let print_langs langs =
+  print_string (Text_table.column_render columns langs)
+</programlisting>
+      <para>
+        The code is a bit longer, but it's also less error prone. In
+        particular, several errors that might be made by the user are
+        now ruled out by the type system. For example, it's no longer
+        possible for the length of the header and the lengths of the
+        rows to be mismatched.
+      </para>
+      <para>
+        The simple column-based interface described here is also a good
+        starting for building a richer API. You could for example build
+        specialized colums with different formatting and alignment
+        rules, which is easier to do with this interface than with the
+        original one based on passing in lists-of-lists.
+      </para>
+    </section>
+  </section>
+</section>
