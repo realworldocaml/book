@@ -4,6 +4,8 @@
 _build
 book/*.html
 book/*.css
+build/
 *.omc
 *.omakedb.lock
 *.tmp
+*.aux
