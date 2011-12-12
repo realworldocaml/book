@@ -9,6 +9,8 @@
 
 <!ENTITY ch00     SYSTEM "ch00-preface.xml">
 <!ENTITY ch01     SYSTEM "ch01-intro.xml">
+<!ENTITY ch02     SYSTEM "ch02-modules.xml">
+<!ENTITY ch03     SYSTEM "ch03-patterns.xml">
 ]>
 
 <book id="ocaml">
@@ -45,7 +47,8 @@
     </copyright>
   </bookinfo>
 
-  <!-- BEGIN ch00 -->
   &ch00;
   &ch01;
+  &ch02;
+  &ch03;
 </book>

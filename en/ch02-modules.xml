@@ -1,0 +1,89 @@
+<chapter id="modules">
+  <title>Modules</title>
+  <para>
+    This chapter will focus on OCaml's module system, which we've
+    already seen in action in small ways in the preceding chapters. For
+    example, the <literal>List</literal> module has shown up repeatedly
+    as a place to find useful functions like
+    <literal>List.map</literal>. Modules are more than just places to
+    file away your code; they also serve as abstraction boundaries that
+    divide a program into conceptual units.
+  </para>
+  <para>
+    We will discuss how modules work as abstraction boundaries, but
+    first let's describe how OCaml works with files as compilation
+    units.
+  </para>
+  <section id="files-as-compilation-units">
+    <title>Files as compilation units</title>
+    <para>
+      The simplest way of organizing an OCaml program is to have a
+      program live within a single file. Consider the example of a
+      one-file program that removes duplicate lines from an input file.
+      That is, the program should read its input a line at a time,
+      printing the line only if it hasn't seen it before.
+    </para>
+    <para>
+      In this implementation, we'll use a list to keep track of which
+      lines have been read. The program can then be as a single
+      recursive function that reads a line of input, compares it with
+      lines that have been previously read, and outputs the line if it
+      has not been read. The entire program is implemented in the single
+      file <literal>unique.ml</literal>, whose contents are shown below:
+    </para>
+    <programlisting>
+open Core.Std
+
+let rec unique already_read =
+   output_string stdout &quot;&gt; &quot;;
+   flush stdout;
+   let line = input_line stdin in
+   if not (List.mem line already_read) then begin
+      output_string stdout line;
+      output_char stdout '\n';
+      unique (line :: already_read)
+   end else
+     unique already_read
+
+(* &quot;Main program&quot; *)
+let () =
+  try unique [] with End_of_file -&gt; ()
+</programlisting>
+    <para>
+      In this case, we can compile the entire program in a single step
+      with the command
+    </para>
+    <programlisting>
+% ocamlc -o unique unique.ml
+</programlisting>
+    <para>
+      where <literal>ocamlc</literal> is the OCaml compiler,
+      <literal>unique.ml</literal> is the program file, and the
+      <literal>-o</literal> option is used to specify
+      <literal>unique</literal> as the name of the generated executable.
+    </para>
+    <para>
+      We can now run the program as follows:
+    </para>
+    <programlisting>
+% ./unique
+&gt; Great Expectations
+Great Expectations
+&gt; Vanity Fair
+Vanity Fair
+&gt; Great Expectations
+&gt; Paradise Lost
+Paradise Lost
+</programlisting>
+    <section id="where-is-the-main-function">
+      <title>Where is the main function?</title>
+      <para>
+        Unlike C programs, OCaml program do not have a ``'' function.
+        When an OCaml program is evaluated, all the statements in the
+        implementation files are evaluated in order. In general,
+        implementation files can contain arbitrary expressions, not just
+        function definitions. For this example, the main program is the
+      </para>
+    </section>
+  </section>
+</chapter>

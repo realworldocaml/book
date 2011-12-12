@@ -88,7 +88,6 @@
       </para>
     </section>
   </section>
-</preface>
 <section id="prologue">
   <title>Prologue</title>
   <section id="why-ocaml">
@@ -199,3 +198,4 @@
     </para>
   </section>
 </section>
+</preface>
