@@ -99,19 +99,17 @@
   <xsl:template name="user.head.content">
     <link rel="alternate" type="application/atom+xml" title="Comments"
       href="/feeds/comments/"/>
-    <link rel="shortcut icon" type="image/png" href="/support/figs/favicon.png"/>
-    <script type="text/javascript" src="/support/jquery-min.js"></script>
-  </xsl:template>
-
-  <xsl:template name="user.footer.content">
-    <div class="hgfooter">
-      <p><img src="support/figs/rss.png"/>Want to stay up to date? Subscribe to the comment feed for <a id="chapterfeed" class="feed" href="feeds/comments/">this chapter</a>, or the <a class="feed" href="feeds/comments/">entire book</a>.</p>
-      <p>Copyright 2011, Jason Hickey, Anil Madhavapeddy and Yaron Minsky</p>
-      Icons by <a href="mailto:mattahan@gmail.com">Paul Davey</a> aka <a href="http://mattahan.deviantart.com/">Mattahan</a>. Based on the <a href="http://hgbook.red-bean.com">Mercurial book</a> by Bryan O'Sullivan.
-    </div>
+    <script type="text/javascript" src="support/javascript/jquery-min.js"></script>
   </xsl:template>
 
   <xsl:template name="user.footer.navigation">
+    <div class="footer">
+      Want to stay up to date? Subscribe to the comment feed for <a id="chapterfeed" class="feed" href="feeds/comments/">this chapter</a>, or the <a class="feed" href="feeds/comments/">entire book</a>.<br />
+      Copyright 2011, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.<br />
+      Icons by <a href="mailto:mattahan@gmail.com">Paul Davey</a> aka <a href="http://mattahan.deviantart.com/">Mattahan</a>. Based on the <a href="http://hgbook.red-bean.com">Mercurial book</a> by Bryan O'Sullivan.
+    </div>
+
+
     <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

@@ -1,6 +1,6 @@
 body {
-  background: #F2F1F0;
-  font-family: verdana,sans-serif;
+  background: #F2F2FD;
+  font-family: georgia,serif;
 }
 
 .navheader, .book, .preface, .chapter, .appendix, .bibliography, .navfooter, .basetemplate {
@@ -9,13 +9,22 @@ body {
   margin-right: auto;
 }
 
+a {
+  text-decoration: none;
+  border-bottom: 1px dotted #888888;
+  color: #000064;
+}
+
 a.commenttoggle:hover, a.commenttoggle:active {
   opacity: 0.7;
 }
 
 .book, .preface, .chapter, .appendix, .bibliography, .basetemplate {
   background: white;
-  padding: 2em;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 h1 {
@@ -44,6 +53,7 @@ h1.booktitle {
 
 h2.booktitle {
   text-align: center;
+  font-family: georgia,serif;
 }
 
 h2.booktitle > a {
@@ -62,6 +72,10 @@ div.note th, div.tip th, div.warning th {
   font-size: 110%;
 }
 
+div.navheader table {
+  width: 100%;
+}
+
 div.navheader th, div.navfooter td {
   font-family: georgia,serif;
 }
@@ -72,11 +86,11 @@ div.navheader th {
 }
 
 pre.screen {
-  background-image: url(/support/icons/shell.png);
+  background-image: url(support/icons/shell.png);
 }
 
 pre.programlisting {
-  background-image: url(/support/icons/source.png);
+  background-image: url(support/icons/source.png);
 }
 
 pre.programlisting, pre.screen, p.remark {
@@ -150,7 +164,7 @@ pre.programlisting, pre.screen, p.remark {
 }
 
 p.remark {
-  background-image: url(/support/icons/remark.png);
+  background-image: url(support/icons/remark.png);
 }
 
 div.warning, p.remark {
@@ -259,12 +273,11 @@ div.new_comment {
   color: darkred;
 }
 
-.hgbookfooter {
+.footer {
   width: 60em;
   margin-left: auto;
   margin-right: auto;
   margin-top: 2em;
-  padding: 2em;
   margin-bottom: 2em;
   font-size: 80%;
   color: #727272;
