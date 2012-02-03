@@ -1,0 +1,225 @@
+<section id="files-compilation-units-and-programs">
+  <title>Files, Compilation Units, and Programs</title>
+  <para>
+    So far, we've experienced OCaml only through the toplevel, but for
+    real programming tasks, we'll need to save programs into multiple
+    files, and to build and link those files into executables. In OCaml,
+    in addition to being a convenient way to store your code, files also
+    serve as abstraction boundaries that divide the program into
+    conceptual components.
+  </para>
+  <para>
+    But before we talk about files as abstraction units, let's see how
+    to build a simple single-file program.
+  </para>
+  <section id="single-file-programs">
+    <title>Single-file programs</title>
+    <para>
+      For this example, we'll build a deduplication utility that reads
+      lines from <literal>stdin</literal> and writes any line it hasn't
+      seen before to <literal>stdout</literal>. For the moment, we'll
+      use a list to represent the set of lines that have already been
+      read.
+    </para>
+    <programlisting>
+open Core.Std
+
+let rec process_lines already_read =
+   match In_channel.input_line stdin with
+   | None -&gt; () (* we're at the end-of-file *)
+   | Some line -&gt;
+     if not (List.mem line ~set:already_read) then
+       begin
+         Out_channel.output_string stdout (line ^ &quot;\n&quot;);
+         process_lines (line :: already_read)
+       end
+     else
+       unique already_read
+
+let () = process_lines []
+</programlisting>
+    <para>
+      We can compile the entire program with a single step by running
+      <literal>ocamlc -o unique unique.ml</literal>. Here, the
+      <literal>-o</literal> flag is used to specify the name of the
+      generated executable, which we can then run from the command-line:
+    </para>
+    <programlisting>
+% cat &gt; input_file
+Do
+you
+you
+you
+like
+OCaml?
+OCaml?
+% ./unique &lt; input_file
+Do
+you
+like
+OCaml?
+</programlisting>
+    <sidebar>
+  </section>
+</section>
+<section id="where-is-the-main-function">
+  <title>Where is the main function?</title>
+  Unlike C, programs in OCaml do not have a unique
+  <literal>main</literal> function. When an OCaml program is evaluated,
+  all the statements in the implementation files are evaluated in order.
+  These implementation files can contain arbitrary expressions, not just
+  function definitions. In this example, the role of the
+  <literal>main</literal> function is played by the expression
+  <literal>let () = process_lines []</literal>, which kicks off the
+  actions of the program. But really the entire file is evaluated at
+  startup, and so in some sense the full codebase is one big
+  <literal>main</literal> function.
+  </sidebar>
+
+  <sidebar>
+</section>
+<section id="byte-code-vs-native-code">
+  <title>Byte-code vs native-code</title>
+  <para>
+    OCaml ships with two compilers---the <literal>ocamlc</literal>
+    byte-code compiler, and the <literal>ocamlopt</literal> native-code
+    compiler. Programs compiled with <literal>ocamlc</literal> are
+    interpreted by a virtual machine, while programs compiled with
+    <literal>ocamlopt</literal> are compiled to native machine code to
+    be run on a specific operating system and processor architecture.
+  </para>
+  <para>
+    While the two compilers produce programs with the same behavior,
+    there are some differences. One basic tradeoff has to do with speed:
+    the byte-code compiler compiles faster, whereas the native-code
+    compiler generates faster executables. Also, the byte-code compiler
+    can be used on more architectures, and has some better tool support;
+    in particular, the OCaml debugger only works with byte-code.
+  </para>
+  As a general matter, production executables should usually be built
+  using the native-code compiler, and it sometimes makes sense to use
+  bytecode for development builds. And, of course, bytecode makese sense
+  when targetting a platform not supported by the native code compiler.
+  </sidebar>
+  <section id="multi-file-projects-and-modules">
+    <title>Multi-file projects and modules</title>
+    <para>
+      In almost any programming environment, non-trivial programs are
+      broken up into multiple files. This is done for a variety of
+      reasons, from simplifying management of the source code to
+      providing a boundary for separate compilation. Files serve these
+      roles in OCaml development too, but in addition, files in OCaml
+      are tied into OCaml's module system, which is the central
+      abstraction boundary in OCaml. In particular, source files are
+      compiled into modules.
+    </para>
+    <para>
+      We've encountered modules before. For example, we got access to
+      list-transformation functions like <literal>map</literal> and
+      <literal>iter</literal> from the <literal>List</literal> module.
+      We've so far used modules as little more than named scopes, that
+      is, places to look things up. But OCaml's module system is more
+      than that; it's also an important tool for structuring programs.
+    </para>
+    <para>
+      At the simplest level, you can think of a module as a collection
+      of definitions that are stored under a name, and potentially
+      constrained by a <emphasis>signature</emphasis>, i.e., an
+      interface. The signature of a module determines what elements of
+      the module are visible externally, and constrains the types of
+      those elements.
+    </para>
+    <para>
+      The mapping to the filesystem is fairly simple:
+      <literal>.ml</literal> files are treated as module definitions,
+      while <literal>.mli</literal> files are treated as module
+      signature definitions.
+    </para>
+    <section id="improving-unique.ml">
+      <title>Improving <literal>unique.ml</literal></title>
+      <para>
+        Let's go back to <literal>unique.ml</literal>, and see how we
+        can improve the code by refactoring it into multiple modules.
+        The implementation shown above is problematic in that we used a
+        list to represent the set of lines that have been read.
+        Unfortunately, checking membership in a list (using
+        <literal>List.mem</literal>) is slow, taking time linear in the
+        length of the list. That means that processing a file is
+        quadratic in the number of distinct lines in the file. There are
+        clearly better data structures than lists for the set of lines
+        that have been read.
+      </para>
+      <para>
+        One step towards improving the implementation is to break out
+        the set implementation into a different file. We can do that as
+        follows:
+      </para>
+      <para>
+        myset.ml
+        <subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript><subscript><subscript>~</subscript></subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript>~~
+        open Core.Std
+      </para>
+      <para>
+        let empty = [] let add l x = x :: l let mem set x = List.mem x
+        <subscript>set
+        </subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript><subscript><subscript><subscript>~</subscript></subscript></subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript><subscript>~</subscript>
+      </para>
+      <para>
+        unique.ml
+        <subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript><subscript><subscript>~</subscript></subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript>~~
+        open Core.Std
+      </para>
+      <para>
+        let rec process_lines already_read = match In_channel.input_line
+        stdin with | None -&gt; () (* we're at the end-of-file *) | Some
+        line -&gt; if not (Myset.mem already_read line) then begin
+        Out_channel.output_string stdout (line ^ &quot;&quot;);
+        process_lines (Myset.add already_read line) end else unique
+        already_read
+      </para>
+      <para>
+        let () = process_lines []
+        <subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript><subscript><subscript>~</subscript></subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript>~~
+      </para>
+      <para>
+        .set.ml [source] --------------------------- let empty = [] let
+        add x l = x :: l let mem x l = List.mem x l
+        ---------------------------
+      </para>
+      <para>
+        .unique.ml [source] ------------------------------------------
+        let rec unique already_read = output_string stdout &quot;&gt;
+        &quot;; flush stdout; let line = input_line stdin in if not
+        (Set.mem line already_read) then begin output_string stdout
+        line; output_char stdout ''; unique (Set.add line already_read)
+        end else unique already_read;;
+      </para>
+      <para>
+        (* Main program *) try unique [] with End_of_file -&gt; ();;
+        ------------------------------------------
+      </para>
+      <para>
+        .Example run .................................... % ocamlc -c
+        set.ml % ocamlc -c unique.ml % ocamlc -o unique set.cmo
+        unique.cmo % ./unique &gt; Adam Bede Adam Bede &gt; A Passage to
+        India A Passage to India &gt; Adam Bede &gt; Moby Dick Moby Dick
+        ....................................
+      </para>
+      <para>
+        The new project is shown in Figure {UNIQUE2}. We have split the
+        set operations into a file called <literal>set.ml</literal>, and
+        instead of using the <literal>List.mem</literal> function we now
+        use the <literal>Set.mem</literal> function. The way to refer to
+        a definition <literal>f</literal> in a file named
+        <emphasis>filename</emphasis> is by capitalizing the filename
+        and using the infix <literal>.</literal> operator to project the
+        value. The <literal>Set.mem</literal> expression refers to the
+        <literal>mem</literal> function in the <literal>set.ml</literal>
+        file. In fact, the <literal>List.mem</literal> function is the
+        same way. The OCaml standard library contains a file
+        <literal>list.ml</literal> that defines a function
+        <literal>mem</literal>.
+      </para>
+    </section>
+  </section>
+</section>

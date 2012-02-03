@@ -1,3 +1,8 @@
+now.pdf: 03-modules.md
+	markdown2pdf --toc $^ -o z.pdf
+	cp z.pdf now.pdf
+	rm z.pdf
+
 notes.pdf: 00-outline.md \
 	   01-prologue.md \
 	   02-guided-tour.md \
@@ -7,7 +12,6 @@ notes.pdf: 00-outline.md \
 	markdown2pdf --toc $^  -o notes-pre.pdf
 	cp notes-pre.pdf notes.pdf
 	rm notes-pre.pdf
-
 
 all.tmp: 00-outline.adoc \
 	  01-prologue.adoc \
