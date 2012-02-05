@@ -4,7 +4,7 @@ One common programming task is displaying tabular data.  In this
 example, will go over the design of a simple library to do just that.
 
 We'll start with the interface.  The code will go in a new module
-called `Text_table` whose mli contains just the following function:
+called `Text_table` whose `.mli` contains just the following function:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (* [render headers rows] returns a string containing a formatted
@@ -71,7 +71,7 @@ lengths.
 ### Rendering the rows
 
 Now we need to write the code to render a single row.  There are
-really two different kinds of rows that need to be rendered: an
+really two different kinds of rows that need to be rendered; an
 ordinary row:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,10 +117,10 @@ character of padding on each side of a string in the table.
 > ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 >
 > allocates one string of size 7, as well as a list of length 7.  At
-> these small sizes, the differences don't amount ot much, but for
+> these small sizes, the differences don't amount to much, but for
 > assembling of large strings, it can be a serious performance issue.
 
-We can write a very similar piece of code for rendering the data in a
+We can write a very similar piece of code for rendering the data in
 an ordinary row.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -196,7 +196,7 @@ let print_langs langs =
 
 This is OK, but as you consider more complicated tables with more
 columns, it becomes easier to make the mistake of having a mismatch in
-between `headers` and `to_row`.  Also, adding, removing and reording
+between `headers` and `to_row`.  Also, adding, removing and reordering
 columns becomes awkward, because changes need to be made in two
 places.
 
