@@ -1,4 +1,9 @@
 *~
+*.aux
+*.idx
+*.log
+*.out
+*.toc
 *.pdf
 *.native
 _build
