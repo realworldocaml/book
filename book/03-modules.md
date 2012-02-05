@@ -72,9 +72,9 @@ build the executable like this:
 ocamlc freq.ml -o freq
 ~~~~~~~~~~~~~~~
 
-But in our case, this command will fail with the error `Unbound module
-Core`.  We need a somewhat more complex invocation to get Core linked
-in:
+But in this case, this command will fail with the error `Unbound
+module Core`.  We need a somewhat more complex invocation to get Core
+linked in:
 
 ~~~~~~~~~~~~~~~
 ocamlfind ocamlc -linkpkg -thread -package core freq.ml \
@@ -191,8 +191,6 @@ count, built in the same way as before on top of an association list.
 ~~~~~~~~~~~~~~~~ { .ocaml }
 open Core.Std
 
-let empty = []
-
 let touch t s =
   let count =
     match List.Assoc.find t s with
@@ -235,17 +233,10 @@ Indeed, the invocation of `build_counts`, as shown below:
   let counts = build_counts [] in
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-depends on the fact that the empty collection of frequency counts is
-represented as an empty list.  Instead, we should have used
-Counter.empty, like this:
-
-~~~~~~~~~~~~~~~~ { .ocaml }
-  let counts = build_counts Counter.empty in
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We'd like to make this kind of mistake harder to make so that we can
-change the implementation of `Counter` freely, without needing to
-change client code like that in `freq.ml`.
+depends on the fact that the empty set of frequency counts is
+represented as an empty list.  We'd like to prevent this kind of
+dependency, so that we can change the implementation of `Counter`
+without needing to change client code like that in `freq.ml`.
 
 The first step towards hiding the implementation details of `Counter`
 is to create an interface file, `counter.mli`, which controls how
@@ -264,60 +255,87 @@ Note that if we put these lines in `counter.mli` and compile, the
 program will build as before.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
-val empty : (string,int) list
-val touch : (string,int) list -> string -> (string,int) list
+val touch : (string * int) list -> string -> (string * int) list
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To hide the implementation details, we need to hide the fact that the
-frequency counts are represented as an association list.  To do this,
-we need to make an _abstract type_, _i.e._, a type whose definition is
-not provided in the interface and thus can not be depended on by code
-outside of the module.  We'll also need to provide an explicit value
-to represent the empty set.  The resulting interface would look like
-this:
-
-~~~~~~~~~~~~~~~~ { .ocaml }
-type 'a t
-
-val empty : 'a t
-val add : 'a t -> 'a -> 'a t
-val mem : 'a t -> 'a -> bool
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We now need to change `counter.ml` to match this signature.
+We can hide the fact that frequency counts are represented as
+association lists by making the type of frequency counts _abstract_.
+A type in a module if the name of the type is exposed in the
+interface, but the definition of that type is not.  In the case of
+`Counter`, an abstract interface might look like this:
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
 open Core.Std
 
-type 'a t = 'a list
+type t
 
-let empty = []
-let add l x =
-   if List.mem l x then l else x :: l
-let mem l x = List.mem l x
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-But we're not quite done yet.  If we now try to compile `freq.ml`,
-we'll get the following error:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-+ /usr/local/bin/ocamlfind ocamlc -c -thread -package core -o freq.cmo freq.ml
-File "freq.ml", line 20, characters 23-25:
-Error: This expression has type 'a list
-       but an expression was expected of type Counter.t
+val empty : t
+val touch : t -> string -> t
+val to_list : t -> (string * int) list
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is because the last line of `freq.ml` assumes that sets are
-represented as lists.  This compilation error is really what tells us
-that we've successfully made the set abstract.  We can now fix the
-error by replacing the last line with
+Note that we needed to add [empty] and [to_list], since those expose
+the two other pieces of functionality that the code in `freq.ml`
+depends on.
+
+Here's a rewrite of `counter.ml` to match this signature.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
-let () = process_lines Counter.empty
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+open Core.Std
 
-Now, with `counter.mli` we have a nice small abstraction that we can
-improve upon.
+type t = (string * int) list
+
+let empty = []
+
+let touch t s =
+  let count =
+    match List.Assoc.find t s with
+    | None -> 0
+    | Some x -> x
+  in
+  List.Assoc.add t s (count + 1)
+
+let to_list x = x
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If we now try to compile `freq.ml`, we'll get the following error:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ /usr/local/bin/ocamlfind ocamlc -c -annot -thread -package core -o freq.cmo freq.ml
+File "freq.ml", line 11, characters 20-22:
+Error: This expression has type 'a list
+       but an expression was expected of type Counter.t
+Command exited with code 2.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is because `freq.ml` depends on the fact that frequency counts
+are represented as association lists, a fact that we've just hidden.
+We just need to fix the code to use `Counter.empty` instead of `[]`
+and `Counter.to_list` to get the association list out at the end for
+processing and printing.
+
+Now we can turn to optimizing the implementation of `Counter`.  Here's
+an alternate and far more efficient implementation, based on the `Map`
+datastructure in Core.
+
+~~~~~~~~~~~~~~~~ { .ocaml }
+open Core.Std
+
+type t = (string,int) Map.t
+
+let empty = Map.empty
+
+let touch t s =
+  let count =
+    match Map.find t s with
+    | None -> 0
+    | Some x -> x
+  in
+  Map.add t s (count + 1)
+
+let to_list t = Map.to_alist t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 # Points to hit
 

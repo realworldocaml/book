@@ -1,15 +1,15 @@
 open Core.Std
 
-type t = int String.Map.t
+type t = (string,int) Map.t
 
-let empty = String.Map.empty
+let empty = Map.empty
 
 let touch t s =
   let count =
-    match String.Map.find t s with
+    match Map.find t s with
     | None -> 0
     | Some x -> x
   in
-  String.Map.add t s (count + 1)
+  Map.add t s (count + 1)
 
-let to_list t = String.Map.to_alist t
+let to_list t = Map.to_alist t
