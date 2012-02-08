@@ -23,7 +23,7 @@ build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/00book.xml stylesheets/s
             stylesheets/$(LINGUA)/web.xsl build/$(LINGUA)/source/00book.xml
 
 stylesheets/system-xsl:
-	ln -s $(DOCBOOK_XSL_PATH) $@
+	ln -sf $(DOCBOOK_XSL_PATH) $@
 
 clean:
 	rm -rf build
