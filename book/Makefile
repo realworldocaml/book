@@ -35,3 +35,11 @@ all-sh.html: all.tmp
 
 all.html: all.tmp
 	a2x -f xhtml $^
+
+# This is a temporary hack, until we have a think we're finally agreed
+# on as to how this will all works
+temp.pdf: 03-modules.md
+	markdown2pdf --toc $^ -o z.pdf
+	cp z.pdf temp.pdf
+	rm z.pdf
+
