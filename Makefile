@@ -3,6 +3,16 @@ DOCBOOK_XSL_PATH ?= /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
 LINGUA:=en
 CSS=rwobook
 
+# update this if a new chapter shows up in en/
+SRC=	00-outline.md \
+	01-prologue.md \
+	02-guided-tour.md \
+	03-modules.md \
+	04-lists-options-and-patterns.md \
+	04a-example-ascii-table.md
+
+XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
+
 all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LINGUA)/html/support/.stamp
 	@ :
 
@@ -14,11 +24,19 @@ build/$(LINGUA)/html/support/.stamp:
 build/$(LINGUA)/html/$(CSS).css: stylesheets/$(CSS).css
 	cp $< $@
 	
-build/$(LINGUA)/source/00book.xml: $(LINGUA)/00book.xml
+build/$(LINGUA)/source/.stamp:
+	rm -rf build/$(LINGUA)/source
 	mkdir -p build/$(LINGUA)/source
-	cp $(LINGUA)/*.xml build/$(LINGUA)/source/
+	touch $@
 
-build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/00book.xml stylesheets/system-xsl
+build/$(LINGUA)/source/00book.xml: $(LINGUA)/00book.xml build/$(LINGUA)/source/.stamp
+	mkdir -p build/$(LINGUA)/source
+	cp $< build/$(LINGUA)/source/00book.xml
+
+build/$(LINGUA)/source/%.xml: $(LINGUA)/%.md
+	pandoc -f markdown -t docbook --chapters $< > $@
+
+build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/00book.xml $(XMLSRCS) stylesheets/system-xsl
 	xsltproc --output build/$(LINGUA)/html/ \
             stylesheets/$(LINGUA)/web.xsl build/$(LINGUA)/source/00book.xml
 

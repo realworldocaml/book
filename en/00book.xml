@@ -7,10 +7,11 @@
 
 <!-- Chapters. -->
 
-<!ENTITY ch00     SYSTEM "ch00-preface.xml">
-<!ENTITY ch01     SYSTEM "ch01-intro.xml">
-<!ENTITY ch02     SYSTEM "ch02-modules.xml">
-<!ENTITY ch03     SYSTEM "ch03-patterns.xml">
+<!ENTITY ch00     SYSTEM "01-prologue.xml">
+<!ENTITY ch01     SYSTEM "02-guided-tour.xml">
+<!ENTITY ch02     SYSTEM "03-modules.xml">
+<!ENTITY ch03     SYSTEM "04-lists-options-and-patterns.xml">
+<!ENTITY ch03     SYSTEM "04a-example-ascii-table.xml">
 ]>
 
 <book id="ocaml">
