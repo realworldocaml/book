@@ -13,3 +13,6 @@ let touch t s =
   Map.add t s (count + 1)
 
 let to_list t = Map.to_alist t
+
+let _ = Freq.build_counts
+

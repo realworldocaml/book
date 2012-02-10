@@ -4,10 +4,8 @@ Real World OCaml
 v0.1
 :doctype: book
 
-
-[about]
 About the Book
----------------
+--------------
 
 OCaml is a modern functional programming language with strong typing,
 fast native code output, automatic type inference and a wide array of
@@ -183,66 +181,6 @@ This section is now about the internals of OCaml and helper tools:
       the `ocamllex` and `ocamlyacc` tools. Also mention useful 
       alternatives such as Menhir.
     - *Example*: write a JSON parser.
-
-
-### Appendix: Installation and Configuration
-
-This section will cover how to set up OCaml and Core on UNIX, MacOS
-and Windows.  There will be a link to an on-line version of this data
-that can be kept up-to-date.  Also, information will be given on how
-to set up an editor and a the interactive toplevel.
-
-## Competition
-
-### Practical OCaml
-
-This book has a great title that goes along with a brand that includes
-other good books like Practical Common Lisp.  Sadly, Practical OCaml
-is a disaster.  The author was not particularly adept at OCaml and it
-shows.  The book is packed full of bad advice, unidiomatic examples,
-and poor writing.  One of our motivations for writing this book is so
-that people interested in OCaml don't end up finding and reading
-Practical OCaml, and ending up with a bad taste in their mouths.
-
-###  Developing Applications with Objective Caml
-
-This book was originally written in French, and translated to English by the
-community in 2007. It is the best available introduction to OCaml at present,
-but is a little dated. It does not include many of the modern language features
-features and a standard library such as Core. 
-
-### [OCaml for Scientists](http://www.ffconsultancy.com/products/ocaml_for_scientists/index.html)
-
-This book was written in 2005 by a scientific computing programmer seeking
-relief from FORTRAN and C++, and includes examples on building numerical code
-and OpenGL-based visualisation using OCaml. The book is self-published and
-expensive (£85), and is also not as well-rounded as our proposed ``Real World
-OCaml''. We also describe how to build scalable concurrent network services,
-use database bindings, build foreign-function interfaces, and use the Core
-standard library for rapid development.
-
-## Schedule
-
-We plan to develop Real World OCaml using an open development model, with feedback
-from the community via a website where they can leave comments on each chapter
-of the book. This is on the advice from the authors of Real World Haskell, who 
-were very satisfied with the success of that method.
-
-We have therefore registered `realworldocaml.org`, and the schedule below leaves
-time for us to regularly update the website with chapter drafts and parse the
-feedback.
-
-- *March 2012*: website infrastructure live for `realworldocaml.org`, with the
-  authors using it privately to upload drafts and collaborate on writing.
-- *June 2012*: complete outline of all the chapters, with some text in place
-  to clarify book flow. Give our advisory group access to the website
-  to deliver early private comments.
-- *November 2012*: early draft chapters of the introduction and tools chapters,
-  and open the website to the community for feedback.
-- *March 2013*: completed draft content of all chapters including examples.
-- *June 2013*: finished book for first-edition publication.
-
-# People
 
 ## About the Authors
 
