@@ -1,0 +1,295 @@
+body
+{
+    background: white;
+    margin: 1in;
+    font-family: Georgia,SimSun,serif;
+}
+
+p, li, ul, ol, dd, dt
+{
+    font-style: normal;
+    font-weight: normal;
+    color: black;
+}
+
+tt, pre
+{
+    font-family: Consolas,KaiTi,FangSong,SimSun,monospace;
+}
+
+a
+{
+    color: blue;
+    text-decoration: underline;
+}    
+
+a:hover 
+{
+    background: rgb(75%,75%,100%);
+    color: blue;
+    text-decoration: underline;
+}
+
+a:visited 
+{
+    color: purple;
+    text-decoration: underline;
+}
+
+img
+{
+    border: none;
+}
+
+h1.title
+{
+    font-size: 250%;
+    font-style: normal;
+    font-weight: bold;
+    color: black;
+}
+
+h2.subtitle
+{
+    font-size: 150%;
+    font-style: italic;
+    color: black;
+}
+
+h2.title
+{
+    font-size: 150%;
+    font-style: normal;
+    font-weight: bold;
+    color: black;
+}
+
+h3.title
+{
+    font-size: 125%;
+    font-style: normal;
+    font-weight: bold;
+    color: black;
+}
+
+h4.title
+{
+    font-size: 100%;
+    font-style: normal;
+    font-weight: bold;
+    color: black;
+}
+
+strong
+{
+    font-weight: normal;
+}
+
+.toc b
+{
+    font-family: Verdana,SimHei,sans-serif;
+    font-size: 120%;
+    font-style: normal;
+    font-weight: bold;
+    color: black;
+}
+
+.title
+{
+    font-family: Verdana,SimHei,sans-serif;
+}
+
+.screen, .programlisting, .structname
+{
+    font-family: Consolas,KaiTi,FangSong,SimSun,monospace;
+    font-style: normal;
+    font-weight: normal;
+}
+
+.userinput
+{
+    font-weight: normal;
+}
+
+.command
+{
+    font-style: italic;
+}
+
+.filename
+{
+    font-family: Georgia,SimSun,serif;
+    font-style: italic;
+}
+
+.figure, .example, .table
+{
+    margin: 0.125in 0.25in;
+}
+
+.figure p.title b, .example p.title b, .table p.title b
+{
+    font-family: Georgia,SimSun,serif;
+    font-size: 80%;
+    font-style: italic;
+    font-weight: normal;
+}
+
+.table table
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+    border-spacing: 0;
+    background: rgb(240,240,240);
+}
+
+.table td
+{
+    border: none;
+    border-right: 1px black solid;
+    border-bottom: 1px black solid;
+    padding: 2px;
+}
+
+.table th
+{
+    background: rgb(180,180,180);
+    border: none;
+    border-right: 1px black solid;
+    border-bottom: 1px black solid;
+    padding: 2px;
+}
+
+.table p.title, .figure p.title, .example p.title
+{
+    text-align: left !important;
+    font-size: 100% !important;
+}
+
+.author, .pubdate
+{
+    margin: 0;
+    font-size: 100%;
+    font-style: italic;
+    font-weight: normal;
+    color: black;
+}
+
+.preface div.author, .preface .pubdate
+{
+    font-size: 80%;
+}
+
+.sidebar 
+{
+    border-top: dotted 1px black;
+    border-left: dotted 1px black;
+    border-right: solid 2px black;
+    border-bottom: solid 2px black;
+    background: rgb(240,220,170);
+    padding: 0 0.12in;
+    margin: 0.25in;
+}
+
+.note .programlisting, .note .screen, 
+.tip .programlisting, .tip .screen, 
+.warning .programlisting, .warning .screen, 
+.sidebar .programlisting, .sidebar .screen
+{
+    border: none;
+    background: none;
+}
+
+.sidebar p.title
+{
+    text-align: center;
+    font-size: 125%;
+}
+
+.note, .tip, .warning
+{
+    border: black solid 1px;
+    margin: 0.125in 0;
+    padding: 0 55px;
+    font-size: 90%;
+}
+
+/*
+.note
+{
+    background: url(./figs/note.png) no-repeat rgb(252,246,220);
+}
+
+.tip
+{
+    background: url(./figs/tip.png) no-repeat rgb(224,244,255);
+}
+
+.warning
+{
+    background: url(./figs/warning.png) no-repeat rgb(255,210,210);
+}
+*/
+
+.note .title, .tip .title, .warning .title
+{
+    display: none;
+}
+
+.programlisting, .screen
+{
+    font-size: 90%;
+    color: black;
+    margin: 1em 0.25in;
+    padding: 0.5em;
+    background: rgb(240,240,240);
+    border-top: black dotted 1px;
+    border-left: black dotted 1px;
+    border-right: black solid 2px;
+    border-bottom: black solid 2px;
+}
+
+.navheader, .navfooter
+{
+    border: black solid 1px;
+    background: rgb(180,180,200);
+}
+
+.navheader hr, .navfooter hr
+{
+    display: none;
+}
+
+#svn-footer
+{
+    font-size: 80%;
+    text-align: center;
+}
+
+#svn-footer hr
+{
+    display: none;
+}
+
+/* --------------------- */
+/* PRINT MEDIA OVERRIDES */
+/* --------------------- */
+
+@media print
+{
+    body 
+    {
+        margin: 0;
+    }
+
+    .navheader, .navfooter
+    {
+        display: none;
+    }
+
+    #svn-footer hr
+    {
+        display: block;
+    }
+}
