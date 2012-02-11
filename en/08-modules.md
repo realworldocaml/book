@@ -610,26 +610,15 @@ A missing type definition will lead to a similar error.
 
 #### Type definition mismatches
 
-Imagine we wanted to add a function to `Counter` for returning the
-median line, and in the case where the number of lines is even and
-there is no precise median, it returns the two lines before and after
-the median.  Here's one way of rendering such a call in the interface.
+Type definitions that show up in an `mli` need to match up with
+corresponding definitions in the `ml`.  Consider again the example of
+the type `median`.  The order of the declaration of variants matters
+to the OCaml compiler so, if the definition of `median` in the
+implementation lists those options in a different order:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-type median = | Exact of line
-              | Surrounding of line * line
-
-val get_median : t -> median
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Note that the type `median` is concrete in the interface.  Note that
-order of the declaration of variants matters, so, if the definition of
-`median` in the implementation lists those options in a different
-order:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-type median = | Surrounding of line * line
-              | Exact of line
+type median = | Before_and_after of line * line
+              | Median of line
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 that will lead to a compilation error:
@@ -639,10 +628,10 @@ File "counter.ml", line 1, characters 0-1:
 Error: The implementation counter.ml
        does not match the interface counter.cmi:
        Type declarations do not match:
-         type median = Surrounding of string * string | Exact of string
+         type median = Before_and_after of string * string | Median of string
        is not included in
-         type median = Exact of string | Surrounding of string * string
-       Their first fields have different names, Surrounding and Exact.
+         type median = Median of string | Before_and_after of string * string
+       Their first fields have different names, Before_and_after and Median.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Order is similarly important in other parts of the signature,
