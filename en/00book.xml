@@ -9,9 +9,9 @@
 
 <!ENTITY ch00     SYSTEM "01-prologue.xml">
 <!ENTITY ch01     SYSTEM "02-guided-tour.xml">
-<!ENTITY ch02     SYSTEM "03-modules.xml">
 <!ENTITY ch03     SYSTEM "04-lists-options-and-patterns.xml">
 <!ENTITY ch03     SYSTEM "04a-example-ascii-table.xml">
+<!ENTITY ch08     SYSTEM "08-modules.xml">
 ]>
 
 <book id="ocaml">
@@ -41,7 +41,7 @@
       <surname>Loukides</surname>
     </editor>
 
-    <copyright>
+l    <copyright>
       <year>2011</year>
       <year>2012</year>
       <holder>The Authors</holder>
@@ -50,6 +50,6 @@
 
   &ch00;
   &ch01;
-  &ch02;
   &ch03;
+  &ch08;
 </book>
