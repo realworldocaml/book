@@ -121,7 +121,7 @@ allocates one string of size 7, as well as a list of length 7.  At
 these small sizes, the differences don't amount to much, but for
 assembling of large strings, it can be a serious performance issue.
 
-<?sidebar>
+</sidebar>
 
 We can write a very similar piece of code for rendering the data in
 an ordinary row.
