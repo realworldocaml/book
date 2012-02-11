@@ -388,6 +388,9 @@ choice depends very much on the context.
 
 ### Module and signature includes ###
 
+_[yminsky: the example here is totally half-baked.  This section needs
+work.]_
+
 OCaml provides a number of tools for manipulating modules.  One
 particularly useful one is the `include` directive.  The basic
 functionality of `include` is to dump the contents of one module into
