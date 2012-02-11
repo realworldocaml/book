@@ -1,4 +1,4 @@
-DOCBOOK_XSL_PATH ?= /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
+DOCBOOK_XSL_PATH = /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
 
 LINGUA:=en
 CSS=rwobook
@@ -7,9 +7,9 @@ CSS=rwobook
 SRC=	00-outline.md \
 	01-prologue.md \
 	02-guided-tour.md \
-	03-modules.md \
 	04-lists-options-and-patterns.md \
-	04a-example-ascii-table.md
+	04a-example-ascii-table.md \
+	08-modules.md
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 
@@ -23,7 +23,7 @@ build/$(LINGUA)/html/support/.stamp:
 
 build/$(LINGUA)/html/$(CSS).css: stylesheets/$(CSS).css
 	cp $< $@
-	
+
 build/$(LINGUA)/source/.stamp:
 	rm -rf build/$(LINGUA)/source
 	mkdir -p build/$(LINGUA)/source
