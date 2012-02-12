@@ -21,7 +21,7 @@ Let's spin up the toplevel and open the `Core.Std` module, which gives
 us access to Core's libraries, and then try out a few simple numerical
 calculations.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
         Objective Caml version 3.12.1
 
 # open Core.Std;;
@@ -56,7 +56,7 @@ few differences that jump right out at you.
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let x = 3 + 4;;
 val x : int = 7
 # let y = x + x;;
@@ -70,7 +70,7 @@ variable, in addition to its type and value.
 
 The `let` syntax can also be used for creating functions:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let square x = x * x ;;
 val square : int -> int = <fun>
 # square (square 2);;
@@ -82,7 +82,7 @@ more interesting too.  `int -> int` is a function type, in this case
 indicating a function that takes an `int` and returns an `int`.  We
 can also write functions that take multiple arguments:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let abs_diff x y =
     abs (x - y) ;;
 val abs_diff : int -> int -> int = <fun>
@@ -90,7 +90,7 @@ val abs_diff : int -> int -> int = <fun>
 
 and even functions that take other functions as arguments:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let abs_change f x =
     abs_diff (f x) x ;;
 val abs_change : (int -> int) -> int -> int = <fun>
@@ -103,14 +103,14 @@ arrows as separating different arguments of the function, with the
 type after the final arrow being the return value of the function.
 Thus, 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 int -> int -> int
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 describes a function that takes two `int` arguments and returns an
 `int`, while 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (int -> int) -> int -> int
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -130,7 +130,7 @@ Sometimes, the type-inference system doesn't have enough information
 to fully determine the concrete type of a given value.  Consider this
 example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let first_if_true test x y =
     if test x then x else y;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -144,7 +144,7 @@ of `x` and `y` are.  Indeed, it seems like one could use this
 take that type as an input.  Indeed, if we look at the type returned
 by the toplevel:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -154,7 +154,7 @@ are used to express that a type is generic.  So, a type containing a
 type variable `'a` can be used in a context where `'a` is replaced
 with any concrete type.  So, we can write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let long_string s = String.length s > 3;;
 val long_string : string -> bool = <fun>
 # first_if_true long_string "foo" "bar";;
@@ -163,7 +163,7 @@ val long_string : string -> bool = <fun>
 
 And we can also write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let big_number x = x > 3;;
 val big_number : int -> bool = <fun>
 # first_if_true big_number 4 3;;
@@ -173,7 +173,7 @@ val big_number : int -> bool = <fun>
 But we can't mix and match two different concrete types for `'a` in
 the same use of `first_if_true`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # first_if_true big_number "foo" "bar";;
 Characters 25-30:
   first_if_true big_number "foo" "bar";;
@@ -198,7 +198,7 @@ haven't yet talked about any datastructures.  We'll start by looking
 at a particularly simple datastructure, the tuple.  You can create a
 tuple by joining values together with a comma:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let tup = (3,"three")
 val tup : int * string = (3, "three")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -213,7 +213,7 @@ pattern-matching syntax Here's a function for computing the distance
 between two points on the plane, where each point is represented as a
 pair of `float`s.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let distance p1 p2 =
     let (x1,y1) = p1 in
     let (x2,y2) = p2 in
@@ -225,7 +225,7 @@ val distance : float * float -> float * float -> float = <fun>
 We can make this code more concise by doing the pattern matching on
 the arguments to the function directly.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let distance (x1,y1) (x2,y2) =
     sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
 ;;
@@ -241,7 +241,7 @@ Another common datastructure in OCaml is the `option`.  An `option` is
 used to express that a value that might or might not be present.  For
 example,
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let divide x y =
     if y = 0 then None else Some (x/y)
 val divide : int -> int -> int option = <fun>
@@ -269,7 +269,7 @@ log entry given an optional time and a message.  If no time is
 provided (_i.e._, if the time is `None`), the current time is computed
 and used in its place.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let print_log_entry maybe_time message =
     let time =
       match maybe_time with
@@ -307,7 +307,7 @@ with options.  For example, we could rewrite `print_log_entry` using
 `Option.value`, which returns the content of an option, or a default
 value if the option is `None`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let print_log_entry maybe_time message =
     let time = Option.value ~default:(Time.now ()) maybe_time in
     printf "%s: %s\n" (Time.to_string time) message
@@ -320,7 +320,7 @@ different types, together in one datastructure.  Lists let you hold
 any number of items of the same type in one datastructure.  For
 example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let languages = ["OCaml";"Perl";"French";"C"];;
 val languages : string list = ["Perl"; "OCaml"; "French"; "C"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -332,7 +332,7 @@ to the remainder of the list.  Using these along with a recursive
 function call, we can do things like define a function for summing the
 elements of a list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let rec sum l =
     match l with
     | [] -> 0
@@ -348,7 +348,7 @@ for `sum` to refer to itself.  We can introduce more complicated list
 patterns as well.  Here's a function for destuttering a list, _i.e._,
 for removing sequential duplicates.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let rec destutter list =
     match list with
     | [] -> []
@@ -370,7 +370,7 @@ This is warning you that we've missed something, in particular that
 our code doesn't handle one-element lists.  That's easy enough to fix
 by adding another case to the match:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let rec destutter list =
     match list with
     | [] -> []
@@ -395,7 +395,7 @@ necessary.  Just like there's an `Option` module with useful functions
 for dealing with options, there's a `List` module with useful
 functions for dealing with lists.  For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # List.map ~f:String.length languages;;
 - : int list = [5; 4; 6; 1]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -419,7 +419,7 @@ the language, like lists and tuples.  But OCaml also allows us to
 define new datatypes.  Here's a toy example of a datatype representing
 a point in 2-dimensional space:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # type vec2d = { x : float; y : float };;
 type vec2d = { x : float; y : float; }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -428,7 +428,7 @@ type vec2d = { x : float; y : float; }
 the individual fields are named, rather than being defined
 positionally.  Record types are easy enough to construct:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let v = { x = 3.; y = -4. };;
 val v : vec2d = {x = 3.; y = -4.}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -436,7 +436,7 @@ val v : vec2d = {x = 3.; y = -4.}
 And we can get access to the contents of these types using pattern
 matching:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let magnitude { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
 val magnitude : vec2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -447,13 +447,13 @@ tersely.  Instead of writing `{ x = x }` to name a variable `x` for
 the value of field `x`, we can write `{ x }`.  Using this, we can
 rewrite the magnitude function as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 We can also use dot-syntax for accessing record fields:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let distance v1 v2 =
      magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 val distance : vec2d -> vec2d -> float = <fun>
@@ -463,7 +463,7 @@ And we can of course include our newly defined types as components in
 larger types, as in the following types, each of which representing a
 different geometric object.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # type circle = { center: vec2d; radius: float } ;;
 # type rect = { lower_left: vec2d; width: float; height: float } ;;
 # type segment = { endpoint1: vec2d; endpoint2: vec2d } ;;
@@ -474,7 +474,7 @@ together, say as a description scene containing multiple objects.  You
 need some unified way of representing these objects together in a
 single type.  One way of doing this is using a _variant_ type:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # type shape = | Circle of circle
                | Rect of rect
                | Segment of segment;;
@@ -487,7 +487,7 @@ and `Segment`) to distinguish each case from the other.  Here's how we
 might write a function for testing whether a point is in the interior
 of one of a list of `shape`s.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let is_inside_shape vec shape =
      match shape with
      | Circle { center; radius } ->

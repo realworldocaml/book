@@ -6,7 +6,7 @@ example, will go over the design of a simple library to do just that.
 We'll start with the interface.  The code will go in a new module
 called `Text_table` whose `.mli` contains just the following function:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* [render headers rows] returns a string containing a formatted
    text table, using unix-style newlines as separators *)
 val render
@@ -17,7 +17,7 @@ val render
 
 If you invoke `render` as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let () =
   print_string (Text_table.render
      ["language";"architect";"first release"]
@@ -47,7 +47,7 @@ implementation.
 To render the rows of the table, we'll first need the width of the
 widest entry in each column.  The following function does just that.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let max_widths header rows =
   let to_lengths l = List.map ~f:String.length l in
   List.fold rows
@@ -86,7 +86,7 @@ and a separator row:
 
 Let's start with the separator row, which we can generate as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let render_separator widths =
   let pieces = List.map widths
     ~f:(fun w -> String.make (w + 2) '-')
@@ -97,33 +97,36 @@ let render_separator widths =
 We need the extra two-characters for each entry to account for the one
 character of padding on each side of a string in the table.
 
-#### Note: Performance of `String.concat` and `^`
+<sidebar>
+<title>Performance of `String.concat` and `^`</title>
 
-> In the above, we're using two different ways of concatenating
-> strings, `String.concat`, which operates on lists of strings, and
-> `^`, which is a pairwise operator.  You should avoid `^` for joining
-> long numbers of strings, since, it allocates a new string every time
-> it runs.  Thus, the following code:
->
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->
-> will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
-> code:
->
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> let s = String.concat [".";".";".";".";".";".";"."]
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->
-> allocates one string of size 7, as well as a list of length 7.  At
-> these small sizes, the differences don't amount to much, but for
-> assembling of large strings, it can be a serious performance issue.
+In the above, we're using two different ways of concatenating
+strings, `String.concat`, which operates on lists of strings, and
+`^`, which is a pairwise operator.  You should avoid `^` for joining
+long numbers of strings, since, it allocates a new string every time
+it runs.  Thus, the following code:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
+code:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let s = String.concat [".";".";".";".";".";".";"."]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+allocates one string of size 7, as well as a list of length 7.  At
+these small sizes, the differences don't amount to much, but for
+assembling of large strings, it can be a serious performance issue.
+
+</sidebar>
 
 We can write a very similar piece of code for rendering the data in
 an ordinary row.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let pad s length =
   if String.length s >= length then s
   else s ^ String.make (length - String.length s) ' '
@@ -139,7 +142,7 @@ You might note that `render_row` and `render_separator` share a bit of
 structure.  We can improve the code a bit by factoring that repeated
 structure out:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let decorate_row ~sep row = "|" ^ String.concat ~sep row ^ "|"
 
 let render_row widths row =
@@ -155,7 +158,7 @@ let render_separator widths =
 
 And now we can write the function for rendering a full table.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let render header rows =
   let widths = max_widths header rows in
   String.concat ~sep:"\n"
@@ -172,9 +175,10 @@ extract data from each record for each of the columns.  So, imagine
 that you start off with a record type for representing information
 about a given programming language:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type style =
     Object_oriented | Functional | Imperative | Logic
+
 type prog_lang = { name: string;
                    architect: string;
                    year_released: int;
@@ -185,7 +189,7 @@ type prog_lang = { name: string;
 If we then wanted to render a table from a list of languages, we might
 write something like this:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let print_langs langs =
    let headers = ["name";"architect";"year released"] in
    let to_row lang =
@@ -204,7 +208,7 @@ We can improve the table API by adding a type which is a first-class
 representative for a column.  We'd add the following to the interface
 of `Text_table`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (** An ['a column] is a specification of a column for rending a table
     of values of type ['a] *)
 type 'a column
@@ -224,7 +228,7 @@ Thus, the `column` functions creates a `column` from a header string
 and a function for extracting the text for that column associated with
 a given row.  Implementing this interface is quite simple:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type 'a column = string * ('a -> string)
 let column header to_string = (header,to_string)
 
@@ -238,7 +242,7 @@ let column_render columns rows =
 
 And we can rewrite `print_langs` to use this new interface as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let columns =
   [ Text_table.column "Name"      (fun x -> x.name);
     Text_table.column "Architect" (fun x -> x.architect);
