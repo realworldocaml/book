@@ -23,6 +23,8 @@ out.  Here's a simple implementation, which we'll save as the file
 with association lists, _i.e._, lists of key/value pairs.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
+(* file.ml: basic implementation *)
+
 open Core.Std
 
 (* build_counts recursively builds up a mapping from lines to
@@ -65,7 +67,7 @@ function.
 
 </sidebar>
 
-If we weren't using `Core` or any other external libraries, we could
+If we weren't using Core or any other external libraries, we could
 build the executable like this:
 
 ~~~~~~~~~~~~~~~
@@ -190,6 +192,8 @@ key function, called `touch`, updates the association list with the
 information that a given line should be added to the frequency counts.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
+(* counter.ml: first version *)
+
 open Core.Std
 
 let touch t s =
@@ -207,6 +211,8 @@ will discover dependencies and realize that `counter.ml` needs to be
 compiled.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
+(* freq.ml: using Counter *)
+
 open Core.Std
 
 let rec build_counts counts =
@@ -243,10 +249,10 @@ kind of dependency, so that we can change the implementation of
 
 The first step towards hiding the implementation details of `Counter`
 is to create an interface file, `counter.mli`, which controls how
-`counter` is accessed.  Let's start by writing down the trivial
-interface, _i.e._, an interface that describes what's currently
-available in `Counter` without hiding anything.  We'll use `val`
-declarations in the `mli`, which have the following syntax
+`counter` is accessed.  Let's start by writing down a simple
+descriptive interface, _i.e._, an interface that describes what's
+currently available in `Counter` without hiding anything.  We'll use
+`val` declarations in the `mli`, which have the following syntax
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 val <identifier> : <type>
@@ -258,6 +264,8 @@ We can save this as `counter.mli` and compile, and the program will
 build as before.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
+(* counter.mli: descriptive interface *)
+
 val touch : (string * int) list -> string -> (string * int) list
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -268,6 +276,8 @@ interface, but its definition is not.  Here's an abstract interface
 for `Counter`:
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
+(* counter.mli: abstract interface *)
+
 open Core.Std
 
 type t
@@ -284,6 +294,8 @@ out of one.
 Here's a rewrite of `counter.ml` to match this signature.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
+(* counter.ml: implementation matching abstract interface *)
+
 open Core.Std
 
 type t = (string * int) list
@@ -320,6 +332,8 @@ an alternate and far more efficient implementation, based on the `Map`
 datastructure in Core.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
+(* counter.ml: efficient version *)
+
 open Core.Std
 
 type t = (string,int) Map.t
@@ -346,12 +360,13 @@ type `Counter.t` for representing a collection of frequency counts.
 Sometimes, you'll want to make a type in your interface _concrete_, by
 including the type definition in the interface.
 
-For example, Imagine we wanted to add a function to `Counter` for
-returning the line with the median frequency count, and in the case
-where the number of lines is even and there is no precise median, it
-returns the two lines before and after the median.  We could do this
-by adding a new type to the interface to represent this possible
-return value.  You might implement the function like this:
+For example, imagine we wanted to add a function to `Counter` for
+returning the line with the median frequency count.  If the number of
+lines is even, then there is no precise median, so the function would
+return the two lines before and after the median instead.  We'll use a
+custom type to represent the fact that there are two possible possible
+return values.  Here's a possible implementation.
+
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type median = | Median of string
@@ -362,15 +377,16 @@ let median t =
       ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
   in
   let len = List.length sorted_strings in
+  if len = 0 then failwith "median: empty frequency count";
   let nth n = List.nth_exn sorted_strings n in
   if len mod 2 = 1
   then Median (nth (len/2))
   else Before_and_after (nth (len/2) (len/2 + 1))
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now, to expose this usefully in the interface, we need to expose the
-definition of the type `median`, so that clients can pattern match on
-it.  We'd do that by adding these lines to the `counter.mli`:
+Now, to expose this usefully in the interface, we need to expose both
+the function and the type `median` with its definition.  We'd do that
+by adding these lines to the `counter.mli`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type median = | Median of string
@@ -382,9 +398,9 @@ val get_median : t -> median
 The decision of whether a given type should be abstract or concrete is
 an important one.  Abstract types give you more control over how
 values are created and accessed, and makes it easier to enforce
-invariants that you care about; concrete types let you expose more
-detail and structure to client code in a lightweight way.  The right
-choice depends very much on the context.
+invariants beyond the what's enforced by the type itself; concrete
+types let you expose more detail and structure to client code in a
+lightweight way.  The right choice depends very much on the context.
 
 ### Module and signature includes ###
 
@@ -392,22 +408,27 @@ _[yminsky: the example here is totally half-baked.  This section needs
 work.]_
 
 OCaml provides a number of tools for manipulating modules.  One
-particularly useful one is the `include` directive.  The basic
-functionality of `include` is to dump the contents of one module into
-another.  This is useful when you want to extend an existing module.
-For example, imagine you want to create a type for a URL, where the
-base representation of a URL is a string.  Here's a simple interface:
+particularly useful one is the `include` directive, which is used to
+include the contents of one module into another.  This is useful when
+you want to build an extension of an existing module.
+
+For example, imagine you were building a program for interacting with
+a database, and you want to make sure that your code for constructing
+queries only uses escaped user input, to prevent database injections
+(??) attacks.  One simple way of doing this would be to create a
+module `Escaped` that represents escaped strings.  Here's a simple
+interface and implementation for such a file
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* escaped.ml *)
+
 open Core.Std
 
 type t
 
-val of_string : string -> t option
-val to_string : t -> string
+val create : string -> t
+val get_escaped_string : t -> string
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-and implementation (assuming that you already have a function called
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 open Core.Std
