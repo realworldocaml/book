@@ -482,7 +482,7 @@ different possibilities.  The `|` character separates the different
 cases of the variant, and each case has a tag (like `Circle`, `Rect`
 and `Segment`) to distinguish each case from the other.  Here's how we
 might write a function for testing whether a point is in the interior
-of one of a list of `shape`s.
+of one of a `shape list`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let is_inside_shape vec shape =
