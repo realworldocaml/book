@@ -46,12 +46,11 @@ few differences that jump right out at you.
 - Function application in OCaml is syntactically unusual, in that
   function arguments are written out separated by spaces, rather than
   being demarcated by parens and commas.
-- OCaml carefully distinguishes between `float`, the type for floating
-  point numbers and `int`.  The types have different literals (_e.g._,
-  `6.` instead of `6`) and different infix operators (_e.g._, `+.`
-  instead of `+`).  This can be a bit of a nuisance, but it has its
-  benefits, since it makes it prevents some classes of bugs that arise
-  from confusion between the semantics of `int` and `float`.
+- OCaml carefully distinguishes between `float`, the type for floating point
+  numbers and `int`.  The types have different literals (`6.` instead of `6`)
+  and different infix operators (`+.` instead of `+`).  This can be a bit of a
+  nuisance, but it has its benefits, since it makes it prevents some classes of
+  bugs that arise from confusion between the semantics of `int` and `float`.
 
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
