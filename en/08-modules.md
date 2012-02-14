@@ -402,96 +402,127 @@ invariants beyond the what's enforced by the type itself; concrete
 types let you expose more detail and structure to client code in a
 lightweight way.  The right choice depends very much on the context.
 
-### Module and signature includes ###
-
-_[yminsky: the example here is totally half-baked.  This section needs
-work.]_
+### The `include` directive ###
 
 OCaml provides a number of tools for manipulating modules.  One
 particularly useful one is the `include` directive, which is used to
-include the contents of one module into another.  This is useful when
-you want to build an extension of an existing module.
+include the contents of one module into another.
 
-For example, imagine you were building a program for interacting with
-a database, and you want to make sure that your code for constructing
-queries only uses escaped user input, to prevent database injections
-(??) attacks.  One simple way of doing this would be to create a
-module `Escaped` that represents escaped strings.  Here's a simple
-interface and implementation for such a file
+One natural application of `include` is to create one module which is
+an extension of another one.  For example, imagine you wanted to build
+an extended version of the `List` module, where you've added some
+functionality not present in the module as distributed in Core.  We
+can do this easily using `include`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-(* escaped.ml *)
+(* ext_list.ml: an extended list module *)
 
 open Core.Std
 
-type t
+(* The new function we're going to add *)
+let rec intersperse list el =
+  match list with
+  | [] | [ _ ]   -> list
+  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
 
-val create : string -> t
-val get_escaped_string : t -> string
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-open Core.Std
-
-type t = string
-
-let is_valid_url s =
-   ... (* some code for validating URLs *) ...
-
-let of_string s =
-   if is_valid_url s then Some s else None
-
-val to_string s = s
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This gives you an abstract type of strings that are guaranteed to be
-valid URLs.  But it's quite incomplete in that you're missing many of
-the useful functions associated with strings.  In particular, you
-might want to have access to the comparison and hash functions
-associated with strings.  One way of getting access to this is by
-rewriting this module as an extension of the String module.  The
-implementation would then look like this:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-open Core.Std
-
-include String
-
-let is_valid_url s =
-   ... (* some code for validating URLs *) ...
-
-let of_string s =
-   if is_valid_url s then Some s else None
-
-val to_string s = s
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-At the interface level, you need to decide which parts of the
-functionality of string to expose.  You could manually add in each
-function that you wanted to expose, but a simpler approach is to use
-include sub-signatures that summarize the relevant functionality in a
-simple way.  In particular, you could write:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-open Core.Std
-
-type t
-include Hashable with type t := t
-include Comparable with type t := t
-
-val of_string : string -> t option
-val to_string : t -> string
+(* The remainder of the list module *)
+include List
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Now, what about the interface of this new module?  It turns out that
+include works on the signature language as well, so we can pull
+essentially the same trick to write an `mli` for this new module.  The
+only trick is that we need to get our hands on the signature for the
+list module, which can be done using `module type of`.
 
-_[Discuss how include works, using the example of creating a custom
-string identifier]_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* ext_list.mli: an extended list module *)
+
+open Core.Std
+
+(* Include the interface of the list module from Core *)
+include (module type of List)
+
+(* Signature of function we're adding *)
+val intersperse : 'a list -> 'a -> 'a list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And we can now use `Ext_list` as a replacement for `List`.  If we want
+to use `Ext_list` in preference to `List` in our project, we can
+create a file of common definitions:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* common.ml *)
+
+module List = Ext_list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And if we then put `open Common` after `open Core.Std` at the top of
+each file in our project, then references to `List` will automatically
+go to `Ext_list` instead.
 
 ### Modules within a file ###
 
-- module expressions at the top-level.  Show how the example of a
-  custom identifier can be done very concisely inside of a module.
-- `let module`
+Up until now, we've only considered modules that correspond to files,
+like `counter.ml`.  But modules (and module signatures) can be nested
+inside other modules.  As a simple example, consider a program that
+needs to deal with some class of identifier like a username.  Rather
+than just keeping usernames as strings, you might want to mint an
+abstract type, so that the type-system will help you to not confuse
+usernames with other string data that is floating around your program.
+
+Here's how you might create such a type, within a module:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+open Core.Std
+
+module Username : sig
+  type t
+  val of_string : string -> t
+  val to_string : t -> string
+end = struct
+  type t = string
+  let of_string x = x
+  let to_string x = x
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The basic structure of a module declaration like this is:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module <name> : <signature> = <implementation>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We could have written this slightly differently, by giving the
+signature its own top-level `module type` declaration, making it
+possible to in a lightweight way create multiple distinct types with
+the same underlying implementation.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module type ID = sig
+  type t
+  val of_string : string -> t
+  val to_string : t -> string
+end
+
+module String_id = struct
+  type t = string
+  let of_string x = x
+  let to_string x = x
+end
+
+module Username : ID = String_id
+module Hostname : ID = String_id
+
+(* Now the following buggy code won't compile *)
+type session_info = { user: Username.t;
+                      host: Hostname.t;
+                      when_started: Time.t;
+                    }
+
+let sessions_have_same_user s1 s2 =
+  s1.user = s1.host
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Opening modules ###
 
