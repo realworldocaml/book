@@ -191,8 +191,8 @@ Java.
 
 So far we've encountered a handful of basic types like `int`, `float`
 and `string` as well as function types like `string -> int`.  But we
-haven't yet talked about any datastructures.  We'll start by looking
-at a particularly simple datastructure, the tuple.  You can create a
+haven't yet talked about any data structures.  We'll start by looking
+at a particularly simple data structure, the tuple.  You can create a
 tuple by joining values together with a comma:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
@@ -234,7 +234,7 @@ tool.
 
 ### Options
 
-Another common datastructure in OCaml is the `option`.  An `option` is
+Another common data structure in OCaml is the `option`.  An `option` is
 used to express that a value that might or might not be present.  For
 example,
 
@@ -279,8 +279,8 @@ val print_log_entry : Time.t option -> string -> unit
 
 Here, we use a new piece of syntax, the `match` statement, to do the
 pattern matching.  A `match` statement lets you do a case analysis
-driven by the shape of a datastructure, and it can be used for many
-different datastructres in OCaml.
+driven by the shape of a data structure, and it can be used for many
+different data structures in OCaml.
 
 This is the basic shape of a match statement.
 
@@ -295,7 +295,7 @@ The first pattern that matches the structure of the expression between
 the `match` and the `with` is chosen, and the right-hand side of the
 `->` is evaluated, and is the result of evaluating the entire
 expression.  As with `print_log_entry`, the pattern can also create
-new variables, giving a name to sub-components of the datastructure
+new variables, giving a name to sub-components of the data structure
 being matched.
 
 But we don't necessarily need to use the `match` statement in this
@@ -313,8 +313,8 @@ value if the option is `None`.
 ### Lists
 
 Tuples let you combine a fixed number of items, potentially of
-different types, together in one datastructure.  Lists let you hold
-any number of items of the same type in one datastructure.  For
+different types, together in one data structure.  Lists let you hold
+any number of items of the same type in one data structure.  For
 example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
@@ -411,7 +411,7 @@ _{??Functions??}_.
 
 ## Records and Variants
 
-So far, we've only looked at datastructures that were pre-defined in
+So far, we've only looked at data structures that were pre-defined in
 the language, like lists and tuples.  But OCaml also allows us to
 define new datatypes.  Here's a toy example of a datatype representing
 a point in 2-dimensional space:
