@@ -1,6 +1,6 @@
 # A Guided Tour
 
-We'll start our introduction to OCaml with the OCaml toplevel, an
+We'll start our introduction to OCaml with the toplevel, an
 interactive shell that lets you type in expressions and then evaluates
 them immediately.  When you get to the point of running real programs,
 you'll want to leave the toplevel behind, but it's a great tool for
