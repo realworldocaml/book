@@ -206,7 +206,7 @@ used because the space of all 2-tuples of type `t * s` effectively
 corresponds to the Cartesian product of `t` and `s`.)
 
 You can extract the components of a tuple using OCaml's
-pattern-matching syntax Here's a function for computing the distance
+pattern-matching syntax. Here's a function for computing the distance
 between two points on the plane, where each point is represented as a
 pair of `float`s.
 
