@@ -147,10 +147,9 @@ val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 we see that rather than choose a particular type for the value being
-tested, OCaml has introduced a _type variable_ `'a`.  Type variables
-are used to express that a type is generic.  So, a type containing a
-type variable `'a` can be used in a context where `'a` is replaced
-with any concrete type.  So, we can write:
+tested, OCaml has introduced a _type variable_ `'a` to express that the type is
+generic.  A type containing a type variable `'a` can be used in a context where
+`'a` is replaced with any concrete type.  So, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let long_string s = String.length s > 3;;
