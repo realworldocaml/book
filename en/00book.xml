@@ -10,7 +10,7 @@
 <!ENTITY ch00     SYSTEM "01-prologue.xml">
 <!ENTITY ch01     SYSTEM "02-guided-tour.xml">
 <!ENTITY ch03     SYSTEM "04-lists-options-and-patterns.xml">
-<!ENTITY ch03     SYSTEM "04a-example-ascii-table.xml">
+<!ENTITY ch03a    SYSTEM "04a-example-ascii-table.xml">
 <!ENTITY ch08     SYSTEM "08-modules.xml">
 ]>
 
@@ -51,5 +51,6 @@ l    <copyright>
   &ch00;
   &ch01;
   &ch03;
+  &ch03a;
   &ch08;
 </book>
