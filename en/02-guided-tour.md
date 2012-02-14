@@ -116,14 +116,13 @@ describes a function that takes two `int` arguments and returns an
 describes a function of two arguments where the first argument is
 itself a function.
 
-The types are quickly getting more complicated, and you might at this
-point ask yourself how OCaml determines these types in the first
-place.  Roughly speaking, OCaml infers the type of an expression from
-what it already knows about the types of the elements of that
-expression.  This process is called _type-inference_.  As an example,
-in `abs_change`, the fact that `abs_diff` takes two integer arguments
-lets the compiler infer that `x` is an `int` and that `f` returns an
-`int`.
+The types are quickly getting more complicated, and at this point you might ask
+yourself how OCaml determines these types in the first place.  Roughly
+speaking, OCaml infers the type of an expression from what it already knows
+about the types of the elements of that expression.  This process is called
+_type-inference_.  As an example, in `abs_change`, the fact that `abs_diff`
+takes two integer arguments lets the compiler infer that `x` is an `int` and
+that `f` returns an `int`.
 
 Sometimes, the type-inference system doesn't have enough information
 to fully determine the concrete type of a given value.  Consider this
