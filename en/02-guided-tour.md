@@ -1,6 +1,6 @@
 # A Guided Tour
 
-We'll start our introduction to OCaml with the OCaml toplevel, an
+We'll start our introduction to OCaml with the toplevel, an
 interactive shell that lets you type in expressions and then evaluates
 them immediately.  When you get to the point of running real programs,
 you'll want to leave the toplevel behind, but it's a great tool for
@@ -46,12 +46,11 @@ few differences that jump right out at you.
 - Function application in OCaml is syntactically unusual, in that
   function arguments are written out separated by spaces, rather than
   being demarcated by parens and commas.
-- OCaml carefully distinguishes between `float`, the type for floating
-  point numbers and `int`.  The types have different literals (_e.g._,
-  `6.` instead of `6`) and different infix operators (_e.g._, `+.`
-  instead of `+`).  This can be a bit of a nuisance, but it has its
-  benefits, since it makes it prevents some classes of bugs that arise
-  from confusion between the semantics of `int` and `float`.
+- OCaml carefully distinguishes between `float`, the type for floating point
+  numbers and `int`.  The types have different literals (`6.` instead of `6`)
+  and different infix operators (`+.` instead of `+`).  This can be a bit of a
+  nuisance, but it has its benefits, since it makes it prevents some classes of
+  bugs that arise from confusion between the semantics of `int` and `float`.
 
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
@@ -117,14 +116,13 @@ describes a function that takes two `int` arguments and returns an
 describes a function of two arguments where the first argument is
 itself a function.
 
-The types are quickly getting more complicated, and you might at this
-point ask yourself how OCaml determines these types in the first
-place.  Roughly speaking, OCaml infers the type of an expression from
-what it already knows about the types of the elements of that
-expression.  This process is called _type-inference_.  As an example,
-in `abs_change`, the fact that `abs_diff` takes two integer arguments
-lets the compiler infer that `x` is an `int` and that `f` returns an
-`int`.
+The types are quickly getting more complicated, and at this point you might ask
+yourself how OCaml determines these types in the first place.  Roughly
+speaking, OCaml infers the type of an expression from what it already knows
+about the types of the elements of that expression.  This process is called
+_type-inference_.  As an example, in `abs_change`, the fact that `abs_diff`
+takes two integer arguments lets the compiler infer that `x` is an `int` and
+that `f` returns an `int`.
 
 Sometimes, the type-inference system doesn't have enough information
 to fully determine the concrete type of a given value.  Consider this
@@ -149,10 +147,9 @@ val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 we see that rather than choose a particular type for the value being
-tested, OCaml has introduced a _type variable_ `'a`.  Type variables
-are used to express that a type is generic.  So, a type containing a
-type variable `'a` can be used in a context where `'a` is replaced
-with any concrete type.  So, we can write:
+tested, OCaml has introduced a _type variable_ `'a` to express that the type is
+generic.  A type containing a type variable `'a` can be used in a context where
+`'a` is replaced with any concrete type.  So, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let long_string s = String.length s > 3;;
@@ -194,8 +191,8 @@ Java.
 
 So far we've encountered a handful of basic types like `int`, `float`
 and `string` as well as function types like `string -> int`.  But we
-haven't yet talked about any datastructures.  We'll start by looking
-at a particularly simple datastructure, the tuple.  You can create a
+haven't yet talked about any data structures.  We'll start by looking
+at a particularly simple data structure, the tuple.  You can create a
 tuple by joining values together with a comma:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
@@ -209,7 +206,7 @@ used because the space of all 2-tuples of type `t * s` effectively
 corresponds to the Cartesian product of `t` and `s`.)
 
 You can extract the components of a tuple using OCaml's
-pattern-matching syntax Here's a function for computing the distance
+pattern-matching syntax. Here's a function for computing the distance
 between two points on the plane, where each point is represented as a
 pair of `float`s.
 
@@ -237,7 +234,7 @@ tool.
 
 ### Options
 
-Another common datastructure in OCaml is the `option`.  An `option` is
+Another common data structure in OCaml is the `option`.  An `option` is
 used to express that a value that might or might not be present.  For
 example,
 
@@ -282,8 +279,8 @@ val print_log_entry : Time.t option -> string -> unit
 
 Here, we use a new piece of syntax, the `match` statement, to do the
 pattern matching.  A `match` statement lets you do a case analysis
-driven by the shape of a datastructure, and it can be used for many
-different datastructres in OCaml.
+driven by the shape of a data structure, and it can be used for many
+different data structures in OCaml.
 
 This is the basic shape of a match statement.
 
@@ -298,7 +295,7 @@ The first pattern that matches the structure of the expression between
 the `match` and the `with` is chosen, and the right-hand side of the
 `->` is evaluated, and is the result of evaluating the entire
 expression.  As with `print_log_entry`, the pattern can also create
-new variables, giving a name to sub-components of the datastructure
+new variables, giving a name to sub-components of the data structure
 being matched.
 
 But we don't necessarily need to use the `match` statement in this
@@ -316,8 +313,8 @@ value if the option is `None`.
 ### Lists
 
 Tuples let you combine a fixed number of items, potentially of
-different types, together in one datastructure.  Lists let you hold
-any number of items of the same type in one datastructure.  For
+different types, together in one data structure.  Lists let you hold
+any number of items of the same type in one data structure.  For
 example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
@@ -414,7 +411,7 @@ _{??Functions??}_.
 
 ## Records and Variants
 
-So far, we've only looked at datastructures that were pre-defined in
+So far, we've only looked at data structures that were pre-defined in
 the language, like lists and tuples.  But OCaml also allows us to
 define new datatypes.  Here's a toy example of a datatype representing
 a point in 2-dimensional space:
@@ -485,7 +482,7 @@ different possibilities.  The `|` character separates the different
 cases of the variant, and each case has a tag (like `Circle`, `Rect`
 and `Segment`) to distinguish each case from the other.  Here's how we
 might write a function for testing whether a point is in the interior
-of one of a list of `shape`s.
+of one of a `shape list`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let is_inside_shape vec shape =
