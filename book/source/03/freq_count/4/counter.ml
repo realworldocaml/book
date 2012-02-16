@@ -14,5 +14,4 @@ let touch t s =
 
 let to_list t = Map.to_alist t
 
-let _ = Freq.build_counts
-
+let build_counts = Freq.build_counts
