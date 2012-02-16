@@ -164,7 +164,7 @@ compiler.
  </sidebar>
 
 
-## Multi-file programs and Modules ##
+## Multi-file programs and modules ##
 
 Source files in OCaml are tied into the module system, with each file
 compiling down into a module whose name is derived from the name of
@@ -693,5 +693,45 @@ function.
 
 #### Cyclic dependencies
 
-_[This is an ocamlbuild error, really...]_
+In most cases, OCaml doesn't allow circular dependencies, _i.e._, a
+collection of definitions that all refer to each other.  If you want
+to create such definitions, you typically have to mark them specially.
+For example, when defining a set of mutually recursive values, you
+need to define them using `let rec` rather than ordinary `let`.
 
+The same is true at the module level.  By default, circular
+dependencies between modules is not allowed, and indeed, circular
+dependencies among files is never allowed.
+
+The simplest case of this is that a module can not directly refer to
+itself (although definitions within a module can refer to each other
+in the ordinary way).  So, if we tried to add a reference to `Counter`
+from within `counter.ml`:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let singleton l = Counter.touch Counter.empty
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+then when we try to build, we'll get this error:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File "counter.ml", line 17, characters 18-31:
+Error: Unbound module Counter
+Command exited with code 2.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The problem manifests in a different way if we create circular
+references between files.  We could create such a situation by adding
+a reference to Freq from `counter.ml`, _e.g._, by adding the following
+line:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let build_counts = Freq.build_counts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this case, `ocamlbuild` will notice the error and complain:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Circular dependencies: "freq.cmo" already seen in
+  [ "counter.cmo"; "freq.cmo" ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
