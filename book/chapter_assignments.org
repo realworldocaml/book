@@ -1,19 +1,19 @@
-| num | Chapter                              | Author |
-|-----+--------------------------------------+--------|
-|  02 | A Guided Tour                        | yaron  |
-|  03 | Expressions, Variables and Functions |        |
-|  04 | Lists, Options and Pattern-matching  |        |
-|  05 | Algebraic Data Types                 |        |
-|  06 | Error Handling                       |        |
-|  07 | Programming with Mutation            |        |
-|  08 | Modules                              | yaron  |
-|  09 | Advanced Modules                     |        |
-|  10 | Synchronous I/O                      |        |
-|  11 | Syntax Extensions                    | yaron  |
-|  12 | Concurrent Programming               |        |
-|  13 | Objects                              | jason  |
-|  14 | Tuning the Runtime                   | anil   |
-|  15 | Foreign Function Interface           | anil   |
-|  16 | Camlp4                               | anil   |
-|  17 | OCamlbuild                           | anil   |
-|  18 | ocamllex/ocamlyacc                   |        |
+| Chapter                              | Author |
+|--------------------------------------+--------|
+| A Guided Tour                        | yaron  |
+| Expressions, Variables and Functions |        |
+| Lists, Options and Pattern-matching  |        |
+| Algebraic Data Types                 |        |
+| Error Handling                       |        |
+| Programming with Mutation            |        |
+| Files, Modules and Programs          | yaron  |
+| Advanced Modules                     |        |
+| Synchronous I/O                      |        |
+| Syntax Extensions                    | yaron  |
+| Concurrent Programming               |        |
+| Objects                              | jason  |
+| Tuning the Runtime                   | anil   |
+| Foreign Function Interface           | anil   |
+| Camlp4                               | anil   |
+| OCamlbuild                           | anil   |
+| ocamllex/ocamlyacc                   |        |

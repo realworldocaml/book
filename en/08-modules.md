@@ -1,5 +1,5 @@
-Files, Modules, and Programs
-============================
+Files, Modules and Programs
+===========================
 
 We've so far experienced OCaml only through the toplevel.  As you move
 from exercises to real-world programs, you'll need to leave the
