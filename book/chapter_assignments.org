@@ -1,19 +1,27 @@
-| Chapter                              | Author |
-|--------------------------------------+--------|
-| A Guided Tour                        | yaron  |
-| Expressions, Variables and Functions |        |
-| Lists, Options and Pattern-matching  |        |
-| Algebraic Data Types                 |        |
-| Error Handling                       |        |
-| Programming with Mutation            |        |
-| Files, Modules and Programs          | yaron  |
-| Advanced Modules                     |        |
-| Synchronous I/O                      |        |
-| Syntax Extensions                    | yaron  |
-| Concurrent Programming               |        |
-| Objects                              | jason  |
-| Tuning the Runtime                   | anil   |
-| Foreign Function Interface           | anil   |
-| Camlp4                               | anil   |
-| OCamlbuild                           | anil   |
-| ocamllex/ocamlyacc                   |        |
+| Chapter                              | Author | Status |
+|--------------------------------------+--------+--------|
+| A Guided Tour                        | yaron  | ###    |
+| Expressions, Variables and Functions |        |        |
+| Lists, Options and Pattern-matching  |        |        |
+| Algebraic Data Types                 |        |        |
+| Error Handling                       | yaron  |        |
+| Programming with Mutation            |        |        |
+| Files, Modules and Programs          | yaron  | ##     |
+| Functors and first-class modules     | yaron  |        |
+| Synchronous I/O                      |        |        |
+| Syntax Extensions                    | yaron  |        |
+| Concurrent Programming               | anil   |        |
+| Objects                              | jason  |        |
+| Tuning the Runtime                   | anil   |        |
+| Foreign Function Interface           | anil   |        |
+| Camlp4                               | anil   |        |
+| OCamlbuild                           | anil   |        |
+| ocamllex/ocamlyacc                   |        |        |
+
+
+** Status key
+ - Blank: no progress
+ - #: In progress
+ - ##: 1st Draft is finished
+ - ###: Chapter is effectively complete, i.e., has undergone a round of
+   review and fixes
