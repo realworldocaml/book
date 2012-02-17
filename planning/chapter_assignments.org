@@ -3,8 +3,8 @@
 | Chapter                              | Author | Status |
 |--------------------------------------+--------+--------|
 | A Guided Tour                        | yaron  | ###    |
-| Expressions, Variables and Functions | yaron  |        |
-| Lists, Options and Pattern-matching  |        |        |
+| Expressions, Variables and Functions | yaron  | #      |
+| Lists, Options and Pattern-matching  |        | #      |
 | Algebraic Data Types                 |        |        |
 | Error Handling                       | yaron  |        |
 | Programming with Mutation            |        |        |

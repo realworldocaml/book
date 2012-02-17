@@ -83,11 +83,10 @@ computation.  He obtained his PhD in Computer Science from Cornell
 University, where he studied programming languages.  He is the author
 of the MetaPRL system, a logical framework for design and analysis of
 large software systems; OMake, an advanced build system for large
-software projects.  He is the author of the textbook, An Introduction
-to Objective Caml (unpublished).
+software projects.  He is the author of the textbook, _An Introduction
+to Objective Caml_ (unpublished).
 
 ### Anil Madhavapeddy
-
 
 Anil Madhavapeddy is a Senior Research Fellow at the University of
 Cambridge, based in the Systems Research Group. He was on the original team
