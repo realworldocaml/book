@@ -7,6 +7,7 @@ CSS=rwobook
 SRC=	00-outline.md \
 	01-prologue.md \
 	02-guided-tour.md \
+        03-expressions-variables-and-functions.md \
 	04-lists-options-and-patterns.md \
 	04a-example-ascii-table.md \
 	08-modules.md
