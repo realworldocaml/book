@@ -196,11 +196,90 @@ instead of using partial application, is caled _eta-expansion_, and is
 often a useful trick.  We'll talk more about eta-expansion in chapter
 {{{VALUE RESTRICTION}}}
 
-### Labelled and Optional Arguments ###
+### Labeled Arguments ###
 
-OCaml also supports functions with labeled and optional arguments.
-Labeled arguments lets you identify the argument to a function by name
-rather than by position.  This is useful in a few different cases:
+OCaml also supports functions with labeled arguments, which let you
+identify a function argument by name rather than by position.
+Functions with labeled arguments can be declared by putting a tilde in
+front of the variable name in the definition of the function:
 
-- When you're defining a function with many arguments.
-- ...
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let f ~foo:a ~bar:b = a + b
+val f : foo:int -> bar:int -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And the function can be called using the same convention:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# f ~foo:3 ~bar:10;;
+- : int = 13
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In addition, OCaml supports _label punning_, in both function
+definition and function invocation, meaning that you get to drop the
+`:` if the name of the label and the name of the variable are the
+same.  So, we can write
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let f ~foo ~bar = foo + bar
+val f : foo:int -> bar:int -> int = <fun>
+# let foo = 3;;
+# let bar = 4;;
+# f ~foo ~bar;;
+- : int = 7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Labeled arguments are useful in a few different cases:
+
+  - When defining a function with lots of arguments, because when you
+    have enough arguments, names are easier to remember than positions.
+
+  - For functions that have multiple arguments that might get confused
+    with each other, particularly if they're of the same type.  For
+    example, consider this signature for a function for creating a
+    substring of another string.
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    val substring: string -> int -> int -> string
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    where the two ints are the starting position and length of the
+    substring to extract.  Labeled arguments can make this signature
+    clearer:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    val substring: string -> pos:int -> len:int -> string
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This makes the signature easier to read, and it also makes it
+    easier to read code that uses this function.
+
+  - Labeled arguments give you a way to assign a clear name and
+    meaning to an argument whose type is otherwise less than
+    informative.  For example, consider a function for creating a
+    hashtable where the first argument is the initial size of the
+    table, and the second argument is a flag which, when true,
+    indicates that the hashtable will adjust its size down when its
+    size is small.  The following signature is less than informative.
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    val create_hashtable : int -> bool -> Hashtable.t
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    but with labeled arguments, we can make the intent much clearer:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    val create_hashtable : init_size:int -> allow_shrinking:bool -> Hashtable.t
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  - Labeled arguments make it possible for the caller to decide which
+    argument of a function to partially apply, whereas in ordinary
+    curried functions, you can only partially apply the arguments in
+    order, from first to last.  Labeled arguments also make it
+    possible to place the arguments to a function in different orders,
+    which is useful for functions like `List.map` where you often want
+    to partially apply `List.map` with just the function, and at the
+    same time mapping over a large function is easier to read if the
+    functionis the last argument.
+
+### Optional arguments ###
