@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter>
+  <title>Chapter Title Here</title>
+
+  <para>If you have any opening text before the first section heading, put it
+  here. (Do not use a <literal>&lt;sect1&gt;</literal> with an empty
+  <literal>&lt;title&gt;</literal>.) If you want to start your chapter with a
+  section heading, just delete this <literal>&lt;para&gt;</literal>.</para>
+
+  <sect1>
+    <title>Section Title Here</title>
+
+    <para>Opening para...</para>
+  </sect1>
+</chapter>

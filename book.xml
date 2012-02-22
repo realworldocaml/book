@@ -1,0 +1,13 @@
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN' 'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'><book>
+  <!-- Reference new files using XIncludes (not entities): http://www.sagehill.net/docbookxsl/ModularDoc.html#UsingXinclude -->
+  <!-- Each file should have a DOCTYPE at the top of it so you can validate it alone (just like this but with a chapter/preface instead of book-->
+  <!-- Remember, using XIncludes means that you'll have to add a flag (typically 'xinclude' with one or two dashes) when using XML processors/parsers -->
+  <!-- Validate with xmllint as follows (Basic setup same as libxslt: http://www.sagehill.net/docbookxsl/InstallingAProcessor.html)-->
+  <!-- (please collapse dashes in the line beloew) -->
+  <!-- $ xmllint - -xinclude - -noout - -postvalid book.xml -->
+
+<title>Real World OCaml</title>
+<xi:include href='bookinfo.xml' xmlns:xi='http://www.w3.org/2001/XInclude'/>
+<xi:include href='ch00.xml' xmlns:xi='http://www.w3.org/2001/XInclude'/>
+<xi:include href='ch01.xml' xmlns:xi='http://www.w3.org/2001/XInclude'/>
+</book>
