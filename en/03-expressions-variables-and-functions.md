@@ -146,17 +146,18 @@ style.  Most of the time, functions are used in prefix style, for example:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 But there are a specialized set of identifiers called _operators_
-which can be used for definining prefix functions.  An operator is
-defined as being any identifier which is a sequence of characters from
-the following set:
+which can be used for definining infix functions as well as prefix
+functions that bind more tightly than simple function application.  An
+operator is defined as being any identifier which is a sequence of
+characters from the following set:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! $ % & * + - . / : < = > ? @ ^ | ~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are also a handful of fixed strings that are defined to be
-operators, including things like `mod`, the modulus operator, and
-`lsl`, for "logical shift right", which is a bit-shifting operation.
+or one of a handful of fixed strings that are defined to be operators,
+including things like `mod`, the modulus operator, and `lsl`, for
+"logical shift right", which is a bit-shifting operation.
 
 We can define (or redefine) an operator as follows:
 
