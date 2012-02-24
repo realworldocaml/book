@@ -26,23 +26,28 @@
  - ##: 1st Draft is finished
  - ###: Chapter is effectively complete, i.e., has undergone a round of
    review and fixes
-
+   
 * Chapter proposals
 
 Some other thoughts for chapters to add:
 
 ** Designing modules
 
-Maybe a section on design tips for OCaml.  Suggestions on idioms like
-signature includes; conventions on naming functions; suggestions about
-building useful abstractions.
+ Design tips for OCaml modules.  Suggestions on idioms like signature
+ includes; conventions on naming functions; suggestions about building
+ useful abstractions.
 
-Maybe also some clever type-design tricks should be included:
-type-indexed values and phantom types come up from time to time, and
-are pretty handy.
+ Maybe also some clever type-design tricks should be included:
+ type-indexed values and phantom types come up from time to time, and
+ are pretty handy.
 
 ** Unicode
 
 Maybe a chapter on how to use Unicode effectively in OCaml?  I've
 never done this, so I'm not the best person.  But it does seem like a
 common enough issue.
+** Laziness
+ How to use laziness in OCaml, including:
+ - pattern matching of lazy values
+ - declaring mutually recursive values lazy values
+ - lazy lists
