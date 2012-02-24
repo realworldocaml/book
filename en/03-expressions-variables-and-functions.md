@@ -1,13 +1,86 @@
-# Expressions, Variables and Functions
+# Variables and Functions
 
 _(NOTE: this chapter is still very much in progress)_
 
-In this section, we'll go into a bit more depth on the fundamental
-building blocks of OCaml: expressions, variables and functions.
+## Let bindings ##
 
-OCaml is an expression-oriented language, which is to say that most
-OCaml code is structured as expressions to be evaluated rather than a
-sequence of side-effecting statements to be executed.
+CPerhaps the most common declaration in OCaml is the _let binding_.  A
+let binding is used to define a new variable.  At the top-level, a let
+binding has this syntax:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let <identifier> = <expr>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So, for example, we might write the following to define `pi`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let pi = 2. *. asin 1.;;
+- : float = 3.14159265358979312
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let bindings can also show up in the middle of a larger expression,
+rather than just at the toplevel.  When they do, they have this
+syntax:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let <identifier> = <expr> in <expr>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So, we might write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* compute the size of an annulus with an outer radius of 2. and an
+   inner radius of 0.5 *)
+let annulus =
+  let pi = 2. *. asin 1. in
+  let circle r = pi *. r *. r in
+  circle 2. -. circle 0.5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each let binding opens up a new scope, within which you might nest new
+let bindings.  Let bindings are immutable: you can never change what
+value a given variable points to.  (As we'll see in chapter
+{{MUTATION}}, mutation is available in OCaml, but it shows up by
+modifying values, not by modifying variable bindings.)
+
+It's easy to confuse rebinding of the same identifier to different
+values with mutation, but they're fundamentally different.  Here's an
+example of what it looks like.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let x = 3;;
+val x : int = 3
+# let x = 4;;
+val x : int = 4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The key thing to understand is that the second binding of `x` doesn't
+modify the first one, it shadows, or hides, it.  This may seem like a
+minor distinction, but it has real effects.  Consider the following
+function.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let foo () =
+    let x = 3 in
+    let print_x () = printf "%d\n" x in
+    let x = 4 in
+    print_x ();
+    printf "%d\n" xnn
+ ;;
+val foo : unit -> unit = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+What would you epxect `print_x` to print out?  If the second let
+binding is effectively a mutation, it should print `4` twice.  If it's
+just shadowing the old definition of `x`, then it should print `3` and
+then `4`.  That second behavior is exactly what we see:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# foo ();;
+3
+4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Functions
 
@@ -516,29 +589,4 @@ val uppercase_concat :
   ?sep:'a -> Core.Std.String.t -> string -> ?sep:string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Expressions ##
-
-OCaml has a handful of basic forms around which OCaml expressions are
-built.  We'll describe those forms below.
-
-### Function application ###
-
-This is perhaps the simplest thing that you can do in OCaml.  The
-basic form is:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<function> <arg1> [<arg2> ...]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Functions come in both prefix and infix styles:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# min 3 4;;
-- : int = 3
-# 3 > 4;;
-- : bool = false
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here,
-
-### Let binding ###
+## Let binding ##
