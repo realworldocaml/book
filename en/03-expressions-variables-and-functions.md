@@ -4,7 +4,7 @@ _(NOTE: this chapter is still very much in progress)_
 
 ## Let bindings ##
 
-CPerhaps the most common declaration in OCaml is the _let binding_.  A
+Perhaps the most common declaration in OCaml is the _let binding_.  A
 let binding is used to define a new variable.  At the top-level, a let
 binding has this syntax:
 
@@ -56,17 +56,18 @@ val x : int = 4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The key thing to understand is that the second binding of `x` doesn't
-modify the first one, it shadows, or hides, it.  This may seem like a
-minor distinction, but it has real effects.  Consider the following
-function.
+modify the first one, it creates a new variable that _shadows_, or
+hides, the old variable tied to the same identifier.  This may seem
+like a distinction without a difference, but it really is important.
+Consider the following function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let foo () =
     let x = 3 in
-    let print_x () = printf "%d\n" x in
+    let print_x () = print_endline (Int.to_string x) in
     let x = 4 in
     print_x ();
-    printf "%d\n" xnn
+    print_endline (Int.to_string x)
  ;;
 val foo : unit -> unit = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,9 +83,66 @@ then `4`.  That second behavior is exactly what we see:
 4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Functions
+### Pattern matching in let bindings ###
 
-### Declaring functions ###
+Another useful feature of let bindings is that they support the use of
+patterns on the left-hand side of the bind, not just identifiers.
+Thus, the following code uses `List.unzip`, which is a function for
+converting a list of pairs to a pair of lists.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")]
+val ints : int Core.Std.List.t = [1; 2; 3]
+val strings : string Core.Std.List.t = ["one"; "two"; "three"]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This actually binds two variables, one for each element of the pair.
+Using a pattern in a let-binding makes the most sense for a pattern
+that is _irrefutable_, i.e., where there are no other cases.  If we
+try something similar with a list, you'll see that we get a warning
+from the compiler that there are some cases we missed:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let (hd::tl) = [1;2;3];;
+Characters 4-12:
+  let (hd::tl) = [1;2;3];;
+      ^^^^^^^^
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### `let`/`and` bindings ###
+
+Another form of let binding that comes up on occasion is where you
+bind multiple arguments in parallel in a single declaration.  For
+example, we can write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let x = 100 and y = 3.5;;
+val x : int = 100
+val y : float = 3.5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This can be useful when you want to create a number of new definitions
+at once, without having each definition affect the next.  So, if we
+wanted to create new bindings that swapped the values of `x` and `y`,
+we could write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let x = y and y = x ;;
+val x : float = 3.5
+val y : int = 100
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+But this use-case doesn't come up that often.  Most of the time that
+`and` comes into play, it's as part defining multiple mutually
+recursive values, which we'll learn about later in the chapter.
+
+Note that when doing a `let`/`and` style declaration, the order of
+execution of the right-hand side of the definitions is undefined.
+
+## Functions ##
 
 OCaml function declarations come in multiple styles.  Perhaps the most
 fundamental form is the definition of an anonymous functions using the
@@ -102,6 +160,24 @@ function directly:
 # (fun x -> x + 1) 7;;
 - : int = 8
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<sidebar>
+<title>Connections between `let` and `fun`</title>
+
+Functions and let bindings have a lot to do with each other.  In some
+sense, you can think of the argument of a function as a variable being
+bound.  The following two code snippets are nearly equivalent:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# (fun x -> x + 1) 7;;
+- : int = 8
+# let x = 7 in x + 1;;
+- : int = 8
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This connection is important, and will come up more when programming
+in a monadic style, as we'll see in chapter {{ASYNC}}
+</sidebar>
 
 or we can name it, and then use it:
 
@@ -207,6 +283,30 @@ purpose of sending arguments to a tuple-style function.
 There are small tradeoffs between these two styles, but most of the
 time, once should stick to currying, since it's the default style in
 the OCaml world.
+
+### Recursive functions ###
+
+In order to define a recursive function, you need to mark the let
+binding as recursive with the `rec` keyword, as shown in this example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let rec find_first_repeat = function
+     | [] | [_] ->
+       (* only one or two elements, so no repeats *)
+       None
+     | x :: y :: tl ->
+       if x = y then Some x else find_first_repeat (y::tl)
+val find_first_repeat : 'a list -> 'a option = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can also define multiple mutually recursive values by using `let
+rec` and `and` together.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ### Prefix and Infix operators ###
 
@@ -444,7 +544,7 @@ follows:
 # let concat ?(sep="") x y = x ^ sep ^ y ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### Explicit passing of an optional argument ####
+#### Explicit passing of an optional argument ###
 
 Sometimes you want to explicitly invoke an optional argument with a
 concrete option, where `None` indicates that the argument won't be
@@ -467,7 +567,7 @@ val uppercase_concat : ?sep:string -> string -> string -> string =
 - : string = "FOObar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### Erasure of optional arguments ####
+#### Erasure of optional arguments ###
 
 One subtle aspect of optional arguments is the question of OCaml
 decides to _erase_ an optional argument, _i.e._, to give up waiting
@@ -558,7 +658,7 @@ Warning 16: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### When to use optional arguments ####
+#### When to use optional arguments ###
 
 Optional arguments are very useful, but they're also easy to abuse.
 The key advantage of optional arguments is that they let you write
@@ -589,4 +689,3 @@ val uppercase_concat :
   ?sep:'a -> Core.Std.String.t -> string -> ?sep:string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Let binding ##
