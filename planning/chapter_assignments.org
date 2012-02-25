@@ -51,9 +51,11 @@ common enough issue.
  - pattern matching of lazy values
  - declaring mutually recursive values lazy values
  - lazy lists
-
 ** Language minutae
  Not really a chapter idea, but some concepts that should get written
  down somewhere, and I'm not sure where.
  - Order of evaluation.  This is actually pretty surprising in OCaml,
    and should be made clear.
+ - syntax of conditionals
+ - laziness of || and &&
+
