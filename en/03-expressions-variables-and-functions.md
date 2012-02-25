@@ -1,96 +1,98 @@
 # Variables and Functions
 
-_(NOTE: this chapter is still very much in progress)_
+In OCaml, a variable is a name for a value.  Variables are introduced
+using the `let` keyword, which at the top-level has the following
+syntax.
 
-## Let bindings ##
-
-Perhaps the most common declaration in OCaml is the _let binding_.  A
-let binding is used to define a new variable.  At the top-level, a let
-binding has this syntax:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 let <identifier> = <expr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-So, for example, we might write the following to define `pi`.
+So, we can write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let pi = 2. *. asin 1.;;
-- : float = 3.14159265358979312
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Let bindings can also show up in the middle of a larger expression,
-rather than just at the toplevel.  When they do, they have this
-syntax:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-let <identifier> = <expr> in <expr>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-So, we might write:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-(* compute the size of an annulus with an outer radius of 2. and an
-   inner radius of 0.5 *)
-let annulus =
-  let pi = 2. *. asin 1. in
-  let circle r = pi *. r *. r in
-  circle 2. -. circle 0.5
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Each let binding opens up a new scope, within which you might nest new
-let bindings.  Let bindings are immutable: you can never change what
-value a given variable points to.  (As we'll see in chapter
-{{MUTATION}}, mutation is available in OCaml, but it shows up by
-modifying values, not by modifying variable bindings.)
-
-It's easy to confuse rebinding of the same identifier to different
-values with mutation, but they're fundamentally different.  Here's an
-example of what it looks like.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 3;;
 val x : int = 3
-# let x = 4;;
-val x : int = 4
+# let y = 4;;
+val y : int = 4
+# let z = x + y;;
+val z : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The key thing to understand is that the second binding of `x` doesn't
-modify the first one, it creates a new variable that _shadows_, or
-hides, the old variable tied to the same identifier.  This may seem
-like a distinction without a difference, but it really is important.
+Let bindings can also be used to create a variable used for evaluating
+a single expression, using the following syntax.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
+let <identifier> = <expr1> in <expr2>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+THis binds `<identifier>` to the value of `<expr1>` while evaluating
+`<expr2>`, which is the called body of the expression.
+
+In this form, multiple let bindings can be nested, as in this example.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let x = 3 in
+  let y = 4 in
+  x + y
+;;
+- : int = 7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that nested bindings can _shadow_, or hide, previous bindings.
+Thus, we can write
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let x = 1 in
+  let x = x + x in
+  let x = Int.to_string (x + x) in
+  x ^ x;;
+- : string = "44"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Variables are always immutable in OCaml, and it's important not to
+confuse shadowing of variables with mutation.  This may seem like a
+distinction without a difference, but it makes a real difference.
 Consider the following function.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let foo () =
-    let x = 3 in
-    let print_x () = print_endline (Int.to_string x) in
-    let x = 4 in
-    print_x ();
-    print_endline (Int.to_string x)
- ;;
-val foo : unit -> unit = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let x = 3 in
+  let add_to_x y = x + y in
+  let x = 4 in
+  add_to_x 0
+;;
+- : int = 3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-What would you epxect `print_x` to print out?  If the second let
-binding is effectively a mutation, it should print `4` twice.  If it's
-just shadowing the old definition of `x`, then it should print `3` and
-then `4`.  That second behavior is exactly what we see:
+If the second let-binding of x was a mutation, then you would expect
+`add_to_x` to return `4`.  But the old `x` hasn't been overridden;
+it's still available through `add_to_x`.
+
+Another important note is that bindings disappear when the body of the
+expression closes.  In the following example, the second binding of
+`x` occurs within the right-hand side of the definition of `y`, so
+when the definition of `y` is done, that binding of `x` is no longer
+visible, and the original definition of `x` shows up again.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# foo ();;
-3
-4
+# let x = 3 in
+  let y =
+    let x = 2 in
+    x + x
+  in
+  x + y
+- : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ### Pattern matching in let bindings ###
 
 Another useful feature of let bindings is that they support the use of
-patterns on the left-hand side of the bind, not just identifiers.
-Thus, the following code uses `List.unzip`, which is a function for
-converting a list of pairs to a pair of lists.
+simple patterns on the left-hand side of the bind.  Consider the
+following code, which uses `List.unzip`, a function for converting a
+list of pairs to a pair of lists.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")]
 val ints : int Core.Std.List.t = [1; 2; 3]
 val strings : string Core.Std.List.t = ["one"; "two"; "three"]
@@ -98,11 +100,12 @@ val strings : string Core.Std.List.t = ["one"; "two"; "three"]
 
 This actually binds two variables, one for each element of the pair.
 Using a pattern in a let-binding makes the most sense for a pattern
-that is _irrefutable_, i.e., where there are no other cases.  If we
-try something similar with a list, you'll see that we get a warning
-from the compiler that there are some cases we missed:
+that is _irrefutable_, i.e., where everything of the type in question
+must match the pattern.  Tuple and record patterns are immutable, but
+list patterns are not.  Here's an example of a list pattern match that
+generates a warning because not all cases are covered.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (hd::tl) = [1;2;3];;
 Characters 4-12:
   let (hd::tl) = [1;2;3];;
@@ -118,7 +121,7 @@ Another form of let binding that comes up on occasion is where you
 bind multiple arguments in parallel in a single declaration.  For
 example, we can write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 100 and y = 3.5;;
 val x : int = 100
 val y : float = 3.5
@@ -129,7 +132,7 @@ at once, without having each definition affect the next.  So, if we
 wanted to create new bindings that swapped the values of `x` and `y`,
 we could write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = y and y = x ;;
 val x : float = 3.5
 val y : int = 100
@@ -148,7 +151,7 @@ OCaml function declarations come in multiple styles.  Perhaps the most
 fundamental form is the definition of an anonymous functions using the
 `fun` keyword:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (fun x -> x + 1);;
 - : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,7 +159,7 @@ fundamental form is the definition of an anonymous functions using the
 The above expression creates a one-argument function.  We can use the
 function directly:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (fun x -> x + 1) 7;;
 - : int = 8
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,7 +171,7 @@ Functions and let bindings have a lot to do with each other.  In some
 sense, you can think of the argument of a function as a variable being
 bound.  The following two code snippets are nearly equivalent:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (fun x -> x + 1) 7;;
 - : int = 8
 # let x = 7 in x + 1;;
@@ -181,7 +184,7 @@ in a monadic style, as we'll see in chapter {{ASYNC}}
 
 or we can name it, and then use it:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let plusone = (fun x -> x + 1);;
 val plusone : int -> int = <fun>
 # plusone 3;;
@@ -191,7 +194,7 @@ val plusone : int -> int = <fun>
 The declaration of `plusone` above is equivalent to the following
 syntactic form that we saw in chapter {{TOUR}}:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let plusone x = x + 1;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -204,7 +207,7 @@ naming a function using the `fun` keyword.
 OCaml of course also supports multi-argument functions, as we've
 already seen.  Here's an example that came up in chapter {{TOUR}}.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let abs_diff x y = abs (x - y);;
 val abs_diff : int -> int -> int = <fun>
 # abs_diff 3 4;;
@@ -215,7 +218,7 @@ You may find the type signature of `abs_diff` a bit obscure at first.
 To understand what's going on, let's rewrite `abs_diff` in an
 equivalent form, using the `fun` keyword:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let abs_diff =
     (fun x -> (fun y -> abs (x - y)));;
 val abs_diff : int -> int -> int = <fun>
@@ -233,7 +236,7 @@ _curried function_.
 Currying isn't just a theoretical issue: you can actually make use of
 currying in practice.  Here's an example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let dist_from_3 = abs_diff 3;;
 val dist_from_3 : int -> int = <fun>
 # dist_from_3 8;;
@@ -249,14 +252,14 @@ The key to interpreting the type signature is the observation `->` is
 left-associative.  Thus, we could parenthesize the type signature of
 `abs_diff` as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 val abs_diff : int -> (int -> int)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that the `fun` keyword supports its own syntactic sugar for
 currying, so we could also have written `abs_diff` as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let abs_diff = (fun x y -> abs (x - y));;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -269,7 +272,7 @@ Currying is the standard way in OCaml of writing a multi-argument
 function, but it's not the only way.  It's also possible to use the
 different arms of a tuple as different arguments.  So, we could write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let abs_diff (x,y) = abs (x - y)
 val abs_diff : int * int -> int = <fun>
 # abs_diff (3,4);;
@@ -289,31 +292,38 @@ the OCaml world.
 In order to define a recursive function, you need to mark the let
 binding as recursive with the `rec` keyword, as shown in this example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let rec find_first_repeat = function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let rec find_first_stutter = function
      | [] | [_] ->
        (* only one or two elements, so no repeats *)
        None
      | x :: y :: tl ->
-       if x = y then Some x else find_first_repeat (y::tl)
-val find_first_repeat : 'a list -> 'a option = <fun>
+       if x = y then Some x else find_first_stutter (y::tl)
+val find_first_stutter : 'a list -> 'a option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can also define multiple mutually recursive values by using `let
-rec` and `and` together.
+rec` and `and` together, as in this example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let rec is_even x =
+    x = 0 || is_odd (x - 1)
+  and is_odd x =
+    is_even (x - 1)
+val is_even : int -> bool = <fun>
+val is_odd : int -> bool = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Note that in the above example, we take advantage of the fact that the
+right hand side of the `||` is only evaluated if the left hand side
+evaluates to false.
 
 ### Prefix and Infix operators ###
 
 So far, we've seen examples of functions used in both prefix and infix
 style.  Most of the time, functions are used in prefix style, for example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # Int.max 3 4;;
 - : int = 4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -334,7 +344,7 @@ including things like `mod`, the modulus operator, and `lsl`, for
 
 We can define (or redefine) an operator as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (+!) x y = x + y * y;;
 val ( +! ) : int -> int -> int = <fun>
 # 3 +! 4;;
@@ -344,7 +354,7 @@ val ( +! ) : int -> int -> int = <fun>
 Note that operators can be used in prefix style as well, if they are
 put in parens:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (+!) 3 4;;
 - : int = 19
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -376,7 +386,7 @@ Another way to define a function is using the `function` keyword.
 Instead of having syntactic support for declaring curried functions,
 `function` has built-in pattern matching.  Here's an example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let some_or_zero = function
      | Some x -> x
      | None -> 0
@@ -390,7 +400,7 @@ We can also combine the different styles of function declaration
 together, as in the following example where we declare a two argument
 function with a pattern-match on the second argument.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let some_or_default default = function
      | Some x -> x
      | None -> default
@@ -408,14 +418,14 @@ which let you identify a function argument by name.  Functions with
 labeled arguments can be declared by putting a tilde in front of the
 variable name in the definition of the function:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let f ~foo:a ~bar:b = a + b
 val f : foo:int -> bar:int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 And the function can be called using the same convention:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # f ~foo:3 ~bar:10;;
 - : int = 13
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -426,7 +436,7 @@ the variable being used are the same.  Label punning works in both
 function declaration and function invocation, as shown in these
 examples:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let f ~foo ~bar = foo + bar
 val f : foo:int -> bar:int -> int = <fun>
 # let foo = 3;;
@@ -495,7 +505,7 @@ doesn't matter when calling a function with labeled arguments, it does
 matter in a higher-order context, _i.e._, when passing a labeled
 argument to another function.  This is shown by the following example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let apply_to_tuple f (first,second) = f ~first ~second;;
 val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 # let divide ~second ~first = first / second;;
@@ -511,16 +521,14 @@ Error: This expression has type second:int -> first:int -> int
 
 ### Optional arguments ###
 
-One last form of function argument that comes up in OCaml is
-_optional_ arguments.  An optional argument is basically a form of
-labeled argument that the caller can choose whether or not to provide.
-A function with an optional argument must define a default for when
-the argument is absent.  Consider the following example of a string
-concatenation function with an optionally specified separator.  Note
-that the `?` in front of an argument is used to make the separator
-optional.
+An optional argument is like a labeled argument that the caller can
+choose whether or not to provide.  A function with an optional
+argument must define a default for when the argument is absent.
+Consider the following example of a string concatenation function with
+an optionally specified separator.  Note that the `?` in front of an
+argument is used to make the separator optional.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ?sep x y =
      let sep = match sep with None -> "" | Some x -> x in
      x ^ sep ^ y
@@ -532,15 +540,56 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 - : string = "foo:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As you can see, optional arguments are passed in using the same syntax
-as labeled arguments.  Also, similarly to labeled arguments, optional
-arguments can be passed in in any order.
+Optional arguments can be passed in using the same syntax as labeled
+arguments.  Also, similarly to labeled arguments, optional arguments
+can be passed in in any order.
+
+<sidebar>
+<title>How are optional arguments inferred?</title>
+
+One tricky aspect of labeled and optional arguments is the way in
+which those arguments are inferred.  Consider the following example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let foo g x y = g ~x ~y ;;
+val foo : (x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In principle, it seems like the type first argument of `foo` could
+have had a different order for the arguments (_e.g._ `y:'b ->
+x:'a -> 'c`) or could have optional instead of labeled arguments
+(_e.g._, `?y:'a -> x:'b -> 'c`).  OCaml disambiguates between these
+cases by picking labeled arguments when it can, and by choosing the
+order based on the order that is actually used.  If you try to use two
+different orders in the same context, you'll get a compilation errro:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let foo g x y = g ~x ~y + g ~y ~x ;;
+Characters 26-27:
+  let foo g x y = g ~x ~y + g ~y ~x ;;
+                            ^
+Error: This function is applied to arguments
+in an order different from other calls.
+This is only allowed when the real type is known.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If, however, we put in an explicit type constraint, then we can
+specify any compatible type.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let foo g x y = (g : ?y:'a -> x:'b -> int) ~x ~y + g ~y ~x;;
+val foo : (?y:'a -> x:'b -> int) -> 'b -> 'a -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Type constraints are discussed in more detail in chapter {{???}}.
+</sidebar>
+
 
 The behavior of substituting in a default value is so common that it
 has its own syntax.  Thus, we could rewrite the `concat` function as
 follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ?(sep="") x y = x ^ sep ^ y ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -550,7 +599,7 @@ Sometimes you want to explicitly invoke an optional argument with a
 concrete option, where `None` indicates that the argument won't be
 passed in, and `Some` indicates it will.  You can do that as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # concat ?sep:None "foo" "bar";;
 - : string = "foobar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -559,7 +608,7 @@ This is particularly useful when you want to pass through an optional
 argument from one function to another, leaving the choice of default
 to the second function.  For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
 val uppercase_concat : ?sep:string -> string -> string -> string =
   <fun>
@@ -576,7 +625,7 @@ that, for ordinary labeled arguments, if you pass in all of the
 non-labeled arguments, you're left with a partially applied function
 that is still waiting for its labeled arguments.  _e.g._,
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ~sep x y = x ^ sep ^ y ;;
 val concat : sep:string -> string -> string -> string = <fun>
 # concat "a" "b";;
@@ -590,7 +639,7 @@ positional argument defined _after_ the optional argument is passed
 in.  Thus, the following partial application of concat causes the
 optional argument to disappear:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let prepend_foo = concat "foo";;
 val prepend_foo : string -> string = <fun>
 # prepend_foo "bar";;
@@ -606,7 +655,7 @@ maybe you forgot a `;'
 But if we had instead defined `concat` with the optional argument in
 the second position:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat x ?(sep="") y = x ^ sep ^ y ;;
 val concat : string -> ?sep:string -> string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -614,7 +663,7 @@ val concat : string -> ?sep:string -> string -> string = <fun>
 then application of the first argument would not cause the optional
 argument to be erased.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let prepend_foo = concat "foo";;
 val prepend_foo : ?sep:string -> string -> string = <fun>
 # prepend_foo "bar";;;
@@ -627,14 +676,14 @@ One oddity is that, if all arguments to a function are presented at
 once, then erasure of optional arguments isn't applied until all of
 the arguments are passed in.  Thus, this works:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # concat "a" "b" ~sep:"=";;
 - : string = "a=b"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 but a well-placed pair of parenthesis fails.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (concat "a" "b") ~sep:"=";;
 Characters 0-16:
   (concat "a" "b") ~sep:"=";;
@@ -649,7 +698,7 @@ It's possible to define a function in such a way that the optional
 argument can never be erased, by having no positional arguments
 defined after the optional one.  This leads to a compiler warning:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat x y ?(sep="") = x ^ sep ^ y ;;
 Characters 15-38:
   let concat x y ?(sep="") = x ^ sep ^ y ;;
@@ -683,7 +732,7 @@ forget an optional argument part way down a chain.  Note that the
 following code compiles without complaint, even though the optional
 argument passed into `uppercase_concat` is never passed into `concat`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let uppercase_concat ?sep a b = concat (String.uppercase a) b ;;
 val uppercase_concat :
   ?sep:'a -> Core.Std.String.t -> string -> ?sep:string -> string = <fun>
