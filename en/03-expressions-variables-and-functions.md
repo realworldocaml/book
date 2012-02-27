@@ -113,7 +113,7 @@ val strings : string Core.Std.List.t = ["one"; "two"; "three"]
 This actually binds two variables, one for each element of the pair.
 Using a pattern in a let-binding makes the most sense for a pattern
 that is _irrefutable_, i.e., where everything of the type in question
-must match the pattern.  Tuple and record patterns are immutable, but
+must match the pattern.  Tuple and record patterns are irrefutable, but
 list patterns are not.  Here's an example of a list pattern match that
 generates a warning because not all cases are covered.
 
@@ -261,7 +261,7 @@ The practice of applying some of the arguments of a curried function
 to get a new function is called _partial application_.
 
 The key to interpreting the type signature is the observation `->` is
-left-associative.  Thus, we could parenthesize the type signature of
+right-associative.  Thus, we could parenthesize the type signature of
 `abs_diff` as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -749,3 +749,18 @@ val uppercase_concat :
   ?sep:'a -> Core.Std.String.t -> string -> ?sep:string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+_(jyh: This is a great example, but the `?sep` for `concat`
+should be erased.  Also, you may want to mention that warnings can be turned
+on to catch the unused variable.)_
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+$ ocaml -w A
+# let concat ?sep x y =
+     let sep = match sep with None -> "" | Some x -> x in
+     x ^ sep ^ y
+  ;;        
+val concat : ?sep:string -> string -> string -> string = <fun>
+# let uppercase_concat ?sep a b = concat (String.uppercase a) b ;;
+Warning 27: unused variable sep.
+val uppercase_concat : ?sep:'a -> string -> string -> string = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
