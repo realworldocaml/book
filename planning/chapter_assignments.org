@@ -26,11 +26,17 @@
  - ##: 1st Draft is finished
  - ###: Chapter is effectively complete, i.e., has undergone a round of
    review and fixes
-   
+
 * Chapter proposals
 
 Some other thoughts for chapters to add:
 
+** Basic types and expressions
+ - Before our current Chapter 2
+ - Cover the basic types, and where to find functionality relating to
+   them.  The basic organizational scheme of Core should be mentioned
+   (find int functions in Int, string in String, etc.)
+ - basics of simple expressions, syntax and typing if/then/else
 ** Designing modules
 
  Design tips for OCaml modules.  Suggestions on idioms like signature
@@ -58,4 +64,6 @@ common enough issue.
    and should be made clear.
  - syntax of conditionals
  - laziness of || and &&
+ - type constraints
+
 
