@@ -1,14 +1,24 @@
 # Variables and Functions
 
-In OCaml, a variable is a name for a value.  Variables are introduced
-using the `let` keyword, which at the top-level has the following
-syntax.
+_(yminsky: still don't have a decent introceptive)_ 
+
+
+
+
+
+Variables in OCaml are different from variables in most other
+languages in that OCaml's variables are immutable.  At its simplest, a
+variable is an identifier whose meaning is bound to a particular
+value.  In OCaml these bindings are introduces using the `let`
+keyword, which at the top-level of a module has the following syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 let <identifier> = <expr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-So, we can write:
+Every variable binding has a _scope_, which is the portion of the code
+which includes this binding in its evaluation environment.  The scope
+of a top-level let binding is everything that follows it.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 3;;
@@ -19,17 +29,18 @@ val y : int = 4
 val z : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let bindings can also be used to create a variable used for evaluating
-a single expression, using the following syntax.
+Let bindings can also be used to create a variable binding whose scope
+is limited to a particular expressions, using the following syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 let <identifier> = <expr1> in <expr2>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-THis binds `<identifier>` to the value of `<expr1>` while evaluating
-`<expr2>`, which is the called body of the expression.
+This first evaluates `<expr1>`, and then evaluates `<expr2>` in an
+environment that has an extra variable binding, in particular, the
+binding of `<identifier>` to whatever `<expr1>` evaluated to.
 
-In this form, multiple let bindings can be nested, as in this example.
+In this form, multiple let bindings can be nested, like this:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 3 in
@@ -50,9 +61,8 @@ Thus, we can write
 - : string = "44"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Variables are always immutable in OCaml, and it's important not to
-confuse shadowing of variables with mutation.  This may seem like a
-distinction without a difference, but it makes a real difference.
+It's important not to confuse shadowing of variables with assignment,
+_i.e._, mutating a variable by assigning a new definition to it.
 Consider the following function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -64,15 +74,17 @@ Consider the following function.
 - : int = 3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If the second let-binding of x was a mutation, then you would expect
-`add_to_x` to return `4`.  But the old `x` hasn't been overridden;
-it's still available through `add_to_x`.
+If the second let binding of x were in fact an assignment, then you
+would expect `add_to_x 0` to return `4`.  Instead, it returns `3`,
+because the `x` that `add_to_x` refers to is still there, unchanged,
+even after the new binding of `x` to `4` is created.
 
-Another important note is that bindings disappear when the body of the
-expression closes.  In the following example, the second binding of
-`x` occurs within the right-hand side of the definition of `y`, so
-when the definition of `y` is done, that binding of `x` is no longer
-visible, and the original definition of `x` shows up again.
+Here's another demonstration of how let bindings differ from
+assignments.  In the following example, the second binding of `x` is
+only visible within the small scope of a particular sub-expression, in
+particular, the sub-expression that makes up the right-hand side of
+the definition of `y`.  So, when the definition of `y` is complete, we
+see that the definition of `x` is unaffected.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let x = 3 in
@@ -583,7 +595,6 @@ val foo : (?y:'a -> x:'b -> int) -> 'b -> 'a -> int = <fun>
 
 Type constraints are discussed in more detail in chapter {{???}}.
 </sidebar>
-
 
 The behavior of substituting in a default value is so common that it
 has its own syntax.  Thus, we could rewrite the `concat` function as
