@@ -12,7 +12,9 @@
 <!ENTITY ch02     SYSTEM "03-expressions-variables-and-functions.xml">
 <!ENTITY ch03     SYSTEM "04-lists-options-and-patterns.xml">
 <!ENTITY ch03a    SYSTEM "04a-example-ascii-table.xml">
+<!ENTITY ch06     SYSTEM "06-error-handling.xml">
 <!ENTITY ch08     SYSTEM "08-modules.xml">
+<!ENTITY ch09     SYSTEM "09-modules2.xml">
 ]>
 
 <book id="ocaml">
@@ -54,5 +56,7 @@ l    <copyright>
   &ch02;
   &ch03;
   &ch03a;
+  &ch06;
   &ch08;
+  &ch09;
 </book>
