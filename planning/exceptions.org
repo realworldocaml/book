@@ -1,0 +1,29 @@
+* Intro
+ Error handling is important, and there are two basic styles:
+ exceptions and error-aware return types.
+* Exceptions
+** Basic mechanics
+ - exception, raise, try/with
+ - Why raise returns 'a
+** Useful primitives
+ - protect
+ - with_return
+** Advanced concepts
+ - Exceptions as an open variant type
+ - with_return
+* Error-Aware types
+** Basic mechanics
+ - Show how options can be used
+ - Show pattern matching techniques
+ - Point out basic advantage: the programmer gets an explicit warning
+   that an error case is included. 
+** Useful primitives
+ - bind
+ - Option.try_with
+** Error handling with Result and Error
+ - Describe Result, Error, and Or_error
+ - Explain motivation behind design of Error
+* Design advice
+** Exceptions as silent killers
+** Avoid specific exceptions
+** Avoiding the dreaded Not_found

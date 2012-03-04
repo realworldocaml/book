@@ -1,24 +1,29 @@
 # Variables and Functions
 
-_(yminsky: still don't have a decent introceptive)_ 
+Variables are a fundamental concept in programming, one that comes up
+in all but the simplest of examples.  Indeed, we encountered OCaml's
+variables multiple times in chapter {{TOUR}}.  But while variables are
+no doubt a familiar topic, variables in OCaml are different in subtle
+but important ways from what you find in most other languages.
+Accordingly we're going to spend a some time diving into the details
+of how variables work in OCaml.
 
-
-
-
-
-Variables in OCaml are different from variables in most other
-languages in that OCaml's variables are immutable.  At its simplest, a
-variable is an identifier whose meaning is bound to a particular
-value.  In OCaml these bindings are introduces using the `let`
-keyword, which at the top-level of a module has the following syntax.
+At its simplest, a variable is an identifier whose meaning is bound to
+a particular value.  In OCaml these bindings are usually introduced
+using the `let` keyword, which at the top-level of a module has the
+following syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 let <identifier> = <expr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every variable binding has a _scope_, which is the portion of the code
-which includes this binding in its evaluation environment.  The scope
-of a top-level let binding is everything that follows it.
+that considers the given variable binding during its evaluation.  The
+scope of a top-level let binding is everything that follows it in that
+module (or, the remainder of the session if you're using the
+top-level.)
+
+Here's a simple example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 3;;
@@ -29,16 +34,17 @@ val y : int = 4
 val z : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let bindings can also be used to create a variable binding whose scope
-is limited to a particular expressions, using the following syntax.
+`let` can also be used to create a variable binding whose scope is
+limited to a particular, bounded expression, using the following
+syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 let <identifier> = <expr1> in <expr2>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This first evaluates `<expr1>`, and then evaluates `<expr2>` in an
-environment that has an extra variable binding, in particular, the
-binding of `<identifier>` to whatever `<expr1>` evaluated to.
+This first evaluates `<expr1>`, and then evaluates `<expr2>`, with
+`<identifier>` bound to whatever value was produced by the evaluation
+of `<expr1>`.  For example, `let x = 3 + 1 in x * 2` evaluates to `8`.
 
 In this form, multiple let bindings can be nested, like this:
 
@@ -62,8 +68,7 @@ Thus, we can write
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It's important not to confuse shadowing of variables with assignment,
-_i.e._, mutating a variable by assigning a new definition to it.
-Consider the following function.
+_i.e._, mutation.  Consider the following function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 3 in
@@ -80,11 +85,12 @@ because the `x` that `add_to_x` refers to is still there, unchanged,
 even after the new binding of `x` to `4` is created.
 
 Here's another demonstration of how let bindings differ from
-assignments.  In the following example, the second binding of `x` is
-only visible within the small scope of a particular sub-expression, in
+assignment.  In the following example, the second binding of `x` is
+only visible within the scope of a fixed sub-expression, in
 particular, the sub-expression that makes up the right-hand side of
-the definition of `y`.  So, when the definition of `y` is complete, we
-see that the definition of `x` is unaffected.
+the definition of `y`.  When the definition of `y` is complete, we see
+that the inner definition disappears, and the original definition of
+`x` shows up again, unaffected.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let x = 3 in
@@ -96,11 +102,14 @@ see that the definition of `x` is unaffected.
 - : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+In OCaml, let bindings are always immutable.  As we'll see in chapter
+{{MUTABILITY}}, there are mutable values in OCaml, but no mutable
+variables.
 
-### Pattern matching in let bindings ###
+### Pattern matching and `let` ###
 
 Another useful feature of let bindings is that they support the use of
-simple patterns on the left-hand side of the bind.  Consider the
+patterns on the left-hand side of the bind.  Consider the
 following code, which uses `List.unzip`, a function for converting a
 list of pairs to a pair of lists.
 
@@ -112,10 +121,11 @@ val strings : string Core.Std.List.t = ["one"; "two"; "three"]
 
 This actually binds two variables, one for each element of the pair.
 Using a pattern in a let-binding makes the most sense for a pattern
-that is _irrefutable_, i.e., where everything of the type in question
-must match the pattern.  Tuple and record patterns are irrefutable, but
-list patterns are not.  Here's an example of a list pattern match that
-generates a warning because not all cases are covered.
+that is _irrefutable_, i.e., where any value of the type in question
+is guaranteed to match the pattern.  Tuple and record patterns are
+irrefutable, but list patterns are not.  Here's an example of a list
+pattern match that generates a warning because not all cases are
+covered.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (hd::tl) = [1;2;3];;
@@ -127,11 +137,14 @@ Here is an example of a value that is not matched:
 []
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+As a general matter, inexhaustive matches like the one above should be
+avoided.
+
 ### `let`/`and` bindings ###
 
 Another form of let binding that comes up on occasion is where you
-bind multiple arguments in parallel in a single declaration.  For
-example, we can write:
+bind multiple arguments in a single declaration.  For example, we can
+write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 100 and y = 3.5;;
@@ -139,10 +152,10 @@ val x : int = 100
 val y : float = 3.5
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This can be useful when you want to create a number of new definitions
-at once, without having each definition affect the next.  So, if we
-wanted to create new bindings that swapped the values of `x` and `y`,
-we could write:
+This can be useful when you want to create a number of new let
+bindings at once, without having each definition affect the next.  So,
+if we wanted to create new bindings that swapped the values of `x` and
+`y`, we could write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = y and y = x ;;
@@ -150,51 +163,36 @@ val x : float = 3.5
 val y : int = 100
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But this use-case doesn't come up that often.  Most of the time that
-`and` comes into play, it's as part defining multiple mutually
-recursive values, which we'll learn about later in the chapter.
+This use-case doesn't come up that often.  Most of the time that `and`
+comes into play, it's used to define multiple mutually recursive
+values, which we'll learn about later in the chapter.
 
 Note that when doing a `let`/`and` style declaration, the order of
-execution of the right-hand side of the definitions is undefined.
+execution of the right-hand side of the binds is undefined.
 
 ## Functions ##
 
-OCaml function declarations come in multiple styles.  Perhaps the most
-fundamental form is the definition of an anonymous functions using the
-`fun` keyword:
+OCaml function declarations come in multiple styles.  The most basic
+form is to create an _anonymous_ function using the `fun` keyword:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (fun x -> x + 1);;
 - : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The above expression creates a one-argument function.  We can use the
-function directly:
+The above expression creates a one-argument function, which can
+straightforwardly be applied to an argument:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (fun x -> x + 1) 7;;
 - : int = 8
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<sidebar>
-<title>Connections between `let` and `fun`</title>
+Anonymous functions are quite convenient, particularly in a
+higher-order context, _e.g._, when constructing a function to be
+passed as an argument to another function.
 
-Functions and let bindings have a lot to do with each other.  In some
-sense, you can think of the argument of a function as a variable being
-bound.  The following two code snippets are nearly equivalent:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# (fun x -> x + 1) 7;;
-- : int = 8
-# let x = 7 in x + 1;;
-- : int = 8
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This connection is important, and will come up more when programming
-in a monadic style, as we'll see in chapter {{ASYNC}}
-</sidebar>
-
-or we can name it, and then use it:
+We can create a named function using a let binding.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let plusone = (fun x -> x + 1);;
@@ -204,20 +202,38 @@ val plusone : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The declaration of `plusone` above is equivalent to the following
-syntactic form that we saw in chapter {{TOUR}}:
+form, which we already saw in chapter {{TOUR}}:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let plusone x = x + 1;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is the most common and convenient way to declare a function, but
-it's worth remembering that this is equivalent to creating and then
-naming a function using the `fun` keyword.
+syntatic niceties aside, the two forms are entirely equivalent.
+
+<sidebar>
+<title>`let` and `fun`</title>
+
+Functions and let bindings have a lot to do with each other.  In some
+sense, you can think of the argument of a function as a variable being
+bound to its argument.  Indeed, the following two expressions are
+nearly equivalent:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# (fun x -> x + 1) 7;;
+- : int = 8
+# let x = 7 in x + 1;;
+- : int = 8
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This connection is important, and will come up more when programming
+in a monadic style, as we'll see in chapter {{ASYNC}}.
+</sidebar>
 
 ### Multi-argument functions ###
 
-OCaml of course also supports multi-argument functions, as we've
-already seen.  Here's an example that came up in chapter {{TOUR}}.
+OCaml of course also supports multi-argument functions.  Here's an
+example that came up in chapter {{TOUR}}.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let abs_diff x y = abs (x - y);;
@@ -234,19 +250,27 @@ equivalent form, using the `fun` keyword:
 # let abs_diff =
     (fun x -> (fun y -> abs (x - y)));;
 val abs_diff : int -> int -> int = <fun>
-# abs_diff 3 4;;
-- : int = 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this rewrite `abs_diff` is really a function of one argument that
-returns another function of one argument which in turn returns the
-absolute value of the difference between the arguments taken by the
-first and second functions.  It turns out the two formulations of
-`abs_diff` are entirely equivalent.  `abs_diff` is what's called a
-_curried function_.
+This rewrite makes it explicit that `abs_diff` is actually a function
+of one argument that returns another function of one argument, which
+itself returns the absolute difference between the argument given to
+the first function and the argument given to the second.  In other
+words, `abs_diff` is a nested, or _curried_ function.  (Currying is
+named after Haskell Curry, a famous logician who had a significant
+impact on the design and theory of programming languages.)
 
-Currying isn't just a theoretical issue: you can actually make use of
-currying in practice.  Here's an example.
+The key to interpreting the type signature of a curried function is
+the observation that `->` is right-associative.  The type signature of
+`abs_diff` can therefore be parenthesized as follows to make the
+currying more obvious without changing the meaning of the signature.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+val abs_diff : int -> (int -> int)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Currying is more than just a theoretical curiosity.  Here's an example
+of how you can make use of currying.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let dist_from_3 = abs_diff 3;;
@@ -258,15 +282,9 @@ val dist_from_3 : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The practice of applying some of the arguments of a curried function
-to get a new function is called _partial application_.
-
-The key to interpreting the type signature is the observation `->` is
-right-associative.  Thus, we could parenthesize the type signature of
-`abs_diff` as follows:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-val abs_diff : int -> (int -> int)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to get a new function is called _partial application_, and it is a
+convenient way to mint new, specialized functions from more general
+ones.
 
 Note that the `fun` keyword supports its own syntactic sugar for
 currying, so we could also have written `abs_diff` as follows.
@@ -278,7 +296,7 @@ currying, so we could also have written `abs_diff` as follows.
 You might worry that curried functions are terribly expensive, but
 this is not an issue.  In OCaml, there is no penalty for calling a
 curried function with all of its arguments.  (Partial application,
-unsurprisingly, does have a cost.)
+unsurprisingly, does have a small cost.)
 
 Currying is the standard way in OCaml of writing a multi-argument
 function, but it's not the only way.  It's also possible to use the
@@ -307,7 +325,7 @@ binding as recursive with the `rec` keyword, as shown in this example:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let rec find_first_stutter = function
      | [] | [_] ->
-       (* only one or two elements, so no repeats *)
+       (* only zero or one elements, so no repeats *)
        None
      | x :: y :: tl ->
        if x = y then Some x else find_first_stutter (y::tl)
@@ -315,7 +333,8 @@ val find_first_stutter : 'a list -> 'a option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can also define multiple mutually recursive values by using `let
-rec` and `and` together, as in this example.
+rec` and `and` together, as in this (gratuitiously inefficient)
+example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let rec is_even x =
@@ -333,42 +352,43 @@ evaluates to false.
 ### Prefix and Infix operators ###
 
 So far, we've seen examples of functions used in both prefix and infix
-style.  Most of the time, functions are used in prefix style, for example:
+style:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# Int.max 3 4;;
+# Int.max 3 4;;  (* prefix *)
 - : int = 4
+# 3 + 4;;        (* infix  *)
+- : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But there are a specialized set of identifiers called _operators_
-which can be used for definining infix functions as well as prefix
-functions that bind more tightly than simple function application.  An
-operator is defined as being any identifier which is a sequence of
-characters from the following set:
+In OCaml, functions can only be used infix if the name of the function
+is chosen from one of a specialized set of identifiers called
+_operators_.  An operator is any identifier that is a sequence of
+characters from the following set
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! $ % & * + - . / : < = > ? @ ^ | ~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-or one of a handful of fixed strings that are defined to be operators,
-including things like `mod`, the modulus operator, and `lsl`, for
-"logical shift right", which is a bit-shifting operation.
+or is one of a handful of pre-determined strings, including things
+like `mod`, the modulus operator, and `lsl`, for "logical shift
+right", which is a bit-shifting operation.
 
-We can define (or redefine) an operator as follows:
+We can define (or redefine) the meaning of an operator as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let (+!) x y = x + y * y;;
-val ( +! ) : int -> int -> int = <fun>
-# 3 +! 4;;
-- : int = 19
+# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
+val ( +! ) : int * int -> int * int -> int *int = <fun>
+# (3,2) +! (-2,4);;
+- : int * int = (1,6)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that operators can be used in prefix style as well, if they are
 put in parens:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# (+!) 3 4;;
-- : int = 19
+# (+!) (3,2) (-2,4);;
+- : int = (1,6)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The details of how the operator works are determined by the first
@@ -758,7 +778,7 @@ $ ocaml -w A
 # let concat ?sep x y =
      let sep = match sep with None -> "" | Some x -> x in
      x ^ sep ^ y
-  ;;        
+  ;;
 val concat : ?sep:string -> string -> string -> string = <fun>
 # let uppercase_concat ?sep a b = concat (String.uppercase a) b ;;
 Warning 27: unused variable sep.

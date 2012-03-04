@@ -13,7 +13,9 @@ SRC=	00-outline.md \
         03-expressions-variables-and-functions.md \
 	04-lists-options-and-patterns.md \
 	04a-example-ascii-table.md \
-	08-modules.md
+	06-error-handling.md \
+	08-modules.md \
+	09-modules2.md
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 

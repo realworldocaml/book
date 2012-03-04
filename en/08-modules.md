@@ -100,14 +100,14 @@ containing the following lines.
 
 ~~~~~~~~~~~~~~~
 true:package(core)
-true:thread
+true:thread,annot,debugging
 ~~~~~~~~~~~~~~~
 
 The purpose of the `_tags` file is to specify which compilation
 options are required for which files.  In this case, we're telling
-`ocamlbuild` to link in the `core` package and to turn on threading
-for all files (the pattern `true` matches every file in the
-project.)
+`ocamlbuild` to link in the `core` package and to turn on threading,
+output of annotation files, and debugging support for all files (the
+pattern `true` matches every file in the project.)
 
 We then create a build script `build.sh` that invokes `ocamlbuild`:
 
