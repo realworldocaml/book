@@ -19,8 +19,8 @@ errors in OCaml: error-aware return types and exceptions.
 ## Error-aware return types
 
 The best way in OCaml to signal an error is to include that error in
-your return type.  As an example, consider the type of the `find`
-function in the list module;
+your return type.  Consider the type of the `find` function in the
+list module.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # List.find;;
@@ -28,7 +28,7 @@ function in the list module;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The option in the return type indicates that the function may not
-succeed in finding a suitable element, as in these examples:
+succeed in finding a suitable element, as you can see below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = List.find [1;2;3] ~f:(fun x -> x >= 2) ;;
@@ -37,7 +37,57 @@ val x : int option = Some 2
 val y : int option = None
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Here's an example of how you handle errors in this style.  The
+function [compute_bounds] below takes a list and a comparison
+function, and returns upper and lower bounds for the list by finding
+the smallest and largest element on the list.  The function uses
+`List.hd` and `List.last`, both of which fail on empty lists, and
+indicate that failure using an option.
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(** Compute upper and lower bounds on the elements in [list], if
+    list is non-empty *)
+let compute_bounds ~cmp list =
+  let sorted = List.sort ~cmp list in
+  let smallest = List.hd sorted in
+  let largest = List.last sorted in
+  match smallest, largest with
+  | None,_ | _, None -> None
+  | Some x, Some y -> Some (x,y)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The match statement at the end is the code that effectively handles
+the errors.  In this case, the error condition in `hd` and `last` is
+propagated into the return value of `compute_bounds`, again as an
+option.
+
+Here's another example
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(** [find_mismatches table1 table2] Returns a list of keys that show
+    up in both table1 and table2 with different data *)
+let find_mismatches table1 table2 =
+   Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data errors ->
+      match Hashtbl.find table2 key with
+      | Some data' when data' <> data -> key :: errors
+      | _ -> errors
+   )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that in this case, an error in the function that's called
+(`Hashtbl.find`) does not lead to an error in `find_mismatches`.
+
+The use of options to encode errors really underlines the ambiguity
+between errors and ordinary return values.  Indeed, whether you
+consider not finding an element in a list or hashtable to be an error
+depends very much on the context in which the call is happening.
+
+### Encoding errors with `Result`
+
+Sometimes, options aren't sufficiently expressive as a way of
+reporting errors.  In particular, it is sometimes helpful to be able
+to report more information as to the nature of the error, rather than
+just reporting that something went wrong.
 
 
 
