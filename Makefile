@@ -1,4 +1,7 @@
-DOCBOOK_XSL_PATH = /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
+DOCBOOK_XSL_PATH_Darwin = /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
+DOCBOOK_XSL_PATH_Linux = /usr/share/xml/docbook/stylesheet/docbook-xsl
+OS := $(shell uname -s)
+DOCBOOK_XSL_PATH ?= $(DOCBOOK_XSL_PATH_$(OS))
 
 LINGUA:=en
 CSS=rwobook
