@@ -1,24 +1,24 @@
 * Chapter list
 
-| Chapter                              | Author | Status |
-|--------------------------------------+--------+--------|
-| A Guided Tour                        | yaron  | ###    |
-| Expressions, Variables and Functions | yaron  | ##     |
-| Lists, Options and Pattern-matching  | jason  | #      |
-| Algebraic Data Types                 |        |        |
-| Error Handling                       | yaron  |        |
-| Programming with Mutation            |        |        |
-| Files, Modules and Programs          | yaron  | ##     |
-| Functors and first-class modules     | yaron  |        |
-| Synchronous I/O                      |        |        |
-| Syntax Extensions                    | yaron  |        |
-| Concurrent Programming               | anil   |        |
-| Objects                              | jason  |        |
-| Tuning the Runtime                   | anil   |        |
-| Foreign Function Interface           | anil   |        |
-| Camlp4                               | anil   |        |
-| OCamlbuild                           | anil   |        |
-| ocamllex/ocamlyacc                   |        |        |
+| Chapter                             | Author | Status |
+|-------------------------------------+--------+--------|
+| A Guided Tour                       | yaron  | ###    |
+| Variables and Functions             | yaron  | ##     |
+| Lists, Options and Pattern-matching | jason  | #      |
+| Algebraic Data Types                |        |        |
+| Error Handling                      | yaron  |        |
+| Programming with Mutation           |        |        |
+| Files, Modules and Programs         | yaron  | ##     |
+| Functors and first-class modules    | yaron  |        |
+| Synchronous I/O                     |        |        |
+| Syntax Extensions                   | yaron  |        |
+| Concurrent Programming              | anil   |        |
+| Objects                             | jason  |        |
+| Tuning the Runtime                  | anil   |        |
+| Foreign Function Interface          | anil   |        |
+| Camlp4                              | anil   |        |
+| OCamlbuild                          | anil   |        |
+| ocamllex/ocamlyacc                  |        |        |
 
 ** Status key
  - Blank: no progress
@@ -66,4 +66,18 @@ common enough issue.
  - laziness of || and &&
  - type constraints
 
+
+
+** Organization of Core
+ Not sure where this should go, but there are a number of topics to
+ cover:
+ - the idiom of one module for every type, including the core types
+   (Bool, Exn, Fn, Int, etc.)
+ - The use of standardized interface components (List, Option, String,
+   Array etc, all satisfy the container interface.)
+ - Modules with unusual structure like Map and Hashtbl.  When you
+   create a Map, you can either create a polymorphic one
+   (Map.Poly.create), or one for a specific type (Int.Map.create), but
+   you end up with an element of the same polymorphic map datatype
+   either way.
 
