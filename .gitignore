@@ -14,3 +14,4 @@ build/
 *.omakedb.lock
 *.tmp
 *.aux
+stylesheets/system-xsl

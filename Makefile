@@ -1,4 +1,7 @@
-DOCBOOK_XSL_PATH = /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
+DOCBOOK_XSL_PATH_Darwin = /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
+DOCBOOK_XSL_PATH_Linux = /usr/share/xml/docbook/stylesheet/docbook-xsl
+OS := $(shell uname -s)
+DOCBOOK_XSL_PATH ?= $(DOCBOOK_XSL_PATH_$(OS))
 
 LINGUA:=en
 CSS=rwobook
@@ -12,7 +15,8 @@ SRC=	00-outline.md \
 	04a-example-ascii-table.md \
 	06-error-handling.md \
 	08-modules.md \
-	09-modules2.md
+	09-modules2.md \
+	13-objects.md
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 
