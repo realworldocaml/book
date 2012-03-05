@@ -65,7 +65,7 @@ common enough issue.
  - syntax of conditionals
  - laziness of || and &&
  - type constraints
-
+ - nominal vs structural types
 
 
 ** Organization of Core
@@ -80,4 +80,5 @@ common enough issue.
    (Map.Poly.create), or one for a specific type (Int.Map.create), but
    you end up with an element of the same polymorphic map datatype
    either way.
+
 
