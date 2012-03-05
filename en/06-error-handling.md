@@ -84,10 +84,31 @@ depends very much on the context in which the call is happening.
 
 ### Encoding errors with `Result`
 
-Sometimes, options aren't sufficiently expressive as a way of
-reporting errors.  In particular, it is sometimes helpful to be able
-to report more information as to the nature of the error, rather than
-just reporting that something went wrong.
+Sometimes, options aren't a sufficiently expressive way to report
+errors.  In particular, it is sometimes helpful to be able to report
+more information as to the nature of the error, rather than just
+reporting that something went wrong.
+
+The `Result.t` type is a good way of doing this.  Here's the
+definition of the type:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module Result : sig
+   type ('a,'b) t = | Ok of 'a
+                    | Error of 'b
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`Result` is basically an option augmented with the ability to store
+other information in the error case. `Result` is so important in Core
+that the constructors `Ok` and `Error` are promoted to the top-level
+by `Core.Std`, much like `Some` and `None`.  So, we can write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# [ Ok 3; Error "abject failure"; Ok 4 ];;
+[Ok 3; Error "abject failure"; Ok 4]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 
 
