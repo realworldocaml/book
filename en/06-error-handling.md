@@ -111,23 +111,26 @@ and `Error` are promoted to the top-level by `Core.Std`, much like
 
 without first opening the `Result` module.
 
-### Using `Error`, `Result` and `Or_error`
+### `Error` and `Or_error`
 
-You have complete freedom in terms of what error type to use with
-`Result.t`, but it's often useful to standardize on a single type for
-reporting errors, which, among other things, makes it easier to write
-small utility functions to automate common error handling patterns,
-which we'll see more of below.  
 
-But the question remains, what type should you choose?  It turns out
-to be a tricky choice.
+`Result.t` gives you complete freedom to choose the type of value you
+use to represent errors, but it's often useful to standardize on a
+single error type.  Among other things, this makes it easier to write
+utility functions to automate common error handling patterns.
 
-Indeed, Core has a distinguished type for this, called `Error.t`.  An
-`Error.t` tries to do a number of things well at the same time:
+But what type to choose?  Is it better to represent errors as strings?
+Or S-expressions?  Or something else entirely?
 
-- **Efficient to construct**: in complex systems, many errors may be
-  created and noted along the path, but a comparatively small subset
-  of those errors will actually be displayed.
+Core's answer to this question is the `Error.t` type, which tries to
+be a good compromise between multiple different goals.
+
+- **Efficiency of construction**: in complex systems, many errors may
+  be created and noted along the path, but comparatively few of these
+  errors will actually be displayed.  `Error` is optimized for this
+  case, making errors very cheap to construct, by lazily delaying the
+  cost of construction until the `Error` needs to be serialized.
+- 
 
 ### Helper functions
 
