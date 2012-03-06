@@ -19,7 +19,7 @@ errors in OCaml: error-aware return types and exceptions.
 ## Error-aware return types
 
 The best way in OCaml to signal an error is to include that error in
-your return type.  Consider the type of the `find` function in the
+your return value.  Consider the type of the `find` function in the
 list module.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -37,60 +37,59 @@ val x : int option = Some 2
 val y : int option = None
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here's an example of how you handle errors in this style.  The
-function [compute_bounds] below takes a list and a comparison
-function, and returns upper and lower bounds for the list by finding
-the smallest and largest element on the list.  The function uses
-`List.hd` and `List.last`, both of which fail on empty lists, and
-indicate that failure using an option.
+The function `compute_bounds` below shows how you can handle errors in
+this style.  The function takes a list and a comparison function, and
+returns upper and lower bounds for the list by finding the smallest
+and largest element on the list.  `List.hd` and `List.last`, which
+return `None` when they encounter an empty list, are used to extract
+the largest and smallest element of the list.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-(** Compute upper and lower bounds on the elements in [list], if
-    list is non-empty *)
-let compute_bounds ~cmp list =
-  let sorted = List.sort ~cmp list in
-  let smallest = List.hd sorted in
-  let largest = List.last sorted in
-  match smallest, largest with
-  | None,_ | _, None -> None
-  | Some x, Some y -> Some (x,y)
+# let compute_bounds ~cmp list =
+    let sorted = List.sort ~cmp list in
+    let smallest = List.hd sorted in
+    let largest = List.last sorted in
+    match smallest, largest with
+    | None,_ | _, None -> None
+    | Some x, Some y -> Some (x,y)
+  ;;
+val compute_bounds :
+  cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The match statement at the end is the code that effectively handles
-the errors.  In this case, the error condition in `hd` and `last` is
-propagated into the return value of `compute_bounds`, again as an
-option.
-
-Here's another example
+The match statement is used to handle the error cases, propagating any
+error in `hd` and `last` into the return value of `compute_bounds`.
+On the other hand, in `find_mismatches` below, errors encountered
+during the computation do not propagate to the return value of the
+function.  The point of `find_mismatches` is to find keys that are
+stored in both tables, and so a failure to find a key in one of the
+tables actually indicates the lack of an error.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-(** [find_mismatches table1 table2] Returns a list of keys that show
-    up in both table1 and table2 with different data *)
-let find_mismatches table1 table2 =
-   Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data errors ->
-      match Hashtbl.find table2 key with
-      | Some data' when data' <> data -> key :: errors
-      | _ -> errors
-   )
+# let find_mismatches table1 table2 =
+     Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data errors ->
+        match Hashtbl.find table2 key with
+        | Some data' when data' <> data -> key :: errors
+        | _ -> errors
+     )
+ ;;
+val find_mismatches :
+  ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that in this case, an error in the function that's called
-(`Hashtbl.find`) does not lead to an error in `find_mismatches`.
-
-The use of options to encode errors really underlines the ambiguity
-between errors and ordinary return values.  Indeed, whether you
-consider not finding an element in a list or hashtable to be an error
-depends very much on the context in which the call is happening.
+The use of options to encode errors underlines the ambiguity between
+errors and other return values.  Indeed, whether you consider not
+finding an element in a list or hashtable to be an error depends very
+much on context.
 
 ### Encoding errors with `Result`
 
-Sometimes, options aren't a sufficiently expressive way to report
-errors.  In particular, it is sometimes helpful to be able to report
-more information as to the nature of the error, rather than just
-reporting that something went wrong.
+Options aren't always a sufficiently expressive way to report errors.
+Specifically, when you encode an error as `None`, there's nowhere to
+say anything about the nature of the error.
 
-The `Result.t` type is a good way of doing this.  Here's the
-definition of the type:
+If you need to report more detailed error information, the `Result.t`
+type is the way to go.  Here's the definition of the type:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 module Result : sig
@@ -99,17 +98,38 @@ module Result : sig
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`Result` is basically an option augmented with the ability to store
-other information in the error case. `Result` is so important in Core
-that the constructors `Ok` and `Error` are promoted to the top-level
-by `Core.Std`, much like `Some` and `None`.  So, we can write:
+`Result` is nothing more than an option augmented with the ability to
+store other information in the error case.  That said, it's a very
+important and often-used type, so much so that the constructors `Ok`
+and `Error` are promoted to the top-level by `Core.Std`, much like
+`Some` and `None`.  As such, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # [ Ok 3; Error "abject failure"; Ok 4 ];;
 [Ok 3; Error "abject failure"; Ok 4]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+without first opening the `Result` module.
 
+### Using `Error`, `Result` and `Or_error`
+
+You have complete freedom in terms of what error type to use with
+`Result.t`, but it's often useful to standardize on a single type for
+reporting errors, which, among other things, makes it easier to write
+small utility functions to automate common error handling patterns,
+which we'll see more of below.  
+
+But the question remains, what type should you choose?  It turns out
+to be a tricky choice.
+
+Indeed, Core has a distinguished type for this, called `Error.t`.  An
+`Error.t` tries to do a number of things well at the same time:
+
+- **Efficient to construct**: in complex systems, many errors may be
+  created and noted along the path, but a comparatively small subset
+  of those errors will actually be displayed.
+
+### Helper functions
 
 
 ## Exceptions
