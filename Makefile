@@ -16,6 +16,7 @@ SRC=	00-outline.md \
 	06-error-handling.md \
 	08-modules.md \
 	09-modules2.md \
+	11-syntax-extensions.md \
 	13-objects.md
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)

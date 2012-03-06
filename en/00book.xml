@@ -15,6 +15,7 @@
 <!ENTITY ch06     SYSTEM "06-error-handling.xml">
 <!ENTITY ch08     SYSTEM "08-modules.xml">
 <!ENTITY ch09     SYSTEM "09-modules2.xml">
+<!ENTITY ch11     SYSTEM "11-syntax-extensions.xml">
 <!ENTITY ch13     SYSTEM "13-objects.xml">
 ]>
 
@@ -60,5 +61,6 @@ l    <copyright>
   &ch06;
   &ch08;
   &ch09;
+  &ch11;
   &ch13;
 </book>
