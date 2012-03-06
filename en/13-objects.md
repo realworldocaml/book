@@ -1,6 +1,25 @@
 Object Oriented Programming
 ===========================
 
+_(yminsky: If we don't feel like these are
+"great" tools, maybe we shouldn't say it!)_
+
+_(yminsky: Maybe add first-class modules to the list below and drop
+compilation units (I didn't introduce the term in the modules section,
+and anyway, it seems like it's a slightly different kind of thing)_
+
+_(yminsky: I wonder if it's worth emphasizing what makes objects
+unique early on.  I think of them as no better of an encapsulation
+tool than closures.  What makes them unique in my mind is that they
+are some combination of lighter weight and more dynamic than the
+alternatives (modules, records of closures, etc.))_
+
+_(yminsky: I'm not sure where we should say it, but OCaml's object
+system is strikingly different from those that most people are used
+to.  It would be nice if we could call those differences out clearly
+somewhere.  The main difference I see is the fact that subtyping and
+inheritance are not tied together, and that subtyping is structural.)_
+
 We've already seen several tools that OCaml provides for organizing
 programs.  There are compilation units, interfaces, modules, and
 functors.  In addition to all of this, OCaml also support
@@ -64,9 +83,14 @@ the value.
 
 ## Object Polymorphism ##
 
+_(yminsky: Maybe this is a good time to talk about the nature of
+object subtyping?)_
+
 Functions can also take object arguments.  Let's construct a new
 object `average` that thats the average of any two objects with a
 `get` method.
+
+_(yminsky: "that thats" -> "that's")_
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # let average p1 p2 =
@@ -91,6 +115,12 @@ type `< get : int; .. >` specifies an object that must have at least a
 exact type `< get : int >` for an object with more methods, the type
 conversion will fail.
 
+_(yminsky: Maybe we should call this "unification" rather than
+"conversion".  To me, "conversion" is more suggestive of conversion of
+values, which is of course not what's going on.  Of course, people
+won't know the term, so if we're going to use it, we'll need to
+introduce unification as a term earlier.)_
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # let (p : < get : int >) = make 5;;
 Error: This expression has type < get : int; set : int -> unit >
@@ -103,11 +133,21 @@ It may not be apparent, but an elided object type is actually
 polymorphic.  If we try to write a type definition, we get an obscure
 error.
 
+_(yminsky: sidebars should have a `<title></title>` block.)_
+
+_(yminsky: We haven't introduced the term "elided" yet.  It seems like
+it needs a quick definition.)_
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # type point = < get:int; .. >;;
 Error: A type variable is unbound in this type declaration.
 In type < get : int; .. > as 'a the variable 'a is unbound
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_(yminsky: In the following sentence, maybe drop "Technically
+speaking" at the front?  You already have a clause "Even thought
+`..` doesn't look like... it actually is", which to me feels slightly
+repetitive.)_
 
 Technically speaking, a `..` in an object type is called a _row
 variable_ and this typing scheme is called _row polymorphism_.  Even
@@ -155,6 +195,9 @@ in a compilation unit or module.  A class is not an object, and a
 class definition is not an expression.  The syntax for a class
 definition uses the keyword `class`.
 
+_(yminsky: the above is slightly confusing: a class definition must be
+a top-level expression, but it's not an expression?)_
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # class point =
   object
@@ -188,6 +231,12 @@ val p : point = <obj>
 - : int = 5
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+_(yminsky: You say that inheritance uses an existing class to define a
+new one, but the example below looks like using an existing class to
+define a new module.  Is that what's going on?  Or is a new class
+being created implicitly?  If the latter, it might be better to be
+more explicit in this example and name the new class.)_
+
 Inheritance uses an existing class to define a new one.  For example,
 the following class definition supports an addition method `moveby`
 that moves the point by a relative amount.  This also makes use of the
@@ -216,6 +265,13 @@ single element of the list.  We'll call it a `node`, and it will hold
 a value of type `'a`.  When defining the class, the type parameters
 are placed in square brackets before the class name in the class
 definition.  We also need a parameter `x` for the initial value.
+
+_(yminsky: Are the parens around the `'a` in the definition of
+`next_node` necessary?)_
+
+_(yminsky: Why are the type annotations for the `val` declarations
+necessary at all?  What happens if you drop them?  Why on the `val`s
+but not on the `method`s?)_
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 class ['a] node x =
