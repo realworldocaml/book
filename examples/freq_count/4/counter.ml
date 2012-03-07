@@ -1,8 +1,8 @@
 open Core.Std
 
-type t = (string,int) Map.t
+type t = int String.Map.t
 
-let empty = Map.empty
+let empty = String.Map.empty
 
 let touch t s =
   let count =
@@ -13,5 +13,3 @@ let touch t s =
   Map.add t s (count + 1)
 
 let to_list t = Map.to_alist t
-
-let build_counts = Freq.build_counts
