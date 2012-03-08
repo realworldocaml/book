@@ -1,5 +1,7 @@
 # Syntax Extensions
 
+_(yminsky: still very very rough)_
+
 This chapter is going to discuss several _syntax extensions_, _i.e._,
 extensions to OCaml's syntax, that are distributed with Core.  Before
 diving into the details of how to use these extensions, let's take a
