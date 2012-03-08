@@ -1,17 +1,18 @@
 # Syntax Extensions
 
 This chapter is going to discuss several _syntax extensions_, _i.e._,
-extensions to OCaml's syntax, that are distributed with Core.  But
-before diving into the details of how these syntax extensions work,
-let's take a detour that will explain the motivation behind creating
-these extensions in the first place.
+extensions to OCaml's syntax, that are distributed with Core.  Before
+diving into the details of how to use these extensions, let's take a
+detour that will explain the motivation behind creating them in the
+first place.
 
-## A detour: Serialization
+## A detour: serialization with s-expressions
 
-Programmers spend a lot of time creating machine and human readable
-formats for serializing and deserializing program data.  One
-convenient general-purpose serialization format that is well supported
-in Core is the _s-expression_, which has the following type:
+Serialization, _i.e._ reading and writing program data to a sequence
+of bytes, is an important and common programming task.  To this end,
+Core comes with good support for _s-expressions_, which are a
+convenient general-purpose serialization format with the following
+type:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 module Sexp : sig
@@ -20,9 +21,8 @@ end
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Thus, an s-expression is a nested parenthetical lists whose atomic
-values are strings.  Core has a lot of s-expression related
-functionality, such as functions for parsing and printing
-s-expressions.
+values are strings.  Using the `Sexp` module, you can easily parse and
+print s-expressions:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let sexp = Sexp.of_string "(This (is an) (s expression))";;
@@ -35,9 +35,8 @@ Sexp.List
 - : string = "((This (is an) (s expression)) (This (is an) (s expression)))"
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-S-expressions are a convenient data serialization format, and most of
-the base types in Core support conversion to and from s-expressions.
-For example, we can write:
+In addition, most of the base types in Core support conversion to and
+from s-expressions.  For example, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # Int.sexp_of_t 3
@@ -67,11 +66,10 @@ type t = { foo : int; bar : float; }
 - : string = "((foo 3)(bar -5.5))"
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is somewhat tiresome to write, and you can imagine it gets more
-so when you also write the `t_of_sexp` function, which is the more
-complicated function to write.  Writing this kind of code by hand for
-many large and complex types is a mechanical process that is made
-error prone by the sheer drudgery involved.
+This is somewhat tiresome to write, and it gets more so when you
+consider `t_of_sexp`, which is consierably more complex.  Writing this
+kind of code by hand is a mechanical process that is made error prone
+by the sheer drudgery involved.
 
 Given how mechanical the code is, you could imagine writing a program
 that inspected the type definition and auto-generated the conversion
@@ -93,32 +91,27 @@ val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
 (You can ignore the value `t_of_sexp__`, which is a helper function
 that is needed in very rare cases.)
 
-The syntax-extensions in Core that we're going to discuss have this
-same basic structure: they all involve creating new functionality
-based on the definition of a type.  In the remainder of this chapter,
-we'll go into each of these syntax extensions in more detail and
-discuss what they do and how to use them effectively.
+The syntax-extensions in Core that we're going to discuss all have
+this same basic structure: they are type-driven processes for
+auto-generating standardized functionality for newly declared types.
 
-It's worth noting that all of these syntax extensions are optional.
-You can use Core without them with no real penalty.  But they're also
-highly valuable, and you would do well to add them to your OCaml
-toolkit.
+In the remainder of this chapter, we'll go into each of these syntax
+extensions in more detail and discuss what they do and how to use them
+effectively.
 
 ## Sexplib
 
-Sexplib is a package for dealing with s-expressions that was developed
-for and is tightly integrated with Core, although it can be used
-independently from Core as well.  Sexplib itself really has two parts:
-a library for dealing with s-expressions, which is mostly found in the
-module `Sexp` in Core, and the syntax extension, which automates the
+Sexplib is a package for dealing with s-expressions, and it has two
+parts: a library for dealing with s-expressions, which is found in the
+`Sexp` module in Core, and the syntax extension, which automates the
 creation of converters to and from the s-expression type itself.
 
-Sexplib's format for s-expressions is pretty straightforward.  A valid
-s-expression needs to be a balanced parenthetical statements, and by
-default atoms are separted by spaces.  You can use quotes for atoms
-that contain parenthesis or spaces themselves, and backslash is an
-escape character.  A semicolon is used to introduce comments.  Thus,
-if you create the following file:
+Sexplib's format for s-expressions is pretty straightforward.  An
+s-expression is written down as a nested parenthetical expression,
+with whitespace-separated strings as the atoms.  Quotes are used for
+atoms that contain parenthesis or spaces themselves, backslash is the
+escape character, and semicolons are used to introduce comments.
+Thus, if you create the following file:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ;; foo.scm
@@ -139,7 +132,7 @@ Note that the comments were dropped from the file upon reading.  This
 is because there's no place in the `Sexp.t` type to store comments.
 
 If we introduce an error in our s-expression, say, by deleting the
-open-paren in front of `bar`, we'll get a syntax error:
+open-paren in front of `bar`, we'll get a parse error:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # Exn.handle_uncaught ~exit:false (fun () -> 
@@ -151,12 +144,8 @@ open-paren in front of `bar`, we'll get a syntax error:
     (text_char 29) (global_offset 94) (buf_pos 94)))
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+(In the above, we use `Exn.handle_uncaught` to make sure that the
+exception gets printed out in full detail.)
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# Sexp.load_sexp "foo.scm" |! Sexp.to_string_hum |! print_endline ;;
-Exception: Pre_sexp.Parse_error _.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This exception is rather uninformative, but we can get a more detailed
-message if we run this bit of code in a different way:
 
 
