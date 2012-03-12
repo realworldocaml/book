@@ -1,15 +1,90 @@
 Object Oriented Programming
 ===========================
 
-We've already seen several tools that OCaml provides for organizing
-programs.  There are compilation units, interfaces, modules, and
-functors.  In addition to all of this, OCaml also support
-object-oriented programming.  There are objects, classes, and their
-associated types.  Objects are great for encapsulation and
-abstraction, and classes are great for code re-use.
+_(yminsky: If we don't feel like these are "great" tools, maybe we
+shouldn't say it!)_
 
-If you want to use objects, it isn't required to use classes, you can
-use objects directly.  Here is an example of a simple object.
+_(yminsky: I wonder if it's worth emphasizing what makes objects
+unique early on.  I think of them as no better of an encapsulation
+tool than closures.  What makes them unique in my mind is that they
+are some combination of lighter weight and more dynamic than the
+alternatives (modules, records of closures, etc.))_
+
+_(yminsky: I'm not sure where we should say it, but OCaml's object
+system is strikingly different from those that most people are used
+to.  It would be nice if we could call those differences out clearly
+somewhere.  The main difference I see is the fact that subtyping and
+inheritance are not tied together, and that subtyping is structural.)_
+
+We've already seen several tools that OCaml provides for organizing
+programs, particularly first-class modules.  In addition, OCaml also
+supports object-oriented programming.  There are objects, classes, and
+their associated types.  Objects are good for encapsulation and
+abstraction, and classes are good for code re-use.
+
+## When to use objects ##
+
+You might wonder when to use objects.  First-class modules are more
+expressive (a module can include types, classes and objects cannot),
+and modules, functors, and algebraic data types offer a wide range of
+ways to express program structure.  In fact, many seasoned OCaml
+programmers rarely use classes and objects, if at all.
+
+What exactly is object-oriented programming?  Mitchell [6] points out
+four fundamental properties.
+
+* _Abstraction_: the details of the implementation are hidden in the
+  object; the interface is just the set of publically-accessible
+  methods.
+* _Subtyping_: if an object `a` has all the functionality of an object
+  `b`, then we may use `a` in any context where `b` is expected.
+* _Dynamic lookup_: when a message is sent to an object, the method to
+  be executed is determined by the implementation of the object, not
+  by some static property of the program.  In other words, different
+  objects may react to the same message in different ways.
+* _Inheritance_: the definition of one kind of object can be re-used
+  to produce a new kind of object.
+
+Modules already provide these features in some form, but the main
+focus of classes is on code re-use through inheritance and late
+binding of methods.  This is a critical property of classes: the
+methods that implement an object are determined when the object is
+instantiated, a form of _dynamic_ binding.  In the meantime, while
+classes are being defined, it is possible (and necessary) to refer to
+methods without knowing statically how they will be implemented.
+
+In contrast, modules use static (lexical) scoping.  If you want to
+parameterize your module code so that some part of it can be
+implemented later, you would write a function/functor.  This is more
+explicit, but often more verbose than overriding a method in a class.
+
+In general, a rule of thumb might be: use classes and objects in
+situations where dynamic binding is a big win, for example if you have
+many similar variations in the implementation of a concept.  Real
+world examples are fairly rare, but one good example is Xavier Leroy's
+[Cryptokit][Cryptokit], which provides a variety of cryptographic
+primitives that can be combined in building-block style.
+
+[Cryptokit]: http://gallium.inria.fr/~xleroy/software.html#cryptokit
+
+## OCaml objects ##
+
+If you already know about object oriented programming in a language
+like Java or C++, the OCaml object system may come as a surprise.
+Foremost is the complete separation of subtyping and inheritance in
+OCaml.  In a language like Java, a class name is also used as the type
+of objects created by instantiating it, and the subtyping rule
+corresponds to inheritance.  For example. if we implement a class
+`Stack` in Java by inheriting from a class `Deque`, we would be
+allowed to pass a stack anywhere a deque is expected (this is a silly
+example of course, practitioners will point out that we shouldn't do
+it).
+
+OCaml is entirely different.  Classes are used to construct objects
+and support inheritance, including non-subtyping inheritance.  Classes
+are not types.  Instead, objects have _object types_, and if you want
+to use objects, you aren't required to use classes at all.  Here is an
+example of a simple object.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # let p =
@@ -64,8 +139,11 @@ the value.
 
 ## Object Polymorphism ##
 
+_(yminsky: Maybe this is a good time to talk about the nature of
+object subtyping?)_
+
 Functions can also take object arguments.  Let's construct a new
-object `average` that thats the average of any two objects with a
+object `average` that's the average of any two objects with a
 `get` method.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
@@ -88,8 +166,8 @@ Note that the type for `average` uses the object type `< get : int;
 .. >`.  The `..` are ellipsis, standing for any other methods.  The
 type `< get : int; .. >` specifies an object that must have at least a
 `get` method, and possibly some others as well.  If we try using the
-exact type `< get : int >` for an object with more methods, the type
-conversion will fail.
+exact type `< get : int >` for an object with more methods, type
+inference will fail.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # let (p : < get : int >) = make 5;;
@@ -99,9 +177,12 @@ Error: This expression has type < get : int; set : int -> unit >
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 <sidebar>
-It may not be apparent, but an elided object type is actually
-polymorphic.  If we try to write a type definition, we get an obscure
-error.
+<title>Elisions are polymorphic</title>
+
+The `..` in an object type is an elision, standing for "possibly
+more methods."  It may not be apparent from the syntax, but an elided
+object type is actually polymorphic.  If we try to write a type
+definition, we get an obscure error.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # type point = < get:int; .. >;;
@@ -109,11 +190,10 @@ Error: A type variable is unbound in this type declaration.
 In type < get : int; .. > as 'a the variable 'a is unbound
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Technically speaking, a `..` in an object type is called a _row
-variable_ and this typing scheme is called _row polymorphism_.  Even
-though `..` doesn't look like a type variable, it actually is.  The
-error message suggests a solution, which is to add the `as 'a` type
-constraint.
+A `..` in an object type is called a _row variable_ and this typing
+scheme is called _row polymorphism_.  Even though `..` doesn't look
+like a type variable, it actually is.  The error message suggests a
+solution, which is to add the `as 'a` type constraint.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # type 'a point = < get:int; .. > as 'a;;
@@ -150,10 +230,10 @@ In object-oriented programming, a class is a "recipe" for creating
 objects.  The recipe can be changed by adding new methods and fields,
 or it can be changed by modifying existing methods.
 
-In OCaml, class definitions must be defined as top-level expressions
-in a compilation unit or module.  A class is not an object, and a
-class definition is not an expression.  The syntax for a class
-definition uses the keyword `class`.
+In OCaml, class definitions must be defined as top-level statements in
+a module.  A class is not an object, and a class definition is not an
+expression.  The syntax for a class definition uses the keyword
+`class`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 # class point =
@@ -188,6 +268,12 @@ val p : point = <obj>
 - : int = 5
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+_(yminsky: You say that inheritance uses an existing class to define a
+new one, but the example below looks like using an existing class to
+define a new module.  Is that what's going on?  Or is a new class
+being created implicitly?  If the latter, it might be better to be
+more explicit in this example and name the new class.)_
+
 Inheritance uses an existing class to define a new one.  For example,
 the following class definition supports an addition method `moveby`
 that moves the point by a relative amount.  This also makes use of the
@@ -197,7 +283,7 @@ the type variable `'self` stands for the type of the current object
 (which in general is a subtype of `movable_point`).
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
-# let movable_point =
+# class movable_point =
   object (self : 'self)
     inherit point
     method moveby dx = self#set (self#get + dx)
@@ -217,11 +303,15 @@ a value of type `'a`.  When defining the class, the type parameters
 are placed in square brackets before the class name in the class
 definition.  We also need a parameter `x` for the initial value.
 
+_(yminsky: Why are the type annotations for the `val` declarations
+necessary at all?  What happens if you drop them?  Why on the `val`s
+but not on the `method`s?)_
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 class ['a] node x =
 object
   val mutable value : 'a = x
-  val mutable next_node : ('a) node option = None
+  val mutable next_node : 'a node option = None
 
   method get = value
   method set x = value <- x
@@ -235,7 +325,47 @@ The `value` is the value stored in the node, and it can be retrieved
 and changed with the `get` and `set` methods.  The `next_node` field
 is the link to the next element in the stack.  Note that the type
 parameter `['a]` in the definition uses square brackets, but other
-uses of the type use parentheses.
+uses of the type can omit them (or use parentheses if there is more
+than one type parameter).
+
+The type annotations on the `val` declarations are used to constrain
+type inference.  If we omit these annotations, the type inferred for
+the class will be "too polymorphic," `x` could have some type `'b` and
+`next_node` some type `'c option`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  class ['a] node x =
+  object
+    val mutable value = x
+    val mutable next_node = None
+  
+    method get = value
+    method set x = value <- x
+  
+    method next = next_node
+    method set_next node = next_node <- node
+  end;;
+Error: Some type variables are unbound in this type:
+         class ['a] node :
+           'b ->
+           object
+             val mutable next_node : 'c option
+             val mutable value : 'b
+             method get : 'b
+             method next : 'c option
+             method set : 'b -> unit
+             method set_next : 'c option -> unit
+           end
+       The method get has type 'b where 'b is unbound
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In general, we need to provide enough constraints so that the compiler
+will infer the correct type.  We can add type constraints to the
+parameters, to the fields, and to the methods.  It is a matter of
+preference how many constraints to add.  You can add type constraints
+in all three places, but the extra text may not help clarity.  A
+convenient middle ground is to annotate the fields and/or class
+parameters, and add constraints to methods only if necessary.
 
 Next, we can define the list itself.  We'll keep a field `head` the
 refers to the first element in the list, and `last` refers to the
@@ -308,12 +438,7 @@ First, we'll define an object type `iterator` that specifies the
 methods in an iterator.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
-class type ['a] iterator =
-object
-  method get : 'a
-  method has_value : bool
-  method next : unit
-end;;
+type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next, we'll define an actual iterator for the class `slist`.  We can
@@ -339,7 +464,7 @@ object
 end;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Finally, we add a method `iterator` to the sxlist class to produce an
+Finally, we add a method `iterator` to the slist class to produce an
 iterator.  To do so, we construct an `slist_iterator` that refers to
 the first node in the list, but we want to return a value with the
 object type `iterator`.  This requires an explicit coercion using the
@@ -348,8 +473,7 @@ object type `iterator`.  This requires an explicit coercion using the
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 class ['a] slist = object
 ...
-   method iterator =
-      (new slist_iterator first :> 'a iterator)
+   method iterator = (new slist_iterator first :> 'a iterator)
 end
 
 # let l = new slist;;
@@ -368,10 +492,8 @@ end
 - : bool = false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We may also wish to define functional-style versions for iterating
-through the list.  Iterating through the list without changing it is
-easy enough, we can just construct an iterator to iterate through the
-list.
+We may also wish to define functional-style methods, `iter f` takes a
+function `f` and applies it to each of the elements of the list.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 method iter f =
@@ -390,7 +512,7 @@ function `List.fold` has type `'a list -> ('b -> 'a -> 'b) -> 'b ->
 `slist` class, we need a method type `('b -> 'a -> 'b) -> 'b -> 'b`,
 where the method type is polymorphic over `'b`.
 
-The solution is to use a type quantifier, as shown in the folllowing
+The solution is to use a type quantifier, as shown in the following
 example.  The method type must be specified directly after the method
 name, which means that method parameters must be expressed using a
 `fun` or `function` expression.
@@ -472,3 +594,6 @@ object
        | [] -> raise (Invalid_argument "list is empty")
 end;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Subtyping ##
+
