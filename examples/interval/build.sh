@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-ocamlbuild -use-ocamlfind test_interval.native
+ocamlbuild -use-ocamlfind test_interval.native test_interval.byte
