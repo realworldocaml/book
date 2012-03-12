@@ -7,13 +7,13 @@ that are distributed with Core.  Before diving into the details of the
 syntax extensions, let's take a detour that will explain the
 motivation behind creating them in the first place.
 
-## A detour: serialization with s-expressions
+## Serialization with s-expressions
 
 Serialization, _i.e._ reading and writing program data to a sequence
 of bytes, is an important and common programming task.  To this end,
 Core comes with good support for _s-expressions_, which are a
-convenient general-purpose serialization format with the following
-type:
+convenient general-purpose serialization format.  The type of an
+s-expression is as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 module Sexp : sig
@@ -21,9 +21,9 @@ module Sexp : sig
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Thus, an s-expression is a nested parenthetical lists whose atomic
-values are strings.  Using the `Sexp` module, you can easily parse and
-print s-expressions:
+An s-expression is in essence a nested parenthetical list whose atomic
+values are strings.  The `Sexp` module comes with functionality for
+parsing and printing s-expressions.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let sexp = Sexp.of_string "(This (is an) (s expression))";;
@@ -69,8 +69,8 @@ type t = { foo : int; bar : float; }
 
 This is somewhat tiresome to write, and it gets more so when you
 consider `t_of_sexp`, which is consierably more complex.  Writing this
-kind of code by hand is a mechanical process that is made error prone
-by the sheer drudgery involved.
+kind of code by hand is mechanical and error prone, not to mention a
+drag.
 
 Given how mechanical the code is, you could imagine writing a program
 that inspected the type definition and auto-generated the conversion
@@ -93,34 +93,30 @@ val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
 needed in very rare cases.)
 
 The syntax-extensions in Core that we're going to discuss all have
-this same basic structure: they auto-generate functionality for newly
-declared types by writing new code that is based on the type
-definition.
+this same basic structure: they auto-generate code based on type
+definitions, implementing functionality that you could in theory have
+implemented by hand, but with far less effort.
 
-Here's the list of the major syntax extensions distributed with core:
+There are several syntax extensions distributed with Core, including:
 
-- **Sexplib**, which we just discussed, provides serialization
-  functions for s-expressions.
-- **Bin_prot** provides serialization to an efficient binary
+- **Sexplib**: provides serialization for s-expressions.
+- **Bin_prot**: provides serialization to an efficient binary
   format.
-- **Fieldslib** generates first-class values that represent fields of
+- **Fieldslib**: generates first-class values that represent fields of
   a record, as well as accessor functions and setters for mutable
   record fields.x
-- **Variantslib** is like Fieldslib for variants, producing
-  first-class variants and other helper functions for interacting with
-  variant types.
-- **Pa_compare** generates efficient, type-specialized comparison
+- **Variantslib**: like Fieldslib for variants, producing first-class
+  variants and other helper functions for interacting with variant
+  types.
+- **Pa_compare**: generates efficient, type-specialized comparison
   functions.
 
-We'll start our tour of Core's syntax extensions by looking at Sexplib
-in more detail.
+We'll discuss each of these syntax extensions in detail, starting with
+Sexplib.
 
 ## Sexplib
 
-Sexplib is is both a library for dealing with s-expressions and a
-syntax extension to automate the creation of converters to and from
-s-expressions for arbitrary types.  Both of these are tightly
-integrated into Core.
+### Formatting of s-expressions
 
 Sexplib's format for s-expressions is pretty straightforward.  An
 s-expression is written down as a nested parenthetical expression,
@@ -164,11 +160,13 @@ open-paren in front of `bar`, we'll get a parse error:
 (In the above, we use `Exn.handle_uncaught` to make sure that the
 exception gets printed out in full detail.)
 
-### Sexp-converters
+### Sexp converters
 
-The syntax-extension comes into play when we want s-expressions for
-new types that we define.  We've seen a bit of how this works already,
-but let's walk through a complete example.
+The most important functionality provided by Sexplib is the
+auto-generation of converters for new types.  We've seen a bit of how
+this works already, but let's walk through a complete example.  Here's
+the source for the beginning of a library for representing integer
+intervals.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* file: int_interval.ml *)
@@ -176,11 +174,12 @@ but let's walk through a complete example.
 
 open Core.Std
 
+(* Invariant: For any Range (x,y), y > x *)
 type t = | Range of int * int
          | Empty
 with sexp
 
-let empty = Empty
+let is_empty = function Empty -> true | Range _ -> false
 let create x y = if x > y then Empty else Range (x,y)
 let contains i x = match i with
    | Empty -> false
@@ -219,7 +218,7 @@ s-expression converters that were created within the ml.  If we don't:
 
 type t
 
-val empty : t
+val is_empty : t -> bool
 val create : int -> int -> t
 val contains : t -> int -> bool
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -240,11 +239,53 @@ val sexp_of_t : Sexp.t -> t
 val t_of_sexp : t -> Sexp.t
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-but Sexplib has a shorthand for this as well, so that we can instead
+But Sexplib has a shorthand for this as well, so that we can instead
 write simply:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type t with sexp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-at which point `test_interval.ml` will compile again.
+at which point `test_interval.ml` will compile again, and if we run
+it, we'll get the following output:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ ./test_interval.native
+((Range 3 4) Empty (Range 2 3) (Range 1 6))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+<sidebar> <title>Preserving invariants</title>
+
+One easy mistake to make when dealing with sexp converters is to
+ignore the fact that those converters can violate the invariants of
+your code.  For example, the `Int_interval` module depends for the
+correctness of the `is_empty` check on the fact that for any value
+`Range (x,y)`, `y` is greater than or equal to `x`.  The `create`
+function preserves this invariant, but the `t_of_sexp` function does
+not.
+
+We can fix this problem by writing a custom sexp-converter, in this
+case, using the sexp-converter that we already have:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+type t = | Range of int * int
+         | Empty
+with sexp
+
+let create x y = if x > y then Empty else Range (x,y)
+
+let t_of_sexp sexp =
+  let t = t_of_sexp sexp in
+  begin match t with
+  | Range (x,y) when y < x ->
+    of_sexp_error "Upper and lower bound of Range swapped" sexp
+  | Empty | Range _ -> ()
+  end;
+  t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We call the function `of_sexp_error` to raise an exception because
+that improves the error reporting that Sexplib can provide when a
+conversion fails.
+</sidebar>
