@@ -5,6 +5,7 @@
 *.out
 *.toc
 *.pdf
+*.byte
 *.native
 _build
 book/*.html
