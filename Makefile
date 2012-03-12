@@ -7,7 +7,7 @@ LINGUA:=en
 CSS=rwobook
 
 # update this if a new chapter shows up in en/
-SRC=	[0-9]*.md
+SRC=	$(notdir $(wildcard $(LINGUA)/[0-9]*.md))
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 
