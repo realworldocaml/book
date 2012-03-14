@@ -1,5 +1,10 @@
 # Prologue
 
+_(yminsky: this is something of a placeholder.  We need a real
+introduction that should talk, amongst other things, about what kinds
+of applications OCaml is good for and why one should want to learn it.
+Also, some coverage of who uses OCaml successfully now.)_
+
 ## Why OCaml?
 
 Programming languages matter.
