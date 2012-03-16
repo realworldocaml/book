@@ -465,7 +465,7 @@ alternate syntax:
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Bin-prot
+## Bin_prot
 
 S-expressions are a good serialization format when you need something
 machine-parseable as well as human readable and editable.  But
@@ -478,7 +478,7 @@ can be expensive for types like `int`s, `float`s and `Time.t`s where
 some real computation needs to be done to produce or parse the ASCII
 representation.
 
-Bin-prot is a library designed to address these issues by providing
+Bin_prot is a library designed to address these issues by providing
 fast serialization in a compact binary format.  Kicking off the syntax
 extension is done by putting `with bin_io`.  (This looks a bit
 unsightly in the top-level because of all the definitions that are
