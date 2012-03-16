@@ -1,0 +1,8 @@
+* Fixes to Core
+** Install top-level printers for more types (Error, for one)
+** Improve Core's documentation.
+*** Have a front-page for the documentation
+** Improve bin-prot's usability in the non-async world?
+** Fix inconsistency of sexp_option and sexp_list
+** Make fieldslib respect private record types (i.e., no map, no
+   set_XXX)
