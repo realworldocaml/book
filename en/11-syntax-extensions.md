@@ -293,16 +293,14 @@ There are two steps to deserializing a type from an s-expression:
 first, converting the bytes in a file to an s-expression, and the
 second, converting that s-expression into the type in question.  One
 problem with this is that it can be hard to localize errors to the
-right place using this scheme.  Consider the following example type:
+right place using this scheme.  Consider the following example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* file: read_foo.ml *)
 
 open Core.Std
 
-type u = Foo | Bar with sexp
-type t = { a: u; b: int; c: float option }
-with sexp
+type t = { a: string; b: int; c: float option } with sexp
 
 let run () =
   let t =
@@ -314,6 +312,56 @@ let run () =
 let () =
   Exn.handle_uncaught ~exit:true run
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you were to run this on a malformatted file, say, this one:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;; foo.scm
+((a not-an-integer)
+ (b not-an-integer)
+ (c ()))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+you'll get the following error:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+read_foo $ ./read_foo.native
+Uncaught exception:
+
+  (Sexplib.Conv.Of_sexp_error
+   (Failure "int_of_sexp: (Failure int_of_string)") not-an-integer)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If all you have is the error message and the string, it's not terribly
+informative.  In particular, you know that the parsing errored out on
+the atom "not-an-integer", but you don't know which one!  In a large
+file, this kind of bad error message can be pure misery.
+
+But there's hope!  If we make s amll change to the `run` function as
+follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let run () =
+  let t = Sexp.load_sexp_conv_exn "foo.scm" t_of_sexp in
+  printf "b is: %d\n%!" t.b
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+and run it again, we'll get the following much more helpful error
+message:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+read_foo $ ./read_foo.native
+Uncaught exception:
+
+  (Sexplib.Conv.Of_sexp_error
+   (Sexplib.Sexp.Annotated.Conv_exn foo.scm:3:4
+    (Failure "int_of_sexp: (Failure int_of_string)"))
+   not-an-integer)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the above error, "foo.scm:3:4" tells us that the error occurred on
+"foo.scm", line 3, character 4, which is a much better start for
+figuring out what has gone wrong.
 
 ### Sexp-conversion directives
 

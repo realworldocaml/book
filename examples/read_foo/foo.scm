@@ -1,5 +1,4 @@
-
-((b 3)
- (a Fooo)
+;; foo.scm
+((a not-an-integer)
+ (b not-an-integer)
  (c ()))
-
