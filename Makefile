@@ -31,16 +31,13 @@ build/$(LINGUA)/source/.stamp:
 	mkdir -p build/$(LINGUA)/source
 	touch $@
 
-build/$(LINGUA)/source/00book.xml: $(LINGUA)/00book.xml build/$(LINGUA)/source/.stamp
+build/$(LINGUA)/source/rwo.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
-	cp $< build/$(LINGUA)/source/00book.xml
+	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ > $@
 
-build/$(LINGUA)/source/%.xml: $(LINGUA)/%.md
-	pandoc -f markdown -t docbook --chapters $< > $@
-
-build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/00book.xml $(XMLSRCS) stylesheets/system-xsl
+build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/rwo.xml stylesheets/system-xsl
 	xsltproc --output build/$(LINGUA)/html/ \
-            stylesheets/$(LINGUA)/web.xsl build/$(LINGUA)/source/00book.xml
+            stylesheets/$(LINGUA)/web.xsl build/$(LINGUA)/source/rwo.xml
 
 build/$(LINGUA)/pdf/rwo.tex: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/pdf
