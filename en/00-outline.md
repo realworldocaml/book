@@ -1,8 +1,5 @@
-Real World OCaml
-================
-:author: Jason_Hickey,_Anil_Madhavapeddy,_and_Yaron_Minsky
-v0.1
-:doctype: book
+% Real World OCaml
+% Jason Hickey; Anil Madhavapeddy; Yaron Minsky
 
 About the Book
 --------------

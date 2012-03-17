@@ -8,10 +8,14 @@ CSS=rwobook
 
 # update this if a new chapter shows up in en/
 SRC=	$(notdir $(wildcard $(LINGUA)/[0-9]*.md))
+FULLSRCS= $(wildcard $(LINGUA)/[0-9]*.md)
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 
 all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LINGUA)/html/support/.stamp
+	@ :
+
+pdf: build/$(LINGUA)/pdf/rwo.pdf
 	@ :
 
 build/$(LINGUA)/html/support/.stamp:
@@ -37,6 +41,13 @@ build/$(LINGUA)/source/%.xml: $(LINGUA)/%.md
 build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/00book.xml $(XMLSRCS) stylesheets/system-xsl
 	xsltproc --output build/$(LINGUA)/html/ \
             stylesheets/$(LINGUA)/web.xsl build/$(LINGUA)/source/00book.xml
+
+build/$(LINGUA)/pdf/rwo.tex: $(FULLSRCS)
+	mkdir -p build/$(LINGUA)/pdf
+	pandoc -f markdown -t latex --chapters -s $^ > $@
+
+build/$(LINGUA)/pdf/rwo.pdf: build/$(LINGUA)/pdf/rwo.tex
+	cd build/$(LINGUA)/pdf && pdflatex rwo.tex
 
 stylesheets/system-xsl:
 	ln -sf $(DOCBOOK_XSL_PATH) $@
