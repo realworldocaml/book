@@ -18,6 +18,9 @@ all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LIN
 pdf: build/$(LINGUA)/pdf/rwo.pdf
 	@ :
 
+epub: build/$(LINGUA)/epub/rwo.epub
+	@ :
+
 build/$(LINGUA)/html/support/.stamp:
 	rm -rf build/$(LINGUA)/html/support
 	cp -r web/support build/$(LINGUA)/html/support
@@ -42,6 +45,10 @@ build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/rwo.xml stylesheets/syst
 build/$(LINGUA)/pdf/rwo.tex: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/pdf
 	pandoc -f markdown -t latex --chapters -s $^ > $@
+
+build/$(LINGUA)/epub/rwo.epub: $(FULLSRCS)
+	mkdir -p build/$(LINGUA)/epub
+	pandoc -S --epub-metadata=metadata.xml -o $@ $^
 
 build/$(LINGUA)/pdf/rwo.pdf: build/$(LINGUA)/pdf/rwo.tex
 	cd build/$(LINGUA)/pdf && pdflatex rwo.tex
