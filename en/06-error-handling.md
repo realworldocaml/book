@@ -292,22 +292,26 @@ the following function for looking up a key in an _association list_,
 _i.e._ a list of key/value pairs.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let rec find alist key = match alist with
+# let rec find_exn alist key = match alist with
     | [] -> raise (Key_not_found key)
-    | (key',data) :: tl -> if key = key' then data else find tl key
+    | (key',data) :: tl -> if key = key' then data else find_exn tl key
   ;;
-val find : (string * 'a) list -> string -> 'a = <fun>
+val find_exn : (string * 'a) list -> string -> 'a = <fun>
 # let alist = [("a",1); ("b",2)];;
 val alist : (string * int) list = [("a", 1); ("b", 2)]
-# find alist "a";;
+# find_exn alist "a";;
 - : int = 1
-# find alist "c";;
+# find_exn alist "c";;
 Exception: Key_not_found("c").
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above example, the function `raise` throws the exception, thus
-terminating the type of the computation.  The type of raise is a bit
-surprising when you first see it:
+Note that we named the function `find_exn` to warn the user that the
+function routinely throws exceptions.  This is common practice in
+Core.
+
+In the above example, `raise` throws the exception, thus terminating
+the computation.  The type of raise is a bit surprising when you first
+see it:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # raise;;
@@ -371,4 +375,37 @@ _(more here...)_
 Both exceptions and error-aware types are necessary parts of
 programming in OCaml.  As such, it often makes sense to move between
 the two worlds.  Happily, Core comes with some useful helper functions
-to help you do just that.
+to help you do just that.  For example, given a piece of code that can
+throw an exception, you can capture that exception into an option as
+follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let find alist key =
+    Option.try_with (fun () -> find_exn alist key) ;;
+val find : (string * 'a) list -> string -> 'a option = <fun>
+# find ["a",1; "b",2] "c";;
+- : int Core.Std.Option.t = None
+# find ["a",1; "b",2] "b";;
+- : int Core.Std.Option.t = Some 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And `Result` and `Or_error` have similar `try_with` functions.  So, we
+could write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let find alist key =
+    Result.try_with (fun () -> find_exn alist key) ;;
+val find : (string * 'a) list -> string -> ('a, exn) Result.t = <fun>
+# find ["a",1; "b",2] "c";;
+- : (int, exn) Result.t = Result.Error Key_not_found("c")
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And then we can re-raise that exception:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# Result.ok_exn (find ["a",1; "b",2] "b");;
+- : int = 2
+# Result.ok_exn (find ["a",1; "b",2] "c");;
+Exception: Key_not_found("c").
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
