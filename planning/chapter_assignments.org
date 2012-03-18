@@ -2,10 +2,11 @@
 
 | Chapter                             | Author | Status |
 |-------------------------------------+--------+--------|
+| Preface/Forward                     |        |        |
 | A Guided Tour                       | yaron  | ###    |
 | Variables and Functions             | yaron  | ##     |
 | Lists, Options and Pattern-matching | jason  | #      |
-| Algebraic Data Types                |        |        |
+| Records and Variants                |        |        |
 | Error Handling                      | yaron  |        |
 | Programming with Mutation           |        |        |
 | Files, Modules and Programs         | yaron  | ##     |
@@ -17,8 +18,9 @@
 | Tuning the Runtime                  | anil   |        |
 | Foreign Function Interface          | anil   |        |
 | Camlp4                              | anil   |        |
-| OCamlbuild                          | anil   |        |
+| OCamlbuild / Oasis                  | anil   |        |
 | ocamllex/ocamlyacc                  |        |        |
+
 
 ** Status key
  - Blank: no progress
@@ -66,7 +68,13 @@ common enough issue.
  - laziness of || and &&
  - type constraints
  - nominal vs structural types
-
+ - private types, and private type abbreviations
+** Maps and Hashtables
+ - Maps and Hashtables in Core are unusual.  Perhaps worth talking
+   about them and the typing disciplined behind them.
+** Polymorphic compare
+ - Polymorphic hash and compare are subtle and problematic concepts.
+   Seems worth discussing them somewhere
 
 ** Organization of Core
  Not sure where this should go, but there are a number of topics to
