@@ -22,6 +22,7 @@ us access to Core's libraries, and then try out a few simple numerical
 calculations.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+$ rlwrap ocaml
         Objective Caml version 3.12.1
 
 # open Core.Std;;
@@ -93,6 +94,8 @@ and even functions that take other functions as arguments:
 # let abs_change f x =
     abs_diff (f x) x ;;
 val abs_change : (int -> int) -> int -> int = <fun>
+# abs_change square 10;;
+- : int = 90
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This notation for multi-argument functions may be a little surprising
@@ -116,17 +119,17 @@ describes a function that takes two `int` arguments and returns an
 describes a function of two arguments where the first argument is
 itself a function.
 
-The types are quickly getting more complicated, and at this point you might ask
-yourself how OCaml determines these types in the first place.  Roughly
-speaking, OCaml infers the type of an expression from what it already knows
-about the types of the elements of that expression.  This process is called
-_type-inference_.  As an example, in `abs_change`, the fact that `abs_diff`
-takes two integer arguments lets the compiler infer that `x` is an `int` and
-that `f` returns an `int`.
+The types are quickly getting more complicated, and at this point you
+might ask yourself how OCaml determines these types, given that we
+didn't write out any explicit type information.  It turns out that
+OCaml can infer the type of an expression from what it already knows
+about the types of the elements of that expression through a process
+called _type-inference_.  So, in `abs_change`, the fact that
+`abs_diff` is already known to take two integer arguments lets the
+compiler infer that `x` is an `int` and that `f` returns an `int`.
 
-Sometimes, the type-inference system doesn't have enough information
-to fully determine the concrete type of a given value.  Consider this
-example.
+Sometimes, there isn't enough information to fully determine the
+concrete type of a given value.  Consider this function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let first_if_true test x y =
@@ -147,9 +150,9 @@ val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 we see that rather than choose a particular type for the value being
-tested, OCaml has introduced a _type variable_ `'a` to express that the type is
-generic.  A type containing a type variable `'a` can be used in a context where
-`'a` is replaced with any concrete type.  So, we can write:
+tested, OCaml has introduced a _type variable_ `'a` to express that
+the type is generic.  A type containing a type variable `'a` can be
+used with `'a` replaced by any concrete type.  So, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let long_string s = String.length s > 3;;
@@ -202,8 +205,8 @@ val tup : int * string = (3, "three")
 
 The type, `int * string` corresponds to set of pairs of `int`s and
 `string`s.  (For the mathematically inclined, the `*` character is
-used because the space of all 2-tuples of type `t * s` effectively
-corresponds to the Cartesian product of `t` and `s`.)
+used because the space of all 2-tuples of type `t * s` corresponds to
+the Cartesian product of `t` and `s`.)
 
 You can extract the components of a tuple using OCaml's
 pattern-matching syntax. Here's a function for computing the distance
@@ -229,8 +232,8 @@ the arguments to the function directly.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is just a first taste of pattern matching.  Pattern matching
-shows up in many contexts, and turns out to be a surprisingly powerful
-tool.
+shows up in many contexts, and is a surprisingly powerful and
+pervasive tool.
 
 ### Options
 
@@ -253,8 +256,8 @@ are non-nullable, so if you have a function that takes an argument of
 type `string`, it's guaranteed to actually get a well-defined value of
 type `string` when it is invoked.  This is different from most other
 languages, including Java and C#, where objects are by default
-nullable, and as a result, the type system does little to defend you
-from null pointer exceptions at runtime.
+nullable. As a result, the type system of those languages does little
+to defend you from null-pointer exceptions at runtime.
 
 Given that in OCaml ordinary values are not nullable, you need some
 other way of representing values that might not be there, and the
@@ -291,12 +294,11 @@ match <expr> with
 | ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The first pattern that matches the structure of the expression between
-the `match` and the `with` is chosen, and the right-hand side of the
-`->` is evaluated, and is the result of evaluating the entire
-expression.  As with `print_log_entry`, the pattern can also create
-new variables, giving a name to sub-components of the data structure
-being matched.
+The return value of the `match` is the result of evaluating the
+right-hand side of the first pattern that matches the value of
+`<expr>`.  As with `print_log_entry`, the patterns can mint new
+variables, giving names to sub-components of the data structure being
+matched.
 
 But we don't necessarily need to use the `match` statement in this
 case.  Core has a whole module full of useful functions for dealing
