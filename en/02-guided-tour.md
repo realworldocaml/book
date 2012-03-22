@@ -62,7 +62,7 @@ val x : int = 7
 # let y = x + x;;
 val y : int = 14
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
+
 After a new variable is created, the toplevel tells us the name of the
 variable, in addition to its type and value.
 
@@ -103,14 +103,14 @@ at first, but we'll explain where it comes from when we get to
 function currying in Chapter {???}.  For the moment, think of the
 arrows as separating different arguments of the function, with the
 type after the final arrow being the return value of the function.
-Thus, 
+Thus,
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 int -> int -> int
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 describes a function that takes two `int` arguments and returns an
-`int`, while 
+`int`, while
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (int -> int) -> int -> int
@@ -248,7 +248,7 @@ val divide : int -> int -> int option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here, `Some` and `None` are explicit tags that are used to construct
-an optional value.  
+an optional value.
 
 Options are important because they are the standard way in OCaml to
 encode a value that might not be there.  By default, values in OCaml
@@ -430,7 +430,7 @@ positionally.  Record types are easy enough to construct:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let v = { x = 3.; y = -4. };;
 val v : vec2d = {x = 3.; y = -4.}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 And we can get access to the contents of these types using pattern
 matching:
@@ -438,7 +438,7 @@ matching:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let magnitude { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
 val magnitude : vec2d -> float = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the case where we want to name the value in a record field after
 the name of that field, we can write the pattern match even more
@@ -448,7 +448,7 @@ rewrite the magnitude function as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can also use dot-syntax for accessing record fields:
 
@@ -456,7 +456,7 @@ We can also use dot-syntax for accessing record fields:
 # let distance v1 v2 =
      magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 val distance : vec2d -> vec2d -> float = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 And we can of course include our newly defined types as components in
 larger types, as in the following types, each of which representing a
@@ -507,3 +507,11 @@ reminiscent of how we used `match` with `option` and `list`.  This is
 no accident: `option` and `list` are really just examples of variant
 types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
+
+## I/O
+## Maps and Sets
+## Exceptions
+## Mutation
+## Modules and Interfaces
+
+
