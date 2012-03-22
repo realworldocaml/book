@@ -303,10 +303,6 @@ a value of type `'a`.  When defining the class, the type parameters
 are placed in square brackets before the class name in the class
 definition.  We also need a parameter `x` for the initial value.
 
-_(yminsky: Why are the type annotations for the `val` declarations
-necessary at all?  What happens if you drop them?  Why on the `val`s
-but not on the `method`s?)_
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 class ['a] node x =
 object
@@ -394,19 +390,20 @@ end;;
 
 ## Object types ##
 
-Of course, this definition of the class `slist` is only part of the
-implementation, we also need to add the ability in inspect the
-elements in the list.  One common style for doing this is to define a
-class for an `iterator` object.  An iterator provides a generic
-mechanism to inspect and traverse the elements of a collection.  This
-isn't just for a list, but for many different kinds of collections.
+This definition of the class `slist` is not complete, we can construct
+lists, but we also need to add the ability to traverse the elements in
+the list.  One common style for doing this is to define a class for an
+`iterator` object.  An iterator provides a generic mechanism to
+inspect and traverse the elements of a collection.  This pattern isn't
+restricted to lists, it can be used for many different kinds of
+collections.
 
-There are also two common styles for defining abstract interfaces like
+There are two common styles for defining abstract interfaces like
 this.  In Java, an iterator would normally be specified with an
 interface, which specifies a set of method types.  In languages
 without interfaces, like C++, the specification would normally use
-_abstract_ classes to specifiy the methods without implementing them
-(C++ uses the "= 0" definition to mean "unimplemented").
+_abstract_ classes to specify the methods without implementing them
+(C++ uses the "= 0" definition to mean "not implemented").
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Java-style iterator, specified as an interface.
@@ -427,12 +424,11 @@ class Iterator {
 };
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OCaml support both styles of definition.  In fact, if we view object
-types like interfaces, OCaml is even more flexible because an object
-type can be implemented by any object with the appropriate methods, it
-does not have to be specified by the object's class _a priori_.  We'll
-leave abstract classes for later.  Let's demonstrate the technique using
-object.types.
+OCaml support both styles.  In fact, OCaml is more flexible than these
+approaches because an object type can be implemented by any object
+with the appropriate methods, it does not have to be specified by the
+object's class _a priori_.  We'll leave abstract classes for later.
+Let's demonstrate the technique using object types.
 
 First, we'll define an object type `iterator` that specifies the
 methods in an iterator.
@@ -595,5 +591,312 @@ object
 end;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Class types ##
+
+Once we have defined the list implementation, the next step is to wrap
+it in a module or `.ml` file and give it a type so that it can be used
+in the rest of our code.  What is the type?
+
+Before we begin, let's wrap up the implementation in an explicit
+module (we'll use explicit modules for illustration, but the process
+is similar when we want to define a `.mli` file).  In keeping with the
+usual style for modules, we define a type `'a t` to represent the type
+of list values.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module SList = struct
+   type 'a iterator = < get : 'a; has_value : bool; next : unit >
+   type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
+
+   class ['a] node x = object ... end
+   class ['a] slist_iterator cur = object ... end
+   class ['a] slist = object ... end
+   
+   let make () = new slist
+end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+We have multiple choices in definining the module type, depending on
+how much of the implementation we want to expose.  At one extreme, a
+maximally-abstract signature would completely hide the class
+definitions.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module AbstractSList : sig
+   type 'a iterator = < get : 'a; has_value : bool; next : unit >
+   type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
+
+   val make : unit -> 'a t
+end = SList
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The abstract signature is simple because we ignore the classes.  But
+what if we want to include them in the signature, so that other modules
+can inherit from the class definitions?  For this, we need to specify
+types for the classes, called _class types_.  Class types do not
+appear in mainstream object-oriented programming languages, so you may
+not be familiar with them, but the concept is pretty simple.  A class
+type specifies the type of each of the visible parts of the class,
+including both fields and methods.  Just like for module types, you
+don't have to give a type for everything; anything you omit will be
+hidden.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module VisibleSList : sig
+  type 'a iterator = < get : 'a; has_value : bool; next : unit >
+  type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
+
+  class ['a] node : 'a ->
+  object
+     method get : 'a
+     method set : 'a -> unit
+     method next : 'a node option
+     method set_next : 'a node option -> unit
+  end
+
+  class ['a] slist_iterator : 'a node option ->
+  object
+     method has_value : bool
+     method get : 'a
+     method next : unit
+  end
+
+  class ['a] slist :
+  object
+    val mutable first : 'a node option
+    val mutable last : 'a node option
+    method is_empty : bool
+    method insert : 'a -> unit
+    method iterator : 'a iterator
+  end
+
+  val make : unit -> 'a slist
+end = SList
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this signature, we've chosen to make nearly everything visible.
+The class type for `slist` specifies the types of the fields `first`
+and `last`, as well ad the types of each of the methods.  We've also
+included a class type for `slist_iterator`, which is of somewhat more
+questionable value, since the type doesn't appear in the type for
+`slist` at all.
+
+One more thing, in this example the function `make` has type `unit ->
+'a slist`.  But wait, we've stressed _classes are not types_, so
+what's up with that?  In fact, what we've said is entirely true,
+classes and class names *are not* types.  However, class names can be
+used to stand for types.  When the compiler sees a class name in type
+position, it automatically constructs an object type from it by
+erasing all the fields and keeping only the method types.  In this
+case, the type expression `'a slist` is exactly equivalent to `'a t`.
+  
 ## Subtyping ##
 
+Subtyping is a central concept in object-oriented programming.  It
+governs when an object with one type _A_ can be used in an expression
+that expects an object of another type _B_.  When this is true, we say
+that _A_ is a _subtype_ of _B_.  Actually, more concretely, subtyping
+determines when the coercion operator `e :> t` can be applied.  This
+coercion works only if the expression `e` has some type `s` and `s` is
+a subtype of `t`.
+
+To explore this, let's define some simple classes for geometric
+shapes.  The generic type `shape` has a method to compute the area,
+and a `square` is a specific kind of shape.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type shape = < area : float >;;
+
+class square w =
+object (self : 'self)
+  method area = self#width *. self#width
+  method width = w
+end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A `square` has a method `area` just like a `shape`, and an additional
+method `width`.  Still, we expect a `square` to be a `shape`, and it
+is.  The coercion `:>` must be explicit.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# let new_square x : shape = new square x;;
+Characters 27-39:
+  let new_square x : shape = new square x;;
+                             ^^^^^^^^^^^^
+Error: This expression has type square but an expression was expected of type shape
+The second object type has no method width
+# let new_square x : shape = (new square x :> shape);;
+val new_square : float -> shape = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+What are the rules for subtyping?  In general, object subtyping has
+two general forms, called _width_ and _depth_ subtyping.  Width
+subtyping means that an object type _A_ is a a subtype of _B_, if _A_
+has all of the methods of _B_, and possibly more.  A `square` is a
+subtype of `shape` because it implements all of the methods of `shape`
+(the `area` method).
+
+The subtyping rules are purely technical, they have no relation to
+object semantics.  We can define a class `rectangle` that has all of
+the methods of a `square`, so it is a subtype of square and can be
+used wherever a `square` is expected.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# class rectangle h w =
+  object (self : 'self)
+     inherit square w
+     method area = self#width *. self#height
+     method height = h
+  end;;
+# let square_rectangle h w : square = (new rectangle h w :> square);;
+val square_rectangle : float -> float -> square = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This may seem absurd, but this concept is expressible in all
+object-oriented languages.  The contradiction is semantic -- we know
+that in the real world, not all rectangles are squares; but in the
+programming world, rectangles have all of the features of squares
+(according to our definition), so they can be used just like squares.
+Suffice it to say that it is usually better to avoid such apparent
+contradictions.
+
+Next, let's take a seemingly tiny step forward, and start building
+collections of shapes.  It is easy enough to define a `slist` of
+squares.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# let squares =
+     let l = SList.make () in
+     l#insert (new square 1.0);
+     l#insert (new square 2.0);
+     l;;
+val squares : square slist = <obj>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can also define a function to calculate the total area of a list of
+shapes.  There is no reason to restrict this to squares, it should
+work for any list of shapes with type `shape slist`.  The problem is
+that doing so raises some serious typing questions -- can a `square
+slist` be passed to a function that expects a `shape slist`?  If we
+try it, the compiler produces a verbose error message.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# let total_area (l : shape slist) : float =
+     let total = ref 0.0 in
+     let it = l#iterator in
+     while it#has_value do
+        total := !total +. it#get#area;
+	    it#next
+     done;
+     !total;;
+val total_area : shape slist -> float = <fun>
+# total_area squares;;
+Characters 11-18:
+  total_area squares;;
+             ^^^^^^^
+Error: This expression has type
+         square slist =
+           < insert : square -> unit; is_empty : bool;
+             iterator : square iterator >
+       but an expression was expected of type
+         shape slist =
+           < insert : shape -> unit; is_empty : bool;
+             iterator : shape iterator >
+       Type square = < area : float; width : float >
+       is not compatible with type shape = < area : float > 
+       The second object type has no method width
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It might seem tempting to give up at this point, especially because
+the subtyping is not even true -- the type `square slist` is not a
+subtype of `shape slist`.  The problem is with the `insert` method.
+For `shape slist`, the `insert` method takes an arbitrary `shape` and
+inserts it into the list.  So if we could coerce a `square slist` to a
+`shape slist`, then it would be possible to insert an arbitrary shape
+into the list, which would be an error.
+
+Still, the `total_area` function should be fine, in principle.  It
+doesn't call `insert`, so it isn't making that error.  To make it
+work, we need to use a more precise type that indicates we are not
+going to be mutating the list.  We define a type
+`readonly_shape_slist` and confirm that we can coerce the list of
+squares.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# type readonly_shape_slist = < iterator : shape iterator >;;
+type readonly_shape_slist = < iterator : shape iterator >
+# (squares :> readonly_shape_slist);;
+- : readonly_shape_slist = <obj>
+# let total_area (l : readonly_shape_slist) : float = ...;;
+val total_area : readonly_shape_slist -> float = <fun>
+#   total_area (squares :> readonly_shape_slist);;
+- : float = 5.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Why does this work, why is a `square slist` a subtype of
+`readonly_shape_slist`.  The reasoning is in two steps.  First, the
+easy part is width subtyping: we can drop the other methods to see
+that `square slist` is a subtype of `< iterator : square iterator >`.
+The next step is to use _depth_ subtyping, which, in its general form,
+says that an object type `< m : t1 >` is a subtype of a type `< m :
+t2>` iff `t1` is a subtype of `t2`.  In other words, instead of
+reasoning about the number of methods in a type (the width), the
+number of methods is fixed, and we look within the method types
+themselves (the "depth").
+
+In this particular case, depth subtyping on the `iterator` method
+requires that `square iterator` be a subtype of `shape iterator`.
+Expanding the type definition for the type `iterator`, we again invoke
+depth subtyping, and we need to show that the type `< get : square >`
+is a subtype of `<get : shape >`, which follows because `square` is a
+subtype of `shape`.
+
+This reasoning may seem fairly long and complicated, but it should be
+pointed out that this typing _works_, and in the end the type
+annotations are fairly minor.  In most typed object-oriented
+languages, the coercion would simply not be possible.  For example, in
+C++, a STL type `slist<T>` is invariant in `T`, it is simply not
+possible to use `slist<square>` where `slist<shape>` is expected (at
+least safely).  The situation is similar in Java, although Java
+supports has an escape hatch that allows the program to fall back to
+dynamic typing.  The situation in OCaml is much better; it works, it
+is statically checked, and the annotations are pretty simple.
+
+Before we move to the next topic, there is one more thing to address.
+The typing we gave above, using `readonly_shape_slist`, requires that
+the caller perform an explicit coercion before calling the
+`total_area` function.  We would like to give a better type that
+avoids the coercion.
+
+A solution is to use an elided type.  Instead of `shape`, we can use
+the elided type `< area : float; .. >`.  In fact, once we do this, it
+also becomes possible to use the `slist` type.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# let total_area (l : < area : float; .. > slist) : float = ...;;
+val total_area : < area : float; .. > slist -> float = <fun>
+# total_area squares;;
+- : float = 5.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This works, and it removes the need for explicit coercions.  This type
+is still fairly simple, but it does have the drawback that the
+programmer needs to remember that the types `< area : float; ..>` and
+`shape` are related.
+
+OCaml supports an abbreviation in this case, but it works only for
+classes, not object types.  The type expression `# classname` is an
+abbreviation for an elided type containing all of the methods in the
+named class, and more.  Since `shape` is an object type, we can't
+write `#shape`.  However, if a class definition is available, this
+abbreviation can be useful.  The following definition is exactly
+equivalent to the preceeding.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# class cshape = object method area = 0.0 end;;
+class cshape : object method area : float end
+# let total_area (l : #cshape list) : float = ...;;
+val total_area : #cshape slist -> float = <fun>
+# total_area squares;;
+- : float = 5.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
