@@ -136,9 +136,9 @@ concrete type of a given value.  Consider this function.
     if test x then x else y;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This function takes a function called `test`, and two values, `x` and
-`y`, where `x` is to be returned if `test x` is `true`, and `y`
-otherwise.  So what's the type of `first_if_true`?  There are no
+This function takes a one-argument function `test`, and two values,
+`x` and `y`, where `x` is to be returned if `test x` is `true`, and
+`y` otherwise.  So what's the type of `first_if_true`?  There are no
 obvious clues such as arithmetic operators to tell you what the type
 of `x` and `y` are.  Indeed, it seems like one could use this
 `first_if_true` on values of any type, as long as `test` was able to
@@ -155,10 +155,10 @@ the type is generic.  A type containing a type variable `'a` can be
 used with `'a` replaced by any concrete type.  So, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let long_string s = String.length s > 3;;
+# let long_string s = String.length s > 6;;
 val long_string : string -> bool = <fun>
-# first_if_true long_string "foo" "bar";;
-- : string = "bar"
+# first_if_true long_string "short" "this string is long";;
+- : string = "this string is long"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 And we can also write:
@@ -174,10 +174,10 @@ But we can't mix and match two different concrete types for `'a` in
 the same use of `first_if_true`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# first_if_true big_number "foo" "bar";;
+# first_if_true big_number "short" "this string is long";;
 Characters 25-30:
-  first_if_true big_number "foo" "bar";;
-                           ^^^^^
+  first_if_true big_number "short" "this string is long";;
+                           ^^^^^^^
 Error: This expression has type string but
     an expression was expected of type int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -199,7 +199,7 @@ at a particularly simple data structure, the tuple.  You can create a
 tuple by joining values together with a comma:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let tup = (3,"three")
+# let tup = (3,"three");;
 val tup : int * string = (3, "three")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -209,9 +209,22 @@ used because the space of all 2-tuples of type `t * s` corresponds to
 the Cartesian product of `t` and `s`.)
 
 You can extract the components of a tuple using OCaml's
-pattern-matching syntax. Here's a function for computing the distance
-between two points on the plane, where each point is represented as a
-pair of `float`s.
+pattern-matching syntax. For example, we can extract the components of
+`tup` as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let (x,y) = tup;;
+val x : int = 3
+val y : string = "three"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This kind of pattern-matching let binding allows us to mint multiple
+new variables corresponding to different components of the value being
+matched.
+
+Here's another example: a function for computing the distance between
+two points on the plane, where each point is represented as a pair of
+`float`s.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let distance p1 p2 =
@@ -407,9 +420,9 @@ There's another new piece of syntax to learn here: labeled arguments.
 `String.length` is passed with the label, `~f`.  Labeled arguments are
 arguments that are specified by name rather than position, which means
 they can be passed in any order.  Thus, we could have written
-`List.map ~f:String.length languages` instead of `List.map languages
-~f:String.length`.  We'll see why labels are important in Chapter
-_{??Functions??}_.
+`List.map languages ~f:String.length` instead of `List.map
+~f:String.length languages`.  We'll see why labels are important in
+Chapter _{??Functions??}_.
 
 ## Records and Variants
 
@@ -419,17 +432,17 @@ define new datatypes.  Here's a toy example of a datatype representing
 a point in 2-dimensional space:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# type vec2d = { x : float; y : float };;
-type vec2d = { x : float; y : float; }
+# type point2d = { x : float; y : float };;
+type point2d = { x : float; y : float; }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`vec2d` is a _record_ type, which you can think of as a tuple where
+`point2d` is a _record_ type, which you can think of as a tuple where
 the individual fields are named, rather than being defined
 positionally.  Record types are easy enough to construct:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let v = { x = 3.; y = -4. };;
-val v : vec2d = {x = 3.; y = -4.}
+# let p = { x = 3.; y = -4. };;
+val p : point2d = {x = 3.; y = -4.}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 And we can get access to the contents of these types using pattern
@@ -437,7 +450,7 @@ matching:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let magnitude { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
-val magnitude : vec2d -> float = <fun>
+val magnitude : point2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the case where we want to name the value in a record field after
@@ -455,7 +468,7 @@ We can also use dot-syntax for accessing record fields:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let distance v1 v2 =
      magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
-val distance : vec2d -> vec2d -> float = <fun>
+val distance : point2d -> point2d -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 And we can of course include our newly defined types as components in
@@ -463,9 +476,9 @@ larger types, as in the following types, each of which representing a
 different geometric object.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# type circle = { center: vec2d; radius: float } ;;
-# type rect = { lower_left: vec2d; width: float; height: float } ;;
-# type segment = { endpoint1: vec2d; endpoint2: vec2d } ;;
+# type circle = { center: point2d; radius: float } ;;
+# type rect = { lower_left: point2d; width: float; height: float } ;;
+# type segment = { endpoint1: point2d; endpoint2: point2d } ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now, imagine that you want to combine multiple of these scene objects
@@ -487,19 +500,22 @@ might write a function for testing whether a point is in the interior
 of one of a `shape list`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let is_inside_shape vec shape =
+# let is_inside_shape point shape =
      match shape with
      | Circle { center; radius } ->
-       distance center vec < radius
+       distance center point < radius
      | Rect { lower_left; width; height } ->
-       vec.x > lower_left.x && vec.x < lower_left.x +. width
-       && vec.y > lower_left.y && vec.y < lower_left.y +. height
+       point.x > lower_left.x && point.x < lower_left.x +. width
+       && point.y > lower_left.y && point.y < lower_left.y +. height
      | Segment _ -> false
      ;;
-val is_inside_shape : vec2d -> shape -> bool = <fun>
-# let is_inside_shapes vec shapes =
-     List.for_all shapes ~f:(fun shape -> is_inside_shape vec shape)
-val is_inside_shapes : vec2d -> shape list -> bool = <fun>
+val is_inside_shape : point2d -> shape -> bool = <fun>
+# let is_inside_shapes point shapes =
+     let point_is_inside_shape shape =
+       is_inside_shape point shape
+     in
+     List.for_all shapes ~f:point_is_inside_shape
+val is_inside_shapes : point2d -> shape list -> bool = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You might at this point notice that the use of `match` here is
