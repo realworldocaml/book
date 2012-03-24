@@ -691,10 +691,8 @@ no accident: `option` and `list` are really just examples of variant
 types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
 
-## I/O
-## Maps and Sets
-## Exceptions
 ## Mutation
+## I/O
 ## Modules and Interfaces
 
 
