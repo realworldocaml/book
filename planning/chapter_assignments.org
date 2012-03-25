@@ -12,7 +12,6 @@
 | Files, Modules and Programs         | yaron  | ##     |
 | Functors and first-class modules    | yaron  |        |
 | Synchronous I/O                     |        |        |
-| Syntax Extensions                   | yaron  | #      |
 | Concurrent Programming              | anil   |        |
 | Objects                             | jason  | ##     |
 | Tuning the Runtime                  | anil   |        |
