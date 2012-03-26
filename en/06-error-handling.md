@@ -443,9 +443,115 @@ let load_config filename =
 
 OCaml's exception-handling system allows you to tune your
 error-recovery logic to the particular error that was thrown.  For
-example, `List.find_exn`
+example, `List.find_exn` always throws `Not_found`.  You can take
+advantage of this in your code, for example, let's define a function
+called `lookup_weight`, with the following signature:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(** [lookup_weight ~compute_weight alist key] Looks up a
+    floating-point weight by applying [compute_weight] to the data
+    associated with [key] by [alist].  If [key] is not found, then
+    return 0.
+*)
+val lookup_weight :
+  compute_weight:('data -> float) -> ('key * 'data) list -> 'key -> float
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can implement such a function using exceptions as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let lookup_weight ~compute_weight alist key =
+    try
+      let data = List.Assoc.find_exn alist key in
+      compute_weight data
+    with
+      Not_found -> 0. ;;
+val lookup_weight :
+  compute_weight:('a -> float) -> ('b * 'a) list -> 'b -> float =
+  <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This implementation is more problematic than it looks.  In particular,
+what happens if `compute_weight` itself throws an exception?  Ideally,
+`lookup_weight` should propagate that exception on, but if the
+exception happens to be `Not_found`, then that's not what will happen:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# lookup_weight ~compute_weight:(fun _ -> raise Not_found)
+    ["a",3; "b",4] "a" ;;
+- : float = 0.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This kind of problem is hard to detect in advance, because the type
+system doesn't tell us what kinds of exceptions a given function might
+throw.  Because of this kind of confusion, it's usually better to
+avoid catching specific exceptions.  In this case, we can improve the
+code by catching the exception in a narrower scope.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let lookup_weight ~compute_weight alist key =
+    match
+      try Some (List.Assoc.find_exn alist key) with
+      | Not_found -> None
+    with
+    | None -> 0.
+    | Some data -> compute_weight data ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+At which point, it makes sense to simply use the non-exception
+throwing function, `List.Assoc.find`, instead.
 
 ### Backtraces
+
+A big part of the point of exceptions is to give useful debugging
+information.  But at first glance, OCaml's exceptions can be less than
+informative.   Consider the following simple program.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* exn.ml *)
+
+open Core.Std
+exception Empty_list
+
+let list_max = function
+  | [] -> raise Empty_list
+  | hd :: tl -> List.fold tl ~init:hd ~f:(Int.max)
+
+let () =
+  printf "%d\n" (list_max [1;2;3]);
+  printf "%d\n" (list_max [])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If we build and run this program, we'll get a pretty uninformative
+error:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .shell }
+$ ./exn
+3
+Fatal error: exception Exn.Empty_list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The example in qeustion is short enough that it's quite easy to see
+where the error came from.  But in a complex program, simply knowing
+which exception was thrown is usually not enough information to figure
+out what went wrong.
+
+We can get more information from OCaml if we turn on stack traces.
+This can be done by setting the `OCAMLRUNPARAM` environment variable,
+as shown:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .shell }
+exn $ export OCAMLRUNPARAM=b
+exn $ ./exn
+3
+Fatal error: exception Exn.Empty_list
+Raised at file "exn.ml", line 7, characters 16-26
+Called from file "exn.ml", line 12, characters 17-28
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Backtraces can also be obtained at runtime.  In particular,
+`Exn.backtrace` will return the backtrace fo the most recently thrown
+exception.
 
 ### Exceptions for control flow
 
