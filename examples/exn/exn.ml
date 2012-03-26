@@ -1,14 +1,11 @@
-(* simple_exn.ml *)
+(* exn.ml *)
 
 open Core.Std
-
 exception Empty_list
 
-let list_max l =
-  match l with
+let list_max = function
   | [] -> raise Empty_list
-  | hd :: tl -> List.fold tl ~init:hd ~f:(+)
-
+  | hd :: tl -> List.fold tl ~init:hd ~f:(Int.max)
 
 let () =
   printf "%d\n" (list_max [1;2;3]);
