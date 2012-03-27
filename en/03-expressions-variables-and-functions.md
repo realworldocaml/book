@@ -228,6 +228,7 @@ nearly equivalent:
 
 This connection is important, and will come up more when programming
 in a monadic style, as we'll see in chapter {{ASYNC}}.
+
 </sidebar>
 
 ### Multi-argument functions ###
@@ -614,6 +615,7 @@ val foo : (?y:'a -> x:'b -> int) -> 'b -> 'a -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Type constraints are discussed in more detail in chapter {{???}}.
+
 </sidebar>
 
 The behavior of substituting in a default value is so common that it
