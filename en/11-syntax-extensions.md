@@ -285,6 +285,7 @@ let t_of_sexp sexp =
 We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
 conversion fails.
+
 </sidebar>
 
 ### Getting good error messages
