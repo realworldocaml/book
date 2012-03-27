@@ -1342,12 +1342,6 @@ val plusone : int -&gt; int = &lt;fun&gt;
       variable being bound to its argument. Indeed, the following two
       expressions are nearly equivalent:
     </para>
-    <programlisting>
-# (fun x -&gt; x + 1) 7;;
-- : int = 8
-# let x = 7 in x + 1;;
-- : int = 8
-</programlisting>
     This connection is important, and will come up more when programming
     in a monadic style, as we'll see in chapter {{ASYNC}}.
     </sidebar>
@@ -1802,10 +1796,6 @@ val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
         in which those arguments are inferred. Consider the following
         example:
       </para>
-      <programlisting language="ocaml">
-# let foo g x y = g ~x ~y ;;
-val foo : (x:'a -&gt; y:'b -&gt; 'c) -&gt; 'a -&gt; 'b -&gt; 'c = &lt;fun&gt;
-</programlisting>
       <para>
         In principle, it seems like the type first argument of
         <literal>foo</literal> could have had a different order for the
@@ -4161,22 +4151,6 @@ $ ./test_interval.native
         We can fix this problem by writing a custom sexp-converter, in
         this case, using the sexp-converter that we already have:
       </para>
-      <programlisting language="ocaml">
-type t = | Range of int * int
-         | Empty
-with sexp
-
-let create x y = if x &gt; y then Empty else Range (x,y)
-
-let t_of_sexp sexp =
-  let t = t_of_sexp sexp in
-  begin match t with
-  | Range (x,y) when y &lt; x -&gt;
-    of_sexp_error &quot;Upper and lower bound of Range swapped&quot; sexp
-  | Empty | Range _ -&gt; ()
-  end;
-  t
-</programlisting>
       We call the function <literal>of_sexp_error</literal> to raise an
       exception because that improves the error reporting that Sexplib
       can provide when a conversion fails.
