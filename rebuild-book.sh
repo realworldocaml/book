@@ -16,3 +16,4 @@ cd $SVNR
 svn commit -m 'autocommit from $REPO $REVID orm:commitpdf'
 sleep 10
 cp pdf/book.xml.pdf $HTML/rwo-snapshot.pdf
+cp pdf/.buildlog $HTML/buildlog.txt
