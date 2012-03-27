@@ -1343,10 +1343,8 @@ val plusone : int -&gt; int = &lt;fun&gt;
       expressions are nearly equivalent:
     </para>
     <para>
-    <para>
       This connection is important, and will come up more when
       programming in a monadic style, as we'll see in chapter {{ASYNC}}.
-    </para>
     </para>
     </sidebar>
     <sect2 id="multi-argument-functions">
