@@ -1,10 +1,15 @@
 # A Guided Tour
 
-We'll start our introduction to OCaml with the toplevel, an
-interactive shell that lets you type in expressions and then evaluates
-them immediately.  When you get to the point of running real programs,
-you'll want to leave the toplevel behind, but it's a great tool for
-getting to know the language.
+This chapter is going to give an overview of OCaml, by walking you
+through a series of small examples that cover most of the major
+features.  The idea is to give you a sense of what OCaml can do,
+without going into great detail about any individual feature.
+
+We'll present this using the toplevel, an interactive shell that lets
+you type in expressions and then evaluates them immediately.  When you
+get to the point of running real programs, you'll want to leave the
+toplevel behind, but it's a great tool for getting to know the
+language.
 
 You should have a working toplevel as you go through this chapter, so
 you can try out the examples as you go.  There is a zero-configuration
@@ -692,7 +697,83 @@ types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
 
 ## Mutation
-## I/O
-## Modules and Interfaces
 
+All of our examples so far have been examples of mutation-free, or
+_pure_ code.  This is typical of code in functional languages, which
+tend to have a focus on so-called _pure_ code.  That said, OCaml has
+good support for mutation, including standard mutable data structures
+like arrays and hashtables.  For example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let numbers = [| 1;2;3;4 |];;
+val numbers : int array = [|1; 2; 3; 4|]
+# numbers.(2) <- 4;;
+- : unit = ()
+# numbers;;
+- : int array = [|1; 2; 4; 4|]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the above, the `ar.(i)` syntax is used for referencing the element
+of an array, and the `<-` syntax is used for setting a mutable value.
+
+Variable bindings in OCaml are always immutable, but datastructures
+like arrays can be mutable.  In addition, record fields, which are
+immutable by default can be declared as mutable.  Here's a small
+example of a datastructure for mutable storing a running sum.  Here,
+we've declared all the record fields as mutable.  Here
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# type running_sum = { mutable sum: float;
+                       mutable sum_sq: float; (* sum of squares, for stdev *)
+                       mutable samples: float; }
+  let empty () = { sum = 0.; sum_sq = 0.; samples = 0. }
+  let mean rsum = rsum.sum /. rsum.samples
+  let stdev rsum =
+     let square x = x *. x in
+     sqrt (rsum.sum_sq /. rsum.samples -. square (rsum.sum /. rsum.samples))
+  let update rsum x =
+     rsum.sum <- rsum.sum +. x;
+     rsum.sum_sq <- rsum.sum_sq +. x *. x;
+     rsum.samples <- rsum.samples +. 1.
+  ;;
+# let rsum = empty ();;
+val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
+# List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
+- : unit = ()
+# mean rsum;;
+- : float = 1.33333333333333326
+# stdev rsum;;
+- : float = 1.61015297179882655
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can declare a single mutable value by using a `ref`, which is a
+record type with a single mutable field that is defined in the
+standard library.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let x = { contents = 0 };;
+val x : int ref = {contents = 0}
+# x.contents <- x.contents + 1;;
+- : unit = ()
+# x;;
+- : int ref = {contents = 1}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are a handful of useful functions and operators defined for refs
+to make them more convenient to work with.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
+val x : int ref = {contents = 0}
+# !x ;;            (* get the contents of a ref, i.e., x.contents *)
+- : int = 0
+# x := !x + 1 ;;   (* assignment, i.e., x.contents <- ... *)
+- : unit = ()
+# incr x ;;        (* increments, i.e., x := !x + 1 *)
+- : unit = ()
+# !x ;;
+- : int = 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## I/O
 

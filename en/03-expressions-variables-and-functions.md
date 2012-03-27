@@ -756,31 +756,3 @@ This means that rarely used functions should not have optional
 arguments.  A good rule of thumb for optional arguments is that you
 should never use an optional argument for internal functions of a
 module, only for functions that are exposed to users of a module.
-
-One pattern to be particularly leery of is the pattern of passing
-optional arguments from one function to another, because it's easy to
-forget an optional argument part way down a chain.  Note that the
-following code compiles without complaint, even though the optional
-argument passed into `uppercase_concat` is never passed into `concat`.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let uppercase_concat ?sep a b = concat (String.uppercase a) b ;;
-val uppercase_concat :
-  ?sep:'a -> Core.Std.String.t -> string -> ?sep:string -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-_(jyh: This is a great example, but the `?sep` for `concat`
-should be erased.  Also, you may want to mention that warnings can be turned
-on to catch the unused variable.)_
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-$ ocaml -w A
-# let concat ?sep x y =
-     let sep = match sep with None -> "" | Some x -> x in
-     x ^ sep ^ y
-  ;;
-val concat : ?sep:string -> string -> string -> string = <fun>
-# let uppercase_concat ?sep a b = concat (String.uppercase a) b ;;
-Warning 27: unused variable sep.
-val uppercase_concat : ?sep:'a -> string -> string -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~

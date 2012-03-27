@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-TARGET=$1
-ocamlbuild -use-ocamlfind $TARGET.byte && mv $TARGET.byte $TARGET
+for TARGET in $*
+do
+  ocamlbuild -use-ocamlfind $TARGET.native
+done
 
 
