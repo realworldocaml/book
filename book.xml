@@ -1343,8 +1343,10 @@ val plusone : int -&gt; int = &lt;fun&gt;
       expressions are nearly equivalent:
     </para>
     <para>
-    This connection is important, and will come up more when programming
-    in a monadic style, as we'll see in chapter {{ASYNC}}.
+    <para>
+      This connection is important, and will come up more when
+      programming in a monadic style, as we'll see in chapter {{ASYNC}}.
+    </para>
     </para>
     </sidebar>
     <sect2 id="multi-argument-functions">
@@ -1828,7 +1830,10 @@ This is only allowed when the real type is known.
 # let foo g x y = (g : ?y:'a -&gt; x:'b -&gt; int) ~x ~y + g ~y ~x;;
 val foo : (?y:'a -&gt; x:'b -&gt; int) -&gt; 'b -&gt; 'a -&gt; int = &lt;fun&gt;
 </programlisting>
-      Type constraints are discussed in more detail in chapter {{???}}.
+      <para>
+        Type constraints are discussed in more detail in chapter
+        {{???}}.
+      </para>
       </sidebar>
       <para>
         The behavior of substituting in a default value is so common
@@ -4153,9 +4158,11 @@ $ ./test_interval.native
         We can fix this problem by writing a custom sexp-converter, in
         this case, using the sexp-converter that we already have:
       </para>
-      We call the function <literal>of_sexp_error</literal> to raise an
-      exception because that improves the error reporting that Sexplib
-      can provide when a conversion fails.
+      <para>
+        We call the function <literal>of_sexp_error</literal> to raise
+        an exception because that improves the error reporting that
+        Sexplib can provide when a conversion fails.
+      </para>
       </sidebar>
     </sect2>
     <sect2 id="getting-good-error-messages">
@@ -4775,12 +4782,14 @@ In type &lt; get : int; .. &gt; as 'a the variable 'a is unbound
 # type 'a point = &lt; get:int; .. &gt; as 'a;;
 type 'a point = 'a constraint 'a = &lt; get : int; .. &gt;
 </programlisting>
-    In other words, the type <literal>'a point</literal> is equal to
-    <literal>'a</literal>, where
-    <literal>'a = &lt; get : int; .. &gt;</literal>. That may seem like
-    an odd way to say it, and in fact, this type definition is not
-    really an abbreviation because <literal>'a</literal> refers to the
-    entire type.
+    <para>
+      In other words, the type <literal>'a point</literal> is equal to
+      <literal>'a</literal>, where
+      <literal>'a = &lt; get : int; .. &gt;</literal>. That may seem
+      like an odd way to say it, and in fact, this type definition is
+      not really an abbreviation because <literal>'a</literal> refers to
+      the entire type.
+    </para>
     </sidebar>
     <para>
       An object of type <literal>&lt; get:int; .. &gt;</literal> can be
