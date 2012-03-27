@@ -1342,8 +1342,10 @@ val plusone : int -&gt; int = &lt;fun&gt;
       variable being bound to its argument. Indeed, the following two
       expressions are nearly equivalent:
     </para>
+    <para>
     This connection is important, and will come up more when programming
     in a monadic style, as we'll see in chapter {{ASYNC}}.
+    </para>
     </sidebar>
     <sect2 id="multi-argument-functions">
       <title>Multi-argument functions</title>
