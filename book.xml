@@ -6420,101 +6420,106 @@ object
    inherit ['a] fold_mixin
 end;;
 </programlisting>
-      <highlights>
-      <para>
-        A highlights section at the beginning of a chapter looks like
-        this. It will:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            Have a set of useful bits.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            List entry 2.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            List entry 3.
-          </para>
-        </listitem>
-      </itemizedlist>
-      </highlights>
-      <para>
-        Break up the notes with a normal paragraph of text.
-      </para>
-      <tip>
-      <para>
-        This is a tip in Docbook. Lorem ipsum dolor sit amet,
-        consectetuer adipiscing elit, sed diam nonummy nibh euismod
-        tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi
-        enim ad minim veniam, quis nostrud exerci tation ullamcorper
-        suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis
-        autem vel eum iriure dolor in hendrerit in vulputate velit esse
-        molestie consequat, vel illum dolore eu feugiat nulla facilisis
-        at vero eros et accumsan et iusto odio dignissim qui blandit
-        praesent luptatum zzril delenit augue duis dolore te feugait
-        nulla facilisi. Nam liber tempor cum soluta nobis eleifend
-        option congue nihil imperdiet doming id quod mazim placerat
-        facer possim assum. Typi non habent claritatem insitam; est usus
-        legentis in iis qui facit eorum claritatem. Investigationes
-        demonstraverunt lectores legere me lius quod ii legunt saepius.
-        Claritas est etiam processus dynamicus, qui sequitur mutationem
-        consuetudium lectorum. Mirum est notare quam littera gothica,
-        quam nunc putamus parum claram, anteposuerit litterarum formas
-        humanitatis per seacula quarta decima et quinta decima. Eodem
-        modo typi, qui nunc nobis videntur parum clari, fiant sollemnes
-        in futurum.
-      </para>
-      </tip>
-
-      <note>
-      <title>
-      This is a note title
-      </title>
-      <para>
-        This is a tip in Docbook. Lorem ipsum dolor sit amet,
-        consectetuer adipiscing elit, sed diam nonummy nibh euismod
-        tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi
-        enim ad minim veniam, quis nostrud exerci tation ullamcorper
-        suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis
-        autem vel eum iriure dolor in hendrerit in vulputate velit esse
-        molestie consequat, vel illum dolore eu feugiat nulla facilisis
-        at vero eros et accumsan et iusto odio dignissim qui blandit
-        praesent luptatum zzril delenit augue duis dolore te feugait
-        nulla facilisi.
-      </para>
-      </note>
-      <para>
-        Break up the notes with a normal paragraph of text.
-      </para>
-      <caution>
-      <title>
-      This is a warning
-      </title>
-      <para>
-        It's very, very important to not run with scissors!
-      </para>
-      </caution>
-      <para>
-        Break up the notes with a normal paragraph of text.
-      </para>
-      <qandaset defaultlabel='qanda'>
-      <qandaentry> <question>
-      <para>
-        To be, or not to be?
-      </para>
-      </question> <answer>
-      <para>
-        That is the question.
-      </para>
-      </answer> </qandaentry>
-      </qandaset>
-
     </sect2>
   </sect1>
+</chapter>
+<chapter id="docbook-playground">
+  <title>DocBook Playground</title>
+  <highlights>
+  <para>
+    A highlights section at the beginning of a chapter looks like this.
+    It will:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Have a set of useful bits.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        List entry 2.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        List entry 3.
+      </para>
+    </listitem>
+  </itemizedlist>
+  </highlights>
+  <para>
+    Break up the notes with a normal paragraph of text.
+  </para>
+  <tip>
+  <para>
+    This is a tip in Docbook. Lorem ipsum dolor sit amet, consectetuer
+    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
+    dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
+    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
+    aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in
+    hendrerit in vulputate velit esse molestie consequat, vel illum
+    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+    odio dignissim qui blandit praesent luptatum zzril delenit augue
+    duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta
+    nobis eleifend option congue nihil imperdiet doming id quod mazim
+    placerat facer possim assum. Typi non habent claritatem insitam; est
+    usus legentis in iis qui facit eorum claritatem. Investigationes
+    demonstraverunt lectores legere me lius quod ii legunt saepius.
+  </para>
+  </tip>
+
+  <note>
+  <title>
+  this is a note title
+  </title>
+  <para>
+    this is a tip in docbook. lorem ipsum dolor sit amet, consectetuer
+    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
+    dolore magna aliquam erat volutpat. ut wisi enim ad minim veniam,
+    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
+    aliquip ex ea commodo consequat. duis autem vel eum iriure dolor in
+    hendrerit in vulputate velit esse molestie consequat, vel illum
+    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+    odio dignissim qui blandit praesent luptatum zzril delenit augue
+    duis dolore te feugait nulla facilisi.
+  </para>
+  </note>
+
+  <important>
+  <title>
+  Don't use Obj.magic!
+  </title>
+  <para>
+    As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is not
+    part of the OCaml language&quot;</quote>.
+  </para>
+  </important>
+  <para>
+    break up the notes with a normal paragraph of text.
+  </para>
+  <caution>
+  <title>
+  This is a warning
+  </title>
+  <para>
+    It's very, very important to not run with scissors!
+  </para>
+  </caution>
+  <para>
+    Break up the notes with a normal paragraph of text.
+  </para>
+  <qandaset defaultlabel='qanda'>
+  <qandaentry> <question>
+  <para>
+    To be, or not to be?
+  </para>
+  </question> <answer>
+  <para>
+    That is the question.
+  </para>
+  </answer> </qandaentry>
+  </qandaset>
+
 </chapter>
 </book>
