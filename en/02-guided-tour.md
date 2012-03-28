@@ -1,15 +1,15 @@
 # A Guided Tour
 
-This chapter is going to give an overview of OCaml, by walking you
-through a series of small examples that cover most of the major
-features.  The idea is to give you a sense of what OCaml can do,
-without going into great detail about any individual feature.
+This chapter is going to give an overview of OCaml by walking through
+a series of small examples that cover most of the major features.
+This should give a sense of what OCaml can do, without going into too
+much detail about any particular topic.
 
-We'll present this using the toplevel, an interactive shell that lets
-you type in expressions and then evaluates them immediately.  When you
-get to the point of running real programs, you'll want to leave the
-toplevel behind, but it's a great tool for getting to know the
-language.
+We'll present this guided tour using the OCaml toplevel, an
+interactive shell that lets you type in expressions and evaluate them
+interactively.  When you get to the point of running real programs,
+you'll want to leave the toplevel behind, but it's a great tool for
+getting to know the language.
 
 You should have a working toplevel as you go through this chapter, so
 you can try out the examples as you go.  There is a zero-configuration
@@ -48,7 +48,7 @@ few differences that jump right out at you.
   evaluate an expression.  This is a pecularity of the toplevel that
   is not required in compiled code.
 - After evaluating an expression, the toplevel spits out both the type
-  of the result and a the result itself.
+  of the result and the result itself.
 - Function application in OCaml is syntactically unusual, in that
   function arguments are written out separated by spaces, rather than
   being demarcated by parens and commas.
@@ -56,9 +56,9 @@ few differences that jump right out at you.
   point numbers and `int`.  The types have different literals (`6.`
   instead of `6`) and different infix operators (`+.` instead of `+`),
   and OCaml doesn't do any automated casting between the types.  This
-  can be a bit of a nuisance, but it has its benefits, since it makes
-  it prevents some classes of bugs that arise from confusion between
-  the semantics of `int` and `float`.
+  can be a bit of a nuisance, but it has its benefits, since it
+  prevents some classes of bugs that arise from confusion between the
+  semantics of `int` and `float`.
 
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
@@ -107,9 +107,9 @@ val abs_change : (int -> int) -> int -> int = <fun>
 
 This notation for multi-argument functions may be a little surprising
 at first, but we'll explain where it comes from when we get to
-function currying in Chapter {???}.  For the moment, think of the
-arrows as separating different arguments of the function, with the
-type after the final arrow being the return value of the function.
+function currying in Chapter {{{VARIABLES}}}.  For the moment, think
+of the arrows as separating different arguments of the function, with
+the type after the final arrow being the return value of the function.
 Thus,
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
@@ -126,12 +126,13 @@ describes a function that takes two `int` arguments and returns an
 describes a function of two arguments where the first argument is
 itself a function.
 
-The types are quickly getting more complicated, and at this point you
-might ask yourself how OCaml determines these types, given that we
-didn't write out any explicit type information.  It turns out that
-OCaml can infer the type of an expression from what it already knows
-about the types of the elements of that expression through a process
-called _type-inference_.  So, in `abs_change`, the fact that
+As the types we encounter get more complicated, you might ask yourself
+how OCaml is able to determine these types, given that we didn't write
+down any explicit type information.  It turns out that OCaml is able
+to determine the type of a new expression using a technique called
+_type-inference_, by which it infers the type of a new expression
+based on what it already knows about the types of other related
+variables.  For example, in `abs_change` above, the fact that
 `abs_diff` is already known to take two integer arguments lets the
 compiler infer that `x` is an `int` and that `f` returns an `int`.
 
@@ -143,23 +144,27 @@ concrete type of a given value.  Consider this function.
     if (test x) then x else y;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This function takes a one-argument function `test`, and two values,
-`x` and `y`, where `x` is to be returned if `test x` is `true`, and
-`y` otherwise.  So what's the type of `first_if_true`?  There are no
-obvious clues such as arithmetic operators to tell you what the type
-of `x` and `y` are.  Indeed, it seems like one could use this
-`first_if_true` on values of any type, as long as `test` was able to
-take that type as an input.  Indeed, if we look at the type returned
-by the toplevel:
+`first_if_true` takes as its arguments a function `test`, and two
+values, `x` and `y`, where `x` is to be returned if `(test x)`
+evaluates to `true`, and `y` otherwise.  So what's the type of
+`first_if_true`?  There are no obvious clues such as arithmetic
+operators to tell you what the type of `x` and `y` are.  Indeed, it
+seems like one could use this `first_if_true` on values of any type.
+Indeed, if we look at the type returned by the toplevel:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-we see that rather than choose a particular type for the value being
-tested, OCaml has introduced a _type variable_ `'a` to express that
-the type is generic.  A type containing a type variable `'a` can be
-used with `'a` replaced by any concrete type.  So, we can write:
+we see that rather than choose a single concrete type, OCaml has
+introduced a _type variable_ `'a` to express that the type is generic.
+In particular, the type of the `test` argument is `('a -> bool)`,
+which means that test is a one-argument function whose return value is
+`bool`, and whose argument could be of any type `'a`.  But, whatever
+type `'a` is, it has to be the same as the type of the other two
+arguments, `x` and `y`.
+
+This genericity means that we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let long_string s = String.length s > 6;;
@@ -246,7 +251,7 @@ but this code works fine.
 
 </sidebar>
 
-## Tuples, Options, Lists and Pattern-matching
+## Tuples, Lists, Options and Pattern-matching
 
 ### Tuples
 
@@ -368,7 +373,7 @@ remainder of the list, as you can see below.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let (my_favorite :: the_rest) = languages ;;
 val my_favorite : string = "OCaml"
-val the_rest : string list = ["Perl"; "C"] 
+val the_rest : string list = ["Perl"; "C"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By pattern matching using `::`, we've broken off the first element of
@@ -520,9 +525,10 @@ for dealing with lists.  For example:
 - : int list = [5; 4; 6; 1]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`List.map` is a function that takes a list and a function for
-transforming elements of that list, and returns to us a new list with
-the transformed elements.
+Here, we use the dot-notation to reference elements of the `List` and
+`String` module.  `List.map` in particular is a function that takes a
+list and a function for transforming elements of that list, and
+returns to us a new list with the transformed elements.
 
 There's another new piece of syntax to learn here: labeled arguments.
 `String.length` is passed with the label, `~f`.  Labeled arguments are
@@ -635,7 +641,7 @@ rewrite the magnitude function as follows.
 # let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We can also use dot-syntax for accessing record fields:
+We can also use dot-notation for accessing record fields:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let distance v1 v2 =
@@ -769,7 +775,7 @@ val x : int ref = {contents = 0}
 - : int = 0
 # x := !x + 1 ;;   (* assignment, i.e., x.contents <- ... *)
 - : unit = ()
-# incr x ;;        (* increments, i.e., x := !x + 1 *)
+# incr x ;;        (* increment, i.e., x := !x + 1 *)
 - : unit = ()
 # !x ;;
 - : int = 2
