@@ -6485,41 +6485,47 @@ end;;
     duis dolore te feugait nulla facilisi.
   </para>
   </note>
+  <sect1 id="cross-reference-example">
+    <title>Cross reference example</title>
+    <para>
+      This is a cross reference
+      <link linkend="variables-and-functions">to another chapter</link>.
+    </para>
+    <important>
+    <title>
+    Don't use Obj.magic!
+    </title>
+    <para>
+      As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is
+      not part of the OCaml language&quot;</quote>.
+    </para>
+    </important>
+    <para>
+      break up the notes with a normal paragraph of text.
+    </para>
+    <caution>
+    <title>
+    This is a warning
+    </title>
+    <para>
+      It's very, very important to not run with scissors!
+    </para>
+    </caution>
+    <para>
+      Break up the notes with a normal paragraph of text.
+    </para>
+    <qandaset defaultlabel='qanda'>
+    <qandaentry> <question>
+    <para>
+      To be, or not to be?
+    </para>
+    </question> <answer>
+    <para>
+      That is the question.
+    </para>
+    </answer> </qandaentry>
+    </qandaset>
 
-  <important>
-  <title>
-  Don't use Obj.magic!
-  </title>
-  <para>
-    As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is not
-    part of the OCaml language&quot;</quote>.
-  </para>
-  </important>
-  <para>
-    break up the notes with a normal paragraph of text.
-  </para>
-  <caution>
-  <title>
-  This is a warning
-  </title>
-  <para>
-    It's very, very important to not run with scissors!
-  </para>
-  </caution>
-  <para>
-    Break up the notes with a normal paragraph of text.
-  </para>
-  <qandaset defaultlabel='qanda'>
-  <qandaentry> <question>
-  <para>
-    To be, or not to be?
-  </para>
-  </question> <answer>
-  <para>
-    That is the question.
-  </para>
-  </answer> </qandaentry>
-  </qandaset>
-
+  </sect1>
 </chapter>
 </book>
