@@ -469,8 +469,9 @@ Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
     <para>
-      are compile-time errors, whereas division by zero, is a runtime
-      error, or an exception:
+      are compile-time errors, whereas an error that can't be caught by
+      the type system, like division by zero, leads to a runtime
+      exception.
     </para>
     <programlisting>
 # 3 / 0;;
@@ -534,21 +535,18 @@ val x : int = 3
 val y : string = &quot;three&quot;
 </programlisting>
       <para>
-        <literal>(x,y)</literal> is the pattern, and it's used as the
-        right-hand side of the <literal>let</literal> binding. Note that
-        this operation lets us mint the new variables
-        <literal>x</literal> and <literal>y</literal>, each bound to
-        different components of the value being matched.
+        Here, the <literal>(x,y)</literal> on the right-hand side of the
+        <literal>let</literal> is the pattern. This pattern lets us mint
+        the new variables <literal>x</literal> and <literal>y</literal>,
+        each bound to different components of the value being matched.
+        Note that the same syntax is used both for constructing and for
+        pattern-matching on tuples.
       </para>
       <para>
-        This is just a first taste of pattern matching. Pattern matching
-        shows up in many contexts, and is a surprisingly powerful and
-        pervasive tool.
-      </para>
-      <para>
-        Here's another example: a function for computing the distance
-        between two points on the plane, where each point is represented
-        as a pair of <literal>float</literal>s.
+        Here's an example of how you might use pattern matching in
+        practice: a function for computing the distance between two
+        points on the plane, where each point is represented as a pair
+        of <literal>float</literal>s.
       </para>
       <programlisting language="ocaml">
 # let distance p1 p2 =
@@ -567,6 +565,11 @@ val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
     sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
 ;;
 </programlisting>
+      <para>
+        This is just a first taste of pattern matching. We'll see that
+        pattern matching shows up in many contexts in OCaml, and turns
+        out to be a surprisingly powerful and pervasive tool.
+      </para>
     </sect2>
     <sect2 id="lists">
       <title>Lists</title>
@@ -592,27 +595,27 @@ Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
       <para>
-        We can also use the operator <literal>::</literal> for adding
-        elements to the front of a list
+        In addition to constructing lists using brackets, we can use the
+        operator <literal>::</literal> for adding elements to the front
+        of a list.
       </para>
       <programlisting>
 # &quot;French&quot; :: &quot;Spanish&quot; :: languages;;
 - : string list = [&quot;French&quot;; &quot;Spanish&quot;; &quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
       <para>
-        This is creating a new list, not changing the list we started
-        with, so the definition of <literal>languages</literal> is
-        unchanged.
+        Here, we're creating a new extended list, not changing the list
+        we started with, as we can see.
       </para>
       <programlisting>
 # languages;;
 - : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
       <para>
-        The bracket notation for lists is just syntactic sugar for
-        <literal>::</literal>. Thus, the following declarations are all
-        equivalent. Note that <literal>[]</literal> is used to represent
-        the empty list.
+        The bracket notation for lists is really just syntactic sugar
+        for <literal>::</literal>. Thus, the following declarations are
+        all equivalent. Note that <literal>[]</literal> is used to
+        represent the empty list.
       </para>
       <programlisting language="ocaml">
 # [1; 2; 3];;
@@ -622,14 +625,19 @@ Error: This expression has type string but an expression was expected of type
 # 1 :: 2 :: 3 :: [];;
 - : int list = [1; 2; 3]
 </programlisting>
+      <para>
+        Thus, <literal>::</literal> and <literal>[]</literal>, which are
+        examples of what are called
+        <emphasis>type-constructors</emphasis>, are the basic
+        building-blocks for lists.
+      </para>
       <sect3 id="basic-list-patterns">
         <title>Basic list patterns</title>
         <para>
           The elements of a list can be accessed through
-          pattern-matching. List patterns have two key components:
-          <literal>[]</literal>, which represents the empty list, and
-          <literal>::</literal>, which connects an element at the head
-          of a list to the remainder of the list, as you can see below.
+          pattern-matching. List patterns are fundamentally based on the
+          two list constructors, <literal>[]</literal> and
+          <literal>::</literal>. Here's a simple example.
         </para>
         <programlisting language="ocaml">
 # let (my_favorite :: the_rest) = languages ;;
@@ -657,7 +665,7 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
 val my_favorite : string = &quot;OCaml&quot;
-val the_rest : string list = [&quot;Perl&quot;; &quot;French&quot;; &quot;C&quot;]
+val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
         <para>
           The warning comes because the compiler can't be certain that
@@ -696,30 +704,9 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
 # my_favorite_language [];;
 - : string = &quot;OCaml&quot;
 </programlisting>
-        <para>
-          This is the syntax of a match statement.
-        </para>
-        <programlisting>
-match &lt;expr&gt; with
-| &lt;pattern1&gt; -&gt; &lt;expr1&gt;
-| &lt;pattern2&gt; -&gt; &lt;expr2&gt;
-| ...
-</programlisting>
-        <para>
-          The return value of the <literal>match</literal> is the result
-          of evaluating the right-hand side of the first pattern that
-          matches the value of <literal>&lt;expr&gt;</literal>. As with
-          <literal>print_log_entry</literal>, the patterns can mint new
-          variables, giving names to sub-components of the data
-          structure being matched.
-        </para>
       </sect3>
       <sect3 id="recursive-list-functions">
         <title>Recursive list functions</title>
-        <para>
-          <emphasis>(yminsky: maybe we should kick this subsection to
-          the full list chapter? This is getting long...)</emphasis>
-        </para>
         <para>
           If we combine pattern matching with a recursive function call,
           we can do things like define a function for summing the
@@ -737,7 +724,7 @@ val sum : int list -&gt; int
 </programlisting>
         <para>
           We had to add the <literal>rec</literal> keyword in the
-          definition of <literal>sum</literal> to allow for
+          definition of <literal>sum</literal> to allow
           <literal>sum</literal> to refer to itself. We can introduce
           more complicated list patterns as well. Here's a function for
           destuttering a list, <emphasis>i.e.</emphasis>, for removing
@@ -800,7 +787,7 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
         </para>
         <programlisting language="ocaml">
 # List.map ~f:String.length languages;;
-- : int list = [5; 4; 6; 1]
+- : int list = [5; 4; 1]
 </programlisting>
         <para>
           Here, we use the dot-notation to reference elements of the
@@ -836,11 +823,11 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
 </programlisting>
       <para>
-        Here, <literal>Some</literal> and <literal>None</literal> are
-        explicit tags, caled <emphasis>type constructors</emphasis> that
-        are used to build an optional value. You can think of an
-        <literal>option</literal> as a specialized list that can only
-        have zero or one element.
+        <literal>Some</literal> and <literal>None</literal> are type
+        constructors, like <literal>::</literal> and
+        <literal>[]</literal> for lists, which let you build optional
+        values. You can think of an <literal>option</literal> as a
+        specialized list that can only have zero or one element.
       </para>
       <para>
         To get a value out of an option, we use pattern matching, as we
@@ -867,7 +854,7 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
         statement in this case. We can instead use some built in
         functions from the <literal>Option</literal> module, which, like
         the <literal>List</literal> module for lists, is a place where
-        you can find a large collection of useful functions for owrking
+        you can find a large collection of useful functions for working
         with options.
       </para>
       <para>
@@ -892,11 +879,6 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
         languages, including Java and C#, where objects are by default
         nullable, and whose type systems do little to defend from
         null-pointer exceptions at runtime.
-      </para>
-      <para>
-        Given that in OCaml ordinary values are not nullable, you need
-        some other way of representing values that might not be there,
-        and the <literal>option</literal> type is the standard solution.
       </para>
     </sect2>
   </sect1>
@@ -960,10 +942,10 @@ val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
 # type segment = { endpoint1: point2d; endpoint2: point2d } ;;
 </programlisting>
     <para>
-      Now, imagine that you want to combine multiple of these scene
-      objects together, say as a description scene containing multiple
-      objects. You need some unified way of representing these objects
-      together in a single type. One way of doing this is using a
+      Now, imagine that you want to combine multiple of these objects
+      together, say as a description of a multi-object scene. You need
+      some unified way of representing these objects together in a
+      single type. One way of doing this is using a
       <emphasis>variant</emphasis> type:
     </para>
     <programlisting language="ocaml">
@@ -972,15 +954,13 @@ val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
                | Segment of segment;;
 </programlisting>
     <para>
-      You can think of a variant as a way of combining different types
-      as different possibilities. The <literal>|</literal> character
-      separates the different cases of the variant (the first
-      <literal>|</literal> is optional), and each case has a tag (like
-      <literal>Circle</literal>, <literal>Rect</literal> and
-      <literal>Segment</literal>) to distinguish each case from the
-      other. Here's how we might write a function for testing whether a
-      point is in the interior of one of a
-      <literal>shape list</literal>.
+      The <literal>|</literal> character separates the different cases
+      of the variant (the first <literal>|</literal> is optional), and
+      each case has a tag (like <literal>Circle</literal>,
+      <literal>Rect</literal> and <literal>Segment</literal>) to
+      distinguish that case from the others. Here's how we might write a
+      function for testing whether a point is in the interior of one of
+      a <literal>shape list</literal>.
     </para>
     <programlisting language="ocaml">
 # let is_inside_shape point shape =
