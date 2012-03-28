@@ -684,11 +684,16 @@ library (and in the case of lists, to have some special syntax).
 
 ## Mutation
 
-All of our examples so far have been examples of mutation-free, or
-_pure_ code.  This is typical of code in functional languages, which
-tend to have a focus on so-called _pure_ code.  That said, OCaml has
-good support for mutation, including standard mutable data structures
-like arrays and hashtables.  For example:
+All of our examples so far have been examples of mutation-free code.
+This is typical of code in functional languages, which tend to focus
+on so-called _pure_ code.  Indeed, variable bindings and most
+datastructures in OCaml (including tuples, options and lists) are
+immutable.  
+
+Nonetheless, OCaml has good support for imperative programming,
+including constructs like while and for loops, and standard mutable
+data structures like arrays and hashtables.  Here's an example of how
+to use an array.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let numbers = [| 1;2;3;4 |];;
@@ -699,30 +704,58 @@ val numbers : int array = [|1; 2; 3; 4|]
 - : int array = [|1; 2; 4; 4|]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above, the `ar.(i)` syntax is used for referencing the element
-of an array, and the `<-` syntax is used for setting a mutable value.
+In the above, the `.(i)` syntax is used for referencing the element of
+an array, and the `<-` syntax is used for modifying an element of the
+array.
 
-Variable bindings in OCaml are always immutable, but datastructures
-like arrays can be mutable.  In addition, record fields, which are
-immutable by default can be declared as mutable.  Here's a small
-example of a datastructure for mutable storing a running sum.  Here,
-we've declared all the record fields as mutable.  Here
+### Mutable record fields
+
+The array is an important mutable datastructure, but it's not the only
+one.  Records, which are immutable by default, can be declared with
+specific fields as being mutable.  Here's a small example of a
+datastructure for storing a running statistical summary of a
+collection of numbers.  Here's the basic data structure:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # type running_sum = { mutable sum: float;
                        mutable sum_sq: float; (* sum of squares, for stdev *)
                        mutable samples: float; }
-  let empty () = { sum = 0.; sum_sq = 0.; samples = 0. }
-  let mean rsum = rsum.sum /. rsum.samples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here are some functions for computing means and standard deviations
+based on the `running_sum`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let mean rsum = rsum.sum /. rsum.samples
   let stdev rsum =
-     let square x = x *. x in
-     sqrt (rsum.sum_sq /. rsum.samples -. square (rsum.sum /. rsum.samples))
+     sqrt (rsum.sum_sq /. rsum.samples
+           -. (rsum.sum /. rsum.samples) ** 2.) ;;
+val mean : running_sum -> float = <fun>
+val stdev : running_sum -> float = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And finally, we can define functions for creating and modifying a
+`running_sum`.  Note the use of single semi-colons to express a
+sequence of operations.  When we were operating purely functionally,
+this wasn't necessary, but you start needing it when your code is
+acting by side-effect.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let create () = { sum = 0.; sum_sq = 0.; samples = 0. }
   let update rsum x =
-     rsum.sum <- rsum.sum +. x;
-     rsum.sum_sq <- rsum.sum_sq +. x *. x;
-     rsum.samples <- rsum.samples +. 1.
+     rsum.samples <- rsum.samples +. 1.;
+     rsum.sum     <- rsum.sum     +. x;
+     rsum.sum_sq  <- rsum.sum_sq  +. x *. x
   ;;
-# let rsum = empty ();;
+val create : unit -> running_sum = <fun>
+val update : running_sum -> float -> unit = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As we can see, `update` operates by side-effect.  Here's an example of
+it in action.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let rsum = create ();;
 val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
 - : unit = ()
@@ -731,6 +764,8 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # stdev rsum;;
 - : float = 1.61015297179882655
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Refs
 
 We can declare a single mutable value by using a `ref`, which is a
 record type with a single mutable field that is defined in the
@@ -761,5 +796,54 @@ val x : int ref = {contents = 0}
 - : int = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## I/O
+A ref is really just an example of a mutable record, but in practice,
+it's the standard way of dealing with a single mutable value in a
+computation.
+
+### For and while loops
+
+Along with mutable data structures, OCaml gives you constructs like
+`while` and `for` loops for interacting with them.  Here, for example,
+is a piece of imperative code for permuting an array.  Here, we use
+the `Random` module as our source of randomness.  (`Random` starts out
+with a deterministic seed, but you can call `Random.self_init` to get
+a new random seed chosen.)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let permute ar =
+    for i = 0 to Array.length ar - 2 do
+       (* pick a j that is after i and before the end of the list *)
+       let j = i + 1 + Random.int (Array.length ar - i - 1) in
+       (* Swap i and j *)
+       let tmp = ar.(i) in
+       ar.(i) <- ar.(j);
+       ar.(j) <- tmp
+    done
+  ;;
+val permute : 'a array -> unit = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`permute` returns `unit`, which is typical of functions whose primary
+result is a side-effect rather than a return value.  Here's how
+`permute` looks in action.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let ar = Array.init 20 ~f:(fun i -> i);;
+val ar : int array =
+  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
+# permute ar;;
+- : unit = ()
+# ar;;
+- : int array =
+[|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Where to go from here
+
+That's it for our guided tour!  There are plenty of features left to
+touch upon - we haven't shown you how to read from a file, as just one
+example - but the hope is that this has given you enough of a feel for
+the language that you have your bearings, and will be comfortable
+reading examples in the rest of the book.
+
 
