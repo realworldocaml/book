@@ -43,6 +43,10 @@ dolore te feugait nulla facilisi.
 
 </note>
 
+## Cross reference example
+
+This is a cross reference [to another chapter](#variables-and-functions).
+
 <important>
 <title>Don't use Obj.magic!</title>
 
