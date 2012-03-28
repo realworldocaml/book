@@ -197,17 +197,17 @@
 <chapter id="a-guided-tour">
   <title>A Guided Tour</title>
   <para>
-    This chapter is going to give an overview of OCaml, by walking you
+    This chapter is going to give an overview of OCaml by walking
     through a series of small examples that cover most of the major
-    features. The idea is to give you a sense of what OCaml can do,
-    without going into great detail about any individual feature.
+    features. This should give a sense of what OCaml can do, without
+    going into too much detail about any particular topic.
   </para>
   <para>
-    We'll present this using the toplevel, an interactive shell that
-    lets you type in expressions and then evaluates them immediately.
-    When you get to the point of running real programs, you'll want to
-    leave the toplevel behind, but it's a great tool for getting to know
-    the language.
+    We'll present this guided tour using the OCaml toplevel, an
+    interactive shell that lets you type in expressions and evaluate
+    them interactively. When you get to the point of running real
+    programs, you'll want to leave the toplevel behind, but it's a great
+    tool for getting to know the language.
   </para>
   <para>
     You should have a working toplevel as you go through this chapter,
@@ -260,7 +260,7 @@ $ rlwrap ocaml
       <listitem>
         <para>
           After evaluating an expression, the toplevel spits out both
-          the type of the result and a the result itself.
+          the type of the result and the result itself.
         </para>
       </listitem>
       <listitem>
@@ -279,10 +279,9 @@ $ rlwrap ocaml
           different infix operators (<literal>+.</literal> instead of
           <literal>+</literal>), and OCaml doesn't do any automated
           casting between the types. This can be a bit of a nuisance,
-          but it has its benefits, since it makes it prevents some
-          classes of bugs that arise from confusion between the
-          semantics of <literal>int</literal> and
-          <literal>float</literal>.
+          but it has its benefits, since it prevents some classes of
+          bugs that arise from confusion between the semantics of
+          <literal>int</literal> and <literal>float</literal>.
         </para>
       </listitem>
     </itemizedlist>
@@ -338,10 +337,10 @@ val abs_change : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
     <para>
       This notation for multi-argument functions may be a little
       surprising at first, but we'll explain where it comes from when we
-      get to function currying in Chapter {???}. For the moment, think
-      of the arrows as separating different arguments of the function,
-      with the type after the final arrow being the return value of the
-      function. Thus,
+      get to function currying in Chapter {{{VARIABLES}}}. For the
+      moment, think of the arrows as separating different arguments of
+      the function, with the type after the final arrow being the return
+      value of the function. Thus,
     </para>
     <programlisting language="ocaml">
 int -&gt; int -&gt; int
@@ -358,13 +357,14 @@ int -&gt; int -&gt; int
       itself a function.
     </para>
     <para>
-      The types are quickly getting more complicated, and at this point
-      you might ask yourself how OCaml determines these types, given
-      that we didn't write out any explicit type information. It turns
-      out that OCaml can infer the type of an expression from what it
-      already knows about the types of the elements of that expression
-      through a process called <emphasis>type-inference</emphasis>. So,
-      in <literal>abs_change</literal>, the fact that
+      As the types we encounter get more complicated, you might ask
+      yourself how OCaml is able to determine these types, given that we
+      didn't write down any explicit type information. It turns out that
+      OCaml is able to determine the type of a new expression using a
+      technique called <emphasis>type-inference</emphasis>, by which it
+      infers the type of a new expression based on what it already knows
+      about the types of other related variables. For example, in
+      <literal>abs_change</literal> above, the fact that
       <literal>abs_diff</literal> is already known to take two integer
       arguments lets the compiler infer that <literal>x</literal> is an
       <literal>int</literal> and that <literal>f</literal> returns an
@@ -379,29 +379,35 @@ int -&gt; int -&gt; int
     if (test x) then x else y;;
 </programlisting>
     <para>
-      This function takes a one-argument function
+      <literal>first_if_true</literal> takes as its arguments a function
       <literal>test</literal>, and two values, <literal>x</literal> and
       <literal>y</literal>, where <literal>x</literal> is to be returned
-      if <literal>test x</literal> is <literal>true</literal>, and
-      <literal>y</literal> otherwise. So what's the type of
-      <literal>first_if_true</literal>? There are no obvious clues such
-      as arithmetic operators to tell you what the type of
-      <literal>x</literal> and <literal>y</literal> are. Indeed, it
-      seems like one could use this <literal>first_if_true</literal> on
-      values of any type, as long as <literal>test</literal> was able to
-      take that type as an input. Indeed, if we look at the type
-      returned by the toplevel:
+      if <literal>(test x)</literal> evaluates to
+      <literal>true</literal>, and <literal>y</literal> otherwise. So
+      what's the type of <literal>first_if_true</literal>? There are no
+      obvious clues such as arithmetic operators to tell you what the
+      type of <literal>x</literal> and <literal>y</literal> are. Indeed,
+      it seems like one could use this <literal>first_if_true</literal>
+      on values of any type. Indeed, if we look at the type returned by
+      the toplevel:
     </para>
     <programlisting language="ocaml">
 val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
 </programlisting>
     <para>
-      we see that rather than choose a particular type for the value
-      being tested, OCaml has introduced a <emphasis>type
-      variable</emphasis> <literal>'a</literal> to express that the type
-      is generic. A type containing a type variable
-      <literal>'a</literal> can be used with <literal>'a</literal>
-      replaced by any concrete type. So, we can write:
+      we see that rather than choose a single concrete type, OCaml has
+      introduced a <emphasis>type variable</emphasis>
+      <literal>'a</literal> to express that the type is generic. In
+      particular, the type of the <literal>test</literal> argument is
+      <literal>('a -&gt; bool)</literal>, which means that test is a
+      one-argument function whose return value is
+      <literal>bool</literal>, and whose argument could be of any type
+      <literal>'a</literal>. But, whatever type <literal>'a</literal>
+      is, it has to be the same as the type of the other two arguments,
+      <literal>x</literal> and <literal>y</literal>.
+    </para>
+    <para>
+      This genericity means that we can write:
     </para>
     <programlisting language="ocaml">
 # let long_string s = String.length s &gt; 6;;
@@ -492,8 +498,8 @@ Error: This expression has type string but an expression was expected of type
 </programlisting>
     </sidebar>
   </sect1>
-  <sect1 id="tuples-options-lists-and-pattern-matching">
-    <title>Tuples, Options, Lists and Pattern-matching</title>
+  <sect1 id="tuples-lists-options-and-pattern-matching">
+    <title>Tuples, Lists, Options and Pattern-matching</title>
     <sect2 id="tuples">
       <title>Tuples</title>
       <para>
@@ -628,7 +634,7 @@ Error: This expression has type string but an expression was expected of type
         <programlisting language="ocaml">
 # let (my_favorite :: the_rest) = languages ;;
 val my_favorite : string = &quot;OCaml&quot;
-val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;] 
+val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
         <para>
           By pattern matching using <literal>::</literal>, we've broken
@@ -797,9 +803,12 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 - : int list = [5; 4; 6; 1]
 </programlisting>
         <para>
-          <literal>List.map</literal> is a function that takes a list
-          and a function for transforming elements of that list, and
-          returns to us a new list with the transformed elements.
+          Here, we use the dot-notation to reference elements of the
+          <literal>List</literal> and <literal>String</literal> module.
+          <literal>List.map</literal> in particular is a function that
+          takes a list and a function for transforming elements of that
+          list, and returns to us a new list with the transformed
+          elements.
         </para>
         <para>
           There's another new piece of syntax to learn here: labeled
@@ -933,7 +942,7 @@ val magnitude : point2d -&gt; float = &lt;fun&gt;
 # let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
 </programlisting>
     <para>
-      We can also use dot-syntax for accessing record fields:
+      We can also use dot-notation for accessing record fields:
     </para>
     <programlisting language="ocaml">
 # let distance v1 v2 =
@@ -1081,7 +1090,7 @@ val x : int ref = {contents = 0}
 - : int = 0
 # x := !x + 1 ;;   (* assignment, i.e., x.contents &lt;- ... *)
 - : unit = ()
-# incr x ;;        (* increments, i.e., x := !x + 1 *)
+# incr x ;;        (* increment, i.e., x := !x + 1 *)
 - : unit = ()
 # !x ;;
 - : int = 2
@@ -3844,8 +3853,79 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
 <chapter id="functors-and-first-class-modules">
   <title>Functors and First-class modules</title>
   <para>
-    Lorem ipsit, et all
+    Up until now, modules have played a limited role, used as the way
+    for organizing the system into different components with
+    well-defined interfaces. This is of course important, but it is only
+    part of what modules can do. OCaml's module system is part of a
+    powerful toolset for organizing and putting together complex
+    functionality.
   </para>
+  <sect1 id="functors">
+    <title>Functors</title>
+    <para>
+      A functor in OCaml is essentially a function from modules to
+      modules. Let's walk through a small, complete example of how to
+      use functors. In this case, we're going to show how you can use a
+      functor build up a larger module interface from a few key
+      components. First, let's start with the interface, in particular,
+      an interface for something that supports the comparison operator.
+    </para>
+    <programlisting language="ocaml">
+module type Comparable = sig
+  type t
+  val compare : t -&gt; t -&gt; int
+  val (=)  : t -&gt; t -&gt; bool
+  val (&lt;&gt;) : t -&gt; t -&gt; bool
+  val (&gt;)  : t -&gt; t -&gt; bool
+  val (&lt;)  : t -&gt; t -&gt; bool
+  val (&gt;=) : t -&gt; t -&gt; bool
+  val (&lt;=) : t -&gt; t -&gt; bool
+  val min  : t -&gt; t -&gt; t
+  val max  : t -&gt; t -&gt; t
+end
+</programlisting>
+    <para>
+      This is in fact a subset of the <literal>Comparable</literal>
+      interface in Core.
+    </para>
+    <para>
+      Now, suppose we want to implement multiple modules that support
+      this interface. Implementing all of these individual functions for
+      each module is going to be a lot of painful boilerplate, since
+      it's essentially the same logic that ties it all together.
+    </para>
+    <para>
+      By using a functor, however, we can derive an implementation that
+      satisfies this interface provided with just the
+      <literal>compare</literal> function. In particular, we'll require
+      as input a module that satisfies this signature:
+    </para>
+    <programlisting language="ocaml">
+module type Comparable_input = sig
+  type t
+  val compare : t -&gt; t -&gt; int
+end
+</programlisting>
+    <para>
+      and we'll create a new module that satisfies the
+      <literal>Comparable</literal> signature. Here's a functor which
+      does just that.
+    </para>
+    <programlisting language="ocaml">
+module Make(M:Comparable_input) : Comparable with type t = M.t = struct
+  type t = M.t
+  let compare = M.compare
+  let (=) x y = compare x y = 0
+  let (&lt;&gt;) x y = compare x y &lt;&gt; 0
+  let (&gt;) x y = compare x y &gt; 0
+  let (&lt;) x y = compare x y &lt; 0
+  let (&gt;=) x y = compare x y &gt;= 0
+  let (&lt;=) x y = compare x y &lt;= 0
+  let min x y = if x &lt; y then x else y
+  let max x y = if x &gt; y then x else y
+end
+</programlisting>
+  </sect1>
 </chapter>
 <chapter id="syntax-extensions">
   <title>Syntax Extensions</title>
