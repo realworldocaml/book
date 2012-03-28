@@ -204,6 +204,7 @@ In other words, the type `'a point` is equal to `'a`, where `'a = <
 get : int; .. >`.  That may seem like an odd way to say it, and in
 fact, this type definition is not really an abbreviation because `'a`
 refers to the entire type.
+
 </sidebar>
 
 An object of type `< get:int; .. >` can be any object with a method
