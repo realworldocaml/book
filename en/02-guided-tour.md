@@ -221,8 +221,8 @@ Error: This expression has type string but an expression was expected of type
          int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-are compile-time errors, whereas division by zero, is a runtime error,
-or an exception:
+are compile-time errors, whereas an error that can't be caught by the
+type system, like division by zero, leads to a runtime exception.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # 3 / 0;;
@@ -280,18 +280,15 @@ val x : int = 3
 val y : string = "three"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`(x,y)` is the pattern, and it's used as the right-hand side of the
-`let` binding.  Note that this operation lets us mint the new
-variables `x` and `y`, each bound to different components of the value
-being matched.
+Here, the `(x,y)` on the right-hand side of the `let` is the pattern.
+This pattern lets us mint the new variables `x` and `y`, each bound to
+different components of the value being matched.  Note that the same
+syntax is used both for constructing and for pattern-matching on
+tuples.
 
-This is just a first taste of pattern matching.  Pattern matching
-shows up in many contexts, and is a surprisingly powerful and
-pervasive tool.
-
-Here's another example: a function for computing the distance between
-two points on the plane, where each point is represented as a pair of
-`float`s.
+Here's an example of how you might use pattern matching in practice: a
+function for computing the distance between two points on the plane,
+where each point is represented as a pair of `float`s.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let distance p1 p2 =
@@ -310,6 +307,10 @@ the arguments to the function directly.
     sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
 ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is just a first taste of pattern matching.  We'll see that
+pattern matching shows up in many contexts in OCaml, and turns out to
+be a surprisingly powerful and pervasive tool.
 
 ### Lists
 
@@ -334,25 +335,25 @@ Error: This expression has type string but an expression was expected of type
          int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We can also use the operator `::` for adding elements to the front of
-a list
+In addition to constructing lists using brackets, we can use the
+operator `::` for adding elements to the front of a list.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # "French" :: "Spanish" :: languages;;
 - : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is creating a new list, not changing the list we started with, so
-the definition of `languages` is unchanged.
+Here, we're creating a new extended list, not changing the list we
+started with, as we can see.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # languages;;
 - : string list = ["OCaml"; "Perl"; "C"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The bracket notation for lists is just syntactic sugar for `::`.
-Thus, the following declarations are all equivalent.  Note that `[]`
-is used to represent the empty list.
+The bracket notation for lists is really just syntactic sugar for
+`::`.  Thus, the following declarations are all equivalent.  Note that
+`[]` is used to represent the empty list.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # [1; 2; 3];;
@@ -363,12 +364,14 @@ is used to represent the empty list.
 - : int list = [1; 2; 3]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Thus, `::` and `[]`, which are examples of what are called
+_type-constructors_, are the basic building-blocks for lists.
+
 #### Basic list patterns
 
 The elements of a list can be accessed through pattern-matching.  List
-patterns have two key components: `[]`, which represents the empty
-list, and `::`, which connects an element at the head of a list to the
-remainder of the list, as you can see below.
+patterns are fundamentally based on the two list constructors, `[]`
+and `::`.  Here's a simple example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let (my_favorite :: the_rest) = languages ;;
@@ -394,7 +397,7 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
 val my_favorite : string = "OCaml"
-val the_rest : string list = ["Perl"; "French"; "C"]
+val the_rest : string list = ["Perl"; "C"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The warning comes because the compiler can't be certain that the
@@ -432,25 +435,7 @@ val my_favorite_language : string list -> string = <fun>
 - : string = "OCaml"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is the syntax of a match statement.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-match <expr> with
-| <pattern1> -> <expr1>
-| <pattern2> -> <expr2>
-| ...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The return value of the `match` is the result of evaluating the
-right-hand side of the first pattern that matches the value of
-`<expr>`.  As with `print_log_entry`, the patterns can mint new
-variables, giving names to sub-components of the data structure being
-matched.
-
 #### Recursive list functions
-
-_(yminsky: maybe we should kick this subsection to the full list
-chapter?  This is getting long...)_
 
 If we combine pattern matching with a recursive function call, we can
 do things like define a function for summing the elements of a list.
@@ -467,7 +452,7 @@ val sum : int list -> int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We had to add the `rec` keyword in the definition of `sum` to allow
-for `sum` to refer to itself.  We can introduce more complicated list
+`sum` to refer to itself.  We can introduce more complicated list
 patterns as well.  Here's a function for destuttering a list, _i.e._,
 for removing sequential duplicates.
 
@@ -522,7 +507,7 @@ for dealing with lists.  For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # List.map ~f:String.length languages;;
-- : int list = [5; 4; 6; 1]
+- : int list = [5; 4; 1]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here, we use the dot-notation to reference elements of the `List` and
@@ -550,9 +535,9 @@ For example,
 val divide : int -> int -> int option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, `Some` and `None` are explicit tags, caled _type constructors_
-that are used to build an optional value.  You can think of an
-`option` as a specialized list that can only have zero or one element.
+`Some` and `None` are type constructors, like `::` and `[]` for lists,
+which let you build optional values.  You can think of an `option` as
+a specialized list that can only have zero or one element.
 
 To get a value out of an option, we use pattern matching, as we did
 with tuples and lists.  Consider the following simple function for
@@ -576,7 +561,7 @@ states of an option.  It's worth noting that we don't necessarily need
 to use an explicit `match` statement in this case.  We can instead use
 some built in functions from the `Option` module, which, like the
 `List` module for lists, is a place where you can find a large
-collection of useful functions for owrking with options.
+collection of useful functions for working with options.
 
 In this case, we can rewrite `print_log_entry` using `Option.value`,
 which either returns the content of an option if the option is `Some`,
@@ -597,10 +582,6 @@ awell-defined value of type `string`.  This is different from most
 other languages, including Java and C#, where objects are by default
 nullable, and whose type systems do little to defend from null-pointer
 exceptions at runtime.
-
-Given that in OCaml ordinary values are not nullable, you need some
-other way of representing values that might not be there, and the
-`option` type is the standard solution.
 
 ## Records and Variants
 
@@ -659,10 +640,10 @@ different geometric object.
 # type segment = { endpoint1: point2d; endpoint2: point2d } ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now, imagine that you want to combine multiple of these scene objects
-together, say as a description scene containing multiple objects.  You
-need some unified way of representing these objects together in a
-single type.  One way of doing this is using a _variant_ type:
+Now, imagine that you want to combine multiple of these objects
+together, say as a description of a multi-object scene.  You need some
+unified way of representing these objects together in a single type.
+One way of doing this is using a _variant_ type:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # type shape = | Circle of circle
@@ -670,12 +651,11 @@ single type.  One way of doing this is using a _variant_ type:
                | Segment of segment;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can think of a variant as a way of combining different types as
-different possibilities.  The `|` character separates the different
-cases of the variant (the first `|` is optional), and each case has a
-tag (like `Circle`, `Rect` and `Segment`) to distinguish each case
-from the other.  Here's how we might write a function for testing
-whether a point is in the interior of one of a `shape list`.
+The `|` character separates the different cases of the variant (the
+first `|` is optional), and each case has a tag (like `Circle`, `Rect`
+and `Segment`) to distinguish that case from the others.  Here's how
+we might write a function for testing whether a point is in the
+interior of one of a `shape list`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let is_inside_shape point shape =
