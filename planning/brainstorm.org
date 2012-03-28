@@ -1,16 +1,12 @@
-* Record ideas
-** vector
-** personnel record
-** Encryption key / PGP packet
-** Order message
-** Timestamped event
-** DNS entry
-** Host/Service database
-** Bibliography entry
-** higher-order record
-*** ASCII Column
-** Geometric transformations
-** Circle/Square/Point/Scene
-** Contact database
-** interval
-
+* Functor examples
+** Maps, Sets
+** Comparable, Hashable
+** sorted list with a special comparator
+** Monad
+** Trivial examples
+** Example types
+*** Extending an interface
+*** Dependency injection (World)
+*** Instantiating a module with state (Unique)
+* Issues to cover
+** Functor creep

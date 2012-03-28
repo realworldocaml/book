@@ -2,7 +2,7 @@
 
 for TARGET in $*
 do
-  ocamlbuild -use-ocamlfind $TARGET.native
+  ocamlbuild -use-ocamlfind $TARGET
 done
 
 
