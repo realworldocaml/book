@@ -684,16 +684,21 @@ library (and in the case of lists, to have some special syntax).
 
 ## Mutation
 
-All of our examples so far have been examples of mutation-free code.
-This is typical of code in functional languages, which tend to focus
-on so-called _pure_ code.  Indeed, variable bindings and most
-datastructures in OCaml (including tuples, options and lists) are
-immutable.  
+All of our examples so far have been examples of mutation-free, _pure_
+code, which is typical of code in OCaml and other functional
+languages.  OCaml has a very strong focus on immutability, with
+variable bindings and most datastructures in OCaml (including tuples,
+options and lists) being immutable.
 
-Nonetheless, OCaml has good support for imperative programming,
-including constructs like while and for loops, and standard mutable
-data structures like arrays and hashtables.  Here's an example of how
-to use an array.
+But despite immutability being the default in OCaml, the language has
+excellent support for imperative programming, including mutable data
+structures like arrays and hashtables and control-flow constructs like
+while and for loops.
+
+### Arrays
+
+Perhaps the simplest mutable datastructure in OCaml is the array.
+Here's an example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let numbers = [| 1;2;3;4 |];;
@@ -708,6 +713,13 @@ In the above, the `.(i)` syntax is used for referencing the element of
 an array, and the `<-` syntax is used for modifying an element of the
 array.
 
+Arrays in OCaml are very similar to arrays in C: arrays are fixed
+width, indexing starts at 0, and accessing or modifying an array
+element is a constant-time operation.  Arrays are more compact in
+terms of memory utilization than most other data structures in OCaml,
+including lists.  OCaml uses three words per element of a list, but
+only one per element of an array.
+
 ### Mutable record fields
 
 The array is an important mutable datastructure, but it's not the only
@@ -717,9 +729,10 @@ datastructure for storing a running statistical summary of a
 collection of numbers.  Here's the basic data structure:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# type running_sum = { mutable sum: float;
-                       mutable sum_sq: float; (* sum of squares, for stdev *)
-                       mutable samples: float; }
+# type running_sum =
+   { mutable sum: float;
+     mutable sum_sq: float; (* sum of squares, for stdev *)
+     mutable samples: float; } ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here are some functions for computing means and standard deviations
