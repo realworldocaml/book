@@ -107,10 +107,10 @@ val abs_change : (int -> int) -> int -> int = <fun>
 
 This notation for multi-argument functions may be a little surprising
 at first, but we'll explain where it comes from when we get to
-function currying in Chapter {{{VARIABLES}}}.  For the moment, think
-of the arrows as separating different arguments of the function, with
-the type after the final arrow being the return value of the function.
-Thus,
+function currying in [Chapter 3](#variables-and-functions).  For the
+moment, think of the arrows as separating different arguments of the
+function, with the type after the final arrow being the return value
+of the function.  Thus,
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 int -> int -> int
