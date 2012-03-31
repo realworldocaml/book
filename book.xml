@@ -994,14 +994,25 @@ val is_inside_shapes : point2d -&gt; shape list -&gt; bool = &lt;fun&gt;
   <sect1 id="mutation">
     <title>Mutation</title>
     <para>
-      All of our examples so far have been examples of mutation-free, or
-      <emphasis>pure</emphasis> code. This is typical of code in
-      functional languages, which tend to have a focus on so-called
-      <emphasis>pure</emphasis> code. That said, OCaml has good support
-      for mutation, including standard mutable data structures like
-      arrays and hashtables. For example:
+      All of our examples so far have been examples of mutation-free,
+      <emphasis>pure</emphasis> code, which is typical of code in OCaml
+      and other functional languages. OCaml has a very strong focus on
+      immutability, with variable bindings and most datastructures in
+      OCaml (including tuples, options and lists) being immutable.
     </para>
-    <programlisting>
+    <para>
+      But despite immutability being the default in OCaml, the language
+      has excellent support for imperative programming, including
+      mutable data structures like arrays and hashtables and
+      control-flow constructs like while and for loops.
+    </para>
+    <sect2 id="arrays">
+      <title>Arrays</title>
+      <para>
+        Perhaps the simplest mutable datastructure in OCaml is the
+        array. Here's an example.
+      </para>
+      <programlisting>
 # let numbers = [| 1;2;3;4 |];;
 val numbers : int array = [|1; 2; 3; 4|]
 # numbers.(2) &lt;- 4;;
@@ -1009,35 +1020,72 @@ val numbers : int array = [|1; 2; 3; 4|]
 # numbers;;
 - : int array = [|1; 2; 4; 4|]
 </programlisting>
-    <para>
-      In the above, the <literal>ar.(i)</literal> syntax is used for
-      referencing the element of an array, and the
-      <literal>&lt;-</literal> syntax is used for setting a mutable
-      value.
-    </para>
-    <para>
-      Variable bindings in OCaml are always immutable, but
-      datastructures like arrays can be mutable. In addition, record
-      fields, which are immutable by default can be declared as mutable.
-      Here's a small example of a datastructure for mutable storing a
-      running sum. Here, we've declared all the record fields as
-      mutable. Here
-    </para>
-    <programlisting language="ocaml">
-# type running_sum = { mutable sum: float;
-                       mutable sum_sq: float; (* sum of squares, for stdev *)
-                       mutable samples: float; }
-  let empty () = { sum = 0.; sum_sq = 0.; samples = 0. }
-  let mean rsum = rsum.sum /. rsum.samples
+      <para>
+        In the above, the <literal>.(i)</literal> syntax is used for
+        referencing the element of an array, and the
+        <literal>&lt;-</literal> syntax is used for modifying an element
+        of the array.
+      </para>
+      <para>
+        Arrays in OCaml are very similar to arrays in C: arrays are
+        fixed width, indexing starts at 0, and accessing or modifying an
+        array element is a constant-time operation. Arrays are more
+        compact in terms of memory utilization than most other data
+        structures in OCaml, including lists. OCaml uses three words per
+        element of a list, but only one per element of an array.
+      </para>
+    </sect2>
+    <sect2 id="mutable-record-fields">
+      <title>Mutable record fields</title>
+      <para>
+        The array is an important mutable datastructure, but it's not
+        the only one. Records, which are immutable by default, can be
+        declared with specific fields as being mutable. Here's a small
+        example of a datastructure for storing a running statistical
+        summary of a collection of numbers. Here's the basic data
+        structure:
+      </para>
+      <programlisting language="ocaml">
+# type running_sum =
+   { mutable sum: float;
+     mutable sum_sq: float; (* sum of squares, for stdev *)
+     mutable samples: float; } ;;
+</programlisting>
+      <para>
+        Here are some functions for computing means and standard
+        deviations based on the <literal>running_sum</literal>.
+      </para>
+      <programlisting language="ocaml">
+# let mean rsum = rsum.sum /. rsum.samples
   let stdev rsum =
-     let square x = x *. x in
-     sqrt (rsum.sum_sq /. rsum.samples -. square (rsum.sum /. rsum.samples))
+     sqrt (rsum.sum_sq /. rsum.samples
+           -. (rsum.sum /. rsum.samples) ** 2.) ;;
+val mean : running_sum -&gt; float = &lt;fun&gt;
+val stdev : running_sum -&gt; float = &lt;fun&gt;
+</programlisting>
+      <para>
+        And finally, we can define functions for creating and modifying
+        a <literal>running_sum</literal>. Note the use of single
+        semi-colons to express a sequence of operations. When we were
+        operating purely functionally, this wasn't necessary, but you
+        start needing it when your code is acting by side-effect.
+      </para>
+      <programlisting language="ocaml">
+# let create () = { sum = 0.; sum_sq = 0.; samples = 0. }
   let update rsum x =
-     rsum.sum &lt;- rsum.sum +. x;
-     rsum.sum_sq &lt;- rsum.sum_sq +. x *. x;
-     rsum.samples &lt;- rsum.samples +. 1.
+     rsum.samples &lt;- rsum.samples +. 1.;
+     rsum.sum     &lt;- rsum.sum     +. x;
+     rsum.sum_sq  &lt;- rsum.sum_sq  +. x *. x
   ;;
-# let rsum = empty ();;
+val create : unit -&gt; running_sum = &lt;fun&gt;
+val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
+</programlisting>
+      <para>
+        As we can see, <literal>update</literal> operates by
+        side-effect. Here's an example of it in action.
+      </para>
+      <programlisting language="ocaml">
+# let rsum = create ();;
 val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -&gt; update rsum x);;
 - : unit = ()
@@ -1046,12 +1094,15 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # stdev rsum;;
 - : float = 1.61015297179882655
 </programlisting>
-    <para>
-      We can declare a single mutable value by using a
-      <literal>ref</literal>, which is a record type with a single
-      mutable field that is defined in the standard library.
-    </para>
-    <programlisting>
+    </sect2>
+    <sect2 id="refs">
+      <title>Refs</title>
+      <para>
+        We can declare a single mutable value by using a
+        <literal>ref</literal>, which is a record type with a single
+        mutable field that is defined in the standard library.
+      </para>
+      <programlisting>
 # let x = { contents = 0 };;
 val x : int ref = {contents = 0}
 # x.contents &lt;- x.contents + 1;;
@@ -1059,11 +1110,11 @@ val x : int ref = {contents = 0}
 # x;;
 - : int ref = {contents = 1}
 </programlisting>
-    <para>
-      There are a handful of useful functions and operators defined for
-      refs to make them more convenient to work with.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        There are a handful of useful functions and operators defined
+        for refs to make them more convenient to work with.
+      </para>
+      <programlisting language="ocaml">
 # let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
 val x : int ref = {contents = 0}
 # !x ;;            (* get the contents of a ref, i.e., x.contents *)
@@ -1075,10 +1126,63 @@ val x : int ref = {contents = 0}
 # !x ;;
 - : int = 2
 </programlisting>
+      <para>
+        A ref is really just an example of a mutable record, but in
+        practice, it's the standard way of dealing with a single mutable
+        value in a computation.
+      </para>
+    </sect2>
+    <sect2 id="for-and-while-loops">
+      <title>For and while loops</title>
+      <para>
+        Along with mutable data structures, OCaml gives you constructs
+        like <literal>while</literal> and <literal>for</literal> loops
+        for interacting with them. Here, for example, is a piece of
+        imperative code for permuting an array. Here, we use the
+        <literal>Random</literal> module as our source of randomness.
+        (<literal>Random</literal> starts out with a deterministic seed,
+        but you can call <literal>Random.self_init</literal> to get a
+        new random seed chosen.)
+      </para>
+      <programlisting language="ocaml">
+# let permute ar =
+    for i = 0 to Array.length ar - 2 do
+       (* pick a j that is after i and before the end of the list *)
+       let j = i + 1 + Random.int (Array.length ar - i - 1) in
+       (* Swap i and j *)
+       let tmp = ar.(i) in
+       ar.(i) &lt;- ar.(j);
+       ar.(j) &lt;- tmp
+    done
+  ;;
+val permute : 'a array -&gt; unit = &lt;fun&gt;
+</programlisting>
+      <para>
+        <literal>permute</literal> returns <literal>unit</literal>,
+        which is typical of functions whose primary result is a
+        side-effect rather than a return value. Here's how
+        <literal>permute</literal> looks in action.
+      </para>
+      <programlisting language="ocaml">
+# let ar = Array.init 20 ~f:(fun i -&gt; i);;
+val ar : int array =
+  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
+# permute ar;;
+- : unit = ()
+# ar;;
+- : int array =
+[|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
+</programlisting>
+    </sect2>
   </sect1>
-  <sect1 id="io">
-    <title>I/O</title>
+  <sect1 id="where-to-go-from-here">
+    <title>Where to go from here</title>
     <para>
+      That's it for our guided tour! There are plenty of features left
+      to touch upon - we haven't shown you how to read from a file, as
+      just one example - but the hope is that this has given you enough
+      of a feel for the language that you have your bearings, and will
+      be comfortable reading examples in the rest of the book.
     </para>
   </sect1>
 </chapter>
@@ -3007,7 +3111,7 @@ Exception: Key_not_found(&quot;c&quot;).
       <emphasis>i.e.</emphasis>, lists of key/value pairs.
     </para>
     <programlisting language="ocaml">
-(* file.ml: basic implementation *)
+(* freq.ml: basic implementation *)
 
 open Core.Std
 
@@ -3833,6 +3937,9 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
 <chapter id="functors-and-first-class-modules">
   <title>Functors and First-class modules</title>
   <para>
+    <emphasis>(yminsky: Highly preliminary)</emphasis>
+  </para>
+  <para>
     Up until now, modules have played a limited role, used as the way
     for organizing the system into different components with
     well-defined interfaces. This is of course important, but it is only
@@ -3843,12 +3950,68 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
   <sect1 id="functors">
     <title>Functors</title>
     <para>
-      A functor in OCaml is essentially a function from modules to
-      modules. Let's walk through a small, complete example of how to
-      use functors. In this case, we're going to show how you can use a
-      functor build up a larger module interface from a few key
-      components. First, let's start with the interface, in particular,
-      an interface for something that supports the comparison operator.
+      A functor is essentially a function from modules to modules. Let's
+      walk through a small, complete example of how to use functors.
+      Let's go back to frequency count program that we discussed last
+      chapter. We experimented with multiple different implementations
+      of the data-structure for storing the frequency counts. But what
+      if we wanted to make the frequency count data-structure pluggable,
+      so we could instantiate the program with different
+      implementations? Functors allow us to do just that.
+    </para>
+    <para>
+      The first step towards making the frequency-count datastructure
+      pluggable is to specify precisely the interface. We can do this by
+      declaring an interface as follows:
+    </para>
+    <programlisting language="ocaml">
+(* counter_intf.ml *)
+
+open Core.Std
+
+module type S = sig
+  type t
+
+  val empty : t
+  val to_list : t -&gt; (string * int) list
+  val touch : t -&gt; string -&gt; t
+end
+</programlisting>
+    <para>
+      Now, we can write the main program as a functor.
+    </para>
+    <programlisting language="ocaml">
+(* freq.ml: using Counter *)
+
+open Core.Std
+
+module Make(Counter : Counter_intf.S) = struct
+
+let rec build_counts counts =
+  match In_channel.input_line stdin with
+  | None -&gt; counts
+  | Some line -&gt; build_counts (Counter.touch counts line)
+
+let () =
+  let counts = build_counts [] in
+  let sorted_counts = List.sort counts
+    ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  in
+  List.iter (List.take sorted_counts 10)
+    ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
+
+end
+</programlisting>
+  </sect1>
+  <sect1 id="detritus">
+    <title>Detritus</title>
+    <para>
+      A functor is essentially a function from modules to modules. Let's
+      walk through a small, complete example of how to use functors. In
+      this case, we're going to show how you can use a functor build up
+      a larger module interface from a few key components. First, let's
+      start with the interface, in particular, an interface for
+      something that supports the comparison operator.
     </para>
     <programlisting language="ocaml">
 module type Comparable = sig
