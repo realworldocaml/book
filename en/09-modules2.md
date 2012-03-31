@@ -1,5 +1,7 @@
 # Functors and First-class modules
 
+_(yminsky: Highly preliminary)_
+
 Up until now, modules have played a limited role, used as the way for
 organizing the system into different components with well-defined
 interfaces.  This is of course important, but it is only part of what
