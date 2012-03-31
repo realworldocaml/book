@@ -337,7 +337,8 @@ val abs_change : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
     <para>
       This notation for multi-argument functions may be a little
       surprising at first, but we'll explain where it comes from when we
-      get to function currying in Chapter {{{VARIABLES}}}. For the
+      get to function currying in
+      <link linkend="variables-and-functions">Chapter 3</link>. For the
       moment, think of the arrows as separating different arguments of
       the function, with the type after the final arrow being the return
       value of the function. Thus,
