@@ -23,7 +23,7 @@ out.  Here's a simple implementation, which we'll save as the file
 with association lists, _i.e._, lists of key/value pairs.
 
 ~~~~~~~~~~~~~~~~ { .ocaml }
-(* file.ml: basic implementation *)
+(* freq.ml: basic implementation *)
 
 open Core.Std
 

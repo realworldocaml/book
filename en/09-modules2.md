@@ -8,9 +8,64 @@ for organizing and putting together complex functionality.
 
 ## Functors
 
-A functor in OCaml is essentially a function from modules to modules.
-Let's walk through a small, complete example of how to use functors.
-In this case, we're going to show how you can use a functor build up a
+A functor is essentially a function from modules to modules.  Let's
+walk through a small, complete example of how to use functors.
+Let's go back to frequency count program that we discussed last
+chapter.  We experimented with multiple different implementations of
+the data-structure for storing the frequency counts.  But what if we
+wanted to make the frequency count data-structure pluggable, so we
+could instantiate the program with different implementations?
+Functors allow us to do just that.
+
+The first step towards making the frequency-count datastructure
+pluggable is to specify precisely the interface.  We can do this by
+declaring an interface as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* counter_intf.ml *)
+
+open Core.Std
+
+module type S = sig
+  type t
+
+  val empty : t
+  val to_list : t -> (string * int) list
+  val touch : t -> string -> t
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, we can write the main program as a functor.
+
+~~~~~~~~~~~~~~~~ { .ocaml }
+(* freq.ml: using Counter *)
+
+open Core.Std
+
+module Make(Counter : Counter_intf.S) = struct
+
+let rec build_counts counts =
+  match In_channel.input_line stdin with
+  | None -> counts
+  | Some line -> build_counts (Counter.touch counts line)
+
+let () =
+  let counts = build_counts [] in
+  let sorted_counts = List.sort counts
+    ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
+  in
+  List.iter (List.take sorted_counts 10)
+    ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+## Detritus
+
+A functor is essentially a function from modules to modules.  Let's
+walk through a small, complete example of how to use functors.  In
+this case, we're going to show how you can use a functor build up a
 larger module interface from a few key components.  First, let's start
 with the interface, in particular, an interface for something that
 supports the comparison operator.
