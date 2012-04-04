@@ -3,7 +3,7 @@
 | Chapter                             | Author | Status |
 |-------------------------------------+--------+--------|
 | Preface/Forward                     |        |        |
-| A Guided Tour                       | yaron  | ##     |
+| A Guided Tour                       | yaron  | ###    |
 | Variables and Functions             | yaron  | ##     |
 | Lists, Options and Pattern-matching | jason  | #      |
 | Records and Variants                |        |        |
@@ -29,9 +29,6 @@
    review and fixes
 
 * Chapter proposals
-
-Some other thoughts for chapters to add:
-
 ** Basic types and expressions
  - Before our current Chapter 2
  - Cover the basic types, and where to find functionality relating to

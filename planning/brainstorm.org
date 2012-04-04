@@ -1,12 +1,25 @@
-* Functor examples
-** Maps, Sets
-** Comparable, Hashable
-** sorted list with a special comparator
-** Monad
-** Trivial examples
-** Example types
-*** Extending an interface
-*** Dependency injection (World)
-*** Instantiating a module with state (Unique)
+* Functor examples (v2)
+** Singleton with state
+*** Unique_id
+*** Hash-consing
+** Library structuring
+*** Comparable, Hashable
+*** Monad
+*** Interval
+** Architectural
+*** Freq_count -- abstract over the container used
+** Plug-in architectures
+*** Machine learning library
+*** Plotting library
+*** Web service
+*** Configurables
+*** Logging library
+*** Graph algorithm library
+*** DSL?
+*** Platform-specific back-end?
+** Dependency injection
 * Issues to cover
 ** Functor creep
+** Who to ask?
+*** Sweeks?
+*** Olin?
