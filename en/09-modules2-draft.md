@@ -2,16 +2,90 @@
 
 _(yminsky: Highly preliminary)_
 
-Up until now, modules have played a limited role, used as the way for
-organizing the system into different components with well-defined
-interfaces.  This is of course important, but it is only part of what
-modules can do.  OCaml's module system is part of a powerful toolset
-for organizing and putting together complex functionality.
+Up until now, modules have played a limited role in our programming.
+They are a way of organizing code into units, along with a mechanism
+for specifying interfaces for those units.  But that is only part of
+what modules do in OCaml.  OCaml's module system is in fact a powerful
+toolset for structuring larger-scale systems.  In this chapter, we'll
+try to give you a taste of the full power of this system.
 
 ## Functors
 
-A functor is essentially a function from modules to modules.  Let's
-walk through a small, complete example of how to use functors.
+One fundamental component of OCaml's module system is the _functor_.
+A functor is at its core a function from modules to modules.  In order
+to get a concrete understanding of what functor are and how they work,
+we'll start by playing around with some simple examples.
+
+We'll start with something quite simple indeed: a functor for
+incrementing an integer.  Or, more precisely, a functor that takes a
+module containing an integer value, and returns a new module,
+containing the incremented integer instead.
+
+We'll start by defining a module type for a module that just contains
+an integer:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module type M_int = sig val x : int end;;
+module type M_int = sig val x : int end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, we'll ....
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Increment (M:S) : S = struct
+    let x = M.x + 1
+  end;;
+module Increment : functor (M : S) -> sig val x : int end
+# module Three = struct let x = 3 end;;
+  module Three : sig val x : int end
+# module Four = Increment(Three);;
+module Four : sig val x : int end
+# Four.x - Three.x;;
+- : int = 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here's the basic syntax of a functor definition:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module F (<mod1> : <sig1>) (<mod2> : <sig2>) ... (<modN> : <sigN>) : <sig> = struct
+  <implementation>
+end
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here `<mod1>` ...`<modN>` are module names, and `<sig1>` ... `<sigN>`
+are module types.  Unlike ordinary functions, with functors, the types
+of the arguments can not be inferred.  The final `: <sig>` is a
+constraint on the module type of the output of the functor.  The
+output type can actually be inferred, so that final signature is
+optional.
+
+A functor will accept as input any module that satisfies the
+signature, in the same way that a given module implementation in an
+`.ml` file can satisfy the signature in its `.mli`.  Thus, the input
+signature can drop elements of the module, and can have more abstract
+types.  Consider the following example.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Three_and_more = struct
+    let x = 3
+    let y = "three"
+  end;;
+module Three_and_more : sig val x : int val x_string : string end
+# module Four = Increment(Three_and_more);;
+module Four : sig val x : int end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, we were able to pass in `Three_and_more`, even though
+`Three_and_more` had the field `y`, which is not mentioned in the
+signature applied to that argument.  
+
+
+
+
+### A worked example
+
+Let's walk through a small, complete example of how to use functors.
 Let's go back to frequency count program that we discussed last
 chapter.  We experimented with multiple different implementations of
 the data-structure for storing the frequency counts.  But what if we
