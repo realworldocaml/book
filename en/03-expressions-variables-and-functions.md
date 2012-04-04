@@ -385,7 +385,7 @@ val ( +! ) : int * int -> int * int -> int *int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that operators can be used in prefix style as well, if they are
-put in parens:
+put in parentheses:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (+!) (3,2) (-2,4);;

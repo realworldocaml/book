@@ -231,8 +231,8 @@ access to the infix operator `>>=`.  The module is called
 `Monad_infix` because the bind operator is part of a sub-interface
 called `Monad`, which we'll talk about more in chapter {{{ASYNC}}}.
 
-This is a bit easier to read if we write it with fewer parens and less
-indentation, as follows.
+This is a bit easier to read if we write it with fewer parentheses and
+less indentation, as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let compute_bounds ~cmp list =
