@@ -197,10 +197,10 @@
 <chapter id="a-guided-tour">
   <title>A Guided Tour</title>
   <para>
-    This chapter is going to give an overview of OCaml by walking
-    through a series of small examples that cover most of the major
-    features. This should give a sense of what OCaml can do, without
-    going into too much detail about any particular topic.
+    This chapter gives an overview of OCaml by walking through a series
+    of small examples that cover most of the major features. This should
+    give a sense of what OCaml can do, without going into too much
+    detail about any particular topic.
   </para>
   <para>
     We'll present this guided tour using the OCaml toplevel, an
@@ -230,7 +230,7 @@
       Core's libraries, and then try out a few simple numerical
       calculations.
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 $ rlwrap ocaml
         Objective Caml version 3.12.1
 
@@ -267,7 +267,7 @@ $ rlwrap ocaml
         <para>
           Function application in OCaml is syntactically unusual, in
           that function arguments are written out separated by spaces,
-          rather than being demarcated by parens and commas.
+          rather than being demarcated by parentheses and commas.
         </para>
       </listitem>
       <listitem>
@@ -289,7 +289,7 @@ $ rlwrap ocaml
       We can also create variables to name the value of a given
       expression, using the <literal>let</literal> syntax.
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let x = 3 + 4;;
 val x : int = 7
 # let y = x + x;;
@@ -299,6 +299,36 @@ val y : int = 14
       After a new variable is created, the toplevel tells us the name of
       the variable, in addition to its type and value.
     </para>
+    <para>
+      The above examples are of top-level variables. We can introduce a
+      <emphasis>local</emphasis> variable that exists only for the
+      purpose of evaluating a single expression using
+      <literal>let</literal> and <literal>in</literal>:
+    </para>
+    <programlisting>
+# let z = 3 in z + z;;
+- : int = 6
+# z;;
+Characters 0-1:
+  z;;
+  ^
+Error: Unbound value z
+</programlisting>
+    <para>
+      Note that <literal>z</literal> is a valid variable in the scope of
+      the expression <literal>z + z</literal>, but that it doesn't exist
+      thereafter.
+    </para>
+    <para>
+      We can also define multiple local variables using nested
+      <literal>let</literal>/<literal>in</literal> expressions.
+    </para>
+    <programlisting>
+# let x = 3 in
+  let y = 4 in
+  x * y ;;
+- : int = 12
+</programlisting>
   </sect1>
   <sect1 id="functions-and-type-inference">
     <title>Functions and Type Inference</title>
@@ -306,7 +336,7 @@ val y : int = 14
       The <literal>let</literal> syntax can also be used for creating
       functions:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let square x = x * x ;;
 val square : int -&gt; int = &lt;fun&gt;
 # square (square 2);;
@@ -319,7 +349,7 @@ val square : int -&gt; int = &lt;fun&gt;
       <literal>int</literal> and returns an <literal>int</literal>. We
       can also write functions that take multiple arguments:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let abs_diff x y =
     abs (x - y) ;;
 val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
@@ -327,7 +357,7 @@ val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
     <para>
       and even functions that take other functions as arguments:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let abs_change f x =
     abs_diff (f x) x ;;
 val abs_change : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
@@ -375,7 +405,7 @@ int -&gt; int -&gt; int
       Sometimes, there isn't enough information to fully determine the
       concrete type of a given value. Consider this function.
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let first_if_true test x y =
     if (test x) then x else y;;
 </programlisting>
@@ -387,12 +417,12 @@ int -&gt; int -&gt; int
       <literal>true</literal>, and <literal>y</literal> otherwise. So
       what's the type of <literal>first_if_true</literal>? There are no
       obvious clues such as arithmetic operators to tell you what the
-      type of <literal>x</literal> and <literal>y</literal> are. Indeed,
-      it seems like one could use this <literal>first_if_true</literal>
-      on values of any type. Indeed, if we look at the type returned by
-      the toplevel:
+      type of <literal>x</literal> and <literal>y</literal> are, which
+      makes it seem like one could use this
+      <literal>first_if_true</literal> on values of any type. Indeed, if
+      we look at the type returned by the toplevel:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
 </programlisting>
     <para>
@@ -410,7 +440,7 @@ val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
     <para>
       This genericity means that we can write:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let long_string s = String.length s &gt; 6;;
 val long_string : string -&gt; bool = &lt;fun&gt;
 # first_if_true long_string &quot;short&quot; &quot;loooooong&quot;;;
@@ -419,7 +449,7 @@ val long_string : string -&gt; bool = &lt;fun&gt;
     <para>
       And we can also write:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let big_number x = x &gt; 3;;
 val big_number : int -&gt; bool = &lt;fun&gt;
 # first_if_true big_number 4 3;;
@@ -428,9 +458,9 @@ val big_number : int -&gt; bool = &lt;fun&gt;
     <para>
       But we can't mix and match two different concrete types for
       <literal>'a</literal> in the same use of
-      <literal>first_if_true</literal>:
+      <literal>first_if_true</literal>.
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # first_if_true big_number &quot;short&quot; &quot;loooooong&quot;;;
 Characters 25-30:
   first_if_true big_number &quot;short&quot; &quot;loooooong&quot;;;
@@ -439,12 +469,14 @@ Error: This expression has type string but
     an expression was expected of type int
 </programlisting>
     <para>
-      While the <literal>'a</literal> in the type of
-      <literal>first_if_true</literal> can be instantiated as any
-      concrete type, it has to be the same concrete type in all of the
-      different places it appears. This kind of genericity is called
-      <emphasis>parametric polymorphism</emphasis>, and is very similar
-      to generics in C# and Java.
+      In this example, <literal>big_number</literal> requires that
+      <literal>'a</literal> be of type <literal>int</literal>, whereas
+      <literal>&quot;short&quot;</literal> and
+      <literal>&quot;loooooong&quot;</literal> require that
+      <literal>'a</literal> be of type <literal>string</literal>, and
+      they can't all be right at the same time. This kind of genericity
+      is called <emphasis>parametric polymorphism</emphasis>, and is
+      very similar to generics in C# and Java.
     </para>
     <sidebar><title>
     Type errors vs exceptions
@@ -494,7 +526,7 @@ Error: This expression has type string but an expression was expected of type
     <para>
       but this code works fine.
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # if 3 &lt; 4 then 0 else 3 / 0;;
 - : int = 0
 </programlisting>
@@ -513,7 +545,7 @@ Error: This expression has type string but an expression was expected of type
         particularly simple data structure, the tuple. You can create a
         tuple by joining values together with a comma:
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let tup = (3,&quot;three&quot;);;
 val tup : int * string = (3, &quot;three&quot;)
 </programlisting>
@@ -536,7 +568,7 @@ val x : int = 3
 val y : string = &quot;three&quot;
 </programlisting>
       <para>
-        Here, the <literal>(x,y)</literal> on the right-hand side of the
+        Here, the <literal>(x,y)</literal> on the left-hand side of the
         <literal>let</literal> is the pattern. This pattern lets us mint
         the new variables <literal>x</literal> and <literal>y</literal>,
         each bound to different components of the value being matched.
@@ -549,7 +581,7 @@ val y : string = &quot;three&quot;
         points on the plane, where each point is represented as a pair
         of <literal>float</literal>s.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let distance p1 p2 =
     let (x1,y1) = p1 in
     let (x2,y2) = p2 in
@@ -561,7 +593,7 @@ val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
         We can make this code more concise by doing the pattern matching
         on the arguments to the function directly.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let distance (x1,y1) (x2,y2) =
     sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
 ;;
@@ -579,7 +611,7 @@ val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
         potentially of different types, lists let you hold any number of
         items of the same type. For example:
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let languages = [&quot;OCaml&quot;;&quot;Perl&quot;;&quot;C&quot;];;
 val languages : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
@@ -587,7 +619,7 @@ val languages : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot
         Note that you can't mix elements of different types on the same
         list, as we did with tuples.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let numbers = [3;&quot;four&quot;;5];;
 Characters 17-23:
   let numbers = [3;&quot;four&quot;;5];;
@@ -618,7 +650,7 @@ Error: This expression has type string but an expression was expected of type
         all equivalent. Note that <literal>[]</literal> is used to
         represent the empty list.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # [1; 2; 3];;
 - : int list = [1; 2; 3]
 # 1 :: (2 :: (3 :: []));;
@@ -640,7 +672,7 @@ Error: This expression has type string but an expression was expected of type
           two list constructors, <literal>[]</literal> and
           <literal>::</literal>. Here's a simple example.
         </para>
-        <programlisting language="ocaml">
+        <programlisting>
 # let (my_favorite :: the_rest) = languages ;;
 val my_favorite : string = &quot;OCaml&quot;
 val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;]
@@ -654,7 +686,7 @@ val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;]
         </para>
         <para>
           If you tried the above example in the toplevel, you probably
-          noticed that I omitted a warning generated by the compiler.
+          noticed that we omitted a warning generated by the compiler.
           Here's the full output:
         </para>
         <programlisting>
@@ -675,7 +707,7 @@ val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;]
           <literal>[]</literal>. Indeed, if we try to use such a
           pattern-match on the empty list:
         </para>
-        <programlisting language="ocaml">
+        <programlisting>
 # let (my_favorite :: the_rest) = [];;
 Characters 5-28:
   let (my_favorite :: the_rest) = [];;
@@ -693,7 +725,7 @@ Exception: (Match_failure &quot;&quot; 1 5).
           that your code actually handles all of the possible cases, by
           using a <literal>match</literal> statement. Here's an example:
         </para>
-        <programlisting language="ocaml">
+        <programlisting>
 # let my_favorite_language languages =
     match languages with
     | first :: the_rest -&gt; first
@@ -713,7 +745,7 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
           we can do things like define a function for summing the
           elements of a list.
         </para>
-        <programlisting language="ocaml">
+        <programlisting>
 # let rec sum l =
     match l with
     | [] -&gt; 0
@@ -731,13 +763,14 @@ val sum : int list -&gt; int
           destuttering a list, <emphasis>i.e.</emphasis>, for removing
           sequential duplicates.
         </para>
-        <programlisting language="ocaml">
+        <programlisting>
 # let rec destutter list =
     match list with
     | [] -&gt; []
     | hd1 :: (hd2 :: tl) -&gt;
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
+  ;;
 </programlisting>
         <para>
           Actually, the code above has a problem. If you type it into
@@ -753,14 +786,14 @@ _::[]
           that our code doesn't handle one-element lists. That's easy
           enough to fix by adding another case to the match:
         </para>
-        <programlisting language="ocaml">
+        <programlisting>
 # let rec destutter list =
     match list with
     | [] -&gt; []
     | [hd] -&gt; [hd]
     | hd1 :: (hd2 :: tl) -&gt;
       if hd1 = hd2 then destutter (hd2 :: tl)
-      else hd1 :: destutter (hd2 :: tl)
+      else hd1 :: destutter (hd2 :: tl) ;;
 val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 # destutter [&quot;hey&quot;;&quot;hey&quot;;&quot;hey&quot;;&quot;man!&quot;];;
 - : string list = [&quot;hey&quot;; &quot;man!&quot;]
@@ -781,12 +814,11 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
         <para>
           So far, we've built up all of our list functions using pattern
           matching and recursion. But in practice, this isn't usually
-          necessary. OCaml libraries are organized into
-          <emphasis>modules</emphasis>, and there is a module in Core
-          called <literal>List</literal> which contains many useful
-          functions for dealing with lists. For example:
+          necessary. Instead, you'll mostly use the rich collection of
+          utility functions contained in Core's <literal>List</literal>
+          module. For example:
         </para>
-        <programlisting language="ocaml">
+        <programlisting>
 # List.map ~f:String.length languages;;
 - : int list = [5; 4; 1]
 </programlisting>
@@ -795,18 +827,10 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
           <literal>List</literal> and <literal>String</literal> module.
           <literal>List.map</literal> in particular is a function that
           takes a list and a function for transforming elements of that
-          list, and returns to us a new list with the transformed
-          elements.
-        </para>
-        <para>
-          There's another new piece of syntax to learn here: labeled
-          arguments. <literal>String.length</literal> is passed with the
-          label, <literal>~f</literal>. Labeled arguments are arguments
-          that are specified by name rather than position, which means
-          they can be passed in any order. Thus, we could have written
-          <literal>List.map languages ~f:String.length</literal> instead
-          of <literal>List.map ~f:String.length languages</literal>.
-          We'll see why labels are important in Chapter {{{Functions}}}.
+          list (under the label <literal>~f</literal>. For now, you can
+          ignore that bit of syntax, and we'll learn more about it in
+          chapter {{{FUNCTIONS}}}), and returns to us a new list with
+          the transformed elements.
         </para>
       </sect3>
     </sect2>
@@ -818,9 +842,9 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
         to express that a value that might or might not be present. For
         example,
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let divide x y =
-    if y = 0 then None else Some (x/y)
+    if y = 0 then None else Some (x/y) ;;
 val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
 </programlisting>
       <para>
@@ -838,14 +862,14 @@ val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
         the time is <literal>None</literal>), the current time is
         computed and used in its place.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let print_log_entry maybe_time message =
     let time =
       match maybe_time with
       | Some x -&gt; x
       | None -&gt; Time.now ()
     in
-    printf &quot;%s: %s\n&quot; (Time.to_string time) message
+    printf &quot;%s: %s\n&quot; (Time.to_string time) message ;;
 val print_log_entry : Time.t option -&gt; string -&gt; unit
 </programlisting>
       <para>
@@ -864,10 +888,10 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
         content of an option if the option is <literal>Some</literal>,
         or a default value if the option is <literal>None</literal>.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let print_log_entry maybe_time message =
     let time = Option.value ~default:(Time.now ()) maybe_time in
-    printf &quot;%s: %s\n&quot; (Time.to_string time) message
+    printf &quot;%s: %s\n&quot; (Time.to_string time) message ;;
 </programlisting>
       <para>
         Options are important because they are the standard way in OCaml
@@ -891,7 +915,7 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
       to define new datatypes. Here's a toy example of a datatype
       representing a point in 2-dimensional space:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # type point2d = { x : float; y : float };;
 type point2d = { x : float; y : float; }
 </programlisting>
@@ -901,7 +925,7 @@ type point2d = { x : float; y : float; }
       named, rather than being defined positionally. Record types are
       easy enough to construct:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let p = { x = 3.; y = -4. };;
 val p : point2d = {x = 3.; y = -4.}
 </programlisting>
@@ -909,38 +933,37 @@ val p : point2d = {x = 3.; y = -4.}
       And we can get access to the contents of these types using pattern
       matching:
     </para>
-    <programlisting language="ocaml">
-# let magnitude { x = x; y = y } = sqrt (x ** 2. +. y ** 2.);;
+    <programlisting>
+# let magnitude { x = x_pos; y = y_pos } = sqrt (x_pos ** 2. +. y_pos ** 2.);;
 val magnitude : point2d -&gt; float = &lt;fun&gt;
 </programlisting>
     <para>
-      In the case where we want to name the value in a record field
-      after the name of that field, we can write the pattern match even
-      more tersely. Instead of writing <literal>{ x = x }</literal> to
-      name a variable <literal>x</literal> for the value of field
-      <literal>x</literal>, we can write <literal>{ x }</literal>. Using
-      this, we can rewrite the magnitude function as follows.
+      We can write the pattern match even more tersely, using what's
+      called <emphasis>field punning</emphasis>. In particular, when the
+      name of the field and the name of the variable coincide, we don't
+      have to write them both down. Thus, the magnitude function can be
+      rewritten as follows.
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
 </programlisting>
     <para>
       We can also use dot-notation for accessing record fields:
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
 # let distance v1 v2 =
      magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
 </programlisting>
     <para>
       And we can of course include our newly defined types as components
-      in larger types, as in the following types, each of which
-      representing a different geometric object.
+      in larger types, as in the following types, each of which is a
+      description of a different geometric object.
     </para>
-    <programlisting language="ocaml">
-# type circle = { center: point2d; radius: float } ;;
-# type rect = { lower_left: point2d; width: float; height: float } ;;
-# type segment = { endpoint1: point2d; endpoint2: point2d } ;;
+    <programlisting>
+# type circle_desc  = { center: point2d; radius: float } ;;
+# type rect_desc    = { lower_left: point2d; width: float; height: float } ;;
+# type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
 </programlisting>
     <para>
       Now, imagine that you want to combine multiple of these objects
@@ -949,37 +972,39 @@ val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
       single type. One way of doing this is using a
       <emphasis>variant</emphasis> type:
     </para>
-    <programlisting language="ocaml">
-# type shape = | Circle of circle
-               | Rect of rect
-               | Segment of segment;;
+    <programlisting>
+# type scene_element =
+    | Circle  of circle_desc
+    | Rect    of rect_desc
+    | Segment of segment_desc
+  ;;
 </programlisting>
     <para>
       The <literal>|</literal> character separates the different cases
       of the variant (the first <literal>|</literal> is optional), and
-      each case has a tag (like <literal>Circle</literal>,
-      <literal>Rect</literal> and <literal>Segment</literal>) to
+      each case has a tag, like <literal>Circle</literal>,
+      <literal>Rect</literal> and <literal>Scene</literal>, to
       distinguish that case from the others. Here's how we might write a
-      function for testing whether a point is in the interior of one of
-      a <literal>shape list</literal>.
+      function for testing whether a point is in the interior of some
+      element of a list of <literal>scene_element</literal>s.
     </para>
-    <programlisting language="ocaml">
-# let is_inside_shape point shape =
-     match shape with
+    <programlisting>
+# let is_inside_scene_element point scene_element =
+     match scene_element with
      | Circle { center; radius } -&gt;
        distance center point &lt; radius
      | Rect { lower_left; width; height } -&gt;
        point.x &gt; lower_left.x &amp;&amp; point.x &lt; lower_left.x +. width
        &amp;&amp; point.y &gt; lower_left.y &amp;&amp; point.y &lt; lower_left.y +. height
-     | Segment _ -&gt; false
+     | Segment { endpoint1; endpoint2 } -&gt; false
      ;;
-val is_inside_shape : point2d -&gt; shape -&gt; bool = &lt;fun&gt;
-# let is_inside_shapes point shapes =
-     let point_is_inside_shape shape =
-       is_inside_shape point shape
+val is_inside_scene_element : point2d -&gt; scene_element -&gt; bool = &lt;fun&gt;
+# let is_inside_scene point scene =
+     let point_is_inside_scene_element scene_element =
+       is_inside_scene_element point scene_element
      in
-     List.for_all shapes ~f:point_is_inside_shape
-val is_inside_shapes : point2d -&gt; shape list -&gt; bool = &lt;fun&gt;
+     List.for_all scene ~f:point_is_inside_scene_element;;
+val is_inside_shapes : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
 </programlisting>
     <para>
       You might at this point notice that the use of
@@ -992,20 +1017,23 @@ val is_inside_shapes : point2d -&gt; shape list -&gt; bool = &lt;fun&gt;
       to have some special syntax).
     </para>
   </sect1>
-  <sect1 id="mutation">
-    <title>Mutation</title>
+  <sect1 id="imperative-programming">
+    <title>Imperative programming</title>
     <para>
-      All of our examples so far have been examples of mutation-free,
-      <emphasis>pure</emphasis> code, which is typical of code in OCaml
-      and other functional languages. OCaml has a very strong focus on
-      immutability, with variable bindings and most datastructures in
-      OCaml (including tuples, options and lists) being immutable.
+      So far, we've only written so-called <emphasis>pure</emphasis> or
+      <emphasis>functional</emphasis> code, meaning that we didn't write
+      any code that modified a variable or value after its creation.
+      This is a quite different style from
+      <emphasis>imperative</emphasis> programming, where computations
+      are structured as sequences of instructions that operate by
+      modifying state as they go.
     </para>
     <para>
-      But despite immutability being the default in OCaml, the language
-      has excellent support for imperative programming, including
-      mutable data structures like arrays and hashtables and
-      control-flow constructs like while and for loops.
+      Functional code is the default in OCaml, with variable bindings
+      and most datastructures being immutable. But OCaml also has
+      excellent support for imperative programming, including mutable
+      data structures like arrays and hashtables and control-flow
+      constructs like for and while loops.
     </para>
     <sect2 id="arrays">
       <title>Arrays</title>
@@ -1028,12 +1056,13 @@ val numbers : int array = [|1; 2; 3; 4|]
         of the array.
       </para>
       <para>
-        Arrays in OCaml are very similar to arrays in C: arrays are
-        fixed width, indexing starts at 0, and accessing or modifying an
-        array element is a constant-time operation. Arrays are more
-        compact in terms of memory utilization than most other data
-        structures in OCaml, including lists. OCaml uses three words per
-        element of a list, but only one per element of an array.
+        Arrays in OCaml are very similar to arrays in other languages
+        like C: they are fixed width, indexing starts at 0, and
+        accessing or modifying an array element is a constant-time
+        operation. Arrays are more compact in terms of memory
+        utilization than most other data structures in OCaml, including
+        lists. OCaml uses three words per element of a list, but only
+        one per element of an array.
       </para>
     </sect2>
     <sect2 id="mutable-record-fields">
@@ -1046,21 +1075,21 @@ val numbers : int array = [|1; 2; 3; 4|]
         summary of a collection of numbers. Here's the basic data
         structure:
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # type running_sum =
    { mutable sum: float;
      mutable sum_sq: float; (* sum of squares, for stdev *)
-     mutable samples: float; } ;;
+     mutable samples: int; } ;;
 </programlisting>
       <para>
         Here are some functions for computing means and standard
         deviations based on the <literal>running_sum</literal>.
       </para>
-      <programlisting language="ocaml">
-# let mean rsum = rsum.sum /. rsum.samples
+      <programlisting>
+# let mean rsum = rsum.sum /. float rsum.samples
   let stdev rsum =
-     sqrt (rsum.sum_sq /. rsum.samples
-           -. (rsum.sum /. rsum.samples) ** 2.) ;;
+     sqrt (rsum.sum_sq /. float rsum.samples
+           -. (rsum.sum /. float rsum.samples) ** 2.) ;;
 val mean : running_sum -&gt; float = &lt;fun&gt;
 val stdev : running_sum -&gt; float = &lt;fun&gt;
 </programlisting>
@@ -1071,10 +1100,10 @@ val stdev : running_sum -&gt; float = &lt;fun&gt;
         operating purely functionally, this wasn't necessary, but you
         start needing it when your code is acting by side-effect.
       </para>
-      <programlisting language="ocaml">
-# let create () = { sum = 0.; sum_sq = 0.; samples = 0. }
+      <programlisting>
+# let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
   let update rsum x =
-     rsum.samples &lt;- rsum.samples +. 1.;
+     rsum.samples &lt;- rsum.samples + 1;
      rsum.sum     &lt;- rsum.sum     +. x;
      rsum.sum_sq  &lt;- rsum.sum_sq  +. x *. x
   ;;
@@ -1082,10 +1111,28 @@ val create : unit -&gt; running_sum = &lt;fun&gt;
 val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
 </programlisting>
       <para>
-        As we can see, <literal>update</literal> operates by
-        side-effect. Here's an example of it in action.
+        A new and somewhat odd type has cropped up in this example:
+        <literal>unit</literal>. What makes <literal>unit</literal>
+        unusual is that there is only one value of type
+        <literal>unit</literal>, which is written <literal>()</literal>.
+        Because <literal>unit</literal> has only one inhabitant, a value
+        of type <literal>unit</literal> can't convey any information.
       </para>
-      <programlisting language="ocaml">
+      <para>
+        If it doesn't convey any information, then what is
+        <literal>unit</literal> good for? Most of the time,
+        <literal>unit</literal> acts as a placeholder. Thus, we use
+        <literal>unit</literal> for the return value of a function like
+        <literal>update</literal> that operates by side effect rather
+        than by returning a value, and for the argument to a function
+        like <literal>create</literal> that doesn't require any
+        information to be passed into it in order to run.
+      </para>
+      <para>
+        Here's an example of <literal>create</literal> and
+        <literal>update</literal> in action.
+      </para>
+      <programlisting>
 # let rsum = create ();;
 val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -&gt; update rsum x);;
@@ -1115,7 +1162,7 @@ val x : int ref = {contents = 0}
         There are a handful of useful functions and operators defined
         for refs to make them more convenient to work with.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
 val x : int ref = {contents = 0}
 # !x ;;            (* get the contents of a ref, i.e., x.contents *)
@@ -1145,7 +1192,7 @@ val x : int ref = {contents = 0}
         but you can call <literal>Random.self_init</literal> to get a
         new random seed chosen.)
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let permute ar =
     for i = 0 to Array.length ar - 2 do
        (* pick a j that is after i and before the end of the list *)
@@ -1159,12 +1206,10 @@ val x : int ref = {contents = 0}
 val permute : 'a array -&gt; unit = &lt;fun&gt;
 </programlisting>
       <para>
-        <literal>permute</literal> returns <literal>unit</literal>,
-        which is typical of functions whose primary result is a
-        side-effect rather than a return value. Here's how
-        <literal>permute</literal> looks in action.
+        Note that the semi-colon after the first array assignment
+        doesn't terminate the scope of the let-binding.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
 # let ar = Array.init 20 ~f:(fun i -&gt; i);;
 val ar : int array =
   [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
@@ -1621,7 +1666,7 @@ val ( +! ) : int * int -&gt; int * int -&gt; int *int = &lt;fun&gt;
 </programlisting>
       <para>
         Note that operators can be used in prefix style as well, if they
-        are put in parens:
+        are put in parentheses:
       </para>
       <programlisting>
 # (+!) (3,2) (-2,4);;
@@ -2676,8 +2721,8 @@ val (&gt;&gt;=) : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
         which we'll talk about more in chapter {{{ASYNC}}}.
       </para>
       <para>
-        This is a bit easier to read if we write it with fewer parens
-        and less indentation, as follows.
+        This is a bit easier to read if we write it with fewer
+        parentheses and less indentation, as follows.
       </para>
       <programlisting>
 # let compute_bounds ~cmp list =
@@ -3941,31 +3986,112 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
     <emphasis>(yminsky: Highly preliminary)</emphasis>
   </para>
   <para>
-    Up until now, modules have played a limited role, used as the way
-    for organizing the system into different components with
-    well-defined interfaces. This is of course important, but it is only
-    part of what modules can do. OCaml's module system is part of a
-    powerful toolset for organizing and putting together complex
-    functionality.
+    Up until now, modules have played a limited role in our programming.
+    They are a way of organizing code into units, along with a mechanism
+    for specifying interfaces for those units. But that is only part of
+    what modules do in OCaml. OCaml's module system is in fact a
+    powerful toolset for structuring larger-scale systems. In this
+    chapter, we'll try to give you a taste of the full power of this
+    system.
   </para>
   <sect1 id="functors">
     <title>Functors</title>
     <para>
-      A functor is essentially a function from modules to modules. Let's
-      walk through a small, complete example of how to use functors.
-      Let's go back to frequency count program that we discussed last
-      chapter. We experimented with multiple different implementations
-      of the data-structure for storing the frequency counts. But what
-      if we wanted to make the frequency count data-structure pluggable,
-      so we could instantiate the program with different
-      implementations? Functors allow us to do just that.
+      One fundamental component of OCaml's module system is the
+      <emphasis>functor</emphasis>. A functor is at its core a function
+      from modules to modules. In order to get a concrete understanding
+      of what functor are and how they work, we'll start by playing
+      around with some simple examples.
     </para>
     <para>
-      The first step towards making the frequency-count datastructure
-      pluggable is to specify precisely the interface. We can do this by
-      declaring an interface as follows:
+      We'll start with something quite simple indeed: a functor for
+      incrementing an integer. Or, more precisely, a functor that takes
+      a module containing an integer value, and returns a new module,
+      containing the incremented integer instead.
+    </para>
+    <para>
+      We'll start by defining a module type for a module that just
+      contains an integer:
+    </para>
+    <programlisting>
+# module type M_int = sig val x : int end;;
+module type M_int = sig val x : int end
+</programlisting>
+    <para>
+      Now, we'll ....
+    </para>
+    <programlisting>
+# module Increment (M:S) : S = struct
+    let x = M.x + 1
+  end;;
+module Increment : functor (M : S) -&gt; sig val x : int end
+# module Three = struct let x = 3 end;;
+  module Three : sig val x : int end
+# module Four = Increment(Three);;
+module Four : sig val x : int end
+# Four.x - Three.x;;
+- : int = 1
+</programlisting>
+    <para>
+      Here's the basic syntax of a functor definition:
     </para>
     <programlisting language="ocaml">
+module F (&lt;mod1&gt; : &lt;sig1&gt;) (&lt;mod2&gt; : &lt;sig2&gt;) ... (&lt;modN&gt; : &lt;sigN&gt;) : &lt;sig&gt; = struct
+  &lt;implementation&gt;
+end
+</programlisting>
+    <para>
+      Here <literal>&lt;mod1&gt;</literal>
+      ...<literal>&lt;modN&gt;</literal> are module names, and
+      <literal>&lt;sig1&gt;</literal> ...
+      <literal>&lt;sigN&gt;</literal> are module types. Unlike ordinary
+      functions, with functors, the types of the arguments can not be
+      inferred. The final <literal>: &lt;sig&gt;</literal> is a
+      constraint on the module type of the output of the functor. The
+      output type can actually be inferred, so that final signature is
+      optional.
+    </para>
+    <para>
+      A functor will accept as input any module that satisfies the
+      signature, in the same way that a given module implementation in
+      an <literal>.ml</literal> file can satisfy the signature in its
+      <literal>.mli</literal>. Thus, the input signature can drop
+      elements of the module, and can have more abstract types. Consider
+      the following example.
+    </para>
+    <programlisting>
+# module Three_and_more = struct
+    let x = 3
+    let y = &quot;three&quot;
+  end;;
+module Three_and_more : sig val x : int val x_string : string end
+# module Four = Increment(Three_and_more);;
+module Four : sig val x : int end
+</programlisting>
+    <para>
+      Here, we were able to pass in <literal>Three_and_more</literal>,
+      even though <literal>Three_and_more</literal> had the field
+      <literal>y</literal>, which is not mentioned in the signature
+      applied to that argument.
+    </para>
+    <sect2 id="a-worked-example">
+      <title>A worked example</title>
+      <para>
+        Let's walk through a small, complete example of how to use
+        functors. Let's go back to frequency count program that we
+        discussed last chapter. We experimented with multiple different
+        implementations of the data-structure for storing the frequency
+        counts. But what if we wanted to make the frequency count
+        data-structure pluggable, so we could instantiate the program
+        with different implementations? Functors allow us to do just
+        that.
+      </para>
+      <para>
+        The first step towards making the frequency-count datastructure
+        pluggable is to specify precisely the interface. We can do this
+        by declaring an interface as follows:
+      </para>
+      <programlisting language="ocaml">
 (* counter_intf.ml *)
 
 open Core.Std
@@ -3978,10 +4104,10 @@ module type S = sig
   val touch : t -&gt; string -&gt; t
 end
 </programlisting>
-    <para>
-      Now, we can write the main program as a functor.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        Now, we can write the main program as a functor.
+      </para>
+      <programlisting language="ocaml">
 (* freq.ml: using Counter *)
 
 open Core.Std
@@ -4003,6 +4129,7 @@ let () =
 
 end
 </programlisting>
+    </sect2>
   </sect1>
   <sect1 id="detritus">
     <title>Detritus</title>
@@ -4583,7 +4710,7 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
         <title><literal>sexp_list</literal></title>
         <para>
           One problem with the autogenerated sexp-converters is that
-          they can have more parens than one would ideally like.
+          they can have more parentheses than one would ideally like.
           Consider, for example, the following variant type:
         </para>
         <programlisting>
@@ -4595,7 +4722,7 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
 </programlisting>
         <para>
           You might prefer to make the syntax a bit less
-          parenthesis-laden by dropping the parens around the list.
+          parenthesis-laden by dropping the parentheses around the list.
           <literal>sexp_list</literal> gives us this alternate syntax:
         </para>
         <programlisting>
