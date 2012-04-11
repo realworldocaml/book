@@ -1,27 +1,31 @@
 # Variables and Functions
 
-Variables are a fundamental concept in programming, one that comes up
-in all but the simplest of examples.  Indeed, we encountered OCaml's
-variables multiple times in chapter {{TOUR}}.  But while variables are
-no doubt a familiar topic, variables in OCaml are different in subtle
-but important ways from what you find in most other languages.
-Accordingly we're going to spend a some time diving into the details
-of how variables work in OCaml.
+Variables and functions are fundamental ideas that show up in
+virtually all programming languages.  But while these are familiar
+topics, OCaml's variables and functions are different in subtle but
+important ways from what you may have seen elsewhere.  Accordingly
+we're going to spend a some time diving into the details of how these
+concepts play out in OCaml.
+
+## Variables
 
 At its simplest, a variable is an identifier whose meaning is bound to
-a particular value.  In OCaml these bindings are usually introduced
-using the `let` keyword, which at the top-level of a module has the
-following syntax.
+a particular value.  In OCaml these bindings are often introduced
+using the `let` keyword.  When typed in at the prompt of the
+interpreter, a let binding has the following syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 let <identifier> = <expr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+As we'll see when we get to the module system in chapter
+{{{MODULES}}}, this same syntax is used for top-level definitions in a
+module.
+
 Every variable binding has a _scope_, which is the portion of the code
-that considers the given variable binding during its evaluation.  The
-scope of a top-level let binding is everything that follows it in that
-module (or, the remainder of the session if you're using the
-top-level.)
+that can access that binding.  The scope of a top-level let binding is
+everything that follows it in the top-level session (or in the
+remainder of the module).
 
 Here's a simple example.
 
@@ -35,97 +39,132 @@ val z : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `let` can also be used to create a variable binding whose scope is
-limited to a particular, bounded expression, using the following
-syntax.
+limited to a particular expression, using the following syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 let <identifier> = <expr1> in <expr2>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This first evaluates `<expr1>`, and then evaluates `<expr2>`, with
-`<identifier>` bound to whatever value was produced by the evaluation
-of `<expr1>`.  For example, `let x = 3 + 1 in x * 2` evaluates to `8`.
-
-In this form, multiple let bindings can be nested, like this:
+This first evaluates _`expr1`_ and then evaluates _`expr2`_ with
+_`identifier`_ bound to whatever value was produced by the evaluation
+of _`expr1`_.  Here's how it looks in practice.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let x = 3 in
-  let y = 4 in
-  x + y
-;;
-- : int = 7
+# let languages = "OCaml,Perl,C++,C";;
+val languages : string = "OCaml,Perl,C++,C"
+# let dashed_languages =
+     let language_list = String.split languages ~on:',' in
+     String.concat ~sep:"-" language_list
+  ;;
+val dashed_languages : string = "OCaml-Perl-C++-C"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that nested bindings can _shadow_, or hide, previous bindings.
-Thus, we can write
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let x = 1 in
-  let x = x + x in
-  let x = Int.to_string (x + x) in
-  x ^ x;;
-- : string = "44"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-It's important not to confuse shadowing of variables with assignment,
-_i.e._, mutation.  Consider the following function.
+Note that the scope of `language_list` is just the expression
+`String.split languages ~on:','`, and is not available at the
+top-level, as we can see if we try to access it now.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let x = 3 in
-  let add_to_x y = x + y in
-  let x = 4 in
-  add_to_x 0
-;;
-- : int = 3
+# language_list;;
+Characters 0-13:
+  language_list;;
+  ^^^^^^^^^^^^^
+Error: Unbound value language_list
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If the second let binding of x were in fact an assignment, then you
-would expect `add_to_x 0` to return `4`.  Instead, it returns `3`,
-because the `x` that `add_to_x` refers to is still there, unchanged,
-even after the new binding of `x` to `4` is created.
+A let binding in an inner scope can _shadow_, or hide, the definition
+from an outer scope.  So, for example, we could have written the
+`dashed_languages` example as follows:
 
-Here's another demonstration of how let bindings differ from
-assignment.  In the following example, the second binding of `x` is
-only visible within the scope of a fixed sub-expression, in
-particular, the sub-expression that makes up the right-hand side of
-the definition of `y`.  When the definition of `y` is complete, we see
-that the inner definition disappears, and the original definition of
-`x` shows up again, unaffected.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let x = 3 in
-  let y =
-    let x = 2 in
-    x + x
-  in
-  x + y
-- : int = 7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let languages = "OCaml,Perl,C++,C";;
+val languages : string = "OCaml,Perl,C++,C"
+# let dashed_languages =
+     let languages = String.split languages ~on:',' in
+     String.concat ~sep:"-" languages
+  ;;
+val dashed_languages : Core.Std.String.t = "OCaml-Perl-C++-C"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In OCaml, let bindings are always immutable.  As we'll see in chapter
+This time, in the inner scope we called the list of strings
+`languages` instead of `language_list`, thus hiding the original
+definition of `languages`.  But once the definition of
+`dashed_languages` is complete, the inner scope has closed and the
+original definition of languages reappears.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# languages;;
+- : string = "OCaml,Perl,C++,C"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One common idiom is to use a series of nested `let`/`in` expressions
+to build up the components of a larger compution.  Thus, we might
+write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let area_of_ring inner_radius outer_radius =
+     let pi = acos (-1.) in
+     let area_of_circle r = pi *. r *. r in
+     area_of_circle outer_radius -. area_of_circle inner_radius
+  ;;
+# area_of_ring 1. 3.;;
+- : float = 25.1327412287183449
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It's important not to confuse this sequence of let bindings with the
+modification of a mutable variable.  How would `area_of_ring` be
+different, for example, if we had instead written this purposefully
+confusing bit of code:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let area_of_ring inner_radius outer_radius =
+     let pi = acos (-1.) in
+     let area_of_circle r = pi *. r *. r in
+     let pi = 0. in
+     area_of_circle outer_radius -. area_of_circle inner_radius
+  ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, we redefined `pi` to be zero after the definition of
+`area_of_circle`.  You might think that this would mean that the
+result of the computation would now be zero, but you'd be wrong.  In
+fact, the behavior of the function is unchanged.  That's because the
+original definition of `pi` wasn't changed, it was just shadowed, so
+that any subsequent reference to `pi` would see the new definition of
+`pi` as zero.  But there is no later use of `pi`, so the binding
+doesn't make a difference.  Indeed, if you type the example I gave
+above into the toplevel, OCaml will warn you that the definition is
+unused.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+Characters 126-128:
+    let pi = 0. in
+        ^^
+Warning 26: unused variable pi.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In OCaml, let bindings are immutable.  As we'll see in chapter
 {{MUTABILITY}}, there are mutable values in OCaml, but no mutable
 variables.
 
 ### Pattern matching and `let` ###
 
 Another useful feature of let bindings is that they support the use of
-patterns on the left-hand side of the bind.  Consider the
-following code, which uses `List.unzip`, a function for converting a
-list of pairs to a pair of lists.
+patterns on the left-hand side of the bind.  Consider the following
+code, which uses `List.unzip`, a function for converting a list of
+pairs into a pair of lists.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")]
-val ints : int Core.Std.List.t = [1; 2; 3]
-val strings : string Core.Std.List.t = ["one"; "two"; "three"]
+val ints : int list = [1; 2; 3]
+val strings : string list = ["one"; "two"; "three"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This actually binds two variables, one for each element of the pair.
 Using a pattern in a let-binding makes the most sense for a pattern
-that is _irrefutable_, i.e., where any value of the type in question
+that is _irrefutable_, _i.e._, where any value of the type in question
 is guaranteed to match the pattern.  Tuple and record patterns are
-irrefutable, but list patterns are not.  Here's an example of a list
-pattern match that generates a warning because not all cases are
-covered.
+irrefutable, but list patterns are not.  Indeed, the following pattern
+match generates a warning because not all cases are covered.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (hd::tl) = [1;2;3];;
@@ -142,9 +181,9 @@ avoided.
 
 ### `let`/`and` bindings ###
 
-Another form of let binding that comes up on occasion is where you
-bind multiple arguments in a single declaration.  For example, we can
-write:
+Another variant on the let binding is the use of `and` to join
+multiple variable definitions into a single declaration.  For example,
+we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = 100 and y = 3.5;;
@@ -168,7 +207,8 @@ comes into play, it's used to define multiple mutually recursive
 values, which we'll learn about later in the chapter.
 
 Note that when doing a `let`/`and` style declaration, the order of
-execution of the right-hand side of the binds is undefined.
+execution of the right-hand side of the binds is undefined by the
+language definition, so one should not write code that relies on it.
 
 ## Functions ##
 

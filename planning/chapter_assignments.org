@@ -1,3 +1,9 @@
+* Schedule
+
+** March 7th: Any 2 substantial Chapters
+** June 30th: Half the chapters
+** Nov 30th: Draft suitable for final review
+
 * Chapter list
 
 | Chapter                             | Author | Status |
