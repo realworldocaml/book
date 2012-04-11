@@ -2188,6 +2188,9 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       </sect3>
     </sect2>
   </sect1>
+</chapter>
+<chapter id="lists-options-and-patterns">
+  <title>Lists, Options and Patterns</title>
   <sect1 id="example-pretty-printing-a-table">
     <title>Example: pretty-printing a table</title>
     <para>
@@ -2483,12 +2486,6 @@ let print_langs langs =
       </para>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="lists-options-and-pattern-matching">
-  <title>Lists, Options and Pattern Matching</title>
-  <para>
-    <emphasis>(Lorem Ipsit)</emphasis>
-  </para>
 </chapter>
 <chapter id="error-handling">
   <title>Error Handling</title>
