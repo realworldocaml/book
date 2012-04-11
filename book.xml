@@ -1235,34 +1235,40 @@ val ar : int array =
 <chapter id="variables-and-functions">
   <title>Variables and Functions</title>
   <para>
-    Variables are a fundamental concept in programming, one that comes
-    up in all but the simplest of examples. Indeed, we encountered
-    OCaml's variables multiple times in chapter {{TOUR}}. But while
-    variables are no doubt a familiar topic, variables in OCaml are
-    different in subtle but important ways from what you find in most
-    other languages. Accordingly we're going to spend a some time diving
-    into the details of how variables work in OCaml.
+    Variables and functions are fundamental ideas that show up in
+    virtually all programming languages. But while these are familiar
+    topics, OCaml's variables and functions are different in subtle but
+    important ways from what you may have seen elsewhere. Accordingly
+    we're going to spend a some time diving into the details of how
+    these concepts play out in OCaml.
   </para>
-  <para>
-    At its simplest, a variable is an identifier whose meaning is bound
-    to a particular value. In OCaml these bindings are usually
-    introduced using the <literal>let</literal> keyword, which at the
-    top-level of a module has the following syntax.
-  </para>
-  <programlisting>
+  <sect1 id="variables">
+    <title>Variables</title>
+    <para>
+      At its simplest, a variable is an identifier whose meaning is
+      bound to a particular value. In OCaml these bindings are often
+      introduced using the <literal>let</literal> keyword. When typed in
+      at the prompt of the interpreter, a let binding has the following
+      syntax.
+    </para>
+    <programlisting>
 let &lt;identifier&gt; = &lt;expr&gt;
 </programlisting>
-  <para>
-    Every variable binding has a <emphasis>scope</emphasis>, which is
-    the portion of the code that considers the given variable binding
-    during its evaluation. The scope of a top-level let binding is
-    everything that follows it in that module (or, the remainder of the
-    session if you're using the top-level.)
-  </para>
-  <para>
-    Here's a simple example.
-  </para>
-  <programlisting>
+    <para>
+      As we'll see when we get to the module system in chapter
+      {{{MODULES}}}, this same syntax is used for top-level definitions
+      in a module.
+    </para>
+    <para>
+      Every variable binding has a <emphasis>scope</emphasis>, which is
+      the portion of the code that can access that binding. The scope of
+      a top-level let binding is everything that follows it in the
+      top-level session (or in the remainder of the module).
+    </para>
+    <para>
+      Here's a simple example.
+    </para>
+    <programlisting>
 # let x = 3;;
 val x : int = 3
 # let y = 4;;
@@ -1270,111 +1276,148 @@ val y : int = 4
 # let z = x + y;;
 val z : int = 7
 </programlisting>
-  <para>
-    <literal>let</literal> can also be used to create a variable binding
-    whose scope is limited to a particular, bounded expression, using
-    the following syntax.
-  </para>
-  <programlisting>
+    <para>
+      <literal>let</literal> can also be used to create a variable
+      binding whose scope is limited to a particular expression, using
+      the following syntax.
+    </para>
+    <programlisting>
 let &lt;identifier&gt; = &lt;expr1&gt; in &lt;expr2&gt;
 </programlisting>
-  <para>
-    This first evaluates <literal>&lt;expr1&gt;</literal>, and then
-    evaluates <literal>&lt;expr2&gt;</literal>, with
-    <literal>&lt;identifier&gt;</literal> bound to whatever value was
-    produced by the evaluation of <literal>&lt;expr1&gt;</literal>. For
-    example, <literal>let x = 3 + 1 in x * 2</literal> evaluates to
-    <literal>8</literal>.
-  </para>
-  <para>
-    In this form, multiple let bindings can be nested, like this:
-  </para>
-  <programlisting>
-# let x = 3 in
-  let y = 4 in
-  x + y
-;;
-- : int = 7
-</programlisting>
-  <para>
-    Note that nested bindings can <emphasis>shadow</emphasis>, or hide,
-    previous bindings. Thus, we can write
-  </para>
-  <programlisting language="ocaml">
-# let x = 1 in
-  let x = x + x in
-  let x = Int.to_string (x + x) in
-  x ^ x;;
-- : string = &quot;44&quot;
-</programlisting>
-  <para>
-    It's important not to confuse shadowing of variables with
-    assignment, <emphasis>i.e.</emphasis>, mutation. Consider the
-    following function.
-  </para>
-  <programlisting>
-# let x = 3 in
-  let add_to_x y = x + y in
-  let x = 4 in
-  add_to_x 0
-;;
-- : int = 3
-</programlisting>
-  <para>
-    If the second let binding of x were in fact an assignment, then you
-    would expect <literal>add_to_x 0</literal> to return
-    <literal>4</literal>. Instead, it returns <literal>3</literal>,
-    because the <literal>x</literal> that <literal>add_to_x</literal>
-    refers to is still there, unchanged, even after the new binding of
-    <literal>x</literal> to <literal>4</literal> is created.
-  </para>
-  <para>
-    Here's another demonstration of how let bindings differ from
-    assignment. In the following example, the second binding of
-    <literal>x</literal> is only visible within the scope of a fixed
-    sub-expression, in particular, the sub-expression that makes up the
-    right-hand side of the definition of <literal>y</literal>. When the
-    definition of <literal>y</literal> is complete, we see that the
-    inner definition disappears, and the original definition of
-    <literal>x</literal> shows up again, unaffected.
-  </para>
-  <programlisting language="ocaml">
-# let x = 3 in
-  let y =
-    let x = 2 in
-    x + x
-  in
-  x + y
-- : int = 7
-</programlisting>
-  <para>
-    In OCaml, let bindings are always immutable. As we'll see in chapter
-    {{MUTABILITY}}, there are mutable values in OCaml, but no mutable
-    variables.
-  </para>
-  <sect1 id="pattern-matching-and-let">
-    <title>Pattern matching and <literal>let</literal></title>
     <para>
-      Another useful feature of let bindings is that they support the
-      use of patterns on the left-hand side of the bind. Consider the
-      following code, which uses <literal>List.unzip</literal>, a
-      function for converting a list of pairs to a pair of lists.
+      This first evaluates <emphasis><literal>expr1</literal></emphasis>
+      and then evaluates <emphasis><literal>expr2</literal></emphasis>
+      with <emphasis><literal>identifier</literal></emphasis> bound to
+      whatever value was produced by the evaluation of
+      <emphasis><literal>expr1</literal></emphasis>. Here's how it looks
+      in practice.
     </para>
     <programlisting>
+# let languages = &quot;OCaml,Perl,C++,C&quot;;;
+val languages : string = &quot;OCaml,Perl,C++,C&quot;
+# let dashed_languages =
+     let language_list = String.split languages ~on:',' in
+     String.concat ~sep:&quot;-&quot; language_list
+  ;;
+val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
+</programlisting>
+    <para>
+      Note that the scope of <literal>language_list</literal> is just
+      the expression <literal>String.split languages ~on:','</literal>,
+      and is not available at the top-level, as we can see if we try to
+      access it now.
+    </para>
+    <programlisting>
+# language_list;;
+Characters 0-13:
+  language_list;;
+  ^^^^^^^^^^^^^
+Error: Unbound value language_list
+</programlisting>
+    <para>
+      A let binding in an inner scope can <emphasis>shadow</emphasis>,
+      or hide, the definition from an outer scope. So, for example, we
+      could have written the <literal>dashed_languages</literal> example
+      as follows:
+    </para>
+    <programlisting>
+# let languages = &quot;OCaml,Perl,C++,C&quot;;;
+val languages : string = &quot;OCaml,Perl,C++,C&quot;
+# let dashed_languages =
+     let languages = String.split languages ~on:',' in
+     String.concat ~sep:&quot;-&quot; languages
+  ;;
+val dashed_languages : Core.Std.String.t = &quot;OCaml-Perl-C++-C&quot;
+</programlisting>
+    <para>
+      This time, in the inner scope we called the list of strings
+      <literal>languages</literal> instead of
+      <literal>language_list</literal>, thus hiding the original
+      definition of <literal>languages</literal>. But once the
+      definition of <literal>dashed_languages</literal> is complete, the
+      inner scope has closed and the original definition of languages
+      reappears.
+    </para>
+    <programlisting>
+# languages;;
+- : string = &quot;OCaml,Perl,C++,C&quot;
+</programlisting>
+    <para>
+      One common idiom is to use a series of nested
+      <literal>let</literal>/<literal>in</literal> expressions to build
+      up the components of a larger compution. Thus, we might write:
+    </para>
+    <programlisting>
+# let area_of_ring inner_radius outer_radius =
+     let pi = acos (-1.) in
+     let area_of_circle r = pi *. r *. r in
+     area_of_circle outer_radius -. area_of_circle inner_radius
+  ;;
+# area_of_ring 1. 3.;;
+- : float = 25.1327412287183449
+</programlisting>
+    <para>
+      It's important not to confuse this sequence of let bindings with
+      the modification of a mutable variable. How would
+      <literal>area_of_ring</literal> be different, for example, if we
+      had instead written this purposefully confusing bit of code:
+    </para>
+    <programlisting>
+# let area_of_ring inner_radius outer_radius =
+     let pi = acos (-1.) in
+     let area_of_circle r = pi *. r *. r in
+     let pi = 0. in
+     area_of_circle outer_radius -. area_of_circle inner_radius
+  ;;
+</programlisting>
+    <para>
+      Here, we redefined <literal>pi</literal> to be zero after the
+      definition of <literal>area_of_circle</literal>. You might think
+      that this would mean that the result of the computation would now
+      be zero, but you'd be wrong. In fact, the behavior of the function
+      is unchanged. That's because the original definition of
+      <literal>pi</literal> wasn't changed, it was just shadowed, so
+      that any subsequent reference to <literal>pi</literal> would see
+      the new definition of <literal>pi</literal> as zero. But there is
+      no later use of <literal>pi</literal>, so the binding doesn't make
+      a difference. Indeed, if you type the example I gave above into
+      the toplevel, OCaml will warn you that the definition is unused.
+    </para>
+    <programlisting>
+Characters 126-128:
+    let pi = 0. in
+        ^^
+Warning 26: unused variable pi.
+</programlisting>
+    <para>
+      In OCaml, let bindings are immutable. As we'll see in chapter
+      {{MUTABILITY}}, there are mutable values in OCaml, but no mutable
+      variables.
+    </para>
+    <sect2 id="pattern-matching-and-let">
+      <title>Pattern matching and <literal>let</literal></title>
+      <para>
+        Another useful feature of let bindings is that they support the
+        use of patterns on the left-hand side of the bind. Consider the
+        following code, which uses <literal>List.unzip</literal>, a
+        function for converting a list of pairs into a pair of lists.
+      </para>
+      <programlisting>
 # let (ints,strings) = List.unzip [(1,&quot;one&quot;); (2,&quot;two&quot;); (3,&quot;three&quot;)]
-val ints : int Core.Std.List.t = [1; 2; 3]
-val strings : string Core.Std.List.t = [&quot;one&quot;; &quot;two&quot;; &quot;three&quot;]
+val ints : int list = [1; 2; 3]
+val strings : string list = [&quot;one&quot;; &quot;two&quot;; &quot;three&quot;]
 </programlisting>
-    <para>
-      This actually binds two variables, one for each element of the
-      pair. Using a pattern in a let-binding makes the most sense for a
-      pattern that is <emphasis>irrefutable</emphasis>, i.e., where any
-      value of the type in question is guaranteed to match the pattern.
-      Tuple and record patterns are irrefutable, but list patterns are
-      not. Here's an example of a list pattern match that generates a
-      warning because not all cases are covered.
-    </para>
-    <programlisting>
+      <para>
+        This actually binds two variables, one for each element of the
+        pair. Using a pattern in a let-binding makes the most sense for
+        a pattern that is <emphasis>irrefutable</emphasis>,
+        <emphasis>i.e.</emphasis>, where any value of the type in
+        question is guaranteed to match the pattern. Tuple and record
+        patterns are irrefutable, but list patterns are not. Indeed, the
+        following pattern match generates a warning because not all
+        cases are covered.
+      </para>
+      <programlisting>
 # let (hd::tl) = [1;2;3];;
 Characters 4-12:
   let (hd::tl) = [1;2;3];;
@@ -1383,47 +1426,50 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
 </programlisting>
-    <para>
-      As a general matter, inexhaustive matches like the one above
-      should be avoided.
-    </para>
-  </sect1>
-  <sect1 id="letand-bindings">
-    <title><literal>let</literal>/<literal>and</literal>
-    bindings</title>
-    <para>
-      Another form of let binding that comes up on occasion is where you
-      bind multiple arguments in a single declaration. For example, we
-      can write:
-    </para>
-    <programlisting>
+      <para>
+        As a general matter, inexhaustive matches like the one above
+        should be avoided.
+      </para>
+    </sect2>
+    <sect2 id="letand-bindings">
+      <title><literal>let</literal>/<literal>and</literal>
+      bindings</title>
+      <para>
+        Another variant on the let binding is the use of
+        <literal>and</literal> to join multiple variable definitions
+        into a single declaration. For example, we can write:
+      </para>
+      <programlisting>
 # let x = 100 and y = 3.5;;
 val x : int = 100
 val y : float = 3.5
 </programlisting>
-    <para>
-      This can be useful when you want to create a number of new let
-      bindings at once, without having each definition affect the next.
-      So, if we wanted to create new bindings that swapped the values of
-      <literal>x</literal> and <literal>y</literal>, we could write:
-    </para>
-    <programlisting>
+      <para>
+        This can be useful when you want to create a number of new let
+        bindings at once, without having each definition affect the
+        next. So, if we wanted to create new bindings that swapped the
+        values of <literal>x</literal> and <literal>y</literal>, we
+        could write:
+      </para>
+      <programlisting>
 # let x = y and y = x ;;
 val x : float = 3.5
 val y : int = 100
 </programlisting>
-    <para>
-      This use-case doesn't come up that often. Most of the time that
-      <literal>and</literal> comes into play, it's used to define
-      multiple mutually recursive values, which we'll learn about later
-      in the chapter.
-    </para>
-    <para>
-      Note that when doing a
-      <literal>let</literal>/<literal>and</literal> style declaration,
-      the order of execution of the right-hand side of the binds is
-      undefined.
-    </para>
+      <para>
+        This use-case doesn't come up that often. Most of the time that
+        <literal>and</literal> comes into play, it's used to define
+        multiple mutually recursive values, which we'll learn about
+        later in the chapter.
+      </para>
+      <para>
+        Note that when doing a
+        <literal>let</literal>/<literal>and</literal> style declaration,
+        the order of execution of the right-hand side of the binds is
+        undefined by the language definition, so one should not write
+        code that relies on it.
+      </para>
+    </sect2>
   </sect1>
   <sect1 id="functions">
     <title>Functions</title>
@@ -2441,6 +2487,7 @@ let print_langs langs =
 <chapter id="lists-options-and-pattern-matching">
   <title>Lists, Options and Pattern Matching</title>
   <para>
+    <emphasis>(Lorem Ipsit)</emphasis>
   </para>
 </chapter>
 <chapter id="error-handling">
@@ -3986,45 +4033,112 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
     <emphasis>(yminsky: Highly preliminary)</emphasis>
   </para>
   <para>
-    Up until now, modules have played a limited role in our programming.
-    They are a way of organizing code into units, along with a mechanism
-    for specifying interfaces for those units. But that is only part of
-    what modules do in OCaml. OCaml's module system is in fact a
-    powerful toolset for structuring larger-scale systems. In this
-    chapter, we'll try to give you a taste of the full power of this
-    system.
+    Up until now, we've seen modules play only a limited role as a way
+    of organizing code into units, with a mechanism for specifying
+    interfaces for those units. But that is only part of what modules
+    can do in OCaml. The module system is in fact a powerful toolset for
+    structuring larger-scale systems. In this chapter, we'll try to give
+    you a taste of the power of that system and show ways of using it
+    effectively.
   </para>
   <sect1 id="functors">
     <title>Functors</title>
     <para>
-      One fundamental component of OCaml's module system is the
-      <emphasis>functor</emphasis>. A functor is at its core a function
-      from modules to modules. In order to get a concrete understanding
-      of what functor are and how they work, we'll start by playing
-      around with some simple examples.
+      A functor is, roughly speaking, a function from modules to
+      modules. Functors can be used to solve a variety of
+      code-structuring problems, including:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <emphasis>Dependency injection</emphasis>, or making the
+          implementations of some components of a system swappable.
+          Among other reasons, this is useful to mock up parts of your
+          system for testing and simulation purposes.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis>Auto-extension of modules</emphasis>. Sometimes,
+          there is a set of functionality that you want to build in a
+          standard way based on some small piece of type-specific logic.
+          For example, you might want to add a slew of comparison
+          operators derived from a base comparison function. To do this
+          by hand would require a great deal of boilerplate, but
+          functors let you do this with a minimum of fuss.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis>Instantiating modules with state</emphasis>. Modules
+          can contain mutable state, and that means that you'll
+          occasionally want to have multiple instantiations of a
+          particular module, each with its own independent state. One
+          simple but common example is that of a unique-id allocator.
+          Functors let you automate the construction of such modules.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      <emphasis>(yminsky: awk)</emphasis>
     </para>
     <para>
-      We'll start with something quite simple indeed: a functor for
-      incrementing an integer. Or, more precisely, a functor that takes
-      a module containing an integer value, and returns a new module,
-      containing the incremented integer instead.
+      And that is just part of what functors are good for.
     </para>
     <para>
-      We'll start by defining a module type for a module that just
-      contains an integer:
+      In the following, we'll walk through the details of how functors
+      work, after which we'll look at examples of how to use functors
+      effectively in your software designs.
     </para>
-    <programlisting>
-# module type M_int = sig val x : int end;;
-module type M_int = sig val x : int end
+    <sect2 id="the-basics-of-functors">
+      <title>The basics of functors</title>
+      <para>
+        In order to get a concrete understanding of what functors are
+        and how they work, we'll start by playing around with some
+        simple examples, starting with a very simple example indeed: a
+        functor for incrementing an integer.
+      </para>
+      <para>
+        More precisely, we'll create a functor that takes a module
+        containing a single integer variable <literal>x</literal>, and
+        returns a new module with <literal>x</literal> incremented by
+        one. The first step is to define a module type to describe the
+        input and output of the functor.
+      </para>
+      <programlisting>
+# module type X_int = sig val x : int end;;
+module type X_int = sig val x : int end
 </programlisting>
-    <para>
-      Now, we'll ....
-    </para>
-    <programlisting>
-# module Increment (M:S) : S = struct
+      <para>
+        Now, we can use that module type to write the increment functor.
+      </para>
+      <programlisting>
+# module Increment (M:X_int) : X_int = struct
     let x = M.x + 1
   end;;
-module Increment : functor (M : S) -&gt; sig val x : int end
+module Increment : functor (M : X_int) -&gt; X_int
+</programlisting>
+      <para>
+        Unlike ordinary functions, functors require more explicit type
+        annotations. In particular, the module type on input module of a
+        functor is mandatory. The module type on the output is not,
+        however, and would be inferred if it were omitted.
+      </para>
+      <programlisting>
+# module Increment (M:X_int) = struct
+    let x = M.x + 1
+  end;;
+module Increment : functor (M : X_int) -&gt; sig val x : int end
+</programlisting>
+      <para>
+        In the above, we can see that the module type of the output is
+        written out explicitly, rather than being a reference to the
+        named signature <literal>X_int</literal>.
+      </para>
+      <para>
+        Here's what <literal>Increment</literal> looks like in action.
+      </para>
+      <programlisting>
 # module Three = struct let x = 3 end;;
   module Three : sig val x : int end
 # module Four = Increment(Three);;
@@ -4032,34 +4146,19 @@ module Four : sig val x : int end
 # Four.x - Three.x;;
 - : int = 1
 </programlisting>
-    <para>
-      Here's the basic syntax of a functor definition:
-    </para>
-    <programlisting language="ocaml">
-module F (&lt;mod1&gt; : &lt;sig1&gt;) (&lt;mod2&gt; : &lt;sig2&gt;) ... (&lt;modN&gt; : &lt;sigN&gt;) : &lt;sig&gt; = struct
-  &lt;implementation&gt;
-end
-</programlisting>
-    <para>
-      Here <literal>&lt;mod1&gt;</literal>
-      ...<literal>&lt;modN&gt;</literal> are module names, and
-      <literal>&lt;sig1&gt;</literal> ...
-      <literal>&lt;sigN&gt;</literal> are module types. Unlike ordinary
-      functions, with functors, the types of the arguments can not be
-      inferred. The final <literal>: &lt;sig&gt;</literal> is a
-      constraint on the module type of the output of the functor. The
-      output type can actually be inferred, so that final signature is
-      optional.
-    </para>
-    <para>
-      A functor will accept as input any module that satisfies the
-      signature, in the same way that a given module implementation in
-      an <literal>.ml</literal> file can satisfy the signature in its
-      <literal>.mli</literal>. Thus, the input signature can drop
-      elements of the module, and can have more abstract types. Consider
-      the following example.
-    </para>
-    <programlisting>
+      <para>
+        In this case, we applied <literal>Increment</literal> to a
+        module whose signature is exactly equal to
+        <literal>X_int</literal>. But we can apply
+        <literal>Increment</literal> to any module that satisfies
+        <literal>X_int</literal>, in the same way that an
+        <literal>.ml</literal> file satisfies the signature in its
+        <literal>.mli</literal>. So, for example,
+        <literal>Increment</literal> can take as its input a module that
+        has more fields than are contemplated in
+        <literal>X_int</literal>. For example:
+      </para>
+      <programlisting>
 # module Three_and_more = struct
     let x = 3
     let y = &quot;three&quot;
@@ -4068,12 +4167,89 @@ module Three_and_more : sig val x : int val x_string : string end
 # module Four = Increment(Three_and_more);;
 module Four : sig val x : int end
 </programlisting>
-    <para>
-      Here, we were able to pass in <literal>Three_and_more</literal>,
-      even though <literal>Three_and_more</literal> had the field
-      <literal>y</literal>, which is not mentioned in the signature
-      applied to that argument.
-    </para>
+      <para>
+        We were able to pass <literal>Three_and_more</literal> to
+        <literal>Increment</literal>, even though
+        <literal>Three_and_more</literal> has the field
+        <literal>y</literal> which is not present in
+        <literal>X_int</literal>.
+      </para>
+    </sect2>
+    <sect2 id="working-with-types">
+      <title>Working with types</title>
+      <para>
+        The <literal>Increment</literal> example was especially trivial,
+        in that the modules that were being operated on contained only
+        values. But functors can operate on the types of a module as
+        well. Imagine, for example, that we want to create a module for
+        dealing with closed intervals over any given type. A functor is
+        one effective way of doing this.
+      </para>
+      <para>
+        The firs thing we'll need is a module type to represent the type
+        of values along with a comparison function.
+      </para>
+      <programlisting>
+# module type Comparable = sig
+    type t
+    val compare : t -&gt; t -&gt; int
+  end ;;
+</programlisting>
+      <para>
+        Note that the comparison function returns an integer. The
+        comparison function should return <literal>0</literal> if the
+        two elements are zero, a positive number if the first element is
+        larger than the second, and a negative number if the first
+        element is smaller than the second. Thus, this is how we would
+        rewrite the standard comparision functions on top of compare:
+      </para>
+      <programlisting language="ocaml">
+compare x y &lt; 0     (* x &lt; y *)
+compare x y = 0     (* x = y *)
+compare x y &gt; 0     (* x &gt; y *)
+</programlisting>
+      <para>
+        Now, we can use this signature as the basis of our
+        implementation.
+      </para>
+      <programlisting>
+# module Make(C : Comparable) = struct
+    type t = | Interval of C.t * C.t
+             | Empty
+
+    let create low high =
+      if C.compare low high &gt; 0 then Empty
+      else Interval (low,high)
+
+    let contains t x =
+      match t with
+      | Empty -&gt; false
+      | Interval (l,h) -&gt;
+        C.compare x l &gt;= 0 &amp;&amp; C.compare x h &lt;= 0
+
+    let intersect t1 t2 =
+      let min x y = if C.compare x y &lt;= 0 then x else y in
+      let max x y = if C.compare x y &gt;= 0 then x else y in
+      match t1,t2 with
+      | Empty, _ | _, Empty -&gt; Empty
+      | Interval (l1,h1), Interval (l2,h2) -&gt;
+        create (max l1 l2) (min h1 h2)
+
+  end ;;
+module Make :
+  functor (C : Comparable) -&gt;
+    sig
+      type t = Interval of C.t * C.t | Empty
+      val create : C.t -&gt; C.t -&gt; t
+      val contains : t -&gt; C.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</programlisting>
+      <para>
+        We can then take this functor, and apply it to concrete modules
+        like <literal>Int</literal> or <literal>String</literal>.
+      </para>
+    </sect2>
     <sect2 id="a-worked-example">
       <title>A worked example</title>
       <para>
