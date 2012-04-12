@@ -1474,69 +1474,113 @@ val y : int = 100
   <sect1 id="functions">
     <title>Functions</title>
     <para>
-      OCaml function declarations come in multiple styles. The most
-      basic form is to create an <emphasis>anonymous</emphasis> function
-      using the <literal>fun</literal> keyword:
+      OCaml being a functional language, it's no surprise that functions
+      are an important and pervasive element of programming in OCaml.
+      Indeed, we've seen functions pop up already in many of the
+      examples we've looked at thus far. But while we've introduced the
+      basics of functions, we're now going to cover them in more depth,
+      starting from the foundations.
     </para>
-    <programlisting>
+    <sect2 id="anonymous-functions">
+      <title>Anonymous Functions</title>
+      <para>
+        We'll start by looking at the most basic form of OCaml function,
+        the <emphasis>anonymous</emphasis> function. Anonymous functions
+        are declared using the <literal>fun</literal> keyword, as
+        follows.
+      </para>
+      <programlisting>
 # (fun x -&gt; x + 1);;
 - : int -&gt; int = &lt;fun&gt;
 </programlisting>
-    <para>
-      The above expression creates a one-argument function, which can
-      straightforwardly be applied to an argument:
-    </para>
-    <programlisting>
+      <para>
+        Anonymous functions aren't named, but they can be used for many
+        different purposes nonetheless. You can, for example, apply an
+        anonymous function to an argument:
+      </para>
+      <programlisting>
 # (fun x -&gt; x + 1) 7;;
 - : int = 8
 </programlisting>
-    <para>
-      Anonymous functions are quite convenient, particularly in a
-      higher-order context, <emphasis>e.g.</emphasis>, when constructing
-      a function to be passed as an argument to another function.
-    </para>
-    <para>
-      We can create a named function using a let binding.
-    </para>
-    <programlisting>
+      <para>
+        Or pass it to another function.
+      </para>
+      <programlisting>
+# List.map ~f:(fun x -&gt; x + 1) [1;2;3];;
+- : int list = [2; 3; 4]
+</programlisting>
+      <para>
+        Or even stuff then into a datastructure.
+      </para>
+      <programlisting>
+# let increments = [ (fun x -&gt; x + 1); (fun x -&gt; x + 2) ] ;;
+val increments : (int -&gt; int) list = [&lt;fun&gt;; &lt;fun&gt;]
+# List.map ~f:(fun f -&gt; f 5) increments;;
+- : int list = [6; 7]
+</programlisting>
+      <para>
+        It's worth stopping for a moment to puzzle this example out,
+        since this kind of higher-order use of functions can be a bit
+        obscure at first. The first thing to understand is the function
+        <literal>(fun f -&gt; f 5)</literal>, which takes a function as
+        its argument, and applies that function to the number
+        <literal>5</literal>. The invocation of
+        <literal>List.map</literal> applies
+        <literal>(fun f -&gt; f 5)</literal> to the elements of the
+        <literal>increments</literal> list (which are themselves
+        functions) and returns the list containing the results of these
+        function applications.
+      </para>
+      <para>
+        The key thing to understand is that functions are ordinary
+        values in OCaml, and you can do everything with them that you'd
+        do with an ordinary value, including passing them to and
+        returning them from other functions and storing them in
+        datastructures. We even name functions in the same way that we
+        name other values, by using a let binding.
+      </para>
+      <programlisting>
 # let plusone = (fun x -&gt; x + 1);;
 val plusone : int -&gt; int = &lt;fun&gt;
 # plusone 3;;
 - : int = 4
 </programlisting>
-    <para>
-      The declaration of <literal>plusone</literal> above is equivalent
-      to the following form, which we already saw in chapter {{TOUR}}:
-    </para>
-    <programlisting>
+      <para>
+        Defining named functions is so common that there is some built
+        in syntactic sugar for it. Thus, we can write:
+      </para>
+      <programlisting>
 # let plusone x = x + 1;;
+val plusone : int -&gt; int = &lt;fun&gt;
 </programlisting>
-    <para>
-      This is the most common and convenient way to declare a function,
-      but syntatic niceties aside, the two forms are entirely
-      equivalent.
-    </para>
-    <sidebar>
-    <title>
-    <literal>let</literal> and <literal>fun</literal>
-    </title>
-    <para>
-      Functions and let bindings have a lot to do with each other. In
-      some sense, you can think of the argument of a function as a
-      variable being bound to its argument. Indeed, the following two
-      expressions are nearly equivalent:
-    </para>
-    <programlisting>
+      <para>
+        This is the most common and convenient way to declare a
+        function, but syntatic niceties aside, the two styles of
+        function definition are entirely equivalent.
+      </para>
+      <sidebar>
+      <title>
+      <literal>let</literal> and <literal>fun</literal>
+      </title>
+      <para>
+        Functions and let bindings have a lot to do with each other. In
+        some sense, you can think of the argument of a function as a
+        variable being bound to its argument. Indeed, the following two
+        expressions are nearly equivalent:
+      </para>
+      <programlisting>
 # (fun x -&gt; x + 1) 7;;
 - : int = 8
 # let x = 7 in x + 1;;
 - : int = 8
 </programlisting>
-    <para>
-      This connection is important, and will come up more when
-      programming in a monadic style, as we'll see in chapter {{ASYNC}}.
-    </para>
-    </sidebar>
+      <para>
+        This connection is important, and will come up more when
+        programming in a monadic style, as we'll see in chapter
+        {{ASYNC}}.
+      </para>
+      </sidebar>
+    </sect2>
     <sect2 id="multi-argument-functions">
       <title>Multi-argument functions</title>
       <para>
@@ -1563,28 +1607,34 @@ val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
       <para>
         This rewrite makes it explicit that <literal>abs_diff</literal>
         is actually a function of one argument that returns another
-        function of one argument, which itself returns the absolute
-        difference between the argument given to the first function and
-        the argument given to the second. In other words,
-        <literal>abs_diff</literal> is a nested, or
-        <emphasis>curried</emphasis> function. (Currying is named after
-        Haskell Curry, a famous logician who had a significant impact on
-        the design and theory of programming languages.)
+        function of one argument, which itself returns the final
+        computation. Because the functions are nested, the inner
+        expression <literal>abs (x - y)</literal> has access to both
+        <literal>x</literal>, which was captured by the first function
+        application, and <literal>y</literal>, which was captured by the
+        second one.
       </para>
       <para>
-        The key to interpreting the type signature of a curried function
-        is the observation that <literal>-&gt;</literal> is
-        right-associative. The type signature of
-        <literal>abs_diff</literal> can therefore be parenthesized as
-        follows to make the currying more obvious without changing the
-        meaning of the signature.
+        This style of function is called a <emphasis>curried</emphasis>
+        function. (Currying is named after Haskell Curry, a famous
+        logician who had a significant impact on the design and theory
+        of programming languages.) The key to interpreting the type
+        signature of a curried function is the observation that
+        <literal>-&gt;</literal> is right-associative. The type
+        signature of <literal>abs_diff</literal> can therefore be
+        parenthesized as follows. This doesn't change the meaning of the
+        signature, but it's now easier to see how currying comes into
+        play.
       </para>
       <programlisting>
 val abs_diff : int -&gt; (int -&gt; int)
 </programlisting>
       <para>
-        Currying is more than just a theoretical curiosity. Here's an
-        example of how you can make use of currying.
+        Currying is more than just a theoretical curiosity. You can make
+        use of currying to create specialized functions by just feeding
+        in some of the arguments, as you can see in this example, where
+        we create a specialized version of <literal>abs_diff</literal>
+        that always measures its diff from a given starting number.
       </para>
       <programlisting>
 # let dist_from_3 = abs_diff 3;;
@@ -1597,8 +1647,7 @@ val dist_from_3 : int -&gt; int = &lt;fun&gt;
       <para>
         The practice of applying some of the arguments of a curried
         function to get a new function is called <emphasis>partial
-        application</emphasis>, and it is a convenient way to mint new,
-        specialized functions from more general ones.
+        application</emphasis>.
       </para>
       <para>
         Note that the <literal>fun</literal> keyword supports its own
@@ -1609,10 +1658,16 @@ val dist_from_3 : int -&gt; int = &lt;fun&gt;
 # let abs_diff = (fun x y -&gt; abs (x - y));;
 </programlisting>
       <para>
+        Or, even more tersely:
+      </para>
+      <programlisting>
+# let abs_diff x y = abs (x - y);;
+</programlisting>
+      <para>
         You might worry that curried functions are terribly expensive,
-        but this is not an issue. In OCaml, there is no penalty for
+        but this is not the case. In OCaml, there is no penalty for
         calling a curried function with all of its arguments. (Partial
-        application, unsurprisingly, does have a small cost.)
+        application, unsurprisingly, does have a small extra cost.)
       </para>
       <para>
         Currying is the standard way in OCaml of writing a
@@ -1685,24 +1740,43 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
 - : int = 7
 </programlisting>
       <para>
-        In OCaml, functions can only be used infix if the name of the
-        function is chosen from one of a specialized set of identifiers
-        called <emphasis>operators</emphasis>. An operator is any
-        identifier that is a sequence of characters from the following
-        set
+        You might not have thought of the second example as a function,
+        but it really is. Infix operators like <literal>+</literal>
+        really only differ syntactically from other functions. Indeed,
+        if we put parenthesis around an infix operator like
+        <literal>+</literal>, it operates like a normal prefix operator:
+      </para>
+      <programlisting>
+# (+) 3 4;;
+- : int = 7
+# List.map ~f:((+) 3) [4;5;6];;
+- : int list = [7; 8; 9]
+</programlisting>
+      <para>
+        Here, we've partially applied <literal>(+)</literal> to gain a
+        function that increments its single argument by
+        <literal>3</literal>, and then applied that to all the elements
+        of a list.
+      </para>
+      <para>
+        A function is infix if the name of that function is chosen from
+        one of a specialized set of identifiers called
+        <emphasis>operators</emphasis>. An operator is any identifier
+        that is a sequence of characters from the following set
       </para>
       <programlisting>
 ! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~
 </programlisting>
       <para>
         or is one of a handful of pre-determined strings, including
-        things like <literal>mod</literal>, the modulus operator, and
+        <literal>mod</literal>, the modulus operator, and
         <literal>lsl</literal>, for &quot;logical shift right&quot;,
         which is a bit-shifting operation.
       </para>
       <para>
         We can define (or redefine) the meaning of an operator as
-        follows:
+        follows. Here's an example of a simple vector-addition operator
+        on int pairs.
       </para>
       <programlisting>
 # let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
@@ -1711,17 +1785,9 @@ val ( +! ) : int * int -&gt; int * int -&gt; int *int = &lt;fun&gt;
 - : int * int = (1,6)
 </programlisting>
       <para>
-        Note that operators can be used in prefix style as well, if they
-        are put in parentheses:
-      </para>
-      <programlisting>
-# (+!) (3,2) (-2,4);;
-- : int = (1,6)
-</programlisting>
-      <para>
-        The details of how the operator works are determined by the
-        first character of the operator. This table describes how, and
-        lists the operators from highest to lowest precedence.
+        The syntactic role of an operator work is determined by its
+        first character. This table describes how, and lists the
+        operators from highest to lowest precedence.
       </para>
       <informaltable>
         <tgroup cols="2">
@@ -1803,6 +1869,18 @@ val ( +! ) : int * int -&gt; int * int -&gt; int *int = &lt;fun&gt;
 val some_or_zero : int option -&gt; int = &lt;fun&gt;
 # List.map ~f:some_or_zero [Some 3; None; Some 4];;
 - : int list = [3; 0; 4]
+</programlisting>
+      <para>
+        This is equivalent to combining a <literal>fun</literal> with
+        <literal>match</literal>, as follows:
+      </para>
+      <programlisting>
+# let some_or_zero num_opt =
+    match num_opt with
+     | Some x -&gt; x
+     | None -&gt; 0
+  ;;
+val some_or_zero : int option -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
         We can also combine the different styles of function declaration
