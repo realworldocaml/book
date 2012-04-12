@@ -63,7 +63,10 @@ less clinical and confusing form.
 > abs_diff along with an argument into another function. You could also
 > say that dist_from_3 calls abs_diff with one of its two values already
 > filled in.
->
+
+I rewrote the section to try to make it clearer.  Tell me what you
+think!
+
 > This is too long and too abstract: "Labeled arguments also make it
 > possible to place the arguments to a function in different orders,
 > which is useful for functions like List.map where you often want to

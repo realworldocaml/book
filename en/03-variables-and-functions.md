@@ -212,27 +212,64 @@ language definition, so one should not write code that relies on it.
 
 ## Functions ##
 
-OCaml function declarations come in multiple styles.  The most basic
-form is to create an _anonymous_ function using the `fun` keyword:
+OCaml being a functional language, it's no surprise that functions are
+an important and pervasive element of programming in OCaml.  Indeed,
+we've seen functions pop up already in many of the examples we've
+looked at thus far.  But while we've introduced the basics of
+functions, we're now going to cover them in more depth, starting from
+the foundations.
+
+### Anonymous Functions ###
+
+We'll start by looking at the most basic form of OCaml function, the
+_anonymous_ function.  Anonymous functions are declared using the
+`fun` keyword, as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (fun x -> x + 1);;
 - : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The above expression creates a one-argument function, which can
-straightforwardly be applied to an argument:
+Anonymous functions aren't named, but they can be used for many
+different purposes nonetheless.  You can, for example, apply an
+anonymous function to an argument:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (fun x -> x + 1) 7;;
 - : int = 8
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Anonymous functions are quite convenient, particularly in a
-higher-order context, _e.g._, when constructing a function to be
-passed as an argument to another function.
+Or pass it to another function.
 
-We can create a named function using a let binding.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# List.map ~f:(fun x -> x + 1) [1;2;3];;
+- : int list = [2; 3; 4]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Or even stuff then into a datastructure.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
+val increments : (int -> int) list = [<fun>; <fun>]
+# List.map ~f:(fun f -> f 5) increments;;
+- : int list = [6; 7]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It's worth stopping for a moment to puzzle this example out, since
+this kind of higher-order use of functions can be a bit obscure at
+first.  The first thing to understand is the function `(fun f -> f
+5)`, which takes a function as its argument, and applies that function
+to the number `5`.  The invocation of `List.map` applies `(fun f -> f
+5)` to the elements of the `increments` list (which are themselves
+functions) and returns the list containing the results of these
+function applications.
+
+The key thing to understand is that functions are ordinary values in
+OCaml, and you can do everything with them that you'd do with an
+ordinary value, including passing them to and returning them from
+other functions and storing them in datastructures.  We even name
+functions in the same way that we name other values, by using a let
+binding.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let plusone = (fun x -> x + 1);;
@@ -241,15 +278,17 @@ val plusone : int -> int = <fun>
 - : int = 4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The declaration of `plusone` above is equivalent to the following
-form, which we already saw in chapter {{TOUR}}:
+Defining named functions is so common that there is some built in
+syntactic sugar for it.  Thus, we can write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let plusone x = x + 1;;
+val plusone : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is the most common and convenient way to declare a function, but
-syntatic niceties aside, the two forms are entirely equivalent.
+syntatic niceties aside, the two styles of function definition are
+entirely equivalent.
 
 <sidebar>
 <title>`let` and `fun`</title>
@@ -295,23 +334,29 @@ val abs_diff : int -> int -> int = <fun>
 
 This rewrite makes it explicit that `abs_diff` is actually a function
 of one argument that returns another function of one argument, which
-itself returns the absolute difference between the argument given to
-the first function and the argument given to the second.  In other
-words, `abs_diff` is a nested, or _curried_ function.  (Currying is
-named after Haskell Curry, a famous logician who had a significant
-impact on the design and theory of programming languages.)
+itself returns the final computation.  Because the functions are
+nested, the inner expression `abs (x - y)` has access to both `x`,
+which was captured by the first function application, and `y`, which
+was captured by the second one.
 
-The key to interpreting the type signature of a curried function is
-the observation that `->` is right-associative.  The type signature of
-`abs_diff` can therefore be parenthesized as follows to make the
-currying more obvious without changing the meaning of the signature.
+This style of function is called a _curried_ function.  (Currying is
+named after Haskell Curry, a famous logician who had a significant
+impact on the design and theory of programming languages.)  The key to
+interpreting the type signature of a curried function is the
+observation that `->` is right-associative.  The type signature of
+`abs_diff` can therefore be parenthesized as follows.  This doesn't
+change the meaning of the signature, but it's now easier to see how
+currying comes into play.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 val abs_diff : int -> (int -> int)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Currying is more than just a theoretical curiosity.  Here's an example
-of how you can make use of currying.
+Currying is more than just a theoretical curiosity.  You can make use
+of currying to create specialized functions by just feeding in some of
+the arguments, as you can see in this example, where we create a
+specialized version of `abs_diff` that always measures its diff from a
+given starting number.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let dist_from_3 = abs_diff 3;;
@@ -323,9 +368,7 @@ val dist_from_3 : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The practice of applying some of the arguments of a curried function
-to get a new function is called _partial application_, and it is a
-convenient way to mint new, specialized functions from more general
-ones.
+to get a new function is called _partial application_.
 
 Note that the `fun` keyword supports its own syntactic sugar for
 currying, so we could also have written `abs_diff` as follows.
@@ -334,10 +377,16 @@ currying, so we could also have written `abs_diff` as follows.
 # let abs_diff = (fun x y -> abs (x - y));;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Or, even more tersely:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let abs_diff x y = abs (x - y);;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 You might worry that curried functions are terribly expensive, but
-this is not an issue.  In OCaml, there is no penalty for calling a
+this is not the case.  In OCaml, there is no penalty for calling a
 curried function with all of its arguments.  (Partial application,
-unsurprisingly, does have a small cost.)
+unsurprisingly, does have a small extra cost.)
 
 Currying is the standard way in OCaml of writing a multi-argument
 function, but it's not the only way.  It's also possible to use the
@@ -402,20 +451,36 @@ style:
 - : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In OCaml, functions can only be used infix if the name of the function
-is chosen from one of a specialized set of identifiers called
-_operators_.  An operator is any identifier that is a sequence of
-characters from the following set
+You might not have thought of the second example as a function, but it
+really is.  Infix operators like `+` really only differ syntactically
+from other functions.  Indeed, if we put parenthesis around an infix
+operator like `+`, it operates like a normal prefix operator:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# (+) 3 4;;
+- : int = 7
+# List.map ~f:((+) 3) [4;5;6];;
+- : int list = [7; 8; 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, we've partially applied `(+)` to gain a function that increments
+its single argument by `3`, and then applied that to all the elements
+of a list.
+
+A function is infix if the name of that function is chosen from one of
+a specialized set of identifiers called _operators_.  An operator is
+any identifier that is a sequence of characters from the following set
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! $ % & * + - . / : < = > ? @ ^ | ~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-or is one of a handful of pre-determined strings, including things
-like `mod`, the modulus operator, and `lsl`, for "logical shift
-right", which is a bit-shifting operation.
+or is one of a handful of pre-determined strings, including `mod`, the
+modulus operator, and `lsl`, for "logical shift right", which is a
+bit-shifting operation.
 
-We can define (or redefine) the meaning of an operator as follows:
+We can define (or redefine) the meaning of an operator as follows.
+Here's an example of a simple vector-addition operator on int pairs.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
@@ -424,17 +489,9 @@ val ( +! ) : int * int -> int * int -> int *int = <fun>
 - : int * int = (1,6)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that operators can be used in prefix style as well, if they are
-put in parentheses:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# (+!) (3,2) (-2,4);;
-- : int = (1,6)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The details of how the operator works are determined by the first
-character of the operator.  This table describes how, and lists the
-operators from highest to lowest precedence.
+The syntactic role of an operator work is determined by its first
+character.  This table describes how, and lists the operators from
+highest to lowest precedence.
 
 -------------------------------------------------------------
 First character    Usage
@@ -452,7 +509,6 @@ First character    Usage
 
 -------------------------------------------------------------
 
-
 ### Declaring functions with `function` ###
 
 Another way to define a function is using the `function` keyword.
@@ -467,6 +523,17 @@ Instead of having syntactic support for declaring curried functions,
 val some_or_zero : int option -> int = <fun>
 # List.map ~f:some_or_zero [Some 3; None; Some 4];;
 - : int list = [3; 0; 4]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is equivalent to combining a `fun` with `match`, as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let some_or_zero num_opt =
+    match num_opt with
+     | Some x -> x
+     | None -> 0
+  ;;
+val some_or_zero : int option -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can also combine the different styles of function declaration
