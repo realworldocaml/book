@@ -688,7 +688,7 @@ Error: The implementation counter.ml
 
 Order is similarly important in other parts of the signature,
 including the order in which record fields are declared and the order
-of arguments (including labelled and optional arguments) to a
+of arguments (including labeled and optional arguments) to a
 function.
 
 #### Cyclic dependencies
