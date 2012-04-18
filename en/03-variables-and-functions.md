@@ -322,9 +322,9 @@ val abs_diff : int -> int -> int = <fun>
 - : int = 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You may find the type signature of `abs_diff` a bit obscure at first.
-To understand what's going on, let's rewrite `abs_diff` in an
-equivalent form, using the `fun` keyword:
+You may find the type signature of `abs_diff` with all of its arrows a
+little hard to parse.  To understand what's going on, let's rewrite
+`abs_diff` in an equivalent form, using the `fun` keyword:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let abs_diff =
@@ -345,18 +345,17 @@ impact on the design and theory of programming languages.)  The key to
 interpreting the type signature of a curried function is the
 observation that `->` is right-associative.  The type signature of
 `abs_diff` can therefore be parenthesized as follows.  This doesn't
-change the meaning of the signature, but it's now easier to see how
-currying comes into play.
+change the meaning of the signature, but it makes it easier to see how
+the currying fits in.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 val abs_diff : int -> (int -> int)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Currying is more than just a theoretical curiosity.  You can make use
-of currying to create specialized functions by just feeding in some of
-the arguments, as you can see in this example, where we create a
-specialized version of `abs_diff` that always measures its diff from a
-given starting number.
+of currying to specialize a function by feeding in some of the
+arguments.  Here's an example where we create a specialized version of
+`abs_diff` that measures the distance of a given number from `3`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let dist_from_3 = abs_diff 3;;
@@ -377,20 +376,14 @@ currying, so we could also have written `abs_diff` as follows.
 # let abs_diff = (fun x y -> abs (x - y));;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Or, even more tersely:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let abs_diff x y = abs (x - y);;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 You might worry that curried functions are terribly expensive, but
 this is not the case.  In OCaml, there is no penalty for calling a
 curried function with all of its arguments.  (Partial application,
 unsurprisingly, does have a small extra cost.)
 
-Currying is the standard way in OCaml of writing a multi-argument
-function, but it's not the only way.  It's also possible to use the
-different arms of a tuple as different arguments.  So, we could write:
+Currying is not the only way of writing a multi-argument function in
+OCaml.  It's also possible to use the different arms of a tuple as
+different arguments.  So, we could write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let abs_diff (x,y) = abs (x - y)
@@ -403,9 +396,9 @@ OCaml handles this calling convention efficiently as well.  In
 particular it does not generally have to allocate a tuple just for the
 purpose of sending arguments to a tuple-style function.
 
-There are small tradeoffs between these two styles, but most of the
-time, once should stick to currying, since it's the default style in
-the OCaml world.
+There are small tradeoffs between these two approaches, but most of
+the time, once should stick to currying, since it's the default style
+in the OCaml world.
 
 ### Recursive functions ###
 
@@ -451,10 +444,11 @@ style:
 - : int = 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You might not have thought of the second example as a function, but it
-really is.  Infix operators like `+` really only differ syntactically
-from other functions.  Indeed, if we put parenthesis around an infix
-operator like `+`, it operates like a normal prefix operator:
+You might not have thought of the second example as an ordinary
+function, but it very much is.  Infix operators like `+` really only
+differ syntactically from other functions.  In fact, if we put
+parenthesis around an infix operator, you can use it as an ordinary
+prefix function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # (+) 3 4;;
@@ -463,21 +457,22 @@ operator like `+`, it operates like a normal prefix operator:
 - : int list = [7; 8; 9]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, we've partially applied `(+)` to gain a function that increments
-its single argument by `3`, and then applied that to all the elements
-of a list.
+In the second expression above, we've partially applied `(+)` to gain
+a function that increments its single argument by `3`, and then
+applied that to all the elements of a list.
 
-A function is infix if the name of that function is chosen from one of
-a specialized set of identifiers called _operators_.  An operator is
-any identifier that is a sequence of characters from the following set
+A function is treated syntactically as an operator if the name of that
+function is chosen from one of a specialized set of identifiers.  This
+set includes any identifier that is a sequence of characters from the
+following set
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! $ % & * + - . / : < = > ? @ ^ | ~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 or is one of a handful of pre-determined strings, including `mod`, the
-modulus operator, and `lsl`, for "logical shift right", which is a
-bit-shifting operation.
+modulus operator, and `lsl`, for "logical shift right", a bit-shifting
+operation.
 
 We can define (or redefine) the meaning of an operator as follows.
 Here's an example of a simple vector-addition operator on int pairs.
@@ -509,6 +504,62 @@ First character    Usage
 
 -------------------------------------------------------------
 
+Here's an example of a very useful operator that's defined in Core,
+following these rules.  Here's the definition:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let (|!) x f = f x ;;
+val ( |! ) : 'a -> ('a -> 'b) -> 'b = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It's not quite obvious at first what the purpose of this operator is:
+it just takes some value and a function, and applies the function to
+the value.  But its utility is clearer when you see it in action.  It
+works as a kind of sequencing operator, similar in spirit to using
+pipe in the UNIX shell.  So, for example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let drop_zs string =
+    String.to_list string
+    |! List.filter ~f:(fun c -> c <> 'z')
+    |! String.of_char_list
+  ;;
+val drop_zs : string -> string = <fun>  
+# drop_zs "lizkze UNIX zzpipes wizth tzzypzzes";;
+- : string = "like UNIX pipes with types"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that `|!` works here because it is left-associative.  If it were
+right associative, it wouldn't be doing the right thing at all.
+Indeed, let's see what happens if we try using a right associative
+operator, like (^!).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let (^!) = (|!);;
+val ( ^! ) : 'a -> ('a -> 'b) -> 'b = <fun>
+# let drop_zs string =
+    String.to_list string
+    ^! List.filter ~f:(fun c -> c <> 'z')
+    ^! String.of_char_list
+  ;;
+        Characters 96-115:
+      ^! String.of_char_list
+         ^^^^^^^^^^^^^^^^^^^
+Error: This expression has type char list -> string
+       but an expression was expected of type
+         (char list -> char list) -> 'a
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The above type error is a little bewildering at first glance.  What's
+going on is that, because `^!` is right associative, the operator is
+trying to feed the value `List.filter ~f:(func -> c <> 'z')` to the
+function `String.of_char_list`.  But `String.of_char_list` expects a
+list of characters as its input, not a function.
+
+The type error aside, this example highlights the importance of
+choosing the operator you use with care, particularly with respect to
+associativity.
+
 ### Declaring functions with `function` ###
 
 Another way to define a function is using the `function` keyword.
@@ -530,8 +581,8 @@ This is equivalent to combining a `fun` with `match`, as follows:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let some_or_zero num_opt =
     match num_opt with
-     | Some x -> x
-     | None -> 0
+    | Some x -> x
+    | None -> 0
   ;;
 val some_or_zero : int option -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -548,6 +599,9 @@ function with a pattern-match on the second argument.
 # List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 - : int Core.Std.List.t = [3; 100; 4]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Also, note the use of partial application to generate the function
+passed to `List.map`
 
 ### Labeled Arguments ###
 
@@ -587,13 +641,14 @@ val f : foo:int -> bar:int -> int = <fun>
 
 Labeled arguments are useful in a few different cases:
 
-  - When defining a function with lots of arguments.  When you have
-    enough arguments, names are easier to remember than positions.
+  - When defining a function with lots of arguments.  Beyond a certain
+    number, arguments are easier to remember by name than by position.
 
-  - For functions that have multiple arguments that might get confused
-    with each other, particularly if they're of the same type.  For
-    example, consider this signature for a function for extracting a
-    substring of another string.
+  - When defining functions that have multiple arguments that might
+    get confused with each other.  This is most at issue when the
+    arguments are of the same type.  For example, consider this
+    signature for a function for extracting a substring of another
+    string.
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
     val substring: string -> int -> int -> string
@@ -611,62 +666,121 @@ Labeled arguments are useful in a few different cases:
     code that makes use of `substring`, and makes it harder to
     accidentally swap the position and the length.
 
-  - Labeled arguments give you a way to assign a clear name and
-    meaning to an argument whose type is otherwise less than
-    informative.  For example, consider a function for creating a
-    hashtable where the first argument is the initial size of the
-    table, and the second argument is a flag which, when true,
-    indicates that the hashtable will adjust its size down when its
-    size is small.  The following signature is less than informative.
+  - When the meaning of a particular argument is unclear from the type
+    alone.  For example, consider a function for creating a hashtable
+    where the first argument is the initial size of the table, and the
+    second argument is a flag which, when true, indicates that the
+    hashtable will reduce its size when the hashtable contains few
+    elements.  The following signature doesn't give you much of a hint
+    as to the meaning of the arguments.
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
     val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    but with labeled arguments, we can make the intent much clearer:
+    but with labeled arguments, we can make the intent much clearer.
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
     val create_hashtable : init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  - Labeled arguments can be used to make a function signature more
-    flexible.  For example, labeled arguments make it possible for
-    the caller to decide which argument of a function to partially
-    apply, whereas in ordinary curried functions, you can only
-    partially apply the arguments in order from first to last.
-    Labeled arguments also make it possible to place the arguments to
-    a function in different orders, which is useful for functions like
-    `List.map` where you often want to partially apply `List.map` with
-    just the function, and at the same time mapping over a large
-    function is easier to read if the function is the last argument.
+  - When you want flexibility on the order in which arguments are
+    presented and the order of partial application.  One common
+    example is functions like `List.map` or List.fold which take a
+    function as one of their arguments.  When the function in question
+    is big, it's often more readable to put the function last, _e.g._:
 
-One surprising gotcha about labeled arguments is that while order
-doesn't matter when calling a function with labeled arguments, it does
-matter in a higher-order context, _i.e._, when passing a labeled
-argument to another function.  This is shown by the following example.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+    # let rot13 s =
+         String.map s ~f:(fun c ->
+            if not (Char.is_alpha c) then c
+            else
+              let a_int = Char.to_int 'a' in
+              let offset = Char.to_int (Char.lowercase c) - a_int in
+              let c' = Char.of_int_exn ((offset + 13) mod 26 + a_int) in
+              if Char.is_uppercase c then Char.uppercase c' else c'
+          );;
+    val rot13 : string -> string = <fun>
+    # rot13 "Hello world!";;
+    - : string = "Uryyb jbeyq!"
+    # rot13 (rot13 "Hello world!");;
+    - : string = "Hello world!"
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    But despite the fact that we often want the argument `f` to go
+    last, we sometimes want to partially apply that argument.  In this
+    example, we do so with `String.map`.
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+    # List.map ~f:(String.map ~f:Char.uppercase)
+        [ "Hello"; "World" ];;
+    - : string list = ["HELLO"; "WORLD"]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### Higher-order functions and labels ####
+
+One surprising gotcha labeled arguments is that while order doesn't
+matter when calling a function with labeled arguments, it does matter
+in a higher-order context, _e.g._, when passing a function with
+labeled arguments to another function.  Here's an example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let apply_to_tuple f (first,second) = f ~first ~second;;
 val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
-# let divide ~second ~first = first / second;;
-val divide : second:int -> first:int -> int = <fun>
-# apply_to_tuple divide 3 4;;
-Characters 15-21:
-  apply_to_tuple divide 3 4;;
-                 ^^^^^^
-Error: This expression has type second:int -> first:int -> int
-       but an expression was expected of type
-         first:'a -> second:'b -> 'c -> 'd
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, the definition of `apply_to_tuple` sets up the expectation that
+its first argument is a function with two labeled arguments, `first`
+and `second`, listed in that order.  We could have defined
+`apply_to_tuple` differently to change the order in which the labeled
+arguments were listed.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let apply_to_tuple f (first,second) = f ~second ~first;;
+val apply_to_tuple : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It turns out this order of listing matters.  In particular, if we
+define a function that has a different order
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let divide ~first ~second = first / second;;
+val divide : first:int -> second:int -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+we'll find that it can't be passed in to `apply_to_tuple`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# apply_to_tuple divide (3,4);;
+Characters 15-21:
+  apply_to_tuple divide (3,4);;
+                 ^^^^^^
+Error: This expression has type first:int -> second:int -> int
+       but an expression was expected of type second:'a -> first:'b -> 'c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+But, if we go back to the original definition of `apply_to_tuple`,
+things will work smoothly.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let apply_to_tuple f (first,second) = f ~first ~second;;
+val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
+# apply_to_tuple divide (3,4);;
+- : int = 0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So, even though the order of labeled arguments usually doesn't matter,
+it will sometimes bite you in higher-ordered contexts, where you're
+doing things like passing functions as arguments to other functions.
 
 ### Optional arguments ###
 
 An optional argument is like a labeled argument that the caller can
-choose whether or not to provide.  A function with an optional
-argument must define a default for when the argument is absent.
-Consider the following example of a string concatenation function with
-an optionally specified separator.  Note that the `?` in front of an
-argument is used to make the separator optional.
+choose whether or not to provide.  Functions with optional arguments
+must define a behavior for when the argument is absent.  Here's an
+example of a string concatenation function with an optionally
+specified separator.  Note that `?` is used to mark an argument as
+optional.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ?sep x y =
@@ -674,47 +788,74 @@ argument is used to make the separator optional.
      x ^ sep ^ y
   ;;
 val concat : ?sep:string -> string -> string -> string = <fun>
-# concat "foo" "bar";; (* without the optional argument *)
+# concat "foo" "bar";;             (* without the optional argument *)
 - : string = "foobar"
-# concat ~sep:":" "foo" "bar";; (* with the optional argument *)
+# concat ~sep:":" "foo" "bar";;    (* with the optional argument    *)
 - : string = "foo:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Optional arguments can be passed in using the same syntax as labeled
 arguments.  Also, similarly to labeled arguments, optional arguments
-can be passed in in any order.
+can be passed in any order.
+
+If instead of getting an explicit option you want to define a default
+value, there is a special syntax for this, as shown below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let concat ?(sep="") x y = x ^ sep ^ y ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 <sidebar>
-<title>How are optional arguments inferred?</title>
 
-One tricky aspect of labeled and optional arguments is the way in
-which those arguments are inferred.  Consider the following example:
+<title>How are labeled and optional arguments inferred?</title>
+
+One tricky aspect of labeled and optional arguments is how they are
+inferred by the type system.  Consider the following example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let foo g x y = g ~x ~y ;;
 val foo : (x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In principle, it seems like the type first argument of `foo` could
-have had a different order for the arguments (_e.g._ `y:'b ->
-x:'a -> 'c`) or could have optional instead of labeled arguments
-(_e.g._, `?y:'a -> x:'b -> 'c`).  OCaml disambiguates between these
-cases by picking labeled arguments when it can, and by choosing the
-order based on the order that is actually used.  If you try to use two
-different orders in the same context, you'll get a compilation errro:
+In principle, it seems like the inferred type of `g` could have its
+labeled arguments listed in a different order, such as:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let foo g x y = g ~x ~y + g ~y ~x ;;
+val foo : (y:'b -> x:'a -> 'c) -> 'a -> 'b -> 'c = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And it would be perfectly consistent for `g` to take an optional
+argument, which might lead to this type signature for `foo`:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+val foo : (?x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Since there are multiple plausible types to choose from, OCaml needs
+some heuristic for choosing between them.  The heuristic the compiler
+uses is to prefer types that have labels over those that have options,
+and to choose an order of arguments that matches what shows up in the
+source code.
+
+Note that these heuristics might at different points in the source
+suggest different types.  For example, here's a function whose
+argument `g` is a function that is used once with argument `~x`
+followed by `~y`, and once with argument `~y` followed by `~x`.  The
+result of this is a compilation error.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let bar g x y = g ~x ~y + g ~y ~x ;;
 Characters 26-27:
-  let foo g x y = g ~x ~y + g ~y ~x ;;
+  let bar g x y = g ~x ~y + g ~y ~x ;;
                             ^
 Error: This function is applied to arguments
 in an order different from other calls.
 This is only allowed when the real type is known.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If, however, we put in an explicit type constraint, then we can
-specify any compatible type.
+Note that if we provide an explicit type constraint for `g`, that
+constraint decides the question of what `g`'s type is, and the error
+disappears.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 # let foo g x y = (g : ?y:'a -> x:'b -> int) ~x ~y + g ~y ~x;;
@@ -725,45 +866,14 @@ Type constraints are discussed in more detail in chapter {{???}}.
 
 </sidebar>
 
-The behavior of substituting in a default value is so common that it
-has its own syntax.  Thus, we could rewrite the `concat` function as
-follows:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let concat ?(sep="") x y = x ^ sep ^ y ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#### Explicit passing of an optional argument ###
-
-Sometimes you want to explicitly invoke an optional argument with a
-concrete option, where `None` indicates that the argument won't be
-passed in, and `Some` indicates it will.  You can do that as follows:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# concat ?sep:None "foo" "bar";;
-- : string = "foobar"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This is particularly useful when you want to pass through an optional
-argument from one function to another, leaving the choice of default
-to the second function.  For example:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
-val uppercase_concat : ?sep:string -> string -> string -> string =
-  <fun>
-# uppercase_concat "foo" "bar";;
-- : string = "FOObar"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 #### Erasure of optional arguments ###
 
-One subtle aspect of optional arguments is the question of OCaml
+One subtle aspect of optional arguments is the question of how OCaml
 decides to _erase_ an optional argument, _i.e._, to give up waiting
-for an optional argument, and substitute in the default value?  Note
-that, for ordinary labeled arguments, if you pass in all of the
-non-labeled arguments, you're left with a partially applied function
-that is still waiting for its labeled arguments.  _e.g._,
+for the argument to arrive.  For ordinary labeled arguments, if you
+pass in all of the non-labeled arguments, you're left with a partially
+applied function that is still waiting for its labeled arguments.
+_e.g._,
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ~sep x y = x ^ sep ^ y ;;
@@ -845,6 +955,29 @@ Characters 15-38:
                  ^^^^^^^^^^^^^^^^^^^^^^^
 Warning 16: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### Explicit passing of an optional argument ###
+
+Sometimes you want to explicitly invoke an optional argument with a
+concrete option, where `None` indicates that the argument won't be
+passed in, and `Some` indicates it will.  You can do that as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# concat ?sep:None "foo" "bar";;
+- : string = "foobar"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is particularly useful when you want to pass through an optional
+argument from one function to another, leaving the choice of default
+to the second function.  For example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
+val uppercase_concat : ?sep:string -> string -> string -> string =
+  <fun>
+# uppercase_concat "foo" "bar";;
+- : string = "FOObar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### When to use optional arguments ###

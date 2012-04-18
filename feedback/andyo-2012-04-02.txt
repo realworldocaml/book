@@ -75,12 +75,17 @@ think!
 > last argument." I suggest you end the first sentence after "orders".
 > Then say, "For instance, if you apply List.map..." and give an actual
 > example.
->
+
+I've added a couple of examples.  Tell me what you think.
+
 > Your "divide" example is a bit too hard to understand and requires a
 > little more explanation. You should point out that apply_to_tuple sets
 > up certain expectations about the order of the arguments, which the
 > divide call violates.
->
+
+I've tried to clean this up by having more helpful notes along the
+way.  Tell me what you think.
+
 > This doesn't looke right, like there's an extra word or missing word:
 > "In principle, it seems like the type first argument of foo..." This
 > passage is hard to understand in general. You seem to be saying that
