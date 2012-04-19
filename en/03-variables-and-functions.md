@@ -776,11 +776,12 @@ doing things like passing functions as arguments to other functions.
 ### Optional arguments ###
 
 An optional argument is like a labeled argument that the caller can
-choose whether or not to provide.  Functions with optional arguments
-must define a behavior for when the argument is absent.  Here's an
-example of a string concatenation function with an optionally
-specified separator.  Note that `?` is used to mark an argument as
-optional.
+choose whether or not to provide.  Optional arguments are passed in
+using the same syntax as labeled arguments, and, similarly to labeled
+arguments, optional arguments can be provided in any order.
+
+Here's an example of a string concatenation function with an optional
+separator.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ?sep x y =
@@ -794,168 +795,38 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 - : string = "foo:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Optional arguments can be passed in using the same syntax as labeled
-arguments.  Also, similarly to labeled arguments, optional arguments
-can be passed in any order.
+Here, `?` is used to mark the separator as optional.  Note that, while
+the type of the optional argument is `string`, internally, the
+argument is received as a `string option`, where `None` indicates that
+the optional argument was not specified.
 
-If instead of getting an explicit option you want to define a default
-value, there is a special syntax for this, as shown below.
+In the above example, we had a bit of code to substitute in the empty
+string when no argument was provided.  This is a common enough pattern
+that there's an explicit syntax for doing this, which allows us to
+write `concat` even more tersely:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ?(sep="") x y = x ^ sep ^ y ;;
+val concat : ?sep:string -> string -> string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<sidebar>
+Optional arguments are very useful, but they're also easy to abuse.
+The key advantage of optional arguments is that they let you write
+functions with complex options that users can ignore most of the time,
+only needing to think about them when they specifically want to invoke
+those options.
 
-<title>How are labeled and optional arguments inferred?</title>
+The downside is that it's easy for the caller of a function to not be
+aware that there is a choice to be made, leading them to pick the
+default behavior unknowingly, and sometimes wrongly.  Optional
+arguments really only make sense when the extra concision of omitting
+the argument overwhelms the corresponding loss of explicitness.
 
-One tricky aspect of labeled and optional arguments is how they are
-inferred by the type system.  Consider the following example:
+This means that rarely used functions should not have optional
+arguments.  A good rule of thumb for optional arguments is that you
+should never use an optional argument for internal functions of a
+module, only for functions that are exposed to users of a module.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let foo g x y = g ~x ~y ;;
-val foo : (x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In principle, it seems like the inferred type of `g` could have its
-labeled arguments listed in a different order, such as:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-val foo : (y:'b -> x:'a -> 'c) -> 'a -> 'b -> 'c = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-And it would be perfectly consistent for `g` to take an optional
-argument, which might lead to this type signature for `foo`:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-val foo : (?x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Since there are multiple plausible types to choose from, OCaml needs
-some heuristic for choosing between them.  The heuristic the compiler
-uses is to prefer types that have labels over those that have options,
-and to choose an order of arguments that matches what shows up in the
-source code.
-
-Note that these heuristics might at different points in the source
-suggest different types.  For example, here's a function whose
-argument `g` is a function that is used once with argument `~x`
-followed by `~y`, and once with argument `~y` followed by `~x`.  The
-result of this is a compilation error.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let bar g x y = g ~x ~y + g ~y ~x ;;
-Characters 26-27:
-  let bar g x y = g ~x ~y + g ~y ~x ;;
-                            ^
-Error: This function is applied to arguments
-in an order different from other calls.
-This is only allowed when the real type is known.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Note that if we provide an explicit type constraint for `g`, that
-constraint decides the question of what `g`'s type is, and the error
-disappears.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let foo g x y = (g : ?y:'a -> x:'b -> int) ~x ~y + g ~y ~x;;
-val foo : (?y:'a -> x:'b -> int) -> 'b -> 'a -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Type constraints are discussed in more detail in chapter {{???}}.
-
-</sidebar>
-
-#### Erasure of optional arguments ###
-
-One subtle aspect of optional arguments is the question of how OCaml
-decides to _erase_ an optional argument, _i.e._, to give up waiting
-for the argument to arrive.  For ordinary labeled arguments, if you
-pass in all of the non-labeled arguments, you're left with a partially
-applied function that is still waiting for its labeled arguments.
-_e.g._,
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let concat ~sep x y = x ^ sep ^ y ;;
-val concat : sep:string -> string -> string -> string = <fun>
-# concat "a" "b";;
-- : sep:string -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-So when should an optional argument be erased?
-
-OCaml's rule is: an optional argument is erased as soon as the first
-positional argument defined _after_ the optional argument is passed
-in.  Thus, the following partial application of concat causes the
-optional argument to disappear:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let prepend_foo = concat "foo";;
-val prepend_foo : string -> string = <fun>
-# prepend_foo "bar";;
-- : string = "foobar"
-# prepend_foo "bar" ~sep:":";;
-Characters 0-11:
-  prepend_foo "bar" ~sep:":";;
-  ^^^^^^^^^^^
-Error: This function is applied to too many arguments;
-maybe you forgot a `;'
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-But if we had instead defined `concat` with the optional argument in
-the second position:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let concat x ?(sep="") y = x ^ sep ^ y ;;
-val concat : string -> ?sep:string -> string -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-then application of the first argument would not cause the optional
-argument to be erased.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let prepend_foo = concat "foo";;
-val prepend_foo : ?sep:string -> string -> string = <fun>
-# prepend_foo "bar";;;
-- : string = "foobar"
-# prepend_foo ~sep:"=" "bar";;;
-- : string = "foo=bar"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-One oddity is that, if all arguments to a function are presented at
-once, then erasure of optional arguments isn't applied until all of
-the arguments are passed in.  Thus, this works:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# concat "a" "b" ~sep:"=";;
-- : string = "a=b"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-but a well-placed pair of parenthesis fails.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# (concat "a" "b") ~sep:"=";;
-Characters 0-16:
-  (concat "a" "b") ~sep:"=";;
-  ^^^^^^^^^^^^^^^^
-Error: This expression is not a function; it cannot be applied
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The failure is a result of the fact that the expression `(concat "a"
-"b")` has erased `concat`'s optional argument.
-
-It's possible to define a function in such a way that the optional
-argument can never be erased, by having no positional arguments
-defined after the optional one.  This leads to a compiler warning:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let concat x y ?(sep="") = x ^ sep ^ y ;;
-Characters 15-38:
-  let concat x y ?(sep="") = x ^ sep ^ y ;;
-                 ^^^^^^^^^^^^^^^^^^^^^^^
-Warning 16: this optional argument cannot be erased.
-val concat : string -> string -> ?sep:string -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Explicit passing of an optional argument ###
 
@@ -978,23 +849,134 @@ val uppercase_concat : ?sep:string -> string -> string -> string =
   <fun>
 # uppercase_concat "foo" "bar";;
 - : string = "FOObar"
+# uppercase_concat "foo" "bar" ~sep:":";;
+- : string = "FOO:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### When to use optional arguments ###
+#### Inference of labeled and optional arguments
 
-Optional arguments are very useful, but they're also easy to abuse.
-The key advantage of optional arguments is that they let you write
-functions with complex options that users can ignore most of the time,
-only needing to think about them when they specifically want to invoke
-those options.
+_(yminsky: This is too abstract of an example.)_
 
-The downside is that it's easy for the caller of a function to not
-be aware that there is a choice to be made, and as a result end up
-making the wrong choice by not doing anything.  Optional arguments
-really only make sense when the extra concision of omitting the
-argument overwhelms the corresponding loss of explicitness.
+One subtle aspect of labeled and optional arguments is how they are
+inferred by the type system.  Consider the following example:
 
-This means that rarely used functions should not have optional
-arguments.  A good rule of thumb for optional arguments is that you
-should never use an optional argument for internal functions of a
-module, only for functions that are exposed to users of a module.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let foo g x y = g ~x ~y ;;
+val foo : (x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In principle, it seems like the inferred type of `g` could have its
+labeled arguments listed in a different order, such as:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+val foo : (y:'b -> x:'a -> 'c) -> 'a -> 'b -> 'c = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And it would be perfectly consistent for `g` to take an optional
+argument instead of a labeled one, which could lead to this type
+signature for `foo`:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+val foo : (?x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Since there are multiple plausible types to choose from, OCaml needs
+some heuristic for choosing between them.  The heuristic the compiler
+uses is to prefer labels to options, and to choose the order of
+arguments that shows up in the source code.
+
+Note that these heuristics might at different points in the source
+suggest different types.  For example, here's a function whose
+argument `g` is a function that is used once with argument `~x`
+followed by `~y`, and once with argument `~y` followed by `~x`.  The
+result of this is a compilation error.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let bar g x y = g ~x ~y + g ~y ~x ;;
+Characters 26-27:
+  let bar g x y = g ~x ~y + g ~y ~x ;;
+                            ^
+Error: This function is applied to arguments
+in an order different from other calls.
+This is only allowed when the real type is known.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that if we provide an explicit type constraint for `g`, that
+constraint decides the question of what `g`'s type is, and the error
+disappears.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# let foo (g : ?y:'a -> x:'b -> int) x y =
+    g ~x ~y + g ~y ~x ;;
+val foo : (?y:'a -> x:'b -> int) -> 'b -> 'a -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### Optional arguments and partial application ###
+
+Optional arguments can be tricky to think about in the presence of
+partial application.  We can of course partially apply the optional
+argument itself:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let colon_concat = concat ~sep:":";;
+val colon_concat : string -> string -> string = <fun>
+# colon_concat "a" "b";;
+- : string = "a:b"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+But what happens if we partially apply just the first argument?
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let prepend_pound = concat "# ";;
+val prepend_pound : string -> string = <fun>
+# prepend_pound "a BASH comment";;
+- : string = "# a BASH comment"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that the optional argument `?sep` has now disappeared, or
+_erased_.  So when does OCaml decide to erase an optional argument?
+
+The rule is: an optional argument is erased as soon as the first
+positional argument defined _after_ the optional argument is passed
+in.  That explains the behavior of `prepend_pound` above.  But if we
+had instead defined `concat` with the optional argument in the second
+position:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let concat x ?(sep="") y = x ^ sep ^ y ;;
+val concat : string -> ?sep:string -> string -> string = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+then application of the first argument would not cause the optional
+argument to be erased.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let prepend_pound = concat "# ";;
+val prepend_pound : ?sep:string -> string -> string = <fun>
+# prepend_pound "a BASH comment";;
+- : string = "# a BASH comment"
+# prepend_pound "a BASH comment" ~sep:"--- ";;
+- : string = "# --- a BASH comment"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+However, if all arguments to a function are presented at once, then
+erasure of optional arguments isn't applied until all of the arguments
+are passed in.  This preserves our ability to pass in optional
+arguments anywhere on the argument list.  Thus, we can write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# concat "a" "b" ~sep:"=";;
+- : string = "a=b"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An optional argument that doesn't have any following positional
+arguments can't be erased at all, which leads to a compiler warning.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let concat x y ?(sep="") = x ^ sep ^ y ;;
+Characters 15-38:
+  let concat x y ?(sep="") = x ^ sep ^ y ;;
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+Warning 16: this optional argument cannot be erased.
+val concat : string -> string -> ?sep:string -> string = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
