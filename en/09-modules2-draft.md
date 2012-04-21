@@ -3,12 +3,11 @@
 _(yminsky: Highly preliminary)_
 
 Up until now, we've seen modules play only a limited role as a way of
-organizing code into units, with a mechanism for specifying interfaces
-for those units.  But that is only part of what modules can do in
-OCaml.  The module system is in fact a powerful toolset for
-structuring larger-scale systems.  In this chapter, we'll try to give
-you a taste of the power of that system and show ways of using it
-effectively.
+organizing code into units with a mechanism for specifying interfaces
+for those units.  But OCaml's modules serve a broader and deeper role,
+acting as a powerful toolset for structuring larger-scale systems.  In
+this chapter, we'll try to give you a taste of the power of that
+system and show ways of using it effectively.
 
 ## Functors
 
@@ -17,36 +16,30 @@ Functors can be used to solve a variety of code-structuring problems,
 including:
 
 * _Dependency injection_, or making the implementations of some
-  components of a system swappable.  Among other reasons, this is
-  useful to mock up parts of your system for testing and simulation
+  components of a system swappable.  This is particularly useful when
+  you want to mock up parts of your system for testing and simulation
   purposes.
-* _Auto-extension of modules_.  Sometimes, there is a set of
-  functionality that you want to build in a standard way based on some
-  small piece of type-specific logic.  For example, you might want to
-  add a slew of comparison operators derived from a base comparison
-  function.  To do this by hand would require a great deal of
-  boilerplate, but functors let you do this with a minimum of fuss.
+* _Auto-extension of modules_.  Sometimes, there is some functionality
+  that you want to build in a standard way for many different types,
+  based on a core piece of type-specific logic.  For example, you
+  might want to add a slew of comparison operators derived from a base
+  comparison function.  To do this by hand would require a lot of
+  repetitive code for each type, but functors let you write this logic
+  once and for all.C  
 * _Instantiating modules with state_.  Modules can contain mutable
   state, and that means that you'll occasionally want to have multiple
   instantiations of a particular module, each with its own independent
-  state.  One simple but common example is that of a unique-id
-  allocator.  Functors let you automate the construction of such
-  modules.
+  state.  Functors let you automate the construction of such modules.
 
-_(yminsky: awk)_
-
-And that is just part of what functors are good for.
-
-In the following, we'll walk through the details of how functors work,
+In the following, we'll walk through the basics of how functors work,
 after which we'll look at examples of how to use functors effectively
 in your software designs.
 
-### The basics of functors
+### A trivial functor
 
-In order to get a concrete understanding of what functors are and how
-they work, we'll start by playing around with some simple examples,
-starting with a very simple example indeed: a functor for incrementing
-an integer.
+We'll start explaining functors by playing around with some simple
+examples, starting with a very simple example indeed: a functor for
+incrementing an integer.
 
 More precisely, we'll create a functor that takes a module containing
 a single integer variable `x`, and returns a new module with `x`
@@ -96,10 +89,9 @@ module Four : sig val x : int end
 
 In this case, we applied `Increment` to a module whose signature is
 exactly equal to `X_int`.  But we can apply `Increment` to any module
-that satisfies `X_int`, in the same way that an `.ml` file satisfies
-the signature in its `.mli`.  So, for example, `Increment` can take as
-its input a module that has more fields than are contemplated in
-`X_int`.  For example:
+that satisfies `X_int`.  So, for example, `Increment` can take as its
+input a module that has more fields than are contemplated in `X_int`.
+For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module Three_and_more = struct
@@ -111,18 +103,18 @@ module Three_and_more : sig val x : int val x_string : string end
 module Four : sig val x : int end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We were able to pass `Three_and_more` to `Increment`, even though
-`Three_and_more` has the field `y` which is not present in `X_int`.
+Note that `Increment` works on `Three_and_more`, despite the presence
+of the variable `y` that was not mentioned in the signature `X_int`.
 
-### Working with types
+### An example: Interval logic
 
-The `Increment` example was especially trivial, in that the modules
-that were being operated on contained only values.  But functors can
-operate on the types of a module as well.  Imagine, for example, that
-we want to create a module for dealing with closed intervals over any
-given type.  A functor is one effective way of doing this.
+To get a better sense of how functors work, it's useful to see an
+example that's more realistic than the rather trivial `Increment`
+example we used above.  In the following, we'll show how to build a
+library for operating on intervals that is parameterized over the type
+of the endpoints of the intervals and the comparison function.
 
-The firs thing we'll need is a module type to represent the type of
+The first thing we'll need is a module type to represent the type of
 values along with a comparison function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -132,11 +124,12 @@ values along with a comparison function.
   end ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that the comparison function returns an integer.  The comparison
-function should return `0` if the two elements are zero, a positive
+The comparison function follows the standard OCaml idiom for such
+functions, returning `0` if the two elements are equal, a positive
 number if the first element is larger than the second, and a negative
-number if the first element is smaller than the second.  Thus, this is
-how we would rewrite the standard comparision functions on top of compare:
+number if the first element is smaller than the second.  Thus, we
+could rewrite the standard comparision functions on top of compare as
+follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 compare x y < 0     (* x < y *)
@@ -144,16 +137,21 @@ compare x y = 0     (* x = y *)
 compare x y > 0     (* x > y *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now, we can use this signature as the basis of our implementation.
+Here is the functor which defines the interval logic.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# module Make(C : Comparable) = struct
+# module Make_interval(C : Comparable) = struct
+
     type t = | Interval of C.t * C.t
              | Empty
 
     let create low high =
       if C.compare low high > 0 then Empty
       else Interval (low,high)
+
+    let is_empty = function
+      | Empty -> true
+      | Interval _ -> false
 
     let contains t x =
       match t with
@@ -170,7 +168,7 @@ Now, we can use this signature as the basis of our implementation.
         create (max l1 l2) (min h1 h2)
 
   end ;;
-module Make :
+module Make_interval :
   functor (C : Comparable) ->
     sig
       type t = Interval of C.t * C.t | Empty
@@ -180,11 +178,209 @@ module Make :
     end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We can then take this functor, and apply it to concrete modules like
-`Int` or `String`.
+And now, we can instantiate the functor by applying it to a module
+with the right signature.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+# module Int_interval = Make_interval(struct
+      type t = int
+      let compare = Int.compare
+  end);;
+module Int_interval :
+  sig
+    type t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that if we choose our interfaces and design our libraries
+carefully, then we typically don't have to construct a custom module.
+In this case, for example, we can use the `Int` module provided by
+Core.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Int_interval = Make_interval(Core)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This works reliably because many modules in Core satisfy an extended
+version of the `Comparable` signature described above.  We'll talk
+about that more later when we discuss signature components, but as a
+general matter, enforcing compliance with standardized signatures is a
+good practice which makes functors easier to use.
+
+Now we can use the newly defined `Int_interval` module like any
+ordinary module.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let i1 = Int_interval.create 3 8;;
+val i1 : Int_interval.t = Int_interval.Interval (3, 8)
+# let i2 = Int_interval.create 4 10;;
+val i2 : Int_interval.t = Int_interval.Interval (4, 10)
+# Int_interval.intersect i1 i2;;
+- : Int_interval.t = Int_interval.Interval (4, 8)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that, if we wanted to, we could create another instance of int
+intervals with the order of the comparison reversed, as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Rev_int_interval = Make_interval(struct
+    type t = int
+    let compare x y = Int.compare y x
+  end);;
+module Rev_int_interval :
+  sig
+    type el = int
+    type t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The behavior of these intervals is of course different, as we can see
+below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let i1 = Int_interval.create 4 3;;
+val i1 : Int_interval.t = Int_interval.Empty
+# let i2 = Rev_int_interval.create 4 3;;
+val i2 : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that `i1` and `i2` are of different types, which is important,
+since they are defined based on different comparison functions.
+Indeed, if we try to operate on them jointly, we'll get an error:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# Int_interval.intersect i1 i2;;
+Characters 26-28:
+  Int_interval.intersect i1 i2;;
+                            ^^
+Error: This expression has type Rev_int_interval.t
+       but an expression was expected of type Int_interval.t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This highlights an important feature of OCaml's modules, which is that
+applying a module can mint new types.
+
+#### Making the functor abstract
+
+There's one problem with the `Make_interval` functor we defined.  The
+interval logic depends on the invariant that one never creates an
+interval with crossed bounds.  But in fact, it's quite easy to do so
+if we bypass the `create` function.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let empty = Int_interval.create 4 3;; (* using create, everything's good *)
+val empty : Int_interval.t = Int_interval.Empty
+# let should_be_empty = Int_interval.Interval (4,3);;
+val should_be_empty : Int_interval.t = Int_interval.Interval (4, 3)
+# Int_interval.intersect should_be_empty should_be_empty;;
+- : Int_interval.t = Int_interval.Empty
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The problem here is that the constructor of Int_interval is exposed
+when it should really be abstract.  To make it properly abstract, we
+need to apply an interface.  Here's what that interface might look
+like:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module type Interval_intf = sig
+   type t
+   type endpoint
+   val create : endpoint -> endpoint -> t
+   val is_empty : t -> bool
+   val contains : t -> endpoint -> bool
+   val intersect : t -> t -> t
+  end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Given this interface, we can redo our definition of `Make_interval`,
+as follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Make_interval(C : Comparable) : Interval_intf = struct
+
+    type endpoint = C.t
+    type t = | Interval of C.t * C.t
+             | Empty
+
+    ....
+
+  end ;;
+module Make_interval : functor (C : Comparable) -> Interval_intf
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is progress, but there's still a problem.  Now we've made the
+type of the output module too abstract.  In particular, we haven't
+exposed the type `endpoint`, which means that we can't actually
+construct an interval.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Int_interval = Make_interval(struct type t = int let compare = Int.compare end);;
+module Int_interval : Interval_intf
+# Int_interval.create 3 4;;
+Characters 20-21:
+  Int_interval.create 3 4;;
+                      ^
+Error: This expression has type int but an expression was expected of type
+         Int_interval.endpoint
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To fix this, we need to explicitly redefine the type `endpoint` to be
+equal to the type `t` in the argument to the functor.  We can do that
+with what's called a _destructive signature update_.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Make_interval(C : Comparable) 
+    : Interval_intf with type endpoint := C.t = struct
+
+    type endpoint = C.t
+    type t = | Interval of C.t * C.t
+             | Empty
+
+    ....
+
+  end ;;
+module Make_interval :
+  functor (C : Comparable) ->
+    sig
+      type t
+      val create : C.t -> C.t -> t
+      val is_empty : t -> bool
+      val contains : t -> C.t -> bool
+      val intersect : t -> t -> t
+    end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And now, the result of the functor works as we would expect, with the
+appropriate abstractions in place.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Int_interval = Make_interval(struct type t = int let compare = Int.compare end);;
+module Int_interval :
+  sig
+    type t
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+# Int_interval.create 3 4;;
+- : Int_interval.t = <abstr>
+# Int_interval.Interval (4,3);;
+Characters 0-27:
+  Int_interval.Interval (4,3);;
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: Unbound constructor Int_interval.Interval
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
+## Detritus
 
 ### A worked example
 
