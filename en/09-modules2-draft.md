@@ -75,7 +75,7 @@ output of the functor.
 module Increment : functor (M : X_int) -> sig val x : int end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above, we can see that the module type of the output is written
+We can see that the inferred module type of the output is now written
 out explicitly, rather than being a reference to the named signature
 `X_int`.
 
@@ -106,11 +106,13 @@ module Three_and_more : sig val x : int val x_string : string end
 module Four : sig val x : int end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### An example: Intervals
+### A more realistic example: Intervals
 
-This example will show how to build a library for operating on
-intervals that is functorized over the type of the endpoints of the
-intervals and the ordering of the endpoints.
+We'll now consider a more realistic example which will allow us to
+explore more aspects of functors.  In particular, we'll show how to
+build a library for operating on intervals that is functorized over
+the type of the endpoints of the intervals and the ordering of the
+endpoints.
 
 First we'll define a module type that captures the information we'll
 need about the endpoints.  This interface, which we call `Comparable`,
