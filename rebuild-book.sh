@@ -15,7 +15,7 @@ cd $SVNR
 svn update
 cp $LOCAL/build/en/source/rwo-oreilly.xml $SVNR/book.xml
 svn commit -m 'autocommit from $REPO $REVID orm:commitpdf'
-sleep 10
+sleep 60
 cp pdf/book.xml.pdf $HTML/rwo-snapshot.pdf
 cp pdf/.buildlog $HTML/buildlog.txt
 
