@@ -4234,12 +4234,13 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
     <emphasis>(yminsky: Highly preliminary)</emphasis>
   </para>
   <para>
-    Up until now, we've seen modules play only a limited role as a way
-    of organizing code into units with a mechanism for specifying
-    interfaces for those units. But OCaml's modules serve a broader and
-    deeper role, acting as a powerful toolset for structuring
-    larger-scale systems. In this chapter, we'll try to give you a taste
-    of the power of that system and show ways of using it effectively.
+    Up until now, we've seen modules play a limited role, serving as a
+    mechanism for organizing code into units with specified interfaces.
+    But OCaml's modules play a bigger role in the langauge, acting as a
+    powerful toolset for structuring large-scale systems. This chapter
+    will introduce you to the more powerful parts of that toolset,
+    including functors and first-class modules, and we'll demonstrate
+    how to use them effectively in your software designs.
   </para>
   <sect1 id="functors">
     <title>Functors</title>
@@ -4265,8 +4266,8 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
           of type-specific logic. For example, you might want to add a
           slew of comparison operators derived from a base comparison
           function. To do this by hand would require a lot of repetitive
-          code for each type, but functors let you write this logic once
-          and for all.C
+          code for each type, but functors let you write this logic just
+          once and apply it to many different types.
         </para>
       </listitem>
       <listitem>
@@ -4274,29 +4275,25 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
           <emphasis>Instantiating modules with state</emphasis>. Modules
           can contain mutable state, and that means that you'll
           occasionally want to have multiple instantiations of a
-          particular module, each with its own independent state.
-          Functors let you automate the construction of such modules.
+          particular module, each with its own separate and independent
+          mutable state. Functors let you automate the construction of
+          such modules.
         </para>
       </listitem>
     </itemizedlist>
-    <para>
-      In the following, we'll walk through the basics of how functors
-      work, after which we'll look at examples of how to use functors
-      effectively in your software designs.
-    </para>
     <sect2 id="a-trivial-functor">
       <title>A trivial functor</title>
       <para>
-        We'll start explaining functors by playing around with some
-        simple examples, starting with a very simple example indeed: a
-        functor for incrementing an integer.
+        We'll start explaining functors by considering them in the
+        simplest possible application: a functor for incrementing an
+        integer.
       </para>
       <para>
         More precisely, we'll create a functor that takes a module
         containing a single integer variable <literal>x</literal>, and
         returns a new module with <literal>x</literal> incremented by
-        one. The first step is to define a module type to describe the
-        input and output of the functor.
+        one. The first step is to define a module type which will
+        describe the input and output of the functor.
       </para>
       <programlisting>
 # module type X_int = sig val x : int end;;
@@ -4312,10 +4309,17 @@ module type X_int = sig val x : int end
 module Increment : functor (M : X_int) -&gt; X_int
 </programlisting>
       <para>
-        Functors require more explicit type annotations than ordinary
-        functions. In particular, the module type on the input module of
-        a functor is mandatory. The module type on the output is not,
-        however, and will be inferred if omitted.
+        One thing that immediately jumps out about functors is that
+        they're considerably more heavyweight syntactically than
+        ordinary functions. For one thing, functors require explicit
+        type annotations, which ordinary functions do not. Here, we've
+        specified the module type for both the input and output of the
+        functor. Technically, only the type on the input is mandatory,
+        although in practice, one often specifies both.
+      </para>
+      <para>
+        The following shows what happens when we omit the module type
+        for the output of the functor.
       </para>
       <programlisting>
 # module Increment (M:X_int) = struct
@@ -4324,7 +4328,7 @@ module Increment : functor (M : X_int) -&gt; X_int
 module Increment : functor (M : X_int) -&gt; sig val x : int end
 </programlisting>
       <para>
-        In the above, we can see that the module type of the output is
+        We can see that the inferred module type of the output is now
         written out explicitly, rather than being a reference to the
         named signature <literal>X_int</literal>.
       </para>
@@ -4359,12 +4363,14 @@ module Three_and_more : sig val x : int val x_string : string end
 module Four : sig val x : int end
 </programlisting>
     </sect2>
-    <sect2 id="an-example-intervals">
-      <title>An example: Intervals</title>
+    <sect2 id="a-more-realistic-example-intervals">
+      <title>A more realistic example: Intervals</title>
       <para>
-        This example will show how to build a library for operating on
-        intervals that is functorized over the type of the endpoints of
-        the intervals and the ordering of the endpoints.
+        We'll now consider a more realistic example which will allow us
+        to explore more aspects of functors. In particular, we'll show
+        how to build a library for operating on intervals that is
+        functorized over the type of the endpoints of the intervals and
+        the ordering of the endpoints.
       </para>
       <para>
         First we'll define a module type that captures the information
@@ -4684,7 +4690,7 @@ S with type t := s
              | Empty
 
     ....
-
+D
   end ;;
 module Make_interval :
   functor (C : Comparable) -&gt;
@@ -4836,131 +4842,6 @@ module Make_interval :
 </programlisting>
       </sect3>
     </sect2>
-  </sect1>
-  <sect1 id="detritus">
-    <title>Detritus</title>
-    <sect2 id="a-worked-example">
-      <title>A worked example</title>
-      <para>
-        Let's walk through a small, complete example of how to use
-        functors. Let's go back to frequency count program that we
-        discussed last chapter. We experimented with multiple different
-        implementations of the data-structure for storing the frequency
-        counts. But what if we wanted to make the frequency count
-        data-structure pluggable, so we could instantiate the program
-        with different implementations? Functors allow us to do just
-        that.
-      </para>
-      <para>
-        The first step towards making the frequency-count datastructure
-        pluggable is to specify precisely the interface. We can do this
-        by declaring an interface as follows:
-      </para>
-      <programlisting language="ocaml">
-(* counter_intf.ml *)
-
-open Core.Std
-
-module type S = sig
-  type t
-
-  val empty : t
-  val to_list : t -&gt; (string * int) list
-  val touch : t -&gt; string -&gt; t
-end
-</programlisting>
-      <para>
-        Now, we can write the main program as a functor.
-      </para>
-      <programlisting language="ocaml">
-(* freq.ml: using Counter *)
-
-open Core.Std
-
-module Make(Counter : Counter_intf.S) = struct
-
-let rec build_counts counts =
-  match In_channel.input_line stdin with
-  | None -&gt; counts
-  | Some line -&gt; build_counts (Counter.touch counts line)
-
-let () =
-  let counts = build_counts [] in
-  let sorted_counts = List.sort counts
-    ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
-  in
-  List.iter (List.take sorted_counts 10)
-    ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
-
-end
-</programlisting>
-    </sect2>
-  </sect1>
-  <sect1 id="detritus-1">
-    <title>Detritus</title>
-    <para>
-      A functor is essentially a function from modules to modules. Let's
-      walk through a small, complete example of how to use functors. In
-      this case, we're going to show how you can use a functor build up
-      a larger module interface from a few key components. First, let's
-      start with the interface, in particular, an interface for
-      something that supports the comparison operator.
-    </para>
-    <programlisting language="ocaml">
-module type Comparable = sig
-  type t
-  val compare : t -&gt; t -&gt; int
-  val (=)  : t -&gt; t -&gt; bool
-  val (&lt;&gt;) : t -&gt; t -&gt; bool
-  val (&gt;)  : t -&gt; t -&gt; bool
-  val (&lt;)  : t -&gt; t -&gt; bool
-  val (&gt;=) : t -&gt; t -&gt; bool
-  val (&lt;=) : t -&gt; t -&gt; bool
-  val min  : t -&gt; t -&gt; t
-  val max  : t -&gt; t -&gt; t
-end
-</programlisting>
-    <para>
-      This is in fact a subset of the <literal>Comparable</literal>
-      interface in Core.
-    </para>
-    <para>
-      Now, suppose we want to implement multiple modules that support
-      this interface. Implementing all of these individual functions for
-      each module is going to be a lot of painful boilerplate, since
-      it's essentially the same logic that ties it all together.
-    </para>
-    <para>
-      By using a functor, however, we can derive an implementation that
-      satisfies this interface provided with just the
-      <literal>compare</literal> function. In particular, we'll require
-      as input a module that satisfies this signature:
-    </para>
-    <programlisting language="ocaml">
-module type Comparable_input = sig
-  type t
-  val compare : t -&gt; t -&gt; int
-end
-</programlisting>
-    <para>
-      and we'll create a new module that satisfies the
-      <literal>Comparable</literal> signature. Here's a functor which
-      does just that.
-    </para>
-    <programlisting language="ocaml">
-module Make(M:Comparable_input) : Comparable with type t = M.t = struct
-  type t = M.t
-  let compare = M.compare
-  let (=) x y = compare x y = 0
-  let (&lt;&gt;) x y = compare x y &lt;&gt; 0
-  let (&gt;) x y = compare x y &gt; 0
-  let (&lt;) x y = compare x y &lt; 0
-  let (&gt;=) x y = compare x y &gt;= 0
-  let (&lt;=) x y = compare x y &lt;= 0
-  let min x y = if x &lt; y then x else y
-  let max x y = if x &gt; y then x else y
-end
-</programlisting>
   </sect1>
 </chapter>
 <chapter id="syntax-extensions">
