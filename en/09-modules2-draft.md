@@ -2,12 +2,13 @@
 
 _(yminsky: Highly preliminary)_
 
-Up until now, we've seen modules play only a limited role as a way of
-organizing code into units with a mechanism for specifying interfaces
-for those units.  But OCaml's modules serve a broader and deeper role,
-acting as a powerful toolset for structuring larger-scale systems.  In
-this chapter, we'll try to give you a taste of the power of that
-system and show ways of using it effectively.
+Up until now, we've seen modules play a limited role, serving as a
+mechanism for organizing code into units with specified interfaces.
+But OCaml's modules play a bigger role in the langauge, acting as a
+powerful toolset for structuring large-scale systems.  This chapter
+will introduce you to the more powerful parts of that toolset,
+including functors and first-class modules, and we'll demonstrate how
+to use them effectively in your software designs.
 
 ## Functors
 
@@ -25,26 +26,22 @@ including:
   might want to add a slew of comparison operators derived from a base
   comparison function.  To do this by hand would require a lot of
   repetitive code for each type, but functors let you write this logic
-  once and for all.C
+  just once and apply it to many different types.
 * _Instantiating modules with state_.  Modules can contain mutable
   state, and that means that you'll occasionally want to have multiple
-  instantiations of a particular module, each with its own independent
-  state.  Functors let you automate the construction of such modules.
-
-In the following, we'll walk through the basics of how functors work,
-after which we'll look at examples of how to use functors effectively
-in your software designs.
+  instantiations of a particular module, each with its own separate
+  and independent mutable state.  Functors let you automate the
+  construction of such modules.
 
 ### A trivial functor
 
-We'll start explaining functors by playing around with some simple
-examples, starting with a very simple example indeed: a functor for
-incrementing an integer.
+We'll start explaining functors by considering them in the simplest
+possible application: a functor for incrementing an integer.
 
 More precisely, we'll create a functor that takes a module containing
 a single integer variable `x`, and returns a new module with `x`
-incremented by one.  The first step is to define a module type to
-describe the input and output of the functor.
+incremented by one.  The first step is to define a module type which
+will describe the input and output of the functor.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module type X_int = sig val x : int end;;
@@ -60,10 +57,16 @@ Now, we can use that module type to write the increment functor.
 module Increment : functor (M : X_int) -> X_int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Functors require more explicit type annotations than ordinary
-functions.  In particular, the module type on the input module of a
-functor is mandatory.  The module type on the output is not, however,
-and will be inferred if omitted.
+One thing that immediately jumps out about functors is that they're
+considerably more heavyweight syntactically than ordinary functions.
+For one thing, functors require explicit type annotations, which
+ordinary functions do not.  Here, we've specified the module type for
+both the input and output of the functor.  Technically, only the type
+on the input is mandatory, although in practice, one often specifies
+both.
+
+The following shows what happens when we omit the module type for the
+output of the functor.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module Increment (M:X_int) = struct
@@ -399,7 +402,7 @@ different type.  The following shows how we could use this with
              | Empty
 
     ....
-
+D
   end ;;
 module Make_interval :
   functor (C : Comparable) ->
@@ -541,119 +544,3 @@ And now, we can use that sexp-converter in the ordinary way:
 
 
 
-## Detritus
-
-### A worked example
-
-Let's walk through a small, complete example of how to use functors.
-Let's go back to frequency count program that we discussed last
-chapter.  We experimented with multiple different implementations of
-the data-structure for storing the frequency counts.  But what if we
-wanted to make the frequency count data-structure pluggable, so we
-could instantiate the program with different implementations?
-Functors allow us to do just that.
-
-The first step towards making the frequency-count datastructure
-pluggable is to specify precisely the interface.  We can do this by
-declaring an interface as follows:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-(* counter_intf.ml *)
-
-open Core.Std
-
-module type S = sig
-  type t
-
-  val empty : t
-  val to_list : t -> (string * int) list
-  val touch : t -> string -> t
-end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Now, we can write the main program as a functor.
-
-~~~~~~~~~~~~~~~~ { .ocaml }
-(* freq.ml: using Counter *)
-
-open Core.Std
-
-module Make(Counter : Counter_intf.S) = struct
-
-let rec build_counts counts =
-  match In_channel.input_line stdin with
-  | None -> counts
-  | Some line -> build_counts (Counter.touch counts line)
-
-let () =
-  let counts = build_counts [] in
-  let sorted_counts = List.sort counts
-    ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
-  in
-  List.iter (List.take sorted_counts 10)
-    ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
-
-end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-## Detritus
-
-A functor is essentially a function from modules to modules.  Let's
-walk through a small, complete example of how to use functors.  In
-this case, we're going to show how you can use a functor build up a
-larger module interface from a few key components.  First, let's start
-with the interface, in particular, an interface for something that
-supports the comparison operator.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-module type Comparable = sig
-  type t
-  val compare : t -> t -> int
-  val (=)  : t -> t -> bool
-  val (<>) : t -> t -> bool
-  val (>)  : t -> t -> bool
-  val (<)  : t -> t -> bool
-  val (>=) : t -> t -> bool
-  val (<=) : t -> t -> bool
-  val min  : t -> t -> t
-  val max  : t -> t -> t
-end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This is in fact a subset of the `Comparable` interface in Core.
-
-Now, suppose we want to implement multiple modules that support this
-interface.  Implementing all of these individual functions for each
-module is going to be a lot of painful boilerplate, since it's
-essentially the same logic that ties it all together.
-
-By using a functor, however, we can derive an implementation that
-satisfies this interface provided with just the `compare` function.
-In particular, we'll require as input a module that satisfies this
-signature:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-module type Comparable_input = sig
-  type t
-  val compare : t -> t -> int
-end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-and we'll create a new module that satisfies the `Comparable`
-signature.  Here's a functor which does just that.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-module Make(M:Comparable_input) : Comparable with type t = M.t = struct
-  type t = M.t
-  let compare = M.compare
-  let (=) x y = compare x y = 0
-  let (<>) x y = compare x y <> 0
-  let (>) x y = compare x y > 0
-  let (<) x y = compare x y < 0
-  let (>=) x y = compare x y >= 0
-  let (<=) x y = compare x y <= 0
-  let min x y = if x < y then x else y
-  let max x y = if x > y then x else y
-end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
