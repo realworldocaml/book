@@ -4281,12 +4281,11 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
         </para>
       </listitem>
     </itemizedlist>
-    <sect2 id="a-trivial-functor">
-      <title>A trivial functor</title>
+    <sect2 id="a-trivial-example">
+      <title>A trivial example</title>
       <para>
-        We'll start explaining functors by considering them in the
-        simplest possible application: a functor for incrementing an
-        integer.
+        We'll start by considering the simplest possible example: a
+        functor for incrementing an integer.
       </para>
       <para>
         More precisely, we'll create a functor that takes a module
@@ -4363,22 +4362,21 @@ module Three_and_more : sig val x : int val x_string : string end
 module Four : sig val x : int end
 </programlisting>
     </sect2>
-    <sect2 id="a-more-realistic-example-intervals">
-      <title>A more realistic example: Intervals</title>
+    <sect2 id="a-bigger-example-computing-with-intervals">
+      <title>A bigger example: computing with intervals</title>
       <para>
-        We'll now consider a more realistic example which will allow us
-        to explore more aspects of functors. In particular, we'll show
-        how to build a library for operating on intervals that is
-        functorized over the type of the endpoints of the intervals and
-        the ordering of the endpoints.
+        We'll now look at a more complex example, which will give us an
+        opportunity to learn more about how functors work. In
+        particular, we'll walk through the design of a library for
+        computing with intervals. This library will be functorized over
+        the type of the endpoints of the intervals and the ordering of
+        those endpoints.
       </para>
       <para>
         First we'll define a module type that captures the information
-        we'll need about the endpoints. This interface, which we call
-        <literal>Comparable</literal>, contains just two things: the
-        type of the endpoint, and a corresponding comparison function.
-        Here, we follow the convention that the type that the module is
-        about is called <literal>t</literal>.
+        we'll need about the endpoint type. This interface, which we'll
+        call <literal>Comparable</literal>, contains just two things: a
+        comparison function, and the type of the values to be compared.
       </para>
       <programlisting>
 # module type Comparable = sig
@@ -4404,19 +4402,18 @@ compare x y &gt; 0     (* x &gt; y *)
         Now that we have the <literal>Comparable</literal> interface, we
         can write the implementation of our interval module. In this
         module, we'll represent an interval with a variant type, which
-        is either <literal>Empty</literal>, if the interval is empty, or
-        <literal>Interval (x,y)</literal> where <literal>x</literal> and
-        <literal>y</literal> are the lower and upper bounds of the
-        interval, respectively.
+        is either <literal>Empty</literal> or
+        <literal>Interval (x,y)</literal>, where <literal>x</literal>
+        and <literal>y</literal> are the bounds of the interval.
       </para>
       <programlisting>
-# module Make_interval(C : Comparable) = struct
+# module Make_interval(Endpoint : Comparable) = struct
 
-    type t = | Interval of C.t * C.t
+    type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
 
     let create low high =
-      if C.compare low high &gt; 0 then Empty
+      if Endpoint.compare low high &gt; 0 then Empty
       else Interval (low,high)
 
     let is_empty = function
@@ -4427,11 +4424,11 @@ compare x y &gt; 0     (* x &gt; y *)
       match t with
       | Empty -&gt; false
       | Interval (l,h) -&gt;
-        C.compare x l &gt;= 0 &amp;&amp; C.compare x h &lt;= 0
+        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0
 
     let intersect t1 t2 =
-      let min x y = if C.compare x y &lt;= 0 then x else y in
-      let max x y = if C.compare x y &gt;= 0 then x else y in
+      let min x y = if Endpoint.compare x y &lt;= 0 then x else y in
+      let max x y = if Endpoint.compare x y &gt;= 0 then x else y in
       match t1,t2 with
       | Empty, _ | _, Empty -&gt; Empty
       | Interval (l1,h1), Interval (l2,h2) -&gt;
@@ -4439,23 +4436,25 @@ compare x y &gt; 0     (* x &gt; y *)
 
   end ;;
 module Make_interval :
-  functor (C : Comparable) -&gt;
+  functor (Endpoint : Comparable) -&gt;
     sig
-      type t = Interval of C.t * C.t | Empty
-      val create : C.t -&gt; C.t -&gt; t
-      val contains : t -&gt; C.t -&gt; bool
+      type t = Interval of Endpoint.t * Endpoint.t | Empty
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val contains : t -&gt; Endpoint.t -&gt; bool
       val intersect : t -&gt; t -&gt; t
     end
 </programlisting>
       <para>
-        And now, we can instantiate the functor by applying it to a
-        module with the right signature.
+        We can instantiate the functor by applying it to a module with
+        the right signature. In the following, we provide the functor
+        input as an anonymous module.
       </para>
       <programlisting language="ocaml">
-# module Int_interval = Make_interval(struct
+# module Int_interval =
+    Make_interval(struct
       type t = int
       let compare = Int.compare
-  end);;
+    end);;
 module Int_interval :
   sig
     type t = Interval of int * int | Empty
@@ -4465,10 +4464,10 @@ module Int_interval :
   end
 </programlisting>
       <para>
-        Note that if we choose our interfaces to be aligned with the
-        standards of the rest of our codebase, then we often don't have
-        to construct a custom module for a given functor. In this case,
-        for example, we can directly use the <literal>Int</literal> or
+        If we choose our interfaces to be aligned with the standards of
+        our libraries, then we often don't have to construct a custom
+        module for a given functor. In this case, for example, we can
+        directly use the <literal>Int</literal> or
         <literal>String</literal> modules provided by Core.
       </para>
       <programlisting>
@@ -4477,12 +4476,12 @@ module Int_interval :
 </programlisting>
       <para>
         This works because many modules in Core, including
-        <literal>Int</literal> and <literal>String</literal> satisfy an
+        <literal>Int</literal> and <literal>String</literal>, satisfy an
         extended version of the <literal>Comparable</literal> signature
         described above. As a general matter, having standardized
-        signatures is a good practice, both because it makes your
-        codebase more uniform and easier to navigatge, and because it
-        makes functors easier to use.
+        signatures is a good practice, both because a more uniform
+        codebase is easier to navigatge, and because it makes functors
+        easier to use.
       </para>
       <para>
         Now we can use the newly defined <literal>Int_interval</literal>
@@ -4497,52 +4496,49 @@ val i2 : Int_interval.t = Int_interval.Interval (4, 10)
 - : Int_interval.t = Int_interval.Interval (4, 8)
 </programlisting>
       <para>
-        We're not locked in to using the standard comparison function is
-        for the endpoint type. We could, for example, create a type of
-        int interval with the order of the comparison reversed, as
-        follows:
+        This design gives us the freedom to use any comparison function
+        we want for comparing the endpoints. We could, for example,
+        create a type of int interval with the order of the comparison
+        reversed, as follows:
       </para>
       <programlisting>
-# module Rev_int_interval = Make_interval(struct
-    type t = int
-    let compare x y = Int.compare y x
-  end);;
-module Rev_int_interval :
-  sig
-    type t = Interval of int * int | Empty
-    val create : int -&gt; int -&gt; t
-    val is_empty : t -&gt; bool
-    val contains : t -&gt; int -&gt; bool
-    val intersect : t -&gt; t -&gt; t
-  end
+# module Rev_int_interval =
+    Make_interval(struct
+      type t = int
+      let compare x y = Int.compare y x
+    end);;
 </programlisting>
       <para>
-        The behavior of these intervals is of course different, as we
-        can see below.
+        The behavior of <literal>Rev_int_interval</literal> is of course
+        different from <literal>Int_interval</literal>, as we can see
+        below.
       </para>
       <programlisting>
-# let i1 = Int_interval.create 4 3;;
-val i1 : Int_interval.t = Int_interval.Empty
-# let i2 = Rev_int_interval.create 4 3;;
-val i2 : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
+# let interval = Int_interval.create 4 3;;
+val interval : Int_interval.t = Int_interval.Empty
+# let rev_interval = Rev_int_interval.create 4 3;;
+val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
 </programlisting>
       <para>
-        Note that <literal>i1</literal> and <literal>i2</literal> are of
-        different types, which is important, since they are defined
-        based on different comparison functions. Indeed, if we try to
-        operate on them jointly, we'll get an error:
+        Importantly, <literal>Rev_int_interval.t</literal> is a
+        different type than <literal>Int_interval.t</literal>, even
+        though its physical represenation is the same. Indeed, the type
+        system will prevent us from confusing them.
       </para>
       <programlisting>
-# Int_interval.intersect i1 i2;;
-Characters 26-28:
-  Int_interval.intersect i1 i2;;
-                            ^^
+# Int_interval.contains rev_interval 3;;
+Characters 22-34:
+  Int_interval.contains rev_interval 3;;
+                        ^^^^^^^^^^^^
 Error: This expression has type Rev_int_interval.t
-       but an expression was expected of type Int_interval.t
+       but an expression was expected of type
+         Int_interval.t = Make_interval(Int).t
 </programlisting>
       <para>
-        This highlights an important feature functors, which is the
-        ability to mint new types.
+        This is important, because confusing the two kinds of intervals
+        would be a semantic error, and it's an easy one to make. The
+        ability of functors to mint new types is a useful trick that
+        comes up a lot.
       </para>
       <sect3 id="making-the-functor-abstract">
         <title>Making the functor abstract</title>
@@ -4553,7 +4549,7 @@ Error: This expression has type Rev_int_interval.t
           invariant can be violated. The invariant is enforced by the
           create function, but because <literal>Interval.t</literal> is
           not abstract, we can bypass the <literal>create</literal>
-          function, thus violating the invariant.
+          function.
         </para>
         <programlisting>
 # Int_interval.create 4 3;; (* going through create *)
@@ -4562,11 +4558,10 @@ Error: This expression has type Rev_int_interval.t
 - : Int_interval.t = Int_interval.Interval (4, 3)
 </programlisting>
         <para>
-          To abstract the type <literal>Int_interval.t</literal>, we
-          need to apply an interface to the output of the functor.
-          Here's one possible such interface. Note that we needed to add
-          a new type, <literal>endpoint</literal>, to represent the type
-          of the endpoints of the interval.
+          To make <literal>Int_interval.t</literal> abstract, we need to
+          apply an interface to the output of the
+          <literal>Make_interval</literal>. Here's an explicit interface
+          that we can use for that purpose.
         </para>
         <programlisting>
 # module type Interval_intf = sig
@@ -4579,29 +4574,34 @@ Error: This expression has type Rev_int_interval.t
   end;;
 </programlisting>
         <para>
-          Given this interface, we can redo our definition of
-          <literal>Make_interval</literal>, as follows. Note that we
-          have to add the type <literal>endpoint</literal> to the
-          implementation of the module to make it satisfy our new
-          interface.
+          This interface includes the type <literal>endpoint</literal>
+          to represent the type of the endpoints of the interval. Given
+          this interface, we can redo our definition of
+          <literal>Make_interval</literal>, as follows. Notice that we
+          added the type <literal>endpoint</literal> to the
+          implementation of the module to make the implementation match
+          <literal>Interval_intf</literal>.
         </para>
         <programlisting>
-# module Make_interval(C : Comparable) : Interval_intf = struct
+# module Make_interval(Endpoint : Comparable) : Interval_intf = struct
 
-    type endpoint = C.t
-    type t = | Interval of C.t * C.t
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
 
     ....
 
   end ;;
-module Make_interval : functor (C : Comparable) -&gt; Interval_intf
+module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf
 </programlisting>
+      </sect3>
+      <sect3 id="sharing-constraints">
+        <title>Sharing constraints</title>
         <para>
           The resulting module is abstract, but unfortunately, it's too
           abstract. In particular, we haven't exposed the type
           <literal>endpoint</literal>, which means that we can't even
-          construct an interval.
+          construct an interval anymore.
         </para>
         <programlisting>
 # module Int_interval = Make_interval(Int);;
@@ -4617,12 +4617,13 @@ Error: This expression has type int but an expression was expected of type
           To fix this, we need to expose the fact that
           <literal>endpoint</literal> is equal to
           <literal>Int.t</literal> (or more generally,
-          <literal>C.t</literal>, where <literal>C</literal> is the
-          argument to the functor). There are two ways of doing this.
-          The first is a <emphasis>sharing constraint</emphasis>, which
-          simply tells the compiler that the two types in question are
-          equal. The syntax for a sharing constraint on a module type
-          is:
+          <literal>Endpoint.t</literal>, where
+          <literal>Endpoint</literal> is the argument to the functor).
+          One way of doing this is through a <emphasis>sharing
+          constraint</emphasis>, which allows you to tell the compiler
+          to expose the fact that a given type is equal to some other
+          type. The syntax for a sharing constraint on a module type is
+          as follows.
         </para>
         <programlisting language="ocaml">
 S with type t = s
@@ -4630,26 +4631,49 @@ S with type t = s
         <para>
           where <literal>S</literal> is a module type,
           <literal>t</literal> is a type inside of <literal>S</literal>,
-          and <literal>s</literal> is a different type. Here's how we
-          would use a sharing constraint with
-          <literal>Make_interval</literal>.
+          and <literal>s</literal> is a different type. The result of
+          this expression is a new signature that's been modified so
+          that it exposes the fact that <literal>t</literal> is equal to
+          <literal>s</literal>. We can use a sharing constraint to
+          create a specialized version of
+          <literal>Interval_intf</literal> for integer intervals.
         </para>
         <programlisting>
-# module Make_interval(C : Comparable)
-      : Interval_intf with type endpoint = C.t = struct
+# module type Int_interval_intf = Interval_intf with type endpoint = int;;
+module type Int_interval_intf =
+  sig
+    type t
+    type endpoint = int
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+        <para>
+          And we can also use it in the context of a functor, where the
+          right-hand side of the sharing constraint is an element of the
+          functor argument. Thus, we expose an equality between a type
+          in the output of the functor (in this case, the type
+          <literal>endpoint</literal>) and a type in its input
+          (<literal>Endpoint.t</literal>).
+        </para>
+        <programlisting>
+# module Make_interval(Endpoint : Comparable)
+      : Interval_intf with type endpoint = Endpoint.t = struct
 
-    type endpoint = C.t
-    type t = | Interval of C.t * C.t
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
 
     ...
 
   end ;;
 module Make_interval :
-  functor (C : Comparable) -&gt;
+  functor (Endpoint : Comparable) -&gt;
     sig
       type t
-      type endpoint = C.t
+      type endpoint = Endpoint.t
       val create : endpoint -&gt; endpoint -&gt; t
       val is_empty : t -&gt; bool
       val contains : t -&gt; endpoint -&gt; bool
@@ -4659,15 +4683,27 @@ module Make_interval :
         <para>
           So now, the interface is as it was, except that
           <literal>endpoint</literal> is now known to be equal to
-          <literal>C.t</literal>.
+          <literal>Endpoint.t</literal>. As a result of that type
+          equality, we can now do things like construct intervals again.
         </para>
+        <programlisting>
+# let i = Int_interval.create 3 4;;
+val i : Int_interval.t = &lt;abstr&gt;
+# Int_interval.contains i 5;;
+- : bool = false
+</programlisting>
+      </sect3>
+      <sect3 id="destructive-substitution">
+        <title>Destructive substitution</title>
         <para>
-          Sharing constraints basically do the job, but they're not
-          perfect. In particular, we've now been stuck with this extra
-          <literal>endpoint</literal> type that clutters up both the
-          interface and the implementation. Ideally, we'd just modify
-          the signature by replacing <literal>endpoint</literal> with
-          <literal>C.t</literal> everywhere it shows up, making
+          Sharing constraints basically do the job, but the approach we
+          used has some downsides. In particular, we've now been stuck
+          with the useless type declaration of
+          <literal>endpoint</literal> that clutters up both the
+          interface and the implementation. A better solution would be
+          to modify the <literal>Interval_intf</literal> signature by
+          replacing <literal>endpoint</literal> with
+          <literal>Endpoint.t</literal> everywhere it shows up, making
           <literal>endpoint</literal> unnecessary. We can do just this
           using what's called <emphasis>destructive
           substitution</emphasis>. Here's the basic syntax.
@@ -4682,23 +4718,47 @@ S with type t := s
           shows how we could use this with
           <literal>Make_interval</literal>.
         </para>
+        <para>
+          Here's an example of what we get if we use destructive
+          substitution to specialize the
+          <literal>Interval_intf</literal> interface to integer
+          intervals.
+        </para>
         <programlisting>
-# module Make_interval(C : Comparable)
-    : Interval_intf with type endpoint := C.t = struct
+# module type Int_interval_intf = Interval_intf with type endpoint := int;;
+module type Int_interval_intf =
+  sig
+    type t
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+        <para>
+          There's now no mention of n <literal>endpoint</literal>, all
+          occurrences of that type having been replaced by
+          <literal>int</literal>. As with sharing constraints, we can
+          also use this in the context of a functor.
+        </para>
+        <programlisting>
+# module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t =
+  struct
 
-    type t = | Interval of C.t * C.t
+    type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
 
     ....
-D
+
   end ;;
 module Make_interval :
-  functor (C : Comparable) -&gt;
+  functor (Endpoint : Comparable) -&gt;
     sig
       type t
-      val create : C.t -&gt; C.t -&gt; t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
       val is_empty : t -&gt; bool
-      val contains : t -&gt; C.t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
       val intersect : t -&gt; t -&gt; t
     end
 </programlisting>
@@ -4733,10 +4793,10 @@ Error: Unbound constructor Int_interval.Interval
           <literal>t</literal>, though, we'll get an error:
         </para>
         <programlisting>
-# module Make_interval(C : Comparable)
-    : Interval_intf with type endpoint := C.t = struct
+# module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t = struct
 
-    type t = | Interval of C.t * C.t
+    type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
     with sexp
 
@@ -4744,18 +4804,18 @@ Error: Unbound constructor Int_interval.Interval
 
   end ;;
 Characters 120-123:
-        type t = | Interval of C.t * C.t
-                               ^^^
-Error: Unbound value C.t_of_sexp
+        type t = | Interval of Endpoint.t * Endpoint.t
+                               ^^^^^^^^^^
+Error: Unbound value Endpoint.t_of_sexp
 </programlisting>
         <para>
           The problem is that <literal>with sexp</literal> adds code for
           defining the s-expression converters, and that code assumes
-          that <literal>C</literal> has the appropriate sexp-conversion
-          functions for <literal>C.t</literal>. But all we know about
-          <literal>C</literal> is that it satisfies the
-          <literal>Comparable</literal> interface, which doesn't say
-          anything about s-expressions.
+          that <literal>Endpoint</literal> has the appropriate
+          sexp-conversion functions for <literal>Endpoint.t</literal>.
+          But all we know about <literal>Endpoint</literal> is that it
+          satisfies the <literal>Comparable</literal> interface, which
+          doesn't say anything about s-expressions.
         </para>
         <para>
           Happily, Core comes with a built in interface for just this
@@ -4778,11 +4838,10 @@ end
           different signatures from interfering with each other.
         </para>
         <para>
-          Here's a version of <literal>Make_interval</literal> that
-          supports s-expressions. Note here that we are careful to
-          override the sexp-converter here to ensure that the
-          datastructures invariants are still maintained when reading in
-          from an s-expression.
+          Also note that we have been careful to override the
+          sexp-converter here to ensure that the datastructures
+          invariants are still maintained when reading in from an
+          s-expression.
         </para>
         <programlisting>
 # module type Interval_intf_with_sexp = sig
@@ -4790,14 +4849,14 @@ end
    include Interval_intf with type t := t
    include Sexpable      with type t := t
   end;;
-# module Make_interval(C : sig
+# module Make_interval(Endpoint : sig
     type t
     include Comparable with type t := t
     include Sexpable   with type t := t
-  end)
-    : Interval_intf_with_sexp with type endpoint := C.t = struct
+  end) : Interval_intf_with_sexp with type endpoint := Endpoint.t =
+  struct
 
-      type t = | Interval of C.t * C.t
+      type t = | Interval of Endpoint.t * Endpoint.t
                | Empty
       with sexp
 
@@ -4816,7 +4875,7 @@ end
      end ;;
 module Make_interval :
   functor
-    (C : sig
+    (Endpoint : sig
            type t
            val compare : t -&gt; t -&gt; int
            val sexp_of_t : t -&gt; Sexplib.Sexp.t
@@ -4824,9 +4883,9 @@ module Make_interval :
          end) -&gt;
     sig
       type t
-      val create : C.t -&gt; C.t -&gt; t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
       val is_empty : t -&gt; bool
-      val contains : t -&gt; C.t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
       val intersect : t -&gt; t -&gt; t
       val sexp_of_t : t -&gt; Sexplib.Sexp.t
       val t_of_sexp : Sexplib.Sexp.t -&gt; t
@@ -4839,9 +4898,30 @@ module Make_interval :
 # module Int = Make_interval(Int) ;;
 # Int_interval.sexp_of_t (Int_interval.create 3 4);;
 - : Sexplib.Sexp.t = (Interval 3 4)
+# Int_interval.sexp_of_t (Int_interval.create 4 3);;
+- : Sexplib.Sexp.t = Empty
 </programlisting>
       </sect3>
     </sect2>
+    <sect2 id="extending-modules-with-functors">
+      <title>Extending modules with functors</title>
+      <para>
+        One important use of functors is to build out type-specific
+        functionality in a standardized way. For example, there are lots
+        of things that you want to have to go along with a comparison
+        function.
+      </para>
+    </sect2>
+    <sect2 id="using-functors-in-dynamic-contexts">
+      <title>Using functors in dynamic contexts</title>
+      <para>
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="first-class-modules">
+    <title>First-class modules</title>
+    <para>
+    </para>
   </sect1>
 </chapter>
 <chapter id="syntax-extensions">
