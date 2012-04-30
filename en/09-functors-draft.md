@@ -603,4 +603,3 @@ things that you want to have to go along with a comparison function.
 
 ### Using functors in dynamic contexts
 
-## First-class modules
