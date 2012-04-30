@@ -1,4 +1,4 @@
-# Functors and First-class modules
+# Functors
 
 _(yminsky: Highly preliminary)_
 
@@ -9,8 +9,6 @@ powerful toolset for structuring large-scale systems.  This chapter
 will introduce you to the more powerful parts of that toolset,
 including functors and first-class modules, and we'll demonstrate how
 to use them effectively in your software designs.
-
-## Functors
 
 A functor is, roughly speaking, a function from modules to modules.
 Functors can be used to solve a variety of code-structuring problems,
@@ -33,7 +31,7 @@ including:
   and independent mutable state.  Functors let you automate the
   construction of such modules.
 
-### A trivial example
+## A trivial example
 
 We'll start by considering the simplest possible example: a functor
 for incrementing an integer.
@@ -106,7 +104,7 @@ module Three_and_more : sig val x : int val x_string : string end
 module Four : sig val x : int end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### A bigger example: computing with intervals
+## A bigger example: computing with intervals
 
 We'll now look at a more complex example, which will give us an
 opportunity to learn more about how functors work.  In particular,
@@ -271,7 +269,7 @@ This is important, because confusing the two kinds of intervals would
 be a semantic error, and it's an easy one to make.  The ability of
 functors to mint new types is a useful trick that comes up a lot.
 
-#### Making the functor abstract
+### Making the functor abstract
 
 There's a problem with `Make_interval`.  The code we wrote depends on
 the invariant that the upper bound of an interval is greater than its
@@ -320,7 +318,7 @@ implementation match `Interval_intf`.
 module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### Sharing constraints
+### Sharing constraints
 
 The resulting module is abstract, but unfortunately, it's too
 abstract.  In particular, we haven't exposed the type `endpoint`,
@@ -407,7 +405,7 @@ val i : Int_interval.t = <abstr>
 - : bool = false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### Destructive substitution
+### Destructive substitution
 
 Sharing constraints basically do the job, but the approach we used has
 some downsides.  In particular, we've now been stuck with the useless
@@ -485,7 +483,7 @@ Characters 0-27:
 Error: Unbound constructor Int_interval.Interval
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### Using multiple interfaces
+### Using multiple interfaces
 
 Another feature that we might want for our interval module is the
 ability to serialize the type, in particular, by converting to
@@ -595,11 +593,11 @@ And now, we can use that sexp-converter in the ordinary way:
 - : Sexplib.Sexp.t = Empty
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Extending modules with functors
+## Extending modules with functors
 
 One important use of functors is to build out type-specific
 functionality in a standardized way.  For example, there are lots of
 things that you want to have to go along with a comparison function.
 
-### Using functors in dynamic contexts
+## Local functors
 

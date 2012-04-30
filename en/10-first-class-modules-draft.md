@@ -1,3 +1,3 @@
-## First-class modules
+# First-class modules
 
 Lorem ipsit!
