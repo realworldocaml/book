@@ -4,14 +4,14 @@ _(yminsky: Highly preliminary)_
 
 Up until now, we've seen modules play a limited role, serving as a
 mechanism for organizing code into units with specified interfaces.
-But OCaml's modules play a bigger role in the langauge, acting as a
-powerful toolset for structuring large-scale systems.  This chapter
-will introduce you to the more powerful parts of that toolset,
-including functors and first-class modules, and we'll demonstrate how
-to use them effectively in your software designs.
+But OCaml's module system plays a bigger role in the langauge, acting
+as a powerful toolset for structuring large-scale systems.  This
+chapter will introduce you to functors, one of the more powerful
+elements of this toolset, and will show how to integrate them into
+your software designs.
 
-A functor is, roughly speaking, a function from modules to modules.
-Functors can be used to solve a variety of code-structuring problems,
+Functors are, roughly speaking, functions from modules to modules, and
+they can be used to solve a variety of code-structuring problems,
 including:
 
 * _Dependency injection_, or making the implementations of some
@@ -115,7 +115,7 @@ endpoints of the intervals and the ordering of those endpoints.
 First we'll define a module type that captures the information we'll
 need about the endpoint type.  This interface, which we'll call
 `Comparable`, contains just two things: a comparison function, and the
-type of the values to be compared.  
+type of the values to be compared.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module type Comparable = sig
@@ -593,11 +593,169 @@ And now, we can use that sexp-converter in the ordinary way:
 - : Sexplib.Sexp.t = Empty
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Extending modules with functors
+## Extending modules
 
-One important use of functors is to build out type-specific
-functionality in a standardized way.  For example, there are lots of
-things that you want to have to go along with a comparison function.
+One common use of functors is to generate type-specific functionality
+for a given module in a standardized way.  We'll think about this in
+the context of an example of creating a simple data structure.
+
+The following is a minimal interface for a functional queue.  A
+functional queue is simple a functional version of a FIFO (first-in,
+first-out) queue.  Being functional, operations on the queue return
+new queues, rather than modifying the queues that were passed in.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: fqueue.mli *)
+
+type 'a t
+val empty : 'a t
+val enqueue : 'a t -> 'a -> 'a t
+(** [dequeue q] returns None if the [q] is empty *)
+val dequeue : 'a t -> ('a * 'a t) option
+val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A standard trick for implementing functional queues efficiently is to
+maintain both an input and an output list, where the input list is
+ordered to make `enqueue` fast, and the output list is ordered to make
+`dequeue` fast.  When the output list is empty, the input list is
+reveresed and becomes the new output list. Thinking through why this
+is efficient is a worthwhile exercise, but we won't dwell on that
+here.
+
+Here's a concrete implementation.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: fqueue.ml *)
+
+type 'a t = 'a list * 'a list
+
+let empty = ([],[])
+
+let enqueue (l1,l2) x = (x :: l1,l2)
+
+let dequeue (in_list,out_list) =
+  match out_list with
+  | hd :: tl -> Some (hd, (in_list,tl))
+  | [] ->
+    match List.rev in_list with
+    | [] -> None
+    | hd::tl -> Some (hd, ([], tl))
+
+let fold (in_list,out_list) ~init ~f =
+  List.fold ~init:(List.fold ~init ~f out_list) ~f
+     (List.rev in_list)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The code above works fine, but the interface it implements is
+unfortunately quite skeletal; there are lots of useful helper
+functions that one might want that aren't there.  And implementing
+those helper functions can be something of a dull affair, since you
+need to implement essentially the same helper functions for multiple
+different data structures in essentially the same way.
+
+As it happens, many of these helper functions can be derived
+mechanically from just the fold function we already implemented.
+Rather than write all of these helper functions by hand for every new
+container type, we can instead use a functor to write the code for
+these once and for all, basing them off of the `fold` function.
+
+Let's create a new module, `Foldable`, that contains support for this.
+The first thing we'll need is a signature to describe a container that
+supports fold.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: foldable.ml *)
+
+module type S = sig
+  type 'a t
+  val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We'll also need a signature for the helper functions we're going to
+generate.  This just represents some of the helper functions we can
+derive from fold, but it's enough to give you a flavor of what you can
+do.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module type Extension = sig
+  type 'a t
+  val iter    : 'a t -> f:('a -> unit) -> unit
+  val length  : 'a t -> int
+  val count   : 'a t -> f:('a -> bool) -> int
+  val for_all : 'a t -> f:('a -> bool) -> bool
+  val exists  : 'a t -> f:('a -> bool) -> bool
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finally, we can define the functor itself.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module Extend(Container : S)
+  : Extension with type 'a t := 'a C.t =
+struct
+  open Container
+
+  let iter   t ~f = fold t ~init:() ~f:(fun () a -> f a)
+  let length t    = fold t ~init:0  ~f:(fun acc _ -> acc + 1)
+  let count  t ~f = fold t ~init:0  ~f:(fun count x -> count + if f x then 1 else 0)
+
+  exception Short_circuit
+
+  let for_all c ~f =
+    try iter c ~f:(fun x -> if not (f x) then raise Short_circuit); true
+    with Short_circuit -> false
+
+  let exists c ~f =
+    try iter c ~f:(fun x -> if f x then raise Short_circuit); false
+    with Short_circuit -> true
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now we can apply this to `Fqueue`.  First, we can extend the interface:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: fqueue.mli, 2nd version *)
+
+type 'a t
+val empty : 'a t
+val enqueue : 'a t -> 'a -> 'a t
+val dequeue : 'a t -> ('a * 'a t) option
+val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
+
+include Foldable.Extension with type 'a t := 'a t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In order to apply the functor, we'll put the definition of `Fqueue` in
+a sub-module called `T`, and then call `Foldable.Extend` on `T`.
+Here's how that code would look.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module T = struct
+  type 'a t = 'a list * 'a list
+
+  ....
+
+  let fold (in_list,out_list) ~init ~f =
+    List.fold ~init:(List.fold ~init ~f out_list)
+      ~f (List.rev in_list)
+
+end
+include T
+include Foldable.Extend(T)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This pattern comes up quite a bit in Core.  It's used to implement
+various standard bits of functionality, including:
+
+- Comparison-based datastructures like
+  maps and sets, based on the `Comparable` interface.
+- Hash-based datastructures like hash sets and hash heaps.
+- Support for so-called monadic libraries, like the ones discussed in
+  {{{ERROR HANDLING}}} and {{{CONCURRENCY}}}.  Here, the functor is
+  used to provide a collection of standard helper functions based on
+  the core `bind` and `return` operators.
 
 ## Local functors
 
