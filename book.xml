@@ -4228,113 +4228,111 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
     </sect2>
   </sect1>
 </chapter>
-<chapter id="functors-and-first-class-modules">
-  <title>Functors and First-class modules</title>
+<chapter id="functors">
+  <title>Functors</title>
   <para>
     <emphasis>(yminsky: Highly preliminary)</emphasis>
   </para>
   <para>
     Up until now, we've seen modules play a limited role, serving as a
     mechanism for organizing code into units with specified interfaces.
-    But OCaml's modules play a bigger role in the langauge, acting as a
-    powerful toolset for structuring large-scale systems. This chapter
-    will introduce you to the more powerful parts of that toolset,
-    including functors and first-class modules, and we'll demonstrate
-    how to use them effectively in your software designs.
+    But OCaml's module system plays a bigger role in the langauge,
+    acting as a powerful toolset for structuring large-scale systems.
+    This chapter will introduce you to functors, one of the more
+    powerful elements of this toolset, and will show how to integrate
+    them into your software designs.
   </para>
-  <sect1 id="functors">
-    <title>Functors</title>
+  <para>
+    Functors are, roughly speaking, functions from modules to modules,
+    and they can be used to solve a variety of code-structuring
+    problems, including:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <emphasis>Dependency injection</emphasis>, or making the
+        implementations of some components of a system swappable. This
+        is particularly useful when you want to mock up parts of your
+        system for testing and simulation purposes.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Auto-extension of modules</emphasis>. Sometimes, there
+        is some functionality that you want to build in a standard way
+        for many different types, based on a core piece of type-specific
+        logic. For example, you might want to add a slew of comparison
+        operators derived from a base comparison function. To do this by
+        hand would require a lot of repetitive code for each type, but
+        functors let you write this logic just once and apply it to many
+        different types.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Instantiating modules with state</emphasis>. Modules
+        can contain mutable state, and that means that you'll
+        occasionally want to have multiple instantiations of a
+        particular module, each with its own separate and independent
+        mutable state. Functors let you automate the construction of
+        such modules.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <sect1 id="a-trivial-example">
+    <title>A trivial example</title>
     <para>
-      A functor is, roughly speaking, a function from modules to
-      modules. Functors can be used to solve a variety of
-      code-structuring problems, including:
+      We'll start by considering the simplest possible example: a
+      functor for incrementing an integer.
     </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <emphasis>Dependency injection</emphasis>, or making the
-          implementations of some components of a system swappable. This
-          is particularly useful when you want to mock up parts of your
-          system for testing and simulation purposes.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis>Auto-extension of modules</emphasis>. Sometimes,
-          there is some functionality that you want to build in a
-          standard way for many different types, based on a core piece
-          of type-specific logic. For example, you might want to add a
-          slew of comparison operators derived from a base comparison
-          function. To do this by hand would require a lot of repetitive
-          code for each type, but functors let you write this logic just
-          once and apply it to many different types.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis>Instantiating modules with state</emphasis>. Modules
-          can contain mutable state, and that means that you'll
-          occasionally want to have multiple instantiations of a
-          particular module, each with its own separate and independent
-          mutable state. Functors let you automate the construction of
-          such modules.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <sect2 id="a-trivial-example">
-      <title>A trivial example</title>
-      <para>
-        We'll start by considering the simplest possible example: a
-        functor for incrementing an integer.
-      </para>
-      <para>
-        More precisely, we'll create a functor that takes a module
-        containing a single integer variable <literal>x</literal>, and
-        returns a new module with <literal>x</literal> incremented by
-        one. The first step is to define a module type which will
-        describe the input and output of the functor.
-      </para>
-      <programlisting>
+    <para>
+      More precisely, we'll create a functor that takes a module
+      containing a single integer variable <literal>x</literal>, and
+      returns a new module with <literal>x</literal> incremented by one.
+      The first step is to define a module type which will describe the
+      input and output of the functor.
+    </para>
+    <programlisting>
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
 </programlisting>
-      <para>
-        Now, we can use that module type to write the increment functor.
-      </para>
-      <programlisting>
+    <para>
+      Now, we can use that module type to write the increment functor.
+    </para>
+    <programlisting>
 # module Increment (M:X_int) : X_int = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -&gt; X_int
 </programlisting>
-      <para>
-        One thing that immediately jumps out about functors is that
-        they're considerably more heavyweight syntactically than
-        ordinary functions. For one thing, functors require explicit
-        type annotations, which ordinary functions do not. Here, we've
-        specified the module type for both the input and output of the
-        functor. Technically, only the type on the input is mandatory,
-        although in practice, one often specifies both.
-      </para>
-      <para>
-        The following shows what happens when we omit the module type
-        for the output of the functor.
-      </para>
-      <programlisting>
+    <para>
+      One thing that immediately jumps out about functors is that
+      they're considerably more heavyweight syntactically than ordinary
+      functions. For one thing, functors require explicit type
+      annotations, which ordinary functions do not. Here, we've
+      specified the module type for both the input and output of the
+      functor. Technically, only the type on the input is mandatory,
+      although in practice, one often specifies both.
+    </para>
+    <para>
+      The following shows what happens when we omit the module type for
+      the output of the functor.
+    </para>
+    <programlisting>
 # module Increment (M:X_int) = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -&gt; sig val x : int end
 </programlisting>
-      <para>
-        We can see that the inferred module type of the output is now
-        written out explicitly, rather than being a reference to the
-        named signature <literal>X_int</literal>.
-      </para>
-      <para>
-        Here's what <literal>Increment</literal> looks like in action.
-      </para>
-      <programlisting>
+    <para>
+      We can see that the inferred module type of the output is now
+      written out explicitly, rather than being a reference to the named
+      signature <literal>X_int</literal>.
+    </para>
+    <para>
+      Here's what <literal>Increment</literal> looks like in action.
+    </para>
+    <programlisting>
 # module Three = struct let x = 3 end;;
   module Three : sig val x : int end
 # module Four = Increment(Three);;
@@ -4342,17 +4340,16 @@ module Four : sig val x : int end
 # Four.x - Three.x;;
 - : int = 1
 </programlisting>
-      <para>
-        In this case, we applied <literal>Increment</literal> to a
-        module whose signature is exactly equal to
-        <literal>X_int</literal>. But we can apply
-        <literal>Increment</literal> to any module that satisfies
-        <literal>X_int</literal>. So, for example,
-        <literal>Increment</literal> can take as its input a module that
-        has more fields than are contemplated in
-        <literal>X_int</literal>, as shown below.
-      </para>
-      <programlisting>
+    <para>
+      In this case, we applied <literal>Increment</literal> to a module
+      whose signature is exactly equal to <literal>X_int</literal>. But
+      we can apply <literal>Increment</literal> to any module that
+      satisfies <literal>X_int</literal>. So, for example,
+      <literal>Increment</literal> can take as its input a module that
+      has more fields than are contemplated in <literal>X_int</literal>,
+      as shown below.
+    </para>
+    <programlisting>
 # module Three_and_more = struct
     let x = 3
     let y = &quot;three&quot;
@@ -4361,52 +4358,50 @@ module Three_and_more : sig val x : int val x_string : string end
 # module Four = Increment(Three_and_more);;
 module Four : sig val x : int end
 </programlisting>
-    </sect2>
-    <sect2 id="a-bigger-example-computing-with-intervals">
-      <title>A bigger example: computing with intervals</title>
-      <para>
-        We'll now look at a more complex example, which will give us an
-        opportunity to learn more about how functors work. In
-        particular, we'll walk through the design of a library for
-        computing with intervals. This library will be functorized over
-        the type of the endpoints of the intervals and the ordering of
-        those endpoints.
-      </para>
-      <para>
-        First we'll define a module type that captures the information
-        we'll need about the endpoint type. This interface, which we'll
-        call <literal>Comparable</literal>, contains just two things: a
-        comparison function, and the type of the values to be compared.
-      </para>
-      <programlisting>
+  </sect1>
+  <sect1 id="a-bigger-example-computing-with-intervals">
+    <title>A bigger example: computing with intervals</title>
+    <para>
+      We'll now look at a more complex example, which will give us an
+      opportunity to learn more about how functors work. In particular,
+      we'll walk through the design of a library for computing with
+      intervals. This library will be functorized over the type of the
+      endpoints of the intervals and the ordering of those endpoints.
+    </para>
+    <para>
+      First we'll define a module type that captures the information
+      we'll need about the endpoint type. This interface, which we'll
+      call <literal>Comparable</literal>, contains just two things: a
+      comparison function, and the type of the values to be compared.
+    </para>
+    <programlisting>
 # module type Comparable = sig
     type t
     val compare : t -&gt; t -&gt; int
   end ;;
 </programlisting>
-      <para>
-        The comparison function follows the standard OCaml idiom for
-        such functions, returning <literal>0</literal> if the two
-        elements are equal, a positive number if the first element is
-        larger than the second, and a negative number if the first
-        element is smaller than the second. Thus, we could rewrite the
-        standard comparison functions on top of
-        <literal>compare</literal> as shown below.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      The comparison function follows the standard OCaml idiom for such
+      functions, returning <literal>0</literal> if the two elements are
+      equal, a positive number if the first element is larger than the
+      second, and a negative number if the first element is smaller than
+      the second. Thus, we could rewrite the standard comparison
+      functions on top of <literal>compare</literal> as shown below.
+    </para>
+    <programlisting language="ocaml">
 compare x y &lt; 0     (* x &lt; y *)
 compare x y = 0     (* x = y *)
 compare x y &gt; 0     (* x &gt; y *)
 </programlisting>
-      <para>
-        Now that we have the <literal>Comparable</literal> interface, we
-        can write the implementation of our interval module. In this
-        module, we'll represent an interval with a variant type, which
-        is either <literal>Empty</literal> or
-        <literal>Interval (x,y)</literal>, where <literal>x</literal>
-        and <literal>y</literal> are the bounds of the interval.
-      </para>
-      <programlisting>
+    <para>
+      Now that we have the <literal>Comparable</literal> interface, we
+      can write the implementation of our interval module. In this
+      module, we'll represent an interval with a variant type, which is
+      either <literal>Empty</literal> or
+      <literal>Interval (x,y)</literal>, where <literal>x</literal> and
+      <literal>y</literal> are the bounds of the interval.
+    </para>
+    <programlisting>
 # module Make_interval(Endpoint : Comparable) = struct
 
     type t = | Interval of Endpoint.t * Endpoint.t
@@ -4444,12 +4439,12 @@ module Make_interval :
       val intersect : t -&gt; t -&gt; t
     end
 </programlisting>
-      <para>
-        We can instantiate the functor by applying it to a module with
-        the right signature. In the following, we provide the functor
-        input as an anonymous module.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      We can instantiate the functor by applying it to a module with the
+      right signature. In the following, we provide the functor input as
+      an anonymous module.
+    </para>
+    <programlisting language="ocaml">
 # module Int_interval =
     Make_interval(struct
       type t = int
@@ -4463,31 +4458,31 @@ module Int_interval :
     val intersect : t -&gt; t -&gt; t
   end
 </programlisting>
-      <para>
-        If we choose our interfaces to be aligned with the standards of
-        our libraries, then we often don't have to construct a custom
-        module for a given functor. In this case, for example, we can
-        directly use the <literal>Int</literal> or
-        <literal>String</literal> modules provided by Core.
-      </para>
-      <programlisting>
+    <para>
+      If we choose our interfaces to be aligned with the standards of
+      our libraries, then we often don't have to construct a custom
+      module for a given functor. In this case, for example, we can
+      directly use the <literal>Int</literal> or
+      <literal>String</literal> modules provided by Core.
+    </para>
+    <programlisting>
 # module Int_interval = Make_interval(Int) ;;
 # module String_interval = Make_interval(String) ;;
 </programlisting>
-      <para>
-        This works because many modules in Core, including
-        <literal>Int</literal> and <literal>String</literal>, satisfy an
-        extended version of the <literal>Comparable</literal> signature
-        described above. As a general matter, having standardized
-        signatures is a good practice, both because a more uniform
-        codebase is easier to navigatge, and because it makes functors
-        easier to use.
-      </para>
-      <para>
-        Now we can use the newly defined <literal>Int_interval</literal>
-        module like any ordinary module.
-      </para>
-      <programlisting>
+    <para>
+      This works because many modules in Core, including
+      <literal>Int</literal> and <literal>String</literal>, satisfy an
+      extended version of the <literal>Comparable</literal> signature
+      described above. As a general matter, having standardized
+      signatures is a good practice, both because a more uniform
+      codebase is easier to navigatge, and because it makes functors
+      easier to use.
+    </para>
+    <para>
+      Now we can use the newly defined <literal>Int_interval</literal>
+      module like any ordinary module.
+    </para>
+    <programlisting>
 # let i1 = Int_interval.create 3 8;;
 val i1 : Int_interval.t = Int_interval.Interval (3, 8)
 # let i2 = Int_interval.create 4 10;;
@@ -4495,37 +4490,37 @@ val i2 : Int_interval.t = Int_interval.Interval (4, 10)
 # Int_interval.intersect i1 i2;;
 - : Int_interval.t = Int_interval.Interval (4, 8)
 </programlisting>
-      <para>
-        This design gives us the freedom to use any comparison function
-        we want for comparing the endpoints. We could, for example,
-        create a type of int interval with the order of the comparison
-        reversed, as follows:
-      </para>
-      <programlisting>
+    <para>
+      This design gives us the freedom to use any comparison function we
+      want for comparing the endpoints. We could, for example, create a
+      type of int interval with the order of the comparison reversed, as
+      follows:
+    </para>
+    <programlisting>
 # module Rev_int_interval =
     Make_interval(struct
       type t = int
       let compare x y = Int.compare y x
     end);;
 </programlisting>
-      <para>
-        The behavior of <literal>Rev_int_interval</literal> is of course
-        different from <literal>Int_interval</literal>, as we can see
-        below.
-      </para>
-      <programlisting>
+    <para>
+      The behavior of <literal>Rev_int_interval</literal> is of course
+      different from <literal>Int_interval</literal>, as we can see
+      below.
+    </para>
+    <programlisting>
 # let interval = Int_interval.create 4 3;;
 val interval : Int_interval.t = Int_interval.Empty
 # let rev_interval = Rev_int_interval.create 4 3;;
 val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
 </programlisting>
-      <para>
-        Importantly, <literal>Rev_int_interval.t</literal> is a
-        different type than <literal>Int_interval.t</literal>, even
-        though its physical represenation is the same. Indeed, the type
-        system will prevent us from confusing them.
-      </para>
-      <programlisting>
+    <para>
+      Importantly, <literal>Rev_int_interval.t</literal> is a different
+      type than <literal>Int_interval.t</literal>, even though its
+      physical represenation is the same. Indeed, the type system will
+      prevent us from confusing them.
+    </para>
+    <programlisting>
 # Int_interval.contains rev_interval 3;;
 Characters 22-34:
   Int_interval.contains rev_interval 3;;
@@ -4534,36 +4529,35 @@ Error: This expression has type Rev_int_interval.t
        but an expression was expected of type
          Int_interval.t = Make_interval(Int).t
 </programlisting>
+    <para>
+      This is important, because confusing the two kinds of intervals
+      would be a semantic error, and it's an easy one to make. The
+      ability of functors to mint new types is a useful trick that comes
+      up a lot.
+    </para>
+    <sect2 id="making-the-functor-abstract">
+      <title>Making the functor abstract</title>
       <para>
-        This is important, because confusing the two kinds of intervals
-        would be a semantic error, and it's an easy one to make. The
-        ability of functors to mint new types is a useful trick that
-        comes up a lot.
+        There's a problem with <literal>Make_interval</literal>. The
+        code we wrote depends on the invariant that the upper bound of
+        an interval is greater than its lower bound, but that invariant
+        can be violated. The invariant is enforced by the create
+        function, but because <literal>Interval.t</literal> is not
+        abstract, we can bypass the <literal>create</literal> function.
       </para>
-      <sect3 id="making-the-functor-abstract">
-        <title>Making the functor abstract</title>
-        <para>
-          There's a problem with <literal>Make_interval</literal>. The
-          code we wrote depends on the invariant that the upper bound of
-          an interval is greater than its lower bound, but that
-          invariant can be violated. The invariant is enforced by the
-          create function, but because <literal>Interval.t</literal> is
-          not abstract, we can bypass the <literal>create</literal>
-          function.
-        </para>
-        <programlisting>
+      <programlisting>
 # Int_interval.create 4 3;; (* going through create *)
 - : Int_interval.t = Int_interval.Empty
 # Int_interval.Interval (4,3);; (* bypassing create *)
 - : Int_interval.t = Int_interval.Interval (4, 3)
 </programlisting>
-        <para>
-          To make <literal>Int_interval.t</literal> abstract, we need to
-          apply an interface to the output of the
-          <literal>Make_interval</literal>. Here's an explicit interface
-          that we can use for that purpose.
-        </para>
-        <programlisting>
+      <para>
+        To make <literal>Int_interval.t</literal> abstract, we need to
+        apply an interface to the output of the
+        <literal>Make_interval</literal>. Here's an explicit interface
+        that we can use for that purpose.
+      </para>
+      <programlisting>
 # module type Interval_intf = sig
    type t
    type endpoint
@@ -4573,16 +4567,16 @@ Error: This expression has type Rev_int_interval.t
    val intersect : t -&gt; t -&gt; t
   end;;
 </programlisting>
-        <para>
-          This interface includes the type <literal>endpoint</literal>
-          to represent the type of the endpoints of the interval. Given
-          this interface, we can redo our definition of
-          <literal>Make_interval</literal>, as follows. Notice that we
-          added the type <literal>endpoint</literal> to the
-          implementation of the module to make the implementation match
-          <literal>Interval_intf</literal>.
-        </para>
-        <programlisting>
+      <para>
+        This interface includes the type <literal>endpoint</literal> to
+        represent the type of the endpoints of the interval. Given this
+        interface, we can redo our definition of
+        <literal>Make_interval</literal>, as follows. Notice that we
+        added the type <literal>endpoint</literal> to the implementation
+        of the module to make the implementation match
+        <literal>Interval_intf</literal>.
+      </para>
+      <programlisting>
 # module Make_interval(Endpoint : Comparable) : Interval_intf = struct
 
     type endpoint = Endpoint.t
@@ -4594,16 +4588,16 @@ Error: This expression has type Rev_int_interval.t
   end ;;
 module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf
 </programlisting>
-      </sect3>
-      <sect3 id="sharing-constraints">
-        <title>Sharing constraints</title>
-        <para>
-          The resulting module is abstract, but unfortunately, it's too
-          abstract. In particular, we haven't exposed the type
-          <literal>endpoint</literal>, which means that we can't even
-          construct an interval anymore.
-        </para>
-        <programlisting>
+    </sect2>
+    <sect2 id="sharing-constraints">
+      <title>Sharing constraints</title>
+      <para>
+        The resulting module is abstract, but unfortunately, it's too
+        abstract. In particular, we haven't exposed the type
+        <literal>endpoint</literal>, which means that we can't even
+        construct an interval anymore.
+      </para>
+      <programlisting>
 # module Int_interval = Make_interval(Int);;
 module Int_interval : Interval_intf
 # Int_interval.create 3 4;;
@@ -4613,32 +4607,31 @@ Characters 20-21:
 Error: This expression has type int but an expression was expected of type
          Int_interval.endpoint
 </programlisting>
-        <para>
-          To fix this, we need to expose the fact that
-          <literal>endpoint</literal> is equal to
-          <literal>Int.t</literal> (or more generally,
-          <literal>Endpoint.t</literal>, where
-          <literal>Endpoint</literal> is the argument to the functor).
-          One way of doing this is through a <emphasis>sharing
-          constraint</emphasis>, which allows you to tell the compiler
-          to expose the fact that a given type is equal to some other
-          type. The syntax for a sharing constraint on a module type is
-          as follows.
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        To fix this, we need to expose the fact that
+        <literal>endpoint</literal> is equal to <literal>Int.t</literal>
+        (or more generally, <literal>Endpoint.t</literal>, where
+        <literal>Endpoint</literal> is the argument to the functor). One
+        way of doing this is through a <emphasis>sharing
+        constraint</emphasis>, which allows you to tell the compiler to
+        expose the fact that a given type is equal to some other type.
+        The syntax for a sharing constraint on a module type is as
+        follows.
+      </para>
+      <programlisting language="ocaml">
 S with type t = s
 </programlisting>
-        <para>
-          where <literal>S</literal> is a module type,
-          <literal>t</literal> is a type inside of <literal>S</literal>,
-          and <literal>s</literal> is a different type. The result of
-          this expression is a new signature that's been modified so
-          that it exposes the fact that <literal>t</literal> is equal to
-          <literal>s</literal>. We can use a sharing constraint to
-          create a specialized version of
-          <literal>Interval_intf</literal> for integer intervals.
-        </para>
-        <programlisting>
+      <para>
+        where <literal>S</literal> is a module type,
+        <literal>t</literal> is a type inside of <literal>S</literal>,
+        and <literal>s</literal> is a different type. The result of this
+        expression is a new signature that's been modified so that it
+        exposes the fact that <literal>t</literal> is equal to
+        <literal>s</literal>. We can use a sharing constraint to create
+        a specialized version of <literal>Interval_intf</literal> for
+        integer intervals.
+      </para>
+      <programlisting>
 # module type Int_interval_intf = Interval_intf with type endpoint = int;;
 module type Int_interval_intf =
   sig
@@ -4650,15 +4643,15 @@ module type Int_interval_intf =
     val intersect : t -&gt; t -&gt; t
   end
 </programlisting>
-        <para>
-          And we can also use it in the context of a functor, where the
-          right-hand side of the sharing constraint is an element of the
-          functor argument. Thus, we expose an equality between a type
-          in the output of the functor (in this case, the type
-          <literal>endpoint</literal>) and a type in its input
-          (<literal>Endpoint.t</literal>).
-        </para>
-        <programlisting>
+      <para>
+        And we can also use it in the context of a functor, where the
+        right-hand side of the sharing constraint is an element of the
+        functor argument. Thus, we expose an equality between a type in
+        the output of the functor (in this case, the type
+        <literal>endpoint</literal>) and a type in its input
+        (<literal>Endpoint.t</literal>).
+      </para>
+      <programlisting>
 # module Make_interval(Endpoint : Comparable)
       : Interval_intf with type endpoint = Endpoint.t = struct
 
@@ -4680,51 +4673,49 @@ module Make_interval :
       val intersect : t -&gt; t -&gt; t
     end
 </programlisting>
-        <para>
-          So now, the interface is as it was, except that
-          <literal>endpoint</literal> is now known to be equal to
-          <literal>Endpoint.t</literal>. As a result of that type
-          equality, we can now do things like construct intervals again.
-        </para>
-        <programlisting>
+      <para>
+        So now, the interface is as it was, except that
+        <literal>endpoint</literal> is now known to be equal to
+        <literal>Endpoint.t</literal>. As a result of that type
+        equality, we can now do things like construct intervals again.
+      </para>
+      <programlisting>
 # let i = Int_interval.create 3 4;;
 val i : Int_interval.t = &lt;abstr&gt;
 # Int_interval.contains i 5;;
 - : bool = false
 </programlisting>
-      </sect3>
-      <sect3 id="destructive-substitution">
-        <title>Destructive substitution</title>
-        <para>
-          Sharing constraints basically do the job, but the approach we
-          used has some downsides. In particular, we've now been stuck
-          with the useless type declaration of
-          <literal>endpoint</literal> that clutters up both the
-          interface and the implementation. A better solution would be
-          to modify the <literal>Interval_intf</literal> signature by
-          replacing <literal>endpoint</literal> with
-          <literal>Endpoint.t</literal> everywhere it shows up, making
-          <literal>endpoint</literal> unnecessary. We can do just this
-          using what's called <emphasis>destructive
-          substitution</emphasis>. Here's the basic syntax.
-        </para>
-        <programlisting language="ocaml">
+    </sect2>
+    <sect2 id="destructive-substitution">
+      <title>Destructive substitution</title>
+      <para>
+        Sharing constraints basically do the job, but the approach we
+        used has some downsides. In particular, we've now been stuck
+        with the useless type declaration of <literal>endpoint</literal>
+        that clutters up both the interface and the implementation. A
+        better solution would be to modify the
+        <literal>Interval_intf</literal> signature by replacing
+        <literal>endpoint</literal> with <literal>Endpoint.t</literal>
+        everywhere it shows up, making <literal>endpoint</literal>
+        unnecessary. We can do just this using what's called
+        <emphasis>destructive substitution</emphasis>. Here's the basic
+        syntax.
+      </para>
+      <programlisting language="ocaml">
 S with type t := s
 </programlisting>
-        <para>
-          where <literal>S</literal> is a signature,
-          <literal>t</literal> is a type inside of <literal>S</literal>,
-          and <literal>s</literal> is a different type. The following
-          shows how we could use this with
-          <literal>Make_interval</literal>.
-        </para>
-        <para>
-          Here's an example of what we get if we use destructive
-          substitution to specialize the
-          <literal>Interval_intf</literal> interface to integer
-          intervals.
-        </para>
-        <programlisting>
+      <para>
+        where <literal>S</literal> is a signature, <literal>t</literal>
+        is a type inside of <literal>S</literal>, and
+        <literal>s</literal> is a different type. The following shows
+        how we could use this with <literal>Make_interval</literal>.
+      </para>
+      <para>
+        Here's an example of what we get if we use destructive
+        substitution to specialize the <literal>Interval_intf</literal>
+        interface to integer intervals.
+      </para>
+      <programlisting>
 # module type Int_interval_intf = Interval_intf with type endpoint := int;;
 module type Int_interval_intf =
   sig
@@ -4735,13 +4726,13 @@ module type Int_interval_intf =
     val intersect : t -&gt; t -&gt; t
   end
 </programlisting>
-        <para>
-          There's now no mention of n <literal>endpoint</literal>, all
-          occurrences of that type having been replaced by
-          <literal>int</literal>. As with sharing constraints, we can
-          also use this in the context of a functor.
-        </para>
-        <programlisting>
+      <para>
+        There's now no mention of n <literal>endpoint</literal>, all
+        occurrences of that type having been replaced by
+        <literal>int</literal>. As with sharing constraints, we can also
+        use this in the context of a functor.
+      </para>
+      <programlisting>
 # module Make_interval(Endpoint : Comparable)
     : Interval_intf with type endpoint := Endpoint.t =
   struct
@@ -4762,16 +4753,16 @@ module Make_interval :
       val intersect : t -&gt; t -&gt; t
     end
 </programlisting>
-        <para>
-          The interface is precisely what we want, and we didn't need to
-          define the <literal>endpoint</literal> type alias in the body
-          of the module. If we instantiate this module, we'll see that
-          it works properly: we can construct new intervals, but
-          <literal>t</literal> is abstract, and so we can't directly
-          access the constructors and vioalte the invariants of the data
-          structure.
-        </para>
-        <programlisting>
+      <para>
+        The interface is precisely what we want, and we didn't need to
+        define the <literal>endpoint</literal> type alias in the body of
+        the module. If we instantiate this module, we'll see that it
+        works properly: we can construct new intervals, but
+        <literal>t</literal> is abstract, and so we can't directly
+        access the constructors and vioalte the invariants of the data
+        structure.
+      </para>
+      <programlisting>
 # module Int_interval = Make_interval(Int);;
 # Int_interval.create 3 4;;
 - : Int_interval.t = &lt;abstr&gt;
@@ -4781,18 +4772,18 @@ Characters 0-27:
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: Unbound constructor Int_interval.Interval
 </programlisting>
-      </sect3>
-      <sect3 id="using-multiple-interfaces">
-        <title>Using multiple interfaces</title>
-        <para>
-          Another feature that we might want for our interval module is
-          the ability to serialize the type, in particular, by
-          converting to s-expressions. If we simply invoke the
-          <literal>sexplib</literal> macros by adding
-          <literal>with sexp</literal> to the definition of
-          <literal>t</literal>, though, we'll get an error:
-        </para>
-        <programlisting>
+    </sect2>
+    <sect2 id="using-multiple-interfaces">
+      <title>Using multiple interfaces</title>
+      <para>
+        Another feature that we might want for our interval module is
+        the ability to serialize the type, in particular, by converting
+        to s-expressions. If we simply invoke the
+        <literal>sexplib</literal> macros by adding
+        <literal>with sexp</literal> to the definition of
+        <literal>t</literal>, though, we'll get an error:
+      </para>
+      <programlisting>
 # module Make_interval(Endpoint : Comparable)
     : Interval_intf with type endpoint := Endpoint.t = struct
 
@@ -4808,42 +4799,41 @@ Characters 120-123:
                                ^^^^^^^^^^
 Error: Unbound value Endpoint.t_of_sexp
 </programlisting>
-        <para>
-          The problem is that <literal>with sexp</literal> adds code for
-          defining the s-expression converters, and that code assumes
-          that <literal>Endpoint</literal> has the appropriate
-          sexp-conversion functions for <literal>Endpoint.t</literal>.
-          But all we know about <literal>Endpoint</literal> is that it
-          satisfies the <literal>Comparable</literal> interface, which
-          doesn't say anything about s-expressions.
-        </para>
-        <para>
-          Happily, Core comes with a built in interface for just this
-          purpose called <literal>Sexpable</literal>, which is defined
-          as follows:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        The problem is that <literal>with sexp</literal> adds code for
+        defining the s-expression converters, and that code assumes that
+        <literal>Endpoint</literal> has the appropriate sexp-conversion
+        functions for <literal>Endpoint.t</literal>. But all we know
+        about <literal>Endpoint</literal> is that it satisfies the
+        <literal>Comparable</literal> interface, which doesn't say
+        anything about s-expressions.
+      </para>
+      <para>
+        Happily, Core comes with a built in interface for just this
+        purpose called <literal>Sexpable</literal>, which is defined as
+        follows:
+      </para>
+      <programlisting language="ocaml">
 module type Sexpable = sig
   type t = int
   val sexp_of_t : t -&gt; Sexp.t
   val t_of_sexp : Sexp.t -&gt; t
 end
 </programlisting>
-        <para>
-          We can modify <literal>Make_interval</literal> to use the
-          <literal>Sexpable</literal> interface, for both its input and
-          its output. Note the use of destructive substitution to
-          combine multiple signatures together. This is important
-          because it stops the <literal>type t</literal>'s from the
-          different signatures from interfering with each other.
-        </para>
-        <para>
-          Also note that we have been careful to override the
-          sexp-converter here to ensure that the datastructures
-          invariants are still maintained when reading in from an
-          s-expression.
-        </para>
-        <programlisting>
+      <para>
+        We can modify <literal>Make_interval</literal> to use the
+        <literal>Sexpable</literal> interface, for both its input and
+        its output. Note the use of destructive substitution to combine
+        multiple signatures together. This is important because it stops
+        the <literal>type t</literal>'s from the different signatures
+        from interfering with each other.
+      </para>
+      <para>
+        Also note that we have been careful to override the
+        sexp-converter here to ensure that the datastructures invariants
+        are still maintained when reading in from an s-expression.
+      </para>
+      <programlisting>
 # module type Interval_intf_with_sexp = sig
    type t
    include Interval_intf with type t := t
@@ -4891,38 +4881,219 @@ module Make_interval :
       val t_of_sexp : Sexplib.Sexp.t -&gt; t
     end
 </programlisting>
-        <para>
-          And now, we can use that sexp-converter in the ordinary way:
-        </para>
-        <programlisting>
+      <para>
+        And now, we can use that sexp-converter in the ordinary way:
+      </para>
+      <programlisting>
 # module Int = Make_interval(Int) ;;
 # Int_interval.sexp_of_t (Int_interval.create 3 4);;
 - : Sexplib.Sexp.t = (Interval 3 4)
 # Int_interval.sexp_of_t (Int_interval.create 4 3);;
 - : Sexplib.Sexp.t = Empty
 </programlisting>
-      </sect3>
-    </sect2>
-    <sect2 id="extending-modules-with-functors">
-      <title>Extending modules with functors</title>
-      <para>
-        One important use of functors is to build out type-specific
-        functionality in a standardized way. For example, there are lots
-        of things that you want to have to go along with a comparison
-        function.
-      </para>
-    </sect2>
-    <sect2 id="using-functors-in-dynamic-contexts">
-      <title>Using functors in dynamic contexts</title>
-      <para>
-      </para>
     </sect2>
   </sect1>
-  <sect1 id="first-class-modules">
-    <title>First-class modules</title>
+  <sect1 id="extending-modules">
+    <title>Extending modules</title>
+    <para>
+      One common use of functors is to generate type-specific
+      functionality for a given module in a standardized way. We'll
+      think about this in the context of an example of creating a simple
+      data structure.
+    </para>
+    <para>
+      The following is a minimal interface for a functional queue. A
+      functional queue is simple a functional version of a FIFO
+      (first-in, first-out) queue. Being functional, operations on the
+      queue return new queues, rather than modifying the queues that
+      were passed in.
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.mli *)
+
+type 'a t
+val empty : 'a t
+val enqueue : 'a t -&gt; 'a -&gt; 'a t
+(** [dequeue q] returns None if the [q] is empty *)
+val dequeue : 'a t -&gt; ('a * 'a t) option
+val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+</programlisting>
+    <para>
+      A standard trick for implementing functional queues efficiently is
+      to maintain both an input and an output list, where the input list
+      is ordered to make <literal>enqueue</literal> fast, and the output
+      list is ordered to make <literal>dequeue</literal> fast. When the
+      output list is empty, the input list is reveresed and becomes the
+      new output list. Thinking through why this is efficient is a
+      worthwhile exercise, but we won't dwell on that here.
+    </para>
+    <para>
+      Here's a concrete implementation.
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.ml *)
+
+type 'a t = 'a list * 'a list
+
+let empty = ([],[])
+
+let enqueue (l1,l2) x = (x :: l1,l2)
+
+let dequeue (in_list,out_list) =
+  match out_list with
+  | hd :: tl -&gt; Some (hd, (in_list,tl))
+  | [] -&gt;
+    match List.rev in_list with
+    | [] -&gt; None
+    | hd::tl -&gt; Some (hd, ([], tl))
+
+let fold (in_list,out_list) ~init ~f =
+  List.fold ~init:(List.fold ~init ~f out_list) ~f
+     (List.rev in_list)
+</programlisting>
+    <para>
+      The code above works fine, but the interface it implements is
+      unfortunately quite skeletal; there are lots of useful helper
+      functions that one might want that aren't there. And implementing
+      those helper functions can be something of a dull affair, since
+      you need to implement essentially the same helper functions for
+      multiple different data structures in essentially the same way.
+    </para>
+    <para>
+      As it happens, many of these helper functions can be derived
+      mechanically from just the fold function we already implemented.
+      Rather than write all of these helper functions by hand for every
+      new container type, we can instead use a functor to write the code
+      for these once and for all, basing them off of the
+      <literal>fold</literal> function.
+    </para>
+    <para>
+      Let's create a new module, <literal>Foldable</literal>, that
+      contains support for this. The first thing we'll need is a
+      signature to describe a container that supports fold.
+    </para>
+    <programlisting language="ocaml">
+(* file: foldable.ml *)
+
+module type S = sig
+  type 'a t
+  val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+end
+</programlisting>
+    <para>
+      We'll also need a signature for the helper functions we're going
+      to generate. This just represents some of the helper functions we
+      can derive from fold, but it's enough to give you a flavor of what
+      you can do.
+    </para>
+    <programlisting language="ocaml">
+module type Extension = sig
+  type 'a t
+  val iter    : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
+  val length  : 'a t -&gt; int
+  val count   : 'a t -&gt; f:('a -&gt; bool) -&gt; int
+  val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+  val exists  : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+end
+</programlisting>
+    <para>
+      Finally, we can define the functor itself.
+    </para>
+    <programlisting language="ocaml">
+module Extend(Container : S)
+  : Extension with type 'a t := 'a C.t =
+struct
+  open Container
+
+  let iter   t ~f = fold t ~init:() ~f:(fun () a -&gt; f a)
+  let length t    = fold t ~init:0  ~f:(fun acc _ -&gt; acc + 1)
+  let count  t ~f = fold t ~init:0  ~f:(fun count x -&gt; count + if f x then 1 else 0)
+
+  exception Short_circuit
+
+  let for_all c ~f =
+    try iter c ~f:(fun x -&gt; if not (f x) then raise Short_circuit); true
+    with Short_circuit -&gt; false
+
+  let exists c ~f =
+    try iter c ~f:(fun x -&gt; if f x then raise Short_circuit); false
+    with Short_circuit -&gt; true
+end
+</programlisting>
+    <para>
+      Now we can apply this to <literal>Fqueue</literal>. First, we can
+      extend the interface:
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.mli, 2nd version *)
+
+type 'a t
+val empty : 'a t
+val enqueue : 'a t -&gt; 'a -&gt; 'a t
+val dequeue : 'a t -&gt; ('a * 'a t) option
+val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+
+include Foldable.Extension with type 'a t := 'a t
+</programlisting>
+    <para>
+      In order to apply the functor, we'll put the definition of
+      <literal>Fqueue</literal> in a sub-module called
+      <literal>T</literal>, and then call
+      <literal>Foldable.Extend</literal> on <literal>T</literal>. Here's
+      how that code would look.
+    </para>
+    <programlisting language="ocaml">
+module T = struct
+  type 'a t = 'a list * 'a list
+
+  ....
+
+  let fold (in_list,out_list) ~init ~f =
+    List.fold ~init:(List.fold ~init ~f out_list)
+      ~f (List.rev in_list)
+
+end
+include T
+include Foldable.Extend(T)
+</programlisting>
+    <para>
+      This pattern comes up quite a bit in Core. It's used to implement
+      various standard bits of functionality, including:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Comparison-based datastructures like maps and sets, based on
+          the <literal>Comparable</literal> interface.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Hash-based datastructures like hash sets and hash heaps.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Support for so-called monadic libraries, like the ones
+          discussed in {{{ERROR HANDLING}}} and {{{CONCURRENCY}}}. Here,
+          the functor is used to provide a collection of standard helper
+          functions based on the core <literal>bind</literal> and
+          <literal>return</literal> operators.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </sect1>
+  <sect1 id="local-functors">
+    <title>Local functors</title>
     <para>
     </para>
   </sect1>
+</chapter>
+<chapter id="first-class-modules">
+  <title>First-class modules</title>
+  <para>
+    Lorem ipsit!
+  </para>
 </chapter>
 <chapter id="syntax-extensions">
   <title>Syntax Extensions</title>
