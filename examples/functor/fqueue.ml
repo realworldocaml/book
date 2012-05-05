@@ -16,4 +16,4 @@ module T = struct
       ~f (List.rev in_list)
 end
 include T
-include Foldable.Extend(T)
+include Foldable.Extend(T

@@ -1,7 +1,5 @@
 # Functors
 
-_(yminsky: Highly preliminary)_
-
 Up until now, we've seen modules play a limited role, serving as a
 mechanism for organizing code into units with specified interfaces.
 But OCaml's module system plays a bigger role in the langauge, acting
@@ -19,12 +17,12 @@ including:
   you want to mock up parts of your system for testing and simulation
   purposes.
 * _Auto-extension of modules_.  Sometimes, there is some functionality
-  that you want to build in a standard way for many different types,
-  based on a core piece of type-specific logic.  For example, you
-  might want to add a slew of comparison operators derived from a base
-  comparison function.  To do this by hand would require a lot of
-  repetitive code for each type, but functors let you write this logic
-  just once and apply it to many different types.
+  that you want to build in a standard way for different types, in
+  each case based on a some piece of type-specific logic.  For
+  example, you might want to add a slew of comparison operators
+  derived from a base comparison function.  To do this by hand would
+  require a lot of repetitive code for each type, but functors let you
+  write this logic just once and apply it to many different types.
 * _Instantiating modules with state_.  Modules can contain mutable
   state, and that means that you'll occasionally want to have multiple
   instantiations of a particular module, each with its own separate
@@ -757,5 +755,4 @@ various standard bits of functionality, including:
   used to provide a collection of standard helper functions based on
   the core `bind` and `return` operators.
 
-## Local functors
 
