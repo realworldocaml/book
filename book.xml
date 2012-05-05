@@ -4231,9 +4231,6 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
 <chapter id="functors">
   <title>Functors</title>
   <para>
-    <emphasis>(yminsky: Highly preliminary)</emphasis>
-  </para>
-  <para>
     Up until now, we've seen modules play a limited role, serving as a
     mechanism for organizing code into units with specified interfaces.
     But OCaml's module system plays a bigger role in the langauge,
@@ -4260,12 +4257,12 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
       <para>
         <emphasis>Auto-extension of modules</emphasis>. Sometimes, there
         is some functionality that you want to build in a standard way
-        for many different types, based on a core piece of type-specific
-        logic. For example, you might want to add a slew of comparison
-        operators derived from a base comparison function. To do this by
-        hand would require a lot of repetitive code for each type, but
-        functors let you write this logic just once and apply it to many
-        different types.
+        for different types, in each case based on a some piece of
+        type-specific logic. For example, you might want to add a slew
+        of comparison operators derived from a base comparison function.
+        To do this by hand would require a lot of repetitive code for
+        each type, but functors let you write this logic just once and
+        apply it to many different types.
       </para>
     </listitem>
     <listitem>
@@ -5083,17 +5080,55 @@ include Foldable.Extend(T)
       </listitem>
     </itemizedlist>
   </sect1>
-  <sect1 id="local-functors">
-    <title>Local functors</title>
-    <para>
-    </para>
-  </sect1>
 </chapter>
 <chapter id="first-class-modules">
   <title>First-class modules</title>
   <para>
-    Lorem ipsit!
+    <emphasis>(highly preliminary)</emphasis>
   </para>
+  <para>
+    Modules as we've seen them so far are a fairly static affair. While
+    functors allow you to synthesize new modules, the input of a functor
+    needs to be specified completely at compile time. In addition,
+    modules can't be dealt with like ordinary values, so you can't store
+    them in a list, or return them from a function.
+  </para>
+  <para>
+    In this section, we'll show how you can make more dynamic use of
+    modules bymaking use of so-called <emphasis>first-class
+    modules</emphasis>. As we'll see, first class modules give us a way
+    of taking a module and packaging it up as an ordinary value, which
+    can later be unpacked into an ordinary module.
+  </para>
+  <para>
+    Let's introduce the mechanics of first-class modules by introducing
+    a simple application: a logging module with a plug-in architecture
+    based on first-class modules.
+  </para>
+  <sect1 id="a-logging-infrastructure">
+    <title>A logging infrastructure</title>
+    <para>
+      A good logging library should allow you to log to multiple
+      different destinations.
+    </para>
+    <programlisting language="ocaml">
+(* file: logger.mli *)
+
+(** The type of a log *)
+val initialize : unit -&gt; unit
+
+val log : string -&gt; unit
+</programlisting>
+  </sect1>
+  <sect1 id="detritus">
+    <title>Detritus</title>
+    <programlisting>
+- Examples
+  - Selecting a module at run-time
+  - plug-in architecture
+  - 
+</programlisting>
+  </sect1>
 </chapter>
 <chapter id="syntax-extensions">
   <title>Syntax Extensions</title>
