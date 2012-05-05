@@ -1,5 +1,7 @@
 # First-class modules
 
+_(highly preliminary)_
+
 Modules as we've seen them so far are a fairly static affair.  While
 functors allow you to synthesize new modules, the input of a functor
 needs to be specified completely at compile time.  In addition,
