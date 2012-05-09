@@ -184,7 +184,9 @@ Describe cohttp (much simpler than Ocsigen at this stage).
 Show how we can use a monadic style to bind to the Github API and make simple JSON requests/responses.
 
 <sidebar><title>A Note on Portability</title>
+
 Explain libev and why its needed here.
+
 </sidebar>
 
 
