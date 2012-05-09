@@ -7931,7 +7931,9 @@ let main () =
     <sidebar><title>
     A Note on Portability
     </title>
-    Explain libev and why its needed here.
+    <para>
+      Explain libev and why its needed here.
+    </para>
     </sidebar>
 
 
