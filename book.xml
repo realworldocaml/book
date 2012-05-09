@@ -7646,6 +7646,297 @@ end;;
     </sect2>
   </sect1>
 </chapter>
+<chapter id="concurrent-programming-with-lwt">
+  <title>Concurrent Programming with Lwt</title>
+  <para>
+    As soon as you start building OCaml code that interfaces with
+    external systems, you'll need to handle concurrent, blocking
+    operations. A web server sending a large file to many clients or a
+    GUI waiting for a mouse click are both applications of this sort.
+    These applications need to keep track of how blocking code is woken
+    up in response to external I/O, and do so efficiently for many
+    instances of these network connections or GUI elements.
+  </para>
+  <para>
+    In some programming languages such as Java or C#, you've probably
+    used preemptive system threads to handle such operations. Other
+    languages like Javascript are single-threaded, and an application
+    must register callbacks to be triggered upon an external event such
+    as a timeout or a browser click. Both methods have tradeoffs:
+    threads are more memory hungry and require careful locking, but
+    event callbacks quickly descend into a spaghetti of callbacks.
+  </para>
+  <para>
+    In OCaml, the Lwt library offers an interesting hybrid that lets you
+    write straight-line blocking code that is internally evaluated via a
+    single event-loop. Lwt threads are simply normal OCaml
+    heap-allocated values, without any runtime magic, that hide internal
+    state using the abstract types described earlier. These lightweight
+    threads are limited only by your main memory and can be interfaced
+    with a variety of network, storage and graphical outputs (including
+    web browsers). In this chapter, we'll focus on the basics of Lwt and
+    how to use it for building network services. Later, we'll describe
+    more exotic platforms such compiling the same code to Javascript
+    (Chapter {???}).
+  </para>
+  <para>
+    Lets begin by constructing our first thread. <literal>Lwt</literal>
+    is just a normal library, so open it in your toplevel and create
+    your first thread:
+  </para>
+  <programlisting>
+# require &quot;lwt&quot; ;;
+# open Lwt ;;
+# return 5 ;;
+- : int Lwt.t = &lt;abstr&gt;
+</programlisting>
+  <para>
+    <literal>return</literal> constructs a thread that returns
+    immediately, and above we've built one that returns a constant 5.
+    Notice that the return type is not a normal <literal>int</literal>,
+    but instead <literal>int Lwt.t</literal>. The additional type
+    parameter marks the value as a lightweight thread, which can
+    internally be blocked, raising an exception, or completed. We can
+    only <emphasis>use</emphasis> the return value by binding a further
+    function to be invoked after the input thread has finished.
+  </para>
+  <programlisting>
+# let x = return 5 ;;
+val x : int Lwt.t = &lt;abstr&gt;
+# let y = bind x (fun a -&gt; return (string_of_int a)) ;;
+val y : string Lwt.t = &lt;abstr&gt;
+</programlisting>
+  <para>
+    Here, we've bound a function to <literal>x</literal> that will
+    convert it to a string. Notice that while both <literal>x</literal>
+    and <literal>y</literal> share a common <literal>Lwt.t</literal>
+    type, their type variables differ based on return type of the
+    thread. This can be really useful in large codebases, as you can
+    tell if any function will block simply by the presence of an
+    <literal>Lwt.t</literal> in the signature.
+  </para>
+  <para>
+    Lets examine the function signatures of <literal>bind</literal> and
+    <literal>return</literal> more closely.
+  </para>
+  <programlisting>
+# return ;;
+- : 'a -&gt; 'a Lwt.t = &lt;fun&gt;
+# bind ;;
+- : 'a Lwt.t -&gt; ('a -&gt; 'b Lwt.t) -&gt; 'b Lwt.t = &lt;fun&gt;
+</programlisting>
+  <para>
+    <literal>return</literal>, <literal>bind</literal> and the
+    <literal>Lwt.t</literal> type all contain polymorphic type variables
+    that are automatically inferred based on how they are used in your
+    code. <literal>bind</literal> is particularly interesting as the the
+    callback argument <literal>'a</literal> <emphasis>must</emphasis> be
+    the same as the return type of the input thread, preventing runtime
+    mismatches between callbacks. Both <literal>bind</literal> and
+    <literal>return</literal> form a design pattern in functional
+    programming known as <emphasis>monads</emphasis>, and you will run
+    across this signature in many applications beyond just threads.
+  </para>
+  <programlisting>
+# #require &quot;lwt.unix&quot; ;;
+# Lwt_unix.run ;;
+- : 'a Lwt.t -&gt; 'a = &lt;fun&gt;
+# Lwt_unix.run y;;
+- : string = &quot;5&quot;
+</programlisting>
+  <para>
+    <literal>Lwt_unix.run</literal> executes a thread until it
+    completes, and returns a normal OCaml value. This usually forms the
+    main loop of your program, as threads cannot be unblocked unless
+    they run within the <literal>run</literal> function.
+  </para>
+  <sect1 id="timing-and-thread-composition">
+    <title>Timing and Thread Composition</title>
+    <para>
+      Our examples so far have been with static threads, and now we'll
+      look at how to coordinate multiple threads and timeouts. Lets
+      write a program that spins off two threads, each of which sleep
+      for some random amount of time, and then one prints
+      &quot;Heads&quot; and the other &quot;Tails&quot;, and finally
+      prints &quot;Finished&quot; before exiting.
+    </para>
+    <programlisting language="ocaml">
+open Lwt
+open Printf
+
+let main () =
+  bind (join [
+    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () -&gt;
+      print_endline &quot;Heads&quot;;
+      return ()
+    );
+    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () -&gt;
+      print_endline &quot;Tails&quot;;
+      return ()
+    );
+  ]) (fun () -&gt;
+    print_endline &quot;Finished&quot;;
+    return ()
+  )
+
+let _ = Lwt_unix.run (main ())
+</programlisting>
+    <para>
+      This is a full code example that you can compile via (???). The
+      <literal>bind</literal> function is joined by couple of new
+      functions. <literal>Lwt_unix.sleep</literal> puts a thread to
+      sleep for a given time, and <literal>join</literal> takes a list
+      of threads and waits for all of them to terminate. If at least one
+      thread fails then <literal>join</literal> fails with the same
+      exception as the first to fail <emphasis>after</emphasis> all
+      threads terminate. When run, this program immediately spawns two
+      coin threads, and waits on them to complete before calling the
+      final &quot;Finished&quot; closure.
+    </para>
+    <para>
+      The control flow above is somewhat hard to follow due to all the
+      nested binds, and so Lwt provides infix operators with the same
+      behaviour.
+    </para>
+    <informaltable>
+      <tgroup cols="3">
+        <colspec align="left" />
+        <colspec align="left" />
+        <colspec align="left" />
+        <thead>
+          <row>
+            <entry>
+              Function
+            </entry>
+            <entry>
+              Operator
+            </entry>
+            <entry>
+              Behaviour
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              bind
+            </entry>
+            <entry>
+              &gt;&gt;=
+            </entry>
+            <entry>
+              Wait for thread to finish, and apply return to new thread
+            </entry>
+          </row>
+          <row>
+            <entry>
+              join
+            </entry>
+            <entry>
+              &lt;&amp;&gt;
+            </entry>
+            <entry>
+              Wait for two threads to finish and return unit
+            </entry>
+          </row>
+          <row>
+            <entry>
+              choose
+            </entry>
+            <entry>
+              &lt;?&gt;
+            </entry>
+            <entry>
+              Wait for the first thread to finish, cancel rest
+            </entry>
+          </row>
+          <row>
+            <entry>
+              map
+            </entry>
+            <entry>
+              &gt;|=
+            </entry>
+            <entry>
+              Map a non-blocking function over a blocking thread
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      We can now rewrite the earlier coin-flipping example using these
+      operators. Notice that we can explicitly name threads simply by
+      binding them via <literal>let</literal>, and they execute in
+      parallel until joined together.
+    </para>
+    <programlisting language="ocaml">
+let main () =
+  let t1 =
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;= fun () -&gt;
+    return (print_endline &quot;Heads&quot;)
+  in
+  let t2 = 
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;= fun () -&gt;
+    return (print_endline &quot;Tails&quot;)
+  in
+  (t1 &lt;&amp;&gt; t2) &gt;&gt;= fun () -&gt;
+  return (print_endline &quot;Finished&quot;)
+</programlisting>
+    <sect2 id="syntax-extensions-1">
+      <title>Syntax Extensions</title>
+      <programlisting language="ocaml">
+let main () =
+  let t1 =
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;
+    return (print_endline &quot;Heads&quot;)
+  in
+  let t2 = 
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;
+    return (print_endline &quot;Tails&quot;)
+  in
+  lwt () = t1 &lt;&amp;&gt; t2 in
+  return (print_endline &quot;Finished&quot;)
+</programlisting>
+    </sect2>
+    <sect2 id="cancellation">
+      <title>Cancellation</title>
+      <para>
+        <literal>choose</literal> behaves as the first thread in l to
+        terminate. If several threads are already terminated, one is
+        chosen at random. Mixing normal exceptions and Lwt exceptions is
+        bad.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="a-simple-tcp-echo-server">
+    <title>A simple TCP Echo Server</title>
+    <para>
+      Not using Lwt_daemon, but directly. This will be UNIX-only from
+      this stage on, hmm...
+    </para>
+  </sect1>
+  <sect1 id="onto-an-http-server">
+    <title>Onto an HTTP Server</title>
+    <para>
+      Describe cohttp (much simpler than Ocsigen at this stage).
+    </para>
+  </sect1>
+  <sect1 id="binding-to-the-github-api">
+    <title>Binding to the Github API</title>
+    <para>
+      Show how we can use a monadic style to bind to the Github API and
+      make simple JSON requests/responses.
+    </para>
+    <sidebar><title>
+    A Note on Portability
+    </title>
+    Explain libev and why its needed here.
+    </sidebar>
+
+
+  </sect1>
+</chapter>
 <chapter id="docbook-playground">
   <title>DocBook Playground</title>
   <highlights>
@@ -7748,7 +8039,76 @@ end;;
     </para>
     </answer> </qandaentry>
     </qandaset>
-
+  </sect1>
+</chapter>
+<chapter id="installation">
+  <title>Installation</title>
+  <para>
+    <emphasis>avsm: these are just notes so far until we decide on firm
+    recommendations for all these</emphasis>
+  </para>
+  <sect1 id="base-installation">
+    <title>Base Installation</title>
+    <sect2 id="macos-x">
+      <title>MacOS X</title>
+      <para>
+        Homebrew is probably the best solution here.
+      </para>
+    </sect2>
+    <sect2 id="windows">
+      <title>Windows</title>
+      <para>
+        Protzenko's Windows installer.
+      </para>
+    </sect2>
+    <sect2 id="linux">
+      <title>Linux</title>
+      <para>
+        Debian/Ubuntu packages. RHEL/Fedora RPMs.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="useful-libraries">
+    <title>Useful Libraries</title>
+    <para>
+      Core, Lwt, mainly. Mention OPAM and OASIS-db, whichever works.
+      Many packages maintained on github these days.
+    </para>
+  </sect1>
+  <sect1 id="environment">
+    <title>Environment</title>
+    <sect2 id="command-line">
+      <title>Command Line</title>
+      <para>
+        <ulink url="http://utopia.knoware.nl/~hlub/uck/rlwrap/">rlwrap</ulink>
+        provides line-editing support. An <literal>.ocamlinit</literal>
+        file in your home directory will set up your environment with
+        useful libraries and syntax extensions open, e.g.:
+      </para>
+      <programlisting>
+#use &quot;topfind&quot;;;
+#load &quot;dynlink.cma&quot;;;
+#camlp4o;;
+#require &quot;lwt.syntax&quot;;;
+#require &quot;lwt.unix&quot;;;
+open Lwt;;
+</programlisting>
+    </sect2>
+    <sect2 id="editors">
+      <title>Editors</title>
+      <para>
+        Emacs users have tuareg and
+        <ulink url="http://www.typerex.org/">Typerex</ulink>.
+      </para>
+      <para>
+        Vim users can use the built-in style, and
+        <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
+        may also be useful.
+      </para>
+      <para>
+        Eclipse plugins: which one is maintained?
+      </para>
+    </sect2>
   </sect1>
 </chapter>
 </book>
