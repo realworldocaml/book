@@ -5,7 +5,7 @@ open Core.Std
     [header] and each element of [data] must be of the same length.  Uses UNIX-style
     newline separators, i.e., `\n`
 *)
-val render_table
+val render
   :  string list         (* header *)
   -> string list list    (* data *)
   -> string

@@ -1,12 +1,13 @@
-# Functors
+# Functors and First-Class Modules
 
 Up until now, we've seen modules play a limited role, serving as a
 mechanism for organizing code into units with specified interfaces.
 But OCaml's module system plays a bigger role in the langauge, acting
 as a powerful toolset for structuring large-scale systems.  This
-chapter will introduce you to functors, one of the more powerful
-elements of this toolset, and will show how to integrate them into
-your software designs.
+chapter will introduce you to functors and first class modules, which
+greatly increase the power of the module system.
+
+## Functors
 
 Functors are, roughly speaking, functions from modules to modules, and
 they can be used to solve a variety of code-structuring problems,
@@ -29,7 +30,7 @@ including:
   and independent mutable state.  Functors let you automate the
   construction of such modules.
 
-## A trivial example
+### A trivial example
 
 We'll start by considering the simplest possible example: a functor
 for incrementing an integer.
@@ -102,7 +103,7 @@ module Three_and_more : sig val x : int val x_string : string end
 module Four : sig val x : int end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## A bigger example: computing with intervals
+### A bigger example: computing with intervals
 
 We'll now look at a more complex example, which will give us an
 opportunity to learn more about how functors work.  In particular,
@@ -267,7 +268,7 @@ This is important, because confusing the two kinds of intervals would
 be a semantic error, and it's an easy one to make.  The ability of
 functors to mint new types is a useful trick that comes up a lot.
 
-### Making the functor abstract
+#### Making the functor abstract
 
 There's a problem with `Make_interval`.  The code we wrote depends on
 the invariant that the upper bound of an interval is greater than its
@@ -316,7 +317,7 @@ implementation match `Interval_intf`.
 module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Sharing constraints
+#### Sharing constraints
 
 The resulting module is abstract, but unfortunately, it's too
 abstract.  In particular, we haven't exposed the type `endpoint`,
@@ -403,7 +404,7 @@ val i : Int_interval.t = <abstr>
 - : bool = false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Destructive substitution
+#### Destructive substitution
 
 Sharing constraints basically do the job, but the approach we used has
 some downsides.  In particular, we've now been stuck with the useless
@@ -481,7 +482,7 @@ Characters 0-27:
 Error: Unbound constructor Int_interval.Interval
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Using multiple interfaces
+#### Using multiple interfaces
 
 Another feature that we might want for our interval module is the
 ability to serialize the type, in particular, by converting to
@@ -591,7 +592,7 @@ And now, we can use that sexp-converter in the ordinary way:
 - : Sexplib.Sexp.t = Empty
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Extending modules
+### Extending modules
 
 One common use of functors is to generate type-specific functionality
 for a given module in a standardized way.  We'll think about this in
@@ -754,5 +755,191 @@ various standard bits of functionality, including:
   {{{ERROR HANDLING}}} and {{{CONCURRENCY}}}.  Here, the functor is
   used to provide a collection of standard helper functions based on
   the core `bind` and `return` operators.
+
+
+## First class modules
+
+You can think of OCaml as being broken up into two sub-language: a
+core language that is concerned with values and types, and a module
+language that is concerned with modules and module signatures.  These
+sub-languages are stratified, in that modules can contain types and
+values, but ordinary values can't contain modules or module types.
+That means you can't do things like define a variable whose definition
+is a module, or a function that takes a module as an argument.
+
+OCaml provides a way around this stratification in the form of
+_first-class module_.  First-class modules are ordinary values that
+can be created from and converted back to regular modules.  This is
+important because letting modules into the core language makes it
+possible to write code that deals with modules in a much more dynamic
+fashion, and thus opens up many possibilities in the design of your
+software.
+
+### Another trivial example
+
+Much as we did with functors, we'll start out with first class modules
+by considering a very simple case: a module which contains just an
+integer.
+
+You create a first-class module by packaging up a module with a
+signature that it satisfies.  First, we'll define the module and
+signature we're going to use.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module type X_int = sig val x : int end;;
+module type X_int = sig val x : int end
+# module Three : X_int = struct let x = 3 end;;
+module Three : X_int
+# Three.x;;
+- : int = 3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can then create a first-class module using the `module` keyword.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let three = (module Three : X_int);;
+val three : (module X_int) = <module>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that the type of the first-class module, `(module X_int)`, is
+based on the name of the signature that we used in constructing it.
+
+To get at the contents of `three`, we need to unpack it into a module
+again, which we can do using the `val` keyword.  _(yminsky: update for
+ocaml 4.00)_
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module New_three = (val three : X_int) ;;
+module New_three : X_int
+# New_three.x;;
+- : int = 3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And we can now write functions that operate on first-class modules.
+In the following we define two functions, `to_int`, for converting a
+`(module X_int)` into an `int`.  And `plus`, for summing two `(module
+X_int)`s.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let to_int m =
+    let module M = (val m : X_int) in
+    M.x
+  ;;
+val to_int : (module X_int) -> int = <fun>
+# let plus m1 m2 =
+    let module M1 = (val m1 : X_int) in
+    let module M2 = (val m2 : X_int) in
+    let module S = struct let x = M1.x + M2.x end in
+    (module S : X_int)
+  ;;
+val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To define these functions we needed to pack and unpack first-class
+modules.  But once we have them defined, we can use them to operate on
+first-class modules as we would with any other value, taking full
+advantage of the concision and simplicity of the core langauge.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let six = plus three three;;
+val six : (module X_int) = <module>
+# to_int (List.fold ~init:six ~f:plus [three;three]);;
+- : int = 12
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Example: A service registery
+
+To get beyond the basic mechanics of first-class modules, we need to
+consider a fuller example.  In particular, we'll describe the design
+of a library for registering a network service, where we define a
+service to be some computation that exports a query interface that
+could be accessed by clients.
+
+First, let's write out the interface to our `Service` module, which
+will define the module type of a service, as well as a `Handler`
+module which allows one to combine multiple services together and
+dispatch queries to them.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: service.mli *)
+
+open Core.Std
+
+(** The module type for a service. *)
+module type S = sig
+  type t
+  val name           : string
+  val create         : unit -> t
+  val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
+end
+
+(** A handler for dispatching queries to one of many services. *)
+module Handler : sig
+  type t
+  val create : (module S) list -> t
+  val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, a service has a state, represented by the type `t`, a name by
+which the service can be referenced, a function `create` for
+instantiating a service, and a function by which a service can
+actually handle a request.  Here, requests and responses are assummed
+to be in the form of s-expressions.  The idea is that the s-expression
+is formatted as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(<service-name> <query>)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+where `<service_name>` tells you which service should handle the
+request, and `<query>` is the body of that request.
+
+Now let's look at how to implement `Service`, and in particular,
+`Service.Handler`.  The core datastructure of a `Handler.t` is a
+hashtable of handlers, indexed by the service-name, where each handler
+is a function of type `(Sexp.t -> Sexp.t Or_error.t)`.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: service.ml *)
+
+open Core.Std
+
+module type S = sig
+  type t
+  val name           : string
+  val create         : unit -> t
+  val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
+end
+
+module Handler = struct
+  type t = { handlers: (Sexp.t -> Sexp.t Or_error.t) String.Table.t; }
+
+  (** Creates a handler given a list of services *)
+  let create services =
+    let handlers = String.Table.create () in
+    List.iter services ~f:(fun service ->
+      let module Service = (val service : S) in
+      let service = Service.create () in
+      if Hashtbl.mem handlers Service.name then
+        failwith ("Attempt to register duplicate handler for "^Service.name);
+      Hashtbl.replace handlers ~key:Service.name
+        ~data:(fun sexp -> Service.handle_request service sexp)
+    );
+    {handlers}
+
+  let handle_request t sexp =
+    match sexp with
+    | Sexp.List [Sexp.Atom name;query] ->
+      begin match Hashtbl.find t.handlers name with
+      | None -> Or_error.error_string ("Unknown service: "^name)
+      | Some handler ->
+        try handler query
+        with exn -> Error (Error.of_exn exn)
+      end
+    | _ -> Or_error.error_string "Malformed query"
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
