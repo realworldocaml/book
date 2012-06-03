@@ -772,20 +772,20 @@ _first-class module_.  First-class modules are ordinary values that
 can be created from and converted back to regular modules.  This is
 important because letting modules into the core language makes it
 possible to write code that deals with modules in a much more dynamic
-fashion, and thus opens up many possibilities in the design of your
-software.
+fashion, and thus opens up many software designs that can simplify
+your code.
 
 ### Another trivial example
 
-Much as we did with functors, we'll start out with first class modules
-by considering a very simple case: a module which contains just an
-integer.
+Much as we did with functors, we'll start out with an utterly trivial
+example, to allow us to show the basic mechanics of first class
+modules with a minimum of fuss.
 
-You create a first-class module by packaging up a module with a
-signature that it satisfies.  First, we'll define the module and
-signature we're going to use.
+A first-class module is created by packaging up a module with a
+signature that it satisfies.  The following defines a simple signature
+and a module that matches it.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+C~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
 # module Three : X_int = struct let x = 3 end;;
@@ -805,8 +805,7 @@ Note that the type of the first-class module, `(module X_int)`, is
 based on the name of the signature that we used in constructing it.
 
 To get at the contents of `three`, we need to unpack it into a module
-again, which we can do using the `val` keyword.  _(yminsky: update for
-ocaml 4.00)_
+again, which we can do using the `val` keyword.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module New_three = (val three : X_int) ;;
@@ -815,9 +814,10 @@ module New_three : X_int
 - : int = 3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And we can now write functions that operate on first-class modules.
-In the following we define two functions, `to_int`, for converting a
-`(module X_int)` into an `int`.  And `plus`, for summing two `(module
+Using these conversions as building blocks, we can create tools for
+working with first-class modules in a natural way.  The following
+shows the definition of two function, `to_int`, which converts a
+`(module X_int)` into an `int`.  And `plus`, which adds two `(module
 X_int)`s.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -827,18 +827,16 @@ X_int)`s.
   ;;
 val to_int : (module X_int) -> int = <fun>
 # let plus m1 m2 =
-    let module M1 = (val m1 : X_int) in
-    let module M2 = (val m2 : X_int) in
-    let module S = struct let x = M1.x + M2.x end in
-    (module S : X_int)
+    (module struct
+       let x = to_int m1 + to_int m2
+     end : X_int)
   ;;
 val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To define these functions we needed to pack and unpack first-class
-modules.  But once we have them defined, we can use them to operate on
-first-class modules as we would with any other value, taking full
-advantage of the concision and simplicity of the core langauge.
+With these functions in hand, we can start operating on our `(module
+X_int)`'s in a more natural style, taking full advantage of the
+concision and simplicity of the core langauge.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let six = plus three three;;
@@ -847,18 +845,22 @@ val six : (module X_int) = <module>
 - : int = 12
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Example: A service registery
+Of course, all we've really done with this example is come up with a
+more cumbersome way of working with integers.  To see the power of
+first class modules, we'll need to look at a more realistic example.
 
-To get beyond the basic mechanics of first-class modules, we need to
-consider a fuller example.  In particular, we'll describe the design
-of a library for registering a network service, where we define a
-service to be some computation that exports a query interface that
-could be accessed by clients.
+### Example: A service bundle
 
-First, let's write out the interface to our `Service` module, which
-will define the module type of a service, as well as a `Handler`
-module which allows one to combine multiple services together and
-dispatch queries to them.
+This section describe the design of a library for bundling together
+multiple services, where a service is a piece of code that exports a
+query interface.  A service bundle combines together multiple
+individual services under a single query interface that works by
+dispatching incoming queries to the appropriate underlying service.
+
+The following is a first attempt at an interface for our `Service`
+module, which contains both a module type `S`, which is the interface
+that a service should meet, as well as a `Bundle` module which is for
+combining multiple services.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* file: service.mli *)
@@ -873,33 +875,39 @@ module type S = sig
   val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
 end
 
-(** A handler for dispatching queries to one of many services. *)
-module Handler : sig
+(** Bundles multiple services together *)
+module Bundle : sig
   type t
   val create : (module S) list -> t
   val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
+  val service_names  : t -> string list
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here, a service has a state, represented by the type `t`, a name by
 which the service can be referenced, a function `create` for
 instantiating a service, and a function by which a service can
-actually handle a request.  Here, requests and responses are assummed
-to be in the form of s-expressions.  The idea is that the s-expression
-is formatted as follows:
+actually handle a request.  Here, requests and responses are delivered
+as s-expressions.  At the `Bundle` level, the s-expression of a
+request is expected to be formatted as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(<service-name> <query>)
+(<service-name> <body>)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-where `<service_name>` tells you which service should handle the
-request, and `<query>` is the body of that request.
+where `<service_name>` is the service that should handle the request,
+and `<body>` is the body of the request.
 
-Now let's look at how to implement `Service`, and in particular,
-`Service.Handler`.  The core datastructure of a `Handler.t` is a
-hashtable of handlers, indexed by the service-name, where each handler
-is a function of type `(Sexp.t -> Sexp.t Or_error.t)`.
+Now let's look at how to implement `Service`.  The core datastructure
+of `Bundle` is a hashtable of request handlers, one per service.
+Each request handler is a function of type `(Sexp.t -> Sexp.t
+Or_error.t)`.  These request handlers really stand in for the
+underlying service, with the particular state of the service in
+question being hidden inside of the request handler.
 
+The first part of `service.ml` is just the preliminaries: the
+definition of the module type `S`, and the definition of the type
+`Bundle.t`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* file: service.ml *)
@@ -913,14 +921,22 @@ module type S = sig
   val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
 end
 
-module Handler = struct
+module Bundle = struct
   type t = { handlers: (Sexp.t -> Sexp.t Or_error.t) String.Table.t; }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The next thing we need is a function for creating a `Bundle.t`.  This
+`create` function builds a table to hold the request handlers, and
+then iterates through the services, unpacking each module,
+constructing the request handler, and then putting that request
+handler in the table.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
   (** Creates a handler given a list of services *)
   let create services =
     let handlers = String.Table.create () in
-    List.iter services ~f:(fun service ->
-      let module Service = (val service : S) in
+    List.iter services ~f:(fun service_m ->
+      let module Service = (val service_m : S) in
       let service = Service.create () in
       if Hashtbl.mem handlers Service.name then
         failwith ("Attempt to register duplicate handler for "^Service.name);
@@ -928,7 +944,18 @@ module Handler = struct
         ~data:(fun sexp -> Service.handle_request service sexp)
     );
     {handlers}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Note that the `Service.t` that is created is referenced by the
+corresponding request handler, so that it is effectively hidden behind
+the function in the `handlers` table.
+
+Now we can write the function for the bundle to handle requests.  The
+handler will examine the s-expression to determine the body of the
+query and the name of the service to dispatch to.  It then looks up
+the hnalder calls it to generate the response.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
   let handle_request t sexp =
     match sexp with
     | Sexp.List [Sexp.Atom name;query] ->
@@ -939,7 +966,112 @@ module Handler = struct
         with exn -> Error (Error.of_exn exn)
       end
     | _ -> Or_error.error_string "Malformed query"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Last of all, we define a function for looking up the names of the
+available services.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+  let service_names t = Hashtbl.keys t.handlers
+
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+To see this system in action, we need to define some services, create
+the corresponding bundle, and then hook that bundle up to some kind of
+client.  For simplicity, we'll build a simple command-line interface.
+There are two functions below: `handle_one`, which handles a single
+interaction; and `handle_loop`, which creates the bundle and then runs
+`handle_one` in a loop.
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: service_client.ml *)
+
+open Core.Std
+
+(** Handles a single request coming from stdin *)
+let handle_one bundle =
+  printf ">>> %!"; (* prompt *)
+  match In_channel.input_line stdin with
+  | None -> `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
+  | Some line ->
+    let line = String.strip line in (* drop leading and trailing whitespace *)
+    if line = "" then `Continue
+    else match Or_error.try_with (fun () -> Sexp.of_string line) with
+    | Error err ->
+      eprintf "Couldn't parse query: %s\n%!" (Error.to_string_hum err);
+      `Continue
+    | Ok query_sexp ->
+      let resp = Service.Bundle.handle_request bundle query_sexp in
+      Sexp.output_hum stdout (<:sexp_of<Sexp.t Or_error.t>> resp);
+      Out_channel.newline stdout;
+      `Continue
+
+let handle_loop services =
+  let bundle = Service.Bundle.create services in
+  let rec loop () =
+    match handle_one bundle with
+    | `Stop -> ()
+    | `Continue -> loop ()
+  in
+  loop ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now we'll create a couple of toy services.  One service is a counter
+that can be updated by query; and the other service lists a directory.
+The last line then kicks off the shell with the services we've
+defined.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module Counter : Service.S = struct
+  type t = int ref
+
+  let name = "update-counter"
+  let create () = ref 0
+
+  let handle_request t sexp =
+    match Or_error.try_with (fun () -> int_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok x ->
+      t := !t + x;
+      Ok (sexp_of_int !t)
+end
+
+module List_dir : Service.S = struct
+  type t = unit
+
+  let name = "ls"
+  let create () = ()
+
+  let handle_request () sexp =
+    match Or_error.try_with (fun () -> string_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok dir -> Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
+end
+
+let () =
+  handle_loop [(module List_dir : Service.S); (module Counter : Service.S)]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And now we can go ahead and start up the client.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ ./service_client.byte
+>>> (update-counter 1)
+(Ok 1)
+>>> (update-counter 10)
+(Ok 11)
+>>> (ls .)
+(Ok
+ (_build _tags service.ml service.mli service.mli~ service.ml~
+  service_client.byte service_client.ml service_client.ml~))
+>>>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, let's consider what happens to the design when we want to make
+the interface of a service a bit more realistic.  In particular, right
+now services are created without any configuration.  Let's add a
+config type to each service, and change the interface of `Bundle` so
+that services can be registered along with their configs.  At the same
+time, we'll change the `Bundle` API to allow services to be changed
+dynamically, rather than just added at creation time.

@@ -521,7 +521,23 @@ type session_info = { user: Username.t;
                     }
 
 let sessions_have_same_user s1 s2 =
-  s1.user = s1.host
+  s1.user = s2.user
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can also combine this with the use of the include directive to add
+some extra functionality to such a module.  Thus, we could have
+rewritten the definition of `Hostname` above as follows to add a
+function `Hostname.mine` that returns the hostname of the present
+machine.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module Hostname : sig
+  include ID
+  val mine : unit -> t
+end = struct
+  include String_id
+  let mine = Unix.gethostname
+end  
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Opening modules ###

@@ -9,9 +9,10 @@ module type S = sig
   val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
 end
 
-(** A handler for dispatching queries to one of many services. *)
-module Handler : sig
+(** Bundles multiple services together *)
+module Bundle : sig
   type t
   val create : (module S) list -> t
   val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
+  val service_names  : t -> string list
 end
