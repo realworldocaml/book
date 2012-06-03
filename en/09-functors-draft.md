@@ -785,7 +785,7 @@ A first-class module is created by packaging up a module with a
 signature that it satisfies.  The following defines a simple signature
 and a module that matches it.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+C~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
 # module Three : X_int = struct let x = 3 end;;
