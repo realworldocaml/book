@@ -769,11 +769,9 @@ is a module, or a function that takes a module as an argument.
 
 OCaml provides a way around this stratification in the form of
 _first-class module_.  First-class modules are ordinary values that
-can be created from and converted back to regular modules.  This is
-important because letting modules into the core language makes it
-possible to write code that deals with modules in a much more dynamic
-fashion, and thus opens up many software designs that can simplify
-your code.
+can be created from and converted back to regular modules.  As we'll
+see, letting modules into the core language makes it possible to use
+more flexible and dynamic module-oriented designs.
 
 ### Another trivial example
 
@@ -785,7 +783,7 @@ A first-class module is created by packaging up a module with a
 signature that it satisfies.  The following defines a simple signature
 and a module that matches it.
 
-C~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
 # module Three : X_int = struct let x = 3 end;;
@@ -848,6 +846,36 @@ val six : (module X_int) = <module>
 Of course, all we've really done with this example is come up with a
 more cumbersome way of working with integers.  To see the power of
 first class modules, we'll need to look at a more realistic example.
+
+### Dynamically choosing a module
+
+Perhaps the simplest thing you can do with first-class modules that
+you can't do without them is to pick the implementation of a module at
+runtime.  Imagine you had different implementations of a set of
+OS-level calls in your application, where you wanted to pick the
+implementation based on the OS you happen to be running on.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* An interface for each OS to provide *)
+module type OS_intf = sig ... end
+
+(* The individual OS implementations *)
+module Unix   = struct ... end  
+module Win32  = struct ... end
+module Cygwin = struct ... end
+
+(* returns a first class module based on [Sys.os_type] *)
+let choose_os () =
+  match Sys.os_type with
+  | "Win32"  -> (module Win32  : OS_intf)
+  | "Unix"   -> (module Unix   : OS_intf)
+  | "Cygwin" -> (module Cygwin : OS_intf)
+  | os_string -> failwithf "unknown OS type %s" os_string ()
+
+(* The final, dynamically chosen, implementation *)
+module OS = (val (choose_os ()) : OS_intf)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ### Example: A service bundle
 
