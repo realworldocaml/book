@@ -2765,7 +2765,7 @@ val my_host : host_info =
         pattern match. Thus, we can write:
       </para>
       <programlisting>
-# let host_info_to_string { hostname = h; os_name = os; 
+# let host_info_to_string { hostname = h; os_name = os;
                             os_release = r; cpu_arch = c } =
        sprintf &quot;%s (%s %s / %s)&quot; h os r c;;
     val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
@@ -2899,114 +2899,382 @@ let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
         know what to expect.
       </para>
     </sect2>
-    <sect2 id="collision-of-field-names">
-      <title>Collision of field names</title>
+    <sect2 id="reusing-field-names">
+      <title>Reusing field names</title>
       <para>
-        One problem you can run into with record declarations is what
-        happens when you define two record types that share the same
-        field names. Consider the following example.
+        Defining records with the same field names can be problematic.
+        Consider the following types, which represent messages a server
+        might receive from a client. The two messages are the
+        <literal>logon</literal>, which occurs when a new client
+        connects for the first time and includes the identity of the
+        user connecting and credentials used for authentication, and a
+        <literal>heartbeat</literal>, which each client generates
+        periodically to demonstrate to the server that the client is
+        alive and connected, and includes a status message. Both these
+        messages include a session id and the time the message was
+        generated.
       </para>
-      <programlisting>
-# type vec3d = { x: float; y: float; z: float };;
-# type vec2d = { x: float; y: float };;
+      <programlisting language="ocaml">
+# type heartbeat =
+    { session_id: string;
+      time: Time.t;
+      status_message: string;
+    };;
+# type logon =
+    { session_id: string;
+      time: Time.t;
+      user: string;
+      credentials: string;
+    };;
 </programlisting>
       <para>
-        Now, see what happens when we try to write a function that
-        operates over a vec3d.
+        The fact that we reused the same field name between
+        <literal>heartbeat</literal> and <literal>logon</literal> causes
+        trouble when we try to construct a <literal>heartbeat</literal>.
       </para>
       <programlisting>
-# let mag3d p = 
-     let sqr x = x *. x in
-     sqrt (sqr p.x +. sqr p.y +. sqr p.z);;
-    Characters 79-80:
-       sqrt (sqr p.x +. sqr p.y +. sqr p.z);;
-                                       ^
-Error: This expression has type vec2d but an expression was expected of type
-         vec3d
+# let create_heartbeat ~session_id ~status_message =
+     { time = Time.now (); session_id; status_message }
+  ;;
+    Characters 56-106:
+       { time = Time.now (); session_id; status_message }
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: The record field label status_message belongs to the type heartbeat
+       but is mixed here with labels of type logon
 </programlisting>
       <para>
-        Essentially what's happened here is that the declaration of
-        <literal>vec3d</literal> has shadowed two of the record fields
-        of <literal>vec3d</literal>, and now there's no natural way to
-        access them.
-      </para>
-      <para>
-        There are two standard idioms for dealing with this issue. The
-        first is to add a prefix to each field name to make it unique.
-        Thus, we might write:
+        The problem is that the declaration of <literal>logon</literal>
+        shadowed the corresponding fields of
+        <literal>heartbeat</literal>, so they can no longer be
+        referenced directly. There are two common solutions to this
+        problem. The first is to add a prefix to each field name to make
+        it unique. Thus, we could define <literal>heartbeat</literal>
+        and <literal>logon</literal> as follows:
       </para>
       <programlisting>
-# type vec3d = { v3_x: float; v3_y: float; v3_z: float };;
-type vec3d = { v3_x : float; v3_y : float; v3_z : float; }
-# type vec2d = { v2_x: float; v2_y: float };;
-type vec2d = { v2_x : float; v2_y : float; }
+# type heartbeat =
+    { heartbeat_session_id: string;
+      heartbeat_time: Time.t;
+      heartbeat_status_message: string;
+    };;
+# type logon =
+    { logon_session_id: string;
+      logon_time: Time.t;
+      logon_client_addr: Unix.Inet_addr.t;
+      logon_client: int;
+    };;
 </programlisting>
+      <para>
+        This eliminates the collisions and is simple enough, but it
+        requires you to pick awkward names for your record fields, and
+        adds needless repetition and verbosity, both to your type
+        declaration and more importantly to every subsequent use of the
+        fields in question.
+      </para>
       <para>
         Another approach is to mint a module for each type. This is
         actually a broadly useful idiom, providing for each type a
-        namespace within which to put values related to the type that
-        the module is about. Thus, we might write:
+        namespace within which to put related values. Using this style
+        we would write:
       </para>
       <programlisting>
-# module Vec3d = struct
-    type t = { x: float; y: float; z: float }
-    let mag p = 
-       let sqr x = x *.x in
-       sqrt (sqr p.x +. sqr p.y +. sqr p.z)
+# module Heartbeat = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        status_message: string;
+      }
+  end
+  module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        user: string;
+        credentials: string;
+      }
   end;;
-          module Vec3d :
-  sig type t = { x : float; y : float; z : float; } val mag : t -&gt; float end
 </programlisting>
       <para>
-        We can now use this function as follows:
+        Now, we can write a function for creating a heartbeat as follows
       </para>
       <programlisting>
-# Vec3d.mag { Vec3d.x = 3.; Vec3d.y = 0.; Vec3d.z = -4. };;
-- : float = 5.
+# let create_heartbeat ~session_id ~status_message =
+      { Heartbeat.time = Time.now ();
+        Heartbeat.session_id; Heartbeat.status_message };;
+val create_heartbeat :
+  session_id:string -&gt; status_message:string -&gt; Heartbeat.t = &lt;fun&gt;
 </programlisting>
       <para>
-        Note that now we need to use the module name to qualify the
-        field name, because this code is written outside of the module
-        where the record is defined. This qualification is actually only
-        needed for one record field, so this can be written more tersely
-        as follows.
+        We do need to use the module name to qualify the field names,
+        because this code is written outside of the module where the
+        record is defined. This qualification is only required needed
+        for one record field, so this can be written more tersely as
+        follows.
       </para>
       <programlisting>
-# Vec3d.mag { Vec3d. x = 3.; y = 0.; z = -4. };;
-- : float = 5.
+# let create_heartbeat ~session_id ~status_message =
+      { Heartbeat. time = Time.now (); session_id; status_message };;
+val create_heartbeat :
+  session_id:string -&gt; status_message:string -&gt; Heartbeat.t = &lt;fun&gt;
 </programlisting>
       <para>
-        This works for record construction and pattern matching, so we
-        can write:
+        For functions defined within the module, which is a quite common
+        pattern, the module qualification goes away entirely.
       </para>
-      <programlisting>
-# let flip_x { Vec3d. x; y; z } = { Vec3d. x = (-.x);y;z };;
-val flip_x : Vec3d.t -&gt; Vec3d.t = &lt;fun&gt;
-</programlisting>
     </sect2>
     <sect2 id="functional-updates">
       <title>Functional updates</title>
       <para>
-        A common idiom in functional programming is to take an existing
-        record field and change one or two of the fields. For example,
-        in the <literal>flip_x</literal> example above, there was really
-        only one field we wanted to change, but we had to list all of
-        the field names to construct the new record.
+        One common operation on a record is to create a new record that
+        differs from an existing record in only a subset of the fields.
+        For example, imagine that you had a record for keeping track of
+        information about a given client, including when the last
+        heartbeat was received from that client. The following defines a
+        type for representing this information, as well as a function
+        for updating the client information when a new heartbeat
+        arrives.
+      </para>
+      <programlisting>
+# type client_info =
+   { addr: Unix.Inet_addr.t;
+     port: int;
+     user: string;
+     credentials: string;
+     last_heartbeat_time: Time.t;
+   };;
+# let register_heartbeat t hb =
+    { addr = t.addr;
+      port = t.port;
+      user = t.user;
+      credentials = t.credentials;
+      last_heartbeat_time = hb.Heartbeat.time;
+    };;
+</programlisting>
+      <para>
+        This is fairly verbose, given that there's only one field that
+        we actually want to change. We can use OCaml's functional update
+        syntax to do this more tersely. The syntax of a functional
+        update is as follows:
+      </para>
+      <programlisting>
+{ &lt;record-value&gt; with &lt;field&gt; = &lt;value&gt;;
+                      &lt;field&gt; = &lt;value&gt;;
+                      ...
+}
+</programlisting>
+      <para>
+        Thus, we can rewrite <literal>register_heartbeat</literal> as
+        follows
+      </para>
+      <programlisting>
+# let register_heartbeat t hb =
+    { t with last_heartbeat_time = hb.Heartbeat.time };;
+</programlisting>
+      <para>
+        Obviously, there is more benefit the larger the record is.
+      </para>
+      <para>
+        One issue with functional updates is that they make your code
+        independent of the identity of the other fields in the record.
+        This is often the right choice, but it does mean that if you
+        change the definition of your record to have more fields, the
+        type system will not prompt you to reconsider whether your
+        update code should affect those fields. Consider what happens if
+        we decided to add a field for the last status message received.
+      </para>
+      <programlisting>
+# type client_info =
+   { addr: Unix.Inet_addr.t;
+     port: int;
+     user: string;
+     credentials: string;
+     last_heartbeat_time: Time.t;
+     last_status_message: string;
+   };;
+</programlisting>
+      <para>
+        With <literal>register_heartbeat</literal> handling all fields
+        explicitly, the compiler will warn you that you need to handle
+        this new field. But the version using a functional update
+        continues to compile as is, even though in truth, it should now
+        behave as follows:
+      </para>
+      <programlisting>
+# let register_heartbeat t hb =
+    { t with last_heartbeat_time = hb.Heartbeat.time;
+             last_status_message = hb.Heartbeat.status_message;
+    };;
+</programlisting>
+      <para>
+        The lesson here is that when you use a functional update, you
+        should be confident that the full effect of the update will be
+        registered by updating just the fields in question, even if the
+        record changes later.
       </para>
     </sect2>
-    <sect2 id="polymorphic-records">
-      <title>Polymorphic records</title>
+    <sect2 id="mutable-fields">
+      <title>Mutable fields</title>
       <para>
+        Records are by default immutable, meaning that while you can do
+        functional updates, you can't normally change the value of a
+        record field. It is, however, possible to declare a field as
+        being mutable, as shown below.
       </para>
-    </sect2>
-    <sect2 id="mutable-record-fields-1">
-      <title>Mutable record fields</title>
+      <programlisting>
+# type t = { mutable x: int;
+             y: float;
+           };;
+</programlisting>
       <para>
+        We'll talk about mutability more in chapter {{{MUTABILITY}}}
       </para>
     </sect2>
     <sect2 id="first-class-fields">
       <title>First-class fields</title>
       <para>
+        Consider the following function for extracting the usernames
+        from a list of <literal>Logon</literal> messages.
+      </para>
+      <programlisting>
+# let get_users logons =
+     List.map logons ~f:(fun x -&gt; x.Logon.user);;
+  val get_hostnames : Logon.t list -&gt; string list = &lt;fun&gt;
+</programlisting>
+      <para>
+        Here, we wrote a small function
+        <literal>(fun x -&gt; x.Logon.user)</literal> to access the
+        <literal>user</literal> field. This kind of accessor function is
+        a common enough pattern that that it would be convenient to
+        generate them automatically. OCaml doesn't have any direct
+        support for this, but the <literal>fieldslib</literal> syntax
+        extension that ships with <literal>Core</literal> does just
+        that.
+      </para>
+      <para>
+        <literal>fieldslib</literal> is invoked by putting the
+        <literal>with fields</literal> annotation at the end of the
+        declaration of a record type. So, for example, we could have
+        defined <literal>Logon</literal> as follows.
+      </para>
+      <programlisting>
+# module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        user: string;
+        credentials: string;
+      }
+    with fields
+  end;;
+</programlisting>
+      <para>
+        Given that definition, we can use the function
+        <literal>Logon.user</literal> to extract the user field from a
+        logon message.
+      </para>
+      <programlisting>
+# let get_users logons = List.map logons ~f:Logon.user;;
+  val get_hostnames : Logon.t list -&gt; string list = &lt;fun&gt;
+</programlisting>
+      <para>
+        In addition to generating field accessor functions,
+        <literal>fieldslib</literal> also creates a sub-module called
+        <literal>Fields</literal> that contains a first class
+        representative of each field, in the form of a value of type
+        <literal>Field.t</literal>. A <literal>Field.t</literal> bundles
+        up the following functionality of a record filed:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            The name of the field as a string
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The ability to extract the field
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The ability to do a functional update of that field
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The (optional) ability to set the record field, which is
+            present only if the field is mutable.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        We can use these first class fields to do things like write a
+        generic function for displaying a record field. The function
+        <literal>show_field</literal> takes three arguments: the
+        <literal>Field.t</literal>, a function for converting the
+        contents of the field in question to a string, and the record
+        type.
+      </para>
+      <programlisting>
+# let show_field field to_string record =
+     sprintf &quot;(%s: %s)&quot; (Field.name field) (Field.get field record |! to_string);;
+val show_field : ('a, 'b) Core.Std.Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string =
+  &lt;fun&gt;
+</programlisting>
+      <para>
+        And here, we show how these functions can be used to display
+        individual fields.
+      </para>
+      <programlisting>
+# let logon = { Logon.
+                session_id = &quot;26685&quot;;
+                time = Time.now ();
+                user = &quot;yminsky&quot;;
+                credentials = &quot;Xy2d9W&quot;; }
+  ;;
+# show_field Logon.Fields.user Fn.id logon;;
+- : string = &quot;(user: yminsky)&quot;
+# extract Logon.Fields.time Time.to_string logon;;
+- : string = &quot;(time: 2012-06-26 18:44:13.807826)&quot;
+</programlisting>
+      <para>
+        <literal>fieldslib</literal> also provides higher-level
+        operators, like <literal>Fields.fold</literal> and
+        <literal>Fields.iter</literal>, which let you operate over all
+        of the fields of a record. For example, here's a function that
+        uses show_field to print out a representation of a complete
+        record.
+      </para>
+      <programlisting>
+# let print_logon logon =
+    let print to_string field =
+      printf &quot;%s\n&quot; (show_field field to_string logon)
+    in
+    Logon.Fields.iter
+      ~session_id:(print Fn.id)
+      ~time:(print Time.to_string)
+      ~user:(print Fn.id)
+      ~credentials:(print Fn.id)
+  ;;
+val print_logon : Logon.t -&gt; unit = &lt;fun&gt;
+# print_logon logon;;
+(session_id: 26685)
+(time: 2012-06-26 18:44:13.807826)
+(user: yminsky)
+(credentials: Xy2d9W)
+- : unit = ()
+</programlisting>
+      <para>
+        The advantage of this approach is that when the definition of
+        <literal>Logon</literal> changes, <literal>iter</literal> will
+        change along with it, prompting you to fix
+        <literal>print_logon</literal> to match.
+      </para>
+      <para>
+        These field-based iterators are useful for a variety of
+        practical programming tasks, from building validation functions
+        to scaffolding the definition of a web-form based on a record
+        type.
       </para>
     </sect2>
     <sect2 id="sharing-common-sub-structures">
@@ -3019,6 +3287,19 @@ val flip_x : Vec3d.t -&gt; Vec3d.t = &lt;fun&gt;
     <title>Variants</title>
     <para>
     </para>
+  </sect1>
+  <sect1 id="more-advanced-declarations">
+    <title>More advanced declarations</title>
+    <sect2 id="polymorphic-types">
+      <title>Polymorphic types</title>
+      <para>
+      </para>
+    </sect2>
+    <sect2 id="recursive-types">
+      <title>Recursive types</title>
+      <para>
+      </para>
+    </sect2>
   </sect1>
 </chapter>
 <chapter id="error-handling">
@@ -5454,7 +5735,7 @@ include Foldable.Extend(T)
     </para>
     <para>
       OCaml provides a way around this stratification in the form of
-      <emphasis>first-class module</emphasis>. First-class modules are
+      <emphasis>first-class modules</emphasis>. First-class modules are
       ordinary values that can be created from and converted back to
       regular modules. As we'll see, letting modules into the core
       language makes it possible to use more flexible and dynamic
@@ -5550,30 +5831,57 @@ val six : (module X_int) = &lt;module&gt;
       <para>
         Perhaps the simplest thing you can do with first-class modules
         that you can't do without them is to pick the implementation of
-        a module at runtime. Imagine you had different implementations
-        of a set of OS-level calls in your application, where you wanted
-        to pick the implementation based on the OS you happen to be
-        running on.
+        a module at runtime.
+      </para>
+      <para>
+        Consider an application that does I/O multiplexing using a
+        system call like <literal>select</literal> to determine which
+        file descriptors are ready to use. There are in fact multiple
+        APIs you might want to use, including <literal>select</literal>
+        itself, <literal>epoll</literal>, and <literal>libev</literal>,
+        where different multiplexers make somewhat different performance
+        and portability trade-offs. You could support all of these in
+        one application by defining a single module, let's call it
+        <literal>Mutliplexer</literal>, whose implementation is chosen
+        at run-time based on an environment variable.
+      </para>
+      <para>
+        To do this, you'd first need an interface <literal>S</literal>
+        that all of the different multiplexer implementations would need
+        to match, and then an implementation of each multiplexer.
       </para>
       <programlisting language="ocaml">
-(* An interface for each OS to provide *)
-module type OS_intf = sig ... end
+(* file: multiplexer.ml *)
 
-(* The individual OS implementations *)
-module Unix   = struct ... end  
-module Win32  = struct ... end
-module Cygwin = struct ... end
+(* An interface the OS-specific functionality *)
+module type S = sig ... end
 
-(* returns a first class module based on [Sys.os_type] *)
-let choose_os () =
-  match Sys.os_type with
-  | &quot;Win32&quot;  -&gt; (module Win32  : OS_intf)
-  | &quot;Unix&quot;   -&gt; (module Unix   : OS_intf)
-  | &quot;Cygwin&quot; -&gt; (module Cygwin : OS_intf)
-  | os_string -&gt; failwithf &quot;unknown OS type %s&quot; os_string ()
-
+(* The implementations of each individual multiplexer *)
+module Select : S = struct ... end  
+module Epoll  : S = struct ... end
+module Libev  : S = struct ... end
+</programlisting>
+      <para>
+        We can choose the first-class module that we want based on
+        looking up an environment variable.
+      </para>
+      <programlisting language="ocaml">
+let multiplexer =
+  match Sys.getenv &quot;MULTIPLEXER&quot; with
+  | None
+  | Some &quot;select&quot; -&gt; (module Select : S)
+  | Some &quot;epoll&quot;  -&gt; (module Epoll : S)
+  | Some &quot;libev&quot;  -&gt; (module Libev : S)
+  | Some other -&gt; failwithf &quot;Unknown multiplexer: %s&quot; other ()
+</programlisting>
+      <para>
+        Finally, we can convert the resulting first-class module back to
+        an ordinary module, and then include that so it becomes part of
+        the body of our module.
+      </para>
+      <programlisting language="ocaml">
 (* The final, dynamically chosen, implementation *)
-module OS = (val (choose_os ()) : OS_intf)
+include (val multiplexer : S)
 </programlisting>
     </sect2>
     <sect2 id="example-a-service-bundle">
