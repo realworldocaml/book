@@ -768,7 +768,7 @@ That means you can't do things like define a variable whose definition
 is a module, or a function that takes a module as an argument.
 
 OCaml provides a way around this stratification in the form of
-_first-class module_.  First-class modules are ordinary values that
+_first-class modules_.  First-class modules are ordinary values that
 can be created from and converted back to regular modules.  As we'll
 see, letting modules into the core language makes it possible to use
 more flexible and dynamic module-oriented designs.
@@ -851,31 +851,54 @@ first class modules, we'll need to look at a more realistic example.
 
 Perhaps the simplest thing you can do with first-class modules that
 you can't do without them is to pick the implementation of a module at
-runtime.  Imagine you had different implementations of a set of
-OS-level calls in your application, where you wanted to pick the
-implementation based on the OS you happen to be running on.
+runtime.  
+
+Consider an application that does I/O multiplexing using a system call
+like `select` to determine which file descriptors are ready to use.
+There are in fact multiple APIs you might want to use, including
+`select` itself, `epoll`, and `libev`, where different multiplexers
+make somewhat different performance and portability trade-offs.  You
+could support all of these in one application by defining a single
+module, let's call it `Mutliplexer`, whose implementation is chosen at
+run-time based on an environment variable.
+
+To do this, you'd first need an interface `S` that all of the
+different multiplexer implementations would need to match, and then an
+implementation of each multiplexer.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-(* An interface for each OS to provide *)
-module type OS_intf = sig ... end
+(* file: multiplexer.ml *)
 
-(* The individual OS implementations *)
-module Unix   = struct ... end  
-module Win32  = struct ... end
-module Cygwin = struct ... end
+(* An interface the OS-specific functionality *)
+module type S = sig ... end
 
-(* returns a first class module based on [Sys.os_type] *)
-let choose_os () =
-  match Sys.os_type with
-  | "Win32"  -> (module Win32  : OS_intf)
-  | "Unix"   -> (module Unix   : OS_intf)
-  | "Cygwin" -> (module Cygwin : OS_intf)
-  | os_string -> failwithf "unknown OS type %s" os_string ()
-
-(* The final, dynamically chosen, implementation *)
-module OS = (val (choose_os ()) : OS_intf)
+(* The implementations of each individual multiplexer *)
+module Select : S = struct ... end  
+module Epoll  : S = struct ... end
+module Libev  : S = struct ... end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+We can choose the first-class module that we want based on looking up
+an environment variable.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let multiplexer =
+  match Sys.getenv "MULTIPLEXER" with
+  | None
+  | Some "select" -> (module Select : S)
+  | Some "epoll"  -> (module Epoll : S)
+  | Some "libev"  -> (module Libev : S)
+  | Some other -> failwithf "Unknown multiplexer: %s" other ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finally, we can convert the resulting first-class module back to an
+ordinary module, and then include that so it becomes part of the body
+of our module.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* The final, dynamically chosen, implementation *)
+include (val multiplexer : S)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Example: A service bundle
 
