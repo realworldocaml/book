@@ -462,7 +462,7 @@ contents of the field in question to a string, and the record type.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let show_field field to_string record =
-     sprintf "(%s: %s)" (Field.name field) (Field.get field record |! to_string);;
+     sprintf "%s: %s" (Field.name field) (Field.get field record |! to_string);;
 val show_field : ('a, 'b) Core.Std.Field.t -> ('b -> string) -> 'a -> string =
   <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -478,9 +478,9 @@ individual fields.
                 credentials = "Xy2d9W"; }
   ;;
 # show_field Logon.Fields.user Fn.id logon;;
-- : string = "(user: yminsky)"
-# extract Logon.Fields.time Time.to_string logon;;
-- : string = "(time: 2012-06-26 18:44:13.807826)"
+- : string = "user: yminsky"
+# show_field Logon.Fields.time Time.to_string logon;;
+- : string = "time: 2012-06-26 18:44:13.807826"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `fieldslib` also provides higher-level operators, like `Fields.fold`
@@ -501,10 +501,10 @@ out a representation of a complete record.
   ;;
 val print_logon : Logon.t -> unit = <fun>
 # print_logon logon;;
-(session_id: 26685)
-(time: 2012-06-26 18:44:13.807826)
-(user: yminsky)
-(credentials: Xy2d9W)
+session_id: 26685
+time: 2012-06-26 18:44:13.807826
+user: yminsky
+credentials: Xy2d9W
 - : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
