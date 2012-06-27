@@ -3217,7 +3217,7 @@ val create_heartbeat :
       </para>
       <programlisting>
 # let show_field field to_string record =
-     sprintf &quot;(%s: %s)&quot; (Field.name field) (Field.get field record |! to_string);;
+     sprintf &quot;%s: %s&quot; (Field.name field) (Field.get field record |! to_string);;
 val show_field : ('a, 'b) Core.Std.Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string =
   &lt;fun&gt;
 </programlisting>
@@ -3233,9 +3233,9 @@ val show_field : ('a, 'b) Core.Std.Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt
                 credentials = &quot;Xy2d9W&quot;; }
   ;;
 # show_field Logon.Fields.user Fn.id logon;;
-- : string = &quot;(user: yminsky)&quot;
-# extract Logon.Fields.time Time.to_string logon;;
-- : string = &quot;(time: 2012-06-26 18:44:13.807826)&quot;
+- : string = &quot;user: yminsky&quot;
+# show_field Logon.Fields.time Time.to_string logon;;
+- : string = &quot;time: 2012-06-26 18:44:13.807826&quot;
 </programlisting>
       <para>
         <literal>fieldslib</literal> also provides higher-level
@@ -3258,10 +3258,10 @@ val show_field : ('a, 'b) Core.Std.Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt
   ;;
 val print_logon : Logon.t -&gt; unit = &lt;fun&gt;
 # print_logon logon;;
-(session_id: 26685)
-(time: 2012-06-26 18:44:13.807826)
-(user: yminsky)
-(credentials: Xy2d9W)
+session_id: 26685
+time: 2012-06-26 18:44:13.807826
+user: yminsky
+credentials: Xy2d9W
 - : unit = ()
 </programlisting>
       <para>
