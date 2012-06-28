@@ -4852,20 +4852,21 @@ let build_counts = Freq.build_counts
 Circular dependencies: &quot;freq.cmo&quot; already seen in
   [ &quot;counter.cmo&quot;; &quot;freq.cmo&quot; ]
 </programlisting>
+        <para>
+          Functors and First-Class Modules
+        </para>
+        <para>
+          Up until now, we've seen modules play a limited role, serving
+          as a mechanism for organizing code into units with specified
+          interfaces. But OCaml's module system plays a bigger role in
+          the langauge, acting as a powerful toolset for structuring
+          large-scale systems. This chapter will introduce you to
+          functors and first class modules, which greatly increase the
+          power of the module system.
+        </para>
       </sect3>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="functors-and-first-class-modules">
-  <title>Functors and First-Class Modules</title>
-  <para>
-    Up until now, we've seen modules play a limited role, serving as a
-    mechanism for organizing code into units with specified interfaces.
-    But OCaml's module system plays a bigger role in the langauge,
-    acting as a powerful toolset for structuring large-scale systems.
-    This chapter will introduce you to functors and first class modules,
-    which greatly increase the power of the module system.
-  </para>
   <sect1 id="functors">
     <title>Functors</title>
     <para>
@@ -5724,14 +5725,50 @@ include Foldable.Extend(T)
   <sect1 id="first-class-modules">
     <title>First class modules</title>
     <para>
-      You can think of OCaml as being broken up into two sub-language: a
-      core language that is concerned with values and types, and a
-      module language that is concerned with modules and module
-      signatures. These sub-languages are stratified, in that modules
-      can contain types and values, but ordinary values can't contain
-      modules or module types. That means you can't do things like
-      define a variable whose definition is a module, or a function that
-      takes a module as an argument.
+      _(jyh: I'm going to start some new text on FCM. We might want
+      another chapter, but let's see how it goes. I've kept Ron's
+      original text below.)
+    </para>
+    <para>
+      OCaml provides several mechanisms for organizing your programs,
+      including modules and functors, files and compilation units, and
+      classes and objects. Files and compilation units
+      (<literal>.ml</literal> and <literal>.mli</literal> files) are
+      really just a simplified module system. Classes and objects are a
+      different form of organization altogether (as we'll see in
+      <link linkend="objects">Chapter 13</link>). Yet, in each of these
+      cases, there is a clear separation between types and values --
+      values cannot contain types, and types cannot contain values. And
+      since modules can contain types, modules can't be values.
+    </para>
+    <para>
+      Next, we'll relax this restriction with <emphasis>first-class
+      modules</emphasis>. &quot;First-class&quot; means that modules can
+      be passed around as ordinary values that can be created from and
+      converted back to regular modules. This is a relatively recent
+      addition to the OCaml language, and while it might seem trivial to
+      say, it has profound consequences on the language. First-class
+      modules are strictly more expressive than any other organization
+      mechanism, including classes and objects. Once you use first-class
+      modules, you'll never want to go back.
+    </para>
+    <para>
+      This is not say that first-class modules should be used
+      indiscriminately. When you pass modules as values, the reason is
+      to support dynamic behavior, and this can have a negative impact
+      on understandability. As we proceed, we'll compare first-class
+      modules to other techniques, and suggest alternatives when it
+      seems appropriate.
+    </para>
+    <para>
+      _(jyh: Original text You can think of OCaml as being broken up
+      into two sub-language: a core language that is concerned with
+      values and types, and a module language that is concerned with
+      modules and module signatures. These sub-languages are stratified,
+      in that modules can contain types and values, but ordinary values
+      can't contain modules or module types. That means you can't do
+      things like define a variable whose definition is a module, or a
+      function that takes a module as an argument.
     </para>
     <para>
       OCaml provides a way around this stratification in the form of
@@ -5739,7 +5776,7 @@ include Foldable.Extend(T)
       ordinary values that can be created from and converted back to
       regular modules. As we'll see, letting modules into the core
       language makes it possible to use more flexible and dynamic
-      module-oriented designs.
+      module-oriented designs.)
     </para>
     <sect2 id="another-trivial-example">
       <title>Another trivial example</title>
@@ -5821,10 +5858,387 @@ val six : (module X_int) = &lt;module&gt;
 </programlisting>
       <para>
         Of course, all we've really done with this example is come up
-        with a more cumbersome way of working with integers. To see the
-        power of first class modules, we'll need to look at a more
-        realistic example.
+        with a more cumbersome way of working with integers. Let's see
+        what happens when with work with more complex abstract types.
       </para>
+    </sect2>
+    <sect2 id="standard-vs.-first-class-modules">
+      <title>Standard vs. first-class modules</title>
+      <para>
+        Let's compare the style of &quot;standard&quot; modules to
+        first-class modules, using a simple library of abstract
+        geometric shapes. In a &quot;standard&quot; module definition,
+        we would define the shapes using abstract data types, where
+        there is a type <literal>t</literal> that defines the actual
+        representation, and the module would include functions that
+        operate on the values of type <literal>t</literal>. In the
+        following code, the module type <literal>Shape</literal> defines
+        the type of generic shape, and the modules
+        <literal>Rectangle</literal> and <literal>Line</literal>
+        implement some concrete shapes.
+      </para>
+      <programlisting>
+module type Shape = sig
+  type t
+  val area : t -&gt; int
+  val position : t -&gt; int * int
+end
+
+module Rectangle = struct
+   type t = { width : int; height : int; x : int; y : int }
+   let make ~x ~y ~width ~height =
+      { width = width; height = height; x = x; y = y }
+   let area { width = width; height = height } = width * height
+   let position { x = x; y = y } = (x, y)
+end
+
+module Line = struct
+   type t = { dx : int; dy : int; x : int; y : int }
+   let make ~x ~y ~dx ~dy = { dx = dx; dy = dy; x = x; y = y }
+   let area _ = 0
+   let position { x = x; y = y } = (x, y)
+end
+</programlisting>
+      <para>
+        Next, if we want to define a generic shape that is either a
+        rectagle or a line, we would probably use a variant type. The
+        following module <literal>Shapes</literal> is entirely
+        boilerplate. We define the variant type, then functions to
+        perform a dynamic dispatch based on the type of object.
+      </para>
+      <programlisting language="ocaml">
+module Shapes = struct
+   type t = [ `Rect of Rectangle.t | `Line of Line.t ]
+   let make_rectangle = Rectangle.make
+   let make_line = Line.make
+   let area = function
+      `Rect r -&gt; Rectangle.area r
+    | `Line l -&gt; Line.area l
+   let position = function
+      `Rect r -&gt; Rectangle.position r
+    | `Line l -&gt; Line.position l
+end;;
+</programlisting>
+      <para>
+        In fact, confronted with this boilerplate, we would probably
+        choose not use modules at all, but simply define a single module
+        with a variant type and the code for all of the shapes. This
+        isn't to say that separate code for separate shapes is bad, it
+        just means that the language doesn't support it well (at least
+        with standard modules).
+      </para>
+      <para>
+        With first-class modules, the situation changes, but we have to
+        dispense with the representation type altogether. For immutable
+        shapes, the implementation is now trivial.
+      </para>
+      <programlisting>
+# module type Shape = sig
+    val area : int
+    val position : int * int
+  end;;
+module type Shape = sig val area : int val position : int * int end
+# let make_rectangle ~x ~y ~width ~height =
+   let module Rectangle = struct
+      let area = width * height
+      let position = (x, y)
+   end in
+   (module Rectangle : Shape);;
+val make_rectangle :
+  x:int -&gt; y:int -&gt; width:int -&gt; height:int -&gt; (module Shape) = &lt;fun&gt;
+# let make_line ~x ~y ~dx ~dy =
+   let module Line = struct
+      let area = 0
+      let position = (x, y)
+   end in
+   (module Line : Shape);;
+val make_line : x:int -&gt; y:int -&gt; dx:'a -&gt; dy:'b -&gt; (module Shape) = &lt;fun&gt;
+</programlisting>
+      <para>
+        For mutable shapes, it isn't much different, but we have to
+        include the state as values in the module implementations. For
+        this, we'll define a representation type <literal>t</literal> in
+        the module implementation, and for rectangles, a value
+        <literal>rect</literal> of that type. The code for lines is
+        similar.
+      </para>
+      <programlisting>
+# module type Shape = sig
+     val area : unit -&gt; int
+     val position : unit -&gt; int * int
+     val moveby : dx:int -&gt; dy:int -&gt; unit
+     val enlargeby : size:int -&gt; unit
+  end;;
+module type Shape = ...
+# let make_rectangle ~x ~y ~width ~height =
+    let module Rectangle = struct
+      type t = { mutable x : int; mutable y : int;
+                 mutable width : int; mutable height : int }
+      let rect = { x = x; y = y; width = width; height = height }
+      let area () = rect.width * rect.height
+      let position () = (rect.x, rect.y)
+      let moveby ~dx ~dy =
+         rect.x &lt;- rect.x + dx;
+         rect.y &lt;- rect.y + dy
+      let enlargeby ~size =
+         rect.width &lt;- rect.width * size;
+         rect.height &lt;- rect.height * size
+    end in
+    (module Rectangle : Shape);;
+val make_rectangle :
+  x:int -&gt; y:int -&gt; width:int -&gt; height:int -&gt; (module Shape) = &lt;fun&gt;
+</programlisting>
+    </sect2>
+    <sect2 id="a-more-complete-example----containers">
+      <title>A more complete example -- containers</title>
+      <para>
+        So far, we haven't done anything that really needs modules. The
+        type <literal>Shape</literal> could just as well be specified as
+        a record type
+        <literal>type shape = { area : int; position : int * int; ... }</literal>.
+      </para>
+      <para>
+        To explore the topic more fully, let's implement a system of
+        dynamic containers. OCaml already provides a set of standard
+        containers like <literal>List</literal>, <literal>Set</literal>,
+        <literal>Hashtbl</literal>, etc., but these types have to be
+        selected statically. If a function expects a value of type
+        <literal>Set.Make(ElementType).t</literal>, then you have to
+        pass it a set of exactly that type. What we would like is a kind
+        of container where the container implementation is chosen by the
+        caller. We define an abstraxct <emphasis>interface</emphasis>,
+        as a module type, then define one or more concrete module
+        implementations.
+      </para>
+      <para>
+        Let's start by defining an abstract container interface. It
+        contains some elements of type <literal>elt</literal>, and
+        functions to examine and iterate through the contents. For
+        convenience, we also define a normal type
+        <literal>'a container</literal> to represent containers with
+        elements of type <literal>'a</literal>.
+      </para>
+      <programlisting language="ocaml">
+module type Container = sig
+   type elt
+   val empty : unit -&gt; bool
+   val iter : (elt -&gt; unit) -&gt; unit
+   val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
+end;;
+
+type 'a container = (module Container with type elt = 'a)
+</programlisting>
+      <sect3 id="imperative-containers">
+        <title>Imperative containers</title>
+        <para>
+          For imperative containers, will also want functions to mutate
+          the contents by adding or removing elements. For example, a
+          stack can be implemented as a module <literal>Stack</literal>
+          that includes all the functions in the generic
+          <literal>Container</literal> module, as well as functions to
+          push and pop elements.
+        </para>
+        <programlisting language="ocaml">
+module type Stack = sig
+   include Container
+   val push : elt -&gt; unit
+   val pop : unit -&gt; elt
+end;;
+
+type 'a stack = (module Stack with type elt = 'a)
+</programlisting>
+        <para>
+          Now that the types are defined, the next step is to define a
+          concrete container implementation. For this simple example,
+          we'll use a list to represent a stack. The function
+          <literal>make_list_stack</literal> constructs module
+          implementation using a <literal>let module</literal>
+          construction, then returns the result.
+        </para>
+        <programlisting>
+# let make_list_stack (type element) () : element stack =
+    let module ListStack = struct
+      type elt = element
+      let contents = ref []
+      let empty () = !contents = []
+      let iter f = List.iter f !contents
+      let fold f x = List.fold_left f x !contents
+      let push x = contents := x :: !contents
+      let pop () =
+         match !contents with
+            x :: rest -&gt; contents := rest; x
+          | [] -&gt; raise (Invalid_argument &quot;stack is empty&quot;)
+    end in
+    (module ListStack : Stack with type elt = element);;
+val make_list_stack : unit -&gt; 'a stack = &lt;fun&gt;
+</programlisting>
+        <para>
+          Note the use of the explicit type parameter
+          <literal>element</literal>. This is required because the use
+          of a type variable in the module definition (like
+          <literal>type elt = 'a</literal>) would be rejected by the
+          compiler. The construction and use of the stack is
+          straightforward.
+        </para>
+        <programlisting>
+# let demo (s : int stack) =
+    let module S = (val s) in
+    S.push 5;
+    S.push 17;
+    S.iter (fun i -&gt; Printf.printf &quot;Element: %d\n&quot; i);;
+val demo : int stack -&gt; unit = &lt;fun&gt;
+# demo (make_list_stack ());;
+Element: 17
+Element: 5
+- : unit = ()
+</programlisting>
+        <para>
+          The <literal>demo</literal> function is entirely oblivious to
+          the implementation of the stack. Instead of passing a module
+          implementation based on lists, we could pass a different
+          implementation based on arrays.
+        </para>
+        <para>
+          We could go on to define other containers, sets, dictionaries,
+          queues, etc. but the implementations would be similar to what
+          we have seen. Instead, let's look at functional data
+          structures, which require a little more work to express.
+        </para>
+      </sect3>
+      <sect3 id="pure-functional-containers">
+        <title>Pure functional containers</title>
+        <para>
+          Imperative data structures have simpler types that functional
+          ones because the return type of imperative functions is just
+          <literal>unit</literal>. When we look at pure functional data
+          structures, we immediately run into a problem with type
+          recursion.
+        </para>
+        <programlisting>
+# module type Container = sig
+    type elt
+    val empty : bool
+    val iter : (elt -&gt; unit) -&gt; unit
+    val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
+    val add : elt -&gt; (module Container)
+  end;;
+Characters 160-178:
+     val add : elt -&gt; (module Container)
+                      ^^^^^^^^^^^^^^^^^^
+Error: Unbound module type Container
+</programlisting>
+        <para>
+          The problem here is that module type definitions are not
+          recursive -- we can't use the type being defined in its own
+          definition.
+        </para>
+        <para>
+          Recursive modules provide a solution, but it requires a
+          &quot;trick&quot;, where we define a module that is equal to
+          itself. This module contains only type definitions, and the
+          only purpose of the outer recursive module is to allow the
+          recursion in the definition. While we're at it, let's include
+          a <literal>map</literal> function with the usual semantics.
+        </para>
+        <programlisting>
+module rec Container : sig
+   module type T = sig
+      type elt
+      val empty : bool
+      val iter : (elt -&gt; unit) -&gt; unit
+      val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
+      val map : (elt -&gt; 'a) -&gt; 'a Container.t
+      val add : elt -&gt; elt Container.t
+   end
+   type 'a t = (module Container.T with type elt = 'a)
+end = Container;;
+</programlisting>
+        <para>
+          There are several ways to write this modle, but this
+          definition is convenient because it defines both a module type
+          <literal>Container.T</literal> and a value type
+          <literal>'a Container.t</literal>. The outer recursive module
+          <literal>Container</literal> allows the module type
+          <literal>T</literal> to refer to the value type
+          <literal>t</literal> and <emphasis>vice versa</emphasis>. Note
+          that the module <literal>Container</literal> is defined as
+          itself (as <literal>Container</literal>).
+        </para>
+        <para>
+          With this first technicality out of the way, the next one is
+          how to construct values of type
+          <literal>Container.t</literal>. In the imperative version of
+          the stack, we used a function
+          <literal>make_list_stack</literal>. We want to do the same
+          here, but the function definition must be both recursive and
+          polymorphic.
+        </para>
+        <programlisting>
+# let make_stack () =
+    let rec make : 'a. 'a list -&gt; 'a Container.t = fun
+      (type element) (contents : element list) -&gt;
+      let module NewList = struct
+         type elt = element
+         let empty = contents = []
+         let iter f = List.iter f contents
+         let fold f x = List.fold_left f x contents
+         let map f = make (List.map f contents)
+         let add x = make (x :: contents)
+      end in
+      (module NewList : Container.T with type elt = element)
+   in
+   make [];;
+val make_stack : unit -&gt; 'a Container.t = &lt;fun&gt;
+</programlisting>
+        <para>
+          The recursion here is particularly important. The functions
+          <literal>map</literal> and <literal>add</literal> return new
+          collections, so they call the function <literal>make</literal>
+          recursively. The explicit polymorphic type
+          <literal>make : 'a. 'a list -&gt; 'a Container.t</literal>
+          means that the function <literal>make</literal> is properly
+          polymorphic, so that the <literal>map</literal> function is
+          polymorphic.
+        </para>
+        <para>
+          Now that the construction is done, the usage is similar to the
+          imperative case, except that now the data structure is
+          functional.
+        </para>
+        <programlisting>
+# let demo (s : int Container.t) =
+    let module S = (val s) in
+    let module S = (val (S.add 5)) in
+    let module S = (val (S.add 17)) in
+    S.iter (fun i -&gt; Printf.printf &quot;Int Element: %d\n&quot; i);
+    let s = S.map (fun i -&gt; float_of_int i +. 0.1) in
+    let module S = (val s) in
+    S.iter (fun x -&gt; Printf.printf &quot;Float Element: %f\n&quot; x);
+    s;;
+val demo : int Container.t -&gt; float Container.t = &lt;fun&gt;
+# demo (make_stack ());;
+Int Element: 17
+Int Element: 5
+Float Element: 17.100000
+Float Element: 5.100000
+- : unit = ()
+</programlisting>
+        <para>
+          The syntactic load here is pretty high, requiring a
+          <literal>let module</literal> expression to name every
+          intermediate value. First-class modules are fairly new to the
+          language, and this is likely to change, but in the meantime
+          the syntactic load can be pretty daunting.
+        </para>
+        <para>
+          Let's look a some other more typical examples, where dynamic
+          module selection is more localized.
+        </para>
+        <para>
+          _(jyh: This is a rough draft, I'm not sure about the ordering
+          and the topics, yet. Switching back to Ron's text now.)
+        </para>
+      </sect3>
     </sect2>
     <sect2 id="dynamically-choosing-a-module">
       <title>Dynamically choosing a module</title>
