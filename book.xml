@@ -2694,17 +2694,13 @@ let print_langs langs =
 <chapter id="records-and-variants-1">
   <title>Records and Variants</title>
   <para>
-    One of OCaml's best features is its system for declaring new
-    datatypes. This system is both highly concise and very expressive,
-    allowing you to design types that very precisely match your
-    intentsions.
-  </para>
-  <para>
-    Two key elements of this system are <emphasis>records</emphasis> and
-    <emphasis>variants</emphasis>. We presented records and variants
-    briefly in chapter {{{GUIDEDTOUR}}}, but in this section, we'll
-    cover them in more depth, and presenting some more realistic
-    examples. We'll start with records.
+    One of OCaml's best features is its concise and expressive system
+    for declaring new datatypes. Two key elements of this system are
+    <emphasis>records</emphasis> and <emphasis>variants</emphasis>, both
+    of which we discussed briefly in chapter {{{GUIDEDTOUR}}}. This
+    section will cover both of them in more depth, showing some of the
+    more advanced features, as well as discuss more in-depth questions
+    about how to design types.
   </para>
   <sect1 id="records">
     <title>Records</title>
@@ -2751,8 +2747,8 @@ val my_host : host_info =
    os_release = &quot;11.4.0&quot;; cpu_arch = &quot;i386&quot;}
 </programlisting>
     <para>
-      And once we have a record value in hand, we can extract elements
-      from the record field using dot-notation.
+      Once we have a record value in hand, we can extract elements from
+      the record field using dot-notation.
     </para>
     <programlisting>
 # my_host.cpu_arch;;
@@ -2773,16 +2769,20 @@ val my_host : host_info =
 - : string = &quot;Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)&quot;
 </programlisting>
       <para>
-        Here, we've used a pattern match in the argument to capture the
-        relevant record fields. We didn't need to use a match statement
-        because pattern matches of a record are
-        <emphasis>irrefutable</emphasis>, meaning that a a single
-        pattern is guaranteed to match all values of the record type in
-        question. In other words, all of the requirements imposed by the
-        pattern match are the enforced by the compiler, so that if your
-        code compiles, you can't have a runtime failure due to a failed
-        match. This is in contrast to lists, where it's easy to write a
-        pattern match that fails at runtime. For example:
+        Notice that we didn't need a match statement because we used
+        only a single pattern to match all possible records of type
+        <literal>host_info</literal>. This works because record patterns
+        are <emphasis>irrefutable</emphasis>, meaning that a single
+        pattern is guaranteed to match any value of the type in
+        question.
+      </para>
+      <para>
+        In other words, an irrefutable pattern is one where all of the
+        requirements imposed by the pattern match are enforced by the
+        type system, so that code that compiles will never have a
+        runtime failure due to a failed match. This is in contrast to
+        lists, where it's easy to write a pattern match that fails at
+        runtime. For example:
       </para>
       <programlisting>
 # let first_plus_second (x :: y :: _) = x + y;;
@@ -2793,19 +2793,17 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
 val first_plus_second : int list -&gt; int = &lt;fun&gt;
-# first_plus_second [];;
-Exception: (Match_failure &quot;&quot; 54 -135).
+# first_plus_second [5;3;6];;
+- : int = 8
+# first_plus_second [5];;
+Exception: (Match_failure &quot;&quot; 1 22).
 </programlisting>
       <para>
-        With records, this kind of failure is not possible, and so this
-        exhaustiveness check is not relevant.
-      </para>
-      <para>
-        OCaml has a different kind of exhaustiveness check, though, that
-        does matter for records. In particular, OCaml offers a warning
-        for missing fields in a record pattern. With that warning turned
-        on, the following code will return a warning about an
-        inexhaustive match.
+        OCaml does offer an exhaustiveness check for record patterns, in
+        particular, a warning for missing fields in a record pattern.
+        With that warning turned on (which you can do in the toplevel by
+        typing <literal>#warnings &quot;+9&quot;</literal>), the
+        following code will complain about an inexhaustive match.
       </para>
       <programlisting>
 # let host_info_to_string
@@ -2822,14 +2820,13 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
       <para>
         Note that, unlike our previous example, ignoring this warning
         won't lead to a runtime error. The warning is nonetheless
-        worthwhile, because it gives you an opportunity to notice that
-        there is some data that you're ignoring, which is often
-        important.
+        useful, because it gives you an opportunity to notice that there
+        is some data that you're ignoring, which is often important.
       </para>
       <para>
-        Sometimes, we do want to ignore extra fields, and we can
-        explicitly do so by adding <literal>_</literal>, which silently
-        matches all remaining fields, and makes the error go away.
+        We can disable the warning for a given pattern by explicitly
+        acknowledging that we are ignoring extra fields by adding
+        <literal>_</literal> to the pattern, as shown below.
       </para>
       <programlisting>
 # let host_info_to_string
@@ -2841,9 +2838,11 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
     <sect2 id="field-punning">
       <title>Field punning</title>
       <para>
-        We can also use <emphasis>field punning</emphasis> to bind the
-        fields of a record to variables of the same name. Thus, we can
-        write:
+        When the name of a variable coincides with the name of a record
+        field, OCaml provides some handy syntactic shortcuts. For
+        example, the pattern in the following function binds all of the
+        fields in question to variables of the same name. This is called
+        <emphasis>field punning</emphasis>.
       </para>
       <programlisting>
 # let host_info_to_string { hostname; os_name; os_release; cpu_arch } =
@@ -2851,9 +2850,9 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
   val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
       <para>
-        Field punning can also be used to construct a record. For
-        example, we could have rewritten our code to generate the host
-        info record as follows:
+        Field punning can also be used to construct a record. Consider
+        the following code for generating a <literal>host_info</literal>
+        record.
       </para>
       <programlisting>
 # let my_host =
@@ -2867,13 +2866,14 @@ val my_host : host_info =
    os_release = &quot;11.4.0&quot;; cpu_arch = &quot;i386&quot;}
 </programlisting>
       <para>
-        In this case, the use of field punning doesn't really clarify
-        the code. But it can be quite useful when the computation of the
-        elememnts of the records is complex. One common pattern is to
-        produce a function for constructing a record from labeled
-        arguments. In the following example, we have a simple
-        constructor, which as part of the construction converts the
-        hostname to lowercase.
+        In the above code, we defined variables corresponding to the
+        record fields first, and then the record declaration itself
+        simply listed the fields that needed to be included.
+      </para>
+      <para>
+        You can take advantage of both field punning and label punning
+        when writing a function for constructing a record from labeled
+        arguments, as shown below.
       </para>
       <programlisting>
 # let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
@@ -2881,11 +2881,12 @@ val my_host : host_info =
     { hostname; os_name; os_release; cpu_arch };;
 </programlisting>
       <para>
-        This looks considerably better than it would without field
-        punning:
+        This is considerably more concise than what you would get
+        without punning at all.
       </para>
       <programlisting>
-let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
+let create_host_info ~hostname:hostname ~os_name:os_name
+   ~os_release:os_release ~cpu_arch:cpu_arch = 
     let hostname = String.lowercase hostname in
     { hostname = hostname ; os_name = os_name;
       os_release = os_release; cpu_arch = cpu_arch };;
@@ -2894,9 +2895,8 @@ let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
         Together, labeled arguments, field names, and field and label
         punning, encourage a style where you carry names through your
         codebase, across different functions and modules. This is
-        generally good practice, since it encourages uniform naming
-        choices, which makes it easier for someone new to the code to
-        know what to expect.
+        generally good practice, since it encourages consistent naming,
+        which makes it easier for new people to navigate your source.
       </para>
     </sect2>
     <sect2 id="reusing-field-names">
@@ -2904,13 +2904,12 @@ let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
       <para>
         Defining records with the same field names can be problematic.
         Consider the following types, which represent messages a server
-        might receive from a client. The two messages are the
-        <literal>logon</literal>, which occurs when a new client
-        connects for the first time and includes the identity of the
-        user connecting and credentials used for authentication, and a
-        <literal>heartbeat</literal>, which each client generates
-        periodically to demonstrate to the server that the client is
-        alive and connected, and includes a status message. Both these
+        might receive from a client. Here, the <literal>logon</literal>
+        message is sent when a client initiates a connection, and
+        includes the identity of the user connecting and credentials
+        used for authentication. The <literal>heartbeat</literal>
+        message is periodically sent by the client to demonstrate to the
+        server that the client is alive and connected. Both these
         messages include a session id and the time the message was
         generated.
       </para>
@@ -2919,8 +2918,8 @@ let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
     { session_id: string;
       time: Time.t;
       status_message: string;
-    };;
-# type logon =
+    }
+  type logon =
     { session_id: string;
       time: Time.t;
       user: string;
@@ -2944,20 +2943,28 @@ Error: The record field label status_message belongs to the type heartbeat
 </programlisting>
       <para>
         The problem is that the declaration of <literal>logon</literal>
-        shadowed the corresponding fields of
-        <literal>heartbeat</literal>, so they can no longer be
-        referenced directly. There are two common solutions to this
-        problem. The first is to add a prefix to each field name to make
-        it unique. Thus, we could define <literal>heartbeat</literal>
-        and <literal>logon</literal> as follows:
+        shadowed some of the fields of <literal>heartbeat</literal>. As
+        a result, the fields <literal>time</literal> and
+        <literal>session_id</literal> are assummed to be fields of
+        <literal>logon</literal>, and <literal>status_message</literal>,
+        which was not shadowed, is assummed to be a field of
+        <literal>heartbeat</literal>. The compiler therefore complains
+        that we're trying to construct a record with fields from two
+        different record types.
+      </para>
+      <para>
+        There are two common solutions to this problem. The first is to
+        add a prefix to each field name to make it unique. Thus, we
+        could define <literal>heartbeat</literal> and
+        <literal>logon</literal> as follows:
       </para>
       <programlisting>
 # type heartbeat =
     { heartbeat_session_id: string;
       heartbeat_time: Time.t;
       heartbeat_status_message: string;
-    };;
-# type logon =
+    }
+  type logon =
     { logon_session_id: string;
       logon_time: Time.t;
       logon_client_addr: Unix.Inet_addr.t;
@@ -2965,11 +2972,9 @@ Error: The record field label status_message belongs to the type heartbeat
     };;
 </programlisting>
       <para>
-        This eliminates the collisions and is simple enough, but it
-        requires you to pick awkward names for your record fields, and
-        adds needless repetition and verbosity, both to your type
-        declaration and more importantly to every subsequent use of the
-        fields in question.
+        This eliminates the collisions and is simple enough to do. But
+        it leaves you with awkwardly named record fields, and adds
+        needless repetition and verbosity to your code.
       </para>
       <para>
         Another approach is to mint a module for each type. This is
@@ -2995,7 +3000,7 @@ Error: The record field label status_message belongs to the type heartbeat
   end;;
 </programlisting>
       <para>
-        Now, we can write a function for creating a heartbeat as follows
+        Now, our heartbeat-creation function can be rendered as follows.
       </para>
       <programlisting>
 # let create_heartbeat ~session_id ~status_message =
@@ -3005,11 +3010,11 @@ val create_heartbeat :
   session_id:string -&gt; status_message:string -&gt; Heartbeat.t = &lt;fun&gt;
 </programlisting>
       <para>
-        We do need to use the module name to qualify the field names,
-        because this code is written outside of the module where the
-        record is defined. This qualification is only required needed
-        for one record field, so this can be written more tersely as
-        follows.
+        The module name <literal>Heartbeat</literal> is required to
+        qualify the fields, because this function is outside of the
+        <literal>Heartbeat</literal> module where the record was
+        defined. OCaml only requires the module qualification for one
+        record field, however, so we can write this more concisely.
       </para>
       <programlisting>
 # let create_heartbeat ~session_id ~status_message =
@@ -3018,21 +3023,20 @@ val create_heartbeat :
   session_id:string -&gt; status_message:string -&gt; Heartbeat.t = &lt;fun&gt;
 </programlisting>
       <para>
-        For functions defined within the module, which is a quite common
-        pattern, the module qualification goes away entirely.
+        For functions defined within the module where a given record is
+        defined, the module qualification goes away entirely.
       </para>
     </sect2>
     <sect2 id="functional-updates">
       <title>Functional updates</title>
       <para>
-        One common operation on a record is to create a new record that
-        differs from an existing record in only a subset of the fields.
-        For example, imagine that you had a record for keeping track of
-        information about a given client, including when the last
-        heartbeat was received from that client. The following defines a
-        type for representing this information, as well as a function
-        for updating the client information when a new heartbeat
-        arrives.
+        One common operation is to create a new record that differs from
+        an existing record in only a subset of the fields. For example,
+        imagine that you had a record for keeping track of information
+        about a given client, including when the last heartbeat was
+        received from that client. The following defines a type for
+        representing this information, as well as a function for
+        updating the client information when a new heartbeat arrives.
       </para>
       <programlisting>
 # type client_info =
@@ -3049,12 +3053,13 @@ val create_heartbeat :
       credentials = t.credentials;
       last_heartbeat_time = hb.Heartbeat.time;
     };;
+val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </programlisting>
       <para>
         This is fairly verbose, given that there's only one field that
-        we actually want to change. We can use OCaml's functional update
-        syntax to do this more tersely. The syntax of a functional
-        update is as follows:
+        we actually want to change. We can use OCaml's
+        <emphasis>functional update</emphasis> syntax to do this more
+        tersely. The syntax of a functional update is as follows.
       </para>
       <programlisting>
 { &lt;record-value&gt; with &lt;field&gt; = &lt;value&gt;;
@@ -3063,24 +3068,27 @@ val create_heartbeat :
 }
 </programlisting>
       <para>
-        Thus, we can rewrite <literal>register_heartbeat</literal> as
-        follows
+        The purpose of the functional update is to create a new record
+        based on an existing one, with a set of field changes layered on
+        top.
+      </para>
+      <para>
+        Given this, we can rewrite <literal>register_heartbeat</literal>
+        more concisely.
       </para>
       <programlisting>
 # let register_heartbeat t hb =
     { t with last_heartbeat_time = hb.Heartbeat.time };;
 </programlisting>
       <para>
-        Obviously, there is more benefit the larger the record is.
-      </para>
-      <para>
-        One issue with functional updates is that they make your code
-        independent of the identity of the other fields in the record.
-        This is often the right choice, but it does mean that if you
-        change the definition of your record to have more fields, the
-        type system will not prompt you to reconsider whether your
+        Functional updates make your code independent of the identity of
+        the fields in the record that are not changing. This is often
+        what you want, but it has downsides as well. In particular, if
+        you change the definition of your record to have more fields,
+        the type system will not prompt you to reconsider whether your
         update code should affect those fields. Consider what happens if
-        we decided to add a field for the last status message received.
+        we decided to add a field for the status message received on the
+        last heartbeat.
       </para>
       <programlisting>
 # type client_info =
@@ -3089,20 +3097,22 @@ val create_heartbeat :
      user: string;
      credentials: string;
      last_heartbeat_time: Time.t;
-     last_status_message: string;
+     last_heartbeat_status: string;
    };;
 </programlisting>
       <para>
-        With <literal>register_heartbeat</literal> handling all fields
-        explicitly, the compiler will warn you that you need to handle
+        The original implementation of
+        <literal>register_heartbeat</literal> would now be invalid, and
+        thus the compiler would warn us to think about how to handle
         this new field. But the version using a functional update
-        continues to compile as is, even though in truth, it should now
-        behave as follows:
+        continues to compile as is, even though it incorrectly ignores
+        the new field. The correct thing to do would be to update the
+        code as follows.
       </para>
       <programlisting>
 # let register_heartbeat t hb =
-    { t with last_heartbeat_time = hb.Heartbeat.time;
-             last_status_message = hb.Heartbeat.status_message;
+    { t with last_heartbeat_time   = hb.Heartbeat.time;
+             last_heartbeat_status = hb.Heartbeat.status_message;
     };;
 </programlisting>
       <para>
@@ -3110,23 +3120,6 @@ val create_heartbeat :
         should be confident that the full effect of the update will be
         registered by updating just the fields in question, even if the
         record changes later.
-      </para>
-    </sect2>
-    <sect2 id="mutable-fields">
-      <title>Mutable fields</title>
-      <para>
-        Records are by default immutable, meaning that while you can do
-        functional updates, you can't normally change the value of a
-        record field. It is, however, possible to declare a field as
-        being mutable, as shown below.
-      </para>
-      <programlisting>
-# type t = { mutable x: int;
-             y: float;
-           };;
-</programlisting>
-      <para>
-        We'll talk about mutability more in chapter {{{MUTABILITY}}}
       </para>
     </sect2>
     <sect2 id="first-class-fields">
@@ -3145,10 +3138,9 @@ val create_heartbeat :
         <literal>(fun x -&gt; x.Logon.user)</literal> to access the
         <literal>user</literal> field. This kind of accessor function is
         a common enough pattern that that it would be convenient to
-        generate them automatically. OCaml doesn't have any direct
-        support for this, but the <literal>fieldslib</literal> syntax
-        extension that ships with <literal>Core</literal> does just
-        that.
+        generate them automatically. The <literal>fieldslib</literal>
+        syntax extension that ships with <literal>Core</literal> does
+        just that.
       </para>
       <para>
         <literal>fieldslib</literal> is invoked by putting the
@@ -3174,7 +3166,7 @@ val create_heartbeat :
       </para>
       <programlisting>
 # let get_users logons = List.map logons ~f:Logon.user;;
-  val get_hostnames : Logon.t list -&gt; string list = &lt;fun&gt;
+val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
 </programlisting>
       <para>
         In addition to generating field accessor functions,
@@ -3203,7 +3195,8 @@ val create_heartbeat :
         <listitem>
           <para>
             The (optional) ability to set the record field, which is
-            present only if the field is mutable.
+            present only if the field is mutable. We'll talk more about
+            mutable record fields in chapter {{{MUTABILITY}}}.
           </para>
         </listitem>
       </itemizedlist>
@@ -3218,12 +3211,11 @@ val create_heartbeat :
       <programlisting>
 # let show_field field to_string record =
      sprintf &quot;%s: %s&quot; (Field.name field) (Field.get field record |! to_string);;
-val show_field : ('a, 'b) Core.Std.Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string =
+val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string =
   &lt;fun&gt;
 </programlisting>
       <para>
-        And here, we show how these functions can be used to display
-        individual fields.
+        Here's an example of <literal>show_field</literal> in action.
       </para>
       <programlisting>
 # let logon = { Logon.
@@ -3240,10 +3232,11 @@ val show_field : ('a, 'b) Core.Std.Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt
       <para>
         <literal>fieldslib</literal> also provides higher-level
         operators, like <literal>Fields.fold</literal> and
-        <literal>Fields.iter</literal>, which let you operate over all
-        of the fields of a record. For example, here's a function that
-        uses show_field to print out a representation of a complete
-        record.
+        <literal>Fields.iter</literal>, which let you iterate over all
+        the fields of a record. The following function uses
+        <literal>Logon.Fields.iter</literal> and
+        <literal>show_field</literal> to print out all the fields of a
+        <literal>Logon</literal> record.
       </para>
       <programlisting>
 # let print_logon logon =
@@ -3265,31 +3258,53 @@ credentials: Xy2d9W
 - : unit = ()
 </programlisting>
       <para>
-        The advantage of this approach is that when the definition of
-        <literal>Logon</literal> changes, <literal>iter</literal> will
-        change along with it, prompting you to fix
-        <literal>print_logon</literal> to match.
+        The advantage of using field iterators is that when the
+        definition of <literal>Logon</literal> changes,
+        <literal>iter</literal> will change along with it, prompting you
+        to handle whatever new cases arise.
       </para>
       <para>
-        These field-based iterators are useful for a variety of
-        practical programming tasks, from building validation functions
-        to scaffolding the definition of a web-form based on a record
-        type.
-      </para>
-    </sect2>
-    <sect2 id="sharing-common-sub-structures">
-      <title>Sharing common sub-structures</title>
-      <para>
+        Field iterators are useful for a variety of tasks, from building
+        validation functions to scaffolding the definition of a web-form
+        based on a record type, all with a guarantee that you've
+        exhaustively considered all elements of the field.
       </para>
     </sect2>
   </sect1>
   <sect1 id="variants">
     <title>Variants</title>
     <para>
+      Variants and records are closely related concepts. Records are
+      about combining multiple types together in a conjunctive way: a
+      logon message has a session id <emphasis>and</emphasis> a time
+      <emphasis>and</emphasis> a user <emphasis>and</emphasis>
+      credentials. Variants, on the other hand, are about combining
+      multiple types together in a disjunctive way: a message is logon
+      message <emphasis>or</emphasis> a heartbeat
+      <emphasis>or</emphasis> a <emphasis>something</emphasis> message.
     </para>
+    <para>
+      Indeed, let's flesh out the client/server example we discussed in
+      the previous section, and add a third message type.
+    </para>
+    <programlisting>
+# module File_request = struct
+    type t = { session_id: string;
+               time: Time.t;
+               filename: string;
+             }
+  end
+# type message = | Logon of Logon.t
+                 | Heartbeat of Heartbeat.t
+</programlisting>
   </sect1>
   <sect1 id="more-advanced-declarations">
     <title>More advanced declarations</title>
+    <sect2 id="sharing-across-datatypes">
+      <title>Sharing across datatypes</title>
+      <para>
+      </para>
+    </sect2>
     <sect2 id="polymorphic-types">
       <title>Polymorphic types</title>
       <para>
@@ -4852,21 +4867,20 @@ let build_counts = Freq.build_counts
 Circular dependencies: &quot;freq.cmo&quot; already seen in
   [ &quot;counter.cmo&quot;; &quot;freq.cmo&quot; ]
 </programlisting>
-        <para>
-          Functors and First-Class Modules
-        </para>
-        <para>
-          Up until now, we've seen modules play a limited role, serving
-          as a mechanism for organizing code into units with specified
-          interfaces. But OCaml's module system plays a bigger role in
-          the langauge, acting as a powerful toolset for structuring
-          large-scale systems. This chapter will introduce you to
-          functors and first class modules, which greatly increase the
-          power of the module system.
-        </para>
       </sect3>
     </sect2>
   </sect1>
+</chapter>
+<chapter id="functors-and-first-class-modules">
+  <title>Functors and First-Class Modules</title>
+  <para>
+    Up until now, we've seen modules play a limited role, serving as a
+    mechanism for organizing code into units with specified interfaces.
+    But OCaml's module system plays a bigger role in the langauge,
+    acting as a powerful toolset for structuring large-scale systems.
+    This chapter will introduce you to functors and first class modules,
+    which greatly increase the power of the module system.
+  </para>
   <sect1 id="functors">
     <title>Functors</title>
     <para>
