@@ -1,4 +1,4 @@
- Functors and First-Class Modules
+# Functors and First-Class Modules
 
 Up until now, we've seen modules play a limited role, serving as a
 mechanism for organizing code into units with specified interfaces.
