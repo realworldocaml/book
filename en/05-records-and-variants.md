@@ -195,17 +195,27 @@ people to navigate your source.
 
 ### Reusing field names
 
-Defining records with the same field names can be problematic.
-Consider the following types, which represent messages a server might
-receive from a client.  Here, the `logon` message is sent when a
-client initiates a connection, and includes the identity of the user
-connecting and credentials used for authentication.  The `heartbeat`
-message is periodically sent by the client to demonstrate to the
-server that the client is alive and connected.  Both these messages
-include a session id and the time the message was generated.
+Defining records with the same field names can be problematic.  Let's
+consider a simple example: building types to represent the protocol
+used for a logging server.  The following types represent messages a
+server might receive from a client.
+
+Below, the `log_entry` message is used to deliver a log entry to the
+server for processing.  The `logon` message is sent when a client
+initiates a connection, and includes the identity of the user
+connecting and credentials used for authentication.  Finally, the
+`heartbeat` message is periodically sent by the client to demonstrate
+to the server that the client is alive and connected.  All of these
+messages include a session id and the time the message was generated.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# type heartbeat =
+# type log_entry =
+    { session_id: string;
+      time: Time.t;
+      important: bool;
+      message: string;
+    }
+  type heartbeat =
     { session_id: string;
       time: Time.t;
       status_message: string;
@@ -215,36 +225,44 @@ include a session id and the time the message was generated.
       time: Time.t;
       user: string;
       credentials: string;
-    };;
+    }
+;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The fact that we reused the same field name between `heartbeat` and
-`logon` causes trouble when we try to construct a `heartbeat`.
+The fact that we reused field names will cause trouble when we try to
+construct a message.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let create_heartbeat ~session_id ~status_message =
-     { time = Time.now (); session_id; status_message }
+# let create_log_entry ~session_id ~important message =
+     { time = Time.now (); session_id; important; message }
   ;;
-    Characters 56-106:
-       { time = Time.now (); session_id; status_message }
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The record field label status_message belongs to the type heartbeat
+    Characters 75-129:
+       { time = Time.now (); session_id; important; message }
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: The record field label important belongs to the type log_entry
        but is mixed here with labels of type logon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The problem is that the declaration of `logon` shadowed some of the
-fields of `heartbeat`.  As a result, the fields `time` and
-`session_id` are assummed to be fields of `logon`, and
-`status_message`, which was not shadowed, is assummed to be a field of
-`heartbeat`.  The compiler therefore complains that we're trying to
-construct a record with fields from two different record types.
+The problem is that the declaration of `logon` (and `heartbeat`)
+shadowed some of the fields of `log_entry`.  As a result, the fields
+`time` and `session_id` are assummed to be fields of `logon`, and
+`important` and `message`, which were not shadowed, are assummed to be
+a field of `log_entry`.  The compiler therefore complains that we're
+trying to construct a record with fields from two different record
+types.
 
 There are two common solutions to this problem.  The first is to add a
 prefix to each field name to make it unique.  Thus, we could define
 `heartbeat` and `logon` as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type heartbeat =
+# type log_entry =
+    { log_entry_session_id: string;
+      log_entry_time: Time.t;
+      log_entry_important: bool;
+      log_entry_message: string;
+    }
+  type heartbeat =
     { heartbeat_session_id: string;
       heartbeat_time: Time.t;
       heartbeat_status_message: string;
@@ -252,9 +270,10 @@ prefix to each field name to make it unique.  Thus, we could define
   type logon =
     { logon_session_id: string;
       logon_time: Time.t;
-      logon_client_addr: Unix.Inet_addr.t;
-      logon_client: int;
-    };;
+      logon_user: string;
+      logon_credentials: string;
+    }
+;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This eliminates the collisions and is simple enough to do.  But it
@@ -266,7 +285,15 @@ a broadly useful idiom, providing for each type a namespace within
 which to put related values.  Using this style we would write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# module Heartbeat = struct
+# module Log_entry = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        important: bool;
+        message: string;
+      }
+  end 
+  module Heartbeat = struct
     type t =
       { session_id: string;
         time: Time.t;
@@ -286,40 +313,44 @@ which to put related values.  Using this style we would write:
 Now, our heartbeat-creation function can be rendered as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let create_heartbeat ~session_id ~status_message =
-      { Heartbeat.time = Time.now ();
-        Heartbeat.session_id; Heartbeat.status_message };;
-val create_heartbeat :
-  session_id:string -> status_message:string -> Heartbeat.t = <fun>
+# let create_log_entry ~session_id ~important message =
+     { Log_entry.time = Time.now (); Log_entry.session_id; 
+       Log_entry.important; Log_entry.message }
+  ;;
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The module name `Heartbeat` is required to qualify the fields, because
-this function is outside of the `Heartbeat` module where the record
+The module name `Log_entry` is required to qualify the fields, because
+this function is outside of the `Log_entry` module where the record
 was defined.  OCaml only requires the module qualification for one
 record field, however, so we can write this more concisely.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let create_heartbeat ~session_id ~status_message =
-      { Heartbeat. time = Time.now (); session_id; status_message };;
-val create_heartbeat :
-  session_id:string -> status_message:string -> Heartbeat.t = <fun>
+# let create_log_entry ~session_id ~important message =
+     { Log_entry. time = Time.now (); session_id; important; message }
+  ;;
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For functions defined within the module where a given record is
-defined, the module qualification goes away entirely.
+defined, the module qualification goes away entirely.  And indeed, for
+things like constructors, defining it within the module is often the
+best solution.
 
 ### Functional updates
 
-One common operation is to create a new record that differs from an
-existing record in only a subset of the fields.  For example, imagine
-that you had a record for keeping track of information about a given
-client, including when the last heartbeat was received from that
-client.  The following defines a type for representing this
-information, as well as a function for updating the client information
-when a new heartbeat arrives.
+Fairly often, you will find yourself wanting to create a new record
+that differs from an existing record in only a subset of the fields.
+For example, imagine our logging server had a record type for
+representing the state of a given client, including when the last
+heartbeat was received from that client.  The following defines a type
+for representing this information, as well as a function for updating
+the client information when a new heartbeat arrives.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type client_info =
+# type client_info = 
    { addr: Unix.Inet_addr.t;
      port: int;
      user: string;
@@ -327,19 +358,19 @@ when a new heartbeat arrives.
      last_heartbeat_time: Time.t;
    };;
 # let register_heartbeat t hb =
-    { addr = t.addr;
-      port = t.port;
-      user = t.user;
-      credentials = t.credentials;
-      last_heartbeat_time = hb.Heartbeat.time;
-    };;
+      { addr = t.addr;
+        port = t.port;
+        user = t.user;
+        credentials = t.credentials;
+        last_heartbeat_time = hb.Heartbeat.time;
+      };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is fairly verbose, given that there's only one field that we
-actually want to change.  We can use OCaml's _functional update_ syntax
-to do this more tersely.  The syntax of a functional update is as
-follows.
+actually want to change, and all the others are just being copied over
+from `t`.  We can use OCaml's _functional update_ syntax to do this
+more tersely.  The syntax of a functional update is as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 { <record-value> with <field> = <value>;
