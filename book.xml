@@ -2695,12 +2695,12 @@ let print_langs langs =
   <title>Records and Variants</title>
   <para>
     One of OCaml's best features is its concise and expressive system
-    for declaring new datatypes. Two key elements of this system are
+    for declaring new datatypes. Two key elements of that system are
     <emphasis>records</emphasis> and <emphasis>variants</emphasis>, both
-    of which we discussed briefly in chapter {{{GUIDEDTOUR}}}. This
-    section will cover both of them in more depth, showing some of the
-    more advanced features, as well as discuss more in-depth questions
-    about how to design types.
+    of which we discussed briefly in chapter {{{GUIDEDTOUR}}}. In this
+    chapter we'll cover records and variants in more depth, showing some
+    of the more advanced features, as well as discuss how to use them
+    effectively in your software designs.
   </para>
   <sect1 id="records">
     <title>Records</title>
@@ -2717,8 +2717,8 @@ type &lt;record-name&gt; =
   }
 </programlisting>
     <para>
-      So, for example, we could declare a type that summarizes
-      information about a given host as follows:
+      Here's a simple example, a <literal>host_info</literal> record
+      that summarizes information about a given computer.
     </para>
     <programlisting>
 # type host_info =
@@ -2729,11 +2729,11 @@ type &lt;record-name&gt; =
     };;
 </programlisting>
     <para>
-      And we can construct an instance of this record type just as
-      easily. In the following code, we use the <literal>Shell</literal>
-      module from <literal>Core_extended</literal> to dispatch commands
-      to the shell to extract the information we need about the computer
-      we're running on.
+      We can construct a <literal>host_info</literal> just as easily.
+      The following code uses the <literal>Shell</literal> module from
+      <literal>Core_extended</literal> to dispatch commands to the shell
+      to extract the information we need about the computer we're
+      running on.
     </para>
     <programlisting>
 # open Core_extended.Std;;
@@ -2757,8 +2757,9 @@ val my_host : host_info =
     <sect2 id="pattern-matching">
       <title>Pattern matching</title>
       <para>
-        Another way of getting information out of a record is using a
-        pattern match. Thus, we can write:
+        Another way of getting information out of a record is by using a
+        pattern match. In the following example, we use a pattern-match
+        on the argument to a function.
       </para>
       <programlisting>
 # let host_info_to_string { hostname = h; os_name = os;
@@ -2780,9 +2781,9 @@ val my_host : host_info =
         In other words, an irrefutable pattern is one where all of the
         requirements imposed by the pattern match are enforced by the
         type system, so that code that compiles will never have a
-        runtime failure due to a failed match. This is in contrast to
-        lists, where it's easy to write a pattern match that fails at
-        runtime. For example:
+        runtime failure due to a failed match. This is in contrast to,
+        say, lists, where it's easy to write a pattern match that fails
+        at runtime. For example:
       </para>
       <programlisting>
 # let first_plus_second (x :: y :: _) = x + y;;
@@ -2903,18 +2904,29 @@ let create_host_info ~hostname:hostname ~os_name:os_name
       <title>Reusing field names</title>
       <para>
         Defining records with the same field names can be problematic.
-        Consider the following types, which represent messages a server
-        might receive from a client. Here, the <literal>logon</literal>
-        message is sent when a client initiates a connection, and
-        includes the identity of the user connecting and credentials
-        used for authentication. The <literal>heartbeat</literal>
-        message is periodically sent by the client to demonstrate to the
-        server that the client is alive and connected. Both these
-        messages include a session id and the time the message was
-        generated.
+        Let's consider a simple example: building types to represent the
+        protocol used for a logging server. The following types
+        represent messages a server might receive from a client.
+      </para>
+      <para>
+        Below, the <literal>log_entry</literal> message is used to
+        deliver a log entry to the server for processing. The
+        <literal>logon</literal> message is sent when a client initiates
+        a connection, and includes the identity of the user connecting
+        and credentials used for authentication. Finally, the
+        <literal>heartbeat</literal> message is periodically sent by the
+        client to demonstrate to the server that the client is alive and
+        connected. All of these messages include a session id and the
+        time the message was generated.
       </para>
       <programlisting language="ocaml">
-# type heartbeat =
+# type log_entry =
+    { session_id: string;
+      time: Time.t;
+      important: bool;
+      message: string;
+    }
+  type heartbeat =
     { session_id: string;
       time: Time.t;
       status_message: string;
@@ -2924,31 +2936,32 @@ let create_host_info ~hostname:hostname ~os_name:os_name
       time: Time.t;
       user: string;
       credentials: string;
-    };;
+    }
+;;
 </programlisting>
       <para>
-        The fact that we reused the same field name between
-        <literal>heartbeat</literal> and <literal>logon</literal> causes
-        trouble when we try to construct a <literal>heartbeat</literal>.
+        The fact that we reused field names will cause trouble when we
+        try to construct a message.
       </para>
       <programlisting>
-# let create_heartbeat ~session_id ~status_message =
-     { time = Time.now (); session_id; status_message }
+# let create_log_entry ~session_id ~important message =
+     { time = Time.now (); session_id; important; message }
   ;;
-    Characters 56-106:
-       { time = Time.now (); session_id; status_message }
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The record field label status_message belongs to the type heartbeat
+    Characters 75-129:
+       { time = Time.now (); session_id; important; message }
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: The record field label important belongs to the type log_entry
        but is mixed here with labels of type logon
 </programlisting>
       <para>
         The problem is that the declaration of <literal>logon</literal>
-        shadowed some of the fields of <literal>heartbeat</literal>. As
-        a result, the fields <literal>time</literal> and
-        <literal>session_id</literal> are assummed to be fields of
-        <literal>logon</literal>, and <literal>status_message</literal>,
-        which was not shadowed, is assummed to be a field of
-        <literal>heartbeat</literal>. The compiler therefore complains
+        (and <literal>heartbeat</literal>) shadowed some of the fields
+        of <literal>log_entry</literal>. As a result, the fields
+        <literal>time</literal> and <literal>session_id</literal> are
+        assummed to be fields of <literal>logon</literal>, and
+        <literal>important</literal> and <literal>message</literal>,
+        which were not shadowed, are assummed to be a field of
+        <literal>log_entry</literal>. The compiler therefore complains
         that we're trying to construct a record with fields from two
         different record types.
       </para>
@@ -2959,7 +2972,13 @@ Error: The record field label status_message belongs to the type heartbeat
         <literal>logon</literal> as follows:
       </para>
       <programlisting>
-# type heartbeat =
+# type log_entry =
+    { log_entry_session_id: string;
+      log_entry_time: Time.t;
+      log_entry_important: bool;
+      log_entry_message: string;
+    }
+  type heartbeat =
     { heartbeat_session_id: string;
       heartbeat_time: Time.t;
       heartbeat_status_message: string;
@@ -2967,9 +2986,10 @@ Error: The record field label status_message belongs to the type heartbeat
   type logon =
     { logon_session_id: string;
       logon_time: Time.t;
-      logon_client_addr: Unix.Inet_addr.t;
-      logon_client: int;
-    };;
+      logon_user: string;
+      logon_credentials: string;
+    }
+;;
 </programlisting>
       <para>
         This eliminates the collisions and is simple enough to do. But
@@ -2983,7 +3003,15 @@ Error: The record field label status_message belongs to the type heartbeat
         we would write:
       </para>
       <programlisting>
-# module Heartbeat = struct
+# module Log_entry = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        important: bool;
+        message: string;
+      }
+  end 
+  module Heartbeat = struct
     type t =
       { session_id: string;
         time: Time.t;
@@ -3003,43 +3031,48 @@ Error: The record field label status_message belongs to the type heartbeat
         Now, our heartbeat-creation function can be rendered as follows.
       </para>
       <programlisting>
-# let create_heartbeat ~session_id ~status_message =
-      { Heartbeat.time = Time.now ();
-        Heartbeat.session_id; Heartbeat.status_message };;
-val create_heartbeat :
-  session_id:string -&gt; status_message:string -&gt; Heartbeat.t = &lt;fun&gt;
+# let create_log_entry ~session_id ~important message =
+     { Log_entry.time = Time.now (); Log_entry.session_id; 
+       Log_entry.important; Log_entry.message }
+  ;;
+val create_log_entry :
+  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 </programlisting>
       <para>
-        The module name <literal>Heartbeat</literal> is required to
+        The module name <literal>Log_entry</literal> is required to
         qualify the fields, because this function is outside of the
-        <literal>Heartbeat</literal> module where the record was
+        <literal>Log_entry</literal> module where the record was
         defined. OCaml only requires the module qualification for one
         record field, however, so we can write this more concisely.
       </para>
       <programlisting>
-# let create_heartbeat ~session_id ~status_message =
-      { Heartbeat. time = Time.now (); session_id; status_message };;
-val create_heartbeat :
-  session_id:string -&gt; status_message:string -&gt; Heartbeat.t = &lt;fun&gt;
+# let create_log_entry ~session_id ~important message =
+     { Log_entry. time = Time.now (); session_id; important; message }
+  ;;
+val create_log_entry :
+  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 </programlisting>
       <para>
         For functions defined within the module where a given record is
-        defined, the module qualification goes away entirely.
+        defined, the module qualification goes away entirely. And
+        indeed, for things like constructors, defining it within the
+        module is often the best solution.
       </para>
     </sect2>
     <sect2 id="functional-updates">
       <title>Functional updates</title>
       <para>
-        One common operation is to create a new record that differs from
-        an existing record in only a subset of the fields. For example,
-        imagine that you had a record for keeping track of information
-        about a given client, including when the last heartbeat was
-        received from that client. The following defines a type for
-        representing this information, as well as a function for
-        updating the client information when a new heartbeat arrives.
+        Fairly often, you will find yourself wanting to create a new
+        record that differs from an existing record in only a subset of
+        the fields. For example, imagine our logging server had a record
+        type for representing the state of a given client, including
+        when the last heartbeat was received from that client. The
+        following defines a type for representing this information, as
+        well as a function for updating the client information when a
+        new heartbeat arrives.
       </para>
       <programlisting>
-# type client_info =
+# type client_info = 
    { addr: Unix.Inet_addr.t;
      port: int;
      user: string;
@@ -3047,17 +3080,18 @@ val create_heartbeat :
      last_heartbeat_time: Time.t;
    };;
 # let register_heartbeat t hb =
-    { addr = t.addr;
-      port = t.port;
-      user = t.user;
-      credentials = t.credentials;
-      last_heartbeat_time = hb.Heartbeat.time;
-    };;
+      { addr = t.addr;
+        port = t.port;
+        user = t.user;
+        credentials = t.credentials;
+        last_heartbeat_time = hb.Heartbeat.time;
+      };;
 val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </programlisting>
       <para>
         This is fairly verbose, given that there's only one field that
-        we actually want to change. We can use OCaml's
+        we actually want to change, and all the others are just being
+        copied over from <literal>t</literal>. We can use OCaml's
         <emphasis>functional update</emphasis> syntax to do this more
         tersely. The syntax of a functional update is as follows.
       </para>
@@ -3274,29 +3308,137 @@ credentials: Xy2d9W
   <sect1 id="variants">
     <title>Variants</title>
     <para>
-      Variants and records are closely related concepts. Records are
-      about combining multiple types together in a conjunctive way: a
-      logon message has a session id <emphasis>and</emphasis> a time
-      <emphasis>and</emphasis> a user <emphasis>and</emphasis>
-      credentials. Variants, on the other hand, are about combining
-      multiple types together in a disjunctive way: a message is logon
-      message <emphasis>or</emphasis> a heartbeat
-      <emphasis>or</emphasis> a <emphasis>something</emphasis> message.
-    </para>
-    <para>
-      Indeed, let's flesh out the client/server example we discussed in
-      the previous section, and add a third message type.
+      A variant represents a collection of different possible structures
+      for a datatype, where each possibility is identified by a
+      different <emphasis>constructor</emphasis>. The basic syntax of a
+      variant type declaration is as follows.
     </para>
     <programlisting>
-# module File_request = struct
-    type t = { session_id: string;
-               time: Time.t;
-               filename: string;
-             }
-  end
-# type message = | Logon of Logon.t
-                 | Heartbeat of Heartbeat.t
+type &lt;variant-name&gt; =
+  | &lt;Constr1&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
+  | &lt;Constr2&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
+  ...
 </programlisting>
+    <para>
+      Note that the pipe in front of the first constructor is optional.
+    </para>
+    <para>
+      Each constructor corresponds to a different case of the datatype,
+      and these constructors can have other data attached to them.
+      Without this attached data, a variant is like the enumeration type
+      found in many languages. Here, for example, is a simple
+      enumeration-like variant for representing the 7 standard terminal
+      colors supported by most terminal types, including
+      <literal>xterm</literal> and <literal>vt100</literal>.
+    </para>
+    <programlisting>
+# type std_color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
+</programlisting>
+    <para>
+      Each color has an associated number that is used for setting
+      colors in the terminal. The following function uses a match
+      statement to compute the number for each
+      <literal>std_color</literal>.
+    </para>
+    <programlisting>
+# let std_color_to_int = function
+  | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3
+  | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7 ;;
+val std_color_to_int : std_color -&gt; int = &lt;fun&gt;
+</programlisting>
+    <para>
+      Using these numbers we can construct the escape codes required to
+      do things like set the foreground color for a chunk of text.
+      Here's an example.
+    </para>
+    <programlisting>
+# let color_by_number number text =
+    sprintf &quot;\027[38;5;%dm%s\027[0m&quot; number text;;
+  val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;
+# let s = color_by_number (std_color_to_int Blue) &quot;Hello Blue World!&quot;;;
+val s : string = &quot;\027[38;5;4mHello Blue World!\027[0m&quot;
+# printf &quot;%s\n&quot; s;;
+Hello Blue World!
+- : unit = ()
+</programlisting>
+    <para>
+      If you're running your toplevel on a standard terminal, then that
+      last line should have been printed in blue.
+    </para>
+    <para>
+      The simple enumeration of <literal>std_color</literal> isn't
+      enough to fully describe the set of colors that a modern terminal
+      can display. Modern <literal>xterm</literal>s and many other
+      terminal support 256 different color codes. The colors in an
+      <literal>xterm</literal> are broken up into three groups.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          A set of 16 colors devoted to showing the 8 standard colors,
+          in regular and bold.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          A 6 × 6 × 6 RGB color cube
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          A 24-level grayscale ramp
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      This is no longer conveniently representable as an enumeration,
+      but we can represent all three of these concisely as a variant
+      whose constructors have arguments.
+    </para>
+    <programlisting>
+# type weight = Regular | Bold ;;
+# type color =
+  | Standard of std_color * weight (* standard colors *)
+  | RGB      of int * int * int    (* 6x6x6 color cube *)
+  | Gray     of int                (* 24 grayscale levels *);;
+</programlisting>
+    <para>
+      In order to compute the color code for a <literal>color</literal>,
+      we use pattern matching to break down the <literal>color</literal>
+      variant into the appropriate cases. Note that the type system
+      provides an exhaustiveness guarantee for pattern-matches, which
+      means that we will be warned if a case is missed.
+    </para>
+    <programlisting>
+# let color_to_int = function
+  | Standard (std_color,weight) -&gt;
+    let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+    base + std_color_to_int std_color
+  | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | Gray i -&gt; 232 + i ;;
+val color_to_int : color -&gt; int = &lt;fun&gt;
+</programlisting>
+    <para>
+      Now, we can use this conversion function to print text using the
+      full set of available colors. Here, we construct instances of
+      <literal>color</literal> by using the constructors we defined.
+    </para>
+    <programlisting>
+# let color_print color s =
+     printf &quot;%s\n&quot; (color_by_number (color_to_int color) s);;
+val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;
+# color_print (Standard (Red,Bold)) &quot;A bold red!&quot;;;
+A bold red!
+- : unit = ()
+# color_print (Gray 4) &quot;A muted gray...&quot;;;
+A muted gray...
+- : unit = ()
+</programlisting>
+    <sect2 id="polymorphic-variants">
+      <title>Polymorphic variants</title>
+      <para>
+      </para>
+    </sect2>
   </sect1>
   <sect1 id="more-advanced-declarations">
     <title>More advanced declarations</title>
@@ -3314,6 +3456,41 @@ credentials: Xy2d9W
       <title>Recursive types</title>
       <para>
       </para>
+    </sect2>
+    <sect2 id="detritus">
+      <title>Detritus</title>
+      <para>
+        Variants and records are closely related concepts. Records
+        combine multiple types together in a conjunctive way: a logon
+        record has a session id <emphasis>and</emphasis> a time
+        <emphasis>and</emphasis> a user <emphasis>and</emphasis>
+        credentials. But sometimes, you want to combine types in a
+        disjunctive way. For example, if you wanted a type to represent
+        all possible message, you'd need something that was a log entry
+        <emphasis>or</emphasis> a heartbeat <emphasis>or</emphasis> a
+        log-on. Variant types are used for just such declarations, as
+        shown below.
+      </para>
+      <programlisting>
+# type client_message = | Logon of Logon.t
+                        | Heartbeat of Heartbeat.t
+                        | Log_entry of Log_entry.t;;
+</programlisting>
+      <para>
+        <literal>Logon</literal>, <literal>Heartbeat</literal> and
+        <literal>Log_entry</literal> are called constructors, and
+        they're what you use to create a <literal>message</literal>.
+      </para>
+      <programlisting>
+# let message =
+     Log_entry (create_log_entry ~session_id:&quot;345&quot;
+                ~important:false &quot;Hello World&quot;);;
+val message : client_message =
+  Log_entry
+   {Log_entry.session_id = &quot;345&quot;;
+    Log_entry.time = 2012-07-04 13:55:18.798289; Log_entry.important = false;
+    Log_entry.message = &quot;Hello World&quot;}
+</programlisting>
     </sect2>
   </sect1>
 </chapter>
@@ -5756,6 +5933,17 @@ include Foldable.Extend(T)
       since modules can contain types, modules can't be values.
     </para>
     <para>
+      <emphasis>(yminsky: Instead of saying that ml and mli files are a
+      simplified module system, maybe say that they &quot;provide a
+      simple way of creating modules and interfaces&quot;, or some such?
+      It's not like there's a simplified module system floating
+      around)</emphasis>
+    </para>
+    <para>
+      <emphasis>(yminsky: consider dropping &quot;Yet&quot; in the
+      above.)</emphasis>
+    </para>
+    <para>
       Next, we'll relax this restriction with <emphasis>first-class
       modules</emphasis>. &quot;First-class&quot; means that modules can
       be passed around as ordinary values that can be created from and
@@ -5765,6 +5953,11 @@ include Foldable.Extend(T)
       modules are strictly more expressive than any other organization
       mechanism, including classes and objects. Once you use first-class
       modules, you'll never want to go back.
+    </para>
+    <para>
+      <emphasis>(yminsky: I wouldn't say they're strictly more
+      expressive. For example, they don't give you a way of expressing
+      subtyping relationships effectively, which objects do.)</emphasis>
     </para>
     <para>
       This is not say that first-class modules should be used
@@ -5790,7 +5983,7 @@ include Foldable.Extend(T)
       ordinary values that can be created from and converted back to
       regular modules. As we'll see, letting modules into the core
       language makes it possible to use more flexible and dynamic
-      module-oriented designs.)
+      module-oriented designs.)_
     </para>
     <sect2 id="another-trivial-example">
       <title>Another trivial example</title>
@@ -5878,6 +6071,17 @@ val six : (module X_int) = &lt;module&gt;
     </sect2>
     <sect2 id="standard-vs.-first-class-modules">
       <title>Standard vs. first-class modules</title>
+      <para>
+        <emphasis>(yminsky: I'm not in olve with the example. It feels
+        in some sense too artificial, and that aside, when you get to
+        the end of the example, you haven't really gotten any juice of
+        first-class modules)</emphasis>
+      </para>
+      <para>
+        <emphasis>(yminsky: using &quot;standard&quot; in quotes seems a
+        little awkward. Maybe just drop the quotes, and talk about
+        standard or ordinary modules directly?)</emphasis>
+      </para>
       <para>
         Let's compare the style of &quot;standard&quot; modules to
         first-class modules, using a simple library of abstract
