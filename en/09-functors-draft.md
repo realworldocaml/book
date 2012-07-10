@@ -773,6 +773,13 @@ clear separation between types and values -- values cannot contain
 types, and types cannot contain values.  And since modules can contain
 types, modules can't be values.
 
+_(yminsky: Instead of saying that ml and mli files are a simplified
+module system, maybe say that they "provide a simple way of creating
+modules and interfaces", or some such?  It's not like there's a
+simplified module system floating around)_
+
+_(yminsky: consider dropping "Yet" in the above.)_
+
 Next, we'll relax this restriction with _first-class modules_.
 "First-class" means that modules can be passed around as ordinary
 values that can be created from and converted back to regular modules.
@@ -781,6 +788,10 @@ it might seem trivial to say, it has profound consequences on the
 language.  First-class modules are strictly more expressive than any
 other organization mechanism, including classes and objects.  Once you
 use first-class modules, you'll never want to go back.
+
+_(yminsky: I wouldn't say they're strictly more expressive.  For
+example, they don't give you a way of expressing subtyping
+relationships effectively, which objects do.)_
 
 This is not say that first-class modules should be used
 indiscriminately.  When you pass modules as values, the reason is to
@@ -802,7 +813,7 @@ OCaml provides a way around this stratification in the form of
 _first-class modules_.  First-class modules are ordinary values that
 can be created from and converted back to regular modules.  As we'll
 see, letting modules into the core language makes it possible to use
-more flexible and dynamic module-oriented designs.)
+more flexible and dynamic module-oriented designs.)_
 
 ### Another trivial example
 
@@ -879,6 +890,14 @@ more cumbersome way of working with integers.  Let's see what happens
 when with work with more complex abstract types.
 
 ### Standard vs. first-class modules
+
+_(yminsky: I'm not in olve with the example.  It feels in some sense
+too artificial, and that aside, when you get to the end of the
+example, you haven't really gotten any juice of first-class modules)_
+
+_(yminsky: using "standard" in quotes seems a little awkward.  Maybe
+just drop the quotes, and talk about standard or ordinary modules
+directly?)_
 
 Let's compare the style of "standard" modules to first-class modules,
 using a simple library of abstract geometric shapes.  In a "standard"
