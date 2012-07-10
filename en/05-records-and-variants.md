@@ -1,11 +1,11 @@
 # Records and Variants
 
 One of OCaml's best features is its concise and expressive system for
-declaring new datatypes.  Two key elements of this system are
+declaring new datatypes.  Two key elements of that system are
 _records_ and _variants_, both of which we discussed briefly in
-chapter {{{GUIDEDTOUR}}}.  This section will cover both of them in
-more depth, showing some of the more advanced features, as well as
-discuss more in-depth questions about how to design types.
+chapter {{{GUIDEDTOUR}}}.  In this chapter we'll cover records and
+variants in more depth, showing some of the more advanced features, as
+well as discuss how to use them effectively in your software designs.
 
 ## Records
 
@@ -21,8 +21,8 @@ type <record-name> =
   }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-So, for example, we could declare a type that summarizes information
-about a given host as follows:
+Here's a simple example, a `host_info` record that summarizes
+information about a given computer.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type host_info =
@@ -33,10 +33,10 @@ about a given host as follows:
     };;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And we can construct an instance of this record type just as easily.
-In the following code, we use the `Shell` module from `Core_extended`
-to dispatch commands to the shell to extract the information we need
-about the computer we're running on.
+We can construct a `host_info` just as easily.  The following code
+uses the `Shell` module from `Core_extended` to dispatch commands to
+the shell to extract the information we need about the computer we're
+running on.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # open Core_extended.Std;;
@@ -60,8 +60,9 @@ record field using dot-notation.
 
 ### Pattern matching
 
-Another way of getting information out of a record is using a pattern
-match.  Thus, we can write:
+Another way of getting information out of a record is by using a
+pattern match.  In the following example, we use a pattern-match on
+the argument to a function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let host_info_to_string { hostname = h; os_name = os;
@@ -76,13 +77,13 @@ Notice that we didn't need a match statement because we used only a
 single pattern to match all possible records of type `host_info`.
 This works because record patterns are _irrefutable_, meaning that a
 single pattern is guaranteed to match any value of the type in
-question.  
+question.
 
 In other words, an irrefutable pattern is one where all of the
 requirements imposed by the pattern match are enforced by the type
 system, so that code that compiles will never have a runtime failure
-due to a failed match.  This is in contrast to lists, where it's easy
-to write a pattern match that fails at runtime.  For example:
+due to a failed match.  This is in contrast to, say, lists, where it's
+easy to write a pattern match that fails at runtime.  For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let first_plus_second (x :: y :: _) = x + y;;
@@ -544,28 +545,115 @@ considered all elements of the field.
 
 ## Variants
 
-Variants and records are closely related concepts.  Records are about
-combining multiple types together in a conjunctive way: a logon
-message has a session id _and_ a time _and_ a user _and_ credentials.
-Variants, on the other hand, are about combining multiple types
-together in a disjunctive way: a message is logon message _or_ a
-heartbeat _or_ a _something_ message.
+A variant represents a collection of different possible structures for
+a datatype, where each possibility is identified by a different
+_constructor_.  The basic syntax of a variant type declaration is as
+follows.
 
-Indeed, let's flesh out the client/server example we discussed in the
-previous section, and add a third message type.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# module File_request = struct
-    type t = { session_id: string;
-               time: Time.t;
-               filename: string;
-             }
-  end
-# type message = | Logon of Logon.t
-                 | Heartbeat of Heartbeat.t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
+type <variant-name> =
+  | <Constr1> [of <arg1> * .. * <argn>]?
+  | <Constr2> [of <arg1> * .. * <argn>]?
+  ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Note that the pipe in front of the first constructor is optional.
 
+Each constructor corresponds to a different case of the datatype, and
+these constructors can have other data attached to them.  Without this
+attached data, a variant is like the enumeration type found in many
+languages.  Here, for example, is a simple enumeration-like variant
+for representing the 7 standard terminal colors supported by most
+terminal types, including `xterm` and `vt100`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type std_color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each color has an associated number that is used for setting colors in
+the terminal.  The following function uses a match statement to
+compute the number for each `std_color`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let std_color_to_int = function
+  | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
+  | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
+val std_color_to_int : std_color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using these numbers we can construct the escape codes required to do
+things like set the foreground color for a chunk of text.  Here's an
+example.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_by_number number text =
+    sprintf "\027[38;5;%dm%s\027[0m" number text;;
+  val color_by_number : int -> string -> string = <fun>
+# let s = color_by_number (std_color_to_int Blue) "Hello Blue World!";;
+val s : string = "\027[38;5;4mHello Blue World!\027[0m"
+# printf "%s\n" s;;
+Hello Blue World!
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you're running your toplevel on a standard terminal, then that last
+line should have been printed in blue.
+
+The simple enumeration of `std_color` isn't enough to fully describe
+the set of colors that a modern terminal can display.  Modern `xterm`s
+and many other terminal support 256 different color codes.  The colors
+in an `xterm` are broken up into three groups.
+
+- A set of 16 colors devoted to showing the 8 standard colors, in
+  regular and bold.
+- A $6 \times 6 \times 6$ RGB color cube
+- A 24-level grayscale ramp
+
+This is no longer conveniently representable as an enumeration, but we
+can represent all three of these concisely as a variant whose
+constructors have arguments.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type weight = Regular | Bold ;;
+# type color =
+  | Standard of std_color * weight (* standard colors *)
+  | RGB      of int * int * int    (* 6x6x6 color cube *)
+  | Gray     of int                (* 24 grayscale levels *);;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In order to compute the color code for a `color`, we use pattern
+matching to break down the `color` variant into the appropriate cases.
+Note that the type system provides an exhaustiveness guarantee for
+pattern-matches, which means that we will be warned if a case is
+missed.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+  | Standard (std_color,weight) ->
+    let base = match weight with Bold -> 8 | Regular -> 0 in
+    base + std_color_to_int std_color
+  | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+  | Gray i -> 232 + i ;;
+val color_to_int : color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, we can use this conversion function to print text using the full
+set of available colors.  Here, we construct instances of `color` by
+using the constructors we defined.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_print color s =
+     printf "%s\n" (color_by_number (color_to_int color) s);;
+val color_print : color -> string -> unit = <fun>
+# color_print (Standard (Red,Bold)) "A bold red!";;
+A bold red!
+- : unit = ()
+# color_print (Gray 4) "A muted gray...";;
+A muted gray...
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Polymorphic variants
 
 ## More advanced declarations
 
@@ -574,3 +662,34 @@ previous section, and add a third message type.
 ### Polymorphic types
 
 ### Recursive types
+
+
+### Detritus
+
+Variants and records are closely related concepts.  Records combine
+multiple types together in a conjunctive way: a logon record has a
+session id _and_ a time _and_ a user _and_ credentials.  But
+sometimes, you want to combine types in a disjunctive way.  For
+example, if you wanted a type to represent all possible message, you'd
+need something that was a log entry _or_ a heartbeat _or_ a log-on.
+Variant types are used for just such declarations, as shown below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type client_message = | Logon of Logon.t
+                        | Heartbeat of Heartbeat.t
+                        | Log_entry of Log_entry.t;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`Logon`, `Heartbeat` and `Log_entry` are called constructors, and
+they're what you use to create a `message`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let message =
+     Log_entry (create_log_entry ~session_id:"345"
+                ~important:false "Hello World");;
+val message : client_message =
+  Log_entry
+   {Log_entry.session_id = "345";
+    Log_entry.time = 2012-07-04 13:55:18.798289; Log_entry.important = false;
+    Log_entry.message = "Hello World"}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
