@@ -182,7 +182,7 @@ punning at all.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 let create_host_info ~hostname:hostname ~os_name:os_name
-   ~os_release:os_release ~cpu_arch:cpu_arch = 
+   ~os_release:os_release ~cpu_arch:cpu_arch =
     let hostname = String.lowercase hostname in
     { hostname = hostname ; os_name = os_name;
       os_release = os_release; cpu_arch = cpu_arch };;
@@ -293,7 +293,7 @@ which to put related values.  Using this style we would write:
         important: bool;
         message: string;
       }
-  end 
+  end
   module Heartbeat = struct
     type t =
       { session_id: string;
@@ -315,7 +315,7 @@ Now, our heartbeat-creation function can be rendered as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let create_log_entry ~session_id ~important message =
-     { Log_entry.time = Time.now (); Log_entry.session_id; 
+     { Log_entry.time = Time.now (); Log_entry.session_id;
        Log_entry.important; Log_entry.message }
   ;;
 val create_log_entry :
@@ -351,7 +351,7 @@ for representing this information, as well as a function for updating
 the client information when a new heartbeat arrives.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type client_info = 
+# type client_info =
    { addr: Unix.Inet_addr.t;
      port: int;
      user: string;
@@ -545,34 +545,47 @@ considered all elements of the field.
 
 ## Variants
 
-A variant represents a collection of different possible structures for
-a datatype, where each possibility is identified by a different
-_constructor_.  The basic syntax of a variant type declaration is as
-follows.
+Variant types are used to represent multiple different possibilities,
+where each possibility is identified by a different _constructor_.
+The syntax of a variant type declaration is as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
 type <variant-name> =
-  | <Constr1> [of <arg1> * .. * <argn>]?
-  | <Constr2> [of <arg1> * .. * <argn>]?
+  | <Constructor1> [of <arg1> * .. * <argn>]?
+  | <Constructor2> [of <arg1> * .. * <argn>]?
   ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that the pipe in front of the first constructor is optional.
+To give a better sense of why variants are useful, we'll walk through
+a concrete example of variants in action.
 
-Each constructor corresponds to a different case of the datatype, and
-these constructors can have other data attached to them.  Without this
-attached data, a variant is like the enumeration type found in many
-languages.  Here, for example, is a simple enumeration-like variant
-for representing the 7 standard terminal colors supported by most
-terminal types, including `xterm` and `vt100`.
+### Example: terminal colors
+
+Almost all terminals support a set of 8 basic colors, which we can
+represent with the following variant type.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type std_color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
+# type std_color =
+    Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each color has an associated number that is used for setting colors in
-the terminal.  The following function uses a match statement to
-compute the number for each `std_color`.
+This is a particularly simple form of variant, in that the
+constructors don't have arguments.  Such variants are very similar to
+the enumerations found in many languages, including C and Java.
+
+We can construct an instance of `std_color` by writing out the
+appropriate constructor, as shown below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# [Black;Blue;Red];;
+- : std_color list = [Black; Blue; Red]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pattern matching can then be used to process a variant.  Consider the
+following function which converts each `std_color` to a corresponding
+integer.  As we'll see, these integers will be used to compute escape
+codes for setting colors in the terminal.  The pattern match is used
+to choose a different integer for each constructor.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let std_color_to_int = function
@@ -581,9 +594,11 @@ compute the number for each `std_color`.
 val std_color_to_int : std_color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Using these numbers we can construct the escape codes required to do
-things like set the foreground color for a chunk of text.  Here's an
-example.
+Note that the exhaustiveness checking on pattern matches means that
+the compiler will warn us if we miss a case in the pattern match.
+
+Using `std_color_to_int`, we can now generate the escape codes to
+change the color of a given string.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_by_number number text =
@@ -596,62 +611,271 @@ Hello Blue World!
 - : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you're running your toplevel on a standard terminal, then that last
-line should have been printed in blue.
+On most terminals, that last line is printed in blue.
+
+#### Full terminal colors
 
 The simple enumeration of `std_color` isn't enough to fully describe
-the set of colors that a modern terminal can display.  Modern `xterm`s
-and many other terminal support 256 different color codes.  The colors
-in an `xterm` are broken up into three groups.
+the set of colors that a modern terminal can display.  `xterm`s (and
+many other terminal programs) support 256 different colors, broken up
+into the following groups.
 
-- A set of 16 colors devoted to showing the 8 standard colors, in
-  regular and bold.
+- The 8 basic colors, in regular and bold versions.
 - A $6 \times 6 \times 6$ RGB color cube
 - A 24-level grayscale ramp
 
-This is no longer conveniently representable as an enumeration, but we
-can represent all three of these concisely as a variant whose
-constructors have arguments.
+We can represent this more complicated colorspace as a variant, but
+this time, the different constructors will have arguments, to describe
+the data available in each case.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type weight = Regular | Bold ;;
-# type color =
-  | Standard of std_color * weight (* standard colors *)
-  | RGB      of int * int * int    (* 6x6x6 color cube *)
-  | Gray     of int                (* 24 grayscale levels *);;
+# type weight = Regular | Bold
+  type color =
+  | Basic of basic__color * weight (* basic colors, regular and bold *)
+  | RGB   of int * int * int       (* 6x6x6 color cube *)
+  | Gray  of int                   (* 24 grayscale levels *)
+;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to compute the color code for a `color`, we use pattern
 matching to break down the `color` variant into the appropriate cases.
-Note that the type system provides an exhaustiveness guarantee for
-pattern-matches, which means that we will be warned if a case is
-missed.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
-  | Standard (std_color,weight) ->
-    let base = match weight with Bold -> 8 | Regular -> 0 in
-    base + std_color_to_int std_color
-  | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-  | Gray i -> 232 + i ;;
+    | Basic (basic_color,weight) ->
+      let base = match weight with Bold -> 8 | Regular -> 0 in
+      base + basic_color_to_int basic_color
+    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | Gray i -> 232 + i ;;
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now, we can use this conversion function to print text using the full
-set of available colors.  Here, we construct instances of `color` by
-using the constructors we defined.
+<sidebar><title>Static checks for pattern matches</title>
+
+The pattern matching code for `color_to_int` benefits from a number of
+static checks from the compiler.  If we were to change the definition
+of color as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type color =
+  | Basic of basic_color     (* basic colors *)
+  | Bold  of basic_color     (* bold basic colors *)
+  | RGB   of int * int * int (* 6x6x6 color cube *)
+  | Gray  of int             (* 24 grayscale levels *)
+;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Then our definition of `color_to_int` would be wrong in two ways, both
+of which the compiler would catch.  First, the type of the contents of
+`Basic` have changed: first there were two arguments, and now only
+one:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic (basic_color,weight) ->
+      let base = match weight with Bold -> 8 | Regular -> 0 in
+      base + basic_color_to_int basic_color
+    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | Gray i -> 232 + i ;;
+Characters 40-60:
+Error: This pattern matches values of type 'a * 'b
+       but a pattern was expected which matches values of type basic_color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once we fix that, however, there's another problem, which is that we
+haven't handled the new case of the `Bold` constructor.  The compiler
+will catch this as well:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic basic_color -> basic_color_to_int basic_color
+    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | Gray i -> 232 + i ;;
+Characters 19-154:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Bold _
+val color_to_int : color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finally leading us to the correct implementation:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic basic_color -> basic_color_to_int basic_color
+    | Bold  basic_color -> 8 + basic_color_to_int basic_color
+    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | Gray i -> 232 + i ;;
+val color_to_int : color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+</sidebar>
+
+
+Using the above function, we can print text using the full set of
+available colors.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_print color s =
      printf "%s\n" (color_by_number (color_to_int color) s);;
 val color_print : color -> string -> unit = <fun>
-# color_print (Standard (Red,Bold)) "A bold red!";;
+# color_print (Basic (Red,Bold)) "A bold red!";;
 A bold red!
 - : unit = ()
 # color_print (Gray 4) "A muted gray...";;
 A muted gray...
 - : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Combining records and variants
+
+Variants and records are most effective when used in concert.
+Consider again the record example from section [[REUSING FIELD
+NAMES]].
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time.t;
+      important: bool;
+      message: string;
+    }
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As you can see, record types act like conjuntions: a `Log_entry.t` has
+a `session_id` _and_ a `time` _and_ an `imporant` flag _and_ a
+`message`.  Variants, on the other hand, are more like disjunctions,
+letting you write down a type that represents multiple different
+possibilities.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+type client_message = | Logon of Logon.t
+                      | Heartbeat of Heartbeat.t
+                      | Log_entry of Log_entry.t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Thus, a `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a
+`Log_entry`.  Indeed, if we want to write code that processes messages
+generically, rather than code specialized to a fixed message type, we
+need a type like `client_message` to unify the different message types
+into one overarching type. 
+
+Consider the following function that takes a list of `client_message`s
+and returns all messages assocaited with a given user.  The code is
+implemented as a fold over the list of messages, where the accumulator o
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+let messages_for_user user messages =
+  let (user_messages,_) =
+    List.fold messages ~init:([],String.Set.empty)
+      ~f:(fun ((messages,user_sessions) as acc) message ->
+        match message with
+        | Logon m ->
+          if m.Logon.user = user then
+            (message::messages, Set.add user_sessions m.Logon.session_id)
+          else acc
+        | _ ->
+          let session_id = match message with
+            | Logon     m -> m.Logon.session_id
+            | Heartbeat m -> m.Heartbeat.session_id
+            | Log_entry m -> m.Log_entry.session_id
+          in
+          if Set.mem user_sessions session_id then
+            (message::messages,user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+This gets at the basic structure, but there are some problems with
+this design.  Consider how you would write a function to extract the
+time that a `client_message` happened.  You might write something like
+this:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let message_time = function
+    | Logon m -> m.Logon.time
+    | Heartbeat m -> m.Heartbeat.time
+    | Log_entry m -> m.Log_entry.time
+    ;;
+val message_time : client_message -> Core.Std.Time.t = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This works, but it's unfortunate that we need to write what is
+essentially the same code over and over, once for each message type.
+We can get around this by refactoring our types to explicitly separate
+which parts are shared and which parts are common.  The first step is
+to cut down the definitions of the per-message records to just contain
+the unique components of each message.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Log_entry = struct
+    type t = { important: bool;
+               message: string }
+  end
+  module Heartbeat = struct
+    type t = { status_message: string; }
+  end
+  module Logon = struct
+    type t = { user: string;
+               credentials: string }
+  end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And we can also define a variant type for capturing the different
+details.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type details =
+    | Logon     of Logon.t
+    | Heartbeat of Heartbeat.t
+    | Log_entry of Log_entry.t ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And then, we can define a record that contains the fields that are
+common across all messages.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# module Common = struct
+    type t = { session_id: string;
+               time: Time.t; }
+  end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A full message can then represented as a pair of a `Common.t` and a
+`details`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let message_time (c,_) = c.Common.time;;
+val message_time : Common.t * 'a -> Time.t = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can now use the type `Common.t * message` to represent a message of
+any type.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let c = { Common. time = Time.now (); session_id = "abc" };;
+# let l = { Logon.user = "yminsky"; credentials = "Xyx23djfD" };;
+# (c,l);;
+- : Common.t * Logon.t =
+({Common.session_id = "abc"; Common.time = 2012-07-10 08:24:30.713823},
+ {Logon.user = "yminsky"; Logon.credentials = "Xyx23djfD"})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Indeed, we can use variants to solve some problems with the original
+design of our message types.  Remember that all three of our message
+types contained a `session_id` and `time` field with the same types
+and the same meaning.   This repetition is problematic
+
+
+
+
 
 ### Polymorphic variants
 
