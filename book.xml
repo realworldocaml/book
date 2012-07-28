@@ -2887,7 +2887,7 @@ val my_host : host_info =
       </para>
       <programlisting>
 let create_host_info ~hostname:hostname ~os_name:os_name
-   ~os_release:os_release ~cpu_arch:cpu_arch = 
+   ~os_release:os_release ~cpu_arch:cpu_arch =
     let hostname = String.lowercase hostname in
     { hostname = hostname ; os_name = os_name;
       os_release = os_release; cpu_arch = cpu_arch };;
@@ -3010,7 +3010,7 @@ Error: The record field label important belongs to the type log_entry
         important: bool;
         message: string;
       }
-  end 
+  end
   module Heartbeat = struct
     type t =
       { session_id: string;
@@ -3032,7 +3032,7 @@ Error: The record field label important belongs to the type log_entry
       </para>
       <programlisting>
 # let create_log_entry ~session_id ~important message =
-     { Log_entry.time = Time.now (); Log_entry.session_id; 
+     { Log_entry.time = Time.now (); Log_entry.session_id;
        Log_entry.important; Log_entry.message }
   ;;
 val create_log_entry :
@@ -3072,7 +3072,7 @@ val create_log_entry :
         new heartbeat arrives.
       </para>
       <programlisting>
-# type client_info = 
+# type client_info =
    { addr: Unix.Inet_addr.t;
      port: int;
      user: string;
@@ -3308,50 +3308,69 @@ credentials: Xy2d9W
   <sect1 id="variants">
     <title>Variants</title>
     <para>
-      A variant represents a collection of different possible structures
-      for a datatype, where each possibility is identified by a
-      different <emphasis>constructor</emphasis>. The basic syntax of a
-      variant type declaration is as follows.
+      Variant types are used to represent multiple different
+      possibilities, where each possibility is identified by a different
+      <emphasis>constructor</emphasis>. The syntax of a variant type
+      declaration is as follows.
     </para>
     <programlisting>
 type &lt;variant-name&gt; =
-  | &lt;Constr1&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
-  | &lt;Constr2&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
+  | &lt;Constructor1&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
+  | &lt;Constructor2&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
   ...
 </programlisting>
     <para>
-      Note that the pipe in front of the first constructor is optional.
+      To give a better sense of why variants are useful, we'll walk
+      through a concrete example of variants in action.
     </para>
-    <para>
-      Each constructor corresponds to a different case of the datatype,
-      and these constructors can have other data attached to them.
-      Without this attached data, a variant is like the enumeration type
-      found in many languages. Here, for example, is a simple
-      enumeration-like variant for representing the 7 standard terminal
-      colors supported by most terminal types, including
-      <literal>xterm</literal> and <literal>vt100</literal>.
-    </para>
-    <programlisting>
-# type std_color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
+    <sect2 id="example-terminal-colors">
+      <title>Example: terminal colors</title>
+      <para>
+        Almost all terminals support a set of 8 basic colors, which we
+        can represent with the following variant type.
+      </para>
+      <programlisting>
+# type std_color =
+    Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 </programlisting>
-    <para>
-      Each color has an associated number that is used for setting
-      colors in the terminal. The following function uses a match
-      statement to compute the number for each
-      <literal>std_color</literal>.
-    </para>
-    <programlisting>
+      <para>
+        This is a particularly simple form of variant, in that the
+        constructors don't have arguments. Such variants are very
+        similar to the enumerations found in many languages, including C
+        and Java.
+      </para>
+      <para>
+        We can construct an instance of <literal>std_color</literal> by
+        writing out the appropriate constructor, as shown below.
+      </para>
+      <programlisting>
+# [Black;Blue;Red];;
+- : std_color list = [Black; Blue; Red]
+</programlisting>
+      <para>
+        Pattern matching can then be used to process a variant. Consider
+        the following function which converts each
+        <literal>std_color</literal> to a corresponding integer. As
+        we'll see, these integers will be used to compute escape codes
+        for setting colors in the terminal. The pattern match is used to
+        choose a different integer for each constructor.
+      </para>
+      <programlisting>
 # let std_color_to_int = function
   | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3
   | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7 ;;
 val std_color_to_int : std_color -&gt; int = &lt;fun&gt;
 </programlisting>
-    <para>
-      Using these numbers we can construct the escape codes required to
-      do things like set the foreground color for a chunk of text.
-      Here's an example.
-    </para>
-    <programlisting>
+      <para>
+        Note that the exhaustiveness checking on pattern matches means
+        that the compiler will warn us if we miss a case in the pattern
+        match.
+      </para>
+      <para>
+        Using <literal>std_color_to_int</literal>, we can now generate
+        the escape codes to change the color of a given string.
+      </para>
+      <programlisting>
 # let color_by_number number text =
     sprintf &quot;\027[38;5;%dm%s\027[0m&quot; number text;;
   val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;
@@ -3361,79 +3380,299 @@ val s : string = &quot;\027[38;5;4mHello Blue World!\027[0m&quot;
 Hello Blue World!
 - : unit = ()
 </programlisting>
-    <para>
-      If you're running your toplevel on a standard terminal, then that
-      last line should have been printed in blue.
-    </para>
-    <para>
-      The simple enumeration of <literal>std_color</literal> isn't
-      enough to fully describe the set of colors that a modern terminal
-      can display. Modern <literal>xterm</literal>s and many other
-      terminal support 256 different color codes. The colors in an
-      <literal>xterm</literal> are broken up into three groups.
-    </para>
-    <itemizedlist>
-      <listitem>
+      <para>
+        On most terminals, that last line is printed in blue.
+      </para>
+      <sect3 id="full-terminal-colors">
+        <title>Full terminal colors</title>
         <para>
-          A set of 16 colors devoted to showing the 8 standard colors,
-          in regular and bold.
+          The simple enumeration of <literal>std_color</literal> isn't
+          enough to fully describe the set of colors that a modern
+          terminal can display. <literal>xterm</literal>s (and many
+          other terminal programs) support 256 different colors, broken
+          up into the following groups.
         </para>
-      </listitem>
-      <listitem>
+        <itemizedlist>
+          <listitem>
+            <para>
+              The 8 basic colors, in regular and bold versions.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              A 6 × 6 × 6 RGB color cube
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              A 24-level grayscale ramp
+            </para>
+          </listitem>
+        </itemizedlist>
         <para>
-          A 6 × 6 × 6 RGB color cube
+          We can represent this more complicated colorspace as a
+          variant, but this time, the different constructors will have
+          arguments, to describe the data available in each case.
         </para>
-      </listitem>
-      <listitem>
-        <para>
-          A 24-level grayscale ramp
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      This is no longer conveniently representable as an enumeration,
-      but we can represent all three of these concisely as a variant
-      whose constructors have arguments.
-    </para>
-    <programlisting>
-# type weight = Regular | Bold ;;
-# type color =
-  | Standard of std_color * weight (* standard colors *)
-  | RGB      of int * int * int    (* 6x6x6 color cube *)
-  | Gray     of int                (* 24 grayscale levels *);;
+        <programlisting>
+# type weight = Regular | Bold
+  type color =
+  | Basic of basic__color * weight (* basic colors, regular and bold *)
+  | RGB   of int * int * int       (* 6x6x6 color cube *)
+  | Gray  of int                   (* 24 grayscale levels *)
+;;
 </programlisting>
-    <para>
-      In order to compute the color code for a <literal>color</literal>,
-      we use pattern matching to break down the <literal>color</literal>
-      variant into the appropriate cases. Note that the type system
-      provides an exhaustiveness guarantee for pattern-matches, which
-      means that we will be warned if a case is missed.
-    </para>
-    <programlisting>
+        <para>
+          In order to compute the color code for a
+          <literal>color</literal>, we use pattern matching to break
+          down the <literal>color</literal> variant into the appropriate
+          cases.
+        </para>
+        <programlisting>
 # let color_to_int = function
-  | Standard (std_color,weight) -&gt;
-    let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
-    base + std_color_to_int std_color
-  | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
-  | Gray i -&gt; 232 + i ;;
+    | Basic (basic_color,weight) -&gt;
+      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+      base + basic_color_to_int basic_color
+    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+    | Gray i -&gt; 232 + i ;;
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
-    <para>
-      Now, we can use this conversion function to print text using the
-      full set of available colors. Here, we construct instances of
-      <literal>color</literal> by using the constructors we defined.
-    </para>
-    <programlisting>
+        <sidebar><title>
+        Static checks for pattern matches
+        </title>
+        <para>
+          The pattern matching code for <literal>color_to_int</literal>
+          benefits from a number of static checks from the compiler. If
+          we were to change the definition of color as follows:
+        </para>
+        <programlisting>
+# type color =
+  | Basic of basic_color     (* basic colors *)
+  | Bold  of basic_color     (* bold basic colors *)
+  | RGB   of int * int * int (* 6x6x6 color cube *)
+  | Gray  of int             (* 24 grayscale levels *)
+;;
+</programlisting>
+        <para>
+          Then our definition of <literal>color_to_int</literal> would
+          be wrong in two ways, both of which the compiler would catch.
+          First, the type of the contents of <literal>Basic</literal>
+          have changed: first there were two arguments, and now only
+          one:
+        </para>
+        <programlisting>
+# let color_to_int = function
+    | Basic (basic_color,weight) -&gt;
+      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+      base + basic_color_to_int basic_color
+    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+    | Gray i -&gt; 232 + i ;;
+Characters 40-60:
+Error: This pattern matches values of type 'a * 'b
+       but a pattern was expected which matches values of type basic_color
+</programlisting>
+        <para>
+          Once we fix that, however, there's another problem, which is
+          that we haven't handled the new case of the
+          <literal>Bold</literal> constructor. The compiler will catch
+          this as well:
+        </para>
+        <programlisting>
+# let color_to_int = function
+    | Basic basic_color -&gt; basic_color_to_int basic_color
+    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+    | Gray i -&gt; 232 + i ;;
+Characters 19-154:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Bold _
+val color_to_int : color -&gt; int = &lt;fun&gt;
+</programlisting>
+        <para>
+          Finally leading us to the correct implementation:
+        </para>
+        <programlisting>
+# let color_to_int = function
+    | Basic basic_color -&gt; basic_color_to_int basic_color
+    | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color
+    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+    | Gray i -&gt; 232 + i ;;
+val color_to_int : color -&gt; int = &lt;fun&gt;
+</programlisting>
+        </sidebar>
+
+        <para>
+          Using the above function, we can print text using the full set
+          of available colors.
+        </para>
+        <programlisting>
 # let color_print color s =
      printf &quot;%s\n&quot; (color_by_number (color_to_int color) s);;
 val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;
-# color_print (Standard (Red,Bold)) &quot;A bold red!&quot;;;
+# color_print (Basic (Red,Bold)) &quot;A bold red!&quot;;;
 A bold red!
 - : unit = ()
 # color_print (Gray 4) &quot;A muted gray...&quot;;;
 A muted gray...
 - : unit = ()
 </programlisting>
+      </sect3>
+    </sect2>
+    <sect2 id="combining-records-and-variants">
+      <title>Combining records and variants</title>
+      <para>
+        Variants and records are most effective when used in concert.
+        Consider again the record example from section [[REUSING FIELD
+        NAMES]].
+      </para>
+      <programlisting language="ocaml">
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time.t;
+      important: bool;
+      message: string;
+    }
+end
+</programlisting>
+      <para>
+        As you can see, record types act like conjuntions: a
+        <literal>Log_entry.t</literal> has a
+        <literal>session_id</literal> <emphasis>and</emphasis> a
+        <literal>time</literal> <emphasis>and</emphasis> an
+        <literal>imporant</literal> flag <emphasis>and</emphasis> a
+        <literal>message</literal>. Variants, on the other hand, are
+        more like disjunctions, letting you write down a type that
+        represents multiple different possibilities.
+      </para>
+      <programlisting language="ocaml">
+type client_message = | Logon of Logon.t
+                      | Heartbeat of Heartbeat.t
+                      | Log_entry of Log_entry.t
+</programlisting>
+      <para>
+        Thus, a <literal>client_message</literal> is a
+        <literal>Logon</literal> <emphasis>or</emphasis> a
+        <literal>Heartbeat</literal> <emphasis>or</emphasis> a
+        <literal>Log_entry</literal>. Indeed, if we want to write code
+        that processes messages generically, rather than code
+        specialized to a fixed message type, we need a type like
+        <literal>client_message</literal> to unify the different message
+        types into one overarching type.
+      </para>
+      <para>
+        Consider the following function that takes a list of
+        <literal>client_message</literal>s and returns all messages
+        assocaited with a given user. The code is implemented as a fold
+        over the list of messages, where the accumulator o
+      </para>
+      <programlisting>
+let messages_for_user user messages =
+  let (user_messages,_) =
+    List.fold messages ~init:([],String.Set.empty)
+      ~f:(fun ((messages,user_sessions) as acc) message -&gt;
+        match message with
+        | Logon m -&gt;
+          if m.Logon.user = user then
+            (message::messages, Set.add user_sessions m.Logon.session_id)
+          else acc
+        | _ -&gt;
+          let session_id = match message with
+            | Logon     m -&gt; m.Logon.session_id
+            | Heartbeat m -&gt; m.Heartbeat.session_id
+            | Log_entry m -&gt; m.Log_entry.session_id
+          in
+          if Set.mem user_sessions session_id then
+            (message::messages,user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+</programlisting>
+      <para>
+        This gets at the basic structure, but there are some problems
+        with this design. Consider how you would write a function to
+        extract the time that a <literal>client_message</literal>
+        happened. You might write something like this:
+      </para>
+      <programlisting>
+# let message_time = function
+    | Logon m -&gt; m.Logon.time
+    | Heartbeat m -&gt; m.Heartbeat.time
+    | Log_entry m -&gt; m.Log_entry.time
+    ;;
+val message_time : client_message -&gt; Core.Std.Time.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        This works, but it's unfortunate that we need to write what is
+        essentially the same code over and over, once for each message
+        type. We can get around this by refactoring our types to
+        explicitly separate which parts are shared and which parts are
+        common. The first step is to cut down the definitions of the
+        per-message records to just contain the unique components of
+        each message.
+      </para>
+      <programlisting>
+# module Log_entry = struct
+    type t = { important: bool;
+               message: string }
+  end
+  module Heartbeat = struct
+    type t = { status_message: string; }
+  end
+  module Logon = struct
+    type t = { user: string;
+               credentials: string }
+  end;;
+</programlisting>
+      <para>
+        And we can also define a variant type for capturing the
+        different details.
+      </para>
+      <programlisting>
+# type details =
+    | Logon     of Logon.t
+    | Heartbeat of Heartbeat.t
+    | Log_entry of Log_entry.t ;;
+</programlisting>
+      <para>
+        And then, we can define a record that contains the fields that
+        are common across all messages.
+      </para>
+      <programlisting>
+# module Common = struct
+    type t = { session_id: string;
+               time: Time.t; }
+  end;;
+</programlisting>
+      <para>
+        A full message can then represented as a pair of a
+        <literal>Common.t</literal> and a <literal>details</literal>.
+      </para>
+      <programlisting>
+# let message_time (c,_) = c.Common.time;;
+val message_time : Common.t * 'a -&gt; Time.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        We can now use the type <literal>Common.t * message</literal> to
+        represent a message of any type.
+      </para>
+      <programlisting>
+# let c = { Common. time = Time.now (); session_id = &quot;abc&quot; };;
+# let l = { Logon.user = &quot;yminsky&quot;; credentials = &quot;Xyx23djfD&quot; };;
+# (c,l);;
+- : Common.t * Logon.t =
+({Common.session_id = &quot;abc&quot;; Common.time = 2012-07-10 08:24:30.713823},
+ {Logon.user = &quot;yminsky&quot;; Logon.credentials = &quot;Xyx23djfD&quot;})
+</programlisting>
+      <para>
+        Indeed, we can use variants to solve some problems with the
+        original design of our message types. Remember that all three of
+        our message types contained a <literal>session_id</literal> and
+        <literal>time</literal> field with the same types and the same
+        meaning. This repetition is problematic
+      </para>
+    </sect2>
     <sect2 id="polymorphic-variants">
       <title>Polymorphic variants</title>
       <para>
