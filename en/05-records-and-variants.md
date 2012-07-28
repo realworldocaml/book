@@ -556,14 +556,8 @@ type <variant-name> =
   ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As you can see, each constructor can optionally have arguments
-attached.  Constructors without arguments act like the enumerations
-found in many languages, including C and Java, whereas constructors
-with arguments allow you to embed different data (with different
-types) into the individual cases.
-
-Let's start by considering an how to use a simple enumeration-style
-variant in a practical setting.
+To give a better sense of why variants are useful, we'll walk through
+a concrete example of variants in action.
 
 ### Example: terminal colors
 
@@ -575,19 +569,23 @@ represent with the following variant type.
     Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of `std_color` by just writing out the appropriate
-constructor name, as shown below.
+This is a particularly simple form of variant, in that the
+constructors don't have arguments.  Such variants are very similar to
+the enumerations found in many languages, including C and Java.
+
+We can construct an instance of `std_color` by writing out the
+appropriate constructor, as shown below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # [Black;Blue;Red];;
 - : std_color list = [Black; Blue; Red]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We process variants using pattern matching.  For example, the
-following function converts each `std_color` to a corresponding
-integer that we can later use for computing escape codes for setting
-colors in the terminal.  Here, the pattern match lets us return a
-different integer for each constructor.
+Pattern matching can then be used to process a variant.  Consider the
+following function which converts each `std_color` to a corresponding
+integer.  As we'll see, these integers will be used to compute escape
+codes for setting colors in the terminal.  The pattern match is used
+to choose a different integer for each constructor.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let std_color_to_int = function
@@ -596,7 +594,11 @@ different integer for each constructor.
 val std_color_to_int : std_color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And using these numbers, we can apply terminal colors to a string.
+Note that the exhaustiveness checking on pattern matches means that
+the compiler will warn us if we miss a case in the pattern match.
+
+Using `std_color_to_int`, we can now generate the escape codes to
+change the color of a given string.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_by_number number text =
@@ -609,13 +611,13 @@ Hello Blue World!
 - : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-On most terminals, that last line would be printed in blue.
+On most terminals, that last line is printed in blue.
 
 #### Full terminal colors
 
 The simple enumeration of `std_color` isn't enough to fully describe
-the set of colors that a modern terminal can display.  Modern `xterm`s
-(and many other terminals) support 256 different colors, broken up
+the set of colors that a modern terminal can display.  `xterm`s (and
+many other terminal programs) support 256 different colors, broken up
 into the following groups.
 
 - The 8 basic colors, in regular and bold versions.
@@ -648,9 +650,70 @@ matching to break down the `color` variant into the appropriate cases.
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now, we can use this conversion function to print text using the full
-set of available colors.  Here, we construct instances of `color` by
-using the constructors we defined.
+<sidebar><title>Static checks for pattern matches</title>
+
+The pattern matching code for `color_to_int` benefits from a number of
+static checks from the compiler.  If we were to change the definition
+of color as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type color =
+  | Basic of basic_color     (* basic colors *)
+  | Bold  of basic_color     (* bold basic colors *)
+  | RGB   of int * int * int (* 6x6x6 color cube *)
+  | Gray  of int             (* 24 grayscale levels *)
+;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Then our definition of `color_to_int` would be wrong in two ways, both
+of which the compiler would catch.  First, the type of the contents of
+`Basic` have changed: first there were two arguments, and now only
+one:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic (basic_color,weight) ->
+      let base = match weight with Bold -> 8 | Regular -> 0 in
+      base + basic_color_to_int basic_color
+    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | Gray i -> 232 + i ;;
+Characters 40-60:
+Error: This pattern matches values of type 'a * 'b
+       but a pattern was expected which matches values of type basic_color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once we fix that, however, there's another problem, which is that we
+haven't handled the new case of the `Bold` constructor.  The compiler
+will catch this as well:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic basic_color -> basic_color_to_int basic_color
+    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | Gray i -> 232 + i ;;
+Characters 19-154:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Bold _
+val color_to_int : color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finally leading us to the correct implementation:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic basic_color -> basic_color_to_int basic_color
+    | Bold  basic_color -> 8 + basic_color_to_int basic_color
+    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | Gray i -> 232 + i ;;
+val color_to_int : color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+</sidebar>
+
+
+Using the above function, we can print text using the full set of
+available colors.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_print color s =
