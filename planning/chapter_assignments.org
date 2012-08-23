@@ -12,10 +12,10 @@
 | A Guided Tour                       | yaron  | ###    |
 | Variables and Functions             | yaron  | ##     |
 | Lists, Options and Pattern-matching | jason  | #      |
-| Records and Variants                |        |        |
-| Error Handling                      | yaron  | ##     |
+| Records and Variants                | yaron  | #      |
+| Error Handling                      | yaron  | ###    |
 | Programming with Mutation           |        |        |
-| Files, Modules and Programs         | yaron  | ##     |
+| Files, Modules and Programs         | yaron  | ###    |
 | Functors and first-class modules    | yaron  |        |
 | Synchronous I/O                     |        |        |
 | Concurrent Programming              | anil   |        |
