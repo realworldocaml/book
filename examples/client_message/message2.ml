@@ -40,7 +40,7 @@ let messages_for_user user messages =
           if m.Logon.user = user then
             (message::messages, Set.add user_sessions session_id)
           else acc
-        | _ ->
+        | Heartbeat _ | Log_entry _ ->
           if Set.mem user_sessions session_id then
             (message::messages,user_sessions)
           else acc

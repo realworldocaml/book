@@ -38,7 +38,7 @@ let messages_for_user user messages =
           if m.Logon.user = user then
             (message::messages, Set.add user_sessions m.Logon.session_id)
           else acc
-        | _ ->
+        | Heartbeat _ | Log_entry _ ->
           let session_id = match message with
             | Logon     m -> m.Logon.session_id
             | Heartbeat m -> m.Heartbeat.session_id
