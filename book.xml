@@ -3330,7 +3330,7 @@ type &lt;variant-name&gt; =
         can represent with the following variant type.
       </para>
       <programlisting>
-# type std_color =
+# type basic_color =
     Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 </programlisting>
       <para>
@@ -3340,26 +3340,25 @@ type &lt;variant-name&gt; =
         and Java.
       </para>
       <para>
-        We can construct an instance of <literal>std_color</literal> by
-        writing out the appropriate constructor, as shown below.
+        We can construct instances of <literal>basic_color</literal> by
+        simply writing out the constructors in question.
       </para>
       <programlisting>
 # [Black;Blue;Red];;
-- : std_color list = [Black; Blue; Red]
+- : basic_color list = [Black; Blue; Red]
 </programlisting>
       <para>
-        Pattern matching can then be used to process a variant. Consider
-        the following function which converts each
-        <literal>std_color</literal> to a corresponding integer. As
+        Pattern matching can be used to process a variant. Consider the
+        following function which converts each
+        <literal>basic_color</literal> to a corresponding integer. As
         we'll see, these integers will be used to compute escape codes
-        for setting colors in the terminal. The pattern match is used to
-        choose a different integer for each constructor.
+        for setting colors in the terminal.
       </para>
       <programlisting>
-# let std_color_to_int = function
+# let basic_color_to_int = function
   | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3
   | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7 ;;
-val std_color_to_int : std_color -&gt; int = &lt;fun&gt;
+val basic_color_to_int : basic_color -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
         Note that the exhaustiveness checking on pattern matches means
@@ -3367,14 +3366,14 @@ val std_color_to_int : std_color -&gt; int = &lt;fun&gt;
         match.
       </para>
       <para>
-        Using <literal>std_color_to_int</literal>, we can now generate
+        Using <literal>basic_color_to_int</literal>, we can now generate
         the escape codes to change the color of a given string.
       </para>
       <programlisting>
 # let color_by_number number text =
     sprintf &quot;\027[38;5;%dm%s\027[0m&quot; number text;;
   val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;
-# let s = color_by_number (std_color_to_int Blue) &quot;Hello Blue World!&quot;;;
+# let s = color_by_number (basic_color_to_int Blue) &quot;Hello Blue World!&quot;;;
 val s : string = &quot;\027[38;5;4mHello Blue World!\027[0m&quot;
 # printf &quot;%s\n&quot; s;;
 Hello Blue World!
@@ -3386,7 +3385,7 @@ Hello Blue World!
       <sect3 id="full-terminal-colors">
         <title>Full terminal colors</title>
         <para>
-          The simple enumeration of <literal>std_color</literal> isn't
+          The simple enumeration of <literal>basic_color</literal> isn't
           enough to fully describe the set of colors that a modern
           terminal can display. <literal>xterm</literal>s (and many
           other terminal programs) support 256 different colors, broken
@@ -3417,7 +3416,7 @@ Hello Blue World!
         <programlisting>
 # type weight = Regular | Bold
   type color =
-  | Basic of basic__color * weight (* basic colors, regular and bold *)
+  | Basic of basic_color * weight (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color cube *)
   | Gray  of int                   (* 24 grayscale levels *)
 ;;
@@ -3438,12 +3437,17 @@ Hello Blue World!
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
         <sidebar><title>
-        Static checks for pattern matches
+        Catch-all cases and refactoring
         </title>
         <para>
-          The pattern matching code for <literal>color_to_int</literal>
-          benefits from a number of static checks from the compiler. If
-          we were to change the definition of color as follows:
+          OCaml's static checks can act as a form of refactoring tool,
+          where the compiler warns you of places where your code needs
+          to be adapted to changes made elsewhere. This shows up quite a
+          bit when defining variant types.
+        </para>
+        <para>
+          Consider what would happen if we were to change the definition
+          of <literal>color</literal> to the following.
         </para>
         <programlisting>
 # type color =
@@ -3454,11 +3458,11 @@ val color_to_int : color -&gt; int = &lt;fun&gt;
 ;;
 </programlisting>
         <para>
-          Then our definition of <literal>color_to_int</literal> would
-          be wrong in two ways, both of which the compiler would catch.
-          First, the type of the contents of <literal>Basic</literal>
-          have changed: first there were two arguments, and now only
-          one:
+          Under this definition, <literal>color_to_int</literal> is
+          wrong in two ways. First, the type of the contents of
+          <literal>Basic</literal> have changed from having two
+          arguments to having just one, and
+          <literal>color_to_int</literal> still expects two.
         </para>
         <programlisting>
 # let color_to_int = function
@@ -3473,9 +3477,8 @@ Error: This pattern matches values of type 'a * 'b
 </programlisting>
         <para>
           Once we fix that, however, there's another problem, which is
-          that we haven't handled the new case of the
-          <literal>Bold</literal> constructor. The compiler will catch
-          this as well:
+          that we haven't handled the new <literal>Bold</literal>
+          constructor.
         </para>
         <programlisting>
 # let color_to_int = function
@@ -3489,7 +3492,7 @@ Bold _
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
         <para>
-          Finally leading us to the correct implementation:
+          Fixing this leads us to the correct implementation.
         </para>
         <programlisting>
 # let color_to_int = function
@@ -3497,6 +3500,44 @@ val color_to_int : color -&gt; int = &lt;fun&gt;
     | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color
     | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
     | Gray i -&gt; 232 + i ;;
+val color_to_int : color -&gt; int = &lt;fun&gt;
+</programlisting>
+        <para>
+          Here, the type system has worked as a refactoring tool,
+          identifying the places in our code that needed to be fixed.
+          But for this refactoring to work well, there are some pitfalls
+          you need to avoid in your code. In particular, you should
+          avoid catch-all cases in pattern matches.
+        </para>
+        <para>
+          Imagine we wanted <literal>color_to_int</literal> to render
+          the first 16 colors (the 8 <literal>basic_color</literal>s in
+          regular and bold) in the expected way, but render everything
+          else as white. We might have written the function as follows.
+        </para>
+        <programlisting>
+# let color_to_int = function
+    | Basic (basic_color,weight) -&gt;
+      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+      base + basic_color_to_int basic_color
+    | _ -&gt; basic_color_to_int White;;
+val color_to_int : color -&gt; int = &lt;fun&gt;
+</programlisting>
+        <para>
+          But because the catch-all case encompases all possibilities,
+          the type system will no longer warn us that we have missed the
+          new <literal>Bold</literal> case when we change the type to
+          include it. To get the full power out of the static checks
+          provided by the compiler, we need to be explicit about which
+          cases are being handled by which branch of a pattern match, as
+          we do below.
+        </para>
+        <programlisting>
+# let color_to_int = function
+    | Basic (basic_color,weight) -&gt;
+      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+      base + basic_color_to_int basic_color
+    | RGB _ | Gray _ -&gt; basic_color_to_int White;;
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
         </sidebar>
@@ -3521,9 +3562,9 @@ A muted gray...
     <sect2 id="combining-records-and-variants">
       <title>Combining records and variants</title>
       <para>
-        Variants and records are most effective when used in concert.
-        Consider again the record example from section [[REUSING FIELD
-        NAMES]].
+        Variants and records serve quite different purposes. Consider
+        again the type <literal>Log_entry.t</literal> from section
+        [[REUSING FIELD NAMES]]:
       </para>
       <programlisting language="ocaml">
 module Log_entry = struct
@@ -3536,14 +3577,15 @@ module Log_entry = struct
 end
 </programlisting>
       <para>
-        As you can see, record types act like conjuntions: a
-        <literal>Log_entry.t</literal> has a
-        <literal>session_id</literal> <emphasis>and</emphasis> a
+        This record type combines multiple pieces of data into one
+        value. In particular, a single <literal>Log_entry.t</literal>
+        has a <literal>session_id</literal> <emphasis>and</emphasis> a
         <literal>time</literal> <emphasis>and</emphasis> an
         <literal>imporant</literal> flag <emphasis>and</emphasis> a
-        <literal>message</literal>. Variants, on the other hand, are
-        more like disjunctions, letting you write down a type that
-        represents multiple different possibilities.
+        <literal>message</literal>. More generally, you can think of
+        record types as acting as conjunctions. Variants, on the other
+        hand, are disjunctions, letting you represent multiple
+        possibilities. Consider the following variant type.
       </para>
       <programlisting language="ocaml">
 type client_message = | Logon of Logon.t
@@ -3551,22 +3593,42 @@ type client_message = | Logon of Logon.t
                       | Log_entry of Log_entry.t
 </programlisting>
       <para>
-        Thus, a <literal>client_message</literal> is a
+        A <literal>client_message</literal> is a
         <literal>Logon</literal> <emphasis>or</emphasis> a
         <literal>Heartbeat</literal> <emphasis>or</emphasis> a
-        <literal>Log_entry</literal>. Indeed, if we want to write code
-        that processes messages generically, rather than code
-        specialized to a fixed message type, we need a type like
+        <literal>Log_entry</literal>. If we want to write code that
+        processes messages generically, rather than code specialized to
+        a fixed message type, we need a type like
         <literal>client_message</literal> to unify the different message
         types into one overarching type.
       </para>
       <para>
-        Consider the following function that takes a list of
-        <literal>client_message</literal>s and returns all messages
-        assocaited with a given user. The code is implemented as a fold
-        over the list of messages, where the accumulator o
+        Variants and records are most effective when used in concert,
+        with variants used to represent true differences between
+        different types, and records used to represent the parts that
+        remain constant. As an example, consider the following function
+        that takes a list of <literal>client_message</literal>s and
+        returns all messages generated by a given user. The code in
+        question is implemented by folding over the list of messages,
+        where the accumulator is a pair of:
       </para>
-      <programlisting>
+      <itemizedlist>
+        <listitem>
+          <para>
+            the set of session identifiers for the user in question.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            the set of messages that have occurred under a session
+            identifier known to be associated with a given user.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Here's the concrete code.
+      </para>
+      <programlisting language="ocaml">
 let messages_for_user user messages =
   let (user_messages,_) =
     List.fold messages ~init:([],String.Set.empty)
@@ -3576,7 +3638,7 @@ let messages_for_user user messages =
           if m.Logon.user = user then
             (message::messages, Set.add user_sessions m.Logon.session_id)
           else acc
-        | _ -&gt;
+        | Heartbeat _ | Log_entry _ -&gt;
           let session_id = match message with
             | Logon     m -&gt; m.Logon.session_id
             | Heartbeat m -&gt; m.Heartbeat.session_id
@@ -3590,87 +3652,120 @@ let messages_for_user user messages =
   List.rev user_messages
 </programlisting>
       <para>
-        This gets at the basic structure, but there are some problems
-        with this design. Consider how you would write a function to
-        extract the time that a <literal>client_message</literal>
-        happened. You might write something like this:
+        There's one awkward bit about the code above, which is the
+        calculation of the session ids. In particular, we have the
+        following repetitive snippet of code:
       </para>
-      <programlisting>
-# let message_time = function
-    | Logon m -&gt; m.Logon.time
-    | Heartbeat m -&gt; m.Heartbeat.time
-    | Log_entry m -&gt; m.Log_entry.time
-    ;;
-val message_time : client_message -&gt; Core.Std.Time.t = &lt;fun&gt;
+      <programlisting language="ocaml">
+  let session_id = match message with
+    | Logon     m -&gt; m.Logon.session_id
+    | Heartbeat m -&gt; m.Heartbeat.session_id
+    | Log_entry m -&gt; m.Log_entry.session_id
+  in
 </programlisting>
       <para>
-        This works, but it's unfortunate that we need to write what is
-        essentially the same code over and over, once for each message
-        type. We can get around this by refactoring our types to
-        explicitly separate which parts are shared and which parts are
-        common. The first step is to cut down the definitions of the
-        per-message records to just contain the unique components of
-        each message.
+        This code effectively computes the session id for each
+        underlying message type. The repetition in this case isn't that
+        bad, but would become problematic in larger and more complicated
+        examples.
       </para>
-      <programlisting>
-# module Log_entry = struct
-    type t = { important: bool;
-               message: string }
-  end
-  module Heartbeat = struct
-    type t = { status_message: string; }
-  end
-  module Logon = struct
-    type t = { user: string;
-               credentials: string }
-  end;;
+      <para>
+        We can improve the code by refactoring our types to explicitly
+        separate which parts are shared and which are common. The first
+        step is to cut down the definitions of the per-message records
+        to just contain the unique components of each message.
+      </para>
+      <programlisting language="ocaml">
+module Log_entry = struct
+  type t = { important: bool;
+             message: string;
+           }
+end
+
+module Heartbeat = struct
+  type t = { status_message: string; }
+end
+
+module Logon = struct
+  type t = { user: string;
+             credentials: string;
+           }
+end
 </programlisting>
       <para>
-        And we can also define a variant type for capturing the
-        different details.
+        We can then define a variant type that covers the different
+        possible unique components.
       </para>
-      <programlisting>
-# type details =
-    | Logon     of Logon.t
-    | Heartbeat of Heartbeat.t
-    | Log_entry of Log_entry.t ;;
+      <programlisting language="ocaml">
+type details =
+| Logon of Logon.t
+| Heartbeat of Heartbeat.t
+| Log_entry of Log_entry.t
 </programlisting>
       <para>
-        And then, we can define a record that contains the fields that
-        are common across all messages.
+        Separately, we need a record that contains the fields that are
+        common across all messages.
       </para>
-      <programlisting>
-# module Common = struct
-    type t = { session_id: string;
-               time: Time.t; }
-  end;;
+      <programlisting language="ocaml">
+module Common = struct
+  type t = { session_id: string;
+             time: Time.t;
+           }
+end
 </programlisting>
       <para>
         A full message can then represented as a pair of a
         <literal>Common.t</literal> and a <literal>details</literal>.
+        Using this, we can rewrite our example above as follows:
       </para>
-      <programlisting>
-# let message_time (c,_) = c.Common.time;;
-val message_time : Common.t * 'a -&gt; Time.t = &lt;fun&gt;
+      <programlisting language="ocaml">
+let messages_for_user user messages =
+  let (user_messages,_) =
+    List.fold messages ~init:([],String.Set.empty)
+      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) -&gt;
+        let session_id = common.Common.session_id in
+        match details with
+        | Logon m -&gt;
+          if m.Logon.user = user then
+            (message::messages, Set.add user_sessions session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ -&gt;
+          if Set.mem user_sessions session_id then
+            (message::messages,user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
 </programlisting>
       <para>
-        We can now use the type <literal>Common.t * message</literal> to
-        represent a message of any type.
+        Note that the more complex match statement for computing the
+        session id has been replaced with the simple expression
+        <literal>common.Common.session_id</literal>.
       </para>
-      <programlisting>
-# let c = { Common. time = Time.now (); session_id = &quot;abc&quot; };;
-# let l = { Logon.user = &quot;yminsky&quot;; credentials = &quot;Xyx23djfD&quot; };;
-# (c,l);;
-- : Common.t * Logon.t =
-({Common.session_id = &quot;abc&quot;; Common.time = 2012-07-10 08:24:30.713823},
- {Logon.user = &quot;yminsky&quot;; Logon.credentials = &quot;Xyx23djfD&quot;})
+      <para>
+        This basic design is good in another way: it allows us to
+        essentially downcast to the specific message type once we know
+        what it is, and then dispatch code to handle just that message
+        type. In particular, while we use the type
+        <literal>Common.t * details</literal> to represent an arbitrary
+        message, we can use <literal>Common.t * Logon.t</literal> to
+        represent a logon message. Thus, if we had functions for
+        handling individual message types, we could write a dispatch
+        function as follows.
+      </para>
+      <programlisting language="ocaml">
+let handle_message server_state (common,details) =
+  match details with
+  | Log_entry m -&gt; handle_log_entry server_state (common,m)
+  | Logon     m -&gt; handle_logon     server_state (common,m)
+  | Heartbeat m -&gt; handle_heartbeat server_state (common,m)
 </programlisting>
       <para>
-        Indeed, we can use variants to solve some problems with the
-        original design of our message types. Remember that all three of
-        our message types contained a <literal>session_id</literal> and
-        <literal>time</literal> field with the same types and the same
-        meaning. This repetition is problematic
+        And it's explicit at the type level that
+        <literal>handle_log_entry</literal> sees only
+        <literal>Log_entry</literal> messages,
+        <literal>handle_logon</literal> sees only
+        <literal>Logon</literal> messages, etc.
       </para>
     </sect2>
     <sect2 id="polymorphic-variants">
@@ -3681,11 +3776,6 @@ val message_time : Common.t * 'a -&gt; Time.t = &lt;fun&gt;
   </sect1>
   <sect1 id="more-advanced-declarations">
     <title>More advanced declarations</title>
-    <sect2 id="sharing-across-datatypes">
-      <title>Sharing across datatypes</title>
-      <para>
-      </para>
-    </sect2>
     <sect2 id="polymorphic-types">
       <title>Polymorphic types</title>
       <para>
@@ -3695,41 +3785,6 @@ val message_time : Common.t * 'a -&gt; Time.t = &lt;fun&gt;
       <title>Recursive types</title>
       <para>
       </para>
-    </sect2>
-    <sect2 id="detritus">
-      <title>Detritus</title>
-      <para>
-        Variants and records are closely related concepts. Records
-        combine multiple types together in a conjunctive way: a logon
-        record has a session id <emphasis>and</emphasis> a time
-        <emphasis>and</emphasis> a user <emphasis>and</emphasis>
-        credentials. But sometimes, you want to combine types in a
-        disjunctive way. For example, if you wanted a type to represent
-        all possible message, you'd need something that was a log entry
-        <emphasis>or</emphasis> a heartbeat <emphasis>or</emphasis> a
-        log-on. Variant types are used for just such declarations, as
-        shown below.
-      </para>
-      <programlisting>
-# type client_message = | Logon of Logon.t
-                        | Heartbeat of Heartbeat.t
-                        | Log_entry of Log_entry.t;;
-</programlisting>
-      <para>
-        <literal>Logon</literal>, <literal>Heartbeat</literal> and
-        <literal>Log_entry</literal> are called constructors, and
-        they're what you use to create a <literal>message</literal>.
-      </para>
-      <programlisting>
-# let message =
-     Log_entry (create_log_entry ~session_id:&quot;345&quot;
-                ~important:false &quot;Hello World&quot;);;
-val message : client_message =
-  Log_entry
-   {Log_entry.session_id = &quot;345&quot;;
-    Log_entry.time = 2012-07-04 13:55:18.798289; Log_entry.important = false;
-    Log_entry.message = &quot;Hello World&quot;}
-</programlisting>
     </sect2>
   </sect1>
 </chapter>
