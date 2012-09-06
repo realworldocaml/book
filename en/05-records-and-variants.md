@@ -565,7 +565,7 @@ Almost all terminals support a set of 8 basic colors, which we can
 represent with the following variant type.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type std_color =
+# type basic_color =
     Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -573,38 +573,37 @@ This is a particularly simple form of variant, in that the
 constructors don't have arguments.  Such variants are very similar to
 the enumerations found in many languages, including C and Java.
 
-We can construct an instance of `std_color` by writing out the
-appropriate constructor, as shown below.
+We can construct instances of `basic_color` by simply writing out the
+constructors in question.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # [Black;Blue;Red];;
-- : std_color list = [Black; Blue; Red]
+- : basic_color list = [Black; Blue; Red]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Pattern matching can then be used to process a variant.  Consider the
-following function which converts each `std_color` to a corresponding
-integer.  As we'll see, these integers will be used to compute escape
-codes for setting colors in the terminal.  The pattern match is used
-to choose a different integer for each constructor.
+Pattern matching can be used to process a variant.  Consider the
+following function which converts each `basic_color` to a
+corresponding integer.  As we'll see, these integers will be used to
+compute escape codes for setting colors in the terminal.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let std_color_to_int = function
+# let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
-val std_color_to_int : std_color -> int = <fun>
+val basic_color_to_int : basic_color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that the exhaustiveness checking on pattern matches means that
 the compiler will warn us if we miss a case in the pattern match.
 
-Using `std_color_to_int`, we can now generate the escape codes to
+Using `basic_color_to_int`, we can now generate the escape codes to
 change the color of a given string.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_by_number number text =
     sprintf "\027[38;5;%dm%s\027[0m" number text;;
   val color_by_number : int -> string -> string = <fun>
-# let s = color_by_number (std_color_to_int Blue) "Hello Blue World!";;
+# let s = color_by_number (basic_color_to_int Blue) "Hello Blue World!";;
 val s : string = "\027[38;5;4mHello Blue World!\027[0m"
 # printf "%s\n" s;;
 Hello Blue World!
@@ -615,7 +614,7 @@ On most terminals, that last line is printed in blue.
 
 #### Full terminal colors
 
-The simple enumeration of `std_color` isn't enough to fully describe
+The simple enumeration of `basic_color` isn't enough to fully describe
 the set of colors that a modern terminal can display.  `xterm`s (and
 many other terminal programs) support 256 different colors, broken up
 into the following groups.
@@ -631,7 +630,7 @@ the data available in each case.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type weight = Regular | Bold
   type color =
-  | Basic of basic__color * weight (* basic colors, regular and bold *)
+  | Basic of basic_color * weight (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color cube *)
   | Gray  of int                   (* 24 grayscale levels *)
 ;;
@@ -650,11 +649,15 @@ matching to break down the `color` variant into the appropriate cases.
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<sidebar><title>Static checks for pattern matches</title>
+<sidebar><title>Catch-all cases and refactoring</title>
 
-The pattern matching code for `color_to_int` benefits from a number of
-static checks from the compiler.  If we were to change the definition
-of color as follows:
+OCaml's static checks can act as a form of refactoring tool, where the
+compiler warns you of places where your code needs to be adapted to
+changes made elsewhere.  This shows up quite a bit when defining
+variant types.
+
+Consider what would happen if we were to change the definition of
+`color` to the following.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type color =
@@ -665,10 +668,9 @@ of color as follows:
 ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Then our definition of `color_to_int` would be wrong in two ways, both
-of which the compiler would catch.  First, the type of the contents of
-`Basic` have changed: first there were two arguments, and now only
-one:
+Under this definition, `color_to_int` is wrong in two ways.  First,
+the type of the contents of `Basic` have changed from having two
+arguments to having just one, and `color_to_int` still expects two.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -683,8 +685,7 @@ Error: This pattern matches values of type 'a * 'b
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once we fix that, however, there's another problem, which is that we
-haven't handled the new case of the `Bold` constructor.  The compiler
-will catch this as well:
+haven't handled the new `Bold` constructor.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -698,7 +699,7 @@ Bold _
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Finally leading us to the correct implementation:
+Fixing this leads us to the correct implementation.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -706,6 +707,42 @@ Finally leading us to the correct implementation:
     | Bold  basic_color -> 8 + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i ;;
+val color_to_int : color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, the type system has worked as a refactoring tool, identifying
+the places in our code that needed to be fixed.  But for this
+refactoring to work well, there are some pitfalls you need to avoid in
+your code.  In particular, you should avoid catch-all cases in pattern
+matches.
+
+Imagine we wanted `color_to_int` to render the first 16 colors (the 8
+`basic_color`s in regular and bold) in the expected way, but render
+everything else as white.  We might have written the function as
+follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic (basic_color,weight) ->
+      let base = match weight with Bold -> 8 | Regular -> 0 in
+      base + basic_color_to_int basic_color
+    | _ -> basic_color_to_int White;;
+val color_to_int : color -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+But because the catch-all case encompases all possibilities, the type
+system will no longer warn us that we have missed the new `Bold` case
+when we change the type to include it.  To get the full power out of
+the static checks provided by the compiler, we need to be explicit
+about which cases are being handled by which branch of a pattern
+match, as we do below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | Basic (basic_color,weight) ->
+      let base = match weight with Bold -> 8 | Regular -> 0 in
+      base + basic_color_to_int basic_color
+    | RGB _ | Gray _ -> basic_color_to_int White;;
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -729,9 +766,8 @@ A muted gray...
 
 ### Combining records and variants
 
-Variants and records are most effective when used in concert.
-Consider again the record example from section [[REUSING FIELD
-NAMES]].
+Variants and records serve quite different purposes.  Consider again
+the type `Log_entry.t` from section [[REUSING FIELD NAMES]]:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 module Log_entry = struct
@@ -744,11 +780,12 @@ module Log_entry = struct
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As you can see, record types act like conjuntions: a `Log_entry.t` has
-a `session_id` _and_ a `time` _and_ an `imporant` flag _and_ a
-`message`.  Variants, on the other hand, are more like disjunctions,
-letting you write down a type that represents multiple different
-possibilities.
+This record type combines multiple pieces of data into one value.  In
+particular, a single `Log_entry.t` has a `session_id` _and_ a `time`
+_and_ an `imporant` flag _and_ a `message`.  More generally, you can
+think of record types as acting as conjunctions.  Variants, on the
+other hand, are disjunctions, letting you represent multiple
+possibilities.  Consider the following variant type.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type client_message = | Logon of Logon.t
@@ -756,17 +793,27 @@ type client_message = | Logon of Logon.t
                       | Log_entry of Log_entry.t
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Thus, a `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a
-`Log_entry`.  Indeed, if we want to write code that processes messages
-generically, rather than code specialized to a fixed message type, we
-need a type like `client_message` to unify the different message types
-into one overarching type. 
+A `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a `Log_entry`.
+If we want to write code that processes messages generically, rather
+than code specialized to a fixed message type, we need a type like
+`client_message` to unify the different message types into one
+overarching type.
 
-Consider the following function that takes a list of `client_message`s
-and returns all messages assocaited with a given user.  The code is
-implemented as a fold over the list of messages, where the accumulator o
+Variants and records are most effective when used in concert, with
+variants used to represent true differences between different types,
+and records used to represent the parts that remain constant.  As an
+example, consider the following function that takes a list of
+`client_message`s and returns all messages generated by a given user.
+The code in question is implemented by folding over the list of
+messages, where the accumulator is a pair of:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+  - the set of session identifiers for the user in question.
+  - the set of messages that have occurred under a session identifier
+    known to be associated with a given user.
+
+Here's the concrete code.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let messages_for_user user messages =
   let (user_messages,_) =
     List.fold messages ~init:([],String.Set.empty)
@@ -776,7 +823,7 @@ let messages_for_user user messages =
           if m.Logon.user = user then
             (message::messages, Set.add user_sessions m.Logon.session_id)
           else acc
-        | _ ->
+        | Heartbeat _ | Log_entry _ ->
           let session_id = match message with
             | Logon     m -> m.Logon.session_id
             | Heartbeat m -> m.Heartbeat.session_id
@@ -790,130 +837,116 @@ let messages_for_user user messages =
   List.rev user_messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+There's one awkward bit about the code above, which is the calculation
+of the session ids.  In particular, we have the following repetitive
+snippet of code:
 
-
-
-This gets at the basic structure, but there are some problems with
-this design.  Consider how you would write a function to extract the
-time that a `client_message` happened.  You might write something like
-this:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let message_time = function
-    | Logon m -> m.Logon.time
-    | Heartbeat m -> m.Heartbeat.time
-    | Log_entry m -> m.Log_entry.time
-    ;;
-val message_time : client_message -> Core.Std.Time.t = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+  let session_id = match message with
+    | Logon     m -> m.Logon.session_id
+    | Heartbeat m -> m.Heartbeat.session_id
+    | Log_entry m -> m.Log_entry.session_id
+  in
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This works, but it's unfortunate that we need to write what is
-essentially the same code over and over, once for each message type.
-We can get around this by refactoring our types to explicitly separate
-which parts are shared and which parts are common.  The first step is
-to cut down the definitions of the per-message records to just contain
-the unique components of each message.
+This code effectively computes the session id for each underlying
+message type.  The repetition in this case isn't that bad, but would
+become problematic in larger and more complicated examples.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# module Log_entry = struct
-    type t = { important: bool;
-               message: string }
-  end
-  module Heartbeat = struct
-    type t = { status_message: string; }
-  end
-  module Logon = struct
-    type t = { user: string;
-               credentials: string }
-  end;;
+We can improve the code by refactoring our types to explicitly
+separate which parts are shared and which are common.  The first step
+is to cut down the definitions of the per-message records to just
+contain the unique components of each message.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module Log_entry = struct
+  type t = { important: bool;
+             message: string;
+           }
+end
+
+module Heartbeat = struct
+  type t = { status_message: string; }
+end
+
+module Logon = struct
+  type t = { user: string;
+             credentials: string;
+           }
+end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And we can also define a variant type for capturing the different
-details.
+We can then define a variant type that covers the different possible
+unique components.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type details =
-    | Logon     of Logon.t
-    | Heartbeat of Heartbeat.t
-    | Log_entry of Log_entry.t ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+type details =
+| Logon of Logon.t
+| Heartbeat of Heartbeat.t
+| Log_entry of Log_entry.t
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And then, we can define a record that contains the fields that are
-common across all messages.
+Separately, we need a record that contains the fields that are common
+across all messages.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# module Common = struct
-    type t = { session_id: string;
-               time: Time.t; }
-  end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+module Common = struct
+  type t = { session_id: string;
+             time: Time.t;
+           }
+end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A full message can then represented as a pair of a `Common.t` and a
-`details`.
+`details`.  Using this, we can rewrite our example above as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let message_time (c,_) = c.Common.time;;
-val message_time : Common.t * 'a -> Time.t = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let messages_for_user user messages =
+  let (user_messages,_) =
+    List.fold messages ~init:([],String.Set.empty)
+      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
+        let session_id = common.Common.session_id in
+        match details with
+        | Logon m ->
+          if m.Logon.user = user then
+            (message::messages, Set.add user_sessions session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ ->
+          if Set.mem user_sessions session_id then
+            (message::messages,user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We can now use the type `Common.t * message` to represent a message of
-any type.
+Note that the more complex match statement for computing the session
+id has been replaced with the simple expression
+`common.Common.session_id`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let c = { Common. time = Time.now (); session_id = "abc" };;
-# let l = { Logon.user = "yminsky"; credentials = "Xyx23djfD" };;
-# (c,l);;
-- : Common.t * Logon.t =
-({Common.session_id = "abc"; Common.time = 2012-07-10 08:24:30.713823},
- {Logon.user = "yminsky"; Logon.credentials = "Xyx23djfD"})
+This basic design is good in another way: it allows us to essentially
+downcast to the specific message type once we know what it is, and
+then dispatch code to handle just that message type.  In particular,
+while we use the type `Common.t * details` to represent an arbitrary
+message, we can use `Common.t * Logon.t` to represent a logon message.
+Thus, if we had functions for handling individual message types, we
+could write a dispatch function as follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let handle_message server_state (common,details) =
+  match details with
+  | Log_entry m -> handle_log_entry server_state (common,m)
+  | Logon     m -> handle_logon     server_state (common,m)
+  | Heartbeat m -> handle_heartbeat server_state (common,m)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Indeed, we can use variants to solve some problems with the original
-design of our message types.  Remember that all three of our message
-types contained a `session_id` and `time` field with the same types
-and the same meaning.   This repetition is problematic
-
-
-
-
+And it's explicit at the type level that `handle_log_entry` sees only
+`Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
 
 ### Polymorphic variants
 
 ## More advanced declarations
 
-### Sharing across datatypes
-
 ### Polymorphic types
 
 ### Recursive types
-
-
-### Detritus
-
-Variants and records are closely related concepts.  Records combine
-multiple types together in a conjunctive way: a logon record has a
-session id _and_ a time _and_ a user _and_ credentials.  But
-sometimes, you want to combine types in a disjunctive way.  For
-example, if you wanted a type to represent all possible message, you'd
-need something that was a log entry _or_ a heartbeat _or_ a log-on.
-Variant types are used for just such declarations, as shown below.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type client_message = | Logon of Logon.t
-                        | Heartbeat of Heartbeat.t
-                        | Log_entry of Log_entry.t;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-`Logon`, `Heartbeat` and `Log_entry` are called constructors, and
-they're what you use to create a `message`.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let message =
-     Log_entry (create_log_entry ~session_id:"345"
-                ~important:false "Hello World");;
-val message : client_message =
-  Log_entry
-   {Log_entry.session_id = "345";
-    Log_entry.time = 2012-07-04 13:55:18.798289; Log_entry.important = false;
-    Log_entry.message = "Hello World"}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
