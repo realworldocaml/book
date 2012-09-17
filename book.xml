@@ -585,7 +585,7 @@ val y : string = &quot;three&quot;
 # let distance p1 p2 =
     let (x1,y1) = p1 in
     let (x2,y2) = p2 in
-    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2)
+    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
 ;;
 val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
 </programlisting>
@@ -595,7 +595,7 @@ val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
       </para>
       <programlisting>
 # let distance (x1,y1) (x2,y2) =
-    sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
+    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
 ;;
 </programlisting>
       <para>
@@ -895,15 +895,23 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
 </programlisting>
       <para>
         Options are important because they are the standard way in OCaml
-        to encode a value that might not be there. Values in OCaml are
-        non-nullable, so if you have a function that takes an argument
-        of type <literal>string</literal>, then the compiler guarantees
-        that, if the code compiles successfully, then at run-time, that
-        function will only be called with awell-defined value of type
-        <literal>string</literal>. This is different from most other
-        languages, including Java and C#, where objects are by default
-        nullable, and whose type systems do little to defend from
-        null-pointer exceptions at runtime.
+        to encode a value that might not be there. This is different
+        from most other languages, including Java and C#, where most if
+        not all datatypes are <emphasis>nullable</emphasis>, meaning
+        that, whatever their type is, any given value also contains the
+        possibility of being a null value. In such languages, null is
+        lurking everywhere.
+      </para>
+      <para>
+        In OCaml, however, nulls are explicit. A value of type
+        <literal>string * string</literal> always actually contains two
+        two well-defined values of type <literal>string</literal>. If
+        you want to allow, say, the first of those, to possibly be
+        absent, then you need to change the type to something like
+        <literal>string option * string</literal>. As we'll see, this
+        explicitness allows the compiler to provide a great deal of help
+        in making sure you're correctly handing the possibility of
+        missing data.
       </para>
     </sect2>
   </sect1>
@@ -1140,7 +1148,7 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # mean rsum;;
 - : float = 1.33333333333333326
 # stdev rsum;;
-- : float = 1.61015297179882655
+- : float = 3.94405318873307698
 </programlisting>
     </sect2>
     <sect2 id="refs">
@@ -1523,7 +1531,7 @@ val increments : (int -&gt; int) list = [&lt;fun&gt;; &lt;fun&gt;]
         since this kind of higher-order use of functions can be a bit
         obscure at first. The first thing to understand is the function
         <literal>(fun f -&gt; f 5)</literal>, which takes a function as
-        its argument, and applies that function to the number
+        its argument and applies that function to the number
         <literal>5</literal>. The invocation of
         <literal>List.map</literal> applies
         <literal>(fun f -&gt; f 5)</literal> to the elements of the
@@ -1681,7 +1689,7 @@ val abs_diff : int * int -&gt; int = &lt;fun&gt;
       </para>
       <para>
         There are small tradeoffs between these two approaches, but most
-        of the time, once should stick to currying, since it's the
+        of the time, one should stick to currying, since it's the
         default style in the OCaml world.
       </para>
     </sect2>
@@ -1708,11 +1716,16 @@ val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;
       </para>
       <programlisting>
 # let rec is_even x =
-    x = 0 || is_odd (x - 1)
+    if x = 0 then true else is_odd (x - 1)
   and is_odd x =
-    is_even (x - 1)
+    if x = 0 then false else is_even (x - 1) 
+ ;;
 val is_even : int -&gt; bool = &lt;fun&gt;
 val is_odd : int -&gt; bool = &lt;fun&gt;
+# List.map ~f:is_even [0;1;2;3;4;5];;
+- : bool Core.Std.List.t = [true; false; true; false; true; false]
+# List.map ~f:is_odd [0;1;2;3;4;5];;
+- : bool Core.Std.List.t = [false; true; false; true; false; true]
 </programlisting>
       <para>
         Note that in the above example, we take advantage of the fact
@@ -1763,7 +1776,7 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
       <para>
         or is one of a handful of pre-determined strings, including
         <literal>mod</literal>, the modulus operator, and
-        <literal>lsl</literal>, for &quot;logical shift right&quot;, a
+        <literal>lsl</literal>, for &quot;logical shift left&quot;, a
         bit-shifting operation.
       </para>
       <para>
