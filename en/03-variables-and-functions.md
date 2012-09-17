@@ -258,7 +258,7 @@ val increments : (int -> int) list = [<fun>; <fun>]
 It's worth stopping for a moment to puzzle this example out, since
 this kind of higher-order use of functions can be a bit obscure at
 first.  The first thing to understand is the function `(fun f -> f
-5)`, which takes a function as its argument, and applies that function
+5)`, which takes a function as its argument and applies that function
 to the number `5`.  The invocation of `List.map` applies `(fun f -> f
 5)` to the elements of the `increments` list (which are themselves
 functions) and returns the list containing the results of these
@@ -397,7 +397,7 @@ particular it does not generally have to allocate a tuple just for the
 purpose of sending arguments to a tuple-style function.
 
 There are small tradeoffs between these two approaches, but most of
-the time, once should stick to currying, since it's the default style
+the time, one should stick to currying, since it's the default style
 in the OCaml world.
 
 ### Recursive functions ###
@@ -421,11 +421,16 @@ example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let rec is_even x =
-    x = 0 || is_odd (x - 1)
+    if x = 0 then true else is_odd (x - 1)
   and is_odd x =
-    is_even (x - 1)
+    if x = 0 then false else is_even (x - 1) 
+ ;;
 val is_even : int -> bool = <fun>
 val is_odd : int -> bool = <fun>
+# List.map ~f:is_even [0;1;2;3;4;5];;
+- : bool Core.Std.List.t = [true; false; true; false; true; false]
+# List.map ~f:is_odd [0;1;2;3;4;5];;
+- : bool Core.Std.List.t = [false; true; false; true; false; true]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that in the above example, we take advantage of the fact that the
@@ -471,7 +476,7 @@ following set
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 or is one of a handful of pre-determined strings, including `mod`, the
-modulus operator, and `lsl`, for "logical shift right", a bit-shifting
+modulus operator, and `lsl`, for "logical shift left", a bit-shifting
 operation.
 
 We can define (or redefine) the meaning of an operator as follows.
