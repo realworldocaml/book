@@ -7,7 +7,7 @@
 
  - opam
  - Core
- - Async/LWET
+ - Async/LWT
 
  The tutorial will work through real-world examples, including build
  system on up to deploying an opam package.
@@ -20,8 +20,14 @@
 
 * Outline
 ** Getting started
+ - OCaml/OPAM installation
+** Whirlwind tour
+** 
+
+
+
  - Installation of OPAM
- - Choosing a compiler versions
- - Overview of the libraries and topics (as compiler and packages are building)
-*** TODO get Jacques Garrigue's hacked compiler set up in OPAM.
+ - Choosing a compiler
+ - Overview of the libraries and topics (as compiler and packages are
+   building)
 ** 
