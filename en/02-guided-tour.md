@@ -321,7 +321,7 @@ where each point is represented as a pair of `float`s.
 # let distance p1 p2 =
     let (x1,y1) = p1 in
     let (x2,y2) = p2 in
-    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2)
+    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
 ;;
 val distance : float * float -> float * float -> float = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -331,7 +331,7 @@ the arguments to the function directly.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let distance (x1,y1) (x2,y2) =
-    sqrt ((x1 -. x2) ** 2. +. sqr (y1 -. y2) ** 2.)
+    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
 ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -595,14 +595,19 @@ or a default value if the option is `None`.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Options are important because they are the standard way in OCaml to
-encode a value that might not be there.  Values in OCaml are
-non-nullable, so if you have a function that takes an argument of type
-`string`, then the compiler guarantees that, if the code compiles
-successfully, then at run-time, that function will only be called with
-awell-defined value of type `string`.  This is different from most
-other languages, including Java and C#, where objects are by default
-nullable, and whose type systems do little to defend from null-pointer
-exceptions at runtime.
+encode a value that might not be there.  This is different from most
+other languages, including Java and C#, where most if not all
+datatypes are _nullable_, meaning that, whatever their type is, any
+given value also contains the possibility of being a null value.  In
+such languages, null is lurking everywhere.  
+
+In OCaml, however, nulls are explicit.  A value of type `string *
+string` always actually contains two two well-defined values of type
+`string`.  If you want to allow, say, the first of those, to possibly
+be absent, then you need to change the type to something like `string
+option * string`.  As we'll see, this explicitness allows the compiler
+to provide a great deal of help in making sure you're correctly
+handing the possibility of missing data.
 
 ## Records and Variants
 
@@ -809,7 +814,7 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # mean rsum;;
 - : float = 1.33333333333333326
 # stdev rsum;;
-- : float = 1.61015297179882655
+- : float = 3.94405318873307698
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Refs
