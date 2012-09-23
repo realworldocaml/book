@@ -253,7 +253,7 @@ $ rlwrap ocaml
         <para>
           We needed to type <literal>;;</literal> in order to tell the
           toplevel that it should evaluate an expression. This is a
-          pecularity of the toplevel that is not required in compiled
+          peculiarity of the toplevel that is not required in compiled
           code.
         </para>
       </listitem>
@@ -1353,7 +1353,7 @@ val dashed_languages : Core.Std.String.t = &quot;OCaml-Perl-C++-C&quot;
     <para>
       One common idiom is to use a series of nested
       <literal>let</literal>/<literal>in</literal> expressions to build
-      up the components of a larger compution. Thus, we might write:
+      up the components of a larger computation. Thus, we might write:
     </para>
     <programlisting>
 # let area_of_ring inner_radius outer_radius =
@@ -1563,7 +1563,7 @@ val plusone : int -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
         This is the most common and convenient way to declare a
-        function, but syntatic niceties aside, the two styles of
+        function, but syntactic niceties aside, the two styles of
         function definition are entirely equivalent.
       </para>
       <sidebar>
@@ -1712,7 +1712,7 @@ val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;
       <para>
         We can also define multiple mutually recursive values by using
         <literal>let rec</literal> and <literal>and</literal> together,
-        as in this (gratuitiously inefficient) example.
+        as in this (gratuitously inefficient) example.
       </para>
       <programlisting>
 # let rec is_even x =
@@ -1907,7 +1907,7 @@ Error: This expression has type char list -&gt; string
         The above type error is a little bewildering at first glance.
         What's going on is that, because <literal>^!</literal> is right
         associative, the operator is trying to feed the value
-        <literal>List.filter ~f:(func -&gt; c &lt;&gt; 'z')</literal> to
+        <literal>List.filter ~f:(fun -&gt; c &lt;&gt; 'z')</literal> to
         the function <literal>String.of_char_list</literal>. But
         <literal>String.of_char_list</literal> expects a list of
         characters as its input, not a function.
@@ -2422,7 +2422,7 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 (* [render headers rows] returns a string containing a formatted
-   text table, using unix-style newlines as separators *)
+   text table, using Unix-style newlines as separators *)
 val render
    :  string list         (* header *)
    -&gt; string list list    (* data *)
@@ -2479,7 +2479,7 @@ let max_widths header rows =
         starting with the lengths of the headers, we use
         <literal>List.fold</literal> to join in the lengths of the
         elements of each row by <literal>max</literal>'ing them together
-        elementwise.
+        element-wise.
       </para>
       <para>
         Note that this code will throw an exception if any of the rows
@@ -2697,7 +2697,7 @@ let print_langs langs =
       <para>
         The simple column-based interface described here is also a good
         starting for building a richer API. You could for example build
-        specialized colums with different formatting and alignment
+        specialized columns with different formatting and alignment
         rules, which is easier to do with this interface than with the
         original one based on passing in lists-of-lists.
       </para>
@@ -2971,9 +2971,9 @@ Error: The record field label important belongs to the type log_entry
         (and <literal>heartbeat</literal>) shadowed some of the fields
         of <literal>log_entry</literal>. As a result, the fields
         <literal>time</literal> and <literal>session_id</literal> are
-        assummed to be fields of <literal>logon</literal>, and
+        assumed to be fields of <literal>logon</literal>, and
         <literal>important</literal> and <literal>message</literal>,
-        which were not shadowed, are assummed to be a field of
+        which were not shadowed, are assumed to be a field of
         <literal>log_entry</literal>. The compiler therefore complains
         that we're trying to construct a record with fields from two
         different record types.
@@ -3422,7 +3422,7 @@ Hello Blue World!
           </listitem>
         </itemizedlist>
         <para>
-          We can represent this more complicated colorspace as a
+          We can represent this more complicated color-space as a
           variant, but this time, the different constructors will have
           arguments, to describe the data available in each case.
         </para>
@@ -3537,7 +3537,7 @@ val color_to_int : color -&gt; int = &lt;fun&gt;
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
         <para>
-          But because the catch-all case encompases all possibilities,
+          But because the catch-all case encompasses all possibilities,
           the type system will no longer warn us that we have missed the
           new <literal>Bold</literal> case when we change the type to
           include it. To get the full power out of the static checks
@@ -3594,7 +3594,7 @@ end
         value. In particular, a single <literal>Log_entry.t</literal>
         has a <literal>session_id</literal> <emphasis>and</emphasis> a
         <literal>time</literal> <emphasis>and</emphasis> an
-        <literal>imporant</literal> flag <emphasis>and</emphasis> a
+        <literal>important</literal> flag <emphasis>and</emphasis> a
         <literal>message</literal>. More generally, you can think of
         record types as acting as conjunctions. Variants, on the other
         hand, are disjunctions, letting you represent multiple
@@ -3877,7 +3877,7 @@ val compute_bounds :
       other hand, in <literal>find_mismatches</literal> below, errors
       encountered during the computation do not propagate to the return
       value of the function. <literal>find_mismatches</literal> takes
-      two hashtables as its arugments and tries to find keys that are
+      two hashtables as its arguments and tries to find keys that are
       stored in both. As such, a failure to find a key in one of the
       tables isn't really an error.
     </para>
@@ -4024,7 +4024,7 @@ end
         Error also has operations for transforming errors. For example,
         it's often useful to augment an error with some extra
         information about the context of the error, or to combine
-        multipler errors together. <literal>Error.of_list</literal> and
+        multiplier errors together. <literal>Error.of_list</literal> and
         <literal>Error.tag</literal> fill these roles.
       </para>
       <para>
@@ -4091,7 +4091,7 @@ val (&gt;&gt;=) : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
     Some (first,last)
 </programlisting>
       <para>
-        There are other usuful idioms encoded in the functions in
+        There are other useful idioms encoded in the functions in
         <literal>Option</literal>. Another example is
         <literal>Option.both</literal>, which takes two optional values
         and produces a new optional pair that is <literal>None</literal>
@@ -4414,7 +4414,7 @@ $ ./exn
 Fatal error: exception Exn.Empty_list
 </programlisting>
       <para>
-        The example in qeustion is short enough that it's quite easy to
+        The example in question is short enough that it's quite easy to
         see where the error came from. But in a complex program, simply
         knowing which exception was thrown is usually not enough
         information to figure out what went wrong.
@@ -4434,7 +4434,7 @@ Called from file &quot;exn.ml&quot;, line 12, characters 17-28
 </programlisting>
       <para>
         Backtraces can also be obtained at runtime. In particular,
-        <literal>Exn.backtrace</literal> will return the backtrace fo
+        <literal>Exn.backtrace</literal> will return the backtrace of
         the most recently thrown exception.
       </para>
     </sect2>
@@ -4520,10 +4520,10 @@ Exception: Key_not_found(&quot;c&quot;).
 open Core.Std
 
 (* build_counts recursively builds up a mapping from lines to
-   number of occurences of that line. *)
+   number of occurrences of that line. *)
 let rec build_counts counts =
   match In_channel.input_line stdin with
-  | None -&gt; counts (* EOF, so return the counts accummulated so far *)
+  | None -&gt; counts (* EOF, so return the counts accumulated so far *)
   | Some line -&gt;
     (* get the number of times this line has been seen before,
        inferring 0 if the line doesn't show up in [counts] *)
@@ -4659,9 +4659,9 @@ $ strings `which ocamlopt` | ./freq
       system and processor architecture.
     </para>
     <para>
-      Aside from performance, executables generated by thet two
-      compilers have nearly identical behavior. There are a few things
-      to be aware of. First, the byte-code compiler can be used on more
+      Aside from performance, executables generated by the two compilers
+      have nearly identical behavior. There are a few things to be aware
+      of. First, the byte-code compiler can be used on more
       architectures, and has some better tool support; in particular,
       the OCaml debugger only works with byte-code. Also, the byte-code
       compiler compiles faster than the native code compiler.
@@ -4670,8 +4670,8 @@ $ strings `which ocamlopt` | ./freq
       As a general matter, production executables should usually be
       built using the native-code compiler, but it sometimes makes sense
       to use bytecode for development builds. And, of course, bytecode
-      makese sense when targetting a platform not supported by the
-      native code compiler.
+      makes sense when targeting a platform not supported by the native
+      code compiler.
     </para>
     </sidebar>
 
@@ -4728,7 +4728,7 @@ let touch t s =
       We can now rewrite <literal>freq.ml</literal> to use
       <literal>Counter</literal>. Note that the resulting code can still
       be built with <literal>build.sh</literal>, since
-      <literal>ocambuild</literal> will discover dependencies and
+      <literal>ocamlbuild</literal> will discover dependencies and
       realize that <literal>counter.ml</literal> needs to be compiled.
     </para>
     <programlisting language="ocaml">
@@ -5217,7 +5217,7 @@ val touch : string -&gt; t -&gt; t
         <para>
           and then try to compile <literal>Counter</literal> (by writing
           <literal>ocamlbuild -use-ocamlfind counter.cmo</literal>),
-          we'll ge the following error:
+          we'll get the following error:
         </para>
         <programlisting>
 File &quot;counter.ml&quot;, line 1, characters 0-1:
@@ -5252,7 +5252,7 @@ Error: The implementation counter.ml
 val count : t -&gt; string -&gt; int
 </programlisting>
         <para>
-          Now, if we try to compile without actully adding the
+          Now, if we try to compile without actually adding the
           implementation, we'll get this error:
         </para>
         <programlisting>
@@ -5360,7 +5360,7 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
   <para>
     Up until now, we've seen modules play a limited role, serving as a
     mechanism for organizing code into units with specified interfaces.
-    But OCaml's module system plays a bigger role in the langauge,
+    But OCaml's module system plays a bigger role in the language,
     acting as a powerful toolset for structuring large-scale systems.
     This chapter will introduce you to functors and first class modules,
     which greatly increase the power of the module system.
@@ -5603,7 +5603,7 @@ module Int_interval :
         extended version of the <literal>Comparable</literal> signature
         described above. As a general matter, having standardized
         signatures is a good practice, both because a more uniform
-        codebase is easier to navigatge, and because it makes functors
+        codebase is easier to navigate, and because it makes functors
         easier to use.
       </para>
       <para>
@@ -5645,7 +5645,7 @@ val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
       <para>
         Importantly, <literal>Rev_int_interval.t</literal> is a
         different type than <literal>Int_interval.t</literal>, even
-        though its physical represenation is the same. Indeed, the type
+        though its physical representation is the same. Indeed, the type
         system will prevent us from confusing them.
       </para>
       <programlisting>
@@ -5891,7 +5891,7 @@ module Make_interval :
           of the module. If we instantiate this module, we'll see that
           it works properly: we can construct new intervals, but
           <literal>t</literal> is abstract, and so we can't directly
-          access the constructors and vioalte the invariants of the data
+          access the constructors and violate the invariants of the data
           structure.
         </para>
         <programlisting>
@@ -5986,7 +5986,7 @@ end
       let create low high =
          ...
 
-      (* put a wrapper round the autogenerated sexp_of_t to enforce
+      (* put a wrapper round the auto-generated sexp_of_t to enforce
          the invariants of the datastructure *)
       let t_of_sexp sexp =
         match t_of_sexp sexp with
@@ -6056,7 +6056,7 @@ val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
         is to maintain both an input and an output list, where the input
         list is ordered to make <literal>enqueue</literal> fast, and the
         output list is ordered to make <literal>dequeue</literal> fast.
-        When the output list is empty, the input list is reveresed and
+        When the output list is empty, the input list is reversed and
         becomes the new output list. Thinking through why this is
         efficient is a worthwhile exercise, but we won't dwell on that
         here.
@@ -6264,7 +6264,8 @@ include Foldable.Extend(T)
     <para>
       <emphasis>(yminsky: I wouldn't say they're strictly more
       expressive. For example, they don't give you a way of expressing
-      subtyping relationships effectively, which objects do.)</emphasis>
+      sub typing relationships effectively, which objects
+      do.)</emphasis>
     </para>
     <para>
       This is not say that first-class modules should be used
@@ -6362,7 +6363,7 @@ val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt
         With these functions in hand, we can start operating on our
         <literal>(module X_int)</literal>'s in a more natural style,
         taking full advantage of the concision and simplicity of the
-        core langauge.
+        core language.
       </para>
       <programlisting>
 # let six = plus three three;;
@@ -6379,7 +6380,7 @@ val six : (module X_int) = &lt;module&gt;
     <sect2 id="standard-vs.-first-class-modules">
       <title>Standard vs. first-class modules</title>
       <para>
-        <emphasis>(yminsky: I'm not in olve with the example. It feels
+        <emphasis>(yminsky: I'm not in solve with the example. It feels
         in some sense too artificial, and that aside, when you get to
         the end of the example, you haven't really gotten any juice of
         first-class modules)</emphasis>
@@ -6426,7 +6427,7 @@ end
 </programlisting>
       <para>
         Next, if we want to define a generic shape that is either a
-        rectagle or a line, we would probably use a variant type. The
+        rectangle or a line, we would probably use a variant type. The
         following module <literal>Shapes</literal> is entirely
         boilerplate. We define the variant type, then functions to
         perform a dynamic dispatch based on the type of object.
@@ -6531,8 +6532,8 @@ val make_rectangle :
         <literal>Set.Make(ElementType).t</literal>, then you have to
         pass it a set of exactly that type. What we would like is a kind
         of container where the container implementation is chosen by the
-        caller. We define an abstraxct <emphasis>interface</emphasis>,
-        as a module type, then define one or more concrete module
+        caller. We define an abstract <emphasis>interface</emphasis>, as
+        a module type, then define one or more concrete module
         implementations.
       </para>
       <para>
@@ -6679,7 +6680,7 @@ module rec Container : sig
 end = Container;;
 </programlisting>
         <para>
-          There are several ways to write this modle, but this
+          There are several ways to write this model, but this
           definition is convenient because it defines both a module type
           <literal>Container.T</literal> and a value type
           <literal>'a Container.t</literal>. The outer recursive module
@@ -6942,7 +6943,7 @@ module Bundle = struct
         Now we can write the function for the bundle to handle requests.
         The handler will examine the s-expression to determine the body
         of the query and the name of the service to dispatch to. It then
-        looks up the hnalder calls it to generate the response.
+        looks up the handler calls it to generate the response.
       </para>
       <programlisting language="ocaml">
   let handle_request t sexp =
@@ -7078,7 +7079,7 @@ $ ./service_client.byte
     <emphasis>(yminsky: still very very rough)</emphasis>
   </para>
   <para>
-    This chapter convers several extensions to OCaml's syntax that are
+    This chapter covers several extensions to OCaml's syntax that are
     distributed with Core. Before diving into the details of the syntax
     extensions, let's take a small detour that will explain the
     motivation behind creating them in the first place.
@@ -7462,12 +7463,12 @@ Uncaught exception:
       <para>
         If all you have is the error message and the string, it's not
         terribly informative. In particular, you know that the parsing
-        errored out on the atom &quot;not-an-integer&quot;, but you
+        error-ed out on the atom &quot;not-an-integer&quot;, but you
         don't know which one! In a large file, this kind of bad error
         message can be pure misery.
       </para>
       <para>
-        But there's hope! If we make s amll change to the
+        But there's hope! If we make small change to the
         <literal>run</literal> function as follows:
       </para>
       <programlisting language="ocaml">
@@ -7499,7 +7500,7 @@ Uncaught exception:
       <title>Sexp-conversion directives</title>
       <para>
         Sexplib supports a collection of directives for modifying the
-        default behavior of the autogenerated sexp-converters. These
+        default behavior of the auto-generated sexp-converters. These
         directives allow you to customize the way in which types are
         represented as s-expressions without having to write a custom
         parser. We describe these directives below.
@@ -7509,7 +7510,7 @@ Uncaught exception:
         <para>
           The most commonly used directive is
           <literal>sexp_opaque</literal>, whose purpose is to mark a
-          given component of a type as being unconvertable. Anything
+          given component of a type as being unconvertible. Anything
           marked with <literal>sexp_opaque</literal> will be presented
           as the atom <literal>&lt;opaque&gt;</literal> by the to-sexp
           converter, and will trigger an exception from the from-sexp
@@ -7583,7 +7584,7 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
       <sect3 id="sexp_list">
         <title><literal>sexp_list</literal></title>
         <para>
-          One problem with the autogenerated sexp-converters is that
+          One problem with the auto-generated sexp-converters is that
           they can have more parentheses than one would ideally like.
           Consider, for example, the following variant type:
         </para>
