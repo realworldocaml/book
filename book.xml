@@ -6234,10 +6234,10 @@ include Foldable.Extend(T)
       (<literal>.ml</literal> and <literal>.mli</literal> files) are
       really just a simplified module system. Classes and objects are a
       different form of organization altogether (as we'll see in
-      <link linkend="objects">Chapter 13</link>). Yet, in each of these
-      cases, there is a clear separation between types and values --
-      values cannot contain types, and types cannot contain values. And
-      since modules can contain types, modules can't be values.
+      [[[Chapter 13]]]). Yet, in each of these cases, there is a clear
+      separation between types and values -- values cannot contain
+      types, and types cannot contain values. And since modules can
+      contain types, modules can't be values.
     </para>
     <para>
       <emphasis>(yminsky: Instead of saying that ml and mli files are a
