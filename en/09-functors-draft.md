@@ -768,7 +768,7 @@ including modules and functors, files and compilation units, and
 classes and objects.  Files and compilation units (`.ml` and `.mli`
 files) are really just a simplified module system.  Classes and
 objects are a different form of organization altogether (as we'll see
-in [Chapter 13](#objects)).  Yet, in each of these cases, there is a
+in [[[Chapter 13]]]).  Yet, in each of these cases, there is a
 clear separation between types and values -- values cannot contain
 types, and types cannot contain values.  And since modules can contain
 types, modules can't be values.
