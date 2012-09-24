@@ -599,7 +599,7 @@ for a given module in a standardized way.  We'll think about this in
 the context of an example of creating a simple data structure.
 
 The following is a minimal interface for a functional queue.  A
-functional queue is simple a functional version of a FIFO (first-in,
+functional queue is simply a functional version of a FIFO (first-in,
 first-out) queue.  Being functional, operations on the queue return
 new queues, rather than modifying the queues that were passed in.
 
@@ -1286,7 +1286,7 @@ include (val multiplexer : S)
 
 ### Example: A service bundle
 
-This section describe the design of a library for bundling together
+This section describes the design of a library for bundling together
 multiple services, where a service is a piece of code that exports a
 query interface.  A service bundle combines together multiple
 individual services under a single query interface that works by

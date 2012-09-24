@@ -336,7 +336,7 @@ datastructure in Core.
 
 open Core.Std
 
-type t = (string,int) Map.t
+type t = string Int.Map.t
 
 let empty = Map.empty
 
@@ -364,9 +364,8 @@ For example, imagine we wanted to add a function to `Counter` for
 returning the line with the median frequency count.  If the number of
 lines is even, then there is no precise median, so the function would
 return the two lines before and after the median instead.  We'll use a
-custom type to represent the fact that there are two possible possible
-return values.  Here's a possible implementation.
-
+custom type to represent the fact that there are two possible return
+values.  Here's a possible implementation.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type median = | Median of string
@@ -378,10 +377,10 @@ let median t =
   in
   let len = List.length sorted_strings in
   if len = 0 then failwith "median: empty frequency count";
-  let nth n = List.nth_exn sorted_strings n in
+  let nth n = fst (List.nth_exn sorted_strings n) in
   if len mod 2 = 1
   then Median (nth (len/2))
-  else Before_and_after (nth (len/2) (len/2 + 1))
+  else Before_and_after (nth (len/2), nth (len/2 + 1));;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now, to expose this usefully in the interface, we need to expose both
