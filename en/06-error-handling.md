@@ -422,7 +422,7 @@ let load_config filename =
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The problem with this code is that the function that loads the
-s-expression and parses it into a `Config.t` might thrown an exception
+s-expression and parses it into a `Config.t` might throw an exception
 if the config file in question is malformed.  Unfortunately, that
 means that the `In_channel.t` that was opened will never be closed,
 leading to a file-descriptor leak.

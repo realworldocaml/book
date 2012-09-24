@@ -1,5 +1,8 @@
 # Lists, Options and Patterns
 
+_(Note, this chapter is highly incomplete.  All it currently contains
+is an example...)_
+
 ## Example: pretty-printing a table
 
 One common programming task is displaying tabular data.  In this
