@@ -2408,6 +2408,10 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
 </chapter>
 <chapter id="lists-options-and-patterns">
   <title>Lists, Options and Patterns</title>
+  <para>
+    <emphasis>(Note, this chapter is highly incomplete. All it currently
+    contains is an example...)</emphasis>
+  </para>
   <sect1 id="example-pretty-printing-a-table">
     <title>Example: pretty-printing a table</title>
     <para>
@@ -4294,7 +4298,7 @@ let load_config filename =
       <para>
         The problem with this code is that the function that loads the
         s-expression and parses it into a <literal>Config.t</literal>
-        might thrown an exception if the config file in question is
+        might throw an exception if the config file in question is
         malformed. Unfortunately, that means that the
         <literal>In_channel.t</literal> that was opened will never be
         closed, leading to a file-descriptor leak.
@@ -4870,7 +4874,7 @@ Error: This expression has type 'a list
 
 open Core.Std
 
-type t = (string,int) Map.t
+type t = string Int.Map.t
 
 let empty = Map.empty
 
@@ -4904,8 +4908,8 @@ let to_list t = Map.to_alist t
         median frequency count. If the number of lines is even, then
         there is no precise median, so the function would return the two
         lines before and after the median instead. We'll use a custom
-        type to represent the fact that there are two possible possible
-        return values. Here's a possible implementation.
+        type to represent the fact that there are two possible return
+        values. Here's a possible implementation.
       </para>
       <programlisting language="ocaml">
 type median = | Median of string
@@ -4917,10 +4921,10 @@ let median t =
   in
   let len = List.length sorted_strings in
   if len = 0 then failwith &quot;median: empty frequency count&quot;;
-  let nth n = List.nth_exn sorted_strings n in
+  let nth n = fst (List.nth_exn sorted_strings n) in
   if len mod 2 = 1
   then Median (nth (len/2))
-  else Before_and_after (nth (len/2) (len/2 + 1))
+  else Before_and_after (nth (len/2), nth (len/2 + 1));;
 </programlisting>
       <para>
         Now, to expose this usefully in the interface, we need to expose
@@ -6036,7 +6040,7 @@ module Make_interval :
       </para>
       <para>
         The following is a minimal interface for a functional queue. A
-        functional queue is simple a functional version of a FIFO
+        functional queue is simply a functional version of a FIFO
         (first-in, first-out) queue. Being functional, operations on the
         queue return new queues, rather than modifying the queues that
         were passed in.
@@ -6827,7 +6831,7 @@ include (val multiplexer : S)
     <sect2 id="example-a-service-bundle">
       <title>Example: A service bundle</title>
       <para>
-        This section describe the design of a library for bundling
+        This section describes the design of a library for bundling
         together multiple services, where a service is a piece of code
         that exports a query interface. A service bundle combines
         together multiple individual services under a single query
