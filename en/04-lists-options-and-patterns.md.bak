@@ -10,7 +10,7 @@ called `Text_table` whose `.mli` contains just the following function:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* [render headers rows] returns a string containing a formatted
-   text table, using Unix-style newlines as separators *)
+   text table, using unix-style newlines as separators *)
 val render
    :  string list         (* header *)
    -> string list list    (* data *)
@@ -62,7 +62,7 @@ In the above we define a helper function, `to_lengths` which uses
 `List.map` and `String.length` to convert a list of strings to a list
 of string lengths.  Then, starting with the lengths of the headers, we
 use `List.fold` to join in the lengths of the elements of each row by
-`max`'ing them together element-wise.
+`max`'ing them together elementwise.
 
 
 Note that this code will throw an exception if any of the rows has a
@@ -264,6 +264,6 @@ mismatched.
 
 The simple column-based interface described here is also a good
 starting for building a richer API.  You could for example build
-specialized columns with different formatting and alignment rules,
+specialized colums with different formatting and alignment rules,
 which is easier to do with this interface than with the original one
 based on passing in lists-of-lists.

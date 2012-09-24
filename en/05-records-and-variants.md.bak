@@ -246,8 +246,8 @@ Error: The record field label important belongs to the type log_entry
 
 The problem is that the declaration of `logon` (and `heartbeat`)
 shadowed some of the fields of `log_entry`.  As a result, the fields
-`time` and `session_id` are assumed to be fields of `logon`, and
-`important` and `message`, which were not shadowed, are assumed to be
+`time` and `session_id` are assummed to be fields of `logon`, and
+`important` and `message`, which were not shadowed, are assummed to be
 a field of `log_entry`.  The compiler therefore complains that we're
 trying to construct a record with fields from two different record
 types.
@@ -623,7 +623,7 @@ into the following groups.
 - A $6 \times 6 \times 6$ RGB color cube
 - A 24-level grayscale ramp
 
-We can represent this more complicated color-space as a variant, but
+We can represent this more complicated colorspace as a variant, but
 this time, the different constructors will have arguments, to describe
 the data available in each case.
 
@@ -730,7 +730,7 @@ follows.
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But because the catch-all case encompasses all possibilities, the type
+But because the catch-all case encompases all possibilities, the type
 system will no longer warn us that we have missed the new `Bold` case
 when we change the type to include it.  To get the full power out of
 the static checks provided by the compiler, we need to be explicit
@@ -782,7 +782,7 @@ end
 
 This record type combines multiple pieces of data into one value.  In
 particular, a single `Log_entry.t` has a `session_id` _and_ a `time`
-_and_ an `important` flag _and_ a `message`.  More generally, you can
+_and_ an `imporant` flag _and_ a `message`.  More generally, you can
 think of record types as acting as conjunctions.  Variants, on the
 other hand, are disjunctions, letting you represent multiple
 possibilities.  Consider the following variant type.
