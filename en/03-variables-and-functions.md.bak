@@ -97,7 +97,7 @@ original definition of languages reappears.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One common idiom is to use a series of nested `let`/`in` expressions
-to build up the components of a larger computation.  Thus, we might
+to build up the components of a larger compution.  Thus, we might
 write:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -287,7 +287,7 @@ val plusone : int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is the most common and convenient way to declare a function, but
-syntactic niceties aside, the two styles of function definition are
+syntatic niceties aside, the two styles of function definition are
 entirely equivalent.
 
 <sidebar>
@@ -416,7 +416,7 @@ val find_first_stutter : 'a list -> 'a option = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can also define multiple mutually recursive values by using `let
-rec` and `and` together, as in this (gratuitously inefficient)
+rec` and `and` together, as in this (gratuitiously inefficient)
 example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -557,7 +557,7 @@ Error: This expression has type char list -> string
 
 The above type error is a little bewildering at first glance.  What's
 going on is that, because `^!` is right associative, the operator is
-trying to feed the value `List.filter ~f:(fun -> c <> 'z')` to the
+trying to feed the value `List.filter ~f:(func -> c <> 'z')` to the
 function `String.of_char_list`.  But `String.of_char_list` expects a
 list of characters as its input, not a function.
 

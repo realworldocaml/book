@@ -66,7 +66,7 @@ The match statement is used to handle the error cases, propagating an
 error in `hd` or `last` into the return value of `compute_bounds`.  On
 the other hand, in `find_mismatches` below, errors encountered during
 the computation do not propagate to the return value of the function.
-`find_mismatches` takes two hashtables as its arguments and tries to
+`find_mismatches` takes two hashtables as its arugments and tries to
 find keys that are stored in both.  As such, a failure to find a key
 in one of the tables isn't really an error.
 
@@ -190,7 +190,7 @@ Sexplib to generate the sexp-converter for the tuple.
 
 Error also has operations for transforming errors.  For example, it's
 often useful to augment an error with some extra information about the
-context of the error, or to combine multiplier errors together.
+context of the error, or to combine multipler errors together.
 `Error.of_list` and `Error.tag` fill these roles.
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
@@ -243,7 +243,7 @@ less indentation, as follows.
     Some (first,last)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are other useful idioms encoded in the functions in `Option`.
+There are other usuful idioms encoded in the functions in `Option`.
 Another example is `Option.both`, which takes two optional values and
 produces a new optional pair that is `None` if either of its arguments
 are `None`.  Using `Option.both`, we can make `compute_bounds` even
@@ -422,7 +422,7 @@ let load_config filename =
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The problem with this code is that the function that loads the
-s-expression and parses it into a `Config.t` might throw an exception
+s-expression and parses it into a `Config.t` might thrown an exception
 if the config file in question is malformed.  Unfortunately, that
 means that the `In_channel.t` that was opened will never be closed,
 leading to a file-descriptor leak.
@@ -531,7 +531,7 @@ $ ./exn
 Fatal error: exception Exn.Empty_list
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The example in question is short enough that it's quite easy to see
+The example in qeustion is short enough that it's quite easy to see
 where the error came from.  But in a complex program, simply knowing
 which exception was thrown is usually not enough information to figure
 out what went wrong.
@@ -550,7 +550,7 @@ Called from file "exn.ml", line 12, characters 17-28
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Backtraces can also be obtained at runtime.  In particular,
-`Exn.backtrace` will return the backtrace of the most recently thrown
+`Exn.backtrace` will return the backtrace fo the most recently thrown
 exception.
 
 ### Exceptions for control flow
