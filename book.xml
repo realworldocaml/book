@@ -9993,55 +9993,158 @@ let main () =
 <chapter id="installation">
   <title>Installation</title>
   <para>
-    <emphasis>avsm: these are just notes so far until we decide on firm
-    recommendations for all these</emphasis>
+    There are two ways to develop OCaml code and libraries. You can
+    install the OPAM source package manager, or alternatively, many
+    operating systems have binary packages for popular OCaml libraries
+    and applications. Binary packages are useful for releasing your
+    applications easily, but are less flexible for day-to-day
+    development.
   </para>
-  <sect1 id="base-installation">
-    <title>Base Installation</title>
+  <para>
+    Let's get started with the OPAM source manager, as that will get you
+    an interactive top-level very quickly. OPAM manages simultaneous
+    OCaml compiler and library installations. It tracks library versions
+    across upgrades, and will recompile dependencies automatically if
+    they get out of date.
+  </para>
+  <sect1 id="opam-base-installation">
+    <title>OPAM Base Installation</title>
+    <para>
+      To install OPAM, you will need a working OCaml installation to
+      bootstrap the package manager. Once installed, all of the OPAM
+      state is held in the <literal>$HOME/.opam</literal> directory, and
+      you can reinitialise it by deleting this directory and starting
+      over.
+    </para>
+    <important>
+    <title>
+    OCamlfind and OPAM
+    </title>
+    <para>
+      OPAM maintains multiple compiler and library installations, but
+      this can clash with a global installation of the
+      <literal>ocamlfind</literal> tool. Uninstall any existing copies
+      of <literal>ocamlfind</literal> before installing OPAM, and use
+      the OPAM version instead.
+    </para>
+    </important>
     <sect2 id="macos-x">
       <title>MacOS X</title>
       <para>
-        Homebrew is probably the best solution here.
+        The easiest way to install OCaml on MacOS X is via the
+        <literal>homebrew</literal> package manager. If the
+        <literal>brew tap</literal> command fails, you may need to
+        upgrade your version of Homebrew to the latest version.
+      </para>
+      <programlisting>
+$ brew install ocaml
+$ brew tap mirage/ocaml
+$ brew install opam
+</programlisting>
+    </sect2>
+    <sect2 id="linux">
+      <title>Linux</title>
+      <para>
+        On Debian Linux, you should install OCaml via binary packages,
+        and then install the latest OPAM release from source.
+      </para>
+      <programlisting>
+$ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
+$ tar -jxvf opam-&lt;version&gt;.tar.gz
+$ cd opam-&lt;version&gt;.tar.gz
+$ ./configure &amp;&amp; make &amp;&amp; sudo make install
+</programlisting>
+      <para>
+        On Fedora/RHEL...?
       </para>
     </sect2>
     <sect2 id="windows">
       <title>Windows</title>
       <para>
-        Protzenko's Windows installer.
-      </para>
-    </sect2>
-    <sect2 id="linux">
-      <title>Linux</title>
-      <para>
-        Debian/Ubuntu packages. RHEL/Fedora RPMs.
+        Investigate Protzenko's Windows installer.
       </para>
     </sect2>
   </sect1>
-  <sect1 id="useful-libraries">
-    <title>Useful Libraries</title>
+  <sect1 id="opam-usage">
+    <title>OPAM Usage</title>
     <para>
-      Core, Lwt, mainly. Mention OPAM and OASIS-db, whichever works.
-      Many packages maintained on github these days.
+      All of the OPAM state is held in the <literal>.opam</literal>
+      directory in your home directory, including compiler
+      installations. You should never need to switch to an admin user to
+      install packages. Package listings are obtained by adding
+      <emphasis>remotes</emphasis> that provide package descriptions,
+      installation instructions and URLs.
     </para>
+    <programlisting>
+$ opam init
+$ opam install utop async
+$ eval `opam config -env`
+</programlisting>
+    <para>
+      This will initialise OPAM with the default package set from
+      <literal>opam.ocamlpro.com</literal>, and install the
+      <literal>utop</literal> interactive top-level and the
+      <literal>Async</literal> library. OPAM figures out the minimal set
+      of dependencies required, and installs those too. The
+      <literal>eval</literal> command is sets your
+      <literal>PATH</literal> variable to point to the current active
+      compiler, and you should add this to your shell
+      <literal>.profile</literal> to run every time you open a new
+      command shell.
+    </para>
+    <sect2 id="switching-compiler-versions">
+      <title>Switching compiler versions</title>
+      <para>
+        The default compiler installed by OPAM uses the system OCaml
+        installation. You can use <literal>opam switch</literal> to swap
+        between different compiler versions, or experiment with a
+        different set of libraries or new compiler versions. For
+        instance, one of the alternate compilers has a debugging version
+        of the runtime library, which can be useful to track down bugs
+        in C bindings. To use it:
+      </para>
+      <programlisting>
+$ opam switch -list
+$ opam switch 4.00.0+debug-runtime
+$ eval `opam config -env`
+$ opam install utop async
+</programlisting>
+      <para>
+        The new compiler will be compiled and installed into
+        <literal>~/.opam/4.00.0+debug-runtime</literal>, and the
+        libraries will be separately tracked. You can have any number of
+        compilers installed simultaneously, but only one can be active
+        at any time.
+      </para>
+    </sect2>
   </sect1>
-  <sect1 id="environment">
-    <title>Environment</title>
+  <sect1 id="editing-environment">
+    <title>Editing Environment</title>
     <sect2 id="command-line">
       <title>Command Line</title>
       <para>
-        <ulink url="http://utopia.knoware.nl/~hlub/uck/rlwrap/">rlwrap</ulink>
-        provides line-editing support. An <literal>.ocamlinit</literal>
-        file in your home directory will set up your environment with
-        useful libraries and syntax extensions open, e.g.:
+        The <literal>utop</literal> tool provides a convenient
+        interactive top-level, with full command history, command macros
+        and module name completion. An <literal>.ocamlinit</literal>
+        file in your home directory will initialise
+        <literal>utop</literal> with common libraries and syntax
+        extensions open, e.g.:
       </para>
       <programlisting>
-#use &quot;topfind&quot;;;
-#load &quot;dynlink.cma&quot;;;
-#camlp4o;;
-#require &quot;lwt.syntax&quot;;;
-#require &quot;lwt.unix&quot;;;
-open Lwt;;
+#use &quot;topfind&quot;
+#camlp4o
+#thread
+#require &quot;core.top&quot;;;
+#require &quot;async&quot;;;
+open Core.Std
+open Async.Std
 </programlisting>
+      <para>
+        TODO: the <literal>.ocamlinit</literal> handling in OPAM is
+        being finalised and is tracked in
+        <ulink url="https://github.com/OCamlPro/opam/issues/185">issue
+        185</ulink>.
+      </para>
     </sect2>
     <sect2 id="editors">
       <title>Editors</title>
