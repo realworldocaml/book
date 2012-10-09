@@ -1,37 +1,35 @@
-# Concurrent Programming with Lwt
+# Concurrent Programming with Async
 
-As soon as you start building OCaml code that interfaces with external systems,
-you'll need to handle concurrent, blocking operations. A web server sending a
-large file to many clients or a GUI waiting for a mouse click are both
-applications of this sort.  These applications need to keep track of how
-blocking code is woken up in response to external I/O, and do so efficiently
-for many instances of these network connections or GUI elements.
+When you start building OCaml code that interfaces with external systems,
+you'll need to handle many concurrent operations. A web server sending a
+large file to many clients, or a GUI waiting for a mouse click are both
+applications of this sort. These applications need to track controls threads
+that block waiting for data, how to wake them up in response to new data, and
+do so efficiently across thousands of connections.
 
-In some programming languages such as Java or C#, you've probably used preemptive
-system threads to handle such operations.  Other languages like Javascript are
-single-threaded, and an application must register callbacks to be triggered
-upon an external event such as a timeout or a browser click.
-Both methods have tradeoffs: threads are more memory hungry and require careful
-locking, but event callbacks quickly descend into a spaghetti of callbacks.
+In some programming languages such as Java or C#, you've probably used
+preemptive system threads.  Javascript is single-threaded, and an application
+must register function callbacks to be triggered upon an external event
+(such as a timeout or browser click).  Both mechanisms have tradeoff:
+preemptive threads can be memory hungry and require careful locking, but
+events quickly descend into a maze of callbacks that are hard to read and
+debug.
 
-In OCaml, the Lwt library offers an interesting hybrid that lets you write
-straight-line blocking code that is internally evaluated via a single
-event-loop.  Lwt threads are simply normal OCaml heap-allocated values, without
-any runtime magic, that hide internal state using the abstract types described
-earlier.  These lightweight threads are limited only by your main memory and
-can be interfaced with a variety of network, storage and graphical outputs
-(including web browsers).  In this chapter, we'll focus on the basics of Lwt
-and how to use it for building network services. Later, we'll describe more
-exotic platforms such compiling the same code to Javascript (Chapter {???}).
+The Async library offers an interesting hybrid that lets you write
+straight-line blocking OCaml code that scales very well. Async internally
+converts this code into a single event loop.  ``Threads'' in Async are normal
+OCaml heap-allocated values, without any runtime magic, and their number
+is limited only by your available main memory. 
 
-Lets begin by constructing our first thread. `Lwt` is just a normal library, so open
-it in your toplevel and create your first thread:
+Lets begin by constructing some a simple TCP client.  Async follows the
+Core convention and provides an `Async.Std` that provides threaded variants
+of many standard library functions.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# require "lwt" ;;
-# open Lwt ;;
+# require "async.unix" ;;
+# open Async.Std ;;
 # return 5 ;;
-- : int Lwt.t = <abstr>
+- : int Deferred.t = <abstr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `return` constructs a thread that returns immediately, and above we've built
