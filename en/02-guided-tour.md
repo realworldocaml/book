@@ -5,7 +5,7 @@ small examples that cover most of the major features.  This should
 give a sense of what OCaml can do, without going into too much detail
 about any particular topic.
 
-We'll present this guided tour using the OCaml toplevel, an
+We'll present this guided tour using the `utop` OCaml toplevel, an
 interactive shell that lets you type in expressions and evaluate them
 interactively.  When you get to the point of running real programs,
 you'll want to leave the toplevel behind, but it's a great tool for
@@ -17,8 +17,8 @@ browser-based toplevel that you can use for this, which you can find here:
 
      http://realworldocaml.org/core-top
 
-Or you can install OCaml and Core on your computer directly.
-Instructions for this are found in Appendix {???}.
+Or you can install OCaml, Core and utop on your computer directly.
+Instructions for this are found in [Appendix X](#installation).
 
 ## OCaml as a calculator
 
@@ -27,8 +27,7 @@ us access to Core's libraries, and then try out a few simple numerical
 calculations.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-$ rlwrap ocaml
-        Objective Caml version 3.12.1
+$ utop
 
 # open Core.Std;;
 # 3 + 4;;
