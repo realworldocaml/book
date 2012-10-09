@@ -1,29 +1,29 @@
 # Concurrent Programming with Async
 
 When you start building OCaml code that interfaces with external systems,
-you'll need to handle many concurrent operations. A web server sending a
-large file to many clients, or a GUI waiting for a mouse click are both
-applications of this sort. These applications need to track controls threads
-that block waiting for data, how to wake them up in response to new data, and
-do so efficiently across thousands of connections.
+you'll soon need to handle concurrent operations. A web server sending a large
+file to many clients, or a GUI waiting for a mouse click are examples of
+applications that need to keep track of multiple threads.  These threads can
+block waiting for input, and the runtime system has to wake them up in response
+to new data, and do so efficiently across thousands of connections.
 
 In some programming languages such as Java or C#, you've probably used
-preemptive system threads.  Javascript is single-threaded, and an application
-must register function callbacks to be triggered upon an external event
-(such as a timeout or browser click).  Both mechanisms have tradeoff:
-preemptive threads can be memory hungry and require careful locking, but
-events quickly descend into a maze of callbacks that are hard to read and
-debug.
+preemptive system threads.  Other languages such as Javascript are
+single-threaded, and an application must register function callbacks to be
+triggered upon an external event (such as a timeout or browser click).  Both
+mechanisms have tradeoff: preemptive threads can be memory hungry and require
+careful locking, but events quickly
+descend into a maze of callbacks that are hard to read and debug.
 
 The Async library offers an interesting hybrid that lets you write
 straight-line blocking OCaml code that scales very well. Async internally
 converts this code into a single event loop.  ``Threads'' in Async are normal
-OCaml heap-allocated values, without any runtime magic, and their number
-is limited only by your available main memory. 
+OCaml heap-allocated values, without any runtime magic, and their number is
+limited only by your available main memory. 
 
-Lets begin by constructing some a simple TCP client.  Async follows the
-Core convention and provides an `Async.Std` that provides threaded variants
-of many standard library functions.
+Lets begin by constructing a simple thread. Async follows the Core convention
+and provides an `Async.Std` that provides threaded variants of many standard
+library functions.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # require "async.unix" ;;
@@ -32,45 +32,56 @@ of many standard library functions.
 - : int Deferred.t = <abstr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`return` constructs a thread that returns immediately, and above we've built
-one that returns a constant 5.  Notice that the return type is not a normal
-`int`, but instead `int Lwt.t`. The additional type parameter marks the value
-as a lightweight thread, which can internally be blocked, raising an exception,
-or completed.  We can only *use* the return value by binding a further function
-to be invoked after the input thread has finished.
+The basic type of an Async thread is a `Deferred.t`, which can be constructed
+by the `return` function.  The type parameter (in this case `int`) represents
+the ultimate type of the thread once it has completed.  This return value
+cannot be used directly while it is wrapped in a `Deferred.t` as it may not be
+available yet.  Instead, we can *bind* a function closure to be called once the
+value is eventually ready.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = return 5 ;;
-val x : int Lwt.t = <abstr>
-# let y = bind x (fun a -> return (string_of_int a)) ;;
-val y : string Lwt.t = <abstr>
+val x : int Deferred.t = <abstr>
+# let y = Deferred.bind x (fun a -> return (string_of_int a)) ;;
+val y : string Deferred.t = <abstr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, we've bound a function to `x` that will convert it to a string.  Notice
-that while both `x` and `y` share a common `Lwt.t` type, their type variables
-differ based on return type of the thread.  This can be really useful in large
-codebases, as you can tell if any function will block simply by the presence
-of an `Lwt.t` in the signature.
+Here, we've bound a function to `x` that will convert the `int` to a `string`.
+Notice that while both `x` and `y` share a common `Deferred.t` type, their type
+variables differ and so they cannot be interchangably used except in
+polymorphic functions.  This is very useful when refactoring large codebases as
+you can tell if any function will block simply by the presence of an
+`Deferred.t` in the signature.
 
-Lets examine the function signatures of `bind` and `return` more closely.
+Let's examine the function signatures of `bind` and `return` more closely.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # return ;;
-- : 'a -> 'a Lwt.t = <fun>
-# bind ;;
-- : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b Lwt.t = <fun>
+- : 'a -> 'a Deferred.t = <fun>
+# Deferred.bind ;;
+- : 'a Deferred.t -> ('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`return`, `bind` and the `Lwt.t` type all contain polymorphic type variables
-that are automatically inferred based on how they are used in your code.
-`bind` is particularly interesting as the the callback argument `'a` *must* be
-the same as the return type of the input thread, preventing runtime mismatches
+`return`, `bind` and the `Deferred.t` type all contain polymorphic type
+variables that are inferred based on how they are used in your code.  In
+`bind`, the `'a` type of the argument passed to the callback *must* be the same
+as the `'a Deferred.t` of the input thread, preventing runtime mismatches
 between callbacks.  Both `bind` and `return` form a design pattern in
 functional programming known as *monads*, and you will run across this
 signature in many applications beyond just threads.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# #require "lwt.unix" ;;
+# let x = return 5 ;;
+val x : int Deferred.t = <abstr>
+# x >>= (fun a -> return (string_of_int a)) ;;
+val - : string Deferred.t = <abstr>
+# x >>| string_of_int ;;
+val - : string Deferred.t = <abstr>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TODO explain `>>=` and `>>|`
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # Lwt_unix.run ;;
 - : 'a Lwt.t -> 'a = <fun>
 # Lwt_unix.run y;;
