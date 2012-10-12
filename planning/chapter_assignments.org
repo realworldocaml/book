@@ -10,9 +10,9 @@
 |-------------------------------------+--------+--------|
 | Preface/Forward                     |        |        |
 | A Guided Tour                       | yaron  | ###    |
-| Variables and Functions             | yaron  | ##     |
+| Variables and Functions             | yaron  | ###    |
 | Lists, Options and Pattern-matching | jason  | #      |
-| Records and Variants                | yaron  | #      |
+| Records and Variants                | yaron  | ##     |
 | Error Handling                      | yaron  | ###    |
 | Programming with Mutation           |        |        |
 | Files, Modules and Programs         | yaron  | ###    |
@@ -24,8 +24,7 @@
 | Foreign Function Interface          | anil   |        |
 | Camlp4                              | anil   |        |
 | OCamlbuild / Oasis                  | anil   |        |
-| ocamllex/ocamlyacc                  |        |        |
-
+| ocamllex/ocamlyacc/menhir                  
 
 ** Status key
  - Blank: no progress
