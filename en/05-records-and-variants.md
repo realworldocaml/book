@@ -4,8 +4,9 @@ One of OCaml's best features is its concise and expressive system for
 declaring new datatypes.  Two key elements of that system are
 _records_ and _variants_, both of which we discussed briefly in
 chapter {{{GUIDEDTOUR}}}.  In this chapter we'll cover records and
-variants in more depth, showing some of the more advanced features, as
-well as discuss how to use them effectively in your software designs.
+variants in more depth, covering more of the details of how they work,
+as well as advice on how to use them effectively in your software
+designs.
 
 ## Records
 
@@ -58,11 +59,11 @@ record field using dot-notation.
 - : string = "i386"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Pattern matching
+### Irrefutable patterns and exhaustiveness   checks
 
 Another way of getting information out of a record is by using a
-pattern match.  In the following example, we use a pattern-match on
-the argument to a function.
+pattern match.  This example shows how you can pattern-match on a
+function argument.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let host_info_to_string { hostname = h; os_name = os;
@@ -73,17 +74,15 @@ the argument to a function.
 - : string = "Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Notice that we didn't need a match statement because we used only a
-single pattern to match all possible records of type `host_info`.
-This works because record patterns are _irrefutable_, meaning that a
-single pattern is guaranteed to match any value of the type in
-question.
+We didn't need a full match statement because a single pattern can
+match all records of type `host_info`.  This works because record
+patterns (like tuple patterns) are _irrefutable_, meaning that a
+pattern is guaranteed to match any value of the type in question.
 
-In other words, an irrefutable pattern is one where all of the
-requirements imposed by the pattern match are enforced by the type
-system, so that code that compiles will never have a runtime failure
-due to a failed match.  This is in contrast to, say, lists, where it's
-easy to write a pattern match that fails at runtime.  For example:
+In other words, a pattern is irrefutable if any code that compiles
+will never have a runtime failure due to a failed match.  This is in
+contrast to, say, lists, where it's easy to write a pattern match that
+compiles but fails at runtime.  For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let first_plus_second (x :: y :: _) = x + y;;
@@ -100,11 +99,26 @@ val first_plus_second : int list -> int = <fun>
 Exception: (Match_failure "" 1 22).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OCaml does offer an exhaustiveness check for record patterns, in
-particular, a warning for missing fields in a record pattern.  With
-that warning turned on (which you can do in the toplevel by typing
-`#warnings "+9" `), the following code will complain about an
-inexhaustive match.
+Because variant patterns (of which list patterns are an example) are
+not irrefutable, the compiler provides a static check to warn you when
+your match is inexhaustive.  We can fix the code above by adding the
+other cases:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let first_plus_second = function
+    | x :: y :: _ -> x + y
+    | x :: [] -> x
+    | [] -> 0
+  ;;
+val first_plus_second : int list -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This kind of exhaustiveness check isn't meaningful for record
+patterns, but there is a different kind of exhaustiveness check that
+is useful.  In particular, OCaml offers a warning for missing fields
+in a record pattern.  With that warning turned on (which you can do in
+the toplevel by typing `#warnings "+9" `), the following code will
+complain about.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let host_info_to_string
@@ -119,14 +133,13 @@ Either bind these labels explicitly or add `; _' to the pattern.
 val host_info_to_string : host_info -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that, unlike our previous example, ignoring this warning won't
-lead to a runtime error.  The warning is nonetheless useful, because
-it gives you an opportunity to notice that there is some data that
-you're ignoring, which is often important.
+Unlike the exhaustiveness warning for variants, ignoring this warning
+won't lead to a runtime error.  The warning is nonetheless useful,
+because it helps you find cases where important data is being ignored.
 
 We can disable the warning for a given pattern by explicitly
-acknowledging that we are ignoring extra fields by adding `_` to the
-pattern, as shown below.
+acknowledging that we are ignoring extra fields.  This is done by
+adding an underscore to the pattern, as shown below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let host_info_to_string
@@ -189,10 +202,10 @@ let create_host_info ~hostname:hostname ~os_name:os_name
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Together, labeled arguments, field names, and field and label punning,
-encourage a style where you carry names through your codebase, across
-different functions and modules.  This is generally good practice,
-since it encourages consistent naming, which makes it easier for new
-people to navigate your source.
+encourage a style where you propagate the same names throughout your
+code-base.  This is generally good practice, since it encourages
+consistent naming, which makes it easier for new people to navigate
+your source.
 
 ### Reusing field names
 
@@ -248,13 +261,12 @@ The problem is that the declaration of `logon` (and `heartbeat`)
 shadowed some of the fields of `log_entry`.  As a result, the fields
 `time` and `session_id` are assumed to be fields of `logon`, and
 `important` and `message`, which were not shadowed, are assumed to be
-a field of `log_entry`.  The compiler therefore complains that we're
+fields of `log_entry`.  The compiler therefore complains that we're
 trying to construct a record with fields from two different record
 types.
 
 There are two common solutions to this problem.  The first is to add a
-prefix to each field name to make it unique.  Thus, we could define
-`heartbeat` and `logon` as follows:
+prefix to each field name to make it unique, as shown below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type log_entry =
@@ -423,11 +435,6 @@ follows.
     };;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The lesson here is that when you use a functional update, you should
-be confident that the full effect of the update will be registered by
-updating just the fields in question, even if the record changes
-later.
-
 ### First-class fields
 
 Consider the following function for extracting the usernames from a
@@ -435,7 +442,7 @@ list of `Logon` messages.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let get_users logons =
-     List.map logons ~f:(fun x -> x.Logon.user);;
+     List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
   val get_hostnames : Logon.t list -> string list = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -465,7 +472,7 @@ Given that definition, we can use the function `Logon.user` to extract
 the user field from a logon message.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let get_users logons = List.map logons ~f:Logon.user;;
+# let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
 val get_users : Logon.t list -> string list = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -556,8 +563,10 @@ type <variant-name> =
   ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To give a better sense of why variants are useful, we'll walk through
-a concrete example of variants in action.
+The basic purpose of variants is to effectively represent data that
+may have multiple different cases.  We can give a better sense of the
+utility of variants by walking through a concrete example, which we'll
+do by thinking about how to represent terminal colors.
 
 ### Example: terminal colors
 
@@ -581,10 +590,9 @@ constructors in question.
 - : basic_color list = [Black; Blue; Red]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Pattern matching can be used to process a variant.  Consider the
-following function which converts each `basic_color` to a
-corresponding integer.  As we'll see, these integers will be used to
-compute escape codes for setting colors in the terminal.
+Pattern matching can be used to process a variant.  The following
+function uses pattern matching to convert `basic_color` to a
+corresponding integer for use in creating color-setting escape codes.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let basic_color_to_int = function
@@ -594,10 +602,10 @@ val basic_color_to_int : basic_color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that the exhaustiveness checking on pattern matches means that
-the compiler will warn us if we miss a case in the pattern match.
+the compiler will warn us if we miss a color.
 
-Using `basic_color_to_int`, we can now generate the escape codes to
-change the color of a given string.
+Using this function, we can generate the escape codes to change the
+color of a given string.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_by_number number text =
@@ -615,9 +623,9 @@ On most terminals, that last line is printed in blue.
 #### Full terminal colors
 
 The simple enumeration of `basic_color` isn't enough to fully describe
-the set of colors that a modern terminal can display.  `xterm`s (and
-many other terminal programs) support 256 different colors, broken up
-into the following groups.
+the set of colors that a modern terminal can display.  Many terminals,
+including the venerable `xterm`, support 256 different colors, broken
+up into the following groups.
 
 - The 8 basic colors, in regular and bold versions.
 - A $6 \times 6 \times 6$ RGB color cube
@@ -651,10 +659,10 @@ val color_to_int : color -> int = <fun>
 
 <sidebar><title>Catch-all cases and refactoring</title>
 
-OCaml's static checks can act as a form of refactoring tool, where the
+OCaml's type system can act as a form of refactoring tool, where the
 compiler warns you of places where your code needs to be adapted to
-changes made elsewhere.  This shows up quite a bit when defining
-variant types.
+changes made elsewhere.  This is particularly valuable when working
+with variant types.
 
 Consider what would happen if we were to change the definition of
 `color` to the following.
@@ -668,9 +676,11 @@ Consider what would happen if we were to change the definition of
 ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Under this definition, `color_to_int` is wrong in two ways.  First,
-the type of the contents of `Basic` have changed from having two
-arguments to having just one, and `color_to_int` still expects two.
+We've essentially broken out the `Basic` case into two cases, `Basic`
+and `Bold`, and `Basic` has changed from having two arguments to one.
+`color_to_int` as we wrote it still expects the old structure of the
+variant, and if we try to compile that same code again, the compiler
+will notice the discrepancy.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -684,8 +694,10 @@ Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once we fix that, however, there's another problem, which is that we
-haven't handled the new `Bold` constructor.
+Here, the compiler is complaining that the `Basic` constructor is
+assumed to have the wrong number of arguments.  If we fix that,
+however, the compiler flag will flag a second problem, which is that
+we haven't handled the new `Bold` constructor.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -699,7 +711,7 @@ Bold _
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Fixing this leads us to the correct implementation.
+Fixing this now leads us to the correct implementation.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -710,41 +722,33 @@ Fixing this leads us to the correct implementation.
 val color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, the type system has worked as a refactoring tool, identifying
-the places in our code that needed to be fixed.  But for this
-refactoring to work well, there are some pitfalls you need to avoid in
-your code.  In particular, you should avoid catch-all cases in pattern
+As you can see, the type system identified for us the places in our
+code that needed to be fixed.  This refactoring isn't entirely free,
+however.  To really take advantage of it, you need to write your code
+in a way that maximizes the compiler's chances of helping you find
+your bugs.  One important rule is to avoid catch-all cases in pattern
 matches.
 
-Imagine we wanted `color_to_int` to render the first 16 colors (the 8
-`basic_color`s in regular and bold) in the expected way, but render
-everything else as white.  We might have written the function as
-follows.
+Here's an example of how a catch-all case plays in.  Imagine we wanted
+a version of `color_to_int` that works on older terminals by rendering
+the first 16 colors (the 8 `basic_color`s in regular and bold) in the
+normal way, but rendering everything else as white.  We might have
+written the function as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let color_to_int = function
+# let oldschool_color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | _ -> basic_color_to_int White;;
-val color_to_int : color -> int = <fun>
+val oldschool_color_to_int : color -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 But because the catch-all case encompasses all possibilities, the type
 system will no longer warn us that we have missed the new `Bold` case
-when we change the type to include it.  To get the full power out of
-the static checks provided by the compiler, we need to be explicit
-about which cases are being handled by which branch of a pattern
-match, as we do below.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let color_to_int = function
-    | Basic (basic_color,weight) ->
-      let base = match weight with Bold -> 8 | Regular -> 0 in
-      base + basic_color_to_int basic_color
-    | RGB _ | Gray _ -> basic_color_to_int White;;
-val color_to_int : color -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+when we change the type to include it.  We can get this check back by
+being more explicit about what we're ignoring.  We haven't changed the
+behavior of the code, but we have improved our robustness to change.
 
 </sidebar>
 
@@ -766,8 +770,9 @@ A muted gray...
 
 ### Combining records and variants
 
-Variants and records serve quite different purposes.  Consider again
-the type `Log_entry.t` from section [[REUSING FIELD NAMES]]:
+Records and variants are most effective when used in concert.
+Consider again the type `Log_entry.t` from section [[REUSING FIELD
+NAMES]]:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 module Log_entry = struct
@@ -785,7 +790,7 @@ particular, a single `Log_entry.t` has a `session_id` _and_ a `time`
 _and_ an `important` flag _and_ a `message`.  More generally, you can
 think of record types as acting as conjunctions.  Variants, on the
 other hand, are disjunctions, letting you represent multiple
-possibilities.  Consider the following variant type.
+possibilities, as in the following example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type client_message = | Logon of Logon.t
@@ -795,21 +800,21 @@ type client_message = | Logon of Logon.t
 
 A `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a `Log_entry`.
 If we want to write code that processes messages generically, rather
-than code specialized to a fixed message type, we need a type like
-`client_message` to unify the different message types into one
-overarching type.
+than code specialized to a fixed message type, we need something like
+`client_message` to act as one overarching type for the different
+possible messages.
 
-Variants and records are most effective when used in concert, with
-variants used to represent true differences between different types,
-and records used to represent the parts that remain constant.  As an
-example, consider the following function that takes a list of
-`client_message`s and returns all messages generated by a given user.
-The code in question is implemented by folding over the list of
-messages, where the accumulator is a pair of:
+You can increase the precision of your types by using variants to
+represent structural differences between types, and records to
+represent structure that is shared.  As an example, consider the
+following function that takes a list of `client_message`s and returns
+all messages generated by a given user.  The code in question is
+implemented by folding over the list of messages, where the
+accumulator is a pair of:
 
-  - the set of session identifiers for the user in question.
-  - the set of messages that have occurred under a session identifier
-    known to be associated with a given user.
+  - the set of session identifiers for the user that have been seen
+    thus far.
+  - the set of messages so far that are associated with the user.
 
 Here's the concrete code.
 
@@ -943,7 +948,369 @@ let handle_message server_state (common,details) =
 And it's explicit at the type level that `handle_log_entry` sees only
 `Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
 
-### Polymorphic variants
+### Variants and recursive data structures
+
+Another common application of variants is to generate tree-like
+recursive data-structures.  One very simple application of this
+technique is that of building an expression evaluator.
+
+Imagine you wanted a small domain-specific language for expressing
+boolean conditions.  This is useful in many applications where you
+need to allow users to configure a filter on some data that is
+delivered to them.
+
+
+
+
+
+## Polymorphic variants
+
+In addition to ordinary variant types, OCaml has a second kind of
+variant type called _polymorphic variants_.  As we've seen, ordinary
+variants are a powerful tool for describing and operating on complex
+data-structures.  But variants have limitations as well.  One notable
+limitation is that you can't share constructors between different
+variant types.  To see what this means, let's consider an example.
+
+Imagine that we have a new terminal type that adds yet more colors,
+say, by adding an alpha channel, and we wanted a type to model those
+colors.  We might model that as follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type extended_color =
+  | Basic of basic_color * weight  (* basic colors, regular and bold *)
+  | RGB   of int * int * int       (* 6x6x6 color space *)
+  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
+  | Gray  of int                   (* 24 grayscale levels *)
+  ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The problem is that the constructors of this new type have no
+relationship with the constructors of `color`.  In particular, we'd
+like to be able to write the following function.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let extended_color_to_int = function
+    | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+    | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
+  ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On the face of it this looks reasonable enough, but it leads to the
+following type error.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+Characters 93-98:
+    | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
+                                                          ^^^^^
+Error: This expression has type extended_color
+       but an expression was expected of type color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The problem is that `extended_color` and `color` are in the compiler's
+view distinct and unrelated types.  The compiler doesn't recognize
+that, for instance, the `Basic` constructor in both types is in some
+sense the same.  Moreover, the definition of `extended_color` shadows
+the constructors from `color`, so we can no longer even create a
+`color`, though we can deal with this problem by moving the
+definitions into different modules, much as we did with records to
+avoid collisions between field names.
+
+Polymorphic variants allow a way around this problem entirely.  In the
+following we'll rewrite our color code to use polymorphic variants.
+As you can see, polymorphic variants are distinguished from ordinary
+variants by the backtick at the beginning of the constructor.  We'll
+start with `basic_color_to_int`:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let basic_color_to_int = function
+  | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
+  | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
+;;
+val basic_color_to_int :
+  [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
+  int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As you can see, we didn't need to declare the polymorphic variant
+before using it; it was simply inferred from the code.  We can infer
+more complicated polymorphic variants as well, as you can see here.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+  | `Basic (basic_color,weight) ->
+    let base = match weight with `Bold -> 8 | `Regular -> 0 in
+    base + basic_color_to_int basic_color
+  | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+  | `Gray i -> 232 + i
+;;
+val color_to_int :
+  [< `Basic of
+       [< `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [< `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int ] ->
+  int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+and indeed, the full `extended_color_to_int` function works exactly as
+intended.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let extended_color_to_int = function
+    | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+    | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+;;
+val extended_color_to_int :
+  [< `Basic of
+       [< `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [< `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int
+   | `RGBA of int * int * int * int ] ->
+  int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Polymorphic variants and subtyping
+
+Seeing polymorphic variants in action makes them seem a little
+magical, and indeed, understanding how polymorphic variants really
+work is somewhat tricky.  Let's step back to work through some simple
+numerical examples.
+
+First, let's see what happens when we declare a simple variant for
+representing integers.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let three = `Int 3;;
+val three : [> `Int of int ] = `Int 3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note the `>` at the beginning of the type.  This indicates that the
+type of three is open to other variants.  In particular, we can put
+`three` on a list with a value of a different variant.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let nums = [three; `Float 4.0];;
+val nums : [> `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Roughly speaking, you can read the `>` as indicating "these variants
+are present, and maybe more".  We can close the definition of `three`
+by an explicit annotation, at which point, combining it with other
+constructors no longer works.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let three : [`Int of int] = `Int 3 ;;
+val three : [ `Int of int ] = `Int 3
+# let nums = [three; `Float 4.];;
+Characters 19-28:
+  let nums = [three; `Float 4.];;
+                     ^^^^^^^^^
+Error: This expression has type [> `Float of float ]
+       but an expression was expected of type [ `Int of int ]
+       The second variant type does not allow tag(s) `Float
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In our example above, `three` was compatible with a particular set of
+tags or more.  In some cases, we see types that are compatible with a
+given set of types or less, as in the following case:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let add x y =
+    match x,y with
+    | `Int x, `Int y -> `Int (x + y)
+    | `Float x, `Float y -> `Float (x +. y)
+    | `Int i, `Float f | `Float f, `Int i -> `Float (f +. Float.of_int i)
+  ;;
+val add :
+  [< `Float of float | `Int of int ] ->
+  [< `Float of float | `Int of int ] -> [> `Float of float | `Int of int ] =
+  <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, `add` can take any value that has floats or ints, but nothing
+else.  Thus, we can write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# add three three;;
+- : [> `Float of float | `Int of int ] = `Int 6
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+but we can't write:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# add three (`Rational (3,4));;
+Characters 11-26:
+  add three (`Rational (3,4));;
+             ^^^^^^^^^^^^^^^
+Error: This expression has type [> `Rational of int * int ]
+       but an expression was expected of type
+         [< `Float of float | `Int of int ]
+       The second variant type does not allow tag(s) `Rational
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+## Detritus
+
+
+
+As we've seen, variants are a powerful tool, letting you concisely and
+easily model and transform with complex data.  But variants have their
+downsides as well.  One notable limitation is that you can't share
+constructors between different variant types.
+
+To see why this is an issue, consider the logging protocol described
+earlier.  The protocol had three messages: `Log_entry`, `Heartbeat`
+and `Logon`.  Now, what if we want to create a variant of the protocol
+with a `Logout` message.  As you may remember, the `details` type was
+a variant that had the message-specific details, and it was written as
+follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type details =
+  | Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+  ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We could simply add a second type, `extended_details`, to represent
+the extended protocol, as follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type extended_details =
+  | Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+  | Logout
+  ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The problem we run into is that, despite the fact that the two types
+share a lot o structure, we can't write code that operates directly on
+messages of both types.  If we define both of these types in the same
+module, it's even worse, in that the constructors in
+`extended_details` would shadow the ones in `details`, meaning that in
+order to access both types, we either need to stick them in different
+modules, or to modify the names of the constructors in one so they
+don't collide with the other.
+
+Essentially, the two type system is insensitive to the structure that
+is shared between the two types.
+
+This is where _polymorphic variants_ come into play.  Like tuples,
+polymorphic variants can be used directly, without defining a specific
+type in advance.  Thus, we can write
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+
+
+OCaml has a second kind of variant type called _polymorphic variants_,
+which have some advantages and some disadvantages relative to regular
+variants.  The most striking feature of polymorphic variants are how
+lightweight they are.  In particular, you can use a polymorphic
+variant without declaring a type for it in advance.  Thus, going back
+to the example of section [[[TERMINAL COLORS]]], we can rewrite the
+function `basic_color_to_int` as follows, using polymorphic variants
+instead of regular variants.  Polymorphic variants are distinguished
+by having a backtick in front of each constructor.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let basic_color_to_int = function
+  | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
+  | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7 ;;
+val basic_color_to_int :
+  [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
+  int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As you see, the variant that this function can return is inferred.  As
+a result, we can use this to compute codes for the basic colors:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# basic_color_to_int `White;;
+- : int = 7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+and we'll get a type-error if we try to apply it to a value that it
+can't handle:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# basic_color_to_int `Orange;;
+Characters 19-26:
+  basic_color_to_int `Orange;;
+                     ^^^^^^^
+Error: This expression has type [> `Orange ]
+       but an expression was expected of type
+         [< `Black
+          | `Blue
+          | `Cyan
+          | `Green
+          | `Magenta
+          | `Red
+          | `White
+          | `Yellow ]
+       The second variant type does not allow tag(s) `Orange
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And we're not limited to simple enum-style variants.  Here's the more
+complicated `color_to_int` code, translated to use polymorphic
+variants.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let color_to_int = function
+    | `Basic basic_color -> basic_color_to_int basic_color
+    | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | `Gray i -> 232 + i ;;
+val color_to_int :
+  [< `Basic of
+       [< `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ]
+   | `Gray of int
+   | `RGB of int * int * int ] ->
+  int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Again, the type-system infers an entirely reasonable type for the
+function, without us having to write down the type explicitly.
+
+Polymorphic variants are pleasantly lightweight, but there are some
+downsides to using them
+
+
+
+
 
 ## More advanced declarations
 
