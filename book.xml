@@ -3795,16 +3795,84 @@ let handle_message server_state (common,details) =
     <sect2 id="variants-and-recursive-data-structures">
       <title>Variants and recursive data structures</title>
       <para>
-        Another common application of variants is to generate tree-like
+        Another common application of variants is to represent tree-like
         recursive data-structures. One very simple application of this
         technique is that of building an expression evaluator.
       </para>
       <para>
         Imagine you wanted a small domain-specific language for
-        expressing boolean conditions. This is useful in many
-        applications where you need to allow users to configure a filter
-        on some data that is delivered to them.
+        expressing Boolean expressions. This can be useful in any
+        application that requires a filter language, which show up in
+        everything from packet analyzers to mail clients.
       </para>
+      <para>
+        The declaration of the type for representing an expression is
+        fairly straight-forward --- we'll have one constructor for each
+        different kind of expression in our mini language, as follows.
+      </para>
+      <programlisting>
+# type 'a t =
+  | Base  of 'a
+  | Const of bool
+  | And   of 'a t list
+  | Or    of 'a t list
+  | Not   of 'a t
+  ;;
+</programlisting>
+      <para>
+        The <literal>Base</literal> constructor is to allow us to
+        include some set of base predicates. These base predicates are
+        what tie the expressions in question to the application. Thus,
+        if you were writing a filter language for an email processor,
+        your base predicates might have things like what is found on the
+        <literal>to</literal> or <literal>subject</literal> line of an
+        email.
+      </para>
+      <para>
+        The definition of <literal>t</literal> is recursive, which means
+        that we can construct complex nested expressions based on this.
+        Here, we'll first declare a type for the base predicates that
+        encodes a very simple set of email filters.
+      </para>
+      <programlisting>
+# type mail_field = To | From | CC | Date | Subject
+  type mail_filter = { field: mail_field;
+                       contains: string }
+  ;;
+</programlisting>
+      <para>
+        And now, we can construct a simple expression that uses
+        <literal>mail_filter</literal> for its base predicate as
+        follows.
+      </para>
+      <programlisting>
+# And [ Or [ Base { field = To; contains = &quot;doligez&quot; } ;
+             Base { field = CC; contains = &quot;doligez&quot; } ];
+        Base { field = Subject; contains = &quot;runtime&quot; } ];;
+    - : mail_filter t =
+And
+ [Or
+   [Base {field = To; contains = &quot;doligez&quot;};
+    Base {field = CC; contains = &quot;doligez&quot;}];
+  Base {field = Subject; contains = &quot;runtime&quot;}]
+</programlisting>
+      <para>
+        Being able to construct such expressions is all well and good,
+        but to do any real work, we need some way to evaluate these
+        expressions. Here's a piece of code to do just that.
+      </para>
+      <programlisting>
+# let rec eval t base_eval =
+    let eval t = eval t base_eval in
+    match t with
+    | Base  base -&gt; base_eval base
+    | Const bool -&gt; bool
+    | And   ts   -&gt; List.for_all ts ~f:eval
+    | Or    ts   -&gt; List.exists  ts ~f:eval
+    | Not   t    -&gt; not (eval t)
+  ;;
+val eval : 'a t -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
+</programlisting>
     </sect2>
   </sect1>
   <sect1 id="polymorphic-variants">
