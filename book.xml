@@ -203,11 +203,11 @@
     detail about any particular topic.
   </para>
   <para>
-    We'll present this guided tour using the OCaml toplevel, an
-    interactive shell that lets you type in expressions and evaluate
-    them interactively. When you get to the point of running real
-    programs, you'll want to leave the toplevel behind, but it's a great
-    tool for getting to know the language.
+    We'll present this guided tour using the <literal>utop</literal>
+    OCaml toplevel, an interactive shell that lets you type in
+    expressions and evaluate them interactively. When you get to the
+    point of running real programs, you'll want to leave the toplevel
+    behind, but it's a great tool for getting to know the language.
   </para>
   <para>
     You should have a working toplevel as you go through this chapter,
@@ -219,8 +219,9 @@
  http://realworldocaml.org/core-top
 </programlisting>
   <para>
-    Or you can install OCaml and Core on your computer directly.
-    Instructions for this are found in Appendix {???}.
+    Or you can install OCaml, Core and utop on your computer directly.
+    Instructions for this are found in
+    <link linkend="installation">Appendix X</link>.
   </para>
   <sect1 id="ocaml-as-a-calculator">
     <title>OCaml as a calculator</title>
@@ -231,8 +232,7 @@
       calculations.
     </para>
     <programlisting>
-$ rlwrap ocaml
-        Objective Caml version 3.12.1
+$ utop
 
 # open Core.Std;;
 # 3 + 4;;
@@ -10035,99 +10035,111 @@ end;;
     </sect2>
   </sect1>
 </chapter>
-<chapter id="concurrent-programming-with-lwt">
-  <title>Concurrent Programming with Lwt</title>
+<chapter id="concurrent-programming-with-async">
+  <title>Concurrent Programming with Async</title>
   <para>
-    As soon as you start building OCaml code that interfaces with
-    external systems, you'll need to handle concurrent, blocking
-    operations. A web server sending a large file to many clients or a
-    GUI waiting for a mouse click are both applications of this sort.
-    These applications need to keep track of how blocking code is woken
-    up in response to external I/O, and do so efficiently for many
-    instances of these network connections or GUI elements.
+    When you start building OCaml code that interfaces with external
+    systems, you'll soon need to handle concurrent operations. Consider
+    the case of a web server sending a large file to many clients, or a
+    GUI waiting for a mouse clicks. These applications must often block
+    threads of control flow waiting for input, and the runtime has to
+    resume these threads in response to new data. Efficiency is
+    important on busy systems withs thousands of connections, but
+    equally important is readable source code where the control flow of
+    the program is obvious at a glance.
   </para>
   <para>
     In some programming languages such as Java or C#, you've probably
-    used preemptive system threads to handle such operations. Other
-    languages like Javascript are single-threaded, and an application
-    must register callbacks to be triggered upon an external event such
-    as a timeout or a browser click. Both methods have tradeoffs:
-    threads are more memory hungry and require careful locking, but
-    event callbacks quickly descend into a spaghetti of callbacks.
+    used preemptive system threads, where multiple connections are often
+    tracked using operating system threads. Other languages such as
+    Javascript are single-threaded, and an application must register
+    function callbacks to be triggered upon an external event (such as a
+    timeout or browser click). Both mechanisms have tradeoffs.
+    Preemptive threads can be memory hungry and require careful locking
+    due to unpredictable interleaving. Event-driven systems can descend
+    into a maze of callbacks that are hard to read and understand.
   </para>
   <para>
-    In OCaml, the Lwt library offers an interesting hybrid that lets you
-    write straight-line blocking code that is internally evaluated via a
-    single event-loop. Lwt threads are simply normal OCaml
-    heap-allocated values, without any runtime magic, that hide internal
-    state using the abstract types described earlier. These lightweight
-    threads are limited only by your main memory and can be interfaced
-    with a variety of network, storage and graphical outputs (including
-    web browsers). In this chapter, we'll focus on the basics of Lwt and
-    how to use it for building network services. Later, we'll describe
-    more exotic platforms such compiling the same code to Javascript
-    (Chapter {???}).
+    The Async OCamllibrary offers an interesting hybrid model that lets
+    you write straight-line blocking OCaml code that scales well without
+    using preemptive threading. Async internally converts this code into
+    a single event loop. ``Threads'' in Async are normal OCaml
+    heap-allocated values, without any runtime magic, and their number
+    is limited only by your available main memory.
   </para>
   <para>
-    Lets begin by constructing our first thread. <literal>Lwt</literal>
-    is just a normal library, so open it in your toplevel and create
-    your first thread:
+    Lets begin by constructing a simple thread. Async follows the Core
+    convention and provides an <literal>Async.Std</literal> that
+    provides threaded variants of many standard library functions.
   </para>
   <programlisting>
-# require &quot;lwt&quot; ;;
-# open Lwt ;;
+# require &quot;async.unix&quot; ;;
+# open Async.Std ;;
 # return 5 ;;
-- : int Lwt.t = &lt;abstr&gt;
+- : int Deferred.t = &lt;abstr&gt;
 </programlisting>
   <para>
-    <literal>return</literal> constructs a thread that returns
-    immediately, and above we've built one that returns a constant 5.
-    Notice that the return type is not a normal <literal>int</literal>,
-    but instead <literal>int Lwt.t</literal>. The additional type
-    parameter marks the value as a lightweight thread, which can
-    internally be blocked, raising an exception, or completed. We can
-    only <emphasis>use</emphasis> the return value by binding a further
-    function to be invoked after the input thread has finished.
+    The basic type of an Async thread is a
+    <literal>Deferred.t</literal>, which can be constructed by the
+    <literal>return</literal> function. The type parameter (in this case
+    <literal>int</literal>) represents the ultimate type of the thread
+    once it has completed. This return value cannot be used directly
+    while it is wrapped in a <literal>Deferred.t</literal> as it may not
+    be available yet. Instead, we can <emphasis>bind</emphasis> a
+    function closure to be called once the value is eventually ready.
   </para>
   <programlisting>
 # let x = return 5 ;;
-val x : int Lwt.t = &lt;abstr&gt;
-# let y = bind x (fun a -&gt; return (string_of_int a)) ;;
-val y : string Lwt.t = &lt;abstr&gt;
+val x : int Deferred.t = &lt;abstr&gt;
+# let y = Deferred.bind x (fun a -&gt; return (string_of_int a)) ;;
+val y : string Deferred.t = &lt;abstr&gt;
 </programlisting>
   <para>
     Here, we've bound a function to <literal>x</literal> that will
-    convert it to a string. Notice that while both <literal>x</literal>
-    and <literal>y</literal> share a common <literal>Lwt.t</literal>
-    type, their type variables differ based on return type of the
-    thread. This can be really useful in large codebases, as you can
-    tell if any function will block simply by the presence of an
-    <literal>Lwt.t</literal> in the signature.
+    convert the <literal>int</literal> to a <literal>string</literal>.
+    Notice that while both <literal>x</literal> and <literal>y</literal>
+    share a common <literal>Deferred.t</literal> type, their type
+    variables differ and so they cannot be interchangably used except in
+    polymorphic functions. This is very useful when refactoring large
+    codebases as you can tell if any function will block simply by the
+    presence of an <literal>Deferred.t</literal> in the signature.
   </para>
   <para>
-    Lets examine the function signatures of <literal>bind</literal> and
+    Let's examine the function signatures of <literal>bind</literal> and
     <literal>return</literal> more closely.
   </para>
   <programlisting>
 # return ;;
-- : 'a -&gt; 'a Lwt.t = &lt;fun&gt;
-# bind ;;
-- : 'a Lwt.t -&gt; ('a -&gt; 'b Lwt.t) -&gt; 'b Lwt.t = &lt;fun&gt;
+- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
+# Deferred.bind ;;
+- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
 </programlisting>
   <para>
     <literal>return</literal>, <literal>bind</literal> and the
-    <literal>Lwt.t</literal> type all contain polymorphic type variables
-    that are automatically inferred based on how they are used in your
-    code. <literal>bind</literal> is particularly interesting as the the
-    callback argument <literal>'a</literal> <emphasis>must</emphasis> be
-    the same as the return type of the input thread, preventing runtime
-    mismatches between callbacks. Both <literal>bind</literal> and
-    <literal>return</literal> form a design pattern in functional
-    programming known as <emphasis>monads</emphasis>, and you will run
-    across this signature in many applications beyond just threads.
+    <literal>Deferred.t</literal> type all contain polymorphic type
+    variables that are inferred based on how they are used in your code.
+    In <literal>bind</literal>, the <literal>'a</literal> type of the
+    argument passed to the callback <emphasis>must</emphasis> be the
+    same as the <literal>'a Deferred.t</literal> of the input thread,
+    preventing runtime mismatches between callbacks. Both
+    <literal>bind</literal> and <literal>return</literal> form a design
+    pattern in functional programming known as
+    <emphasis>monads</emphasis>, and you will run across this signature
+    in many applications beyond just threads.
   </para>
   <programlisting>
-# #require &quot;lwt.unix&quot; ;;
+# let x = return 5 ;;
+val x : int Deferred.t = &lt;abstr&gt;
+# x &gt;&gt;= (fun a -&gt; return (string_of_int a)) ;;
+val - : string Deferred.t = &lt;abstr&gt;
+# x &gt;&gt;| string_of_int ;;
+val - : string Deferred.t = &lt;abstr&gt;
+</programlisting>
+  <para>
+    TODO explain <literal>&gt;&gt;=</literal> and
+    <literal>&gt;&gt;|</literal>
+  </para>
+  <programlisting>
 # Lwt_unix.run ;;
 - : 'a Lwt.t -&gt; 'a = &lt;fun&gt;
 # Lwt_unix.run y;;
@@ -10436,18 +10448,21 @@ let main () =
   <title>Installation</title>
   <para>
     There are two ways to develop OCaml code and libraries. You can
-    install the OPAM source package manager, or alternatively, many
-    operating systems have binary packages for popular OCaml libraries
-    and applications. Binary packages are useful for releasing your
+    install a source-based package manager that downloads and compiles
+    libraries, or alternatively use the binary packages provides by many
+    operating systems. Binary packages are useful for releasing your
     applications easily, but are less flexible for day-to-day
     development.
   </para>
   <para>
-    Let's get started with the OPAM source manager, as that will get you
-    an interactive top-level very quickly. OPAM manages simultaneous
-    OCaml compiler and library installations. It tracks library versions
-    across upgrades, and will recompile dependencies automatically if
-    they get out of date.
+    For the purposes of this book, we will use the OPAM source-based
+    package manager. There are other alternatives that you can
+    investigate, such as GODI and ODB, but we do not cover them here.
+    Let's get started with OPAM now, as that will get you an interactive
+    top-level that can run the examples in the book quickly. OPAM
+    manages multiple simultaneous OCaml compiler and library
+    installations, tracks library versions across upgrades, and
+    recompiles dependencies automatically if they get out of date.
   </para>
   <sect1 id="opam-base-installation">
     <title>OPAM Base Installation</title>
@@ -10474,13 +10489,11 @@ let main () =
       <title>MacOS X</title>
       <para>
         The easiest way to install OCaml on MacOS X is via the
-        <literal>homebrew</literal> package manager. If the
-        <literal>brew tap</literal> command fails, you may need to
-        upgrade your version of Homebrew to the latest version.
+        <literal>homebrew</literal> package manager, available from
+        [http://github.com/mxcl/homebrew].
       </para>
       <programlisting>
 $ brew install ocaml
-$ brew tap mirage/ocaml
 $ brew install opam
 </programlisting>
     </sect2>
