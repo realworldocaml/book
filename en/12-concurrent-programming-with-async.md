@@ -29,7 +29,8 @@ as file descriptors.
 
 Lets begin by constructing a simple thread. Async follows the Core convention
 and provides an `Async.Std` that provides threaded variants of many standard
-library functions.
+library functions.  The examples throughout this chapter assume that `Async.Std`
+is open in your environment.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # require "async.unix" ;;
@@ -94,8 +95,8 @@ val - : string Deferred.t = <abstr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `>>=` operator is exactly the same as `bind` and unpacks the integer future
-into the `y` variable, and the subsequent closure builds a new future which
-contains the string value.  It can be a little verbose to keep calling `bind`
+into the `y` variable. The subsequent closure receives the unpacked integer and
+builds a new string future.  It can be a little verbose to keep calling `bind`
 and `return`, and so the `>>|` operator maps a non-Async function across a
 future value.  In the second example, the future value of `x` is mapped to
 `string_of_int` directly, and the result is a `string` future.
@@ -118,101 +119,73 @@ val fn : unit -> string Deferred.t = <abstr>
 In the second evaluation of `fn`, the top-level detected the return type of
 a future and evaluated the result into a concrete string.
 
+(_avsm_: this utop feature not actually implemented yet for Async, but works for Lwt)
+
 ## Timing and Thread Composition
 
 Our examples so far have been with static threads, and now we'll look at how to
-coordinate multiple threads and timeouts.  Lets write a program that spins off
-two threads, each of which sleep for some random amount of time, and then one
-prints "Heads" and the other "Tails", and finally prints "Finished" before
-exiting.
+coordinate multiple threads and timeouts.  Let's write a program that spawns
+two threads, each of which sleep for some random time and return either
+"Heads" or "Tails", and the quickest thread returns its value.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-open Lwt
-open Printf
-
-let main () =
-  bind (join [
-    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () ->
-      print_endline "Heads";
-      return ()
-    );
-    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () ->
-      print_endline "Tails";
-      return ()
-    );
-  ]) (fun () ->
-    print_endline "Finished";
-    return ()
-  )
-
-let _ = Lwt_unix.run (main ())
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let flip () =
+  let span = Time.Span.of_sec 3.0 in
+  let span_heads = Time.Span.randomize span ~percent:0.75 in
+  let span_tails = Time.Span.randomize span ~percent:0.75 in
+  let coin_heads =
+    Clock.after span_one
+    >>| fun () ->
+    "Heads!", span_heads, span_tails
+  in
+  let coin_tails =
+    Clock.after span_tails
+    >>| fun () ->
+    "Tails!", span_heads, span_tails
+  in
+  Deferred.any [coin_heads; coin_tails] ;;
+val flip : unit -> (string * Time.Span.t * Time.Span.t) Deferred.t = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is a full code example that you can compile via (???).  The `bind`
-function is joined by couple of new functions.  `Lwt_unix.sleep` puts a thread
-to sleep for a given time, and `join` takes a list of threads and waits for all
-of them to terminate. If at least one thread fails then `join` fails with the
-same exception as the first to fail *after* all threads terminate.  When run,
-this program immediately spawns two coin threads, and waits on them to complete
-before calling the final "Finished" closure.
+This introduces a couple of new time-related Async functions. The `Time` module
+contains functions to express both absolute and relative temporal
+relationships.  In our coin flipping example, we create a relative time span of
+3 seconds, and then permute it randomly twice by 75%.  We then create two
+threads, `coin_heads` and `coin_tails` which return after their respective
+intervals.  Finally, `Deferred.any` waits for the first thread which completes
+and returns its value, ignoring the remaining undetermined threads.
 
-The control flow above is somewhat hard to follow due to all the nested binds,
-and so Lwt provides infix operators with the same behaviour.
+Both of the threads encode the time intervals in their return value so that you
+can can easily verify the calculations (you could also simply print the time
+spans to the console as they are calculated and simplify the return types).
+You can see this by executing the `flip` function at the toplevel a few times.
 
-Function    Operator  Behaviour
---------    --------  ---------
-bind        >>=       Wait for thread to finish, and apply return to new thread
-join        <&>       Wait for two threads to finish and return unit
-choose      <?>       Wait for the first thread to finish, cancel rest
-map         >|=       Map a non-blocking function over a blocking thread
-
-We can now rewrite the earlier coin-flipping example using these operators.
-Notice that we can explicitly name threads simply by binding them via `let`,
-and they execute in parallel until joined together.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-let main () =
-  let t1 =
-    Lwt_unix.sleep (Random.float 3.0) >>= fun () ->
-    return (print_endline "Heads")
-  in
-  let t2 = 
-    Lwt_unix.sleep (Random.float 3.0) >>= fun () ->
-    return (print_endline "Tails")
-  in
-  (t1 <&> t2) >>= fun () ->
-  return (print_endline "Finished")
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# Thread_safe.block_on_async_exn flip ;;
+# - : string * Time.Span.t * Time.Span.t = ("Heads!", 2.86113s, 3.64635s) 
+# Thread_safe.block_on_async_exn flip ;;
+# - : string * Time.Span.t * Time.Span.t = ("Tails!", 4.44979s, 2.14977s)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The `Deferred` module has a number of other ways to select between multiple
+threads, such as:
 
-### Syntax Extensions
+Function    # Threads  Behaviour
+--------    ---------  ---------
+both        2          Combines both threads into a tuple and returns both values.
+any         list       Returns the first thread that becomes determined.
+all         list       Waits for all threads to complete and returns their values.
+all_unit    list       Waits for all `unit` threads to complete and returns `unit`.
+peek        1          Inspects a single thread to see if it is determined yet.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-let main () =
-  let t1 =
-    Lwt_unix.sleep (Random.float 3.0) >>
-    return (print_endline "Heads")
-  in
-  let t2 = 
-    Lwt_unix.sleep (Random.float 3.0) >>
-    return (print_endline "Tails")
-  in
-  lwt () = t1 <&> t2 in
-  return (print_endline "Finished")
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Try modifying the `Deferred.any` in the above example to use some of the other
+thread joining functions above, such as `Deferred.both`.
 
 ### Cancellation
 
-`choose` behaves as the first thread in l to terminate. If several threads are already terminated, one is chosen at random.
-Mixing normal exceptions and Lwt exceptions is bad.
-
 ## A simple TCP Echo Server
 
-Not using Lwt_daemon, but directly. This will be UNIX-only from this stage on, hmm...
-
 ## Onto an HTTP Server
-
-Describe cohttp (much simpler than Ocsigen at this stage).
 
 ## Binding to the Github API
 
