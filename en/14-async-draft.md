@@ -1,25 +1,28 @@
 # Concurrent Programming with Async
 
 When you start building OCaml code that interfaces with external systems,
-you'll soon need to handle concurrent operations. A web server sending a large
-file to many clients, or a GUI waiting for a mouse click are examples of
-applications that need to keep track of multiple threads.  These threads can
-block waiting for input, and the runtime system has to wake them up in response
-to new data, and do so efficiently across thousands of connections.
+you'll soon need to handle concurrent operations. Consider the case of a web
+server sending a large file to many clients, or a GUI waiting for a mouse
+clicks.  These applications must often block threads of control flow waiting
+for input, and the runtime has to resume these threads in response to new data.
+Efficiency is important on busy systems withs thousands of connections, but
+equally important is readable source code where the control flow of the program
+is obvious at a glance.
 
 In some programming languages such as Java or C#, you've probably used
-preemptive system threads.  Other languages such as Javascript are
+preemptive system threads, where multiple connections are often tracked using
+operating system threads.  Other languages such as Javascript are
 single-threaded, and an application must register function callbacks to be
 triggered upon an external event (such as a timeout or browser click).  Both
-mechanisms have tradeoff: preemptive threads can be memory hungry and require
-careful locking, but events quickly
-descend into a maze of callbacks that are hard to read and debug.
+mechanisms have tradeoffs. Preemptive threads can be memory hungry and require
+careful locking due to unpredictable interleaving. Event-driven systems can
+descend into a maze of callbacks that are hard to read and understand.
 
-The Async library offers an interesting hybrid that lets you write
-straight-line blocking OCaml code that scales very well. Async internally
-converts this code into a single event loop.  ``Threads'' in Async are normal
-OCaml heap-allocated values, without any runtime magic, and their number is
-limited only by your available main memory. 
+The Async OCamllibrary offers an interesting hybrid model that lets you write
+straight-line blocking OCaml code that scales well without using preemptive
+threading. Async internally converts this code into a single event loop.
+``Threads'' in Async are normal OCaml heap-allocated values, without any
+runtime magic, and their number is limited only by your available main memory. 
 
 Lets begin by constructing a simple thread. Async follows the Core convention
 and provides an `Async.Std` that provides threaded variants of many standard
