@@ -2708,36 +2708,34 @@ let print_langs langs =
     </sect2>
   </sect1>
 </chapter>
-<chapter id="records-and-variants-1">
-  <title>Records and Variants</title>
+<chapter id="records">
+  <title>Records</title>
   <para>
     One of OCaml's best features is its concise and expressive system
     for declaring new datatypes. Two key elements of that system are
     <emphasis>records</emphasis> and <emphasis>variants</emphasis>, both
     of which we discussed briefly in chapter {{{GUIDEDTOUR}}}. In this
-    chapter we'll cover records and variants in more depth, covering
-    more of the details of how they work, as well as advice on how to
-    use them effectively in your software designs.
+    chapter we'll cover records in more depth, covering more of the
+    details of how they work, as well as advice on how to use them
+    effectively in your software designs.
   </para>
-  <sect1 id="records">
-    <title>Records</title>
-    <para>
-      A record represents a collection of values stored together as one,
-      where each component is identified by a different field name. The
-      basic syntax for a record type declaration is as follows.
-    </para>
-    <programlisting>
+  <para>
+    A record represents a collection of values stored together as one,
+    where each component is identified by a different field name. The
+    basic syntax for a record type declaration is as follows.
+  </para>
+  <programlisting>
 type &lt;record-name&gt; =
   { &lt;field-name&gt; : &lt;type-name&gt; ;
     &lt;field-name&gt; : &lt;type-name&gt; ;
     ...
   }
 </programlisting>
-    <para>
-      Here's a simple example, a <literal>host_info</literal> record
-      that summarizes information about a given computer.
-    </para>
-    <programlisting>
+  <para>
+    Here's a simple example, a <literal>host_info</literal> record that
+    summarizes information about a given computer.
+  </para>
+  <programlisting>
 # type host_info =
     { hostname   : string;
       os_name    : string;
@@ -2745,14 +2743,14 @@ type &lt;record-name&gt; =
       cpu_arch   : string;
     };;
 </programlisting>
-    <para>
-      We can construct a <literal>host_info</literal> just as easily.
-      The following code uses the <literal>Shell</literal> module from
-      <literal>Core_extended</literal> to dispatch commands to the shell
-      to extract the information we need about the computer we're
-      running on.
-    </para>
-    <programlisting>
+  <para>
+    We can construct a <literal>host_info</literal> just as easily. The
+    following code uses the <literal>Shell</literal> module from
+    <literal>Core_extended</literal> to dispatch commands to the shell
+    to extract the information we need about the computer we're running
+    on.
+  </para>
+  <programlisting>
 # open Core_extended.Std;;
 # let my_host = { hostname   = Shell.sh_one &quot;hostname&quot;;
                   os_name    = Shell.sh_one &quot;uname -s&quot;;
@@ -2763,22 +2761,22 @@ val my_host : host_info =
   {hostname = &quot;Yarons-MacBook-Air.local&quot;; os_name = &quot;Darwin&quot;;
    os_release = &quot;11.4.0&quot;; cpu_arch = &quot;i386&quot;}
 </programlisting>
-    <para>
-      Once we have a record value in hand, we can extract elements from
-      the record field using dot-notation.
-    </para>
-    <programlisting>
+  <para>
+    Once we have a record value in hand, we can extract elements from
+    the record field using dot-notation.
+  </para>
+  <programlisting>
 # my_host.cpu_arch;;
 - : string = &quot;i386&quot;
 </programlisting>
-    <sect2 id="irrefutable-patterns-and-exhaustiveness-checks">
-      <title>Irrefutable patterns and exhaustiveness checks</title>
-      <para>
-        Another way of getting information out of a record is by using a
-        pattern match. This example shows how you can pattern-match on a
-        function argument.
-      </para>
-      <programlisting>
+  <sect1 id="irrefutable-patterns-and-exhaustiveness-checks">
+    <title>Irrefutable patterns and exhaustiveness checks</title>
+    <para>
+      Another way of getting information out of a record is by using a
+      pattern match. This example shows how you can pattern-match on a
+      function argument.
+    </para>
+    <programlisting>
 # let host_info_to_string { hostname = h; os_name = os;
                             os_release = r; cpu_arch = c } =
        sprintf &quot;%s (%s %s / %s)&quot; h os r c;;
@@ -2786,21 +2784,20 @@ val my_host : host_info =
 # host_info_to_string my_host;;
 - : string = &quot;Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)&quot;
 </programlisting>
-      <para>
-        We didn't need a full match statement because a single pattern
-        can match all records of type <literal>host_info</literal>. This
-        works because record patterns (like tuple patterns) are
-        <emphasis>irrefutable</emphasis>, meaning that a pattern is
-        guaranteed to match any value of the type in question.
-      </para>
-      <para>
-        In other words, a pattern is irrefutable if any code that
-        compiles will never have a runtime failure due to a failed
-        match. This is in contrast to, say, lists, where it's easy to
-        write a pattern match that compiles but fails at runtime. For
-        example:
-      </para>
-      <programlisting>
+    <para>
+      We didn't need a full match statement because a single pattern can
+      match all records of type <literal>host_info</literal>. This works
+      because record patterns (like tuple patterns) are
+      <emphasis>irrefutable</emphasis>, meaning that a pattern is
+      guaranteed to match any value of the type in question.
+    </para>
+    <para>
+      In other words, a pattern is irrefutable if any code that compiles
+      will never have a runtime failure due to a failed match. This is
+      in contrast to, say, lists, where it's easy to write a pattern
+      match that compiles but fails at runtime. For example:
+    </para>
+    <programlisting>
 # let first_plus_second (x :: y :: _) = x + y;;
 Characters 22-43:
   let first_plus_second (x :: y :: _) = x + y;;
@@ -2814,13 +2811,13 @@ val first_plus_second : int list -&gt; int = &lt;fun&gt;
 # first_plus_second [5];;
 Exception: (Match_failure &quot;&quot; 1 22).
 </programlisting>
-      <para>
-        Because variant patterns (of which list patterns are an example)
-        are not irrefutable, the compiler provides a static check to
-        warn you when your match is inexhaustive. We can fix the code
-        above by adding the other cases:
-      </para>
-      <programlisting>
+    <para>
+      Because variant patterns (of which list patterns are an example)
+      are not irrefutable, the compiler provides a static check to warn
+      you when your match is inexhaustive. We can fix the code above by
+      adding the other cases:
+    </para>
+    <programlisting>
 # let first_plus_second = function
     | x :: y :: _ -&gt; x + y
     | x :: [] -&gt; x
@@ -2828,16 +2825,16 @@ Exception: (Match_failure &quot;&quot; 1 22).
   ;;
 val first_plus_second : int list -&gt; int = &lt;fun&gt;
 </programlisting>
-      <para>
-        This kind of exhaustiveness check isn't meaningful for record
-        patterns, but there is a different kind of exhaustiveness check
-        that is useful. In particular, OCaml offers a warning for
-        missing fields in a record pattern. With that warning turned on
-        (which you can do in the toplevel by typing
-        <literal>#warnings &quot;+9&quot;</literal>), the following code
-        will complain about.
-      </para>
-      <programlisting>
+    <para>
+      This kind of exhaustiveness check isn't meaningful for record
+      patterns, but there is a different kind of exhaustiveness check
+      that is useful. In particular, OCaml offers a warning for missing
+      fields in a record pattern. With that warning turned on (which you
+      can do in the toplevel by typing
+      <literal>#warnings &quot;+9&quot;</literal>), the following code
+      will complain about.
+    </para>
+    <programlisting>
 # let host_info_to_string
       { hostname = h; os_name = os; os_release = r } =
     sprintf &quot;%s (%s %s)&quot; h os r;;
@@ -2849,44 +2846,44 @@ cpu_arch
 Either bind these labels explicitly or add `; _' to the pattern.
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
-      <para>
-        Unlike the exhaustiveness warning for variants, ignoring this
-        warning won't lead to a runtime error. The warning is
-        nonetheless useful, because it helps you find cases where
-        important data is being ignored.
-      </para>
-      <para>
-        We can disable the warning for a given pattern by explicitly
-        acknowledging that we are ignoring extra fields. This is done by
-        adding an underscore to the pattern, as shown below.
-      </para>
-      <programlisting>
+    <para>
+      Unlike the exhaustiveness warning for variants, ignoring this
+      warning won't lead to a runtime error. The warning is nonetheless
+      useful, because it helps you find cases where important data is
+      being ignored.
+    </para>
+    <para>
+      We can disable the warning for a given pattern by explicitly
+      acknowledging that we are ignoring extra fields. This is done by
+      adding an underscore to the pattern, as shown below.
+    </para>
+    <programlisting>
 # let host_info_to_string
       { hostname = h; os_name = os; os_release = r; _ } =
     sprintf &quot;%s (%s %s)&quot; h os r;;
     val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
-    </sect2>
-    <sect2 id="field-punning">
-      <title>Field punning</title>
-      <para>
-        When the name of a variable coincides with the name of a record
-        field, OCaml provides some handy syntactic shortcuts. For
-        example, the pattern in the following function binds all of the
-        fields in question to variables of the same name. This is called
-        <emphasis>field punning</emphasis>.
-      </para>
-      <programlisting>
+  </sect1>
+  <sect1 id="field-punning">
+    <title>Field punning</title>
+    <para>
+      When the name of a variable coincides with the name of a record
+      field, OCaml provides some handy syntactic shortcuts. For example,
+      the pattern in the following function binds all of the fields in
+      question to variables of the same name. This is called
+      <emphasis>field punning</emphasis>.
+    </para>
+    <programlisting>
 # let host_info_to_string { hostname; os_name; os_release; cpu_arch } =
      sprintf &quot;%s (%s %s / %s)&quot; hostname os_name os_release cpu_arch;;
   val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
-      <para>
-        Field punning can also be used to construct a record. Consider
-        the following code for generating a <literal>host_info</literal>
-        record.
-      </para>
-      <programlisting>
+    <para>
+      Field punning can also be used to construct a record. Consider the
+      following code for generating a <literal>host_info</literal>
+      record.
+    </para>
+    <programlisting>
 # let my_host =
     let hostname   = Shell.sh_one &quot;hostname&quot; in
     let os_name    = Shell.sh_one &quot;uname -s&quot; in
@@ -2897,60 +2894,60 @@ val my_host : host_info =
   {hostname = &quot;Yarons-MacBook-Air.local&quot;; os_name = &quot;Darwin&quot;;
    os_release = &quot;11.4.0&quot;; cpu_arch = &quot;i386&quot;}
 </programlisting>
-      <para>
-        In the above code, we defined variables corresponding to the
-        record fields first, and then the record declaration itself
-        simply listed the fields that needed to be included.
-      </para>
-      <para>
-        You can take advantage of both field punning and label punning
-        when writing a function for constructing a record from labeled
-        arguments, as shown below.
-      </para>
-      <programlisting>
+    <para>
+      In the above code, we defined variables corresponding to the
+      record fields first, and then the record declaration itself simply
+      listed the fields that needed to be included.
+    </para>
+    <para>
+      You can take advantage of both field punning and label punning
+      when writing a function for constructing a record from labeled
+      arguments, as shown below.
+    </para>
+    <programlisting>
 # let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
     let hostname = String.lowercase hostname in
     { hostname; os_name; os_release; cpu_arch };;
 </programlisting>
-      <para>
-        This is considerably more concise than what you would get
-        without punning at all.
-      </para>
-      <programlisting>
+    <para>
+      This is considerably more concise than what you would get without
+      punning at all.
+    </para>
+    <programlisting>
 let create_host_info ~hostname:hostname ~os_name:os_name
    ~os_release:os_release ~cpu_arch:cpu_arch =
     let hostname = String.lowercase hostname in
     { hostname = hostname ; os_name = os_name;
       os_release = os_release; cpu_arch = cpu_arch };;
 </programlisting>
-      <para>
-        Together, labeled arguments, field names, and field and label
-        punning, encourage a style where you propagate the same names
-        throughout your code-base. This is generally good practice,
-        since it encourages consistent naming, which makes it easier for
-        new people to navigate your source.
-      </para>
-    </sect2>
-    <sect2 id="reusing-field-names">
-      <title>Reusing field names</title>
-      <para>
-        Defining records with the same field names can be problematic.
-        Let's consider a simple example: building types to represent the
-        protocol used for a logging server. The following types
-        represent messages a server might receive from a client.
-      </para>
-      <para>
-        Below, the <literal>log_entry</literal> message is used to
-        deliver a log entry to the server for processing. The
-        <literal>logon</literal> message is sent when a client initiates
-        a connection, and includes the identity of the user connecting
-        and credentials used for authentication. Finally, the
-        <literal>heartbeat</literal> message is periodically sent by the
-        client to demonstrate to the server that the client is alive and
-        connected. All of these messages include a session id and the
-        time the message was generated.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      Together, labeled arguments, field names, and field and label
+      punning, encourage a style where you propagate the same names
+      throughout your code-base. This is generally good practice, since
+      it encourages consistent naming, which makes it easier for new
+      people to navigate your source.
+    </para>
+  </sect1>
+  <sect1 id="reusing-field-names">
+    <title>Reusing field names</title>
+    <para>
+      Defining records with the same field names can be problematic.
+      Let's consider a simple example: building types to represent the
+      protocol used for a logging server. The following types represent
+      messages a server might receive from a client.
+    </para>
+    <para>
+      Below, the <literal>log_entry</literal> message is used to deliver
+      a log entry to the server for processing. The
+      <literal>logon</literal> message is sent when a client initiates a
+      connection, and includes the identity of the user connecting and
+      credentials used for authentication. Finally, the
+      <literal>heartbeat</literal> message is periodically sent by the
+      client to demonstrate to the server that the client is alive and
+      connected. All of these messages include a session id and the time
+      the message was generated.
+    </para>
+    <programlisting language="ocaml">
 # type log_entry =
     { session_id: string;
       time: Time.t;
@@ -2970,11 +2967,11 @@ let create_host_info ~hostname:hostname ~os_name:os_name
     }
 ;;
 </programlisting>
-      <para>
-        The fact that we reused field names will cause trouble when we
-        try to construct a message.
-      </para>
-      <programlisting>
+    <para>
+      The fact that we reused field names will cause trouble when we try
+      to construct a message.
+    </para>
+    <programlisting>
 # let create_log_entry ~session_id ~important message =
      { time = Time.now (); session_id; important; message }
   ;;
@@ -2984,24 +2981,23 @@ let create_host_info ~hostname:hostname ~os_name:os_name
 Error: The record field label important belongs to the type log_entry
        but is mixed here with labels of type logon
 </programlisting>
-      <para>
-        The problem is that the declaration of <literal>logon</literal>
-        (and <literal>heartbeat</literal>) shadowed some of the fields
-        of <literal>log_entry</literal>. As a result, the fields
-        <literal>time</literal> and <literal>session_id</literal> are
-        assumed to be fields of <literal>logon</literal>, and
-        <literal>important</literal> and <literal>message</literal>,
-        which were not shadowed, are assumed to be fields of
-        <literal>log_entry</literal>. The compiler therefore complains
-        that we're trying to construct a record with fields from two
-        different record types.
-      </para>
-      <para>
-        There are two common solutions to this problem. The first is to
-        add a prefix to each field name to make it unique, as shown
-        below.
-      </para>
-      <programlisting>
+    <para>
+      The problem is that the declaration of <literal>logon</literal>
+      (and <literal>heartbeat</literal>) shadowed some of the fields of
+      <literal>log_entry</literal>. As a result, the fields
+      <literal>time</literal> and <literal>session_id</literal> are
+      assumed to be fields of <literal>logon</literal>, and
+      <literal>important</literal> and <literal>message</literal>, which
+      were not shadowed, are assumed to be fields of
+      <literal>log_entry</literal>. The compiler therefore complains
+      that we're trying to construct a record with fields from two
+      different record types.
+    </para>
+    <para>
+      There are two common solutions to this problem. The first is to
+      add a prefix to each field name to make it unique, as shown below.
+    </para>
+    <programlisting>
 # type log_entry =
     { log_entry_session_id: string;
       log_entry_time: Time.t;
@@ -3021,18 +3017,18 @@ Error: The record field label important belongs to the type log_entry
     }
 ;;
 </programlisting>
-      <para>
-        This eliminates the collisions and is simple enough to do. But
-        it leaves you with awkwardly named record fields, and adds
-        needless repetition and verbosity to your code.
-      </para>
-      <para>
-        Another approach is to mint a module for each type. This is
-        actually a broadly useful idiom, providing for each type a
-        namespace within which to put related values. Using this style
-        we would write:
-      </para>
-      <programlisting>
+    <para>
+      This eliminates the collisions and is simple enough to do. But it
+      leaves you with awkwardly named record fields, and adds needless
+      repetition and verbosity to your code.
+    </para>
+    <para>
+      Another approach is to mint a module for each type. This is
+      actually a broadly useful idiom, providing for each type a
+      namespace within which to put related values. Using this style we
+      would write:
+    </para>
+    <programlisting>
 # module Log_entry = struct
     type t =
       { session_id: string;
@@ -3057,10 +3053,10 @@ Error: The record field label important belongs to the type log_entry
       }
   end;;
 </programlisting>
-      <para>
-        Now, our heartbeat-creation function can be rendered as follows.
-      </para>
-      <programlisting>
+    <para>
+      Now, our heartbeat-creation function can be rendered as follows.
+    </para>
+    <programlisting>
 # let create_log_entry ~session_id ~important message =
      { Log_entry.time = Time.now (); Log_entry.session_id;
        Log_entry.important; Log_entry.message }
@@ -3068,40 +3064,40 @@ Error: The record field label important belongs to the type log_entry
 val create_log_entry :
   session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 </programlisting>
-      <para>
-        The module name <literal>Log_entry</literal> is required to
-        qualify the fields, because this function is outside of the
-        <literal>Log_entry</literal> module where the record was
-        defined. OCaml only requires the module qualification for one
-        record field, however, so we can write this more concisely.
-      </para>
-      <programlisting>
+    <para>
+      The module name <literal>Log_entry</literal> is required to
+      qualify the fields, because this function is outside of the
+      <literal>Log_entry</literal> module where the record was defined.
+      OCaml only requires the module qualification for one record field,
+      however, so we can write this more concisely.
+    </para>
+    <programlisting>
 # let create_log_entry ~session_id ~important message =
      { Log_entry. time = Time.now (); session_id; important; message }
   ;;
 val create_log_entry :
   session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 </programlisting>
-      <para>
-        For functions defined within the module where a given record is
-        defined, the module qualification goes away entirely. And
-        indeed, for things like constructors, defining it within the
-        module is often the best solution.
-      </para>
-    </sect2>
-    <sect2 id="functional-updates">
-      <title>Functional updates</title>
-      <para>
-        Fairly often, you will find yourself wanting to create a new
-        record that differs from an existing record in only a subset of
-        the fields. For example, imagine our logging server had a record
-        type for representing the state of a given client, including
-        when the last heartbeat was received from that client. The
-        following defines a type for representing this information, as
-        well as a function for updating the client information when a
-        new heartbeat arrives.
-      </para>
-      <programlisting>
+    <para>
+      For functions defined within the module where a given record is
+      defined, the module qualification goes away entirely. And indeed,
+      for things like constructors, defining it within the module is
+      often the best solution.
+    </para>
+  </sect1>
+  <sect1 id="functional-updates">
+    <title>Functional updates</title>
+    <para>
+      Fairly often, you will find yourself wanting to create a new
+      record that differs from an existing record in only a subset of
+      the fields. For example, imagine our logging server had a record
+      type for representing the state of a given client, including when
+      the last heartbeat was received from that client. The following
+      defines a type for representing this information, as well as a
+      function for updating the client information when a new heartbeat
+      arrives.
+    </para>
+    <programlisting>
 # type client_info =
    { addr: Unix.Inet_addr.t;
      port: int;
@@ -3118,43 +3114,42 @@ val create_log_entry :
       };;
 val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </programlisting>
-      <para>
-        This is fairly verbose, given that there's only one field that
-        we actually want to change, and all the others are just being
-        copied over from <literal>t</literal>. We can use OCaml's
-        <emphasis>functional update</emphasis> syntax to do this more
-        tersely. The syntax of a functional update is as follows.
-      </para>
-      <programlisting>
+    <para>
+      This is fairly verbose, given that there's only one field that we
+      actually want to change, and all the others are just being copied
+      over from <literal>t</literal>. We can use OCaml's
+      <emphasis>functional update</emphasis> syntax to do this more
+      tersely. The syntax of a functional update is as follows.
+    </para>
+    <programlisting>
 { &lt;record-value&gt; with &lt;field&gt; = &lt;value&gt;;
                       &lt;field&gt; = &lt;value&gt;;
                       ...
 }
 </programlisting>
-      <para>
-        The purpose of the functional update is to create a new record
-        based on an existing one, with a set of field changes layered on
-        top.
-      </para>
-      <para>
-        Given this, we can rewrite <literal>register_heartbeat</literal>
-        more concisely.
-      </para>
-      <programlisting>
+    <para>
+      The purpose of the functional update is to create a new record
+      based on an existing one, with a set of field changes layered on
+      top.
+    </para>
+    <para>
+      Given this, we can rewrite <literal>register_heartbeat</literal>
+      more concisely.
+    </para>
+    <programlisting>
 # let register_heartbeat t hb =
     { t with last_heartbeat_time = hb.Heartbeat.time };;
 </programlisting>
-      <para>
-        Functional updates make your code independent of the identity of
-        the fields in the record that are not changing. This is often
-        what you want, but it has downsides as well. In particular, if
-        you change the definition of your record to have more fields,
-        the type system will not prompt you to reconsider whether your
-        update code should affect those fields. Consider what happens if
-        we decided to add a field for the status message received on the
-        last heartbeat.
-      </para>
-      <programlisting>
+    <para>
+      Functional updates make your code independent of the identity of
+      the fields in the record that are not changing. This is often what
+      you want, but it has downsides as well. In particular, if you
+      change the definition of your record to have more fields, the type
+      system will not prompt you to reconsider whether your update code
+      should affect those fields. Consider what happens if we decided to
+      add a field for the status message received on the last heartbeat.
+    </para>
+    <programlisting>
 # type client_info =
    { addr: Unix.Inet_addr.t;
      port: int;
@@ -3164,49 +3159,47 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
      last_heartbeat_status: string;
    };;
 </programlisting>
-      <para>
-        The original implementation of
-        <literal>register_heartbeat</literal> would now be invalid, and
-        thus the compiler would warn us to think about how to handle
-        this new field. But the version using a functional update
-        continues to compile as is, even though it incorrectly ignores
-        the new field. The correct thing to do would be to update the
-        code as follows.
-      </para>
-      <programlisting>
+    <para>
+      The original implementation of
+      <literal>register_heartbeat</literal> would now be invalid, and
+      thus the compiler would warn us to think about how to handle this
+      new field. But the version using a functional update continues to
+      compile as is, even though it incorrectly ignores the new field.
+      The correct thing to do would be to update the code as follows.
+    </para>
+    <programlisting>
 # let register_heartbeat t hb =
     { t with last_heartbeat_time   = hb.Heartbeat.time;
              last_heartbeat_status = hb.Heartbeat.status_message;
     };;
 </programlisting>
-    </sect2>
-    <sect2 id="first-class-fields">
-      <title>First-class fields</title>
-      <para>
-        Consider the following function for extracting the usernames
-        from a list of <literal>Logon</literal> messages.
-      </para>
-      <programlisting>
+  </sect1>
+  <sect1 id="first-class-fields">
+    <title>First-class fields</title>
+    <para>
+      Consider the following function for extracting the usernames from
+      a list of <literal>Logon</literal> messages.
+    </para>
+    <programlisting>
 # let get_users logons =
      List.dedup (List.map logons ~f:(fun x -&gt; x.Logon.user));;
   val get_hostnames : Logon.t list -&gt; string list = &lt;fun&gt;
 </programlisting>
-      <para>
-        Here, we wrote a small function
-        <literal>(fun x -&gt; x.Logon.user)</literal> to access the
-        <literal>user</literal> field. This kind of accessor function is
-        a common enough pattern that that it would be convenient to
-        generate them automatically. The <literal>fieldslib</literal>
-        syntax extension that ships with <literal>Core</literal> does
-        just that.
-      </para>
-      <para>
-        <literal>fieldslib</literal> is invoked by putting the
-        <literal>with fields</literal> annotation at the end of the
-        declaration of a record type. So, for example, we could have
-        defined <literal>Logon</literal> as follows.
-      </para>
-      <programlisting>
+    <para>
+      Here, we wrote a small function
+      <literal>(fun x -&gt; x.Logon.user)</literal> to access the
+      <literal>user</literal> field. This kind of accessor function is a
+      common enough pattern that that it would be convenient to generate
+      them automatically. The <literal>fieldslib</literal> syntax
+      extension that ships with <literal>Core</literal> does just that.
+    </para>
+    <para>
+      <literal>fieldslib</literal> is invoked by putting the
+      <literal>with fields</literal> annotation at the end of the
+      declaration of a record type. So, for example, we could have
+      defined <literal>Logon</literal> as follows.
+    </para>
+    <programlisting>
 # module Logon = struct
     type t =
       { session_id: string;
@@ -3217,65 +3210,64 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
     with fields
   end;;
 </programlisting>
-      <para>
-        Given that definition, we can use the function
-        <literal>Logon.user</literal> to extract the user field from a
-        logon message.
-      </para>
-      <programlisting>
+    <para>
+      Given that definition, we can use the function
+      <literal>Logon.user</literal> to extract the user field from a
+      logon message.
+    </para>
+    <programlisting>
 # let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
 val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
 </programlisting>
-      <para>
-        In addition to generating field accessor functions,
-        <literal>fieldslib</literal> also creates a sub-module called
-        <literal>Fields</literal> that contains a first class
-        representative of each field, in the form of a value of type
-        <literal>Field.t</literal>. A <literal>Field.t</literal> bundles
-        up the following functionality of a record filed:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            The name of the field as a string
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The ability to extract the field
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The ability to do a functional update of that field
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The (optional) ability to set the record field, which is
-            present only if the field is mutable. We'll talk more about
-            mutable record fields in chapter {{{MUTABILITY}}}.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        We can use these first class fields to do things like write a
-        generic function for displaying a record field. The function
-        <literal>show_field</literal> takes three arguments: the
-        <literal>Field.t</literal>, a function for converting the
-        contents of the field in question to a string, and the record
-        type.
-      </para>
-      <programlisting>
+    <para>
+      In addition to generating field accessor functions,
+      <literal>fieldslib</literal> also creates a sub-module called
+      <literal>Fields</literal> that contains a first class
+      representative of each field, in the form of a value of type
+      <literal>Field.t</literal>. A <literal>Field.t</literal> bundles
+      up the following functionality of a record filed:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          The name of the field as a string
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The ability to extract the field
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The ability to do a functional update of that field
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The (optional) ability to set the record field, which is
+          present only if the field is mutable. We'll talk more about
+          mutable record fields in chapter {{{MUTABILITY}}}.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      We can use these first class fields to do things like write a
+      generic function for displaying a record field. The function
+      <literal>show_field</literal> takes three arguments: the
+      <literal>Field.t</literal>, a function for converting the contents
+      of the field in question to a string, and the record type.
+    </para>
+    <programlisting>
 # let show_field field to_string record =
      sprintf &quot;%s: %s&quot; (Field.name field) (Field.get field record |! to_string);;
 val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string =
   &lt;fun&gt;
 </programlisting>
-      <para>
-        Here's an example of <literal>show_field</literal> in action.
-      </para>
-      <programlisting>
+    <para>
+      Here's an example of <literal>show_field</literal> in action.
+    </para>
+    <programlisting>
 # let logon = { Logon.
                 session_id = &quot;26685&quot;;
                 time = Time.now ();
@@ -3287,16 +3279,16 @@ val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string 
 # show_field Logon.Fields.time Time.to_string logon;;
 - : string = &quot;time: 2012-06-26 18:44:13.807826&quot;
 </programlisting>
-      <para>
-        <literal>fieldslib</literal> also provides higher-level
-        operators, like <literal>Fields.fold</literal> and
-        <literal>Fields.iter</literal>, which let you iterate over all
-        the fields of a record. The following function uses
-        <literal>Logon.Fields.iter</literal> and
-        <literal>show_field</literal> to print out all the fields of a
-        <literal>Logon</literal> record.
-      </para>
-      <programlisting>
+    <para>
+      <literal>fieldslib</literal> also provides higher-level operators,
+      like <literal>Fields.fold</literal> and
+      <literal>Fields.iter</literal>, which let you iterate over all the
+      fields of a record. The following function uses
+      <literal>Logon.Fields.iter</literal> and
+      <literal>show_field</literal> to print out all the fields of a
+      <literal>Logon</literal> record.
+    </para>
+    <programlisting>
 # let print_logon logon =
     let print to_string field =
       printf &quot;%s\n&quot; (show_field field to_string logon)
@@ -3315,85 +3307,84 @@ user: yminsky
 credentials: Xy2d9W
 - : unit = ()
 </programlisting>
-      <para>
-        The advantage of using field iterators is that when the
-        definition of <literal>Logon</literal> changes,
-        <literal>iter</literal> will change along with it, prompting you
-        to handle whatever new cases arise.
-      </para>
-      <para>
-        Field iterators are useful for a variety of tasks, from building
-        validation functions to scaffolding the definition of a web-form
-        based on a record type, all with a guarantee that you've
-        exhaustively considered all elements of the field.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="variants">
-    <title>Variants</title>
     <para>
-      Variant types are used to represent multiple different
-      possibilities, where each possibility is identified by a different
-      <emphasis>constructor</emphasis>. The syntax of a variant type
-      declaration is as follows.
+      The advantage of using field iterators is that when the definition
+      of <literal>Logon</literal> changes, <literal>iter</literal> will
+      change along with it, prompting you to handle whatever new cases
+      arise.
     </para>
-    <programlisting>
+    <para>
+      Field iterators are useful for a variety of tasks, from building
+      validation functions to scaffolding the definition of a web-form
+      based on a record type, all with a guarantee that you've
+      exhaustively considered all elements of the field.
+    </para>
+  </sect1>
+</chapter>
+<chapter id="variants">
+  <title>Variants</title>
+  <para>
+    Variant types are used to represent multiple different
+    possibilities, where each possibility is identified by a different
+    <emphasis>constructor</emphasis>. The syntax of a variant type
+    declaration is as follows.
+  </para>
+  <programlisting>
 type &lt;variant-name&gt; =
   | &lt;Constructor1&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
   | &lt;Constructor2&gt; [of &lt;arg1&gt; * .. * &lt;argn&gt;]?
   ...
 </programlisting>
+  <para>
+    The basic purpose of variants is to effectively represent data that
+    may have multiple different cases. We can give a better sense of the
+    utility of variants by walking through a concrete example, which
+    we'll do by thinking about how to represent terminal colors.
+  </para>
+  <sect1 id="example-terminal-colors">
+    <title>Example: terminal colors</title>
     <para>
-      The basic purpose of variants is to effectively represent data
-      that may have multiple different cases. We can give a better sense
-      of the utility of variants by walking through a concrete example,
-      which we'll do by thinking about how to represent terminal colors.
+      Almost all terminals support a set of 8 basic colors, which we can
+      represent with the following variant type.
     </para>
-    <sect2 id="example-terminal-colors">
-      <title>Example: terminal colors</title>
-      <para>
-        Almost all terminals support a set of 8 basic colors, which we
-        can represent with the following variant type.
-      </para>
-      <programlisting>
+    <programlisting>
 # type basic_color =
     Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 </programlisting>
-      <para>
-        This is a particularly simple form of variant, in that the
-        constructors don't have arguments. Such variants are very
-        similar to the enumerations found in many languages, including C
-        and Java.
-      </para>
-      <para>
-        We can construct instances of <literal>basic_color</literal> by
-        simply writing out the constructors in question.
-      </para>
-      <programlisting>
+    <para>
+      This is a particularly simple form of variant, in that the
+      constructors don't have arguments. Such variants are very similar
+      to the enumerations found in many languages, including C and Java.
+    </para>
+    <para>
+      We can construct instances of <literal>basic_color</literal> by
+      simply writing out the constructors in question.
+    </para>
+    <programlisting>
 # [Black;Blue;Red];;
 - : basic_color list = [Black; Blue; Red]
 </programlisting>
-      <para>
-        Pattern matching can be used to process a variant. The following
-        function uses pattern matching to convert
-        <literal>basic_color</literal> to a corresponding integer for
-        use in creating color-setting escape codes.
-      </para>
-      <programlisting>
+    <para>
+      Pattern matching can be used to process a variant. The following
+      function uses pattern matching to convert
+      <literal>basic_color</literal> to a corresponding integer for use
+      in creating color-setting escape codes.
+    </para>
+    <programlisting>
 # let basic_color_to_int = function
   | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3
   | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7 ;;
 val basic_color_to_int : basic_color -&gt; int = &lt;fun&gt;
 </programlisting>
-      <para>
-        Note that the exhaustiveness checking on pattern matches means
-        that the compiler will warn us if we miss a color.
-      </para>
-      <para>
-        Using this function, we can generate the escape codes to change
-        the color of a given string.
-      </para>
-      <programlisting>
+    <para>
+      Note that the exhaustiveness checking on pattern matches means
+      that the compiler will warn us if we miss a color.
+    </para>
+    <para>
+      Using this function, we can generate the escape codes to change
+      the color of a given string.
+    </para>
+    <programlisting>
 # let color_by_number number text =
     sprintf &quot;\027[38;5;%dm%s\027[0m&quot; number text;;
   val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;
@@ -3403,41 +3394,41 @@ val s : string = &quot;\027[38;5;4mHello Blue World!\027[0m&quot;
 Hello Blue World!
 - : unit = ()
 </programlisting>
+    <para>
+      On most terminals, that last line is printed in blue.
+    </para>
+    <sect2 id="full-terminal-colors">
+      <title>Full terminal colors</title>
       <para>
-        On most terminals, that last line is printed in blue.
+        The simple enumeration of <literal>basic_color</literal> isn't
+        enough to fully describe the set of colors that a modern
+        terminal can display. Many terminals, including the venerable
+        <literal>xterm</literal>, support 256 different colors, broken
+        up into the following groups.
       </para>
-      <sect3 id="full-terminal-colors">
-        <title>Full terminal colors</title>
-        <para>
-          The simple enumeration of <literal>basic_color</literal> isn't
-          enough to fully describe the set of colors that a modern
-          terminal can display. Many terminals, including the venerable
-          <literal>xterm</literal>, support 256 different colors, broken
-          up into the following groups.
-        </para>
-        <itemizedlist>
-          <listitem>
-            <para>
-              The 8 basic colors, in regular and bold versions.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              A 6 × 6 × 6 RGB color cube
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              A 24-level grayscale ramp
-            </para>
-          </listitem>
-        </itemizedlist>
-        <para>
-          We can represent this more complicated color-space as a
-          variant, but this time, the different constructors will have
-          arguments, to describe the data available in each case.
-        </para>
-        <programlisting>
+      <itemizedlist>
+        <listitem>
+          <para>
+            The 8 basic colors, in regular and bold versions.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            A 6 × 6 × 6 RGB color cube
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            A 24-level grayscale ramp
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        We can represent this more complicated color-space as a variant,
+        but this time, the different constructors will have arguments,
+        to describe the data available in each case.
+      </para>
+      <programlisting>
 # type weight = Regular | Bold
   type color =
   | Basic of basic_color * weight (* basic colors, regular and bold *)
@@ -3445,13 +3436,12 @@ Hello Blue World!
   | Gray  of int                   (* 24 grayscale levels *)
 ;;
 </programlisting>
-        <para>
-          In order to compute the color code for a
-          <literal>color</literal>, we use pattern matching to break
-          down the <literal>color</literal> variant into the appropriate
-          cases.
-        </para>
-        <programlisting>
+      <para>
+        In order to compute the color code for a
+        <literal>color</literal>, we use pattern matching to break down
+        the <literal>color</literal> variant into the appropriate cases.
+      </para>
+      <programlisting>
 # let color_to_int = function
     | Basic (basic_color,weight) -&gt;
       let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
@@ -3460,20 +3450,20 @@ Hello Blue World!
     | Gray i -&gt; 232 + i ;;
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
-        <sidebar><title>
-        Catch-all cases and refactoring
-        </title>
-        <para>
-          OCaml's type system can act as a form of refactoring tool,
-          where the compiler warns you of places where your code needs
-          to be adapted to changes made elsewhere. This is particularly
-          valuable when working with variant types.
-        </para>
-        <para>
-          Consider what would happen if we were to change the definition
-          of <literal>color</literal> to the following.
-        </para>
-        <programlisting>
+      <sidebar><title>
+      Catch-all cases and refactoring
+      </title>
+      <para>
+        OCaml's type system can act as a form of refactoring tool, where
+        the compiler warns you of places where your code needs to be
+        adapted to changes made elsewhere. This is particularly valuable
+        when working with variant types.
+      </para>
+      <para>
+        Consider what would happen if we were to change the definition
+        of <literal>color</literal> to the following.
+      </para>
+      <programlisting>
 # type color =
   | Basic of basic_color     (* basic colors *)
   | Bold  of basic_color     (* bold basic colors *)
@@ -3481,17 +3471,16 @@ val color_to_int : color -&gt; int = &lt;fun&gt;
   | Gray  of int             (* 24 grayscale levels *)
 ;;
 </programlisting>
-        <para>
-          We've essentially broken out the <literal>Basic</literal> case
-          into two cases, <literal>Basic</literal> and
-          <literal>Bold</literal>, and <literal>Basic</literal> has
-          changed from having two arguments to one.
-          <literal>color_to_int</literal> as we wrote it still expects
-          the old structure of the variant, and if we try to compile
-          that same code again, the compiler will notice the
-          discrepancy.
-        </para>
-        <programlisting>
+      <para>
+        We've essentially broken out the <literal>Basic</literal> case
+        into two cases, <literal>Basic</literal> and
+        <literal>Bold</literal>, and <literal>Basic</literal> has
+        changed from having two arguments to one.
+        <literal>color_to_int</literal> as we wrote it still expects the
+        old structure of the variant, and if we try to compile that same
+        code again, the compiler will notice the discrepancy.
+      </para>
+      <programlisting>
 # let color_to_int = function
     | Basic (basic_color,weight) -&gt;
       let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
@@ -3502,14 +3491,14 @@ Characters 40-60:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 </programlisting>
-        <para>
-          Here, the compiler is complaining that the
-          <literal>Basic</literal> constructor is assumed to have the
-          wrong number of arguments. If we fix that, however, the
-          compiler flag will flag a second problem, which is that we
-          haven't handled the new <literal>Bold</literal> constructor.
-        </para>
-        <programlisting>
+      <para>
+        Here, the compiler is complaining that the
+        <literal>Basic</literal> constructor is assumed to have the
+        wrong number of arguments. If we fix that, however, the compiler
+        flag will flag a second problem, which is that we haven't
+        handled the new <literal>Bold</literal> constructor.
+      </para>
+      <programlisting>
 # let color_to_int = function
     | Basic basic_color -&gt; basic_color_to_int basic_color
     | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
@@ -3520,10 +3509,10 @@ Here is an example of a value that is not matched:
 Bold _
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
-        <para>
-          Fixing this now leads us to the correct implementation.
-        </para>
-        <programlisting>
+      <para>
+        Fixing this now leads us to the correct implementation.
+      </para>
+      <programlisting>
 # let color_to_int = function
     | Basic basic_color -&gt; basic_color_to_int basic_color
     | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color
@@ -3531,23 +3520,23 @@ val color_to_int : color -&gt; int = &lt;fun&gt;
     | Gray i -&gt; 232 + i ;;
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
-        <para>
-          As you can see, the type system identified for us the places
-          in our code that needed to be fixed. This refactoring isn't
-          entirely free, however. To really take advantage of it, you
-          need to write your code in a way that maximizes the compiler's
-          chances of helping you find your bugs. One important rule is
-          to avoid catch-all cases in pattern matches.
-        </para>
-        <para>
-          Here's an example of how a catch-all case plays in. Imagine we
-          wanted a version of <literal>color_to_int</literal> that works
-          on older terminals by rendering the first 16 colors (the 8
-          <literal>basic_color</literal>s in regular and bold) in the
-          normal way, but rendering everything else as white. We might
-          have written the function as follows.
-        </para>
-        <programlisting>
+      <para>
+        As you can see, the type system identified for us the places in
+        our code that needed to be fixed. This refactoring isn't
+        entirely free, however. To really take advantage of it, you need
+        to write your code in a way that maximizes the compiler's
+        chances of helping you find your bugs. One important rule is to
+        avoid catch-all cases in pattern matches.
+      </para>
+      <para>
+        Here's an example of how a catch-all case plays in. Imagine we
+        wanted a version of <literal>color_to_int</literal> that works
+        on older terminals by rendering the first 16 colors (the 8
+        <literal>basic_color</literal>s in regular and bold) in the
+        normal way, but rendering everything else as white. We might
+        have written the function as follows.
+      </para>
+      <programlisting>
 # let oldschool_color_to_int = function
     | Basic (basic_color,weight) -&gt;
       let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
@@ -3555,21 +3544,21 @@ val color_to_int : color -&gt; int = &lt;fun&gt;
     | _ -&gt; basic_color_to_int White;;
 val oldschool_color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
-        <para>
-          But because the catch-all case encompasses all possibilities,
-          the type system will no longer warn us that we have missed the
-          new <literal>Bold</literal> case when we change the type to
-          include it. We can get this check back by being more explicit
-          about what we're ignoring. We haven't changed the behavior of
-          the code, but we have improved our robustness to change.
-        </para>
-        </sidebar>
+      <para>
+        But because the catch-all case encompasses all possibilities,
+        the type system will no longer warn us that we have missed the
+        new <literal>Bold</literal> case when we change the type to
+        include it. We can get this check back by being more explicit
+        about what we're ignoring. We haven't changed the behavior of
+        the code, but we have improved our robustness to change.
+      </para>
+      </sidebar>
 
-        <para>
-          Using the above function, we can print text using the full set
-          of available colors.
-        </para>
-        <programlisting>
+      <para>
+        Using the above function, we can print text using the full set
+        of available colors.
+      </para>
+      <programlisting>
 # let color_print color s =
      printf &quot;%s\n&quot; (color_by_number (color_to_int color) s);;
 val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;
@@ -3580,16 +3569,16 @@ A bold red!
 A muted gray...
 - : unit = ()
 </programlisting>
-      </sect3>
     </sect2>
-    <sect2 id="combining-records-and-variants">
-      <title>Combining records and variants</title>
-      <para>
-        Records and variants are most effective when used in concert.
-        Consider again the type <literal>Log_entry.t</literal> from
-        section [[REUSING FIELD NAMES]]:
-      </para>
-      <programlisting language="ocaml">
+  </sect1>
+  <sect1 id="combining-records-and-variants">
+    <title>Combining records and variants</title>
+    <para>
+      Records and variants are most effective when used in concert.
+      Consider again the type <literal>Log_entry.t</literal> from
+      section [[REUSING FIELD NAMES]]:
+    </para>
+    <programlisting language="ocaml">
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -3599,60 +3588,58 @@ module Log_entry = struct
     }
 end
 </programlisting>
-      <para>
-        This record type combines multiple pieces of data into one
-        value. In particular, a single <literal>Log_entry.t</literal>
-        has a <literal>session_id</literal> <emphasis>and</emphasis> a
-        <literal>time</literal> <emphasis>and</emphasis> an
-        <literal>important</literal> flag <emphasis>and</emphasis> a
-        <literal>message</literal>. More generally, you can think of
-        record types as acting as conjunctions. Variants, on the other
-        hand, are disjunctions, letting you represent multiple
-        possibilities, as in the following example.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      This record type combines multiple pieces of data into one value.
+      In particular, a single <literal>Log_entry.t</literal> has a
+      <literal>session_id</literal> <emphasis>and</emphasis> a
+      <literal>time</literal> <emphasis>and</emphasis> an
+      <literal>important</literal> flag <emphasis>and</emphasis> a
+      <literal>message</literal>. More generally, you can think of
+      record types as acting as conjunctions. Variants, on the other
+      hand, are disjunctions, letting you represent multiple
+      possibilities, as in the following example.
+    </para>
+    <programlisting language="ocaml">
 type client_message = | Logon of Logon.t
                       | Heartbeat of Heartbeat.t
                       | Log_entry of Log_entry.t
 </programlisting>
-      <para>
-        A <literal>client_message</literal> is a
-        <literal>Logon</literal> <emphasis>or</emphasis> a
-        <literal>Heartbeat</literal> <emphasis>or</emphasis> a
-        <literal>Log_entry</literal>. If we want to write code that
-        processes messages generically, rather than code specialized to
-        a fixed message type, we need something like
-        <literal>client_message</literal> to act as one overarching type
-        for the different possible messages.
-      </para>
-      <para>
-        You can increase the precision of your types by using variants
-        to represent structural differences between types, and records
-        to represent structure that is shared. As an example, consider
-        the following function that takes a list of
-        <literal>client_message</literal>s and returns all messages
-        generated by a given user. The code in question is implemented
-        by folding over the list of messages, where the accumulator is a
-        pair of:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            the set of session identifiers for the user that have been
-            seen thus far.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            the set of messages so far that are associated with the
-            user.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        Here's the concrete code.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      A <literal>client_message</literal> is a <literal>Logon</literal>
+      <emphasis>or</emphasis> a <literal>Heartbeat</literal>
+      <emphasis>or</emphasis> a <literal>Log_entry</literal>. If we want
+      to write code that processes messages generically, rather than
+      code specialized to a fixed message type, we need something like
+      <literal>client_message</literal> to act as one overarching type
+      for the different possible messages.
+    </para>
+    <para>
+      You can increase the precision of your types by using variants to
+      represent structural differences between types, and records to
+      represent structure that is shared. As an example, consider the
+      following function that takes a list of
+      <literal>client_message</literal>s and returns all messages
+      generated by a given user. The code in question is implemented by
+      folding over the list of messages, where the accumulator is a pair
+      of:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          the set of session identifiers for the user that have been
+          seen thus far.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          the set of messages so far that are associated with the user.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Here's the concrete code.
+    </para>
+    <programlisting language="ocaml">
 let messages_for_user user messages =
   let (user_messages,_) =
     List.fold messages ~init:([],String.Set.empty)
@@ -3675,31 +3662,30 @@ let messages_for_user user messages =
   in
   List.rev user_messages
 </programlisting>
-      <para>
-        There's one awkward bit about the code above, which is the
-        calculation of the session ids. In particular, we have the
-        following repetitive snippet of code:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      There's one awkward bit about the code above, which is the
+      calculation of the session ids. In particular, we have the
+      following repetitive snippet of code:
+    </para>
+    <programlisting language="ocaml">
   let session_id = match message with
     | Logon     m -&gt; m.Logon.session_id
     | Heartbeat m -&gt; m.Heartbeat.session_id
     | Log_entry m -&gt; m.Log_entry.session_id
   in
 </programlisting>
-      <para>
-        This code effectively computes the session id for each
-        underlying message type. The repetition in this case isn't that
-        bad, but would become problematic in larger and more complicated
-        examples.
-      </para>
-      <para>
-        We can improve the code by refactoring our types to explicitly
-        separate which parts are shared and which are common. The first
-        step is to cut down the definitions of the per-message records
-        to just contain the unique components of each message.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      This code effectively computes the session id for each underlying
+      message type. The repetition in this case isn't that bad, but
+      would become problematic in larger and more complicated examples.
+    </para>
+    <para>
+      We can improve the code by refactoring our types to explicitly
+      separate which parts are shared and which are common. The first
+      step is to cut down the definitions of the per-message records to
+      just contain the unique components of each message.
+    </para>
+    <programlisting language="ocaml">
 module Log_entry = struct
   type t = { important: bool;
              message: string;
@@ -3716,33 +3702,33 @@ module Logon = struct
            }
 end
 </programlisting>
-      <para>
-        We can then define a variant type that covers the different
-        possible unique components.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      We can then define a variant type that covers the different
+      possible unique components.
+    </para>
+    <programlisting language="ocaml">
 type details =
 | Logon of Logon.t
 | Heartbeat of Heartbeat.t
 | Log_entry of Log_entry.t
 </programlisting>
-      <para>
-        Separately, we need a record that contains the fields that are
-        common across all messages.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      Separately, we need a record that contains the fields that are
+      common across all messages.
+    </para>
+    <programlisting language="ocaml">
 module Common = struct
   type t = { session_id: string;
              time: Time.t;
            }
 end
 </programlisting>
-      <para>
-        A full message can then represented as a pair of a
-        <literal>Common.t</literal> and a <literal>details</literal>.
-        Using this, we can rewrite our example above as follows:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      A full message can then represented as a pair of a
+      <literal>Common.t</literal> and a <literal>details</literal>.
+      Using this, we can rewrite our example above as follows:
+    </para>
+    <programlisting language="ocaml">
 let messages_for_user user messages =
   let (user_messages,_) =
     List.fold messages ~init:([],String.Set.empty)
@@ -3761,56 +3747,56 @@ let messages_for_user user messages =
   in
   List.rev user_messages
 </programlisting>
-      <para>
-        Note that the more complex match statement for computing the
-        session id has been replaced with the simple expression
-        <literal>common.Common.session_id</literal>.
-      </para>
-      <para>
-        This basic design is good in another way: it allows us to
-        essentially downcast to the specific message type once we know
-        what it is, and then dispatch code to handle just that message
-        type. In particular, while we use the type
-        <literal>Common.t * details</literal> to represent an arbitrary
-        message, we can use <literal>Common.t * Logon.t</literal> to
-        represent a logon message. Thus, if we had functions for
-        handling individual message types, we could write a dispatch
-        function as follows.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      Note that the more complex match statement for computing the
+      session id has been replaced with the simple expression
+      <literal>common.Common.session_id</literal>.
+    </para>
+    <para>
+      This basic design is good in another way: it allows us to
+      essentially downcast to the specific message type once we know
+      what it is, and then dispatch code to handle just that message
+      type. In particular, while we use the type
+      <literal>Common.t * details</literal> to represent an arbitrary
+      message, we can use <literal>Common.t * Logon.t</literal> to
+      represent a logon message. Thus, if we had functions for handling
+      individual message types, we could write a dispatch function as
+      follows.
+    </para>
+    <programlisting language="ocaml">
 let handle_message server_state (common,details) =
   match details with
   | Log_entry m -&gt; handle_log_entry server_state (common,m)
   | Logon     m -&gt; handle_logon     server_state (common,m)
   | Heartbeat m -&gt; handle_heartbeat server_state (common,m)
 </programlisting>
-      <para>
-        And it's explicit at the type level that
-        <literal>handle_log_entry</literal> sees only
-        <literal>Log_entry</literal> messages,
-        <literal>handle_logon</literal> sees only
-        <literal>Logon</literal> messages, etc.
-      </para>
-    </sect2>
-    <sect2 id="variants-and-recursive-data-structures">
-      <title>Variants and recursive data structures</title>
-      <para>
-        Another common application of variants is to represent tree-like
-        recursive data-structures. One very simple application of this
-        technique is that of building an expression evaluator.
-      </para>
-      <para>
-        Imagine you wanted a small domain-specific language for
-        expressing Boolean expressions. This can be useful in any
-        application that requires a filter language, which show up in
-        everything from packet analyzers to mail clients.
-      </para>
-      <para>
-        The declaration of the type for representing an expression is
-        fairly straight-forward --- we'll have one constructor for each
-        different kind of expression in our mini language, as follows.
-      </para>
-      <programlisting>
+    <para>
+      And it's explicit at the type level that
+      <literal>handle_log_entry</literal> sees only
+      <literal>Log_entry</literal> messages,
+      <literal>handle_logon</literal> sees only <literal>Logon</literal>
+      messages, etc.
+    </para>
+  </sect1>
+  <sect1 id="variants-and-recursive-data-structures">
+    <title>Variants and recursive data structures</title>
+    <para>
+      Another common application of variants is to represent tree-like
+      recursive data-structures. One very simple application of this
+      technique is that of building an expression evaluator.
+    </para>
+    <para>
+      Imagine you wanted a small domain-specific language for expressing
+      Boolean expressions. This can be useful in any application that
+      requires a filter language, which show up in everything from
+      packet analyzers to mail clients.
+    </para>
+    <para>
+      The declaration of the type for representing an expression is
+      fairly straight-forward --- we'll have one constructor for each
+      different kind of expression in our mini language, as follows.
+    </para>
+    <programlisting>
 # type 'a t =
   | Base  of 'a
   | Const of bool
@@ -3819,33 +3805,32 @@ let handle_message server_state (common,details) =
   | Not   of 'a t
   ;;
 </programlisting>
-      <para>
-        The <literal>Base</literal> constructor is to allow us to
-        include some set of base predicates. These base predicates are
-        what tie the expressions in question to the application. Thus,
-        if you were writing a filter language for an email processor,
-        your base predicates might have things like what is found on the
-        <literal>to</literal> or <literal>subject</literal> line of an
-        email.
-      </para>
-      <para>
-        The definition of <literal>t</literal> is recursive, which means
-        that we can construct complex nested expressions based on this.
-        Here, we'll first declare a type for the base predicates that
-        encodes a very simple set of email filters.
-      </para>
-      <programlisting>
+    <para>
+      The <literal>Base</literal> constructor is to allow us to include
+      some set of base predicates. These base predicates are what tie
+      the expressions in question to the application. Thus, if you were
+      writing a filter language for an email processor, your base
+      predicates might have things like what is found on the
+      <literal>to</literal> or <literal>subject</literal> line of an
+      email.
+    </para>
+    <para>
+      The definition of <literal>t</literal> is recursive, which means
+      that we can construct complex nested expressions based on this.
+      Here, we'll first declare a type for the base predicates that
+      encodes a very simple set of email filters.
+    </para>
+    <programlisting>
 # type mail_field = To | From | CC | Date | Subject
   type mail_filter = { field: mail_field;
                        contains: string }
   ;;
 </programlisting>
-      <para>
-        And now, we can construct a simple expression that uses
-        <literal>mail_filter</literal> for its base predicate as
-        follows.
-      </para>
-      <programlisting>
+    <para>
+      And now, we can construct a simple expression that uses
+      <literal>mail_filter</literal> for its base predicate as follows.
+    </para>
+    <programlisting>
 # And [ Or [ Base { field = To; contains = &quot;doligez&quot; } ;
              Base { field = CC; contains = &quot;doligez&quot; } ];
         Base { field = Subject; contains = &quot;runtime&quot; } ];;
@@ -3856,24 +3841,92 @@ And
     Base {field = CC; contains = &quot;doligez&quot;}];
   Base {field = Subject; contains = &quot;runtime&quot;}]
 </programlisting>
-      <para>
-        Being able to construct such expressions is all well and good,
-        but to do any real work, we need some way to evaluate these
-        expressions. Here's a piece of code to do just that.
-      </para>
-      <programlisting>
+    <para>
+      Being able to construct such expressions is all well and good, but
+      to do any real work, we need some way to evaluate these
+      expressions. Here's a piece of code to do just that.
+    </para>
+    <programlisting>
 # let rec eval t base_eval =
-    let eval t = eval t base_eval in
+    let eval' t = eval t base_eval in
     match t with
     | Base  base -&gt; base_eval base
     | Const bool -&gt; bool
-    | And   ts   -&gt; List.for_all ts ~f:eval
-    | Or    ts   -&gt; List.exists  ts ~f:eval
-    | Not   t    -&gt; not (eval t)
+    | And   ts   -&gt; List.for_all ts ~f:eval'
+    | Or    ts   -&gt; List.exists  ts ~f:eval'
+    | Not   t    -&gt; not (eval' t)
   ;;
 val eval : 'a t -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
 </programlisting>
-    </sect2>
+    <para>
+      Note that we defined a helper function, <literal>eval'</literal>,
+      which is the same as <literal>eval</literal> except that it's
+      specialized to use <literal>base_eval</literal>. That's just to
+      remove a bit of boilerplate from the recursive applications of
+      <literal>eval</literal>.
+    </para>
+    <para>
+      The structure of the code is pretty straightforward --- we're just
+      walking over the structure of the data, doing the appropriate
+      thing at each state, which sometimes requires a recursive call and
+      sometimes doesn't.
+    </para>
+    <para>
+      Our <literal>eval</literal> function just walks the value in
+      question. We can also write code to transform an expression, for
+      example, by simplifying an expression. Here's a function that does
+      just that.
+    </para>
+    <programlisting>
+# let rec simplify = function
+    | Base _ | Const _ as x -&gt; x
+    | And ts -&gt;
+      let ts = List.map ~f:simplify ts in
+      if List.exists ts ~f:(function Const false -&gt; true | _ -&gt; false)
+      then Const false
+      else And ts
+    | Or ts -&gt;
+      let ts = List.map ~f:simplify ts in
+      if List.exists ts ~f:(function Const true -&gt; true | _ -&gt; false)
+      then Const true else Or ts
+    | Not t -&gt;
+      match simplify t with
+      | Const b -&gt; Const (not b)
+      | t -&gt; Not t
+  ;;
+val simplify : 'a t -&gt; 'a t = &lt;fun&gt;
+</programlisting>
+    <para>
+      One thing to notice about the above code is that it uses a
+      catch-all case in the very last line within the
+      <literal>Not</literal> case. It's generally better to be explicit
+      about the cases you're ignoring. Indeed, if we change this snippet
+      of code to be more explicit:
+    </para>
+    <programlisting language="ocaml">
+    | Not t -&gt;
+      match simplify t with
+      | Const b -&gt; Const (not b)
+      | (And _ | Or _ | Base _ | Not _) -&gt; Not t
+</programlisting>
+    <para>
+      we can immediately notice that we've missed an important
+      simplification. Really, we should have simplified double negation.
+    </para>
+    <programlisting language="ocaml">
+    | Not t -&gt;
+      match simplify t with
+      | Const b -&gt; Const (not b)
+      | Not t -&gt; t
+      | (And _ | Or _ | Base _ ) -&gt; Not t
+</programlisting>
+    <para>
+      All of this is more than a theoretical example. There's a library
+      very much in this spirit already exists as part of
+      <literal>Core</literal>, called <literal>Blang</literal> (short
+      for &quot;boolean language&quot;), and it gets a lot of practical
+      use in a variety of applications.
+    </para>
   </sect1>
   <sect1 id="polymorphic-variants">
     <title>Polymorphic variants</title>
@@ -4087,163 +4140,6 @@ Error: This expression has type [&gt; `Rational of int * int ]
          [&lt; `Float of float | `Int of int ]
        The second variant type does not allow tag(s) `Rational
 </programlisting>
-    </sect2>
-  </sect1>
-  <sect1 id="detritus">
-    <title>Detritus</title>
-    <para>
-      As we've seen, variants are a powerful tool, letting you concisely
-      and easily model and transform with complex data. But variants
-      have their downsides as well. One notable limitation is that you
-      can't share constructors between different variant types.
-    </para>
-    <para>
-      To see why this is an issue, consider the logging protocol
-      described earlier. The protocol had three messages:
-      <literal>Log_entry</literal>, <literal>Heartbeat</literal> and
-      <literal>Logon</literal>. Now, what if we want to create a variant
-      of the protocol with a <literal>Logout</literal> message. As you
-      may remember, the <literal>details</literal> type was a variant
-      that had the message-specific details, and it was written as
-      follows.
-    </para>
-    <programlisting>
-# type details =
-  | Logon of Logon.t
-  | Heartbeat of Heartbeat.t
-  | Log_entry of Log_entry.t
-  ;;
-</programlisting>
-    <para>
-      We could simply add a second type,
-      <literal>extended_details</literal>, to represent the extended
-      protocol, as follows.
-    </para>
-    <programlisting>
-# type extended_details =
-  | Logon of Logon.t
-  | Heartbeat of Heartbeat.t
-  | Log_entry of Log_entry.t
-  | Logout
-  ;;
-</programlisting>
-    <para>
-      The problem we run into is that, despite the fact that the two
-      types share a lot o structure, we can't write code that operates
-      directly on messages of both types. If we define both of these
-      types in the same module, it's even worse, in that the
-      constructors in <literal>extended_details</literal> would shadow
-      the ones in <literal>details</literal>, meaning that in order to
-      access both types, we either need to stick them in different
-      modules, or to modify the names of the constructors in one so they
-      don't collide with the other.
-    </para>
-    <para>
-      Essentially, the two type system is insensitive to the structure
-      that is shared between the two types.
-    </para>
-    <para>
-      This is where <emphasis>polymorphic variants</emphasis> come into
-      play. Like tuples, polymorphic variants can be used directly,
-      without defining a specific type in advance. Thus, we can write
-    </para>
-    <programlisting>
-</programlisting>
-    <para>
-      OCaml has a second kind of variant type called
-      <emphasis>polymorphic variants</emphasis>, which have some
-      advantages and some disadvantages relative to regular variants.
-      The most striking feature of polymorphic variants are how
-      lightweight they are. In particular, you can use a polymorphic
-      variant without declaring a type for it in advance. Thus, going
-      back to the example of section [[[TERMINAL COLORS]]], we can
-      rewrite the function <literal>basic_color_to_int</literal> as
-      follows, using polymorphic variants instead of regular variants.
-      Polymorphic variants are distinguished by having a backtick in
-      front of each constructor.
-    </para>
-    <programlisting>
-# let basic_color_to_int = function
-  | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
-  | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7 ;;
-val basic_color_to_int :
-  [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] -&gt;
-  int = &lt;fun&gt;
-</programlisting>
-    <para>
-      As you see, the variant that this function can return is inferred.
-      As a result, we can use this to compute codes for the basic
-      colors:
-    </para>
-    <programlisting>
-# basic_color_to_int `White;;
-- : int = 7
-</programlisting>
-    <para>
-      and we'll get a type-error if we try to apply it to a value that
-      it can't handle:
-    </para>
-    <programlisting>
-# basic_color_to_int `Orange;;
-Characters 19-26:
-  basic_color_to_int `Orange;;
-                     ^^^^^^^
-Error: This expression has type [&gt; `Orange ]
-       but an expression was expected of type
-         [&lt; `Black
-          | `Blue
-          | `Cyan
-          | `Green
-          | `Magenta
-          | `Red
-          | `White
-          | `Yellow ]
-       The second variant type does not allow tag(s) `Orange
-</programlisting>
-    <para>
-      And we're not limited to simple enum-style variants. Here's the
-      more complicated <literal>color_to_int</literal> code, translated
-      to use polymorphic variants.
-    </para>
-    <programlisting>
-# let color_to_int = function
-    | `Basic basic_color -&gt; basic_color_to_int basic_color
-    | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
-    | `Gray i -&gt; 232 + i ;;
-val color_to_int :
-  [&lt; `Basic of
-       [&lt; `Black
-        | `Blue
-        | `Cyan
-        | `Green
-        | `Magenta
-        | `Red
-        | `White
-        | `Yellow ]
-   | `Gray of int
-   | `RGB of int * int * int ] -&gt;
-  int = &lt;fun&gt;
-</programlisting>
-    <para>
-      Again, the type-system infers an entirely reasonable type for the
-      function, without us having to write down the type explicitly.
-    </para>
-    <para>
-      Polymorphic variants are pleasantly lightweight, but there are
-      some downsides to using them
-    </para>
-  </sect1>
-  <sect1 id="more-advanced-declarations">
-    <title>More advanced declarations</title>
-    <sect2 id="polymorphic-types">
-      <title>Polymorphic types</title>
-      <para>
-      </para>
-    </sect2>
-    <sect2 id="recursive-types">
-      <title>Recursive types</title>
-      <para>
-      </para>
     </sect2>
   </sect1>
 </chapter>
@@ -4931,6 +4827,11 @@ Exception: Key_not_found(&quot;c&quot;).
 </programlisting>
     </sect2>
   </sect1>
+</chapter>
+<chapter id="imperative-programming-1">
+  <title>Imperative Programming</title>
+  <para>
+  </para>
 </chapter>
 <chapter id="files-modules-and-programs">
   <title>Files, Modules and Programs</title>
@@ -7519,709 +7420,314 @@ $ ./service_client.byte
     </sect2>
   </sect1>
 </chapter>
-<chapter id="syntax-extensions">
-  <title>Syntax Extensions</title>
+<chapter id="input-and-output">
+  <title>Input and Output</title>
   <para>
-    <emphasis>(yminsky: still very very rough)</emphasis>
+  </para>
+</chapter>
+<chapter id="concurrent-programming-with-async">
+  <title>Concurrent Programming with Async</title>
+  <para>
+    When you start building OCaml code that interfaces with external
+    systems, you'll soon need to handle concurrent operations. Consider
+    the case of a web server sending a large file to many clients, or a
+    GUI waiting for a mouse clicks. These applications must often block
+    threads of control flow waiting for input, and the runtime has to
+    resume these threads in response to new data. Efficiency is
+    important on busy systems withs thousands of connections, but
+    equally important is readable source code where the control flow of
+    the program is obvious at a glance.
   </para>
   <para>
-    This chapter covers several extensions to OCaml's syntax that are
-    distributed with Core. Before diving into the details of the syntax
-    extensions, let's take a small detour that will explain the
-    motivation behind creating them in the first place.
+    In some programming languages such as Java or C#, you've probably
+    used preemptive system threads, where multiple connections are often
+    tracked using operating system threads. Other languages such as
+    Javascript are single-threaded, and an application must register
+    function callbacks to be triggered upon an external event (such as a
+    timeout or browser click). Both mechanisms have tradeoffs.
+    Preemptive threads can be memory hungry and require careful locking
+    due to unpredictable interleaving. Event-driven systems can descend
+    into a maze of callbacks that are hard to read and understand.
   </para>
-  <sect1 id="serialization-with-s-expressions">
-    <title>Serialization with s-expressions</title>
+  <para>
+    The Async OCamllibrary offers an interesting hybrid model that lets
+    you write straight-line blocking OCaml code that scales well without
+    using preemptive threading. Async internally converts this code into
+    a single event loop. ``Threads'' in Async are normal OCaml
+    heap-allocated values, without any runtime magic, and their number
+    is limited only by your available main memory.
+  </para>
+  <para>
+    Lets begin by constructing a simple thread. Async follows the Core
+    convention and provides an <literal>Async.Std</literal> that
+    provides threaded variants of many standard library functions.
+  </para>
+  <programlisting>
+# require &quot;async.unix&quot; ;;
+# open Async.Std ;;
+# return 5 ;;
+- : int Deferred.t = &lt;abstr&gt;
+</programlisting>
+  <para>
+    The basic type of an Async thread is a
+    <literal>Deferred.t</literal>, which can be constructed by the
+    <literal>return</literal> function. The type parameter (in this case
+    <literal>int</literal>) represents the ultimate type of the thread
+    once it has completed. This return value cannot be used directly
+    while it is wrapped in a <literal>Deferred.t</literal> as it may not
+    be available yet. Instead, we can <emphasis>bind</emphasis> a
+    function closure to be called once the value is eventually ready.
+  </para>
+  <programlisting>
+# let x = return 5 ;;
+val x : int Deferred.t = &lt;abstr&gt;
+# let y = Deferred.bind x (fun a -&gt; return (string_of_int a)) ;;
+val y : string Deferred.t = &lt;abstr&gt;
+</programlisting>
+  <para>
+    Here, we've bound a function to <literal>x</literal> that will
+    convert the <literal>int</literal> to a <literal>string</literal>.
+    Notice that while both <literal>x</literal> and <literal>y</literal>
+    share a common <literal>Deferred.t</literal> type, their type
+    variables differ and so they cannot be interchangably used except in
+    polymorphic functions. This is very useful when refactoring large
+    codebases as you can tell if any function will block simply by the
+    presence of an <literal>Deferred.t</literal> in the signature.
+  </para>
+  <para>
+    Let's examine the function signatures of <literal>bind</literal> and
+    <literal>return</literal> more closely.
+  </para>
+  <programlisting>
+# return ;;
+- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
+# Deferred.bind ;;
+- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
+</programlisting>
+  <para>
+    <literal>return</literal>, <literal>bind</literal> and the
+    <literal>Deferred.t</literal> type all contain polymorphic type
+    variables that are inferred based on how they are used in your code.
+    In <literal>bind</literal>, the <literal>'a</literal> type of the
+    argument passed to the callback <emphasis>must</emphasis> be the
+    same as the <literal>'a Deferred.t</literal> of the input thread,
+    preventing runtime mismatches between callbacks. Both
+    <literal>bind</literal> and <literal>return</literal> form a design
+    pattern in functional programming known as
+    <emphasis>monads</emphasis>, and you will run across this signature
+    in many applications beyond just threads.
+  </para>
+  <programlisting>
+# let x = return 5 ;;
+val x : int Deferred.t = &lt;abstr&gt;
+# x &gt;&gt;= (fun a -&gt; return (string_of_int a)) ;;
+val - : string Deferred.t = &lt;abstr&gt;
+# x &gt;&gt;| string_of_int ;;
+val - : string Deferred.t = &lt;abstr&gt;
+</programlisting>
+  <para>
+    TODO explain <literal>&gt;&gt;=</literal> and
+    <literal>&gt;&gt;|</literal>
+  </para>
+  <programlisting>
+# Lwt_unix.run ;;
+- : 'a Lwt.t -&gt; 'a = &lt;fun&gt;
+# Lwt_unix.run y;;
+- : string = &quot;5&quot;
+</programlisting>
+  <para>
+    <literal>Lwt_unix.run</literal> executes a thread until it
+    completes, and returns a normal OCaml value. This usually forms the
+    main loop of your program, as threads cannot be unblocked unless
+    they run within the <literal>run</literal> function.
+  </para>
+  <sect1 id="timing-and-thread-composition">
+    <title>Timing and Thread Composition</title>
     <para>
-      Serialization, <emphasis>i.e.</emphasis> reading and writing
-      program data to a sequence of bytes, is an important and common
-      programming task. To this end, Core comes with good support for
-      <emphasis>s-expressions</emphasis>, which are a convenient
-      general-purpose serialization format. The type of an s-expression
-      is as follows:
+      Our examples so far have been with static threads, and now we'll
+      look at how to coordinate multiple threads and timeouts. Lets
+      write a program that spins off two threads, each of which sleep
+      for some random amount of time, and then one prints
+      &quot;Heads&quot; and the other &quot;Tails&quot;, and finally
+      prints &quot;Finished&quot; before exiting.
     </para>
     <programlisting language="ocaml">
-module Sexp : sig
-  type t = Atom of string | List of t list
-end
+open Lwt
+open Printf
+
+let main () =
+  bind (join [
+    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () -&gt;
+      print_endline &quot;Heads&quot;;
+      return ()
+    );
+    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () -&gt;
+      print_endline &quot;Tails&quot;;
+      return ()
+    );
+  ]) (fun () -&gt;
+    print_endline &quot;Finished&quot;;
+    return ()
+  )
+
+let _ = Lwt_unix.run (main ())
 </programlisting>
     <para>
-      An s-expression is in essence a nested parenthetical list whose
-      atomic values are strings. The <literal>Sexp</literal> module
-      comes with functionality for parsing and printing s-expressions.
-    </para>
-    <programlisting>
-# let sexp =
-    let a x = Sexp.Atom x and l x = Sexp.List x in
-    l [a &quot;this&quot;;l [a &quot;is&quot;; a &quot;an&quot;]; l [a &quot;s&quot;; a &quot;expression&quot;]];;
-val sexp : Sexp.t = (this (is an) (s expression))
-</programlisting>
-    <para>
-      In addition, most of the base types in Core support conversion to
-      and from s-expressions. For example, we can write:
-    </para>
-    <programlisting>
-# Int.sexp_of_t 3;;
-- : Sexp.t = 3
-# List.sexp_of_t;;
-- : ('a -&gt; Sexp.t) -&gt; 'a List.t -&gt; Sexp.t = &lt;fun&gt;
-# List.sexp_of_t Int.sexp_of_t [1;2;3];;
-- : Sexp.t = (1 2 3)
-</programlisting>
-    <para>
-      Notice that <literal>List.sexp_of_t</literal> is polymorphic, and
-      takes as its first argument another conversion function to handle
-      the elements of the list to be converted. Core uses this scheme
-      more generally for defining sexp-converters for polymorphic types.
+      This is a full code example that you can compile via (???). The
+      <literal>bind</literal> function is joined by couple of new
+      functions. <literal>Lwt_unix.sleep</literal> puts a thread to
+      sleep for a given time, and <literal>join</literal> takes a list
+      of threads and waits for all of them to terminate. If at least one
+      thread fails then <literal>join</literal> fails with the same
+      exception as the first to fail <emphasis>after</emphasis> all
+      threads terminate. When run, this program immediately spawns two
+      coin threads, and waits on them to complete before calling the
+      final &quot;Finished&quot; closure.
     </para>
     <para>
-      But what if you want a function to convert some brand new type to
-      an s-expression? You can of course write it yourself:
+      The control flow above is somewhat hard to follow due to all the
+      nested binds, and so Lwt provides infix operators with the same
+      behaviour.
     </para>
-    <programlisting>
-# type t = { foo: int; bar: float };;
-# let sexp_of_t t =
-    let a x = Sexp.Atom x and l x = Sexp.List x in
-    l [ l [a &quot;foo&quot;; Int.sexp_of_t t.foo  ];
-        l [a &quot;bar&quot;; Float.sexp_of_t t.bar]; ]
-  ;;
-val sexp_of_t : t -&gt; Core.Std.Sexp.t = &lt;fun&gt;
-# sexp_of_t { foo = 3; bar = -5.5 };;
-- : Core.Std.Sexp.t = ((foo 3) (bar -5.5))
-</programlisting>
+    <informaltable>
+      <tgroup cols="3">
+        <colspec align="left" />
+        <colspec align="left" />
+        <colspec align="left" />
+        <thead>
+          <row>
+            <entry>
+              Function
+            </entry>
+            <entry>
+              Operator
+            </entry>
+            <entry>
+              Behaviour
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              bind
+            </entry>
+            <entry>
+              &gt;&gt;=
+            </entry>
+            <entry>
+              Wait for thread to finish, and apply return to new thread
+            </entry>
+          </row>
+          <row>
+            <entry>
+              join
+            </entry>
+            <entry>
+              &lt;&amp;&gt;
+            </entry>
+            <entry>
+              Wait for two threads to finish and return unit
+            </entry>
+          </row>
+          <row>
+            <entry>
+              choose
+            </entry>
+            <entry>
+              &lt;?&gt;
+            </entry>
+            <entry>
+              Wait for the first thread to finish, cancel rest
+            </entry>
+          </row>
+          <row>
+            <entry>
+              map
+            </entry>
+            <entry>
+              &gt;|=
+            </entry>
+            <entry>
+              Map a non-blocking function over a blocking thread
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
     <para>
-      This is somewhat tiresome to write, and it gets more so when you
-      consider the parser, <emphasis>i.e.</emphasis>,
-      <literal>t_of_sexp</literal>, which is considerably more complex.
-      Writing this kind of parsing and printing code by hand is
-      mechanical and error prone, not to mention a drag.
+      We can now rewrite the earlier coin-flipping example using these
+      operators. Notice that we can explicitly name threads simply by
+      binding them via <literal>let</literal>, and they execute in
+      parallel until joined together.
     </para>
-    <para>
-      Given how mechanical the code is, you could imagine writing a
-      program that inspected the type definition and auto-generated the
-      conversion code for you. That is precisely where syntax extensions
-      come in. Using Sexplib and adding <literal>with sexp</literal> as
-      an annotation to our type definition, we get the functions we want
-      for free.
-    </para>
-    <programlisting>
-# type t = { foo: int; bar: float } with sexp;;
-type t = { foo : int; bar : float; }
-val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
-# t_of_sexp (Sexp.of_string &quot;((bar 35) (foo 3))&quot;);;
-- : t = {foo = 3; bar = 35.}
-</programlisting>
-    <para>
-      (You can ignore <literal>t_of_sexp__</literal>, which is a helper
-      function that is needed in very rare cases.)
-    </para>
-    <para>
-      The syntax-extensions in Core that we're going to discuss all have
-      this same basic structure: they auto-generate code based on type
-      definitions, implementing functionality that you could in theory
-      have implemented by hand, but with far less programmer effort.
-    </para>
-    <para>
-      There are several syntax extensions distributed with Core,
-      including:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <emphasis role="strong">Sexplib</emphasis>: provides
-          serialization for s-expressions.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Bin_prot</emphasis>: provides
-          serialization to an efficient binary format.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Fieldslib</emphasis>: generates
-          first-class values that represent fields of a record, as well
-          as accessor functions and setters for mutable record fields.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Variantslib</emphasis>: like Fieldslib
-          for variants, producing first-class variants and other helper
-          functions for interacting with variant types.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Pa_compare</emphasis>: generates
-          efficient, type-specialized comparison functions.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Pa_typehash</emphasis>: generates a
-          hash value for a type definition, <emphasis>i.e.</emphasis>,
-          an integer that is highly unlikely to be the same for two
-          distinct types.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      We'll discuss each of these syntax extensions in detail, starting
-      with Sexplib.
-    </para>
-  </sect1>
-  <sect1 id="sexplib">
-    <title>Sexplib</title>
-    <sect2 id="formatting-of-s-expressions">
-      <title>Formatting of s-expressions</title>
-      <para>
-        Sexplib's format for s-expressions is pretty straightforward: an
-        s-expression is written down as a nested parenthetical
-        expression, with whitespace-separated strings as the atoms.
-        Quotes are used for atoms that contain parenthesis or spaces
-        themselves, backslash is the escape character, and semicolons
-        are used to introduce comments. Thus, if you create the
-        following file:
-      </para>
-      <programlisting>
-;; foo.scm
-
-((foo 3.3) ;; Shall I compare thee  to a summer's dream?
- (bar &quot;this is () an \&quot; atom&quot;))
-</programlisting>
-      <para>
-        we can load it up and print it back out again:
-      </para>
-      <programlisting>
-# Sexp.load_sexp &quot;foo.scm&quot;;;
-- : Sexp.t = ((foo 3.3) (bar &quot;this is () an \&quot; atom&quot;))
-</programlisting>
-      <para>
-        Note that the comments were dropped from the file upon reading.
-        This is expected, since there's no place in the
-        <literal>Sexp.t</literal> type to store comments.
-      </para>
-      <para>
-        If we introduce an error into our s-expression, by, say,
-        deleting the open-paren in front of <literal>bar</literal>,
-        we'll get a parse error:
-      </para>
-      <programlisting>
-# Exn.handle_uncaught ~exit:false (fun () -&gt;
-    ignore (Sexp.load_sexp &quot;foo.scm&quot;));;
-  Uncaught exception:
-
-  (Sexplib.Sexp.Parse_error
-   ((location parse) (err_msg &quot;unexpected character: ')'&quot;) (text_line 4)
-    (text_char 29) (global_offset 94) (buf_pos 94)))
-</programlisting>
-      <para>
-        (In the above, we use <literal>Exn.handle_uncaught</literal> to
-        make sure that the exception gets printed out in full detail.)
-      </para>
-    </sect2>
-    <sect2 id="sexp-converters">
-      <title>Sexp converters</title>
-      <para>
-        The most important functionality provided by Sexplib is the
-        auto-generation of converters for new types. We've seen a bit of
-        how this works already, but let's walk through a complete
-        example. Here's the source for the beginning of a library for
-        representing integer intervals.
-      </para>
-      <programlisting language="ocaml">
-(* file: int_interval.ml *)
-(* Module for representing closed integer intervals *)
-
-open Core.Std
-
-(* Invariant: For any Range (x,y), y &gt; x *)
-type t = | Range of int * int
-         | Empty
-with sexp
-
-let is_empty = function Empty -&gt; true | Range _ -&gt; false
-let create x y = if x &gt; y then Empty else Range (x,y)
-let contains i x = match i with
-   | Empty -&gt; false
-   | Range (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
-</programlisting>
-      <para>
-        We can now use this module as follows:
-      </para>
-      <programlisting language="ocaml">
-(* file: test_interval.ml *)
-
-open Core.Std
-
-let intervals =
-  let module I = Int_interval in
-  [ I.create 3 4;
-    I.create 5 4; (* should be empty *)
-    I.create 2 3;
-    I.create 1 6;
-  ]
-
-let () =
-  intervals
-  |! List.sexp_of_t Int_interval.sexp_of_t
-  |! Sexp.to_string_hum
-  |! print_endline
-</programlisting>
-      <para>
-        But we're still missing something: we haven't created an
-        <literal>mli</literal> for <literal>Int_interval</literal> yet.
-        Note that we need to explicitly export the s-expression
-        converters that were created within the ml. If we don't:
-      </para>
-      <programlisting language="ocaml">
-(* file: int_interval.mli *)
-(* Module for representing closed integer intervals *)
-
-type t
-
-val is_empty : t -&gt; bool
-val create : int -&gt; int -&gt; t
-val contains : t -&gt; int -&gt; bool
-</programlisting>
-      <para>
-        then we'll get the following error:
-      </para>
-      <programlisting>
-File &quot;test_interval.ml&quot;, line 15, characters 20-42:
-Error: Unbound value Int_interval.sexp_of_t
-Command exited with code 2.
-</programlisting>
-      <para>
-        We could export the types by hand:
-      </para>
-      <programlisting language="ocaml">
-type t
-val sexp_of_t : Sexp.t -&gt; t
-val t_of_sexp : t -&gt; Sexp.t
-</programlisting>
-      <para>
-        But Sexplib has a shorthand for this as well, so that we can
-        instead write simply:
-      </para>
-      <programlisting language="ocaml">
-type t with sexp
-</programlisting>
-      <para>
-        at which point <literal>test_interval.ml</literal> will compile
-        again, and if we run it, we'll get the following output:
-      </para>
-      <programlisting>
-$ ./test_interval.native
-((Range 3 4) Empty (Range 2 3) (Range 1 6))
-</programlisting>
-      <sidebar> <title>
-      Preserving invariants
-      </title>
-      <para>
-        One easy mistake to make when dealing with sexp converters is to
-        ignore the fact that those converters can violate the invariants
-        of your code. For example, the <literal>Int_interval</literal>
-        module depends for the correctness of the
-        <literal>is_empty</literal> check on the fact that for any value
-        <literal>Range (x,y)</literal>, <literal>y</literal> is greater
-        than or equal to <literal>x</literal>. The
-        <literal>create</literal> function preserves this invariant, but
-        the <literal>t_of_sexp</literal> function does not.
-      </para>
-      <para>
-        We can fix this problem by writing a custom sexp-converter, in
-        this case, using the sexp-converter that we already have:
-      </para>
-      <programlisting language="ocaml">
-type t = | Range of int * int
-         | Empty
-with sexp
-
-let create x y = if x &gt; y then Empty else Range (x,y)
-
-let t_of_sexp sexp =
-  let t = t_of_sexp sexp in
-  begin match t with
-  | Range (x,y) when y &lt; x -&gt;
-    of_sexp_error &quot;Upper and lower bound of Range swapped&quot; sexp
-  | Empty | Range _ -&gt; ()
-  end;
-  t
-</programlisting>
-      <para>
-        We call the function <literal>of_sexp_error</literal> to raise
-        an exception because that improves the error reporting that
-        Sexplib can provide when a conversion fails.
-      </para>
-      </sidebar>
-    </sect2>
-    <sect2 id="getting-good-error-messages">
-      <title>Getting good error messages</title>
-      <para>
-        There are two steps to deserializing a type from an
-        s-expression: first, converting the bytes in a file to an
-        s-expression, and the second, converting that s-expression into
-        the type in question. One problem with this is that it can be
-        hard to localize errors to the right place using this scheme.
-        Consider the following example:
-      </para>
-      <programlisting language="ocaml">
-(* file: read_foo.ml *)
-
-open Core.Std
-
-type t = { a: string; b: int; c: float option } with sexp
-
-let run () =
-  let t =
-    Sexp.load_sexp &quot;foo.scm&quot;
-    |! t_of_sexp
+    <programlisting language="ocaml">
+let main () =
+  let t1 =
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;= fun () -&gt;
+    return (print_endline &quot;Heads&quot;)
   in
-  printf &quot;b is: %d\n%!&quot; t.b
-
-let () =
-  Exn.handle_uncaught ~exit:true run
-</programlisting>
-      <para>
-        If you were to run this on a malformatted file, say, this one:
-      </para>
-      <programlisting>
-;; foo.scm
-((a not-an-integer)
- (b not-an-integer)
- (c ()))
-</programlisting>
-      <para>
-        you'll get the following error:
-      </para>
-      <programlisting>
-read_foo $ ./read_foo.native
-Uncaught exception:
-
-  (Sexplib.Conv.Of_sexp_error
-   (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) not-an-integer)
-</programlisting>
-      <para>
-        If all you have is the error message and the string, it's not
-        terribly informative. In particular, you know that the parsing
-        error-ed out on the atom &quot;not-an-integer&quot;, but you
-        don't know which one! In a large file, this kind of bad error
-        message can be pure misery.
-      </para>
-      <para>
-        But there's hope! If we make small change to the
-        <literal>run</literal> function as follows:
-      </para>
-      <programlisting language="ocaml">
-let run () =
-  let t = Sexp.load_sexp_conv_exn &quot;foo.scm&quot; t_of_sexp in
-  printf &quot;b is: %d\n%!&quot; t.b
-</programlisting>
-      <para>
-        and run it again, we'll get the following much more helpful
-        error message:
-      </para>
-      <programlisting language="ocaml">
-read_foo $ ./read_foo.native
-Uncaught exception:
-
-  (Sexplib.Conv.Of_sexp_error
-   (Sexplib.Sexp.Annotated.Conv_exn foo.scm:3:4
-    (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;))
-   not-an-integer)
-</programlisting>
-      <para>
-        In the above error, &quot;foo.scm:3:4&quot; tells us that the
-        error occurred on &quot;foo.scm&quot;, line 3, character 4,
-        which is a much better start for figuring out what has gone
-        wrong.
-      </para>
-    </sect2>
-    <sect2 id="sexp-conversion-directives">
-      <title>Sexp-conversion directives</title>
-      <para>
-        Sexplib supports a collection of directives for modifying the
-        default behavior of the auto-generated sexp-converters. These
-        directives allow you to customize the way in which types are
-        represented as s-expressions without having to write a custom
-        parser. We describe these directives below.
-      </para>
-      <sect3 id="sexp-opaque">
-        <title><literal>sexp-opaque</literal></title>
-        <para>
-          The most commonly used directive is
-          <literal>sexp_opaque</literal>, whose purpose is to mark a
-          given component of a type as being unconvertible. Anything
-          marked with <literal>sexp_opaque</literal> will be presented
-          as the atom <literal>&lt;opaque&gt;</literal> by the to-sexp
-          converter, and will trigger an exception from the from-sexp
-          converter. Note that the type of a component marked as opaque
-          doesn't need to have a sexp-converter defined. Here, if we
-          define a type without a sexp-converter, and then try to use it
-          another type with a sexp-converter, we'll error out:
-        </para>
-        <programlisting>
-# type no_converter = int * int;;
-type no_converter = int * int
-# type t = { a: no_converter; b: string } with sexp;;
-Characters 14-26:
-  type t = { a: no_converter; b: string } with sexp;;
-                ^^^^^^^^^^^^
-Error: Unbound value no_converter_of_sexp
-</programlisting>
-        <para>
-          But with <literal>sexp_opaque</literal>, we won't:
-        </para>
-        <programlisting>
-# type t = { a: no_converter sexp_opaque; b: string } with sexp;;
-type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
-val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
-</programlisting>
-        <para>
-          And if we now convert a value of this type to an s-expression,
-          we'll see the contents of field <literal>a</literal> marked as
-          opaque:
-        </para>
-        <programlisting>
-# sexp_of_t { a = (3,4); b = &quot;foo&quot; };;
-- : Sexp.t = ((a &lt;opaque&gt;) (b foo))
-</programlisting>
-      </sect3>
-      <sect3 id="sexp_option">
-        <title><literal>sexp_option</literal></title>
-        <para>
-          Another common directive is <literal>sexp_opaque</literal>,
-          which is used to make an optional field in a record. Ordinary
-          optional values are represented either as
-          <literal>()</literal> for <literal>None</literal>, or as
-          <literal>(x)</literal> for <literal>Some x</literal>. If you
-          put an option in a record field, then the record field will
-          always be required, and its value will be presented in the way
-          an ordinary optional value would. For example:
-        </para>
-        <programlisting>
-# type t = { a: int option; b: string } with sexp;;
-# sexp_of_t { a = None; b = &quot;hello&quot; };;
-- : Sexp.t = ((a ()) (b hello))
-# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
-- : Sexp.t = ((a (3)) (b hello))
-</programlisting>
-        <para>
-          But what if we want a field to be optional,
-          <emphasis>i.e.</emphasis>, we want to allow it to be omitted
-          from the record entirely? In that case, we can mark it with
-          <literal>sexp_option</literal>:
-        </para>
-        <programlisting language="ocaml">
-# type t = { a: int sexp_option; b: string } with sexp;;
-# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
-- : Sexp.t = ((a 3) (b hello))
-# sexp_of_t { a = None; b = &quot;hello&quot; };;
-- : Sexp.t = ((b hello))
-</programlisting>
-      </sect3>
-      <sect3 id="sexp_list">
-        <title><literal>sexp_list</literal></title>
-        <para>
-          One problem with the auto-generated sexp-converters is that
-          they can have more parentheses than one would ideally like.
-          Consider, for example, the following variant type:
-        </para>
-        <programlisting>
-# type compatible_versions = | Specific of string list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
-- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
-</programlisting>
-        <para>
-          You might prefer to make the syntax a bit less
-          parenthesis-laden by dropping the parentheses around the list.
-          <literal>sexp_list</literal> gives us this alternate syntax:
-        </para>
-        <programlisting>
-# type compatible_versions = | Specific of string sexp_list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
-- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
-</programlisting>
-      </sect3>
-    </sect2>
-  </sect1>
-  <sect1 id="bin_prot">
-    <title>Bin_prot</title>
-    <para>
-      S-expressions are a good serialization format when you need
-      something machine-parseable as well as human readable and
-      editable. But Sexplib's s-expressions are not particularly
-      performant. There are a number of reasons for this. For one thing,
-      s-expression serialization goes through an intermediate type,
-      <literal>Sexp.t</literal>, which must be allocated and is then
-      typically thrown away, putting non-trivial pressure on the GC. In
-      addition, parsing and printing to strings in an ASCII format can
-      be expensive for types like <literal>int</literal>s,
-      <literal>float</literal>s and <literal>Time.t</literal>s where
-      some real computation needs to be done to produce or parse the
-      ASCII representation.
-    </para>
-    <para>
-      Bin_prot is a library designed to address these issues by
-      providing fast serialization in a compact binary format. Kicking
-      off the syntax extension is done by putting
-      <literal>with bin_io</literal>. (This looks a bit unsightly in the
-      top-level because of all the definitions that are generated. We'll
-      elide those definitions here, but you can see it for yourself in
-      the toplevel.)
-    </para>
-    <para>
-      Here's a small complete example of a program that can read and
-      write values using bin-io. Here, the serialization is of types
-      that might be used as part of a message-queue, where each message
-      has a topic, some content, and a source, which is in turn a
-      hostname and a port.
-    </para>
-    <programlisting language="ocaml">
-(* file: message_example.ml *)
-
-open Core.Std
-
-(* The type of a message *)
-module Message = struct
-  module Source = struct
-    type t = { hostname: string;
-               port: int;
-             }
-    with bin_io
-  end
-
-  type t = { topic: string;
-             content: string;
-             source: Source.t;
-           }
-  with bin_io
-end
-
-(* Create the 1st-class module providing the binability of messages *)
-let binable = (module Message : Binable.S with type t = Message.t)
-
-(* Saves a message to an output channel.  The message is serialized to
-   a bigstring before being written out to the channel.  Also, a
-   binary encoding of an integer is written out to tell the reader how
-   long of a message to expect.  *)
-let save_message outc msg =
-  let s = Binable.to_bigstring binable msg in
-  let len = Bigstring.length s in
-  Out_channel.output_binary_int outc len;
-  Bigstring.really_output outc s
-
-(* Loading the message is done by first reading in the length, and by
-   then reading in the appropriate number of bytes into a Bigstring
-   created for that purpose. *)
-let load_message inc =
-  match In_channel.input_binary_int inc with
-  | None -&gt; failwith &quot;Couldn't load message: length missing from header&quot;
-  | Some len -&gt;
-    let buf = Bigstring.create len in
-    Bigstring.really_input ~pos:0 ~len inc buf;
-    Binable.of_bigstring binable buf
-
-(* To generate some example messages *)
-let example content =
-  let source =
-    { Message.Source.
-      hostname = &quot;ocaml.org&quot;; port = 2322 }
+  let t2 = 
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;= fun () -&gt;
+    return (print_endline &quot;Tails&quot;)
   in
-  { Message.
-    topic = &quot;rwo-example&quot;; content; source; }
-
-(* write out three messages... *)
-let write_messages () =
-  let outc = Out_channel.create &quot;tmp.bin&quot; in
-  List.iter ~f:(save_message outc) [
-    example &quot;a wonderful&quot;;
-    example &quot;trio&quot;;
-    example &quot;of messages&quot;;
-  ];
-  Out_channel.close outc
-
-(* ... and read them back in *)
-let read_messages () =
-  let inc = In_channel.create &quot;tmp.bin&quot; in
-  for i = 1 to 3 do
-    let msg = load_message inc in
-    printf &quot;msg %d: %s\n&quot; i msg.Message.content
-  done
-
-let () =
-  write_messages (); read_messages ()
+  (t1 &lt;&amp;&gt; t2) &gt;&gt;= fun () -&gt;
+  return (print_endline &quot;Finished&quot;)
 </programlisting>
+    <sect2 id="syntax-extensions">
+      <title>Syntax Extensions</title>
+      <programlisting language="ocaml">
+let main () =
+  let t1 =
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;
+    return (print_endline &quot;Heads&quot;)
+  in
+  let t2 = 
+    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;
+    return (print_endline &quot;Tails&quot;)
+  in
+  lwt () = t1 &lt;&amp;&gt; t2 in
+  return (print_endline &quot;Finished&quot;)
+</programlisting>
+    </sect2>
+    <sect2 id="cancellation">
+      <title>Cancellation</title>
+      <para>
+        <literal>choose</literal> behaves as the first thread in l to
+        terminate. If several threads are already terminated, one is
+        chosen at random. Mixing normal exceptions and Lwt exceptions is
+        bad.
+      </para>
+    </sect2>
   </sect1>
-  <sect1 id="fieldslib">
-    <title>Fieldslib</title>
+  <sect1 id="a-simple-tcp-echo-server">
+    <title>A simple TCP Echo Server</title>
     <para>
-      One common idiom when using records is to provide field accessor
-      functions for a particular record.
+      Not using Lwt_daemon, but directly. This will be UNIX-only from
+      this stage on, hmm...
     </para>
-    <programlisting>
-type t = { topic: string;
-           content: string;
-           source: Source.t;
-         }
+  </sect1>
+  <sect1 id="onto-an-http-server">
+    <title>Onto an HTTP Server</title>
+    <para>
+      Describe cohttp (much simpler than Ocsigen at this stage).
+    </para>
+  </sect1>
+  <sect1 id="binding-to-the-github-api">
+    <title>Binding to the Github API</title>
+    <para>
+      Show how we can use a monadic style to bind to the Github API and
+      make simple JSON requests/responses.
+    </para>
+    <sidebar><title>
+    A Note on Portability
+    </title>
+    <para>
+      Explain libev and why its needed here.
+    </para>
+    </sidebar>
 
-let topic   t = t.topic
-let content t = t.content
-let source  t = t.source
-</programlisting>
-    <para>
-      Similarly, sometimes you simultaneously want an accessor to a
-      field of a record and a textual representation of the name of that
-      field. This might come up if you were validating a field and
-      needed the string representation to generate an error message, or
-      if you wanted to scaffold a form in a GUI automatically based on
-      the fields of a record. Fieldslib provides a module
-      <literal>Field</literal> for this purpose. Here's some code for
-      creating <literal>Field.t</literal>'s for all the fields of our
-      type <literal>t</literal>.
-    </para>
-    <programlisting language="ocaml">
-# module Fields = struct
-    let topic =
-      { Field.
-        name   = &quot;topic&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.topic);
-        fset   = (fun t topic -&gt; { t with topic });
-      }
-    let content =
-      { Field.
-        name   = &quot;content&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.content);
-        fset   = (fun t content -&gt; { t with content });
-      }
-    let source =
-      { Field.
-        name   = &quot;source&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.source);
-        fset   = (fun t source -&gt; { t with source });
-      }
-  end ;;
-module Fields :
-  sig
-    val topic : (t, string list) Core.Std.Field.t
-    val content : (t, string) Core.Std.Field.t
-    val source : (t, Source.t) Core.Std.Field.t
-  end
-</programlisting>
+
   </sect1>
 </chapter>
 <chapter id="object-oriented-programming">
@@ -10035,414 +9541,30 @@ end;;
     </sect2>
   </sect1>
 </chapter>
-<chapter id="concurrent-programming-with-async">
-  <title>Concurrent Programming with Async</title>
+<chapter id="tuning-and-profiling">
+  <title>Tuning and Profiling</title>
   <para>
-    When you start building OCaml code that interfaces with external
-    systems, you'll soon need to handle concurrent operations. Consider
-    the case of a web server sending a large file to many clients, or a
-    GUI waiting for a mouse clicks. These applications must often block
-    threads of control flow waiting for input, and the runtime has to
-    resume these threads in response to new data. Efficiency is
-    important on busy systems withs thousands of connections, but
-    equally important is readable source code where the control flow of
-    the program is obvious at a glance.
   </para>
-  <para>
-    In some programming languages such as Java or C#, you've probably
-    used preemptive system threads, where multiple connections are often
-    tracked using operating system threads. Other languages such as
-    Javascript are single-threaded, and an application must register
-    function callbacks to be triggered upon an external event (such as a
-    timeout or browser click). Both mechanisms have tradeoffs.
-    Preemptive threads can be memory hungry and require careful locking
-    due to unpredictable interleaving. Event-driven systems can descend
-    into a maze of callbacks that are hard to read and understand.
-  </para>
-  <para>
-    The Async OCamllibrary offers an interesting hybrid model that lets
-    you write straight-line blocking OCaml code that scales well without
-    using preemptive threading. Async internally converts this code into
-    a single event loop. ``Threads'' in Async are normal OCaml
-    heap-allocated values, without any runtime magic, and their number
-    is limited only by your available main memory.
-  </para>
-  <para>
-    Lets begin by constructing a simple thread. Async follows the Core
-    convention and provides an <literal>Async.Std</literal> that
-    provides threaded variants of many standard library functions.
-  </para>
-  <programlisting>
-# require &quot;async.unix&quot; ;;
-# open Async.Std ;;
-# return 5 ;;
-- : int Deferred.t = &lt;abstr&gt;
-</programlisting>
-  <para>
-    The basic type of an Async thread is a
-    <literal>Deferred.t</literal>, which can be constructed by the
-    <literal>return</literal> function. The type parameter (in this case
-    <literal>int</literal>) represents the ultimate type of the thread
-    once it has completed. This return value cannot be used directly
-    while it is wrapped in a <literal>Deferred.t</literal> as it may not
-    be available yet. Instead, we can <emphasis>bind</emphasis> a
-    function closure to be called once the value is eventually ready.
-  </para>
-  <programlisting>
-# let x = return 5 ;;
-val x : int Deferred.t = &lt;abstr&gt;
-# let y = Deferred.bind x (fun a -&gt; return (string_of_int a)) ;;
-val y : string Deferred.t = &lt;abstr&gt;
-</programlisting>
-  <para>
-    Here, we've bound a function to <literal>x</literal> that will
-    convert the <literal>int</literal> to a <literal>string</literal>.
-    Notice that while both <literal>x</literal> and <literal>y</literal>
-    share a common <literal>Deferred.t</literal> type, their type
-    variables differ and so they cannot be interchangably used except in
-    polymorphic functions. This is very useful when refactoring large
-    codebases as you can tell if any function will block simply by the
-    presence of an <literal>Deferred.t</literal> in the signature.
-  </para>
-  <para>
-    Let's examine the function signatures of <literal>bind</literal> and
-    <literal>return</literal> more closely.
-  </para>
-  <programlisting>
-# return ;;
-- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
-# Deferred.bind ;;
-- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
-</programlisting>
-  <para>
-    <literal>return</literal>, <literal>bind</literal> and the
-    <literal>Deferred.t</literal> type all contain polymorphic type
-    variables that are inferred based on how they are used in your code.
-    In <literal>bind</literal>, the <literal>'a</literal> type of the
-    argument passed to the callback <emphasis>must</emphasis> be the
-    same as the <literal>'a Deferred.t</literal> of the input thread,
-    preventing runtime mismatches between callbacks. Both
-    <literal>bind</literal> and <literal>return</literal> form a design
-    pattern in functional programming known as
-    <emphasis>monads</emphasis>, and you will run across this signature
-    in many applications beyond just threads.
-  </para>
-  <programlisting>
-# let x = return 5 ;;
-val x : int Deferred.t = &lt;abstr&gt;
-# x &gt;&gt;= (fun a -&gt; return (string_of_int a)) ;;
-val - : string Deferred.t = &lt;abstr&gt;
-# x &gt;&gt;| string_of_int ;;
-val - : string Deferred.t = &lt;abstr&gt;
-</programlisting>
-  <para>
-    TODO explain <literal>&gt;&gt;=</literal> and
-    <literal>&gt;&gt;|</literal>
-  </para>
-  <programlisting>
-# Lwt_unix.run ;;
-- : 'a Lwt.t -&gt; 'a = &lt;fun&gt;
-# Lwt_unix.run y;;
-- : string = &quot;5&quot;
-</programlisting>
-  <para>
-    <literal>Lwt_unix.run</literal> executes a thread until it
-    completes, and returns a normal OCaml value. This usually forms the
-    main loop of your program, as threads cannot be unblocked unless
-    they run within the <literal>run</literal> function.
-  </para>
-  <sect1 id="timing-and-thread-composition">
-    <title>Timing and Thread Composition</title>
-    <para>
-      Our examples so far have been with static threads, and now we'll
-      look at how to coordinate multiple threads and timeouts. Lets
-      write a program that spins off two threads, each of which sleep
-      for some random amount of time, and then one prints
-      &quot;Heads&quot; and the other &quot;Tails&quot;, and finally
-      prints &quot;Finished&quot; before exiting.
-    </para>
-    <programlisting language="ocaml">
-open Lwt
-open Printf
-
-let main () =
-  bind (join [
-    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () -&gt;
-      print_endline &quot;Heads&quot;;
-      return ()
-    );
-    bind (Lwt_unix.sleep (Random.float 3.0)) (fun () -&gt;
-      print_endline &quot;Tails&quot;;
-      return ()
-    );
-  ]) (fun () -&gt;
-    print_endline &quot;Finished&quot;;
-    return ()
-  )
-
-let _ = Lwt_unix.run (main ())
-</programlisting>
-    <para>
-      This is a full code example that you can compile via (???). The
-      <literal>bind</literal> function is joined by couple of new
-      functions. <literal>Lwt_unix.sleep</literal> puts a thread to
-      sleep for a given time, and <literal>join</literal> takes a list
-      of threads and waits for all of them to terminate. If at least one
-      thread fails then <literal>join</literal> fails with the same
-      exception as the first to fail <emphasis>after</emphasis> all
-      threads terminate. When run, this program immediately spawns two
-      coin threads, and waits on them to complete before calling the
-      final &quot;Finished&quot; closure.
-    </para>
-    <para>
-      The control flow above is somewhat hard to follow due to all the
-      nested binds, and so Lwt provides infix operators with the same
-      behaviour.
-    </para>
-    <informaltable>
-      <tgroup cols="3">
-        <colspec align="left" />
-        <colspec align="left" />
-        <colspec align="left" />
-        <thead>
-          <row>
-            <entry>
-              Function
-            </entry>
-            <entry>
-              Operator
-            </entry>
-            <entry>
-              Behaviour
-            </entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>
-              bind
-            </entry>
-            <entry>
-              &gt;&gt;=
-            </entry>
-            <entry>
-              Wait for thread to finish, and apply return to new thread
-            </entry>
-          </row>
-          <row>
-            <entry>
-              join
-            </entry>
-            <entry>
-              &lt;&amp;&gt;
-            </entry>
-            <entry>
-              Wait for two threads to finish and return unit
-            </entry>
-          </row>
-          <row>
-            <entry>
-              choose
-            </entry>
-            <entry>
-              &lt;?&gt;
-            </entry>
-            <entry>
-              Wait for the first thread to finish, cancel rest
-            </entry>
-          </row>
-          <row>
-            <entry>
-              map
-            </entry>
-            <entry>
-              &gt;|=
-            </entry>
-            <entry>
-              Map a non-blocking function over a blocking thread
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-    <para>
-      We can now rewrite the earlier coin-flipping example using these
-      operators. Notice that we can explicitly name threads simply by
-      binding them via <literal>let</literal>, and they execute in
-      parallel until joined together.
-    </para>
-    <programlisting language="ocaml">
-let main () =
-  let t1 =
-    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;= fun () -&gt;
-    return (print_endline &quot;Heads&quot;)
-  in
-  let t2 = 
-    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;= fun () -&gt;
-    return (print_endline &quot;Tails&quot;)
-  in
-  (t1 &lt;&amp;&gt; t2) &gt;&gt;= fun () -&gt;
-  return (print_endline &quot;Finished&quot;)
-</programlisting>
-    <sect2 id="syntax-extensions-1">
-      <title>Syntax Extensions</title>
-      <programlisting language="ocaml">
-let main () =
-  let t1 =
-    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;
-    return (print_endline &quot;Heads&quot;)
-  in
-  let t2 = 
-    Lwt_unix.sleep (Random.float 3.0) &gt;&gt;
-    return (print_endline &quot;Tails&quot;)
-  in
-  lwt () = t1 &lt;&amp;&gt; t2 in
-  return (print_endline &quot;Finished&quot;)
-</programlisting>
-    </sect2>
-    <sect2 id="cancellation">
-      <title>Cancellation</title>
-      <para>
-        <literal>choose</literal> behaves as the first thread in l to
-        terminate. If several threads are already terminated, one is
-        chosen at random. Mixing normal exceptions and Lwt exceptions is
-        bad.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="a-simple-tcp-echo-server">
-    <title>A simple TCP Echo Server</title>
-    <para>
-      Not using Lwt_daemon, but directly. This will be UNIX-only from
-      this stage on, hmm...
-    </para>
-  </sect1>
-  <sect1 id="onto-an-http-server">
-    <title>Onto an HTTP Server</title>
-    <para>
-      Describe cohttp (much simpler than Ocsigen at this stage).
-    </para>
-  </sect1>
-  <sect1 id="binding-to-the-github-api">
-    <title>Binding to the Github API</title>
-    <para>
-      Show how we can use a monadic style to bind to the Github API and
-      make simple JSON requests/responses.
-    </para>
-    <sidebar><title>
-    A Note on Portability
-    </title>
-    <para>
-      Explain libev and why its needed here.
-    </para>
-    </sidebar>
-
-
-  </sect1>
 </chapter>
-<chapter id="docbook-playground">
-  <title>DocBook Playground</title>
-  <highlights>
+<chapter id="interfacing-with-c">
+  <title>Interfacing with C</title>
   <para>
-    A highlights section at the beginning of a chapter looks like this.
-    It will:
   </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        Have a set of useful bits.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        List entry 2.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        List entry 3.
-      </para>
-    </listitem>
-  </itemizedlist>
-  </highlights>
+</chapter>
+<chapter id="extending-ocaml-with-camlp4">
+  <title>Extending OCaml with Camlp4</title>
   <para>
-    Break up the notes with a normal paragraph of text.
   </para>
-  <tip>
+</chapter>
+<chapter id="packaging-and-build-systems">
+  <title>Packaging and Build Systems</title>
   <para>
-    This is a tip in Docbook. Lorem ipsum dolor sit amet, consectetuer
-    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
-    dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
-    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
-    aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in
-    hendrerit in vulputate velit esse molestie consequat, vel illum
-    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
-    odio dignissim qui blandit praesent luptatum zzril delenit augue
-    duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta
-    nobis eleifend option congue nihil imperdiet doming id quod mazim
-    placerat facer possim assum. Typi non habent claritatem insitam; est
-    usus legentis in iis qui facit eorum claritatem. Investigationes
-    demonstraverunt lectores legere me lius quod ii legunt saepius.
   </para>
-  </tip>
-
-  <note>
-  <title>
-  this is a note title
-  </title>
+</chapter>
+<chapter id="parsing-with-ocamllex-and-ocamlyacc">
+  <title>Parsing with OCamllex and OCamlyacc</title>
   <para>
-    this is a tip in docbook. lorem ipsum dolor sit amet, consectetuer
-    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
-    dolore magna aliquam erat volutpat. ut wisi enim ad minim veniam,
-    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
-    aliquip ex ea commodo consequat. duis autem vel eum iriure dolor in
-    hendrerit in vulputate velit esse molestie consequat, vel illum
-    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
-    odio dignissim qui blandit praesent luptatum zzril delenit augue
-    duis dolore te feugait nulla facilisi.
   </para>
-  </note>
-  <sect1 id="cross-reference-example">
-    <title>Cross reference example</title>
-    <para>
-      This is a cross reference
-      <link linkend="variables-and-functions">to another chapter</link>.
-    </para>
-    <important>
-    <title>
-    Don't use Obj.magic!
-    </title>
-    <para>
-      As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is
-      not part of the OCaml language&quot;</quote>.
-    </para>
-    </important>
-    <para>
-      break up the notes with a normal paragraph of text.
-    </para>
-    <caution>
-    <title>
-    This is a warning
-    </title>
-    <para>
-      It's very, very important to not run with scissors!
-    </para>
-    </caution>
-    <para>
-      Break up the notes with a normal paragraph of text.
-    </para>
-    <qandaset defaultlabel='qanda'>
-    <qandaentry> <question>
-    <para>
-      To be, or not to be?
-    </para>
-    </question> <answer>
-    <para>
-      That is the question.
-    </para>
-    </answer> </qandaentry>
-    </qandaset>
-  </sect1>
 </chapter>
 <chapter id="installation">
   <title>Installation</title>
@@ -10616,6 +9738,815 @@ open Async.Std
         Eclipse plugins: which one is maintained?
       </para>
     </sect2>
+  </sect1>
+</chapter>
+<chapter id="docbook-playground">
+  <title>DocBook Playground</title>
+  <highlights>
+  <para>
+    A highlights section at the beginning of a chapter looks like this.
+    It will:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Have a set of useful bits.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        List entry 2.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        List entry 3.
+      </para>
+    </listitem>
+  </itemizedlist>
+  </highlights>
+  <para>
+    Break up the notes with a normal paragraph of text.
+  </para>
+  <tip>
+  <para>
+    This is a tip in Docbook. Lorem ipsum dolor sit amet, consectetuer
+    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
+    dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
+    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
+    aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in
+    hendrerit in vulputate velit esse molestie consequat, vel illum
+    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+    odio dignissim qui blandit praesent luptatum zzril delenit augue
+    duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta
+    nobis eleifend option congue nihil imperdiet doming id quod mazim
+    placerat facer possim assum. Typi non habent claritatem insitam; est
+    usus legentis in iis qui facit eorum claritatem. Investigationes
+    demonstraverunt lectores legere me lius quod ii legunt saepius.
+  </para>
+  </tip>
+
+  <note>
+  <title>
+  this is a note title
+  </title>
+  <para>
+    this is a tip in docbook. lorem ipsum dolor sit amet, consectetuer
+    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
+    dolore magna aliquam erat volutpat. ut wisi enim ad minim veniam,
+    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
+    aliquip ex ea commodo consequat. duis autem vel eum iriure dolor in
+    hendrerit in vulputate velit esse molestie consequat, vel illum
+    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+    odio dignissim qui blandit praesent luptatum zzril delenit augue
+    duis dolore te feugait nulla facilisi.
+  </para>
+  </note>
+  <sect1 id="cross-reference-example">
+    <title>Cross reference example</title>
+    <para>
+      This is a cross reference
+      <link linkend="variables-and-functions">to another chapter</link>.
+    </para>
+    <important>
+    <title>
+    Don't use Obj.magic!
+    </title>
+    <para>
+      As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is
+      not part of the OCaml language&quot;</quote>.
+    </para>
+    </important>
+    <para>
+      break up the notes with a normal paragraph of text.
+    </para>
+    <caution>
+    <title>
+    This is a warning
+    </title>
+    <para>
+      It's very, very important to not run with scissors!
+    </para>
+    </caution>
+    <para>
+      Break up the notes with a normal paragraph of text.
+    </para>
+    <qandaset defaultlabel='qanda'>
+    <qandaentry> <question>
+    <para>
+      To be, or not to be?
+    </para>
+    </question> <answer>
+    <para>
+      That is the question.
+    </para>
+    </answer> </qandaentry>
+    </qandaset>
+  </sect1>
+</chapter>
+<chapter id="syntax-extensions-1">
+  <title>Syntax Extensions</title>
+  <para>
+    <emphasis>(yminsky: still very very rough)</emphasis>
+  </para>
+  <para>
+    This chapter covers several extensions to OCaml's syntax that are
+    distributed with Core. Before diving into the details of the syntax
+    extensions, let's take a small detour that will explain the
+    motivation behind creating them in the first place.
+  </para>
+  <sect1 id="serialization-with-s-expressions">
+    <title>Serialization with s-expressions</title>
+    <para>
+      Serialization, <emphasis>i.e.</emphasis> reading and writing
+      program data to a sequence of bytes, is an important and common
+      programming task. To this end, Core comes with good support for
+      <emphasis>s-expressions</emphasis>, which are a convenient
+      general-purpose serialization format. The type of an s-expression
+      is as follows:
+    </para>
+    <programlisting language="ocaml">
+module Sexp : sig
+  type t = Atom of string | List of t list
+end
+</programlisting>
+    <para>
+      An s-expression is in essence a nested parenthetical list whose
+      atomic values are strings. The <literal>Sexp</literal> module
+      comes with functionality for parsing and printing s-expressions.
+    </para>
+    <programlisting>
+# let sexp =
+    let a x = Sexp.Atom x and l x = Sexp.List x in
+    l [a &quot;this&quot;;l [a &quot;is&quot;; a &quot;an&quot;]; l [a &quot;s&quot;; a &quot;expression&quot;]];;
+val sexp : Sexp.t = (this (is an) (s expression))
+</programlisting>
+    <para>
+      In addition, most of the base types in Core support conversion to
+      and from s-expressions. For example, we can write:
+    </para>
+    <programlisting>
+# Int.sexp_of_t 3;;
+- : Sexp.t = 3
+# List.sexp_of_t;;
+- : ('a -&gt; Sexp.t) -&gt; 'a List.t -&gt; Sexp.t = &lt;fun&gt;
+# List.sexp_of_t Int.sexp_of_t [1;2;3];;
+- : Sexp.t = (1 2 3)
+</programlisting>
+    <para>
+      Notice that <literal>List.sexp_of_t</literal> is polymorphic, and
+      takes as its first argument another conversion function to handle
+      the elements of the list to be converted. Core uses this scheme
+      more generally for defining sexp-converters for polymorphic types.
+    </para>
+    <para>
+      But what if you want a function to convert some brand new type to
+      an s-expression? You can of course write it yourself:
+    </para>
+    <programlisting>
+# type t = { foo: int; bar: float };;
+# let sexp_of_t t =
+    let a x = Sexp.Atom x and l x = Sexp.List x in
+    l [ l [a &quot;foo&quot;; Int.sexp_of_t t.foo  ];
+        l [a &quot;bar&quot;; Float.sexp_of_t t.bar]; ]
+  ;;
+val sexp_of_t : t -&gt; Core.Std.Sexp.t = &lt;fun&gt;
+# sexp_of_t { foo = 3; bar = -5.5 };;
+- : Core.Std.Sexp.t = ((foo 3) (bar -5.5))
+</programlisting>
+    <para>
+      This is somewhat tiresome to write, and it gets more so when you
+      consider the parser, <emphasis>i.e.</emphasis>,
+      <literal>t_of_sexp</literal>, which is considerably more complex.
+      Writing this kind of parsing and printing code by hand is
+      mechanical and error prone, not to mention a drag.
+    </para>
+    <para>
+      Given how mechanical the code is, you could imagine writing a
+      program that inspected the type definition and auto-generated the
+      conversion code for you. That is precisely where syntax extensions
+      come in. Using Sexplib and adding <literal>with sexp</literal> as
+      an annotation to our type definition, we get the functions we want
+      for free.
+    </para>
+    <programlisting>
+# type t = { foo: int; bar: float } with sexp;;
+type t = { foo : int; bar : float; }
+val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
+# t_of_sexp (Sexp.of_string &quot;((bar 35) (foo 3))&quot;);;
+- : t = {foo = 3; bar = 35.}
+</programlisting>
+    <para>
+      (You can ignore <literal>t_of_sexp__</literal>, which is a helper
+      function that is needed in very rare cases.)
+    </para>
+    <para>
+      The syntax-extensions in Core that we're going to discuss all have
+      this same basic structure: they auto-generate code based on type
+      definitions, implementing functionality that you could in theory
+      have implemented by hand, but with far less programmer effort.
+    </para>
+    <para>
+      There are several syntax extensions distributed with Core,
+      including:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <emphasis role="strong">Sexplib</emphasis>: provides
+          serialization for s-expressions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Bin_prot</emphasis>: provides
+          serialization to an efficient binary format.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Fieldslib</emphasis>: generates
+          first-class values that represent fields of a record, as well
+          as accessor functions and setters for mutable record fields.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Variantslib</emphasis>: like Fieldslib
+          for variants, producing first-class variants and other helper
+          functions for interacting with variant types.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Pa_compare</emphasis>: generates
+          efficient, type-specialized comparison functions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Pa_typehash</emphasis>: generates a
+          hash value for a type definition, <emphasis>i.e.</emphasis>,
+          an integer that is highly unlikely to be the same for two
+          distinct types.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      We'll discuss each of these syntax extensions in detail, starting
+      with Sexplib.
+    </para>
+  </sect1>
+  <sect1 id="sexplib">
+    <title>Sexplib</title>
+    <sect2 id="formatting-of-s-expressions">
+      <title>Formatting of s-expressions</title>
+      <para>
+        Sexplib's format for s-expressions is pretty straightforward: an
+        s-expression is written down as a nested parenthetical
+        expression, with whitespace-separated strings as the atoms.
+        Quotes are used for atoms that contain parenthesis or spaces
+        themselves, backslash is the escape character, and semicolons
+        are used to introduce comments. Thus, if you create the
+        following file:
+      </para>
+      <programlisting>
+;; foo.scm
+
+((foo 3.3) ;; Shall I compare thee  to a summer's dream?
+ (bar &quot;this is () an \&quot; atom&quot;))
+</programlisting>
+      <para>
+        we can load it up and print it back out again:
+      </para>
+      <programlisting>
+# Sexp.load_sexp &quot;foo.scm&quot;;;
+- : Sexp.t = ((foo 3.3) (bar &quot;this is () an \&quot; atom&quot;))
+</programlisting>
+      <para>
+        Note that the comments were dropped from the file upon reading.
+        This is expected, since there's no place in the
+        <literal>Sexp.t</literal> type to store comments.
+      </para>
+      <para>
+        If we introduce an error into our s-expression, by, say,
+        deleting the open-paren in front of <literal>bar</literal>,
+        we'll get a parse error:
+      </para>
+      <programlisting>
+# Exn.handle_uncaught ~exit:false (fun () -&gt;
+    ignore (Sexp.load_sexp &quot;foo.scm&quot;));;
+  Uncaught exception:
+
+  (Sexplib.Sexp.Parse_error
+   ((location parse) (err_msg &quot;unexpected character: ')'&quot;) (text_line 4)
+    (text_char 29) (global_offset 94) (buf_pos 94)))
+</programlisting>
+      <para>
+        (In the above, we use <literal>Exn.handle_uncaught</literal> to
+        make sure that the exception gets printed out in full detail.)
+      </para>
+    </sect2>
+    <sect2 id="sexp-converters">
+      <title>Sexp converters</title>
+      <para>
+        The most important functionality provided by Sexplib is the
+        auto-generation of converters for new types. We've seen a bit of
+        how this works already, but let's walk through a complete
+        example. Here's the source for the beginning of a library for
+        representing integer intervals.
+      </para>
+      <programlisting language="ocaml">
+(* file: int_interval.ml *)
+(* Module for representing closed integer intervals *)
+
+open Core.Std
+
+(* Invariant: For any Range (x,y), y &gt; x *)
+type t = | Range of int * int
+         | Empty
+with sexp
+
+let is_empty = function Empty -&gt; true | Range _ -&gt; false
+let create x y = if x &gt; y then Empty else Range (x,y)
+let contains i x = match i with
+   | Empty -&gt; false
+   | Range (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
+</programlisting>
+      <para>
+        We can now use this module as follows:
+      </para>
+      <programlisting language="ocaml">
+(* file: test_interval.ml *)
+
+open Core.Std
+
+let intervals =
+  let module I = Int_interval in
+  [ I.create 3 4;
+    I.create 5 4; (* should be empty *)
+    I.create 2 3;
+    I.create 1 6;
+  ]
+
+let () =
+  intervals
+  |! List.sexp_of_t Int_interval.sexp_of_t
+  |! Sexp.to_string_hum
+  |! print_endline
+</programlisting>
+      <para>
+        But we're still missing something: we haven't created an
+        <literal>mli</literal> for <literal>Int_interval</literal> yet.
+        Note that we need to explicitly export the s-expression
+        converters that were created within the ml. If we don't:
+      </para>
+      <programlisting language="ocaml">
+(* file: int_interval.mli *)
+(* Module for representing closed integer intervals *)
+
+type t
+
+val is_empty : t -&gt; bool
+val create : int -&gt; int -&gt; t
+val contains : t -&gt; int -&gt; bool
+</programlisting>
+      <para>
+        then we'll get the following error:
+      </para>
+      <programlisting>
+File &quot;test_interval.ml&quot;, line 15, characters 20-42:
+Error: Unbound value Int_interval.sexp_of_t
+Command exited with code 2.
+</programlisting>
+      <para>
+        We could export the types by hand:
+      </para>
+      <programlisting language="ocaml">
+type t
+val sexp_of_t : Sexp.t -&gt; t
+val t_of_sexp : t -&gt; Sexp.t
+</programlisting>
+      <para>
+        But Sexplib has a shorthand for this as well, so that we can
+        instead write simply:
+      </para>
+      <programlisting language="ocaml">
+type t with sexp
+</programlisting>
+      <para>
+        at which point <literal>test_interval.ml</literal> will compile
+        again, and if we run it, we'll get the following output:
+      </para>
+      <programlisting>
+$ ./test_interval.native
+((Range 3 4) Empty (Range 2 3) (Range 1 6))
+</programlisting>
+      <sidebar> <title>
+      Preserving invariants
+      </title>
+      <para>
+        One easy mistake to make when dealing with sexp converters is to
+        ignore the fact that those converters can violate the invariants
+        of your code. For example, the <literal>Int_interval</literal>
+        module depends for the correctness of the
+        <literal>is_empty</literal> check on the fact that for any value
+        <literal>Range (x,y)</literal>, <literal>y</literal> is greater
+        than or equal to <literal>x</literal>. The
+        <literal>create</literal> function preserves this invariant, but
+        the <literal>t_of_sexp</literal> function does not.
+      </para>
+      <para>
+        We can fix this problem by writing a custom sexp-converter, in
+        this case, using the sexp-converter that we already have:
+      </para>
+      <programlisting language="ocaml">
+type t = | Range of int * int
+         | Empty
+with sexp
+
+let create x y = if x &gt; y then Empty else Range (x,y)
+
+let t_of_sexp sexp =
+  let t = t_of_sexp sexp in
+  begin match t with
+  | Range (x,y) when y &lt; x -&gt;
+    of_sexp_error &quot;Upper and lower bound of Range swapped&quot; sexp
+  | Empty | Range _ -&gt; ()
+  end;
+  t
+</programlisting>
+      <para>
+        We call the function <literal>of_sexp_error</literal> to raise
+        an exception because that improves the error reporting that
+        Sexplib can provide when a conversion fails.
+      </para>
+      </sidebar>
+    </sect2>
+    <sect2 id="getting-good-error-messages">
+      <title>Getting good error messages</title>
+      <para>
+        There are two steps to deserializing a type from an
+        s-expression: first, converting the bytes in a file to an
+        s-expression, and the second, converting that s-expression into
+        the type in question. One problem with this is that it can be
+        hard to localize errors to the right place using this scheme.
+        Consider the following example:
+      </para>
+      <programlisting language="ocaml">
+(* file: read_foo.ml *)
+
+open Core.Std
+
+type t = { a: string; b: int; c: float option } with sexp
+
+let run () =
+  let t =
+    Sexp.load_sexp &quot;foo.scm&quot;
+    |! t_of_sexp
+  in
+  printf &quot;b is: %d\n%!&quot; t.b
+
+let () =
+  Exn.handle_uncaught ~exit:true run
+</programlisting>
+      <para>
+        If you were to run this on a malformatted file, say, this one:
+      </para>
+      <programlisting>
+;; foo.scm
+((a not-an-integer)
+ (b not-an-integer)
+ (c ()))
+</programlisting>
+      <para>
+        you'll get the following error:
+      </para>
+      <programlisting>
+read_foo $ ./read_foo.native
+Uncaught exception:
+
+  (Sexplib.Conv.Of_sexp_error
+   (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) not-an-integer)
+</programlisting>
+      <para>
+        If all you have is the error message and the string, it's not
+        terribly informative. In particular, you know that the parsing
+        error-ed out on the atom &quot;not-an-integer&quot;, but you
+        don't know which one! In a large file, this kind of bad error
+        message can be pure misery.
+      </para>
+      <para>
+        But there's hope! If we make small change to the
+        <literal>run</literal> function as follows:
+      </para>
+      <programlisting language="ocaml">
+let run () =
+  let t = Sexp.load_sexp_conv_exn &quot;foo.scm&quot; t_of_sexp in
+  printf &quot;b is: %d\n%!&quot; t.b
+</programlisting>
+      <para>
+        and run it again, we'll get the following much more helpful
+        error message:
+      </para>
+      <programlisting language="ocaml">
+read_foo $ ./read_foo.native
+Uncaught exception:
+
+  (Sexplib.Conv.Of_sexp_error
+   (Sexplib.Sexp.Annotated.Conv_exn foo.scm:3:4
+    (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;))
+   not-an-integer)
+</programlisting>
+      <para>
+        In the above error, &quot;foo.scm:3:4&quot; tells us that the
+        error occurred on &quot;foo.scm&quot;, line 3, character 4,
+        which is a much better start for figuring out what has gone
+        wrong.
+      </para>
+    </sect2>
+    <sect2 id="sexp-conversion-directives">
+      <title>Sexp-conversion directives</title>
+      <para>
+        Sexplib supports a collection of directives for modifying the
+        default behavior of the auto-generated sexp-converters. These
+        directives allow you to customize the way in which types are
+        represented as s-expressions without having to write a custom
+        parser. We describe these directives below.
+      </para>
+      <sect3 id="sexp-opaque">
+        <title><literal>sexp-opaque</literal></title>
+        <para>
+          The most commonly used directive is
+          <literal>sexp_opaque</literal>, whose purpose is to mark a
+          given component of a type as being unconvertible. Anything
+          marked with <literal>sexp_opaque</literal> will be presented
+          as the atom <literal>&lt;opaque&gt;</literal> by the to-sexp
+          converter, and will trigger an exception from the from-sexp
+          converter. Note that the type of a component marked as opaque
+          doesn't need to have a sexp-converter defined. Here, if we
+          define a type without a sexp-converter, and then try to use it
+          another type with a sexp-converter, we'll error out:
+        </para>
+        <programlisting>
+# type no_converter = int * int;;
+type no_converter = int * int
+# type t = { a: no_converter; b: string } with sexp;;
+Characters 14-26:
+  type t = { a: no_converter; b: string } with sexp;;
+                ^^^^^^^^^^^^
+Error: Unbound value no_converter_of_sexp
+</programlisting>
+        <para>
+          But with <literal>sexp_opaque</literal>, we won't:
+        </para>
+        <programlisting>
+# type t = { a: no_converter sexp_opaque; b: string } with sexp;;
+type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
+val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
+</programlisting>
+        <para>
+          And if we now convert a value of this type to an s-expression,
+          we'll see the contents of field <literal>a</literal> marked as
+          opaque:
+        </para>
+        <programlisting>
+# sexp_of_t { a = (3,4); b = &quot;foo&quot; };;
+- : Sexp.t = ((a &lt;opaque&gt;) (b foo))
+</programlisting>
+      </sect3>
+      <sect3 id="sexp_option">
+        <title><literal>sexp_option</literal></title>
+        <para>
+          Another common directive is <literal>sexp_opaque</literal>,
+          which is used to make an optional field in a record. Ordinary
+          optional values are represented either as
+          <literal>()</literal> for <literal>None</literal>, or as
+          <literal>(x)</literal> for <literal>Some x</literal>. If you
+          put an option in a record field, then the record field will
+          always be required, and its value will be presented in the way
+          an ordinary optional value would. For example:
+        </para>
+        <programlisting>
+# type t = { a: int option; b: string } with sexp;;
+# sexp_of_t { a = None; b = &quot;hello&quot; };;
+- : Sexp.t = ((a ()) (b hello))
+# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
+- : Sexp.t = ((a (3)) (b hello))
+</programlisting>
+        <para>
+          But what if we want a field to be optional,
+          <emphasis>i.e.</emphasis>, we want to allow it to be omitted
+          from the record entirely? In that case, we can mark it with
+          <literal>sexp_option</literal>:
+        </para>
+        <programlisting language="ocaml">
+# type t = { a: int sexp_option; b: string } with sexp;;
+# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
+- : Sexp.t = ((a 3) (b hello))
+# sexp_of_t { a = None; b = &quot;hello&quot; };;
+- : Sexp.t = ((b hello))
+</programlisting>
+      </sect3>
+      <sect3 id="sexp_list">
+        <title><literal>sexp_list</literal></title>
+        <para>
+          One problem with the auto-generated sexp-converters is that
+          they can have more parentheses than one would ideally like.
+          Consider, for example, the following variant type:
+        </para>
+        <programlisting>
+# type compatible_versions = | Specific of string list
+                             | All
+  with sexp;;
+# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
+- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
+</programlisting>
+        <para>
+          You might prefer to make the syntax a bit less
+          parenthesis-laden by dropping the parentheses around the list.
+          <literal>sexp_list</literal> gives us this alternate syntax:
+        </para>
+        <programlisting>
+# type compatible_versions = | Specific of string sexp_list
+                             | All
+  with sexp;;
+# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
+- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
+</programlisting>
+      </sect3>
+    </sect2>
+  </sect1>
+  <sect1 id="bin_prot">
+    <title>Bin_prot</title>
+    <para>
+      S-expressions are a good serialization format when you need
+      something machine-parseable as well as human readable and
+      editable. But Sexplib's s-expressions are not particularly
+      performant. There are a number of reasons for this. For one thing,
+      s-expression serialization goes through an intermediate type,
+      <literal>Sexp.t</literal>, which must be allocated and is then
+      typically thrown away, putting non-trivial pressure on the GC. In
+      addition, parsing and printing to strings in an ASCII format can
+      be expensive for types like <literal>int</literal>s,
+      <literal>float</literal>s and <literal>Time.t</literal>s where
+      some real computation needs to be done to produce or parse the
+      ASCII representation.
+    </para>
+    <para>
+      Bin_prot is a library designed to address these issues by
+      providing fast serialization in a compact binary format. Kicking
+      off the syntax extension is done by putting
+      <literal>with bin_io</literal>. (This looks a bit unsightly in the
+      top-level because of all the definitions that are generated. We'll
+      elide those definitions here, but you can see it for yourself in
+      the toplevel.)
+    </para>
+    <para>
+      Here's a small complete example of a program that can read and
+      write values using bin-io. Here, the serialization is of types
+      that might be used as part of a message-queue, where each message
+      has a topic, some content, and a source, which is in turn a
+      hostname and a port.
+    </para>
+    <programlisting language="ocaml">
+(* file: message_example.ml *)
+
+open Core.Std
+
+(* The type of a message *)
+module Message = struct
+  module Source = struct
+    type t = { hostname: string;
+               port: int;
+             }
+    with bin_io
+  end
+
+  type t = { topic: string;
+             content: string;
+             source: Source.t;
+           }
+  with bin_io
+end
+
+(* Create the 1st-class module providing the binability of messages *)
+let binable = (module Message : Binable.S with type t = Message.t)
+
+(* Saves a message to an output channel.  The message is serialized to
+   a bigstring before being written out to the channel.  Also, a
+   binary encoding of an integer is written out to tell the reader how
+   long of a message to expect.  *)
+let save_message outc msg =
+  let s = Binable.to_bigstring binable msg in
+  let len = Bigstring.length s in
+  Out_channel.output_binary_int outc len;
+  Bigstring.really_output outc s
+
+(* Loading the message is done by first reading in the length, and by
+   then reading in the appropriate number of bytes into a Bigstring
+   created for that purpose. *)
+let load_message inc =
+  match In_channel.input_binary_int inc with
+  | None -&gt; failwith &quot;Couldn't load message: length missing from header&quot;
+  | Some len -&gt;
+    let buf = Bigstring.create len in
+    Bigstring.really_input ~pos:0 ~len inc buf;
+    Binable.of_bigstring binable buf
+
+(* To generate some example messages *)
+let example content =
+  let source =
+    { Message.Source.
+      hostname = &quot;ocaml.org&quot;; port = 2322 }
+  in
+  { Message.
+    topic = &quot;rwo-example&quot;; content; source; }
+
+(* write out three messages... *)
+let write_messages () =
+  let outc = Out_channel.create &quot;tmp.bin&quot; in
+  List.iter ~f:(save_message outc) [
+    example &quot;a wonderful&quot;;
+    example &quot;trio&quot;;
+    example &quot;of messages&quot;;
+  ];
+  Out_channel.close outc
+
+(* ... and read them back in *)
+let read_messages () =
+  let inc = In_channel.create &quot;tmp.bin&quot; in
+  for i = 1 to 3 do
+    let msg = load_message inc in
+    printf &quot;msg %d: %s\n&quot; i msg.Message.content
+  done
+
+let () =
+  write_messages (); read_messages ()
+</programlisting>
+  </sect1>
+  <sect1 id="fieldslib">
+    <title>Fieldslib</title>
+    <para>
+      One common idiom when using records is to provide field accessor
+      functions for a particular record.
+    </para>
+    <programlisting>
+type t = { topic: string;
+           content: string;
+           source: Source.t;
+         }
+
+let topic   t = t.topic
+let content t = t.content
+let source  t = t.source
+</programlisting>
+    <para>
+      Similarly, sometimes you simultaneously want an accessor to a
+      field of a record and a textual representation of the name of that
+      field. This might come up if you were validating a field and
+      needed the string representation to generate an error message, or
+      if you wanted to scaffold a form in a GUI automatically based on
+      the fields of a record. Fieldslib provides a module
+      <literal>Field</literal> for this purpose. Here's some code for
+      creating <literal>Field.t</literal>'s for all the fields of our
+      type <literal>t</literal>.
+    </para>
+    <programlisting language="ocaml">
+# module Fields = struct
+    let topic =
+      { Field.
+        name   = &quot;topic&quot;;
+        setter = None;
+        getter = (fun t -&gt; t.topic);
+        fset   = (fun t topic -&gt; { t with topic });
+      }
+    let content =
+      { Field.
+        name   = &quot;content&quot;;
+        setter = None;
+        getter = (fun t -&gt; t.content);
+        fset   = (fun t content -&gt; { t with content });
+      }
+    let source =
+      { Field.
+        name   = &quot;source&quot;;
+        setter = None;
+        getter = (fun t -&gt; t.source);
+        fset   = (fun t source -&gt; { t with source });
+      }
+  end ;;
+module Fields :
+  sig
+    val topic : (t, string list) Core.Std.Field.t
+    val content : (t, string) Core.Std.Field.t
+    val source : (t, Source.t) Core.Std.Field.t
+  end
+</programlisting>
   </sect1>
 </chapter>
 </book>
