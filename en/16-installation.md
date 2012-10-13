@@ -1,15 +1,18 @@
 # Installation
 
-There are two ways to develop OCaml code and libraries.  You can install the
-OPAM source package manager, or alternatively, many operating systems have
-binary packages for popular OCaml libraries and applications.  Binary packages
-are useful for releasing your applications easily, but are less flexible for
-day-to-day development.
+There are two ways to develop OCaml code and libraries.  You can install a
+source-based package manager that downloads and compiles libraries, or
+alternatively use the binary packages provides by many operating systems.
+Binary packages are useful for releasing your applications easily, but are less
+flexible for day-to-day development.
 
-Let's get started with the OPAM source manager, as that will get you an
-interactive top-level very quickly.  OPAM manages simultaneous OCaml compiler
-and library installations. It tracks library versions across upgrades, and will
-recompile dependencies automatically if they get out of date.
+For the purposes of this book, we will use the OPAM source-based package
+manager.  There are other alternatives that you can investigate, such as GODI
+and ODB, but we do not cover them here.  Let's get started with OPAM now, as
+that will get you an interactive top-level that can run the examples in the
+book quickly.  OPAM manages multiple simultaneous OCaml compiler and library
+installations, tracks library versions across upgrades, and recompiles
+dependencies automatically if they get out of date.
 
 ## OPAM Base Installation
 
@@ -30,12 +33,10 @@ copies of `ocamlfind` before installing OPAM, and use the OPAM version instead.
 ### MacOS X
 
 The easiest way to install OCaml on MacOS X is via the `homebrew` package
-manager.  If the `brew tap` command fails, you may need to upgrade your version
-of Homebrew to the latest version.
+manager, available from [http://github.com/mxcl/homebrew].
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ brew install ocaml
-$ brew tap mirage/ocaml
 $ brew install opam
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -101,8 +102,9 @@ installed simultaneously, but only one can be active at any time.
 ### Command Line
 
 The `utop` tool provides a convenient interactive top-level, with full command
-history, command macros and module name completion.
-An `.ocamlinit` file in your home directory will initialise `utop` with common libraries and syntax extensions open, e.g.:
+history, command macros and module name completion.  An `.ocamlinit` file in
+your home directory will initialise `utop` with common libraries and syntax
+extensions open, e.g.:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 #use "topfind"
@@ -123,4 +125,3 @@ Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 Vim users can use the built-in style, and [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
 
 Eclipse plugins: which one is maintained?
-
