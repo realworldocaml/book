@@ -12,19 +12,21 @@
 | 02 | A Guided Tour                       | yaron  | ###    |
 | 03 | Variables and Functions             | yaron  | ###    |
 | 04 | Lists, Options and Pattern-matching | jason  | #      |
-| 05 | Records and Variants                | yaron  | ##     |
-| 06 | Error Handling                      | yaron  | ###    |
-| 07 | Programming with Mutation           |        |        |
-| 08 | Files, Modules and Programs         | yaron  | ###    |
-| 09 | Functors and first-class modules    | yaron  |        |
-| 10 | Synchronous I/O                     |        |        |
-| 11 | Concurrent Programming              | anil   |        |
-| 12 | Objects                             | jason  | ##     |
-| 13 | Tuning the Runtime                  | anil   |        |
-| 14 | Foreign Function Interface          | anil   |        |
-| 15 | Camlp4                              | anil   |        |
-| 16 | OCamlbuild / Oasis                  | anil   |        |
-| 17 | ocamllex/ocamlyacc/menhir           |        |        |
+| 05 | Records                             | yaron  | ###    |
+| 06 | Variants                            | yaron  | ##     |
+| 07 | Error Handling                      | yaron  | ###    |
+| 08 | Imperative programming              |        |        |
+| 09 | Files, Modules and Programs         | yaron  | ###    |
+| 10 | Functors and first-class modules    | yaron  |        |
+| 11 | Synchronous I/O                     |        |        |
+| 12 | Concurrent Programming              | anil   |        |
+| 13 | Objects                             | jason  | ##     |
+| 14 | Tuning and Profiling                | anil   |        |
+| 15 | Interfacing with C                  | anil   |        |
+| 16 | Extending OCaml with Camlp4         | anil   |        |
+| 17 | Packaging and build systems         | anil   |        |
+| 18 | Parsing with OCamllex and OCamlyacc | anil   |        |
+| 19 | Installing OCaml                    | anil   |        |
 
 
 ** Status key
