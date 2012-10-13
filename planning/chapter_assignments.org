@@ -6,25 +6,26 @@
 
 * Chapter list
 
-| Chapter                             | Author | Status |
-|-------------------------------------+--------+--------|
-| Preface/Forward                     |        |        |
-| A Guided Tour                       | yaron  | ###    |
-| Variables and Functions             | yaron  | ###    |
-| Lists, Options and Pattern-matching | jason  | #      |
-| Records and Variants                | yaron  | ##     |
-| Error Handling                      | yaron  | ###    |
-| Programming with Mutation           |        |        |
-| Files, Modules and Programs         | yaron  | ###    |
-| Functors and first-class modules    | yaron  |        |
-| Synchronous I/O                     |        |        |
-| Concurrent Programming              | anil   |        |
-| Objects                             | jason  | ##     |
-| Tuning the Runtime                  | anil   |        |
-| Foreign Function Interface          | anil   |        |
-| Camlp4                              | anil   |        |
-| OCamlbuild / Oasis                  | anil   |        |
-| ocamllex/ocamlyacc/menhir                  
+|  # | Chapter                             | Author | Status |
+|----+-------------------------------------+--------+--------|
+| 01 | Preface/Forward                     |        |        |
+| 02 | A Guided Tour                       | yaron  | ###    |
+| 03 | Variables and Functions             | yaron  | ###    |
+| 04 | Lists, Options and Pattern-matching | jason  | #      |
+| 05 | Records and Variants                | yaron  | ##     |
+| 06 | Error Handling                      | yaron  | ###    |
+| 07 | Programming with Mutation           |        |        |
+| 08 | Files, Modules and Programs         | yaron  | ###    |
+| 09 | Functors and first-class modules    | yaron  |        |
+| 10 | Synchronous I/O                     |        |        |
+| 11 | Concurrent Programming              | anil   |        |
+| 12 | Objects                             | jason  | ##     |
+| 13 | Tuning the Runtime                  | anil   |        |
+| 14 | Foreign Function Interface          | anil   |        |
+| 15 | Camlp4                              | anil   |        |
+| 16 | OCamlbuild / Oasis                  | anil   |        |
+| 17 | ocamllex/ocamlyacc/menhir           |        |        |
+
 
 ** Status key
  - Blank: no progress
