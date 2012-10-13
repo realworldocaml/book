@@ -18,7 +18,7 @@
 | 08 | Imperative programming              |        |        |
 | 09 | Files, Modules and Programs         | yaron  | ###    |
 | 10 | Functors and first-class modules    | yaron  |        |
-| 11 | Synchronous I/O                     |        |        |
+| 11 | Input and Output                    |        |        |
 | 12 | Concurrent Programming              | anil   |        |
 | 13 | Objects                             | jason  | ##     |
 | 14 | Tuning and Profiling                | anil   |        |
