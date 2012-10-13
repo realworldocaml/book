@@ -950,18 +950,78 @@ And it's explicit at the type level that `handle_log_entry` sees only
 
 ### Variants and recursive data structures
 
-Another common application of variants is to generate tree-like
+Another common application of variants is to represent tree-like
 recursive data-structures.  One very simple application of this
 technique is that of building an expression evaluator.
 
 Imagine you wanted a small domain-specific language for expressing
-boolean conditions.  This is useful in many applications where you
-need to allow users to configure a filter on some data that is
-delivered to them.
+Boolean expressions.  This can be useful in any application that
+requires a filter language, which show up in everything from packet
+analyzers to mail clients.
 
+The declaration of the type for representing an expression is fairly
+straight-forward --- we'll have one constructor for each different
+kind of expression in our mini language, as follows.
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type 'a t =
+  | Base  of 'a
+  | Const of bool
+  | And   of 'a t list
+  | Or    of 'a t list
+  | Not   of 'a t
+  ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The `Base` constructor is to allow us to include some set of base
+predicates.  These base predicates are what tie the expressions in
+question to the application.  Thus, if you were writing a filter
+language for an email processor, your base predicates might have
+things like what is found on the `to` or `subject` line of an email.
 
+The definition of `t` is recursive, which means that we can construct
+complex nested expressions based on this.  Here, we'll first declare a
+type for the base predicates that encodes a very simple set of email
+filters.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type mail_field = To | From | CC | Date | Subject
+  type mail_filter = { field: mail_field;
+                       contains: string }
+  ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And now, we can construct a simple expression that uses `mail_filter`
+for its base predicate as follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# And [ Or [ Base { field = To; contains = "doligez" } ;
+             Base { field = CC; contains = "doligez" } ];
+        Base { field = Subject; contains = "runtime" } ];;
+    - : mail_filter t =
+And
+ [Or
+   [Base {field = To; contains = "doligez"};
+    Base {field = CC; contains = "doligez"}];
+  Base {field = Subject; contains = "runtime"}]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Being able to construct such expressions is all well and good, but to
+do any real work, we need some way to evaluate these expressions.
+Here's a piece of code to do just that.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let rec eval t base_eval =
+    let eval t = eval t base_eval in
+    match t with
+    | Base  base -> base_eval base
+    | Const bool -> bool
+    | And   ts   -> List.for_all ts ~f:eval
+    | Or    ts   -> List.exists  ts ~f:eval
+    | Not   t    -> not (eval t)
+  ;;
+val eval : 'a t -> ('a -> bool) -> bool = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Polymorphic variants
 
