@@ -1012,16 +1012,78 @@ Here's a piece of code to do just that.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let rec eval t base_eval =
-    let eval t = eval t base_eval in
+    let eval' t = eval t base_eval in
     match t with
     | Base  base -> base_eval base
     | Const bool -> bool
-    | And   ts   -> List.for_all ts ~f:eval
-    | Or    ts   -> List.exists  ts ~f:eval
-    | Not   t    -> not (eval t)
+    | And   ts   -> List.for_all ts ~f:eval'
+    | Or    ts   -> List.exists  ts ~f:eval'
+    | Not   t    -> not (eval' t)
   ;;
 val eval : 'a t -> ('a -> bool) -> bool = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that we defined a helper function, `eval'`, which is the same as
+`eval` except that it's specialized to use `base_eval`.  That's just
+to remove a bit of boilerplate from the recursive applications of
+`eval`.
+
+The structure of the code is pretty straightforward --- we're just
+walking over the structure of the data, doing the appropriate thing at
+each state, which sometimes requires a recursive call and sometimes
+doesn't.
+
+Our `eval` function just walks the value in question.  We can also
+write code to transform an expression, for example, by simplifying an
+expression.  Here's a function that does just that.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let rec simplify = function
+    | Base _ | Const _ as x -> x
+    | And ts ->
+      let ts = List.map ~f:simplify ts in
+      if List.exists ts ~f:(function Const false -> true | _ -> false)
+      then Const false
+      else And ts
+    | Or ts ->
+      let ts = List.map ~f:simplify ts in
+      if List.exists ts ~f:(function Const true -> true | _ -> false)
+      then Const true else Or ts
+    | Not t ->
+      match simplify t with
+      | Const b -> Const (not b)
+      | t -> Not t
+  ;;
+val simplify : 'a t -> 'a t = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One thing to notice about the above code is that it uses a catch-all
+case in the very last line within the `Not` case.  It's generally
+better to be explicit about the cases you're ignoring.  Indeed, if we
+change this snippet of code to be more explicit:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    | Not t ->
+      match simplify t with
+      | Const b -> Const (not b)
+      | (And _ | Or _ | Base _ | Not _) -> Not t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+we can immediately notice that we've missed an important
+simplification.  Really, we should have simplified double negation.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    | Not t ->
+      match simplify t with
+      | Const b -> Const (not b)
+      | Not t -> t
+      | (And _ | Or _ | Base _ ) -> Not t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All of this is more than a theoretical example.  There's a library
+very much in this spirit already exists as part of `Core`, called
+`Blang` (short for "boolean language"), and it gets a lot of practical
+use in a variety of applications.
 
 ## Polymorphic variants
 

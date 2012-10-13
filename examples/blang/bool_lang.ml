@@ -8,13 +8,13 @@ type 'a t =
 | Not   of 'a t
 
 let rec eval t base_eval =
-  let eval t = eval t base_eval in
+  let eval' t = eval t base_eval in
   match t with
   | Base  base -> base_eval base
   | Const bool -> bool
-  | And   ts   -> List.for_all ts ~f:eval
-  | Or    ts   -> List.exists  ts ~f:eval
-  | Not   t    -> not (eval t)
+  | And   ts   -> List.for_all ts ~f:eval'
+  | Or    ts   -> List.exists  ts ~f:eval'
+  | Not   t    -> not (eval' t)
 
 let rec simplify = function
   | Base _ | Const _ as x -> x
@@ -34,7 +34,7 @@ let rec simplify = function
     | (And _ | Or _ | Base _) as t -> Not t
 
 let rec specialize t ~f =
-  let specialize t = specialize t ~f in
+  let specialize' t = specialize t ~f in
   let specialized =
     match t with
     | Base base ->
@@ -42,9 +42,9 @@ let rec specialize t ~f =
       | Some bool -> Const bool
       | None      -> Base  base
       end
-    | Not t  -> Not (specialize t)
-    | And ts -> And (List.map ~f:specialize ts)
-    | Or  ts -> Or  (List.map ~f:specialize ts)
+    | Not t  -> Not (specialize' t)
+    | And ts -> And (List.map ~f:specialize' ts)
+    | Or  ts -> Or  (List.map ~f:specialize' ts)
     | Const x -> Const x
   in
   simplify specialized
