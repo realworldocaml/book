@@ -33,12 +33,10 @@ copies of `ocamlfind` before installing OPAM, and use the OPAM version instead.
 ### MacOS X
 
 The easiest way to install OCaml on MacOS X is via the `homebrew` package
-manager.  If the `brew tap` command fails, you may need to upgrade your version
-of Homebrew to the latest version.
+manager, available from [http://github.com/mxcl/homebrew].
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ brew install ocaml
-$ brew tap mirage/ocaml
 $ brew install opam
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -104,8 +102,9 @@ installed simultaneously, but only one can be active at any time.
 ### Command Line
 
 The `utop` tool provides a convenient interactive top-level, with full command
-history, command macros and module name completion.
-An `.ocamlinit` file in your home directory will initialise `utop` with common libraries and syntax extensions open, e.g.:
+history, command macros and module name completion.  An `.ocamlinit` file in
+your home directory will initialise `utop` with common libraries and syntax
+extensions open, e.g.:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 #use "topfind"
@@ -126,4 +125,3 @@ Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 Vim users can use the built-in style, and [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
 
 Eclipse plugins: which one is maintained?
-
