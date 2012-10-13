@@ -1,23 +1,25 @@
 open Core.Std
 
-module Host_info = struct
-  type t = { hostname: string;
-             os_name: string;
-             os_release: string;
-             cpu_arch: string;
-             num_cores: int;
-           }
+module Check_name : Identifiable = String 
+module User : Identifiable = String
+module Host : Identifiable = String
+
+module Check_result = struct
+  type t =
+    { check: Check_name.t;
+      host: Host.t;
+      time: Time.t;
+      exit_code: int;
+      output: string;
+    }
 end
 
-type logon_event =
-  { session_id: string;
-    time: Time.t;
-    client_addr: Unix.Inet_addr.t;
-    client: int;
-  } with fields
+type event =
+[ `Check_result of Check_result.t
+| `Downtimed_until of Time.t * User.t * Check_name.t * Host.t
+| `Downtime_cancelled of Check_name.t * User.t
+| `Acknowledged of Check_name.t * User.t
+| `Host_added of Host.t
+| `Host_removed of Host.t    
+]
 
-type heartbeat =
-  { session_id: string;
-    time: Time.t;
-    status_message: string;
-  } with fields
