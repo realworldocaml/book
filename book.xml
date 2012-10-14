@@ -9576,299 +9576,6 @@ end;;
   <para>
   </para>
 </chapter>
-<chapter id="extending-ocaml-with-camlp4">
-  <title>Extending OCaml with Camlp4</title>
-  <para>
-  </para>
-</chapter>
-<chapter id="packaging-and-build-systems">
-  <title>Packaging and Build Systems</title>
-  <para>
-  </para>
-</chapter>
-<chapter id="parsing-with-ocamllex-and-ocamlyacc">
-  <title>Parsing with OCamllex and OCamlyacc</title>
-  <para>
-  </para>
-</chapter>
-<chapter id="installation">
-  <title>Installation</title>
-  <para>
-    There are two ways to develop OCaml code and libraries. You can
-    install a source-based package manager that downloads and compiles
-    libraries, or alternatively use the binary packages provides by many
-    operating systems. Binary packages are useful for releasing your
-    applications easily, but are less flexible for day-to-day
-    development.
-  </para>
-  <para>
-    For the purposes of this book, we will use the OPAM source-based
-    package manager. There are other alternatives that you can
-    investigate, such as GODI and ODB, but we do not cover them here.
-    Let's get started with OPAM now, as that will get you an interactive
-    top-level that can run the examples in the book quickly. OPAM
-    manages multiple simultaneous OCaml compiler and library
-    installations, tracks library versions across upgrades, and
-    recompiles dependencies automatically if they get out of date.
-  </para>
-  <sect1 id="opam-base-installation">
-    <title>OPAM Base Installation</title>
-    <para>
-      To install OPAM, you will need a working OCaml installation to
-      bootstrap the package manager. Once installed, all of the OPAM
-      state is held in the <literal>$HOME/.opam</literal> directory, and
-      you can reinitialise it by deleting this directory and starting
-      over.
-    </para>
-    <important>
-    <title>
-    OCamlfind and OPAM
-    </title>
-    <para>
-      OPAM maintains multiple compiler and library installations, but
-      this can clash with a global installation of the
-      <literal>ocamlfind</literal> tool. Uninstall any existing copies
-      of <literal>ocamlfind</literal> before installing OPAM, and use
-      the OPAM version instead.
-    </para>
-    </important>
-    <sect2 id="macos-x">
-      <title>MacOS X</title>
-      <para>
-        The easiest way to install OCaml on MacOS X is via the
-        <literal>homebrew</literal> package manager, available from
-        [http://github.com/mxcl/homebrew].
-      </para>
-      <programlisting>
-$ brew install ocaml
-$ brew install opam
-</programlisting>
-    </sect2>
-    <sect2 id="linux">
-      <title>Linux</title>
-      <para>
-        On Debian Linux, you should install OCaml via binary packages,
-        and then install the latest OPAM release from source.
-      </para>
-      <programlisting>
-$ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
-$ tar -jxvf opam-&lt;version&gt;.tar.gz
-$ cd opam-&lt;version&gt;.tar.gz
-$ ./configure &amp;&amp; make &amp;&amp; sudo make install
-</programlisting>
-      <para>
-        On Fedora/RHEL...?
-      </para>
-    </sect2>
-    <sect2 id="windows">
-      <title>Windows</title>
-      <para>
-        Investigate Protzenko's Windows installer.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="opam-usage">
-    <title>OPAM Usage</title>
-    <para>
-      All of the OPAM state is held in the <literal>.opam</literal>
-      directory in your home directory, including compiler
-      installations. You should never need to switch to an admin user to
-      install packages. Package listings are obtained by adding
-      <emphasis>remotes</emphasis> that provide package descriptions,
-      installation instructions and URLs.
-    </para>
-    <programlisting>
-$ opam init
-$ opam install utop async
-$ eval `opam config -env`
-</programlisting>
-    <para>
-      This will initialise OPAM with the default package set from
-      <literal>opam.ocamlpro.com</literal>, and install the
-      <literal>utop</literal> interactive top-level and the
-      <literal>Async</literal> library. OPAM figures out the minimal set
-      of dependencies required, and installs those too. The
-      <literal>eval</literal> command is sets your
-      <literal>PATH</literal> variable to point to the current active
-      compiler, and you should add this to your shell
-      <literal>.profile</literal> to run every time you open a new
-      command shell.
-    </para>
-    <sect2 id="switching-compiler-versions">
-      <title>Switching compiler versions</title>
-      <para>
-        The default compiler installed by OPAM uses the system OCaml
-        installation. You can use <literal>opam switch</literal> to swap
-        between different compiler versions, or experiment with a
-        different set of libraries or new compiler versions. For
-        instance, one of the alternate compilers has a debugging version
-        of the runtime library, which can be useful to track down bugs
-        in C bindings. To use it:
-      </para>
-      <programlisting>
-$ opam switch -list
-$ opam switch 4.00.0+debug-runtime
-$ eval `opam config -env`
-$ opam install utop async
-</programlisting>
-      <para>
-        The new compiler will be compiled and installed into
-        <literal>~/.opam/4.00.0+debug-runtime</literal>, and the
-        libraries will be separately tracked. You can have any number of
-        compilers installed simultaneously, but only one can be active
-        at any time.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="editing-environment">
-    <title>Editing Environment</title>
-    <sect2 id="command-line">
-      <title>Command Line</title>
-      <para>
-        The <literal>utop</literal> tool provides a convenient
-        interactive top-level, with full command history, command macros
-        and module name completion. An <literal>.ocamlinit</literal>
-        file in your home directory will initialise
-        <literal>utop</literal> with common libraries and syntax
-        extensions open, e.g.:
-      </para>
-      <programlisting>
-#use &quot;topfind&quot;
-#camlp4o
-#thread
-#require &quot;core.top&quot;;;
-#require &quot;async&quot;;;
-open Core.Std
-open Async.Std
-</programlisting>
-      <para>
-        TODO: the <literal>.ocamlinit</literal> handling in OPAM is
-        being finalised and is tracked in
-        <ulink url="https://github.com/OCamlPro/opam/issues/185">issue
-        185</ulink>.
-      </para>
-    </sect2>
-    <sect2 id="editors">
-      <title>Editors</title>
-      <para>
-        Emacs users have tuareg and
-        <ulink url="http://www.typerex.org/">Typerex</ulink>.
-      </para>
-      <para>
-        Vim users can use the built-in style, and
-        <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
-        may also be useful.
-      </para>
-      <para>
-        Eclipse plugins: which one is maintained?
-      </para>
-    </sect2>
-  </sect1>
-</chapter>
-<chapter id="docbook-playground">
-  <title>DocBook Playground</title>
-  <highlights>
-  <para>
-    A highlights section at the beginning of a chapter looks like this.
-    It will:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        Have a set of useful bits.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        List entry 2.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        List entry 3.
-      </para>
-    </listitem>
-  </itemizedlist>
-  </highlights>
-  <para>
-    Break up the notes with a normal paragraph of text.
-  </para>
-  <tip>
-  <para>
-    This is a tip in Docbook. Lorem ipsum dolor sit amet, consectetuer
-    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
-    dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
-    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
-    aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in
-    hendrerit in vulputate velit esse molestie consequat, vel illum
-    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
-    odio dignissim qui blandit praesent luptatum zzril delenit augue
-    duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta
-    nobis eleifend option congue nihil imperdiet doming id quod mazim
-    placerat facer possim assum. Typi non habent claritatem insitam; est
-    usus legentis in iis qui facit eorum claritatem. Investigationes
-    demonstraverunt lectores legere me lius quod ii legunt saepius.
-  </para>
-  </tip>
-
-  <note>
-  <title>
-  this is a note title
-  </title>
-  <para>
-    this is a tip in docbook. lorem ipsum dolor sit amet, consectetuer
-    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
-    dolore magna aliquam erat volutpat. ut wisi enim ad minim veniam,
-    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
-    aliquip ex ea commodo consequat. duis autem vel eum iriure dolor in
-    hendrerit in vulputate velit esse molestie consequat, vel illum
-    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
-    odio dignissim qui blandit praesent luptatum zzril delenit augue
-    duis dolore te feugait nulla facilisi.
-  </para>
-  </note>
-  <sect1 id="cross-reference-example">
-    <title>Cross reference example</title>
-    <para>
-      This is a cross reference
-      <link linkend="variables-and-functions">to another chapter</link>.
-    </para>
-    <important>
-    <title>
-    Don't use Obj.magic!
-    </title>
-    <para>
-      As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is
-      not part of the OCaml language&quot;</quote>.
-    </para>
-    </important>
-    <para>
-      break up the notes with a normal paragraph of text.
-    </para>
-    <caution>
-    <title>
-    This is a warning
-    </title>
-    <para>
-      It's very, very important to not run with scissors!
-    </para>
-    </caution>
-    <para>
-      Break up the notes with a normal paragraph of text.
-    </para>
-    <qandaset defaultlabel='qanda'>
-    <qandaentry> <question>
-    <para>
-      To be, or not to be?
-    </para>
-    </question> <answer>
-    <para>
-      That is the question.
-    </para>
-    </answer> </qandaentry>
-    </qandaset>
-  </sect1>
-</chapter>
 <chapter id="syntax-extensions">
   <title>Syntax Extensions</title>
   <para>
@@ -10572,6 +10279,295 @@ module Fields :
     val source : (t, Source.t) Core.Std.Field.t
   end
 </programlisting>
+  </sect1>
+</chapter>
+<chapter id="packaging-and-build-systems">
+  <title>Packaging and Build Systems</title>
+  <para>
+  </para>
+</chapter>
+<chapter id="parsing-with-ocamllex-and-ocamlyacc">
+  <title>Parsing with OCamllex and OCamlyacc</title>
+  <para>
+  </para>
+</chapter>
+<chapter id="installation">
+  <title>Installation</title>
+  <para>
+    There are two ways to develop OCaml code and libraries. You can
+    install a source-based package manager that downloads and compiles
+    libraries, or alternatively use the binary packages provides by many
+    operating systems. Binary packages are useful for releasing your
+    applications easily, but are less flexible for day-to-day
+    development.
+  </para>
+  <para>
+    For the purposes of this book, we will use the OPAM source-based
+    package manager. There are other alternatives that you can
+    investigate, such as GODI and ODB, but we do not cover them here.
+    Let's get started with OPAM now, as that will get you an interactive
+    top-level that can run the examples in the book quickly. OPAM
+    manages multiple simultaneous OCaml compiler and library
+    installations, tracks library versions across upgrades, and
+    recompiles dependencies automatically if they get out of date.
+  </para>
+  <sect1 id="opam-base-installation">
+    <title>OPAM Base Installation</title>
+    <para>
+      To install OPAM, you will need a working OCaml installation to
+      bootstrap the package manager. Once installed, all of the OPAM
+      state is held in the <literal>$HOME/.opam</literal> directory, and
+      you can reinitialise it by deleting this directory and starting
+      over.
+    </para>
+    <important>
+    <title>
+    OCamlfind and OPAM
+    </title>
+    <para>
+      OPAM maintains multiple compiler and library installations, but
+      this can clash with a global installation of the
+      <literal>ocamlfind</literal> tool. Uninstall any existing copies
+      of <literal>ocamlfind</literal> before installing OPAM, and use
+      the OPAM version instead.
+    </para>
+    </important>
+    <sect2 id="macos-x">
+      <title>MacOS X</title>
+      <para>
+        The easiest way to install OCaml on MacOS X is via the
+        <literal>homebrew</literal> package manager, available from
+        [http://github.com/mxcl/homebrew].
+      </para>
+      <programlisting>
+$ brew install ocaml
+$ brew install opam
+</programlisting>
+    </sect2>
+    <sect2 id="linux">
+      <title>Linux</title>
+      <para>
+        On Debian Linux, you should install OCaml via binary packages,
+        and then install the latest OPAM release from source.
+      </para>
+      <programlisting>
+$ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
+$ tar -jxvf opam-&lt;version&gt;.tar.gz
+$ cd opam-&lt;version&gt;.tar.gz
+$ ./configure &amp;&amp; make &amp;&amp; sudo make install
+</programlisting>
+      <para>
+        On Fedora/RHEL...?
+      </para>
+    </sect2>
+    <sect2 id="windows">
+      <title>Windows</title>
+      <para>
+        Investigate Protzenko's Windows installer.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="opam-usage">
+    <title>OPAM Usage</title>
+    <para>
+      All of the OPAM state is held in the <literal>.opam</literal>
+      directory in your home directory, including compiler
+      installations. You should never need to switch to an admin user to
+      install packages. Package listings are obtained by adding
+      <emphasis>remotes</emphasis> that provide package descriptions,
+      installation instructions and URLs.
+    </para>
+    <programlisting>
+$ opam init
+$ opam install utop async
+$ eval `opam config -env`
+</programlisting>
+    <para>
+      This will initialise OPAM with the default package set from
+      <literal>opam.ocamlpro.com</literal>, and install the
+      <literal>utop</literal> interactive top-level and the
+      <literal>Async</literal> library. OPAM figures out the minimal set
+      of dependencies required, and installs those too. The
+      <literal>eval</literal> command is sets your
+      <literal>PATH</literal> variable to point to the current active
+      compiler, and you should add this to your shell
+      <literal>.profile</literal> to run every time you open a new
+      command shell.
+    </para>
+    <sect2 id="switching-compiler-versions">
+      <title>Switching compiler versions</title>
+      <para>
+        The default compiler installed by OPAM uses the system OCaml
+        installation. You can use <literal>opam switch</literal> to swap
+        between different compiler versions, or experiment with a
+        different set of libraries or new compiler versions. For
+        instance, one of the alternate compilers has a debugging version
+        of the runtime library, which can be useful to track down bugs
+        in C bindings. To use it:
+      </para>
+      <programlisting>
+$ opam switch -list
+$ opam switch 4.00.0+debug-runtime
+$ eval `opam config -env`
+$ opam install utop async
+</programlisting>
+      <para>
+        The new compiler will be compiled and installed into
+        <literal>~/.opam/4.00.0+debug-runtime</literal>, and the
+        libraries will be separately tracked. You can have any number of
+        compilers installed simultaneously, but only one can be active
+        at any time.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="editing-environment">
+    <title>Editing Environment</title>
+    <sect2 id="command-line">
+      <title>Command Line</title>
+      <para>
+        The <literal>utop</literal> tool provides a convenient
+        interactive top-level, with full command history, command macros
+        and module name completion. An <literal>.ocamlinit</literal>
+        file in your home directory will initialise
+        <literal>utop</literal> with common libraries and syntax
+        extensions open, e.g.:
+      </para>
+      <programlisting>
+#use &quot;topfind&quot;
+#camlp4o
+#thread
+#require &quot;core.top&quot;;;
+#require &quot;async&quot;;;
+open Core.Std
+open Async.Std
+</programlisting>
+      <para>
+        TODO: the <literal>.ocamlinit</literal> handling in OPAM is
+        being finalised and is tracked in
+        <ulink url="https://github.com/OCamlPro/opam/issues/185">issue
+        185</ulink>.
+      </para>
+    </sect2>
+    <sect2 id="editors">
+      <title>Editors</title>
+      <para>
+        Emacs users have tuareg and
+        <ulink url="http://www.typerex.org/">Typerex</ulink>.
+      </para>
+      <para>
+        Vim users can use the built-in style, and
+        <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
+        may also be useful.
+      </para>
+      <para>
+        Eclipse plugins: which one is maintained?
+      </para>
+    </sect2>
+  </sect1>
+</chapter>
+<chapter id="docbook-playground">
+  <title>DocBook Playground</title>
+  <highlights>
+  <para>
+    A highlights section at the beginning of a chapter looks like this.
+    It will:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Have a set of useful bits.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        List entry 2.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        List entry 3.
+      </para>
+    </listitem>
+  </itemizedlist>
+  </highlights>
+  <para>
+    Break up the notes with a normal paragraph of text.
+  </para>
+  <tip>
+  <para>
+    This is a tip in Docbook. Lorem ipsum dolor sit amet, consectetuer
+    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
+    dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
+    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
+    aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in
+    hendrerit in vulputate velit esse molestie consequat, vel illum
+    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+    odio dignissim qui blandit praesent luptatum zzril delenit augue
+    duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta
+    nobis eleifend option congue nihil imperdiet doming id quod mazim
+    placerat facer possim assum. Typi non habent claritatem insitam; est
+    usus legentis in iis qui facit eorum claritatem. Investigationes
+    demonstraverunt lectores legere me lius quod ii legunt saepius.
+  </para>
+  </tip>
+
+  <note>
+  <title>
+  this is a note title
+  </title>
+  <para>
+    this is a tip in docbook. lorem ipsum dolor sit amet, consectetuer
+    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
+    dolore magna aliquam erat volutpat. ut wisi enim ad minim veniam,
+    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
+    aliquip ex ea commodo consequat. duis autem vel eum iriure dolor in
+    hendrerit in vulputate velit esse molestie consequat, vel illum
+    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+    odio dignissim qui blandit praesent luptatum zzril delenit augue
+    duis dolore te feugait nulla facilisi.
+  </para>
+  </note>
+  <sect1 id="cross-reference-example">
+    <title>Cross reference example</title>
+    <para>
+      This is a cross reference
+      <link linkend="variables-and-functions">to another chapter</link>.
+    </para>
+    <important>
+    <title>
+    Don't use Obj.magic!
+    </title>
+    <para>
+      As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is
+      not part of the OCaml language&quot;</quote>.
+    </para>
+    </important>
+    <para>
+      break up the notes with a normal paragraph of text.
+    </para>
+    <caution>
+    <title>
+    This is a warning
+    </title>
+    <para>
+      It's very, very important to not run with scissors!
+    </para>
+    </caution>
+    <para>
+      Break up the notes with a normal paragraph of text.
+    </para>
+    <qandaset defaultlabel='qanda'>
+    <qandaentry> <question>
+    <para>
+      To be, or not to be?
+    </para>
+    </question> <answer>
+    <para>
+      That is the question.
+    </para>
+    </answer> </qandaentry>
+    </qandaset>
+
   </sect1>
 </chapter>
 </book>
