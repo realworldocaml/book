@@ -19,10 +19,10 @@
 | 09 | Files, Modules and Programs         | yaron  | ###    |
 | 10 | Functors and first-class modules    | yaron  |        |
 | 11 | Input and Output                    |        |        |
-| 12 | Concurrent Programming              | anil   |        |
+| 12 | Concurrent Programming              | anil   | #      |
 | 13 | Objects                             | jason  | ##     |
-| 14 | Tuning and Profiling                | anil   |        |
-| 15 | Interfacing with C                  | anil   |        |
+| 14 | Interfacing with C                  | anil   | #      |
+| 15 | Tuning and Profiling                | anil   |        |
 | 16 | Syntax extensions                   | yaron  |        |
 | 17 | Packaging and build systems         | anil   |        |
 | 18 | Parsing with OCamllex and OCamlyacc | anil   |        |
