@@ -1,12 +1,12 @@
 # Packaging and Build Systems
 
-The OCaml toolchain and runtime is structured much like a C compiler, with
-several tools that operate over intermediate files, and finally link against a
-runtime.  The outputs don't have to be just executables. Many people embed
-OCaml code as object files that are called from other applications, or even
-compile it to Javascript and other esoteric targets.  Let's start by covering
-some of the standard OCaml tools, and then move on to some of the higher level
-methods for packaging and publishing your code online.
+The OCaml toolchain is structured much like a C compiler, with several tools
+that generate intermediate files and finally link against a runtime.  The
+final outputs don't have to be just executables. Many people embed OCaml code as
+object files that are called from other applications, or even compile it to
+Javascript and other esoteric targets.  Let's start by covering some of the
+standard OCaml tools, and then move on to some of the higher level methods for
+packaging and publishing your code online.
 
 ## The OCaml toolchain
 
