@@ -19,7 +19,7 @@ careful locking due to unpredictable interleaving. Event-driven systems can
 descend into a maze of callbacks that are hard to read and understand.
 
 The Async OCaml library offers an interesting hybrid model that lets you write
-straight-line blocking OCaml code that scales well without using preemptive
+straight-line blocking code that scales well without using preemptive
 threading. Async "threads" are co-operative and never preempt each other, and
 the library internally converts blocking code into a single event loop.  The
 threads are normal OCaml heap-allocated values (without any runtime magic!) and
