@@ -7451,14 +7451,14 @@ $ ./service_client.byte
   </para>
   <para>
     The Async OCaml library offers an interesting hybrid model that lets
-    you write straight-line blocking OCaml code that scales well without
-    using preemptive threading. Async &quot;threads&quot; are
-    co-operative and never preempt each other, and the library
-    internally converts blocking code into a single event loop. The
-    threads are normal OCaml heap-allocated values (without any runtime
-    magic!) and are therefore very fast to allocate. Concurrency is
-    mostly limited only by your available main memory, or operating
-    system limits on non-memory resources such as file descriptors.
+    you write straight-line blocking code that scales well without using
+    preemptive threading. Async &quot;threads&quot; are co-operative and
+    never preempt each other, and the library internally converts
+    blocking code into a single event loop. The threads are normal OCaml
+    heap-allocated values (without any runtime magic!) and are therefore
+    very fast to allocate. Concurrency is mostly limited only by your
+    available main memory, or operating system limits on non-memory
+    resources such as file descriptors.
   </para>
   <para>
     Lets begin by constructing a simple thread. Async follows the Core
@@ -9566,15 +9566,126 @@ end;;
     </sect2>
   </sect1>
 </chapter>
-<chapter id="tuning-and-profiling">
-  <title>Tuning and Profiling</title>
-  <para>
-  </para>
-</chapter>
 <chapter id="interfacing-with-c">
   <title>Interfacing with C</title>
   <para>
+    Much of the static type information contained within an OCaml
+    program is checked and discarded at compile time, leaving a much
+    simpler <emphasis>runtime</emphasis> representation for values.
+    OCaml adopts a uniform memory representation for such memory values,
+    and understanding this layout is important to writing fast programs
+    and interfacing with C libraries.
   </para>
+  <para>
+    Let's first explain the memory layout of an OCaml program, and then
+    move onto how to interface it with other systems after that.
+  </para>
+  <sect1 id="understanding-the-heap">
+    <title>Understanding the Heap</title>
+    <para>
+      Every OCaml value starts with a single word (either 32- or 64-bit)
+      that represents either an unboxed integer or a pointer. If the
+      lowest bit of the word is non-zero, then the value is an integer.
+      Several OCaml types map onto such integers, including
+      <literal>bool</literal>, <literal>int</literal>, the empty list,
+      <literal>unit</literal>, and some variants. Integers are the only
+      unboxed runtime values in OCaml, and are thus cheap to allocate
+      and manipulate. A <literal>value</literal> containing a pointer is
+      stored unmodified, and can be followed just like a C pointer.
+    </para>
+    <para>
+      Runtime values that are more complex than integers are stored in
+      OCaml <emphasis>blocks</emphasis>. An OCaml block consists of a
+      header word followed by a variable number of data words. The
+      header word is broken up as follows:
+    </para>
+    <programlisting>
+(TODO draw this properly)
++------------------------+-------+----------+----------+----------+----
+| size of block in words |  col  | tag byte | value[0] | value[1] | ...
++------------------------+-------+----------+----------+----------+----
+ &lt;-either 22 or 54 bits-&gt; &lt;2 bit&gt; &lt;--8 bit--&gt;
+</programlisting>
+    <para>
+      The size part records the length of the block in words. Note that
+      it is limited to 22-bits on 32-bit platforms, which is the reason
+      why OCaml strings are limited to 16MB. If you need bigger strings,
+      then either switch to a 64-bit host, or use the
+      <literal>Bigarray</literal> module. The 2-bit color is used by the
+      garbage collector to keep track of its scanning, and we will
+      discuss it more later. The tag byte is more important now, as it
+      encodes the format of the subsequent words.
+    </para>
+    <para>
+      (<emphasis>avsm</emphasis>: pointers to blocks actually point 4/8
+      bytes into it, for some efficiency reason that I cannot recall
+      right now).
+    </para>
+    <para>
+      (<emphasis>avsm</emphasis>: is the string padding trick to
+      guarantee nul-termination worth mentioning here? it seems more on
+      topic for the C interface section)
+    </para>
+    <note>
+    <title>
+    Why are OCaml integers missing a bit?
+    </title>
+    <para>
+      Since the lowest bit of an OCaml value is reserved, native OCaml
+      integers have a maximum allowable length of 31- or 63-bits,
+      depending on the host architecture. The rationale for reserving
+      the lowest bit is for efficiency. Pointers always point to
+      word-aligned addresses, and so their lower bits are normally zero.
+      By setting the lower bit to a non-zero value for integers, the
+      garbage collector can simply iterate over every header tag to
+      distinguish integers from pointers. This reduces the garbage
+      collection overhead on the overall program.
+    </para>
+    </note>
+  </sect1>
+  <sect1 id="linking-to-c-libraries">
+    <title>Linking to C libraries</title>
+    <para>
+    </para>
+  </sect1>
+</chapter>
+<chapter id="tuning-and-profiling">
+  <title>Tuning and Profiling</title>
+  <para>
+    (<emphasis>avsm</emphasis>: all notes and outline so far)
+  </para>
+  <sect1 id="tuning-the-garbage-collector">
+    <title>Tuning the Garbage Collector</title>
+    <para>
+    </para>
+  </sect1>
+  <sect1 id="byte-code-profiling">
+    <title>Byte code Profiling</title>
+    <para>
+      ocamlcp and call trace information
+    </para>
+  </sect1>
+  <sect1 id="native-code-profiling">
+    <title>Native Code Profiling</title>
+    <sect2 id="gdb">
+      <title>gdb</title>
+      <para>
+        requires shinwell's patch in ocaml trunk via opam
+      </para>
+    </sect2>
+    <sect2 id="perf">
+      <title>perf</title>
+      <para>
+        requires fabrice's frame pointer patch
+      </para>
+    </sect2>
+    <sect2 id="dtrace">
+      <title>dtrace</title>
+      <para>
+        requires my dtrace/instruments patch for libasmrun
+      </para>
+    </sect2>
+  </sect1>
 </chapter>
 <chapter id="syntax-extensions">
   <title>Syntax Extensions</title>
@@ -10284,7 +10395,222 @@ module Fields :
 <chapter id="packaging-and-build-systems">
   <title>Packaging and Build Systems</title>
   <para>
+    The OCaml toolchain and runtime is structured much like a C
+    compiler, with several tools that operate over intermediate files,
+    and finally link against a runtime. The outputs don't have to be
+    just executables. Many people embed OCaml code as object files that
+    are called from other applications, or even compile it to Javascript
+    and other esoteric targets. Let's start by covering some of the
+    standard OCaml tools, and then move on to some of the higher level
+    methods for packaging and publishing your code online.
   </para>
+  <sect1 id="the-ocaml-toolchain">
+    <title>The OCaml toolchain</title>
+    <para>
+      There are two distinct compilers for OCaml code included in the
+      standard distribution. The first outputs bytecode that is
+      interpreted at runtime, and the second generates fast, efficient
+      native code directly. Both of these share the front-end
+      type-checking logic, and only diverge when it comes to code
+      generation.
+    </para>
+    <sect2 id="the-ocamlc-bytecode-compiler">
+      <title>The <literal>ocamlc</literal> bytecode compiler</title>
+      <para>
+        The simplest code generator is the <literal>ocamlc</literal>
+        compiler, which outputs portable bytecode that is interpreted
+        via the <literal>ocamlrun</literal> runtime. The OCaml bytecode
+        virtual machine is a stack machine (much like the Java Virtual
+        Machine), with the exception of a single register that stores
+        the more recent result. This provides a simple runtime model
+        that is easy to implement, but executes rather slowly due to
+        being interpreted.
+      </para>
+      <para>
+        Here are some of the files generated by
+        <literal>ocamlc</literal>:
+      </para>
+      <informaltable>
+        <tgroup cols="3">
+          <colspec align="left" />
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                Extension
+              </entry>
+              <entry>
+                Generated By
+              </entry>
+              <entry>
+                Purpose
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                .ml
+              </entry>
+              <entry>
+                manual/codegen
+              </entry>
+              <entry>
+                Source files for compilation unit module
+                implementations.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .mli
+              </entry>
+              <entry>
+                manual/codegen
+              </entry>
+              <entry>
+                Source files for compilation unit module interfaces. If
+                missing, generated from the <literal>.ml</literal> file.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmi
+              </entry>
+              <entry>
+                ocamlc
+              </entry>
+              <entry>
+                Compiled module interface from a corresponding
+                <literal>.mli</literal> source file.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmo
+              </entry>
+              <entry>
+                ocamlc
+              </entry>
+              <entry>
+                Compiled bytecode object file of the module
+                implementation.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cma
+              </entry>
+              <entry>
+                ocamlc
+              </entry>
+              <entry>
+                Library of bytecode object files packed into a single
+                file.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .o
+              </entry>
+              <entry>
+                ocamlc
+              </entry>
+              <entry>
+                C source files are compiled into native object files by
+                the system <literal>cc</literal>.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </sect2>
+    <sect2 id="the-ocamlopt-native-code-compiler">
+      <title>The <literal>ocamlopt</literal> native code
+      compiler</title>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                Extension
+              </entry>
+              <entry>
+                Purpose
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                .cmi
+              </entry>
+              <entry>
+                Compiled module interface from a corresponding
+                <literal>.mli</literal> source file.
+                (<emphasis>avsm</emphasis>: this is not compatible with
+                the ocamlc version iirc)
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .o
+              </entry>
+              <entry>
+                Compiled native object file of the module
+                implementation.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmx
+              </entry>
+              <entry>
+                Contains extra information for linking and cross-module
+                optimization of the unit.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmxa/.a
+              </entry>
+              <entry>
+                Library of <literal>cmx</literal> and
+                <literal>o</literal> units, stored in the
+                <literal>cmxa</literal> and <literal>a</literal> files
+                respectively.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </sect2>
+    <sect2 id="the-ocaml-top-level-loop">
+      <title>The <literal>ocaml</literal> top-level loop</title>
+      <para>
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="the-findlib-compiler-frontend">
+    <title>The Findlib compiler frontend</title>
+    <para>
+    </para>
+  </sect1>
+  <sect1 id="packaging-applications-with-oasis">
+    <title>Packaging applications with OASIS</title>
+    <sect2 id="ocamlbuild">
+      <title>ocamlbuild</title>
+      <para>
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="distributing-applications-with-opam">
+    <title>Distributing applications with OPAM</title>
+    <para>
+    </para>
+  </sect1>
 </chapter>
 <chapter id="parsing-with-ocamllex-and-ocamlyacc">
   <title>Parsing with OCamllex and OCamlyacc</title>
