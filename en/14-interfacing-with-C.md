@@ -1,12 +1,15 @@
 # Interfacing with C
 
-## Understanding the Heap
-
 Much of the static type information contained within an OCaml program is
 checked and discarded at compile time, leaving a much simpler *runtime*
 representation for values.  OCaml adopts a uniform memory representation for
-such memory values, and understanding it is important to writing fast
-programs.
+such memory values, and understanding this layout is important to writing fast
+programs and interfacing with C libraries.
+
+Let's first explain the memory layout of an OCaml program, and then move
+onto how to interface it with other systems after that.
+
+## Understanding the Heap
 
 Every OCaml value starts with a single word (either 32- or 64-bit) that
 represents either an unboxed integer or a pointer. If the lowest bit of the
@@ -56,3 +59,6 @@ overall program.
 
 </note>
 
+## Linking to C libraries
+
+ 
