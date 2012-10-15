@@ -399,54 +399,51 @@ And it's explicit at the type level that `handle_log_entry` sees only
 ## Variants and recursive data structures
 
 Another common application of variants is to represent tree-like
-recursive data-structures.  One very simple application of this
-technique is that of building an expression evaluator.
+recursive data-structures.  Let's see how this works by working
+through a simple example: designing a Boolean expression evaluator.
 
-Imagine you wanted a small domain-specific language for expressing
-Boolean expressions.  This can be useful in any application that
-requires a filter language, which show up in everything from packet
-analyzers to mail clients.
-
-The declaration of the type for representing an expression is fairly
-straight-forward --- we'll have one constructor for each different
-kind of expression in our mini language, as follows.
+Such a language can be useful anywhere you need to specify filters,
+which are used in everything from packet analyzers to mail clients.
+Below, we define a variant called `blang` (short for "binary
+language") with one constructor for each kind of expression we want to
+support.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# type 'a t =
+# type 'a blang =
   | Base  of 'a
   | Const of bool
-  | And   of 'a t list
-  | Or    of 'a t list
-  | Not   of 'a t
+  | And   of 'a blang list
+  | Or    of 'a blang list
+  | Not   of 'a blang
   ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `Base` constructor is to allow us to include some set of base
-predicates.  These base predicates are what tie the expressions in
-question to the application.  Thus, if you were writing a filter
-language for an email processor, your base predicates might have
-things like what is found on the `to` or `subject` line of an email.
+Note that the definition of the type `blang` is recursive, meaning
+that a `blang` may contain other `blang`s.
 
-The definition of `t` is recursive, which means that we can construct
-complex nested expressions based on this.  Here, we'll first declare a
-type for the base predicates that encodes a very simple set of email
-filters.
+The only mysterious bit about `blang` is the role of `Base`.  The
+`Base` constructor is to let the language include a set of base
+predicates.  These base predicates tie the expressions in question to
+whatever our application is.  Thus, if you were writing a filter
+language for an email processor, your base predicates might specify
+the tests you would run against an email.  Here's a simple example of
+how you might define a base predicate type.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type mail_field = To | From | CC | Date | Subject
-  type mail_filter = { field: mail_field;
-                       contains: string }
+  type mail_predicate = { field: mail_field;
+                          contains: string }
   ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And now, we can construct a simple expression that uses `mail_filter`
-for its base predicate as follows.
+And now, we can construct a simple expression that uses
+`mail_predicate` for its base predicate.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # And [ Or [ Base { field = To; contains = "doligez" } ;
              Base { field = CC; contains = "doligez" } ];
         Base { field = Subject; contains = "runtime" } ];;
-    - : mail_filter t =
+    - : mail_predicate blang =
 And
  [Or
    [Base {field = To; contains = "doligez"};
@@ -455,54 +452,50 @@ And
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Being able to construct such expressions is all well and good, but to
-do any real work, we need some way to evaluate these expressions.
-Here's a piece of code to do just that.
+do any real work, we need some way to evaluate an expression.  Here's
+a piece of code to do just that.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let rec eval t base_eval =
-    let eval' t = eval t base_eval in
-    match t with
-    | Base  base -> base_eval base
-    | Const bool -> bool
-    | And   ts   -> List.for_all ts ~f:eval'
-    | Or    ts   -> List.exists  ts ~f:eval'
-    | Not   t    -> not (eval' t)
+# let rec eval blang base_eval =
+    let eval' blang = eval blang base_eval in
+    match blang with
+    | Base  base   -> base_eval base
+    | Const bool   -> bool
+    | And   blangs -> List.for_all blangs ~f:eval'
+    | Or    blangs -> List.exists  blangs ~f:eval'
+    | Not   blang  -> not (eval' blang)
   ;;
-val eval : 'a t -> ('a -> bool) -> bool = <fun>
+val eval : 'a blang  -> ('a -> bool) -> bool = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Note that we defined a helper function, `eval'`, which is the same as
-`eval` except that it's specialized to use `base_eval`.  That's just
-to remove a bit of boilerplate from the recursive applications of
-`eval`.
 
 The structure of the code is pretty straightforward --- we're just
 walking over the structure of the data, doing the appropriate thing at
 each state, which sometimes requires a recursive call and sometimes
-doesn't.
+doesn't.  We did define a helper function, `eval'`, which is just
+`eval` specialized to use `base_eval`, and is there to remove some
+boilerplate from the recursive calls to `eval`.
 
-Our `eval` function just walks the value in question.  We can also
-write code to transform an expression, for example, by simplifying an
-expression.  Here's a function that does just that.
+We can also write code to transform an expression, for example, by
+simplifying it.  Here's a function to does just that.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let rec simplify = function
     | Base _ | Const _ as x -> x
-    | And ts ->
-      let ts = List.map ~f:simplify ts in
-      if List.exists ts ~f:(function Const false -> true | _ -> false)
+    | And blangs ->
+      let blangs = List.map ~f:simplify blangs in
+      if List.exists blangs ~f:(function Const false -> true | _ -> false)
       then Const false
-      else And ts
-    | Or ts ->
-      let ts = List.map ~f:simplify ts in
-      if List.exists ts ~f:(function Const true -> true | _ -> false)
-      then Const true else Or ts
-    | Not t ->
-      match simplify t with
-      | Const b -> Const (not b)
-      | t -> Not t
+      else And blangs
+    | Or blangs ->
+      let blangs = List.map ~f:simplify blangs in
+      if List.exists blangs ~f:(function Const true -> true | _ -> false)
+      then Const true else Or blangs
+    | Not blang ->
+      match simplify blang with
+      | Const bool -> Const (not bool)
+      | blang -> Not blang
   ;;
-val simplify : 'a t -> 'a t = <fun>
+val simplify : 'a blang -> 'a blang = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One thing to notice about the above code is that it uses a catch-all
@@ -511,27 +504,29 @@ better to be explicit about the cases you're ignoring.  Indeed, if we
 change this snippet of code to be more explicit:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-    | Not t ->
-      match simplify t with
-      | Const b -> Const (not b)
-      | (And _ | Or _ | Base _ | Not _) -> Not t
+    | Not blang ->
+      match simplify blang with
+      | Const bool -> Const (not bool)
+      | (And _ | Or _ | Base _ | Not _) -> Not blang
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 we can immediately notice that we've missed an important
 simplification.  Really, we should have simplified double negation.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-    | Not t ->
-      match simplify t with
+    | Not blang ->
+      match simplify blang with
       | Const b -> Const (not b)
-      | Not t -> t
-      | (And _ | Or _ | Base _ ) -> Not t
+      | Not blang -> blang
+      | (And _ | Or _ | Base _ ) -> Not blang
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-All of this is more than a theoretical example.  There's a library
-very much in this spirit already exists as part of `Core`, called
-`Blang` (short for "boolean language"), and it gets a lot of practical
-use in a variety of applications.
+This example is more than a toy.  There's a module very much in this
+spirit already exists as part of Core, and gets a lot of practical use
+in a variety of applications.  More generally, using variants to build
+recursive data-structures is a common technique, and shows up
+everywhere from designing little languages to building efficient
+data-structures like red-black trees.
 
 ## Polymorphic variants
 
