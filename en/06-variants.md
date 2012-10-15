@@ -537,6 +537,8 @@ data-structures.  But variants have limitations as well.  One notable
 limitation is that you can't share constructors between different
 variant types.  To see what this means, let's consider an example.
 
+### Terminal colors redux
+
 Imagine that we have a new terminal type that adds yet more colors,
 say, by adding an alpha channel, and we wanted a type to model those
 colors.  We might model that as follows.
@@ -583,9 +585,9 @@ avoid collisions between field names.
 
 Polymorphic variants allow a way around this problem entirely.  In the
 following we'll rewrite our color code to use polymorphic variants.
-As you can see, polymorphic variants are distinguished from ordinary
-variants by the backtick at the beginning of the constructor.  We'll
-start with `basic_color_to_int`:
+We'll start with `basic_color_to_int`.  We can change from using
+ordinary variants to polymorphic ones simply by putting a back-tick in
+front of each constructor.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let basic_color_to_int = function
@@ -597,9 +599,10 @@ val basic_color_to_int :
   int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As you can see, we didn't need to declare the polymorphic variant
-before using it; it was simply inferred from the code.  We can infer
-more complicated polymorphic variants as well, as you can see here.
+We didn't need to declare the polymorphic variant before using it; it
+was simply inferred from the code.  We can infer more complicated and
+deeply nested polymorphic variant types as well, which becomes clear
+as we port more of our color code over.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -650,15 +653,41 @@ val extended_color_to_int :
   int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Polymorphic variants and subtyping
+### Polymorphic variants in more depth
 
-Seeing polymorphic variants in action makes them seem a little
-magical, and indeed, understanding how polymorphic variants really
-work is somewhat tricky.  Let's step back to work through some simple
-numerical examples.
+At first glance, polymorphic variants look like a strict improvement
+over regular variants.  You seem to be able to do all the same things,
+but it's even more flexible and requires less typing, since you don't
+need all those pesky type declarations.  
 
-First, let's see what happens when we declare a simple variant for
-representing integers.
+While that's all true, most of the time, you'll want to stick to
+regular variants.  That's because the flexibility of polymorphic
+variants comes at a price.  There are a few disadvantages to
+polymorphic variants:
+
+- _Efficiency:_ This isn't a huge effect,
+  but polymorphic variants are somewhat heavier than regular variants,
+  and there are fewer optimizations that the compiler can apply
+  because it has less type information.
+- _Error-finding:_ Polymorphic variants are type-safe, but the typing
+  discipline that they impose is, by dint of its flexibility, less
+  likely to catch bugs in your program.
+- _Complexity:_ This is an important issue.  The typing rules for
+  polymorphic variants are a lot more complicated than they are for
+  regular variants.  This means that heavy use of polymorphic variants
+  can leave you scratching your head trying to figure out why a given
+  piece of code did or didn't compile.
+
+All that said, polymorphic variants are still a useful and powerful
+feature, but it's worth understanding their limitations, and how to
+use them sensibly and modestly.
+
+To understand the limitations of polymorphic variants, it's worth
+working through some simple examples so we can understand polymorphic
+variants in more detail.  
+
+First, consider what happens when we declare a simple variant
+representing an integer.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let three = `Int 3;;
@@ -698,9 +727,10 @@ given set of types or less, as in the following case:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let add x y =
     match x,y with
-    | `Int x, `Int y -> `Int (x + y)
+    | `Int x  , `Int y   -> `Int (x + y)
     | `Float x, `Float y -> `Float (x +. y)
-    | `Int i, `Float f | `Float f, `Int i -> `Float (f +. Float.of_int i)
+    | `Int i , `Float f | `Float f, `Int i -> 
+      `Float (f +. Float.of_int i) 
   ;;
 val add :
   [< `Float of float | `Int of int ] ->
