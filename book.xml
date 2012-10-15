@@ -3174,6 +3174,44 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
     };;
 </programlisting>
   </sect1>
+  <sect1 id="mutable-fields">
+    <title>Mutable fields</title>
+    <para>
+      By default, records, like most OCaml values, are immutable. That
+      said, it is possible to declare a record field as mutable. For
+      example, we could take the <literal>client_info</literal> type and
+      make the fields that may need to change over time mutable, as
+      follows.
+    </para>
+    <programlisting>
+# type client_info =
+   { addr: Unix.Inet_addr.t;
+     port: int;
+     user: string;
+     credentials: string;
+     mutable last_heartbeat_time: Time.t;
+     mutable last_heartbeat_status: string;
+   };;
+</programlisting>
+    <para>
+      We then use the <literal>&lt;-</literal> operator for actually
+      changing the state. The side-effecting version of
+      <literal>register_heartbeat</literal> would be written as follows.
+    </para>
+    <programlisting>
+# let register_heartbeat t hb =
+    t.last_heartbeat_time   &lt;- hb.Heartbeat.time;
+    t.last_heartbeat_status &lt;- hb.Heartbeat.status_message
+  ;;
+val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
+</programlisting>
+    <para>
+      OCaml's policy of immutable-by-default is a good one, but
+      imperative programming does have its place. We'll discuss more
+      about how (and when) to use OCaml's imperative features in chapter
+      {{{IMPERATIVE-PROGRAMMING}}}.
+    </para>
+  </sect1>
   <sect1 id="first-class-fields">
     <title>First-class fields</title>
     <para>
@@ -3246,8 +3284,7 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
       <listitem>
         <para>
           The (optional) ability to set the record field, which is
-          present only if the field is mutable. We'll talk more about
-          mutable record fields in chapter {{{MUTABILITY}}}.
+          present only if the field is mutable.
         </para>
       </listitem>
     </itemizedlist>
@@ -3782,59 +3819,57 @@ let handle_message server_state (common,details) =
     <title>Variants and recursive data structures</title>
     <para>
       Another common application of variants is to represent tree-like
-      recursive data-structures. One very simple application of this
-      technique is that of building an expression evaluator.
+      recursive data-structures. Let's see how this works by working
+      through a simple example: designing a Boolean expression
+      evaluator.
     </para>
     <para>
-      Imagine you wanted a small domain-specific language for expressing
-      Boolean expressions. This can be useful in any application that
-      requires a filter language, which show up in everything from
-      packet analyzers to mail clients.
-    </para>
-    <para>
-      The declaration of the type for representing an expression is
-      fairly straight-forward --- we'll have one constructor for each
-      different kind of expression in our mini language, as follows.
+      Such a language can be useful anywhere you need to specify
+      filters, which are used in everything from packet analyzers to
+      mail clients. Below, we define a variant called
+      <literal>blang</literal> (short for &quot;binary language&quot;)
+      with one constructor for each kind of expression we want to
+      support.
     </para>
     <programlisting>
-# type 'a t =
+# type 'a blang =
   | Base  of 'a
   | Const of bool
-  | And   of 'a t list
-  | Or    of 'a t list
-  | Not   of 'a t
+  | And   of 'a blang list
+  | Or    of 'a blang list
+  | Not   of 'a blang
   ;;
 </programlisting>
     <para>
-      The <literal>Base</literal> constructor is to allow us to include
-      some set of base predicates. These base predicates are what tie
-      the expressions in question to the application. Thus, if you were
-      writing a filter language for an email processor, your base
-      predicates might have things like what is found on the
-      <literal>to</literal> or <literal>subject</literal> line of an
-      email.
+      Note that the definition of the type <literal>blang</literal> is
+      recursive, meaning that a <literal>blang</literal> may contain
+      other <literal>blang</literal>s.
     </para>
     <para>
-      The definition of <literal>t</literal> is recursive, which means
-      that we can construct complex nested expressions based on this.
-      Here, we'll first declare a type for the base predicates that
-      encodes a very simple set of email filters.
+      The only mysterious bit about <literal>blang</literal> is the role
+      of <literal>Base</literal>. The <literal>Base</literal>
+      constructor is to let the language include a set of base
+      predicates. These base predicates tie the expressions in question
+      to whatever our application is. Thus, if you were writing a filter
+      language for an email processor, your base predicates might
+      specify the tests you would run against an email. Here's a simple
+      example of how you might define a base predicate type.
     </para>
     <programlisting>
 # type mail_field = To | From | CC | Date | Subject
-  type mail_filter = { field: mail_field;
-                       contains: string }
+  type mail_predicate = { field: mail_field;
+                          contains: string }
   ;;
 </programlisting>
     <para>
       And now, we can construct a simple expression that uses
-      <literal>mail_filter</literal> for its base predicate as follows.
+      <literal>mail_predicate</literal> for its base predicate.
     </para>
     <programlisting>
 # And [ Or [ Base { field = To; contains = &quot;doligez&quot; } ;
              Base { field = CC; contains = &quot;doligez&quot; } ];
         Base { field = Subject; contains = &quot;runtime&quot; } ];;
-    - : mail_filter t =
+    - : mail_predicate blang =
 And
  [Or
    [Base {field = To; contains = &quot;doligez&quot;};
@@ -3843,58 +3878,53 @@ And
 </programlisting>
     <para>
       Being able to construct such expressions is all well and good, but
-      to do any real work, we need some way to evaluate these
-      expressions. Here's a piece of code to do just that.
+      to do any real work, we need some way to evaluate an expression.
+      Here's a piece of code to do just that.
     </para>
     <programlisting>
-# let rec eval t base_eval =
-    let eval' t = eval t base_eval in
-    match t with
-    | Base  base -&gt; base_eval base
-    | Const bool -&gt; bool
-    | And   ts   -&gt; List.for_all ts ~f:eval'
-    | Or    ts   -&gt; List.exists  ts ~f:eval'
-    | Not   t    -&gt; not (eval' t)
+# let rec eval blang base_eval =
+    let eval' blang = eval blang base_eval in
+    match blang with
+    | Base  base   -&gt; base_eval base
+    | Const bool   -&gt; bool
+    | And   blangs -&gt; List.for_all blangs ~f:eval'
+    | Or    blangs -&gt; List.exists  blangs ~f:eval'
+    | Not   blang  -&gt; not (eval' blang)
   ;;
-val eval : 'a t -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
+val eval : 'a blang  -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
 </programlisting>
-    <para>
-      Note that we defined a helper function, <literal>eval'</literal>,
-      which is the same as <literal>eval</literal> except that it's
-      specialized to use <literal>base_eval</literal>. That's just to
-      remove a bit of boilerplate from the recursive applications of
-      <literal>eval</literal>.
-    </para>
     <para>
       The structure of the code is pretty straightforward --- we're just
       walking over the structure of the data, doing the appropriate
       thing at each state, which sometimes requires a recursive call and
-      sometimes doesn't.
+      sometimes doesn't. We did define a helper function,
+      <literal>eval'</literal>, which is just <literal>eval</literal>
+      specialized to use <literal>base_eval</literal>, and is there to
+      remove some boilerplate from the recursive calls to
+      <literal>eval</literal>.
     </para>
     <para>
-      Our <literal>eval</literal> function just walks the value in
-      question. We can also write code to transform an expression, for
-      example, by simplifying an expression. Here's a function that does
-      just that.
+      We can also write code to transform an expression, for example, by
+      simplifying it. Here's a function to does just that.
     </para>
     <programlisting>
 # let rec simplify = function
     | Base _ | Const _ as x -&gt; x
-    | And ts -&gt;
-      let ts = List.map ~f:simplify ts in
-      if List.exists ts ~f:(function Const false -&gt; true | _ -&gt; false)
+    | And blangs -&gt;
+      let blangs = List.map ~f:simplify blangs in
+      if List.exists blangs ~f:(function Const false -&gt; true | _ -&gt; false)
       then Const false
-      else And ts
-    | Or ts -&gt;
-      let ts = List.map ~f:simplify ts in
-      if List.exists ts ~f:(function Const true -&gt; true | _ -&gt; false)
-      then Const true else Or ts
-    | Not t -&gt;
-      match simplify t with
-      | Const b -&gt; Const (not b)
-      | t -&gt; Not t
+      else And blangs
+    | Or blangs -&gt;
+      let blangs = List.map ~f:simplify blangs in
+      if List.exists blangs ~f:(function Const true -&gt; true | _ -&gt; false)
+      then Const true else Or blangs
+    | Not blang -&gt;
+      match simplify blang with
+      | Const bool -&gt; Const (not bool)
+      | blang -&gt; Not blang
   ;;
-val simplify : 'a t -&gt; 'a t = &lt;fun&gt;
+val simplify : 'a blang -&gt; 'a blang = &lt;fun&gt;
 </programlisting>
     <para>
       One thing to notice about the above code is that it uses a
@@ -3904,28 +3934,29 @@ val simplify : 'a t -&gt; 'a t = &lt;fun&gt;
       of code to be more explicit:
     </para>
     <programlisting language="ocaml">
-    | Not t -&gt;
-      match simplify t with
-      | Const b -&gt; Const (not b)
-      | (And _ | Or _ | Base _ | Not _) -&gt; Not t
+    | Not blang -&gt;
+      match simplify blang with
+      | Const bool -&gt; Const (not bool)
+      | (And _ | Or _ | Base _ | Not _) -&gt; Not blang
 </programlisting>
     <para>
       we can immediately notice that we've missed an important
       simplification. Really, we should have simplified double negation.
     </para>
     <programlisting language="ocaml">
-    | Not t -&gt;
-      match simplify t with
+    | Not blang -&gt;
+      match simplify blang with
       | Const b -&gt; Const (not b)
-      | Not t -&gt; t
-      | (And _ | Or _ | Base _ ) -&gt; Not t
+      | Not blang -&gt; blang
+      | (And _ | Or _ | Base _ ) -&gt; Not blang
 </programlisting>
     <para>
-      All of this is more than a theoretical example. There's a library
-      very much in this spirit already exists as part of
-      <literal>Core</literal>, called <literal>Blang</literal> (short
-      for &quot;boolean language&quot;), and it gets a lot of practical
-      use in a variety of applications.
+      This example is more than a toy. There's a module very much in
+      this spirit already exists as part of Core, and gets a lot of
+      practical use in a variety of applications. More generally, using
+      variants to build recursive data-structures is a common technique,
+      and shows up everywhere from designing little languages to
+      building efficient data-structures like red-black trees.
     </para>
   </sect1>
   <sect1 id="polymorphic-variants">
