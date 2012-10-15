@@ -3970,12 +3970,14 @@ val simplify : 'a blang -&gt; 'a blang = &lt;fun&gt;
       share constructors between different variant types. To see what
       this means, let's consider an example.
     </para>
-    <para>
-      Imagine that we have a new terminal type that adds yet more
-      colors, say, by adding an alpha channel, and we wanted a type to
-      model those colors. We might model that as follows.
-    </para>
-    <programlisting>
+    <sect2 id="terminal-colors-redux">
+      <title>Terminal colors redux</title>
+      <para>
+        Imagine that we have a new terminal type that adds yet more
+        colors, say, by adding an alpha channel, and we wanted a type to
+        model those colors. We might model that as follows.
+      </para>
+      <programlisting>
 # type extended_color =
   | Basic of basic_color * weight  (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color space *)
@@ -3983,49 +3985,50 @@ val simplify : 'a blang -&gt; 'a blang = &lt;fun&gt;
   | Gray  of int                   (* 24 grayscale levels *)
   ;;
 </programlisting>
-    <para>
-      The problem is that the constructors of this new type have no
-      relationship with the constructors of <literal>color</literal>. In
-      particular, we'd like to be able to write the following function.
-    </para>
-    <programlisting>
+      <para>
+        The problem is that the constructors of this new type have no
+        relationship with the constructors of <literal>color</literal>.
+        In particular, we'd like to be able to write the following
+        function.
+      </para>
+      <programlisting>
 # let extended_color_to_int = function
     | RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
     | (Basic _ | RGB _ | Gray _) as color -&gt; color_to_int color
   ;;
 </programlisting>
-    <para>
-      On the face of it this looks reasonable enough, but it leads to
-      the following type error.
-    </para>
-    <programlisting>
+      <para>
+        On the face of it this looks reasonable enough, but it leads to
+        the following type error.
+      </para>
+      <programlisting>
 Characters 93-98:
     | (Basic _ | RGB _ | Gray _) as color -&gt; color_to_int color
                                                           ^^^^^
 Error: This expression has type extended_color
        but an expression was expected of type color
 </programlisting>
-    <para>
-      The problem is that <literal>extended_color</literal> and
-      <literal>color</literal> are in the compiler's view distinct and
-      unrelated types. The compiler doesn't recognize that, for
-      instance, the <literal>Basic</literal> constructor in both types
-      is in some sense the same. Moreover, the definition of
-      <literal>extended_color</literal> shadows the constructors from
-      <literal>color</literal>, so we can no longer even create a
-      <literal>color</literal>, though we can deal with this problem by
-      moving the definitions into different modules, much as we did with
-      records to avoid collisions between field names.
-    </para>
-    <para>
-      Polymorphic variants allow a way around this problem entirely. In
-      the following we'll rewrite our color code to use polymorphic
-      variants. As you can see, polymorphic variants are distinguished
-      from ordinary variants by the backtick at the beginning of the
-      constructor. We'll start with
-      <literal>basic_color_to_int</literal>:
-    </para>
-    <programlisting>
+      <para>
+        The problem is that <literal>extended_color</literal> and
+        <literal>color</literal> are in the compiler's view distinct and
+        unrelated types. The compiler doesn't recognize that, for
+        instance, the <literal>Basic</literal> constructor in both types
+        is in some sense the same. Moreover, the definition of
+        <literal>extended_color</literal> shadows the constructors from
+        <literal>color</literal>, so we can no longer even create a
+        <literal>color</literal>, though we can deal with this problem
+        by moving the definitions into different modules, much as we did
+        with records to avoid collisions between field names.
+      </para>
+      <para>
+        Polymorphic variants allow a way around this problem entirely.
+        In the following we'll rewrite our color code to use polymorphic
+        variants. We'll start with
+        <literal>basic_color_to_int</literal>. We can change from using
+        ordinary variants to polymorphic ones simply by putting a
+        back-tick in front of each constructor.
+      </para>
+      <programlisting>
 # let basic_color_to_int = function
   | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
   | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7
@@ -4034,13 +4037,13 @@ val basic_color_to_int :
   [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] -&gt;
   int = &lt;fun&gt;
 </programlisting>
-    <para>
-      As you can see, we didn't need to declare the polymorphic variant
-      before using it; it was simply inferred from the code. We can
-      infer more complicated polymorphic variants as well, as you can
-      see here.
-    </para>
-    <programlisting>
+      <para>
+        We didn't need to declare the polymorphic variant before using
+        it; it was simply inferred from the code. We can infer more
+        complicated and deeply nested polymorphic variant types as well,
+        which becomes clear as we port more of our color code over.
+      </para>
+      <programlisting>
 # let color_to_int = function
   | `Basic (basic_color,weight) -&gt;
     let base = match weight with `Bold -&gt; 8 | `Regular -&gt; 0 in
@@ -4063,11 +4066,11 @@ val color_to_int :
    | `RGB of int * int * int ] -&gt;
   int = &lt;fun&gt;
 </programlisting>
-    <para>
-      and indeed, the full <literal>extended_color_to_int</literal>
-      function works exactly as intended.
-    </para>
-    <programlisting>
+      <para>
+        and indeed, the full <literal>extended_color_to_int</literal>
+        function works exactly as intended.
+      </para>
+      <programlisting>
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
     | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color
@@ -4088,17 +4091,62 @@ val extended_color_to_int :
    | `RGBA of int * int * int * int ] -&gt;
   int = &lt;fun&gt;
 </programlisting>
-    <sect2 id="polymorphic-variants-and-subtyping">
-      <title>Polymorphic variants and subtyping</title>
+    </sect2>
+    <sect2 id="polymorphic-variants-in-more-depth">
+      <title>Polymorphic variants in more depth</title>
       <para>
-        Seeing polymorphic variants in action makes them seem a little
-        magical, and indeed, understanding how polymorphic variants
-        really work is somewhat tricky. Let's step back to work through
-        some simple numerical examples.
+        At first glance, polymorphic variants look like a strict
+        improvement over regular variants. You seem to be able to do all
+        the same things, but it's even more flexible and requires less
+        typing, since you don't need all those pesky type declarations.
       </para>
       <para>
-        First, let's see what happens when we declare a simple variant
-        for representing integers.
+        While that's all true, most of the time, you'll want to stick to
+        regular variants. That's because the flexibility of polymorphic
+        variants comes at a price. There are a few disadvantages to
+        polymorphic variants:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <emphasis>Efficiency:</emphasis> This isn't a huge effect,
+            but polymorphic variants are somewhat heavier than regular
+            variants, and there are fewer optimizations that the
+            compiler can apply because it has less type information.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Error-finding:</emphasis> Polymorphic variants are
+            type-safe, but the typing discipline that they impose is, by
+            dint of its flexibility, less likely to catch bugs in your
+            program.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Complexity:</emphasis> This is an important issue.
+            The typing rules for polymorphic variants are a lot more
+            complicated than they are for regular variants. This means
+            that heavy use of polymorphic variants can leave you
+            scratching your head trying to figure out why a given piece
+            of code did or didn't compile.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        All that said, polymorphic variants are still a useful and
+        powerful feature, but it's worth understanding their
+        limitations, and how to use them sensibly and modestly.
+      </para>
+      <para>
+        To understand the limitations of polymorphic variants, it's
+        worth working through some simple examples so we can understand
+        polymorphic variants in more detail.
+      </para>
+      <para>
+        First, consider what happens when we declare a simple variant
+        representing an integer.
       </para>
       <programlisting>
 # let three = `Int 3;;
@@ -4141,9 +4189,10 @@ Error: This expression has type [&gt; `Float of float ]
       <programlisting>
 # let add x y =
     match x,y with
-    | `Int x, `Int y -&gt; `Int (x + y)
+    | `Int x  , `Int y   -&gt; `Int (x + y)
     | `Float x, `Float y -&gt; `Float (x +. y)
-    | `Int i, `Float f | `Float f, `Int i -&gt; `Float (f +. Float.of_int i)
+    | `Int i , `Float f | `Float f, `Int i -&gt; 
+      `Float (f +. Float.of_int i) 
   ;;
 val add :
   [&lt; `Float of float | `Int of int ] -&gt;
