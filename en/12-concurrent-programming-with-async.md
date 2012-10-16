@@ -134,7 +134,7 @@ two threads, each of which sleep for some random time and return either
   let span_heads = Time.Span.randomize span ~percent:0.75 in
   let span_tails = Time.Span.randomize span ~percent:0.75 in
   let coin_heads =
-    Clock.after span_one
+    Clock.after span_heads
     >>| fun () ->
     "Heads!", span_heads, span_tails
   in
