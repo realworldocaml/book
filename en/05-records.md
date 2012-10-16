@@ -432,6 +432,41 @@ follows.
     };;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Mutable fields
+
+By default, records, like most OCaml values, are immutable.  That
+said, it is possible to declare a record field as mutable.  For
+example, we could take the `client_info` type and make the fields that
+may need to change over time mutable, as follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type client_info =
+   { addr: Unix.Inet_addr.t;
+     port: int;
+     user: string;
+     credentials: string;
+     mutable last_heartbeat_time: Time.t;
+     mutable last_heartbeat_status: string;
+   };;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We then use the `<-` operator for actually changing the state.  The
+side-effecting version of `register_heartbeat` would be written as
+follows.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let register_heartbeat t hb =
+    t.last_heartbeat_time   <- hb.Heartbeat.time;
+    t.last_heartbeat_status <- hb.Heartbeat.status_message
+  ;;
+val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+OCaml's policy of immutable-by-default is a good one, but imperative
+programming does have its place.  We'll discuss more about how (and
+when) to use OCaml's imperative features in chapter
+{{{IMPERATIVE-PROGRAMMING}}}.
+
 ## First-class fields
 
 Consider the following function for extracting the usernames from a
@@ -483,8 +518,7 @@ record filed:
 * The ability to extract the field
 * The ability to do a functional update of that field
 * The (optional) ability to set the record field, which is present
-  only if the field is mutable.  We'll talk more about mutable record
-  fields in chapter {{{MUTABILITY}}}.
+  only if the field is mutable.
 
 We can use these first class fields to do things like write a generic
 function for displaying a record field.  The function `show_field`
