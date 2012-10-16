@@ -7675,7 +7675,7 @@ val fn : unit -&gt; string Deferred.t = &lt;abstr&gt;
   let span_heads = Time.Span.randomize span ~percent:0.75 in
   let span_tails = Time.Span.randomize span ~percent:0.75 in
   let coin_heads =
-    Clock.after span_one
+    Clock.after span_heads
     &gt;&gt;| fun () -&gt;
     &quot;Heads!&quot;, span_heads, span_tails
   in
@@ -9646,65 +9646,148 @@ end;;
     </sect2>
   </sect1>
 </chapter>
-<chapter id="interfacing-with-c">
-  <title>Interfacing with C</title>
+<chapter id="understanding-the-runtime-system">
+  <title>Understanding the runtime system</title>
   <para>
     Much of the static type information contained within an OCaml
-    program is checked and discarded at compile time, leaving a much
+    program is checked and discarded at compilation time, leaving a much
     simpler <emphasis>runtime</emphasis> representation for values.
-    OCaml adopts a uniform memory representation for such memory values,
-    and understanding this layout is important to writing fast programs
-    and interfacing with C libraries.
+    Understanding this runtime layout is important to writing fast
+    programs, and interfacing with C libraries which work directly with
+    these values.
   </para>
   <para>
-    Let's first explain the memory layout of an OCaml program, and then
-    move onto how to interface it with other systems after that.
+    Let's start by explaining the memory layout, and then move onto the
+    details of how C bindings work.
   </para>
-  <sect1 id="understanding-the-heap">
-    <title>Understanding the Heap</title>
+  <sect1 id="the-garbage-collector">
+    <title>The garbage collector</title>
     <para>
-      Every OCaml value starts with a single word (either 32- or 64-bit)
-      that represents either an unboxed integer or a pointer. If the
-      lowest bit of the word is non-zero, then the value is an integer.
-      Several OCaml types map onto such integers, including
-      <literal>bool</literal>, <literal>int</literal>, the empty list,
-      <literal>unit</literal>, and some variants. Integers are the only
-      unboxed runtime values in OCaml, and are thus cheap to allocate
-      and manipulate. A <literal>value</literal> containing a pointer is
-      stored unmodified, and can be followed just like a C pointer.
-    </para>
-    <para>
-      Runtime values that are more complex than integers are stored in
-      OCaml <emphasis>blocks</emphasis>. An OCaml block consists of a
-      header word followed by a variable number of data words. The
-      header word is broken up as follows:
+      A running OCaml program uses blocks of memory (i.e. contiguous
+      sequences of words in RAM) to represent many of the values that it
+      deals with such as tuples, records, closures or arrays. An OCaml
+      program implicitly allocates a block of memory when such a value
+      is created.
     </para>
     <programlisting>
-(TODO draw this properly)
-+------------------------+-------+----------+----------+----------+----
-| size of block in words |  col  | tag byte | value[0] | value[1] | ...
-+------------------------+-------+----------+----------+----------+----
- &lt;-either 22 or 54 bits-&gt; &lt;2 bit&gt; &lt;--8 bit--&gt;
+# let x = { foo = 13; bar = 14 } ;;
 </programlisting>
     <para>
-      The size part records the length of the block in words. Note that
-      it is limited to 22-bits on 32-bit platforms, which is the reason
-      why OCaml strings are limited to 16MB. If you need bigger strings,
-      then either switch to a 64-bit host, or use the
-      <literal>Bigarray</literal> module. The 2-bit color is used by the
-      garbage collector to keep track of its scanning, and we will
-      discuss it more later. The tag byte is more important now, as it
-      encodes the format of the subsequent words.
+      An expression such as the record above requires a new block of
+      memory with two words of available space. One word holds the
+      <literal>foo</literal> field and the second word holds the
+      <literal>bar</literal> field. The OCaml compiler translates such
+      an expression into an explicit allocation for the block from
+      OCaml's runtime system: a C library that provides a collection of
+      routines that can be called by running OCaml programs. The runtime
+      system manages a &quot;heap&quot;, which a collection of memory
+      regions it obtains from the operating system using
+      <literal>malloc</literal>. The OCaml runtime uses these memory
+      regions to hold &quot;heap blocks&quot;, which it then fills up in
+      response to allocation requests by the OCaml program.
     </para>
     <para>
-      (<emphasis>avsm</emphasis>: pointers to blocks actually point 4/8
-      bytes into it, for some efficiency reason that I cannot recall
-      right now).
+      When there is'nt enough memory available to satisfy an allocation
+      request from the allocated heap blocks, the runtime system invokes
+      the &quot;garbage collector&quot; (or GC). An OCaml program does
+      not explicitly free a heap block when it is done with it, and the
+      GC must determine which heap blocks are &quot;alive&quot; and
+      which heap blocks are &quot;dead&quot;, i.e. no longer in use.
+      Dead blocks are collected and their memory made available for
+      re-use by the application.
     </para>
     <para>
-      (<emphasis>avsm</emphasis>: is the string padding trick to
-      guarantee nul-termination worth mentioning here? it seems more on
-      topic for the C interface section)
+      The garbage collector does not keep constant track of blocks as
+      they are allocated and used. Instead, it regularly scans blocks by
+      starting from a set of &quot;roots&quot;, which are values that
+      the application always has access to (such as the stack). Thus,
+      the GC maintains a directed graph in which heap blocks are nodes,
+      and there is an edge from heap block <literal>b1</literal> to heap
+      block <literal>b2</literal> if some field of <literal>b1</literal>
+      points to <literal>b2</literal>. All blocks reachable from the
+      roots by following edges in the graph must be retained, and
+      unreachable blocks can be reused.
+    </para>
+    <para>
+      With the typical OCaml programming style, many small blocks are
+      frequently allocated, used for a short period of time, and then
+      never used again. OCaml takes advantage of this fact to improve
+      the performance of allocation and collection by using a
+      &quot;generational&quot; garbage collector, which means that it
+      has different memory regions to hold blocks based on how long the
+      blocks have been alive. Specifically, OCaml's heap is split in
+      two; there is a small, fixed-size &quot;minor heap&quot; (or
+      &quot;young generation&quot;) used for initially allocating most
+      blocks, and a large, variable-sized &quot;major heap&quot; (or
+      &quot;old generation&quot;) for holding blocks that have been
+      alive longer or are larger than 4KB. A typical functional
+      programming style means that young blocks tend to die young, and
+      old blocks tend to stay around for longer than young ones (this is
+      referred to as the &quot;generational hypothesis&quot;). To
+      reflect this, OCaml uses different memory layouts and garbage
+      collection algorithms for the major and minor heaps.
+    </para>
+    <para>
+      The minor heap is one contiguous chunk of memory containing a
+      sequence of heap blocks that have been allocated. If there is
+      space, allocating a new block is a fast constant-time operation in
+      which the pointer to the end of the heap is incremented by the
+      desired size. To garbage collect the minor heap, OCaml uses
+      <emphasis>copying collection</emphasis> to copy all live blocks in
+      the minor heap to the major heap. This only takes work
+      proportional to the number of live blocks in the minor heap, which
+      is typically small according to the generational hypothesis. One
+      complexity of generational collection is that in order to know
+      which blocks in the minor heap are live, the collector must know
+      which minor-heap blocks are directly pointed to by major-heap
+      blocks. To do this, OCaml maintains a set of such
+      inter-generational pointers, and, through cooperation with the
+      compiler, uses a write barrier to update this set whenever a
+      major-heap block is modified to point at a minor-heap block.
+    </para>
+    <para>
+      The major heap consists of a number of chunks of memory, each
+      containing live blocks interspersed with regions of free memory.
+      The runtime system maintains a &quot;free list&quot;, which is a
+      data structure indexing all the free memory, that is used to
+      satisfy allocation requests. OCaml uses
+      <emphasis>mark-sweep-compact</emphasis> garbage collection for the
+      major heap. The &quot;mark&quot; phase to traverses the block
+      graph and marks all live blocks, literally by setting a bit in the
+      block header. The &quot;sweep&quot; phase sequentially scans all
+      heap memory and identifies dead block. The &quot;compact&quot;
+      phase happens more rarely, and moves live blocks to eliminate the
+      gaps of free memory between them, and ensure memory does not
+      fragment.
+    </para>
+    <para>
+      A garbage collection must &quot;stop the world&quot; (that is,
+      halt the application) in order to ensure that memory can be safely
+      moved. To minimise this impact, the mark and sweep phases are
+      incremental, and are broken up into a number of steps that are
+      interspersed with the running OCaml program. Only a compaction
+      touches all the memory in one go, and it is a relatively rare
+      operation. We will discuss garbage collection tuning in
+      (<emphasis>avsm</emphasis>: crossref).
+    </para>
+  </sect1>
+  <sect1 id="the-representation-of-values">
+    <title>The representation of values</title>
+    <para>
+      Every OCaml <emphasis>value</emphasis> is a single word that is
+      either an integer or a pointer elsewhere in memory. If the lowest
+      bit of the word is non-zero, the value is an unboxed integer.
+      Several OCaml types map onto integers, including
+      <literal>bool</literal>, <literal>int</literal>, the empty list,
+      <literal>unit</literal>, and variants without constructors.
+      Integers are the only unboxed runtime values in OCaml, and are
+      thus the cheapest values to allocate and manipulate. A
+      <literal>value</literal> containing a pointer is stored unmodified
+      since pointers are guaranteed to be word-aligned, so the bottom
+      bits are zeroed. If the pointer is inside an area managed by the
+      runtime, it is assumed to point to a valid OCaml
+      <emphasis>block</emphasis>, or else is treated as an opaque C
+      pointer to some other system resource.
     </para>
     <note>
     <title>
@@ -9722,11 +9805,259 @@ end;;
       collection overhead on the overall program.
     </para>
     </note>
-  </sect1>
-  <sect1 id="linking-to-c-libraries">
-    <title>Linking to C libraries</title>
     <para>
+      A <emphasis>block</emphasis> is the basic unit of allocation on
+      the heap. A block consists of a one-word header (either 32- or
+      64-bits) followed by variable-length data, which is either opaque
+      bytes or &quot;fields&quot;, which are OCaml values. The collector
+      never inspects opaque bytes, which hence should never contain
+      OCaml pointers. The runtime always inspects fields, and follows
+      them as part of the garbage collection process described earlier.
+      Every block header has a tag that defines its runtime type, and
+      how to interprete the subsequent fields.
     </para>
+    <para>
+      (<emphasis>avsm</emphasis>: pointers to blocks actually point 4/8
+      bytes into it, for some efficiency reason that I cannot recall
+      right now).
+    </para>
+    <programlisting>
+(TODO draw this properly)
++------------------------+-------+----------+----------+----------+----
+| size of block in words |  col  | tag byte | value[0] | value[1] | ...
++------------------------+-------+----------+----------+----------+----
+ &lt;-either 22 or 54 bits-&gt; &lt;2 bit&gt; &lt;--8 bit--&gt;
+</programlisting>
+    <para>
+      The size part records the length of the block in words. Note that
+      it is limited to 22-bits on 32-bit platforms, which is the reason
+      why OCaml strings are limited to 16MB. If you need bigger strings,
+      then either switch to a 64-bit host, or use the
+      <literal>Bigarray</literal> module. The 2-bit color is used by the
+      garbage collector to keep track of the mark and sweep status, and
+      is not exposed directly to OCaml programs.
+    </para>
+    <informaltable>
+      <tgroup cols="2">
+        <colspec align="left" />
+        <colspec align="left" />
+        <thead>
+          <row>
+            <entry>
+              Tag Color
+            </entry>
+            <entry>
+              Block Status
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              blue
+            </entry>
+            <entry>
+              on the free list and not currently in use
+            </entry>
+          </row>
+          <row>
+            <entry>
+              white
+            </entry>
+            <entry>
+              not reached yet, but possibly reachable
+            </entry>
+          </row>
+          <row>
+            <entry>
+              gray
+            </entry>
+            <entry>
+              reachable, but its fields have not been scanned
+            </entry>
+          </row>
+          <row>
+            <entry>
+              black
+            </entry>
+            <entry>
+              reachable, and its fields have been scanned
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      A block's tag byte indicates whether the data array represents
+      opaque bytes or fields. Tags are also used to distinguish
+      constructors of an OCaml variant type. If a block's tag is greater
+      than or equal to <literal>No_scan_tag</literal> (251), then the
+      block's data is opaque bytes, and are not scanned by the
+      collector. The most common such block is the
+      <literal>string</literal> type.
+    </para>
+    <para>
+      (<emphasis>avsm</emphasis>: too much info here) If the header is
+      zero, then the object has been forwarded as part of minor
+      collection, and the first field points to the new location. Also,
+      if the block is on the <subscript>oldify_todo_list</subscript>,
+      part of the minor gc, then the second field points to the next
+      entry on the oldify_todo_list.
+    </para>
+    <sect2 id="the-representation-of-strings">
+      <title>The representation of strings</title>
+      <para>
+        Strings are standard OCaml heap blocks, with the header size
+        defining the size of the string in machine words. The actual
+        block contents are the contents of the string, and padding bytes
+        to align the block on a word boundary. On a 32-bit machine, the
+        padding is one of
+      </para>
+      <programlisting>
+ : 00
+ : 00 01
+ : 00 00 02
+ : 00 00 00 03
+for 64-bit:
+ : 00 00 00 00 04
+ : 00 00 00 00 00 05
+ : 00 00 00 00 00 00 06
+ : 00 00 00 00 00 00 00 07
+</programlisting>
+      <para>
+        Thus, the string contents are always zero-terminated by the
+        padding word, and its length can be computed very quickly by:
+      </para>
+      <programlisting>
+number_of_words_in_block * sizeof(word) + last_byte_of_block - 1
+</programlisting>
+      <para>
+        The guaranteed NULL-termination comes in handy when passing a
+        string to C, but is not relied upon to compute the length from
+        OCaml. Thus, OCaml strings can contain nulls at any point within
+        the string.
+      </para>
+    </sect2>
+    <sect2 id="custom-heap-blocks">
+      <title>Custom heap blocks</title>
+      <para>
+        OCaml supports &quot;custom&quot; heap blocks that have a
+        special tag, <subscript>Custom_tag</subscript>, and are treated
+        specially by the runtime. A custom block lives in the OCaml heap
+        like an ordinary block and can be of whatever size the user
+        desires. However, the runtime does not know anything about the
+        structure of the data in the block, other than that the first
+        word of the custom block is a C pointer to a
+        <literal>struct</literal> of custom operations. The custom block
+        cannot have pointers to OCaml blocks.
+      </para>
+      <programlisting>
+struct custom_operations {
+  char *identifier;
+  void (*finalize)(value v);
+  int (*compare)(value v1, value v2);
+  intnat (*hash)(value v);
+  void (*serialize)(value v,
+                    /*out*/ uintnat * wsize_32 /*size in bytes*/,
+                    /*out*/ uintnat * wsize_64 /*size in bytes*/);
+  uintnat (*deserialize)(void * dst);
+  int (*compare_ext)(value v1, value v2);
+};
+</programlisting>
+      <para>
+        The custom operations specify how the runtime should perform
+        polymorphic comparison, hashing and binary marshalling. They
+        also optionally contain a finalizer, which the runtime will call
+        just before the block is garbage collected. This finalizer has
+        nothing to do with ordinary OCaml finalizers, as created by
+        <literal>Gc.finalise</literal>. (<emphasis>avsm</emphasis>: xref
+        to GC module explanation)
+      </para>
+      <para>
+        When a custom block is allocated, you can also specify the
+        proportion of &quot;extra-heap resources&quot; consumed by the
+        block, which will affect the garbage collector's decision as to
+        how much work to do in the next major slice.
+        (<emphasis>avsm</emphasis>: elaborate on this or move to the C
+        interface section)
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="bigarrays-for-external-memory-blocks">
+    <title>Bigarrays for external memory blocks</title>
+    <para>
+      An OCaml bigarray is a useful custom block provided as standard to
+      manipulate memory blocks outside the OCaml heap. It has
+      <literal>Custom_tag</literal> in the header, and the first word
+      points to the <literal>custom_operations</literal> struct for
+      bigarrays. Following this is a <literal>caml_ba_array</literal>
+      struct.
+    </para>
+    <programlisting>
+struct caml_ba_array {
+  void * data;                  /* Pointer to raw data */
+  intnat num_dims;              /* Number of dimensions */
+  intnat flags;                 /* Kind of element array + memory layout + allocation status */
+  struct caml_ba_proxy * proxy; /* The proxy for sub-arrays, or NULL */
+  intnat dim[]  /*[num_dims]*/; /* Size in each dimension */
+};
+</programlisting>
+    <para>
+      The <literal>data</literal> is usually a pointer to a
+      <literal>malloc</literal>'ed chunk of memory, which the custom
+      finalizer operation <literal>free</literal>'s when the block is
+      free. The <literal>flags</literal> field encodes three values,
+      located in the bits as specified by three masks:
+    </para>
+    <programlisting>
+CAML_BA_KIND_MASK = 0xFF     /* Mask for kind in flags field */
+CAML_BA_LAYOUT_MASK = 0x100  /* Mask for layout in flags field */
+CAML_BA_MANAGED_MASK = 0x600 /* Mask for &quot;managed&quot; bits in flags field */
+</programlisting>
+    <para>
+      The <literal>CAML_BA_KIND_MASK</literal> bits hold a value of the
+      <literal>caml_ba_kind</literal> enum that identifies the kind of
+      value in the bigarray <literal>data</literal>.
+    </para>
+    <programlisting>
+enum caml_ba_kind {
+  CAML_BA_FLOAT32,             /* Single-precision floats */
+  CAML_BA_FLOAT64,             /* Double-precision floats */
+  CAML_BA_SINT8,               /* Signed 8-bit integers */
+  CAML_BA_UINT8,               /* Unsigned 8-bit integers */
+  CAML_BA_SINT16,              /* Signed 16-bit integers */
+  CAML_BA_UINT16,              /* Unsigned 16-bit integers */
+  CAML_BA_INT32,               /* Signed 32-bit integers */
+  CAML_BA_INT64,               /* Signed 64-bit integers */
+  CAML_BA_CAML_INT,            /* OCaml-style integers (signed 31 or 63 bits) */
+  CAML_BA_NATIVE_INT,          /* Platform-native long integers (32 or 64 bits) */
+  CAML_BA_COMPLEX32,           /* Single-precision complex */
+  CAML_BA_COMPLEX64,           /* Double-precision complex */
+}
+</programlisting>
+    <para>
+      The <literal>CAML_BA_LAYOUT_MASK</literal> bit says whether
+      multi-dimensional arrays are layed out C or Fortran style.
+    </para>
+    <programlisting>
+enum caml_ba_layout {
+  CAML_BA_C_LAYOUT = 0,           /* Row major, indices start at 0 */
+  CAML_BA_FORTRAN_LAYOUT = 0x100, /* Column major, indices start at 1 */
+};
+</programlisting>
+    <para>
+      The <literal>CAML_BA_MANAGED_MASK</literal> bits hold a value of
+      the <literal>caml_ba_managed</literal> enum that identifies
+      whether OCaml is responsible for freeing the
+      <literal>data</literal> or some other code is.
+    </para>
+    <programlisting>
+enum caml_ba_managed {
+  CAML_BA_EXTERNAL = 0,        /* Data is not allocated by OCaml */
+  CAML_BA_MANAGED = 0x200,     /* Data is allocated by OCaml */
+  CAML_BA_MAPPED_FILE = 0x400, /* Data is a memory mapped file */
+};
+</programlisting>
   </sect1>
 </chapter>
 <chapter id="tuning-and-profiling">
@@ -10475,14 +10806,14 @@ module Fields :
 <chapter id="packaging-and-build-systems">
   <title>Packaging and Build Systems</title>
   <para>
-    The OCaml toolchain and runtime is structured much like a C
-    compiler, with several tools that operate over intermediate files,
-    and finally link against a runtime. The outputs don't have to be
-    just executables. Many people embed OCaml code as object files that
-    are called from other applications, or even compile it to Javascript
-    and other esoteric targets. Let's start by covering some of the
-    standard OCaml tools, and then move on to some of the higher level
-    methods for packaging and publishing your code online.
+    The OCaml toolchain is structured much like a C compiler, with
+    several tools that generate intermediate files and finally link
+    against a runtime. The final outputs don't have to be just
+    executables. Many people embed OCaml code as object files that are
+    called from other applications, or even compile it to Javascript and
+    other esoteric targets. Let's start by covering some of the standard
+    OCaml tools, and then move on to some of the higher level methods
+    for packaging and publishing your code online.
   </para>
   <sect1 id="the-ocaml-toolchain">
     <title>The OCaml toolchain</title>
@@ -10498,30 +10829,26 @@ module Fields :
       <title>The <literal>ocamlc</literal> bytecode compiler</title>
       <para>
         The simplest code generator is the <literal>ocamlc</literal>
-        compiler, which outputs portable bytecode that is interpreted
-        via the <literal>ocamlrun</literal> runtime. The OCaml bytecode
-        virtual machine is a stack machine (much like the Java Virtual
-        Machine), with the exception of a single register that stores
-        the more recent result. This provides a simple runtime model
-        that is easy to implement, but executes rather slowly due to
-        being interpreted.
+        compiler, which outputs bytecode that is interpreted via the
+        <literal>ocamlrun</literal> runtime. The OCaml bytecode virtual
+        machine is a stack machine (much like the Java Virtual Machine),
+        with the exception of a single register that stores the most
+        recent result. This provides a simple runtime model that is easy
+        to implement or embed within other systems, but executes rather
+        slowly due to being interpreted.
       </para>
       <para>
-        Here are some of the files generated by
+        Here are some of the intermediate files generated by
         <literal>ocamlc</literal>:
       </para>
       <informaltable>
-        <tgroup cols="3">
-          <colspec align="left" />
+        <tgroup cols="2">
           <colspec align="left" />
           <colspec align="left" />
           <thead>
             <row>
               <entry>
                 Extension
-              </entry>
-              <entry>
-                Generated By
               </entry>
               <entry>
                 Purpose
@@ -10534,9 +10861,6 @@ module Fields :
                 .ml
               </entry>
               <entry>
-                manual/codegen
-              </entry>
-              <entry>
                 Source files for compilation unit module
                 implementations.
               </entry>
@@ -10544,9 +10868,6 @@ module Fields :
             <row>
               <entry>
                 .mli
-              </entry>
-              <entry>
-                manual/codegen
               </entry>
               <entry>
                 Source files for compilation unit module interfaces. If
@@ -10558,9 +10879,6 @@ module Fields :
                 .cmi
               </entry>
               <entry>
-                ocamlc
-              </entry>
-              <entry>
                 Compiled module interface from a corresponding
                 <literal>.mli</literal> source file.
               </entry>
@@ -10568,9 +10886,6 @@ module Fields :
             <row>
               <entry>
                 .cmo
-              </entry>
-              <entry>
-                ocamlc
               </entry>
               <entry>
                 Compiled bytecode object file of the module
@@ -10582,9 +10897,6 @@ module Fields :
                 .cma
               </entry>
               <entry>
-                ocamlc
-              </entry>
-              <entry>
                 Library of bytecode object files packed into a single
                 file.
               </entry>
@@ -10594,9 +10906,6 @@ module Fields :
                 .o
               </entry>
               <entry>
-                ocamlc
-              </entry>
-              <entry>
                 C source files are compiled into native object files by
                 the system <literal>cc</literal>.
               </entry>
@@ -10604,6 +10913,11 @@ module Fields :
           </tbody>
         </tgroup>
       </informaltable>
+      <para>
+        To obtain a bytecode executable, you need to compile a set of
+        <literal>cmo</literal> object files, and then link them into an
+        executable
+      </para>
     </sect2>
     <sect2 id="the-ocamlopt-native-code-compiler">
       <title>The <literal>ocamlopt</literal> native code
@@ -10649,7 +10963,7 @@ module Fields :
               </entry>
               <entry>
                 Contains extra information for linking and cross-module
-                optimization of the unit.
+                optimization of the object file.
               </entry>
             </row>
             <row>
