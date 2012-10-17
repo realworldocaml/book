@@ -59,6 +59,8 @@ blocks tend to stay around for longer than young ones (this is referred to as
 the "generational hypothesis"). To reflect this, OCaml uses different memory
 layouts and garbage collection algorithms for the major and minor heaps.
 
+### The fast minor heap
+
 The minor heap is one contiguous chunk of memory containing a sequence of heap
 blocks that have been allocated.  If there is space, allocating a new block is
 a fast constant-time operation in which the pointer to the end of the heap is
@@ -66,6 +68,7 @@ incremented by the desired size.  To garbage collect the minor heap, OCaml uses
 *copying collection* to copy all live blocks in the minor heap to the major
 heap.  This only takes work proportional to the number of live blocks in the
 minor heap, which is typically small according to the generational hypothesis.
+
 One complexity of generational collection is that in order to know which blocks
 in the minor heap are live, the collector must know which minor-heap blocks are
 directly pointed to by major-heap blocks.  To do this, OCaml maintains a set of
@@ -73,22 +76,28 @@ such inter-generational pointers, and, through cooperation with the compiler,
 uses a write barrier to update this set whenever a major-heap block is modified
 to point at a minor-heap block.
 
+### The long-lived major heap
+
 The major heap consists of a number of chunks of memory, each containing live
 blocks interspersed with regions of free memory.  The runtime system maintains
-a "free list", which is a data structure indexing all the free memory, that is
-used to satisfy allocation requests.  OCaml uses *mark-sweep-compact* garbage
-collection for the major heap.  The "mark" phase to traverses the block graph
-and marks all live blocks, literally by setting a bit in the block header.  The
-"sweep" phase sequentially scans all heap memory and identifies dead block.
-The "compact" phase happens more rarely, and moves live blocks to eliminate the
-gaps of free memory between them, and ensure memory does not fragment.
+a free list data structure that indexes all the free memory, and this list is
+used to satisfy allocation requests. OCaml uses mark and sweep garbage
+collection for the major heap.  The *mark* phase to traverses the block graph
+and marks all live blocks by setting a bit in the color tag of the block header.
 
-A garbage collection must "stop the world" (that is, halt the application) in
-order to ensure that memory can be safely moved. To minimise this impact, the
-mark and sweep phases are incremental, and are broken up into a number of steps
+The *sweep* phase sequentially scans all heap memory and identifies dead blocks
+that weren't marked earlier.  The *compact* phase relocates live blocks to
+eliminate the gaps of free memory between them and ensure memory does not
+fragment.
+
+A garbage collection must *stop the world* (that is, halt the application) in
+order to ensure that blocks can be safely moved. The mark and sweep phases run
+incrementally over slices of memory, and are broken up into a number of steps
 that are interspersed with the running OCaml program.  Only a compaction
-touches all the memory in one go, and it is a relatively rare operation.
-We will discuss garbage collection tuning in (_avsm_: crossref).
+touches all the memory in one go, and is a relatively rare operation.
+
+The `Gc` module lets you control all these parameters from your application,
+and we will discuss garbage collection tuning in (_avsm_: crossref).
 
 ## The representation of values
 
