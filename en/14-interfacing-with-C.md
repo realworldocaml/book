@@ -84,6 +84,7 @@ a free list data structure that indexes all the free memory, and this list is
 used to satisfy allocation requests. OCaml uses mark and sweep garbage
 collection for the major heap.  The *mark* phase to traverses the block graph
 and marks all live blocks by setting a bit in the color tag of the block header.
+(_avsm_: we only explain the color tag in the next section, so rephrase or xref).
 
 The *sweep* phase sequentially scans all heap memory and identifies dead blocks
 that weren't marked earlier.  The *compact* phase relocates live blocks to
@@ -175,25 +176,21 @@ gc, then the second field points to the next entry on the oldify_todo_list.
 Strings are standard OCaml heap blocks, with the header size defining the size
 of the string in machine words.  The actual block contents are the contents of
 the string, and padding bytes to align the block on a word boundary.  On a
-32-bit machine, the padding is one of
+32-bit machine, the padding is calculated based on the modulo of the string
+length and word size to ensure the result is word-aligned.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
- : 00
- : 00 01
- : 00 00 02
- : 00 00 00 03
-for 64-bit:
- : 00 00 00 00 04
- : 00 00 00 00 00 05
- : 00 00 00 00 00 00 06
- : 00 00 00 00 00 00 00 07
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+String length mod 4  Padding
+-------------------  -------
+0                    `00 00 00 03`
+1                    `00 00 02`
+2                    `00 01`
+3                    `00`
 
 Thus, the string contents are always zero-terminated by the padding word, and
-its length can be computed very quickly by:
+its length can be computed quickly by:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-number_of_words_in_block * sizeof(word) + last_byte_of_block - 1
+number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The guaranteed NULL-termination comes in handy when passing a string to C, but
@@ -202,13 +199,13 @@ contain nulls at any point within the string.
 
 ### Custom heap blocks
 
-OCaml supports "custom" heap blocks that have a special tag, ~Custom_tag~, and
-are treated specially by the runtime.  A custom block lives in the OCaml heap
-like an ordinary block and can be of whatever size the user desires.  However,
-the runtime does not know anything about the structure of the data in the
-block, other than that the first word of the custom block is a C pointer to a
-`struct` of custom operations. The custom block cannot have pointers to OCaml
-blocks.
+OCaml supports *custom* heap blocks that have a special `Custom_tag` that let
+the runtime perform user-defined operations over OCaml values.  A custom block
+lives in the OCaml heap like an ordinary block and can be of whatever size the
+user desires.  However, the runtime does not know anything about the structure
+of the data in the block, other than that the first word of the custom block is
+a C pointer to a `struct` of custom operations. The custom block cannot have
+pointers to OCaml blocks and is considered opaque to the garbage collector.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct custom_operations {
