@@ -170,6 +170,18 @@ forwarded as part of minor collection, and the first field points to the new
 location.  Also, if the block is on the `oldify_todo_list`, part of the minor
 gc, then the second field points to the next entry on the oldify_todo_list.
 
+OCaml Value                        Representation
+-----------                        --------------
+any `int` or `char`                stored directly as a value, shifted left by 1 bit, with the least significant bit set to 1
+`unit`, `[]`, `false`              stored as OCaml int 0 (unboxed native integer 1).
+`true`                             stored as OCaml int 1 (unboxed native integer 3).
+`type t = Foo | Bar | Baz`         stored as OCaml int 0, 1, 2
+`type t = Foo | Bar of int`        The variants with no parameters are stored as ascending OCaml ints from 0, counting from the leftmost and just the variants with no parameters. Variants with parameters are stored as blocks, with tags ascending from 0 and counting from leftmost variants with parameters. The parameters are stored as words in the block.  Note there is a limit around 240 variants with parameters that applies to each type, but no limit on the number of variants without parameters you can have. This limit arises because of the size of the tag byte and the fact that some of the high numbered tags are reserved.
+list `[1; 2; 3]`                   Lists are represented as `1::2::3::[]` where `[]` is a value OCaml int 0, and `h::t` is a block with tag 0 and two parameters. This representation is exactly the same as if the list was a variant of `Head` and `Cons`.
+tuples, records and arrays         These are all represented identically as an array of values with tag `0`. The only difference is that an array can be allocated with variable size, but structs and tuples always have a fixed size.
+records or arrays, all float       These are treated as a special case. The tag has the special value `Double_array_tag` for the GC to detect them.  Note this exception does not apply to tuples that contain floats.
+any string                         Strings are byte arrays in OCaml, but they have quite a clever representation to make it very efficient to get their length, and at the same time make them directly compatible with C strings. The tag is set to `String_tag`.
+
 ### The representation of strings
 
 Strings are standard OCaml heap blocks, with the header size defining the size
@@ -230,4 +242,5 @@ When a custom block is allocated, you can also specify the proportion of
 "extra-heap resources" consumed by the block, which will affect the garbage
 collector's decision as to how much work to do in the next major slice.
 (_avsm_: elaborate on this or move to the C interface section)
+
 
