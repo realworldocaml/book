@@ -9680,51 +9680,52 @@ end;;
       an expression into an explicit allocation for the block from
       OCaml's runtime system: a C library that provides a collection of
       routines that can be called by running OCaml programs. The runtime
-      system manages a &quot;heap&quot;, which a collection of memory
-      regions it obtains from the operating system using
-      <literal>malloc</literal>. The OCaml runtime uses these memory
-      regions to hold &quot;heap blocks&quot;, which it then fills up in
-      response to allocation requests by the OCaml program.
+      system manages a <emphasis>heap</emphasis>, which a collection of
+      memory regions it obtains from the operating system using
+      <emphasis>malloc(3)</emphasis>. The OCaml runtime uses these
+      memory regions to hold <emphasis>heap blocks</emphasis>, which it
+      then fills up in response to allocation requests by the OCaml
+      program.
     </para>
     <para>
       When there is'nt enough memory available to satisfy an allocation
       request from the allocated heap blocks, the runtime system invokes
-      the &quot;garbage collector&quot; (or GC). An OCaml program does
-      not explicitly free a heap block when it is done with it, and the
-      GC must determine which heap blocks are &quot;alive&quot; and
-      which heap blocks are &quot;dead&quot;, i.e. no longer in use.
-      Dead blocks are collected and their memory made available for
-      re-use by the application.
+      the <emphasis>garbage collector</emphasis> (or GC). An OCaml
+      program does not explicitly free a heap block when it is done with
+      it, and the GC must determine which heap blocks are
+      &quot;alive&quot; and which heap blocks are
+      <emphasis>dead</emphasis>, i.e. no longer in use. Dead blocks are
+      collected and their memory made available for re-use by the
+      application.
     </para>
     <para>
       The garbage collector does not keep constant track of blocks as
       they are allocated and used. Instead, it regularly scans blocks by
-      starting from a set of &quot;roots&quot;, which are values that
-      the application always has access to (such as the stack). Thus,
-      the GC maintains a directed graph in which heap blocks are nodes,
-      and there is an edge from heap block <literal>b1</literal> to heap
-      block <literal>b2</literal> if some field of <literal>b1</literal>
-      points to <literal>b2</literal>. All blocks reachable from the
-      roots by following edges in the graph must be retained, and
-      unreachable blocks can be reused.
+      starting from a set of <emphasis>roots</emphasis>, which are
+      values that the application always has access to (such as the
+      stack). The GC maintains a directed graph in which heap blocks are
+      nodes, and there is an edge from heap block <literal>b1</literal>
+      to heap block <literal>b2</literal> if some field of
+      <literal>b1</literal> points to <literal>b2</literal>. All blocks
+      reachable from the roots by following edges in the graph must be
+      retained, and unreachable blocks can be reused.
     </para>
     <para>
       With the typical OCaml programming style, many small blocks are
       frequently allocated, used for a short period of time, and then
       never used again. OCaml takes advantage of this fact to improve
       the performance of allocation and collection by using a
-      &quot;generational&quot; garbage collector, which means that it
-      has different memory regions to hold blocks based on how long the
-      blocks have been alive. Specifically, OCaml's heap is split in
-      two; there is a small, fixed-size &quot;minor heap&quot; (or
-      &quot;young generation&quot;) used for initially allocating most
-      blocks, and a large, variable-sized &quot;major heap&quot; (or
-      &quot;old generation&quot;) for holding blocks that have been
+      <emphasis>generational</emphasis> garbage collector. This means
+      that it has different memory regions to hold blocks based on how
+      long the blocks have been alive. OCaml's heap is split in two;
+      there is a small, fixed-size <emphasis>minor heap</emphasis> used
+      for initially allocating most blocks, and a large, variable-sized
+      <emphasis>major heap</emphasis> for holding blocks that have been
       alive longer or are larger than 4KB. A typical functional
       programming style means that young blocks tend to die young, and
       old blocks tend to stay around for longer than young ones (this is
-      referred to as the &quot;generational hypothesis&quot;). To
-      reflect this, OCaml uses different memory layouts and garbage
+      referred to as the <emphasis>generational hypothesis</emphasis>).
+      To reflect this, OCaml uses different memory layouts and garbage
       collection algorithms for the major and minor heaps.
     </para>
     <sect2 id="the-fast-minor-heap">
@@ -9762,6 +9763,8 @@ end;;
         collection for the major heap. The <emphasis>mark</emphasis>
         phase to traverses the block graph and marks all live blocks by
         setting a bit in the color tag of the block header.
+        (<emphasis>avsm</emphasis>: we only explain the color tag in the
+        next section, so rephrase or xref).
       </para>
       <para>
         The <emphasis>sweep</emphasis> phase sequentially scans all heap
@@ -9824,12 +9827,12 @@ end;;
       A <emphasis>block</emphasis> is the basic unit of allocation on
       the heap. A block consists of a one-word header (either 32- or
       64-bits) followed by variable-length data, which is either opaque
-      bytes or &quot;fields&quot;, which are OCaml values. The collector
-      never inspects opaque bytes, which hence should never contain
-      OCaml pointers. The runtime always inspects fields, and follows
-      them as part of the garbage collection process described earlier.
-      Every block header has a tag that defines its runtime type, and
-      how to interprete the subsequent fields.
+      bytes or <emphasis>fields</emphasis>. The collector never inspects
+      opaque bytes, but fields are valid OCaml values. The runtime
+      always inspects fields, and follows them as part of the garbage
+      collection process described earlier. Every block header has a tag
+      that defines its runtime type, and how to interprete the
+      subsequent fields.
     </para>
     <para>
       (<emphasis>avsm</emphasis>: pointers to blocks actually point 4/8
@@ -9915,10 +9918,127 @@ end;;
       (<emphasis>avsm</emphasis>: too much info here) If the header is
       zero, then the object has been forwarded as part of minor
       collection, and the first field points to the new location. Also,
-      if the block is on the <subscript>oldify_todo_list</subscript>,
-      part of the minor gc, then the second field points to the next
-      entry on the oldify_todo_list.
+      if the block is on the <literal>oldify_todo_list</literal>, part
+      of the minor gc, then the second field points to the next entry on
+      the oldify_todo_list.
     </para>
+    <informaltable>
+      <tgroup cols="2">
+        <colspec align="left" />
+        <colspec align="left" />
+        <thead>
+          <row>
+            <entry>
+              OCaml Value
+            </entry>
+            <entry>
+              Representation
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              any <literal>int</literal> or <literal>char</literal>
+            </entry>
+            <entry>
+              stored directly as a value, shifted left by 1 bit, with
+              the least significant bit set to 1
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>unit</literal>, <literal>[]</literal>,
+              <literal>false</literal>
+            </entry>
+            <entry>
+              stored as OCaml int 0 (unboxed native integer 1).
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>true</literal>
+            </entry>
+            <entry>
+              stored as OCaml int 1 (unboxed native integer 3).
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>type t = Foo | Bar | Baz</literal>
+            </entry>
+            <entry>
+              stored as OCaml int 0, 1, 2
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>type t = Foo | Bar of int</literal>
+            </entry>
+            <entry>
+              The variants with no parameters are stored as ascending
+              OCaml ints from 0, counting from the leftmost and just the
+              variants with no parameters. Variants with parameters are
+              stored as blocks, with tags ascending from 0 and counting
+              from leftmost variants with parameters. The parameters are
+              stored as words in the block. Note there is a limit around
+              240 variants with parameters that applies to each type,
+              but no limit on the number of variants without parameters
+              you can have. This limit arises because of the size of the
+              tag byte and the fact that some of the high numbered tags
+              are reserved.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              list <literal>[1; 2; 3]</literal>
+            </entry>
+            <entry>
+              Lists are represented as <literal>1::2::3::[]</literal>
+              where <literal>[]</literal> is a value OCaml int 0, and
+              <literal>h::t</literal> is a block with tag 0 and two
+              parameters. This representation is exactly the same as if
+              the list was a variant of <literal>Head</literal> and
+              <literal>Cons</literal>.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              tuples, records and arrays
+            </entry>
+            <entry>
+              These are all represented identically as an array of
+              values with tag <literal>0</literal>. The only difference
+              is that an array can be allocated with variable size, but
+              structs and tuples always have a fixed size.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              records or arrays, all float
+            </entry>
+            <entry>
+              These are treated as a special case. The tag has the
+              special value <literal>Double_array_tag</literal> for the
+              GC to detect them. Note this exception does not apply to
+              tuples that contain floats.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              any string
+            </entry>
+            <entry>
+              Strings are byte arrays in OCaml, but they have quite a
+              clever representation to make it very efficient to get
+              their length, and at the same time make them directly
+              compatible with C strings. The tag is set to
+              <literal>String_tag</literal>.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
     <sect2 id="the-representation-of-strings">
       <title>The representation of strings</title>
       <para>
@@ -9926,25 +10046,65 @@ end;;
         defining the size of the string in machine words. The actual
         block contents are the contents of the string, and padding bytes
         to align the block on a word boundary. On a 32-bit machine, the
-        padding is one of
+        padding is calculated based on the modulo of the string length
+        and word size to ensure the result is word-aligned.
       </para>
-      <programlisting>
- : 00
- : 00 01
- : 00 00 02
- : 00 00 00 03
-for 64-bit:
- : 00 00 00 00 04
- : 00 00 00 00 00 05
- : 00 00 00 00 00 00 06
- : 00 00 00 00 00 00 00 07
-</programlisting>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                String length mod 4
+              </entry>
+              <entry>
+                Padding
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                0
+              </entry>
+              <entry>
+                <literal>00 00 00 03</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                1
+              </entry>
+              <entry>
+                <literal>00 00 02</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                2
+              </entry>
+              <entry>
+                <literal>00 01</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                3
+              </entry>
+              <entry>
+                <literal>00</literal>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
       <para>
         Thus, the string contents are always zero-terminated by the
-        padding word, and its length can be computed very quickly by:
+        padding word, and its length can be computed quickly by:
       </para>
       <programlisting>
-number_of_words_in_block * sizeof(word) + last_byte_of_block - 1
+number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
 </programlisting>
       <para>
         The guaranteed NULL-termination comes in handy when passing a
@@ -9956,15 +10116,16 @@ number_of_words_in_block * sizeof(word) + last_byte_of_block - 1
     <sect2 id="custom-heap-blocks">
       <title>Custom heap blocks</title>
       <para>
-        OCaml supports &quot;custom&quot; heap blocks that have a
-        special tag, <subscript>Custom_tag</subscript>, and are treated
-        specially by the runtime. A custom block lives in the OCaml heap
-        like an ordinary block and can be of whatever size the user
-        desires. However, the runtime does not know anything about the
-        structure of the data in the block, other than that the first
-        word of the custom block is a C pointer to a
-        <literal>struct</literal> of custom operations. The custom block
-        cannot have pointers to OCaml blocks.
+        OCaml supports <emphasis>custom</emphasis> heap blocks that have
+        a special <literal>Custom_tag</literal> that let the runtime
+        perform user-defined operations over OCaml values. A custom
+        block lives in the OCaml heap like an ordinary block and can be
+        of whatever size the user desires. However, the runtime does not
+        know anything about the structure of the data in the block,
+        other than that the first word of the custom block is a C
+        pointer to a <literal>struct</literal> of custom operations. The
+        custom block cannot have pointers to OCaml blocks and is
+        considered opaque to the garbage collector.
       </para>
       <programlisting>
 struct custom_operations {
@@ -9998,6 +10159,9 @@ struct custom_operations {
       </para>
     </sect2>
   </sect1>
+</chapter>
+<chapter id="managing-external-memory-with-bigarrays">
+  <title>Managing external memory with Bigarrays</title>
   <sect1 id="bigarrays-for-external-memory-blocks">
     <title>Bigarrays for external memory blocks</title>
     <para>
@@ -10109,6 +10273,388 @@ enum caml_ba_managed {
       <title>dtrace</title>
       <para>
         requires my dtrace/instruments patch for libasmrun
+      </para>
+    </sect2>
+  </sect1>
+</chapter>
+<chapter id="packaging-and-build-systems">
+  <title>Packaging and Build Systems</title>
+  <para>
+    The OCaml toolchain is structured much like a C compiler, with
+    several tools that generate intermediate files and finally link
+    against a runtime. The final outputs don't have to be just
+    executables. Many people embed OCaml code as object files that are
+    called from other applications, or even compile it to Javascript and
+    other esoteric targets. Let's start by covering some of the standard
+    OCaml tools, and then move on to some of the higher level methods
+    for packaging and publishing your code online.
+  </para>
+  <sect1 id="the-ocaml-toolchain">
+    <title>The OCaml toolchain</title>
+    <para>
+      There are two distinct compilers for OCaml code included in the
+      standard distribution. The first outputs bytecode that is
+      interpreted at runtime, and the second generates fast, efficient
+      native code directly. Both of these share the front-end
+      type-checking logic, and only diverge when it comes to code
+      generation.
+    </para>
+    <sect2 id="the-ocamlc-bytecode-compiler">
+      <title>The <literal>ocamlc</literal> bytecode compiler</title>
+      <para>
+        The simplest code generator is the <literal>ocamlc</literal>
+        compiler, which outputs bytecode that is interpreted via the
+        <literal>ocamlrun</literal> runtime. The OCaml bytecode virtual
+        machine is a stack machine (much like the Java Virtual Machine),
+        with the exception of a single register that stores the most
+        recent result. This provides a simple runtime model that is easy
+        to implement or embed within other systems, but executes rather
+        slowly due to being interpreted.
+      </para>
+      <para>
+        Here are some of the intermediate files generated by
+        <literal>ocamlc</literal>:
+      </para>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                Extension
+              </entry>
+              <entry>
+                Purpose
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                .ml
+              </entry>
+              <entry>
+                Source files for compilation unit module
+                implementations.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .mli
+              </entry>
+              <entry>
+                Source files for compilation unit module interfaces. If
+                missing, generated from the <literal>.ml</literal> file.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmi
+              </entry>
+              <entry>
+                Compiled module interface from a corresponding
+                <literal>.mli</literal> source file.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmo
+              </entry>
+              <entry>
+                Compiled bytecode object file of the module
+                implementation.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cma
+              </entry>
+              <entry>
+                Library of bytecode object files packed into a single
+                file.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .o
+              </entry>
+              <entry>
+                C source files are compiled into native object files by
+                the system <literal>cc</literal>.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <para>
+        To obtain a bytecode executable, you need to compile a set of
+        <literal>cmo</literal> object files, and then link them into an
+        executable
+      </para>
+    </sect2>
+    <sect2 id="the-ocamlopt-native-code-compiler">
+      <title>The <literal>ocamlopt</literal> native code
+      compiler</title>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                Extension
+              </entry>
+              <entry>
+                Purpose
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                .cmi
+              </entry>
+              <entry>
+                Compiled module interface from a corresponding
+                <literal>.mli</literal> source file.
+                (<emphasis>avsm</emphasis>: this is not compatible with
+                the ocamlc version iirc)
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .o
+              </entry>
+              <entry>
+                Compiled native object file of the module
+                implementation.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmx
+              </entry>
+              <entry>
+                Contains extra information for linking and cross-module
+                optimization of the object file.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                .cmxa/.a
+              </entry>
+              <entry>
+                Library of <literal>cmx</literal> and
+                <literal>o</literal> units, stored in the
+                <literal>cmxa</literal> and <literal>a</literal> files
+                respectively.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </sect2>
+    <sect2 id="the-ocaml-top-level-loop">
+      <title>The <literal>ocaml</literal> top-level loop</title>
+      <para>
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="the-findlib-compiler-frontend">
+    <title>The Findlib compiler frontend</title>
+    <para>
+    </para>
+  </sect1>
+  <sect1 id="packaging-applications-with-oasis">
+    <title>Packaging applications with OASIS</title>
+    <sect2 id="ocamlbuild">
+      <title>ocamlbuild</title>
+      <para>
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="distributing-applications-with-opam">
+    <title>Distributing applications with OPAM</title>
+    <para>
+    </para>
+  </sect1>
+</chapter>
+<chapter id="parsing-with-ocamllex-and-ocamlyacc">
+  <title>Parsing with OCamllex and OCamlyacc</title>
+  <para>
+  </para>
+</chapter>
+<chapter id="installation">
+  <title>Installation</title>
+  <para>
+    There are two ways to develop OCaml code and libraries. You can
+    install a source-based package manager that downloads and compiles
+    libraries, or alternatively use the binary packages provides by many
+    operating systems. Binary packages are useful for releasing your
+    applications easily, but are less flexible for day-to-day
+    development.
+  </para>
+  <para>
+    For the purposes of this book, we will use the OPAM source-based
+    package manager. There are other alternatives that you can
+    investigate, such as GODI and ODB, but we do not cover them here.
+    Let's get started with OPAM now, as that will get you an interactive
+    top-level that can run the examples in the book quickly. OPAM
+    manages multiple simultaneous OCaml compiler and library
+    installations, tracks library versions across upgrades, and
+    recompiles dependencies automatically if they get out of date.
+  </para>
+  <sect1 id="opam-base-installation">
+    <title>OPAM Base Installation</title>
+    <para>
+      To install OPAM, you will need a working OCaml installation to
+      bootstrap the package manager. Once installed, all of the OPAM
+      state is held in the <literal>$HOME/.opam</literal> directory, and
+      you can reinitialise it by deleting this directory and starting
+      over.
+    </para>
+    <important>
+    <title>
+    OCamlfind and OPAM
+    </title>
+    <para>
+      OPAM maintains multiple compiler and library installations, but
+      this can clash with a global installation of the
+      <literal>ocamlfind</literal> tool. Uninstall any existing copies
+      of <literal>ocamlfind</literal> before installing OPAM, and use
+      the OPAM version instead.
+    </para>
+    </important>
+    <sect2 id="macos-x">
+      <title>MacOS X</title>
+      <para>
+        The easiest way to install OCaml on MacOS X is via the
+        <literal>homebrew</literal> package manager, available from
+        [http://github.com/mxcl/homebrew].
+      </para>
+      <programlisting>
+$ brew install ocaml
+$ brew install opam
+</programlisting>
+    </sect2>
+    <sect2 id="linux">
+      <title>Linux</title>
+      <para>
+        On Debian Linux, you should install OCaml via binary packages,
+        and then install the latest OPAM release from source.
+      </para>
+      <programlisting>
+$ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
+$ tar -jxvf opam-&lt;version&gt;.tar.gz
+$ cd opam-&lt;version&gt;.tar.gz
+$ ./configure &amp;&amp; make &amp;&amp; sudo make install
+</programlisting>
+      <para>
+        On Fedora/RHEL...?
+      </para>
+    </sect2>
+    <sect2 id="windows">
+      <title>Windows</title>
+      <para>
+        Investigate Protzenko's Windows installer.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="opam-usage">
+    <title>OPAM Usage</title>
+    <para>
+      All of the OPAM state is held in the <literal>.opam</literal>
+      directory in your home directory, including compiler
+      installations. You should never need to switch to an admin user to
+      install packages. Package listings are obtained by adding
+      <emphasis>remotes</emphasis> that provide package descriptions,
+      installation instructions and URLs.
+    </para>
+    <programlisting>
+$ opam init
+$ opam install utop async
+$ eval `opam config -env`
+</programlisting>
+    <para>
+      This will initialise OPAM with the default package set from
+      <literal>opam.ocamlpro.com</literal>, and install the
+      <literal>utop</literal> interactive top-level and the
+      <literal>Async</literal> library. OPAM figures out the minimal set
+      of dependencies required, and installs those too. The
+      <literal>eval</literal> command is sets your
+      <literal>PATH</literal> variable to point to the current active
+      compiler, and you should add this to your shell
+      <literal>.profile</literal> to run every time you open a new
+      command shell.
+    </para>
+    <sect2 id="switching-compiler-versions">
+      <title>Switching compiler versions</title>
+      <para>
+        The default compiler installed by OPAM uses the system OCaml
+        installation. You can use <literal>opam switch</literal> to swap
+        between different compiler versions, or experiment with a
+        different set of libraries or new compiler versions. For
+        instance, one of the alternate compilers has a debugging version
+        of the runtime library, which can be useful to track down bugs
+        in C bindings. To use it:
+      </para>
+      <programlisting>
+$ opam switch -list
+$ opam switch 4.00.0+debug-runtime
+$ eval `opam config -env`
+$ opam install utop async
+</programlisting>
+      <para>
+        The new compiler will be compiled and installed into
+        <literal>~/.opam/4.00.0+debug-runtime</literal>, and the
+        libraries will be separately tracked. You can have any number of
+        compilers installed simultaneously, but only one can be active
+        at any time.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="editing-environment">
+    <title>Editing Environment</title>
+    <sect2 id="command-line">
+      <title>Command Line</title>
+      <para>
+        The <literal>utop</literal> tool provides a convenient
+        interactive top-level, with full command history, command macros
+        and module name completion. An <literal>.ocamlinit</literal>
+        file in your home directory will initialise
+        <literal>utop</literal> with common libraries and syntax
+        extensions open, e.g.:
+      </para>
+      <programlisting>
+#use &quot;topfind&quot;
+#camlp4o
+#thread
+#require &quot;core.top&quot;;;
+#require &quot;async&quot;;;
+open Core.Std
+open Async.Std
+</programlisting>
+      <para>
+        TODO: the <literal>.ocamlinit</literal> handling in OPAM is
+        being finalised and is tracked in
+        <ulink url="https://github.com/OCamlPro/opam/issues/185">issue
+        185</ulink>.
+      </para>
+    </sect2>
+    <sect2 id="editors">
+      <title>Editors</title>
+      <para>
+        Emacs users have tuareg and
+        <ulink url="http://www.typerex.org/">Typerex</ulink>.
+      </para>
+      <para>
+        Vim users can use the built-in style, and
+        <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
+        may also be useful.
+      </para>
+      <para>
+        Eclipse plugins: which one is maintained?
       </para>
     </sect2>
   </sect1>
@@ -10816,493 +11362,6 @@ module Fields :
     val source : (t, Source.t) Core.Std.Field.t
   end
 </programlisting>
-  </sect1>
-</chapter>
-<chapter id="packaging-and-build-systems">
-  <title>Packaging and Build Systems</title>
-  <para>
-    The OCaml toolchain is structured much like a C compiler, with
-    several tools that generate intermediate files and finally link
-    against a runtime. The final outputs don't have to be just
-    executables. Many people embed OCaml code as object files that are
-    called from other applications, or even compile it to Javascript and
-    other esoteric targets. Let's start by covering some of the standard
-    OCaml tools, and then move on to some of the higher level methods
-    for packaging and publishing your code online.
-  </para>
-  <sect1 id="the-ocaml-toolchain">
-    <title>The OCaml toolchain</title>
-    <para>
-      There are two distinct compilers for OCaml code included in the
-      standard distribution. The first outputs bytecode that is
-      interpreted at runtime, and the second generates fast, efficient
-      native code directly. Both of these share the front-end
-      type-checking logic, and only diverge when it comes to code
-      generation.
-    </para>
-    <sect2 id="the-ocamlc-bytecode-compiler">
-      <title>The <literal>ocamlc</literal> bytecode compiler</title>
-      <para>
-        The simplest code generator is the <literal>ocamlc</literal>
-        compiler, which outputs bytecode that is interpreted via the
-        <literal>ocamlrun</literal> runtime. The OCaml bytecode virtual
-        machine is a stack machine (much like the Java Virtual Machine),
-        with the exception of a single register that stores the most
-        recent result. This provides a simple runtime model that is easy
-        to implement or embed within other systems, but executes rather
-        slowly due to being interpreted.
-      </para>
-      <para>
-        Here are some of the intermediate files generated by
-        <literal>ocamlc</literal>:
-      </para>
-      <informaltable>
-        <tgroup cols="2">
-          <colspec align="left" />
-          <colspec align="left" />
-          <thead>
-            <row>
-              <entry>
-                Extension
-              </entry>
-              <entry>
-                Purpose
-              </entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>
-                .ml
-              </entry>
-              <entry>
-                Source files for compilation unit module
-                implementations.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .mli
-              </entry>
-              <entry>
-                Source files for compilation unit module interfaces. If
-                missing, generated from the <literal>.ml</literal> file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmi
-              </entry>
-              <entry>
-                Compiled module interface from a corresponding
-                <literal>.mli</literal> source file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmo
-              </entry>
-              <entry>
-                Compiled bytecode object file of the module
-                implementation.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cma
-              </entry>
-              <entry>
-                Library of bytecode object files packed into a single
-                file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .o
-              </entry>
-              <entry>
-                C source files are compiled into native object files by
-                the system <literal>cc</literal>.
-              </entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-      <para>
-        To obtain a bytecode executable, you need to compile a set of
-        <literal>cmo</literal> object files, and then link them into an
-        executable
-      </para>
-    </sect2>
-    <sect2 id="the-ocamlopt-native-code-compiler">
-      <title>The <literal>ocamlopt</literal> native code
-      compiler</title>
-      <informaltable>
-        <tgroup cols="2">
-          <colspec align="left" />
-          <colspec align="left" />
-          <thead>
-            <row>
-              <entry>
-                Extension
-              </entry>
-              <entry>
-                Purpose
-              </entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>
-                .cmi
-              </entry>
-              <entry>
-                Compiled module interface from a corresponding
-                <literal>.mli</literal> source file.
-                (<emphasis>avsm</emphasis>: this is not compatible with
-                the ocamlc version iirc)
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .o
-              </entry>
-              <entry>
-                Compiled native object file of the module
-                implementation.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmx
-              </entry>
-              <entry>
-                Contains extra information for linking and cross-module
-                optimization of the object file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmxa/.a
-              </entry>
-              <entry>
-                Library of <literal>cmx</literal> and
-                <literal>o</literal> units, stored in the
-                <literal>cmxa</literal> and <literal>a</literal> files
-                respectively.
-              </entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-    </sect2>
-    <sect2 id="the-ocaml-top-level-loop">
-      <title>The <literal>ocaml</literal> top-level loop</title>
-      <para>
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="the-findlib-compiler-frontend">
-    <title>The Findlib compiler frontend</title>
-    <para>
-    </para>
-  </sect1>
-  <sect1 id="packaging-applications-with-oasis">
-    <title>Packaging applications with OASIS</title>
-    <sect2 id="ocamlbuild">
-      <title>ocamlbuild</title>
-      <para>
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="distributing-applications-with-opam">
-    <title>Distributing applications with OPAM</title>
-    <para>
-    </para>
-  </sect1>
-</chapter>
-<chapter id="parsing-with-ocamllex-and-ocamlyacc">
-  <title>Parsing with OCamllex and OCamlyacc</title>
-  <para>
-  </para>
-</chapter>
-<chapter id="installation">
-  <title>Installation</title>
-  <para>
-    There are two ways to develop OCaml code and libraries. You can
-    install a source-based package manager that downloads and compiles
-    libraries, or alternatively use the binary packages provides by many
-    operating systems. Binary packages are useful for releasing your
-    applications easily, but are less flexible for day-to-day
-    development.
-  </para>
-  <para>
-    For the purposes of this book, we will use the OPAM source-based
-    package manager. There are other alternatives that you can
-    investigate, such as GODI and ODB, but we do not cover them here.
-    Let's get started with OPAM now, as that will get you an interactive
-    top-level that can run the examples in the book quickly. OPAM
-    manages multiple simultaneous OCaml compiler and library
-    installations, tracks library versions across upgrades, and
-    recompiles dependencies automatically if they get out of date.
-  </para>
-  <sect1 id="opam-base-installation">
-    <title>OPAM Base Installation</title>
-    <para>
-      To install OPAM, you will need a working OCaml installation to
-      bootstrap the package manager. Once installed, all of the OPAM
-      state is held in the <literal>$HOME/.opam</literal> directory, and
-      you can reinitialise it by deleting this directory and starting
-      over.
-    </para>
-    <important>
-    <title>
-    OCamlfind and OPAM
-    </title>
-    <para>
-      OPAM maintains multiple compiler and library installations, but
-      this can clash with a global installation of the
-      <literal>ocamlfind</literal> tool. Uninstall any existing copies
-      of <literal>ocamlfind</literal> before installing OPAM, and use
-      the OPAM version instead.
-    </para>
-    </important>
-    <sect2 id="macos-x">
-      <title>MacOS X</title>
-      <para>
-        The easiest way to install OCaml on MacOS X is via the
-        <literal>homebrew</literal> package manager, available from
-        [http://github.com/mxcl/homebrew].
-      </para>
-      <programlisting>
-$ brew install ocaml
-$ brew install opam
-</programlisting>
-    </sect2>
-    <sect2 id="linux">
-      <title>Linux</title>
-      <para>
-        On Debian Linux, you should install OCaml via binary packages,
-        and then install the latest OPAM release from source.
-      </para>
-      <programlisting>
-$ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
-$ tar -jxvf opam-&lt;version&gt;.tar.gz
-$ cd opam-&lt;version&gt;.tar.gz
-$ ./configure &amp;&amp; make &amp;&amp; sudo make install
-</programlisting>
-      <para>
-        On Fedora/RHEL...?
-      </para>
-    </sect2>
-    <sect2 id="windows">
-      <title>Windows</title>
-      <para>
-        Investigate Protzenko's Windows installer.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="opam-usage">
-    <title>OPAM Usage</title>
-    <para>
-      All of the OPAM state is held in the <literal>.opam</literal>
-      directory in your home directory, including compiler
-      installations. You should never need to switch to an admin user to
-      install packages. Package listings are obtained by adding
-      <emphasis>remotes</emphasis> that provide package descriptions,
-      installation instructions and URLs.
-    </para>
-    <programlisting>
-$ opam init
-$ opam install utop async
-$ eval `opam config -env`
-</programlisting>
-    <para>
-      This will initialise OPAM with the default package set from
-      <literal>opam.ocamlpro.com</literal>, and install the
-      <literal>utop</literal> interactive top-level and the
-      <literal>Async</literal> library. OPAM figures out the minimal set
-      of dependencies required, and installs those too. The
-      <literal>eval</literal> command is sets your
-      <literal>PATH</literal> variable to point to the current active
-      compiler, and you should add this to your shell
-      <literal>.profile</literal> to run every time you open a new
-      command shell.
-    </para>
-    <sect2 id="switching-compiler-versions">
-      <title>Switching compiler versions</title>
-      <para>
-        The default compiler installed by OPAM uses the system OCaml
-        installation. You can use <literal>opam switch</literal> to swap
-        between different compiler versions, or experiment with a
-        different set of libraries or new compiler versions. For
-        instance, one of the alternate compilers has a debugging version
-        of the runtime library, which can be useful to track down bugs
-        in C bindings. To use it:
-      </para>
-      <programlisting>
-$ opam switch -list
-$ opam switch 4.00.0+debug-runtime
-$ eval `opam config -env`
-$ opam install utop async
-</programlisting>
-      <para>
-        The new compiler will be compiled and installed into
-        <literal>~/.opam/4.00.0+debug-runtime</literal>, and the
-        libraries will be separately tracked. You can have any number of
-        compilers installed simultaneously, but only one can be active
-        at any time.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="editing-environment">
-    <title>Editing Environment</title>
-    <sect2 id="command-line">
-      <title>Command Line</title>
-      <para>
-        The <literal>utop</literal> tool provides a convenient
-        interactive top-level, with full command history, command macros
-        and module name completion. An <literal>.ocamlinit</literal>
-        file in your home directory will initialise
-        <literal>utop</literal> with common libraries and syntax
-        extensions open, e.g.:
-      </para>
-      <programlisting>
-#use &quot;topfind&quot;
-#camlp4o
-#thread
-#require &quot;core.top&quot;;;
-#require &quot;async&quot;;;
-open Core.Std
-open Async.Std
-</programlisting>
-      <para>
-        TODO: the <literal>.ocamlinit</literal> handling in OPAM is
-        being finalised and is tracked in
-        <ulink url="https://github.com/OCamlPro/opam/issues/185">issue
-        185</ulink>.
-      </para>
-    </sect2>
-    <sect2 id="editors">
-      <title>Editors</title>
-      <para>
-        Emacs users have tuareg and
-        <ulink url="http://www.typerex.org/">Typerex</ulink>.
-      </para>
-      <para>
-        Vim users can use the built-in style, and
-        <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
-        may also be useful.
-      </para>
-      <para>
-        Eclipse plugins: which one is maintained?
-      </para>
-    </sect2>
-  </sect1>
-</chapter>
-<chapter id="docbook-playground">
-  <title>DocBook Playground</title>
-  <highlights>
-  <para>
-    A highlights section at the beginning of a chapter looks like this.
-    It will:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        Have a set of useful bits.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        List entry 2.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        List entry 3.
-      </para>
-    </listitem>
-  </itemizedlist>
-  </highlights>
-  <para>
-    Break up the notes with a normal paragraph of text.
-  </para>
-  <tip>
-  <para>
-    This is a tip in Docbook. Lorem ipsum dolor sit amet, consectetuer
-    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
-    dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
-    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
-    aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in
-    hendrerit in vulputate velit esse molestie consequat, vel illum
-    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
-    odio dignissim qui blandit praesent luptatum zzril delenit augue
-    duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta
-    nobis eleifend option congue nihil imperdiet doming id quod mazim
-    placerat facer possim assum. Typi non habent claritatem insitam; est
-    usus legentis in iis qui facit eorum claritatem. Investigationes
-    demonstraverunt lectores legere me lius quod ii legunt saepius.
-  </para>
-  </tip>
-
-  <note>
-  <title>
-  this is a note title
-  </title>
-  <para>
-    this is a tip in docbook. lorem ipsum dolor sit amet, consectetuer
-    adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
-    dolore magna aliquam erat volutpat. ut wisi enim ad minim veniam,
-    quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
-    aliquip ex ea commodo consequat. duis autem vel eum iriure dolor in
-    hendrerit in vulputate velit esse molestie consequat, vel illum
-    dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
-    odio dignissim qui blandit praesent luptatum zzril delenit augue
-    duis dolore te feugait nulla facilisi.
-  </para>
-  </note>
-  <sect1 id="cross-reference-example">
-    <title>Cross reference example</title>
-    <para>
-      This is a cross reference
-      <link linkend="variables-and-functions">to another chapter</link>.
-    </para>
-    <important>
-    <title>
-    Don't use Obj.magic!
-    </title>
-    <para>
-      As Xavier Leroy said: <quote>Repeat after me: &quot;Obj.magic is
-      not part of the OCaml language&quot;</quote>.
-    </para>
-    </important>
-    <para>
-      break up the notes with a normal paragraph of text.
-    </para>
-    <caution>
-    <title>
-    This is a warning
-    </title>
-    <para>
-      It's very, very important to not run with scissors!
-    </para>
-    </caution>
-    <para>
-      Break up the notes with a normal paragraph of text.
-    </para>
-    <qandaset defaultlabel='qanda'>
-    <qandaentry> <question>
-    <para>
-      To be, or not to be?
-    </para>
-    </question> <answer>
-    <para>
-      That is the question.
-    </para>
-    </answer> </qandaentry>
-    </qandaset>
-
   </sect1>
 </chapter>
 </book>
