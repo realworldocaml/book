@@ -25,22 +25,22 @@ words of available space. One word holds the `foo` field and the second word
 holds the `bar` field.  The OCaml compiler translates such an expression into
 an explicit allocation for the block from OCaml's runtime system: a C library
 that provides a collection of routines that can be called by running OCaml
-programs.  The runtime system manages a "heap", which a collection of memory
-regions it obtains from the operating system using `malloc`. The OCaml runtime
-uses these memory regions to hold "heap blocks", which it then fills up in
+programs.  The runtime system manages a *heap*, which a collection of memory
+regions it obtains from the operating system using *malloc(3)*. The OCaml runtime
+uses these memory regions to hold *heap blocks*, which it then fills up in
 response to allocation requests by the OCaml program.
 
 When there is'nt enough memory available to satisfy an allocation request from
-the allocated heap blocks, the runtime system invokes the "garbage collector"
+the allocated heap blocks, the runtime system invokes the *garbage collector*
 (or GC). An OCaml program does not explicitly free a heap block when it is done
 with it, and the GC must determine which heap blocks are "alive" and which heap
-blocks are "dead", i.e. no longer in use.  Dead blocks are collected and their
+blocks are *dead*, i.e. no longer in use. Dead blocks are collected and their
 memory made available for re-use by the application.
 
 The garbage collector does not keep constant track of blocks as they are
 allocated and used.  Instead, it regularly scans blocks by starting from a set
-of "roots", which are values that the application always has access to (such as
-the stack).  Thus, the GC maintains a directed graph in which heap blocks are
+of *roots*, which are values that the application always has access to (such as
+the stack).  The GC maintains a directed graph in which heap blocks are
 nodes, and there is an edge from heap block `b1` to heap block `b2` if some
 field of `b1` points to `b2`.  All blocks reachable from the roots by following
 edges in the graph must be retained, and unreachable blocks can be reused.
@@ -48,16 +48,15 @@ edges in the graph must be retained, and unreachable blocks can be reused.
 With the typical OCaml programming style, many small blocks are frequently
 allocated, used for a short period of time, and then never used again.  OCaml
 takes advantage of this fact to improve the performance of allocation and
-collection by using a "generational" garbage collector, which means that it has
+collection by using a *generational* garbage collector. This means that it has
 different memory regions to hold blocks based on how long the blocks have been
-alive.  Specifically, OCaml's heap is split in two; there is a small,
-fixed-size "minor heap" (or "young generation") used for initially allocating
-most blocks, and a large, variable-sized "major heap" (or "old generation") for
-holding blocks that have been alive longer or are larger than 4KB.  A typical
-functional programming style means that young blocks tend to die young, and old
-blocks tend to stay around for longer than young ones (this is referred to as
-the "generational hypothesis"). To reflect this, OCaml uses different memory
-layouts and garbage collection algorithms for the major and minor heaps.
+alive.  OCaml's heap is split in two; there is a small, fixed-size *minor heap*
+used for initially allocating most blocks, and a large, variable-sized *major
+heap* for holding blocks that have been alive longer or are larger than 4KB.  A
+typical functional programming style means that young blocks tend to die young,
+and old blocks tend to stay around for longer than young ones (this is referred
+to as the *generational hypothesis*). To reflect this, OCaml uses different
+memory layouts and garbage collection algorithms for the major and minor heaps.
 
 ### The fast minor heap
 
@@ -84,6 +83,7 @@ a free list data structure that indexes all the free memory, and this list is
 used to satisfy allocation requests. OCaml uses mark and sweep garbage
 collection for the major heap.  The *mark* phase to traverses the block graph
 and marks all live blocks by setting a bit in the color tag of the block header.
+(_avsm_: we only explain the color tag in the next section, so rephrase or xref).
 
 The *sweep* phase sequentially scans all heap memory and identifies dead blocks
 that weren't marked earlier.  The *compact* phase relocates live blocks to
@@ -128,11 +128,11 @@ overall program.
 
 A *block* is the basic unit of allocation on the heap.  A block consists of a
 one-word header (either 32- or 64-bits) followed by variable-length data, which
-is either opaque bytes or "fields", which are OCaml values.  The collector
-never inspects opaque bytes, which hence should never contain OCaml pointers.
-The runtime always inspects fields, and follows them as part of the garbage
-collection process described earlier.  Every block header has a tag that
-defines its runtime type, and how to interprete the subsequent fields.
+is either opaque bytes or *fields*.  The collector never inspects opaque bytes,
+but fields are valid OCaml values. The runtime always inspects fields, and
+follows them as part of the garbage collection process described earlier.
+Every block header has a tag that defines its runtime type, and how to
+interprete the subsequent fields.
 
 (_avsm_: pointers to blocks actually point 4/8 bytes into it, for some efficiency
 reason that I cannot recall right now).
@@ -167,33 +167,41 @@ most common such block is the `string` type.
 
 (_avsm_: too much info here) If the header is zero, then the object has been
 forwarded as part of minor collection, and the first field points to the new
-location.  Also, if the block is on the ~oldify_todo_list~, part of the minor
+location.  Also, if the block is on the `oldify_todo_list`, part of the minor
 gc, then the second field points to the next entry on the oldify_todo_list.
+
+OCaml Value                        Representation
+-----------                        --------------
+any `int` or `char`                stored directly as a value, shifted left by 1 bit, with the least significant bit set to 1
+`unit`, `[]`, `false`              stored as OCaml int 0 (unboxed native integer 1).
+`true`                             stored as OCaml int 1 (unboxed native integer 3).
+`type t = Foo | Bar | Baz`         stored as OCaml int 0, 1, 2
+`type t = Foo | Bar of int`        The variants with no parameters are stored as ascending OCaml ints from 0, counting from the leftmost and just the variants with no parameters. Variants with parameters are stored as blocks, with tags ascending from 0 and counting from leftmost variants with parameters. The parameters are stored as words in the block.  Note there is a limit around 240 variants with parameters that applies to each type, but no limit on the number of variants without parameters you can have. This limit arises because of the size of the tag byte and the fact that some of the high numbered tags are reserved.
+list `[1; 2; 3]`                   Lists are represented as `1::2::3::[]` where `[]` is a value OCaml int 0, and `h::t` is a block with tag 0 and two parameters. This representation is exactly the same as if the list was a variant of `Head` and `Cons`.
+tuples, records and arrays         These are all represented identically as an array of values with tag `0`. The only difference is that an array can be allocated with variable size, but structs and tuples always have a fixed size.
+records or arrays, all float       These are treated as a special case. The tag has the special value `Double_array_tag` for the GC to detect them.  Note this exception does not apply to tuples that contain floats.
+any string                         Strings are byte arrays in OCaml, but they have quite a clever representation to make it very efficient to get their length, and at the same time make them directly compatible with C strings. The tag is set to `String_tag`.
 
 ### The representation of strings
 
 Strings are standard OCaml heap blocks, with the header size defining the size
 of the string in machine words.  The actual block contents are the contents of
 the string, and padding bytes to align the block on a word boundary.  On a
-32-bit machine, the padding is one of
+32-bit machine, the padding is calculated based on the modulo of the string
+length and word size to ensure the result is word-aligned.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
- : 00
- : 00 01
- : 00 00 02
- : 00 00 00 03
-for 64-bit:
- : 00 00 00 00 04
- : 00 00 00 00 00 05
- : 00 00 00 00 00 00 06
- : 00 00 00 00 00 00 00 07
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+String length mod 4  Padding
+-------------------  -------
+0                    `00 00 00 03`
+1                    `00 00 02`
+2                    `00 01`
+3                    `00`
 
 Thus, the string contents are always zero-terminated by the padding word, and
-its length can be computed very quickly by:
+its length can be computed quickly by:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-number_of_words_in_block * sizeof(word) + last_byte_of_block - 1
+number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The guaranteed NULL-termination comes in handy when passing a string to C, but
@@ -202,13 +210,13 @@ contain nulls at any point within the string.
 
 ### Custom heap blocks
 
-OCaml supports "custom" heap blocks that have a special tag, ~Custom_tag~, and
-are treated specially by the runtime.  A custom block lives in the OCaml heap
-like an ordinary block and can be of whatever size the user desires.  However,
-the runtime does not know anything about the structure of the data in the
-block, other than that the first word of the custom block is a C pointer to a
-`struct` of custom operations. The custom block cannot have pointers to OCaml
-blocks.
+OCaml supports *custom* heap blocks that have a special `Custom_tag` that let
+the runtime perform user-defined operations over OCaml values.  A custom block
+lives in the OCaml heap like an ordinary block and can be of whatever size the
+user desires.  However, the runtime does not know anything about the structure
+of the data in the block, other than that the first word of the custom block is
+a C pointer to a `struct` of custom operations. The custom block cannot have
+pointers to OCaml blocks and is considered opaque to the garbage collector.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct custom_operations {
@@ -235,71 +243,4 @@ When a custom block is allocated, you can also specify the proportion of
 collector's decision as to how much work to do in the next major slice.
 (_avsm_: elaborate on this or move to the C interface section)
 
-## Bigarrays for external memory blocks
-
-An OCaml bigarray is a useful custom block provided as standard to manipulate
-memory blocks outside the OCaml heap.  It has `Custom_tag` in the header, and
-the first word points to the `custom_operations` struct for bigarrays.
-Following this is a `caml_ba_array` struct.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-struct caml_ba_array {
-  void * data;                  /* Pointer to raw data */
-  intnat num_dims;              /* Number of dimensions */
-  intnat flags;                 /* Kind of element array + memory layout + allocation status */
-  struct caml_ba_proxy * proxy; /* The proxy for sub-arrays, or NULL */
-  intnat dim[]  /*[num_dims]*/; /* Size in each dimension */
-};
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The `data` is usually a pointer to a `malloc`'ed chunk of memory, which the
-custom finalizer operation `free`'s when the block is free.  The `flags` field
-encodes three values, located in the bits as specified by three masks:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-CAML_BA_KIND_MASK = 0xFF     /* Mask for kind in flags field */
-CAML_BA_LAYOUT_MASK = 0x100  /* Mask for layout in flags field */
-CAML_BA_MANAGED_MASK = 0x600 /* Mask for "managed" bits in flags field */
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The `CAML_BA_KIND_MASK` bits hold a value of the `caml_ba_kind` enum that identifies the
-kind of value in the bigarray `data`.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-enum caml_ba_kind {
-  CAML_BA_FLOAT32,             /* Single-precision floats */
-  CAML_BA_FLOAT64,             /* Double-precision floats */
-  CAML_BA_SINT8,               /* Signed 8-bit integers */
-  CAML_BA_UINT8,               /* Unsigned 8-bit integers */
-  CAML_BA_SINT16,              /* Signed 16-bit integers */
-  CAML_BA_UINT16,              /* Unsigned 16-bit integers */
-  CAML_BA_INT32,               /* Signed 32-bit integers */
-  CAML_BA_INT64,               /* Signed 64-bit integers */
-  CAML_BA_CAML_INT,            /* OCaml-style integers (signed 31 or 63 bits) */
-  CAML_BA_NATIVE_INT,          /* Platform-native long integers (32 or 64 bits) */
-  CAML_BA_COMPLEX32,           /* Single-precision complex */
-  CAML_BA_COMPLEX64,           /* Double-precision complex */
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The `CAML_BA_LAYOUT_MASK` bit says whether multi-dimensional arrays are layed out C or
-Fortran style.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-enum caml_ba_layout {
-  CAML_BA_C_LAYOUT = 0,           /* Row major, indices start at 0 */
-  CAML_BA_FORTRAN_LAYOUT = 0x100, /* Column major, indices start at 1 */
-};
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The `CAML_BA_MANAGED_MASK` bits hold a value of the `caml_ba_managed` enum that identifies
-whether OCaml is responsible for freeing the `data` or some other code is.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-enum caml_ba_managed {
-  CAML_BA_EXTERNAL = 0,        /* Data is not allocated by OCaml */
-  CAML_BA_MANAGED = 0x200,     /* Data is allocated by OCaml */
-  CAML_BA_MAPPED_FILE = 0x400, /* Data is a memory mapped file */
-};
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
