@@ -25,22 +25,22 @@ words of available space. One word holds the `foo` field and the second word
 holds the `bar` field.  The OCaml compiler translates such an expression into
 an explicit allocation for the block from OCaml's runtime system: a C library
 that provides a collection of routines that can be called by running OCaml
-programs.  The runtime system manages a "heap", which a collection of memory
-regions it obtains from the operating system using `malloc`. The OCaml runtime
-uses these memory regions to hold "heap blocks", which it then fills up in
+programs.  The runtime system manages a *heap*, which a collection of memory
+regions it obtains from the operating system using *malloc(3)*. The OCaml runtime
+uses these memory regions to hold *heap blocks*, which it then fills up in
 response to allocation requests by the OCaml program.
 
 When there is'nt enough memory available to satisfy an allocation request from
-the allocated heap blocks, the runtime system invokes the "garbage collector"
+the allocated heap blocks, the runtime system invokes the *garbage collector*
 (or GC). An OCaml program does not explicitly free a heap block when it is done
 with it, and the GC must determine which heap blocks are "alive" and which heap
-blocks are "dead", i.e. no longer in use.  Dead blocks are collected and their
+blocks are *dead*, i.e. no longer in use. Dead blocks are collected and their
 memory made available for re-use by the application.
 
 The garbage collector does not keep constant track of blocks as they are
 allocated and used.  Instead, it regularly scans blocks by starting from a set
-of "roots", which are values that the application always has access to (such as
-the stack).  Thus, the GC maintains a directed graph in which heap blocks are
+of *roots*, which are values that the application always has access to (such as
+the stack).  The GC maintains a directed graph in which heap blocks are
 nodes, and there is an edge from heap block `b1` to heap block `b2` if some
 field of `b1` points to `b2`.  All blocks reachable from the roots by following
 edges in the graph must be retained, and unreachable blocks can be reused.
@@ -48,16 +48,15 @@ edges in the graph must be retained, and unreachable blocks can be reused.
 With the typical OCaml programming style, many small blocks are frequently
 allocated, used for a short period of time, and then never used again.  OCaml
 takes advantage of this fact to improve the performance of allocation and
-collection by using a "generational" garbage collector, which means that it has
+collection by using a *generational* garbage collector. This means that it has
 different memory regions to hold blocks based on how long the blocks have been
-alive.  Specifically, OCaml's heap is split in two; there is a small,
-fixed-size "minor heap" (or "young generation") used for initially allocating
-most blocks, and a large, variable-sized "major heap" (or "old generation") for
-holding blocks that have been alive longer or are larger than 4KB.  A typical
-functional programming style means that young blocks tend to die young, and old
-blocks tend to stay around for longer than young ones (this is referred to as
-the "generational hypothesis"). To reflect this, OCaml uses different memory
-layouts and garbage collection algorithms for the major and minor heaps.
+alive.  OCaml's heap is split in two; there is a small, fixed-size *minor heap*
+used for initially allocating most blocks, and a large, variable-sized *major
+heap* for holding blocks that have been alive longer or are larger than 4KB.  A
+typical functional programming style means that young blocks tend to die young,
+and old blocks tend to stay around for longer than young ones (this is referred
+to as the *generational hypothesis*). To reflect this, OCaml uses different
+memory layouts and garbage collection algorithms for the major and minor heaps.
 
 ### The fast minor heap
 
@@ -129,11 +128,11 @@ overall program.
 
 A *block* is the basic unit of allocation on the heap.  A block consists of a
 one-word header (either 32- or 64-bits) followed by variable-length data, which
-is either opaque bytes or "fields", which are OCaml values.  The collector
-never inspects opaque bytes, which hence should never contain OCaml pointers.
-The runtime always inspects fields, and follows them as part of the garbage
-collection process described earlier.  Every block header has a tag that
-defines its runtime type, and how to interprete the subsequent fields.
+is either opaque bytes or *fields*.  The collector never inspects opaque bytes,
+but fields are valid OCaml values. The runtime always inspects fields, and
+follows them as part of the garbage collection process described earlier.
+Every block header has a tag that defines its runtime type, and how to
+interprete the subsequent fields.
 
 (_avsm_: pointers to blocks actually point 4/8 bytes into it, for some efficiency
 reason that I cannot recall right now).
