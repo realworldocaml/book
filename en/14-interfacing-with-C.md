@@ -167,7 +167,7 @@ most common such block is the `string` type.
 
 (_avsm_: too much info here) If the header is zero, then the object has been
 forwarded as part of minor collection, and the first field points to the new
-location.  Also, if the block is on the ~oldify_todo_list~, part of the minor
+location.  Also, if the block is on the `oldify_todo_list`, part of the minor
 gc, then the second field points to the next entry on the oldify_todo_list.
 
 ### The representation of strings
