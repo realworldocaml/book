@@ -40,10 +40,10 @@ memory made available for re-use by the application.
 The garbage collector does not keep constant track of blocks as they are
 allocated and used.  Instead, it regularly scans blocks by starting from a set
 of *roots*, which are values that the application always has access to (such as
-the stack).  The GC maintains a directed graph in which heap blocks are
-nodes, and there is an edge from heap block `b1` to heap block `b2` if some
-field of `b1` points to `b2`.  All blocks reachable from the roots by following
-edges in the graph must be retained, and unreachable blocks can be reused.
+the stack).  The GC maintains a directed graph in which heap blocks are nodes,
+and there is an edge from heap block `b1` to heap block `b2` if some field of
+`b1` points to `b2`.  All blocks reachable from the roots by following edges in
+the graph must be retained, and unreachable blocks can be reused.
 
 With the typical OCaml programming style, many small blocks are frequently
 allocated, used for a short period of time, and then never used again.  OCaml
