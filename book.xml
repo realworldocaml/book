@@ -10023,8 +10023,8 @@ end;;
         </tbody>
       </tgroup>
     </informaltable>
-    <sect2 id="integers-characters-and-booleans">
-      <title>Integers, characters and booleans</title>
+    <sect2 id="integers-characters-and-other-basic-types">
+      <title>Integers, characters and other basic types</title>
       <para>
         Many basic types are stored directly as unboxed values at
         runtime. The native <literal>int</literal> type is the most
@@ -10053,8 +10053,13 @@ end;;
       </para>
       </note>
     </sect2>
-    <sect2 id="variants-lists-and-polymorphic-variants">
-      <title>Variants, lists and polymorphic variants</title>
+    <sect2 id="tuples-records-and-arrays">
+      <title>Tuples, records and arrays</title>
+      <para>
+      </para>
+    </sect2>
+    <sect2 id="variants-and-lists">
+      <title>Variants and lists</title>
       <para>
         Basic variant types with no extra parameters for any of their
         branches are simply stored as an OCaml integer, starting with
@@ -10156,10 +10161,55 @@ type t = Apple | Orange of int | Pear of string | Kiwi
         because of the size of the tag byte, and that some of the high
         numbered tags are reserved.
       </para>
+    </sect2>
+    <sect2 id="polymorphic-variants-1">
+      <title>Polymorphic variants</title>
       <para>
-        Polymorphic variants are stored as ...
-        (<emphasis>avsm</emphasis>: TODO efficiency vs normal variants
-        in terms of space usage and possibly href to jacques paper).
+        Polymorphic variants are more flexible than normal variants when
+        writing code, but can be less efficient at runtime. This is
+        because there isn't as much static compile-time information
+        available to optimise their memory layout. This isn't always the
+        case, however. A polymorphic variant without any parameters is
+        stored as an unboxed integer and so only takes up one word of
+        memory. Unlike normal variants, the integer value is determined
+        by apply a hash function to the <emphasis>name</emphasis> of the
+        variant. The hash function isn't exposed directly by the
+        compiler, but the <literal>type_conv</literal> library from Core
+        provides an alternative implementation.
+      </para>
+      <programlisting>
+# #require &quot;type_conv&quot; ;;
+# Pa_type_conv.hash_variant &quot;Foo&quot; ;;
+- : int = 3505894
+# (Obj.(magic (repr `Foo)) : int) ;;
+- : int = 3505894
+</programlisting>
+      <para>
+        The hash function is designed to give the same results on 32-bit
+        and 64-bit architectures, so the memory representation is stable
+        across different CPUs and host types.
+      </para>
+      <para>
+        Polymorphic variants use more memory space when parameters are
+        included in the datatype constructors. Normal variants use the
+        tag byte to encode the variant value, but this byte is
+        insufficient to encode the hashed value for polymoprhic
+        variants. Therefore, they must allocate a new block (with tag
+        <literal>0</literal>) and store the value in there instead. This
+        means that polymorphic variants with constructors use one word
+        of memory more than normal variant constructors.
+      </para>
+      <para>
+        An additional inefficiency is when multiple parameters are
+        specified for a constructor. Normal variants can hold these
+        parameters as a single flat block with multiple fields for each
+        entry. Polymorphic variants must adopt a more flexible uniform
+        memory representation since they may be re-used in a different
+        subtype elsewhere. They allocate a tuple block for the
+        parameters that is pointed to from the argument field of the
+        variant. Thus, there are three additional words for such
+        variants, along with an extra memory indirection due to the
+        tuple.
       </para>
     </sect2>
     <sect2 id="the-representation-of-strings">
