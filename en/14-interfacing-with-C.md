@@ -171,7 +171,7 @@ string                             word-aligned byte arrays with a clever repres
 tuples, records and arrays         as an array of values with tag `0`. Arrays can be allocated with variable size, but structs and tuples are fixed size.
 records or arrays, all float       The tag has the special value `Double_array_tag` for the GC to detect them.  Note this exception does not apply to tuples that contain floats.
 
-### Integers, characters and booleans
+### Integers, characters and other basic types
 
 Many basic types are stored directly as unboxed values at runtime.  The native
 `int` type is the most obvious, although it drops a single bit of precision
@@ -193,7 +193,9 @@ overall program.
 
 </note>
 
-### Variants, lists and polymorphic variants
+### Tuples, records and arrays
+
+### Variants and lists
 
 Basic variant types with no extra parameters for any of their branches are
 simply stored as an OCaml integer, starting with `0` for the first option and
@@ -272,8 +274,44 @@ without parameters is the size of the native integer (either 31- or 63-bits).
 This limit arises because of the size of the tag byte, and that some of the
 high numbered tags are reserved.
 
-Polymorphic variants are stored as ... (_avsm_: TODO efficiency vs normal
-variants in terms of space usage and possibly href to jacques paper).
+### Polymorphic variants
+
+Polymorphic variants are more flexible than normal variants when writing code,
+but can be less efficient at runtime. This is because there isn't as much
+static compile-time information available to optimise their memory layout.
+This isn't always the case, however.  A polymorphic variant without any parameters is stored 
+as an unboxed integer and so only takes up one word of memory. Unlike normal
+variants, the integer value is determined by apply a hash function to the 
+*name* of the variant.  The hash function isn't exposed directly by the compiler, but
+the `type_conv` library from Core provides an alternative implementation.
+
+~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# #require "type_conv" ;;
+# Pa_type_conv.hash_variant "Foo" ;;
+- : int = 3505894
+# (Obj.(magic (repr `Foo)) : int) ;;
+- : int = 3505894
+~~~~~~~~~~~~~~~~
+
+The hash function is designed to give the same results on 32-bit and 64-bit
+architectures, so the memory representation is stable across different
+CPUs and host types.
+
+Polymorphic variants use more memory space when parameters are included in the
+datatype constructors.  Normal variants use the tag byte to encode the variant
+value, but this byte is insufficient to encode the hashed value for polymoprhic
+variants.  Therefore, they must allocate a new block (with tag `0`) and store
+the value in there instead. This means that polymorphic variants with
+constructors use one word of memory more than normal variant constructors.
+
+An additional inefficiency is when multiple parameters are specified for a
+constructor.  Normal variants can hold these parameters as a single flat block
+with multiple fields for each entry.  Polymorphic variants must adopt a more
+flexible uniform memory representation since they may be re-used in a different
+subtype elsewhere.  They allocate a tuple block for the parameters that is
+pointed to from the argument field of the variant. Thus, there are three
+additional words for such variants, along with an extra memory indirection due
+to the tuple.
 
 ### The representation of strings
 
