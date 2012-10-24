@@ -416,13 +416,24 @@ pointed to from the argument field of the variant. Thus, there are three
 additional words for such variants, along with an extra memory indirection due
 to the tuple.
 
-### The representation of strings
+### String values
 
-Strings are standard OCaml heap blocks, with the header size defining the size
-of the string in machine words.  The actual block contents are the contents of
-the string, and padding bytes to align the block on a word boundary.  On a
-32-bit machine, the padding is calculated based on the modulo of the string
-length and word size to ensure the result is word-aligned.
+Strings are standard OCaml blocks with the header size defining the size
+of the string in machine words. The `String_tag` (252) is higher than the
+`No_scan_tag`, indicating that the contents of the block are opaque to the
+collector.  The block contents are the contents of the string, with padding
+bytes to align the block on a word boundary.
+
+~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
++---------------+----------------+--------+-----------+
+| header        | 'a' 'b' 'c' 'd' 'e' 'f' | '\O' '\1' |
++---------------+----------------+--------+-----------+
+                L data                    L padding
+~~~~~~~~~~~~~~~~
+
+On a 32-bit machine, the padding is calculated based on the modulo of the
+string length and word size to ensure the result is word-aligned.  A
+64-bit machine extends the potential padding up to 7 bytes instead of 3.
 
 String length mod 4  Padding
 -------------------  -------
@@ -431,26 +442,30 @@ String length mod 4  Padding
 2                    `00 01`
 3                    `00`
 
-Thus, the string contents are always zero-terminated by the padding word, and
-its length can be computed quickly by:
+This string representation is a clever way to ensure that the string contents
+are always zero-terminated by the padding word, and still compute its length
+efficiently without scanning the whole string.  The following formula is used:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The guaranteed NULL-termination comes in handy when passing a string to C, but
-is not relied upon to compute the length from OCaml. Thus, OCaml strings can
-contain nulls at any point within the string.
+is not relied upon to compute the length from OCaml code. Thus, OCaml strings
+can contain null bytes at any point within the string, but care should be taken
+that any C library functions can also cope with this.
 
 ### Custom heap blocks
 
-OCaml supports *custom* heap blocks that have a special `Custom_tag` that let
-the runtime perform user-defined operations over OCaml values.  A custom block
-lives in the OCaml heap like an ordinary block and can be of whatever size the
-user desires.  However, the runtime does not know anything about the structure
-of the data in the block, other than that the first word of the custom block is
-a C pointer to a `struct` of custom operations. The custom block cannot have
-pointers to OCaml blocks and is considered opaque to the garbage collector.
+OCaml supports *custom* heap blocks via a `Custom_tag` that let the runtime
+perform user-defined operations over OCaml values.  A custom block lives in the
+OCaml heap like an ordinary block and can be of whatever size the user desires.
+The `Custom_tag` (255) is higher than `No_scan_tag` and so cannot contain any
+OCaml values.
+
+The first word of the data within the custom block is a C pointer to a `struct`
+of custom operations. The custom block cannot have pointers to OCaml blocks and
+is opaque to the garbage collector.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct custom_operations {
