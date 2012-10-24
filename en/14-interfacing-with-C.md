@@ -6,6 +6,26 @@ representation for values.  Understanding this difference is important for
 writing efficient programs, and also for interfacing with C libraries that work
 directly with the runtime system.
 
+<note>
+<title>Why do OCaml types disappear at runtime?</title>
+
+The OCaml compiler runs through several phases of during the compilation
+process.  After syntax checking, the next stage is *type checking*.  In a
+validly typed program, a function cannot be applied with an unexpected type.
+For example, the `print_endline` function must receive a single `string`
+argument, and an `int` will result in a type error.
+
+Since OCaml verifies these properties at compile time, it doesn't need to keep
+track of as much information at runtime. Thus, later stages of the compiler can
+discard and simplify the type declarations to a much more minimal subset that's
+actually required to distinguish polymorphic values at runtime.  This is a
+major performance win versus something like a Java or .NET method call, where
+the runtime must look up the concrete instance of the object and dispatch the
+method call.  Those languages amortize some of the cost via "Just-in-Time"
+dynamic patching, but OCaml prefers runtime simplicity instead.
+
+</note>
+
 Let's start by explaining the memory layout, and then move onto the details
 of how C bindings work.
 
@@ -40,10 +60,10 @@ memory made available for re-use by the application.
 The garbage collector does not keep constant track of blocks as they are
 allocated and used.  Instead, it regularly scans blocks by starting from a set
 of *roots*, which are values that the application always has access to (such as
-the stack).  The GC maintains a directed graph in which heap blocks are
-nodes, and there is an edge from heap block `b1` to heap block `b2` if some
-field of `b1` points to `b2`.  All blocks reachable from the roots by following
-edges in the graph must be retained, and unreachable blocks can be reused.
+the stack).  The GC maintains a directed graph in which heap blocks are nodes,
+and there is an edge from heap block `b1` to heap block `b2` if some field of
+`b1` points to `b2`.  All blocks reachable from the roots by following edges in
+the graph must be retained, and unreachable blocks can be reused.
 
 With the typical OCaml programming style, many small blocks are frequently
 allocated, used for a short period of time, and then never used again.  OCaml
@@ -177,26 +197,6 @@ string                             word-aligned byte arrays that are also direct
 `[1; 2; 3]`                        as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
 tuples, records and arrays         an array of values. Arrays can be variable size, but structs and tuples are fixed size.
 records or arrays, all float       special tag for unboxed arrays of floats. Doesn't apply to tuples.
-
-<note>
-<title>Why do OCaml types disappear at runtime?</title>
-
-The OCaml compiler runs through several phases of during the compilation
-process.  After syntax checking, the next stage is *type checking*.  In a
-validly typed program, a function cannot be applied with an unexpected type.
-For example, the `print_endline` function must receive a single `string`
-argument, and an `int` will result in a type error.
-
-Since OCaml verifies these properties at compile time, it doesn't need to keep
-track of as much information at runtime. Thus, later stages of the compiler can
-discard and simplify the type declarations to a much more minimal subset that's
-actually required to distinguish polymorphic values at runtime.  This is a
-major performance win versus something like a Java or .NET method call, where
-the runtime must look up the concrete instance of the object and dispatch the
-method call.  Those languages amortize some of the cost via "Just-in-Time"
-dynamic patching, but OCaml prefers runtime simplicity instead.
-
-</note>
 
 ### Integers, characters and other basic types
 
@@ -392,7 +392,7 @@ alternative implementation.
 # #require "type_conv" ;;
 # Pa_type_conv.hash_variant "Foo" ;;
 - : int = 3505894
-# (Obj.(magic (repr `Foo)) : int) ;;
+# (Obj.magic (Obj.repr `Foo) : int) ;;
 - : int = 3505894
 ~~~~~~~~~~~~~~~~
 
@@ -407,14 +407,13 @@ variants.  Therefore, they must allocate a new block (with tag `0`) and store
 the value in there instead. This means that polymorphic variants with
 constructors use one word of memory more than normal variant constructors.
 
-Another inefficiency is when a polymorphic variant construct has more than one
-parameter.  Normal variants can hold these parameters as a single flat block
-with multiple fields for each entry.  Polymorphic variants must adopt a more
+Another inefficiency is when a polymorphic variant constructor has more than
+one parameter.  Normal variants hold parameters as a single flat block with
+multiple fields for each entry, but polymorphic variants must adopt a more
 flexible uniform memory representation since they may be re-used in a different
-subtype elsewhere.  They allocate a tuple block for the parameters that is
-pointed to from the argument field of the variant. Thus, there are three
-additional words for such variants, along with an extra memory indirection due
-to the tuple.
+context. They allocate a tuple block for the parameters that is pointed to from
+the argument field of the variant. Thus, there are three additional words for
+such variants, along with an extra memory indirection due to the tuple.
 
 ### String values
 
