@@ -6,6 +6,30 @@ representation for values.  Understanding this difference is important for
 writing efficient programs, and also for interfacing with C libraries that work
 directly with the runtime system.
 
+<note>
+<title>Why do OCaml types disappear at runtime?</title>
+
+The OCaml compiler runs through several phases of during the compilation process
+from source code to an executable binary.  After syntax checking, the next stage
+is *type checking*.  In a validly typed program, a function cannot be applied
+with an unexpected type. For example, the
+`print_endline` function must receive a single `string` argument, and an
+`int` will result in a type error.
+
+Since OCaml verifies these properties at compile time, it doesn't need to keep
+track of as much information at runtime. Thus, later stages of the compiler
+can discard and simplify the type declarations to a much more minimal subset
+that's actually required to distinguish polymorphic values at runtime.
+This is a major performance win versus something like a Java or .NET method
+call, where the runtime must look up the concrete instance of the object
+and dispatch the method call.  Those languages amortize some of the cost
+via "Just-in-Time" dynamic patching, but OCaml prefers runtime simplicity
+instead.
+
+(_avsm_: this is probably in the wrong place)
+
+</note>
+
 Let's start by explaining the memory layout, and then move onto the details
 of how C bindings work.
 
@@ -124,7 +148,6 @@ interprete the subsequent fields.
 reason that I cannot recall right now).
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(TODO draw this properly)
 +------------------------+-------+----------+----------+----------+----
 | size of block in words |  col  | tag byte | value[0] | value[1] | ...
 +------------------------+-------+----------+----------+----------+----
@@ -156,7 +179,8 @@ forwarded as part of minor collection, and the first field points to the new
 location.  Also, if the block is on the `oldify_todo_list`, part of the minor
 gc, then the second field points to the next entry on the oldify_todo_list.
 
-The representation of values depends on their type. They are summarised in the table below, and then we'll examine some of them in greater detail.
+The representation of values depends on their type. They are summarised in the
+table below, and then we'll examine some of them in greater detail.
 
 OCaml Value                        Representation
 -----------                        --------------
@@ -165,11 +189,11 @@ any `int` or `char`                directly as a value, shifted left by 1 bit, w
 `true`                             as OCaml `int` 1.
 `Foo | Bar`                        as ascending OCaml `int`s, starting from 0.
 `Foo | Bar of int`                 variants with parameters are boxed, while entries with no parameters are unboxed (see below).
-polymorphic variants               TODO
-string                             word-aligned byte arrays with a clever representation to make it efficient to get their length, and also directly compatible with C strings.
-`[1; 2; 3]`                        as `1::2::3::[]` where `[]` is a value OCaml int 0, and `h::t` is a block with tag 0 and two parameters.
-tuples, records and arrays         as an array of values with tag `0`. Arrays can be allocated with variable size, but structs and tuples are fixed size.
-records or arrays, all float       The tag has the special value `Double_array_tag` for the GC to detect them.  Note this exception does not apply to tuples that contain floats.
+polymorphic variants               variable space usage depending on the number of parameters (see below).
+string                             word-aligned byte arrays that are also directly compatible with C strings.
+`[1; 2; 3]`                        as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
+tuples, records and arrays         an array of values. Arrays can be variable size, but structs and tuples are fixed size.
+records or arrays, all float       special tag for unboxed arrays of floats. Doesn't apply to tuples.
 
 ### Integers, characters and other basic types
 
@@ -194,6 +218,8 @@ overall program.
 </note>
 
 ### Tuples, records and arrays
+
+### Floating point numbers and arrays
 
 ### Variants and lists
 
