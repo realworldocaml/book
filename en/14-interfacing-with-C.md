@@ -122,8 +122,8 @@ of a one-word header (either 32- or 64-bits) followed by variable-length data,
 which is either opaque bytes or *fields*.  The collector never inspects opaque
 bytes, but fields are valid OCaml values. The runtime always inspects fields,
 and follows them as part of the garbage collection process described earlier.
-Every block header has a tag that defines its runtime type, and how to
-interprete the subsequent fields.
+Every block header has a multipurpose tag byte that defines whether to
+interprete the subsequent data as opaque or OCaml fields.
 
 (_avsm_: pointers to blocks actually point 4/8 bytes into it, for some efficiency
 reason that I cannot recall right now).
@@ -181,12 +181,11 @@ records or arrays, all float       special tag for unboxed arrays of floats. Doe
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
 
-The OCaml compiler runs through several phases of during the compilation process
-from source code to an executable binary.  After syntax checking, the next stage
-is *type checking*.  In a validly typed program, a function cannot be applied
-with an unexpected type. For example, the
-`print_endline` function must receive a single `string` argument, and an
-`int` will result in a type error.
+The OCaml compiler runs through several phases of during the compilation
+process.  After syntax checking, the next stage is *type checking*.  In a
+validly typed program, a function cannot be applied with an unexpected type.
+For example, the `print_endline` function must receive a single `string`
+argument, and an `int` will result in a type error.
 
 Since OCaml verifies these properties at compile time, it doesn't need to keep
 track of as much information at runtime. Thus, later stages of the compiler can
@@ -233,8 +232,9 @@ overall program.
 
 Tuples, records and arrays are all represented identically at runtime, with a
 block with tag `0`.  Tuples and records have constant sizes determined at
-compile-time, whereas arrays can be of variable length.  The size field in the
-header always reflects the correct size of the block in words.
+compile-time, whereas arrays can be of variable length.  While arrays are
+restricted to containing a single type of element in the OCaml type system,
+this is not required by the memory representation.
 
 You can check the difference between a block and a direct integer yourself
 using the `Obj` module, which exposes the internal representation of values to
@@ -253,11 +253,10 @@ a block header or an unboxed integer.
 
 ### Floating point numbers and arrays
 
-Floating point numbers in OCaml are always full double-precision. 
-Individual floating point values are stored as a block with a single
-field that contains the number.  This block has the `Double_tag` set
-which signals to the collector that the floating point value is not
-to be scanned.
+Floating point numbers in OCaml are always stored as full double-precision
+values.  Individual floating point values are stored as a block with a single
+field that contains the number.  This block has the `Double_tag` set which
+signals to the collector that the floating point value is not to be scanned.
 
 ~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # Obj.tag (Obj.repr 1.0) = Obj.double_tag ;;
@@ -269,9 +268,9 @@ to be scanned.
 Since each floating-point value is boxed in a separate memory block, it can be
 inefficient to handle large arrays of floats in comparison to unboxed integers.
 OCaml therefore special-cases records or arrays that contain *only* `float`
-types. These are stored in a block that contains the floats as an array, with
-the `Double_array_tag` to signal to the collector that the contents are not
-OCaml values.
+types. These are stored in a block that contains the floats packed directly in
+the data section, with the `Double_array_tag` set to signal to the collector
+that the contents are not OCaml values.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 +---------+----------+----------- - - - - 
@@ -296,7 +295,9 @@ retrieve a float from within the block.
 ~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 
 Notice that float tuples are *not* optimized in the same way as float records
-or arrays, and so they have the usual tuple tag value of `0`.
+or arrays, and so they have the usual tuple tag value of `0`. Only records
+and arrays can have the array optimization, and only if every single field is
+a float.
 
 ### Variants and lists
 
