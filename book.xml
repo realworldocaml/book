@@ -9656,6 +9656,32 @@ end;;
     programs, and also for interfacing with C libraries that work
     directly with the runtime system.
   </para>
+  <note>
+  <title>
+  Why do OCaml types disappear at runtime?
+  </title>
+  <para>
+    The OCaml compiler runs through several phases of during the
+    compilation process. After syntax checking, the next stage is
+    <emphasis>type checking</emphasis>. In a validly typed program, a
+    function cannot be applied with an unexpected type. For example, the
+    <literal>print_endline</literal> function must receive a single
+    <literal>string</literal> argument, and an <literal>int</literal>
+    will result in a type error.
+  </para>
+  <para>
+    Since OCaml verifies these properties at compile time, it doesn't
+    need to keep track of as much information at runtime. Thus, later
+    stages of the compiler can discard and simplify the type
+    declarations to a much more minimal subset that's actually required
+    to distinguish polymorphic values at runtime. This is a major
+    performance win versus something like a Java or .NET method call,
+    where the runtime must look up the concrete instance of the object
+    and dispatch the method call. Those languages amortize some of the
+    cost via &quot;Just-in-Time&quot; dynamic patching, but OCaml
+    prefers runtime simplicity instead.
+  </para>
+  </note>
   <para>
     Let's start by explaining the memory layout, and then move onto the
     details of how C bindings work.
@@ -10036,32 +10062,6 @@ end;;
           </tbody>
         </tgroup>
       </informaltable>
-      <note>
-      <title>
-      Why do OCaml types disappear at runtime?
-      </title>
-      <para>
-        The OCaml compiler runs through several phases of during the
-        compilation process. After syntax checking, the next stage is
-        <emphasis>type checking</emphasis>. In a validly typed program,
-        a function cannot be applied with an unexpected type. For
-        example, the <literal>print_endline</literal> function must
-        receive a single <literal>string</literal> argument, and an
-        <literal>int</literal> will result in a type error.
-      </para>
-      <para>
-        Since OCaml verifies these properties at compile time, it
-        doesn't need to keep track of as much information at runtime.
-        Thus, later stages of the compiler can discard and simplify the
-        type declarations to a much more minimal subset that's actually
-        required to distinguish polymorphic values at runtime. This is a
-        major performance win versus something like a Java or .NET
-        method call, where the runtime must look up the concrete
-        instance of the object and dispatch the method call. Those
-        languages amortize some of the cost via &quot;Just-in-Time&quot;
-        dynamic patching, but OCaml prefers runtime simplicity instead.
-      </para>
-      </note>
     </sect2>
     <sect2 id="integers-characters-and-other-basic-types">
       <title>Integers, characters and other basic types</title>
@@ -10305,7 +10305,7 @@ type t = Apple | Orange of int | Pear of string | Kiwi
 # #require &quot;type_conv&quot; ;;
 # Pa_type_conv.hash_variant &quot;Foo&quot; ;;
 - : int = 3505894
-# (Obj.(magic (repr `Foo)) : int) ;;
+# (Obj.magic (Obj.repr `Foo) : int) ;;
 - : int = 3505894
 </programlisting>
       <para>
@@ -10324,16 +10324,15 @@ type t = Apple | Orange of int | Pear of string | Kiwi
         of memory more than normal variant constructors.
       </para>
       <para>
-        Another inefficiency is when a polymorphic variant construct has
-        more than one parameter. Normal variants can hold these
-        parameters as a single flat block with multiple fields for each
-        entry. Polymorphic variants must adopt a more flexible uniform
-        memory representation since they may be re-used in a different
-        subtype elsewhere. They allocate a tuple block for the
-        parameters that is pointed to from the argument field of the
-        variant. Thus, there are three additional words for such
-        variants, along with an extra memory indirection due to the
-        tuple.
+        Another inefficiency is when a polymorphic variant constructor
+        has more than one parameter. Normal variants hold parameters as
+        a single flat block with multiple fields for each entry, but
+        polymorphic variants must adopt a more flexible uniform memory
+        representation since they may be re-used in a different context.
+        They allocate a tuple block for the parameters that is pointed
+        to from the argument field of the variant. Thus, there are three
+        additional words for such variants, along with an extra memory
+        indirection due to the tuple.
       </para>
     </sect2>
     <sect2 id="string-values">
