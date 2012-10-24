@@ -392,7 +392,7 @@ alternative implementation.
 # #require "type_conv" ;;
 # Pa_type_conv.hash_variant "Foo" ;;
 - : int = 3505894
-# (Obj.(magic (repr `Foo)) : int) ;;
+# (Obj.magic (Obj.repr `Foo) : int) ;;
 - : int = 3505894
 ~~~~~~~~~~~~~~~~
 
@@ -407,14 +407,13 @@ variants.  Therefore, they must allocate a new block (with tag `0`) and store
 the value in there instead. This means that polymorphic variants with
 constructors use one word of memory more than normal variant constructors.
 
-Another inefficiency is when a polymorphic variant construct has more than one
-parameter.  Normal variants can hold these parameters as a single flat block
-with multiple fields for each entry.  Polymorphic variants must adopt a more
+Another inefficiency is when a polymorphic variant constructor has more than
+one parameter.  Normal variants hold parameters as a single flat block with
+multiple fields for each entry, but polymorphic variants must adopt a more
 flexible uniform memory representation since they may be re-used in a different
-subtype elsewhere.  They allocate a tuple block for the parameters that is
-pointed to from the argument field of the variant. Thus, there are three
-additional words for such variants, along with an extra memory indirection due
-to the tuple.
+context. They allocate a tuple block for the parameters that is pointed to from
+the argument field of the variant. Thus, there are three additional words for
+such variants, along with an extra memory indirection due to the tuple.
 
 ### String values
 
