@@ -279,11 +279,12 @@ high numbered tags are reserved.
 Polymorphic variants are more flexible than normal variants when writing code,
 but can be less efficient at runtime. This is because there isn't as much
 static compile-time information available to optimise their memory layout.
-This isn't always the case, however.  A polymorphic variant without any parameters is stored 
-as an unboxed integer and so only takes up one word of memory. Unlike normal
-variants, the integer value is determined by apply a hash function to the 
-*name* of the variant.  The hash function isn't exposed directly by the compiler, but
-the `type_conv` library from Core provides an alternative implementation.
+This isn't always the case, however.  A polymorphic variant without any
+parameters is stored as an unboxed integer and so only takes up one word of
+memory. Unlike normal variants, the integer value is determined by apply a hash
+function to the *name* of the variant.  The hash function isn't exposed
+directly by the compiler, but the `type_conv` library from Core provides an
+alternative implementation.
 
 ~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # #require "type_conv" ;;
@@ -294,8 +295,8 @@ the `type_conv` library from Core provides an alternative implementation.
 ~~~~~~~~~~~~~~~~
 
 The hash function is designed to give the same results on 32-bit and 64-bit
-architectures, so the memory representation is stable across different
-CPUs and host types.
+architectures, so the memory representation is stable across different CPUs and
+host types.
 
 Polymorphic variants use more memory space when parameters are included in the
 datatype constructors.  Normal variants use the tag byte to encode the variant
@@ -304,8 +305,8 @@ variants.  Therefore, they must allocate a new block (with tag `0`) and store
 the value in there instead. This means that polymorphic variants with
 constructors use one word of memory more than normal variant constructors.
 
-An additional inefficiency is when multiple parameters are specified for a
-constructor.  Normal variants can hold these parameters as a single flat block
+Another inefficiency is when a polymorphic variant construct has more than one
+parameter.  Normal variants can hold these parameters as a single flat block
 with multiple fields for each entry.  Polymorphic variants must adopt a more
 flexible uniform memory representation since they may be re-used in a different
 subtype elsewhere.  They allocate a tuple block for the parameters that is
