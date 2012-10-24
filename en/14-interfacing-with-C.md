@@ -6,6 +6,26 @@ representation for values.  Understanding this difference is important for
 writing efficient programs, and also for interfacing with C libraries that work
 directly with the runtime system.
 
+<note>
+<title>Why do OCaml types disappear at runtime?</title>
+
+The OCaml compiler runs through several phases of during the compilation
+process.  After syntax checking, the next stage is *type checking*.  In a
+validly typed program, a function cannot be applied with an unexpected type.
+For example, the `print_endline` function must receive a single `string`
+argument, and an `int` will result in a type error.
+
+Since OCaml verifies these properties at compile time, it doesn't need to keep
+track of as much information at runtime. Thus, later stages of the compiler can
+discard and simplify the type declarations to a much more minimal subset that's
+actually required to distinguish polymorphic values at runtime.  This is a
+major performance win versus something like a Java or .NET method call, where
+the runtime must look up the concrete instance of the object and dispatch the
+method call.  Those languages amortize some of the cost via "Just-in-Time"
+dynamic patching, but OCaml prefers runtime simplicity instead.
+
+</note>
+
 Let's start by explaining the memory layout, and then move onto the details
 of how C bindings work.
 
@@ -177,26 +197,6 @@ string                             word-aligned byte arrays that are also direct
 `[1; 2; 3]`                        as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
 tuples, records and arrays         an array of values. Arrays can be variable size, but structs and tuples are fixed size.
 records or arrays, all float       special tag for unboxed arrays of floats. Doesn't apply to tuples.
-
-<note>
-<title>Why do OCaml types disappear at runtime?</title>
-
-The OCaml compiler runs through several phases of during the compilation
-process.  After syntax checking, the next stage is *type checking*.  In a
-validly typed program, a function cannot be applied with an unexpected type.
-For example, the `print_endline` function must receive a single `string`
-argument, and an `int` will result in a type error.
-
-Since OCaml verifies these properties at compile time, it doesn't need to keep
-track of as much information at runtime. Thus, later stages of the compiler can
-discard and simplify the type declarations to a much more minimal subset that's
-actually required to distinguish polymorphic values at runtime.  This is a
-major performance win versus something like a Java or .NET method call, where
-the runtime must look up the concrete instance of the object and dispatch the
-method call.  Those languages amortize some of the cost via "Just-in-Time"
-dynamic patching, but OCaml prefers runtime simplicity instead.
-
-</note>
 
 ### Integers, characters and other basic types
 
