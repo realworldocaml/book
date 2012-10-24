@@ -2,9 +2,9 @@
 
 Much of the static type information contained within an OCaml program is
 checked and discarded at compilation time, leaving a much simpler *runtime*
-representation for values.  Understanding this runtime layout is important to
-writing fast programs, and interfacing with C libraries which work directly
-with these values.
+representation for values.  Understanding this difference is important for
+writing efficient programs, and also for interfacing with C libraries that work
+directly with the runtime system.
 
 Let's start by explaining the memory layout, and then move onto the details
 of how C bindings work.
@@ -112,20 +112,6 @@ zeroed. If the pointer is inside an area managed by the runtime, it is assumed
 to point to a valid OCaml *block*, or else is treated as an opaque C pointer to
 some other system resource.
 
-<note>
-<title>Why are OCaml integers missing a bit?</title>
-
-Since the lowest bit of an OCaml value is reserved, native OCaml integers have
-a maximum allowable length of 31- or 63-bits, depending on the host
-architecture. The rationale for reserving the lowest bit is for efficiency.
-Pointers always point to word-aligned addresses, and so their lower bits are
-normally zero. By setting the lower bit to a non-zero value for integers, the
-garbage collector can simply iterate over every header tag to distinguish
-integers from pointers.  This reduces the garbage collection overhead on the
-overall program.
-
-</note>
-
 A *block* is the basic unit of allocation on the heap.  A block consists of a
 one-word header (either 32- or 64-bits) followed by variable-length data, which
 is either opaque bytes or *fields*.  The collector never inspects opaque bytes,
@@ -170,17 +156,124 @@ forwarded as part of minor collection, and the first field points to the new
 location.  Also, if the block is on the `oldify_todo_list`, part of the minor
 gc, then the second field points to the next entry on the oldify_todo_list.
 
+The representation of values depends on their type. They are summarised in the table below, and then we'll examine some of them in greater detail.
+
 OCaml Value                        Representation
 -----------                        --------------
-any `int` or `char`                stored directly as a value, shifted left by 1 bit, with the least significant bit set to 1
-`unit`, `[]`, `false`              stored as OCaml int 0 (unboxed native integer 1).
-`true`                             stored as OCaml int 1 (unboxed native integer 3).
-`type t = Foo | Bar | Baz`         stored as OCaml int 0, 1, 2
-`type t = Foo | Bar of int`        The variants with no parameters are stored as ascending OCaml ints from 0, counting from the leftmost and just the variants with no parameters. Variants with parameters are stored as blocks, with tags ascending from 0 and counting from leftmost variants with parameters. The parameters are stored as words in the block.  Note there is a limit around 240 variants with parameters that applies to each type, but no limit on the number of variants without parameters you can have. This limit arises because of the size of the tag byte and the fact that some of the high numbered tags are reserved.
-list `[1; 2; 3]`                   Lists are represented as `1::2::3::[]` where `[]` is a value OCaml int 0, and `h::t` is a block with tag 0 and two parameters. This representation is exactly the same as if the list was a variant of `Head` and `Cons`.
-tuples, records and arrays         These are all represented identically as an array of values with tag `0`. The only difference is that an array can be allocated with variable size, but structs and tuples always have a fixed size.
-records or arrays, all float       These are treated as a special case. The tag has the special value `Double_array_tag` for the GC to detect them.  Note this exception does not apply to tuples that contain floats.
-any string                         Strings are byte arrays in OCaml, but they have quite a clever representation to make it very efficient to get their length, and at the same time make them directly compatible with C strings. The tag is set to `String_tag`.
+any `int` or `char`                directly as a value, shifted left by 1 bit, with the least significant bit set to 1
+`unit`, `[]`, `false`              as OCaml `int` 0.
+`true`                             as OCaml `int` 1.
+`Foo | Bar`                        as ascending OCaml `int`s, starting from 0.
+`Foo | Bar of int`                 variants with parameters are boxed, while entries with no parameters are unboxed (see below).
+polymorphic variants               TODO
+string                             word-aligned byte arrays with a clever representation to make it efficient to get their length, and also directly compatible with C strings.
+`[1; 2; 3]`                        as `1::2::3::[]` where `[]` is a value OCaml int 0, and `h::t` is a block with tag 0 and two parameters.
+tuples, records and arrays         as an array of values with tag `0`. Arrays can be allocated with variable size, but structs and tuples are fixed size.
+records or arrays, all float       The tag has the special value `Double_array_tag` for the GC to detect them.  Note this exception does not apply to tuples that contain floats.
+
+### Integers, characters and booleans
+
+Many basic types are stored directly as unboxed values at runtime.  The native
+`int` type is the most obvious, although it drops a single bit of precision
+(see below).  Other atomic types such as the `unit` and empty list `[]` value
+are stored as constant integers.  Boolean values have a value of `0` and `1`
+for `true` and `false` respectively.
+
+<note>
+<title>Why are OCaml integers missing a bit?</title>
+
+Since the lowest bit of an OCaml value is reserved, native OCaml integers have
+a maximum allowable length of 31- or 63-bits, depending on the host
+architecture. The rationale for reserving the lowest bit is for efficiency.
+Pointers always point to word-aligned addresses, and so their lower bits are
+normally zero. By setting the lower bit to a non-zero value for integers, the
+garbage collector can simply iterate over every header tag to distinguish
+integers from pointers.  This reduces the garbage collection overhead on the
+overall program.
+
+</note>
+
+### Variants, lists and polymorphic variants
+
+Basic variant types with no extra parameters for any of their branches are
+simply stored as an OCaml integer, starting with `0` for the first option and
+in ascending order.  You can check this for yourself using the `Obj` module,
+which exposes the internal representation of values to OCaml code.
+
+~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# open Obj ;;
+# type t = Apple | Orange | Pear ;;
+type t = Apple | Orange | Pear
+# ((magic (repr Apple)) : int) ;;
+- : int = 0
+# ((magic (repr Pear)) : int) ;;
+- : int = 2
+# is_block (repr Apple) ;;
+- : bool = false
+~~~~~~~~~~~~~~~~
+
+The `Obj.repr` function retrieves the runtime representation of any OCaml
+value. The `Obj.magic` unsafely forces a type cast; in this example the `int`
+type hint is sufficient to retrieve the runtime integer value.  Finally, the
+`Obj.is_block` function confirms that the value isn't a more complex block, but
+just an OCaml `int`.
+
+Variants that have parameters arguments are a little more complex.  They are
+stored as blocks, with the value *tags* ascending from 0 (counting from
+leftmost variants with parameters).  The parameters are stored as words in the
+block.
+
+~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type t = Apple | Orange of int | Pear of string | Kiwi ;;
+type t = Apple | Orange of int | Pear of string | Kiwi
+# is_block (repr (Orange 1234)) ;;
+- : bool = true
+# tag (repr (Orange 1234)) ;; 
+- : int = 0
+# tag (repr (Pear "xyz")) ;;
+- : int = 1
+# (magic (field (repr (Orange 1234)) 0) : int) ;;
+- : int = 1234
+(magic (field (repr (Pear "xyz")) 0) : string) ;;
+- : string = "xyz"
+~~~~~~~~~~~~~~~~
+
+In the above example, the `Apple` and `Kiwi` values are still stored as normal
+OCaml integers with values `0` and `1` respectively.  The `Orange` and `Pear`
+values both have parameters, and are stored as blocks whose tags ascend from
+`0` (and so `Pear` has a tag of `1`, as the use of `Obj.tag` verifies).
+Finally, the parameters are fields which contain OCaml values within the block,
+and `Obj.field` can be used to retrieve them.
+
+Lists are stored with a representation that is exactly the same as if the list
+was written as a variant type with `Head` and `Cons`.  The empty list `[]` is
+an integer `0`, and subsequent blocks have tag `0` and two parameters: a block
+with the current value, and a pointer to the rest of the list.
+
+<warning>
+<title>`Obj` module considered harmful</title>
+
+The `Obj` module is an undocumented module that exposes the internals of the
+OCaml compiler and runtime.  It is very useful for examining and understanding
+how your code will behave at runtime, but should *never* be used for production
+code unless you understand the implications.  The module bypasses the OCaml
+type system, making memory corruption and segmentation faults possible.
+
+Some theorem provers such as Coq do output code which uses `Obj` internally,
+but the external module signatures never expose it.  Unless you too have a
+machine proof of correctness to accompany your use of `Obj`, stay away from it
+except for debugging!
+
+</warning>
+
+Due to this encoding, there is a limit around 240 variants with parameters that
+applies to each type definition, but the only limit on the number of variants
+without parameters is the size of the native integer (either 31- or 63-bits).
+This limit arises because of the size of the tag byte, and that some of the
+high numbered tags are reserved.
+
+Polymorphic variants are stored as ... (_avsm_: TODO efficiency vs normal
+variants in terms of space usage and possibly href to jacques paper).
 
 ### The representation of strings
 
