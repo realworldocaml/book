@@ -9793,246 +9793,286 @@ end;;
     <title>The representation of values</title>
     <para>
       Every OCaml <emphasis>value</emphasis> is a single word that is
-      either an integer or a pointer elsewhere in memory. If the lowest
-      bit of the word is non-zero, the value is an unboxed integer.
-      Several OCaml types map onto integers, including
+      either an integer or a pointer. If the lowest bit of the word is
+      non-zero, the value is an unboxed integer. Several OCaml types map
+      onto this integer representation, including
       <literal>bool</literal>, <literal>int</literal>, the empty list,
       <literal>unit</literal>, and variants without constructors.
-      Integers are the only unboxed runtime values in OCaml, and are
-      thus the cheapest values to allocate and manipulate. A
-      <literal>value</literal> containing a pointer is stored unmodified
-      since pointers are guaranteed to be word-aligned, so the bottom
-      bits are zeroed. If the pointer is inside an area managed by the
-      runtime, it is assumed to point to a valid OCaml
-      <emphasis>block</emphasis>, or else is treated as an opaque C
-      pointer to some other system resource.
+      Integers are the only unboxed runtime values in OCaml, and are the
+      cheapest values to allocate.
     </para>
     <para>
-      A <emphasis>block</emphasis> is the basic unit of allocation on
-      the heap. A block consists of a one-word header (either 32- or
-      64-bits) followed by variable-length data, which is either opaque
-      bytes or <emphasis>fields</emphasis>. The collector never inspects
-      opaque bytes, but fields are valid OCaml values. The runtime
-      always inspects fields, and follows them as part of the garbage
-      collection process described earlier. Every block header has a tag
-      that defines its runtime type, and how to interprete the
-      subsequent fields.
+      If the lowest bit of the <literal>value</literal> is zero, then
+      the value is a pointer. A pointer value is stored unmodified,
+      since pointers are guaranteed to be word-aligned and the bottom
+      bits are always zero. If the pointer is inside an area managed by
+      the OCaml runtime, it is assumed to point to an OCaml
+      <emphasis>block</emphasis>. If it points outside the OCaml runtime
+      area, it is is treated as an opaque C pointer to some other system
+      resource.
     </para>
-    <para>
-      (<emphasis>avsm</emphasis>: pointers to blocks actually point 4/8
-      bytes into it, for some efficiency reason that I cannot recall
-      right now).
-    </para>
-    <programlisting>
-(TODO draw this properly)
+    <sect2 id="blocks-and-values">
+      <title>Blocks and values</title>
+      <para>
+        An OCaml <emphasis>block</emphasis> is the basic unit of
+        allocation on the heap. A block consists of a one-word header
+        (either 32- or 64-bits) followed by variable-length data, which
+        is either opaque bytes or <emphasis>fields</emphasis>. The
+        collector never inspects opaque bytes, but fields are valid
+        OCaml values. The runtime always inspects fields, and follows
+        them as part of the garbage collection process described
+        earlier. Every block header has a tag that defines its runtime
+        type, and how to interprete the subsequent fields.
+      </para>
+      <para>
+        (<emphasis>avsm</emphasis>: pointers to blocks actually point
+        4/8 bytes into it, for some efficiency reason that I cannot
+        recall right now).
+      </para>
+      <programlisting>
 +------------------------+-------+----------+----------+----------+----
 | size of block in words |  col  | tag byte | value[0] | value[1] | ...
 +------------------------+-------+----------+----------+----------+----
  &lt;-either 22 or 54 bits-&gt; &lt;2 bit&gt; &lt;--8 bit--&gt;
 </programlisting>
-    <para>
-      The size part records the length of the block in words. Note that
-      it is limited to 22-bits on 32-bit platforms, which is the reason
-      why OCaml strings are limited to 16MB. If you need bigger strings,
-      then either switch to a 64-bit host, or use the
-      <literal>Bigarray</literal> module. The 2-bit color is used by the
-      garbage collector to keep track of the mark and sweep status, and
-      is not exposed directly to OCaml programs.
-    </para>
-    <informaltable>
-      <tgroup cols="2">
-        <colspec align="left" />
-        <colspec align="left" />
-        <thead>
-          <row>
-            <entry>
-              Tag Color
-            </entry>
-            <entry>
-              Block Status
-            </entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>
-              blue
-            </entry>
-            <entry>
-              on the free list and not currently in use
-            </entry>
-          </row>
-          <row>
-            <entry>
-              white
-            </entry>
-            <entry>
-              not reached yet, but possibly reachable
-            </entry>
-          </row>
-          <row>
-            <entry>
-              gray
-            </entry>
-            <entry>
-              reachable, but its fields have not been scanned
-            </entry>
-          </row>
-          <row>
-            <entry>
-              black
-            </entry>
-            <entry>
-              reachable, and its fields have been scanned
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-    <para>
-      A block's tag byte indicates whether the data array represents
-      opaque bytes or fields. Tags are also used to distinguish
-      constructors of an OCaml variant type. If a block's tag is greater
-      than or equal to <literal>No_scan_tag</literal> (251), then the
-      block's data is opaque bytes, and are not scanned by the
-      collector. The most common such block is the
-      <literal>string</literal> type.
-    </para>
-    <para>
-      (<emphasis>avsm</emphasis>: too much info here) If the header is
-      zero, then the object has been forwarded as part of minor
-      collection, and the first field points to the new location. Also,
-      if the block is on the <literal>oldify_todo_list</literal>, part
-      of the minor gc, then the second field points to the next entry on
-      the oldify_todo_list.
-    </para>
-    <para>
-      The representation of values depends on their type. They are
-      summarised in the table below, and then we'll examine some of them
-      in greater detail.
-    </para>
-    <informaltable>
-      <tgroup cols="2">
-        <colspec align="left" />
-        <colspec align="left" />
-        <thead>
-          <row>
-            <entry>
-              OCaml Value
-            </entry>
-            <entry>
-              Representation
-            </entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>
-              any <literal>int</literal> or <literal>char</literal>
-            </entry>
-            <entry>
-              directly as a value, shifted left by 1 bit, with the least
-              significant bit set to 1
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>unit</literal>, <literal>[]</literal>,
-              <literal>false</literal>
-            </entry>
-            <entry>
-              as OCaml <literal>int</literal> 0.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>true</literal>
-            </entry>
-            <entry>
-              as OCaml <literal>int</literal> 1.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>Foo | Bar</literal>
-            </entry>
-            <entry>
-              as ascending OCaml <literal>int</literal>s, starting from
-              0.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>Foo | Bar of int</literal>
-            </entry>
-            <entry>
-              variants with parameters are boxed, while entries with no
-              parameters are unboxed (see below).
-            </entry>
-          </row>
-          <row>
-            <entry>
-              polymorphic variants
-            </entry>
-            <entry>
-              TODO
-            </entry>
-          </row>
-          <row>
-            <entry>
-              string
-            </entry>
-            <entry>
-              word-aligned byte arrays with a clever representation to
-              make it efficient to get their length, and also directly
-              compatible with C strings.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>[1; 2; 3]</literal>
-            </entry>
-            <entry>
-              as <literal>1::2::3::[]</literal> where
-              <literal>[]</literal> is a value OCaml int 0, and
-              <literal>h::t</literal> is a block with tag 0 and two
-              parameters.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              tuples, records and arrays
-            </entry>
-            <entry>
-              as an array of values with tag <literal>0</literal>.
-              Arrays can be allocated with variable size, but structs
-              and tuples are fixed size.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              records or arrays, all float
-            </entry>
-            <entry>
-              The tag has the special value
-              <literal>Double_array_tag</literal> for the GC to detect
-              them. Note this exception does not apply to tuples that
-              contain floats.
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
+      <para>
+        The size field records the length of the block in memory words.
+        Note that it is limited to 22-bits on 32-bit platforms, which is
+        the reason why OCaml strings are limited to 16MB on that
+        architecture. If you need bigger strings, either switch to a
+        64-bit host, or use the <literal>Bigarray</literal> module
+        (<emphasis>avsm</emphasis>: xref). The 2-bit color field is used
+        by the garbage collector to keep track of its status, and is not
+        exposed directly to OCaml programs.
+      </para>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                Tag Color
+              </entry>
+              <entry>
+                Block Status
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                blue
+              </entry>
+              <entry>
+                on the free list and not currently in use
+              </entry>
+            </row>
+            <row>
+              <entry>
+                white
+              </entry>
+              <entry>
+                not reached yet, but possibly reachable
+              </entry>
+            </row>
+            <row>
+              <entry>
+                gray
+              </entry>
+              <entry>
+                reachable, but its fields have not been scanned
+              </entry>
+            </row>
+            <row>
+              <entry>
+                black
+              </entry>
+              <entry>
+                reachable, and its fields have been scanned
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <para>
+        A block's tag byte is multi-purpose, and indicates whether the
+        data array represents opaque bytes or fields. If a block's tag
+        is greater than or equal to <literal>No_scan_tag</literal>
+        (251), then the block's data are all opaque bytes, and are not
+        scanned by the collector. The most common such block is the
+        <literal>string</literal> type, which we describe more below.
+      </para>
+      <para>
+        (<emphasis>avsm</emphasis>: too much info here) If the header is
+        zero, then the object has been forwarded as part of minor
+        collection, and the first field points to the new location.
+        Also, if the block is on the
+        <literal>oldify_todo_list</literal>, part of the minor gc, then
+        the second field points to the next entry on the
+        oldify_todo_list.
+      </para>
+      <para>
+        The exact representation of values inside a block depends on
+        their OCaml type. They are summarised in the table below, and
+        then we'll examine some of them in greater detail.
+      </para>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                OCaml Value
+              </entry>
+              <entry>
+                Representation
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                any <literal>int</literal> or <literal>char</literal>
+              </entry>
+              <entry>
+                directly as a value, shifted left by 1 bit, with the
+                least significant bit set to 1
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>unit</literal>, <literal>[]</literal>,
+                <literal>false</literal>
+              </entry>
+              <entry>
+                as OCaml <literal>int</literal> 0.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>true</literal>
+              </entry>
+              <entry>
+                as OCaml <literal>int</literal> 1.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Foo | Bar</literal>
+              </entry>
+              <entry>
+                as ascending OCaml <literal>int</literal>s, starting
+                from 0.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Foo | Bar of int</literal>
+              </entry>
+              <entry>
+                variants with parameters are boxed, while entries with
+                no parameters are unboxed (see below).
+              </entry>
+            </row>
+            <row>
+              <entry>
+                polymorphic variants
+              </entry>
+              <entry>
+                variable space usage depending on the number of
+                parameters (see below).
+              </entry>
+            </row>
+            <row>
+              <entry>
+                floating point number
+              </entry>
+              <entry>
+                as a block with a single field containing the
+                double-precision float.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                string
+              </entry>
+              <entry>
+                word-aligned byte arrays that are also directly
+                compatible with C strings.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>[1; 2; 3]</literal>
+              </entry>
+              <entry>
+                as <literal>1::2::3::[]</literal> where
+                <literal>[]</literal> is an int, and
+                <literal>h::t</literal> a block with tag 0 and two
+                parameters.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                tuples, records and arrays
+              </entry>
+              <entry>
+                an array of values. Arrays can be variable size, but
+                structs and tuples are fixed size.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                records or arrays, all float
+              </entry>
+              <entry>
+                special tag for unboxed arrays of floats. Doesn't apply
+                to tuples.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <note>
+      <title>
+      Why do OCaml types disappear at runtime?
+      </title>
+      <para>
+        The OCaml compiler runs through several phases of during the
+        compilation process from source code to an executable binary.
+        After syntax checking, the next stage is <emphasis>type
+        checking</emphasis>. In a validly typed program, a function
+        cannot be applied with an unexpected type. For example, the
+        <literal>print_endline</literal> function must receive a single
+        <literal>string</literal> argument, and an
+        <literal>int</literal> will result in a type error.
+      </para>
+      <para>
+        Since OCaml verifies these properties at compile time, it
+        doesn't need to keep track of as much information at runtime.
+        Thus, later stages of the compiler can discard and simplify the
+        type declarations to a much more minimal subset that's actually
+        required to distinguish polymorphic values at runtime. This is a
+        major performance win versus something like a Java or .NET
+        method call, where the runtime must look up the concrete
+        instance of the object and dispatch the method call. Those
+        languages amortize some of the cost via &quot;Just-in-Time&quot;
+        dynamic patching, but OCaml prefers runtime simplicity instead.
+      </para>
+      </note>
+    </sect2>
     <sect2 id="integers-characters-and-other-basic-types">
       <title>Integers, characters and other basic types</title>
       <para>
         Many basic types are stored directly as unboxed values at
         runtime. The native <literal>int</literal> type is the most
-        obvious, although it drops a single bit of precision (see
-        below). Other atomic types such as the <literal>unit</literal>
-        and empty list <literal>[]</literal> value are stored as
-        constant integers. Boolean values have a value of
-        <literal>0</literal> and <literal>1</literal> for
+        obvious, although it drops a single bit of precision due to the
+        tag bit described earlier. Other atomic types such as the
+        <literal>unit</literal> and empty list <literal>[]</literal>
+        value are stored as constant integers. Boolean values have a
+        value of <literal>0</literal> and <literal>1</literal> for
         <literal>true</literal> and <literal>false</literal>
         respectively.
       </para>
@@ -10052,10 +10092,95 @@ end;;
         collection overhead on the overall program.
       </para>
       </note>
+      <para>
+        (<emphasis>avsm</emphasis>: explain that integer manipulation is
+        almost as fast due to isa quirks)
+      </para>
     </sect2>
     <sect2 id="tuples-records-and-arrays">
       <title>Tuples, records and arrays</title>
+      <programlisting>
++---------+----------+----------- - - - - 
+| header  | value[0] | value[1] | ....
++---------+----------+----------+- - - - -
+</programlisting>
       <para>
+        Tuples, records and arrays are all represented identically at
+        runtime, with a block with tag <literal>0</literal>. Tuples and
+        records have constant sizes determined at compile-time, whereas
+        arrays can be of variable length. The size field in the header
+        always reflects the correct size of the block in words.
+      </para>
+      <para>
+        You can check the difference between a block and a direct
+        integer yourself using the <literal>Obj</literal> module, which
+        exposes the internal representation of values to OCaml code.
+      </para>
+      <programlisting>
+# Obj.is_block (Obj.repr (1,2,3)) ;;
+- : bool = true
+# Obj.is_block (Obj.repr 1) ;;
+- : bool = false
+</programlisting>
+      <para>
+        The <literal>Obj.repr</literal> function retrieves the runtime
+        representation of any OCaml value.
+        <literal>Obj.is_block</literal> checks the bottom bit to
+        determine if the value is a block header or an unboxed integer.
+      </para>
+    </sect2>
+    <sect2 id="floating-point-numbers-and-arrays">
+      <title>Floating point numbers and arrays</title>
+      <para>
+        Floating point numbers in OCaml are always full
+        double-precision. Individual floating point values are stored as
+        a block with a single field that contains the number. This block
+        has the <literal>Double_tag</literal> set which signals to the
+        collector that the floating point value is not to be scanned.
+      </para>
+      <programlisting>
+# Obj.tag (Obj.repr 1.0) = Obj.double_tag ;;
+- : int = 253
+# Obj.double_tag ;;
+- : int = 253
+</programlisting>
+      <para>
+        Since each floating-point value is boxed in a separate memory
+        block, it can be inefficient to handle large arrays of floats in
+        comparison to unboxed integers. OCaml therefore special-cases
+        records or arrays that contain <emphasis>only</emphasis>
+        <literal>float</literal> types. These are stored in a block that
+        contains the floats as an array, with the
+        <literal>Double_array_tag</literal> to signal to the collector
+        that the contents are not OCaml values.
+      </para>
+      <programlisting>
++---------+----------+----------- - - - - 
+| header  | float[0] | float[1] | ....
++---------+----------+----------+- - - - -
+</programlisting>
+      <para>
+        You can test this for yourself using the
+        <literal>Obj.tag</literal> function to check that the allocated
+        block has the expected runtime tag, and
+        <literal>Obj.double_field</literal> to retrieve a float from
+        within the block.
+      </para>
+      <programlisting>
+# open Obj ;;
+# tag (repr [| 1.0; 2.0; 3.0 |]) ;;
+- : int = 254
+# tag (repr (1.0, 2.0, 3.0) ) ;;
+- : int = 0 
+# double_field (repr [| 1.1; 2.2; 3.3 |] ) 1 ;;
+- : float = 2.2
+# Obj.double_field (Obj.repr 1.234) 0;;
+- : float = 1.234
+</programlisting>
+      <para>
+        Notice that float tuples are <emphasis>not</emphasis> optimized
+        in the same way as float records or arrays, and so they have the
+        usual tuple tag value of <literal>0</literal>.
       </para>
     </sect2>
     <sect2 id="variants-and-lists">
@@ -10064,9 +10189,7 @@ end;;
         Basic variant types with no extra parameters for any of their
         branches are simply stored as an OCaml integer, starting with
         <literal>0</literal> for the first option and in ascending
-        order. You can check this for yourself using the
-        <literal>Obj</literal> module, which exposes the internal
-        representation of values to OCaml code.
+        order.
       </para>
       <programlisting>
 # open Obj ;;
@@ -10080,14 +10203,11 @@ type t = Apple | Orange | Pear
 - : bool = false
 </programlisting>
       <para>
-        The <literal>Obj.repr</literal> function retrieves the runtime
-        representation of any OCaml value. The
-        <literal>Obj.magic</literal> unsafely forces a type cast; in
-        this example the <literal>int</literal> type hint is sufficient
-        to retrieve the runtime integer value. Finally, the
-        <literal>Obj.is_block</literal> function confirms that the value
-        isn't a more complex block, but just an OCaml
-        <literal>int</literal>.
+        <literal>Obj.magic</literal> unsafely forces a type cast between
+        any two OCaml types; in this example the <literal>int</literal>
+        type hint retrieves the runtime integer value. The
+        <literal>Obj.is_block</literal> confirms that the value isn't a
+        more complex block, but just an OCaml <literal>int</literal>.
       </para>
       <para>
         Variants that have parameters arguments are a little more
