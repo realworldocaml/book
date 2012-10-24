@@ -10200,8 +10200,8 @@ type t = Apple | Orange of int | Pear of string | Kiwi
         of memory more than normal variant constructors.
       </para>
       <para>
-        An additional inefficiency is when multiple parameters are
-        specified for a constructor. Normal variants can hold these
+        Another inefficiency is when a polymorphic variant construct has
+        more than one parameter. Normal variants can hold these
         parameters as a single flat block with multiple fields for each
         entry. Polymorphic variants must adopt a more flexible uniform
         memory representation since they may be re-used in a different
