@@ -10474,6 +10474,143 @@ struct custom_operations {
       </para>
     </sect2>
   </sect1>
+  <sect1 id="interfacing-with-c">
+    <title>Interfacing with C</title>
+    <para>
+      Now that you understand the runtime structure of the garbage
+      collector, interfacing with C libraries is actually pretty simple.
+      OCaml defines an <literal>external</literal> keyword that maps
+      OCaml functions to a C symbol. That C function will be passed the
+      arguments with the C <literal>value</literal> type which
+      corresponds to the memory layout for OCaml values described
+      earlier.
+    </para>
+    <sect2 id="getting-started-with-a-hello-world-c-binding">
+      <title>Getting started with a &quot;Hello World&quot; C
+      binding</title>
+      <para>
+        Let's define a simple &quot;Hello World&quot; C binding to see
+        how this works. First create a <literal>hello.ml</literal> that
+        contains the external declaration:
+      </para>
+      <programlisting language="ocaml">
+external hello_world: unit -&gt; unit = &quot;caml_hello_world&quot;
+let _ = hello_world ()
+</programlisting>
+      <para>
+        If you try to compile this module now, you should receive a
+        linker error:
+      </para>
+      <programlisting>
+$ ocamlopt -o hello hello.ml
+Undefined symbols for architecture x86_64:
+  &quot;_caml_hello_world&quot;, referenced from:
+      .L100 in hello.o
+      _camlHello in hello.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+File &quot;caml_startup&quot;, line 1:
+Error: Error during linking
+</programlisting>
+      <para>
+        This is the system linker telling you that there is a missing
+        <literal>caml_hello_world</literal> symbol that must be provided
+        before a binary can be linked. Now create a file called
+        <literal>hello_stubs.c</literal> which contains the C function.
+      </para>
+      <programlisting language="c">
+#include &lt;stdio.h&gt;
+#include &lt;caml/mlvalues.h&gt;
+
+CAMLprim value
+caml_hello_world(value v_unit)
+{
+  printf(&quot;Hello OCaml World!\n&quot;);
+  return Val_unit;
+}
+</programlisting>
+      <para>
+        Now attempt to recompile the <literal>hello</literal> binary
+        with the C file also included in the compiler invocation, and it
+        should succeed:
+      </para>
+      <programlisting>
+$ ocamlopt -o hello hello.ml hello_stubs.c
+$ ./hello
+Hello OCaml World!
+</programlisting>
+      <para>
+        The compiler uses the file extensions to determine how to
+        compile each file. In the case of the <literal>.c</literal>
+        extension, it passes it to the system C compiler and appends an
+        include directory containing the OCaml runtime header files that
+        define conversion functions to-and-from OCaml values.
+      </para>
+      <para>
+        The <literal>mlvalues.h</literal> header is the basic header
+        that all C bindings need. Locate it in your system by using
+        <literal>ocamlc -where</literal> to find your system OCaml
+        installation. It defines a few important typedefs early on that
+        should be familiar after the earlier explanations:
+      </para>
+      <programlisting language="C">
+typedef intnat value;
+
+#define Is_long(x)   (((x) &amp; 1) != 0)
+#define Is_block(x)  (((x) &amp; 1) == 0)
+
+#define Val_unit Val_int(0)
+</programlisting>
+      <para>
+        The <literal>value</literal> typedef is a word that can either
+        be an integer if <literal>Is_long</literal> is true, or a heap
+        block if <literal>Is_block</literal> is true. Our C function
+        definition of <literal>caml_hello_world</literal> accepts a
+        single parameter, and returns a <literal>value</literal>. In our
+        simple example, all the types of parameters and returns are
+        <literal>unit</literal>, and so we use the
+        <literal>Val_unit</literal> macro to construct the return value.
+      </para>
+      <para>
+        You must be <emphasis>very</emphasis> careful that the value you
+        return from the C function corresponds exactly to the memory
+        representation of the types you declared earlier in the
+        <literal>external</literal> declaration of the ML file, or else
+        heap carnage and corruption will ensure.
+      </para>
+      <tip>
+      <title>
+      Activating the debug runtime
+      </title>
+      <para>
+        Despite your best efforts, it is easy to introduce a bug into C
+        bindings that cause heap invariants to be violated. OCaml
+        includes a variant of the runtime library that is compiled with
+        debugging symbols, and includes regular memory integrity checks
+        upon every garbage collection. Running these often will abort
+        the program near the point of corruption and helps track it down
+        quickly.
+      </para>
+      <para>
+        To use this, just recompile with
+        <literal>-runtime-variant d</literal> set:
+      </para>
+      <programlisting>
+$ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
+$ ./hello 
+### OCaml runtime: debug mode ###
+Initial minor heap size: 2048k bytes
+Initial major heap size: 992k bytes
+Initial space overhead: 80%
+Initial max overhead: 500%
+Initial heap increment: 992k bytes
+Initial allocation policy: 0
+Hello OCaml World!
+</programlisting>
+      </tip>
+
+    </sect2>
+  </sect1>
 </chapter>
 <chapter id="managing-external-memory-with-bigarrays">
   <title>Managing external memory with Bigarrays</title>
