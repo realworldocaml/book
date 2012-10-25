@@ -491,4 +491,116 @@ When a custom block is allocated, you can also specify the proportion of
 collector's decision as to how much work to do in the next major slice.
 (_avsm_: elaborate on this or move to the C interface section)
 
+## Interfacing with C
+
+Now that you understand the runtime structure of the garbage collector,
+interfacing with C libraries is actually pretty simple.  OCaml defines an
+`external` keyword that maps OCaml functions to a C symbol.  That C function
+will be passed the arguments with the C `value` type which corresponds
+to the memory layout for OCaml values described earlier.
+
+### Getting started with a "Hello World" C binding
+
+Let's define a simple "Hello World" C binding to see how this works.
+First create a `hello.ml` that contains the external declaration:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+external hello_world: unit -> unit = "caml_hello_world"
+let _ = hello_world ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you try to compile this module now, you should receive a linker error:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ ocamlopt -o hello hello.ml
+Undefined symbols for architecture x86_64:
+  "_caml_hello_world", referenced from:
+      .L100 in hello.o
+      _camlHello in hello.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+File "caml_startup", line 1:
+Error: Error during linking
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is the system linker telling you that there is a missing
+`caml_hello_world` symbol that must be provided before a binary can be linked.
+Now create a file called `hello_stubs.c` which contains the C function.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .c }
+#include <stdio.h>
+#include <caml/mlvalues.h>
+
+CAMLprim value
+caml_hello_world(value v_unit)
+{
+  printf("Hello OCaml World!\n");
+  return Val_unit;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now attempt to recompile the `hello` binary with the C file also included
+in the compiler invocation, and it should succeed:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ ocamlopt -o hello hello.ml hello_stubs.c
+$ ./hello
+Hello OCaml World!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The compiler uses the file extensions to determine how to compile each file.
+In the case of the `.c` extension, it passes it to the system C compiler and
+appends an include directory containing the OCaml runtime header files that
+define conversion functions to-and-from OCaml values.
+
+The `mlvalues.h` header is the basic header that all C bindings need. Locate it
+in your system by using `ocamlc -where` to find your system OCaml installation.
+It defines a few important typedefs early on that should be familiar after
+the earlier explanations:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .h }
+typedef intnat value;
+
+#define Is_long(x)   (((x) & 1) != 0)
+#define Is_block(x)  (((x) & 1) == 0)
+
+#define Val_unit Val_int(0)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `value` typedef is a word that can either be an integer if `Is_long` is
+true, or a heap block if `Is_block` is true.  Our C function definition of
+`caml_hello_world` accepts a single parameter, and returns a `value`.  In our
+simple example, all the types of parameters and returns are `unit`, and so we
+use the `Val_unit` macro to construct the return value.
+
+You must be *very* careful that the value you return from the C function
+corresponds exactly to the memory representation of the types you declared
+earlier in the `external` declaration of the ML file, or else heap carnage and
+corruption will ensure.
+
+<tip>
+<title>Activating the debug runtime</title>
+
+Despite your best efforts, it is easy to introduce a bug into C bindings that
+cause heap invariants to be violated.  OCaml includes a variant of the runtime
+library that is compiled with debugging symbols, and includes regular memory
+integrity checks upon every garbage collection.  Running these often will abort
+the program near the point of corruption and helps track it down quickly.
+
+To use this, just recompile with `-runtime-variant d` set:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
+$ ./hello 
+### OCaml runtime: debug mode ###
+Initial minor heap size: 2048k bytes
+Initial major heap size: 992k bytes
+Initial space overhead: 80%
+Initial max overhead: 500%
+Initial heap increment: 992k bytes
+Initial allocation policy: 0
+Hello OCaml World!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+</tip>
 
