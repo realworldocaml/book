@@ -56,11 +56,10 @@ record field using dot-notation.
 - : string = "i386"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Irrefutable patterns and exhaustiveness checks
+## Patterns and exhaustiveness
 
 Another way of getting information out of a record is by using a
-pattern match.  This example shows how you can pattern-match on a
-function argument.
+pattern match, as in the definition of `host_info_to_string` below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let host_info_to_string { hostname = h; os_name = os;
@@ -71,79 +70,73 @@ function argument.
 - : string = "Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We didn't need a full match statement because a single pattern can
-match all records of type `host_info`.  This works because record
-patterns (like tuple patterns) are _irrefutable_, meaning that a
-pattern is guaranteed to match any value of the type in question.
+Note that the pattern that we used had only a single case, rather than
+using several cases separated by `|`s.  We only needed a single
+pattern because record patterns are _irrefutable_, meaning that,
+because the layout of a record is always the same, a record pattern
+match will never fail at runtime.  This is different from, say, lists,
+where it's easy to write pattern matches that compile but fail at
+runtime.
 
-In other words, a pattern is irrefutable if any code that compiles
-will never have a runtime failure due to a failed match.  This is in
-contrast to, say, lists, where it's easy to write a pattern match that
-compiles but fails at runtime.  For example:
+Another important characteristic of record patterns is that they don't
+need to be complete; a pattern can mention only a subset of the fields
+in the record.  This can be convenient, but it's can also be error
+prone.  In particular, this means that when new fields are added to
+the record, code that should be updated to react to the presence of
+those new fields will not be flagged by the compiler.
+
+As an example, imagine that we wanted to add a new field to our
+`host_info` record called `os_version`, as shown below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let first_plus_second (x :: y :: _) = x + y;;
-Characters 22-43:
-  let first_plus_second (x :: y :: _) = x + y;;
-                        ^^^^^^^^^^^^^^^^^^^^^
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-[]
-val first_plus_second : int list -> int = <fun>
-# first_plus_second [5;3;6];;
-- : int = 8
-# first_plus_second [5];;
-Exception: (Match_failure "" 1 22).
+# type host_info =
+    { hostname   : string;
+      os_name    : string;
+      os_release : string;
+      cpu_arch   : string;
+      os_version : string;
+    };;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Because variant patterns (of which list patterns are an example) are
-not irrefutable, the compiler provides a static check to warn you when
-your match is inexhaustive.  We can fix the code above by adding the
-other cases:
+The code for `host_info_to_string` would continue to compile without
+change.  In this particular case, it's pretty clear that you might
+want to update `host_info_to_string` in order to take into account the
+new field, and it would be nice if the type system would give you a
+warning about the change.
+
+Happily, OCaml does offer an optional warning for missing fields in a
+record pattern.  With that warning turned on (which you can do in the
+toplevel by typing `#warnings "+9" `), the compiler will warn about
+the missing field.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let first_plus_second = function
-    | x :: y :: _ -> x + y
-    | x :: [] -> x
-    | [] -> 0
-  ;;
-val first_plus_second : int list -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This kind of exhaustiveness check isn't meaningful for record
-patterns, but there is a different kind of exhaustiveness check that
-is useful.  In particular, OCaml offers a warning for missing fields
-in a record pattern.  With that warning turned on (which you can do in
-the toplevel by typing `#warnings "+9" `), the following code will
-complain about.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let host_info_to_string
-      { hostname = h; os_name = os; os_release = r } =
-    sprintf "%s (%s %s)" h os r;;
-    Characters 30-76:
-        { hostname = h; os_name = os; os_release = r } =
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# warnings "+9";;
+# let host_info_to_string { hostname = h; os_name = os;
+                            os_release = r; cpu_arch = c } =
+       sprintf "%s (%s %s / %s)" h os r c;;
+    Characters 24-112:
+  ........................{ hostname = h; os_name = os;
+                              os_release = r; cpu_arch = c }..
 Warning 9: the following labels are not bound in this record pattern:
-cpu_arch
-Either bind these labels explicitly or add `; _' to the pattern.
+os_version
+Either bind these labels explicitly or add '; _' to the pattern.
 val host_info_to_string : host_info -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Unlike the exhaustiveness warning for variants, ignoring this warning
-won't lead to a runtime error.  The warning is nonetheless useful,
-because it helps you find cases where important data is being ignored.
 
 We can disable the warning for a given pattern by explicitly
 acknowledging that we are ignoring extra fields.  This is done by
 adding an underscore to the pattern, as shown below.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let host_info_to_string
-      { hostname = h; os_name = os; os_release = r; _ } =
-    sprintf "%s (%s %s)" h os r;;
+# let host_info_to_string { hostname = h; os_name = os;
+                            os_release = r; cpu_arch = c; _ } =
+       sprintf "%s (%s %s / %s)" h os r c;;
     val host_info_to_string : host_info -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Generally, the right default is to turn the warning for incomplete
+record matches on, and to explicitly disable it with an `_` where
+necessary.
 
 ## Field punning
 
@@ -434,10 +427,10 @@ follows.
 
 ## Mutable fields
 
-By default, records, like most OCaml values, are immutable.  That
-said, it is possible to declare a record field as mutable.  For
-example, we could take the `client_info` type and make the fields that
-may need to change over time mutable, as follows.
+Like most OCaml values, records are immutable by default.  You can,
+however, declare individual record fields as mutable.  For example, we
+could take the `client_info` type and make the fields that may need to
+change over time mutable, as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type client_info =
