@@ -412,3 +412,9 @@ completes without overflowing the gray list.
 
 (_avsm_: I need to clarify this more, possibly a diagram too. It's not really
 clear what the implications of an impure heap are atm)
+
+### Sweeping unused blocks from the major heap
+
+### Compaction and defragmenting the major heap
+
+Test math $test = \frac{allocated}{heap size * percent overhead}$
