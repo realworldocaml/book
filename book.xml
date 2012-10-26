@@ -3447,7 +3447,9 @@ Hello Blue World!
         </listitem>
         <listitem>
           <para>
-            A 6 × 6 × 6 RGB color cube
+            A
+            <inlineequation><mml:math><mml:mrow><mml:mn>6</mml:mn><mml:mo>×</mml:mo><mml:mn>6</mml:mn><mml:mo>×</mml:mo><mml:mn>6</mml:mn></mml:mrow></mml:math></inlineequation>
+            RGB color cube
           </para>
         </listitem>
         <listitem>
@@ -11498,7 +11500,7 @@ immutable: 2.6186s (19073 minor collections)
       <title>Compaction and defragmenting the major heap</title>
       <para>
         Test math
-        $test = \frac{allocated}{heap size * percent overhead}$
+        <inlineequation><mml:math><mml:mrow><mml:mi>t</mml:mi><mml:mi>e</mml:mi><mml:mi>s</mml:mi><mml:mi>t</mml:mi><mml:mo>=</mml:mo><mml:mfrac><mml:mrow><mml:mi>a</mml:mi><mml:mi>l</mml:mi><mml:mi>l</mml:mi><mml:mi>o</mml:mi><mml:mi>c</mml:mi><mml:mi>a</mml:mi><mml:mi>t</mml:mi><mml:mi>e</mml:mi><mml:mi>d</mml:mi></mml:mrow><mml:mrow><mml:mi>h</mml:mi><mml:mi>e</mml:mi><mml:mi>a</mml:mi><mml:mi>p</mml:mi><mml:mi>s</mml:mi><mml:mi>i</mml:mi><mml:mi>z</mml:mi><mml:mi>e</mml:mi><mml:mo>*</mml:mo><mml:mi>p</mml:mi><mml:mi>e</mml:mi><mml:mi>r</mml:mi><mml:mi>c</mml:mi><mml:mi>e</mml:mi><mml:mi>n</mml:mi><mml:mi>t</mml:mi><mml:mi>o</mml:mi><mml:mi>v</mml:mi><mml:mi>e</mml:mi><mml:mi>r</mml:mi><mml:mi>h</mml:mi><mml:mi>e</mml:mi><mml:mi>a</mml:mi><mml:mi>d</mml:mi></mml:mrow></mml:mfrac></mml:mrow></mml:math></inlineequation>
       </para>
     </sect2>
   </sect1>
