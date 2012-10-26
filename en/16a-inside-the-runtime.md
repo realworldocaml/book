@@ -295,20 +295,77 @@ example. Investigate the options and edit this section)
 (_avsm_: need to mention when a value is allocated directly into the major heap
 somewhere)
 
-## Byte code Profiling
+## How garbage collection works
 
-ocamlcp and call trace information
+### Collecting the minor heap
 
-## Native Code Profiling
+For those familiar with garbage collection terminology, here is OCaml's minor
+colection in one sentence. OCaml's minor collection uses copying collection
+with forwarding pointers, and does a depth-first traversal of the block graph
+using a stack represented as a linked list threaded through blocks that need to
+be scanned.
 
-### gdb
+The goal of minor collection is to empty the minor heap by moving to the major
+heap every block in the minor heap that might be used in the future, and
+updating each pointer to a moved block to the new version of the block.  A
+block is *live* if is reachable by starting at some *root* pointer into a block
+in the minor heap,a nd then following pointers in blocks.  There are many
+different kinds of roots:
 
-requires shinwell's patch in ocaml trunk via opam
+* OCaml stack(s)
+* C stack(s), identified by `BeginRoots` or `CAMLparam` in C code (_avsm_: xref C bindings chapter)
+* Global roots
+* Finalized values (_avsm_: ?)
+* Intergenerational pointers in the `caml_ref_table` (_avsm_: xref above?)
 
-### perf
+Moving a block between heaps is traditionally called *forwarding*. The OCaml
+runtime code uses that term as well as the term *oldify*, which is useful to
+understand when profiling hotspots in your code.  The minor collector first
+visits all roots and forwards them if they point to a block in the minor heap.
+When a block is forwarded, the collector sets the tag of the original block to
+a special `Forward_tag` (250), and the first field of the original block to
+point to the new block.  Then, if the collector ever encounters a pointer to
+the original block again, it can simply update the pointer directly into the
+forwarded block.
 
-requires fabrice's frame pointer patch
+Because a forwarded block might itself contain pointers, it must at some point
+be scanned to see if those pointers point to blocks in the minor heap, so that
+those blocks can also be forwarded.  The collector maintains a linked list
+(called the `oldify_todo_list`) of forwarded objects that it still needs to
+scan.  That linked list looks like:
 
-### dtrace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                oldify_todo_list
+                   |
+                   |
+                   v
+   minor heap  | 0 | v | f1 ... |      | 0 | v | f1 ... |
+                     |                     ^ |
+                     |      +--------------+ |      ---------- ...
+                     v      |                v      |
+   major heap    | h | f0 | ^ | ... |    | h | f0 | ^
 
-requires my dtrace/instruments patch for libasmrun
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each value on the `oldify_todo_list` is marked as forwarded, and the
+first word points to the new block in the major heap.
+That new version contains the actual value header, the real first field of the value, and a link
+(pointer) to the next value on the oldify_todo_list, or ~NULL~ at the end of the list.
+Clearly this approach won't work if an value has only one field, since there will be no
+second field to store the link in. Values with exactly one field are never put on
+the `oldify_todo_list`; instead, the collector immediately traverses them, essentially
+making a tail call in the depth-first search.
+
+Values that are known from the tag in their header to not contain pointers are simply
+forwarded and completely copied, and never placed on the `oldify_todo_list`. These
+tags are all greater than `No_scan_tag` and include strings and float arrays.
+
+(_avsm_: note from sweeks to investigate: There is a hack for objects whose tag
+is `Forward_tag` that does some kind of path compression, or at least removal
+of one link, but I'm not sure what's going on.)
+
+(_avsm_: I dont think we've introduced weak references yet, so this needs rearranging)
+At the end of the depth-first search in minor collection, the collector scans the `weak-ref`
+table, and clears any weak references that are still pointing into the minor heap.  The
+collector then empties the `weak-ref` table and the minor heap.
+
