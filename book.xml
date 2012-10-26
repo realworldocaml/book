@@ -10751,119 +10751,119 @@ enum caml_ba_managed {
 </programlisting>
   </sect1>
 </chapter>
-<chapter id="tuning-and-profiling">
-  <title>Tuning and Profiling</title>
-  <sect1 id="tuning-the-garbage-collector">
-    <title>Tuning the Garbage Collector</title>
-    <sect2 id="how-the-runtime-tracks-memory-usage">
-      <title>How the runtime tracks memory usage</title>
-      <para>
-        The OCaml runtime divides the address space into memory pages of
-        4KB each (this is configurable by recompiling the runtime). At
-        any given time, every page that is in use is used for a single
-        purpose: major heap, minor heap, static data or code. The
-        runtime guarantees this by always allocating slightly more
-        memory than requested so that that it can choose align the
-        memory it will actually use at the beginning of a 4KB page.
-      </para>
-      <para>
-        The runtime maintains a <emphasis>page table</emphasis> that
-        allows it to determine the status of any virtual memory address
-        in the operating system process. The status defines whether that
-        address is a page in use by the OCaml runtime, and if so, which
-        of the four purposes it is being used for.
-      </para>
-      <para>
-        Since the virtual memory space can be very large and sparsely
-        used (especially on a 64-bit CPU), the page table is implemented
-        as a hash table in which keys are page-aligned addresses and
-        values are a single byte. The hash table is represented as an
-        array of words, with each word being a key-value pair. The
-        key-value pair is the bitwise <literal>or</literal> of the
-        virtual address of the start of the page (which has zeros for
-        its lower 12-bits due to being aligned to 4KB), and the lower 8
-        bits are used for the value. To look up an address, one masks
-        out the lower 12-bits of the memory address, compute a
-        multiplicative hash to get a table index, and then compares
-        against the address (i.e. the key) at that index. Linear probing
-        is used to resolve collisions.
-      </para>
-      <para>
-        The byte value stored is a bitwise <literal>or</literal> of the
-        following status bits:
-      </para>
-      <informaltable>
-        <tgroup cols="3">
-          <colspec align="left" />
-          <colspec align="left" />
-          <colspec align="left" />
-          <thead>
-            <row>
-              <entry>
-                Page table status
-              </entry>
-              <entry>
-                Value
-              </entry>
-              <entry>
-                Meaning
-              </entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>
-                <literal>In_heap</literal>
-              </entry>
-              <entry>
-                1
-              </entry>
-              <entry>
-                in the major heap
-              </entry>
-            </row>
-            <row>
-              <entry>
-                <literal>In_young</literal>
-              </entry>
-              <entry>
-                2
-              </entry>
-              <entry>
-                in the minor heap
-              </entry>
-            </row>
-            <row>
-              <entry>
-                <literal>In_static_data</literal>
-              </entry>
-              <entry>
-                4
-              </entry>
-              <entry>
-                in the statically allocated data segment
-              </entry>
-            </row>
-            <row>
-              <entry>
-                <literal>In_code_area</literal>
-              </entry>
-              <entry>
-                8
-              </entry>
-              <entry>
-                in the statically allocated code segment
-              </entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-      <para>
-        The page table starts with a size aiming to be between 25% and
-        50% full of entries, and is automatically doubled in size if it
-        becomes half full. It is never shrunk.
-      </para>
-    </sect2>
+<chapter id="inside-the-runtime">
+  <title>Inside the Runtime</title>
+  <para>
+    (<emphasis>avsm</emphasis>: this chapter is still being chopped and
+    changed)
+  </para>
+  <sect1 id="runtime-memory-management">
+    <title>Runtime Memory Management</title>
+    <para>
+      The OCaml runtime divides the address space into memory pages of
+      4KB each (this is configurable by recompiling the runtime). At any
+      given time, every page that is in use is used for a single
+      purpose: major heap, minor heap, static data or code. The runtime
+      guarantees this by always allocating slightly more memory than
+      requested so that that it can choose align the memory it will
+      actually use at the beginning of a 4KB page.
+    </para>
+    <para>
+      The runtime maintains a <emphasis>page table</emphasis> that
+      allows it to determine the status of any virtual memory address in
+      the operating system process. The status defines whether that
+      address is a page in use by the OCaml runtime, and if so, which of
+      the four purposes it is being used for.
+    </para>
+    <para>
+      Since the virtual memory space can be very large and sparsely used
+      (especially on a 64-bit CPU), the page table is implemented as a
+      hash table in which keys are page-aligned addresses and values are
+      a single byte. The hash table is represented as an array of words,
+      with each word being a key-value pair. The key-value pair is the
+      bitwise <literal>or</literal> of the virtual address of the start
+      of the page (which has zeros for its lower 12-bits due to being
+      aligned to 4KB), and the lower 8 bits are used for the value. To
+      look up an address, one masks out the lower 12-bits of the memory
+      address, compute a multiplicative hash to get a table index, and
+      then compares against the address (i.e. the key) at that index.
+      Linear probing is used to resolve collisions.
+    </para>
+    <para>
+      The byte value stored is a bitwise <literal>or</literal> of the
+      following status bits:
+    </para>
+    <informaltable>
+      <tgroup cols="3">
+        <colspec align="left" />
+        <colspec align="left" />
+        <colspec align="left" />
+        <thead>
+          <row>
+            <entry>
+              Page table status
+            </entry>
+            <entry>
+              Value
+            </entry>
+            <entry>
+              Meaning
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              <literal>In_heap</literal>
+            </entry>
+            <entry>
+              1
+            </entry>
+            <entry>
+              in the major heap
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>In_young</literal>
+            </entry>
+            <entry>
+              2
+            </entry>
+            <entry>
+              in the minor heap
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>In_static_data</literal>
+            </entry>
+            <entry>
+              4
+            </entry>
+            <entry>
+              in the statically allocated data segment
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>In_code_area</literal>
+            </entry>
+            <entry>
+              8
+            </entry>
+            <entry>
+              in the statically allocated code segment
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      The page table starts with a size aiming to be between 25% and 50%
+      full of entries, and is automatically doubled in size if it
+      becomes half full. It is never shrunk.
+    </para>
     <sect2 id="allocating-on-the-minor-heap">
       <title>Allocating on the minor heap</title>
       <para>
@@ -10909,8 +10909,8 @@ enum caml_ba_managed {
         <literal>Gc.??</literal>).
       </para>
     </sect2>
-    <sect2 id="managing-the-major-heap">
-      <title>Managing the major heap</title>
+    <sect2 id="allocating-on-the-major-heap">
+      <title>Allocating on the major heap</title>
       <para>
         The major heap is a singly linked list of contiguous memory
         chunks, sorted in increasing order of virtual address. Each
@@ -10966,56 +10966,53 @@ enum caml_ba_managed {
         and the free list is checked again (and this time will
         definitely succeed).
       </para>
-      <sect3 id="the-major-heap-free-list">
-        <title>The major heap free list</title>
-        <para>
-          The free space in the major heap's chunks is organized as a
-          singly linked list of OCaml blocks, ordered by increasing
-          virtual address. The runtime has a pointer to the first block
-          in the free list. A free list block is at least two words: a
-          header followed by a pointer to the next free-list block. The
-          header specifies the length of the block just as with a normal
-          block. (<emphasis>avsm</emphasis>: I'm not sure that this is
-          quite true. It seems from <literal>freelist.c</literal> that
-          the freelist blocks are normal OCaml blocks, with the first
-          data entry being the next pointer. when detached, they become
-          normal ocaml blocks)
-        </para>
-        <para>
-          As soon as the runtime finds a free block that is larger than
-          the request, there are three possibilities:
-        </para>
-        <itemizedlist>
-          <listitem>
-            <para>
-              If the free block is exactly the right size, it is
-              unlinked from the free list and returned as the requested
-              block.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              If the free block is one word too large, it is unlinked
-              from the free list, and the first word is given a special
-              header recognizable to the collector as an unused word,
-              while the rest of the block is returned as the requested
-              block.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              If the free block is two or more words larger than the
-              requested block, it remains in the free list, with its
-              length shortened, and the end of the free block is
-              returned for the requested block. Since the allocated
-              block is right-justified within the free block, the
-              linking of the free list doesn't need to be changed at all
-              as the block that remains in the free list is the original
-              one.
-            </para>
-          </listitem>
-        </itemizedlist>
-      </sect3>
+    </sect2>
+    <sect2 id="the-major-heap-free-list">
+      <title>The major heap free list</title>
+      <para>
+        The free space in the major heap's chunks is organized as a
+        singly linked list of OCaml blocks, ordered by increasing
+        virtual address. The runtime has a pointer to the first block in
+        the free list. A free list block is at least two words: a header
+        followed by a pointer to the next free-list block. The header
+        specifies the length of the block just as with a normal block.
+        (<emphasis>avsm</emphasis>: I'm not sure that this is quite
+        true. It seems from <literal>freelist.c</literal> that the
+        freelist blocks are normal OCaml blocks, with the first data
+        entry being the next pointer. when detached, they become normal
+        ocaml blocks)
+      </para>
+      <para>
+        As soon as the runtime finds a free block that is larger than
+        the request, there are three possibilities:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            If the free block is exactly the right size, it is unlinked
+            from the free list and returned as the requested block.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            If the free block is one word too large, it is unlinked from
+            the free list, and the first word is given a special header
+            recognizable to the collector as an unused word, while the
+            rest of the block is returned as the requested block.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            If the free block is two or more words larger than the
+            requested block, it remains in the free list, with its
+            length shortened, and the end of the free block is returned
+            for the requested block. Since the allocated block is
+            right-justified within the free block, the linking of the
+            free list doesn't need to be changed at all as the block
+            that remains in the free list is the original one.
+          </para>
+        </listitem>
+      </itemizedlist>
     </sect2>
     <sect2 id="memory-allocation-strategies">
       <title>Memory allocation strategies</title>
@@ -11273,6 +11270,241 @@ immutable: 2.6186s (19073 minor collections)
       </sect3>
     </sect2>
   </sect1>
+  <sect1 id="how-garbage-collection-works">
+    <title>How garbage collection works</title>
+    <sect2 id="collecting-the-minor-heap">
+      <title>Collecting the minor heap</title>
+      <para>
+        For those familiar with garbage collection terminology, here is
+        OCaml's minor colection in one sentence. OCaml's minor
+        collection uses copying collection with forwarding pointers, and
+        does a depth-first traversal of the block graph using a stack
+        represented as a linked list threaded through blocks that need
+        to be scanned.
+      </para>
+      <para>
+        The goal of minor collection is to empty the minor heap by
+        moving to the major heap every block in the minor heap that
+        might be used in the future, and updating each pointer to a
+        moved block to the new version of the block. A block is
+        <emphasis>live</emphasis> if is reachable by starting at some
+        <emphasis>root</emphasis> pointer into a block in the minor
+        heap,a nd then following pointers in blocks. There are many
+        different kinds of roots:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            OCaml stack(s)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            C stack(s), identified by <literal>BeginRoots</literal> or
+            <literal>CAMLparam</literal> in C code
+            (<emphasis>avsm</emphasis>: xref C bindings chapter)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Global roots
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Finalized values (<emphasis>avsm</emphasis>: ?)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Intergenerational pointers in the
+            <literal>caml_ref_table</literal>
+            (<emphasis>avsm</emphasis>: xref above?)
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Moving a block between heaps is traditionally called
+        <emphasis>forwarding</emphasis>. The OCaml runtime code uses
+        that term as well as the term <emphasis>oldify</emphasis>, which
+        is useful to understand when profiling hotspots in your code.
+        The minor collector first visits all roots and forwards them if
+        they point to a block in the minor heap. When a block is
+        forwarded, the collector sets the tag of the original block to a
+        special <literal>Forward_tag</literal> (250), and the first
+        field of the original block to point to the new block. Then, if
+        the collector ever encounters a pointer to the original block
+        again, it can simply update the pointer directly into the
+        forwarded block.
+      </para>
+      <para>
+        Because a forwarded block might itself contain pointers, it must
+        at some point be scanned to see if those pointers point to
+        blocks in the minor heap, so that those blocks can also be
+        forwarded. The collector maintains a linked list (called the
+        <literal>oldify_todo_list</literal>) of forwarded objects that
+        it still needs to scan. That linked list looks like:
+      </para>
+      <programlisting>
+                oldify_todo_list
+                   |
+                   |
+                   v
+   minor heap  | 0 | v | f1 ... |      | 0 | v | f1 ... |
+                     |                     ^ |
+                     |      +--------------+ |      ---------- ...
+                     v      |                v      |
+   major heap    | h | f0 | ^ | ... |    | h | f0 | ^
+</programlisting>
+      <para>
+        Each value on the <literal>oldify_todo_list</literal> is marked
+        as forwarded, and the first word points to the new block in the
+        major heap. That new version contains the actual value header,
+        the real first field of the value, and a link (pointer) to the
+        next value on the oldify_todo_list, or
+        <subscript>NULL</subscript> at the end of the list. Clearly this
+        approach won't work if an value has only one field, since there
+        will be no second field to store the link in. Values with
+        exactly one field are never put on the
+        <literal>oldify_todo_list</literal>; instead, the collector
+        immediately traverses them, essentially making a tail call in
+        the depth-first search.
+      </para>
+      <para>
+        Values that are known from the tag in their header to not
+        contain pointers are simply forwarded and completely copied, and
+        never placed on the <literal>oldify_todo_list</literal>. These
+        tags are all greater than <literal>No_scan_tag</literal> and
+        include strings and float arrays.
+      </para>
+      <para>
+        (<emphasis>avsm</emphasis>: note from sweeks to investigate:
+        There is a hack for objects whose tag is
+        <literal>Forward_tag</literal> that does some kind of path
+        compression, or at least removal of one link, but I'm not sure
+        what's going on.)
+      </para>
+      <para>
+        (<emphasis>avsm</emphasis>: I dont think we've introduced weak
+        references yet, so this needs rearranging) At the end of the
+        depth-first search in minor collection, the collector scans the
+        <literal>weak-ref</literal> table, and clears any weak
+        references that are still pointing into the minor heap. The
+        collector then empties the <literal>weak-ref</literal> table and
+        the minor heap.
+      </para>
+    </sect2>
+    <sect2 id="collecting-the-major-heap">
+      <title>Collecting the major heap</title>
+      <para>
+        The major heap collections operates incrementally, as the amount
+        of memory being tracked is a lot larger than the minor heap. The
+        major collector can be in any of a number of phases:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>Phase_idle</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>Phase_mark</literal>
+          </para>
+          <itemizedlist>
+            <listitem>
+              <para>
+                <literal>Subphase_main</literal>: main marking phase
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>Subphase_weak1</literal>: clear weak pointers
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>Subphase_weak2</literal>: remove dead weak
+                arrays, observe finalized values
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>Subphase_final</literal>: initialise for the
+                sweep phase
+              </para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>Phase_sweep</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    <sect2 id="marking-the-major-heap">
+      <title>Marking the major heap</title>
+      <para>
+        Marking maintains an array of gray blocks,
+        <literal>gray_vals</literal>. It uses as them as a stack,
+        pushing on a white block that is then colored gray, and popping
+        off a gray block when it is scanned and colored black. The
+        <literal>gray_vals</literal> array is allocated via
+        <emphasis>malloc(3)</emphasis>, and there is a pointer,
+        <literal>gray_vals_cur</literal>, to the next open spot in the
+        array.
+      </para>
+      <para>
+        The <literal>gray_vals</literal> array initially has 2048
+        elements. <literal>gray_vals_cur</literal> starts at
+        <literal>gray_vals</literal>, and increases until it reachs
+        <literal>gray_vals_end</literal>, at which point the
+        <literal>gray_vals</literal> array is doubled, as long as its
+        size (in bytes) is less than 1/2^10th of the heap size
+        (<literal>caml_stat_heap_size</literal>). When the gray vals is
+        of its maximum allowed size, it isn't grown any further, and the
+        heap is marked as impure (<literal>heap_is_pure=0</literal>),
+        and last half of <literal>gray_vals</literal> is ignored (by
+        setting <literal>gray_vals_cur</literal> back to the middle of
+        the <literal>gray_vals</literal> array.
+      </para>
+      <para>
+        If the marking is able to complete using just the gray list, it
+        will. Otherwise, once the gray list is emptied, the mark phase
+        will observe that the heap is impure and initiate a backup
+        approach to marking. In this approach it marks the heap as pure
+        and then walks through the entire heap block by block, in
+        increasing order of memory address. If it finds a gray block, it
+        adds it to the gray list and does a DFS marking using the gray
+        list as a stack in the usual way. Once the scan of the complete
+        heap is finished, the mark phase checks again whether the heap
+        has again become impure, and if so initiates another scan. These
+        full-heap scans will continue until a successful scan completes
+        without overflowing the gray list.
+      </para>
+      <para>
+        (<emphasis>avsm</emphasis>: I need to clarify this more,
+        possibly a diagram too. It's not really clear what the
+        implications of an impure heap are atm)
+      </para>
+    </sect2>
+    <sect2 id="sweeping-unused-blocks-from-the-major-heap">
+      <title>Sweeping unused blocks from the major heap</title>
+      <para>
+      </para>
+    </sect2>
+    <sect2 id="compaction-and-defragmenting-the-major-heap">
+      <title>Compaction and defragmenting the major heap</title>
+      <para>
+        Test math
+        $test = \frac{allocated}{heap size * percent overhead}$
+      </para>
+    </sect2>
+  </sect1>
+</chapter>
+<chapter id="performance-tuning-and-profiling">
+  <title>Performance Tuning and Profiling</title>
   <sect1 id="byte-code-profiling">
     <title>Byte code Profiling</title>
     <para>
