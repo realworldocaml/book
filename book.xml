@@ -10693,13 +10693,241 @@ enum caml_ba_managed {
 </chapter>
 <chapter id="tuning-and-profiling">
   <title>Tuning and Profiling</title>
-  <para>
-    (<emphasis>avsm</emphasis>: all notes and outline so far)
-  </para>
   <sect1 id="tuning-the-garbage-collector">
     <title>Tuning the Garbage Collector</title>
-    <para>
-    </para>
+    <sect2 id="how-the-runtime-tracks-memory-usage">
+      <title>How the runtime tracks memory usage</title>
+      <para>
+        The OCaml runtime divides the address space into memory pages of
+        4KB each (this is configurable by recompiling the runtime). At
+        any given time, every page that is in use is used for a single
+        purpose: major heap, minor heap, static data or code. The
+        runtime guarantees this by always allocating slightly more
+        memory than requested so that that it can choose align the
+        memory it will actually use at the beginning of a 4KB page.
+      </para>
+      <para>
+        The runtime maintains a <emphasis>page table</emphasis> that
+        allows it to determine the status of any virtual memory address
+        in the operating system process. The status defines whether that
+        address is a page in use by the OCaml runtime, and if so, which
+        of the four purposes it is being used for.
+      </para>
+      <para>
+        Since the virtual memory space can be very large and sparsely
+        used (especially on a 64-bit CPU), the page table is implemented
+        as a hash table in which keys are page-aligned addresses and
+        values are a single byte. The hash table is represented as an
+        array of words, with each word being a key-value pair. The
+        key-value pair is the bitwise <literal>or</literal> of the
+        virtual address of the start of the page (which has zeros for
+        its lower 12-bits due to being aligned to 4KB), and the lower 8
+        bits are used for the value. To look up an address, one masks
+        out the lower 12-bits of the memory address, compute a
+        multiplicative hash to get a table index, and then compares
+        against the address (i.e. the key) at that index. Linear probing
+        is used to resolve collisions.
+      </para>
+      <para>
+        The byte value stored is a bitwise <literal>or</literal> of the
+        following status bits:
+      </para>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
+          <colspec align="left" />
+          <thead>
+            <row>
+              <entry>
+                Page table status
+              </entry>
+              <entry>
+                Value
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                <literal>In_heap</literal>
+              </entry>
+              <entry>
+                1
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>In_young</literal>
+              </entry>
+              <entry>
+                2
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>In_static_data</literal>
+              </entry>
+              <entry>
+                4
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>In_code_area</literal>
+              </entry>
+              <entry>
+                8
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <para>
+        The page table starts with a size aiming to be between 25% and
+        50% full of entries, and is automatically doubled in size if it
+        becomes half full. It is never shrunk.
+      </para>
+    </sect2>
+    <sect2 id="allocating-on-the-minor-heap">
+      <title>Allocating on the minor heap</title>
+      <para>
+        The minor heap is a contiguous chunk of virtual memory. Its size
+        is set on program startup and decided by the
+        <literal>OCAMLRUNPARAM</literal> environment variable
+        (<emphasis>avsm</emphasis>: xref), and then only changed later
+        by calls to <literal>Gc.set</literal>. The default size is 256k.
+      </para>
+      <para>
+        The range of memory usable for allocation goes from the
+        <literal>caml_young_start</literal> to
+        <literal>caml_young_end</literal> C variables managed by the
+        runtime.
+      </para>
+      <programlisting>
+                &lt;---- size ----&gt;
+ base --- start ---------------- end
+          limit      ptr &lt;------
+                          blocks
+</programlisting>
+      <para>
+        In a fresh minor heap, the <literal>limit</literal> will equal
+        the <literal>start</literal>, and the current
+        <literal>ptr</literal> will equal the <literal>end</literal>. As
+        blocks are allocated, <literal>caml_young_ptr</literal> will
+        decrease until it reaches <literal>caml_young_limit</literal>,
+        at which point a minor garbage collection is triggered. To
+        allocate a block in the minor heap, we decrement
+        <literal>caml_young_ptr</literal> by the size of the block
+        (including the header), and then set the the header to a valid
+        value. If there isn't enough space left for the block without
+        decrementing past the <literal>limit</literal>, a minor
+        collection is triggered.
+      </para>
+      <para>
+        To force a minor gc to occur, one can set the
+        <literal>caml_young_limit</literal> to equal
+        <literal>caml_young_end</literal>, which causes signal handlers
+        to be run and to &quot;urge&quot; the runtime
+        (<emphasis>avsm</emphasis>: elaborate on this urging business,
+        and how to set young from within OCaml via
+        <literal>Gc.??</literal>).
+      </para>
+    </sect2>
+    <sect2 id="managing-the-major-heap">
+      <title>Managing the major heap</title>
+      <para>
+        The major heap is a singly linked list of contiguous memory
+        chunks, sorted in increasing order of virtual address. Each
+        chunk is a single memory chunk allocated via
+        <emphasis>malloc(3)</emphasis> and consists of a header and a
+        data area which contains OCaml blocks. A pointer to a heap chunk
+        points to the start of the data area, and access to the header
+        is done by a negative offset from this pointer. A chunk header
+        has:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            the address of the memory that the chunk is in, as allocated
+            by <emphasis>malloc(3)</emphasis>. It is needed when the
+            chunk is freed.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            the size in bytes of the data area
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            an allocation size in bytes, used during heap compaction to
+            merge small blocks to defragment the heap.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            a link to the next heap chunk in the list.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        The chunk's data area always starts on a page boundary, and its
+        size is a multiple of the page size (4KB). It contains a
+        contiguous sequence of heap blocks. These can be as small as one
+        or two 4KB pages, but are usually allocated in 1MB chunks (or
+        512KB on 32-bit architectures). You can modify these defaults by
+        editing <literal>Heap_chunk_def</literal> in
+        <literal>byterun/config.h</literal> and recompiling the runtime.
+        (<emphasis>avsm</emphasis>: talk about modifying the defaults in
+        a separate callout, as there are quite a few variables which can
+        be tweaked)
+      </para>
+      <para>
+        Allocating a block on the major heap first checks the free list
+        of blocks (see below). If there isn't enough room on the free
+        list, the runtime expands the major heap with a fresh block that
+        will be large enough. That block is then added to the free list,
+        and the free list is checked again (and this time will
+        definitely succeed).
+      </para>
+      <sect3 id="the-major-heap-free-list">
+        <title>The major heap free list</title>
+        <para>
+          The free space in the major heap's chunks is organized as a
+          singly linked list of OCaml blocks, ordered by increasing
+          virtual address. The runtime has a pointer to the first block
+          in the free list. A free list block is at least two words: a
+          header followed by a pointer to the next free-list block. The
+          header specifies the length of the block just as with a normal
+          block. (<emphasis>avsm</emphasis>: I'm not sure that this is
+          quite true. It seems from <literal>freelist.c</literal> that
+          the freelist blocks are normal OCaml blocks, with the first
+          data entry being the next pointer. when detached, they become
+          normal ocaml blocks)
+        </para>
+      </sect3>
+      <sect3 id="allocation-policies">
+        <title>Allocation policies</title>
+        <para>
+          Allocating a new block in the major heap always looks in the
+          free list. There are two allocation policies: first fit and
+          next fit (the default).
+        </para>
+        <para>
+          As soon as the runtime finds a free block that is larger than
+          the request, there are three possibilities. If the free block
+          is exactly the right size, it is unlinked from the free list
+          and returned as the requested block. If the free block is one
+          word too large, it is unlinked from the free list, and the
+          first word is given a special header recognizable to the
+          collector as an unused word, while the rest of the block is
+          returned as the requested block. Finally, if the free block is
+          two or more words larger than the requested block, it remains
+          in the free list, with its length shortened, and the end of
+          the free block is used for the requested block.
+        </para>
+      </sect3>
+    </sect2>
   </sect1>
   <sect1 id="byte-code-profiling">
     <title>Byte code Profiling</title>
