@@ -1,8 +1,8 @@
-# Tuning and Profiling
+# Inside the Runtime
 
-## Tuning the Garbage Collector
+(_avsm_: this chapter is still being chopped and changed)
 
-### How the runtime tracks memory usage
+## Runtime Memory Management
 
 The OCaml runtime divides the address space into memory pages of 4KB each (this
 is configurable by recompiling the runtime).  At any given time, every page
@@ -68,7 +68,7 @@ To force a minor gc to occur, one can set the `caml_young_limit` to equal `caml_
 causes signal handlers to be run and to "urge" the runtime
 (_avsm_: elaborate on this urging business, and how to set young from within OCaml via `Gc.??`).
 
-### Managing the major heap
+### Allocating on the major heap
 
 The major heap is a singly linked list of contiguous memory chunks, sorted in
 increasing order of virtual address.  Each chunk is a single memory chunk
@@ -96,7 +96,7 @@ major heap with a fresh block that will be large enough.  That block is then
 added to the free list, and the free list is checked again (and this time will
 definitely succeed).
 
-#### The major heap free list
+### The major heap free list
 
 The free space in the major heap's chunks is organized as a singly linked list
 of OCaml blocks, ordered by increasing virtual address.  The runtime has a
@@ -295,20 +295,126 @@ example. Investigate the options and edit this section)
 (_avsm_: need to mention when a value is allocated directly into the major heap
 somewhere)
 
-## Byte code Profiling
+## How garbage collection works
 
-ocamlcp and call trace information
+### Collecting the minor heap
 
-## Native Code Profiling
+For those familiar with garbage collection terminology, here is OCaml's minor
+colection in one sentence. OCaml's minor collection uses copying collection
+with forwarding pointers, and does a depth-first traversal of the block graph
+using a stack represented as a linked list threaded through blocks that need to
+be scanned.
 
-### gdb
+The goal of minor collection is to empty the minor heap by moving to the major
+heap every block in the minor heap that might be used in the future, and
+updating each pointer to a moved block to the new version of the block.  A
+block is *live* if is reachable by starting at some *root* pointer into a block
+in the minor heap,a nd then following pointers in blocks.  There are many
+different kinds of roots:
 
-requires shinwell's patch in ocaml trunk via opam
+* OCaml stack(s)
+* C stack(s), identified by `BeginRoots` or `CAMLparam` in C code (_avsm_: xref C bindings chapter)
+* Global roots
+* Finalized values (_avsm_: ?)
+* Intergenerational pointers in the `caml_ref_table` (_avsm_: xref above?)
 
-### perf
+Moving a block between heaps is traditionally called *forwarding*. The OCaml
+runtime code uses that term as well as the term *oldify*, which is useful to
+understand when profiling hotspots in your code.  The minor collector first
+visits all roots and forwards them if they point to a block in the minor heap.
+When a block is forwarded, the collector sets the tag of the original block to
+a special `Forward_tag` (250), and the first field of the original block to
+point to the new block.  Then, if the collector ever encounters a pointer to
+the original block again, it can simply update the pointer directly into the
+forwarded block.
 
-requires fabrice's frame pointer patch
+Because a forwarded block might itself contain pointers, it must at some point
+be scanned to see if those pointers point to blocks in the minor heap, so that
+those blocks can also be forwarded.  The collector maintains a linked list
+(called the `oldify_todo_list`) of forwarded objects that it still needs to
+scan.  That linked list looks like:
 
-### dtrace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                oldify_todo_list
+                   |
+                   |
+                   v
+   minor heap  | 0 | v | f1 ... |      | 0 | v | f1 ... |
+                     |                     ^ |
+                     |      +--------------+ |      ---------- ...
+                     v      |                v      |
+   major heap    | h | f0 | ^ | ... |    | h | f0 | ^
 
-requires my dtrace/instruments patch for libasmrun
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each value on the `oldify_todo_list` is marked as forwarded, and the
+first word points to the new block in the major heap.
+That new version contains the actual value header, the real first field of the value, and a link
+(pointer) to the next value on the oldify_todo_list, or ~NULL~ at the end of the list.
+Clearly this approach won't work if an value has only one field, since there will be no
+second field to store the link in. Values with exactly one field are never put on
+the `oldify_todo_list`; instead, the collector immediately traverses them, essentially
+making a tail call in the depth-first search.
+
+Values that are known from the tag in their header to not contain pointers are simply
+forwarded and completely copied, and never placed on the `oldify_todo_list`. These
+tags are all greater than `No_scan_tag` and include strings and float arrays.
+
+(_avsm_: note from sweeks to investigate: There is a hack for objects whose tag
+is `Forward_tag` that does some kind of path compression, or at least removal
+of one link, but I'm not sure what's going on.)
+
+(_avsm_: I dont think we've introduced weak references yet, so this needs rearranging)
+At the end of the depth-first search in minor collection, the collector scans the `weak-ref`
+table, and clears any weak references that are still pointing into the minor heap.  The
+collector then empties the `weak-ref` table and the minor heap.
+
+### Collecting the major heap
+
+The major heap collections operates incrementally, as the amount of memory
+being tracked is a lot larger than the minor heap.  The major collector can be
+in any of a number of phases:
+
++ `Phase_idle`
++ `Phase_mark`
+    + `Subphase_main`: main marking phase
+    + `Subphase_weak1`: clear weak pointers
+    + `Subphase_weak2`: remove dead weak arrays, observe finalized values
+    + `Subphase_final`: initialise for the sweep phase
++ `Phase_sweep`
+
+### Marking the major heap
+
+Marking maintains an array of gray blocks, `gray_vals`. It uses as them as a
+stack, pushing on a white block that is then colored gray, and popping off a
+gray block when it is scanned and colored black.  The `gray_vals` array is
+allocated via *malloc(3)*, and there is a pointer, `gray_vals_cur`, to the next
+open spot in the array.
+
+The `gray_vals` array initially has 2048 elements.  `gray_vals_cur` starts at
+`gray_vals`, and increases until it reachs `gray_vals_end`, at which point the
+`gray_vals` array is doubled, as long as its size (in bytes) is less than
+1/2^10th of the heap size (`caml_stat_heap_size`).  When the gray vals is of
+its maximum allowed size, it isn't grown any further, and the heap is marked as
+impure (`heap_is_pure=0`), and last half of `gray_vals` is ignored (by setting
+`gray_vals_cur` back to the middle of the `gray_vals` array.
+
+If the marking is able to complete using just the gray list, it will.
+Otherwise, once the gray list is emptied, the mark phase will observe that the
+heap is impure and initiate a backup approach to marking.  In this approach it
+marks the heap as pure and then walks through the entire heap block by block,
+in increasing order of memory address.  If it finds a gray block, it adds it to
+the gray list and does a DFS marking using the gray list as a stack in the
+usual way.  Once the scan of the complete heap is finished, the mark phase
+checks again whether the heap has again become impure, and if so initiates
+another scan. These full-heap scans will continue until a successful scan
+completes without overflowing the gray list.
+
+(_avsm_: I need to clarify this more, possibly a diagram too. It's not really
+clear what the implications of an impure heap are atm)
+
+### Sweeping unused blocks from the major heap
+
+### Compaction and defragmenting the major heap
+
+Test math $test = \frac{allocated}{heap size * percent overhead}$
