@@ -39,11 +39,11 @@ build/$(LINGUA)/source/.stamp:
 
 build/$(LINGUA)/source/rwo.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
-	pandoc --mathml -f markdown -t docbook --chapters --template rwo.docbook -s $^ > $@
+	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ > $@
 
 build/$(LINGUA)/source/rwo-oreilly.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
-	pandoc --mathml -f markdown -t docbook --chapters --template rwo-oreilly.docbook -s $^ > $@
+	pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -s $^ > $@
 
 build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/rwo.xml stylesheets/system-xsl
 	xsltproc --output build/$(LINGUA)/html/ \
