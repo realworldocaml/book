@@ -10793,7 +10793,8 @@ enum caml_ba_managed {
         following status bits:
       </para>
       <informaltable>
-        <tgroup cols="2">
+        <tgroup cols="3">
+          <colspec align="left" />
           <colspec align="left" />
           <colspec align="left" />
           <thead>
@@ -10803,6 +10804,9 @@ enum caml_ba_managed {
               </entry>
               <entry>
                 Value
+              </entry>
+              <entry>
+                Meaning
               </entry>
             </row>
           </thead>
@@ -10814,6 +10818,9 @@ enum caml_ba_managed {
               <entry>
                 1
               </entry>
+              <entry>
+                in the major heap
+              </entry>
             </row>
             <row>
               <entry>
@@ -10821,6 +10828,9 @@ enum caml_ba_managed {
               </entry>
               <entry>
                 2
+              </entry>
+              <entry>
+                in the minor heap
               </entry>
             </row>
             <row>
@@ -10830,6 +10840,9 @@ enum caml_ba_managed {
               <entry>
                 4
               </entry>
+              <entry>
+                in the statically allocated data segment
+              </entry>
             </row>
             <row>
               <entry>
@@ -10837,6 +10850,9 @@ enum caml_ba_managed {
               </entry>
               <entry>
                 8
+              </entry>
+              <entry>
+                in the statically allocated code segment
               </entry>
             </row>
           </tbody>
@@ -10965,26 +10981,294 @@ enum caml_ba_managed {
           data entry being the next pointer. when detached, they become
           normal ocaml blocks)
         </para>
-      </sect3>
-      <sect3 id="allocation-policies">
-        <title>Allocation policies</title>
-        <para>
-          Allocating a new block in the major heap always looks in the
-          free list. There are two allocation policies: first fit and
-          next fit (the default).
-        </para>
         <para>
           As soon as the runtime finds a free block that is larger than
-          the request, there are three possibilities. If the free block
-          is exactly the right size, it is unlinked from the free list
-          and returned as the requested block. If the free block is one
-          word too large, it is unlinked from the free list, and the
-          first word is given a special header recognizable to the
-          collector as an unused word, while the rest of the block is
-          returned as the requested block. Finally, if the free block is
-          two or more words larger than the requested block, it remains
-          in the free list, with its length shortened, and the end of
-          the free block is used for the requested block.
+          the request, there are three possibilities:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              If the free block is exactly the right size, it is
+              unlinked from the free list and returned as the requested
+              block.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              If the free block is one word too large, it is unlinked
+              from the free list, and the first word is given a special
+              header recognizable to the collector as an unused word,
+              while the rest of the block is returned as the requested
+              block.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              If the free block is two or more words larger than the
+              requested block, it remains in the free list, with its
+              length shortened, and the end of the free block is
+              returned for the requested block. Since the allocated
+              block is right-justified within the free block, the
+              linking of the free list doesn't need to be changed at all
+              as the block that remains in the free list is the original
+              one.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+    </sect2>
+    <sect2 id="memory-allocation-strategies">
+      <title>Memory allocation strategies</title>
+      <para>
+        Allocating a new block in the major heap always looks in the
+        free list. There are two allocation policies: first fit and next
+        fit (the default).
+      </para>
+      <sect3 id="next-fit-allocation">
+        <title>Next-fit allocation</title>
+        <para>
+          Next-fit allocation keeps a pointer to the block in the free
+          list that was most recently used to satisfy a request. When a
+          new request comes in, the allocator searches from the next
+          block until the end of the free list, and then from the
+          beginning of the free list up to that block.
+        </para>
+      </sect3>
+      <sect3 id="first-fit-allocation">
+        <title>First-fit allocation</title>
+        <para>
+          First-fit allocation focusses on reducing memory
+          fragmentation, at the expense of slower block allocation. For
+          some workloads, the reduction in the frequency in heap
+          compaction will outweigh the extra allocation cost.
+          (<emphasis>avsm</emphasis>: example?)
+        </para>
+        <para>
+          The runtime maintains an ordered array of freelist chunks,
+          called the <literal>flp</literal> array. Imagine a function
+          mapping a block's index in the free list to its size. The flp
+          array pointers are to the high points of this graph. That is,
+          if you walk the free list between <literal>flp[i]</literal>
+          and <literal>flp[i+1]</literal>, you will come across blocks
+          that have sizes at most the size of <literal>flp[i]</literal>.
+          Furthermore this sequence of smaller-than-flp[i] blocks cannot
+          be extended, which is equivalent to saying
+          <literal>size(flp[i+1]) &gt; size(flp[i])</literal>.
+        </para>
+        <para>
+          When allocating, we first check the flp-array. If
+          <literal>flp[i]</literal> is not big enough for our new block,
+          then we may as well skip to <literal>flp[i+1]</literal>,
+          because everything in the free list before then will also be
+          too small.
+        </para>
+        <para>
+          If there's nothing big enough in the <literal>flp</literal>
+          array, we extend it by walking the free list starting at the
+          <emphasis>last</emphasis> pointer in the
+          <literal>flp</literal>-array, say <literal>flp[N]</literal>.
+          We extend the <literal>flp</literal> array along the way, so
+          that at each block, if this block is bigger than the current
+          last thing in <literal>flp</literal> (which is equivalent to
+          saying this is the biggest block we've ever seen, since the
+          blocks pointed to by the <subscript>flp</subscript> array are
+          increasing in size), we add it to the end of
+          <subscript>flp</subscript>. We stop this walk when we come
+          across a block big enough to house our desired new block.
+        </para>
+        <para>
+          There's also the case when the <literal>flp</literal> array
+          has its ceiling size of <literal>FLP_MAX</literal> (default
+          100). Then we just start at the end of the
+          <literal>flp</literal> array and walk until we find something
+          big enough. This is known in the as a slow first-fit search,
+          since this linear walk may take a long time.
+        </para>
+        <para>
+          If we did manage to find something suitable in the
+          <literal>flp</literal> array, say at index
+          <literal>i</literal>, we need to update
+          <literal>flp</literal>. This update is rather complex, and the
+          reason why first-fit allocation is slower than next-fit. We
+          walk through the free list between <literal>flp[i-1]</literal>
+          and <literal>flp[i]</literal> and record every high point we
+          come across. Say we find <literal>j</literal> such points. We
+          move the upper portion of <literal>flp</literal> (from
+          <literal>flp[i+1]</literal> to the end) to the right by
+          <literal>j</literal> places and insert each new high point
+          into the array. There is a further corner case when adding in
+          <literal>j</literal> new high points would make
+          <literal>flp</literal> bigger than <literal>FLP_MAX</literal>.
+        </para>
+        <para>
+          (<emphasis>avsm</emphasis>: this really needs a diagram)
+        </para>
+        <note>
+        <title>
+        Which allocation policy should I use?
+        </title>
+        <para>
+          (<emphasis>avsm</emphasis>: 0 is the next-fit policy, which is
+          quite fast but can result in fragmentation. 1 is the first-fit
+          policy, which can be slower in some cases but can be better
+          for programs with fragmentation problems. )
+        </para>
+        </note>
+      </sect3>
+    </sect2>
+    <sect2 id="inter-generational-pointers">
+      <title>Inter-generational pointers</title>
+      <para>
+        Most incremental generational garbage collectors have to keep
+        careful track of values pointing from old generations to younger
+        ones. The OCaml runtime is no exception, and maintains a set of
+        addresses in the major heap that may point into the minor heap.
+        These addresses are <emphasis>not</emphasis> OCaml pointers, and
+        just literal memory addresses. The runtime ensures that it never
+        relocates values in the major heap unless this
+        &quot;remembered&quot; set is empty. The set is maintained as a
+        dynamically resized array of pointers, which is itself
+        maintained via a collection of pointers known as the
+        <literal>caml_ref_table</literal>.
+      </para>
+      <programlisting language="c">
+struct caml_ref_table {
+  value **base;
+  value **end;
+  value **threshold;
+  value **ptr;
+  value **limit;
+  asize_t size;
+  asize_t reserve;
+};
+</programlisting>
+      <para>
+        The relationships of the pointers are as follows:
+      </para>
+      <programlisting>
+                   limit
+   base &lt;= ptr     threshold          end
+     |----------------|----------------|
+           size            reserve
+</programlisting>
+      <para>
+        An address is added to <literal>caml_ref_table</literal> when
+        all of these conditions are satisfied:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            a field in a block in the major heap is mutated
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            the field previously did not point to the minor heap
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            the field is being changed to point into the minor heap
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        In that case the entry is added at
+        <literal>caml_ref_table.ptr</literal>, which is then
+        incremented. If <literal>ptr</literal> is already at
+        <literal>limit</literal>, the table is doubled in size before
+        adding the address.
+      </para>
+      <para>
+        The same address can occur in <literal>caml_ref_table</literal>
+        multiple times if a block field is mutated repeatedly and
+        alternated between pointing at the minor heap and the major
+        heap. The field in <literal>caml_ref_table</literal> also may
+        not always point into the minor heap (if it was changed after
+        being added), since fields are never removed. The entire table
+        is cleared as part of the minor collection process.
+      </para>
+      <sect3 id="the-write-barrier">
+        <title>The write barrier</title>
+        <para>
+          The write barrier is one of the reasons why using immutable
+          data structures can sometimes be faster than mutable records.
+          The OCaml compiler keeps track of any mutable types and adds a
+          call to <literal>caml_modify</literal> before making the
+          change. The <literal>caml_modify</literal> checks that the
+          remembered set is consistent, which, although reasonably
+          efficient, can be slower than simply allocating a fresh value
+          on the fast minor heap.
+        </para>
+        <para>
+          Let's see this for ourselves with a simple test program:
+        </para>
+        <programlisting language="ocaml">
+type t1 = { mutable iters1: int; mutable count1: float }
+type t2 = { iters2: int; count2: float }
+
+let rec test_mutable t1 =
+  match t1.iters1 with
+  |0 -&gt; ()
+  |n -&gt;
+    t1.iters1 &lt;- t1.iters1 - 1;
+    t1.count1 &lt;- t1.count1 +. 1.0;
+    test_mutable t1
+
+let rec test_immutable t2 =
+  match t2.iters2 with
+  |0 -&gt; ()
+  |n -&gt;
+    let iters2 = n - 1 in
+    let count2 = t2.count2 +. 1.0 in
+    test_immutable { iters2; count2 }
+
+open Printf
+let time name fn arg =
+  Gc.compact ();
+  let w1 = Gc.((stat ()).minor_collections) in
+  let t1 = Unix.gettimeofday () in
+  fn arg;
+  let w2 = Gc.((stat ()).minor_collections) in
+  let t2 = Unix.gettimeofday () in
+  printf &quot;%s: %.4fs (%d minor collections)\n&quot; name (t2 -. t1) (w2 - w1)
+
+let _ =
+  let iters = 1000000000 in
+  time &quot;mutable&quot; test_mutable { iters1=iters; count1=0.0 };
+  time &quot;immutable&quot; test_immutable { iters2=iters; count2=0.0 }
+</programlisting>
+        <para>
+          This program defines a type <literal>t1</literal> that is
+          mutable, and <literal>t2</literal> that is immutable. The main
+          loop iterates over both fields and runs a simple counter. It
+          measures two things: the wallclock time that all the
+          iterations take, and the number of minor garbage collections
+          that occurred during the test. The results should look
+          something like this:
+        </para>
+        <programlisting>
+mutable: 8.6923s (7629 minor collections)
+immutable: 2.6186s (19073 minor collections)
+</programlisting>
+        <para>
+          Notice the space/time tradeoff here. The mutable version runs
+          almost 4 times slower than the immutable one, but has
+          significantly fewer garbage collection cycles. Minor
+          collections in OCaml are very fast, and so it is often
+          acceptable to use immutable data structures in preference to
+          the more conventional mutable versions. On the other hand, if
+          you only rarely mutable a value, it can be faster to take the
+          write barrier hit and not allocate at all.
+        </para>
+        <para>
+          (<emphasis>avsm</emphasis>: it would be really nice to use a
+          benchmark suite here and shorten the example. Investigate the
+          options and edit this section)
+        </para>
+        <para>
+          (<emphasis>avsm</emphasis>: need to mention when a value is
+          allocated directly into the major heap somewhere)
         </para>
       </sect3>
     </sect2>
