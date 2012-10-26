@@ -1,13 +1,16 @@
 open Core.Std
 
+type basic_color =
+  [ `Black   | `Blue | `Cyan  | `Green
+  | `Magenta | `Red  | `White | `Yellow ]
+  * [ `Bold | `Regular ]
+    | `Gray of int
+    | `RGB  of int * int * int ]
+
+
 let basic_color_to_int = function
   | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
   | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
-
-let color_to_int = function
-    | `Basic basic_color -> basic_color_to_int basic_color
-    | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | `Gray i -> 232 + i ;;
 
 let color_to_int = function
   | `Basic (basic_color,weight) ->
@@ -16,7 +19,7 @@ let color_to_int = function
   | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | `Gray i -> 232 + i
 
-
 let extended_color_to_int = function
   | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+  | `Grey i -> 230 + i
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216

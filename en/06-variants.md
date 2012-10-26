@@ -530,25 +530,161 @@ data-structures like red-black trees.
 
 ## Polymorphic variants
 
-In addition to ordinary variant types, OCaml has a second kind of
-variant type called _polymorphic variants_.  As we've seen, ordinary
-variants are a powerful tool for describing and operating on complex
-data-structures.  But variants have limitations as well.  One notable
-limitation is that you can't share constructors between different
-variant types.  To see what this means, let's consider an example.
+In addition to the ordinary variants we've seen so far, OCaml also
+supports so-called _polymorphic variants_.  As we'll see, polymorphic
+variants are more flexible and syntactically more lightweight than
+ordinary variants, but that extra power comes at a cost.  But before
+we discuss when and where you'd use polymorphic variants, let's learn
+a bit about the mechanics of dealing with them.
 
-### Terminal colors redux
+Syntactically, polymorphic variants are distinguished from ordinary
+variants by the leading backtick.  Pleasantly enough, you can create a
+polymorphic variant without first writing an explicit type
+declaration.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let three = `Int 3;;
+val three : [> `Int of int ] = `Int 3
+# let four = `Float 4.;;
+val four : [> `Float of float ] = `Float 4.
+# let nan = `Not_a_number;;
+val nan : [> `Not_a_number ] = `Not_a_number
+# [three; four; nan];;
+- : [> `Float of float | `Int of int | `Not_a_number ] list =
+[`Int 3; `Float 4.; `Not_a_number]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The variant types are inferred automatically from their use.  And when
+we combine variants whose types contemplate different tags, the
+compiler infers a new type that knows about both all those tags.
+
+The type system will complain, however, if it sees incompatible uses
+of the same tag:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let five = `Int "five";;
+val five : [> `Int of string ] = `Int "five"
+# [three; four; five];;
+Characters 14-18:
+  [three; four; five];;
+                ^^^^
+Error: This expression has type [> `Int of string ]
+       but an expression was expected of type
+         [> `Float of float | `Int of int ]
+       Types for tag `Int are incompatible
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `>` at the beginning of the variant types above is critical,
+because it marks the types as being open to combination with other
+variant types.  We can read the type ``[> `Int of string | `Float of
+float]`` as describing a variant whose tags include `` `Int of string
+`` and `` `Float of float ``, but may include more tags as well.  You
+can roughly translate `>` to "these tags or more".
+
+OCaml will in some cases infer a variant type with ` <`, to indicate
+"these tags or less", as in the following example.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let is_positive = function
+     | `Int x -> x > 0
+     | `Float x -> x > 0.
+  ;;
+val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `<` is there because `is_positive` has no way of dealing with
+values that have tags other than `` `Float of float`` or `` `Int of
+int``.
+
+We can think of these `<` and `>` markers as indications of upper and
+lower bounds.  If the same type is both an upper and a lower bound, we
+end up with an _exact_ polymorphic variant type, which has neither
+marker.  For example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let exact = List.filter ~f:is_positive [three;four];;
+val exact : [ `Float of float | `Int of int ] List.t
+   = [`Int 3; `Float 4.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Perhaps surprisingly, we can also create polymorphic variant types
+that have different lower and upper bounds.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+let is_positive = function
+     | `Int   x -> Ok (x > 0)
+     | `Float x -> Ok (x > 0.)
+     | `Not_a_number -> Error "not a number";;
+val is_positive :
+  [< `Float of float | `Int of int | `Not_a_number ] ->
+  (bool, string) Result.t = <fun>
+# List.filter [three; four] ~f:(fun x ->
+     match is_positive x with Error _ -> false | Ok b -> b);;
+  - : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ]
+    List.t
+= [`Int 3; `Float 4.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, the inferred type states that the tags can be no more than ``
+`Float``, `` `Int`` and `` `Not_a_number``, and must contain at least
+`` `Float`` and `` `Int``.  As you can already start to see,
+polymorphic variants can lead to fairly complex inferred types.
+
+
+<sidebar><title>Polymorphic variants and catch-all cases</title>
+
+As we saw with the definition of `is_positive`, a match statement can
+lead to the inference of an upper bound on a variant type, limiting
+the possible tags to those that can be handled by the match.  If we
+add a catch-all case to our match statement, we can end up with a
+function with a lower bound.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let is_positive_permissive = function
+     | `Int x -> Ok (x > 0)
+     | `Float x -> Ok (x > 0.)
+     | _ -> Error "Unknown number type"
+  ;;
+        val is_positive_permissive :
+  [> `Float of float | `Int of int ] -> (bool, string) Core.Std._result =
+  <fun>
+# is_positive_permissive (`Int 0);;
+- : (bool, string) Result.t = Ok false
+# is_positive_permissive (`Ratio (3,4));;
+- : (bool, string) Result.t = Error "Unknown number type"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Catch-all cases are error-prone even with ordinary variants, but they
+are especially so with polymorphic variants.  That's because you have
+no way of bounding what tags your function might have to deal with.
+Such code is particularly vulnerable to typos.  For instance, if code
+that uses `is_positive_permissive` passes in `Float` misspelled as
+`Floot`, the erroneous code will compile without complaint.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# is_positive_permissive (`Floot 3.5);;
+- : (bool, string) Result.t = Error "Unknown number type"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With ordinary variants, such a typo would have been caught as an
+unknown constructor.  As a general matter, one should be wary about
+mixing catch-all cases and polymorphic variants.
+
+</sidebar>
+
+
+### Example: Terminal colors redux
 
 Imagine that we have a new terminal type that adds yet more colors,
-say, by adding an alpha channel, and we wanted a type to model those
-colors.  We might model that as follows.
+say, by adding an alpha channel so you can specify translucent colors.
+We could model this extended set of colors as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type extended_color =
   | Basic of basic_color * weight  (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color space *)
-  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
   | Gray  of int                   (* 24 grayscale levels *)
+  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
   ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -577,17 +713,11 @@ Error: This expression has type extended_color
 The problem is that `extended_color` and `color` are in the compiler's
 view distinct and unrelated types.  The compiler doesn't recognize
 that, for instance, the `Basic` constructor in both types is in some
-sense the same.  Moreover, the definition of `extended_color` shadows
-the constructors from `color`, so we can no longer even create a
-`color`, though we can deal with this problem by moving the
-definitions into different modules, much as we did with records to
-avoid collisions between field names.
+sense the same.
 
-Polymorphic variants allow a way around this problem entirely.  In the
-following we'll rewrite our color code to use polymorphic variants.
-We'll start with `basic_color_to_int`.  We can change from using
-ordinary variants to polymorphic ones simply by putting a back-tick in
-front of each constructor.
+Polymorphic variants allow a way around this problem.  Let's start by
+rewriting `basic_color_to_int` using polymorphic variants.  Here's the
+full code.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let basic_color_to_int = function
@@ -599,10 +729,9 @@ val basic_color_to_int :
   int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We didn't need to declare the polymorphic variant before using it; it
-was simply inferred from the code.  We can infer more complicated and
-deeply nested polymorphic variant types as well, which becomes clear
-as we port more of our color code over.
+This is a relatively simple case, but we can infer more complicated
+and deeply nested polymorphic variant types as well, as we can see by
+we rewriting `color_to_int` with polymorphic variants.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let color_to_int = function
@@ -653,109 +782,31 @@ val extended_color_to_int :
   int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Polymorphic variants in more depth
+### When and how to use polymorphic variants
 
 At first glance, polymorphic variants look like a strict improvement
-over regular variants.  You seem to be able to do all the same things,
-but it's even more flexible and requires less typing, since you don't
-need all those pesky type declarations.  
+over ordinary variants.  You can do everything that ordinary variants
+can do, plus it's more flexible and more concise.  What's not to like?
 
-While that's all true, most of the time, you'll want to stick to
-regular variants.  That's because the flexibility of polymorphic
-variants comes at a price.  There are a few disadvantages to
-polymorphic variants:
+In reality, regular variants are the more pragmatic choice most of the
+time.  That's because the flexibility of polymorphic variants comes at
+a price.  Here are some of the downsides.
 
-- _Efficiency:_ This isn't a huge effect,
-  but polymorphic variants are somewhat heavier than regular variants,
-  and there are fewer optimizations that the compiler can apply
-  because it has less type information.
+- _Efficiency:_ This isn't a huge effect, but polymorphic variants are
+  somewhat heavier than regular variants, and OCaml can't generate
+  code for matching on polymorphic variants that is quite as efficient
+  as what is generated for regular variants.
 - _Error-finding:_ Polymorphic variants are type-safe, but the typing
   discipline that they impose is, by dint of its flexibility, less
   likely to catch bugs in your program.
-- _Complexity:_ This is an important issue.  The typing rules for
-  polymorphic variants are a lot more complicated than they are for
-  regular variants.  This means that heavy use of polymorphic variants
-  can leave you scratching your head trying to figure out why a given
-  piece of code did or didn't compile.
+- _Complexity:_ This is an important issue.  As we've seen, the typing
+  rules for polymorphic variants are a lot more complicated than they
+  are for regular variants.  This means that heavy use of polymorphic
+  variants can leave you scratching your head trying to figure out why
+  a given piece of code did or didn't compile.  It can also lead to
+  absurdly long and hard to decode error messages.
 
 All that said, polymorphic variants are still a useful and powerful
 feature, but it's worth understanding their limitations, and how to
 use them sensibly and modestly.
-
-To understand the limitations of polymorphic variants, it's worth
-working through some simple examples so we can understand polymorphic
-variants in more detail.  
-
-First, consider what happens when we declare a simple variant
-representing an integer.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let three = `Int 3;;
-val three : [> `Int of int ] = `Int 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Note the `>` at the beginning of the type.  This indicates that the
-type of three is open to other variants.  In particular, we can put
-`three` on a list with a value of a different variant.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let nums = [three; `Float 4.0];;
-val nums : [> `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Roughly speaking, you can read the `>` as indicating "these variants
-are present, and maybe more".  We can close the definition of `three`
-by an explicit annotation, at which point, combining it with other
-constructors no longer works.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let three : [`Int of int] = `Int 3 ;;
-val three : [ `Int of int ] = `Int 3
-# let nums = [three; `Float 4.];;
-Characters 19-28:
-  let nums = [three; `Float 4.];;
-                     ^^^^^^^^^
-Error: This expression has type [> `Float of float ]
-       but an expression was expected of type [ `Int of int ]
-       The second variant type does not allow tag(s) `Float
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In our example above, `three` was compatible with a particular set of
-tags or more.  In some cases, we see types that are compatible with a
-given set of types or less, as in the following case:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let add x y =
-    match x,y with
-    | `Int x  , `Int y   -> `Int (x + y)
-    | `Float x, `Float y -> `Float (x +. y)
-    | `Int i , `Float f | `Float f, `Int i -> 
-      `Float (f +. Float.of_int i) 
-  ;;
-val add :
-  [< `Float of float | `Int of int ] ->
-  [< `Float of float | `Int of int ] -> [> `Float of float | `Int of int ] =
-  <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here, `add` can take any value that has floats or ints, but nothing
-else.  Thus, we can write:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# add three three;;
-- : [> `Float of float | `Int of int ] = `Int 6
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-but we can't write:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# add three (`Rational (3,4));;
-Characters 11-26:
-  add three (`Rational (3,4));;
-             ^^^^^^^^^^^^^^^
-Error: This expression has type [> `Rational of int * int ]
-       but an expression was expected of type
-         [< `Float of float | `Int of int ]
-       The second variant type does not allow tag(s) `Rational
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
