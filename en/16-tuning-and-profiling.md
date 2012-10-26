@@ -1,5 +1,7 @@
 # Tuning and Profiling
 
+(_avsm_: this chapter is still being chopped and changed)
+
 ## Tuning the Garbage Collector
 
 ### How the runtime tracks memory usage
@@ -68,7 +70,7 @@ To force a minor gc to occur, one can set the `caml_young_limit` to equal `caml_
 causes signal handlers to be run and to "urge" the runtime
 (_avsm_: elaborate on this urging business, and how to set young from within OCaml via `Gc.??`).
 
-### Managing the major heap
+### Allocating on the major heap
 
 The major heap is a singly linked list of contiguous memory chunks, sorted in
 increasing order of virtual address.  Each chunk is a single memory chunk
