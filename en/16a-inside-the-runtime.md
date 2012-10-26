@@ -369,3 +369,46 @@ At the end of the depth-first search in minor collection, the collector scans th
 table, and clears any weak references that are still pointing into the minor heap.  The
 collector then empties the `weak-ref` table and the minor heap.
 
+### Collecting the major heap
+
+The major heap collections operates incrementally, as the amount of memory
+being tracked is a lot larger than the minor heap.  The major collector can be
+in any of a number of phases:
+
++ `Phase_idle`
++ `Phase_mark`
+    + `Subphase_main`: main marking phase
+    + `Subphase_weak1`: clear weak pointers
+    + `Subphase_weak2`: remove dead weak arrays, observe finalized values
+    + `Subphase_final`: initialise for the sweep phase
++ `Phase_sweep`
+
+### Marking the major heap
+
+Marking maintains an array of gray blocks, `gray_vals`. It uses as them as a
+stack, pushing on a white block that is then colored gray, and popping off a
+gray block when it is scanned and colored black.  The `gray_vals` array is
+allocated via *malloc(3)*, and there is a pointer, `gray_vals_cur`, to the next
+open spot in the array.
+
+The `gray_vals` array initially has 2048 elements.  `gray_vals_cur` starts at
+`gray_vals`, and increases until it reachs `gray_vals_end`, at which point the
+`gray_vals` array is doubled, as long as its size (in bytes) is less than
+1/2^10th of the heap size (`caml_stat_heap_size`).  When the gray vals is of
+its maximum allowed size, it isn't grown any further, and the heap is marked as
+impure (`heap_is_pure=0`), and last half of `gray_vals` is ignored (by setting
+`gray_vals_cur` back to the middle of the `gray_vals` array.
+
+If the marking is able to complete using just the gray list, it will.
+Otherwise, once the gray list is emptied, the mark phase will observe that the
+heap is impure and initiate a backup approach to marking.  In this approach it
+marks the heap as pure and then walks through the entire heap block by block,
+in increasing order of memory address.  If it finds a gray block, it adds it to
+the gray list and does a DFS marking using the gray list as a stack in the
+usual way.  Once the scan of the complete heap is finished, the mark phase
+checks again whether the heap has again become impure, and if so initiates
+another scan. These full-heap scans will continue until a successful scan
+completes without overflowing the gray list.
+
+(_avsm_: I need to clarify this more, possibly a diagram too. It's not really
+clear what the implications of an impure heap are atm)
