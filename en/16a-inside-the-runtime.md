@@ -1,10 +1,8 @@
-# Tuning and Profiling
+# Inside the Runtime
 
 (_avsm_: this chapter is still being chopped and changed)
 
-## Tuning the Garbage Collector
-
-### How the runtime tracks memory usage
+## Runtime Memory Management
 
 The OCaml runtime divides the address space into memory pages of 4KB each (this
 is configurable by recompiling the runtime).  At any given time, every page
@@ -98,7 +96,7 @@ major heap with a fresh block that will be large enough.  That block is then
 added to the free list, and the free list is checked again (and this time will
 definitely succeed).
 
-#### The major heap free list
+### The major heap free list
 
 The free space in the major heap's chunks is organized as a singly linked list
 of OCaml blocks, ordered by increasing virtual address.  The runtime has a
