@@ -2769,12 +2769,12 @@ val my_host : host_info =
 # my_host.cpu_arch;;
 - : string = &quot;i386&quot;
 </programlisting>
-  <sect1 id="irrefutable-patterns-and-exhaustiveness-checks">
-    <title>Irrefutable patterns and exhaustiveness checks</title>
+  <sect1 id="patterns-and-exhaustiveness">
+    <title>Patterns and exhaustiveness</title>
     <para>
       Another way of getting information out of a record is by using a
-      pattern match. This example shows how you can pattern-match on a
-      function argument.
+      pattern match, as in the definition of
+      <literal>host_info_to_string</literal> below.
     </para>
     <programlisting>
 # let host_info_to_string { hostname = h; os_name = os;
@@ -2785,84 +2785,81 @@ val my_host : host_info =
 - : string = &quot;Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)&quot;
 </programlisting>
     <para>
-      We didn't need a full match statement because a single pattern can
-      match all records of type <literal>host_info</literal>. This works
-      because record patterns (like tuple patterns) are
-      <emphasis>irrefutable</emphasis>, meaning that a pattern is
-      guaranteed to match any value of the type in question.
+      Note that the pattern that we used had only a single case, rather
+      than using several cases separated by <literal>|</literal>s. We
+      only needed a single pattern because record patterns are
+      <emphasis>irrefutable</emphasis>, meaning that, because the layout
+      of a record is always the same, a record pattern match will never
+      fail at runtime. This is different from, say, lists, where it's
+      easy to write pattern matches that compile but fail at runtime.
     </para>
     <para>
-      In other words, a pattern is irrefutable if any code that compiles
-      will never have a runtime failure due to a failed match. This is
-      in contrast to, say, lists, where it's easy to write a pattern
-      match that compiles but fails at runtime. For example:
+      Another important characteristic of record patterns is that they
+      don't need to be complete; a pattern can mention only a subset of
+      the fields in the record. This can be convenient, but it's can
+      also be error prone. In particular, this means that when new
+      fields are added to the record, code that should be updated to
+      react to the presence of those new fields will not be flagged by
+      the compiler.
+    </para>
+    <para>
+      As an example, imagine that we wanted to add a new field to our
+      <literal>host_info</literal> record called
+      <literal>os_version</literal>, as shown below.
     </para>
     <programlisting>
-# let first_plus_second (x :: y :: _) = x + y;;
-Characters 22-43:
-  let first_plus_second (x :: y :: _) = x + y;;
-                        ^^^^^^^^^^^^^^^^^^^^^
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-[]
-val first_plus_second : int list -&gt; int = &lt;fun&gt;
-# first_plus_second [5;3;6];;
-- : int = 8
-# first_plus_second [5];;
-Exception: (Match_failure &quot;&quot; 1 22).
+# type host_info =
+    { hostname   : string;
+      os_name    : string;
+      os_release : string;
+      cpu_arch   : string;
+      os_version : string;
+    };;
 </programlisting>
     <para>
-      Because variant patterns (of which list patterns are an example)
-      are not irrefutable, the compiler provides a static check to warn
-      you when your match is inexhaustive. We can fix the code above by
-      adding the other cases:
+      The code for <literal>host_info_to_string</literal> would continue
+      to compile without change. In this particular case, it's pretty
+      clear that you might want to update
+      <literal>host_info_to_string</literal> in order to take into
+      account the new field, and it would be nice if the type system
+      would give you a warning about the change.
     </para>
-    <programlisting>
-# let first_plus_second = function
-    | x :: y :: _ -&gt; x + y
-    | x :: [] -&gt; x
-    | [] -&gt; 0
-  ;;
-val first_plus_second : int list -&gt; int = &lt;fun&gt;
-</programlisting>
     <para>
-      This kind of exhaustiveness check isn't meaningful for record
-      patterns, but there is a different kind of exhaustiveness check
-      that is useful. In particular, OCaml offers a warning for missing
-      fields in a record pattern. With that warning turned on (which you
-      can do in the toplevel by typing
-      <literal>#warnings &quot;+9&quot;</literal>), the following code
-      will complain about.
+      Happily, OCaml does offer an optional warning for missing fields
+      in a record pattern. With that warning turned on (which you can do
+      in the toplevel by typing
+      <literal>#warnings &quot;+9&quot;</literal>), the compiler will
+      warn about the missing field.
     </para>
     <programlisting>
-# let host_info_to_string
-      { hostname = h; os_name = os; os_release = r } =
-    sprintf &quot;%s (%s %s)&quot; h os r;;
-    Characters 30-76:
-        { hostname = h; os_name = os; os_release = r } =
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# warnings &quot;+9&quot;;;
+# let host_info_to_string { hostname = h; os_name = os;
+                            os_release = r; cpu_arch = c } =
+       sprintf &quot;%s (%s %s / %s)&quot; h os r c;;
+    Characters 24-112:
+  ........................{ hostname = h; os_name = os;
+                              os_release = r; cpu_arch = c }..
 Warning 9: the following labels are not bound in this record pattern:
-cpu_arch
-Either bind these labels explicitly or add `; _' to the pattern.
+os_version
+Either bind these labels explicitly or add '; _' to the pattern.
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
-    <para>
-      Unlike the exhaustiveness warning for variants, ignoring this
-      warning won't lead to a runtime error. The warning is nonetheless
-      useful, because it helps you find cases where important data is
-      being ignored.
-    </para>
     <para>
       We can disable the warning for a given pattern by explicitly
       acknowledging that we are ignoring extra fields. This is done by
       adding an underscore to the pattern, as shown below.
     </para>
     <programlisting>
-# let host_info_to_string
-      { hostname = h; os_name = os; os_release = r; _ } =
-    sprintf &quot;%s (%s %s)&quot; h os r;;
+# let host_info_to_string { hostname = h; os_name = os;
+                            os_release = r; cpu_arch = c; _ } =
+       sprintf &quot;%s (%s %s / %s)&quot; h os r c;;
     val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
+    <para>
+      Generally, the right default is to turn the warning for incomplete
+      record matches on, and to explicitly disable it with an
+      <literal>_</literal> where necessary.
+    </para>
   </sect1>
   <sect1 id="field-punning">
     <title>Field punning</title>
@@ -3177,11 +3174,10 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
   <sect1 id="mutable-fields">
     <title>Mutable fields</title>
     <para>
-      By default, records, like most OCaml values, are immutable. That
-      said, it is possible to declare a record field as mutable. For
-      example, we could take the <literal>client_info</literal> type and
-      make the fields that may need to change over time mutable, as
-      follows.
+      Like most OCaml values, records are immutable by default. You can,
+      however, declare individual record fields as mutable. For example,
+      we could take the <literal>client_info</literal> type and make the
+      fields that may need to change over time mutable, as follows.
     </para>
     <programlisting>
 # type client_info =
@@ -3962,27 +3958,179 @@ val simplify : 'a blang -&gt; 'a blang = &lt;fun&gt;
   <sect1 id="polymorphic-variants">
     <title>Polymorphic variants</title>
     <para>
-      In addition to ordinary variant types, OCaml has a second kind of
-      variant type called <emphasis>polymorphic variants</emphasis>. As
-      we've seen, ordinary variants are a powerful tool for describing
-      and operating on complex data-structures. But variants have
-      limitations as well. One notable limitation is that you can't
-      share constructors between different variant types. To see what
-      this means, let's consider an example.
+      In addition to the ordinary variants we've seen so far, OCaml also
+      supports so-called <emphasis>polymorphic variants</emphasis>. As
+      we'll see, polymorphic variants are more flexible and
+      syntactically more lightweight than ordinary variants, but that
+      extra power comes at a cost. But before we discuss when and where
+      you'd use polymorphic variants, let's learn a bit about the
+      mechanics of dealing with them.
     </para>
-    <sect2 id="terminal-colors-redux">
-      <title>Terminal colors redux</title>
+    <para>
+      Syntactically, polymorphic variants are distinguished from
+      ordinary variants by the leading backtick. Pleasantly enough, you
+      can create a polymorphic variant without first writing an explicit
+      type declaration.
+    </para>
+    <programlisting>
+# let three = `Int 3;;
+val three : [&gt; `Int of int ] = `Int 3
+# let four = `Float 4.;;
+val four : [&gt; `Float of float ] = `Float 4.
+# let nan = `Not_a_number;;
+val nan : [&gt; `Not_a_number ] = `Not_a_number
+# [three; four; nan];;
+- : [&gt; `Float of float | `Int of int | `Not_a_number ] list =
+[`Int 3; `Float 4.; `Not_a_number]
+</programlisting>
+    <para>
+      The variant types are inferred automatically from their use. And
+      when we combine variants whose types contemplate different tags,
+      the compiler infers a new type that knows about both all those
+      tags.
+    </para>
+    <para>
+      The type system will complain, however, if it sees incompatible
+      uses of the same tag:
+    </para>
+    <programlisting>
+# let five = `Int &quot;five&quot;;;
+val five : [&gt; `Int of string ] = `Int &quot;five&quot;
+# [three; four; five];;
+Characters 14-18:
+  [three; four; five];;
+                ^^^^
+Error: This expression has type [&gt; `Int of string ]
+       but an expression was expected of type
+         [&gt; `Float of float | `Int of int ]
+       Types for tag `Int are incompatible
+</programlisting>
+    <para>
+      The <literal>&gt;</literal> at the beginning of the variant types
+      above is critical, because it marks the types as being open to
+      combination with other variant types. We can read the type
+      <literal>[&gt; `Int of string | `Float of float]</literal> as
+      describing a variant whose tags include
+      <literal>`Int of string</literal> and
+      <literal>`Float of float</literal>, but may include more tags as
+      well. You can roughly translate <literal>&gt;</literal> to
+      &quot;these tags or more&quot;.
+    </para>
+    <para>
+      OCaml will in some cases infer a variant type with
+      <literal>&lt;</literal>, to indicate &quot;these tags or
+      less&quot;, as in the following example.
+    </para>
+    <programlisting>
+# let is_positive = function
+     | `Int x -&gt; x &gt; 0
+     | `Float x -&gt; x &gt; 0.
+  ;;
+val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;
+</programlisting>
+    <para>
+      The <literal>&lt;</literal> is there because
+      <literal>is_positive</literal> has no way of dealing with values
+      that have tags other than <literal>`Float of float</literal> or
+      <literal>`Int of int</literal>.
+    </para>
+    <para>
+      We can think of these <literal>&lt;</literal> and
+      <literal>&gt;</literal> markers as indications of upper and lower
+      bounds. If the same type is both an upper and a lower bound, we
+      end up with an <emphasis>exact</emphasis> polymorphic variant
+      type, which has neither marker. For example:
+    </para>
+    <programlisting>
+# let exact = List.filter ~f:is_positive [three;four];;
+val exact : [ `Float of float | `Int of int ] List.t
+   = [`Int 3; `Float 4.]
+</programlisting>
+    <para>
+      Perhaps surprisingly, we can also create polymorphic variant types
+      that have different lower and upper bounds.
+    </para>
+    <programlisting>
+let is_positive = function
+     | `Int   x -&gt; Ok (x &gt; 0)
+     | `Float x -&gt; Ok (x &gt; 0.)
+     | `Not_a_number -&gt; Error &quot;not a number&quot;;;
+val is_positive :
+  [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt;
+  (bool, string) Result.t = &lt;fun&gt;
+# List.filter [three; four] ~f:(fun x -&gt;
+     match is_positive x with Error _ -&gt; false | Ok b -&gt; b);;
+  - : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ]
+    List.t
+= [`Int 3; `Float 4.]
+</programlisting>
+    <para>
+      Here, the inferred type states that the tags can be no more than
+      <literal>`Float</literal>, <literal>`Int</literal> and
+      <literal>`Not_a_number</literal>, and must contain at least
+      <literal>`Float</literal> and <literal>`Int</literal>. As you can
+      already start to see, polymorphic variants can lead to fairly
+      complex inferred types.
+    </para>
+    <sidebar><title>
+    Polymorphic variants and catch-all cases
+    </title>
+    <para>
+      As we saw with the definition of <literal>is_positive</literal>, a
+      match statement can lead to the inference of an upper bound on a
+      variant type, limiting the possible tags to those that can be
+      handled by the match. If we add a catch-all case to our match
+      statement, we can end up with a function with a lower bound.
+    </para>
+    <programlisting>
+# let is_positive_permissive = function
+     | `Int x -&gt; Ok (x &gt; 0)
+     | `Float x -&gt; Ok (x &gt; 0.)
+     | _ -&gt; Error &quot;Unknown number type&quot;
+  ;;
+        val is_positive_permissive :
+  [&gt; `Float of float | `Int of int ] -&gt; (bool, string) Core.Std._result =
+  &lt;fun&gt;
+# is_positive_permissive (`Int 0);;
+- : (bool, string) Result.t = Ok false
+# is_positive_permissive (`Ratio (3,4));;
+- : (bool, string) Result.t = Error &quot;Unknown number type&quot;
+</programlisting>
+    <para>
+      Catch-all cases are error-prone even with ordinary variants, but
+      they are especially so with polymorphic variants. That's because
+      you have no way of bounding what tags your function might have to
+      deal with. Such code is particularly vulnerable to typos. For
+      instance, if code that uses
+      <literal>is_positive_permissive</literal> passes in
+      <literal>Float</literal> misspelled as <literal>Floot</literal>,
+      the erroneous code will compile without complaint.
+    </para>
+    <programlisting>
+# is_positive_permissive (`Floot 3.5);;
+- : (bool, string) Result.t = Error &quot;Unknown number type&quot;
+</programlisting>
+    <para>
+      With ordinary variants, such a typo would have been caught as an
+      unknown constructor. As a general matter, one should be wary about
+      mixing catch-all cases and polymorphic variants.
+    </para>
+    </sidebar>
+
+    <sect2 id="example-terminal-colors-redux">
+      <title>Example: Terminal colors redux</title>
       <para>
         Imagine that we have a new terminal type that adds yet more
-        colors, say, by adding an alpha channel, and we wanted a type to
-        model those colors. We might model that as follows.
+        colors, say, by adding an alpha channel so you can specify
+        translucent colors. We could model this extended set of colors
+        as follows.
       </para>
       <programlisting>
 # type extended_color =
   | Basic of basic_color * weight  (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color space *)
-  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
   | Gray  of int                   (* 24 grayscale levels *)
+  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
   ;;
 </programlisting>
       <para>
@@ -4013,20 +4161,12 @@ Error: This expression has type extended_color
         <literal>color</literal> are in the compiler's view distinct and
         unrelated types. The compiler doesn't recognize that, for
         instance, the <literal>Basic</literal> constructor in both types
-        is in some sense the same. Moreover, the definition of
-        <literal>extended_color</literal> shadows the constructors from
-        <literal>color</literal>, so we can no longer even create a
-        <literal>color</literal>, though we can deal with this problem
-        by moving the definitions into different modules, much as we did
-        with records to avoid collisions between field names.
+        is in some sense the same.
       </para>
       <para>
-        Polymorphic variants allow a way around this problem entirely.
-        In the following we'll rewrite our color code to use polymorphic
-        variants. We'll start with
-        <literal>basic_color_to_int</literal>. We can change from using
-        ordinary variants to polymorphic ones simply by putting a
-        back-tick in front of each constructor.
+        Polymorphic variants allow a way around this problem. Let's
+        start by rewriting <literal>basic_color_to_int</literal> using
+        polymorphic variants. Here's the full code.
       </para>
       <programlisting>
 # let basic_color_to_int = function
@@ -4038,10 +4178,10 @@ val basic_color_to_int :
   int = &lt;fun&gt;
 </programlisting>
       <para>
-        We didn't need to declare the polymorphic variant before using
-        it; it was simply inferred from the code. We can infer more
+        This is a relatively simple case, but we can infer more
         complicated and deeply nested polymorphic variant types as well,
-        which becomes clear as we port more of our color code over.
+        as we can see by we rewriting <literal>color_to_int</literal>
+        with polymorphic variants.
       </para>
       <programlisting>
 # let color_to_int = function
@@ -4092,27 +4232,27 @@ val extended_color_to_int :
   int = &lt;fun&gt;
 </programlisting>
     </sect2>
-    <sect2 id="polymorphic-variants-in-more-depth">
-      <title>Polymorphic variants in more depth</title>
+    <sect2 id="when-and-how-to-use-polymorphic-variants">
+      <title>When and how to use polymorphic variants</title>
       <para>
         At first glance, polymorphic variants look like a strict
-        improvement over regular variants. You seem to be able to do all
-        the same things, but it's even more flexible and requires less
-        typing, since you don't need all those pesky type declarations.
+        improvement over ordinary variants. You can do everything that
+        ordinary variants can do, plus it's more flexible and more
+        concise. What's not to like?
       </para>
       <para>
-        While that's all true, most of the time, you'll want to stick to
-        regular variants. That's because the flexibility of polymorphic
-        variants comes at a price. There are a few disadvantages to
-        polymorphic variants:
+        In reality, regular variants are the more pragmatic choice most
+        of the time. That's because the flexibility of polymorphic
+        variants comes at a price. Here are some of the downsides.
       </para>
       <itemizedlist>
         <listitem>
           <para>
             <emphasis>Efficiency:</emphasis> This isn't a huge effect,
             but polymorphic variants are somewhat heavier than regular
-            variants, and there are fewer optimizations that the
-            compiler can apply because it has less type information.
+            variants, and OCaml can't generate code for matching on
+            polymorphic variants that is quite as efficient as what is
+            generated for regular variants.
           </para>
         </listitem>
         <listitem>
@@ -4126,11 +4266,12 @@ val extended_color_to_int :
         <listitem>
           <para>
             <emphasis>Complexity:</emphasis> This is an important issue.
-            The typing rules for polymorphic variants are a lot more
-            complicated than they are for regular variants. This means
-            that heavy use of polymorphic variants can leave you
-            scratching your head trying to figure out why a given piece
-            of code did or didn't compile.
+            As we've seen, the typing rules for polymorphic variants are
+            a lot more complicated than they are for regular variants.
+            This means that heavy use of polymorphic variants can leave
+            you scratching your head trying to figure out why a given
+            piece of code did or didn't compile. It can also lead to
+            absurdly long and hard to decode error messages.
           </para>
         </listitem>
       </itemizedlist>
@@ -4139,87 +4280,6 @@ val extended_color_to_int :
         powerful feature, but it's worth understanding their
         limitations, and how to use them sensibly and modestly.
       </para>
-      <para>
-        To understand the limitations of polymorphic variants, it's
-        worth working through some simple examples so we can understand
-        polymorphic variants in more detail.
-      </para>
-      <para>
-        First, consider what happens when we declare a simple variant
-        representing an integer.
-      </para>
-      <programlisting>
-# let three = `Int 3;;
-val three : [&gt; `Int of int ] = `Int 3
-</programlisting>
-      <para>
-        Note the <literal>&gt;</literal> at the beginning of the type.
-        This indicates that the type of three is open to other variants.
-        In particular, we can put <literal>three</literal> on a list
-        with a value of a different variant.
-      </para>
-      <programlisting>
-# let nums = [three; `Float 4.0];;
-val nums : [&gt; `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
-</programlisting>
-      <para>
-        Roughly speaking, you can read the <literal>&gt;</literal> as
-        indicating &quot;these variants are present, and maybe
-        more&quot;. We can close the definition of
-        <literal>three</literal> by an explicit annotation, at which
-        point, combining it with other constructors no longer works.
-      </para>
-      <programlisting>
-# let three : [`Int of int] = `Int 3 ;;
-val three : [ `Int of int ] = `Int 3
-# let nums = [three; `Float 4.];;
-Characters 19-28:
-  let nums = [three; `Float 4.];;
-                     ^^^^^^^^^
-Error: This expression has type [&gt; `Float of float ]
-       but an expression was expected of type [ `Int of int ]
-       The second variant type does not allow tag(s) `Float
-</programlisting>
-      <para>
-        In our example above, <literal>three</literal> was compatible
-        with a particular set of tags or more. In some cases, we see
-        types that are compatible with a given set of types or less, as
-        in the following case:
-      </para>
-      <programlisting>
-# let add x y =
-    match x,y with
-    | `Int x  , `Int y   -&gt; `Int (x + y)
-    | `Float x, `Float y -&gt; `Float (x +. y)
-    | `Int i , `Float f | `Float f, `Int i -&gt; 
-      `Float (f +. Float.of_int i) 
-  ;;
-val add :
-  [&lt; `Float of float | `Int of int ] -&gt;
-  [&lt; `Float of float | `Int of int ] -&gt; [&gt; `Float of float | `Int of int ] =
-  &lt;fun&gt;
-</programlisting>
-      <para>
-        Here, <literal>add</literal> can take any value that has floats
-        or ints, but nothing else. Thus, we can write:
-      </para>
-      <programlisting>
-# add three three;;
-- : [&gt; `Float of float | `Int of int ] = `Int 6
-</programlisting>
-      <para>
-        but we can't write:
-      </para>
-      <programlisting>
-# add three (`Rational (3,4));;
-Characters 11-26:
-  add three (`Rational (3,4));;
-             ^^^^^^^^^^^^^^^
-Error: This expression has type [&gt; `Rational of int * int ]
-       but an expression was expected of type
-         [&lt; `Float of float | `Int of int ]
-       The second variant type does not allow tag(s) `Rational
-</programlisting>
     </sect2>
   </sect1>
 </chapter>
