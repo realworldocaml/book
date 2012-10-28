@@ -535,7 +535,7 @@ supports so-called _polymorphic variants_.  As we'll see, polymorphic
 variants are more flexible and syntactically more lightweight than
 ordinary variants, but that extra power comes at a cost.  But before
 we discuss when and where you'd use polymorphic variants, let's learn
-a bit about the mechanics of dealing with them.
+the basic mechanics.
 
 Syntactically, polymorphic variants are distinguished from ordinary
 variants by the leading backtick.  Pleasantly enough, you can create a
@@ -554,7 +554,7 @@ val nan : [> `Not_a_number ] = `Not_a_number
 [`Int 3; `Float 4.; `Not_a_number]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The variant types are inferred automatically from their use.  And when
+The variant types are inferred automatically from their use, and when
 we combine variants whose types contemplate different tags, the
 compiler infers a new type that knows about both all those tags.
 
@@ -603,7 +603,7 @@ marker.  For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let exact = List.filter ~f:is_positive [three;four];;
-val exact : [ `Float of float | `Int of int ] List.t
+val exact : [ `Float of float | `Int of int ] list
    = [`Int 3; `Float 4.]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -675,9 +675,11 @@ mixing catch-all cases and polymorphic variants.
 
 ### Example: Terminal colors redux
 
-Imagine that we have a new terminal type that adds yet more colors,
-say, by adding an alpha channel so you can specify translucent colors.
-We could model this extended set of colors as follows.
+We're going to go back to the terminal color example that we discussed
+earlier.  Imagine that we have a new terminal type that adds yet more
+colors, say, by adding an alpha channel so you can specify translucent
+colors.  We could model this extended set of colors as follows, using
+an ordinary variant.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type extended_color =
@@ -688,9 +690,10 @@ We could model this extended set of colors as follows.
   ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The problem is that the constructors of this new type have no
-relationship with the constructors of `color`.  In particular, we'd
-like to be able to write the following function.
+We want to write a function `extended_color_to_int`, that works like
+`color_to_int` for all of the old kinds of colors, with new logic only
+for handling colors that include an alpha channel.  We might think we
+could write the function to do this as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let extended_color_to_int = function
@@ -699,8 +702,8 @@ like to be able to write the following function.
   ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-On the face of it this looks reasonable enough, but it leads to the
-following type error.
+This looks reasonable enough, but it leads to the following type
+error.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 Characters 93-98:
@@ -711,75 +714,102 @@ Error: This expression has type extended_color
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The problem is that `extended_color` and `color` are in the compiler's
-view distinct and unrelated types.  The compiler doesn't recognize
-that, for instance, the `Basic` constructor in both types is in some
-sense the same.
+view distinct and unrelated types.  The compiler doesn't, for example,
+recognize any equality between the `Basic` constructor in the two
+types.
 
-Polymorphic variants allow a way around this problem.  Let's start by
-rewriting `basic_color_to_int` using polymorphic variants.  Here's the
-full code.
+What we essentially want to do is to share constructors between two
+different types, and polymorphic variants let us do this.
+`basic_color_to_int` and `color_to_int` are straightforward rewrites
+where we just use polymorphic variants instead of ordinary ones.  
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let basic_color_to_int = function
-  | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
-  | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
-;;
+    | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
+    | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
+
+  let color_to_int = function
+    | `Basic (basic_color,weight) ->
+      let base = match weight with `Bold -> 8 | `Regular -> 0 in
+      base + basic_color_to_int basic_color
+    | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+    | `Gray i -> 232 + i
+ ;;
 val basic_color_to_int :
   [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
   int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This is a relatively simple case, but we can infer more complicated
-and deeply nested polymorphic variant types as well, as we can see by
-we rewriting `color_to_int` with polymorphic variants.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let color_to_int = function
-  | `Basic (basic_color,weight) ->
-    let base = match weight with `Bold -> 8 | `Regular -> 0 in
-    base + basic_color_to_int basic_color
-  | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-  | `Gray i -> 232 + i
-;;
 val color_to_int :
   [< `Basic of
-       [< `Black
-        | `Blue
-        | `Cyan
-        | `Green
-        | `Magenta
-        | `Red
-        | `White
-        | `Yellow ] *
+       [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red
+        | `White | `Yellow ] *
        [< `Bold | `Regular ]
    | `Gray of int
    | `RGB of int * int * int ] ->
   int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-and indeed, the full `extended_color_to_int` function works exactly as
-intended.
+`extended_color_to_int` is the interesting one.  The key issue is that
+`color_to_int` supports a larger set of tags than `color_to_int`,
+which means that the variable `color` that is passed as an argument to
+`color_to_int` has to have a different type than the argument that is
+passed to `extended_color_to_int`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
-;;
+  ;;
 val extended_color_to_int :
   [< `Basic of
-       [< `Black
-        | `Blue
-        | `Cyan
-        | `Green
-        | `Magenta
-        | `Red
-        | `White
-        | `Yellow ] *
+       [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red
+        | `White | `Yellow ] *
        [< `Bold | `Regular ]
    | `Gray of int
    | `RGB of int * int * int
    | `RGBA of int * int * int * int ] ->
   int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The above code is more delicately balanced than one might imagine.
+Consider the following inconspicuous change to
+`extended_color_to_int`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let extended_color_to_int = function
+    | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+    | color -> color_to_int color
+  ;;
+      Characters 125-130:
+      | color -> color_to_int color
+                              ^^^^^
+Error: This expression has type [> `RGBA of int * int * int * int ]
+       but an expression was expected of type
+         [< `Basic of
+              [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red
+               | `White | `Yellow ] *
+              [< `Bold | `Regular ]
+          | `Gray of int
+          | `RGB of int * int * int ]
+       The second variant type does not allow tag(s) `RGBA
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We've just changed the final case from being a match on an explicit
+set of tags to being a catch-all.  But it fails now, in a way similar
+to the original error that we got when trying to do this with regular
+variants.  The issue is that the absence of specific variants prevents
+the compiler from computing an exact type for `color`.  As such, it
+falls back to using the larger type which includes the `` `RGBA`` tag,
+which `color_to_int` can't handle.
+
+This code is fragile in a different way as well.  Consider what
+happens if we make a mistake of adding an extra, misspelled case to
+`extended_color_to_int`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+let extended_color_to_int = function
+    | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+    | color -> color_to_int color
+  ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### When and how to use polymorphic variants
