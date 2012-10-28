@@ -3963,8 +3963,7 @@ val simplify : 'a blang -&gt; 'a blang = &lt;fun&gt;
       we'll see, polymorphic variants are more flexible and
       syntactically more lightweight than ordinary variants, but that
       extra power comes at a cost. But before we discuss when and where
-      you'd use polymorphic variants, let's learn a bit about the
-      mechanics of dealing with them.
+      you'd use polymorphic variants, let's learn the basic mechanics.
     </para>
     <para>
       Syntactically, polymorphic variants are distinguished from
@@ -3984,7 +3983,7 @@ val nan : [&gt; `Not_a_number ] = `Not_a_number
 [`Int 3; `Float 4.; `Not_a_number]
 </programlisting>
     <para>
-      The variant types are inferred automatically from their use. And
+      The variant types are inferred automatically from their use, and
       when we combine variants whose types contemplate different tags,
       the compiler infers a new type that knows about both all those
       tags.
@@ -4043,7 +4042,7 @@ val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;
     </para>
     <programlisting>
 # let exact = List.filter ~f:is_positive [three;four];;
-val exact : [ `Float of float | `Int of int ] List.t
+val exact : [ `Float of float | `Int of int ] list
    = [`Int 3; `Float 4.]
 </programlisting>
     <para>
@@ -4120,10 +4119,11 @@ val is_positive :
     <sect2 id="example-terminal-colors-redux">
       <title>Example: Terminal colors redux</title>
       <para>
-        Imagine that we have a new terminal type that adds yet more
-        colors, say, by adding an alpha channel so you can specify
-        translucent colors. We could model this extended set of colors
-        as follows.
+        We're going to go back to the terminal color example that we
+        discussed earlier. Imagine that we have a new terminal type that
+        adds yet more colors, say, by adding an alpha channel so you can
+        specify translucent colors. We could model this extended set of
+        colors as follows, using an ordinary variant.
       </para>
       <programlisting>
 # type extended_color =
@@ -4134,10 +4134,12 @@ val is_positive :
   ;;
 </programlisting>
       <para>
-        The problem is that the constructors of this new type have no
-        relationship with the constructors of <literal>color</literal>.
-        In particular, we'd like to be able to write the following
-        function.
+        We want to write a function
+        <literal>extended_color_to_int</literal>, that works like
+        <literal>color_to_int</literal> for all of the old kinds of
+        colors, with new logic only for handling colors that include an
+        alpha channel. We might think we could write the function to do
+        this as follows.
       </para>
       <programlisting>
 # let extended_color_to_int = function
@@ -4146,8 +4148,8 @@ val is_positive :
   ;;
 </programlisting>
       <para>
-        On the face of it this looks reasonable enough, but it leads to
-        the following type error.
+        This looks reasonable enough, but it leads to the following type
+        error.
       </para>
       <programlisting>
 Characters 93-98:
@@ -4159,77 +4161,109 @@ Error: This expression has type extended_color
       <para>
         The problem is that <literal>extended_color</literal> and
         <literal>color</literal> are in the compiler's view distinct and
-        unrelated types. The compiler doesn't recognize that, for
-        instance, the <literal>Basic</literal> constructor in both types
-        is in some sense the same.
+        unrelated types. The compiler doesn't, for example, recognize
+        any equality between the <literal>Basic</literal> constructor in
+        the two types.
       </para>
       <para>
-        Polymorphic variants allow a way around this problem. Let's
-        start by rewriting <literal>basic_color_to_int</literal> using
-        polymorphic variants. Here's the full code.
+        What we essentially want to do is to share constructors between
+        two different types, and polymorphic variants let us do this.
+        <literal>basic_color_to_int</literal> and
+        <literal>color_to_int</literal> are straightforward rewrites
+        where we just use polymorphic variants instead of ordinary ones.
       </para>
       <programlisting>
 # let basic_color_to_int = function
-  | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
-  | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7
-;;
+    | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
+    | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7
+
+  let color_to_int = function
+    | `Basic (basic_color,weight) -&gt;
+      let base = match weight with `Bold -&gt; 8 | `Regular -&gt; 0 in
+      base + basic_color_to_int basic_color
+    | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+    | `Gray i -&gt; 232 + i
+ ;;
 val basic_color_to_int :
   [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] -&gt;
   int = &lt;fun&gt;
-</programlisting>
-      <para>
-        This is a relatively simple case, but we can infer more
-        complicated and deeply nested polymorphic variant types as well,
-        as we can see by we rewriting <literal>color_to_int</literal>
-        with polymorphic variants.
-      </para>
-      <programlisting>
-# let color_to_int = function
-  | `Basic (basic_color,weight) -&gt;
-    let base = match weight with `Bold -&gt; 8 | `Regular -&gt; 0 in
-    base + basic_color_to_int basic_color
-  | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
-  | `Gray i -&gt; 232 + i
-;;
 val color_to_int :
   [&lt; `Basic of
-       [&lt; `Black
-        | `Blue
-        | `Cyan
-        | `Green
-        | `Magenta
-        | `Red
-        | `White
-        | `Yellow ] *
+       [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red
+        | `White | `Yellow ] *
        [&lt; `Bold | `Regular ]
    | `Gray of int
    | `RGB of int * int * int ] -&gt;
   int = &lt;fun&gt;
 </programlisting>
       <para>
-        and indeed, the full <literal>extended_color_to_int</literal>
-        function works exactly as intended.
+        <literal>extended_color_to_int</literal> is the interesting one.
+        The key issue is that <literal>color_to_int</literal> supports a
+        larger set of tags than <literal>color_to_int</literal>, which
+        means that the variable <literal>color</literal> that is passed
+        as an argument to <literal>color_to_int</literal> has to have a
+        different type than the argument that is passed to
+        <literal>extended_color_to_int</literal>.
       </para>
       <programlisting>
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
     | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color
-;;
+  ;;
 val extended_color_to_int :
   [&lt; `Basic of
-       [&lt; `Black
-        | `Blue
-        | `Cyan
-        | `Green
-        | `Magenta
-        | `Red
-        | `White
-        | `Yellow ] *
+       [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red
+        | `White | `Yellow ] *
        [&lt; `Bold | `Regular ]
    | `Gray of int
    | `RGB of int * int * int
    | `RGBA of int * int * int * int ] -&gt;
   int = &lt;fun&gt;
+</programlisting>
+      <para>
+        The above code is more delicately balanced than one might
+        imagine. Consider the following inconspicuous change to
+        <literal>extended_color_to_int</literal>.
+      </para>
+      <programlisting>
+# let extended_color_to_int = function
+    | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+    | color -&gt; color_to_int color
+  ;;
+      Characters 125-130:
+      | color -&gt; color_to_int color
+                              ^^^^^
+Error: This expression has type [&gt; `RGBA of int * int * int * int ]
+       but an expression was expected of type
+         [&lt; `Basic of
+              [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red
+               | `White | `Yellow ] *
+              [&lt; `Bold | `Regular ]
+          | `Gray of int
+          | `RGB of int * int * int ]
+       The second variant type does not allow tag(s) `RGBA
+</programlisting>
+      <para>
+        We've just changed the final case from being a match on an
+        explicit set of tags to being a catch-all. But it fails now, in
+        a way similar to the original error that we got when trying to
+        do this with regular variants. The issue is that the absence of
+        specific variants prevents the compiler from computing an exact
+        type for <literal>color</literal>. As such, it falls back to
+        using the larger type which includes the
+        <literal>`RGBA</literal> tag, which
+        <literal>color_to_int</literal> can't handle.
+      </para>
+      <para>
+        This code is fragile in a different way as well. Consider what
+        happens if we make a mistake of adding an extra, misspelled case
+        to <literal>extended_color_to_int</literal>.
+      </para>
+      <programlisting>
+let extended_color_to_int = function
+    | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+    | color -&gt; color_to_int color
+  ;;
 </programlisting>
     </sect2>
     <sect2 id="when-and-how-to-use-polymorphic-variants">
