@@ -533,9 +533,7 @@ data-structures like red-black trees.
 In addition to the ordinary variants we've seen so far, OCaml also
 supports so-called _polymorphic variants_.  As we'll see, polymorphic
 variants are more flexible and syntactically more lightweight than
-ordinary variants, but that extra power comes at a cost.  But before
-we discuss when and where you'd use polymorphic variants, let's learn
-the basic mechanics.
+ordinary variants, but that extra power comes at a cost, as we'll see.
 
 Syntactically, polymorphic variants are distinguished from ordinary
 variants by the leading backtick.  Pleasantly enough, you can create a
@@ -554,9 +552,9 @@ val nan : [> `Not_a_number ] = `Not_a_number
 [`Int 3; `Float 4.; `Not_a_number]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The variant types are inferred automatically from their use, and when
-we combine variants whose types contemplate different tags, the
-compiler infers a new type that knows about both all those tags.
+Variant types are inferred automatically from their use, and when we
+combine variants whose types contemplate different tags, the compiler
+infers a new type that knows about both all those tags.
 
 The type system will complain, however, if it sees incompatible uses
 of the same tag:
@@ -586,7 +584,7 @@ OCaml will in some cases infer a variant type with ` <`, to indicate
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let is_positive = function
-     | `Int x -> x > 0
+     | `Int   x -> x > 0
      | `Float x -> x > 0.
   ;;
 val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
@@ -636,16 +634,16 @@ polymorphic variants can lead to fairly complex inferred types.
 As we saw with the definition of `is_positive`, a match statement can
 lead to the inference of an upper bound on a variant type, limiting
 the possible tags to those that can be handled by the match.  If we
-add a catch-all case to our match statement, we can end up with a
-function with a lower bound.
+add a catch-all case to our match statement, we end up with a function
+with a lower bound.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let is_positive_permissive = function
-     | `Int x -> Ok (x > 0)
+     | `Int   x -> Ok (x > 0)
      | `Float x -> Ok (x > 0.)
      | _ -> Error "Unknown number type"
   ;;
-        val is_positive_permissive :
+val is_positive_permissive :
   [> `Float of float | `Int of int ] -> (bool, string) Core.Std._result =
   <fun>
 # is_positive_permissive (`Int 0);;
@@ -675,11 +673,11 @@ mixing catch-all cases and polymorphic variants.
 
 ### Example: Terminal colors redux
 
-We're going to go back to the terminal color example that we discussed
-earlier.  Imagine that we have a new terminal type that adds yet more
-colors, say, by adding an alpha channel so you can specify translucent
-colors.  We could model this extended set of colors as follows, using
-an ordinary variant.
+To see how to use polymorphic variants in practice, let's go back to
+the terminal color example that we discussed earlier.  Imagine that we
+have a new terminal type that adds yet more colors, say, by adding an
+alpha channel so you can specify translucent colors.  We could model
+this extended set of colors as follows, using an ordinary variant.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # type extended_color =
@@ -719,9 +717,10 @@ recognize any equality between the `Basic` constructor in the two
 types.
 
 What we essentially want to do is to share constructors between two
-different types, and polymorphic variants let us do this.
-`basic_color_to_int` and `color_to_int` are straightforward rewrites
-where we just use polymorphic variants instead of ordinary ones.  
+different types, and polymorphic variants let us do this.  First,
+let's rewrite `basic_color_to_int` and `color_to_int` using
+polymorphic variants.  The translation here is entirely
+straightforward.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let basic_color_to_int = function
@@ -748,11 +747,13 @@ val color_to_int :
   int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`extended_color_to_int` is the interesting one.  The key issue is that
-`color_to_int` supports a larger set of tags than `color_to_int`,
-which means that the variable `color` that is passed as an argument to
-`color_to_int` has to have a different type than the argument that is
-passed to `extended_color_to_int`.
+Now we can try writing `extended_color_to_int`.  The key issue with
+this code is that `extended_color_to_int` needs to invoke
+`color_to_int` with a narrower type, _i.e._, one that includes fewer
+tags.  Written properly, this narrowing can be done via a pattern
+match.  In particular, in the following code, the type of the variable
+`color` includes only the tags `` `Basic``, `` `RGB`` and `` `Gray``,
+and not `` `RGBA``.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let extended_color_to_int = function
@@ -771,8 +772,9 @@ val extended_color_to_int :
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The above code is more delicately balanced than one might imagine.
-Consider the following inconspicuous change to
-`extended_color_to_int`.
+In particular, if we use a catch-all case instead of an explicit
+enumeration of the cases, the type is no longer narrowed, and so
+compilation fails.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let extended_color_to_int = function
@@ -793,26 +795,111 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
        The second variant type does not allow tag(s) `RGBA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We've just changed the final case from being a match on an explicit
-set of tags to being a catch-all.  But it fails now, in a way similar
-to the original error that we got when trying to do this with regular
-variants.  The issue is that the absence of specific variants prevents
-the compiler from computing an exact type for `color`.  As such, it
-falls back to using the larger type which includes the `` `RGBA`` tag,
-which `color_to_int` can't handle.
+The code here is fragile in a different way, in that it's too fragile
+to typos.  Let's consider how we might write this code as a proper
+library, including a proper `mli`.  The interface might look something
+like this:
 
-This code is fragile in a different way as well.  Consider what
-happens if we make a mistake of adding an extra, misspelled case to
-`extended_color_to_int`.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: terminal_color.mli *)
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-let extended_color_to_int = function
-    | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-    | color -> color_to_int color
-  ;;
+open Core.Std
+
+type basic_color =
+  [ `Black   | `Blue | `Cyan  | `Green
+  | `Magenta | `Red  | `White | `Yellow ]
+
+type color =
+  [ `Basic of basic_color * [ `Bold | `Regular ]
+  | `Gray of int
+  | `RGB  of int * int * int ]
+
+type extended_color =
+  [ color
+  | `RGBA of int * int * int * int ]
+
+val color_to_int          : color -> int
+val extended_color_to_int : extended_color -> int
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### When and how to use polymorphic variants
+Here, `extended_color` is defined as an explicit extension of
+`color`.  Also, notice that we defined all of these types as exact
+variants.   Now here's what the implementation might look like.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+open Core.Std
+
+type basic_color =
+  [ `Black   | `Blue | `Cyan  | `Green
+  | `Magenta | `Red  | `White | `Yellow ]
+
+type color =
+  [ `Basic of basic_color * [ `Bold | `Regular ]
+  | `Gray of int
+  | `RGB  of int * int * int ]
+
+type extended_color =
+  [ color
+  | `RGBA of int * int * int * int ]
+
+let basic_color_to_int = function
+  | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
+  | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
+
+let color_to_int = function
+  | `Basic (basic_color,weight) ->
+    let base = match weight with `Bold -> 8 | `Regular -> 0 in
+    base + basic_color_to_int basic_color
+  | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+  | `Gray i -> 232 + i
+
+let extended_color_to_int = function
+  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+  | `Grey x -> 2000 + x
+  | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this case, a change was made to `extended_color_to_int`, to add
+special-case handling for the color gray, rather than using
+`color_to_int`.  Unfortunately, `Gray` was misspelled as `Grey`, and
+the compiler didn't complain.  It just inferred a bigger type for
+`extended_color_to_int`, which happens to be compatible with the
+`mli`, and so it compiles without incident.
+
+If we add an explicit type annotation to the code itself (rather than
+just in the mli), then the compiler has enough information to warn us.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let extended_color_to_int : extended_color -> int = function
+  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+  | `Grey x -> 2000 + x
+  | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In particular, the compiler will complain that the `` `Grey`` case as
+unused.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+File "terminal_color.ml", line 29, characters 4-11:
+Warning 11: this match case is unused.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once we have type definitions at our disposal, we can revisit the
+question of how we write the pattern-match that narrows the type.  In
+particular, we can explicitly use the type name as part of the pattern
+match, by prefixing it with a `#`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let extended_color_to_int : extended_color -> int = function
+  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+  | #color as color -> color_to_int color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is useful when you want to narrow down to a type whose definition
+is long, and you don't want the verbosity of writing the tags down
+explicitly in the match.
+
+### When to use polymorphic variants
 
 At first glance, polymorphic variants look like a strict improvement
 over ordinary variants.  You can do everything that ordinary variants
@@ -829,14 +916,30 @@ a price.  Here are some of the downsides.
 - _Error-finding:_ Polymorphic variants are type-safe, but the typing
   discipline that they impose is, by dint of its flexibility, less
   likely to catch bugs in your program.
-- _Complexity:_ This is an important issue.  As we've seen, the typing
-  rules for polymorphic variants are a lot more complicated than they
-  are for regular variants.  This means that heavy use of polymorphic
-  variants can leave you scratching your head trying to figure out why
-  a given piece of code did or didn't compile.  It can also lead to
-  absurdly long and hard to decode error messages.
+- _Complexity:_ As we've seen, the typing rules for polymorphic
+  variants are a lot more complicated than they are for regular
+  variants.  This means that heavy use of polymorphic variants can
+  leave you scratching your head trying to figure out why a given
+  piece of code did or didn't compile.  It can also lead to absurdly
+  long and hard to decode error messages.
 
 All that said, polymorphic variants are still a useful and powerful
 feature, but it's worth understanding their limitations, and how to
 use them sensibly and modestly.
 
+Probably the safest and most common use-case for polymorphic variants
+is for cases where ordinary variants would be sufficient, but are
+syntactically too heavyweight.  For example, you often want to create
+a variant type for encoding the inputs or outputs to a function, where
+it's not worth declaring a separate type for it.  Polymorphic variants
+are very useful here, and as long as there are type annotations that
+constrain these to have explicit, exact types, this tends to work
+well.
+
+Variants are most problematic exactly where you take full advantage of
+their power; in particular, when you take advantage of the ability of
+polymorphic variant types to overlap in the tags they support.  This
+ties into OCaml's support for subtyping.  As we'll discuss further
+when we cover objects in Chapter {{{OBJECTS}}}, subtyping brings in a
+lot of complexity, and most of the time, that's complexity you want to
+avoid.

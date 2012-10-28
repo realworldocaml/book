@@ -13,6 +13,6 @@ type extended_color =
   [ color
   | `RGBA of int * int * int * int ]
 
-val color_to_int          : color ->  int
-val extended_color_to_int : extended_color ->  int
+val color_to_int          : color -> int
+val extended_color_to_int : extended_color -> int
 
