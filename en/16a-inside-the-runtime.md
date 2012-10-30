@@ -417,4 +417,3 @@ clear what the implications of an impure heap are atm)
 
 ### Compaction and defragmenting the major heap
 
-Test math $test = \frac{allocated}{heap size * percent overhead}$
