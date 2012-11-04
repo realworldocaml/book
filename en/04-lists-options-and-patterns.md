@@ -1,12 +1,29 @@
 # Lists, Options and Patterns
 
-_(Note, this chapter is highly incomplete.  All it currently contains
-is an example...)_
+_(Note, this chapter is highly incomplete.  jyh is working on it.)_
 
-## Example: pretty-printing a table
+## Lists
+
+As with any programming language, we need a way to represent _data_,
+things like numbers, words, images, etc., and we need a way to define
+_aggregates_ that bring together related values that represent some
+concept.
+
+In a strongly-typed language like OCaml, the structure of data is
+closely related to the data _type_.  The type defines the ``shape'' of
+the data, and it also specifies exactly what operations are used to
+_construct_ and _destruct_ values of that type.  This relationship is
+essential -- we will always discuss data in relation to its type, its
+constructors, and its destructors.
+
+Let's start with an example using _lists_.  Lists are one of the most
+common ways to aggregate data in OCaml; they are simple, and they are
+extensively supported by the standard library.
+
+### Example: pretty-printing a table
 
 One common programming task is displaying tabular data.  In this
-example, will go over the design of a simple library to do just that.
+example, we will go over the design of a simple library to do just that.
 
 We'll start with the interface.  The code will go in a new module
 called `Text_table` whose `.mli` contains just the following function:
@@ -47,7 +64,7 @@ you'll get the following output:
 Now that we know what `render` is supposed to do, let's dive into the
 implementation.
 
-### Computing the widths
+#### Computing the widths
 
 To render the rows of the table, we'll first need the width of the
 widest entry in each column.  The following function does just that.
@@ -73,7 +90,7 @@ different number of entries than the header.  In particular,
 `List.map2_exn` throws an exception when its arguments have mismatched
 lengths.
 
-### Rendering the rows
+#### Rendering the rows
 
 Now we need to write the code to render a single row.  There are
 really two different kinds of rows that need to be rendered; an
@@ -159,8 +176,6 @@ let render_separator widths =
     (List.map widths ~f:(fun width -> String.make (width + 2) '-'))
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Bringing it all together
-
 And now we can write the function for rendering a full table.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
@@ -172,6 +187,179 @@ let render header rows =
      :: List.map rows ~f:(fun row -> render_row widths row)
     )
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## List basics
+
+In the example, we see calls to `List` functions in the standard
+library, in particular `List.map`.  How does this all work?  To
+understand, we need to consider first how lists are _represented_
+internally, which follows from the type definition and the way lists
+are constructed.  Let's look at the constructors first.
+
+We have seen how square brackets can be used to construct a list of
+values, but there are really just two ways to construct a list value.
+
+* [] is the _empty_ list.
+* If `x` is a value and `l` is a list, then the expression `x :: l`
+  constructs a new list where the first element is `x`, and the rest
+  is `l`.  The value corresponding to `x :: l` is commonly called a
+  _cons_-cell (the term comes from Lisp, where _cons_ is short for
+  ``constructor'').
+
+The bracket syntax `[5; 3; 7]` is syntactic sugar for a list with 3
+cons-cells, `5 :: 3 :: 7 :: []`.  Each cell has two parts: 1) a value,
+and 2) a pointer to the rest of the list.  The final pointer refers to
+the special value `[]` representing the empty list.
+
+![List](figures/04-list-01.svg)
+
+## Pattern matching
+
+Constructing a list is really only half the story -- it would be
+pretty useless to construct lists unless we can also pull them apart.
+We need _destructors_.  In OCaml, in general, destructors use _pattern
+matching_, where we _match_ a value aginst the possible patterns that
+describe its possible shapes.
+
+For a list, there are two possible shapes: the empty list `[]` or a
+cons-cell `h :: t`.  We can use a `match` expression to perform the
+pattern matching.  In the case of a cons-cell, the variables `h` and
+`t` in the pattern are bound to the corresponding values in the list
+when the match is performed.
+
+For example, suppose we want to define a function to add 1 to each
+element of a list.  We have to consider both cases, 1) where the list
+is empty, or 2) where it is a cons-cell.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let rec add1 l =
+    match l with
+     | [] -> []
+	 | h :: t -> (h + 1) :: (add1 t);;
+val add1 : int list -> int list = <fun>
+# add1 [5; 3; 7];;
+- : int list = [6; 4; 8]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The functions in the standard library are implemented in similar ways.
+The `List.map` function can be defined as follows (the `function`
+syntax is equivalent to performing a `match`).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# let rec map f = function
+   | [] -> []
+   | h :: t -> f h :: map f t;;
+val map : ('a -> 'b) -> 'a list -> 'b list = <fun>
+# map string_of_int [5; 3; 7];;
+- : string list = ["5"; "3"; "7"]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## List performance
+
+Lists are ubiquitous in OCaml programs.  They are easy to use and
+reasonably efficient for small lists, but large lists can have
+significant performance problems.  The issue is that lists are formed
+from separately allocated cons-cells.  This has space overhead because
+each value in the list is paried with a pointer to the rest of the
+list.  The separate allocation also reduces locality, so it can result
+in poor cache behavior.
+
+Perhaps more important than those concerns is that list traversal
+takes linear time in the length of the list.  For example, the
+`List.length` function counts the number of elements in the list,
+taking linear time.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let rec length = function [] -> 0 | _ :: t -> (length t) + 1;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In fact, this implementation of the function `length` is worse than
+that, because the function is recursive.  In this implementation of
+the function, the recursive call to `length t` is active at the same
+time as the outer call, with the result that the runtime needs to
+allocate stack frames for each recursive call, so this function also
+takes linear space.  For large lists, this is inefficient, and it can
+result in a stack overflow.
+
+### Tail-recursion
+
+We can't do anything about `length` taking linear time --
+singly-linked lists of this kind don't have an efficient `length`
+operation.  However, we can address the space problem using _tail
+recursion_.
+
+Tail recursion occurs whenever the result of the recursive call is
+returned immediately by the calling function.  In this case, the
+compiler optimizes the call by skipping the allocation of a new stack
+frame, instead branching directly to the called procedure.
+
+In the definition of `nth` above, the expression containing the
+recursive call `(length t) + 1` is _not_ tail recursive because 1 is
+added to the result.  However, it is easy to transform the function so
+that it is properly tail recursive.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let length l =
+  let rec tail_recursive_length len = function
+    | [] -> len
+    | _ :: t -> tail_recursive_length (len + 1) t
+  in tail_recursive_length 0 l;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To preserve the type of the `length` function, we hide the
+tail-recursive implementation by nesting it.  The tail-recursive
+implementation performs the addition _before_ the recursive call,
+instead of afterwards.  Since the result of the recursive call is
+returned without modification, the compiler branches directly to the
+called procedure rather than allocating a new stack frame.
+
+In other cases, it can be more problematic to use tail-recursion.  For
+example, consider the `List.map` function, which has a simple
+non-tail-recursive implementation.  The code is simple, but not
+efficient.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let rec map f = function
+ | [] -> []
+ | h :: t -> f h :: map f t;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If we use the same trick as we used for the `length` method, we need
+to accumulate the result _before_ the recursive call, but this
+collects the result in reverse order.  One way to address it is to
+construct the reserved result, then explicitly correct it before
+returning.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+ let rev l =
+   let rec tail_recursive_rev result = function
+    | [] -> result
+	| h :: t -> tail_recursive_rev (h :: result) t
+   in tail_recursive_rev [] l;;
+
+ let map f l =
+   let rec rev_map result = function
+    | [] -> result
+	| h :: t -> rev_map (f h :: result) t
+   in rev (rev_map [] l);;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The functions `tail_recursive_rev` and `rev_map` are both
+tail-recursive, but at the cost of constructing an intermediate
+reversed list that is immediately discarded.  One way to think of it
+is that instead of allocating a linear number of stack frames, we
+allocate a linear number of cons-cells.
+
+Allocation of short-lived data in OCaml is quite cheap, so the
+intermediate list is not very expensive.  The performance of the two
+implementations is not significantly different, with one exception:
+the tail-recursive implementation will not cause a stack overflow for
+large lists, while the simple non-tail-recursive implementation will.
+
+
+
+## Original stuff (placeholder -- do not review)
+
 
 Now, let's think about how you might actually use this interface in
 practice.  Usually, when you have data to render in a table, that data
