@@ -306,10 +306,18 @@ val y : int = 14
       the variable, in addition to its type and value.
     </para>
     <para>
-      The above examples are of top-level variables. We can introduce a
-      <emphasis>local</emphasis> variable that exists only for the
-      purpose of evaluating a single expression using
-      <literal>let</literal> and <literal>in</literal>:
+      //// AO: It seems to me that you're introducing a new and subtle
+      concept, scope (although most readers will know about scope from
+      using other languages) at an unnecessarily early stage. I would
+      wait before talking about scope. The type of scope you're showing
+      here (limited to a single statement) seems to have very little
+      use. It's not worth the effort you have to go through here, or the
+      reader. I can see why this one-line scope is useful for certain
+      things, like maybe the variable used in a loop, but the examples
+      here aren't useful. //// The above examples are of top-level
+      variables. We can introduce a <emphasis>local</emphasis> variable
+      that exists only for the purpose of evaluating a single expression
+      using <literal>let</literal> and <literal>in</literal>:
     </para>
     <programlisting>
 # let z = 3 in z + z;;
@@ -371,27 +379,51 @@ val abs_change : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
 - : int = 90
 </programlisting>
     <para>
-      This notation for multi-argument functions may be a little
-      surprising at first, but we'll explain where it comes from when we
-      get to function currying in
-      <link linkend="variables-and-functions">Chapter 3</link>. For the
-      moment, think of the arrows as separating different arguments of
-      the function, with the type after the final arrow being the return
-      value of the function. Thus,
+      As in other languages, OCaml evaluates the arguments to a function
+      before running the functio itself. So <literal>abs_diff</literal>
+      doesn't run until the first argument, <literal>(f x)</literal>, is
+      evaluated. We need the parentheses in order to show that
+      <literal>(f x)</literal> is indeed a single argument.
     </para>
-    <programlisting language="ocaml">
-int -&gt; int -&gt; int
-</programlisting>
+    <para>
+      So <literal>abs_change</literal> works as follows: first, it
+      passes the <literal>x</literal> argument to the
+      <literal>f</literal> function. When we try out the function, we
+      pass <literal>square</literal> as <literal>f</literal>, so
+      <literal>square 10</literal> is executed to produce 100. The
+      cumulative effect is that <literal>abs_diff</literal> subtracts
+      <literal>x</literal> from the result in its first argument,
+      calculating 100-10.
+    </para>
+    <para>
+      The notation in the <literal>val</literal> output for
+      multi-argument functions may be a little surprising at first, but
+      we'll explain where it comes from when we get to function currying
+      in <link linkend="variables-and-functions">Chapter 3</link>. For
+      the moment, think of the arrows as separating different arguments
+      of the function, with the type after the final arrow being the
+      return value of the function. Thus,
+    </para>
+    <para>
+      //// AO: The example would be easier to understand if you had
+      different data types. For instance, the two arguments could be
+      float and the last could be an int. ////
+      <subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript><subscript><subscript>~</subscript></subscript>~
+      { .ocaml } int -&gt; int -&gt; int
+      <subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript><subscript>~</subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript></subscript><subscript><subscript>~</subscript></subscript>~
+    </para>
     <para>
       describes a function that takes two <literal>int</literal>
-      arguments and returns an <literal>int</literal>, while
+      arguments and returns an <literal>int</literal> (the last word on
+      the line), while
     </para>
     <programlisting language="ocaml">
 (int -&gt; int) -&gt; int -&gt; int
 </programlisting>
     <para>
       describes a function of two arguments where the first argument is
-      itself a function.
+      itself a function, the second is an <literal>int</literal>, and
+      the return value is an <literal>int</literal>.
     </para>
     <para>
       As the types we encounter get more complicated, you might ask
