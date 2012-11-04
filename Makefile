@@ -12,7 +12,8 @@ FULLSRCS= $(wildcard $(LINGUA)/[0-9]*.md)
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 
-all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LINGUA)/html/support/.stamp
+all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LINGUA)/html/support/.stamp\
+     build/$(LINGUA)/html/figures
 	@ :
 
 pdf: build/$(LINGUA)/pdf/rwo.pdf
@@ -59,6 +60,9 @@ build/$(LINGUA)/epub/rwo.epub: $(FULLSRCS)
 
 build/$(LINGUA)/pdf/rwo.pdf: build/$(LINGUA)/pdf/rwo.tex
 	cd build/$(LINGUA)/pdf && pdflatex rwo.tex
+
+build/$(LINGUA)/html/figures: $(LINGUA)/figures
+	ln -sf ../../../$(LINGUA)/figures $@
 
 stylesheets/system-xsl:
 	ln -sf $(DOCBOOK_XSL_PATH) $@
