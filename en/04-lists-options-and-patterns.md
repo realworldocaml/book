@@ -9,16 +9,9 @@ things like numbers, words, images, etc., and we need a way to define
 _aggregates_ that bring together related values that represent some
 concept.
 
-In a strongly-typed language like OCaml, the structure of data is
-closely related to the data _type_.  The type defines the ``shape'' of
-the data, and it also specifies exactly what operations are used to
-_construct_ and _destruct_ values of that type.  This relationship is
-essential -- we will always discuss data in relation to its type, its
-constructors, and its destructors.
-
-Let's start with an example using _lists_.  Lists are one of the most
-common ways to aggregate data in OCaml; they are simple, and they are
-extensively supported by the standard library.
+Lists are one of the most common ways to aggregate data in OCaml; they
+are simple, and they are extensively supported by the standard
+library.
 
 ### Example: pretty-printing a table
 
@@ -217,9 +210,8 @@ the special value `[]` representing the empty list.
 
 Constructing a list is really only half the story -- it would be
 pretty useless to construct lists unless we can also pull them apart.
-We need _destructors_.  In OCaml, in general, destructors use _pattern
-matching_, where we _match_ a value aginst the possible patterns that
-describe its possible shapes.
+We need _destructors_, and for this we use _pattern matching_, like we
+saw in the previous chapter.
 
 For a list, there are two possible shapes: the empty list `[]` or a
 cons-cell `h :: t`.  We can use a `match` expression to perform the
@@ -354,19 +346,25 @@ Allocation of short-lived data in OCaml is quite cheap, so the
 intermediate list is not very expensive.  The performance of the two
 implementations is not significantly different, with one exception:
 the tail-recursive implementation will not cause a stack overflow for
-large lists, while the simple non-tail-recursive implementation will.
+large lists, while the simple non-tail-recursive implementation will
+have problems with large lists.
 
+## Heterogenous values
 
+Lists are fairly general, but there are several reasons why you might
+not want to use them.
 
-## Original stuff (placeholder -- do not review)
+* Large lists often have poor performance.
+* The list length is variable, not fixed.
+* The data in a list must have the same type.
 
-
-Now, let's think about how you might actually use this interface in
-practice.  Usually, when you have data to render in a table, that data
-comes in the form of a list of objects of some sort, where you need to
-extract data from each record for each of the columns.  So, imagine
-that you start off with a record type for representing information
-about a given programming language:
+In the tabulaton example that we used to start this chapter, the
+`List` is not a good choice for each entry in the table.  Now, let's
+think about how you might actually use this interface in practice.
+Usually, when you have data to render in a table, the data entries are
+described more precisely by a record.  So, imagine that you start off
+with a record type for representing information about a given
+programming language:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type style =
@@ -397,7 +395,7 @@ between `headers` and `to_row`.  Also, adding, removing and reordering
 columns becomes awkward, because changes need to be made in two
 places.
 
-We can improve the table API by adding a type which is a first-class
+We can improve the table API by adding a type that is a first-class
 representative for a column.  We'd add the following to the interface
 of `Text_table`:
 
@@ -458,3 +456,116 @@ starting for building a richer API.  You could for example build
 specialized columns with different formatting and alignment rules,
 which is easier to do with this interface than with the original one
 based on passing in lists-of-lists.
+
+## Options
+
+OCaml has no "NULL" or "nil" values.  Programmers coming from other
+languages are often surprised and annoyed by this -- it seems really
+convenient to have a special `NULL` value that represents concepts
+like "end of list" or "leaf node in a tree."  The possible benefit is
+that _every_ pointer type has a extra NULL value; the problem is that
+using the NULL value as if it were a real value has weak or undefined
+semantics.
+
+How do we get similar semantics in OCaml?  The ubiquitous technique is
+to use the `option` type, which has the following definition.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a option = None | Some of 'a;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+That is, a value of type `'a option` is either `None`, which means "no
+value;" or it is `Some v`, which represents a value `v`.  There is
+nothing special about the `option` type -- it is a variant type just
+like any other.  What it means is that checking for `None` is
+_explicit_, it is not possible to use `None` in a place where `Some x`
+is expected.
+
+In the most direct form, we can use an `option` wherever some value is
+"optional," with the usual meaning.  For example, if the architect of
+a programming language is not always known, we could use a special
+string like `"unknown"` to represent the architect's name, but we
+might accidentally confuse it with the name of a person.  The more
+explicit alternative is to use an option.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type prog_lang = { name: string;
+                   architect: string option;
+                   year_released: int;
+                   style: style list;
+                 }
+
+let x86 = { name = "x86 assembly";
+            architect = None;
+            year_released = 1980;
+			style = Imperative
+		  };;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can also represent a data structure with NULL-pointers using the
+`option` type.  For example, let's build an imperative singly-linked
+list, where new values are added to the _end_ of the list.  In a
+standard imperative language (like in the C++ Standard Template
+Library), NULL is used to represent "end of list."  We'll use the
+`option` type instead.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a slist = { mutable head : 'a elem option; mutable tail : 'a elem option }
+and 'a elem = { value : 'a; mutable next : 'a elem option };;
+
+let new_slist () = { head = None; tail = None };;
+
+let push_back l x =
+  let elem = { value = x; next = None } in
+  match l.tail with
+   | None -> l.head <- Some elem; l.tail <- Some elem
+   | Some last -> last.next <- Some elem;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Similarly, if we're defining a type of binary trees, one choice is to
+use `option` for the child node references.  In a binary search tree,
+each node in the tree is labeled with a value and it has up to two
+children.  The nodes in the tree follow _prefix_ order, meaning that
+the label of the left child is smaller than the label of its parent,
+and the label of the right child is larger than the label of the
+parent.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a node = { label : 'a; left : 'a binary_tree; right : 'a binary_tree }
+and 'a binary_tree = 'a node option;;
+
+let new_binary_tree () : 'a binary_tree = None;;
+
+let rec insert x = function
+ | Some { label = label; left = left; right = right } as tree ->
+   if x < label then
+     Some { label = label; left = insert x left; right = right }
+   else if x > label then
+     Some { label = label; left = left; right = insert x right }
+   else 
+     tree
+ | None -> Some { label = x; left = None; right = None };;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This representation is perfectly adequate, but many OCaml programmers
+would prefer a representation where the `option` is "hoisted" to the
+`node` type, meaning that we have two kinds of nodes.  In this case,
+the code is somewhat more succinct.  In the end, of course, the two
+versions are isomorphic.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a binary_tree =
+ | Leaf
+ | Interior of 'a * 'a binary_tree * 'a binary_tree;;
+ 
+let new_binary_tree () : 'a binary_tree = Leaf;;
+
+let rec insert x = function
+ | Interior (label, left, right) as tree ->
+   if x < label then Interior (label, insert x left, right)
+   else if x > label then Interior (label, left, insert x right)
+   else tree
+ | Leaf -> Interior (x, Leaf, Leaf);;
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
