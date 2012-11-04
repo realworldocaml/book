@@ -260,7 +260,13 @@ $ utop
       <listitem>
         <para>
           After evaluating an expression, the toplevel spits out both
-          the type of the result and the result itself.
+          the type of the result and the result itself. //// AO: You
+          could say, instead of &quot;unusual,&quot; that function
+          arguments in OCaml resemble some scripting languages that use
+          spaces for arguments instead of parentheses and commas.
+          Although you don't have to say it, Perl can optionally show
+          arguments that way, and the old Tcl language did so too. Not
+          to mention the Unix shell. ////
         </para>
       </listitem>
       <listitem>
