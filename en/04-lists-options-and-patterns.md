@@ -1,6 +1,6 @@
 # Lists, Options and Patterns
 
-_(Note, this chapter is highly incomplete.  jyh is working on it.)_
+_(Note, this chapter is incomplete.  jyh is working on it.)_
 
 ## Lists
 
@@ -197,7 +197,7 @@ values, but there are really just two ways to construct a list value.
   constructs a new list where the first element is `x`, and the rest
   is `l`.  The value corresponding to `x :: l` is commonly called a
   _cons_-cell (the term comes from Lisp, where _cons_ is short for
-  ``constructor'').
+  "constructor").
 
 The bracket syntax `[5; 3; 7]` is syntactic sugar for a list with 3
 cons-cells, `5 :: 3 :: 7 :: []`.  Each cell has two parts: 1) a value,
@@ -566,6 +566,4 @@ let rec insert x = function
    else if x > label then Interior (label, left, insert x right)
    else tree
  | Leaf -> Interior (x, Leaf, Leaf);;
- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
