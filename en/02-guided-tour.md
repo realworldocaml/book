@@ -48,6 +48,13 @@ few differences that jump right out at you.
   is not required in compiled code.
 - After evaluating an expression, the toplevel spits out both the type
   of the result and the result itself.
+////
+AO: You could say, instead of "unusual," that function arguments in
+  OCaml resemble some scripting languages that use spaces for
+  arguments instead of parentheses and commas. Although you don't have
+  to say it, Perl can optionally show arguments that way, and the old
+  Tcl language did so too. Not to mention the Unix shell.
+////
 - Function application in OCaml is syntactically unusual, in that
   function arguments are written out separated by spaces, rather than
   being demarcated by parentheses and commas.
