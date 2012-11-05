@@ -2447,22 +2447,35 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
 <chapter id="lists-options-and-patterns">
   <title>Lists, Options and Patterns</title>
   <para>
-    <emphasis>(Note, this chapter is highly incomplete. All it currently
-    contains is an example...)</emphasis>
+    <emphasis>(Note, this chapter is incomplete. jyh is working on
+    it.)</emphasis>
   </para>
-  <sect1 id="example-pretty-printing-a-table">
-    <title>Example: pretty-printing a table</title>
+  <sect1 id="lists-1">
+    <title>Lists</title>
     <para>
-      One common programming task is displaying tabular data. In this
-      example, will go over the design of a simple library to do just
-      that.
+      As with any programming language, we need a way to represent
+      <emphasis>data</emphasis>, things like numbers, words, images,
+      etc., and we need a way to define <emphasis>aggregates</emphasis>
+      that bring together related values that represent some concept.
     </para>
     <para>
-      We'll start with the interface. The code will go in a new module
-      called <literal>Text_table</literal> whose <literal>.mli</literal>
-      contains just the following function:
+      Lists are one of the most common ways to aggregate data in OCaml;
+      they are simple, and they are extensively supported by the
+      standard library.
     </para>
-    <programlisting language="ocaml">
+    <sect2 id="example-pretty-printing-a-table">
+      <title>Example: pretty-printing a table</title>
+      <para>
+        One common programming task is displaying tabular data. In this
+        example, we will go over the design of a simple library to do
+        just that.
+      </para>
+      <para>
+        We'll start with the interface. The code will go in a new module
+        called <literal>Text_table</literal> whose
+        <literal>.mli</literal> contains just the following function:
+      </para>
+      <programlisting language="ocaml">
 (* [render headers rows] returns a string containing a formatted
    text table, using Unix-style newlines as separators *)
 val render
@@ -2470,10 +2483,10 @@ val render
    -&gt; string list list    (* data *)
    -&gt; string
 </programlisting>
-    <para>
-      If you invoke <literal>render</literal> as follows:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        If you invoke <literal>render</literal> as follows:
+      </para>
+      <programlisting language="ocaml">
 let () =
   print_string (Text_table.render
      [&quot;language&quot;;&quot;architect&quot;;&quot;first release&quot;]
@@ -2483,10 +2496,10 @@ let () =
        [&quot;OCaml&quot;;&quot;Xavier Leroy&quot;  ;&quot;1996&quot;] ;
      ])
 </programlisting>
-    <para>
-      you'll get the following output:
-    </para>
-    <programlisting>
+      <para>
+        you'll get the following output:
+      </para>
+      <programlisting>
 | language | architect      | first release |
 |----------+----------------+---------------|
 | Lisp     | John McCarthy  | 1958          |
@@ -2494,18 +2507,18 @@ let () =
 | ML       | Robin Milner   | 1973          |
 | OCaml    | Xavier Leroy   | 1996          |
 </programlisting>
-    <para>
-      Now that we know what <literal>render</literal> is supposed to do,
-      let's dive into the implementation.
-    </para>
-    <sect2 id="computing-the-widths">
-      <title>Computing the widths</title>
       <para>
-        To render the rows of the table, we'll first need the width of
-        the widest entry in each column. The following function does
-        just that.
+        Now that we know what <literal>render</literal> is supposed to
+        do, let's dive into the implementation.
       </para>
-      <programlisting language="ocaml">
+      <sect3 id="computing-the-widths">
+        <title>Computing the widths</title>
+        <para>
+          To render the rows of the table, we'll first need the width of
+          the widest entry in each column. The following function does
+          just that.
+        </para>
+        <programlisting language="ocaml">
 let max_widths header rows =
   let to_lengths l = List.map ~f:String.length l in
   List.fold rows
@@ -2513,90 +2526,90 @@ let max_widths header rows =
     ~f:(fun acc row -&gt;
       List.map2_exn ~f:Int.max acc (to_lengths row))
 </programlisting>
-      <para>
-        In the above we define a helper function,
-        <literal>to_lengths</literal> which uses
-        <literal>List.map</literal> and <literal>String.length</literal>
-        to convert a list of strings to a list of string lengths. Then,
-        starting with the lengths of the headers, we use
-        <literal>List.fold</literal> to join in the lengths of the
-        elements of each row by <literal>max</literal>'ing them together
-        element-wise.
-      </para>
-      <para>
-        Note that this code will throw an exception if any of the rows
-        has a different number of entries than the header. In
-        particular, <literal>List.map2_exn</literal> throws an exception
-        when its arguments have mismatched lengths.
-      </para>
-    </sect2>
-    <sect2 id="rendering-the-rows">
-      <title>Rendering the rows</title>
-      <para>
-        Now we need to write the code to render a single row. There are
-        really two different kinds of rows that need to be rendered; an
-        ordinary row:
-      </para>
-      <programlisting>
+        <para>
+          In the above we define a helper function,
+          <literal>to_lengths</literal> which uses
+          <literal>List.map</literal> and
+          <literal>String.length</literal> to convert a list of strings
+          to a list of string lengths. Then, starting with the lengths
+          of the headers, we use <literal>List.fold</literal> to join in
+          the lengths of the elements of each row by
+          <literal>max</literal>'ing them together element-wise.
+        </para>
+        <para>
+          Note that this code will throw an exception if any of the rows
+          has a different number of entries than the header. In
+          particular, <literal>List.map2_exn</literal> throws an
+          exception when its arguments have mismatched lengths.
+        </para>
+      </sect3>
+      <sect3 id="rendering-the-rows">
+        <title>Rendering the rows</title>
+        <para>
+          Now we need to write the code to render a single row. There
+          are really two different kinds of rows that need to be
+          rendered; an ordinary row:
+        </para>
+        <programlisting>
 | Lisp     | John McCarthy  | 1962          |
 </programlisting>
-      <para>
-        and a separator row:
-      </para>
-      <programlisting>
+        <para>
+          and a separator row:
+        </para>
+        <programlisting>
 |----------+----------------+---------------|
 </programlisting>
-      <para>
-        Let's start with the separator row, which we can generate as
-        follows:
-      </para>
-      <programlisting language="ocaml">
+        <para>
+          Let's start with the separator row, which we can generate as
+          follows:
+        </para>
+        <programlisting language="ocaml">
 let render_separator widths =
   let pieces = List.map widths
     ~f:(fun w -&gt; String.make (w + 2) '-')
   in
   &quot;|&quot; ^ String.concat ~sep:&quot;+&quot; pieces ^ &quot;|&quot;
 </programlisting>
-      <para>
-        We need the extra two-characters for each entry to account for
-        the one character of padding on each side of a string in the
-        table.
-      </para>
-      <sidebar>
-      <title>
-      Performance of <literal>String.concat</literal> and
-      <literal>^</literal>
-      </title>
-      <para>
-        In the above, we're using two different ways of concatenating
-        strings, <literal>String.concat</literal>, which operates on
-        lists of strings, and <literal>^</literal>, which is a pairwise
-        operator. You should avoid <literal>^</literal> for joining long
-        numbers of strings, since, it allocates a new string every time
-        it runs. Thus, the following code:
-      </para>
-      <programlisting language="ocaml">
+        <para>
+          We need the extra two-characters for each entry to account for
+          the one character of padding on each side of a string in the
+          table.
+        </para>
+        <sidebar>
+        <title>
+        Performance of <literal>String.concat</literal> and
+        <literal>^</literal>
+        </title>
+        <para>
+          In the above, we're using two different ways of concatenating
+          strings, <literal>String.concat</literal>, which operates on
+          lists of strings, and <literal>^</literal>, which is a
+          pairwise operator. You should avoid <literal>^</literal> for
+          joining long numbers of strings, since, it allocates a new
+          string every time it runs. Thus, the following code:
+        </para>
+        <programlisting language="ocaml">
 let s = &quot;.&quot; ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;
 </programlisting>
-      <para>
-        will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas
-        this code:
-      </para>
-      <programlisting language="ocaml">
+        <para>
+          will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas
+          this code:
+        </para>
+        <programlisting language="ocaml">
 let s = String.concat [&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;]
 </programlisting>
-      <para>
-        allocates one string of size 7, as well as a list of length 7.
-        At these small sizes, the differences don't amount to much, but
-        for assembling of large strings, it can be a serious performance
-        issue.
-      </para>
-      </sidebar>
-      <para>
-        We can write a very similar piece of code for rendering the data
-        in an ordinary row.
-      </para>
-      <programlisting language="ocaml">
+        <para>
+          allocates one string of size 7, as well as a list of length 7.
+          At these small sizes, the differences don't amount to much,
+          but for assembling of large strings, it can be a serious
+          performance issue.
+        </para>
+        </sidebar>
+        <para>
+          We can write a very similar piece of code for rendering the
+          data in an ordinary row.
+        </para>
+        <programlisting language="ocaml">
 let pad s length =
   if String.length s &gt;= length then s
   else s ^ String.make (length - String.length s) ' '
@@ -2607,13 +2620,13 @@ let render_row row widths =
   in
   &quot;|&quot; ^ String.concat ~sep:&quot;|&quot; pieces ^ &quot;|&quot;
 </programlisting>
-      <para>
-        You might note that <literal>render_row</literal> and
-        <literal>render_separator</literal> share a bit of structure. We
-        can improve the code a bit by factoring that repeated structure
-        out:
-      </para>
-      <programlisting language="ocaml">
+        <para>
+          You might note that <literal>render_row</literal> and
+          <literal>render_separator</literal> share a bit of structure.
+          We can improve the code a bit by factoring that repeated
+          structure out:
+        </para>
+        <programlisting language="ocaml">
 let decorate_row ~sep row = &quot;|&quot; ^ String.concat ~sep row ^ &quot;|&quot;
 
 let render_row widths row =
@@ -2624,13 +2637,10 @@ let render_separator widths =
   decorate_row ~sep:&quot;+&quot;
     (List.map widths ~f:(fun width -&gt; String.make (width + 2) '-'))
 </programlisting>
-    </sect2>
-    <sect2 id="bringing-it-all-together">
-      <title>Bringing it all together</title>
-      <para>
-        And now we can write the function for rendering a full table.
-      </para>
-      <programlisting language="ocaml">
+        <para>
+          And now we can write the function for rendering a full table.
+        </para>
+        <programlisting language="ocaml">
 let render header rows =
   let widths = max_widths header rows in
   String.concat ~sep:&quot;\n&quot;
@@ -2639,15 +2649,264 @@ let render header rows =
      :: List.map rows ~f:(fun row -&gt; render_row widths row)
     )
 </programlisting>
+      </sect3>
+    </sect2>
+  </sect1>
+  <sect1 id="list-basics">
+    <title>List basics</title>
+    <para>
+      In the example, we see calls to <literal>List</literal> functions
+      in the standard library, in particular
+      <literal>List.map</literal>. How does this all work? To
+      understand, we need to consider first how lists are
+      <emphasis>represented</emphasis> internally, which follows from
+      the type definition and the way lists are constructed. Let's look
+      at the constructors first.
+    </para>
+    <para>
+      We have seen how square brackets can be used to construct a list
+      of values, but there are really just two ways to construct a list
+      value.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          [] is the <emphasis>empty</emphasis> list.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          If <literal>x</literal> is a value and <literal>l</literal> is
+          a list, then the expression <literal>x :: l</literal>
+          constructs a new list where the first element is
+          <literal>x</literal>, and the rest is <literal>l</literal>.
+          The value corresponding to <literal>x :: l</literal> is
+          commonly called a <emphasis>cons</emphasis>-cell (the term
+          comes from Lisp, where <emphasis>cons</emphasis> is short for
+          &quot;constructor&quot;).
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The bracket syntax <literal>[5; 3; 7]</literal> is syntactic sugar
+      for a list with 3 cons-cells,
+      <literal>5 :: 3 :: 7 :: []</literal>. Each cell has two parts: 1)
+      a value, and 2) a pointer to the rest of the list. The final
+      pointer refers to the special value <literal>[]</literal>
+      representing the empty list.
+    </para>
+    <figure>
+      <title>List</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="figures/04-list-01.svg" />
+        </imageobject>
+        <textobject><phrase>List</phrase></textobject>
+      </mediaobject>
+    </figure>
+  </sect1>
+  <sect1 id="pattern-matching">
+    <title>Pattern matching</title>
+    <para>
+      Constructing a list is really only half the story -- it would be
+      pretty useless to construct lists unless we can also pull them
+      apart. We need <emphasis>destructors</emphasis>, and for this we
+      use <emphasis>pattern matching</emphasis>, like we saw in the
+      previous chapter.
+    </para>
+    <para>
+      For a list, there are two possible shapes: the empty list
+      <literal>[]</literal> or a cons-cell <literal>h :: t</literal>. We
+      can use a <literal>match</literal> expression to perform the
+      pattern matching. In the case of a cons-cell, the variables
+      <literal>h</literal> and <literal>t</literal> in the pattern are
+      bound to the corresponding values in the list when the match is
+      performed.
+    </para>
+    <para>
+      For example, suppose we want to define a function to add 1 to each
+      element of a list. We have to consider both cases, 1) where the
+      list is empty, or 2) where it is a cons-cell.
+    </para>
+    <programlisting>
+# let rec add1 l =
+    match l with
+     | [] -&gt; []
+     | h :: t -&gt; (h + 1) :: (add1 t);;
+val add1 : int list -&gt; int list = &lt;fun&gt;
+# add1 [5; 3; 7];;
+- : int list = [6; 4; 8]
+</programlisting>
+    <para>
+      The functions in the standard library are implemented in similar
+      ways. The <literal>List.map</literal> function can be defined as
+      follows (the <literal>function</literal> syntax is equivalent to
+      performing a <literal>match</literal>).
+    </para>
+    <programlisting language="ocaml">
+# let rec map f = function
+   | [] -&gt; []
+   | h :: t -&gt; f h :: map f t;;
+val map : ('a -&gt; 'b) -&gt; 'a list -&gt; 'b list = &lt;fun&gt;
+# map string_of_int [5; 3; 7];;
+- : string list = [&quot;5&quot;; &quot;3&quot;; &quot;7&quot;]
+</programlisting>
+  </sect1>
+  <sect1 id="list-performance">
+    <title>List performance</title>
+    <para>
+      Lists are ubiquitous in OCaml programs. They are easy to use and
+      reasonably efficient for small lists, but large lists can have
+      significant performance problems. The issue is that lists are
+      formed from separately allocated cons-cells. This has space
+      overhead because each value in the list is paried with a pointer
+      to the rest of the list. The separate allocation also reduces
+      locality, so it can result in poor cache behavior.
+    </para>
+    <para>
+      Perhaps more important than those concerns is that list traversal
+      takes linear time in the length of the list. For example, the
+      <literal>List.length</literal> function counts the number of
+      elements in the list, taking linear time.
+    </para>
+    <programlisting language="ocaml">
+let rec length = function [] -&gt; 0 | _ :: t -&gt; (length t) + 1;;
+</programlisting>
+    <para>
+      In fact, this implementation of the function
+      <literal>length</literal> is worse than that, because the function
+      is recursive. In this implementation of the function, the
+      recursive call to <literal>length t</literal> is active at the
+      same time as the outer call, with the result that the runtime
+      needs to allocate stack frames for each recursive call, so this
+      function also takes linear space. For large lists, this is
+      inefficient, and it can result in a stack overflow.
+    </para>
+    <sect2 id="tail-recursion">
+      <title>Tail-recursion</title>
       <para>
-        Now, let's think about how you might actually use this interface
-        in practice. Usually, when you have data to render in a table,
-        that data comes in the form of a list of objects of some sort,
-        where you need to extract data from each record for each of the
-        columns. So, imagine that you start off with a record type for
-        representing information about a given programming language:
+        We can't do anything about <literal>length</literal> taking
+        linear time -- singly-linked lists of this kind don't have an
+        efficient <literal>length</literal> operation. However, we can
+        address the space problem using <emphasis>tail
+        recursion</emphasis>.
+      </para>
+      <para>
+        Tail recursion occurs whenever the result of the recursive call
+        is returned immediately by the calling function. In this case,
+        the compiler optimizes the call by skipping the allocation of a
+        new stack frame, instead branching directly to the called
+        procedure.
+      </para>
+      <para>
+        In the definition of <literal>nth</literal> above, the
+        expression containing the recursive call
+        <literal>(length t) + 1</literal> is <emphasis>not</emphasis>
+        tail recursive because 1 is added to the result. However, it is
+        easy to transform the function so that it is properly tail
+        recursive.
       </para>
       <programlisting language="ocaml">
+let length l =
+  let rec tail_recursive_length len = function
+    | [] -&gt; len
+    | _ :: t -&gt; tail_recursive_length (len + 1) t
+  in tail_recursive_length 0 l;;
+</programlisting>
+      <para>
+        To preserve the type of the <literal>length</literal> function,
+        we hide the tail-recursive implementation by nesting it. The
+        tail-recursive implementation performs the addition
+        <emphasis>before</emphasis> the recursive call, instead of
+        afterwards. Since the result of the recursive call is returned
+        without modification, the compiler branches directly to the
+        called procedure rather than allocating a new stack frame.
+      </para>
+      <para>
+        In other cases, it can be more problematic to use
+        tail-recursion. For example, consider the
+        <literal>List.map</literal> function, which has a simple
+        non-tail-recursive implementation. The code is simple, but not
+        efficient.
+      </para>
+      <programlisting language="ocaml">
+let rec map f = function
+ | [] -&gt; []
+ | h :: t -&gt; f h :: map f t;;
+</programlisting>
+      <para>
+        If we use the same trick as we used for the
+        <literal>length</literal> method, we need to accumulate the
+        result <emphasis>before</emphasis> the recursive call, but this
+        collects the result in reverse order. One way to address it is
+        to construct the reserved result, then explicitly correct it
+        before returning.
+      </para>
+      <programlisting language="ocaml">
+ let rev l =
+   let rec tail_recursive_rev result = function
+    | [] -&gt; result
+    | h :: t -&gt; tail_recursive_rev (h :: result) t
+   in tail_recursive_rev [] l;;
+
+ let map f l =
+   let rec rev_map result = function
+    | [] -&gt; result
+    | h :: t -&gt; rev_map (f h :: result) t
+   in rev (rev_map [] l);;
+</programlisting>
+      <para>
+        The functions <literal>tail_recursive_rev</literal> and
+        <literal>rev_map</literal> are both tail-recursive, but at the
+        cost of constructing an intermediate reversed list that is
+        immediately discarded. One way to think of it is that instead of
+        allocating a linear number of stack frames, we allocate a linear
+        number of cons-cells.
+      </para>
+      <para>
+        Allocation of short-lived data in OCaml is quite cheap, so the
+        intermediate list is not very expensive. The performance of the
+        two implementations is not significantly different, with one
+        exception: the tail-recursive implementation will not cause a
+        stack overflow for large lists, while the simple
+        non-tail-recursive implementation will have problems with large
+        lists.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="heterogenous-values">
+    <title>Heterogenous values</title>
+    <para>
+      Lists are fairly general, but there are several reasons why you
+      might not want to use them.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Large lists often have poor performance.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The list length is variable, not fixed.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The data in a list must have the same type.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      In the tabulaton example that we used to start this chapter, the
+      <literal>List</literal> is not a good choice for each entry in the
+      table. Now, let's think about how you might actually use this
+      interface in practice. Usually, when you have data to render in a
+      table, the data entries are described more precisely by a record.
+      So, imagine that you start off with a record type for representing
+      information about a given programming language:
+    </para>
+    <programlisting language="ocaml">
 type style =
     Object_oriented | Functional | Imperative | Logic
 
@@ -2657,11 +2916,11 @@ type prog_lang = { name: string;
                    style: style list;
                  }
 </programlisting>
-      <para>
-        If we then wanted to render a table from a list of languages, we
-        might write something like this:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      If we then wanted to render a table from a list of languages, we
+      might write something like this:
+    </para>
+    <programlisting language="ocaml">
 let print_langs langs =
    let headers = [&quot;name&quot;;&quot;architect&quot;;&quot;year released&quot;] in
    let to_row lang =
@@ -2669,20 +2928,20 @@ let print_langs langs =
    in
    print_string (Text_table.render headers (List.map ~f:to_row langs))
 </programlisting>
-      <para>
-        This is OK, but as you consider more complicated tables with
-        more columns, it becomes easier to make the mistake of having a
-        mismatch in between <literal>headers</literal> and
-        <literal>to_row</literal>. Also, adding, removing and reordering
-        columns becomes awkward, because changes need to be made in two
-        places.
-      </para>
-      <para>
-        We can improve the table API by adding a type which is a
-        first-class representative for a column. We'd add the following
-        to the interface of <literal>Text_table</literal>:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      This is OK, but as you consider more complicated tables with more
+      columns, it becomes easier to make the mistake of having a
+      mismatch in between <literal>headers</literal> and
+      <literal>to_row</literal>. Also, adding, removing and reordering
+      columns becomes awkward, because changes need to be made in two
+      places.
+    </para>
+    <para>
+      We can improve the table API by adding a type that is a
+      first-class representative for a column. We'd add the following to
+      the interface of <literal>Text_table</literal>:
+    </para>
+    <programlisting language="ocaml">
 (** An ['a column] is a specification of a column for rending a table
     of values of type ['a] *)
 type 'a column
@@ -2697,13 +2956,13 @@ val column : string -&gt; ('a -&gt; string) -&gt; 'a column
 val column_render :
   'a column list -&gt; 'a list -&gt; string
 </programlisting>
-      <para>
-        Thus, the <literal>column</literal> functions creates a
-        <literal>column</literal> from a header string and a function
-        for extracting the text for that column associated with a given
-        row. Implementing this interface is quite simple:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      Thus, the <literal>column</literal> functions creates a
+      <literal>column</literal> from a header string and a function for
+      extracting the text for that column associated with a given row.
+      Implementing this interface is quite simple:
+    </para>
+    <programlisting language="ocaml">
 type 'a column = string * ('a -&gt; string)
 let column header to_string = (header,to_string)
 
@@ -2714,11 +2973,11 @@ let column_render columns rows =
   in
   render header rows
 </programlisting>
-      <para>
-        And we can rewrite <literal>print_langs</literal> to use this
-        new interface as follows.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      And we can rewrite <literal>print_langs</literal> to use this new
+      interface as follows.
+    </para>
+    <programlisting language="ocaml">
 let columns =
   [ Text_table.column &quot;Name&quot;      (fun x -&gt; x.name);
     Text_table.column &quot;Architect&quot; (fun x -&gt; x.architect);
@@ -2729,21 +2988,143 @@ let columns =
 let print_langs langs =
   print_string (Text_table.column_render columns langs)
 </programlisting>
-      <para>
-        The code is a bit longer, but it's also less error prone. In
-        particular, several errors that might be made by the user are
-        now ruled out by the type system. For example, it's no longer
-        possible for the length of the header and the lengths of the
-        rows to be mismatched.
-      </para>
-      <para>
-        The simple column-based interface described here is also a good
-        starting for building a richer API. You could for example build
-        specialized columns with different formatting and alignment
-        rules, which is easier to do with this interface than with the
-        original one based on passing in lists-of-lists.
-      </para>
-    </sect2>
+    <para>
+      The code is a bit longer, but it's also less error prone. In
+      particular, several errors that might be made by the user are now
+      ruled out by the type system. For example, it's no longer possible
+      for the length of the header and the lengths of the rows to be
+      mismatched.
+    </para>
+    <para>
+      The simple column-based interface described here is also a good
+      starting for building a richer API. You could for example build
+      specialized columns with different formatting and alignment rules,
+      which is easier to do with this interface than with the original
+      one based on passing in lists-of-lists.
+    </para>
+  </sect1>
+  <sect1 id="options-1">
+    <title>Options</title>
+    <para>
+      OCaml has no &quot;NULL&quot; or &quot;nil&quot; values.
+      Programmers coming from other languages are often surprised and
+      annoyed by this -- it seems really convenient to have a special
+      <literal>NULL</literal> value that represents concepts like
+      &quot;end of list&quot; or &quot;leaf node in a tree.&quot; The
+      possible benefit is that <emphasis>every</emphasis> pointer type
+      has a extra NULL value; the problem is that using the NULL value
+      as if it were a real value has weak or undefined semantics.
+    </para>
+    <para>
+      How do we get similar semantics in OCaml? The ubiquitous technique
+      is to use the <literal>option</literal> type, which has the
+      following definition.
+    </para>
+    <programlisting language="ocaml">
+type 'a option = None | Some of 'a;;
+</programlisting>
+    <para>
+      That is, a value of type <literal>'a option</literal> is either
+      <literal>None</literal>, which means &quot;no value;&quot; or it
+      is <literal>Some v</literal>, which represents a value
+      <literal>v</literal>. There is nothing special about the
+      <literal>option</literal> type -- it is a variant type just like
+      any other. What it means is that checking for
+      <literal>None</literal> is <emphasis>explicit</emphasis>, it is
+      not possible to use <literal>None</literal> in a place where
+      <literal>Some x</literal> is expected.
+    </para>
+    <para>
+      In the most direct form, we can use an <literal>option</literal>
+      wherever some value is &quot;optional,&quot; with the usual
+      meaning. For example, if the architect of a programming language
+      is not always known, we could use a special string like
+      <literal>&quot;unknown&quot;</literal> to represent the
+      architect's name, but we might accidentally confuse it with the
+      name of a person. The more explicit alternative is to use an
+      option.
+    </para>
+    <programlisting language="ocaml">
+type prog_lang = { name: string;
+                   architect: string option;
+                   year_released: int;
+                   style: style list;
+                 }
+
+let x86 = { name = &quot;x86 assembly&quot;;
+            architect = None;
+            year_released = 1980;
+            style = Imperative
+          };;
+</programlisting>
+    <para>
+      We can also represent a data structure with NULL-pointers using
+      the <literal>option</literal> type. For example, let's build an
+      imperative singly-linked list, where new values are added to the
+      <emphasis>end</emphasis> of the list. In a standard imperative
+      language (like in the C++ Standard Template Library), NULL is used
+      to represent &quot;end of list.&quot; We'll use the
+      <literal>option</literal> type instead.
+    </para>
+    <programlisting language="ocaml">
+type 'a slist = { mutable head : 'a elem option; mutable tail : 'a elem option }
+and 'a elem = { value : 'a; mutable next : 'a elem option };;
+
+let new_slist () = { head = None; tail = None };;
+
+let push_back l x =
+  let elem = { value = x; next = None } in
+  match l.tail with
+   | None -&gt; l.head &lt;- Some elem; l.tail &lt;- Some elem
+   | Some last -&gt; last.next &lt;- Some elem;;
+</programlisting>
+    <para>
+      Similarly, if we're defining a type of binary trees, one choice is
+      to use <literal>option</literal> for the child node references. In
+      a binary search tree, each node in the tree is labeled with a
+      value and it has up to two children. The nodes in the tree follow
+      <emphasis>prefix</emphasis> order, meaning that the label of the
+      left child is smaller than the label of its parent, and the label
+      of the right child is larger than the label of the parent.
+    </para>
+    <programlisting language="ocaml">
+type 'a node = { label : 'a; left : 'a binary_tree; right : 'a binary_tree }
+and 'a binary_tree = 'a node option;;
+
+let new_binary_tree () : 'a binary_tree = None;;
+
+let rec insert x = function
+ | Some { label = label; left = left; right = right } as tree -&gt;
+   if x &lt; label then
+     Some { label = label; left = insert x left; right = right }
+   else if x &gt; label then
+     Some { label = label; left = left; right = insert x right }
+   else 
+     tree
+ | None -&gt; Some { label = x; left = None; right = None };;
+</programlisting>
+    <para>
+      This representation is perfectly adequate, but many OCaml
+      programmers would prefer a representation where the
+      <literal>option</literal> is &quot;hoisted&quot; to the
+      <literal>node</literal> type, meaning that we have two kinds of
+      nodes. In this case, the code is somewhat more succinct. In the
+      end, of course, the two versions are isomorphic.
+    </para>
+    <programlisting language="ocaml">
+type 'a binary_tree =
+ | Leaf
+ | Interior of 'a * 'a binary_tree * 'a binary_tree;;
+
+let new_binary_tree () : 'a binary_tree = Leaf;;
+
+let rec insert x = function
+ | Interior (label, left, right) as tree -&gt;
+   if x &lt; label then Interior (label, insert x left, right)
+   else if x &gt; label then Interior (label, left, insert x right)
+   else tree
+ | Leaf -&gt; Interior (x, Leaf, Leaf);;
+</programlisting>
   </sect1>
 </chapter>
 <chapter id="records">
