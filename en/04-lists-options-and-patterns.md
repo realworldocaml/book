@@ -1,12 +1,22 @@
 # Lists, Options and Patterns
 
-_(Note, this chapter is highly incomplete.  All it currently contains
-is an example...)_
+_(Note, this chapter is incomplete.  jyh is working on it.)_
 
-## Example: pretty-printing a table
+## Lists
+
+As with any programming language, we need a way to represent _data_,
+things like numbers, words, images, etc., and we need a way to define
+_aggregates_ that bring together related values that represent some
+concept.
+
+Lists are one of the most common ways to aggregate data in OCaml; they
+are simple, and they are extensively supported by the standard
+library.
+
+### Example: pretty-printing a table
 
 One common programming task is displaying tabular data.  In this
-example, will go over the design of a simple library to do just that.
+example, we will go over the design of a simple library to do just that.
 
 We'll start with the interface.  The code will go in a new module
 called `Text_table` whose `.mli` contains just the following function:
@@ -47,7 +57,7 @@ you'll get the following output:
 Now that we know what `render` is supposed to do, let's dive into the
 implementation.
 
-### Computing the widths
+#### Computing the widths
 
 To render the rows of the table, we'll first need the width of the
 widest entry in each column.  The following function does just that.
@@ -73,7 +83,7 @@ different number of entries than the header.  In particular,
 `List.map2_exn` throws an exception when its arguments have mismatched
 lengths.
 
-### Rendering the rows
+#### Rendering the rows
 
 Now we need to write the code to render a single row.  There are
 really two different kinds of rows that need to be rendered; an
@@ -159,8 +169,6 @@ let render_separator widths =
     (List.map widths ~f:(fun width -> String.make (width + 2) '-'))
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Bringing it all together
-
 And now we can write the function for rendering a full table.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
@@ -173,12 +181,190 @@ let render header rows =
     )
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now, let's think about how you might actually use this interface in
-practice.  Usually, when you have data to render in a table, that data
-comes in the form of a list of objects of some sort, where you need to
-extract data from each record for each of the columns.  So, imagine
-that you start off with a record type for representing information
-about a given programming language:
+## List basics
+
+In the example, we see calls to `List` functions in the standard
+library, in particular `List.map`.  How does this all work?  To
+understand, we need to consider first how lists are _represented_
+internally, which follows from the type definition and the way lists
+are constructed.  Let's look at the constructors first.
+
+We have seen how square brackets can be used to construct a list of
+values, but there are really just two ways to construct a list value.
+
+* [] is the _empty_ list.
+* If `x` is a value and `l` is a list, then the expression `x :: l`
+  constructs a new list where the first element is `x`, and the rest
+  is `l`.  The value corresponding to `x :: l` is commonly called a
+  _cons_-cell (the term comes from Lisp, where _cons_ is short for
+  "constructor").
+
+The bracket syntax `[5; 3; 7]` is syntactic sugar for a list with 3
+cons-cells, `5 :: 3 :: 7 :: []`.  Each cell has two parts: 1) a value,
+and 2) a pointer to the rest of the list.  The final pointer refers to
+the special value `[]` representing the empty list.
+
+![List](figures/04-list-01.svg)
+
+## Pattern matching
+
+Constructing a list is really only half the story -- it would be
+pretty useless to construct lists unless we can also pull them apart.
+We need _destructors_, and for this we use _pattern matching_, like we
+saw in the previous chapter.
+
+For a list, there are two possible shapes: the empty list `[]` or a
+cons-cell `h :: t`.  We can use a `match` expression to perform the
+pattern matching.  In the case of a cons-cell, the variables `h` and
+`t` in the pattern are bound to the corresponding values in the list
+when the match is performed.
+
+For example, suppose we want to define a function to add 1 to each
+element of a list.  We have to consider both cases, 1) where the list
+is empty, or 2) where it is a cons-cell.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let rec add1 l =
+    match l with
+     | [] -> []
+	 | h :: t -> (h + 1) :: (add1 t);;
+val add1 : int list -> int list = <fun>
+# add1 [5; 3; 7];;
+- : int list = [6; 4; 8]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The functions in the standard library are implemented in similar ways.
+The `List.map` function can be defined as follows (the `function`
+syntax is equivalent to performing a `match`).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+# let rec map f = function
+   | [] -> []
+   | h :: t -> f h :: map f t;;
+val map : ('a -> 'b) -> 'a list -> 'b list = <fun>
+# map string_of_int [5; 3; 7];;
+- : string list = ["5"; "3"; "7"]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## List performance
+
+Lists are ubiquitous in OCaml programs.  They are easy to use and
+reasonably efficient for small lists, but large lists can have
+significant performance problems.  The issue is that lists are formed
+from separately allocated cons-cells.  This has space overhead because
+each value in the list is paried with a pointer to the rest of the
+list.  The separate allocation also reduces locality, so it can result
+in poor cache behavior.
+
+Perhaps more important than those concerns is that list traversal
+takes linear time in the length of the list.  For example, the
+`List.length` function counts the number of elements in the list,
+taking linear time.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let rec length = function [] -> 0 | _ :: t -> (length t) + 1;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In fact, this implementation of the function `length` is worse than
+that, because the function is recursive.  In this implementation of
+the function, the recursive call to `length t` is active at the same
+time as the outer call, with the result that the runtime needs to
+allocate stack frames for each recursive call, so this function also
+takes linear space.  For large lists, this is inefficient, and it can
+result in a stack overflow.
+
+### Tail-recursion
+
+We can't do anything about `length` taking linear time --
+singly-linked lists of this kind don't have an efficient `length`
+operation.  However, we can address the space problem using _tail
+recursion_.
+
+Tail recursion occurs whenever the result of the recursive call is
+returned immediately by the calling function.  In this case, the
+compiler optimizes the call by skipping the allocation of a new stack
+frame, instead branching directly to the called procedure.
+
+In the definition of `nth` above, the expression containing the
+recursive call `(length t) + 1` is _not_ tail recursive because 1 is
+added to the result.  However, it is easy to transform the function so
+that it is properly tail recursive.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let length l =
+  let rec tail_recursive_length len = function
+    | [] -> len
+    | _ :: t -> tail_recursive_length (len + 1) t
+  in tail_recursive_length 0 l;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To preserve the type of the `length` function, we hide the
+tail-recursive implementation by nesting it.  The tail-recursive
+implementation performs the addition _before_ the recursive call,
+instead of afterwards.  Since the result of the recursive call is
+returned without modification, the compiler branches directly to the
+called procedure rather than allocating a new stack frame.
+
+In other cases, it can be more problematic to use tail-recursion.  For
+example, consider the `List.map` function, which has a simple
+non-tail-recursive implementation.  The code is simple, but not
+efficient.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let rec map f = function
+ | [] -> []
+ | h :: t -> f h :: map f t;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If we use the same trick as we used for the `length` method, we need
+to accumulate the result _before_ the recursive call, but this
+collects the result in reverse order.  One way to address it is to
+construct the reserved result, then explicitly correct it before
+returning.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+ let rev l =
+   let rec tail_recursive_rev result = function
+    | [] -> result
+	| h :: t -> tail_recursive_rev (h :: result) t
+   in tail_recursive_rev [] l;;
+
+ let map f l =
+   let rec rev_map result = function
+    | [] -> result
+	| h :: t -> rev_map (f h :: result) t
+   in rev (rev_map [] l);;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The functions `tail_recursive_rev` and `rev_map` are both
+tail-recursive, but at the cost of constructing an intermediate
+reversed list that is immediately discarded.  One way to think of it
+is that instead of allocating a linear number of stack frames, we
+allocate a linear number of cons-cells.
+
+Allocation of short-lived data in OCaml is quite cheap, so the
+intermediate list is not very expensive.  The performance of the two
+implementations is not significantly different, with one exception:
+the tail-recursive implementation will not cause a stack overflow for
+large lists, while the simple non-tail-recursive implementation will
+have problems with large lists.
+
+## Heterogenous values
+
+Lists are fairly general, but there are several reasons why you might
+not want to use them.
+
+* Large lists often have poor performance.
+* The list length is variable, not fixed.
+* The data in a list must have the same type.
+
+In the tabulaton example that we used to start this chapter, the
+`List` is not a good choice for each entry in the table.  Now, let's
+think about how you might actually use this interface in practice.
+Usually, when you have data to render in a table, the data entries are
+described more precisely by a record.  So, imagine that you start off
+with a record type for representing information about a given
+programming language:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type style =
@@ -209,7 +395,7 @@ between `headers` and `to_row`.  Also, adding, removing and reordering
 columns becomes awkward, because changes need to be made in two
 places.
 
-We can improve the table API by adding a type which is a first-class
+We can improve the table API by adding a type that is a first-class
 representative for a column.  We'd add the following to the interface
 of `Text_table`:
 
@@ -270,3 +456,114 @@ starting for building a richer API.  You could for example build
 specialized columns with different formatting and alignment rules,
 which is easier to do with this interface than with the original one
 based on passing in lists-of-lists.
+
+## Options
+
+OCaml has no "NULL" or "nil" values.  Programmers coming from other
+languages are often surprised and annoyed by this -- it seems really
+convenient to have a special `NULL` value that represents concepts
+like "end of list" or "leaf node in a tree."  The possible benefit is
+that _every_ pointer type has a extra NULL value; the problem is that
+using the NULL value as if it were a real value has weak or undefined
+semantics.
+
+How do we get similar semantics in OCaml?  The ubiquitous technique is
+to use the `option` type, which has the following definition.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a option = None | Some of 'a;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+That is, a value of type `'a option` is either `None`, which means "no
+value;" or it is `Some v`, which represents a value `v`.  There is
+nothing special about the `option` type -- it is a variant type just
+like any other.  What it means is that checking for `None` is
+_explicit_, it is not possible to use `None` in a place where `Some x`
+is expected.
+
+In the most direct form, we can use an `option` wherever some value is
+"optional," with the usual meaning.  For example, if the architect of
+a programming language is not always known, we could use a special
+string like `"unknown"` to represent the architect's name, but we
+might accidentally confuse it with the name of a person.  The more
+explicit alternative is to use an option.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type prog_lang = { name: string;
+                   architect: string option;
+                   year_released: int;
+                   style: style list;
+                 }
+
+let x86 = { name = "x86 assembly";
+            architect = None;
+            year_released = 1980;
+			style = Imperative
+		  };;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can also represent a data structure with NULL-pointers using the
+`option` type.  For example, let's build an imperative singly-linked
+list, where new values are added to the _end_ of the list.  In a
+standard imperative language (like in the C++ Standard Template
+Library), NULL is used to represent "end of list."  We'll use the
+`option` type instead.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a slist = { mutable head : 'a elem option; mutable tail : 'a elem option }
+and 'a elem = { value : 'a; mutable next : 'a elem option };;
+
+let new_slist () = { head = None; tail = None };;
+
+let push_back l x =
+  let elem = { value = x; next = None } in
+  match l.tail with
+   | None -> l.head <- Some elem; l.tail <- Some elem
+   | Some last -> last.next <- Some elem;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Similarly, if we're defining a type of binary trees, one choice is to
+use `option` for the child node references.  In a binary search tree,
+each node in the tree is labeled with a value and it has up to two
+children.  The nodes in the tree follow _prefix_ order, meaning that
+the label of the left child is smaller than the label of its parent,
+and the label of the right child is larger than the label of the
+parent.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a node = { label : 'a; left : 'a binary_tree; right : 'a binary_tree }
+and 'a binary_tree = 'a node option;;
+
+let new_binary_tree () : 'a binary_tree = None;;
+
+let rec insert x = function
+ | Some { label = label; left = left; right = right } as tree ->
+   if x < label then
+     Some { label = label; left = insert x left; right = right }
+   else if x > label then
+     Some { label = label; left = left; right = insert x right }
+   else 
+     tree
+ | None -> Some { label = x; left = None; right = None };;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This representation is perfectly adequate, but many OCaml programmers
+would prefer a representation where the `option` is "hoisted" to the
+`node` type, meaning that we have two kinds of nodes.  In this case,
+the code is somewhat more succinct.  In the end, of course, the two
+versions are isomorphic.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+type 'a binary_tree =
+ | Leaf
+ | Interior of 'a * 'a binary_tree * 'a binary_tree;;
+ 
+let new_binary_tree () : 'a binary_tree = Leaf;;
+
+let rec insert x = function
+ | Interior (label, left, right) as tree ->
+   if x < label then Interior (label, insert x left, right)
+   else if x > label then Interior (label, left, insert x right)
+   else tree
+ | Leaf -> Interior (x, Leaf, Leaf);;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
