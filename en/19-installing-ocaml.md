@@ -64,7 +64,7 @@ user to install packages.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ opam init
-$ opam install utop async_extra
+$ opam install utop async core_extra
 $ eval `opam config -env`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
