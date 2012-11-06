@@ -27,7 +27,7 @@ X](#installation).  In a nutshell, you need to:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ opam init
 $ opam switch 4.00.1+short-types
-$ opam install utop async core_extra
+$ opam install utop async core_extended
 $ eval `opam config -env`
 $ utop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,14 +38,19 @@ You can exit utop by pressing `control-D` and return.
 
 ## OCaml as a calculator
 
-Let's spin up the toplevel and open the `Core.Std` module, which gives
-us access to Core's libraries, and then try out a few simple numerical
-calculations.
+Let's spin up the toplevel and open the `Core.Std` module to get
+access to Core's libraries.  Don't forget to open `Core.Std`, since
+without it, many of the examples below will fail.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 $ utop
-
 # open Core.Std;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now that we have Core open, let's try a few simple numerical
+calculations.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # 3 + 4;;
 - : int = 7
 # 8 / 3;;
@@ -56,8 +61,9 @@ $ utop
 - : float = 3.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This looks a lot what you'd expect from any language, but there are a
-few differences that jump right out at you.
+By and large, this is pretty similar to what you'd find in any
+programming language, but there are a few things that jump right out
+at you.
 
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  This is a peculiarity of the toplevel that
@@ -65,18 +71,15 @@ few differences that jump right out at you.
 - After evaluating an expression, the toplevel spits out both the type
   of the result and the result itself.
 - Function arguments are separated by spaces, instead of by
-  parenthesis and commas, looking in this way more like the UNIX shell
-  than like C or Java.
-- Function application in OCaml is syntactically unusual, in that
-  function arguments are written out separated by spaces, rather than
-  being demarcated by parentheses and commas.
+  parenthesis and commas, which is more like the UNIX shell than C or
+  Java.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int`.  The types have different literals (`6.`
   instead of `6`) and different infix operators (`+.` instead of `+`),
   and OCaml doesn't do any automated casting between the types.  This
   can be a bit of a nuisance, but it has its benefits, since it
-  prevents some classes of bugs that arise from confusion between the
-  semantics of `int` and `float`.
+  prevents some kinds of bugs that arise from unexpected differences
+  between the behavior of `int` and `float`.
 
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
@@ -108,78 +111,99 @@ indicating a function that takes an `int` and returns an `int`.  We
 can also write functions that take multiple arguments:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let abs_diff x y =
-    abs (x - y) ;;
-val abs_diff : int -> int -> int = <fun>
+# let ratio x y =
+     Float.of_int x /. Float.of_int y
+  ;;
+val ratio : int -> int -> float = <fun>
+# ratio 4 7;;
+- : float = 0.571428571428571397
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-and even functions that take other functions as arguments:
+The notation for the type-signature of a multi-argument functions may
+be a little surprising at first, but we'll explain where it comes from
+when we get to function currying in [Chapter
+3](#variables-and-functions).  For the moment, think of the arrows as
+separating different arguments of the function, with the type after
+the final arrow being the return value of the function.  Thus,
+
+~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+int -> int -> float
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+describes a function that takes two `int` arguments and returns a
+`float`.
+
+We can even write functions that take other functions as arguments.
+Here's an example of a function that takes three arguments: a test
+function and two integer arguments.  The function returns the sum of
+the integers that pass the test.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let abs_change f x =
-    abs_diff (f x) x ;;
-val abs_change : (int -> int) -> int -> int = <fun>
-# abs_change square 10;;
-- : int = 90
+# let sum_if_true test x y =
+     if test x then x else 0
+     + if test y then y else 0
+  ;;
+val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As in other languages, OCaml evaluates the arguments to a function
-before running the functio itself. So `abs_diff` doesn't run until the
-first argument, `(f x)`, is evaluated. We need the parentheses in
-order to show that `(f x)` is indeed a single argument.
+If we look at the inferred type signature in detail, we see that the
+first argument is a function that takes an int and returns a boolean,
+and that the remaining two arguments are integers.  Here's this
+function in action:
 
-So `abs_change` works as follows: first, it passes the `x` argument to
-the `f` function. When we try out the function, we pass `square` as
-`f`, so `square 10` is executed to produce 100. The cumulative effect
-is that `abs_diff` subtracts `x` from the result in its first
-argument, calculating 100-10.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let even x = x mod 2 = 0 ;;
+val even : int -> bool = <fun>
+# sum_if_true even 3 4;;
+- : int = 4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The notation in the `val` output for multi-argument functions may be a
-little surprising at first, but we'll explain where it comes from when
-we get to function currying in [Chapter 3](#variables-and-functions).
-For the moment, think of the arrows as separating different arguments
-of the function, with the type after the final arrow being the return
-value of the function.  Thus,
-
-~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-int -> int -> int
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-describes a function that takes two `int` arguments and returns an
-`int` (the last word on the line), while
-
-~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-(int -> int) -> int -> int
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-describes a function of two arguments where the first argument is
-itself a function, the second is an `int`, and the return value is an `int`.
+### Type inference
 
 As the types we encounter get more complicated, you might ask yourself
-how OCaml is able to determine these types, given that we didn't write
-down any explicit type information.  It turns out that OCaml is able
-to determine the type of a new expression using a technique called
-_type-inference_, by which it infers the type of a new expression
+how OCaml is able to figure them out, given that we didn't write down
+any explicit type information.  
+
+OCaml determines the type of an expression using a technique called
+_type-inference_, by which it infers the type of a given expression
 based on what it already knows about the types of other related
-variables.  For example, in `abs_change` above, the fact that
-`abs_diff` is already known to take two integer arguments lets the
-compiler infer that `x` is an `int` and that `f` returns an `int`.
+variables, and on constraints on the types that arise from the
+structure of the code.  
+
+As an example, let's walk you through what you'd do to infer the type
+of `sum_if_true`.
+
+- OCaml requires that both arms of an `if` statement return the same
+  type, so the expression `if test x then x else 0` requires that
+  `x` must be the same type as `0`, which is `int`.  Similarly for
+  `y`.
+- `test` is passed `x` as an argument.  Since `x` has type `int`, the
+  input type of `test` must be `int`.
+- `test x` is used as the condition in an `if` statement, so the
+  return type of `test` must be bool.
+- The fact that `+` returns an int implies that the return value of
+  `sum_if_true` must be int.
+
+Together, that nails down the the types of all the variables, which
+determines the overall type of `sum_if_true`.
+
+### Inferring generic types
 
 Sometimes, there isn't enough information to fully determine the
 concrete type of a given value.  Consider this function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let first_if_true test x y =
-    if (test x) then x else y;;
+    if test x then x else y;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `first_if_true` takes as its arguments a function `test`, and two
-values, `x` and `y`, where `x` is to be returned if `(test x)`
-evaluates to `true`, and `y` otherwise.  So what's the type of
-`first_if_true`?  There are no obvious clues such as arithmetic
-operators to tell you what the type of `x` and `y` are, which makes it
-seem like one could use this `first_if_true` on values of any type.
-Indeed, if we look at the type returned by the toplevel:
+values, `x` and `y`, where `x` is to be returned if `test x` evaluates
+to `true`, and `y` otherwise.  So what's the type of `first_if_true`?
+There are no obvious clues such as arithmetic operators or literals to
+tell you what the type of `x` and `y` are.  That makes it seem like
+one could use this `first_if_true` on values of any type.  Indeed, if
+we look at the type returned by the toplevel:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
@@ -295,10 +319,10 @@ tuple by joining values together with a comma:
 val tup : int * string = (3, "three")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The type `int * string` corresponds to the set of pairs of `int`s and
-`string`s.  For the mathematically inclined, the `*` character is used
-because the space of all 2-tuples of type `t * s` corresponds to the
-Cartesian product of `t` and `s`.
+For the mathematically inclined, the `*` character is used because the
+space of all pairs of type `t * s` corresponds to the Cartesian
+product of the set of elements of type `t` and the set of elements of
+type `s`.
 
 You can extract the components of a tuple using OCaml's
 pattern-matching syntax. For example:
