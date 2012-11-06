@@ -15,10 +15,26 @@ You should have a working toplevel as you go through this chapter, so
 you can try out the examples as you go.  There is a zero-configuration
 browser-based toplevel that you can use for this, which you can find here:
 
-     http://realworldocaml.org/core-top
+     http://realworldocaml.org/TODO
 
-Or you can install OCaml, Core and utop on your computer directly.
-Instructions for this are found in [Appendix X](#installation).
+<note>
+<title>Getting the interactive top-level</title>
+
+Before proceeding, make sure you have the Core library installed. You can do
+this easily via the OPAM package manager, which is explained in [Chapter
+X](#installation).  In a nutshell, you need to:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ opam init
+$ opam switch 4.00.1+short-types
+$ opam install utop async core_extra
+$ eval `opam config -env`
+$ utop
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can exit utop by pressing `control-D` and return.
+
+</note>
 
 ## OCaml as a calculator
 

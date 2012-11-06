@@ -1,16 +1,14 @@
 # Installation
 
-There are two ways to develop OCaml code and libraries.  You can install a
-source-based package manager that downloads and compiles libraries, or
-alternatively use the binary packages provides by many operating systems.
-Binary packages are useful for releasing your applications easily, but are less
-flexible for day-to-day development.
+The easiest way to install OCaml is via the binary packages available in
+many operating systems.  For day-to-day code development, it is easier to
+use a source-based manager that lets you recompile individual libraries
+easily.
 
-For the purposes of this book, we will use the OPAM source-based package
-manager.  There are other alternatives that you can investigate, such as GODI
-and ODB, but we do not cover them here.  Let's get started with OPAM now, as
-that will get you an interactive top-level that can run the examples in the
-book quickly.  OPAM manages multiple simultaneous OCaml compiler and library
+For the purposes of this book, we'll use the OPAM source manager.  There are
+other alternatives available such as GODI and ODB, but not covered here.  Let's
+get started with OPAM now, as you will need it to run the examples in the rest
+of the book.  OPAM manages multiple simultaneous OCaml compiler and library
 installations, tracks library versions across upgrades, and recompiles
 dependencies automatically if they get out of date.
 
@@ -30,7 +28,7 @@ copies of `ocamlfind` before installing OPAM, and use the OPAM version instead.
 
 </important>
 
-### MacOS X
+#### MacOS X
 
 The easiest way to install OCaml on MacOS X is via the `homebrew` package
 manager, available from [http://github.com/mxcl/homebrew].
@@ -40,34 +38,33 @@ $ brew install ocaml
 $ brew install opam
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Linux
+#### Linux
 
 On Debian Linux, you should install OCaml via binary packages, and then install
 the latest OPAM release from source.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
-$ tar -jxvf opam-<version>.tar.gz
+ tar -jxvf opam-<version>.tar.gz
 $ cd opam-<version>.tar.gz
 $ ./configure && make && sudo make install
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 On Fedora/RHEL...?
 
-### Windows
+#### Windows
 
 Investigate Protzenko's Windows installer.
 
-## OPAM Usage
+### Using the OPAM top-level
 
 All of the OPAM state is held in the `.opam` directory in your home directory,
 including compiler installations. You should never need to switch to an admin
-user to install packages. Package listings are obtained by adding *remotes*
-that provide package descriptions, installation instructions and URLs.
+user to install packages. 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ opam init
-$ opam install utop async
+$ opam install utop async core_extra
 $ eval `opam config -env`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -83,19 +80,20 @@ point to the current active compiler, and you should add this to your shell
 The default compiler installed by OPAM uses the system OCaml installation. You
 can use `opam switch` to swap between different compiler versions, or experiment
 with a different set of libraries or new compiler versions. For instance, one
-of the alternate compilers has a debugging version of the runtime library,
-which can be useful to track down bugs in C bindings.  To use it:
+of the alternate compilers is patched to simplify the types that are output
+in the top-level. You can switch it to by:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ opam switch -list
-$ opam switch 4.00.0+debug-runtime
+$ opam switch 4.00.1+short-types
 $ eval `opam config -env`
-$ opam install utop async
+$ opam install utop async_extra
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The new compiler will be compiled and installed into `~/.opam/4.00.0+debug-runtime`,
-and the libraries will be separately tracked.  You can have any number of compilers
-installed simultaneously, but only one can be active at any time.
+The new compiler will be compiled and installed into
+`~/.opam/4.00.1+short-types` and the libraries will be tracked separately from
+your system installation.  You can have any number of compilers installed
+simultaneously, but only one can be active at any time.
 
 ## Editing Environment
 
@@ -125,3 +123,10 @@ Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 Vim users can use the built-in style, and [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
 
 Eclipse plugins: which one is maintained?
+
+## Developing with OPAM
+
+Package listings are obtained by adding *remotes* that provide package
+descriptions, installation instructions and URLs.
+
+
