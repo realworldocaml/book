@@ -200,7 +200,6 @@ behavior of the code, but we have improved our robustness to change.
 
 </sidebar>
 
-
 Using the above function, we can print text using the full set of
 available colors.
 
@@ -605,6 +604,18 @@ val exact : [ `Float of float | `Int of int ] list
    = [`Int 3; `Float 4.]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<sidebar><title>Polymorphic variants and casts</title>
+
+Most of the time, the inference system is able to infer polymorphic
+variant types that work without any extra help from the user.  In some
+cases, however, OCaml can't figure out how to make the types work on
+its own, and requires some extra annotations.  
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+</sidebar>
+
 Perhaps surprisingly, we can also create polymorphic variant types
 that have different lower and upper bounds.
 
@@ -628,47 +639,6 @@ Here, the inferred type states that the tags can be no more than ``
 `` `Float`` and `` `Int``.  As you can already start to see,
 polymorphic variants can lead to fairly complex inferred types.
 
-
-<sidebar><title>Polymorphic variants and catch-all cases</title>
-
-As we saw with the definition of `is_positive`, a match statement can
-lead to the inference of an upper bound on a variant type, limiting
-the possible tags to those that can be handled by the match.  If we
-add a catch-all case to our match statement, we end up with a function
-with a lower bound.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let is_positive_permissive = function
-     | `Int   x -> Ok (x > 0)
-     | `Float x -> Ok (x > 0.)
-     | _ -> Error "Unknown number type"
-  ;;
-val is_positive_permissive :
-  [> `Float of float | `Int of int ] -> (bool, string) Core.Std._result =
-  <fun>
-# is_positive_permissive (`Int 0);;
-- : (bool, string) Result.t = Ok false
-# is_positive_permissive (`Ratio (3,4));;
-- : (bool, string) Result.t = Error "Unknown number type"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Catch-all cases are error-prone even with ordinary variants, but they
-are especially so with polymorphic variants.  That's because you have
-no way of bounding what tags your function might have to deal with.
-Such code is particularly vulnerable to typos.  For instance, if code
-that uses `is_positive_permissive` passes in `Float` misspelled as
-`Floot`, the erroneous code will compile without complaint.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# is_positive_permissive (`Floot 3.5);;
-- : (bool, string) Result.t = Error "Unknown number type"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-With ordinary variants, such a typo would have been caught as an
-unknown constructor.  As a general matter, one should be wary about
-mixing catch-all cases and polymorphic variants.
-
-</sidebar>
 
 
 ### Example: Terminal colors redux
@@ -795,10 +765,51 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
        The second variant type does not allow tag(s) `RGBA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The code here is fragile in a different way, in that it's too fragile
-to typos.  Let's consider how we might write this code as a proper
-library, including a proper `mli`.  The interface might look something
-like this:
+<sidebar><title>Polymorphic variants and catch-all cases</title>
+
+As we saw with the definition of `is_positive`, a match statement can
+lead to the inference of an upper bound on a variant type, limiting
+the possible tags to those that can be handled by the match.  If we
+add a catch-all case to our match statement, we end up with a function
+with a lower bound.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let is_positive_permissive = function
+     | `Int   x -> Ok (x > 0)
+     | `Float x -> Ok (x > 0.)
+     | _ -> Error "Unknown number type"
+  ;;
+val is_positive_permissive :
+  [> `Float of float | `Int of int ] -> (bool, string) Core.Std._result =
+  <fun>
+# is_positive_permissive (`Int 0);;
+- : (bool, string) Result.t = Ok false
+# is_positive_permissive (`Ratio (3,4));;
+- : (bool, string) Result.t = Error "Unknown number type"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Catch-all cases are error-prone even with ordinary variants, but they
+are especially so with polymorphic variants.  That's because you have
+no way of bounding what tags your function might have to deal with.
+Such code is particularly vulnerable to typos.  For instance, if code
+that uses `is_positive_permissive` passes in `Float` misspelled as
+`Floot`, the erroneous code will compile without complaint.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# is_positive_permissive (`Floot 3.5);;
+- : (bool, string) Result.t = Error "Unknown number type"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With ordinary variants, such a typo would have been caught as an
+unknown constructor.  As a general matter, one should be wary about
+mixing catch-all cases and polymorphic variants.
+
+</sidebar>
+
+The code here is fragile in a different way, in that it's too
+vulnerable to typos.  Let's consider how we might write this code as a
+proper library, including a proper `mli`.  The interface might look
+something like this:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* file: terminal_color.mli *)

@@ -48,13 +48,9 @@ few differences that jump right out at you.
   is not required in compiled code.
 - After evaluating an expression, the toplevel spits out both the type
   of the result and the result itself.
-////
-AO: You could say, instead of "unusual," that function arguments in
-  OCaml resemble some scripting languages that use spaces for
-  arguments instead of parentheses and commas. Although you don't have
-  to say it, Perl can optionally show arguments that way, and the old
-  Tcl language did so too. Not to mention the Unix shell.
-////
+- Function arguments are separated by spaces, instead of by
+  parenthesis and commas, looking in this way more like the UNIX shell
+  than like C or Java.
 - Function application in OCaml is syntactically unusual, in that
   function arguments are written out separated by spaces, rather than
   being demarcated by parentheses and commas.
@@ -78,43 +74,6 @@ val y : int = 14
 
 After a new variable is created, the toplevel tells us the name of the
 variable, in addition to its type and value.  
-
-////
-AO: It seems to me that you're introducing a new and subtle concept,
-scope (although most readers will know about scope from using other
-languages) at an unnecessarily early stage. I would wait before
-talking about scope. The type of scope you're showing here (limited to
-a single statement) seems to have very little use. It's not worth the
-effort you have to go through here, or the reader. I can see why this
-one-line scope is useful for certain things, like maybe the variable
-used in a loop, but the examples here aren't useful.
-////
-The above examples are of top-level variables.  We can introduce a
-_local_ variable that exists only for the purpose of evaluating a
-single expression using `let` and `in`:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let z = 3 in z + z;;
-- : int = 6
-# z;;
-Characters 0-1:
-  z;;
-  ^
-Error: Unbound value z
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Note that `z` is a valid variable in the scope of the expression `z +
-z`, but that it doesn't exist thereafter.
-
-We can also define multiple local variables using nested `let`/`in`
-expressions.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let x = 3 in
-  let y = 4 in
-  x * y ;;
-- : int = 12
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Functions and Type Inference
 
@@ -159,18 +118,13 @@ the `f` function. When we try out the function, we pass `square` as
 is that `abs_diff` subtracts `x` from the result in its first
 argument, calculating 100-10.
 
-The notation in the `val` output for multi-argument functions may be a little surprising
-at first, but we'll explain where it comes from when we get to
-function currying in [Chapter 3](#variables-and-functions).  For the
-moment, think of the arrows as separating different arguments of the
-function, with the type after the final arrow being the return value
-of the function.  Thus,
+The notation in the `val` output for multi-argument functions may be a
+little surprising at first, but we'll explain where it comes from when
+we get to function currying in [Chapter 3](#variables-and-functions).
+For the moment, think of the arrows as separating different arguments
+of the function, with the type after the final arrow being the return
+value of the function.  Thus,
 
-////
-AO: The example would be easier to understand if you had different
-data types. For instance, the two arguments could be float and the
-last could be an int.
-////
 ~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 int -> int -> int
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -348,18 +302,6 @@ tuples.
 Here's an example of how you might use pattern matching in practice: a
 function for computing the distance between two points on the plane,
 where each point is represented as a pair of `float`s.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let distance p1 p2 =
-    let (x1,y1) = p1 in
-    let (x2,y2) = p2 in
-    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
-;;
-val distance : float * float -> float * float -> float = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We can make this code more concise by doing the pattern matching on
-the arguments to the function directly.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let distance (x1,y1) (x2,y2) =
