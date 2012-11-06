@@ -231,7 +231,7 @@
   <programlisting>
 $ opam init
 $ opam switch 4.00.1+short-types
-$ opam install utop async_extra
+$ opam install utop async core_extra
 $ eval `opam config -env`
 $ utop
 </programlisting>
@@ -12361,7 +12361,7 @@ $ ./configure &amp;&amp; make &amp;&amp; sudo make install
       </para>
       <programlisting>
 $ opam init
-$ opam install utop async_extra
+$ opam install utop async core_extra
 $ eval `opam config -env`
 </programlisting>
       <para>
