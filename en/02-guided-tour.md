@@ -22,7 +22,7 @@ browser-based toplevel that you can use for this, which you can find here:
 
 Before proceeding, make sure you have the Core library installed. You can do
 this easily via the OPAM package manager, which is explained in [Chapter
-X](#19-installing-ocaml).  In a nutshell, you need to:
+X](#installing-ocaml).  In a nutshell, you need to:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ opam init
