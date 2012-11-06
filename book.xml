@@ -225,8 +225,8 @@
   <para>
     Before proceeding, make sure you have the Core library installed.
     You can do this easily via the OPAM package manager, which is
-    explained in <link linkend="19-installing-ocaml">Chapter X</link>.
-    In a nutshell, you need to:
+    explained in <link linkend="installing-ocaml">Chapter X</link>. In a
+    nutshell, you need to:
   </para>
   <programlisting>
 $ opam init
