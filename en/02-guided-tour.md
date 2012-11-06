@@ -27,7 +27,7 @@ X](#installation).  In a nutshell, you need to:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ opam init
 $ opam switch 4.00.1+short-types
-$ opam install utop async_extra
+$ opam install utop async core_extra
 $ eval `opam config -env`
 $ utop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
