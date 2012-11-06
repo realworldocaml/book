@@ -231,7 +231,7 @@
   <programlisting>
 $ opam init
 $ opam switch 4.00.1+short-types
-$ opam install utop async core_extra
+$ opam install utop async core_extended
 $ eval `opam config -env`
 $ utop
 </programlisting>
@@ -244,14 +244,19 @@ $ utop
     <title>OCaml as a calculator</title>
     <para>
       Let's spin up the toplevel and open the
-      <literal>Core.Std</literal> module, which gives us access to
-      Core's libraries, and then try out a few simple numerical
-      calculations.
+      <literal>Core.Std</literal> module to get access to Core's
+      libraries. Don't forget to open <literal>Core.Std</literal>, since
+      without it, many of the examples below will fail.
     </para>
     <programlisting>
 $ utop
-
 # open Core.Std;;
+</programlisting>
+    <para>
+      Now that we have Core open, let's try a few simple numerical
+      calculations.
+    </para>
+    <programlisting>
 # 3 + 4;;
 - : int = 7
 # 8 / 3;;
@@ -262,8 +267,9 @@ $ utop
 - : float = 3.
 </programlisting>
     <para>
-      This looks a lot what you'd expect from any language, but there
-      are a few differences that jump right out at you.
+      By and large, this is pretty similar to what you'd find in any
+      programming language, but there are a few things that jump right
+      out at you.
     </para>
     <itemizedlist>
       <listitem>
@@ -283,15 +289,8 @@ $ utop
       <listitem>
         <para>
           Function arguments are separated by spaces, instead of by
-          parenthesis and commas, looking in this way more like the UNIX
-          shell than like C or Java.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Function application in OCaml is syntactically unusual, in
-          that function arguments are written out separated by spaces,
-          rather than being demarcated by parentheses and commas.
+          parenthesis and commas, which is more like the UNIX shell than
+          C or Java.
         </para>
       </listitem>
       <listitem>
@@ -303,8 +302,8 @@ $ utop
           different infix operators (<literal>+.</literal> instead of
           <literal>+</literal>), and OCaml doesn't do any automated
           casting between the types. This can be a bit of a nuisance,
-          but it has its benefits, since it prevents some classes of
-          bugs that arise from confusion between the semantics of
+          but it has its benefits, since it prevents some kinds of bugs
+          that arise from unexpected differences between the behavior of
           <literal>int</literal> and <literal>float</literal>.
         </para>
       </listitem>
@@ -344,136 +343,175 @@ val square : int -&gt; int = &lt;fun&gt;
       can also write functions that take multiple arguments:
     </para>
     <programlisting>
-# let abs_diff x y =
-    abs (x - y) ;;
-val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
+# let ratio x y =
+     Float.of_int x /. Float.of_int y
+  ;;
+val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
+# ratio 4 7;;
+- : float = 0.571428571428571397
 </programlisting>
     <para>
-      and even functions that take other functions as arguments:
-    </para>
-    <programlisting>
-# let abs_change f x =
-    abs_diff (f x) x ;;
-val abs_change : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
-# abs_change square 10;;
-- : int = 90
-</programlisting>
-    <para>
-      As in other languages, OCaml evaluates the arguments to a function
-      before running the functio itself. So <literal>abs_diff</literal>
-      doesn't run until the first argument, <literal>(f x)</literal>, is
-      evaluated. We need the parentheses in order to show that
-      <literal>(f x)</literal> is indeed a single argument.
-    </para>
-    <para>
-      So <literal>abs_change</literal> works as follows: first, it
-      passes the <literal>x</literal> argument to the
-      <literal>f</literal> function. When we try out the function, we
-      pass <literal>square</literal> as <literal>f</literal>, so
-      <literal>square 10</literal> is executed to produce 100. The
-      cumulative effect is that <literal>abs_diff</literal> subtracts
-      <literal>x</literal> from the result in its first argument,
-      calculating 100-10.
-    </para>
-    <para>
-      The notation in the <literal>val</literal> output for
-      multi-argument functions may be a little surprising at first, but
-      we'll explain where it comes from when we get to function currying
-      in <link linkend="variables-and-functions">Chapter 3</link>. For
-      the moment, think of the arrows as separating different arguments
-      of the function, with the type after the final arrow being the
-      return value of the function. Thus,
+      The notation for the type-signature of a multi-argument functions
+      may be a little surprising at first, but we'll explain where it
+      comes from when we get to function currying in
+      <link linkend="variables-and-functions">Chapter 3</link>. For the
+      moment, think of the arrows as separating different arguments of
+      the function, with the type after the final arrow being the return
+      value of the function. Thus,
     </para>
     <programlisting language="ocaml">
-int -&gt; int -&gt; int
+int -&gt; int -&gt; float
 </programlisting>
     <para>
       describes a function that takes two <literal>int</literal>
-      arguments and returns an <literal>int</literal> (the last word on
-      the line), while
-    </para>
-    <programlisting language="ocaml">
-(int -&gt; int) -&gt; int -&gt; int
-</programlisting>
-    <para>
-      describes a function of two arguments where the first argument is
-      itself a function, the second is an <literal>int</literal>, and
-      the return value is an <literal>int</literal>.
+      arguments and returns a <literal>float</literal>.
     </para>
     <para>
-      As the types we encounter get more complicated, you might ask
-      yourself how OCaml is able to determine these types, given that we
-      didn't write down any explicit type information. It turns out that
-      OCaml is able to determine the type of a new expression using a
-      technique called <emphasis>type-inference</emphasis>, by which it
-      infers the type of a new expression based on what it already knows
-      about the types of other related variables. For example, in
-      <literal>abs_change</literal> above, the fact that
-      <literal>abs_diff</literal> is already known to take two integer
-      arguments lets the compiler infer that <literal>x</literal> is an
-      <literal>int</literal> and that <literal>f</literal> returns an
-      <literal>int</literal>.
-    </para>
-    <para>
-      Sometimes, there isn't enough information to fully determine the
-      concrete type of a given value. Consider this function.
+      We can even write functions that take other functions as
+      arguments. Here's an example of a function that takes three
+      arguments: a test function and two integer arguments. The function
+      returns the sum of the integers that pass the test.
     </para>
     <programlisting>
+# let sum_if_true test x y =
+     if test x then x else 0
+     + if test y then y else 0
+  ;;
+val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
+</programlisting>
+    <para>
+      If we look at the inferred type signature in detail, we see that
+      the first argument is a function that takes an int and returns a
+      boolean, and that the remaining two arguments are integers. Here's
+      this function in action:
+    </para>
+    <programlisting>
+# let even x = x mod 2 = 0 ;;
+val even : int -&gt; bool = &lt;fun&gt;
+# sum_if_true even 3 4;;
+- : int = 4
+</programlisting>
+    <sect2 id="type-inference">
+      <title>Type inference</title>
+      <para>
+        As the types we encounter get more complicated, you might ask
+        yourself how OCaml is able to figure them out, given that we
+        didn't write down any explicit type information.
+      </para>
+      <para>
+        OCaml determines the type of an expression using a technique
+        called <emphasis>type-inference</emphasis>, by which it infers
+        the type of a given expression based on what it already knows
+        about the types of other related variables, and on constraints
+        on the types that arise from the structure of the code.
+      </para>
+      <para>
+        As an example, let's walk you through what you'd do to infer the
+        type of <literal>sum_if_true</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            OCaml requires that both arms of an <literal>if</literal>
+            statement return the same type, so the expression
+            <literal>if test x then x else 0</literal> requires that
+            <literal>x</literal> must be the same type as
+            <literal>0</literal>, which is <literal>int</literal>.
+            Similarly for <literal>y</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>test</literal> is passed <literal>x</literal> as an
+            argument. Since <literal>x</literal> has type
+            <literal>int</literal>, the input type of
+            <literal>test</literal> must be <literal>int</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>test x</literal> is used as the condition in an
+            <literal>if</literal> statement, so the return type of
+            <literal>test</literal> must be bool.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The fact that <literal>+</literal> returns an int implies
+            that the return value of <literal>sum_if_true</literal> must
+            be int.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Together, that nails down the the types of all the variables,
+        which determines the overall type of
+        <literal>sum_if_true</literal>.
+      </para>
+    </sect2>
+    <sect2 id="inferring-generic-types">
+      <title>Inferring generic types</title>
+      <para>
+        Sometimes, there isn't enough information to fully determine the
+        concrete type of a given value. Consider this function.
+      </para>
+      <programlisting>
 # let first_if_true test x y =
-    if (test x) then x else y;;
+    if test x then x else y;;
 </programlisting>
-    <para>
-      <literal>first_if_true</literal> takes as its arguments a function
-      <literal>test</literal>, and two values, <literal>x</literal> and
-      <literal>y</literal>, where <literal>x</literal> is to be returned
-      if <literal>(test x)</literal> evaluates to
-      <literal>true</literal>, and <literal>y</literal> otherwise. So
-      what's the type of <literal>first_if_true</literal>? There are no
-      obvious clues such as arithmetic operators to tell you what the
-      type of <literal>x</literal> and <literal>y</literal> are, which
-      makes it seem like one could use this
-      <literal>first_if_true</literal> on values of any type. Indeed, if
-      we look at the type returned by the toplevel:
-    </para>
-    <programlisting>
+      <para>
+        <literal>first_if_true</literal> takes as its arguments a
+        function <literal>test</literal>, and two values,
+        <literal>x</literal> and <literal>y</literal>, where
+        <literal>x</literal> is to be returned if
+        <literal>test x</literal> evaluates to <literal>true</literal>,
+        and <literal>y</literal> otherwise. So what's the type of
+        <literal>first_if_true</literal>? There are no obvious clues
+        such as arithmetic operators or literals to tell you what the
+        type of <literal>x</literal> and <literal>y</literal> are. That
+        makes it seem like one could use this
+        <literal>first_if_true</literal> on values of any type. Indeed,
+        if we look at the type returned by the toplevel:
+      </para>
+      <programlisting>
 val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
 </programlisting>
-    <para>
-      we see that rather than choose a single concrete type, OCaml has
-      introduced a <emphasis>type variable</emphasis>
-      <literal>'a</literal> to express that the type is generic. In
-      particular, the type of the <literal>test</literal> argument is
-      <literal>('a -&gt; bool)</literal>, which means that test is a
-      one-argument function whose return value is
-      <literal>bool</literal>, and whose argument could be of any type
-      <literal>'a</literal>. But, whatever type <literal>'a</literal>
-      is, it has to be the same as the type of the other two arguments,
-      <literal>x</literal> and <literal>y</literal>.
-    </para>
-    <para>
-      This genericity means that we can write:
-    </para>
-    <programlisting>
+      <para>
+        we see that rather than choose a single concrete type, OCaml has
+        introduced a <emphasis>type variable</emphasis>
+        <literal>'a</literal> to express that the type is generic. In
+        particular, the type of the <literal>test</literal> argument is
+        <literal>('a -&gt; bool)</literal>, which means that test is a
+        one-argument function whose return value is
+        <literal>bool</literal>, and whose argument could be of any type
+        <literal>'a</literal>. But, whatever type <literal>'a</literal>
+        is, it has to be the same as the type of the other two
+        arguments, <literal>x</literal> and <literal>y</literal>.
+      </para>
+      <para>
+        This genericity means that we can write:
+      </para>
+      <programlisting>
 # let long_string s = String.length s &gt; 6;;
 val long_string : string -&gt; bool = &lt;fun&gt;
 # first_if_true long_string &quot;short&quot; &quot;loooooong&quot;;;
 - : string = &quot;loooooong&quot;
 </programlisting>
-    <para>
-      And we can also write:
-    </para>
-    <programlisting>
+      <para>
+        And we can also write:
+      </para>
+      <programlisting>
 # let big_number x = x &gt; 3;;
 val big_number : int -&gt; bool = &lt;fun&gt;
 # first_if_true big_number 4 3;;
 - : int = 4
 </programlisting>
-    <para>
-      But we can't mix and match two different concrete types for
-      <literal>'a</literal> in the same use of
-      <literal>first_if_true</literal>.
-    </para>
-    <programlisting>
+      <para>
+        But we can't mix and match two different concrete types for
+        <literal>'a</literal> in the same use of
+        <literal>first_if_true</literal>.
+      </para>
+      <programlisting>
 # first_if_true big_number &quot;short&quot; &quot;loooooong&quot;;;
 Characters 25-30:
   first_if_true big_number &quot;short&quot; &quot;loooooong&quot;;;
@@ -481,32 +519,33 @@ Characters 25-30:
 Error: This expression has type string but
     an expression was expected of type int
 </programlisting>
-    <para>
-      In this example, <literal>big_number</literal> requires that
-      <literal>'a</literal> be of type <literal>int</literal>, whereas
-      <literal>&quot;short&quot;</literal> and
-      <literal>&quot;loooooong&quot;</literal> require that
-      <literal>'a</literal> be of type <literal>string</literal>, and
-      they can't all be right at the same time. This kind of genericity
-      is called <emphasis>parametric polymorphism</emphasis>, and is
-      very similar to generics in C# and Java.
-    </para>
-    <sidebar><title>
-    Type errors vs exceptions
-    </title>
-    <para>
-      There's a big difference in OCaml (and really in any compiled
-      language) between errors that are caught at compile time and those
-      that are caught at run-time. It's better to catch errors as early
-      as possible in the development process, and compilation time is
-      best of all.
-    </para>
-    <para>
-      Working in the top-level somewhat obscures the difference between
-      run-time and compile time errors, but that difference is still
-      there. Generally, type errors, like this one:
-    </para>
-    <programlisting>
+      <para>
+        In this example, <literal>big_number</literal> requires that
+        <literal>'a</literal> be of type <literal>int</literal>, whereas
+        <literal>&quot;short&quot;</literal> and
+        <literal>&quot;loooooong&quot;</literal> require that
+        <literal>'a</literal> be of type <literal>string</literal>, and
+        they can't all be right at the same time. This kind of
+        genericity is called <emphasis>parametric
+        polymorphism</emphasis>, and is very similar to generics in C#
+        and Java.
+      </para>
+      <sidebar><title>
+      Type errors vs exceptions
+      </title>
+      <para>
+        There's a big difference in OCaml (and really in any compiled
+        language) between errors that are caught at compile time and
+        those that are caught at run-time. It's better to catch errors
+        as early as possible in the development process, and compilation
+        time is best of all.
+      </para>
+      <para>
+        Working in the top-level somewhat obscures the difference
+        between run-time and compile time errors, but that difference is
+        still there. Generally, type errors, like this one:
+      </para>
+      <programlisting>
 # 3 + &quot;potato&quot;;;
 Characters 4-12:
   3 + &quot;potato&quot;;;
@@ -514,21 +553,21 @@ Characters 4-12:
 Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
-    <para>
-      are compile-time errors, whereas an error that can't be caught by
-      the type system, like division by zero, leads to a runtime
-      exception.
-    </para>
-    <programlisting>
+      <para>
+        are compile-time errors, whereas an error that can't be caught
+        by the type system, like division by zero, leads to a runtime
+        exception.
+      </para>
+      <programlisting>
 # 3 / 0;;
 Exception: Division_by_zero.
 </programlisting>
-    <para>
-      One important distinction is that type errors will stop you
-      whether or not the offending code is ever actually executed. Thus,
-      you get an error from typing in this code:
-    </para>
-    <programlisting>
+      <para>
+        One important distinction is that type errors will stop you
+        whether or not the offending code is ever actually executed.
+        Thus, you get an error from typing in this code:
+      </para>
+      <programlisting>
 # if 3 &lt; 4 then 0 else 3 + &quot;potato&quot;;;
 Characters 25-33:
   if 3 &lt; 4 then 0 else 3 + &quot;potato&quot;;;
@@ -536,14 +575,15 @@ Characters 25-33:
 Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
-    <para>
-      but this code works fine.
-    </para>
-    <programlisting>
+      <para>
+        but this code works fine.
+      </para>
+      <programlisting>
 # if 3 &lt; 4 then 0 else 3 / 0;;
 - : int = 0
 </programlisting>
-    </sidebar>
+      </sidebar>
+    </sect2>
   </sect1>
   <sect1 id="tuples-lists-options-and-pattern-matching">
     <title>Tuples, Lists, Options and Pattern-matching</title>
@@ -563,13 +603,11 @@ Error: This expression has type string but an expression was expected of type
 val tup : int * string = (3, &quot;three&quot;)
 </programlisting>
       <para>
-        The type <literal>int * string</literal> corresponds to the set
-        of pairs of <literal>int</literal>s and
-        <literal>string</literal>s. For the mathematically inclined, the
-        <literal>*</literal> character is used because the space of all
-        2-tuples of type <literal>t * s</literal> corresponds to the
-        Cartesian product of <literal>t</literal> and
-        <literal>s</literal>.
+        For the mathematically inclined, the <literal>*</literal>
+        character is used because the space of all pairs of type
+        <literal>t * s</literal> corresponds to the Cartesian product of
+        the set of elements of type <literal>t</literal> and the set of
+        elements of type <literal>s</literal>.
       </para>
       <para>
         You can extract the components of a tuple using OCaml's
