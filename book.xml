@@ -216,13 +216,30 @@
     which you can find here:
   </para>
   <programlisting>
- http://realworldocaml.org/core-top
+ http://realworldocaml.org/TODO
+</programlisting>
+  <note>
+  <title>
+  Getting the interactive top-level
+  </title>
+  <para>
+    Before proceeding, make sure you have the Core library installed.
+    You can do this easily via the OPAM package manager, which is
+    explained in <link linkend="19-installing-ocaml.md">Chapter
+    X</link>. In a nutshell, you need to:
+  </para>
+  <programlisting>
+$ opam init
+$ opam switch 4.00.1+short-types
+$ opam install utop async_extra
+$ eval `opam config -env`
+$ utop
 </programlisting>
   <para>
-    Or you can install OCaml, Core and utop on your computer directly.
-    Instructions for this are found in
-    <link linkend="installation">Appendix X</link>.
+    You can exit utop by pressing <literal>control-D</literal> and
+    return.
   </para>
+  </note>
   <sect1 id="ocaml-as-a-calculator">
     <title>OCaml as a calculator</title>
     <para>
@@ -12020,8 +12037,6 @@ immutable: 2.6186s (19073 minor collections)
     <sect2 id="compaction-and-defragmenting-the-major-heap">
       <title>Compaction and defragmenting the major heap</title>
       <para>
-        Test math
-        $test = \frac{allocated}{heap size * percent overhead}$
       </para>
     </sect2>
   </sect1>
@@ -12267,22 +12282,19 @@ immutable: 2.6186s (19073 minor collections)
 <chapter id="installation">
   <title>Installation</title>
   <para>
-    There are two ways to develop OCaml code and libraries. You can
-    install a source-based package manager that downloads and compiles
-    libraries, or alternatively use the binary packages provides by many
-    operating systems. Binary packages are useful for releasing your
-    applications easily, but are less flexible for day-to-day
-    development.
+    The easiest way to install OCaml is via the binary packages
+    available in many operating systems. For day-to-day code
+    development, it is easier to use a source-based manager that lets
+    you recompile individual libraries easily.
   </para>
   <para>
-    For the purposes of this book, we will use the OPAM source-based
-    package manager. There are other alternatives that you can
-    investigate, such as GODI and ODB, but we do not cover them here.
-    Let's get started with OPAM now, as that will get you an interactive
-    top-level that can run the examples in the book quickly. OPAM
-    manages multiple simultaneous OCaml compiler and library
-    installations, tracks library versions across upgrades, and
-    recompiles dependencies automatically if they get out of date.
+    For the purposes of this book, we'll use the OPAM source manager.
+    There are other alternatives available such as GODI and ODB, but not
+    covered here. Let's get started with OPAM now, as you will need it
+    to run the examples in the rest of the book. OPAM manages multiple
+    simultaneous OCaml compiler and library installations, tracks
+    library versions across upgrades, and recompiles dependencies
+    automatically if they get out of date.
   </para>
   <sect1 id="opam-base-installation">
     <title>OPAM Base Installation</title>
@@ -12325,7 +12337,7 @@ $ brew install opam
       </para>
       <programlisting>
 $ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
-$ tar -jxvf opam-&lt;version&gt;.tar.gz
+ tar -jxvf opam-&lt;version&gt;.tar.gz
 $ cd opam-&lt;version&gt;.tar.gz
 $ ./configure &amp;&amp; make &amp;&amp; sudo make install
 </programlisting>
@@ -12339,34 +12351,32 @@ $ ./configure &amp;&amp; make &amp;&amp; sudo make install
         Investigate Protzenko's Windows installer.
       </para>
     </sect2>
-  </sect1>
-  <sect1 id="opam-usage">
-    <title>OPAM Usage</title>
-    <para>
-      All of the OPAM state is held in the <literal>.opam</literal>
-      directory in your home directory, including compiler
-      installations. You should never need to switch to an admin user to
-      install packages. Package listings are obtained by adding
-      <emphasis>remotes</emphasis> that provide package descriptions,
-      installation instructions and URLs.
-    </para>
-    <programlisting>
+    <sect2 id="using-the-opam-top-level">
+      <title>Using the OPAM top-level</title>
+      <para>
+        All of the OPAM state is held in the <literal>.opam</literal>
+        directory in your home directory, including compiler
+        installations. You should never need to switch to an admin user
+        to install packages.
+      </para>
+      <programlisting>
 $ opam init
-$ opam install utop async
+$ opam install utop async_extra
 $ eval `opam config -env`
 </programlisting>
-    <para>
-      This will initialise OPAM with the default package set from
-      <literal>opam.ocamlpro.com</literal>, and install the
-      <literal>utop</literal> interactive top-level and the
-      <literal>Async</literal> library. OPAM figures out the minimal set
-      of dependencies required, and installs those too. The
-      <literal>eval</literal> command is sets your
-      <literal>PATH</literal> variable to point to the current active
-      compiler, and you should add this to your shell
-      <literal>.profile</literal> to run every time you open a new
-      command shell.
-    </para>
+      <para>
+        This will initialise OPAM with the default package set from
+        <literal>opam.ocamlpro.com</literal>, and install the
+        <literal>utop</literal> interactive top-level and the
+        <literal>Async</literal> library. OPAM figures out the minimal
+        set of dependencies required, and installs those too. The
+        <literal>eval</literal> command is sets your
+        <literal>PATH</literal> variable to point to the current active
+        compiler, and you should add this to your shell
+        <literal>.profile</literal> to run every time you open a new
+        command shell.
+      </para>
+    </sect2>
     <sect2 id="switching-compiler-versions">
       <title>Switching compiler versions</title>
       <para>
@@ -12374,22 +12384,22 @@ $ eval `opam config -env`
         installation. You can use <literal>opam switch</literal> to swap
         between different compiler versions, or experiment with a
         different set of libraries or new compiler versions. For
-        instance, one of the alternate compilers has a debugging version
-        of the runtime library, which can be useful to track down bugs
-        in C bindings. To use it:
+        instance, one of the alternate compilers is patched to simplify
+        the types that are output in the top-level. You can switch it to
+        by:
       </para>
       <programlisting>
 $ opam switch -list
-$ opam switch 4.00.0+debug-runtime
+$ opam switch 4.00.1+short-types
 $ eval `opam config -env`
-$ opam install utop async
+$ opam install utop async_extra
 </programlisting>
       <para>
         The new compiler will be compiled and installed into
-        <literal>~/.opam/4.00.0+debug-runtime</literal>, and the
-        libraries will be separately tracked. You can have any number of
-        compilers installed simultaneously, but only one can be active
-        at any time.
+        <literal>~/.opam/4.00.1+short-types</literal> and the libraries
+        will be tracked separately from your system installation. You
+        can have any number of compilers installed simultaneously, but
+        only one can be active at any time.
       </para>
     </sect2>
   </sect1>
@@ -12436,6 +12446,14 @@ open Async.Std
         Eclipse plugins: which one is maintained?
       </para>
     </sect2>
+  </sect1>
+  <sect1 id="developing-with-opam">
+    <title>Developing with OPAM</title>
+    <para>
+      Package listings are obtained by adding
+      <emphasis>remotes</emphasis> that provide package descriptions,
+      installation instructions and URLs.
+    </para>
   </sect1>
 </chapter>
 <chapter id="syntax-extensions">
