@@ -544,8 +544,12 @@ val big_number : int -&gt; bool = &lt;fun&gt;
 - : int = 4
 </programlisting>
       <para>
-        But we can't mix and match two different concrete types for
-        <literal>'a</literal> in the same use of
+        Both <literal>long_string</literal> and
+        <literal>big_number</literal> are functions, and each is passed
+        to <literal>first_if_true</literal> with two other arguments of
+        the appropriate type (strings in the first example, and integers
+        in the second). But we can't mix and match two different
+        concrete types for <literal>'a</literal> in the same use of
         <literal>first_if_true</literal>.
       </para>
       <programlisting>
@@ -613,7 +617,8 @@ Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
       <para>
-        but this code works fine.
+        but this code works fine, even though it contains an branch that
+        would throw an exception if it were ever reached.
       </para>
       <programlisting>
 # if 3 &lt; 4 then 0 else 3 / 0;;
@@ -664,10 +669,11 @@ val y : string = &quot;three&quot;
         pattern-matching on tuples.
       </para>
       <para>
-        Here's an example of how you might use pattern matching in
-        practice: a function for computing the distance between two
-        points on the plane, where each point is represented as a pair
-        of <literal>float</literal>s.
+        Pattern matching can also show up in function arguments. Here's
+        a function for computing the distance between two points on the
+        plane, where each point is represented as a pair of
+        <literal>float</literal>s. The pattern matching syntax lets us
+        get at the values we need with a minimum of fuss.
       </para>
       <programlisting>
 # let distance (x1,y1) (x2,y2) =
@@ -675,9 +681,9 @@ val y : string = &quot;three&quot;
 ;;
 </programlisting>
       <para>
-        This is just a first taste of pattern matching. We'll see that
-        pattern matching shows up in many contexts in OCaml, and turns
-        out to be a surprisingly powerful and pervasive tool.
+        This is just a first taste of pattern matching. Pattern matching
+        is a pervasive tool in OCaml, and as you'll see, it has
+        surprising power.
       </para>
     </sect2>
     <sect2 id="lists">
@@ -703,30 +709,61 @@ Characters 17-23:
 Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
-      <para>
-        In addition to constructing lists using brackets, we can use the
-        operator <literal>::</literal> for adding elements to the front
-        of a list.
-      </para>
-      <programlisting>
+      <sect3 id="the-list-module">
+        <title>The <literal>List</literal> module</title>
+        <para>
+          OCaml comes with a <literal>List</literal> module that has a
+          rich collection of functions for working with lists. We can
+          access values from within a module by using dot-notation.
+          Here, for example, is how we compute the length of a list.
+        </para>
+        <programlisting>
+# List.length languages;;
+- : int = 3
+</programlisting>
+        <para>
+          Here's something a little more complicated. We can compute the
+          list of the lengths of each language as follows.
+        </para>
+        <programlisting>
+# List.map languages ~f:String.length;;
+- : int list = [5; 4; 1]
+</programlisting>
+        <para>
+          <literal>List.map</literal> takes two arguments: a list, and a
+          function (under the label <literal>~f</literal> --- we'll
+          learn more about labeled arguments in Chapter
+          {{{variables-and-functions}}}) for transforming the elements
+          of that list. Note that <literal>List.map</literal> creates a
+          new list and does not modify the original.
+        </para>
+      </sect3>
+      <sect3 id="constructing-lists-with">
+        <title>Constructing lists with <literal>::</literal></title>
+        <para>
+          In addition to constructing lists using brackets, we can use
+          the operator <literal>::</literal> for adding elements to the
+          front of a list.
+        </para>
+        <programlisting>
 # &quot;French&quot; :: &quot;Spanish&quot; :: languages;;
 - : string list = [&quot;French&quot;; &quot;Spanish&quot;; &quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
-      <para>
-        Here, we're creating a new extended list, not changing the list
-        we started with, as we can see.
-      </para>
-      <programlisting>
+        <para>
+          Here, we're creating a new extended list, not changing the
+          list we started with, as you can see below.
+        </para>
+        <programlisting>
 # languages;;
 - : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
-      <para>
-        The bracket notation for lists is really just syntactic sugar
-        for <literal>::</literal>. Thus, the following declarations are
-        all equivalent. Note that <literal>[]</literal> is used to
-        represent the empty list.
-      </para>
-      <programlisting>
+        <para>
+          The bracket notation for lists is really just syntactic sugar
+          for <literal>::</literal>. Thus, the following declarations
+          are all equivalent. Note that <literal>[]</literal> is used to
+          represent the empty list.
+        </para>
+        <programlisting>
 # [1; 2; 3];;
 - : int list = [1; 2; 3]
 # 1 :: (2 :: (3 :: []));;
@@ -734,72 +771,74 @@ Error: This expression has type string but an expression was expected of type
 # 1 :: 2 :: 3 :: [];;
 - : int list = [1; 2; 3]
 </programlisting>
-      <para>
-        Thus, <literal>::</literal> and <literal>[]</literal>, which are
-        examples of what are called
-        <emphasis>type-constructors</emphasis>, are the basic
-        building-blocks for lists.
-      </para>
-      <sect3 id="basic-list-patterns">
-        <title>Basic list patterns</title>
+      </sect3>
+      <sect3 id="list-patterns-using-match">
+        <title>List patterns using <literal>match</literal></title>
         <para>
           The elements of a list can be accessed through
-          pattern-matching. List patterns are fundamentally based on the
-          two list constructors, <literal>[]</literal> and
-          <literal>::</literal>. Here's a simple example.
+          pattern-matching. List patterns are based on the two list
+          constructors, <literal>[]</literal> and <literal>::</literal>.
+          Here's a simple example.
         </para>
         <programlisting>
-# let (my_favorite :: the_rest) = languages ;;
-val my_favorite : string = &quot;OCaml&quot;
-val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;]
+# let my_favorite_language (my_favorite :: the_rest) =
+     my_favorite
+  ;;
 </programlisting>
         <para>
           By pattern matching using <literal>::</literal>, we've broken
           off the first element of <literal>languages</literal> from the
           rest of the list. If you know Lisp or Scheme, what we've done
-          is the equivalent of using <literal>car</literal> and
-          <literal>cdr</literal> to break down a list.
+          is the equivalent of using <literal>car</literal> to grab the
+          first element of a list.
         </para>
         <para>
-          If you tried the above example in the toplevel, you probably
-          noticed that we omitted a warning generated by the compiler.
-          Here's the full output:
+          If you try the above example in the toplevel, however, you'll
+          see that it spits out an error:
         </para>
         <programlisting>
-# let (my_favorite :: the_rest) = languages ;;
-Characters 5-28:
-  let (my_favorite :: the_rest) = languages ;;
-       ^^^^^^^^^^^^^^^^^^^^^^^
+    Characters 25-69:
+  .........................(my_favorite :: the_rest) =
+       my_favorite
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
-val my_favorite : string = &quot;OCaml&quot;
-val the_rest : string list = [&quot;Perl&quot;; &quot;C&quot;]
+val my_favorite_language : 'a list -&gt; 'a = &lt;fun&gt;
 </programlisting>
         <para>
           The warning comes because the compiler can't be certain that
-          the pattern match won't lead to a runtime error, and the
-          warnings gives an example of the problem, the empty list,
-          <literal>[]</literal>. Indeed, if we try to use such a
-          pattern-match on the empty list:
+          the pattern match won't lead to a runtime error. Indeed, the
+          warning gives an example of a pattern that won't match, the
+          empty list, <literal>[]</literal>. We can see this in action
+          below.
         </para>
         <programlisting>
-# let (my_favorite :: the_rest) = [];;
-Characters 5-28:
-  let (my_favorite :: the_rest) = [];;
-       ^^^^^^^^^^^^^^^^^^^^^^^
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-[]
-Exception: (Match_failure &quot;&quot; 1 5).
+# my_favorite_language [&quot;English&quot;;&quot;Spanish&quot;;&quot;French&quot;];;
+- : string = &quot;English&quot;
+# my_favorite_language [];;
+Exception: Match_failure (&quot;//toplevel//&quot;, 11, 10).
 </programlisting>
-        <para>
-          we get a runtime error in addition to the compilation warning.
-        </para>
         <para>
           You can avoid these warnings, and more importantly make sure
           that your code actually handles all of the possible cases, by
-          using a <literal>match</literal> statement. Here's an example:
+          using a <literal>match</literal> statement instead.
+        </para>
+        <para>
+          A <literal>match</literal> statement is a kind of juiced-up
+          version of the switch statement found in <literal>C</literal>
+          and <literal>Java</literal>. It essentially lets you list a
+          sequence of patterns (separated by <literal>|</literal>
+          characters --- the one before the first case is optional), and
+          the compiler then dispatches to the code following the first
+          matched pattern. And, as we've already seen, we can name new
+          variables in our patterns that correspond to sub-structures of
+          the value being matched.
+        </para>
+        <para>
+          Here's a new version of
+          <literal>my_favorite_language</literal> that uses
+          <literal>match</literal>, and doesn't trigger a compiler
+          warning.
         </para>
         <programlisting>
 # let my_favorite_language languages =
@@ -813,13 +852,41 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
 # my_favorite_language [];;
 - : string = &quot;OCaml&quot;
 </programlisting>
+        <para>
+          Note that we included a comment in the above code. OCaml
+          comments are bounded by <literal>(*</literal> and
+          <literal>*)</literal>, and can be nested arbitrarily and cover
+          multiple lines.
+        </para>
+        <para>
+          The first pattern, <literal>first :: the_rest</literal>,
+          covers the case where <literal>languages</literal> has at
+          least one element, since every list except for the empty list
+          can be written down with one or more <literal>::</literal>'s.
+          The second pattern, <literal>[]</literal>, matches only the
+          empty list. These cases are exhaustive (every list is either
+          empty, or has at least one element), and the compiler can
+          detect that exhaustiveness, which is why it doesn't spit out a
+          warning.
+        </para>
       </sect3>
       <sect3 id="recursive-list-functions">
         <title>Recursive list functions</title>
         <para>
-          If we combine pattern matching with a recursive function call,
-          we can do things like define a function for summing the
-          elements of a list.
+          Recursive functions, or, functions that call themselves, are
+          an important technique in OCaml and in any functional
+          language. The typical approach to designing a recursive
+          function is to separate the logic into a set of <emphasis>base
+          cases</emphasis>, that can be solved directly, and a set of
+          <emphasis>inductive cases</emphasis>, where the function
+          breaks the problem down into smaller pieces and then calls
+          itself to solve those smaller problems.
+        </para>
+        <para>
+          When writing recursive list functions, this separation between
+          the base cases and the inductive cases is often done using
+          pattern matching. Here's a simple example of a function that
+          sums the elements of a list.
         </para>
         <programlisting>
 # let rec sum l =
@@ -832,25 +899,32 @@ val sum : int list -&gt; int
 - : int = 15
 </programlisting>
         <para>
-          We had to add the <literal>rec</literal> keyword in the
-          definition of <literal>sum</literal> to allow
-          <literal>sum</literal> to refer to itself. We can introduce
-          more complicated list patterns as well. Here's a function for
-          destuttering a list, <emphasis>i.e.</emphasis>, for removing
-          sequential duplicates.
+          Note that we had to use the <literal>rec</literal> keyword to
+          allow <literal>sum</literal> to refer to itself. And, as you
+          might imagine, the base case and inductive case are different
+          arms of the match. In particular, the base case is that of the
+          empty list, and the inductive case is that of a list of zero
+          or more elements.
+        </para>
+        <para>
+          We can introduce more complicated list patterns as well.
+          Here's a function for destuttering a list,
+          <emphasis>i.e.</emphasis>, for removing sequential duplicates.
         </para>
         <programlisting>
 # let rec destutter list =
     match list with
     | [] -&gt; []
-    | hd1 :: (hd2 :: tl) -&gt;
+    | hd1 :: hd2 :: tl -&gt;
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
   ;;
 </programlisting>
         <para>
-          Actually, the code above has a problem. If you type it into
-          the top-level, you'll see this error:
+          Again, the first arm of the match is the base case, and the
+          second is the inductive. Unfortunately, this code has a
+          problem. If you type it into the top-level, you'll see this
+          error:
         </para>
         <programlisting>
 Warning 8: this pattern-matching is not exhaustive.
@@ -858,9 +932,9 @@ Here is an example of a value that is not matched:
 _::[]
 </programlisting>
         <para>
-          This is warning you that we've missed something, in particular
-          that our code doesn't handle one-element lists. That's easy
-          enough to fix by adding another case to the match:
+          This indicates that we're missing a case, in particular we
+          don't handle one-element lists. That's easy enough to fix by
+          adding another case to the match:
         </para>
         <programlisting>
 # let rec destutter list =
@@ -869,54 +943,38 @@ _::[]
     | [hd] -&gt; [hd]
     | hd1 :: (hd2 :: tl) -&gt;
       if hd1 = hd2 then destutter (hd2 :: tl)
-      else hd1 :: destutter (hd2 :: tl) ;;
+      else hd1 :: destutter (hd2 :: tl)
+  ;;
 val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 # destutter [&quot;hey&quot;;&quot;hey&quot;;&quot;hey&quot;;&quot;man!&quot;];;
 - : string list = [&quot;hey&quot;; &quot;man!&quot;]
 </programlisting>
         <para>
-          Note that in the above, we used another variant of the list
-          pattern, <literal>[hd]</literal>, to match a list with a
-          single element. We can do this to match a list with any fixed
-          number of elements, <emphasis>e.g.</emphasis>,
+          Note that this code used another variant of the list pattern,
+          <literal>[hd]</literal>, to match a list with a single
+          element. We can do this to match a list with any fixed number
+          of elements, <emphasis>e.g.</emphasis>,
           <literal>[x;y;z]</literal> will match any list with exactly
           three elements, and will bind those elements to the variables
           <literal>x</literal>, <literal>y</literal> and
           <literal>z</literal>.
         </para>
-      </sect3>
-      <sect3 id="the-list-module">
-        <title>The <literal>List</literal> module</title>
         <para>
-          So far, we've built up all of our list functions using pattern
-          matching and recursion. But in practice, this isn't usually
-          necessary. Instead, you'll mostly use the rich collection of
-          utility functions contained in Core's <literal>List</literal>
-          module. For example:
-        </para>
-        <programlisting>
-# List.map ~f:String.length languages;;
-- : int list = [5; 4; 1]
-</programlisting>
-        <para>
-          Here, we use the dot-notation to reference elements of the
-          <literal>List</literal> and <literal>String</literal> module.
-          <literal>List.map</literal> in particular is a function that
-          takes a list and a function for transforming elements of that
-          list (under the label <literal>~f</literal>. For now, you can
-          ignore that bit of syntax, and we'll learn more about it in
-          chapter {{{FUNCTIONS}}}), and returns to us a new list with
-          the transformed elements.
+          In the last few examples, our list processing code involved a
+          lot of recursive functions. In practice, this isn't usually
+          necessary. Most of the time, you'll find yourself happy to use
+          the iteration functions found in the <literal>List</literal>
+          module. But it's good to know how to use recursion when you
+          need to do something new that's not already supported.
         </para>
       </sect3>
     </sect2>
     <sect2 id="options">
       <title>Options</title>
       <para>
-        Another common data structure in OCaml is the
-        <literal>option</literal>. An <literal>option</literal> is used
-        to express that a value that might or might not be present. For
-        example,
+        Another common data structure in OCaml is the option. An option
+        is used to express that a value might or might not be present.
+        For example,
       </para>
       <programlisting>
 # let divide x y =
@@ -924,11 +982,11 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
 </programlisting>
       <para>
-        <literal>Some</literal> and <literal>None</literal> are type
+        <literal>Some</literal> and <literal>None</literal> are
         constructors, like <literal>::</literal> and
         <literal>[]</literal> for lists, which let you build optional
-        values. You can think of an <literal>option</literal> as a
-        specialized list that can only have zero or one element.
+        values. You can think of an option as a specialized list that
+        can only have zero or one element.
       </para>
       <para>
         To get a value out of an option, we use pattern matching, as we
@@ -949,20 +1007,20 @@ val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
 val print_log_entry : Time.t option -&gt; string -&gt; unit
 </programlisting>
       <para>
-        Here, we again use a match statement for handling the two
-        possible states of an option. It's worth noting that we don't
-        necessarily need to use an explicit <literal>match</literal>
-        statement in this case. We can instead use some built in
-        functions from the <literal>Option</literal> module, which, like
-        the <literal>List</literal> module for lists, is a place where
-        you can find a large collection of useful functions for working
-        with options.
+        Here, we again use a <literal>match</literal> statement for
+        handling the two possible states of an option. It's worth noting
+        that we don't necessarily need to use an explicit
+        <literal>match</literal> statement in this case. We can instead
+        use some built in functions from the <literal>Option</literal>
+        module, which, like the <literal>List</literal> module for
+        lists, is a place where you can find a large collection of
+        useful functions for working with options.
       </para>
       <para>
         In this case, we can rewrite <literal>print_log_entry</literal>
-        using <literal>Option.value</literal>, which either returns the
-        content of an option if the option is <literal>Some</literal>,
-        or a default value if the option is <literal>None</literal>.
+        using <literal>Option.value</literal>, which returns the content
+        of an option if the option is <literal>Some</literal>, or a
+        default value if the option is <literal>None</literal>.
       </para>
       <programlisting>
 # let print_log_entry maybe_time message =
@@ -994,7 +1052,7 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
   <sect1 id="records-and-variants">
     <title>Records and Variants</title>
     <para>
-      So far, we've only looked at data structures that were pre-defined
+      So far, we've looked only at data structures that were predefined
       in the language, like lists and tuples. But OCaml also allows us
       to define new datatypes. Here's a toy example of a datatype
       representing a point in 2-dimensional space:
@@ -1050,8 +1108,8 @@ val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
 # type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
 </programlisting>
     <para>
-      Now, imagine that you want to combine multiple of these objects
-      together, say as a description of a multi-object scene. You need
+      Now, imagine that you want to combine multiple objects of these
+      types together as a description of a multi-object scene. You need
       some unified way of representing these objects together in a
       single type. One way of doing this is using a
       <emphasis>variant</emphasis> type:
@@ -1123,7 +1181,16 @@ val is_inside_shapes : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
       <title>Arrays</title>
       <para>
         Perhaps the simplest mutable datastructure in OCaml is the
-        array. Here's an example.
+        array. Arrays in OCaml are very similar to arrays in other
+        languages like C: they are fixed width, indexing starts at 0,
+        and accessing or modifying an array element is a constant-time
+        operation. Arrays are more compact in terms of memory
+        utilization than most other data structures in OCaml, including
+        lists. OCaml uses three words per element of a list, but only
+        one per element of an array.
+      </para>
+      <para>
+        Here's an example.
       </para>
       <programlisting>
 # let numbers = [| 1;2;3;4 |];;
@@ -1134,19 +1201,11 @@ val numbers : int array = [|1; 2; 3; 4|]
 - : int array = [|1; 2; 4; 4|]
 </programlisting>
       <para>
-        In the above, the <literal>.(i)</literal> syntax is used for
-        referencing the element of an array, and the
-        <literal>&lt;-</literal> syntax is used for modifying an element
-        of the array.
-      </para>
-      <para>
-        Arrays in OCaml are very similar to arrays in other languages
-        like C: they are fixed width, indexing starts at 0, and
-        accessing or modifying an array element is a constant-time
-        operation. Arrays are more compact in terms of memory
-        utilization than most other data structures in OCaml, including
-        lists. OCaml uses three words per element of a list, but only
-        one per element of an array.
+        the <literal>.(i)</literal> syntax is used to refer to an
+        element of an array, and the <literal>&lt;-</literal> syntax is
+        for modification. Because the elements of the array are counted
+        starting at zero, element <literal>.(2)</literal> is the third
+        element.
       </para>
     </sect2>
     <sect2 id="mutable-record-fields">
@@ -1162,12 +1221,15 @@ val numbers : int array = [|1; 2; 3; 4|]
       <programlisting>
 # type running_sum =
    { mutable sum: float;
-     mutable sum_sq: float; (* sum of squares, for stdev *)
-     mutable samples: int; } ;;
+     mutable sum_sq: float; (* sum of squares *)
+     mutable samples: int;
+   }
+  ;;
 </programlisting>
       <para>
-        Here are some functions for computing means and standard
-        deviations based on the <literal>running_sum</literal>.
+        The fields in <literal>running_sum</literal> are designed to be
+        easy to extend incrementally, and sufficient to compute means
+        and standard deviations, as shown below.
       </para>
       <programlisting>
 # let mean rsum = rsum.sum /. float rsum.samples
@@ -1178,11 +1240,8 @@ val mean : running_sum -&gt; float = &lt;fun&gt;
 val stdev : running_sum -&gt; float = &lt;fun&gt;
 </programlisting>
       <para>
-        And finally, we can define functions for creating and modifying
-        a <literal>running_sum</literal>. Note the use of single
-        semi-colons to express a sequence of operations. When we were
-        operating purely functionally, this wasn't necessary, but you
-        start needing it when your code is acting by side-effect.
+        We also need functions to create and update
+        <literal>running_sum</literal>s:
       </para>
       <programlisting>
 # let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
@@ -1195,9 +1254,23 @@ val create : unit -&gt; running_sum = &lt;fun&gt;
 val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
 </programlisting>
       <para>
+        <literal>create</literal> returns a
+        <literal>running_sum</literal> corresponding to the empty set,
+        and <literal>update rsum x</literal> changes
+        <literal>rsum</literal> to reflect the addition of
+        <literal>x</literal> to its set of samples, by updating the
+        number of samples, the sum, and the sum of squares.
+      </para>
+      <para>
+        Note the use in the above code of single semi-colons to sequence
+        operations. When we were working purely functionally, this
+        wasn't necessary, but you start needing it when your code is
+        acting by side-effect.
+      </para>
+      <para>
         A new and somewhat odd type has cropped up in this example:
         <literal>unit</literal>. What makes <literal>unit</literal>
-        unusual is that there is only one value of type
+        different is that there is only one value of type
         <literal>unit</literal>, which is written <literal>()</literal>.
         Because <literal>unit</literal> has only one inhabitant, a value
         of type <literal>unit</literal> can't convey any information.
@@ -1291,7 +1364,12 @@ val permute : 'a array -&gt; unit = &lt;fun&gt;
 </programlisting>
       <para>
         Note that the semi-colon after the first array assignment
-        doesn't terminate the scope of the let-binding.
+        doesn't terminate the scope of the let-binding, so the variable
+        <literal>j</literal> remains in scope until the end of the body
+        of the for loop.
+      </para>
+      <para>
+        Here's an example run of this code.
       </para>
       <programlisting>
 # let ar = Array.init 20 ~f:(fun i -&gt; i);;
@@ -1308,22 +1386,25 @@ val ar : int array =
   <sect1 id="a-complete-program">
     <title>A complete program</title>
     <para>
-      Everything we've done so far has been about experiencing the basic
-      features of the language through the toplevel. We'll now look at
-      how to create a simple but complete stand-along program that does
-      something useful: summing up a list of numbers read in from the
-      UNIX standard input.
+      So far, we've played with the basic features of the language using
+      the toplevel. Now we'll create a simple, complete stand-along
+      program that does something useful: sum up a list of numbers read
+      in from the UNIX standard input.
+    </para>
+    <para>
+      Here's the code, which you can save in a file called
+      <literal>sum.ml</literal>.
     </para>
     <programlisting language="ocaml">
 (* file: sum.ml *)
 
 open Core.Std
 
-let rec read_and_accumulate sum_so_far =
+let rec read_and_accumulate accum =
   let line = In_channel.input_line stdin in
   match line with
-  | None -&gt; sum_so_far
-  | Some x -&gt; read_and_accumulate (sum_so_far +. Float.of_string x)
+  | None -&gt; accum
+  | Some x -&gt; read_and_accumulate (accum +. Float.of_string x)
 
 let () =
   printf &quot;Total: %F\n&quot; (read_and_accumulate 0.)
@@ -1331,41 +1412,35 @@ let () =
     <para>
       This is our first use of OCaml's input and output routines. The
       function <literal>read_and_accumulate</literal> uses
-      <literal>In_channel.input_line</literal> function to read in lines
-      one by one from the standard input, accumulating a sum of the
-      numbers that are read in. Note that <literal>input_line</literal>
-      returns an optional value, with <literal>None</literal> indicating
-      the end of the file.
+      <literal>In_channel.input_line</literal> to read in lines one by
+      one from the standard input, adding each number to its accumulated
+      sum as it goes. Note that <literal>input_line</literal> returns an
+      optional value, with <literal>None</literal> indicating the end of
+      the input. Note that <literal>read_and_accumulate</literal> is a
+      recursive function, invoking itself to read the next line, until
+      the last line is reached.
     </para>
     <para>
-      Note that <literal>read_and_accumulate</literal> is structured
-      recursively, invoking itself to read the next line, until the last
-      line is reached. Recursion is by far not the only way of
-      structuring iteration in OCaml, but it's a fairly common one.
-    </para>
-    <para>
-      After <literal>read_and_accumulate</literal> returns, we then need
-      to print out the final result. We do this using the
+      After <literal>read_and_accumulate</literal> returns, the total
+      needs to be printed. This is done using the
       <literal>printf</literal> command, which provides support for
       type-safe format strings, similar to what you'll find in a variety
-      of languages. The format string is actually parsed by the compiler
-      and used to determine the number and type of the remaining
-      arguments that are required for <literal>printf</literal>. In this
-      case, there is a single formatting directive,
-      <literal>%F</literal>, which means that <literal>printf</literal>
-      expects one additional argument of type <literal>float</literal>.
+      of languages. The format string is parsed by the compiler and used
+      to determine the number and type of the remaining arguments that
+      are required for <literal>printf</literal>. In this case, there is
+      a single formatting directive, <literal>%F</literal>, so
+      <literal>printf</literal> expects one additional argument of type
+      <literal>float</literal>.
     </para>
     <sect2 id="compiling-and-running">
       <title>Compiling and running</title>
       <para>
-        We'll use <literal>ocamlbuild</literal> to compile our program.
-        We'll need to create a file, in the same directory we put
-        <literal>sum.ml</literal>, called <literal>_tags</literal>. This
-        file contains directives as to the compilation options required
-        for the project. The following line in <literal>_tags</literal>
-        indicate that the files in question need to be build against the
-        package Core, with threads enabled, which is a requirement of
-        Core itself.
+        We can use <literal>ocamlbuild</literal> to compile the program.
+        We'll need to create a file, in the same directory as
+        <literal>sum.ml</literal>, called <literal>_tags</literal>. We
+        can put the following in <literal>_tags</literal> to indicate
+        that we're building against Core, and that threads should be
+        enabled, which is a required by Core.
       </para>
       <programlisting>
 true:package(core),thread
@@ -1381,7 +1456,7 @@ ocamlbuild -use-ocamlfind sum.native
         The <literal>.native</literal> suffix indicates that we're
         building a native-code executable, which we'll discuss more in
         Chapter {{{files-modules-and-programs}}}. Once the build
-        completes, we can then use the resulting program like any
+        completes, we can use the resulting program like any
         command-line utility. In this example, we can just type in a
         sequence of numbers, one per line, hitting control-d to exit
         when the input is complete.
@@ -1394,16 +1469,21 @@ max $ ./sum.native
 94.5
 Total: 100.5
 </programlisting>
+      <para>
+        More work is needed to make a really usable command-line
+        programming, including a proper command-line parsing interface
+        and better error handling.
+      </para>
     </sect2>
   </sect1>
   <sect1 id="where-to-go-from-here">
     <title>Where to go from here</title>
     <para>
       That's it for our guided tour! There are plenty of features left
-      to touch upon - we haven't shown you how to read from a file, as
-      just one example - but the hope is that this has given you enough
-      of a feel for the language that you have your bearings, and will
-      be comfortable reading examples in the rest of the book.
+      to touch upon and lots of details to explain, but the hope is that
+      this has given you enough of a feel for the language that you have
+      a sense as to what to expect, and will be comfortable reading
+      examples in the rest of the book.
     </para>
   </sect1>
 </chapter>
