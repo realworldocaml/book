@@ -198,9 +198,9 @@
   <title>A Guided Tour</title>
   <para>
     This chapter gives an overview of OCaml by walking through a series
-    of small examples that cover most of the major features. This should
-    give a sense of what OCaml can do, without going into too much
-    detail about any particular topic.
+    of small examples that cover most of the major features of the
+    language. This should give a sense of what OCaml can do, without
+    getting too deep in any one topic.
   </para>
   <para>
     We'll present this guided tour using the <literal>utop</literal>
@@ -276,8 +276,8 @@ $ utop
         <para>
           We needed to type <literal>;;</literal> in order to tell the
           toplevel that it should evaluate an expression. This is a
-          peculiarity of the toplevel that is not required in compiled
-          code.
+          peculiarity of the toplevel that is not required in
+          stand-alone programs.
         </para>
       </listitem>
       <listitem>
@@ -303,8 +303,9 @@ $ utop
           <literal>+</literal>), and OCaml doesn't do any automated
           casting between the types. This can be a bit of a nuisance,
           but it has its benefits, since it prevents some kinds of bugs
-          that arise from unexpected differences between the behavior of
-          <literal>int</literal> and <literal>float</literal>.
+          that arise in other languages due to unexpected differences
+          between the behavior of <literal>int</literal> and
+          <literal>float</literal>.
         </para>
       </listitem>
     </itemizedlist>
@@ -336,11 +337,19 @@ val square : int -&gt; int = &lt;fun&gt;
 - : int = 16
 </programlisting>
     <para>
-      Now that we're creating more interesting values, the types have
-      gotten more interesting too. <literal>int -&gt; int</literal> is a
-      function type, in this case indicating a function that takes an
-      <literal>int</literal> and returns an <literal>int</literal>. We
-      can also write functions that take multiple arguments:
+      When using <literal>let</literal> to define a function, the first
+      identifier after the <literal>let</literal> is the function name,
+      and each subsequent identifier is a different argument to the
+      function. Thus, <literal>square</literal> is a function with a
+      single argument.
+    </para>
+    <para>
+      Now that we're creating more interesting values like functions,
+      the types have gotten more interesting too.
+      <literal>int -&gt; int</literal> is a function type, in this case
+      indicating a function that takes an <literal>int</literal> and
+      returns an <literal>int</literal>. We can also write functions
+      that take multiple arguments.
     </para>
     <programlisting>
 # let ratio x y =
@@ -383,13 +392,15 @@ val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
       If we look at the inferred type signature in detail, we see that
       the first argument is a function that takes an int and returns a
       boolean, and that the remaining two arguments are integers. Here's
-      this function in action:
+      an example of this function in action.
     </para>
     <programlisting>
 # let even x = x mod 2 = 0 ;;
 val even : int -&gt; bool = &lt;fun&gt;
 # sum_if_true even 3 4;;
 - : int = 4
+# sum_if_true even 2 4;;
+- : int = 6
 </programlisting>
     <sect2 id="type-inference">
       <title>Type inference</title>
@@ -406,7 +417,7 @@ val even : int -&gt; bool = &lt;fun&gt;
         on the types that arise from the structure of the code.
       </para>
       <para>
-        As an example, let's walk you through what you'd do to infer the
+        As an example, let's walk through the process of inferring the
         type of <literal>sum_if_true</literal>.
       </para>
       <itemizedlist>
@@ -416,8 +427,9 @@ val even : int -&gt; bool = &lt;fun&gt;
             statement return the same type, so the expression
             <literal>if test x then x else 0</literal> requires that
             <literal>x</literal> must be the same type as
-            <literal>0</literal>, which is <literal>int</literal>.
-            Similarly for <literal>y</literal>.
+            <literal>0</literal>, which is <literal>int</literal>. By
+            the same logic we can conclude that <literal>y</literal> has
+            type <literal>int</literal>.
           </para>
         </listitem>
         <listitem>
@@ -432,7 +444,7 @@ val even : int -&gt; bool = &lt;fun&gt;
           <para>
             <literal>test x</literal> is used as the condition in an
             <literal>if</literal> statement, so the return type of
-            <literal>test</literal> must be bool.
+            <literal>test</literal> must be <literal>bool</literal>.
           </para>
         </listitem>
         <listitem>
@@ -448,6 +460,30 @@ val even : int -&gt; bool = &lt;fun&gt;
         which determines the overall type of
         <literal>sum_if_true</literal>.
       </para>
+      <para>
+        Over time, you'll build a rough intuition for how the OCaml
+        inference engine works, which makes it easier to reason through
+        your programs. One way of making it easier to understand the
+        types is to add explicit type annotations. These annotations
+        never change the behavior of an OCaml program, but they can
+        serve as useful documentation, as well as catch unintended type
+        changes. Here's an annotated version of
+        <literal>sum_if_true</literal>:
+      </para>
+      <programlisting>
+# let sum_if_true (test : int -&gt; bool) (x:int) (y:int) : int =
+     if test x then x else 0
+     + if test y then y else 0
+  ;;
+val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
+</programlisting>
+      <para>
+        In the above, we've marked every argument to the function with
+        its type, with the final annotation indicating the type of the
+        return value. Such type annotations can actually go around any
+        value in an OCaml program, and can be useful for figuring out
+        why a given program is failing to compile.
+      </para>
     </sect2>
     <sect2 id="inferring-generic-types">
       <title>Inferring generic types</title>
@@ -457,7 +493,8 @@ val even : int -&gt; bool = &lt;fun&gt;
       </para>
       <programlisting>
 # let first_if_true test x y =
-    if test x then x else y;;
+    if test x then x else y
+  ;;
 </programlisting>
       <para>
         <literal>first_if_true</literal> takes as its arguments a
@@ -604,7 +641,7 @@ val tup : int * string = (3, &quot;three&quot;)
 </programlisting>
       <para>
         For the mathematically inclined, the <literal>*</literal>
-        character is used because the space of all pairs of type
+        character is used because the set of all pairs of type
         <literal>t * s</literal> corresponds to the Cartesian product of
         the set of elements of type <literal>t</literal> and the set of
         elements of type <literal>s</literal>.
@@ -1265,6 +1302,97 @@ val ar : int array =
 # ar;;
 - : int array =
 [|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
+</programlisting>
+    </sect2>
+  </sect1>
+  <sect1 id="a-complete-program">
+    <title>A complete program</title>
+    <para>
+      Everything we've done so far has been about experiencing the basic
+      features of the language through the toplevel. We'll now look at
+      how to create a simple but complete stand-along program that does
+      something useful: summing up a list of numbers read in from the
+      UNIX standard input.
+    </para>
+    <programlisting language="ocaml">
+(* file: sum.ml *)
+
+open Core.Std
+
+let rec read_and_accumulate sum_so_far =
+  let line = In_channel.input_line stdin in
+  match line with
+  | None -&gt; sum_so_far
+  | Some x -&gt; read_and_accumulate (sum_so_far +. Float.of_string x)
+
+let () =
+  printf &quot;Total: %F\n&quot; (read_and_accumulate 0.)
+</programlisting>
+    <para>
+      This is our first use of OCaml's input and output routines. The
+      function <literal>read_and_accumulate</literal> uses
+      <literal>In_channel.input_line</literal> function to read in lines
+      one by one from the standard input, accumulating a sum of the
+      numbers that are read in. Note that <literal>input_line</literal>
+      returns an optional value, with <literal>None</literal> indicating
+      the end of the file.
+    </para>
+    <para>
+      Note that <literal>read_and_accumulate</literal> is structured
+      recursively, invoking itself to read the next line, until the last
+      line is reached. Recursion is by far not the only way of
+      structuring iteration in OCaml, but it's a fairly common one.
+    </para>
+    <para>
+      After <literal>read_and_accumulate</literal> returns, we then need
+      to print out the final result. We do this using the
+      <literal>printf</literal> command, which provides support for
+      type-safe format strings, similar to what you'll find in a variety
+      of languages. The format string is actually parsed by the compiler
+      and used to determine the number and type of the remaining
+      arguments that are required for <literal>printf</literal>. In this
+      case, there is a single formatting directive,
+      <literal>%F</literal>, which means that <literal>printf</literal>
+      expects one additional argument of type <literal>float</literal>.
+    </para>
+    <sect2 id="compiling-and-running">
+      <title>Compiling and running</title>
+      <para>
+        We'll use <literal>ocamlbuild</literal> to compile our program.
+        We'll need to create a file, in the same directory we put
+        <literal>sum.ml</literal>, called <literal>_tags</literal>. This
+        file contains directives as to the compilation options required
+        for the project. The following line in <literal>_tags</literal>
+        indicate that the files in question need to be build against the
+        package Core, with threads enabled, which is a requirement of
+        Core itself.
+      </para>
+      <programlisting>
+true:package(core),thread
+</programlisting>
+      <para>
+        With our <literal>_tags</literal> file in place, we can build
+        our executable by issuing this command.
+      </para>
+      <programlisting>
+ocamlbuild -use-ocamlfind sum.native
+</programlisting>
+      <para>
+        The <literal>.native</literal> suffix indicates that we're
+        building a native-code executable, which we'll discuss more in
+        Chapter {{{files-modules-and-programs}}}. Once the build
+        completes, we can then use the resulting program like any
+        command-line utility. In this example, we can just type in a
+        sequence of numbers, one per line, hitting control-d to exit
+        when the input is complete.
+      </para>
+      <programlisting>
+max $ ./sum.native
+1
+2
+3
+94.5
+Total: 100.5
 </programlisting>
     </sect2>
   </sect1>
