@@ -1,9 +1,9 @@
 # A Guided Tour
 
 This chapter gives an overview of OCaml by walking through a series of
-small examples that cover most of the major features.  This should
-give a sense of what OCaml can do, without going into too much detail
-about any particular topic.
+small examples that cover most of the major features of the language.
+This should give a sense of what OCaml can do, without getting too
+deep in any one topic.
 
 We'll present this guided tour using the `utop` OCaml toplevel, an
 interactive shell that lets you type in expressions and evaluate them
@@ -67,7 +67,7 @@ at you.
 
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  This is a peculiarity of the toplevel that
-  is not required in compiled code.
+  is not required in stand-alone programs.
 - After evaluating an expression, the toplevel spits out both the type
   of the result and the result itself.
 - Function arguments are separated by spaces, instead of by
@@ -78,8 +78,8 @@ at you.
   instead of `6`) and different infix operators (`+.` instead of `+`),
   and OCaml doesn't do any automated casting between the types.  This
   can be a bit of a nuisance, but it has its benefits, since it
-  prevents some kinds of bugs that arise from unexpected differences
-  between the behavior of `int` and `float`.
+  prevents some kinds of bugs that arise in other languages due to
+  unexpected differences between the behavior of `int` and `float`.
 
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
@@ -92,7 +92,7 @@ val y : int = 14
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After a new variable is created, the toplevel tells us the name of the
-variable, in addition to its type and value.  
+variable, in addition to its type and value.
 
 ## Functions and Type Inference
 
@@ -105,10 +105,16 @@ val square : int -> int = <fun>
 - : int = 16
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now that we're creating more interesting values, the types have gotten
-more interesting too.  `int -> int` is a function type, in this case
-indicating a function that takes an `int` and returns an `int`.  We
-can also write functions that take multiple arguments:
+When using `let` to define a function, the first identifier after the
+`let` is the function name, and each subsequent identifier is a
+different argument to the function.  Thus, `square` is a function with
+a single argument.
+
+Now that we're creating more interesting values like functions, the
+types have gotten more interesting too.  `int -> int` is a function
+type, in this case indicating a function that takes an `int` and
+returns an `int`.  We can also write functions that take multiple
+arguments.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let ratio x y =
@@ -148,44 +154,68 @@ val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 
 If we look at the inferred type signature in detail, we see that the
 first argument is a function that takes an int and returns a boolean,
-and that the remaining two arguments are integers.  Here's this
-function in action:
+and that the remaining two arguments are integers.  Here's an example
+of this function in action.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let even x = x mod 2 = 0 ;;
 val even : int -> bool = <fun>
 # sum_if_true even 3 4;;
 - : int = 4
+# sum_if_true even 2 4;;
+- : int = 6
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Type inference
 
 As the types we encounter get more complicated, you might ask yourself
 how OCaml is able to figure them out, given that we didn't write down
-any explicit type information.  
+any explicit type information.
 
 OCaml determines the type of an expression using a technique called
 _type-inference_, by which it infers the type of a given expression
 based on what it already knows about the types of other related
 variables, and on constraints on the types that arise from the
-structure of the code.  
+structure of the code.
 
-As an example, let's walk you through what you'd do to infer the type
-of `sum_if_true`.
+As an example, let's walk through the process of inferring the type of
+`sum_if_true`.
 
 - OCaml requires that both arms of an `if` statement return the same
-  type, so the expression `if test x then x else 0` requires that
-  `x` must be the same type as `0`, which is `int`.  Similarly for
-  `y`.
+  type, so the expression `if test x then x else 0` requires that `x`
+  must be the same type as `0`, which is `int`.  By the same logic we
+  can conclude that `y` has type `int`.
 - `test` is passed `x` as an argument.  Since `x` has type `int`, the
   input type of `test` must be `int`.
 - `test x` is used as the condition in an `if` statement, so the
-  return type of `test` must be bool.
+  return type of `test` must be `bool`.
 - The fact that `+` returns an int implies that the return value of
   `sum_if_true` must be int.
 
 Together, that nails down the the types of all the variables, which
 determines the overall type of `sum_if_true`.
+
+Over time, you'll build a rough intuition for how the OCaml inference
+engine works, which makes it easier to reason through your programs.
+One way of making it easier to understand the types is to add explicit
+type annotations.  These annotations never change the behavior of an
+OCaml program, but they can serve as useful documentation, as well as
+catch unintended type changes.  Here's an annotated version of
+`sum_if_true`:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let sum_if_true (test : int -> bool) (x:int) (y:int) : int =
+     if test x then x else 0
+     + if test y then y else 0
+  ;;
+val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the above, we've marked every argument to the function with its
+type, with the final annotation indicating the type of the return
+value.  Such type annotations can actually go around any value in an
+OCaml program, and can be useful for figuring out why a given program
+is failing to compile.
 
 ### Inferring generic types
 
@@ -194,7 +224,8 @@ concrete type of a given value.  Consider this function.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let first_if_true test x y =
-    if test x then x else y;;
+    if test x then x else y
+  ;;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `first_if_true` takes as its arguments a function `test`, and two
@@ -236,7 +267,7 @@ val big_number : int -> bool = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 But we can't mix and match two different concrete types for `'a` in
-the same use of `first_if_true`.  
+the same use of `first_if_true`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # first_if_true big_number "short" "loooooong";;
@@ -320,9 +351,9 @@ val tup : int * string = (3, "three")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For the mathematically inclined, the `*` character is used because the
-space of all pairs of type `t * s` corresponds to the Cartesian
-product of the set of elements of type `t` and the set of elements of
-type `s`.
+set of all pairs of type `t * s` corresponds to the Cartesian product
+of the set of elements of type `t` and the set of elements of type
+`s`.
 
 You can extract the components of a tuple using OCaml's
 pattern-matching syntax. For example:
@@ -613,7 +644,7 @@ encode a value that might not be there.  This is different from most
 other languages, including Java and C#, where most if not all
 datatypes are _nullable_, meaning that, whatever their type is, any
 given value also contains the possibility of being a null value.  In
-such languages, null is lurking everywhere.  
+such languages, null is lurking everywhere.
 
 In OCaml, however, nulls are explicit.  A value of type `string *
 string` always actually contains two two well-defined values of type
@@ -902,6 +933,86 @@ val ar : int array =
 - : int array =
 [|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## A complete program
+
+Everything we've done so far has been about experiencing the basic
+features of the language through the toplevel.  We'll now look at how
+to create a simple but complete stand-along program that does
+something useful: summing up a list of numbers read in from the UNIX
+standard input.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* file: sum.ml *)
+
+open Core.Std
+
+let rec read_and_accumulate sum_so_far =
+  let line = In_channel.input_line stdin in
+  match line with
+  | None -> sum_so_far
+  | Some x -> read_and_accumulate (sum_so_far +. Float.of_string x)
+
+let () =
+  printf "Total: %F\n" (read_and_accumulate 0.)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is our first use of OCaml's input and output routines.  The
+function `read_and_accumulate` uses `In_channel.input_line` function
+to read in lines one by one from the standard input, accumulating a
+sum of the numbers that are read in.  Note that `input_line` returns
+an optional value, with `None` indicating the end of the file.
+
+Note that `read_and_accumulate` is structured recursively, invoking
+itself to read the next line, until the last line is reached.
+Recursion is by far not the only way of structuring iteration in
+OCaml, but it's a fairly common one.
+
+After `read_and_accumulate` returns, we then need to print out the
+final result.  We do this using the `printf` command, which provides
+support for type-safe format strings, similar to what you'll find in a
+variety of languages.  The format string is actually parsed by the
+compiler and used to determine the number and type of the remaining
+arguments that are required for `printf`.  In this case, there is a
+single formatting directive, `%F`, which means that `printf` expects
+one additional argument of type `float`.
+
+### Compiling and running
+
+We'll use `ocamlbuild` to compile our program.  We'll need to create a
+file, in the same directory we put `sum.ml`, called `_tags`.  This
+file contains directives as to the compilation options required for
+the project.  The following line in `_tags` indicate that the files in
+question need to be build against the package Core, with threads
+enabled, which is a requirement of Core itself.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+true:package(core),thread
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With our `_tags` file in place, we can build our executable by issuing
+this command.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ocamlbuild -use-ocamlfind sum.native
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `.native` suffix indicates that we're building a native-code
+executable, which we'll discuss more in Chapter
+{{{files-modules-and-programs}}}.  Once the build completes, we can
+then use the resulting program like any command-line utility.  In this
+example, we can just type in a sequence of numbers, one per line,
+hitting control-d to exit when the input is complete.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+max $ ./sum.native
+1
+2
+3
+94.5
+Total: 100.5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ## Where to go from here
 
