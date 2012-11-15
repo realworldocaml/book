@@ -1,14 +1,15 @@
 DOCBOOK_XSL_PATH_Darwin = /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
 DOCBOOK_XSL_PATH_Linux = /usr/share/xml/docbook/stylesheet/docbook-xsl
 OS := $(shell uname -s)
+PWD := $(shell pwd)
 DOCBOOK_XSL_PATH ?= $(DOCBOOK_XSL_PATH_$(OS))
 
 LINGUA:=en
 CSS=rwobook
 
 # update this if a new chapter shows up in en/
-SRC=	$(notdir $(wildcard $(LINGUA)/[0-9]*.md))
-FULLSRCS= $(wildcard $(LINGUA)/[0-9]*.md)
+SRC=	$(addprefix $(LINGUA)/,$(shell cat chapters.$(LINGUA)))
+FULLSRCS= $(addprefix $(PWD)/,$(SRC))
 
 XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 
