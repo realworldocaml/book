@@ -1,11 +1,10 @@
 # Variables and Functions
 
 Variables and functions are fundamental ideas that show up in
-virtually all programming languages.  But while these are familiar
-topics, OCaml's variables and functions are different in subtle but
-important ways from what you may have seen elsewhere.  Accordingly
-we're going to spend a some time diving into the details of how these
-concepts play out in OCaml.
+virtually all programming languages.  But OCaml has a different take
+on these basic concepts, and so we'll spend some time digging into the
+details of OCaml's variables and functions differ from what you may
+have seen elsewhere.
 
 ## Variables
 
@@ -18,13 +17,13 @@ interpreter, a let binding has the following syntax.
 let <identifier> = <expr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As we'll see when we get to the module system in chapter
-{{{MODULES}}}, this same syntax is used for top-level definitions in a
-module.
+As we'll see when we get to the module system in Chapter
+{{{files-modules-and-programs}}}, this same syntax is used for
+top-level definitions in a module.
 
 Every variable binding has a _scope_, which is the portion of the code
-that can access that binding.  The scope of a top-level let binding is
-everything that follows it in the top-level session (or in the
+that can refer to that binding.  The scope of a top-level let binding
+is everything that follows it in the top-level session (or in the
 remainder of the module).
 
 Here's a simple example.
@@ -53,14 +52,14 @@ of _`expr1`_.  Here's how it looks in practice.
 # let languages = "OCaml,Perl,C++,C";;
 val languages : string = "OCaml,Perl,C++,C"
 # let dashed_languages =
-     let language_list = String.split languages ~on:',' in
-     String.concat ~sep:"-" language_list
+    let language_list = String.split languages ~on:',' in
+    String.concat ~sep:"-" language_list
   ;;
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that the scope of `language_list` is just the expression
-`String.split languages ~on:','`, and is not available at the
+`String.concat ~sep:"-" language_list`, and is not available at the
 top-level, as we can see if we try to access it now.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -143,8 +142,8 @@ Warning 26: unused variable pi.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In OCaml, let bindings are immutable.  As we'll see in chapter
-{{MUTABILITY}}, there are mutable values in OCaml, but no mutable
-variables.
+{{{imperative-programming}}}, there are mutable values in OCaml, but
+no mutable variables.
 
 ### Pattern matching and `let` ###
 
@@ -163,21 +162,37 @@ This actually binds two variables, one for each element of the pair.
 Using a pattern in a let-binding makes the most sense for a pattern
 that is _irrefutable_, _i.e._, where any value of the type in question
 is guaranteed to match the pattern.  Tuple and record patterns are
-irrefutable, but list patterns are not.  Indeed, the following pattern
-match generates a warning because not all cases are covered.
+irrefutable, but list patterns are not.  Consider the following code
+that implements a function for up-casing the first element of a
+comma-separate list.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let (hd::tl) = [1;2;3];;
-Characters 4-12:
-  let (hd::tl) = [1;2;3];;
-      ^^^^^^^^
+# let upcase_first_entry line =
+     let (key :: values) = String.split ~on:',' line in
+     String.concat ~sep:"," (String.uppercase key :: values)
+  ;;
+      Characters 40-53:
+       let (key :: values) = String.split ~on:',' line in
+            ^^^^^^^^^^^^^
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
+val upcase_first_entry : string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As a general matter, inexhaustive matches like the one above should be
-avoided.
+This case can't really come up in practice, because `String.split`
+always returns a list with at least one element.  But the compiler
+doesn't know this, and so it emits the warning.  It's generally better
+to use a match statement to handle such cases explicitly:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let upcase_first_entry line =
+     match String.split ~on:',' line with
+     | [] -> assert false (* String.split returns at least one element *)
+     | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
+  ;;
+val upcase_first_entry : string -> string = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### `let`/`and` bindings ###
 
@@ -434,8 +449,8 @@ val is_odd : int -> bool = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that in the above example, we take advantage of the fact that the
-right hand side of the `||` is only evaluated if the left hand side
-evaluates to false.
+right hand side of `||` is evaluated lazily, only being executed if
+the left hand side evaluates to false.
 
 ### Prefix and Infix operators ###
 
