@@ -3,37 +3,89 @@
 When you start building OCaml code that interfaces with external systems,
 you'll soon need to handle concurrent operations. Consider the case of a web
 server sending a large file to many clients, or a GUI waiting for a mouse
-clicks.  These applications must block threads of control flow waiting for
-input, and the runtime has to resume these threads when new data arrives.
-While efficiency matters here, an equally important concern is readable source code where the control flow of the program is obvious at a glance.
+clicks. These applications often need to block while waiting for input for a particular task, and process something else during that time. Meanwhile, when new data does appear, the blocked task needs to be resumed as quickly as possible.
 
-You've probably uses preemptive system threads before in some programming languages such as Java or C#.  In this model, each task is usually given an operating system thread of its own.
-Other languages such as Javascript are single-threaded, and applications must register function callbacks to be triggered upon external events (such as a timeout or browser click).  Both
-mechanisms have tradeoffs. Preemptive threads are memory hungry and require
-careful locking due to unpredictable interleaving. Event-driven systems can
-descend into a maze of callbacks that are hard to understand.
+Efficiency really matters here, as busy servers can often handle tens of thousands of simultaneous connections.  An equally important concern is readable source code, where the control flow of the program is obvious at a glance.
+
+You've probably used preemptive system threads before in some programming languages such as Java or C#.  In this model, each task is usually given an operating system thread of its own.
+Other languages such as Javascript are single-threaded, and applications must register function callbacks to be triggered upon external events (such as a timeout or browser click).
+
+Both of these mechanisms have tradeoffs. Preemptive threads require their own memory stacks and can be memory hungry. The operating system can also arbitrarily interleave the execution of threads, and so they require careful locking around shared data structures.
+
+Event-driven systems usually only execute a single task at a time and require less locking.  However, the program structure can often descend into a maze of event callbacks for even a simple operation that blocks a few times.  Code readability matters, and so we'd like to avoid such spaghetti control flow.
 
 The `Async` OCaml library offers a hybrid model that lets you write
-straight-line blocking code without using preemptive threading.
+event-driven code that can block *without* the complexity of preemptive threading.
 Let's dive straight into an example to see what this looks like, and
 then explain some of the new concepts.  We're going to search for definitions of English terms using the DuckDuckGo search engine.
 
 ## Example: searching definitions with DuckDuckGo
 
-A DuckDuckGo search is executed by making an HTTP request to `api.duckduckgo.com`. The result comes back in either JSON or XML format, depending on what was requested in the original query string. Let's write some functions that construct the right URI and can parse the resulting JSON:
+DuckDuckGo is a search engine with a freely available search interface.
+A DuckDuckGo search is executed by making an HTTP request to `api.duckduckgo.com`. The result comes back in either JSON or XML format, depending on what was requested in the original query string. Let's write some functions that construct the right URI and can parse the resulting JSON.
+
+Before we can make the HTTP calls, we need a couple of helper functions with the following signature.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-open Core.Std
-open Async.Std
+(* Generate a DuckDuckGo API search URI for [query] *)
+val make_ddg_uri : query:string -> Uri.t
 
+(* Extract the Definition field from the DuckDuckGo search
+   response, or return [None] if it doesn't exist *)
+val get_definition_from_json: string -> string option
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This code uses a couple of new libraries we haven't seen before.
+You will need to OPAM install `uri` and `yojson` (refer to chapter {{{installation}}} if you need help).  Let's see how to implement them first.
+
+### URI handling
+
+You're hopefully familiar with HTTP URLs, which identify endpoints across the World Wide Web.  These are actually part of a more general family known
+as Uniform Resource Identifiers (URIs). The full URI specification is defined in [RFC3986](http://tools.ietf.org/html/rfc3986) (and is rather complicated!).
+Luckily, the `ocaml-uri` library provides a strongly-typed interface which takes care of much of the hassle.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* Generate a DuckDuckGo search URI from a query string *)
-let ddg_uri =
-  let uri = Uri.of_string ("http://api.duckduckgo.com/?format=json") in
-  fun query ->
+let make_ddg_uri =
+  let base_uri = "http://api.duckduckgo.com/?format=json" in
+  let uri = Uri.of_string base_uri in
+  fun ~query ->
     Uri.add_query_param uri ("q", [query])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-(* Extract the "Definition" field from the DuckDuckGo results *)
-let get_definition_from_json json =
+A `Uri.t` is constructed from the `Uri.of_string` function, and a query parameter `q` is added with the desired search query.  The library takes care of encoding the URI correctly when outputting it in the network protocol.
+
+Note that the URI manipulation functions are all *pure* functions which return a new URI value, and never modify the input.  This makes it easier to pass around URI values through your application stack without fear of modification.
+
+### Parsing JSON strings
+
+The HTTP response from DuckDuckGo is in JSON, a common (and thankfully simple) format that is specified in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt).  There are quite a few JSON parsers available for OCaml, and we've picked [`Yojson`](http://mjambon.com/yojson.html) for this example.
+
+There are a few non-standard extensions to JSON, so Yojson exposes them as the `Basic` and `Safe` sub-modules.  It doesn't really matter which one we pick for this simple example, so we'll go with `Safe`.
+
+The input `string` is parsed using `Yojson.Safe.from_string` into an OCaml data type. The JSON values are represented using polymorphic
+variants, and can thus be pattern matched more easily once they have been parsed by Yojson.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of json list
+  | `Null
+  | `String of string
+  | `Tuple of json list
+]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+ 
+We're expecting the DuckDuckGo response to be a record, with an optional `Description` field being one of the keys in the record. 
+The `get_definition_from_json` does a pattern match on this, and returns an optional string if a definition is found within the result.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* Extract the Definition field from the DuckDuckGo search
+   response, or return [None] if it doesn't exist *)
+let get_definition_from_json (json:string) =
   match Yojson.Safe.from_string json with
   |`Assoc kv_list ->
       let open Option in
@@ -42,25 +94,20 @@ let get_definition_from_json json =
   |_ -> None
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To compile this fragment, you will need to OPAM install `uri`
-for the URI library and `yojson` for the JSON parsing.  The
-`Uri` library takes care of encoding the URI for an HTTP request,
-so you just specify your query as a normal OCaml string to the
-`ddg_uri` function.
+Notice that we use options here instead of throwing exceptions on an error.
+When the `Option` module is opened, it provides a `map` operator (`>>|`) which 
+calls the bound closure if the value exists.
+If no result is found, then the `Yojson.Safe.to_string` conversion function is simply ignored, and a `None` returned. 
 
-Yojson is a JSON library which parses a string into
-a matching OCaml tree. The JSON values are represented using polymorphic
-variants, and can thus be pattern matched more easily once they have been parsed by Yojson.  The `get_definition_from_json`
-function does exactly this, and returns an optional string
-if a definition is found within the result.  Note how we open the `Option` while parsing the result to make it easier to map the JSON list search with a string conversion function. If no result is found, then the conversion function is simply ignored, and a `None` returned. 
+### Executing an HTTP client query
 
-Now that we've written that boilerplate, let's look at the Async code to perform the actual search:
+Now that we've written those utility functions, let's look at the Async code that performs the actual search:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* Execute the DuckDuckGo search *)
 (* TODO: This client API is being simplified in Cohttp *)
-let ddg_query query =
-  Cohttp_async.Client.call `GET (ddg_uri query)
+let do_ddg_query query =
+  Cohttp_async.Client.call `GET (make_ddg_uri ~query)
   >>= function
   | Some (res, Some body) ->
       let buf = Buffer.create 128 in
@@ -72,23 +119,26 @@ let ddg_query query =
       failwith "no body in response"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For this portion of the code, you will need to OPAM install the `cohttp` library.  The `Cohttp_async.Client` module executes the HTTP call, and returns a status and response body wrapped in an Async `Deferred.t` type.
+For this code, you'll need to OPAM install the `cohttp` library.  The `Cohttp_async.Client` module executes the HTTP call, and returns a status and response body wrapped.  This whole result is wrapped in a type you haven't seen before: `Async.Deferred.t`.
 
-The Async `Deferred.t` represents a *future* value whose result is not available yet. You can wait for the result by binding a callback using the `>>=` operator (this operator is imported when you open `Async.Std`). This is the same monad pattern available in other Core libraries such as `Option`, but instead of operating on optional values, we are now mapping over future values. _(avsm: can I xref back to an explanation in the earlier sections about the Monad pattern?)_
+The `Deferred.t` represents a *future* value whose result is not available yet. You can "wait" for the result by binding a callback using the `>>=` operator (which is imported when you open `Async.Std`). This is the same monad pattern available in other Core libraries such as `Option`, but instead of operating on optional values, we are now mapping over future values.
+We'll come back to monads later in this chapter. (_avsm_: TODO xref)
 
-The `ddg_query` function invokes the HTTP client call, and returns a tuple containing the response codes and headers, and a `string Pipe`.  Pipes in Async are often used to transmit large amounts of data that can take some time.  In this case, the HTTP body probably isn't very large, and we just iterate over the Pipe's contents until we have the full HTTP body in a buffer.
+The `ddg_query` function invokes the HTTP client call, and returns a tuple containing the response codes and headers, and a `string Pipe.Reader`.  Pipes in Async are often used to transmit large amounts of data between two processes or concurrent threads.  The `Cohttp` library creates a `Pipe.Writer` which it outputs the HTTP body into, and provides your application with the `Reader` end. 
+
+In this case, the HTTP body probably isn't very large, so we just iterate over the Pipe's contents until we have the full HTTP body in a `Buffer.t`.
 Once the full body has been retrieved into our buffer, the next callback passes it through the JSON parser and returns a human-readable string of the search description that DuckDuckGo gave us.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* Run a single search *)
 let run_one_search =
-  ddg_query "Camel" >>| prerr_endline
+  do_ddg_query "Camel" >>| prerr_endline
 
 (* Start the Async scheduler *)
 let _ = Scheduler.go ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's actually use the search function now. The fragment above spawns a single search, and then fires up the Async scheduler.  The scheduler is where all the work happens, and must be started in every application that uses Async.  Without it, logging won't be output, nor will blocked functions ever wake up.
+Let's actually use the search function to run a real query now. The fragment above spawns a single search, and then fires up the Async scheduler.  The scheduler is where all the work happens, and must be started in every application that uses Async.  Without it, logging won't be output, nor will blocked functions ever wake up.
 When the scheduler is active, it is waiting for incoming I/O events and waking up function callbacks that were sleeping on that particular file descriptor or timeout.
 
 A single connection isn't that interesting from a concurrency perspective.
@@ -98,7 +148,7 @@ Luckily, Async makes it very easy to run multiple parallel searches:
 (* Run many searches in parallel *)
 let run_many_searches =
   let searches = ["Duck"; "Sheep"; "Cow"; "Llama"; "Camel"] in
-  Deferred.List.map ~how:`Parallel searches ~f:ddg_query >>|
+  Deferred.List.map ~how:`Parallel searches ~f:do_ddg_query >>|
   List.iter ~f:print_endline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
