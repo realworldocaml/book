@@ -5,22 +5,120 @@ you'll soon need to handle concurrent operations. Consider the case of a web
 server sending a large file to many clients, or a GUI waiting for a mouse
 clicks.  These applications must block threads of control flow waiting for
 input, and the runtime has to resume these threads when new data arrives.
-Efficiency is an important consideration on busy systems withs thousands of
-connections, but equally important is readable source code where the control
-flow of the program is obvious at a glance.
+While efficiency matters here, an equally important concern is readable source code where the control flow of the program is obvious at a glance.
 
-In some programming languages such as Java or C#, you've probably used
-preemptive system threads, where multiple connections are tracked using
-operating system threads.  Other languages such as Javascript are
-single-threaded, and applications must register function callbacks to be
-triggered upon external events (such as a timeout or browser click).  Both
-mechanisms have tradeoffs. Preemptive threads can be memory hungry and require
+You've probably uses preemptive system threads before in some programming languages such as Java or C#.  In this model, each task is usually given an operating system thread of its own.
+Other languages such as Javascript are single-threaded, and applications must register function callbacks to be triggered upon external events (such as a timeout or browser click).  Both
+mechanisms have tradeoffs. Preemptive threads are memory hungry and require
 careful locking due to unpredictable interleaving. Event-driven systems can
-descend into a maze of callbacks that are hard to read and understand.
+descend into a maze of callbacks that are hard to understand.
 
-The Async OCaml library offers an interesting hybrid model that lets you write
-straight-line blocking code that scales well without using preemptive
-threading. Async "threads" are co-operative and never preempt each other, and
+The `Async` OCaml library offers a hybrid model that lets you write
+straight-line blocking code without using preemptive threading.
+Let's dive straight into an example to see what this looks like, and
+then explain some of the new concepts.  We're going to search for definitions of English terms using the DuckDuckGo search engine.
+
+## Example: searching definitions with DuckDuckGo
+
+A DuckDuckGo search is executed by making an HTTP request to `api.duckduckgo.com`. The result comes back in either JSON or XML format, depending on what was requested in the original query string. Let's write some functions that construct the right URI and can parse the resulting JSON:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+open Core.Std
+open Async.Std
+
+(* Generate a DuckDuckGo search URI from a query string *)
+let ddg_uri =
+  let uri = Uri.of_string ("http://api.duckduckgo.com/?format=json") in
+  fun query ->
+    Uri.add_query_param uri ("q", [query])
+
+(* Extract the "Definition" field from the DuckDuckGo results *)
+let get_definition_from_json json =
+  match Yojson.Safe.from_string json with
+  |`Assoc kv_list ->
+      let open Option in
+      List.Assoc.find kv_list "Definition" >>|
+      Yojson.Safe.to_string
+  |_ -> None
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To compile this fragment, you will need to OPAM install `uri`
+for the URI library and `yojson` for the JSON parsing.  The
+`Uri` library takes care of encoding the URI for an HTTP request,
+so you just specify your query as a normal OCaml string to the
+`ddg_uri` function.
+
+Yojson is a JSON library which parses a string into
+a matching OCaml tree. The JSON values are represented using polymorphic
+variants, and can thus be pattern matched more easily once they have been parsed by Yojson.  The `get_definition_from_json`
+function does exactly this, and returns an optional string
+if a definition is found within the result.  Note how we open the `Option` while parsing the result to make it easier to map the JSON list search with a string conversion function. If no result is found, then the conversion function is simply ignored, and a `None` returned. 
+
+Now that we've written that boilerplate, let's look at the Async code to perform the actual search:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* Execute the DuckDuckGo search *)
+(* TODO: This client API is being simplified in Cohttp *)
+let ddg_query query =
+  Cohttp_async.Client.call `GET (ddg_uri query)
+  >>= function
+  | Some (res, Some body) ->
+      let buf = Buffer.create 128 in
+      Pipe.iter_without_pushback body ~f:(Buffer.add_string buf)
+      >>| fun () ->
+      get_definition_from_json (Buffer.contents buf) |!
+      Option.value ~default:"???"
+  | Some (_, None) | None ->
+      failwith "no body in response"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For this portion of the code, you will need to OPAM install the `cohttp` library.  The `Cohttp_async.Client` module executes the HTTP call, and returns a status and response body wrapped in an Async `Deferred.t` type.
+
+The Async `Deferred.t` represents a *future* value whose result is not available yet. You can wait for the result by binding a callback using the `>>=` operator (this operator is imported when you open `Async.Std`). This is the same monad pattern available in other Core libraries such as `Option`, but instead of operating on optional values, we are now mapping over future values. _(avsm: can I xref back to an explanation in the earlier sections about the Monad pattern?)_
+
+The `ddg_query` function invokes the HTTP client call, and returns a tuple containing the response codes and headers, and a `string Pipe`.  Pipes in Async are often used to transmit large amounts of data that can take some time.  In this case, the HTTP body probably isn't very large, and we just iterate over the Pipe's contents until we have the full HTTP body in a buffer.
+Once the full body has been retrieved into our buffer, the next callback passes it through the JSON parser and returns a human-readable string of the search description that DuckDuckGo gave us.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* Run a single search *)
+let run_one_search =
+  ddg_query "Camel" >>| prerr_endline
+
+(* Start the Async scheduler *)
+let _ = Scheduler.go ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let's actually use the search function now. The fragment above spawns a single search, and then fires up the Async scheduler.  The scheduler is where all the work happens, and must be started in every application that uses Async.  Without it, logging won't be output, nor will blocked functions ever wake up.
+When the scheduler is active, it is waiting for incoming I/O events and waking up function callbacks that were sleeping on that particular file descriptor or timeout.
+
+A single connection isn't that interesting from a concurrency perspective.
+Luckily, Async makes it very easy to run multiple parallel searches:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+(* Run many searches in parallel *)
+let run_many_searches =
+  let searches = ["Duck"; "Sheep"; "Cow"; "Llama"; "Camel"] in
+  Deferred.List.map ~how:`Parallel searches ~f:ddg_query >>|
+  List.iter ~f:print_endline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `Deferred.List` module lets you specify exactly how to map over a collection of futures.  The searches will be executed simultaneously, and the map thread will complete once all of the sub-threads are complete. If you replace the `Parallel` parameter with `Serial`, the map will wait for each search to fully complete before issuing the next one.
+
+<note>
+<title>Terminating Async applications</title>
+
+When you run the search example, you'll notice that the application doesn't terminate even when all of the searches are complete. The Async scheduler doesn't terminate by default, and so most applications will listen for a signal to exit or simply use `CTRL-C` to interrupt it from a console.
+
+Another alternative is to run an Async function in a separate system
+thread. You can do this by wrapping the function in the `Async.Thread_safe.block_on_async_exn`.  The `utop` top-level does this automatically for you if you attempt to evaluate an Async function interactively.
+
+</note>
+
+## Manipulating Async threads
+
+Now that we've seen the search example above, let's examine how Async works in more detail.
+
+Async threads are co-operative and never preempt each other, and
 the library internally converts blocking code into a single event loop.  The
 threads are normal OCaml heap-allocated values (without any runtime magic!) and
 are therefore very fast to allocate. Concurrency is mostly limited only by your
