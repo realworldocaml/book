@@ -115,6 +115,7 @@ When you run the search example, you'll notice that the application doesn't term
 
 Another alternative is to run an Async function in a separate system
 thread. You can do this by wrapping the function in the `Async.Thread_safe.block_on_async_exn`.  The `utop` top-level does this automatically for you if you attempt to evaluate an Async function interactively.
+
 </note>
 
 ## Manipulating Async threads
