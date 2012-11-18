@@ -233,16 +233,17 @@ val add1 : int list -> int list = <fun>
 - : int list = [6; 4; 8]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The functions in the standard library are implemented in similar ways.
-The `List.map` function can be defined as follows (the `function`
-syntax is equivalent to performing a `match`).
+The functions in the standard library can implemented in similar ways.
+A straightforward, but inefficient, version of the `List.map` function
+is as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
-# let rec map f = function
-   | [] -> []
-   | h :: t -> f h :: map f t;;
-val map : ('a -> 'b) -> 'a list -> 'b list = <fun>
-# map string_of_int [5; 3; 7];;
+# let rec map l ~f =
+    match l with
+     | [] -> []
+     | h :: t -> f h :: map ~f t;;
+val map : 'a list -> f:('a -> 'b) -> 'b list = <fun>
+# map ~f:string_of_int [5; 3; 7];;
 - : string list = ["5"; "3"; "7"]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -252,14 +253,14 @@ Lists are ubiquitous in OCaml programs.  They are easy to use and
 reasonably efficient for small lists, but large lists can have
 significant performance problems.  The issue is that lists are formed
 from separately allocated cons-cells.  This has space overhead because
-each value in the list is paried with a pointer to the rest of the
+each value in the list is paired with a pointer to the rest of the
 list.  The separate allocation also reduces locality, so it can result
 in poor cache behavior.
 
-Perhaps more important than those concerns is that list traversal
-takes linear time in the length of the list.  For example, the
-`List.length` function counts the number of elements in the list,
-taking linear time.
+Perhaps more important than those concerns is that naive list
+traversal takes time linear in the length of the list.  For example,
+the following `length` function takes linear time to count the number
+of elements in the list.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 let rec length = function [] -> 0 | _ :: t -> (length t) + 1;;
@@ -270,8 +271,8 @@ that, because the function is recursive.  In this implementation of
 the function, the recursive call to `length t` is active at the same
 time as the outer call, with the result that the runtime needs to
 allocate stack frames for each recursive call, so this function also
-takes linear space.  For large lists, this is inefficient, and it can
-result in a stack overflow.
+takes linear space.  For large lists, this is not only inefficient,
+it can also result in stack overflow.
 
 ### Tail-recursion
 
@@ -285,7 +286,7 @@ returned immediately by the calling function.  In this case, the
 compiler optimizes the call by skipping the allocation of a new stack
 frame, instead branching directly to the called procedure.
 
-In the definition of `nth` above, the expression containing the
+In the definition of `length` above, the expression containing the
 recursive call `(length t) + 1` is _not_ tail recursive because 1 is
 added to the result.  However, it is easy to transform the function so
 that it is properly tail recursive.
@@ -306,9 +307,8 @@ returned without modification, the compiler branches directly to the
 called procedure rather than allocating a new stack frame.
 
 In other cases, it can be more problematic to use tail-recursion.  For
-example, consider the `List.map` function, which has a simple
-non-tail-recursive implementation.  The code is simple, but not
-efficient.
+example, consider the non tail-recursive implemenation of `map`
+function, listed above.  The code is simple, but not efficient.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 let rec map f = function
@@ -323,21 +323,24 @@ construct the reserved result, then explicitly correct it before
 returning.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
- let rev l =
-   let rec tail_recursive_rev result = function
-    | [] -> result
-	| h :: t -> tail_recursive_rev (h :: result) t
-   in tail_recursive_rev [] l;;
+let rev l =
+  let rec tail_recursive_rev result = function
+   | [] -> result
+   | h :: t -> tail_recursive_rev (h :: result) t
+  in tail_recursive_rev [] l;;
+   
+let rev_map l ~f =
+  let rec rmap accu = function
+   | [] -> accu
+   | h :: t -> rmap (f h :: accu) l
+  in rmap [] l;;
 
- let map f l =
-   let rec rev_map result = function
-    | [] -> result
-	| h :: t -> rev_map (f h :: result) t
-   in rev (rev_map [] l);;
+let map l ~f = rev (rev_map l ~f);;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The functions `tail_recursive_rev` and `rev_map` are both
-tail-recursive, but at the cost of constructing an intermediate
+tail-recursive, which means that the function `map` is tail-recursive also.
+The cost of doing so is that we construct an intermediate
 reversed list that is immediately discarded.  One way to think of it
 is that instead of allocating a linear number of stack frames, we
 allocate a linear number of cons-cells.
@@ -348,6 +351,67 @@ implementations is not significantly different, with one exception:
 the tail-recursive implementation will not cause a stack overflow for
 large lists, while the simple non-tail-recursive implementation will
 have problems with large lists.
+
+### Hybrid recursion
+
+In general, the choice of whether to use regular recursion vs. tail
+recursion is not immediately obvious.  Regular recursion is often
+better for small lists (and other data structures), but it is better
+to use tail recursion for very large lists -- especially because stack
+sizes limit the number of recursive calls.
+
+Core takes a hybrid approach that can be illustrated with the
+implementation of the function `Core_list.map`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+let map_slow l ~f = rev (rev_map l ~f);;
+
+let rec count_map ~f l ctr =
+  match l with
+  | [] -> []
+  | [x1] -> let f1 = f x1 in [f1]
+  | [x1; x2] -> let f1 = f x1 in let f2 = f x2 in [f1; f2]
+  | [x1; x2; x3] ->
+    let f1 = f x1 in
+	let f2 = f x2 in
+	let f3 = f x3 in
+	[f1; f2; f3]
+  | [x1; x2; x3; x4] ->
+    let f1 = f x1 in
+	let f2 = f x2 in
+	let f3 = f x3 in
+	let f4 = f x4 in
+	[f1; f2; f3; f4]
+  | x1 :: x2 :: x3 :: x4 :: x5 :: tl ->
+    let f1 = f x1 in 
+	let f2 = f x2 in
+	let f3 = f x3 in
+	let f4 = f x4 in
+	let f5 = f x5 in
+	f1 :: f2 :: f3 :: f4 :: f5 ::
+      (if ctr > 1000 then map_slow ~f tl else count_map ~f tl (ctr + 1));;
+
+let map l ~f = count_map ~f l 0;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For performance, there are separate patterns for small lists with up
+to 4 elements, then a recursive case for lists with five or more
+elements.  The `ctr` value limits the recursion -- regular recursion
+is used for up to 1000 recursive calls (which includes lists with up
+to 4000 elements), then the tail-recursive function `map_slow` is used
+for any remainder.
+
+As an aside, you might wonder why this implementation uses explicit
+let-definitions for the result values `f1`, `f2`, etc.  The reason is
+to force the order of evaluation, so that the the function `f` is
+always applied to the list values left-to-right (starting with the
+first element in the list).  In an expression like
+`[f x1; f x2; f x3]` the order of evaluation is not specified by the
+language, any of the subexpressions might be evaluated first (though
+we would often expect evaluation order to be either left-to-right or
+right-to-left).  For functions that perform I/O, or have other
+side-effects, left-to-right evaluation order is important (and
+required).
 
 ## Heterogenous values
 
