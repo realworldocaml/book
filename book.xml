@@ -8589,11 +8589,13 @@ let run_many_searches =
       most applications will listen for a signal to exit or simply use
       <literal>CTRL-C</literal> to interrupt it from a console.
     </para>
-    Another alternative is to run an Async function in a separate system
-    thread. You can do this by wrapping the function in the
-    <literal>Async.Thread_safe.block_on_async_exn</literal>. The
-    <literal>utop</literal> top-level does this automatically for you if
-    you attempt to evaluate an Async function interactively.
+    <para>
+      Another alternative is to run an Async function in a separate
+      system thread. You can do this by wrapping the function in the
+      <literal>Async.Thread_safe.block_on_async_exn</literal>. The
+      <literal>utop</literal> top-level does this automatically for you
+      if you attempt to evaluate an Async function interactively.
+    </para>
     </note>
   </sect1>
   <sect1 id="manipulating-async-threads">
