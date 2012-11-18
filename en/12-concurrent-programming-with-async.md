@@ -5,28 +5,22 @@ you'll soon need to handle concurrent operations. Consider the case of a web
 server sending a large file to many clients, or a GUI waiting for a mouse
 clicks.  These applications must block threads of control flow waiting for
 input, and the runtime has to resume these threads when new data arrives.
-Efficiency is an important consideration on busy systems withs thousands of
-connections, but equally important is readable source code where the control
-flow of the program is obvious at a glance.
+While efficiency matters here, an equally important concern is readable source code where the control flow of the program is obvious at a glance.
 
-In some programming languages such as Java or C#, you've probably used
-preemptive system threads, where multiple connections are tracked using
-operating system threads.  Other languages such as Javascript are
-single-threaded, and applications must register function callbacks to be
-triggered upon external events (such as a timeout or browser click).  Both
-mechanisms have tradeoffs. Preemptive threads can be memory hungry and require
+You've probably uses preemptive system threads before in some programming languages such as Java or C#.  In this model, each task is usually given an operating system thread of its own.
+Other languages such as Javascript are single-threaded, and applications must register function callbacks to be triggered upon external events (such as a timeout or browser click).  Both
+mechanisms have tradeoffs. Preemptive threads are memory hungry and require
 careful locking due to unpredictable interleaving. Event-driven systems can
-descend into a maze of callbacks that are hard to read and understand.
+descend into a maze of callbacks that are hard to understand.
 
-The Async OCaml library offers a hybrid model that lets you write
+The `Async` OCaml library offers a hybrid model that lets you write
 straight-line blocking code without using preemptive threading.
-Let's dive into an example to see what this looks like, and
-then explain some of the new concepts.  We're going to search for definitions
-using the DuckDuckGo search engine, which exposes a HTTP/JSON API.
+Let's dive straight into an example to see what this looks like, and
+then explain some of the new concepts.  We're going to search for definitions of English terms using the DuckDuckGo search engine.
 
 ## Example: searching definitions with DuckDuckGo
 
-A DuckDuckGo search is executed by making an HTTP request to `api.duckduckgo.com`. The result format comes back as either JSON or XML, depending on what was requested. Lets write some functions that construct the right URI and can parse the JSON:
+A DuckDuckGo search is executed by making an HTTP request to `api.duckduckgo.com`. The result comes back in either JSON or XML format, depending on what was requested in the original query string. Let's write some functions that construct the right URI and can parse the resulting JSON:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 open Core.Std
@@ -54,11 +48,11 @@ for the URI library and `yojson` for the JSON parsing.  The
 so you just specify your query as a normal OCaml string to the
 `ddg_uri` function.
 
-Yojson is a low-level JSON library which parses a string into
+Yojson is a JSON library which parses a string into
 a matching OCaml tree. The JSON values are represented using polymorphic
-variants, and so can be pattern matched on.  The `get_definition_from_json`
-function does exactly this, and returns an optional *Definition* string
-if one is found.  Note how we open the `Option` module here; this lets us map the search of the JSON list with a string conversion function. If no result is found, then the latter function is simply ignored, and a `None` returned. 
+variants, and can thus be pattern matched more easily once they have been parsed by Yojson.  The `get_definition_from_json`
+function does exactly this, and returns an optional string
+if a definition is found within the result.  Note how we open the `Option` while parsing the result to make it easier to map the JSON list search with a string conversion function. If no result is found, then the conversion function is simply ignored, and a `None` returned. 
 
 Now that we've written that boilerplate, let's look at the Async code to perform the actual search:
 
@@ -78,11 +72,12 @@ let ddg_query query =
       failwith "no body in response"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For this portion of the code, you will need to OPAM install the `cohttp` library.
+For this portion of the code, you will need to OPAM install the `cohttp` library.  The `Cohttp_async.Client` module executes the HTTP call, and returns a status and response body wrapped in an Async `Deferred.t` type.
 
-The core new Async concept is the `Deferred.t` type, which represents a *future* value who result is not available yet.  You can wait for the result by using the `>>=` operator (this is imported when you open `Async.Std`). Note that this is the same monad pattern available in other Core libraries such as `Option`, but instead of operating on optional values we are now mapping over future values. _(avsm: can I xref back to an explanation in the earlier sections about the Monad pattern?)_
+The Async `Deferred.t` represents a *future* value whose result is not available yet. You can wait for the result by binding a callback using the `>>=` operator (this operator is imported when you open `Async.Std`). This is the same monad pattern available in other Core libraries such as `Option`, but instead of operating on optional values, we are now mapping over future values. _(avsm: can I xref back to an explanation in the earlier sections about the Monad pattern?)_
 
-The `ddg_query` function first invokes the HTTP client call, and subsequently converts the response body into a string and passes it through the JSON parser and finally returns a human-readable string.
+The `ddg_query` function invokes the HTTP client call, and returns a tuple containing the response codes and headers, and a `string Pipe`.  Pipes in Async are often used to transmit large amounts of data that can take some time.  In this case, the HTTP body probably isn't very large, and we just iterate over the Pipe's contents until we have the full HTTP body in a buffer.
+Once the full body has been retrieved into our buffer, the next callback passes it through the JSON parser and returns a human-readable string of the search description that DuckDuckGo gave us.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* Run a single search *)
@@ -93,10 +88,11 @@ let run_one_search =
 let _ = Scheduler.go ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's actually use the search function now.
-The fragment above first spawns a single search, and then fires up the Async scheduler.  The scheduler is where all the work happens, and must be started in every application that uses Async.  Without it, logging won't be output, nor will blocked functions ever wake up.
+Let's actually use the search function now. The fragment above spawns a single search, and then fires up the Async scheduler.  The scheduler is where all the work happens, and must be started in every application that uses Async.  Without it, logging won't be output, nor will blocked functions ever wake up.
+When the scheduler is active, it is waiting for incoming I/O events and waking up function callbacks that were sleeping on that particular file descriptor or timeout.
 
-A single connection isn't that interested from a concurrency perspective, and Async makes it easy to run multiple parallel searches:
+A single connection isn't that interesting from a concurrency perspective.
+Luckily, Async makes it very easy to run multiple parallel searches:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* Run many searches in parallel *)
@@ -106,7 +102,7 @@ let run_many_searches =
   List.iter ~f:print_endline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `Deferred` library has a `List` module which lets you specify exactly how to map over a collection of future threads.  If you replace the `how` parameter with `Serial`, it will wait for each search to complete before issuing the next one.
+The `Deferred.List` module lets you specify exactly how to map over a collection of futures.  The searches will be executed simultaneously, and the map thread will complete once all of the sub-threads are complete. If you replace the `Parallel` parameter with `Serial`, the map will wait for each search to fully complete before issuing the next one.
 
 <note>
 <title>Terminating Async applications</title>
