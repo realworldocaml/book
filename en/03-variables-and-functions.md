@@ -830,15 +830,15 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 - : string = "foo:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, `?` is used to mark the separator as optional.  Note that, while
-the type of the optional argument is `string`, internally, the
-argument is received as a `string option`, where `None` indicates that
-the optional argument was not specified.
+Here, `?` is used to mark `sep` as optional.  And while the caller can
+pass a value of type `string` for `sep`, internally to the function,
+`sep` is seen as a `string option`, with `None` appearing when `sep`
+is not provided by the caller.
 
 In the above example, we had a bit of code to substitute in the empty
 string when no argument was provided.  This is a common enough pattern
-that there's an explicit syntax for doing this, which allows us to
-write `concat` even more tersely:
+that there's an explicit syntax for providing a default value, which
+allows us to write `concat` even more concisely.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ?(sep="") x y = x ^ sep ^ y ;;
@@ -847,21 +847,21 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 
 Optional arguments are very useful, but they're also easy to abuse.
 The key advantage of optional arguments is that they let you write
-functions with complex options that users can ignore most of the time,
-only needing to think about them when they specifically want to invoke
+functions with multiple arguments that users can ignore most of the
+time, only worrying about them when they specifically want to invoke
 those options.
 
-The downside is that it's easy for the caller of a function to not be
-aware that there is a choice to be made, leading them to pick the
-default behavior unknowingly, and sometimes wrongly.  Optional
-arguments really only make sense when the extra concision of omitting
-the argument overwhelms the corresponding loss of explicitness.
+The downside is that the caller may be unaware that there is a choice
+to be made, and so may unknowingly (and wrongly) pick that default
+behavior.  Optional arguments really only make sense when the extra
+concision of omitting the argument overwhelms the corresponding loss
+of explicitness.
 
 This means that rarely used functions should not have optional
 arguments.  A good rule of thumb for optional arguments is that you
 should never use an optional argument for internal functions of a
-module, only for functions that are exposed to users of a module.
-
+module, only for functions that are exposed as part of the module's
+interface.
 
 #### Explicit passing of an optional argument ###
 
@@ -892,16 +892,12 @@ without specifying `sep`.
 - : string = "foobar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are a few use-cases for this.  One is when you want to define
-wrapper function that mimics the same optional arguments as the
-function it's wrapping, and just passes those optional arguments
-through.  That way, the decision as to how to handle the `None` case
-can be made just once, in the wrapped function.
-
-Here's an example.  Imagine we wanted to create a function called
+One use-case for this is when you want to define a wrapper function
+that mimics the optional arguments of the function it's wrapping.  For
+example, imagine we wanted to create a function called
 `uppercase_concat`, which is the same as `concat` except that it
-uppercases the first string that it's passed.  We could write the
-function like this:
+converts the first string that it's passed to uppercase.  We could
+write the function as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
@@ -912,18 +908,22 @@ val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 - : string = "FOO:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But in this case, we've made a separate decision as to what the
-default separator is.  If later we change `concat`, we'll need to
-remember to change `uppercase_concat` to match it.
+In the way we've written it, we've been forced to separately make the
+decision as to what the default separator is.  Thus, if we later
+change `concat`'s default behavior, we'll need to remember to change
+`uppercase_concat` to match it.
 
 Instead, we can have `uppercase_concat` simply pass through the
-optional argument to `concat` as an explicit option, so that the
-decision as to the default behavior is made in only one place.
+optional argument to `concat` using the `?` syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
 val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, if someone calls `uppercase_concat` without an argument, an
+explicit `None` will be passed to `concat`, leaving `concat` to decide
+what the default behavior should be.
 
 #### Inference of labeled and optional arguments
 
