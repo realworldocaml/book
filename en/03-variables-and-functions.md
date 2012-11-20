@@ -438,7 +438,7 @@ example.
 # let rec is_even x =
     if x = 0 then true else is_odd (x - 1)
   and is_odd x =
-    if x = 0 then false else is_even (x - 1) 
+    if x = 0 then false else is_even (x - 1)
  ;;
 val is_even : int -> bool = <fun>
 val is_odd : int -> bool = <fun>
@@ -536,17 +536,20 @@ It's not quite obvious at first what the purpose of this operator is:
 it just takes some value and a function, and applies the function to
 the value.  But its utility is clearer when you see it in action.  It
 works as a kind of sequencing operator, similar in spirit to using
-pipe in the UNIX shell.  So, for example:
+pipe in the UNIX shell.  Consider, for example, the following
+expression which prints out every unique element of your `PATH`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let drop_zs string =
-    String.to_list string
-    |! List.filter ~f:(fun c -> c <> 'z')
-    |! String.of_char_list
+# Sys.getenv_exn "PATH"
+  |! String.split ~on:':'
+  |! List.dedup
+  |! List.iter ~f:print_endline
   ;;
-val drop_zs : string -> string = <fun>  
-# drop_zs "lizkze UNIX zzpipes wizth tzzypzzes";;
-- : string = "like UNIX pipes with types"
+/bin
+/opt/local/bin
+/usr/bin
+/usr/local/bin
+- : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that `|!` works here because it is left-associative.  If it were
@@ -625,34 +628,34 @@ passed to `List.map`
 
 ### Labeled Arguments ###
 
-Up until now, the different arguments to a function have been
+Up until now, we've written functions where the arguments are
 specified positionally, _i.e._, by the order in which the arguments
 are passed to the function.  OCaml also supports labeled arguments,
-which let you identify a function argument by name.  Functions with
-labeled arguments can be declared by putting a tilde in front of the
-variable name in the definition of the function:
+which let you identify a function argument by name.  Labeled arguments
+are declared by putting a tilde in front of the label.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let f ~foo:a ~bar:b = a + b
+# let f ~foo:a ~bar:b = a + b;;
 val f : foo:int -> bar:int -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-And the function can be called using the same convention:
+We can then provide a labeled argument using a similar convention.  As
+you can see, the arguments can be provided in any order.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # f ~foo:3 ~bar:10;;
 - : int = 13
+# f ~bar:10 ~foo:3;;
+- : int = 13
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In addition, OCaml supports _label punning_, meaning that you get to
-drop the text after the `:` if the name of the label and the name of
-the variable being used are the same.  Label punning works in both
+OCaml also supports _label punning_, meaning that you get to drop the
+text after the `:` if the name of the label and the name of the
+variable being used are the same.  Label punning works in both
 function declaration and function invocation, as shown in these
 examples:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let f ~foo ~bar = foo + bar
-val f : foo:int -> bar:int -> int = <fun>
 # let foo = 3;;
 # let bar = 4;;
 # f ~foo ~bar;;
@@ -705,21 +708,33 @@ Labeled arguments are useful in a few different cases:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   - When you want flexibility on the order in which arguments are
-    presented and the order of partial application.  One common
-    example is functions like `List.map` or List.fold which take a
-    function as one of their arguments.  When the function in question
-    is big, it's often more readable to put the function last, _e.g._:
+    presented.
+
+
+
+
+    One common example is functions like `List.map` or `List.fold`
+    which take a function as one of their arguments.  When the
+    function in question is big, it's often more readable to put the
+    function last.  Here's an example of a function for computing a
+    simple letter-substitution code that moves every letter forward by
+    13 characters.
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
     # let rot13 s =
-         String.map s ~f:(fun c ->
-            if not (Char.is_alpha c) then c
-            else
-              let a_int = Char.to_int 'a' in
-              let offset = Char.to_int (Char.lowercase c) - a_int in
-              let c' = Char.of_int_exn ((offset + 13) mod 26 + a_int) in
-              if Char.is_uppercase c then Char.uppercase c' else c'
-          );;
+        let a_int = Char.to_int 'a' in (* compute the ASCII for 'a' *)
+        String.map s ~f:(fun c ->
+          if not (Char.is_alpha c) then c (* leave non-letters unchanged *)
+          else
+            (* compute how many letters ahead of 'a'  we are *)
+            let offset = Char.to_int (Char.lowercase c) - a_int in
+            (* move forward by 13 mod 26 letters *)
+            let new_offset = (offset + 13) mod 26 in
+            (* compute new letter, but lowercase *)
+            let c' = Char.of_int_exn (a_int + new_offset) in
+            (* restore uppercase-ness *)
+            if Char.is_uppercase c then Char.uppercase c' else c'
+        );;
     val rot13 : string -> string = <fun>
     # rot13 "Hello world!";;
     - : string = "Uryyb jbeyq!"
@@ -850,27 +865,64 @@ module, only for functions that are exposed to users of a module.
 
 #### Explicit passing of an optional argument ###
 
-Sometimes you want to explicitly invoke an optional argument with a
-concrete option, where `None` indicates that the argument won't be
-passed in, and `Some` indicates it will.  You can do that as follows:
+Under the covers, a function with an optional argument receives `None`
+when the caller doesn't provide the argument, and `Some` when it does.
+But the `Some` and `None` are normally not explicitly passed in by the
+caller.
+
+But sometimes, passing in `Some` or `None` explicitly is exactly what
+you want.  OCaml lets you do this by using `?` instead of `~` to mark
+the argument.  Thus, the following two lines are equivalent ways of
+specifying the `sep` argument to concat.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# concat ?sep:None "foo" "bar";;
+# concat ~sep:":" "foo" "bar";; (* provide the optional argument *)
+- : string = "foo:bar"
+# concat ?sep:(Some ":") "foo" "bar";; (* pass an explicit [Some] *)
+- : string = "foo:bar"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And the following two lines are equivalent ways of calling `concat`
+without specifying `sep`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# concat "foo" "bar";; (* don't provide the optional argument *)
+- : string = "foobar"
+# concat ?sep:None "foo" "bar";; (* explicitly pass `None` *)
 - : string = "foobar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is particularly useful when you want to pass through an optional
-argument from one function to another, leaving the choice of default
-to the second function.  For example:
+There are a few use-cases for this.  One is when you want to define
+wrapper function that mimics the same optional arguments as the
+function it's wrapping, and just passes those optional arguments
+through.  That way, the decision as to how to handle the `None` case
+can be made just once, in the wrapped function.
+
+Here's an example.  Imagine we wanted to create a function called
+`uppercase_concat`, which is the same as `concat` except that it
+uppercases the first string that it's passed.  We could write the
+function like this:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
-val uppercase_concat : ?sep:string -> string -> string -> string =
-  <fun>
+# let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
+val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 # uppercase_concat "foo" "bar";;
 - : string = "FOObar"
 # uppercase_concat "foo" "bar" ~sep:":";;
 - : string = "FOO:bar"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+But in this case, we've made a separate decision as to what the
+default separator is.  If later we change `concat`, we'll need to
+remember to change `uppercase_concat` to match it.
+
+Instead, we can have `uppercase_concat` simply pass through the
+optional argument to `concat` as an explicit option, so that the
+decision as to the default behavior is made in only one place.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
+val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Inference of labeled and optional arguments
