@@ -41,10 +41,11 @@ the `pages` value above is actually represented as a string value of `"450"`
 instead of an integer?
 
 Our first task is to parse the JSON into a more structured OCaml type so that
-we can use static typing more effectively.  For example, pattern matching can
-statically check at compilation time that we've tested all the possible variations
-of a given field, instead of relying on runtime unit tests (as you might in Python
-or Ruby).
+we can use static typing more effectively.  When manipulating JSON in Python or
+Ruby, you might write unit tests to check that you have handled unusual inputs.
+The OCaml model prefers compile-time static checking as well as unit tests. For
+example, using pattern matching can warn you if you've not checked that a value
+can be `Null` as well as contain an actual value.
 
 There are several JSON parsers available for OCaml, and we've picked
 [`Yojson`](http://mjambon.com/yojson.html) for the remainder of this chapter.
@@ -52,11 +53,11 @@ You can `opam install yojson` to get it via the OPAM package manager.
  
 ### Parsing standard JSON with Yojson
 
-The JSON specification has very few data types, and Yojson implements
-these in the `Yojson.Basic` module.  A single `json` type is sufficient to
-express any valid JSON structure. Note that it is recursive (so that
-sub-elements can be further JSON fields), and also includes a `Null` variant
-for empty fields.
+The JSON specification has very few data types, and Yojson implements these in
+the `Yojson.Basic` module.  The `json` type shown below is sufficient to
+express any valid JSON structure. Note that some of the types are recursive, so
+that fields can contain references to more JSON fields, and that it also
+specifically includes a `Null` variant for empty fields.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type json = [
@@ -88,10 +89,10 @@ val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
    arguments. *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When reading these interfaces, you can generally ignore the optional arguments
-(with the question marks in the type) at first glance, as they will be filled
-in with sensible values.  The simpler signature for these values with the
-optional elements removed makes their purpose quite clear:
+When first reading these interfaces, you can generally ignore the optional
+arguments (with the question marks in the type), as they will be filled in with
+sensible values. The simpler signature for these values with the optional
+elements removed makes their purpose quite clear:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 val from_string : string -> json
@@ -99,10 +100,11 @@ val from_file : string -> json
 val from_channel : in_channel -> json
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The [in_channel] constructor is from the original OCaml standard library, and
+The `in_channel` constructor is from the original OCaml standard library, and
 its use is consider deprecated when using the Core standard library.  This
-leaves us with two ways of parsing the JSON, so let's see what they look like.
-The example below assumes the JSON fragment is in a file called *book.json*:
+leaves us with two ways of parsing the JSON: either from a string buffer, or
+from a file on a filesystem.  The next example shows both in action, assuming
+the JSON record is stored in a file called *book.json*:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 open Core.Std
@@ -110,45 +112,83 @@ open Core.Std
 let _ =
   (* Read JSON file into an OCaml string *)
   let buf = In_channel.read_all "book.json" in
+
   (* Use the string JSON constructor *)
   let json1 = Yojson.Basic.from_string buf in
+
   (* Use the file JSON constructor *)
   let json2 = Yojson.Basic.from_file "book.json" in
+
   (* Test that the two values are the same *)
   print_endline (if json1 = json2 then "OK" else "FAIL")
+  print_endline (if phys_equal json1 json2 then "FAIL" else "OK")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `from_file` is a convenience function in Yojson that accepts an input filename
-and takes care of closing it for you. It's far more common to construct JSON
-values from `string` buffers that you obtain from a network connection, for
-example (we'll see more of this in in the {{{ASYNC}}} chapter). Finally, the
-example checks that the two input mechanisms did in fact have result in the
-same OCaml data structure.
+and takes care of opening and closing it for you. It's far more common to use
+`from_string` to construct a JSON value an OCaml `string` buffers. These
+strings can come from a network connection (we'll see more of this in in the
+{{{ASYNC}}} chapter) or even a database. Finally, the example checks that the
+two input mechanisms actually resulted in the same OCaml data structure.
 
 <sidebar>
-<title>The difference between `=` and `==`</title>
+<title>The difference between `=` and `==`, and `phys_equal` in Core</title>
 
-If you come from a C/C++ background, you will probably reflexively use `==`
-to test two values for equality. In OCaml, `==` tests for *physical* equality,
-and `=` tests for *structural* equality. This has some important implications
-for your code's performance.
+If you come from a C/C++ background, you will probably reflexively use `==` to
+test two values for equality. In OCaml, `==` tests for *physical* equality, and
+`=` tests for *structural* equality. This has some important differences you
+should understand before using either.
 
-The `==` physical equality test will not match if you have two data structures
-that are have the same contents but were allocated separately. In the JSON
-parsing example above, they would not match.
+The `==` physical equality test will match if two data structures have
+precisely the same pointer in memory.  Two data structures that have identical
+contents, but are constructed separately, will not match using this operator.
+In the JSON example, the `json1` and `json2` values are not identical and so
+would fail the physical equality test.
 
-The `=` structural equality operator will inspect each field in the value and
-test them separately for equality. In the JSON parsing example, this means that
-every JSON value will be traversed and checked, and thus they will check out as
-equal.  However, if you data structure is cyclical (that is, a value
-recursively points back to another field within the same structure), the `=`
-operator will never terminate.  In this situation, you must use the physical
-equality operator, or write a custom comparison function that breaks the
-recursion.
+The `=` structural equality operator recursively inspects each field in the two
+values and tests them individually for equality. In the JSON parsing example,
+every field will be traversed and checked, and they will check out as equal.
+Crucially, if your data structure is cyclical (that is, a value recursively
+points back to another field within the same structure), the `=` operator will
+never terminate, and your program will hang!  In this situation, you must use
+the physical equality operator, or write a custom comparison function that
+breaks the recursion.
+
+It's quite easy to mix up the use of `=` and `==`, so Core disables the `==`
+operator and provides `phys_equal` instead.  You'll see a type error if you use
+`==` anywhere:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# 1 == 2;;
+Error: This expression has type int but an expression was expected of type
+         [ `Consider_using_phys_equal ]
+# phys_equal 1 2;;
+- : bool = false
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you feel like hanging your OCaml interpreter, you can verify what happens
+with recursive values for yourself:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
+type t1 = { foo1 : int; bar1 : t2; }
+and t2 = { foo2 : int; bar2 : t1; }
+# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };; 
+<lots of text>
+# phys_equal v1;;
+- : t1 -> bool = <fun>
+# phys_equal v1 v1;;
+- : bool = true
+# v1 = v1 ;;
+<press ^Z and kill the process now>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 </sidebar>
 
-WIP
+#### Selecting values from JSON structures
+
+Now that we've figured out how to parse the example JSON, lets see how we can
+manipulate it from OCaml code with a more complete example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 open Core.Std
@@ -182,17 +222,28 @@ let _ =
   printf "Translated: %s\n" (string_of_bool_option is_translated)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Next, we open the `Yojson.Basic.Util` module.  This contains *combinator* functions that can be chained together using the Core `|!` pipe operator to select and convert values out of the JSON structure.  Let's examine some of their uses in a bit more detail:
+This introduces the `Yojson.Basic.Util` module, which contains *combinator*
+functions for JSON manipulation.  Combinators are a style of function that can
+be chained together using the `|!` pipe operator to select and convert values
+out of the JSON structure.  Let's examine some of them in more detail:
 
-* For the `title` string, the `member` function extracts the key from the array, and casts it to an OCaml string. An exception is raised if the JSON value is not a string.
-* The `tags` are similar to the `title`, but are passed through the `to_list` function since they are a list of strings.  The `filter_string` function maps all of the strings in the JSON list into an OCaml list (and filters out any non-string values in the JSON).
-* The `is_online` and `is_translated` functions are optional, and no error is raised if they are not present in the JSON array. The resulting OCaml type is a `string option` to reflect this. In our example, only `is_online` is present and `is_translated` will be `None`.
+* For the `title` string, the `member` combinator extracts the key from the array, and casts it to an OCaml string. An exception is raised if the JSON value is not a string.
+* The `tags` field is similar to `title`, but are passed through the `to_list` combinator since they are a JSON list.  The `filter_string` combinator folds all of the strings in the JSON list into an OCaml list (any non-strings also in there are simply ignored).
+* The `is_online` and `is_translated` fields are optional in our JSON schema, and no error is raised if they are not present in the JSON array. The resulting OCaml type is a `string option` to reflect this. In our example, only `is_online` is present and `is_translated` will be `None`.
 
-Finally, we print the parsed fields just as we would normal OCaml values. This technique of using chained parsing functions is very powerful in combination with the OCaml type system. Many errors that don't make sense at runtime (for example, mixing up lists and objects) will be caught statically via a type error.
+In the last part of the example, we simply print the parsed fields since they
+are just normal OCaml values. This technique of using chained parsing functions
+is very powerful in combination with the OCaml type system. Many errors that
+don't make sense at runtime (for example, mixing up lists and objects) will be
+caught statically via a type error.
 
 ### Using JSON extensions for richer types
 
-The basic JSON types  can sometimes be a little too limited for expressing more complex data structures. Yojson also offers a more advanced module which extends the basic JSON types with some useful extras.  These should *not* be used when interoperating with external services, but are useful within your own applications.
+The basic JSON types can sometimes be a little too limited for expressing more
+complex data structures. Yojson also offers a more advanced module which
+extends the basic JSON types with some useful extras.  These should *not* be
+used when interoperating with external services, but are useful within your own
+applications.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type json = [ 
