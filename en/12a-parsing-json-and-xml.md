@@ -237,15 +237,64 @@ is very powerful in combination with the OCaml type system. Many errors that
 don't make sense at runtime (for example, mixing up lists and objects) will be
 caught statically via a type error.
 
-### Using JSON extensions for richer types
+### Constructing JSON values 
 
-The basic JSON types are *really* basic, and OCaml types are far richer. If you're
-not interoperating with external systems, and just want to use JSON as a human-readable
-local protocol, then  can sometimes be a little too limited for expressing more
-complex data structures. Yojson also offers a more advanced module which
-extends the basic JSON types with some useful extras.  These should *not* be
-used when interoperating with external services, but are useful within your own
-applications.
+Constructing JSON values for simply involves composing the appropriate tree and
+calling the relevant output functions on the value.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let x = `Assoc [ ("key", `String "value") ] ;;
+val x : [> `Assoc of (string * [> `String of string ]) list ] =
+  `Assoc [("key", `String "value")]
+# Yojson.Basic.pretty_to_string x ;;
+- : string = "{ \"key\": \"value\" }"
+# Yojson.Basic.pretty_to_channel stdout x ;;
+{ "key": "value" }
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One difficulty you might have is with long type errors if you make a mistake 
+constructing the value.  For example, suppose you build an association list and
+include a single value instead of a list of keys:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let x = `Assoc ("key", `String "value");;
+val x : [> `Assoc of string * [> `String of string ] ] =
+  `Assoc ("key", `String "value")
+# Yojson.Basic.pretty_to_string x;;
+Error: This expression has type
+         [> `Assoc of string * [> `String of string ] ]
+       but an expression was expected of type Yojson.Basic.json
+       Types for tag `Assoc are incompatible
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An easy way to narrow down this sort of type error is to add explicit type
+annotations to give the compiler a hint as to your intentions:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# let (x:Yojson.Basic.json) = `Assoc ("key", `String "value");;
+Error: This expression has type 'a * 'b
+       but an expression was expected of type
+         (string * Yojson.Basic.json) list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this case, we've marked the `x` as being of type `Yojson.Basic.json`, and
+the compiler immediately spots that the argument to the `Assoc` variant has the
+incorrect type.  This illustrates the strengths and drawbacks of using
+polymorphic variants: they make it possible to easily subtype across module
+boundaries (the `Basic` and `Safe` in Yojson's case), but the error messages
+can be more confusing.  However, a bit of careful manual type annotation is 
+all it takes to make tracking down such issues much easier.
+
+_avsm_: segway into memory representation of polyvariants here?
+
+#### Using non-standard JSON extensions
+
+The standard JSON types are *really* basic, and OCaml types are far more
+expressive. Yojson supports an extended JSON format for those times when you're
+not interoperating with external systems and just want a convenient
+human-readable local format.  The `Yojson.Safe.json` type is a superset of the
+`Basic` polymorphic variant, and looks like this:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type json = [ 
@@ -263,13 +312,49 @@ type json = [
   | `Variant of string * json option ] 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The extensions here include the following:
+You should immediately be able to spot a benefit of using polymorphic variants
+here.  A standard JSON type such as a `String` will type-check against both the
+`Basic` module and also the non-standard `Safe` module.  However, if you use
+extension values such as `Tuple` with the `Basic` module, they will not be a
+valid sub-type and the compiler will complain.
 
-* The `lit` suffix denotes that the value is stored as a JSON string. For example, a `Floatlit` might be stored as `"1.234"` instead of `1.234`.
+The extensions includes with Yojson include:
+
+* The `lit` suffix denotes that the value is stored as a JSON string. For example, a `Floatlit` will be stored as `"1.234"` instead of `1.234`.
 * The `Tuple` type is stored as `("abc", 123)` instead of a list.
-* The `Variant` type encodes OCaml variants more explicitly, as ` <"Foo">` or `<"Bar":123>`
+* The `Variant` type encodes OCaml variants more explicitly, as `<"Foo">` or `<"Bar":123>` for a variant with parameters.
  
-_avsm_:  What's the purpose of these extensions? See next on ATDgen
+The only purpose of these extensions is to make the data representation more
+expressive without having to refer to the original OCaml types.  You can always
+cast a `Safe.json` to a `Basic.json` type by using the `to_basic` function as follows:
 
-### Using ATDgen to automatically convert JSON into an OCaml type
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+val to_basic : json -> Yojson.Basic.json
+(** Tuples are converted to JSON arrays, Variants are converted to JSON strings
+or arrays of a string (constructor) and a json value (argument). Long integers
+are converted to JSON strings.  Examples: 
 
+`Tuple [ `Int 1; `Float 2.3 ]   ->    `List [ `Int 1; `Float 2.3 ]
+`Variant ("A", None)            ->    `String "A"
+`Variant ("B", Some x)          ->    `List [ `String "B", x ]
+`Intlit "12345678901234567890"  ->    `String "12345678901234567890"
+ *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Automatically mapping JSON to OCaml types
+
+TODO: describe ATDgen here and how to generate ocaml code.
+
+## XML
+
+### Stream parsing XML
+
+TODO: XMLM, stream parsing.  Main difference from JSON is the stream parsing via signals, and tree mapping.
+
+### Using the COW syntax extension
+
+TODO: Explain how the p4 XML extension works. This is a good excuse.
+
+### Working with XHTML
+
+TODO
