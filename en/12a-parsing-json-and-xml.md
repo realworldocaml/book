@@ -238,8 +238,9 @@ caught statically via a type error.
 
 ### Constructing JSON values 
 
-Constructing JSON values for simply involves composing the appropriate tree and
-calling the relevant output functions on the value.
+To build and print JSON values, you can just construct values of type `json`
+and call the `to_string` function.  There are also pretty-printing functions
+that lay out the output in a more human-readable style:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = `Assoc [ ("key", `String "value") ] ;;
@@ -252,9 +253,13 @@ val x : [> `Assoc of (string * [> `String of string ]) list ] =
 - : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One difficulty you might have is with long type errors if you make a mistake 
-constructing the value.  For example, suppose you build an association list and
-include a single value instead of a list of keys:
+In the example above, although the value that `x` has is compatible with the
+type `json`, it's not explicitly defined as such.  The type inference engine
+will figure out a type that is based on how the value `x` is used, and in this
+case only the `Assoc` and `String` variants are present.  One difficulty you
+will encounter is that type errors involving polymorphic variants can be quite
+verbose if you make a mistake in your code.  For example, suppose you build an
+`Assoc` and include a single value instead of a list of keys:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let x = `Assoc ("key", `String "value");;
@@ -267,8 +272,9 @@ Error: This expression has type
        Types for tag `Assoc are incompatible
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An easy way to narrow down this sort of type error is to add explicit type
-annotations to give the compiler a hint as to your intentions:
+The type error above isn't *wrong* as such, but can be inconvenient to wade
+through for larger values.  An easy way to narrow down this sort of type error
+is to add explicit type annotations as a compiler hint about your intentions:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (x:Yojson.Basic.json) = `Assoc ("key", `String "value");;
