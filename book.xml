@@ -8497,6 +8497,232 @@ $ ./service_client.byte
   <para>
   </para>
 </chapter>
+<chapter id="parsing-json-and-xml">
+  <title>Parsing JSON and XML</title>
+  <sect1 id="json">
+    <title>JSON</title>
+    <para>
+      JSON is a lightweight data-interchange format often used in web
+      services and browsers. It is described in
+      <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>,
+      and designed to be easy to parse and generate.
+    </para>
+    <para>
+      JSON consists of just two basic structures: an unordered
+      collection of key/value pairs, and an ordered list of values.
+      Values can be strings, booleans, floats, integers or null. Let's
+      see what an example JSON record for a book description looks like:
+    </para>
+    <programlisting language="json">
+{
+  &quot;title&quot;: &quot;Real World OCaml&quot;,
+  &quot;tags&quot; : [ &quot;functional programming&quot;, &quot;ocaml&quot;, &quot;algorithms&quot; ],
+  &quot;pages&quot;: 450,
+  &quot;authors&quot;: [
+    { &quot;name&quot;: &quot;Jason Hickey&quot;, &quot;affiliation&quot;: &quot;Google&quot; },
+    { &quot;name&quot;: &quot;Anil Madhavapeddy&quot;, &quot;affiliation&quot;: &quot;Cambridge&quot;},
+    { &quot;name&quot;: &quot;Yaron Minsky&quot;, &quot;affiliation&quot;: &quot;Jane Street&quot;}
+  ],
+  &quot;is_online&quot;: true
+}
+</programlisting>
+    <para>
+      JSON values usually start with an object at the top level. The
+      keys must be strings, but values can be any JSON type, such as the
+      list of string tags or author record list.
+    </para>
+    <para>
+      This free-form nature of JSON types is both a blessing and a
+      curse. It's very easy to generate, but your program also has to
+      cope with handling subtle variations in how values are
+      represented. For example, what if the <literal>pages</literal>
+      value above is actually represented as a string value of
+      &quot;450&quot; instead of an integer?
+    </para>
+    <para>
+      Our first task is thus to parse the JSON into a more structured
+      OCaml type so that we can use pattern matching to statically check
+      that we've tested all the possible variations while parsing data.
+      There are quite a few JSON parsers available for OCaml via OPAM,
+      and we've picked
+      <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
+      for the remainder of this chapter. You can
+      <literal>opam install yojson</literal> to get it via the package
+      manager.
+    </para>
+    <sect2 id="parsing-standard-json-with-yojson">
+      <title>Parsing standard JSON with Yojson</title>
+      <para>
+        The basic JSON specification has very few data types, and Yojson
+        implements these in the <literal>Yojson.Basic</literal> module.
+      </para>
+      <programlisting language="ocaml">
+type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of json list
+  | `Null
+  | `String of string 
+] 
+</programlisting>
+      <para>
+        This single type covers any valid JSON structure, as it is
+        recursive and also includes a <literal>Null</literal> variant.
+        Now, let's parse the earlier JSON example and see how to
+        manipulate the values from OCaml:
+      </para>
+      <programlisting language="ocaml">
+open Core.Std
+open Async.Std
+open Printf
+
+let _ =
+  (* Read the JSON file *)
+  let json = Yojson.Basic.from_file &quot;book.json&quot; in
+
+  (* Locally open the JSON manipulation functions *)
+  let open Yojson.Basic.Util in
+  let title = json |! member &quot;title&quot; |! to_string in
+  let tags = json |! member &quot;tags&quot; |! to_list |! filter_string in
+  let pages = json |! member &quot;pages&quot; |! to_int in
+  let is_online = json |! member &quot;is_online&quot; |! to_bool_option in
+  let is_translated = json |! member &quot;is_translated&quot; |! to_bool_option in
+  let authors = json |! member &quot;authors&quot; |! to_list in
+  let names = List.map authors ~f:(fun json -&gt; member &quot;name&quot; json |! to_string) in
+
+  (* Print the results of the parsing *)
+  printf &quot;Title: %s (%d)\n&quot; title pages;
+  printf &quot;Authors: %s\n&quot; (String.concat ~sep:&quot;, &quot; names);
+  printf &quot;Tags: %s\n&quot; (String.concat ~sep:&quot;, &quot; tags);
+  let string_of_bool_option =
+    function
+    | None -&gt; &quot;&lt;none&gt;&quot;
+    | Some true -&gt; &quot;yes&quot;
+    | Some false -&gt; &quot;no&quot; in
+  printf &quot;Online: %s\n&quot; (string_of_bool_option is_online);
+  printf &quot;Translated: %s\n&quot; (string_of_bool_option is_translated)
+</programlisting>
+      <para>
+        The first thing we do is to parse the contents of
+        <literal>book.json</literal> directly from a disk file into a
+        JSON structure. Yojson can also parse from a channel or a
+        string, depending on where your data is coming from.
+      </para>
+      <para>
+        Next, we open the <literal>Yojson.Basic.Util</literal> module.
+        This contains <emphasis>combinator</emphasis> functions that can
+        be chained together using the Core <literal>|!</literal> pipe
+        operator to select and convert values out of the JSON structure.
+        Let's examine some of their uses in a bit more detail:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            For the <literal>title</literal> string, the
+            <literal>member</literal> function extracts the key from the
+            array, and casts it to an OCaml string. An exception is
+            raised if the JSON value is not a string.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The <literal>tags</literal> are similar to the
+            <literal>title</literal>, but are passed through the
+            <literal>to_list</literal> function since they are a list of
+            strings. The <literal>filter_string</literal> function maps
+            all of the strings in the JSON list into an OCaml list (and
+            filters out any non-string values in the JSON).
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The <literal>is_online</literal> and
+            <literal>is_translated</literal> functions are optional, and
+            no error is raised if they are not present in the JSON
+            array. The resulting OCaml type is a
+            <literal>string option</literal> to reflect this. In our
+            example, only <literal>is_online</literal> is present and
+            <literal>is_translated</literal> will be
+            <literal>None</literal>.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Finally, we print the parsed fields just as we would normal
+        OCaml values. This technique of using chained parsing functions
+        is very powerful in combination with the OCaml type system. Many
+        errors that don't make sense at runtime (for example, mixing up
+        lists and objects) will be caught statically via a type error.
+      </para>
+    </sect2>
+    <sect2 id="using-json-extensions-for-richer-types">
+      <title>Using JSON extensions for richer types</title>
+      <para>
+        The basic JSON types can sometimes be a little too limited for
+        expressing more complex data structures. Yojson also offers a
+        more advanced module which extends the basic JSON types with
+        some useful extras. These should <emphasis>not</emphasis> be
+        used when interoperating with external services, but are useful
+        within your own applications.
+      </para>
+      <programlisting language="ocaml">
+type json = [ 
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Floatlit of string
+  | `Int of int
+  | `Intlit of string
+  | `List of json list
+  | `Null
+  | `String of string
+  | `Stringlit of string
+  | `Tuple of json list
+  | `Variant of string * json option ] 
+</programlisting>
+      <para>
+        The extensions here include the following:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            The <literal>lit</literal> suffix denotes that the value is
+            stored as a JSON string. For example, a
+            <literal>Floatlit</literal> might be stored as
+            <literal>&quot;1.234&quot;</literal> instead of
+            <literal>1.234</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The <literal>Tuple</literal> type is stored as
+            <literal>(&quot;abc&quot;, 123)</literal> instead of a list.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The <literal>Variant</literal> type encodes OCaml variants
+            more explicitly, as
+            <literal>&lt;&quot;Foo&quot;&gt;</literal> or
+            <literal>&lt;&quot;Bar&quot;:123&gt;</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        <emphasis>avsm</emphasis>: What's the purpose of these
+        extensions? See next on ATDgen
+      </para>
+    </sect2>
+    <sect2 id="using-atdgen-to-automatically-convert-json-into-an-ocaml-type">
+      <title>Using ATDgen to automatically convert JSON into an OCaml
+      type</title>
+      <para>
+      </para>
+    </sect2>
+  </sect1>
+</chapter>
 <chapter id="concurrent-programming-with-async">
   <title>Concurrent Programming with Async</title>
   <para>
