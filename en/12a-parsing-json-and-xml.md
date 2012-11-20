@@ -239,7 +239,9 @@ caught statically via a type error.
 
 ### Using JSON extensions for richer types
 
-The basic JSON types can sometimes be a little too limited for expressing more
+The basic JSON types are *really* basic, and OCaml types are far richer. If you're
+not interoperating with external systems, and just want to use JSON as a human-readable
+local protocol, then  can sometimes be a little too limited for expressing more
 complex data structures. Yojson also offers a more advanced module which
 extends the basic JSON types with some useful extras.  These should *not* be
 used when interoperating with external services, but are useful within your own
