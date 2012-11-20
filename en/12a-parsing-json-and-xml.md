@@ -5,9 +5,9 @@
 JSON is a lightweight data-interchange format often used in web services and
 browsers.  It is described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
 and is designed to be easy to parse and generate.  You'll run into JSON very
-often when working with modern APIs, and so we'll cover several different
-ways to manipulate it in this chapter. Along the way we'll introduce several
-new libraries and syntax extensions which make the job easier.
+often when working with modern APIs, and so we'll cover several different ways
+to manipulate it in this chapter. Along the way we'll introduce several new
+libraries and syntax extensions which make the job easier.
 
 JSON consists of just two basic structures: an unordered collection of
 key/value pairs, and an ordered list of values.  Values can be strings,
@@ -70,8 +70,8 @@ type json = [
   | `String of string ] 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's parse the earlier JSON string example into this type now.  We'll first
-look at the `Yojson.Basic` documentation, and find these helpful functions:
+Let's parse the earlier JSON string example into this type now.  The first stop
+is the `Yojson.Basic` documentation, where we find these helpful functions:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
@@ -101,7 +101,7 @@ val from_channel : in_channel -> json
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `in_channel` constructor is from the original OCaml standard library, and
-its use is consider deprecated when using the Core standard library.  This
+its use is considered deprecated when using the Core standard library.  This
 leaves us with two ways of parsing the JSON: either from a string buffer, or
 from a file on a filesystem.  The next example shows both in action, assuming
 the JSON record is stored in a file called *book.json*:
