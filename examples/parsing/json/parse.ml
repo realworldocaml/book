@@ -1,5 +1,4 @@
 open Core.Std
-open Async.Std
 open Printf
 
 let _ =
