@@ -472,10 +472,15 @@ flags to `atdgen`. The important ones for JSON are:
 
 The full ATD specification is quite sophisticated (and well documented online
 at its homepage).  The ATD compiler can also target formats other than JSON,
-making it useful beyond just OCaml programming.  We'll also return to the
-Github example here later in the book when discussing the Async networking
-library, and you can find the full ATD specification for Github in the
-[`ocaml-github`](http://github.com/avsm/ocaml-github) repository.
+and also outputs code for other languages such as Java if you need more
+interoperability.  There are also several similar projects you can investigate
+which automate the code generation process: [Piqi](http://piqi.org) uses the
+Google protobuf format, and [Thrift](http://thrift.apache.org) supports a huge
+variety of other programming languages.
+
+We'll also return to the Github example here later in the book when discussing
+the Async networking library, and you can find the full ATD specification for
+Github in the [`ocaml-github`](http://github.com/avsm/ocaml-github) repository.
 
 ## XML
 
