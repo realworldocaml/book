@@ -10,6 +10,7 @@
 09-files-modules-and-programs.md
 10-functors-and-fcm.md
 11-input-and-output.md
+12a-parsing-json-and-xml.md
 12-concurrent-programming-with-async.md
 13-objects.md
 14-interfacing-with-C.md
