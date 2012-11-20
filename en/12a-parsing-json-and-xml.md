@@ -2,11 +2,17 @@
 
 ## JSON
 
-JSON is a lightweight data-interchange format often used in web services and browsers.  It is described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
-and designed to be easy to parse and generate.
+JSON is a lightweight data-interchange format often used in web services and
+browsers.  It is described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
+and is designed to be easy to parse and generate.  You'll run into JSON very
+often when working with modern APIs, and so we'll cover several different
+ways to manipulate it in this chapter. Along the way we'll introduce several
+new libraries and syntax extensions which make the job easier.
 
-JSON consists of just two basic structures: an unordered collection of key/value pairs, and an ordered list of values.  Values can be strings, booleans, floats, integers or null.
-Let's see what an example JSON record for a book description looks like:
+JSON consists of just two basic structures: an unordered collection of
+key/value pairs, and an ordered list of values.  Values can be strings,
+booleans, floats, integers or null.  Let's see what an example JSON record for
+a book description looks like:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .json }
 {
@@ -22,15 +28,32 @@ Let's see what an example JSON record for a book description looks like:
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-JSON values usually start with an object at the top level.  The keys must be strings, but values can be any JSON type, such as the list of string tags or author record list.
+JSON values usually start with an object at the top level that contains a set
+of key/value pairs.  The keys must be strings, but values can be any JSON type.
+In the example above, `tags` is a string list, while the `authors` field
+contains a list of records.  Unlike OCaml lists, JSON lists can contain
+completely different JSON types within them.
 
-This free-form nature of JSON types is both a blessing and a curse.  It's very easy to generate, but your program also has to cope with handling subtle variations in how values are represented. For example, what if the `pages` value above is actually represented as a string value of "450" instead of an integer?
+This free-form nature of JSON types is both a blessing and a curse.  It's very
+easy to generate JSON values, but code parsing them also has to cope with
+handling subtle variations in how values are represented. For example, what if
+the `pages` value above is actually represented as a string value of `"450"`
+instead of an integer?
 
-Our first task is thus to parse the JSON into a more structured OCaml type so that we can use pattern matching to statically check that we've tested all the possible variations while parsing data. There are quite a few JSON parsers available for OCaml via OPAM, and we've picked [`Yojson`](http://mjambon.com/yojson.html) for the remainder of this chapter.  You can `opam install yojson` to get it via the package manager.
+Our first task is to parse the JSON into a more structured OCaml type so that
+we can use static typing more effectively.  For example, pattern matching can
+statically check at compilation time that we've tested all the possible variations
+of a given field, instead of relying on runtime unit tests (as you might in Python
+or Ruby).
+
+There are several JSON parsers available for OCaml, and we've picked
+[`Yojson`](http://mjambon.com/yojson.html) for the remainder of this chapter.
+You can `opam install yojson` to get it via the OPAM package manager.
 
 ### Parsing standard JSON with Yojson
 
-The basic JSON specification has very few data types, and Yojson implements these in the `Yojson.Basic` module.
+The basic JSON specification has very few data types, and Yojson implements
+these in the `Yojson.Basic` module.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type json = [
