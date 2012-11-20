@@ -146,7 +146,7 @@ operator will never terminate.  In this situation, you must use the physical
 equality operator, or write a custom comparison function that breaks the
 recursion.
 
-</title>
+</sidebar>
 
 WIP
 
