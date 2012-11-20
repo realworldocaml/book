@@ -136,8 +136,7 @@ two input mechanisms actually resulted in the same OCaml data structure.
 
 If you come from a C/C++ background, you will probably reflexively use `==` to
 test two values for equality. In OCaml, `==` tests for *physical* equality, and
-`=` tests for *structural* equality. This has some important differences you
-should understand before using either.
+`=` tests for *structural* equality.
 
 The `==` physical equality test will match if two data structures have
 precisely the same pointer in memory.  Two data structures that have identical
@@ -175,8 +174,8 @@ type t1 = { foo1 : int; bar1 : t2; }
 and t2 = { foo2 : int; bar2 : t1; }
 # let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };; 
 <lots of text>
-# phys_equal v1;;
-- : t1 -> bool = <fun>
+# v1 == v1;;
+- : bool = true
 # phys_equal v1 v1;;
 - : bool = true
 # v1 = v1 ;;
@@ -343,7 +342,145 @@ are converted to JSON strings.  Examples:
 
 ### Automatically mapping JSON to OCaml types
 
-TODO: describe ATDgen here and how to generate ocaml code.
+The combinators described earlier make it fairly easy to extract fields from
+JSON records, but the process is still pretty manual.  We'll talk about how to
+do larger-scale JSON parsing now, using a domain-specific language known as
+[ATD](http://oss.wink.com/atdgen/).
+
+The idea behind ATD is to specify the format of the JSON in a separate file,
+and then run a compiler (`atdgen`) that outputs OCaml code to construct and
+parse JSON values.  This means that you don't need to write any OCaml parsing
+code at all, as it will all be auto-generated for you.
+
+Let's go straight into looking at an example of how this works, by using a
+small portion of the Github API.  Github is a popular code hosting and sharing
+website that provides a JSON-based web [API](http://developer.github.com).  The
+ATD code fragment below describes the Github authorization API.  It is based on
+a pseudo-standard web protocol known as OAuth, and is used to authorized users
+to access Github services.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+type scope = [
+    User <json name="user">
+  | Public_repo <json name="public_repo">
+  | Repo <json name="repo">
+  | Repo_status <json name="repo_status">
+  | Delete_repo <json name="delete_repo">
+  | Gist <json name="gist">
+]
+
+type app = {
+  name: string;
+  url: string;
+}  <ocaml field_prefix="app_">
+
+type authorization_request = {
+  scopes: scope list;
+  note: string;
+} <ocaml field_prefix="auth_req_">
+
+type authorization_response = {
+  scopes: scope list;
+  token: string;
+  app: app;
+  url: string;
+  id: int;
+  ?note: string option;
+  ?note_url: string option;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ATD is (deliberately) similar to OCaml type definitions, with some important
+differences. Each field can include extra annotations to customise the parsing
+code for a particular backend. For example, the Github `scope` field above is
+defined as a variant type, but with the actual JSON values being defined
+explicitly (as lower-case versions).
+
+The ATD spec can be compiled to a number of OCaml targets. Let's run the
+compiler twice, to generate some OCaml type definitions, and a JSON serialiser.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .sh }
+$ atdgen -t github.atd
+$ atdgen -j github.atd
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This will generate some new files in your current directory. `Github_t.ml` and
+`Github_t.mli` will contain an OCaml module with types defines that correspond
+to the ATD file.  It looks like this:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+type scope = [
+  | `User | `Public_repo | `Repo | `Repo_status 
+  | `Delete_repo | `Gist
+]
+
+type app = { 
+  app_name (*atd name *): string; 
+  app_url (*atd url *): string 
+}
+
+type authorization_request = {
+  auth_req_scopes (*atd scopes *): scope list;
+  auth_req_note (*atd note *): string
+}
+
+type authorization_response = {
+  scopes: scope list;
+  token: string;
+  app: app;
+  url: string;
+  id: int;
+  note: string option;
+  note_url: string option
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is an obvious correspondence to the ATD definition.  Note in particular
+that field names in separate OCaml records cannot shadow each other, and so we
+specifically prefix every field with a prefix to distinguish it from other
+records. For example, `<ocaml field_prefix="auth_req_">` in the ATD spec
+prefixes every field name in the generated `authorization_request` record with
+`auth_req`.
+
+The `Github_t` module only contains the type definitions, while `Github_j` has
+a concrete serialization module to and from JSON.  You can read the
+`github_j.mli` to see the full interface, but the important functions for most
+uses are the conversion functions to and from a string.  For our example above,
+this looks like:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+val string_of_authorization_response :
+  ?len:int -> authorization_response -> string
+  (** Serialize a value of type {!authorization_response}
+      into a JSON string.
+      @param len specifies the initial length 
+                 of the buffer used internally.
+                 Default: 1024. *)
+
+val authorization_response_of_string :
+  string -> authorization_response
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is pretty convenient! We've written a single ATD file, and all the OCaml
+boilerplate to convert between JSON and a strongly typed record has been
+generated for us.  You can control various aspects of the serializer by passing
+flags to `atdgen`. The important ones for JSON are:
+
+* `-j-std`: work in standard JSON mode, and never print non-standard JSON extensions.
+* `-j-custom-fields FUNCTION`: call a custom function for every unknown field encountered, instead of raising a parsing exception.
+* `-j-defaults`: force the output a JSON value even if the specification defines it as the default value for that field.
+
+The full ATD specification is quite sophisticated (and well documented online
+at its homepage).  The ATD compiler can also target formats other than JSON,
+and also outputs code for other languages such as Java if you need more
+interoperability.  There are also several similar projects you can investigate
+which automate the code generation process: [Piqi](http://piqi.org) uses the
+Google protobuf format, and [Thrift](http://thrift.apache.org) supports a huge
+variety of other programming languages.
+
+We'll also return to the Github example here later in the book when discussing
+the Async networking library, and you can find the full ATD specification for
+Github in the [`ocaml-github`](http://github.com/avsm/ocaml-github) repository.
 
 ## XML
 
