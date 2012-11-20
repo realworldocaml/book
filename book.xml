@@ -8589,8 +8589,8 @@ type json = [
 </programlisting>
       <para>
         Let's parse the earlier JSON string example into this type now.
-        We'll first look at the <literal>Yojson.Basic</literal>
-        documentation, and find these helpful functions:
+        The first stop is the <literal>Yojson.Basic</literal>
+        documentation, where we find these helpful functions:
       </para>
       <programlisting language="ocaml">
 val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
@@ -8621,7 +8621,7 @@ val from_channel : in_channel -&gt; json
 </programlisting>
       <para>
         The <literal>in_channel</literal> constructor is from the
-        original OCaml standard library, and its use is consider
+        original OCaml standard library, and its use is considered
         deprecated when using the Core standard library. This leaves us
         with two ways of parsing the JSON: either from a string buffer,
         or from a file on a filesystem. The next example shows both in
@@ -8812,20 +8812,80 @@ let _ =
         </para>
       </sect3>
     </sect2>
-    <sect2 id="using-json-extensions-for-richer-types">
-      <title>Using JSON extensions for richer types</title>
+    <sect2 id="constructing-json-values">
+      <title>Constructing JSON values</title>
       <para>
-        The basic JSON types are <emphasis>really</emphasis> basic, and
-        OCaml types are far richer. If you're not interoperating with
-        external systems, and just want to use JSON as a human-readable
-        local protocol, then can sometimes be a little too limited for
-        expressing more complex data structures. Yojson also offers a
-        more advanced module which extends the basic JSON types with
-        some useful extras. These should <emphasis>not</emphasis> be
-        used when interoperating with external services, but are useful
-        within your own applications.
+        Constructing JSON values for simply involves composing the
+        appropriate tree and calling the relevant output functions on
+        the value.
       </para>
-      <programlisting language="ocaml">
+      <programlisting>
+# let x = `Assoc [ (&quot;key&quot;, `String &quot;value&quot;) ] ;;
+val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
+  `Assoc [(&quot;key&quot;, `String &quot;value&quot;)]
+# Yojson.Basic.pretty_to_string x ;;
+- : string = &quot;{ \&quot;key\&quot;: \&quot;value\&quot; }&quot;
+# Yojson.Basic.pretty_to_channel stdout x ;;
+{ &quot;key&quot;: &quot;value&quot; }
+- : unit = ()
+</programlisting>
+      <para>
+        One difficulty you might have is with long type errors if you
+        make a mistake constructing the value. For example, suppose you
+        build an association list and include a single value instead of
+        a list of keys:
+      </para>
+      <programlisting>
+# let x = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
+val x : [&gt; `Assoc of string * [&gt; `String of string ] ] =
+  `Assoc (&quot;key&quot;, `String &quot;value&quot;)
+# Yojson.Basic.pretty_to_string x;;
+Error: This expression has type
+         [&gt; `Assoc of string * [&gt; `String of string ] ]
+       but an expression was expected of type Yojson.Basic.json
+       Types for tag `Assoc are incompatible
+</programlisting>
+      <para>
+        An easy way to narrow down this sort of type error is to add
+        explicit type annotations to give the compiler a hint as to your
+        intentions:
+      </para>
+      <programlisting>
+# let (x:Yojson.Basic.json) = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
+Error: This expression has type 'a * 'b
+       but an expression was expected of type
+         (string * Yojson.Basic.json) list
+</programlisting>
+      <para>
+        In this case, we've marked the <literal>x</literal> as being of
+        type <literal>Yojson.Basic.json</literal>, and the compiler
+        immediately spots that the argument to the
+        <literal>Assoc</literal> variant has the incorrect type. This
+        illustrates the strengths and drawbacks of using polymorphic
+        variants: they make it possible to easily subtype across module
+        boundaries (the <literal>Basic</literal> and
+        <literal>Safe</literal> in Yojson's case), but the error
+        messages can be more confusing. However, a bit of careful manual
+        type annotation is all it takes to make tracking down such
+        issues much easier.
+      </para>
+      <para>
+        <emphasis>avsm</emphasis>: segway into memory representation of
+        polyvariants here?
+      </para>
+      <sect3 id="using-non-standard-json-extensions">
+        <title>Using non-standard JSON extensions</title>
+        <para>
+          The standard JSON types are <emphasis>really</emphasis> basic,
+          and OCaml types are far more expressive. Yojson supports an
+          extended JSON format for those times when you're not
+          interoperating with external systems and just want a
+          convenient human-readable local format. The
+          <literal>Yojson.Safe.json</literal> type is a superset of the
+          <literal>Basic</literal> polymorphic variant, and looks like
+          this:
+        </para>
+        <programlisting language="ocaml">
 type json = [ 
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -8840,43 +8900,95 @@ type json = [
   | `Tuple of json list
   | `Variant of string * json option ] 
 </programlisting>
+        <para>
+          You should immediately be able to spot a benefit of using
+          polymorphic variants here. A standard JSON type such as a
+          <literal>String</literal> will type-check against both the
+          <literal>Basic</literal> module and also the non-standard
+          <literal>Safe</literal> module. However, if you use extension
+          values such as <literal>Tuple</literal> with the
+          <literal>Basic</literal> module, they will not be a valid
+          sub-type and the compiler will complain.
+        </para>
+        <para>
+          The extensions includes with Yojson include:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              The <literal>lit</literal> suffix denotes that the value
+              is stored as a JSON string. For example, a
+              <literal>Floatlit</literal> will be stored as
+              <literal>&quot;1.234&quot;</literal> instead of
+              <literal>1.234</literal>.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <literal>Tuple</literal> type is stored as
+              <literal>(&quot;abc&quot;, 123)</literal> instead of a
+              list.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <literal>Variant</literal> type encodes OCaml variants
+              more explicitly, as
+              <literal>&lt;&quot;Foo&quot;&gt;</literal> or
+              <literal>&lt;&quot;Bar&quot;:123&gt;</literal> for a
+              variant with parameters.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          The only purpose of these extensions is to make the data
+          representation more expressive without having to refer to the
+          original OCaml types. You can always cast a
+          <literal>Safe.json</literal> to a
+          <literal>Basic.json</literal> type by using the
+          <literal>to_basic</literal> function as follows:
+        </para>
+        <programlisting language="ocaml">
+val to_basic : json -&gt; Yojson.Basic.json
+(** Tuples are converted to JSON arrays, Variants are converted to JSON strings
+or arrays of a string (constructor) and a json value (argument). Long integers
+are converted to JSON strings.  Examples: 
+
+`Tuple [ `Int 1; `Float 2.3 ]   -&gt;    `List [ `Int 1; `Float 2.3 ]
+`Variant (&quot;A&quot;, None)            -&gt;    `String &quot;A&quot;
+`Variant (&quot;B&quot;, Some x)          -&gt;    `List [ `String &quot;B&quot;, x ]
+`Intlit &quot;12345678901234567890&quot;  -&gt;    `String &quot;12345678901234567890&quot;
+ *)
+</programlisting>
+      </sect3>
+    </sect2>
+    <sect2 id="automatically-mapping-json-to-ocaml-types">
+      <title>Automatically mapping JSON to OCaml types</title>
       <para>
-        The extensions here include the following:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            The <literal>lit</literal> suffix denotes that the value is
-            stored as a JSON string. For example, a
-            <literal>Floatlit</literal> might be stored as
-            <literal>&quot;1.234&quot;</literal> instead of
-            <literal>1.234</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The <literal>Tuple</literal> type is stored as
-            <literal>(&quot;abc&quot;, 123)</literal> instead of a list.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The <literal>Variant</literal> type encodes OCaml variants
-            more explicitly, as
-            <literal>&lt;&quot;Foo&quot;&gt;</literal> or
-            <literal>&lt;&quot;Bar&quot;:123&gt;</literal>
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        <emphasis>avsm</emphasis>: What's the purpose of these
-        extensions? See next on ATDgen
+        TODO: describe ATDgen here and how to generate ocaml code.
       </para>
     </sect2>
-    <sect2 id="using-atdgen-to-automatically-convert-json-into-an-ocaml-type">
-      <title>Using ATDgen to automatically convert JSON into an OCaml
-      type</title>
+  </sect1>
+  <sect1 id="xml">
+    <title>XML</title>
+    <sect2 id="stream-parsing-xml">
+      <title>Stream parsing XML</title>
       <para>
+        TODO: XMLM, stream parsing. Main difference from JSON is the
+        stream parsing via signals, and tree mapping.
+      </para>
+    </sect2>
+    <sect2 id="using-the-cow-syntax-extension">
+      <title>Using the COW syntax extension</title>
+      <para>
+        TODO: Explain how the p4 XML extension works. This is a good
+        excuse.
+      </para>
+    </sect2>
+    <sect2 id="working-with-xhtml">
+      <title>Working with XHTML</title>
+      <para>
+        TODO
       </para>
     </sect2>
   </sect1>
