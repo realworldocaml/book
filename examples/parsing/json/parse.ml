@@ -8,13 +8,13 @@ let _ =
 
   (* Locally open the JSON manipulation functions *)
   let open Yojson.Basic.Util in
-  let title = json |> member "title" |> to_string in
-  let tags = json |> member "tags" |> to_list |> filter_string in
-  let pages = json |> member "pages" |> to_int in
-  let is_online = json |> member "is_online" |> to_bool_option in
-  let is_translated = json |> member "is_translated" |> to_bool_option in
-  let authors = json |> member "authors" |> to_list in
-  let names = List.map authors ~f:(fun json -> json |> member "name" |> to_string) in
+  let title = json |! member "title" |! to_string in
+  let tags = json |! member "tags" |! to_list |! filter_string in
+  let pages = json |! member "pages" |! to_int in
+  let is_online = json |! member "is_online" |! to_bool_option in
+  let is_translated = json |! member "is_translated" |! to_bool_option in
+  let authors = json |! member "authors" |! to_list in
+  let names = List.map authors ~f:(fun json -> member "name" json |! to_string) in
 
   (* Print the results of the parsing *)
   printf "Title: %s (%d)\n" title pages;
