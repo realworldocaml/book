@@ -731,11 +731,25 @@ Error: This expression has type string but an expression was expected of type
 </programlisting>
         <para>
           <literal>List.map</literal> takes two arguments: a list, and a
-          function (under the label <literal>~f</literal> --- we'll
-          learn more about labeled arguments in Chapter
-          {{{variables-and-functions}}}) for transforming the elements
-          of that list. Note that <literal>List.map</literal> creates a
-          new list and does not modify the original.
+          function for transforming the elements of that list. Note that
+          <literal>List.map</literal> creates a new list and does not
+          modify the original.
+        </para>
+        <para>
+          In this example, the function <literal>String.length</literal>
+          is passed using under the <emphasis>labeled
+          argument</emphasis> <literal>~f</literal>. Labels allow you to
+          specify function arguments by name rather than by position. As
+          you can see below, we can change the order of labeled
+          arguments without changing the function's behavior.
+        </para>
+        <programlisting>
+# List.map ~f:String.length languages;;
+- : int list = [5; 4; 1]
+</programlisting>
+        <para>
+          We'll learn more about labeled arguments and why they're
+          important in Chapter {{{variables-and-functions}}}.
         </para>
       </sect3>
       <sect3 id="constructing-lists-with">
@@ -2133,13 +2147,13 @@ val ( |! ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
         applies the function to the value. But its utility is clearer
         when you see it in action. It works as a kind of sequencing
         operator, similar in spirit to using pipe in the UNIX shell.
-        Consider, for example, the following expression which prints out
-        every unique element of your <literal>PATH</literal>.
+        Consider, for example, the following code for printing out the
+        unique elements of your <literal>PATH</literal>.
       </para>
       <programlisting>
 # Sys.getenv_exn &quot;PATH&quot;
   |! String.split ~on:':'
-  |! List.dedup
+  |! List.dedup ~compare:String.compare
   |! List.iter ~f:print_endline
   ;;
 /bin
@@ -2149,34 +2163,58 @@ val ( |! ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 - : unit = ()
 </programlisting>
       <para>
-        Note that <literal>|!</literal> works here because it is
-        left-associative. If it were right associative, it wouldn't be
-        doing the right thing at all. Indeed, let's see what happens if
-        we try using a right associative operator, like (^!).
+        An important part of what's happening here is partial
+        application. Normally, <literal>List.iter</literal> takes two
+        arguments: a function to be called on each element of the list,
+        and the list to iterate over. We can call
+        <literal>List.iter</literal> with all it's arguments:
+      </para>
+      <programlisting>
+# List.iter ~f:print_endline [&quot;Two&quot;; &quot;lines&quot;];;
+Two
+lines
+- : unit = ()
+</programlisting>
+      <para>
+        Or, we can pass it just the function argument, leaving us with a
+        function for printing out a list of strings.
+      </para>
+      <programlisting>
+# List.iter ~f:print_endline;;
+- : string list -&gt; unit = &lt;fun&gt;
+</programlisting>
+      <para>
+        It is this later form that we're using in the
+        <literal>|!</literal> pipeline above.
+      </para>
+      <para>
+        Note that <literal>|!</literal> only works in the intended way
+        because it is left-associative. Indeed, let's see what happens
+        if we try using a right associative operator, like (^!).
       </para>
       <programlisting>
 # let (^!) = (|!);;
 val ( ^! ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
-# let drop_zs string =
-    String.to_list string
-    ^! List.filter ~f:(fun c -&gt; c &lt;&gt; 'z')
-    ^! String.of_char_list
+# Sys.getenv_exn &quot;PATH&quot;
+  ^! String.split ~on:':'
+  ^! List.dedup ~compare:String.compare
+  ^! List.iter ~f:print_endline
   ;;
-        Characters 96-115:
-      ^! String.of_char_list
-         ^^^^^^^^^^^^^^^^^^^
-Error: This expression has type char list -&gt; string
+        Characters 93-119:
+    ^! List.iter ~f:print_endline
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This expression has type string list -&gt; unit
        but an expression was expected of type
-         (char list -&gt; char list) -&gt; 'a
+         (string list -&gt; string list) -&gt; 'a
 </programlisting>
       <para>
         The above type error is a little bewildering at first glance.
         What's going on is that, because <literal>^!</literal> is right
         associative, the operator is trying to feed the value
-        <literal>List.filter ~f:(fun -&gt; c &lt;&gt; 'z')</literal> to
-        the function <literal>String.of_char_list</literal>. But
-        <literal>String.of_char_list</literal> expects a list of
-        characters as its input, not a function.
+        <literal>List.dedup ~compare:String.compare</literal> to the
+        function <literal>List.iter ~f:print_endline</literal>. But
+        <literal>List.iter ~f:print_endline</literal> expects a list of
+        strings as its input, not a function.
       </para>
       <para>
         The type error aside, this example highlights the importance of
@@ -2333,57 +2371,35 @@ val create_hashtable : init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Ha
         <listitem>
           <para>
             When you want flexibility on the order in which arguments
-            are presented.
-          </para>
-          <para>
-            One common example is functions like
-            <literal>List.map</literal> or <literal>List.fold</literal>
-            which take a function as one of their arguments. When the
-            function in question is big, it's often more readable to put
-            the function last. Here's an example of a function for
-            computing a simple letter-substitution code that moves every
-            letter forward by 13 characters.
+            are passed. Consider a function like
+            <literal>List.iter</literal>, that takes two arguments: a
+            function, and a list of elements to call that function on. A
+            common pattern is to partially apply
+            <literal>List.iter</literal> by giving it just the function,
+            as in the following example from earlier in the chapter.
+            This requires putting the function argument first.
           </para>
           <programlisting>
-# let rot13 s =
-    let a_int = Char.to_int 'a' in (* compute the ASCII for 'a' *)
-    String.map s ~f:(fun c -&gt;
-      if not (Char.is_alpha c) then c (* leave non-letters unchanged *)
-      else
-        (* compute how many letters ahead of 'a'  we are *)
-        let offset = Char.to_int (Char.lowercase c) - a_int in
-        (* move forward by 13 mod 26 letters *)
-        let new_offset = (offset + 13) mod 26 in
-        (* compute new letter, but lowercase *)
-        let c' = Char.of_int_exn (a_int + new_offset) in
-        (* restore uppercase-ness *)
-        if Char.is_uppercase c then Char.uppercase c' else c'
-    );;
-val rot13 : string -&gt; string = &lt;fun&gt;
-# rot13 &quot;Hello world!&quot;;;
-- : string = &quot;Uryyb jbeyq!&quot;
-# rot13 (rot13 &quot;Hello world!&quot;);;
-- : string = &quot;Hello world!&quot;
+# Sys.getenv_exn &quot;PATH&quot;
+  |! String.split ~on:':'
+  |! List.dedup ~compare:String.compare
+  |! List.iter ~f:print_endline
+  ;;
 </programlisting>
           <para>
-            But despite the fact that we often want the argument
-            <literal>f</literal> to go last, we sometimes want to
-            partially apply that argument. In this example, we do so
-            with <literal>String.map</literal>.
+            In other cases, you want to put the function argument
+            second. One common reason is readability. In particular, a
+            function that spans multiple lines is easiest to read when
+            it's the last argument provided.
           </para>
-          <programlisting>
-# List.map ~f:(String.map ~f:Char.uppercase)
-    [ &quot;Hello&quot;; &quot;World&quot; ];;
-- : string list = [&quot;HELLO&quot;; &quot;WORLD&quot;]
-</programlisting>
         </listitem>
       </itemizedlist>
       <sect3 id="higher-order-functions-and-labels">
         <title>Higher-order functions and labels</title>
         <para>
-          One surprising gotcha labeled arguments is that while order
-          doesn't matter when calling a function with labeled arguments,
-          it does matter in a higher-order context,
+          One surprising gotcha with labeled arguments is that while
+          order doesn't matter when calling a function with labeled
+          arguments, it does matter in a higher-order context,
           <emphasis>e.g.</emphasis>, when passing a function with
           labeled arguments to another function. Here's an example.
         </para>
@@ -2466,19 +2482,21 @@ val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 - : string = &quot;foo:bar&quot;
 </programlisting>
       <para>
-        Here, <literal>?</literal> is used to mark the separator as
-        optional. Note that, while the type of the optional argument is
-        <literal>string</literal>, internally, the argument is received
-        as a <literal>string option</literal>, where
-        <literal>None</literal> indicates that the optional argument was
-        not specified.
+        Here, <literal>?</literal> is used to mark
+        <literal>sep</literal> as optional. And while the caller can
+        pass a value of type <literal>string</literal> for
+        <literal>sep</literal>, internally to the function,
+        <literal>sep</literal> is seen as a
+        <literal>string option</literal>, with <literal>None</literal>
+        appearing when <literal>sep</literal> is not provided by the
+        caller.
       </para>
       <para>
         In the above example, we had a bit of code to substitute in the
         empty string when no argument was provided. This is a common
-        enough pattern that there's an explicit syntax for doing this,
-        which allows us to write <literal>concat</literal> even more
-        tersely:
+        enough pattern that there's an explicit syntax for providing a
+        default value, which allows us to write
+        <literal>concat</literal> even more concisely.
       </para>
       <programlisting>
 # let concat ?(sep=&quot;&quot;) x y = x ^ sep ^ y ;;
@@ -2487,24 +2505,23 @@ val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
       <para>
         Optional arguments are very useful, but they're also easy to
         abuse. The key advantage of optional arguments is that they let
-        you write functions with complex options that users can ignore
-        most of the time, only needing to think about them when they
+        you write functions with multiple arguments that users can
+        ignore most of the time, only worrying about them when they
         specifically want to invoke those options.
       </para>
       <para>
-        The downside is that it's easy for the caller of a function to
-        not be aware that there is a choice to be made, leading them to
-        pick the default behavior unknowingly, and sometimes wrongly.
-        Optional arguments really only make sense when the extra
-        concision of omitting the argument overwhelms the corresponding
-        loss of explicitness.
+        The downside is that the caller may be unaware that there is a
+        choice to be made, and so may unknowingly (and wrongly) pick
+        that default behavior. Optional arguments really only make sense
+        when the extra concision of omitting the argument overwhelms the
+        corresponding loss of explicitness.
       </para>
       <para>
         This means that rarely used functions should not have optional
         arguments. A good rule of thumb for optional arguments is that
         you should never use an optional argument for internal functions
-        of a module, only for functions that are exposed to users of a
-        module.
+        of a module, only for functions that are exposed as part of the
+        module's interface.
       </para>
       <sect3 id="explicit-passing-of-an-optional-argument">
         <title>Explicit passing of an optional argument</title>
@@ -2542,19 +2559,13 @@ val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 - : string = &quot;foobar&quot;
 </programlisting>
         <para>
-          There are a few use-cases for this. One is when you want to
-          define wrapper function that mimics the same optional
-          arguments as the function it's wrapping, and just passes those
-          optional arguments through. That way, the decision as to how
-          to handle the <literal>None</literal> case can be made just
-          once, in the wrapped function.
-        </para>
-        <para>
-          Here's an example. Imagine we wanted to create a function
-          called <literal>uppercase_concat</literal>, which is the same
-          as <literal>concat</literal> except that it uppercases the
-          first string that it's passed. We could write the function
-          like this:
+          One use-case for this is when you want to define a wrapper
+          function that mimics the optional arguments of the function
+          it's wrapping. For example, imagine we wanted to create a
+          function called <literal>uppercase_concat</literal>, which is
+          the same as <literal>concat</literal> except that it converts
+          the first string that it's passed to uppercase. We could write
+          the function as follows.
         </para>
         <programlisting>
 # let uppercase_concat ?(sep=&quot;&quot;) a b = concat ~sep (String.uppercase a) b ;;
@@ -2565,21 +2576,29 @@ val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;
 - : string = &quot;FOO:bar&quot;
 </programlisting>
         <para>
-          But in this case, we've made a separate decision as to what
-          the default separator is. If later we change
-          <literal>concat</literal>, we'll need to remember to change
+          In the way we've written it, we've been forced to separately
+          make the decision as to what the default separator is. Thus,
+          if we later change <literal>concat</literal>'s default
+          behavior, we'll need to remember to change
           <literal>uppercase_concat</literal> to match it.
         </para>
         <para>
           Instead, we can have <literal>uppercase_concat</literal>
           simply pass through the optional argument to
-          <literal>concat</literal> as an explicit option, so that the
-          decision as to the default behavior is made in only one place.
+          <literal>concat</literal> using the <literal>?</literal>
+          syntax.
         </para>
         <programlisting>
 # let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
 val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 </programlisting>
+        <para>
+          Now, if someone calls <literal>uppercase_concat</literal>
+          without an argument, an explicit <literal>None</literal> will
+          be passed to <literal>concat</literal>, leaving
+          <literal>concat</literal> to decide what the default behavior
+          should be.
+        </para>
       </sect3>
       <sect3 id="inference-of-labeled-and-optional-arguments">
         <title>Inference of labeled and optional arguments</title>
@@ -2647,6 +2666,21 @@ This is only allowed when the real type is known.
     g ~x ~y + g ~y ~x ;;
 val foo : (?y:'a -&gt; x:'b -&gt; int) -&gt; 'b -&gt; 'a -&gt; int = &lt;fun&gt;
 </programlisting>
+        <para>
+          Here, our type annotation,
+          <literal>?y:'a -&gt; x:'b -&gt; int</literal>, indicates that
+          <literal>foo</literal> has an optional argument
+          <literal>y</literal> followed by a labeled argument
+          <literal>x</literal>, where <literal>y</literal> and
+          <literal>x</literal> are potentially polymorphic, hence the
+          type variables <literal>'a</literal> and
+          <literal>'b</literal>. This annotation nails down the order of
+          the arguments of <literal>g</literal>, and thus allows the
+          compiler to successfully infer a type for
+          <literal>foo</literal>, despite the fact that it uses
+          <literal>g</literal> in ways that suggest two different
+          argument orders.
+        </para>
       </sect3>
       <sect3 id="optional-arguments-and-partial-application">
         <title>Optional arguments and partial application</title>
@@ -2723,6 +2757,16 @@ Characters 15-38:
                  ^^^^^^^^^^^^^^^^^^^^^^^
 Warning 16: this optional argument cannot be erased.
 val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
+</programlisting>
+        <para>
+          And indeed, when we provide the two positions arguments, the
+          <literal>sep</literal> argument is not erased, instead
+          returning a function that expects the <literal>sep</literal>
+          argument to be provided.
+        </para>
+        <programlisting>
+# concat &quot;a&quot; &quot;b&quot;;;
+- : ?sep:string -&gt; string = &lt;fun&gt;
 </programlisting>
       </sect3>
     </sect2>
