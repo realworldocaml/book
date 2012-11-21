@@ -432,11 +432,24 @@ of the lengths of each language as follows.
 - : int list = [5; 4; 1]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`List.map` takes two arguments: a list, and a function (under the
-label `~f` --- we'll learn more about labeled arguments in Chapter
-{{{variables-and-functions}}}) for transforming the elements of that
-list.  Note that `List.map` creates a new list and does not modify the
-original.
+`List.map` takes two arguments: a list, and a function for
+transforming the elements of that list.  Note that `List.map` creates
+a new list and does not modify the original.
+
+In this example, the function `String.length` is passed using under
+the _labeled argument_ `~f`.  Labels allow you to specify function
+arguments by name rather than by position.  As you can see below, we
+can change the order of labeled arguments without changing the
+function's behavior.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# List.map ~f:String.length languages;;
+- : int list = [5; 4; 1]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We'll learn more about labeled arguments and why they're important in
+Chapter {{{variables-and-functions}}}.
+
 
 #### Constructing lists with `::`
 
