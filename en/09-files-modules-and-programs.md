@@ -1,12 +1,12 @@
 Files, Modules and Programs
 ===========================
 
-We've so far experienced OCaml only through the toplevel.  As you move
-from exercises to real-world programs, you'll need to leave the
+We've so far experienced OCaml largely through the toplevel.  As you
+move from exercises to real-world programs, you'll need to leave the
 toplevel behind and start building programs from files.  Files are
 more than just a convenient way to store and manage your code; in
-OCaml, they also act as abstraction boundaries that divide your
-program into conceptual components.
+OCaml, they also act as boundaries that divide your program into
+conceptual units.
 
 In this chapter, we'll show you how to build an OCaml program from a
 collection of files, as well as the basics of working with modules and
@@ -59,11 +59,10 @@ Unlike C, programs in OCaml do not have a unique `main` function. When
 an OCaml program is evaluated, all the statements in the
 implementation files are evaluated in order.  These implementation
 files can contain arbitrary expressions, not just function
-definitions. In this example, the role of the `main` function is
-played by the expression `let () = process_lines []`, which kicks off
-the actions of the program.  But really the entire file is evaluated
-at startup, and so in some sense the full codebase is one big `main`
-function.
+definitions. In this example, the declaration starting with `let () =`
+plays the role of the `main` declaration, kicking off the processing.
+But really the entire file is evaluated at startup, and so in some
+sense the full codebase is one big `main` function.
 
 </sidebar>
 
@@ -99,35 +98,31 @@ required for this simple application.  First, create a `_tags` file,
 containing the following lines.
 
 ~~~~~~~~~~~~~~~
-true:package(core)
-true:thread,annot,debugging
+true:package(core),thread,annot,debugging
 ~~~~~~~~~~~~~~~
 
 The purpose of the `_tags` file is to specify which compilation
 options are required for which files.  In this case, we're telling
 `ocamlbuild` to link in the `core` package and to turn on threading,
 output of annotation files, and debugging support for all files (the
-pattern `true` matches every file in the project.)
+condition `true` causes the options to be applied to every file in the
+project.)
 
-We then create a build script `build.sh` that invokes `ocamlbuild`:
+We can then invoke `ocamlbuild` to build the executable in question.
 
 ~~~~~~~~~~~~~~~
-#!/usr/bin/env bash
-
-TARGET=freq
-ocamlbuild -use-ocamlfind $TARGET.byte && cp $TARGET.byte $TARGET
+$ ocamlbuild -use-ocamlfind freq.byte
 ~~~~~~~~~~~~~~~
 
-If you invoke `build.sh`, you'll get a bytecode executable.  If we'd
-used a target of `unique.native` in `build.sh`, we would have gotten
-native-code instead.
+If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
+`freq.byte`, we would have gotten native-code instead.
 
-Whichever way you build the application, you can now run it from the
-command-line.  The following line extracts strings from the `ocamlopt`
-executable, and then reports the most frequently occurring ones.
+We can now run the our program from the command-line.  The following
+line extracts strings from the `ocamlopt` executable, and then reports
+the most frequently occurring ones.
 
 ~~~~~~~~~~~~~~~~~
-$ strings `which ocamlopt` | ./freq
+$ strings `which ocamlopt` | ./freq.byte
  13: movq
  10: cmpq
   8: ", &
@@ -153,15 +148,18 @@ have nearly identical behavior.  There are a few things to be aware
 of.  First, the byte-code compiler can be used on more architectures,
 and has some better tool support; in particular, the OCaml debugger
 only works with byte-code.  Also, the byte-code compiler compiles
-faster than the native code compiler.
+faster than the native code compiler.  Also, in order to run a
+bytecode executable you typically need to have OCaml installed on the
+system in question.  That's not strictly required, though, since you
+can a byte-code executable with an embedded runtime, using the
+`-custom` compiler flag.
 
 As a general matter, production executables should usually be built
 using the native-code compiler, but it sometimes makes sense to use
-bytecode for development builds.  And, of course, bytecode makes
-sense when targeting a platform not supported by the native code
-compiler.
+bytecode for development builds.  And, of course, bytecode makes sense
+when targeting a platform not supported by the native code compiler.
 
- </sidebar>
+</sidebar>
 
 
 ## Multi-file programs and modules ##
