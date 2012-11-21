@@ -536,13 +536,13 @@ It's not quite obvious at first what the purpose of this operator is:
 it just takes some value and a function, and applies the function to
 the value.  But its utility is clearer when you see it in action.  It
 works as a kind of sequencing operator, similar in spirit to using
-pipe in the UNIX shell.  Consider, for example, the following
-expression which prints out every unique element of your `PATH`.
+pipe in the UNIX shell.  Consider, for example, the following code for
+printing out the unique elements of your `PATH`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # Sys.getenv_exn "PATH"
   |! String.split ~on:':'
-  |! List.dedup
+  |! List.dedup ~compare:String.compare
   |! List.iter ~f:print_endline
   ;;
 /bin
@@ -552,32 +552,54 @@ expression which prints out every unique element of your `PATH`.
 - : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that `|!` works here because it is left-associative.  If it were
-right associative, it wouldn't be doing the right thing at all.
-Indeed, let's see what happens if we try using a right associative
-operator, like (^!).
+An important part of what's happening here is partial application.
+Normally, `List.iter` takes two arguments: a function to be called on
+each element of the list, and the list to iterate over.  We can call
+`List.iter` with all it's arguments:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# List.iter ~f:print_endline ["Two"; "lines"];;
+Two
+lines
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Or, we can pass it just the function argument, leaving us with a
+function for printing out a list of strings.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# List.iter ~f:print_endline;;
+- : string list -> unit = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is this later form that we're using in the `|!` pipeline above.
+
+Note that `|!` only works in the intended way because it is
+left-associative.  Indeed, let's see what happens if we try using a
+right associative operator, like (^!).
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let (^!) = (|!);;
 val ( ^! ) : 'a -> ('a -> 'b) -> 'b = <fun>
-# let drop_zs string =
-    String.to_list string
-    ^! List.filter ~f:(fun c -> c <> 'z')
-    ^! String.of_char_list
+# Sys.getenv_exn "PATH"
+  ^! String.split ~on:':'
+  ^! List.dedup ~compare:String.compare
+  ^! List.iter ~f:print_endline
   ;;
-        Characters 96-115:
-      ^! String.of_char_list
-         ^^^^^^^^^^^^^^^^^^^
-Error: This expression has type char list -> string
+        Characters 93-119:
+    ^! List.iter ~f:print_endline
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This expression has type string list -> unit
        but an expression was expected of type
-         (char list -> char list) -> 'a
+         (string list -> string list) -> 'a
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The above type error is a little bewildering at first glance.  What's
 going on is that, because `^!` is right associative, the operator is
-trying to feed the value `List.filter ~f:(fun -> c <> 'z')` to the
-function `String.of_char_list`.  But `String.of_char_list` expects a
-list of characters as its input, not a function.
+trying to feed the value `List.dedup ~compare:String.compare` to the
+function `List.iter ~f:print_endline`.  But `List.iter
+~f:print_endline` expects a list of strings as its input, not a
+function.
 
 The type error aside, this example highlights the importance of
 choosing the operator you use with care, particularly with respect to
@@ -708,55 +730,31 @@ Labeled arguments are useful in a few different cases:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   - When you want flexibility on the order in which arguments are
-    presented.
-
-
-
-
-    One common example is functions like `List.map` or `List.fold`
-    which take a function as one of their arguments.  When the
-    function in question is big, it's often more readable to put the
-    function last.  Here's an example of a function for computing a
-    simple letter-substitution code that moves every letter forward by
-    13 characters.
+    passed.  Consider a function like `List.iter`, that takes two
+    arguments: a function, and a list of elements to call that
+    function on.  A common pattern is to partially apply `List.iter`
+    by giving it just the function, as in the following example from
+    earlier in the chapter.  This requires putting the function
+    argument first.
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-    # let rot13 s =
-        let a_int = Char.to_int 'a' in (* compute the ASCII for 'a' *)
-        String.map s ~f:(fun c ->
-          if not (Char.is_alpha c) then c (* leave non-letters unchanged *)
-          else
-            (* compute how many letters ahead of 'a'  we are *)
-            let offset = Char.to_int (Char.lowercase c) - a_int in
-            (* move forward by 13 mod 26 letters *)
-            let new_offset = (offset + 13) mod 26 in
-            (* compute new letter, but lowercase *)
-            let c' = Char.of_int_exn (a_int + new_offset) in
-            (* restore uppercase-ness *)
-            if Char.is_uppercase c then Char.uppercase c' else c'
-        );;
-    val rot13 : string -> string = <fun>
-    # rot13 "Hello world!";;
-    - : string = "Uryyb jbeyq!"
-    # rot13 (rot13 "Hello world!");;
-    - : string = "Hello world!"
+    # Sys.getenv_exn "PATH"
+      |! String.split ~on:':'
+      |! List.dedup ~compare:String.compare
+      |! List.iter ~f:print_endline
+      ;;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    But despite the fact that we often want the argument `f` to go
-    last, we sometimes want to partially apply that argument.  In this
-    example, we do so with `String.map`.
-
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-    # List.map ~f:(String.map ~f:Char.uppercase)
-        [ "Hello"; "World" ];;
-    - : string list = ["HELLO"; "WORLD"]
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    In other cases, you want to put the function argument second.  One
+    common reason is readability.  In particular, a function that
+    spans multiple lines is easiest to read when it's the last
+    argument provided.
 
 #### Higher-order functions and labels ####
 
-One surprising gotcha labeled arguments is that while order doesn't
-matter when calling a function with labeled arguments, it does matter
-in a higher-order context, _e.g._, when passing a function with
+One surprising gotcha with labeled arguments is that while order
+doesn't matter when calling a function with labeled arguments, it does
+matter in a higher-order context, _e.g._, when passing a function with
 labeled arguments to another function.  Here's an example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
@@ -830,15 +828,15 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 - : string = "foo:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here, `?` is used to mark the separator as optional.  Note that, while
-the type of the optional argument is `string`, internally, the
-argument is received as a `string option`, where `None` indicates that
-the optional argument was not specified.
+Here, `?` is used to mark `sep` as optional.  And while the caller can
+pass a value of type `string` for `sep`, internally to the function,
+`sep` is seen as a `string option`, with `None` appearing when `sep`
+is not provided by the caller.
 
 In the above example, we had a bit of code to substitute in the empty
 string when no argument was provided.  This is a common enough pattern
-that there's an explicit syntax for doing this, which allows us to
-write `concat` even more tersely:
+that there's an explicit syntax for providing a default value, which
+allows us to write `concat` even more concisely.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let concat ?(sep="") x y = x ^ sep ^ y ;;
@@ -847,21 +845,21 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 
 Optional arguments are very useful, but they're also easy to abuse.
 The key advantage of optional arguments is that they let you write
-functions with complex options that users can ignore most of the time,
-only needing to think about them when they specifically want to invoke
+functions with multiple arguments that users can ignore most of the
+time, only worrying about them when they specifically want to invoke
 those options.
 
-The downside is that it's easy for the caller of a function to not be
-aware that there is a choice to be made, leading them to pick the
-default behavior unknowingly, and sometimes wrongly.  Optional
-arguments really only make sense when the extra concision of omitting
-the argument overwhelms the corresponding loss of explicitness.
+The downside is that the caller may be unaware that there is a choice
+to be made, and so may unknowingly (and wrongly) pick that default
+behavior.  Optional arguments really only make sense when the extra
+concision of omitting the argument overwhelms the corresponding loss
+of explicitness.
 
 This means that rarely used functions should not have optional
 arguments.  A good rule of thumb for optional arguments is that you
 should never use an optional argument for internal functions of a
-module, only for functions that are exposed to users of a module.
-
+module, only for functions that are exposed as part of the module's
+interface.
 
 #### Explicit passing of an optional argument ###
 
@@ -892,16 +890,12 @@ without specifying `sep`.
 - : string = "foobar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are a few use-cases for this.  One is when you want to define
-wrapper function that mimics the same optional arguments as the
-function it's wrapping, and just passes those optional arguments
-through.  That way, the decision as to how to handle the `None` case
-can be made just once, in the wrapped function.
-
-Here's an example.  Imagine we wanted to create a function called
+One use-case for this is when you want to define a wrapper function
+that mimics the optional arguments of the function it's wrapping.  For
+example, imagine we wanted to create a function called
 `uppercase_concat`, which is the same as `concat` except that it
-uppercases the first string that it's passed.  We could write the
-function like this:
+converts the first string that it's passed to uppercase.  We could
+write the function as follows.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
@@ -912,18 +906,22 @@ val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 - : string = "FOO:bar"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-But in this case, we've made a separate decision as to what the
-default separator is.  If later we change `concat`, we'll need to
-remember to change `uppercase_concat` to match it.
+In the way we've written it, we've been forced to separately make the
+decision as to what the default separator is.  Thus, if we later
+change `concat`'s default behavior, we'll need to remember to change
+`uppercase_concat` to match it.
 
 Instead, we can have `uppercase_concat` simply pass through the
-optional argument to `concat` as an explicit option, so that the
-decision as to the default behavior is made in only one place.
+optional argument to `concat` using the `?` syntax.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
 # let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
 val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, if someone calls `uppercase_concat` without an argument, an
+explicit `None` will be passed to `concat`, leaving `concat` to decide
+what the default behavior should be.
 
 #### Inference of labeled and optional arguments
 
@@ -982,6 +980,14 @@ disappears.
     g ~x ~y + g ~y ~x ;;
 val foo : (?y:'a -> x:'b -> int) -> 'b -> 'a -> int = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, our type annotation, `?y:'a -> x:'b -> int`, indicates that
+`foo` has an optional argument `y` followed by a labeled argument `x`,
+where `y` and `x` are potentially polymorphic, hence the type
+variables `'a` and `'b`.  This annotation nails down the order of the
+arguments of `g`, and thus allows the compiler to successfully infer a
+type for `foo`, despite the fact that it uses `g` in ways that suggest
+two different argument orders.
 
 #### Optional arguments and partial application ###
 
@@ -1051,4 +1057,13 @@ Characters 15-38:
                  ^^^^^^^^^^^^^^^^^^^^^^^
 Warning 16: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And indeed, when we provide the two positions arguments, the `sep`
+argument is not erased, instead returning a function that expects the
+`sep` argument to be provided.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+# concat "a" "b";;
+- : ?sep:string -> string = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
