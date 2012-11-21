@@ -3580,6 +3580,15 @@ val my_host : host_info =
    os_release = &quot;11.4.0&quot;; cpu_arch = &quot;i386&quot;}
 </programlisting>
   <para>
+    You might wonder how the compiler inferred that
+    <literal>my_host</literal> is of type <literal>host_info</literal>.
+    The hook that the compiler uses in this case to figure out the type
+    is the record field names. It turns out that, within a given scope,
+    each record field name is associated with a unique record type.
+    Later in the chapter, we'll talk about what to do when you want to
+    have the same record fields in multiple records.
+  </para>
+  <para>
     Once we have a record value in hand, we can extract elements from
     the record field using dot-notation.
   </para>
@@ -3608,8 +3617,9 @@ val my_host : host_info =
       only needed a single pattern because record patterns are
       <emphasis>irrefutable</emphasis>, meaning that, because the layout
       of a record is always the same, a record pattern match will never
-      fail at runtime. This is different from, say, lists, where it's
-      easy to write pattern matches that compile but fail at runtime.
+      fail at runtime. In general, types with a fixed structure, like
+      records and tuples, have irrefutable patterns, whereas types with
+      variable structure, like lists and variants, do not.
     </para>
     <para>
       Another important characteristic of record patterns is that they
@@ -4020,10 +4030,15 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
 val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
 </programlisting>
     <para>
+      Note that <literal>&lt;-</literal> is not needed for
+      initialization, because all fields of a record, including mutable
+      ones, must be specified when the record is created.
+    </para>
+    <para>
       OCaml's policy of immutable-by-default is a good one, but
       imperative programming does have its place. We'll discuss more
-      about how (and when) to use OCaml's imperative features in chapter
-      {{{IMPERATIVE-PROGRAMMING}}}.
+      about how (and when) to use OCaml's imperative features in Chapter
+      {{{imperative-programming}}}.
     </para>
   </sect1>
   <sect1 id="first-class-fields">
@@ -5952,12 +5967,12 @@ Exception: Key_not_found(&quot;c&quot;).
 <chapter id="files-modules-and-programs">
   <title>Files, Modules and Programs</title>
   <para>
-    We've so far experienced OCaml only through the toplevel. As you
+    We've so far experienced OCaml largely through the toplevel. As you
     move from exercises to real-world programs, you'll need to leave the
     toplevel behind and start building programs from files. Files are
     more than just a convenient way to store and manage your code; in
-    OCaml, they also act as abstraction boundaries that divide your
-    program into conceptual components.
+    OCaml, they also act as boundaries that divide your program into
+    conceptual units.
   </para>
   <para>
     In this chapter, we'll show you how to build an OCaml program from a
@@ -6016,10 +6031,9 @@ let () =
       evaluated, all the statements in the implementation files are
       evaluated in order. These implementation files can contain
       arbitrary expressions, not just function definitions. In this
-      example, the role of the <literal>main</literal> function is
-      played by the expression
-      <literal>let () = process_lines []</literal>, which kicks off the
-      actions of the program. But really the entire file is evaluated at
+      example, the declaration starting with <literal>let () =</literal>
+      plays the role of the <literal>main</literal> declaration, kicking
+      off the processing. But really the entire file is evaluated at
       startup, and so in some sense the full codebase is one big
       <literal>main</literal> function.
     </para>
@@ -6062,8 +6076,7 @@ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
       containing the following lines.
     </para>
     <programlisting>
-true:package(core)
-true:thread,annot,debugging
+true:package(core),thread,annot,debugging
 </programlisting>
     <para>
       The purpose of the <literal>_tags</literal> file is to specify
@@ -6071,33 +6084,30 @@ true:thread,annot,debugging
       case, we're telling <literal>ocamlbuild</literal> to link in the
       <literal>core</literal> package and to turn on threading, output
       of annotation files, and debugging support for all files (the
-      pattern <literal>true</literal> matches every file in the
-      project.)
+      condition <literal>true</literal> causes the options to be applied
+      to every file in the project.)
     </para>
     <para>
-      We then create a build script <literal>build.sh</literal> that
-      invokes <literal>ocamlbuild</literal>:
+      We can then invoke <literal>ocamlbuild</literal> to build the
+      executable in question.
     </para>
     <programlisting>
-#!/usr/bin/env bash
-
-TARGET=freq
-ocamlbuild -use-ocamlfind $TARGET.byte &amp;&amp; cp $TARGET.byte $TARGET
+$ ocamlbuild -use-ocamlfind freq.byte
 </programlisting>
     <para>
-      If you invoke <literal>build.sh</literal>, you'll get a bytecode
-      executable. If we'd used a target of
-      <literal>unique.native</literal> in <literal>build.sh</literal>,
-      we would have gotten native-code instead.
+      If we'd invoked <literal>ocamlbuild</literal> with a target of
+      <literal>freq.native</literal> instead of
+      <literal>freq.byte</literal>, we would have gotten native-code
+      instead.
     </para>
     <para>
-      Whichever way you build the application, you can now run it from
-      the command-line. The following line extracts strings from the
+      We can now run the our program from the command-line. The
+      following line extracts strings from the
       <literal>ocamlopt</literal> executable, and then reports the most
       frequently occurring ones.
     </para>
     <programlisting>
-$ strings `which ocamlopt` | ./freq
+$ strings `which ocamlopt` | ./freq.byte
  13: movq
  10: cmpq
   8: &quot;, &amp;
@@ -6127,7 +6137,12 @@ $ strings `which ocamlopt` | ./freq
       of. First, the byte-code compiler can be used on more
       architectures, and has some better tool support; in particular,
       the OCaml debugger only works with byte-code. Also, the byte-code
-      compiler compiles faster than the native code compiler.
+      compiler compiles faster than the native code compiler. Also, in
+      order to run a bytecode executable you typically need to have
+      OCaml installed on the system in question. That's not strictly
+      required, though, since you can a byte-code executable with an
+      embedded runtime, using the <literal>-custom</literal> compiler
+      flag.
     </para>
     <para>
       As a general matter, production executables should usually be
