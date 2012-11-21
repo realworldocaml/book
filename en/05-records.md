@@ -48,6 +48,13 @@ val my_host : host_info =
    os_release = "11.4.0"; cpu_arch = "i386"}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+You might wonder how the compiler inferred that `my_host` is of type
+`host_info`.  The hook that the compiler uses in this case to figure
+out the type is the record field names.  It turns out that, within a
+given scope, each record field name is associated with a unique record
+type.  Later in the chapter, we'll talk about what to do when you want
+to have the same record fields in multiple records.
+
 Once we have a record value in hand, we can extract elements from the
 record field using dot-notation.
 
@@ -74,9 +81,9 @@ Note that the pattern that we used had only a single case, rather than
 using several cases separated by `|`s.  We only needed a single
 pattern because record patterns are _irrefutable_, meaning that,
 because the layout of a record is always the same, a record pattern
-match will never fail at runtime.  This is different from, say, lists,
-where it's easy to write pattern matches that compile but fail at
-runtime.
+match will never fail at runtime.  In general, types with a fixed
+structure, like records and tuples, have irrefutable patterns, whereas
+types with variable structure, like lists and variants, do not.
 
 Another important characteristic of record patterns is that they don't
 need to be complete; a pattern can mention only a subset of the fields
@@ -455,10 +462,14 @@ follows.
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Note that `<-` is not needed for initialization, because all fields of
+a record, including mutable ones, must be specified when the record is
+created.
+
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming does have its place.  We'll discuss more about how (and
-when) to use OCaml's imperative features in chapter
-{{{IMPERATIVE-PROGRAMMING}}}.
+when) to use OCaml's imperative features in Chapter
+{{{imperative-programming}}}.
 
 ## First-class fields
 
