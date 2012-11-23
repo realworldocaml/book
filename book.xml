@@ -9236,25 +9236,27 @@ val authorization_response_of_string :
     <title>XML</title>
     <para>
       XML is a markup language designed to store tree-structured data in
-      a format that is (somewhat) human-readable and machine-readable.
-      Like JSON, it is a textual format and commonly used in web
-      technologies. XML has a complete
+      a format that is (somewhat) human- and machine-readable. Like
+      JSON, it is a textual format commonly used in web technologies,
+      with a complete
       <ulink url="http://www.w3.org/TR/REC-xml/">specification</ulink>
-      available online, and a complete description is beyond the scope
-      of this book. What we are going to do is explain how to manipulate
-      it using the
+      available online. A complete description is beyond the scope of
+      this book, but we are going to explain how to manipulate it using
+      the
       <ulink url="http://erratique.ch/software/xmlm/doc/Xmlm">XMLM</ulink>
-      library. You can install it by
+      OCaml library. You can install XMLM by
       <literal>opam install xmlm</literal> to get the latest version.
     </para>
     <para>
       Since XML is such a common web format, we've taken our example
-      document from the DuckDuckGo search engine. This is a smaller
-      search engine than the usual suspects, but has the advantage of a
-      freely available API that doesn't require you to register before
-      using it. We'll talk more about how to retrieve this document
-      later in the {{{ASYNC}}} chapter, but for now here's what a
-      slightly shortened search response looks like:
+      document from the
+      <ulink url="http://duckduckgo.com">DuckDuckGo</ulink> search
+      engine. This is a smaller search engine than the usual suspects,
+      but has the advantage of a freely available API that doesn't
+      require you to register before using it. We'll talk more about how
+      to use the API later in the {{{ASYNC}}} chapter, but for now
+      here's what a shortened XML search response from DuckDuckGo looks
+      like:
     </para>
     <programlisting language="ocaml">
 &lt;DuckDuckGoResponse version=&quot;1.0&quot;&gt;
@@ -9289,11 +9291,218 @@ val authorization_response_of_string :
 &lt;/RelatedTopics&gt;
 &lt;/DuckDuckGoResponse&gt;
 </programlisting>
+    <para>
+      The XML document is structured as a series of
+      <emphasis>tags</emphasis> enclosed in angle brackets. Tag can have
+      an optional set of key/value attributes, and contain text or
+      further tags. If the XML document is very large, we don't want to
+      read the whole thing into memory before processing it. Luckily we
+      don't have to, as there are two parsing strategies for XML: a
+      low-level <emphasis>streaming</emphasis> API that parses a
+      document incrementally, and a simpler but more inefficient tree
+      API. We'll start with the streaming API first, as the tree API is
+      built on top of it.
+    </para>
     <sect2 id="stream-parsing-xml">
       <title>Stream parsing XML</title>
       <para>
-        TODO: XMLM, stream parsing. Main difference from JSON is the
-        stream parsing via signals, and tree mapping.
+        Let's start by looking at the XMLM docs, which tells us that:
+      </para>
+      <programlisting>
+A well-formed sequence of `signal`s represents an XML document tree traversal in depth-first order. Input pulls a well-formed sequence of `signal`s from a data source and output pushes a well-formed sequence of `signal`s to a data destination. Functions are provided to easily transform sequences of `signal`s to/from arborescent data structures.
+</programlisting>
+      <para>
+        The type of a <literal>signal</literal> reveals the basic
+        structure of the streaming API in XMLM:
+      </para>
+      <programlisting language="ocaml">
+type signal = [
+  | `Data of string
+  | `Dtd of dtd
+  | `El_end 
+  | `El_start of tag 
+] 
+
+(** The type for signals. A well-formed sequence of signals belongs to the 
+    language of the doc grammar :
+doc ::= `Dtd tree
+tree ::= `El_start child `El_end
+child ::= `Data | tree | epsilon 
+*)
+</programlisting>
+      <para>
+        XMLM will output an ordered sequence of these signals to your
+        code as it parses the XML document. Let's look at an XML
+        identity function, which reads in a document and immediately
+        outputs it. Since this uses the streaming API, there is minimal
+        buffering.
+      </para>
+      <programlisting language="ocaml">
+let xml_id i o =
+  let rec pull i o depth =
+    Xmlm.output o (Xmlm.peek i);
+    match Xmlm.input i with
+    | `El_start _ -&gt; pull i o (depth + 1)
+    | `El_end -&gt; if depth &gt; 1 then pull i o (depth - 1)
+    | `Data _ -&gt; pull i o depth
+    | `Dtd _ -&gt; assert false
+  in
+  Xmlm.output o (Xmlm.input i); (* `Dtd *)
+  pull i o 0;
+  if not (Xmlm.eoi i) then invalid_arg &quot;document not well-formed&quot;
+
+let _ =
+  let i = Xmlm.make_input (`Channel (open_in &quot;ddg.xml&quot;)) in
+  let o = Xmlm.make_output (`Channel stdout) in
+  xml_id i o
+</programlisting>
+      <para>
+        Let's start at the bottom function, where we open up input and
+        output channels for XMLM to use. <literal>Channel</literal> is
+        the simplest, but there are several others available.
+      </para>
+      <programlisting language="ocaml">
+type source = [
+  | `Channel of in_channel
+  | `Fun of unit -&gt; int
+  | `String of int * string 
+] 
+</programlisting>
+      <para>
+        The <literal>Fun</literal> channel returns one character at a
+        time as an integer, and <literal>String</literal> starts parsing
+        an OCaml string from the given integer offset. Both of these are
+        will normally be used in preference to
+        <literal>Channel</literal>, which uses an interface that is
+        deprecated in Core.
+      </para>
+      <para>
+        The <literal>xml_id</literal> function begins by reading one
+        signal, which will always be a <literal>Dtd</literal>. The
+        structure of XML documents is defined via a optional
+        &quot;Document Type Description&quot; (DTD). Some XML parsers
+        can validate a document against a DTD, but XMLM is a simpler
+        <emphasis>non-validating</emphasis> parser that reads the DTD if
+        present but disregards its contents.
+      </para>
+      <para>
+        The recursive <literal>pull</literal> function is then invoked
+        to iterate over the remaining signals. This uses
+        <literal>Xmlm.peek</literal> to inspect the current input signal
+        and immediately output it. The rest of the function is not
+        strictly necessary, but it tracks that all of the tags that have
+        been started via the <literal>El_start</literal> signal are also
+        closed by a corresponding <literal>El_end</literal> signal. Once
+        the <literal>pull</literal> function has finished due to the
+        opening tag being closed, the <literal>Xmlm.eoi</literal>
+        function verifies that the &quot;end of input&quot; has been
+        reached.
+      </para>
+    </sect2>
+    <sect2 id="tree-parsing-xml">
+      <title>Tree parsing XML</title>
+      <para>
+        The signals provide a very iterative style of parsing XML, as
+        your program has to deal with signals arriving serially. It's
+        sometimes more convenient to deal with small XML documents
+        directly in-memory as an OCaml data structure. It's easy to
+        convert a signal stream into a tree, as follows:
+      </para>
+      <programlisting language="ocaml">
+type tree = 
+  | Element of Xmlm.tag * tree list
+  | Data of string
+
+let in_tree i = 
+  let el tag children = Element (tag, children) in
+  let data d = Data d in
+  Xmlm.input_doc_tree ~el ~data i
+
+let out_tree o t = 
+  let frag = function
+  | Element (tag, childs) -&gt; `El (tag, childs) 
+  | Data d -&gt; `Data d 
+  in
+  Xmlm.output_doc_tree frag o t
+</programlisting>
+      <para>
+        The type <literal>tree</literal> can be pattern-matched and
+        traversed like a normal OCaml data structure. Let's see how this
+        works by extracting out all the &quot;Related Topics&quot; in
+        the example document. First, we'll need a few helper combinator
+        functions to filter through tags and trees, with the following
+        signature:
+      </para>
+      <programlisting language="ocaml">
+(* Extract a textual name from an XML tag.
+   Discards the namespace information. *)
+val name : Xmlm.tag -&gt; string
+
+(* Filter out the contents of a tag [n] from a tagset,
+   and return the concatenated contents of all of them *)
+val filter_tag : string -&gt; tree list -&gt; tree list
+
+(* Given a list of [trees], concatenate all of the data contents               
+   into a string, and discard any sub-tags within it *)
+val concat_data : tree list -&gt; string
+</programlisting>
+      <para>
+        The implementation of these functions traverses the
+        <literal>tree</literal> type that we defined earlier.
+      </para>
+      <programlisting language="ocaml">
+let name ((_,n),_) = n
+
+let filter_tag n =
+  List.fold_left ~init:[] ~f:(fun acc -&gt;
+    function
+    |Element (tag, ts) when name tag = n -&gt; ts @ acc
+    |_ -&gt; acc
+  )
+
+let concat_data =
+  List.fold_left ~init:&quot;&quot; ~f:(fun acc -&gt;
+    function
+    |Data s -&gt; acc ^ s
+    |_ -&gt; acc                           
+  )
+</programlisting>
+      <para>
+        (<emphasis>avsm</emphasis>: have we explained
+        <literal>fold_left</literal> before this section or does it need
+        a full intro?)
+      </para>
+      <para>
+        Notice the use of a <emphasis>guard pattern</emphasis> in the
+        <literal>filter_tag</literal> pattern match. This looks for an
+        <literal>Element</literal> tag that matches the name parameter,
+        and concatenates the results with the accumulator list.
+      </para>
+      <para>
+        Once we have these helper functions, the selection of all the
+        <literal>&lt;Text&gt;</literal> tags is easy:
+      </para>
+      <programlisting language="ocaml">
+let topics trees =
+  filter_tag &quot;DuckDuckGoResponse&quot; trees |!
+  filter_tag &quot;RelatedTopics&quot; |!
+  filter_tag &quot;RelatedTopic&quot; |!
+  filter_tag &quot;Text&quot; |!
+  List.iter ~f:(fun x -&gt; concat_data [x] |! print_endline)
+
+let _ =
+  let i = Xmlm.make_input (`Channel (open_in &quot;ddg.xml&quot;)) in
+  let (_,it) = in_tree i in
+  topics [it]
+</programlisting>
+      <para>
+        The <literal>filter_tag</literal> combinator accepts a
+        <literal>tree list</literal> parameter and outputs a
+        <literal>tree list</literal>. This lets us easily chain together
+        the results of one filter to another, and hence select
+        hierarchical XML tags very easily. When we get to the
+        <literal>&lt;Text&gt;</literal> tag, we iterate over all the
+        results and print each one individually.
       </para>
     </sect2>
     <sect2 id="using-the-cow-syntax-extension">
