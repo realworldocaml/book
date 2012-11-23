@@ -756,12 +756,12 @@ type author = {
 } with xml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is a standard record type definition with the addition of `with xml`.  This uses a syntax extension to signify that we wish to generate boilerplate code for handling this record as an XML document.
+This is a standard record type definition with the addition of `with xml` at the end.  This uses a syntax extension to signify that we wish to generate boilerplate code for handling this record as an XML document.
 
 <sidebar>
 <title>Invoking `camlp4` syntax extensions</title>
 
-The OCaml compiler can call `camlp4` automatically during a compilation to preprocess the source files. This is specified via the `-pp` flag to the compiler. You don't normally need to specify this flag yourself, and instead use the `ocamlfind` utility to generate the require flags for you.  Here's a small shell script which preprocesses a source file with the COW syntax extension:
+The OCaml compiler can call `camlp4` automatically during a compilation to preprocess the source files. This is specified via the `-pp` flag to the compiler. You don't normally need to specify this flag yourself. Use the `ocamlfind` utility instead to generate the right command-line flags for you. Here's a small shell script which preprocesses a source file with the COW syntax extension:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .sh }
 #!/bin/sh -x
@@ -773,7 +773,7 @@ args=`$bin query -predicates syntax,preprocessor -r -format '-I %d %a' $lib`
 camlp4o -printer o $args $file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can run `ocamlfind` with a number of different predicates to define the sort of build you are running (preprocessing, compilation or linking).  The final part of the script invokes the `camlp4o` binary with and outputs the transformed source code to your terminal.
+You can supply `ocamlfind` with a number of different predicates to define the type of build you are running (preprocessing, compilation or linking).  The final part of the script invokes the `camlp4o` binary on your ML source file and outputs the transformed source code to your terminal.
 
 </sidebar>
 
@@ -814,7 +814,7 @@ let rec xml_of_author author : Cow.Xml.t =
          [ `Data author.name ]) ]) ]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Notice that the `with xml` clause has been replaced with a new `xml_of_author` that has been generated for you.  It accepts an `author` value and returns an `Xml.t` value.  The generated code isn't really meant to be human-readable, but you don't normally see it when using the syntax extension (we've only dumped it out here to illustrate how `camlp4` works).
+Notice that the `with xml` clause has been replaced with a new `xml_of_author` function that has been generated for you.  It accepts an `author` value and returns an `Xml.t` value.  The generated code isn't really meant to be human-readable, but you don't normally see it when using the syntax extension (we've only dumped it out here to illustrate how `camlp4` works).
 
 If we run `xml_of_author` and convert the result to a human-readable string, our complete example looks like:
 
