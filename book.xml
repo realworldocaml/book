@@ -9467,7 +9467,9 @@ val concat_data : tree list -&gt; string
 </programlisting>
       <para>
         The implementation of these signatures fold over the
-        <literal>tree</literal> type:
+        <literal>tree</literal> structure to filter the tags which match
+        the desired tag name. A similar version that matches on tag
+        attributes is left as an exercise for you to try.
       </para>
       <programlisting language="ocaml">
 let name ((_,n),_) = n
@@ -9500,7 +9502,9 @@ let concat_data =
       </para>
       <para>
         Once we have these helper functions, the selection of all the
-        <literal>&lt;Text&gt;</literal> tags is easy:
+        <literal>&lt;Text&gt;</literal> tags is a matter of chaining the
+        combinators together to peform the selection over the
+        <literal>tree</literal> data structure.
       </para>
       <programlisting language="ocaml">
 let topics trees =
@@ -9525,17 +9529,280 @@ let _ =
         results and print each one individually.
       </para>
     </sect2>
-    <sect2 id="using-the-cow-syntax-extension">
-      <title>Using the COW syntax extension</title>
+    <sect2 id="constructing-xml-documents-using-syntax-extensions">
+      <title>Constructing XML documents using syntax extensions</title>
       <para>
-        TODO: Explain how the p4 XML extension works. This is a good
-        excuse.
+        In the earlier JSON chapter, we explained how to construct
+        records by creating the records directly. You can do exactly the
+        same thing for XML, but there is also a more automated method
+        available by using OCaml's facility for syntax extensions.
+      </para>
+      <para>
+        The OCaml distribution provides the <literal>camlp4</literal>
+        tool for this purpose, which you can view as a type-safe
+        preprocessor. Camlp4 operates by loading in a set of syntax
+        extension modules that transform the Abstract Syntax Tree (AST)
+        of OCaml, usually by adding nodes that generate code. We'll talk
+        about how to build your own syntax extensions later in the book,
+        but for now we'll describe how to <emphasis>use</emphasis>
+        several syntax extensions that make it easier to manipulate
+        external data formats such as XML.
+      </para>
+      <para>
+        We'll use the Atom 1.0 syndication format as our example here.
+        Atom feeds allow web-based programs (such as browsers) to poll a
+        website for updates. The website owner publishes a feed of
+        content in a standardized XML format via HTTP. This feed is then
+        parsed by clients and compared against previously downloaded
+        versions to determine which contents are available.
+      </para>
+      <para>
+        Here's an example of an Atom feed:
+      </para>
+      <programlisting language="xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;feed xmlns=&quot;http://www.w3.org/2005/Atom&quot;&gt;
+ &lt;title&gt;Example Feed&lt;/title&gt;
+ &lt;subtitle&gt;A subtitle.&lt;/subtitle&gt;
+ &lt;link href=&quot;http://example.org/feed/&quot; rel=&quot;self&quot; /&gt;
+ &lt;link href=&quot;http://example.org/&quot; /&gt;
+ &lt;id&gt;urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6&lt;/id&gt;
+ &lt;updated&gt;2003-12-13T18:30:02Z&lt;/updated&gt;
+
+ &lt;entry&gt;
+  &lt;title&gt;Atom-Powered Robots Run Amok&lt;/title&gt;
+  &lt;link href=&quot;http://example.org/2003/12/13/atom03&quot; /&gt;
+  &lt;link rel=&quot;alternate&quot; type=&quot;text/html&quot; href=&quot;http://example.org/2003/12/13/atom03.html&quot;/&gt;
+  &lt;link rel=&quot;edit&quot; href=&quot;http://example.org/2003/12/13/atom03/edit&quot;/&gt;
+  &lt;id&gt;urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a&lt;/id&gt;
+  &lt;updated&gt;2003-12-13T18:30:02Z&lt;/updated&gt;
+  &lt;summary&gt;Some text.&lt;/summary&gt;
+  &lt;author&gt;
+    &lt;name&gt;John Doe&lt;/name&gt;
+    &lt;email&gt;johndoe@example.com&lt;/email&gt;
+  &lt;/author&gt;
+ &lt;/entry&gt;
+&lt;/feed&gt;
+</programlisting>
+      <para>
+        We want to build this by minimising the amount of repetitive XML
+        generation code. The &quot;Caml on the Web&quot; (COW) library
+        provides a syntax extension that is useful here.
+      </para>
+      <note>
+      <title>
+      Installing Caml on the Web (COW)
+      </title>
+      <para>
+        The COW library and syntax extension can be installed via OPAM
+        by <literal>opam install cow</literal>. There are two OCamlfind
+        packages installed: the library is called <literal>cow</literal>
+        and the syntax extension is activated with the
+        <literal>cow.syntax</literal> package.
+      </para>
+      <para>
+        One caveat to bear in mind is that COW isn't fully compatible
+        with Core yet, and so you must use the syntax extension before
+        opening the Core modules. (<emphasis>avsm</emphasis>: we can fix
+        this easily, but note is here as a warning to reviewers).
+      </para>
+      </note>
+      <para>
+        Let's start to build up an Atom specification using Cow. First,
+        the <literal>&lt;author&gt;</literal> tag can be represented
+        with the following type:
+      </para>
+      <programlisting language="ocaml">
+type author = {
+  name: string;
+  uri: string option;
+  email: string option;
+} with xml
+</programlisting>
+      <para>
+        This is a standard record type definition with the addition of
+        <literal>with xml</literal>. This uses a syntax extension to
+        signify that we wish to generate boilerplate code for handling
+        this record as an XML document.
+      </para>
+      <sidebar>
+      <title>
+      Invoking <literal>camlp4</literal> syntax extensions
+      </title>
+      <para>
+        The OCaml compiler can call <literal>camlp4</literal>
+        automatically during a compilation to preprocess the source
+        files. This is specified via the <literal>-pp</literal> flag to
+        the compiler. You don't normally need to specify this flag
+        yourself, and instead use the <literal>ocamlfind</literal>
+        utility to generate the require flags for you. Here's a small
+        shell script which preprocesses a source file with the COW
+        syntax extension:
+      </para>
+      <programlisting language="Bash">
+#!/bin/sh -x
+
+file=$1
+lib=cow.syntax
+bin=ocamlfind
+args=`$bin query -predicates syntax,preprocessor -r -format '-I %d %a' $lib`
+camlp4o -printer o $args $file
+</programlisting>
+      <para>
+        You can run <literal>ocamlfind</literal> with a number of
+        different predicates to define the sort of build you are running
+        (preprocessing, compilation or linking). The final part of the
+        script invokes the <literal>camlp4o</literal> binary with and
+        outputs the transformed source code to your terminal.
+      </para>
+      </sidebar>
+      <para>
+        Let's see the OCaml code that has been generated for our
+        <literal>author</literal> record after it has been preprocessed:
+      </para>
+      <programlisting language="ocaml">
+type author = {
+  name: string;
+  uri: string option;
+  email: string option;
+}
+
+let rec xml_of_author author : Cow.Xml.t =
+  List.flatten
+    [ (match match author.email with
+             | None -&gt; []
+             | Some var1 -&gt; [ `Data var1 ]
+       with
+       | [] -&gt; []
+       | _ -&gt;
+         [ `El ((((&quot;&quot;, &quot;email&quot;), []) : Cow.Xml.tag),
+           (match author.email with
+            | None -&gt; []
+            | Some var1 -&gt; [ `Data var1 ])) ]);
+      (match match author.uri with
+        | None -&gt; [] | Some var2 -&gt; [ `Data var2 ]
+       with
+       | [] -&gt; []
+       | _ -&gt;
+         [ `El ((((&quot;&quot;, &quot;uri&quot;), []) : Cow.Xml.tag),
+           (match author.uri with
+             | None -&gt; []
+             | Some var2 -&gt; [ `Data var2 ])) ]);
+      (match [ `Data author.name ] with
+       | [] -&gt; []
+       | _ -&gt;
+         [ `El ((((&quot;&quot;, &quot;name&quot;), []) : Cow.Xml.tag), 
+         [ `Data author.name ]) ]) ]
+</programlisting>
+      <para>
+        Notice that the <literal>with xml</literal> clause has been
+        replaced with a new <literal>xml_of_author</literal> that has
+        been generated for you. It accepts an <literal>author</literal>
+        value and returns an <literal>Xml.t</literal> value. The
+        generated code isn't really meant to be human-readable, but you
+        don't normally see it when using the syntax extension (we've
+        only dumped it out here to illustrate how
+        <literal>camlp4</literal> works).
+      </para>
+      <para>
+        If we run <literal>xml_of_author</literal> and convert the
+        result to a human-readable string, our complete example looks
+        like:
+      </para>
+      <programlisting language="ocaml">
+type author = {
+  name: string;
+  uri: string option;
+  email: string option;
+} with xml
+
+let anil = {
+  name = &quot;Anil Madhavapeddy&quot;;
+  uri = Some &quot;http://anil.recoil.org&quot;;
+  email = Some &quot;anil@recoil.org&quot;
+}
+
+let _ = print_endline (Cow.Xml.to_string (xml_of_author anil))
+</programlisting>
+      <para>
+        This will generate the following XML output on the terminal when
+        you execute it:
+      </para>
+      <programlisting language="xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;email&gt;anil@recoil.org&lt;/email&gt;
+&lt;uri&gt;http://anil.recoil.org&lt;/uri&gt;
+&lt;name&gt;Anil Madhavapeddy&lt;/name&gt;
+</programlisting>
+      <para>
+        This is convenient, but just one small portion of Atom. How do
+        we express the full Atom scheme from earlier? The answer is with
+        just a few more records that match the Atom XML schema.
+      </para>
+      <programlisting language="ocaml">
+type author = {
+  name: string;
+  uri: string option;
+  email: string option;
+} with xml
+
+type date =
+  int * int * int * int * int (* year, month, date, hour, minute *)
+with xml
+
+let xml_of_date (year,month,day,hour,min) =
+  let d = Printf.sprintf &quot;%.4d-%.2d-%.2dT%.2d:%.2d:00Z&quot; year month day hour min in
+  &lt;:xml&lt; $str:d$ &gt;&gt;
+
+type meta = {
+  id: string;
+  title: string;
+  subtitle: string option;
+  author: author option;
+  rights: string option;
+  updated: date;
+} with xml
+</programlisting>
+      <para>
+        We've now filled in more of the Atom schema with these records.
+        The first problem we run into is that occasionally there is a
+        mismatch between the syntax extension's idea of what the
+        auto-generated XML should look like, and the reality of the
+        protocol you are mapping to.
+      </para>
+      <para>
+        The Atom date field is a good example. We define it as a tuple
+        of integers, but the format mandated by the specification is
+        actually a free-form text format and not XML. However, because
+        the syntax extension generates normal OCaml functions, we can
+        just override the <literal>xml_of_date</literal> function with a
+        custom one which returns the correct XML fragment. Any
+        references further down the module will just use our overridden
+        version and ignore the auto-generated one.
+      </para>
+      <para>
+        There's another interesting bit of new syntax in the
+        <literal>xml_of_date</literal> function known as a
+        <emphasis>quotation</emphasis>. OCaml not only allows code to be
+        generated during pre-processing, but also to override the core
+        language grammar with new constructs. The most common way of
+        doing this is by embedding the custom grammars inside
+        <literal>&lt;:foo&lt; ... &gt;&gt;</literal> tags, where
+        <literal>foo</literal> represents the particular grammar being
+        used. In the case of COW, this lets you generate XMLM-compatible
+        OCaml values just by typing in XML tags.
+      </para>
+      <para>
+        TODO antiquotations.
+      </para>
+      <para>
+        TODO finish the atom example.
       </para>
     </sect2>
     <sect2 id="working-with-xhtml">
       <title>Working with XHTML</title>
       <para>
-        TODO
+        TODO use Cow.Html to generate a more complete Atom feed.
       </para>
     </sect2>
   </sect1>
@@ -9549,7 +9816,9 @@ let _ =
     </para>
     <para>
       S-expressions are nested paranthetical strings whose atomic values
-      are strings.
+      are strings. They were first popularized by the Lisp programming
+      language in the 1960s, and have remained a simple way to encode
+      data structures since then.
     </para>
     <programlisting language="ocaml">
 module Sexp : sig
