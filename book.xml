@@ -9261,28 +9261,23 @@ val authorization_response_of_string :
     <programlisting language="ocaml">
 &lt;DuckDuckGoResponse version=&quot;1.0&quot;&gt;
 &lt;Heading&gt;DuckDuckGo&lt;/Heading&gt;
-&lt;Image&gt;https://i.duckduckgo.com/i/d9dea591.png&lt;/Image&gt;
-&lt;Abstract&gt;DuckDuckGo is an Internet search engine.&lt;/Abstract&gt;
 &lt;AbstractText&gt;DuckDuckGo is an Internet search engine.&lt;/AbstractText&gt;
 &lt;AbstractURL&gt;https://en.wikipedia.org/wiki/DuckDuckGo&lt;/AbstractURL&gt;
 &lt;AbstractSource&gt;Wikipedia&lt;/AbstractSource&gt;
 &lt;Results&gt;
 &lt;Result&gt;
-  &lt;a href=&quot;https://duckduckgo.com/&quot;&gt;&lt;b&gt;Official site&lt;/b&gt;&lt;/a&gt;&lt;a href=&quot;https://duckduckgo.com/&quot;&gt;&lt;/a&gt;
   &lt;Text&gt;Official site&lt;/Text&gt;
   &lt;FirstURL&gt;https://duckduckgo.com/&lt;/FirstURL&gt;
   &lt;/Result&gt;
 &lt;/Results&gt;
 &lt;RelatedTopics&gt;
  &lt;RelatedTopic&gt;
-   &lt;a href=&quot;http://duckduckgo.com/c/Companies_based_in_Pennsylvania&quot;&gt;Companies based in Pennsylvania&lt;/a&gt;
    &lt;Text&gt;Companies based in Pennsylvania&lt;/Text&gt;
    &lt;FirstURL&gt; 
      http://duckduckgo.com/c/Companies_based_in_Pennsylvania
    &lt;/FirstURL&gt;
  &lt;/RelatedTopic&gt;
  &lt;RelatedTopic&gt;
-   &lt;a href=&quot;http://duckduckgo.com/c/Internet_search_engines&quot;&gt;Internet search engines&lt;/a&gt;
    &lt;Text&gt;Internet search engines&lt;/Text&gt;
    &lt;FirstURL&gt;
      http://duckduckgo.com/c/Internet_search_engines
@@ -9293,24 +9288,33 @@ val authorization_response_of_string :
 </programlisting>
     <para>
       The XML document is structured as a series of
-      <emphasis>tags</emphasis> enclosed in angle brackets. Tag can have
-      an optional set of key/value attributes, and contain text or
-      further tags. If the XML document is very large, we don't want to
-      read the whole thing into memory before processing it. Luckily we
-      don't have to, as there are two parsing strategies for XML: a
-      low-level <emphasis>streaming</emphasis> API that parses a
-      document incrementally, and a simpler but more inefficient tree
-      API. We'll start with the streaming API first, as the tree API is
-      built on top of it.
+      <literal>&lt;tags&gt;</literal>. Tags can have an optional set of
+      key/value attributes and usually contain text or further tags. If
+      the XML document is very large, we don't want to read the whole
+      thing into memory before processing it. Luckily we don't have to,
+      as there are two parsing strategies for XML: a low-level
+      <emphasis>streaming</emphasis> API that parses a document
+      incrementally, and a simpler but more inefficient tree API. We'll
+      start with the streaming API first, as the tree API is built on
+      top of it.
     </para>
     <sect2 id="stream-parsing-xml">
       <title>Stream parsing XML</title>
       <para>
         Let's start by looking at the XMLM docs, which tells us that:
       </para>
-      <programlisting>
-A well-formed sequence of `signal`s represents an XML document tree traversal in depth-first order. Input pulls a well-formed sequence of `signal`s from a data source and output pushes a well-formed sequence of `signal`s to a data destination. Functions are provided to easily transform sequences of `signal`s to/from arborescent data structures.
-</programlisting>
+      <blockquote>
+        <para>
+          A well-formed sequence of <literal>signal</literal>s
+          represents an XML document tree traversal in depth-first
+          order. Input pulls a well-formed sequence of
+          <literal>signal</literal>s from a data source and output
+          pushes a well-formed sequence of <literal>signal</literal>s to
+          a data destination. Functions are provided to easily transform
+          sequences of <literal>signal</literal>s to/from arborescent
+          data structures.
+        </para>
+      </blockquote>
       <para>
         The type of a <literal>signal</literal> reveals the basic
         structure of the streaming API in XMLM:
