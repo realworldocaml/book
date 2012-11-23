@@ -616,8 +616,8 @@ Once the `pull` function has finished due to the opening tag being closed, the `
 
 ### Tree parsing XML
 
-The signals provide a very iterative style of parsing XML, as your program has to deal with signals arriving serially.  It's sometimes more convenient to deal with small XML documents directly in-memory as an OCaml data structure.
-It's easy to convert a signal stream into a tree, as follows:
+Signals enforce a very iterative style of parsing XML, as your program has to deal with signals arriving serially.  It's often more convenient to deal with complete XML documents directly in-memory as an OCaml data structure.
+You can convert a signal stream into an OCaml structure by defining the following data type and helper functions:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 type tree = 
@@ -654,7 +654,7 @@ val filter_tag : string -> tree list -> tree list
 val concat_data : tree list -> string
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The implementation of these functions traverses the `tree` type that we defined earlier.
+The implementation of these signatures fold over the `tree` type:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let name ((_,n),_) = n
@@ -662,7 +662,8 @@ let name ((_,n),_) = n
 let filter_tag n =
   List.fold_left ~init:[] ~f:(fun acc ->
     function
-    |Element (tag, ts) when name tag = n -> ts @ acc
+    |Element (tag, ts) when name tag = n ->
+      ts @ acc
     |_ -> acc
   )
      
