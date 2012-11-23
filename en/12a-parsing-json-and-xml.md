@@ -562,9 +562,9 @@ child ::= `Data | tree | epsilon
 *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-XMLM will output an ordered sequence of these signals to your code as it parses the XML document.
-Let's look at an XML identity function, which reads in a document and immediately outputs it.
-Since this uses the streaming API, there is minimal buffering.
+XMLM outputs an ordered sequence of these signals to your code as it parses the  document.
+Let's look at how to write the XML identity function that reads in a document and immediately outputs it.
+Since this uses the streaming API, there is minimal buffering required.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let xml_id i o =
@@ -586,7 +586,9 @@ let _ =
   xml_id i o
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's start at the bottom function, where we open up input and output channels for XMLM to use.
+Let's start at the bottom, where we open up input and output channels for XMLM to use.
+The `input` and `output` constructor functions use a polymorphic variant to define
+the mechanism that the library should use to read the document.
 `Channel` is the simplest, but there are several others available.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
