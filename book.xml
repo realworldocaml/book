@@ -9339,23 +9339,24 @@ type signal = [
 </programlisting>
       <para>
         XMLM outputs an ordered sequence of these signals to your code
-        as it parses the document. The structure of XML documents is
-        defined via a optional &quot;Document Type Description&quot;
-        (DTD). Some XML parsers can validate a document against a DTD,
-        but XMLM is a simpler <emphasis>non-validating</emphasis> parser
-        that reads the DTD if present but disregards its contents. The
-        first <literal>signal</literal> when inputting an XML document
-        is always a <literal>Dtd</literal>. The
+        as it parses the document. The first <literal>signal</literal>
+        when inputting an XML document is always a
+        <literal>Dtd</literal>. The DTD (or <emphasis>document type
+        description</emphasis>) optionally defines which tags are
+        allowed within the XML document. Some XML parsers can validate a
+        document against a DTD, but XMLM is a
+        <emphasis>non-validating</emphasis> parser that reads the DTD if
+        present, but disregards its contents. The
         <literal>El_start</literal> and <literal>El_end</literal>
-        indicate the opening and closing of tags, and
-        <literal>Data</literal> is the free-form information contained
-        between tags.
+        signals indicate the opening and closing of tags, and
+        <literal>Data</literal> passes the free-form information
+        contained between tags.
       </para>
       <para>
-        Let's try our hand at handling signals by writing the XML
+        Let's take a shot at handling signals by writing the XML
         identity function that parses some XML and outputs it again.
-        Since this uses the XMLM streaming API, there is minimal
-        buffering required.
+        There is no explicit buffering required since this uses the XMLM
+        streaming API.
       </para>
       <programlisting language="ocaml">
 let xml_id i o =
