@@ -543,13 +543,13 @@ Since XML is such a common web format, we've taken our example document from the
 </DuckDuckGoResponse>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The XML document is structured as a series of `<tags>`. Tags can have an optional set of key/value attributes and usually contain text or further tags.
-If the XML document is very large, we don't want to read the whole thing into memory before processing it.
+The XML document is structured as a series of `<tags>` that are closed by an end `</tag>`.  The opening tags have an optional set of key/value attributes and usually contain text data or further tags within them.
+If the XML document is large, we don't want to read the whole thing into memory before processing it.
 Luckily we don't have to, as there are two parsing strategies for XML: a low-level *streaming* API that parses a document incrementally, and a simpler but more inefficient tree API.  We'll start with the streaming API first, as the tree API is built on top of it.
 
 ### Stream parsing XML
 
-Let's start by looking at the XMLM docs, which tells us that:
+The XMLM documentation is a good place to read about the overall layout of the library.  It tells us that:
 
 > A well-formed sequence of `signal`s represents an XML document tree traversal in depth-first order. Input pulls a well-formed sequence of `signal`s from a data source and output pushes a well-formed sequence of `signal`s to a data destination. Functions are provided to easily transform sequences of `signal`s to/from arborescent data structures.
 
@@ -561,19 +561,15 @@ type signal = [
   | `Dtd of dtd
   | `El_end 
   | `El_start of tag 
-] 
-
-(** The type for signals. A well-formed sequence of signals belongs to the 
-    language of the doc grammar :
-doc ::= `Dtd tree
-tree ::= `El_start child `El_end
-child ::= `Data | tree | epsilon 
-*)
+]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-XMLM outputs an ordered sequence of these signals to your code as it parses the  document.
-Let's look at how to write the XML identity function that reads in a document and immediately outputs it.
-Since this uses the streaming API, there is minimal buffering required.
+XMLM outputs an ordered sequence of these signals to your code as it parses the document.
+The structure of XML documents is defined via a optional "Document Type Description" (DTD).  Some XML parsers can validate a document against a DTD, but XMLM is a simpler *non-validating* parser that reads the DTD if present but disregards its contents.  The first `signal` when inputting an XML document is always a `Dtd`.
+The `El_start` and `El_end` indicate the opening and closing of tags, and `Data` is the free-form information contained between tags.
+
+Let's try our hand at handling signals by writing the XML identity function that parses some XML and outputs it again.
+Since this uses the XMLM streaming API, there is minimal buffering required.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let xml_id i o =
@@ -595,7 +591,7 @@ let _ =
   xml_id i o
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's start at the bottom, where we open up input and output channels for XMLM to use.
+Let's start at the bottom, where we open up input and output channels to pass to `Xmlm` parser.
 The `input` and `output` constructor functions use a polymorphic variant to define
 the mechanism that the library should use to read the document.
 `Channel` is the simplest, but there are several others available.
@@ -610,8 +606,7 @@ type source = [
 
 The `Fun` channel returns one character at a time as an integer, and `String` starts parsing an OCaml string from the given integer offset.  Both of these are will normally be used in preference to `Channel`, which uses an interface that is deprecated in Core.
 
-The `xml_id` function begins by reading one signal, which will always be a `Dtd`.  The structure of XML documents is defined via a optional "Document Type Description" (DTD).  Some XML parsers can validate a document against a DTD, but XMLM is a simpler *non-validating* parser that reads the DTD if present but disregards its contents.
-
+The `xml_id` function begins by reading one signal, which will always be a `Dtd`.
 The recursive `pull` function is then invoked to iterate over the remaining signals.
 This uses `Xmlm.peek` to inspect the current input signal and immediately output it.
 The rest of the function is not strictly necessary, but it tracks that all of the tags that have been started via the `El_start` signal are also closed by a corresponding `El_end` signal.
