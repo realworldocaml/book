@@ -501,7 +501,16 @@ Github in the [`ocaml-github`](http://github.com/avsm/ocaml-github) repository.
 
 ## XML
 
-XML is a markup language designed to store tree-structured data in a format that is (somewhat) human- and machine-readable. Like JSON, it is a textual format  commonly used in web technologies, with a complete [specification](http://www.w3.org/TR/REC-xml/) available online. A complete description is beyond the scope of this book, but we are going to explain how to manipulate it using the [XMLM](http://erratique.ch/software/xmlm/doc/Xmlm) OCaml library.  You can install XMLM by `opam install xmlm` to get the latest version.
+XML is a markup language designed to store tree-structured data in a format that is (somewhat) human- and machine-readable. Like JSON, it is a textual format  commonly used in web technologies, with a complete [specification](http://www.w3.org/TR/REC-xml/) available online. A complete description is beyond the scope of this book, but we'll explain how to manipulate it now.
+
+<note>
+<title>Obtaining and installing XMLM</title>
+
+The remainder of this section uses the freely available XMLM library.
+It's easiest to obtain it via OPAM (`opam install xmlm`), and
+the source code and documentation are also available [online](http://erratique.ch/software/xmlm/doc/Xmlm).
+
+</note>
 
 Since XML is such a common web format, we've taken our example document from the [DuckDuckGo](http://duckduckgo.com) search engine. This is a smaller search engine than the usual suspects, but has the advantage of a freely available API that doesn't require you to register before using it.  We'll talk more about how to use the API later in the {{{ASYNC}}} chapter, but for now here's what a shortened XML search response from DuckDuckGo looks like:
 
