@@ -565,11 +565,13 @@ type signal = [
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 XMLM outputs an ordered sequence of these signals to your code as it parses the document.
-The structure of XML documents is defined via a optional "Document Type Description" (DTD).  Some XML parsers can validate a document against a DTD, but XMLM is a simpler *non-validating* parser that reads the DTD if present but disregards its contents.  The first `signal` when inputting an XML document is always a `Dtd`.
-The `El_start` and `El_end` indicate the opening and closing of tags, and `Data` is the free-form information contained between tags.
+The first `signal` when inputting an XML document is always a `Dtd`.
+The DTD (or *document type description*) optionally defines which tags are allowed within the XML document.
+Some XML parsers can validate a document against a DTD, but XMLM is a *non-validating* parser that reads the DTD if present, but disregards its contents.
+The `El_start` and `El_end` signals indicate the opening and closing of tags, and `Data` passes the free-form information contained between tags.
 
-Let's try our hand at handling signals by writing the XML identity function that parses some XML and outputs it again.
-Since this uses the XMLM streaming API, there is minimal buffering required.
+Let's take a shot at handling signals by writing the XML identity function that parses some XML and outputs it again.
+There is no explicit buffering required since this uses the XMLM streaming API.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 let xml_id i o =
