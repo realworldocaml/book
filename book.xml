@@ -9335,11 +9335,11 @@ child ::= `Data | tree | epsilon
 *)
 </programlisting>
       <para>
-        XMLM will output an ordered sequence of these signals to your
-        code as it parses the XML document. Let's look at an XML
-        identity function, which reads in a document and immediately
+        XMLM outputs an ordered sequence of these signals to your code
+        as it parses the document. Let's look at how to write the XML
+        identity function that reads in a document and immediately
         outputs it. Since this uses the streaming API, there is minimal
-        buffering.
+        buffering required.
       </para>
       <programlisting language="ocaml">
 let xml_id i o =
@@ -9361,8 +9361,11 @@ let _ =
   xml_id i o
 </programlisting>
       <para>
-        Let's start at the bottom function, where we open up input and
-        output channels for XMLM to use. <literal>Channel</literal> is
+        Let's start at the bottom, where we open up input and output
+        channels for XMLM to use. The <literal>input</literal> and
+        <literal>output</literal> constructor functions use a
+        polymorphic variant to define the mechanism that the library
+        should use to read the document. <literal>Channel</literal> is
         the simplest, but there are several others available.
       </para>
       <programlisting language="ocaml">
