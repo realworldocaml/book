@@ -9241,12 +9241,20 @@ val authorization_response_of_string :
       with a complete
       <ulink url="http://www.w3.org/TR/REC-xml/">specification</ulink>
       available online. A complete description is beyond the scope of
-      this book, but we are going to explain how to manipulate it using
-      the
-      <ulink url="http://erratique.ch/software/xmlm/doc/Xmlm">XMLM</ulink>
-      OCaml library. You can install XMLM by
-      <literal>opam install xmlm</literal> to get the latest version.
+      this book, but we'll explain how to manipulate it now.
     </para>
+    <note>
+    <title>
+    Obtaining and installing XMLM
+    </title>
+    <para>
+      The remainder of this section uses the freely available XMLM
+      library. It's easiest to obtain it via OPAM
+      (<literal>opam install xmlm</literal>), and the source code and
+      documentation are also available
+      <ulink url="http://erratique.ch/software/xmlm/doc/Xmlm">online</ulink>.
+    </para>
+    </note>
     <para>
       Since XML is such a common web format, we've taken our example
       document from the
