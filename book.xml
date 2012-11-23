@@ -9296,20 +9296,22 @@ val authorization_response_of_string :
 </programlisting>
     <para>
       The XML document is structured as a series of
-      <literal>&lt;tags&gt;</literal>. Tags can have an optional set of
-      key/value attributes and usually contain text or further tags. If
-      the XML document is very large, we don't want to read the whole
-      thing into memory before processing it. Luckily we don't have to,
-      as there are two parsing strategies for XML: a low-level
-      <emphasis>streaming</emphasis> API that parses a document
-      incrementally, and a simpler but more inefficient tree API. We'll
-      start with the streaming API first, as the tree API is built on
-      top of it.
+      <literal>&lt;tags&gt;</literal> that are closed by an end
+      <literal>&lt;/tag&gt;</literal>. The opening tags have an optional
+      set of key/value attributes and usually contain text data or
+      further tags within them. If the XML document is large, we don't
+      want to read the whole thing into memory before processing it.
+      Luckily we don't have to, as there are two parsing strategies for
+      XML: a low-level <emphasis>streaming</emphasis> API that parses a
+      document incrementally, and a simpler but more inefficient tree
+      API. We'll start with the streaming API first, as the tree API is
+      built on top of it.
     </para>
     <sect2 id="stream-parsing-xml">
       <title>Stream parsing XML</title>
       <para>
-        Let's start by looking at the XMLM docs, which tells us that:
+        The XMLM documentation is a good place to read about the overall
+        layout of the library. It tells us that:
       </para>
       <blockquote>
         <para>
@@ -9333,20 +9335,26 @@ type signal = [
   | `Dtd of dtd
   | `El_end 
   | `El_start of tag 
-] 
-
-(** The type for signals. A well-formed sequence of signals belongs to the 
-    language of the doc grammar :
-doc ::= `Dtd tree
-tree ::= `El_start child `El_end
-child ::= `Data | tree | epsilon 
-*)
+]
 </programlisting>
       <para>
         XMLM outputs an ordered sequence of these signals to your code
-        as it parses the document. Let's look at how to write the XML
-        identity function that reads in a document and immediately
-        outputs it. Since this uses the streaming API, there is minimal
+        as it parses the document. The structure of XML documents is
+        defined via a optional &quot;Document Type Description&quot;
+        (DTD). Some XML parsers can validate a document against a DTD,
+        but XMLM is a simpler <emphasis>non-validating</emphasis> parser
+        that reads the DTD if present but disregards its contents. The
+        first <literal>signal</literal> when inputting an XML document
+        is always a <literal>Dtd</literal>. The
+        <literal>El_start</literal> and <literal>El_end</literal>
+        indicate the opening and closing of tags, and
+        <literal>Data</literal> is the free-form information contained
+        between tags.
+      </para>
+      <para>
+        Let's try our hand at handling signals by writing the XML
+        identity function that parses some XML and outputs it again.
+        Since this uses the XMLM streaming API, there is minimal
         buffering required.
       </para>
       <programlisting language="ocaml">
@@ -9370,11 +9378,12 @@ let _ =
 </programlisting>
       <para>
         Let's start at the bottom, where we open up input and output
-        channels for XMLM to use. The <literal>input</literal> and
-        <literal>output</literal> constructor functions use a
-        polymorphic variant to define the mechanism that the library
-        should use to read the document. <literal>Channel</literal> is
-        the simplest, but there are several others available.
+        channels to pass to <literal>Xmlm</literal> parser. The
+        <literal>input</literal> and <literal>output</literal>
+        constructor functions use a polymorphic variant to define the
+        mechanism that the library should use to read the document.
+        <literal>Channel</literal> is the simplest, but there are
+        several others available.
       </para>
       <programlisting language="ocaml">
 type source = [
@@ -9394,15 +9403,8 @@ type source = [
       <para>
         The <literal>xml_id</literal> function begins by reading one
         signal, which will always be a <literal>Dtd</literal>. The
-        structure of XML documents is defined via a optional
-        &quot;Document Type Description&quot; (DTD). Some XML parsers
-        can validate a document against a DTD, but XMLM is a simpler
-        <emphasis>non-validating</emphasis> parser that reads the DTD if
-        present but disregards its contents.
-      </para>
-      <para>
-        The recursive <literal>pull</literal> function is then invoked
-        to iterate over the remaining signals. This uses
+        recursive <literal>pull</literal> function is then invoked to
+        iterate over the remaining signals. This uses
         <literal>Xmlm.peek</literal> to inspect the current input signal
         and immediately output it. The rest of the function is not
         strictly necessary, but it tracks that all of the tags that have
