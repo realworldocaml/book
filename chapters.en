@@ -5,12 +5,12 @@
 04-lists-options-and-patterns.md
 05-records.md
 06-variants.md
+12a-parsing-json-and-xml.md
 07-error-handling.md
 08-imperative-programming.md
 09-files-modules-and-programs.md
 10-functors-and-fcm.md
 11-input-and-output.md
-12a-parsing-json-and-xml.md
 12-concurrent-programming-with-async.md
 13-objects.md
 14-interfacing-with-C.md
