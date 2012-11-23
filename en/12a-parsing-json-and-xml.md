@@ -508,28 +508,23 @@ Since XML is such a common web format, we've taken our example document from the
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 <DuckDuckGoResponse version="1.0">
 <Heading>DuckDuckGo</Heading>
-<Image>https://i.duckduckgo.com/i/d9dea591.png</Image>
-<Abstract>DuckDuckGo is an Internet search engine.</Abstract>
 <AbstractText>DuckDuckGo is an Internet search engine.</AbstractText>
 <AbstractURL>https://en.wikipedia.org/wiki/DuckDuckGo</AbstractURL>
 <AbstractSource>Wikipedia</AbstractSource>
 <Results>
 <Result>
-  <a href="https://duckduckgo.com/"><b>Official site</b></a><a href="https://duckduckgo.com/"></a>
   <Text>Official site</Text>
   <FirstURL>https://duckduckgo.com/</FirstURL>
   </Result>
 </Results>
 <RelatedTopics>
  <RelatedTopic>
-   <a href="http://duckduckgo.com/c/Companies_based_in_Pennsylvania">Companies based in Pennsylvania</a>
    <Text>Companies based in Pennsylvania</Text>
    <FirstURL> 
      http://duckduckgo.com/c/Companies_based_in_Pennsylvania
    </FirstURL>
  </RelatedTopic>
  <RelatedTopic>
-   <a href="http://duckduckgo.com/c/Internet_search_engines">Internet search engines</a>
    <Text>Internet search engines</Text>
    <FirstURL>
      http://duckduckgo.com/c/Internet_search_engines
@@ -539,7 +534,7 @@ Since XML is such a common web format, we've taken our example document from the
 </DuckDuckGoResponse>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The XML document is structured as a series of *tags* enclosed in angle brackets. Tag can have an optional set of key/value attributes, and contain text or further tags.
+The XML document is structured as a series of `<tags>`. Tags can have an optional set of key/value attributes and usually contain text or further tags.
 If the XML document is very large, we don't want to read the whole thing into memory before processing it.
 Luckily we don't have to, as there are two parsing strategies for XML: a low-level *streaming* API that parses a document incrementally, and a simpler but more inefficient tree API.  We'll start with the streaming API first, as the tree API is built on top of it.
 
@@ -547,7 +542,7 @@ Luckily we don't have to, as there are two parsing strategies for XML: a low-lev
 
 Let's start by looking at the XMLM docs, which tells us that:
 
-    A well-formed sequence of `signal`s represents an XML document tree traversal in depth-first order. Input pulls a well-formed sequence of `signal`s from a data source and output pushes a well-formed sequence of `signal`s to a data destination. Functions are provided to easily transform sequences of `signal`s to/from arborescent data structures.
+> A well-formed sequence of `signal`s represents an XML document tree traversal in depth-first order. Input pulls a well-formed sequence of `signal`s from a data source and output pushes a well-formed sequence of `signal`s to a data destination. Functions are provided to easily transform sequences of `signal`s to/from arborescent data structures.
 
 The type of a `signal` reveals the basic structure of the streaming API in XMLM:
 
