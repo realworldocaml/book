@@ -5361,10 +5361,15 @@ let extended_color_to_int : extended_color -&gt; int = function
       chapter, we've picked the
       <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
       library. The easiest way to install it is by using the OPAM
-      package manager, via <literal>opam install yojson</literal>. See
+      package manager. See
       <xref linkend="packaging-and-build-systems"/> for more
-      information.
+      information about using OPAM.
     </para>
+    <programlisting>
+$ opam install yojson
+$ utop
+# require &quot;xmlm&quot; ;;
+</programlisting>
     </note>
     <sect2 id="parsing-standard-json-with-yojson">
       <title>Parsing standard JSON with Yojson</title>
@@ -5409,10 +5414,10 @@ val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; strin
 </programlisting>
       <para>
         When first reading these interfaces, you can generally ignore
-        the optional arguments (with the question marks in the type), as
-        they will be filled in with sensible values. The simpler
-        signature for these values with the optional elements removed
-        makes their purpose quite clear:
+        the optional arguments (which have the question marks in the
+        type signature), as they will be filled in with sensible values.
+        The signature for these values with the optional elements
+        removed makes their purpose quite clear:
       </para>
       <programlisting language="ocaml">
 val from_string : string -&gt; json
@@ -5446,15 +5451,16 @@ let _ =
   print_endline (if phys_equal json1 json2 then &quot;FAIL&quot; else &quot;OK&quot;)
 </programlisting>
       <para>
-        <literal>from_file</literal> is a convenience function in Yojson
-        that accepts an input filename and takes care of opening and
-        closing it for you. It's far more common to use
-        <literal>from_string</literal> to construct a JSON value an
-        OCaml <literal>string</literal> buffers. These strings can come
-        from a network connection (we'll see more of this in in the
-        {{{ASYNC}}} chapter) or even a database. Finally, the example
-        checks that the two input mechanisms actually resulted in the
-        same OCaml data structure.
+        The <literal>from_file</literal> function accepts an input
+        filename and takes care of opening and closing it for you. It's
+        far more common to use <literal>from_string</literal> to
+        construct a JSON value from an OCaml <literal>string</literal>.
+        These strings can come from a network connection (we'll see more
+        of this in
+        <xref linkend="concurrent-programming-with-async"/>)
+        or even a database. Finally, the example checks that the two
+        input mechanisms actually resulted in the same OCaml data
+        structure.
       </para>
       <sidebar>
       <title>
