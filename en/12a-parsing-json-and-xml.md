@@ -1,4 +1,4 @@
-# Serialization with JSON, XML and S-Expressions
+# Data Serialization with JSON, XML and S-Expressions
 
 Data serialization, _i.e._ reading and writing program data to a sequence
 of bytes, is an important and common programming task.  Sometimes you
@@ -7,9 +7,10 @@ you just want to quickly dump some values to disk and read them
 back later.  To this end, OCaml comes with several techniques for
 data serialization depending on what your problem is.
 
-We'll start off by looking at JSON and XML first, as they
-are very common third-party data formats.  After that, we'll introduce some
-syntax extensions in Core that make it really easy to manipulate s-expressions and safe binary serialisers directly from OCaml types.
+We'll start off by looking at JSON and XML first, as they are very common
+third-party data formats.  After that, we'll introduce some syntax extensions
+in Core that make it really easy to manipulate s-expressions and safe binary
+serialisers directly from OCaml types.
 
 ## JSON
 
@@ -17,8 +18,8 @@ JSON is a lightweight data-interchange format often used in web services and
 browsers.  It is described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
 and is designed to be easy to parse and generate.  You'll run into JSON very
 often when working with modern APIs, and so we'll cover several different ways
-to manipulate it in this chapter. Along the way we'll introduce several new
-libraries and syntax extensions which make the job easier.
+to manipulate it in this chapter. Along the way we'll introduce new libraries
+and syntax extensions which make the job easier.
 
 JSON consists of just two basic structures: an unordered collection of
 key/value pairs, and an ordered list of values.  Values can be strings,
@@ -58,9 +59,17 @@ The OCaml model prefers compile-time static checking as well as unit tests. For
 example, using pattern matching can warn you if you've not checked that a value
 can be `Null` as well as contain an actual value.
 
-There are several JSON parsers available for OCaml, and we've picked
-[`Yojson`](http://mjambon.com/yojson.html) for the remainder of this chapter.
-You can `opam install yojson` to get it via the OPAM package manager.
+<note>
+<title>Installing the Yojson library</title>
+
+There are several JSON parsers available for OCaml.
+For this chapter, we've picked the
+[`Yojson`](http://mjambon.com/yojson.html) library.
+The easiest way to install it is by using the OPAM
+package manager, via `opam install yojson`. See [xref](#packaging-and-build-systems)
+for more information.
+
+</note>
  
 ### Parsing standard JSON with Yojson
 
