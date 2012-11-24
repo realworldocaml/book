@@ -33,6 +33,6 @@ let transform it =
 let _ =
   let i = Xmlm.make_input (`Channel stdin) in
   let o = Xmlm.make_output (`Channel stdout) in
-  let (_,it) = in_tree i in
+  let (dtd,it) = in_tree i in
   let ot = transform it in
-  out_tree o (None, ot)
+  out_tree o (dtd, ot)
