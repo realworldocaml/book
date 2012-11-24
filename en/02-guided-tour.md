@@ -21,8 +21,8 @@ browser-based toplevel that you can use for this, which you can find here:
 <title>Getting the interactive top-level</title>
 
 Before proceeding, make sure you have the Core library installed. You can do
-this easily via the OPAM package manager, which is explained in [Chapter
-X](#installation).  In a nutshell, you need to:
+this easily via the OPAM package manager, which is explained in
+[xref](#packaging-and-build-systems).  In a nutshell, you need to:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $ opam init
