@@ -227,7 +227,8 @@
   <para>
     Before proceeding, make sure you have the Core library installed.
     You can do this easily via the OPAM package manager, which is
-    explained in <link linkend="installation">Chapter X</link>. In a
+    explained in
+    <xref linkend="packaging-and-build-systems"/>. In a
     nutshell, you need to:
   </para>
   <programlisting>
@@ -5625,8 +5626,10 @@ let _ =
 # let x = `Assoc [ (&quot;key&quot;, `String &quot;value&quot;) ] ;;
 val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
   `Assoc [(&quot;key&quot;, `String &quot;value&quot;)]
+
 # Yojson.Basic.pretty_to_string x ;;
 - : string = &quot;{ \&quot;key\&quot;: \&quot;value\&quot; }&quot;
+
 # Yojson.Basic.pretty_to_channel stdout x ;;
 { &quot;key&quot;: &quot;value&quot; }
 - : unit = ()
@@ -5648,6 +5651,7 @@ val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
 # let x = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
 val x : [&gt; `Assoc of string * [&gt; `String of string ] ] =
   `Assoc (&quot;key&quot;, `String &quot;value&quot;)
+
 # Yojson.Basic.pretty_to_string x;;
 Error: This expression has type
          [&gt; `Assoc of string * [&gt; `String of string ] ]
@@ -5830,12 +5834,12 @@ type authorization_response = {
 }
 </programlisting>
       <para>
-        ATD is (deliberately) similar to OCaml type definitions, with
-        some important differences. Each field can include extra
-        annotations to customise the parsing code for a particular
-        backend. For example, the Github <literal>scope</literal> field
-        above is defined as a variant type, but with the actual JSON
-        values being defined explicitly (as lower-case versions).
+        ATD is (deliberately) similar to OCaml type definitions. Each
+        field can include extra annotations to customise the parsing
+        code for a particular backend. For example, the Github
+        <literal>scope</literal> field above is defined as a variant
+        type, but with the actual JSON values being defined explicitly
+        (as lower-case versions).
       </para>
       <para>
         The ATD spec can be compiled to a number of OCaml targets. Let's
@@ -5977,9 +5981,11 @@ val authorization_response_of_string :
     </title>
     <para>
       The remainder of this section uses the freely available XMLM
-      library. It's easiest to obtain it via OPAM
-      (<literal>opam install xmlm</literal>), and the source code and
-      documentation are also available
+      library. It's easiest to obtain it via OPAM (see
+      <xref linkend="packaging-and-build-systems"/> for
+      installation instructions). You need to run
+      <literal>opam install xmlm</literal> once OPAM is installed. The
+      library documentation is also readable
       <ulink url="http://erratique.ch/software/xmlm/doc/Xmlm">online</ulink>.
     </para>
     </note>
@@ -5990,9 +5996,10 @@ val authorization_response_of_string :
       engine. This is a smaller search engine than the usual suspects,
       but has the advantage of a freely available API that doesn't
       require you to register before using it. We'll talk more about how
-      to use the API later in the {{{ASYNC}}} chapter, but for now
-      here's what a shortened XML search response from DuckDuckGo looks
-      like:
+      to use the live API later in
+      <xref linkend="concurrent-programming-with-async"/>, but
+      for now here's what a shortened XML search response from
+      DuckDuckGo looks like:
     </para>
     <programlisting language="ocaml">
 &lt;DuckDuckGoResponse version=&quot;1.0&quot;&gt;
