@@ -62,16 +62,11 @@ can be `Null` as well as contain an actual value.
 <note>
 <title>Installing the Yojson library</title>
 
-There are several JSON parsers available for OCaml.  For this chapter, we've
+There are several JSON libraries available for OCaml.  For this chapter, we've
 picked the [`Yojson`](http://mjambon.com/yojson.html) library.  The easiest way
-to install it is by using the OPAM package manager.  See
-[xref](#packaging-and-build-systems) for more information about using OPAM.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$ opam install yojson
-$ utop
-# require "xmlm" ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to install it is by using the OPAM package manager (see
+[xref](#packaging-and-build-systems) for installation instructions).  Once OPAM
+is working, you will need to run `opam install yojson`.
 
 </note>
  
