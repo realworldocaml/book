@@ -5357,19 +5357,15 @@ let extended_color_to_int : extended_color -&gt; int = function
     Installing the Yojson library
     </title>
     <para>
-      There are several JSON parsers available for OCaml. For this
+      There are several JSON libraries available for OCaml. For this
       chapter, we've picked the
       <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
       library. The easiest way to install it is by using the OPAM
-      package manager. See
-      <xref linkend="packaging-and-build-systems"/> for more
-      information about using OPAM.
+      package manager (see
+      <xref linkend="packaging-and-build-systems"/> for
+      installation instructions). Once OPAM is working, you will need to
+      run <literal>opam install yojson</literal>.
     </para>
-    <programlisting>
-$ opam install yojson
-$ utop
-# require &quot;xmlm&quot; ;;
-</programlisting>
     </note>
     <sect2 id="parsing-standard-json-with-yojson">
       <title>Parsing standard JSON with Yojson</title>
