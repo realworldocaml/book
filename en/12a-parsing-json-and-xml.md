@@ -62,12 +62,16 @@ can be `Null` as well as contain an actual value.
 <note>
 <title>Installing the Yojson library</title>
 
-There are several JSON parsers available for OCaml.
-For this chapter, we've picked the
-[`Yojson`](http://mjambon.com/yojson.html) library.
-The easiest way to install it is by using the OPAM
-package manager, via `opam install yojson`. See [xref](#packaging-and-build-systems)
-for more information.
+There are several JSON parsers available for OCaml.  For this chapter, we've
+picked the [`Yojson`](http://mjambon.com/yojson.html) library.  The easiest way
+to install it is by using the OPAM package manager.  See
+[xref](#packaging-and-build-systems) for more information about using OPAM.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ opam install yojson
+$ utop
+# require "xmlm" ;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 </note>
  
@@ -110,9 +114,9 @@ val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When first reading these interfaces, you can generally ignore the optional
-arguments (with the question marks in the type), as they will be filled in with
-sensible values. The simpler signature for these values with the optional
-elements removed makes their purpose quite clear:
+arguments (which have the question marks in the type signature), as they will
+be filled in with sensible values. The signature for these values with the
+optional elements removed makes their purpose quite clear:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 val from_string : string -> json
@@ -144,12 +148,13 @@ let _ =
   print_endline (if phys_equal json1 json2 then "FAIL" else "OK")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`from_file` is a convenience function in Yojson that accepts an input filename
-and takes care of opening and closing it for you. It's far more common to use
-`from_string` to construct a JSON value an OCaml `string` buffers. These
-strings can come from a network connection (we'll see more of this in in the
-{{{ASYNC}}} chapter) or even a database. Finally, the example checks that the
-two input mechanisms actually resulted in the same OCaml data structure.
+The `from_file` function accepts an input filename and takes care of opening
+and closing it for you. It's far more common to use `from_string` to construct
+a JSON value from an OCaml `string`. These strings can come from a network
+connection (we'll see more of this in
+[xref](#concurrent-programming-with-async)) or even a database. Finally, the
+example checks that the two input mechanisms actually resulted in the same
+OCaml data structure.
 
 <sidebar>
 <title>The difference between `=` and `==`, and `phys_equal` in Core</title>
