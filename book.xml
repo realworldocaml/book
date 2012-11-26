@@ -227,8 +227,7 @@
   <para>
     Before proceeding, make sure you have the Core library installed.
     You can do this easily via the OPAM package manager, which is
-    explained in
-    <xref linkend="packaging-and-build-systems"/>. In a
+    explained in <xref linkend="installing-ocaml"/>. In a
     nutshell, you need to:
   </para>
   <programlisting>
