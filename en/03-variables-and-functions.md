@@ -928,26 +928,43 @@ what the default behavior should be.
 _(yminsky: This is too abstract of an example.)_
 
 One subtle aspect of labeled and optional arguments is how they are
-inferred by the type system.  Consider the following example:
+inferred by the type system.  Consider the following example for
+computing numerical derivatives of a function of two dimensions.  The
+function takes an argument `delta` which determines the scale at which
+to compute the derivative, values `x` and `y` which determine which
+point to compute the derivative at, and the function `f` whose
+derivative is being computed.  The function `f` itself takes two
+labeled arguments `x` and `y`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let foo g x y = g ~x ~y ;;
-val foo : (x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
+# let numeric_deriv ~delta ~x ~y ~f =
+    let x' = x +. delta in
+    let y' = y +. delta in
+    let base = f ~x ~y in
+    let dx = (f ~x:x' ~y -. base) /. delta in
+    let dy = (f ~x ~y:y' -. base) /. delta in
+    (dx,dy)
+  ;;
+val numeric_deriv :
+  delta:float ->
+  x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
+  <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In principle, it seems like the inferred type of `g` could have its
-labeled arguments listed in a different order, such as:
+In principle, it's not obvious how the order of the arguments to `f`
+should be chosen.  Since optional arguments can be passed in arbitrary
+order, it seems like it could as well be `y:float -> x:float -> float`
+as it is `x:float -> y:float -> float`.
+
+Even worse, it would be perfectly consistent for `f` to take an
+optional argument instead of a labeled one, which could lead to this
+type signature for `numeric_deriv`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-val foo : (y:'b -> x:'a -> 'c) -> 'a -> 'b -> 'c = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-And it would be perfectly consistent for `g` to take an optional
-argument instead of a labeled one, which could lead to this type
-signature for `foo`:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-val foo : (?x:'a -> y:'b -> 'c) -> 'a -> 'b -> 'c = <fun>
+val numeric_deriv :
+  delta:float ->
+  x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float =
+  <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Since there are multiple plausible types to choose from, OCaml needs
@@ -956,38 +973,50 @@ uses is to prefer labels to options, and to choose the order of
 arguments that shows up in the source code.
 
 Note that these heuristics might at different points in the source
-suggest different types.  For example, here's a function whose
-argument `g` is a function that is used once with argument `~x`
-followed by `~y`, and once with argument `~y` followed by `~x`.  The
-result of this is a compilation error.
+suggest different types.  Here's a version of `numeric_deriv` where
+the invocations of `f` were changes so they list the arguments in
+different orders.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let bar g x y = g ~x ~y + g ~y ~x ;;
-Characters 26-27:
-  let bar g x y = g ~x ~y + g ~y ~x ;;
-                            ^
+# let numeric_deriv ~delta ~x ~y ~f =
+    let x' = x +. delta in
+    let y' = y +. delta in
+    let base = f ~x ~y in
+    let dx = (f ~y ~x:x' -. base) /. delta in
+    let dy = (f ~x ~y:y' -. base) /. delta in
+    (dx,dy)
+  ;;
+Characters 131-132:
+      let dx = (f ~y ~x:x' -. base) /. delta in
+                ^
 Error: This function is applied to arguments
 in an order different from other calls.
 This is only allowed when the real type is known.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+As suggested by the error message, we can get OCaml to accept the
+fact that `f` is used with different argument orders if we provide
+explicit type information.  Thus, we can write:
+
 Note that if we provide an explicit type constraint for `g`, that
 constraint decides the question of what `g`'s type is, and the error
-disappears.
+disappears.  In the following, we do this by providing an explicit
+type annotation.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
-# let foo (g : ?y:'a -> x:'b -> int) x y =
-    g ~x ~y + g ~y ~x ;;
-val foo : (?y:'a -> x:'b -> int) -> 'b -> 'a -> int = <fun>
+# let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
+    let x' = x +. delta in
+    let y' = y +. delta in
+    let base = f ~x ~y in
+    let dx = (f ~y ~x:x' -. base) /. delta in
+    let dy = (f ~x ~y:y' -. base) /. delta in
+    (dx,dy)
+  ;;
+val numeric_deriv :
+  delta:float ->
+  x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
+  <fun>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here, our type annotation, `?y:'a -> x:'b -> int`, indicates that
-`foo` has an optional argument `y` followed by a labeled argument `x`,
-where `y` and `x` are potentially polymorphic, hence the type
-variables `'a` and `'b`.  This annotation nails down the order of the
-arguments of `g`, and thus allows the compiler to successfully infer a
-type for `foo`, despite the fact that it uses `g` in ways that suggest
-two different argument orders.
 
 #### Optional arguments and partial application ###
 
