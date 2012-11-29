@@ -127,10 +127,10 @@ val ratio : int -> int -> float = <fun>
 
 The notation for the type-signature of a multi-argument functions may
 be a little surprising at first, but we'll explain where it comes from
-when we get to function currying in [Chapter
-3](#variables-and-functions).  For the moment, think of the arrows as
-separating different arguments of the function, with the type after
-the final arrow being the return value of the function.  Thus,
+when we get to function currying in [xref](#variables-and-functions).
+For the moment, think of the arrows as separating different arguments
+of the function, with the type after the final arrow being the return
+value of the function.  Thus,
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 int -> int -> float
@@ -448,7 +448,7 @@ function's behavior.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We'll learn more about labeled arguments and why they're important in
-Chapter {{{variables-and-functions}}}.
+[xref](#variables-and-functions).
 
 
 #### Constructing lists with `::`
@@ -1069,8 +1069,8 @@ ocamlbuild -use-ocamlfind sum.native
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `.native` suffix indicates that we're building a native-code
-executable, which we'll discuss more in Chapter
-{{{files-modules-and-programs}}}.  Once the build completes, we can
+executable, which we'll discuss more in
+[xref](#files-modules-and-programs).  Once the build completes, we can
 use the resulting program like any command-line utility.  In this
 example, we can just type in a sequence of numbers, one per line,
 hitting control-d to exit when the input is complete.

@@ -11,15 +11,28 @@ concept.
 
 Lists are one of the most common ways to aggregate data in OCaml; they
 are simple, and they are extensively supported by the standard
-library.
+library. 
+
+_(yminsky: I would point out that they are the most commonly used
+aggregate, rather than just that they're supported by the standard
+library.  Also, that way we avoid confusion in the sentence. between
+the standard library and Core.)_
 
 ### Example: pretty-printing a table
+
+_(yminsky: I wonder if the whole example should go later in the
+section, after we've done more of the basis of lists in this
+chapter.)_
 
 One common programming task is displaying tabular data.  In this
 example, we will go over the design of a simple library to do just that.
 
-We'll start with the interface.  The code will go in a new module
-called `Text_table` whose `.mli` contains just the following function:
+_(yminsky: This is the first appearance of an mli file.  If we're
+going to introduce it here, we need to do a little more explanation.)_
+
+We'll start with the interface.  The code will go in a new
+module called `Text_table` whose `.mli` contains just the following
+function:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
 (* [render headers rows] returns a string containing a formatted
@@ -182,6 +195,10 @@ let render header rows =
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## List basics
+
+_(yminsky: I wonder if this should come before the example.  The
+example kind of assumes a lot of information, some of which was given
+in the guided tour, and some of which wasn't.)_
 
 In the example, we see calls to `List` functions in the standard
 library, in particular `List.map`.  How does this all work?  To

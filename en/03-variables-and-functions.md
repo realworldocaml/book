@@ -17,8 +17,8 @@ interpreter, a let binding has the following syntax.
 let <identifier> = <expr>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As we'll see when we get to the module system in Chapter
-{{{files-modules-and-programs}}}, this same syntax is used for
+As we'll see when we get to the module system in
+[xref](#files-modules-and-programs), this same syntax is used for
 top-level definitions in a module.
 
 Every variable binding has a _scope_, which is the portion of the code

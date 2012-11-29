@@ -3,7 +3,7 @@
 One of OCaml's best features is its concise and expressive system for
 declaring new datatypes.  Two key elements of that system are
 _records_ and _variants_, both of which we discussed briefly in
-chapter {{{GUIDEDTOUR}}}.  In this chapter we'll cover records in more
+[xref](#a-guided-tour).  In this chapter we'll cover records in more
 depth, covering more of the details of how they work, as well as
 advice on how to use them effectively in your software designs.
 
@@ -468,8 +468,8 @@ created.
 
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming does have its place.  We'll discuss more about how (and
-when) to use OCaml's imperative features in Chapter
-{{{imperative-programming}}}.
+when) to use OCaml's imperative features in 
+[xref](#imperative-programming).
 
 ## First-class fields
 
