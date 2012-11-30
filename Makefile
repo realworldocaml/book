@@ -1,4 +1,4 @@
-DOCBOOK_XSL_PATH_Darwin = /usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1
+DOCBOOK_XSL_PATH_Darwin = $(shell brew --prefix)/Cellar/docbook/5.0/docbook/xsl/1.76.1
 DOCBOOK_XSL_PATH_Linux = /usr/share/xml/docbook/stylesheet/docbook-xsl
 OS := $(shell uname -s)
 PWD := $(shell pwd)
