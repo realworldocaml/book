@@ -25,3 +25,4 @@ stylesheets/system-xsl
 .bzr
 .bzrignore
 Thumbs.db
+/commenting-build
