@@ -148,20 +148,24 @@ def copy_locale_media_dir(media_dir, locale_dst_dir):
     locale_dst_media_dir = os.path.join(locale_dst_dir, "media")
     logging.debug("Copying media from {} to {}".format(media_dir, locale_dst_media_dir))
     shutil.copytree(media_dir, locale_dst_media_dir)
+
+
+def find_required(html_name, soup, *args, **kwargs):
+    """Finds the named element in the given soup, or panics."""
+    element = soup.find(*args, **kwargs)
+    if element:
+        return element
+    panic("Could not find {!r} in {}".format(args, html_name))
     
     
-def process_locale_index_html(html_name, soup):
-    """Process an index html page returning a string of processed data."""
+def render_locale_index_html(html_name, soup):
+    """Process an index HTML page, returning a string of processed HTML."""
     logging.debug("Processing {} as a table of contents".format(html_name))
     # Get the title.
     title = soup.find("title").get_text()
     # Find the root table of contents.
-    toc = soup.find("div", "toc")
-    if not toc:
-        panic("Could not find `div.toc` in {}".format(html_name))
-    root_dl = toc.find("dl", recursive=False)
-    if not root_dl:
-        panic("Could not find `div.toc > dl` in {}".format(html_name))
+    toc = find_required(html_name, soup, "div", "toc")
+    root_dl = find_required(html_name, toc, "dl", recursive=False)
     # Recursively parse the table of contents.
     def parse_toc(parent_dl):
         children = []
@@ -183,6 +187,46 @@ def process_locale_index_html(html_name, soup):
     })
     
     
+def render_locale_chapter_page(html_name, soup):
+    """Processes a chaper page, returning a string of processed HTML."""
+    logging.debug("Processing {} as a chapter page".format(html_name))
+    # Get the title.
+    title = soup.find("title").get_text()
+    # Find the chapter root element.
+    chapter_root = soup.find("div", "chapter")
+    # Strip out some unneccesary elements.
+    [e.extract() for e in chapter_root.find_all("div", "titlepage", recursive=False)]
+    [e.extract() for e in chapter_root.find_all("div", "toc", recursive=False)]
+    # Process sections.
+    for n in xrange(1, 10):
+        for section in chapter_root.find_all("div", "sect{}".format(n)):
+            logging.debug("Processing section '{}' in {}".format(section["title"], html_name))
+            # Make into HTML5 section.
+            section.name = "section"
+            # Replace titlepage div with HTML5 section h1.
+            titlepage = find_required(html_name, section, "div", "titlepage", recursive=False)
+            heading = find_required(html_name, titlepage, "h{}".format(n+1))
+            heading.name = "h1"
+            section.insert(0, heading)
+            titlepage.extract()
+    # Remove wrappers around lists.
+    for element in chapter_root.find_all("div", "itemizedlist"):
+        element.replaceWith(element.find("ul", recursive=False))
+    # Remove all styles and classes.
+    for element in chapter_root.find_all(True):
+        del element["class"]
+        del element["style"]
+        del element["title"]
+        del element["type"]
+    # Convert chapter root to string.
+    content_html = u"".join(unicode(e) for e in chapter_root.find_all(True, recursive=False))
+    # Render the template.
+    return render_to_string("chapter.html", {
+        "title": title,
+        "content_html": content_html,
+    })
+    
+    
 def process_locale_html(locale_src_dir, locale_dst_dir, html_name):
     """Processes the given HTML file and writes it to the destination dir."""
     logging.debug("Processing HTML file {}".format(html_name))
@@ -198,12 +242,11 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name):
     soup = BeautifulSoup(locale_src_html)
     # Is this a table of contents?
     if soup.find("div", "book"):
-        locale_dst_html = process_locale_index_html(html_name, soup)
+        locale_dst_html = render_locale_index_html(html_name, soup)
+    elif soup.find("div", "chapter"):
+        locale_dst_html = render_locale_chapter_page(html_name, soup)
     else:
-        # TODO: Error if unknown page type.
-        locale_dst_html = render_to_string("base.html", {
-            "title": soup.find("title").get_text(),
-        })
+        panic("Unknown page type: {}".format(html_name))
     # Write the destination HTML to disc.
     logging.debug("Writing processed HTML for {}".format(html_name))
     with open(locale_dst_path, "wb") as locale_dst_handle:
