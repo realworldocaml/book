@@ -21,6 +21,7 @@ Then, whenever you want to run this generator, use the following command:
 """
 
 import argparse, os.path, logging, sys, shutil, glob
+from itertools import izip
 
 from bs4 import BeautifulSoup
 
@@ -141,11 +142,45 @@ def copy_local_dir(locale_src_dir, locale_dst_dir, dirname):
     )
     
     
+# TODO: Use r.js to optimize the media.
 def copy_locale_media_dir(media_dir, locale_dst_dir):
     """Copies the media dir to the locale destination dir."""
     locale_dst_media_dir = os.path.join(locale_dst_dir, "media")
     logging.debug("Copying media from {} to {}".format(media_dir, locale_dst_media_dir))
     shutil.copytree(media_dir, locale_dst_media_dir)
+    
+    
+def process_locale_index_html(html_name, soup):
+    """Process an index html page returning a string of processed data."""
+    logging.debug("Processing {} as a table of contents".format(html_name))
+    # Get the title.
+    title = soup.find("title").get_text()
+    # Find the root table of contents.
+    toc = soup.find("div", "toc")
+    if not toc:
+        panic("Could not find `div.toc` in {}".format(html_name))
+    root_dl = toc.find("dl", recursive=False)
+    if not root_dl:
+        panic("Could not find `div.toc > dl` in {}".format(html_name))
+    # Recursively parse the table of contents.
+    def parse_toc(parent_dl):
+        children = []
+        for element in parent_dl.find_all(("dt", "dd"), recursive=False):
+            if element.name == "dt":
+                children.append({
+                    "title": element.find("a").get_text(),
+                    "href": element.find("a")["href"],
+                    "children": [],
+                })
+            if element.name == "dd":
+                children[-1]["children"].extend(parse_toc(element.find("dl", recursive=False)))
+        return children
+    navigation_list = parse_toc(root_dl)
+    # Render the template.
+    return render_to_string("index.html", {
+        "title": title,
+        "navigation_list": navigation_list,
+    })
     
     
 def process_locale_html(locale_src_dir, locale_dst_dir, html_name):
@@ -161,12 +196,14 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name):
     # Parse the source HTML file.
     logging.debug("Parsing HTML for {}".format(html_name))
     soup = BeautifulSoup(locale_src_html)
-    # Extract source information.
-    title = soup.find("title").get_text()
-    # Render the destination HTML.
-    locale_dst_html = render_to_string("base.html", {
-        "title": title,
-    })
+    # Is this a table of contents?
+    if soup.find("div", "book"):
+        locale_dst_html = process_locale_index_html(html_name, soup)
+    else:
+        # TODO: Error if unknown page type.
+        locale_dst_html = render_to_string("base.html", {
+            "title": soup.find("title").get_text(),
+        })
     # Write the destination HTML to disc.
     logging.debug("Writing processed HTML for {}".format(html_name))
     with open(locale_dst_path, "wb") as locale_dst_handle:

@@ -1,0 +1,10 @@
+{% if navigation_list %}
+    <ul>
+        {% for navigation_item in navigation_list %}
+            <li>
+                <a href="{{navigation_item.href}}">{{navigation_item.title}}</a>
+                {% include "includes/navigation_list.html" with navigation_list=navigation_item.children %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
