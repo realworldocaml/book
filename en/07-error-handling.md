@@ -229,7 +229,8 @@ fail at any stage.  Here's a rewrite `compute_bounds` in this style.
 Note that we locally open the `Option.Monad_infix` module to get
 access to the infix operator `>>=`.  The module is called
 `Monad_infix` because the bind operator is part of a sub-interface
-called `Monad`, which we'll talk about more in chapter {{{ASYNC}}}.
+called `Monad`, which we'll talk about more in
+[xref](#concurrent-programming-with-async).
 
 This is a bit easier to read if we write it with fewer parentheses and
 less indentation, as follows.

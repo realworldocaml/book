@@ -752,7 +752,8 @@ various standard bits of functionality, including:
   maps and sets, based on the `Comparable` interface.
 - Hash-based datastructures like hash sets and hash heaps.
 - Support for so-called monadic libraries, like the ones discussed in
-  {{{ERROR HANDLING}}} and {{{CONCURRENCY}}}.  Here, the functor is
+  [xref](#error-handling) and
+  [xref](#concurrent-programming-with-async).  Here, the functor is
   used to provide a collection of standard helper functions based on
   the core `bind` and `return` operators.
 
@@ -768,10 +769,10 @@ including modules and functors, files and compilation units, and
 classes and objects.  Files and compilation units (`.ml` and `.mli`
 files) are really just a simplified module system.  Classes and
 objects are a different form of organization altogether (as we'll see
-in [[[Chapter 13]]]).  Yet, in each of these cases, there is a
-clear separation between types and values -- values cannot contain
-types, and types cannot contain values.  And since modules can contain
-types, modules can't be values.
+in [xref](#object-oriented-programming).  Yet, in each of these cases,
+there is a clear separation between types and values -- values cannot
+contain types, and types cannot contain values.  And since modules can
+contain types, modules can't be values.
 
 _(yminsky: Instead of saying that ml and mli files are a simplified
 module system, maybe say that they "provide a simple way of creating

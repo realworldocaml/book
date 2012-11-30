@@ -16,3 +16,13 @@ build/
 *.tmp
 *.aux
 stylesheets/system-xsl
+.DS_Store
+.project
+.pydevproject
+.settings
+*.pyc
+*.pyo
+.bzr
+.bzrignore
+Thumbs.db
+/commenting-build

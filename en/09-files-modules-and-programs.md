@@ -92,10 +92,10 @@ is required for Core.
 While this works well enough for a one-file project, more complicated
 builds will require a tool to orchestrate the build.  One great tool
 for this task is `ocamlbuild`, which is shipped with the OCaml
-compiler.  We'll talk more about `ocamlbuild` in chapter
-{{{OCAMLBUILD}}}, but for now, we'll just walk through the steps
-required for this simple application.  First, create a `_tags` file,
-containing the following lines.
+compiler.  We'll talk more about `ocamlbuild` in
+[xref](#packaging-and-build-systems), but for now, we'll just walk
+through the steps required for this simple application.  First, create
+a `_tags` file, containing the following lines.
 
 ~~~~~~~~~~~~~~~
 true:package(core),thread,annot,debugging
