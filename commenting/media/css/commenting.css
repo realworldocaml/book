@@ -3,49 +3,19 @@
 }
 
 .comment-block > .comment-action {
-    position: absolute;
-    left: -132px;
-    top: -5px;
-    height: 100%;
-    width: 0;
-    overflow: hidden;
-}
-
-.comment-block > .comment-action > span {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 14px;
-    line-height: 28px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 87px;
-    height: 28px;
-    padding: 0 11px;
-    background: #FCFCFA;
-    border-left: 1px #E2E0D8 solid;
-    border-top: 1px #E2E0D8 solid;
-    border-bottom: 1px #E2E0D8 solid;
-    border-top-left-radius: 14px;
-    border-bottom-left-radius: 14px;
+    font-size: 12px;
+    text-decoration: underline;
     cursor: pointer;
-    overflow: hidden;
-    opacity: 0;
-    -webkit-transition: color 0.15s, opacity 0.15s;
-    -moz-transition: color 0.15s, opacity 0.15s;
-    -ms-transition: color 0.15s, opacity 0.15s;
-    -o-transition: color 0.15s, opacity 0.15s;
-    transition: color 0.15s, opacity 0.15s;
+    -webkit-transition: color 0.15s;
+    -moz-transition: color 0.15s;
+    -ms-transition: color 0.15s;
+    -o-transition: color 0.15s;
+    transition: color 0.15s;
+    color: #9A9994;
+    font-weight: normal;
+    white-space: nowrap;
 }
 
-.comment-block > .comment-action > span:hover {
+.comment-block > .comment-action:hover {
     color: #F14E32;
-}
-
-.comment-block:hover > .comment-action {
-    width: 132px;
-    overflow: visible;
-}
-
-.comment-block:hover > .comment-action > span {
-    opacity: 1;
 }
