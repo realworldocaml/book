@@ -28,8 +28,29 @@ body {
 
 .header h1 {
     font-size: 36px;
-    line-height: 44px;
     font-weight: bold;
+    display: inline;
+    line-height: 44px;
+}
+
+.header h2 {
+    font-size: 18px;
+    color: #9A9994;
+    font-weight: normal;
+    display: inline;
+    margin-left: 11px;
+    vertical-align: 4px;
+}
+
+
+/* Footer. */
+
+.footer {
+    border-top: 1px #E2E0D8 solid;
+    color: #9A9994;
+    font-size: 12px;
+    clear: both;
+    padding: 20px;
 }
 
 
@@ -37,6 +58,7 @@ body {
 
 .navigation {
     margin-top: 30px;
+    margin-bottom: 40px;
     width: 214px;
     padding-right: 44px;
     float: left;
@@ -72,6 +94,7 @@ body {
 
 .page {
     margin-top: 30px;
+    margin-bottom: 40px;
     background: #FCFCFA;
     border: 1px #E2E0D8 solid;
     border-radius: 5px;
