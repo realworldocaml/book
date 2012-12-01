@@ -158,36 +158,19 @@ def find_required(html_name, soup, *args, **kwargs):
     panic("Could not find {!r} in {}".format(args, html_name))
     
     
-def render_locale_index_html(html_name, soup):
+def render_locale_index_html(html_name, soup, navigation_list):
     """Process an index HTML page, returning a string of processed HTML."""
     logging.debug("Processing {} as a table of contents".format(html_name))
-    # Get the title.
-    title = soup.find("title").get_text()
-    # Find the root table of contents.
-    toc = find_required(html_name, soup, "div", "toc")
-    root_dl = find_required(html_name, toc, "dl", recursive=False)
-    # Recursively parse the table of contents.
-    def parse_toc(parent_dl):
-        children = []
-        for element in parent_dl.find_all(("dt", "dd"), recursive=False):
-            if element.name == "dt":
-                children.append({
-                    "title": element.find("a").get_text(),
-                    "href": element.find("a")["href"],
-                    "children": [],
-                })
-            if element.name == "dd":
-                children[-1]["children"].extend(parse_toc(element.find("dl", recursive=False)))
-        return children
-    navigation_list = parse_toc(root_dl)
     # Render the template.
     return render_to_string("index.html", {
-        "title": title,
+        "title": "Table of Contents",
         "navigation_list": navigation_list,
+        "html_name": html_name,
     })
     
     
 def process_locale_chapter_page_section(html_name, section):
+    """Sanitises the given section from a chapter page."""
     logging.debug("Processing section '{}' in {}".format(section["title"], html_name))
     # Make into HTML5 section.
     section.name = "section"
@@ -199,7 +182,7 @@ def process_locale_chapter_page_section(html_name, section):
     titlepage.extract()
     
     
-def render_locale_chapter_page(html_name, soup):
+def render_locale_chapter_page(html_name, soup, navigation_list):
     """Processes a chaper page, returning a string of processed HTML."""
     logging.debug("Processing {} as a chapter page".format(html_name))
     # Get the title.
@@ -254,33 +237,63 @@ def render_locale_chapter_page(html_name, soup):
     return render_to_string("chapter.html", {
         "title": title,
         "content_html": content_html,
+        "navigation_list": navigation_list,
+        "html_name": html_name,
     })
     
     
-def process_locale_html(locale_src_dir, locale_dst_dir, html_name):
-    """Processes the given HTML file and writes it to the destination dir."""
-    logging.debug("Processing HTML file {}".format(html_name))
-    # Generate paths.
+def load_locale_html_as_soup(locale_src_dir, html_name):
+    """Loads the named HTML file as a soup object."""
     locale_src_path = os.path.join(locale_src_dir, html_name)
-    locale_dst_path = os.path.join(locale_dst_dir, html_name)
     # Read the source HTML file.
     logging.debug("Reading source HTML for {}".format(html_name))
     with open(locale_src_path, "rb") as locale_src_handle:
         locale_src_html = locale_src_handle.read()
     # Parse the source HTML file.
     logging.debug("Parsing HTML for {}".format(html_name))
-    soup = BeautifulSoup(locale_src_html)
+    return BeautifulSoup(locale_src_html)
+    
+    
+def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_list):
+    """Processes the given HTML file and writes it to the destination dir."""
+    logging.debug("Processing HTML file {}".format(html_name))
+    # Generate paths.
+    locale_dst_path = os.path.join(locale_dst_dir, html_name)
+    soup = load_locale_html_as_soup(locale_src_dir, html_name)
     # Is this a table of contents?
     if soup.find("div", "book"):
-        locale_dst_html = render_locale_index_html(html_name, soup)
+        locale_dst_html = render_locale_index_html(html_name, soup, navigation_list)
     elif soup.find("div", "chapter"):
-        locale_dst_html = render_locale_chapter_page(html_name, soup)
+        locale_dst_html = render_locale_chapter_page(html_name, soup, navigation_list)
     else:
         panic("Unknown page type: {}".format(html_name))
     # Write the destination HTML to disc.
     logging.debug("Writing processed HTML for {}".format(html_name))
     with open(locale_dst_path, "wb") as locale_dst_handle:
         locale_dst_handle.write(locale_dst_html.encode("utf-8"))
+        
+        
+def parse_locale_toc(locale_src_dir):
+    """Parses the TOC from the given local dir."""
+    html_name = "index.html"
+    soup = load_locale_html_as_soup(locale_src_dir, html_name)
+    # Find the root table of contents.
+    toc = find_required(html_name, soup, "div", "toc")
+    root_dl = find_required(html_name, toc, "dl", recursive=False)
+    # Recursively parse the table of contents.
+    def parse_toc(parent_dl):
+        children = []
+        for element in parent_dl.find_all(("dt", "dd"), recursive=False):
+            if element.name == "dt":
+                children.append({
+                    "title": element.find("a").get_text(),
+                    "href": element.find("a")["href"],
+                    "children": [],
+                })
+            if element.name == "dd":
+                children[-1]["children"].extend(parse_toc(element.find("dl", recursive=False)))
+        return children
+    return parse_toc(root_dl)
 
 
 def process_locale(src_dir, dst_dir, media_dir, locale):
@@ -299,12 +312,15 @@ def process_locale(src_dir, dst_dir, media_dir, locale):
     copy_local_dir(locale_src_dir, locale_dst_dir, "figures")
     # Copy over media items.
     copy_locale_media_dir(media_dir, locale_dst_dir)
+    # Process the index.
+    logging.debug("Parsing table of contents")
+    navigation_list = parse_locale_toc(locale_src_dir)
     # Process HTML files.
     html_paths = glob.glob(os.path.join(locale_src_dir, "*.html"))
     logging.debug("Detected {} HTML file(s)".format(len(html_paths)))
     for html_path in html_paths:
         html_name = html_path[len(locale_src_dir)+1:]
-        process_locale_html(locale_src_dir, locale_dst_dir, html_name)
+        process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_list)
 
 
 def main():

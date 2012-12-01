@@ -15,13 +15,30 @@
     
     <body>
     
-        <article class="page">
+        <div class="body">
     
-            <h1>{{title}}</h1>
+            <aside class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html"{% if html_name == "index.html" %} class="here"{% endif %}>Table of Contents</a>
+                    </li>
+                    {% for navigation_item in navigation_list %}
+                        <li>
+                            <a href="{{navigation_item.href}}"{% if html_name == navigation_item.href %} class="here"{% endif %}>{{navigation_item.title}}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+        
+            <article class="page">
+        
+                <h1>{{title}}</h1>
+                
+                {% block content %}{% endblock %}
+                
+            </article>
             
-            {% block content %}{% endblock %}
-            
-        </article>
+        </div>
     
     </body>
 
