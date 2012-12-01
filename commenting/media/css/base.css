@@ -19,10 +19,24 @@ body {
     overflow: hidden;
 }
 
+
+/* Header. */
+
+.header {
+    padding-top: 30px;
+}
+
+.header h1 {
+    font-size: 36px;
+    line-height: 44px;
+    font-weight: bold;
+}
+
+
 /* Navigation. */
 
 .navigation {
-    margin-top: 67px;
+    margin-top: 30px;
     width: 214px;
     padding-right: 44px;
     float: left;
@@ -39,8 +53,7 @@ body {
 }
 
 .navigation li:first-child {
-    font-size: 18px;
-    margin-bottom: 11px;
+    font-size: 16px;
     margin-left: 0;
 }
 
