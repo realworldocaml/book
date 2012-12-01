@@ -1,0 +1,115 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-size: 100%;
+}
+
+body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+    line-height: 1.57;
+    background: #EFEFE7;
+    color: #4E443C;
+}
+
+.page {
+    background: #FCFCFA;
+    border: 1px #E2E0D8 solid;
+    border-radius: 5px;
+    width: 656px;
+    margin: 30px auto;
+    position: relative;
+    padding: 22px;
+}
+
+
+/* Heading styles. */
+
+.page > h1 {
+    font-size: 36px;
+    line-height: 44px;
+    margin-bottom: 20px;
+    font-weight: normal;
+}
+
+.page section > h1 {
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 11px;
+}
+
+.page section > h1 + section {
+    margin-top: -9px;
+}
+
+.page > section > h1 {
+    color: #F14E32;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.page > section > section > h1 {
+    font-size: 16px;
+}
+
+
+/* Content styles. */
+
+p,
+pre,
+ol,
+ul,
+li,
+table,
+pre {
+    margin-bottom: 11px;
+}
+
+
+ul,
+ol {
+    margin-left: 25px;
+}
+
+code,
+pre {
+    font-family: Courier, monospace;
+}
+
+pre {
+    background: #E8E7DD;
+    line-height: 1.27;
+    padding: 14px;
+    overflow: auto;
+}
+
+table {
+    border: 1px #E2E0D8 solid;
+    border-collapse: collapse;
+}
+
+table td,
+table th {
+    text-align: left;
+    vertical-align: top;
+    padding: 1px 11px;
+}
+
+table th {
+    font-weight: bold;
+    background: #EFEFE7;
+}
+
+table td {
+    border-bottom: 1px #EFEFE7 solid;
+}
+
+a {
+    color: #0388A6;
+    text-decoration: none;
+    -webkit-transition: color 0.15s;
+}
+
+a:hover {
+    color: #04ADD3;
+}

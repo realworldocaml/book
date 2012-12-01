@@ -31,7 +31,7 @@ from django.conf import settings
 def panic(msg, code=1):
     """Logs the given error, then exits."""
     logging.error(msg)
-    logging.debug(traceback.format_exc())
+    logging.debug("".join(traceback.format_stack()[:-1]))
     sys.exit(code)
     
     
@@ -187,6 +187,18 @@ def render_locale_index_html(html_name, soup):
     })
     
     
+def process_locale_chapter_page_section(html_name, section):
+    logging.debug("Processing section '{}' in {}".format(section["title"], html_name))
+    # Make into HTML5 section.
+    section.name = "section"
+    # Replace titlepage div with HTML5 section h1.
+    titlepage = find_required(html_name, section, "div", "titlepage", recursive=False)
+    heading = find_required(html_name, titlepage, ["h1", "h2", "h3", "h4", "h5", "h6", "h7", "p"])
+    heading.name = "h1"
+    section.insert(0, heading)
+    titlepage.extract()
+    
+    
 def render_locale_chapter_page(html_name, soup):
     """Processes a chaper page, returning a string of processed HTML."""
     logging.debug("Processing {} as a chapter page".format(html_name))
@@ -200,15 +212,9 @@ def render_locale_chapter_page(html_name, soup):
     # Process sections.
     for n in xrange(1, 10):
         for section in chapter_root.find_all("div", "sect{}".format(n)):
-            logging.debug("Processing section '{}' in {}".format(section["title"], html_name))
-            # Make into HTML5 section.
-            section.name = "section"
-            # Replace titlepage div with HTML5 section h1.
-            titlepage = find_required(html_name, section, "div", "titlepage", recursive=False)
-            heading = find_required(html_name, titlepage, "h{}".format(n+1))
-            heading.name = "h1"
-            section.insert(0, heading)
-            titlepage.extract()
+            process_locale_chapter_page_section(html_name, section)
+    for section in chapter_root.find_all("div", "sidebar"):
+        process_locale_chapter_page_section(html_name, section)
     # Remove wrappers around lists.
     for element in chapter_root.find_all("div", "itemizedlist"):
         element.replaceWith(element.find("ul", recursive=False))
@@ -238,7 +244,10 @@ def render_locale_chapter_page(html_name, soup):
         del element["title"]
         del element["type"]
         del element["align"]
+        del element["valign"]
         del element["border"]
+        del element["cellspacing"]
+        del element["cellpadding"]
     # Convert chapter root to string.
     content_html = u"".join(unicode(e) for e in chapter_root.find_all(True, recursive=False))
     # Render the template.
