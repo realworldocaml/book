@@ -212,6 +212,10 @@ a {
     color: #0388A6;
     text-decoration: none;
     -webkit-transition: color 0.15s;
+    -moz-transition: color 0.15s;
+    -ms-transition: color 0.15s;
+    -o-transition: color 0.15s;
+    transition: color 0.15s;
 }
 
 a:hover {

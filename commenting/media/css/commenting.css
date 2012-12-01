@@ -4,11 +4,11 @@
 
 .comment-block > .comment-action {
     position: absolute;
-    width: 132px;
     left: -132px;
     top: -5px;
     height: 100%;
-    display: none;
+    width: 0;
+    overflow: hidden;
 }
 
 .comment-block > .comment-action > span {
@@ -18,7 +18,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 88px;
+    width: 87px;
     height: 28px;
     padding: 0 11px;
     background: #FCFCFA;
@@ -29,7 +29,12 @@
     border-bottom-left-radius: 14px;
     cursor: pointer;
     overflow: hidden;
-    -webkit-transition: color 0.15s;
+    opacity: 0;
+    -webkit-transition: color 0.15s, opacity 0.15s;
+    -moz-transition: color 0.15s, opacity 0.15s;
+    -ms-transition: color 0.15s, opacity 0.15s;
+    -o-transition: color 0.15s, opacity 0.15s;
+    transition: color 0.15s, opacity 0.15s;
 }
 
 .comment-block > .comment-action > span:hover {
@@ -37,5 +42,10 @@
 }
 
 .comment-block:hover > .comment-action {
-    display: block;
+    width: 132px;
+    overflow: visible;
+}
+
+.comment-block:hover > .comment-action > span {
+    opacity: 1;
 }
