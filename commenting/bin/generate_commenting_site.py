@@ -204,19 +204,20 @@ def render_locale_chapter_page(html_name, soup, navigation_list):
     # Remove wrappers around tables.
     for element in chapter_root.find_all("div", "informaltable"):
         element.replaceWith(element.find("table", recursive=False))
-    # Remove wrappers around notes.
-    for element in chapter_root.find_all("div", "note") + chapter_root.find_all("div", "important") + chapter_root.find_all("div", "tip"):
-        aside = soup.new_tag("aside")
-        aside["class"] = element["class"]
-        element.replaceWith(aside)
-        header = soup.new_tag("h1")
-        header.append(find_required(html_name, element, "th").get_text())
-        aside.append(header)
-        rows = element.find_all("tr")
-        if len(rows) != 2:
-            panic("Expect two rows in note from {}".format(html_name))
-        for child in find_required(html_name, rows[1], "td").find_all(True, recursive=False):
-            aside.append(child)
+    # Remove wrappers around special sections.
+    for section_class in ("note", "important", "warning", "tip"):
+        for element in chapter_root.find_all("div", section_class):
+            aside = soup.new_tag("aside")
+            aside["class"] = element["class"]
+            element.replaceWith(aside)
+            header = soup.new_tag("h1")
+            header.append(find_required(html_name, element, "th").get_text())
+            aside.append(header)
+            rows = element.find_all("tr")
+            if len(rows) != 2:
+                panic("Expect two rows in special section from {}".format(html_name))
+            for child in find_required(html_name, rows[1], "td").find_all(True, recursive=False):
+                aside.append(child)
     # Clean up table colgroups.
     for element in chapter_root.find_all("colgroup"):
         element.extract()
