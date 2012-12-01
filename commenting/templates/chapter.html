@@ -6,3 +6,25 @@
     {{content_html|safe}}
 
 {% endblock %}
+
+
+{% block post_page %}
+
+    {% if prev_page or next_page %}
+    
+        <nav class="pagination">
+            {% if prev_page %}
+                <a rel="previous" href="{{prev_page.href}}">
+                    &lsaquo; Previous
+                </a>
+            {% endif %}
+            {% if next_page %}
+                <a rel="next" href="{{next_page.href}}">
+                    Next &rsaquo;
+                </a>
+            {% endif %}
+        </nav>
+    
+    {% endif %}
+
+{% endblock %}

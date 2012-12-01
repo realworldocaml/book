@@ -235,12 +235,24 @@ def render_locale_chapter_page(html_name, soup, navigation_list):
             del element["cellpadding"]
     # Convert chapter root to string.
     content_html = u"".join(unicode(e) for e in chapter_root.find_all(True, recursive=False))
+    # Find the next and previous links.
+    prev_page = None
+    next_page = None
+    for n, navigation_item in enumerate(navigation_list):
+        if navigation_item["href"] == html_name:
+            if n > 0:
+                prev_page = navigation_list[n-1]
+            if n < len(navigation_list) - 1:
+                next_page = navigation_list[n+1]
+            break
     # Render the template.
     return render_to_string("chapter.html", {
         "title": title,
         "content_html": content_html,
         "navigation_list": navigation_list,
         "html_name": html_name,
+        "prev_page": prev_page,
+        "next_page": next_page,
     })
     
     

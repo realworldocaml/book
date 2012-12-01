@@ -24,7 +24,7 @@
                 </hgroup>
             </header>
     
-            <aside class="navigation">
+            <nav class="navigation">
                 <ul>
                     <li>
                         <a href="index.html"{% if html_name == "index.html" %} class="here"{% endif %}>Table of Contents</a>
@@ -35,7 +35,7 @@
                         </li>
                     {% endfor %}
                 </ul>
-            </aside>
+            </nav>
         
             <article class="page">
         
@@ -44,6 +44,8 @@
                 {% block content %}{% endblock %}
                 
             </article>
+            
+            {% block post_page %}{% endblock %}
             
             <footer class="footer">
                 <p>Copyright 2011, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
