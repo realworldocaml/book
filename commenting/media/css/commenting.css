@@ -1,0 +1,41 @@
+.comment-block {
+    position: relative;
+}
+
+.comment-block > .comment-action {
+    position: absolute;
+    width: 132px;
+    left: -132px;
+    top: -5px;
+    height: 100%;
+    display: none;
+}
+
+.comment-block > .comment-action > span {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+    line-height: 28px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 88px;
+    height: 28px;
+    padding: 0 11px;
+    background: #FCFCFA;
+    border-left: 1px #E2E0D8 solid;
+    border-top: 1px #E2E0D8 solid;
+    border-bottom: 1px #E2E0D8 solid;
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+    cursor: pointer;
+    overflow: hidden;
+    -webkit-transition: color 0.15s;
+}
+
+.comment-block > .comment-action > span:hover {
+    color: #F14E32;
+}
+
+.comment-block:hover > .comment-action {
+    display: block;
+}

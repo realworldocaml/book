@@ -68,6 +68,12 @@ def parse_args():
         default = os.path.join("commenting", "media"),
         help = "The folder containing all media items, relative to PREFIX (defaults to 'commenting/media')",
     )
+    parser.add_argument("--debug", "-d",
+        dest = "debug",
+        default = False,
+        action = "store_true",
+        help = "Builds the site in debug mode, with unminified assets.",
+    )
     return parser.parse_args()
 
 
@@ -158,7 +164,7 @@ def find_required(html_name, soup, *args, **kwargs):
     panic("Could not find {!r} in {}".format(args, html_name))
     
     
-def render_locale_index_html(html_name, soup, navigation_list):
+def render_locale_index_html(html_name, soup, navigation_list, args):
     """Process an index HTML page, returning a string of processed HTML."""
     logging.debug("Processing {} as a table of contents".format(html_name))
     # Render the template.
@@ -166,6 +172,7 @@ def render_locale_index_html(html_name, soup, navigation_list):
         "title": "Table of Contents",
         "navigation_list": navigation_list,
         "html_name": html_name,
+        "debug": args.debug,
     })
     
     
@@ -184,7 +191,7 @@ def process_locale_chapter_page_section(html_name, section):
     titlepage.extract()
     
     
-def render_locale_chapter_page(html_name, soup, navigation_list):
+def render_locale_chapter_page(html_name, soup, navigation_list, args):
     """Processes a chaper page, returning a string of processed HTML."""
     logging.debug("Processing {} as a chapter page".format(html_name))
     # Get the title.
@@ -255,6 +262,7 @@ def render_locale_chapter_page(html_name, soup, navigation_list):
         "html_name": html_name,
         "prev_page": prev_page,
         "next_page": next_page,
+        "debug": args.debug,
     })
     
     
@@ -270,7 +278,7 @@ def load_locale_html_as_soup(locale_src_dir, html_name):
     return BeautifulSoup(locale_src_html)
     
     
-def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_list):
+def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_list, args):
     """Processes the given HTML file and writes it to the destination dir."""
     logging.debug("Processing HTML file {}".format(html_name))
     # Generate paths.
@@ -278,9 +286,9 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_li
     soup = load_locale_html_as_soup(locale_src_dir, html_name)
     # Is this a table of contents?
     if soup.find("div", "book"):
-        locale_dst_html = render_locale_index_html(html_name, soup, navigation_list)
+        locale_dst_html = render_locale_index_html(html_name, soup, navigation_list, args)
     elif soup.find("div", "chapter"):
-        locale_dst_html = render_locale_chapter_page(html_name, soup, navigation_list)
+        locale_dst_html = render_locale_chapter_page(html_name, soup, navigation_list, args)
     else:
         panic("Unknown page type: {}".format(html_name))
     # Write the destination HTML to disc.
@@ -312,7 +320,7 @@ def parse_locale_toc(locale_src_dir):
     return parse_toc(root_dl)
 
 
-def process_locale(src_dir, dst_dir, media_dir, locale):
+def process_locale(src_dir, dst_dir, media_dir, locale, args):
     """Processes all files for the given locale."""
     logging.info("Processing HTML for locale {}".format(locale))
     # Process the src dir.
@@ -336,7 +344,7 @@ def process_locale(src_dir, dst_dir, media_dir, locale):
     logging.debug("Detected {} HTML file(s)".format(len(html_paths)))
     for html_path in html_paths:
         html_name = html_path[len(locale_src_dir)+1:]
-        process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_list)
+        process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_list, args)
 
 
 def main():
@@ -358,7 +366,7 @@ def main():
     # Process each locale dir.
     for locale_dir in locale_dirs:
         locale = locale_dir[len(src_dir)+1:-5]
-        process_locale(src_dir, dst_dir, media_dir, locale)
+        process_locale(src_dir, dst_dir, media_dir, locale, args)
 
 
 if __name__ == "__main__":
