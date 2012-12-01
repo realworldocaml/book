@@ -74,6 +74,16 @@ def parse_args():
         action = "store_true",
         help = "Builds the site in debug mode, with unminified assets.",
     )
+    parser.add_argument("--github-user",
+        dest = "github_user",
+        default = "etianen",  # TODO: Make the public repo owner default.
+        help = "The user that owns the GitHub repo to use for issues.",
+    )
+    parser.add_argument("--github-repo",
+        dest = "github_repo",
+        default = "OCaml-Book",
+        help = "The name of the GitHub repo to use for issues.",
+    )
     return parser.parse_args()
 
 
@@ -164,15 +174,22 @@ def find_required(html_name, soup, *args, **kwargs):
     panic("Could not find {!r} in {}".format(args, html_name))
     
     
+def render_html_template(template_name, args, context):
+    """Renders the given html template, returning the unicode result."""
+    context.setdefault("debug", args.debug)
+    context.setdefault("github_user", args.github_user)
+    context.setdefault("github_repo", args.github_repo)
+    return render_to_string("index.html", context)
+    
+    
 def render_locale_index_html(html_name, soup, navigation_list, args):
     """Process an index HTML page, returning a string of processed HTML."""
     logging.debug("Processing {} as a table of contents".format(html_name))
     # Render the template.
-    return render_to_string("index.html", {
+    return render_html_template("index.html", args, {
         "title": "Table of Contents",
         "navigation_list": navigation_list,
         "html_name": html_name,
-        "debug": args.debug,
     })
     
     
@@ -255,14 +272,13 @@ def render_locale_chapter_page(html_name, soup, navigation_list, args):
                 next_page = navigation_list[n+1]
             break
     # Render the template.
-    return render_to_string("chapter.html", {
+    return render_html_template("chapter.html", args, {
         "title": title,
         "content_html": content_html,
         "navigation_list": navigation_list,
         "html_name": html_name,
         "prev_page": prev_page,
         "next_page": next_page,
-        "debug": args.debug,
     })
     
     

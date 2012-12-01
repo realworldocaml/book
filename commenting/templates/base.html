@@ -12,6 +12,16 @@
         <link rel="stylesheet" href="media/css/main.css">
         
         <script src="media/js/require.js" data-main="media/js/main.js"></script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: "{{github_user|escapejs}}",
+                        repo: "{{github_repo|escapejs}}"
+                    }
+                }
+            });
+        </script>
         {% if debug %}
             <script>
                 require.config({
