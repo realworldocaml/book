@@ -174,6 +174,8 @@ def process_locale_chapter_page_section(html_name, section):
     logging.debug("Processing section '{}' in {}".format(section["title"], html_name))
     # Make into HTML5 section.
     section.name = "section"
+    del section["class"]
+    del section["title"]
     # Replace titlepage div with HTML5 section h1.
     titlepage = find_required(html_name, section, "div", "titlepage", recursive=False)
     heading = find_required(html_name, titlepage, ["h1", "h2", "h3", "h4", "h5", "h6", "h7", "p"])
