@@ -204,11 +204,11 @@ def render_locale_chapter_page(html_name, soup, navigation_list):
     # Remove wrappers around tables.
     for element in chapter_root.find_all("div", "informaltable"):
         element.replaceWith(element.find("table", recursive=False))
-    # Remove wrappers around special sections.
+    # Remove wrappers around asides.
     for section_class in ("note", "important", "warning", "tip"):
         for element in chapter_root.find_all("div", section_class):
             aside = soup.new_tag("aside")
-            aside["class"] = element["class"]
+            aside["class"] = section_class
             element.replaceWith(aside)
             header = soup.new_tag("h1")
             header.append(find_required(html_name, element, "th").get_text())
@@ -223,15 +223,16 @@ def render_locale_chapter_page(html_name, soup, navigation_list):
         element.extract()
     # Remove all styles and classes.
     for element in chapter_root.find_all(True):
-        del element["class"]
-        del element["style"]
-        del element["title"]
-        del element["type"]
-        del element["align"]
-        del element["valign"]
-        del element["border"]
-        del element["cellspacing"]
-        del element["cellpadding"]
+        if element.name not in ("section", "aside"):
+            del element["class"]
+            del element["style"]
+            del element["title"]
+            del element["type"]
+            del element["align"]
+            del element["valign"]
+            del element["border"]
+            del element["cellspacing"]
+            del element["cellpadding"]
     # Convert chapter root to string.
     content_html = u"".join(unicode(e) for e in chapter_root.find_all(True, recursive=False))
     # Render the template.

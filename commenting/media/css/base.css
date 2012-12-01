@@ -82,7 +82,7 @@ body {
 }
 
 
-/* Heading styles. */
+/* Sectioning. */
 
 .page > h1 {
     font-size: 36px;
@@ -109,6 +109,39 @@ body {
 
 .page > section > section > h1 {
     font-size: 16px;
+}
+
+
+/* Asides */
+
+.page aside {
+    padding: 14px 14px 0 76px;
+    border: 1px #E2E0D8 solid;
+    overflow: hidden;
+    margin: 0 0 11px 0;
+    background-position: 14px 14px;
+    background-repeat: no-repeat;
+    background-size: 48px 48px;
+}
+
+.page aside > h1 {
+    margin-bottom: 11px;
+}
+
+.page aside.note {
+    background-image: url(../img/aside-note.png);
+}
+
+.page aside.important {
+    background-image: url(../img/aside-important.png);
+}
+
+.page aside.warning {
+    background-image: url(../img/aside-warning.png);
+}
+
+.page aside.tip {
+    background-image: url(../img/aside-tip.png);
 }
 
 
