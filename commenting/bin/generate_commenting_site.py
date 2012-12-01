@@ -20,8 +20,7 @@ Then, whenever you want to run this generator, use the following command:
     $ python bin/generate_commenting_site.py
 """
 
-import argparse, os.path, logging, sys, shutil, glob
-from itertools import izip
+import argparse, os.path, logging, sys, shutil, glob, traceback
 
 from bs4 import BeautifulSoup
 
@@ -32,6 +31,7 @@ from django.conf import settings
 def panic(msg, code=1):
     """Logs the given error, then exits."""
     logging.error(msg)
+    logging.debug(traceback.format_exc())
     sys.exit(code)
     
     
@@ -212,12 +212,33 @@ def render_locale_chapter_page(html_name, soup):
     # Remove wrappers around lists.
     for element in chapter_root.find_all("div", "itemizedlist"):
         element.replaceWith(element.find("ul", recursive=False))
+    # Remove wrappers around tables.
+    for element in chapter_root.find_all("div", "informaltable"):
+        element.replaceWith(element.find("table", recursive=False))
+    # Remove wrappers around notes.
+    for element in chapter_root.find_all("div", "note") + chapter_root.find_all("div", "important") + chapter_root.find_all("div", "tip"):
+        aside = soup.new_tag("aside")
+        aside["class"] = element["class"]
+        element.replaceWith(aside)
+        header = soup.new_tag("h1")
+        header.append(find_required(html_name, element, "th").get_text())
+        aside.append(header)
+        rows = element.find_all("tr")
+        if len(rows) != 2:
+            panic("Expect two rows in note from {}".format(html_name))
+        for child in find_required(html_name, rows[1], "td").find_all(True, recursive=False):
+            aside.append(child)
+    # Clean up table colgroups.
+    for element in chapter_root.find_all("colgroup"):
+        element.extract()
     # Remove all styles and classes.
     for element in chapter_root.find_all(True):
         del element["class"]
         del element["style"]
         del element["title"]
         del element["type"]
+        del element["align"]
+        del element["border"]
     # Convert chapter root to string.
     content_html = u"".join(unicode(e) for e in chapter_root.find_all(True, recursive=False))
     # Render the template.
