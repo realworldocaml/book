@@ -31,7 +31,7 @@
 
 
 
-<part label="Guided Tour"><chapter id="prologue">
+<part label="guided-tour"><title>Guided Tour</title><chapter id="prologue">
   <title>Prologue</title>
   <para>
     <emphasis>(yminsky: this is something of a placeholder. We need a
@@ -5345,7 +5345,7 @@ let extended_color_to_int : extended_color -&gt; int = function
       </para>
     </sect2>
   </sect1>
-</chapter></part><part label="Practical Examples"><chapter id="data-serialization-with-json-xml-and-s-expressions">
+</chapter></part><part label="practical-examples"><title>Practical Examples</title><chapter id="data-serialization-with-json-xml-and-s-expressions">
   <title>Data Serialization with JSON, XML and S-Expressions</title>
   <para>
     Data serialization, <emphasis>i.e.</emphasis> reading and writing
@@ -13004,7 +13004,7 @@ end;;
 </programlisting>
     </sect2>
   </sect1>
-</chapter></part><part label="Advanced Topics"><chapter id="understanding-the-runtime-system">
+</chapter></part><part label="advanced-topics"><title>Advanced Topics</title><chapter id="understanding-the-runtime-system">
   <title>Understanding the runtime system</title>
   <para>
     Much of the static type information contained within an OCaml
