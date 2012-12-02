@@ -10,7 +10,28 @@
 <title>Real World OCaml</title>
 <xi:include href="bookinfo.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="ch00.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-<chapter id="prologue">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<part label="Guided Tour"><chapter id="prologue">
   <title>Prologue</title>
   <para>
     <emphasis>(yminsky: this is something of a placeholder. We need a
@@ -195,8 +216,7 @@
       </para>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="a-guided-tour">
+</chapter><chapter id="a-guided-tour">
   <title>A Guided Tour</title>
   <para>
     This chapter gives an overview of OCaml by walking through a series
@@ -365,7 +385,7 @@ val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
       The notation for the type-signature of a multi-argument functions
       may be a little surprising at first, but we'll explain where it
       comes from when we get to function currying in
-      <link linkend="variables-and-functions">Chapter 3</link>. For the
+      <xref linkend="variables-and-functions"/>. For the
       moment, think of the arrows as separating different arguments of
       the function, with the type after the final arrow being the return
       value of the function. Thus,
@@ -751,7 +771,8 @@ Error: This expression has type string but an expression was expected of type
 </programlisting>
         <para>
           We'll learn more about labeled arguments and why they're
-          important in Chapter {{{variables-and-functions}}}.
+          important in
+          <xref linkend="variables-and-functions"/>.
         </para>
       </sect3>
       <sect3 id="constructing-lists-with">
@@ -1471,8 +1492,8 @@ ocamlbuild -use-ocamlfind sum.native
       <para>
         The <literal>.native</literal> suffix indicates that we're
         building a native-code executable, which we'll discuss more in
-        Chapter {{{files-modules-and-programs}}}. Once the build
-        completes, we can use the resulting program like any
+        <xref linkend="files-modules-and-programs"/>. Once the
+        build completes, we can use the resulting program like any
         command-line utility. In this example, we can just type in a
         sequence of numbers, one per line, hitting control-d to exit
         when the input is complete.
@@ -1502,8 +1523,7 @@ Total: 100.5
       examples in the rest of the book.
     </para>
   </sect1>
-</chapter>
-<chapter id="variables-and-functions">
+</chapter><chapter id="variables-and-functions">
   <title>Variables and Functions</title>
   <para>
     Variables and functions are fundamental ideas that show up in
@@ -1525,9 +1545,9 @@ Total: 100.5
 let &lt;identifier&gt; = &lt;expr&gt;
 </programlisting>
     <para>
-      As we'll see when we get to the module system in Chapter
-      {{{files-modules-and-programs}}}, this same syntax is used for
-      top-level definitions in a module.
+      As we'll see when we get to the module system in
+      <xref linkend="files-modules-and-programs"/>, this same
+      syntax is used for top-level definitions in a module.
     </para>
     <para>
       Every variable binding has a <emphasis>scope</emphasis>, which is
@@ -2611,27 +2631,49 @@ val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;
         <para>
           One subtle aspect of labeled and optional arguments is how
           they are inferred by the type system. Consider the following
-          example:
+          example for computing numerical derivatives of a function of
+          two dimensions. The function takes an argument
+          <literal>delta</literal> which determines the scale at which
+          to compute the derivative, values <literal>x</literal> and
+          <literal>y</literal> which determine which point to compute
+          the derivative at, and the function <literal>f</literal> whose
+          derivative is being computed. The function
+          <literal>f</literal> itself takes two labeled arguments
+          <literal>x</literal> and <literal>y</literal>.
         </para>
         <programlisting language="ocaml">
-# let foo g x y = g ~x ~y ;;
-val foo : (x:'a -&gt; y:'b -&gt; 'c) -&gt; 'a -&gt; 'b -&gt; 'c = &lt;fun&gt;
+# let numeric_deriv ~delta ~x ~y ~f =
+    let x' = x +. delta in
+    let y' = y +. delta in
+    let base = f ~x ~y in
+    let dx = (f ~x:x' ~y -. base) /. delta in
+    let dy = (f ~x ~y:y' -. base) /. delta in
+    (dx,dy)
+  ;;
+val numeric_deriv :
+  delta:float -&gt;
+  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =
+  &lt;fun&gt;
 </programlisting>
         <para>
-          In principle, it seems like the inferred type of
-          <literal>g</literal> could have its labeled arguments listed
-          in a different order, such as:
+          In principle, it's not obvious how the order of the arguments
+          to <literal>f</literal> should be chosen. Since optional
+          arguments can be passed in arbitrary order, it seems like it
+          could as well be
+          <literal>y:float -&gt; x:float -&gt; float</literal> as it is
+          <literal>x:float -&gt; y:float -&gt; float</literal>.
         </para>
-        <programlisting language="ocaml">
-val foo : (y:'b -&gt; x:'a -&gt; 'c) -&gt; 'a -&gt; 'b -&gt; 'c = &lt;fun&gt;
-</programlisting>
         <para>
-          And it would be perfectly consistent for <literal>g</literal>
-          to take an optional argument instead of a labeled one, which
-          could lead to this type signature for <literal>foo</literal>:
+          Even worse, it would be perfectly consistent for
+          <literal>f</literal> to take an optional argument instead of a
+          labeled one, which could lead to this type signature for
+          <literal>numeric_deriv</literal>:
         </para>
         <programlisting language="ocaml">
-val foo : (?x:'a -&gt; y:'b -&gt; 'c) -&gt; 'a -&gt; 'b -&gt; 'c = &lt;fun&gt;
+val numeric_deriv :
+  delta:float -&gt;
+  x:float -&gt; y:float -&gt; f:(?x:float -&gt; y:float -&gt; float) -&gt; float * float =
+  &lt;fun&gt;
 </programlisting>
         <para>
           Since there are multiple plausible types to choose from, OCaml
@@ -2642,47 +2684,54 @@ val foo : (?x:'a -&gt; y:'b -&gt; 'c) -&gt; 'a -&gt; 'b -&gt; 'c = &lt;fun&gt;
         </para>
         <para>
           Note that these heuristics might at different points in the
-          source suggest different types. For example, here's a function
-          whose argument <literal>g</literal> is a function that is used
-          once with argument <literal>~x</literal> followed by
-          <literal>~y</literal>, and once with argument
-          <literal>~y</literal> followed by <literal>~x</literal>. The
-          result of this is a compilation error.
+          source suggest different types. Here's a version of
+          <literal>numeric_deriv</literal> where the invocations of
+          <literal>f</literal> were changes so they list the arguments
+          in different orders.
         </para>
         <programlisting language="ocaml">
-# let bar g x y = g ~x ~y + g ~y ~x ;;
-Characters 26-27:
-  let bar g x y = g ~x ~y + g ~y ~x ;;
-                            ^
+# let numeric_deriv ~delta ~x ~y ~f =
+    let x' = x +. delta in
+    let y' = y +. delta in
+    let base = f ~x ~y in
+    let dx = (f ~y ~x:x' -. base) /. delta in
+    let dy = (f ~x ~y:y' -. base) /. delta in
+    (dx,dy)
+  ;;
+Characters 131-132:
+      let dx = (f ~y ~x:x' -. base) /. delta in
+                ^
 Error: This function is applied to arguments
 in an order different from other calls.
 This is only allowed when the real type is known.
 </programlisting>
         <para>
+          As suggested by the error message, we can get OCaml to accept
+          the fact that <literal>f</literal> is used with different
+          argument orders if we provide explicit type information. Thus,
+          we can write:
+        </para>
+        <para>
           Note that if we provide an explicit type constraint for
           <literal>g</literal>, that constraint decides the question of
           what <literal>g</literal>'s type is, and the error disappears.
+          In the following, we do this by providing an explicit type
+          annotation.
         </para>
         <programlisting language="ocaml">
-# let foo (g : ?y:'a -&gt; x:'b -&gt; int) x y =
-    g ~x ~y + g ~y ~x ;;
-val foo : (?y:'a -&gt; x:'b -&gt; int) -&gt; 'b -&gt; 'a -&gt; int = &lt;fun&gt;
+# let numeric_deriv ~delta ~x ~y ~(f: x:float -&gt; y:float -&gt; float) =
+    let x' = x +. delta in
+    let y' = y +. delta in
+    let base = f ~x ~y in
+    let dx = (f ~y ~x:x' -. base) /. delta in
+    let dy = (f ~x ~y:y' -. base) /. delta in
+    (dx,dy)
+  ;;
+val numeric_deriv :
+  delta:float -&gt;
+  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =
+  &lt;fun&gt;
 </programlisting>
-        <para>
-          Here, our type annotation,
-          <literal>?y:'a -&gt; x:'b -&gt; int</literal>, indicates that
-          <literal>foo</literal> has an optional argument
-          <literal>y</literal> followed by a labeled argument
-          <literal>x</literal>, where <literal>y</literal> and
-          <literal>x</literal> are potentially polymorphic, hence the
-          type variables <literal>'a</literal> and
-          <literal>'b</literal>. This annotation nails down the order of
-          the arguments of <literal>g</literal>, and thus allows the
-          compiler to successfully infer a type for
-          <literal>foo</literal>, despite the fact that it uses
-          <literal>g</literal> in ways that suggest two different
-          argument orders.
-        </para>
       </sect3>
       <sect3 id="optional-arguments-and-partial-application">
         <title>Optional arguments and partial application</title>
@@ -2773,8 +2822,7 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       </sect3>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="lists-options-and-patterns">
+</chapter><chapter id="lists-options-and-patterns">
   <title>Lists, Options and Patterns</title>
   <para>
     <emphasis>(Note, this chapter is incomplete. jyh is working on
@@ -2793,12 +2841,28 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       they are simple, and they are extensively supported by the
       standard library.
     </para>
+    <para>
+      <emphasis>(yminsky: I would point out that they are the most
+      commonly used aggregate, rather than just that they're supported
+      by the standard library. Also, that way we avoid confusion in the
+      sentence. between the standard library and Core.)</emphasis>
+    </para>
     <sect2 id="example-pretty-printing-a-table">
       <title>Example: pretty-printing a table</title>
+      <para>
+        <emphasis>(yminsky: I wonder if the whole example should go
+        later in the section, after we've done more of the basis of
+        lists in this chapter.)</emphasis>
+      </para>
       <para>
         One common programming task is displaying tabular data. In this
         example, we will go over the design of a simple library to do
         just that.
+      </para>
+      <para>
+        <emphasis>(yminsky: This is the first appearance of an mli file.
+        If we're going to introduce it here, we need to do a little more
+        explanation.)</emphasis>
       </para>
       <para>
         We'll start with the interface. The code will go in a new module
@@ -2984,6 +3048,12 @@ let render header rows =
   </sect1>
   <sect1 id="list-basics">
     <title>List basics</title>
+    <para>
+      <emphasis>(yminsky: I wonder if this should come before the
+      example. The example kind of assumes a lot of information, some of
+      which was given in the guided tour, and some of which
+      wasn't.)</emphasis>
+    </para>
     <para>
       In the example, we see calls to <literal>List</literal> functions
       in the standard library, in particular
@@ -3527,17 +3597,17 @@ let rec insert x = function
  | Leaf -&gt; Interior (x, Leaf, Leaf);;
 </programlisting>
   </sect1>
-</chapter>
-<chapter id="records">
+</chapter><chapter id="records">
   <title>Records</title>
   <para>
     One of OCaml's best features is its concise and expressive system
     for declaring new datatypes. Two key elements of that system are
     <emphasis>records</emphasis> and <emphasis>variants</emphasis>, both
-    of which we discussed briefly in chapter {{{GUIDEDTOUR}}}. In this
-    chapter we'll cover records in more depth, covering more of the
-    details of how they work, as well as advice on how to use them
-    effectively in your software designs.
+    of which we discussed briefly in
+    <xref linkend="a-guided-tour"/>. In this chapter we'll
+    cover records in more depth, covering more of the details of how
+    they work, as well as advice on how to use them effectively in your
+    software designs.
   </para>
   <para>
     A record represents a collection of values stored together as one,
@@ -4039,8 +4109,8 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
     <para>
       OCaml's policy of immutable-by-default is a good one, but
       imperative programming does have its place. We'll discuss more
-      about how (and when) to use OCaml's imperative features in Chapter
-      {{{imperative-programming}}}.
+      about how (and when) to use OCaml's imperative features in
+      <xref linkend="imperative-programming"/>.
     </para>
   </sect1>
   <sect1 id="first-class-fields">
@@ -4188,8 +4258,7 @@ credentials: Xy2d9W
       exhaustively considered all elements of the field.
     </para>
   </sect1>
-</chapter>
-<chapter id="variants">
+</chapter><chapter id="variants">
   <title>Variants</title>
   <para>
     Variant types are used to represent multiple different
@@ -5269,14 +5338,14 @@ let extended_color_to_int : extended_color -&gt; int = function
         advantage of their power; in particular, when you take advantage
         of the ability of polymorphic variant types to overlap in the
         tags they support. This ties into OCaml's support for subtyping.
-        As we'll discuss further when we cover objects in Chapter
-        {{{OBJECTS}}}, subtyping brings in a lot of complexity, and most
-        of the time, that's complexity you want to avoid.
+        As we'll discuss further when we cover objects in
+        <xref linkend="object-oriented-programming"/>,
+        subtyping brings in a lot of complexity, and most of the time,
+        that's complexity you want to avoid.
       </para>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="data-serialization-with-json-xml-and-s-expressions">
+</chapter></part><part label="Practical Examples"><chapter id="data-serialization-with-json-xml-and-s-expressions">
   <title>Data Serialization with JSON, XML and S-Expressions</title>
   <para>
     Data serialization, <emphasis>i.e.</emphasis> reading and writing
@@ -7238,8 +7307,7 @@ module Fields :
   end
 </programlisting>
   </sect1>
-</chapter>
-<chapter id="error-handling">
+</chapter><chapter id="error-handling">
   <title>Error Handling</title>
   <para>
     Nobody likes dealing with errors. It's tedious, it's easy to get
@@ -7514,7 +7582,8 @@ val (&gt;&gt;=) : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
         the infix operator <literal>&gt;&gt;=</literal>. The module is
         called <literal>Monad_infix</literal> because the bind operator
         is part of a sub-interface called <literal>Monad</literal>,
-        which we'll talk about more in chapter {{{ASYNC}}}.
+        which we'll talk about more in
+        <xref linkend="concurrent-programming-with-async"/>.
       </para>
       <para>
         This is a bit easier to read if we write it with fewer
@@ -7923,13 +7992,11 @@ Exception: Key_not_found(&quot;c&quot;).
 </programlisting>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="imperative-programming-1">
+</chapter><chapter id="imperative-programming-1">
   <title>Imperative Programming</title>
   <para>
   </para>
-</chapter>
-<chapter id="files-modules-and-programs">
+</chapter><chapter id="files-modules-and-programs">
   <title>Files, Modules and Programs</title>
   <para>
     We've so far experienced OCaml largely through the toplevel. As you
@@ -8035,7 +8102,8 @@ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
       complicated builds will require a tool to orchestrate the build.
       One great tool for this task is <literal>ocamlbuild</literal>,
       which is shipped with the OCaml compiler. We'll talk more about
-      <literal>ocamlbuild</literal> in chapter {{{OCAMLBUILD}}}, but for
+      <literal>ocamlbuild</literal> in
+      <xref linkend="packaging-and-build-systems"/>, but for
       now, we'll just walk through the steps required for this simple
       application. First, create a <literal>_tags</literal> file,
       containing the following lines.
@@ -8797,8 +8865,7 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
       </sect3>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="functors-and-first-class-modules">
+</chapter><chapter id="functors-and-first-class-modules">
   <title>Functors and First-Class Modules</title>
   <para>
     Up until now, we've seen modules play a limited role, serving as a
@@ -9653,7 +9720,8 @@ include Foldable.Extend(T)
         <listitem>
           <para>
             Support for so-called monadic libraries, like the ones
-            discussed in {{{ERROR HANDLING}}} and {{{CONCURRENCY}}}.
+            discussed in <xref linkend="error-handling"/> and
+            <xref linkend="concurrent-programming-with-async"/>.
             Here, the functor is used to provide a collection of
             standard helper functions based on the core
             <literal>bind</literal> and <literal>return</literal>
@@ -9677,10 +9745,11 @@ include Foldable.Extend(T)
       (<literal>.ml</literal> and <literal>.mli</literal> files) are
       really just a simplified module system. Classes and objects are a
       different form of organization altogether (as we'll see in
-      [[[Chapter 13]]]). Yet, in each of these cases, there is a clear
-      separation between types and values -- values cannot contain
-      types, and types cannot contain values. And since modules can
-      contain types, modules can't be values.
+      <xref linkend="object-oriented-programming"/>. Yet, in
+      each of these cases, there is a clear separation between types and
+      values -- values cannot contain types, and types cannot contain
+      values. And since modules can contain types, modules can't be
+      values.
     </para>
     <para>
       <emphasis>(yminsky: Instead of saying that ml and mli files are a
@@ -10515,13 +10584,11 @@ $ ./service_client.byte
       </para>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="input-and-output">
+</chapter><chapter id="input-and-output">
   <title>Input and Output</title>
   <para>
   </para>
-</chapter>
-<chapter id="concurrent-programming-with-async">
+</chapter><chapter id="concurrent-programming-with-async">
   <title>Concurrent Programming with Async</title>
   <para>
     When you start building OCaml code that interfaces with external
@@ -11127,8 +11194,7 @@ val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&
 
 
   </sect1>
-</chapter>
-<chapter id="object-oriented-programming">
+</chapter><chapter id="object-oriented-programming">
   <title>Object Oriented Programming</title>
   <para>
     <emphasis>(yminsky: If we don't feel like these are
@@ -12938,8 +13004,7 @@ end;;
 </programlisting>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="understanding-the-runtime-system">
+</chapter></part><part label="Advanced Topics"><chapter id="understanding-the-runtime-system">
   <title>Understanding the runtime system</title>
   <para>
     Much of the static type information contained within an OCaml
@@ -13904,8 +13969,7 @@ Hello OCaml World!
 
     </sect2>
   </sect1>
-</chapter>
-<chapter id="managing-external-memory-with-bigarrays">
+</chapter><chapter id="managing-external-memory-with-bigarrays">
   <title>Managing external memory with Bigarrays</title>
   <sect1 id="bigarrays-for-external-memory-blocks">
     <title>Bigarrays for external memory blocks</title>
@@ -13983,8 +14047,7 @@ enum caml_ba_managed {
 };
 </programlisting>
   </sect1>
-</chapter>
-<chapter id="inside-the-runtime">
+</chapter><chapter id="inside-the-runtime">
   <title>Inside the Runtime</title>
   <para>
     (<emphasis>avsm</emphasis>: this chapter is still being chopped and
@@ -14733,8 +14796,7 @@ immutable: 2.6186s (19073 minor collections)
       </para>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="performance-tuning-and-profiling">
+</chapter><chapter id="performance-tuning-and-profiling">
   <title>Performance Tuning and Profiling</title>
   <sect1 id="byte-code-profiling">
     <title>Byte code Profiling</title>
@@ -14763,8 +14825,7 @@ immutable: 2.6186s (19073 minor collections)
       </para>
     </sect2>
   </sect1>
-</chapter>
-<chapter id="packaging-and-build-systems">
+</chapter><chapter id="packaging-and-build-systems">
   <title>Packaging and Build Systems</title>
   <para>
     The OCaml toolchain is structured much like a C compiler, with
@@ -14966,13 +15027,11 @@ immutable: 2.6186s (19073 minor collections)
     <para>
     </para>
   </sect1>
-</chapter>
-<chapter id="parsing-with-ocamllex-and-ocamlyacc">
+</chapter><chapter id="parsing-with-ocamllex-and-ocamlyacc">
   <title>Parsing with OCamllex and OCamlyacc</title>
   <para>
   </para>
-</chapter>
-<chapter id="installation">
+</chapter><chapter id="installation">
   <title>Installation</title>
   <para>
     The easiest way to install OCaml is via the binary packages
@@ -15148,5 +15207,4 @@ open Async.Std
       installation instructions and URLs.
     </para>
   </sect1>
-</chapter>
-</book>
+</chapter></part></book>
