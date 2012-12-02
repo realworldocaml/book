@@ -42,12 +42,12 @@ build/$(LINGUA)/source/.stamp:
 build/$(LINGUA)/source/rwo.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
 	cd scripts && ./build.sh
-	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ | ./scripts/_build/rewrite_link_to_xref.native > $@
+	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ | ./scripts/_build/filter_book.native > $@
 
 build/$(LINGUA)/source/rwo-oreilly.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
 	cd scripts && ./build.sh
-	pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -s $^ | ./scripts/_build/rewrite_link_to_xref.native > $@
+	pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -s $^ | ./scripts/_build/filter_book.native > $@
 
 build/$(LINGUA)/html/index.html: build/$(LINGUA)/source/rwo.xml stylesheets/system-xsl
 	xsltproc --output build/$(LINGUA)/html/ \

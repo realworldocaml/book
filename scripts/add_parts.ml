@@ -1,4 +1,5 @@
 (*
+ Add <part> tags to organise the <chapter> tags better
 *)
 
 let guided = [
@@ -82,10 +83,6 @@ let output_book chapters others =
   end;
   mk_tag "book" contents
 
-let _ =
-  let i = Xmlm.make_input (`Channel stdin) in
-  let o = Xmlm.make_output (`Channel stdout) in
-  let (dtd,it) = in_tree i in
+let t it =
   let chapters, others = get_chapters it in
-  let book = output_book chapters others in
-  out_tree o (dtd, book)
+  output_book chapters others
