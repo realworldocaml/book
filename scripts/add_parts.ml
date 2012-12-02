@@ -2,7 +2,7 @@
  Add <part> tags to organise the <chapter> tags better
 *)
 
-let guided = [
+let basic = [
  "prologue"; 
  "a-guided-tour";
  "variables-and-functions"; 
@@ -32,9 +32,9 @@ let advanced = [
 ]
 
 let parts = [
-  "Guided Tour", guided;
-  "Practical Examples", practical;
-  "Advanced Topics", advanced
+  "basic-concepts","Basic Concepts", basic;
+  "practical-examples","Practical Examples", practical;
+  "advanced-topics","Advanced Topics", advanced
 ]
 
 open Xml_tree
@@ -72,7 +72,11 @@ let output_book chapters others =
     chapter
   in
   (* Construct a <part> tag *)
-  let mk_part (label,ids) = mk_tag ~attrs:["label",label] "part" (List.map mk_chapter ids) in
+  let mk_part (label,title,ids) = 
+    let title = mk_tag "title" [Data title] in
+    mk_tag ~attrs:["label",label] "part"  
+    (title :: (List.map mk_chapter ids))
+  in
   (* Build the book and include the misc tags from the original parse *)
   let contents = others @ (List.map mk_part parts) in
   (* Verify that the chapters list is empty, or something is left over *)
