@@ -293,8 +293,8 @@ public iterface Iterator {
 
 At any time, a `Iterator` object refers (optionally) to some element of a
 container.  The `hasNext()` method returns true if the iterator refers to an
-element; the method `next()` returns the element, and advances to the next one;
-and `remove()` removes the last element returned by the iterator.
+element; the method `next()` returns the element, and also advances to the next
+one; and `remove()` removes the last element returned by the iterator.
 
 When we define a similar iterator concept in OCaml, we need to choose how to
 represent it.  We _could_ define a separate iterator type for each kind of
@@ -360,11 +360,12 @@ next's elements `previous` pointer, then advancing `current` to the next
 element.  The following example illustrates the semantics.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
-# let l = create ();
-  push_front l 1;
+# let l = create ();;
+val l : '_a dlist
+# push_front l 1;
   push_front l 2;
   push_front l 3;
-  DList.iter (Printf.printf "Item: %d\n") l;;
+  iter (Printf.printf "Item: %d\n") l;;
 Item: 3
 Item: 2
 Item: 1
@@ -394,17 +395,171 @@ Note that the doubly-linked list is a _cyclic_ data structure.  Most notably,
 the builtin equality _does not work_ in general with cyclic values.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
-# let l2 = DList.create();;
-val l2 : '_a DList.t = <abstr>
-# push_front l2 1;;
-- : unit = ()
-# push_front l2 3;;
+# let l2 = create();
+val l2 : '_a dlist
+# push_front l2 1; push_front l2 3;;
 - : unit = ()
 # l == l2;;
 - : bool = false
 # l = l2;;
 Out of memory during evaluation.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Doubly-linked list module
+
+Now that we have defined iterators, let's declare the complete signature for
+doubly-linked lists as a module.  The type of elements `'a element` is internal
+to the implementation, and the type of lists `'a DList.t` is abstract.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module DList : sig
+   type 'a t
+
+   val create : unit -> 'a t
+   val is_empty : 'a t -> bool
+   val push_front : 'a t -> data:'a -> unit
+   val front : 'a t -> 'a
+   val pop_front : 'a t -> 'a
+   val iter : ('a -> unit) -> 'a t -> unit
+   val iterator : 'a t -> 'a iterator
+   val find : 'a t -> data:'a -> 'a iterator
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We have seen the definition of all of the functions except `find`, which seaches
+for an element in the list (sequentially), returning an iterator that refers to
+that element if it exists.  The implementation simply creates an iterator, then
+uses a loop to search sequentially for the element.  If the element is found,
+the returned iterator refers to that value, otherwise the iterator does not have
+a value.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module DList = struct
+   ...
+
+   let find l ~data =
+     let it = iterator l in
+     while it#has_value && it#value <> data do
+        it#next
+     done;
+     it
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Hash tables with iterators
+
+Let's return to the example of hash tables, but this time let's define an
+iterator-style interface.  We'll use the same `iterator` object type as we did
+for doubly-linked lists, but this time the iteration is over key/value pairs.
+The signature changes slightly, the main change being tat the `find` function
+returns an iterator.  This allows retrieval of the value associated with a key,
+and it also allows the entry to be deleted.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module IterableHashMap : sig
+  type ('a, 'b) t
+
+  val create : unit -> ('a, 'b) t
+  val add : ('a, 'b) t -> key:'a -> data:'b -> unit
+  val iterator : ('a, 'b) t -> ('a * 'b) iterator
+  val find : ('a, 'b) t -> key:'a -> ('a * 'b) iterator
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The implementation of `IterableHashMap` is similar to the original `HashMap`
+using lists, except now we will use doubly-linked lists.  The `create` function
+creates an array of doubly-linked lists.  The `add` function first removes any
+existing entry, then add the new element to the front of the bucket.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module IterableHashMap = struct
+  type ('a, 'b) t = ('a * 'b) DList.t array
+
+  let num_buckets = 17
+  let hash_bucket key = (Hashtbl.hash key) mod num_buckets
+
+  let create () = Array.init num_buckets (fun _ -> DList.create ())
+
+  let add table ~key ~data =
+    let index = hash_bucket key in
+    let it = DList.find table.(index) ~data:(key, data) in
+    if it#has_value then it#remove;
+    DList.push_front table.(index) (key, value)
+
+  ...
+end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can define iterators in the hash table as a pair of a bucket index and
+`DList` iterator into the bucket.  To define this as an object, we'll introduce
+a few more object concepts, including mutable fields, private methods, and
+initializers.  The function `make_iterator table index_ dlist_it_` returns an
+iterator for the bucket with index `index_` and list iterator `dlist_it_`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let make_iterator table index_ dlist_it_ =
+    object (self)
+      val mutable index = index_
+      val mutable dlist_it = dlist_it_
+      method has_value = dlist_it#has_value
+      method value = dlist_it#value
+      method next =
+         dlist_it#next;
+         self#normalize
+      method remove =
+         dlist_it#remove;
+         self#normalize
+      method private normalize =
+        while not dlist_it#has_value && index < num_buckets - 1 do
+          index <- index + 1;
+          dlist_it <- DList.iterator table.(index)
+        done
+      initializer self#normalize
+    end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The iterator implementation relies on a "normal" form, where the list iterator
+_always_ refers to an element.  This is handled by the `normalize` method, which
+advances past empty buckets until either a non-empty bucket is found, or the end
+of the table is reached.
+
+The `normalize` method is declared a `private`, so that it does not appear as
+part of the iterator type.  The `has_value` and `value` methods delagate
+directly to the list iterator.  The `next` and `remove` methods also delagate to
+the list iterator; however, since the iterator has been mutated, the `normalize`
+method is called to advance to the next element.
+
+There are several more things to note.  The syntax `object (self) ... end` means
+that the variable `self` refers to the object itself, allowing other method in
+the object to be called (like `self#normalize`).  The fields `index` and
+`dlist_it` are declared as `val mutable`, which means that they can be modified
+by assignment using the `<-` syntax seen in the `normalize` method.  Finally,
+the object also has an `initializer` expression, which is called when the object
+is first created, in this case normalizing the iterator.
+
+Now that the iterator is defined, we can complete the `IterableHashMap`
+implementation.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let iterator table =
+    make_iterator table 0 (DList.iterator table.(0))
+
+  let find table ~key =
+    let index = hash_bucket key in
+    let it = DList.iterator table.(index) in
+    while it#has_value && fst it#value <> key do
+      it#next
+    done;
+    if it#has_value then
+       make_iterator table index it
+    else
+       make_iterator table num_buckets it
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `iterator` function returns in iterator that refers to the first element in
+the table (if the table is non-empty).  The `find` function searches for an
+element in the table, returning an iterator referring to that value if found, or
+else the an iterator at the end of the table.
 
 ## TODO
 

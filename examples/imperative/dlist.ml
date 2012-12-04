@@ -24,9 +24,10 @@ module DList : sig
    val iter : ('a -> unit) -> 'a t -> unit
 
    val iterator : 'a t -> 'a iterator
+   val find : 'a t -> data:'a -> 'a iterator
 end = struct
    type 'a element =
-      { mutable value : 'a;
+      { value : 'a;
         mutable next : 'a element option;
         mutable previous : 'a element option
       }
@@ -92,6 +93,13 @@ end = struct
       | None -> ()
      in
      loop !l
+
+   let find l ~data =
+      let it = iterator l in
+      while it#has_value && it#value <> data do
+         it#next
+      done;
+      it
 end
 
 let l = DList.create ();;
