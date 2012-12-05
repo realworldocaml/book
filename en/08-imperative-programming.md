@@ -561,6 +561,249 @@ the table (if the table is non-empty).  The `find` function searches for an
 element in the table, returning an iterator referring to that value if found, or
 else the an iterator at the end of the table.
 
+## Lazy computation
+
+There are many instances where imperative programming is used to change or
+improve the performance characteristics of a program, without otherwise changing
+the behavior.  In other words, the program could be written without
+side-effects, but performance is improved by techniques like lazy computation,
+caching or memoization, etc.
+
+One of the simplest of these is the builtin lazy computation.  The keyword
+`lazy` can be used to prefix any expression, returning a value of type `'a
+Lazy.t`.  The computation is delayed until forced with the `Lazy.force`
+function, and then saved thereafter.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let v = lazy (print_string "performing lazy computation\n"; 1);;
+val v : int lazy_t = <lazy>
+# Lazy.force v;;
+performing lazy computation
+- : int = 1
+# Lazy.force v;;
+- : int = 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The builtin `lazy` computation has a nice syntax, but the technique is pretty
+generic, and we can implement it with a mutable value.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module ImpLazy : sig
+   type 'a t
+
+   val create : (unit -> 'a) -> 'a t
+   val force : 'a t -> 'a
+end = struct
+   type 'a delayed = Delayed of (unit -> 'a) | Value of 'a
+   type 'a t = 'a delayed ref
+
+   let create f = ref (Delayed f)
+   let force v =
+     match !v with
+      | Delayed f ->
+           let x = f () in
+           v := Value x;
+           x
+      | Value x ->
+           x
+end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `'a delayed` type contains a delayed value represented as a function, or
+else an actual value.  The `ImpLazy.force` function forces the computation; if
+it is delayed, the function is evaluated, and the value is mutated to save the
+resulting value.  Subsequent calls to `ImpLazy.force` will fall into the `Value`
+case, without needing to reevaluate the function.  The main difference between
+our module `ImpLazy` and the builtin module `Lazy` is the nice syntax for the
+latter.  Rather than writing `ImpLazy.create (fun () -> e)`, the builtin syntax
+is just `lazy e`.
+
+### Memoization
+
+We can generalize lazy computations to function _memoization_, where we save the
+result of function applications to avoid their recomputation.  One simple
+implementation is to use a hash table to save the values by side effect.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module Memo : sig
+   type ('a, 'b) t
+
+   val create : unit -> ('a, 'b) t
+   val apply : ('a, 'b) t -> func:('a -> 'b) -> arg:'a -> 'b
+end = struct
+   type ('a, 'b) t = ('a, 'b) HashMap.t
+
+   let create = HashMap.create
+   let apply table ~func ~arg =
+      try HashMap.find table ~key:arg with
+         Not_found ->
+            let x = func arg in
+            HashMap.add table ~key:arg ~data:x;
+            x
+end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Memoization is useful for _dynamic programming_, where problems are solved by
+breraking them down into simpler subproblems.  If subproblems occur more than
+once, memoization can be used to avoid recomputing the subproblem.  A canonical
+example of this is the Fibonacci sequence, which is defined by the following
+program, which produces the sequence _0, 1, 1, 2, 3, 5, 8, 13, 21, ..._ starting
+from 0.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let rec fib i = if i <= 1 then i else fib (i - 1) + fib (i - 2);;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The complexity of this function is exponential _O(2^i)_, because for large
+inputs the function computes two similar-sized subproblems.  To illustrate,
+let's time the computation using the `Sys.time` function to measure the wall
+clock.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let time f x =
+    let start = Sys.time () in
+    let y = f x in
+    Printf.printf "Time: %g sec\n" (Sys.time () -. start);
+    y;;
+val time : ('a -> 'b) -> 'a -> 'b = <fun>
+# time fib 40;;
+Time: 5.53724 sec
+- : int = 102334155
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Next, let's construct a memoized version of the function, where the recursive
+calls are made through a memo table.  This makes a dramatic improvement in
+performance.  Since the recursive calls are computed just once, the complexity
+is linear, and the computation is fast.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let memo_fib =
+    let memo = Memo.create () in
+    let rec fib i =
+      if i <= 1 then
+         i
+      else
+         Memo.apply memo ~func:fib ~arg:(i - 1) +
+         Memo.apply memo ~func:fib ~arg:(i - 2)
+    in
+    fib;;
+val memo_fib : int -> int = <fun>
+# time memo_fib 40;;
+Time: 3.7e-05 sec
+- : int = 102334155
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that this use of memoization relies on side-effects to cache intermediate
+computations, but it doesn't change the values of the function.  Its purpose is
+to improve performance.
+
+### Hash consing
+
+"Hash consing" is a technique to share values that are structurally equal.  The
+term comes from Lisp, where the technique is used to share s-expressions that
+are equal.  In some situations, hash-consing can result in dramatic performance
+improvements in two ways.  First, space can be reduced by using a single
+physical representation for values that are equal.  Second, values can be
+compared for equality using the constant-time physical equality operator `==`.
+
+One of the simplest ways to implement hash-consing is to use a hash-table to
+remember (memoize) values that have already been created.  To illustrate, let's
+define a kind of numerical expression `Exp.t` consisting of integers, variables,
+addition, and multiplication (we can define more operators, but let's keep the
+example simple).
+
+The type `Exp.t` is declared as `private`, meaning that pattern matching can be
+used on the expressions outside the module, but expressions can't be constructed
+without explicitly using the constructors `num`, `var`, `plus`, `times` provided
+by the `Exp` module.  These functions enforce the hash-consing, ensuring that
+structurally equal expressions are mapped to physically equal representations.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module Exp : sig
+  type t = private
+   | Num of int
+   | Var of string
+   | Plus of t * t
+   | Times of t * t
+
+  val num : int -> t
+  val var : string -> t
+  val plus : t -> t -> t
+  val times : t -> t -> t
+end = struct
+  type t =
+   | Num of int
+   | Var of string
+   | Plus of t * t
+   | Times of t * t
+
+  let table = HashMap.create ()
+  let merge exp =
+     try HashMap.find table ~key:exp with
+        Not_found ->
+           HashMap.add table ~key:exp ~data:exp;
+           exp
+
+  let num i = merge (Num i)
+  let var s = merge (Var s)
+  let plus e1 e2 = merge (Plus (e1, e2))
+  let times e1 e2 = merge (Times (e1, e2))
+end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The implementation defines a hash table `table`, and a `merge` function that
+merges an expression into the table, returning the previous value if there was
+one, or inserting a new value if there is not.  The constructors can rely on the
+fact that subexpressions have already been hash-consed, so they simply call the
+merge function to memoize the value.
+
+Note that expressions that are structurally equal are now also physically equal.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let e1 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "x") (Exp.var "y"));;
+val e1 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "x", Exp.Var "y"))
+# let e2 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "x") (Exp.var "y"));;
+val e2 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "x", Exp.Var "y"))
+# e1 == e2;;
+- : bool = true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Expressions that are not equal are equal are not physically equal either,
+however common subexpressions are equal.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let e3 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "z") (Exp.var "y"));;
+val e3 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "z", Exp.Var "y"))
+# e1 == e3;;
+- : bool = false
+# let Exp.Times (a1, Exp.Plus (_, a2)) = e1;;
+val a1 : Exp.t = Exp.Num 10
+val a2 : Exp.t = Exp.Var "y"
+# let Exp.Times (b1, Exp.Plus (_, b2)) = e3;;
+val b1 : Exp.t = Exp.Num 10
+val b2 : Exp.t = Exp.Var "y"
+# a1 == b1;;
+- : bool = true
+# a2 == b2;;
+- : bool = true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Weak hash consing
+
+There is an issue with hash-consing as we have just defined it.  The problem is
+that the hash table holds onto expressions _forever_, even if they are no longer
+used in the program.  This can result in a space leak that cancels out any space
+saving we had in the first place, perhaps making it even worse.
+
+To deal with this problem, we can use "weak" hash tables, implemented in the
+`Weak` module in the OCaml standard library.  The main difference is that a weak
+table may drop values that are no longer being used elsewhere.  Weak tables are
+tied into the garbage collector, which removes values that are no longer live.
+
+
+
+
+
 ## TODO
 
 0. Queues.
