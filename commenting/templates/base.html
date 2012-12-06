@@ -48,9 +48,20 @@
                     <li>
                         <a href="index.html"{% if html_name == "index.html" %} class="here"{% endif %}>Table of Contents</a>
                     </li>
-                    {% for navigation_item in navigation_list %}
+                    {% for navigation_group in navigation_list %}
                         <li>
-                            <a href="{{navigation_item.href}}"{% if html_name == navigation_item.href %} class="here"{% endif %}>{{navigation_item.title}}</a>
+                            <a href="{{navigation_group.href}}"{% if html_name == navigation_group.href %} class="here"{% endif %}>{{navigation_group.title}}</a>
+                            {% if navigation_group.children %}
+                                {% if html_name == navigation_group.href or part_html_name == navigation_group.href %} 
+                                    <ul>
+                                        {% for navigation_item in navigation_group.children %}
+                                            <li>
+                                                <a href="{{navigation_item.href}}"{% if html_name == navigation_item.href %} class="here"{% endif %}>{{navigation_item.title}}</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>
@@ -64,7 +75,22 @@
                 
             </article>
             
-            {% block post_page %}{% endblock %}
+            {% if prev_page or next_page %}
+    
+                <nav class="pagination">
+                    {% if prev_page %}
+                        <a rel="previous" href="{{prev_page}}">
+                            &lsaquo; Previous
+                        </a>
+                    {% endif %}
+                    {% if next_page %}
+                        <a rel="next" href="{{next_page}}">
+                            Next &rsaquo;
+                        </a>
+                    {% endif %}
+                </nav>
+            
+            {% endif %}
             
             <footer class="footer">
                 <p>Copyright 2011, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>

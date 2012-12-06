@@ -174,21 +174,44 @@ def find_required(html_name, soup, *args, **kwargs):
     panic("Could not find {!r} in {}".format(args, html_name))
     
     
-def render_html_template(template_name, args, context):
+def render_html_template(template_name, soup, args, context):
     """Renders the given html template, returning the unicode result."""
     context.setdefault("debug", args.debug)
     context.setdefault("github_user", args.github_user)
     context.setdefault("github_repo", args.github_repo)
-    return render_to_string("index.html", context)
+    # Find the next and previous links.
+    prev_page_link = soup.find("link", attrs={"rel": "prev"})
+    prev_page = prev_page_link and prev_page_link["href"] or None
+    context.setdefault("prev_page", prev_page)
+    next_page_link = soup.find("link", attrs={"rel": "next"})
+    next_page = next_page_link and next_page_link["href"] or None
+    context.setdefault("next_page", next_page)
+    # Render the template already!
+    return render_to_string(template_name, context)
+
+
+def render_locale_part_html(html_name, soup, navigation_list, args):
+    """Process an index HTML page, returning a string of processed HTML."""
+    logging.debug("Processing {} as a part".format(html_name))
+    # Get the title.
+    title = soup.find("title").get_text()
+    # Render the template.
+    return render_html_template("index.html", soup, args, {
+        "title": title,
+        "navigation_list": navigation_list,
+        "page_navigation_list": parse_locale_toc_element(html_name, soup),
+        "html_name": html_name,
+    })
     
     
 def render_locale_index_html(html_name, soup, navigation_list, args):
     """Process an index HTML page, returning a string of processed HTML."""
     logging.debug("Processing {} as a table of contents".format(html_name))
     # Render the template.
-    return render_html_template("index.html", args, {
+    return render_html_template("index.html", soup, args, {
         "title": "Table of Contents",
         "navigation_list": navigation_list,
+        "page_navigation_list": navigation_list,
         "html_name": html_name,
     })
     
@@ -213,6 +236,8 @@ def render_locale_chapter_page(html_name, soup, navigation_list, args):
     logging.debug("Processing {} as a chapter page".format(html_name))
     # Get the title.
     title = soup.find("title").get_text()
+    # Get the part.
+    part_html_name = find_required(html_name, soup, "link", attrs={"rel": "up"})["href"]
     # Find the chapter root element.
     chapter_root = soup.find("div", "chapter")
     # Strip out some unneccesary elements.
@@ -261,24 +286,13 @@ def render_locale_chapter_page(html_name, soup, navigation_list, args):
             del element["cellpadding"]
     # Convert chapter root to string.
     content_html = u"".join(unicode(e) for e in chapter_root.find_all(True, recursive=False))
-    # Find the next and previous links.
-    prev_page = None
-    next_page = None
-    for n, navigation_item in enumerate(navigation_list):
-        if navigation_item["href"] == html_name:
-            if n > 0:
-                prev_page = navigation_list[n-1]
-            if n < len(navigation_list) - 1:
-                next_page = navigation_list[n+1]
-            break
     # Render the template.
-    return render_html_template("chapter.html", args, {
+    return render_html_template("chapter.html", soup, args, {
         "title": title,
         "content_html": content_html,
         "navigation_list": navigation_list,
         "html_name": html_name,
-        "prev_page": prev_page,
-        "next_page": next_page,
+        "part_html_name": part_html_name,
     })
     
     
@@ -303,6 +317,8 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_li
     # Is this a table of contents?
     if soup.find("div", "book"):
         locale_dst_html = render_locale_index_html(html_name, soup, navigation_list, args)
+    elif soup.find("div", "part"):
+        locale_dst_html = render_locale_part_html(html_name, soup, navigation_list, args)
     elif soup.find("div", "chapter"):
         locale_dst_html = render_locale_chapter_page(html_name, soup, navigation_list, args)
     else:
@@ -311,12 +327,10 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_li
     logging.debug("Writing processed HTML for {}".format(html_name))
     with open(locale_dst_path, "wb") as locale_dst_handle:
         locale_dst_handle.write(locale_dst_html.encode("utf-8"))
-        
-        
-def parse_locale_toc(locale_src_dir):
-    """Parses the TOC from the given local dir."""
-    html_name = "index.html"
-    soup = load_locale_html_as_soup(locale_src_dir, html_name)
+
+
+def parse_locale_toc_element(html_name, soup):
+    """Parse the table of contents from a soup."""
     # Find the root table of contents.
     toc = find_required(html_name, soup, "div", "toc")
     root_dl = find_required(html_name, toc, "dl", recursive=False)
@@ -334,6 +348,13 @@ def parse_locale_toc(locale_src_dir):
                 children[-1]["children"].extend(parse_toc(element.find("dl", recursive=False)))
         return children
     return parse_toc(root_dl)
+
+        
+def parse_locale_toc(locale_src_dir):
+    """Parses the TOC from the given local dir."""
+    html_name = "index.html"
+    soup = load_locale_html_as_soup(locale_src_dir, html_name)
+    return parse_locale_toc_element(html_name, soup)
 
 
 def process_locale(src_dir, dst_dir, media_dir, locale, args):

@@ -58,19 +58,24 @@ body {
     margin: 0;
 }
 
-.navigation li {
+.navigation > ul > li {
     margin-bottom: 6px;
-    margin-left: 11px;
 }
 
-.navigation li:first-child {
+.navigation > ul > li > a {
     font-size: 16px;
-    margin-left: 0;
+    line-height: 22px;
+}
+
+.navigation > ul > li > ul > li {
+    margin-left: 12px;
+    margin-bottom: 0;
 }
 
 .navigation a {
     color: #4E443C;
     font-weight: bold;
+    display: block;
 }
 
 .navigation a:hover,
