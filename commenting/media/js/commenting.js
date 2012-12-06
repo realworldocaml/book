@@ -7,6 +7,34 @@ define([
     gitHub
 ) {
     
+    var body = $("body");
+    
+    /**
+     * Creates an overlay to show the given issues.
+     */
+    function createOverlay(issues) {
+        var outer = $("<div/>", {
+            "class": "comment-overlay-outer"
+        }).appendTo(body);
+        var container = $("<div/>", {
+            "class": "comment-overlay"
+        }).appendTo(outer);
+        $("<h1/>", {
+            text: issues.length + " comment" + (issues.length == 1 ? "" : "s")
+        }).appendTo(container);
+        // Add a close button.
+        $("<span/>", {
+            "class": "comment-overlay-close",
+            text: "close"
+        }).appendTo(container).click(function() {
+            outer.fadeOut(function() {
+                outer.remove();
+            });
+        })
+        // Show the overlay.
+        outer.fadeIn();
+    }
+    
     /**
      * Initializes the commenting system.
      */
@@ -32,7 +60,9 @@ define([
                 var button = $("<span/>", {
                     "class": "comment-action",
                     text: issues.length + " comment" + (issues.length == 1 ? "" : "s")
-                }).appendTo(element);
+                }).appendTo(element).click(function() {
+                    createOverlay(issues);
+                });
             });
         });
     }
