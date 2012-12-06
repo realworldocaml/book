@@ -14,6 +14,7 @@ define([
     var gitHubUser = config.user;
     var gitHubRepo = config.repo;
     var gitHubMilestone = config.milestone;
+    var gitHubClientId = config.clientId;
     var gitHubPageLabel = "page-" + config.page.split(".")[0];
     
     /**
@@ -59,10 +60,49 @@ define([
         });
     }
     
+    /**
+     * Looks up the auth code query parameter.
+     */
+    function getAuthCode() {
+        var match = String(document.location).match(/code=(\w+)/);
+        return !!match && match[1];
+    }
+    
+    /**
+     * Activates authentication.
+     */
+    function authenticate(onSuccess) {
+        var authCode = getAuthCode();
+        var loginStatusContainer = $("#login-status");
+        if (authCode) {
+            $.getJSON("https://api.github.com", function(data) {
+                console.log(data)
+            })
+            
+            // Authenticate the code.
+            $.post("https://github.com/login/oauth/access_token", {
+                code: authCode
+            }, function(data) {
+                console.log(data);
+            });
+        } else if (false) {
+            // See if we are already logged in.
+            console.log("Already logged in.")
+        } else {
+            // We are not logged in.
+            loginStatusContainer.append($("<a/>", {
+                text: "Login to GitHub view comments",
+                href: "https://github.com/login/oauth/authorize?response_type=token&client_id=" + gitHubClientId
+            }));
+            onSuccess();
+        }
+    }
+    
     // Export the public API.
     
     return {
-        getIssues: getIssues
+        getIssues: getIssues,
+        authenticate: authenticate
     };
     
 });

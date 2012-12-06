@@ -2,11 +2,6 @@
     font-size: 12px;
     text-decoration: underline;
     cursor: pointer;
-    -webkit-transition: color 0.15s;
-    -moz-transition: color 0.15s;
-    -ms-transition: color 0.15s;
-    -o-transition: color 0.15s;
-    transition: color 0.15s;
     color: #9A9994;
     font-weight: normal;
     white-space: nowrap;
@@ -14,4 +9,87 @@
 
 .comment-action:hover {
     text-decoration: none;
+}
+
+
+/* Comment overlay. */
+
+.comment-overlay-outer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.comment-overlay {
+    position: fixed;
+    width: 600px;
+    height: 500px;
+    margin-top: -300px;
+    margin-left: -300px;
+    top: 50%;
+    left: 50%;
+    overflow: auto;
+    background: #FCFCFA;
+    border: 1px #E2E0D8 solid;
+    border-radius: 5px;
+    padding: 10px 14px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.comment-overlay > h1 {
+    font-size: 18px;
+    margin-bottom: 7px;
+}
+
+.comment-overlay-close {
+    position: absolute;
+    top: 13px;
+    right: 14px;
+    font-size: 12px;
+    text-decoration: underline;
+    color: #9A9994;
+    cursor: pointer;
+}
+
+.comment-overlay-close:hover {
+    text-decoration: none;
+}
+
+
+/* Items in the comment overlay. */
+
+.comment-overlay > article {
+    position: relative;
+    padding: 7px 0 0 58px;
+    margin: 0 0 7px 0;
+    min-height: 48px;
+    border-top: 1px #E2E0D8 solid;
+}
+
+.comment-overlay > article > h1 {
+    font-weight: normal;
+    font-size: 12px;
+}
+
+.comment-overlay > article > p {
+    margin-bottom: 0;
+}
+
+.comment-overlay > article > p.closed {
+    text-decoration: line-through;
+}
+
+.comment-overlay > article img {
+    position: absolute;
+    top: 7px;
+    left: 0;
+    width: 48px;
+    height: 48px;
 }

@@ -19,6 +19,7 @@
                         user: "{{github_user|escapejs}}",
                         repo: "{{github_repo|escapejs}}",
                         milestone: "{{github_milestone|escapejs}}",
+                        clientId: "{{github_client_id|escapejs}}",
                         page: "{{html_name|escapejs}}"
                     }
                 }
@@ -43,6 +44,7 @@
                     <h1>Real World OCaml</h1>
                     <h2>by Jason Hickey, Anil Madhavapeddy and Yaron Minsky</h2>
                 </hgroup>
+                <p id="login-status"></p>
             </header>
     
             <nav class="navigation">

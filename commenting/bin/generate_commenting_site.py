@@ -87,7 +87,12 @@ def parse_args():
     parser.add_argument("--github-milestone",
         dest = "github_milestone",
         required = True,
-        help = "The GitHub milestone to use for issues",
+        help = "The GitHub milestone to use for issues.",
+    )
+    parser.add_argument("--github-client-id",
+        dest = "github_client_id",
+        required = True,
+        help = "The GitHub application client ID to use for authentication.",
     )
     return parser.parse_args()
 
@@ -185,6 +190,7 @@ def render_html_template(template_name, soup, args, context):
     context.setdefault("github_user", args.github_user)
     context.setdefault("github_repo", args.github_repo)
     context.setdefault("github_milestone", args.github_milestone)
+    context.setdefault("github_client_id", args.github_client_id)
     # Find the next and previous links.
     prev_page_link = soup.find("link", attrs={"rel": "prev"})
     prev_page = prev_page_link and prev_page_link["href"] or None

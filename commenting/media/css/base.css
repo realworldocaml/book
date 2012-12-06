@@ -227,6 +227,10 @@ a:hover {
     color: #04ADD3;
 }
 
+a > img {
+    border: none;
+}
+
 
 /* Pagination. */
 
