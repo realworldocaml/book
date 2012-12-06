@@ -14,7 +14,6 @@ define([
     var gitHubUser = config.user;
     var gitHubRepo = config.repo;
     var gitHubMilestone = config.milestone;
-    var gitHubClientId = config.clientId;
     var gitHubPageLabel = "page-" + config.page.split(".")[0];
     
     /**
@@ -53,56 +52,37 @@ define([
      */
     function getIssues(onSuccess) {
         getMilestoneByTitle(function(milestone) {
-            $.getJSON("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/issues?callback=?", {
-                milestone: milestone.number,
-                labels: gitHubPageLabel
-            }, onSuccess);
-        });
-    }
-    
-    /**
-     * Looks up the auth code query parameter.
-     */
-    function getAuthCode() {
-        var match = String(document.location).match(/code=(\w+)/);
-        return !!match && match[1];
-    }
-    
-    /**
-     * Activates authentication.
-     */
-    function authenticate(onSuccess) {
-        var authCode = getAuthCode();
-        var loginStatusContainer = $("#login-status");
-        if (authCode) {
-            $.getJSON("https://api.github.com", function(data) {
-                console.log(data)
-            })
-            
-            // Authenticate the code.
-            $.post("https://github.com/login/oauth/access_token", {
-                code: authCode
-            }, function(data) {
-                console.log(data);
+            // Get all open and closed issues.
+            var receiveCount = 0;
+            var fullData = [];
+            function receiveIssues(data) {
+                fullData = fullData.concat(data.data);
+                console.log(fullData)
+                receiveCount += 1;
+                if (receiveCount == 2) {
+                    fullData.sort(function(a, b) {
+                        if (a.created_at > b.created_at) {
+                            return 1;
+                        }
+                        return -1;
+                    });
+                    onSuccess(fullData);
+                }
+            }
+            $.each(["open", "closed"], function(_, state) {
+                $.getJSON("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/issues?callback=?", {
+                    milestone: milestone.number,
+                    labels: gitHubPageLabel,
+                    state: state
+                }, receiveIssues);
             });
-        } else if (false) {
-            // See if we are already logged in.
-            console.log("Already logged in.")
-        } else {
-            // We are not logged in.
-            loginStatusContainer.append($("<a/>", {
-                text: "Login to GitHub view comments",
-                href: "https://github.com/login/oauth/authorize?response_type=token&client_id=" + gitHubClientId
-            }));
-            onSuccess();
-        }
+        });
     }
     
     // Export the public API.
     
     return {
-        getIssues: getIssues,
-        authenticate: authenticate
+        getIssues: getIssues
     };
     
 });

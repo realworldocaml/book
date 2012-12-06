@@ -79,10 +79,6 @@ define([
      * Initializes the commenting system.
      */
     function init() {
-        gitHub.authenticate(function() {
-            
-        });
-        
         // Load the list of GitHub issues.
         gitHub.getIssues(function(data) {
             // Find all commentable elements.
@@ -93,14 +89,13 @@ define([
                 var elementLabel = "block-" + element.attr("id");
                 // Count issues.
                 var issues = [];
-                $.each(data.data, function(_, issue) {
+                $.each(data, function(_, issue) {
                     $.each(issue.labels, function(_, label) {
                         if (label.name == elementLabel) {
                             issues.push(issue)
                         }
                     });
                 });
-                issues.reverse();
                 // Add in a button to initialize comments.
                 var button = $("<span/>", {
                     "class": "comment-action",
