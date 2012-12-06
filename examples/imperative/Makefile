@@ -1,6 +1,8 @@
 OCAMLOPT = ocamlopt
-OCAMLCFLAGS =\
-	-thread\
+OCAMLOPTFLAGS =\
+	-thread
+
+X=\
 	-I $(HOME)/.opam/system/lib/core\
 	-I $(HOME)/.opam/system/lib/async\
 	-I $(HOME)/.opam/system/lib/async_extra\
@@ -12,15 +14,17 @@ OCAMLCFLAGS =\
 	-I $(HOME)/.opam/system/lib/res\
 	-I $(HOME)/.opam/system/lib/fieldslib
 
-OCAMLLIBS = unix.cmxa threads.cmxa nums.cmxa bigarray.cmxa variantslib.cmxa bin_prot.cmxa sexplib.cmxa res.cmxa fieldslib.cmxa core.cmxa async_core.cmxa async_unix.cmxa async_extra.cmxa async.cmxa
+OCAMLLIBS = unix.cmxa threads.cmxa
 
-all: hashmap.cmx dlist.cmx lazy.cmx memo.cmx hashcons.cmx race
+Y = nums.cmxa bigarray.cmxa variantslib.cmxa bin_prot.cmxa sexplib.cmxa res.cmxa fieldslib.cmxa core.cmxa async_core.cmxa async_unix.cmxa async_extra.cmxa async.cmxa
 
-race: race.cmx
-	$(OCAMLOPT) $(OCAMLCFLAGS) -o $@ $(OCAMLLIBS) $< 
+all: hashmap.cmx dlist.cmx lazy.cmx memo.cmx hashcons.cmx race2
+
+race2: race2.cmx
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -o $@ $(OCAMLLIBS) $< 
 
 %.cmx %.cmi: %.ml
-	$(OCAMLOPT) $(OCAMLCFLAGS) -c $*.ml
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c $*.ml
 
 hashcons.cmx: hashmap.cmi
 memo.cmx: hashmap.cmi
