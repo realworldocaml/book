@@ -84,6 +84,11 @@ def parse_args():
         default = "OCaml-Book",
         help = "The name of the GitHub repo to use for issues.",
     )
+    parser.add_argument("--github-milestone",
+        dest = "github_milestone",
+        required = True,
+        help = "The GitHub milestone to use for issues",
+    )
     return parser.parse_args()
 
 
@@ -179,6 +184,7 @@ def render_html_template(template_name, soup, args, context):
     context.setdefault("debug", args.debug)
     context.setdefault("github_user", args.github_user)
     context.setdefault("github_repo", args.github_repo)
+    context.setdefault("github_milestone", args.github_milestone)
     # Find the next and previous links.
     prev_page_link = soup.find("link", attrs={"rel": "prev"})
     prev_page = prev_page_link and prev_page_link["href"] or None

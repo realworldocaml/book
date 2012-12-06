@@ -1,8 +1,4 @@
-.comment-block {
-    position: relative;
-}
-
-.comment-block > .comment-action {
+.comment-action {
     font-size: 12px;
     text-decoration: underline;
     cursor: pointer;
@@ -16,6 +12,6 @@
     white-space: nowrap;
 }
 
-.comment-block > .comment-action:hover {
-    color: #F14E32;
+.comment-action:hover {
+    text-decoration: none;
 }

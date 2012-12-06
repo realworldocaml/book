@@ -12,20 +12,27 @@ define([
      */
     function init() {
         // Load the list of GitHub issues.
-        gitHub.getIssuesByTag(function(data) {
-            console.log(data);
+        gitHub.getIssues(function(data) {
             // Find all commentable elements.
-            var commentableElements = Array.prototype.slice.call(document.querySelectorAll(".page p[id]"));
+            var commentableElements = $(".page p[id]");
             // Add in the comment action.
-            commentableElements.forEach(function(element) {
+            commentableElements.each(function() {
+                var element = $(this);
+                var elementLabel = "block-" + element.attr("id");
+                // Count issues.
+                var issues = [];
+                $.each(data.data, function(_, issue) {
+                    $.each(issue.labels, function(_, label) {
+                        if (label.name == elementLabel) {
+                            issues.push(issue)
+                        }
+                    });
+                });
                 // Add in a button to initialize comments.
-                var button = document.createElement("span");
-                var buttonInner = document.createElement("span");
-                button.appendChild(buttonInner);
-                buttonInner.appendChild(document.createTextNode("0 comments"));
-                button.classList.add("comment-action");
-                element.appendChild(button);
-                element.classList.add("comment-block");
+                var button = $("<span/>", {
+                    "class": "comment-action",
+                    text: issues.length + " comment" + (issues.length == 1 ? "" : "s")
+                }).appendTo(element);
             });
         });
     }

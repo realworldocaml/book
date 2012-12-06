@@ -1,12 +1,12 @@
 require([
-    "domReady",
+    "jquery",
     "commenting"
 ], function(
-    domReady,
+    $,
     commenting
 ) {
     
-    domReady(function() {
+    $(function() {
         
         commenting.init();
         

@@ -17,7 +17,9 @@
                 config: {
                     gitHub: {
                         user: "{{github_user|escapejs}}",
-                        repo: "{{github_repo|escapejs}}"
+                        repo: "{{github_repo|escapejs}}",
+                        milestone: "{{github_milestone|escapejs}}",
+                        page: "{{html_name|escapejs}}"
                     }
                 }
             });
