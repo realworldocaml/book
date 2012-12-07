@@ -790,18 +790,104 @@ val b2 : Exp.t = Exp.Var "y"
 
 ### Weak hash consing
 
-There is an issue with hash-consing as we have just defined it.  The problem is
-that the hash table holds onto expressions _forever_, even if they are no longer
-used in the program.  This can result in a space leak that cancels out any space
-saving we had in the first place, perhaps making it even worse.
+There is two issues with hash-consing as we have just defined it.  A minor
+problem is that hashing is linear in the size of the expression.  This can be
+fixed by storing the hash code in the expression itself, avoiding the recursive
+computation.  If expressions are small, this won't be much of a benefit, but it
+can save time if large expressions are frequently constructed.
+
+A more serious problem is that the hash table holds onto expressions _forever_,
+even if they are no longer used in the program.  This can result in a space leak
+that cancels out any space saving we had in the first place, perhaps making it
+even worse.
 
 To deal with this problem, we can use "weak" hash tables, implemented in the
 `Weak` module in the OCaml standard library.  The main difference is that a weak
 table may drop values that are no longer being used elsewhere.  Weak tables are
 tied into the garbage collector, which removes values that are no longer live.
 
+We define the type `WExp.t` much as before, except including the hash code for
+the `Plus` and `Times` expressions.
 
+The weak hash table requires that hash and equality functions be provided
+explicitly, so we construct a module `HashExp` that defines the `equal` and
+`hash` functions.  Note that equality and hashing are both constant-time
+functions -- equality can rely on physical equality of subexpressions, and
+hashing can use the explcitly represented hash values.
 
+The module `WeakHash` has the semantics of a set of elements.  The
+`WeakHash.merge` function retrieves an element if it already exists, or adds it
+otherwise.  The constructors are much as before.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module WExp : sig
+  type t = private
+   | Num of int
+   | Var of string
+   | Plus of int * t * t
+   | Times of int * t * t
+
+  val num : int -> t
+  val var : string -> t
+  val plus : t -> t -> t
+  val times : t -> t -> t
+end = struct
+  type t =
+   | Num of int
+   | Var of string
+   | Plus of int * t * t
+   | Times of int * t * t
+
+  module HashExp = struct
+    type exp = t
+    type t = exp
+    let equal e1 e2 =
+      match e1, e2 with
+       | Num i1, Num i2 -> i1 = i2
+       | Var v1, Var v2 -> v1 = v2
+       | Plus (_, a1, a2), Plus (_, b1, b2)
+       | Times (_, a1, a2), Times (_, b1, b2) ->
+            a1 == b1 && a2 == b2
+       | _ -> false
+    let hash = function
+     | Num i -> i lxor 0xabababab
+     | Var v -> (Hashtbl.hash v) lxor 0xcdcdcdcdc
+     | Plus (hash, _, _)
+     | Times (hash, _, _) -> hash
+  end
+
+  module WeakHash = Weak.Make (HashExp);;
+
+  let table = WeakHash.create 17
+  let merge e = WeakHash.merge table e
+
+  let num i = merge (Num i)
+  let var s = merge (Var s)
+  let plus e1 e2 =
+     let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0x12345678 in
+     merge (Plus (hash, e1, e2))
+
+  let times e1 e2 =
+     let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0xdeadbeef in
+     merge (Times (hash, e1, e2))
+end;;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Concurrency
+
+Concurrency is another tool OCaml programmers can use to simplify programs in
+certain cases.  For example, the `Async` library supports concepts like thread
+pools, work groups, pipes (communication channels), etc.  In OCaml, threads do
+not introduce parallelism; only one thread may be running at a time.  However,
+threads can be used to simplify control flow -- a program can devote some
+threads to reading input, others for performing work, others for producing
+output, etc.
+
+Threads interaction is usually imperative.  They communicate through queues,
+channels, and other shared data structures.  Context switches are _involuntary_,
+meaning that a thread may be suspended at _any time_, and this gives rise to the
+usual synchronization issues.  To illustrate, let's have two threads increment a
+shared reference cell concurrently.
 
 
 ## TODO
