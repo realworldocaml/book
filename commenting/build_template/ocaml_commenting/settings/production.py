@@ -17,6 +17,13 @@ import os
 PREPEND_WWW = False
 
 
+# GitHub settings.
+
+GITHUB_CLIENT_ID = "0d3f42d377adb03650e0"
+
+GITHUB_CLIENT_SECRET = "cfbc90cd86b76161859372f72fb80d9f9fc80957"
+
+
 # Database settings.
 
 DATABASES = {
@@ -71,6 +78,7 @@ MIDDLEWARE_CLASSES = (
     "django.middleware.gzip.GZipMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "ocaml_commenting.middleware.OAuth2Middleware",
 )
 
 ROOT_URLCONF = "ocaml_commenting.urls"
@@ -82,7 +90,9 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 # Absolute path to the directory where templates are stored.
 
-TEMPLATE_DIRS = ()
+TEMPLATE_DIRS = (
+    os.path.join(SITE_ROOT, "templates"),
+)
 
 
 # A secret key used for cryptographic algorithms.
