@@ -32,7 +32,7 @@ define([
     /**
      * Creates an overlay to show the given issues.
      */
-    function createOverlay(issues) {
+    function createOverlay(milestone, elementContent, elementLabel, issues, onIssueCreate) {
         var outer = $("<div/>", {
             "class": "comment-overlay-outer"
         }).appendTo(body).hide();
@@ -81,7 +81,16 @@ define([
         var area = $("<textarea/>").appendTo(container);
         var submit = $("<input/>", {
             value: "Submit",
-            type: "submit"
+            type: "submit",
+            click: function() {
+                var content = $.trim(area.val());
+                if (content) {
+                    gitHub.createIssue(content, elementContent, milestone, [elementLabel], onIssueCreate);
+                    outer.fadeOut("fast");
+                } else {
+                    alert("Please enter a comment before submitting!");
+                }
+            }
         }).appendTo(container);
         // Show the overlay.
         outer.fadeIn("fast");
@@ -94,12 +103,13 @@ define([
         // Check if we are authenticated.
         if (gitHub.isAuthenticated()) {
             // Load the list of GitHub issues.
-            gitHub.getIssues(function(data) {
+            gitHub.getIssues(function(milestone, data) {
                 // Find all commentable elements.
                 var commentableElements = $(".page p[id]");
                 // Add in the comment action.
                 commentableElements.each(function() {
                     var element = $(this);
+                    var elementContent = $.trim(element.text()).replace(/\s+/g, " ");
                     var elementLabel = "block-" + element.attr("id");
                     // Count issues.
                     var issues = [];
@@ -111,11 +121,17 @@ define([
                         });
                     });
                     // Add in a button to initialize comments.
+                    function getButtonText() {
+                        return issues.length + " comment" + (issues.length == 1 ? "" : "s");
+                    }
                     var button = $("<span/>", {
                         "class": "comment-action",
-                        text: issues.length + " comment" + (issues.length == 1 ? "" : "s")
+                        text: getButtonText()
                     }).appendTo(element).click(function() {
-                        createOverlay(issues);
+                        createOverlay(milestone, elementContent, elementLabel, issues, function(newIssue) {
+                            issues.push(newIssue);
+                            button.text(getButtonText());
+                        });
                     });
                 });
             });

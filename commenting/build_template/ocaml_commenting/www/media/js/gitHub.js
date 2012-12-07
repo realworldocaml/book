@@ -27,7 +27,7 @@ define([
     }
     
     function getOAuth2RedirectURL() {
-        return "https://github.com/login/oauth/authorize?client_id=" + encodeURIComponent(gitHubClientId) + "&redirect_uri=" + encodeURIComponent(String(window.location));
+        return "https://github.com/login/oauth/authorize?scope=public_repo&client_id=" + encodeURIComponent(gitHubClientId) + "&redirect_uri=" + encodeURIComponent(String(window.location));
     }
     
     /**
@@ -82,7 +82,7 @@ define([
                         }
                         return -1;
                     });
-                    onSuccess(fullData);
+                    onSuccess(milestone, fullData);
                 }
             }
             $.each(["open", "closed"], function(_, state) {
@@ -96,12 +96,26 @@ define([
         });
     }
     
+    /**
+     * Creates an issue from the given comment.
+     */
+    function createIssue(title, body, milestone, labels, onSuccess) {
+        labels = labels.slice().concat([gitHubPageLabel]);
+        $.post("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/issues?access_token=" + encodeURIComponent(gitHubAccessToken), JSON.stringify({
+            title: title,
+            body: body,
+            milestone: milestone.number,
+            labels: labels,
+        }), onSuccess);
+    }
+    
     // Export the public API.
     
     return {
         isAuthenticated: isAuthenticated,
         getOAuth2RedirectURL: getOAuth2RedirectURL,
-        getIssues: getIssues
+        getIssues: getIssues,
+        createIssue: createIssue
     };
     
 });
