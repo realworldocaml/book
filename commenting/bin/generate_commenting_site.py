@@ -63,10 +63,10 @@ def parse_args():
         default = os.path.join("commenting", "templates"),
         help = "The Django template directory, relative to PREFIX (defaults to 'commenting/templates')",
     )
-    parser.add_argument("--media-dir",
-        dest = "media_dir",
-        default = os.path.join("commenting", "media"),
-        help = "The folder containing all media items, relative to PREFIX (defaults to 'commenting/media')",
+    parser.add_argument("--build-template-dir",
+        dest = "build_template_dir",
+        default = os.path.join("commenting", "build_template"),
+        help = "The folder containing all default items to be copied into the DST_DIR, relative to PREFIX (defaults to 'commenting/build_template')",
     )
     parser.add_argument("--debug", "-d",
         dest = "debug",
@@ -135,40 +135,31 @@ def configure_dst_dir(prefix, dst_dir):
     if os.path.exists(dst_dir):
         logging.info("Deleting existing destination directory")
         shutil.rmtree(dst_dir)
-    # Create new destination directory.
-    logging.info("Creating destination directory")
-    os.mkdir(dst_dir)
     # Return parsed dst dir.
     return dst_dir
 
 
-def configure_media_dir(prefix, media_dir):
-    """Parses the media dir, and checks that it exists."""
-    # Parse the media dir.
-    media_dir = os.path.join(prefix, media_dir)
-    logging.debug("Media directory set to {}".format(media_dir))
-    # Check that the media dir exists.
-    if not os.path.exists(media_dir):
-        panic("Media directory {} does not exist".format(media_dir))
-    # Return parsed media dir.
-    return media_dir
+def configure_build_template_dir(prefix, dst_dir, build_template_dir):
+    """Parses the build template dir, and checks that it exists."""
+    # Parse the build template dir.
+    build_template_dir = os.path.join(prefix, build_template_dir)
+    logging.debug("Build template directory set to {}".format(build_template_dir))
+    # Check that the build template dir exists.
+    if not os.path.exists(build_template_dir):
+        panic("Build template directory {} does not exist".format(build_template_dir))
+    # Copy over the template dir.
+    shutil.copytree(build_template_dir, dst_dir)
+    # Return parsed build template dir.
+    return build_template_dir
 
 
-def copy_local_dir(locale_src_dir, locale_dst_dir, dirname):
+def copy_locale_dir(locale_src_dir, locale_dst_dir, dirname):
     """Copies the named directory from the src to the dst."""
     logging.debug("Copying {} from {} to {}".format(dirname, locale_src_dir, locale_dst_dir))
     shutil.copytree(
         os.path.join(locale_src_dir, dirname),
         os.path.join(locale_dst_dir, dirname),
     )
-    
-    
-# TODO: Use r.js to optimize the media.
-def copy_locale_media_dir(media_dir, locale_dst_dir):
-    """Copies the media dir to the locale destination dir."""
-    locale_dst_media_dir = os.path.join(locale_dst_dir, "media")
-    logging.debug("Copying media from {} to {}".format(media_dir, locale_dst_media_dir))
-    shutil.copytree(media_dir, locale_dst_media_dir)
 
 
 def find_required(html_name, soup, *args, **kwargs):
@@ -363,22 +354,20 @@ def parse_locale_toc(locale_src_dir):
     return parse_locale_toc_element(html_name, soup)
 
 
-def process_locale(src_dir, dst_dir, media_dir, locale, args):
+def process_locale(src_dir, dst_dir, locale, args):
     """Processes all files for the given locale."""
     logging.info("Processing HTML for locale {}".format(locale))
     # Process the src dir.
     locale_src_dir = os.path.join(src_dir, locale, "html")
     logging.debug("Locale source directory is {}".format(locale_src_dir))
     # Process the dst dir.
-    locale_dst_dir = os.path.join(dst_dir, locale, "html")
+    locale_dst_dir = os.path.join(dst_dir, "www", locale, "html")
     logging.debug("Locale destination directory is {}".format(locale_dst_dir))
     # Create the dst dir.
     logging.debug("Creating locale destination directory")
     os.makedirs(locale_dst_dir)
     # Copy over figures.
-    copy_local_dir(locale_src_dir, locale_dst_dir, "figures")
-    # Copy over media items.
-    copy_locale_media_dir(media_dir, locale_dst_dir)
+    copy_locale_dir(locale_src_dir, locale_dst_dir, "figures")
     # Process the index.
     logging.debug("Parsing table of contents")
     navigation_list = parse_locale_toc(locale_src_dir)
@@ -400,7 +389,7 @@ def main():
     logging.debug("Prefix set to {}".format(prefix))
     src_dir = configure_src_dir(prefix, args.src_dir)
     dst_dir = configure_dst_dir(prefix, args.dst_dir)
-    media_dir = configure_media_dir(prefix, args.media_dir)
+    configure_build_template_dir(prefix, dst_dir, args.build_template_dir)
     # Configure Django.
     configure_django(prefix, args.template_dir)
     # Search for locales.
@@ -409,7 +398,7 @@ def main():
     # Process each locale dir.
     for locale_dir in locale_dirs:
         locale = locale_dir[len(src_dir)+1:-5]
-        process_locale(src_dir, dst_dir, media_dir, locale, args)
+        process_locale(src_dir, dst_dir, locale, args)
 
 
 if __name__ == "__main__":
