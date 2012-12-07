@@ -32,7 +32,7 @@ define([
     /**
      * Creates an overlay to show the given issues.
      */
-    function createOverlay(milestone, elementContent, elementTag, issues, onIssueCreate) {
+    function createOverlay(milestone, elementTag, issues, onIssueCreate) {
         var outer = $("<div/>", {
             "class": "comment-overlay-outer"
         }).appendTo(body).hide();
@@ -63,7 +63,7 @@ define([
                 " commented " + formatDate(new Date(issue.created_at))
             ).appendTo(article);
             var commentText = $("<p/>", {
-                html: issue.body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")
+                html: $.trim(issue.body).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")
             }).appendTo(article);
             if (issue.closed_at != null) {
                 commentText.addClass("closed");
@@ -85,7 +85,12 @@ define([
             click: function() {
                 var content = $.trim(area.val());
                 if (content) {
-                    gitHub.createIssue("New comment on block" + elementTag, content, milestone, onIssueCreate);
+                    gitHub.createIssue(
+                        "New comment on block" + elementTag,
+                        content,
+                        milestone,
+                        onIssueCreate
+                    );
                     outer.fadeOut("fast");
                 } else {
                     alert("Please enter a comment before submitting!");
@@ -109,7 +114,6 @@ define([
                 // Add in the comment action.
                 commentableElements.each(function() {
                     var element = $(this);
-                    var elementContent = $.trim(element.text()).replace(/\s+/g, " ");
                     var elementLabel = "block-" + element.attr("id");
                     var elementTag = " [" + elementLabel + "]";
                     // Count issues.
@@ -127,7 +131,7 @@ define([
                         "class": "comment-action",
                         text: getButtonText()
                     }).appendTo(element).click(function() {
-                        createOverlay(milestone, elementContent, elementTag, issues, function(newIssue) {
+                        createOverlay(milestone, elementTag, issues, function(newIssue) {
                             issues.push(newIssue);
                             button.text(getButtonText());
                         });
