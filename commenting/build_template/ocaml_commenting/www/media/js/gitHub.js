@@ -3,7 +3,8 @@
  */
 define([
     "module",
-    "jquery"
+    "jquery",
+    "jquery.cookie"
 ], function(
     module,
     $
@@ -15,12 +16,27 @@ define([
     var gitHubRepo = config.repo;
     var gitHubMilestone = config.milestone;
     var gitHubPageLabel = "page-" + config.page.split(".")[0];
+    var gitHubClientId = $.cookie("github_client_id");
+    var gitHubAccessToken = $.cookie("github_access_token");
+    
+    /**
+     * Tests if the user is currently authenticated.
+     */
+    function isAuthenticated() {
+        return !!gitHubAccessToken;
+    }
+    
+    function getOAuth2RedirectURL() {
+        return "https://github.com/login/oauth/authorize?client_id=" + encodeURIComponent(gitHubClientId) + "&redirect_uri=" + encodeURIComponent(String(window.location));
+    }
     
     /**
      * Looks up a list of milestones for this repository.
      */
     function getMilestones(onSuccess) {
-        $.getJSON("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/milestones?callback=?", onSuccess);
+        $.getJSON("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/milestones?callback=?", {
+            access_token: gitHubAccessToken
+        }, onSuccess);
     }
     
     /**
@@ -73,6 +89,7 @@ define([
                 $.getJSON("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/issues?callback=?", {
                     milestone: milestone.number,
                     labels: gitHubPageLabel,
+                    access_token: gitHubAccessToken,
                     state: state
                 }, receiveIssues);
             });
@@ -82,6 +99,8 @@ define([
     // Export the public API.
     
     return {
+        isAuthenticated: isAuthenticated,
+        getOAuth2RedirectURL: getOAuth2RedirectURL,
         getIssues: getIssues
     };
     

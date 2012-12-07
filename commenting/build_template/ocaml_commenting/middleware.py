@@ -2,6 +2,7 @@ import urllib2, json
 
 from django.conf import settings
 from django.utils.http import urlencode
+from django.shortcuts import redirect
 
 
 class OAuth2Middleware(object):
@@ -15,20 +16,27 @@ class OAuth2Middleware(object):
             # Get an access token.
             data = urlencode({
                 "client_id": settings.GITHUB_CLIENT_ID,
+                "client_secret": settings.GITHUB_CLIENT_SECRET,
                 "code": request.GET["code"],
                 "state": "",
             })
-            request = urllib2.Request("https://github.com/login/oauth/access_token", data, headers = {
+            auth_request = urllib2.Request("https://github.com/login/oauth/access_token", data, headers = {
                 "Accept": "application/json",
             })
             try:
-                response = urllib2.urlopen(request)
-                body = response.read()
+                auth_response = urllib2.urlopen(auth_request)
+                body = auth_response.read()
             except urllib2.URLError:
                 pass
             data = json.loads(body)
-            access_token = data["access_token"]
-            # Save access token to a cookie.
-            response.set_cookie("github_access_token", access_token)
+            try:
+                access_token = data["access_token"]
+            except KeyError:
+                pass
+            else:
+                # Clear the code from the URL.
+                response = redirect(request.path)
+                # Save access token to a cookie.
+                response.set_cookie("github_access_token", access_token)
         # All done!
         return response

@@ -9,7 +9,7 @@ While many of these settings assume sensible defaults, you must provide values
 for the site, database, media and email sections below.
 """
 
-import os
+import os, sys
 
 
 # Domain settings.
@@ -40,6 +40,28 @@ ADMINS = (
 MANAGERS = ()
 
 SEND_BROKEN_LINK_EMAILS = False
+
+
+# Email settings.
+
+EMAIL_HOST = "smtp.sendgrid.net"
+
+EMAIL_HOST_USER = os.environ.get("SENDGRID_USERNAME", "")
+
+EMAIL_HOST_PASSWORD = os.environ.get("SENDGRID_PASSWORD", "")
+
+EMAIL_PORT = 25
+
+EMAIL_USE_TLS = False
+
+SERVER_EMAIL = u"{name} <notifications@{domain}>".format(
+    name = "OCaml Commenting",
+    domain = "ocaml-commenting.herokuapp.com",
+)
+
+DEFAULT_FROM_EMAIL = SERVER_EMAIL
+
+EMAIL_SUBJECT_PREFIX = "[OCaml Commenting] "
 
 
 # Locale settings.
@@ -77,15 +99,12 @@ STATICFILES_DIRS = ()
 MIDDLEWARE_CLASSES = (
     "django.middleware.gzip.GZipMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "ocaml_commenting.middleware.OAuth2Middleware",
 )
 
 ROOT_URLCONF = "ocaml_commenting.urls"
 
 WSGI_APPLICATION = "ocaml_commenting.wsgi.application"
-
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 
 # Absolute path to the directory where templates are stored.
@@ -115,7 +134,7 @@ LOGGING = {
             "level": "ERROR",
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler"
-        }
+        },
     },
     "loggers": {
         "django.request": {

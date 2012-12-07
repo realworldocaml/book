@@ -42,6 +42,17 @@ body {
     vertical-align: 4px;
 }
 
+.header p {
+    margin: 0;
+    font-size: 12px;
+    position: absolute;
+    top: 70px;
+}
+
+.header p a {
+    color: #9A9994;
+}
+
 
 /* Navigation. */
 

@@ -79,32 +79,42 @@ define([
      * Initializes the commenting system.
      */
     function init() {
-        // Load the list of GitHub issues.
-        gitHub.getIssues(function(data) {
-            // Find all commentable elements.
-            var commentableElements = $(".page p[id]");
-            // Add in the comment action.
-            commentableElements.each(function() {
-                var element = $(this);
-                var elementLabel = "block-" + element.attr("id");
-                // Count issues.
-                var issues = [];
-                $.each(data, function(_, issue) {
-                    $.each(issue.labels, function(_, label) {
-                        if (label.name == elementLabel) {
-                            issues.push(issue)
-                        }
+        // Check if we are authenticated.
+        if (gitHub.isAuthenticated()) {
+            // Load the list of GitHub issues.
+            gitHub.getIssues(function(data) {
+                // Find all commentable elements.
+                var commentableElements = $(".page p[id]");
+                // Add in the comment action.
+                commentableElements.each(function() {
+                    var element = $(this);
+                    var elementLabel = "block-" + element.attr("id");
+                    // Count issues.
+                    var issues = [];
+                    $.each(data, function(_, issue) {
+                        $.each(issue.labels, function(_, label) {
+                            if (label.name == elementLabel) {
+                                issues.push(issue)
+                            }
+                        });
+                    });
+                    // Add in a button to initialize comments.
+                    var button = $("<span/>", {
+                        "class": "comment-action",
+                        text: issues.length + " comment" + (issues.length == 1 ? "" : "s")
+                    }).appendTo(element).click(function() {
+                        createOverlay(issues);
                     });
                 });
-                // Add in a button to initialize comments.
-                var button = $("<span/>", {
-                    "class": "comment-action",
-                    text: issues.length + " comment" + (issues.length == 1 ? "" : "s")
-                }).appendTo(element).click(function() {
-                    createOverlay(issues);
-                });
             });
-        });
+        } else {
+            // Start the authenticate process.
+            var header = $(".header");
+            header.append($("<p/>").append($("<a/>", {
+                href: gitHub.getOAuth2RedirectURL(),
+                text: "Click here to login with GitHub and view the comments!"
+            })).hide().fadeIn("fast"));
+        }
     }
     
     // Export the public API.
