@@ -4,12 +4,17 @@
     font-size: 100%;
 }
 
-body {
+body,
+textarea,
+input {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 14px;
+    color: #4E443C;
+}
+
+body {
     line-height: 1.57;
     background: #EFEFE7;
-    color: #4E443C;
     min-width: 980px;
 }
 

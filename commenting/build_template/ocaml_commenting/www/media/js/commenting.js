@@ -15,15 +15,18 @@ define([
     function formatDate(date) {
         var delta = Math.floor((Date.now() - date.getTime()) / 1000);
         if (delta < 60) {
-            return delta + " seconds ago";
+            return delta + " second" + (delta == 1 ? "": "s") +  " ago";
         }
         if (delta < 60 * 60) {
-            return Math.floor(delta / 60) + " minutes ago";
+            delta = Math.floor(delta / 60);
+            return delta + " minute" + (delta == 1 ? "": "s") +  " ago";
         }
         if (delta < 60 * 60 * 24) {
-            return Math.floor(delta / 60 / 60) + " hours ago";
+            delta = Math.floor(delta / 60 / 60);
+            return Math.floor(delta / 60 / 60) + " hour" + (delta == 1 ? "": "s") +  " ago";
         }
-        return Math.floor(delta / 60 / 60 / 24) + " days ago";
+        delta = Math.floor(delta / 60 / 60 / 24);
+        return delta + " day" + (delta == 1 ? "": "s") +  " ago";
     }
     
     /**
@@ -71,6 +74,15 @@ define([
                 href: userURL,
             }).appendTo(article));
         });
+        // Add in comment box.
+        $("<h2/>", {
+            text: "Write a comment"
+        }).appendTo(container)
+        var area = $("<textarea/>").appendTo(container);
+        var submit = $("<input/>", {
+            value: "Submit",
+            type: "submit"
+        }).appendTo(container);
         // Show the overlay.
         outer.fadeIn("fast");
     }
