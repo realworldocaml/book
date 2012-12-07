@@ -1,0 +1,9 @@
+Adding or modifying a chapter require a few steps:
+
+1) Add the filename to `chapters.en`
+
+2) Edit scripts/add_parts.ml to add the chapter id (which is the lowercase
+version of the filename with spaces replaced by dashes) to the OCaml program.
+
+If there are any orphan chapters found which aren't in `add_parts.ml`, the
+script should abort with a failure until you add it.
