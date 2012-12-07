@@ -32,7 +32,7 @@ define([
     /**
      * Creates an overlay to show the given issues.
      */
-    function createOverlay(milestone, elementContent, elementLabel, issues, onIssueCreate) {
+    function createOverlay(milestone, elementContent, elementTag, issues, onIssueCreate) {
         var outer = $("<div/>", {
             "class": "comment-overlay-outer"
         }).appendTo(body).hide();
@@ -63,7 +63,7 @@ define([
                 " commented " + formatDate(new Date(issue.created_at))
             ).appendTo(article);
             var commentText = $("<p/>", {
-                text: issue.title
+                html: issue.body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")
             }).appendTo(article);
             if (issue.closed_at != null) {
                 commentText.addClass("closed");
@@ -85,7 +85,7 @@ define([
             click: function() {
                 var content = $.trim(area.val());
                 if (content) {
-                    gitHub.createIssue(content, elementContent, milestone, [elementLabel], onIssueCreate);
+                    gitHub.createIssue("New comment on block" + elementTag, content, milestone, onIssueCreate);
                     outer.fadeOut("fast");
                 } else {
                     alert("Please enter a comment before submitting!");
@@ -111,14 +111,13 @@ define([
                     var element = $(this);
                     var elementContent = $.trim(element.text()).replace(/\s+/g, " ");
                     var elementLabel = "block-" + element.attr("id");
+                    var elementTag = " [" + elementLabel + "]";
                     // Count issues.
                     var issues = [];
                     $.each(data, function(_, issue) {
-                        $.each(issue.labels, function(_, label) {
-                            if (label.name == elementLabel) {
-                                issues.push(issue)
-                            }
-                        });
+                        if (issue.title.indexOf(elementTag) != -1) {
+                            issues.push(issue);
+                        }
                     });
                     // Add in a button to initialize comments.
                     function getButtonText() {
@@ -128,7 +127,7 @@ define([
                         "class": "comment-action",
                         text: getButtonText()
                     }).appendTo(element).click(function() {
-                        createOverlay(milestone, elementContent, elementLabel, issues, function(newIssue) {
+                        createOverlay(milestone, elementContent, elementTag, issues, function(newIssue) {
                             issues.push(newIssue);
                             button.text(getButtonText());
                         });

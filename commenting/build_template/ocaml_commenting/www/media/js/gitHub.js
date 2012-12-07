@@ -34,9 +34,22 @@ define([
      * Looks up a list of milestones for this repository.
      */
     function getMilestones(onSuccess) {
-        $.getJSON("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/milestones?callback=?", {
-            access_token: gitHubAccessToken
-        }, onSuccess);
+        // Get all open and closed milestones.
+        var receiveCount = 0;
+        var fullData = [];
+        function receiveMilestones(data) {
+            fullData = fullData.concat(data.data);
+            receiveCount += 1;
+            if (receiveCount == 2) {
+                onSuccess(fullData);
+            }
+        }
+        $.each(["open", "closed"], function(_, state) {
+            $.getJSON("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/milestones?callback=?", {
+                access_token: gitHubAccessToken,
+                state: state
+            }, receiveMilestones);
+        });
     }
     
     /**
@@ -52,8 +65,8 @@ define([
     function getMilestoneByTitle(onSuccess) {
         getMilestones(function(milestoneData) {
             var milestone;
-            for (var n = 0; n < milestoneData.data.length; n++) {
-                milestone = milestoneData.data[n];
+            for (var n = 0; n < milestoneData.length; n++) {
+                milestone = milestoneData[n];
                 if (santizeMilestoneTitle(milestone.title) == santizeMilestoneTitle(gitHubMilestone)) {
                     onSuccess(milestone);
                     return;
@@ -73,7 +86,6 @@ define([
             var fullData = [];
             function receiveIssues(data) {
                 fullData = fullData.concat(data.data);
-                console.log(fullData)
                 receiveCount += 1;
                 if (receiveCount == 2) {
                     fullData.sort(function(a, b) {
@@ -99,13 +111,12 @@ define([
     /**
      * Creates an issue from the given comment.
      */
-    function createIssue(title, body, milestone, labels, onSuccess) {
-        labels = labels.slice().concat([gitHubPageLabel]);
+    function createIssue(title, body, milestone, onSuccess) {
         $.post("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/issues?access_token=" + encodeURIComponent(gitHubAccessToken), JSON.stringify({
             title: title,
             body: body,
             milestone: milestone.number,
-            labels: labels,
+            labels: [gitHubPageLabel],
         }), onSuccess);
     }
     
