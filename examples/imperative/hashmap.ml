@@ -23,6 +23,7 @@
  * @email{jyh@cs.caltech.edu}
  * @end[license]
  *)
+open Core.Std
 open Dlist
 
 module HashMap : sig
@@ -31,6 +32,7 @@ module HashMap : sig
   val create : unit -> ('a, 'b) t
   val add : ('a, 'b) t -> key:'a -> data:'b -> unit
   val find : ('a, 'b) t -> key:'a -> 'b
+  val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 end = struct
   type ('a, 'b) t = ('a * 'b) list array
 
@@ -50,6 +52,11 @@ end = struct
      | _ :: t -> find t
     in
     find table.(hash_bucket key)
+
+  let iter table ~f =
+    for i = 0 to num_buckets - 1 do
+      List.iter table.(i) ~f:(fun (key, data) -> f ~key ~data)
+    done
 end
 
 module IterableHashMap : sig

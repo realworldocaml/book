@@ -26,6 +26,7 @@ module HashMap : sig
   val create : unit -> ('a, 'b) t
   val add : ('a, 'b) t -> key:'a -> data:'b -> unit
   val find : ('a, 'b) t -> key:'a -> 'b
+  val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 end = struct
   type ('a, 'b) t = ('a * 'b) list array
 
@@ -40,24 +41,31 @@ end = struct
 
   let find table ~key =
     let rec find = function
-     | [] -> raise Not_found
-     | (k, d) :: _ when k = key -> d
-     | _ :: t -> find t
+    | (k, d) :: _ when k = key -> d
+    | _ :: t -> find t
+    | [] -> raise Not_found
     in
     find table.(hash_bucket key)
+
+  let iter table ~f =
+    for i = 0 to num_buckets - 1 do
+      List.iter table.(i) ~f:(fun (key, data) -> f ~key ~data)
+    done
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The signature for the `HashMap` declares the type of dictionaries `('a, 'b) t`,
-with keys of type `'a` and associated values of type `'b`.  It also includes
-three functions.  The `create` function constructs an empty dictionary.  The
-`add` function adds a key/value association in the dictionary, by
-_side-effect_.  That is, the hash table is modified _in place_, and any
-references to the table will be able to observe the change.  Furthermore, the
-`add` method doesn't return a useful value; the type `unit` contains just the
-trivial value `()`, which is used by convention to represent "nothing."  The
-`find` function returns the value associated with a key, raising the exception
-`Not_found` if the table does not contain the key.
+The signature for the `HashMap` declares the type of dictionaries
+`('a, 'b) t`, with keys of type `'a` and associated values of type
+`'b`.  It also includes three functions.  The `create` function
+constructs an empty dictionary.  The `add` function adds a key/value
+association in the dictionary, by _side-effect_.  That is, the hash
+table is modified _in place_, and any references to the table will be
+able to observe the change.  Furthermore, the `add` method doesn't
+return a useful value; the type `unit` contains just the trivial value
+`()`, which is used by convention to represent "nothing."  The `find`
+function returns the value associated with a key, raising the
+exception `Not_found` if the table does not contain the key.  The
+`iter` function iterates through all of the elements in the table.
 
 The hash table is implemented as an array of buckets (fixed-size, in this
 example).  The OCaml runtime provides a builtin polymorphic hash function
@@ -72,9 +80,10 @@ appropriate bucket to find the value associated with a key.
 
 ## Imperative operations
 
-This example illustrates _one_ of the mutating operations in OCaml: array field
-assignment.  There are just two others: the contents of a string can be mutated,
-and so can record fields that have been declared as `mutable`.
+This example illustrates _one_ of the mutating operations in OCaml:
+array field assignment.  There are just three others: the contents of
+a string can be mutated, and so can record and object fields that have
+been declared as `mutable`.
 
 * `array.(index) <- expr`: Array field assignment.  See also the `Array.blit`
   functions for mutating multiple fields at once.
@@ -84,6 +93,9 @@ and so can record fields that have been declared as `mutable`.
 
 * `record.label <- expr`: Record field assignment.  The field `label` must
    be declared as `mutable`.
+   
+* `object.label <- expr`: Object field assignment.  The field `label` must
+  be declared as `mutable`.
 
 Note that _variables are not mutable_.  Variables can refer to mutable data, but
 the binding of a variable cannot be changed.  For convenience, OCaml defines a
@@ -96,7 +108,7 @@ mutated.
 * `refcell := expr` replaces the contents of the reference cell.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
-# let x = ref 1;; 
+# let x = ref 1;;
 val x : int ref = {contents = 1}
 # x := 7;;
 - : unit = ()
@@ -117,6 +129,60 @@ with the following definition.  The expression `!x` is equivalent to
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 type 'a ref = { mutable contents : 'a };;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Looping
+
+The `iter` function iterates through all of the elements in the table
+using a `for` loop.  There are two kinds of loops in OCaml, `for` loops and `while` loops.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+for index = <initial> to <final> do <body> done
+for index = <initial> downto <final> do <body> done
+while <condition> do <body> done
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A loop `for index = <initial> to <final> do <body> done` advances by
+from the `<initial>` integer to the `<final>` one (inclusive).  The
+iterations are evaluated if `<final>` is smaller than `<initial>`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# for i = 0 to 3 do
+    Printf.printf "i = %d\n" i
+  done;;
+  i = 0
+i = 1
+i = 2
+i = 3
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A downto loop `for = <initial> downto <final> do <body> done` advances
+downward by 1 on each iteration.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# for i = 3 downto 0 do Printf.printf "i = %d\n" i done;;
+i = 3
+i = 2
+i = 1
+i = 0
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A while-loop iterates until the condition is false.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let i = ref 0;;
+val i : int ref = {contents = 0}
+# while !i < 3 do Printf.printf "i = %d\n" !i; i := !i + 1 done;;
+i = 0
+i = 1
+i = 2
+- : unit = ()
+# while !i < 3 do Printf.printf "i = %d\n" !i; i := !i + 1 done;;
+- : unit = ()
+# !i;;  
+- : int = 3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Doubly-linked lists
@@ -385,7 +451,7 @@ val it : int iterator = <obj>
 - : unit = ()
 # it#has_value;;
 - : bool = false
-# iter (Printf.printf "%d\n") l;;            
+# iter (Printf.printf "%d\n") l;;
 3
 1
 - : unit = ()
@@ -875,25 +941,380 @@ end;;
 
 ## Concurrency
 
-Concurrency is another tool OCaml programmers can use to simplify programs in
-certain cases.  For example, the `Async` library supports concepts like thread
-pools, work groups, pipes (communication channels), etc.  In OCaml, threads do
-not introduce parallelism; only one thread may be running at a time.  However,
-threads can be used to simplify control flow -- a program can devote some
-threads to reading input, others for performing work, others for producing
-output, etc.
+Concurrency is another tool OCaml programmers can use to simplify
+programs in certain cases.  In OCaml, threads do not introduce
+parallelism; only one thread may be running at a time.  However,
+threads can be used to simplify control flow -- a program can devote
+some threads to reading input, others for performing work, others for
+producing output, etc.
 
-Threads interaction is usually imperative.  They communicate through queues,
-channels, and other shared data structures.  Context switches are _involuntary_,
-meaning that a thread may be suspended at _any time_, and this gives rise to the
-usual synchronization issues.  To illustrate, let's have two threads increment a
-shared reference cell concurrently.
+The OCaml standard library supports threads, where individual threads
+of control can be created that run concurrently (but only one thread
+at a time), and context switches are _involuntary_, meaning that a
+thread may be suspended at any time.
 
+When threads share imperative state, this gives rise to the standard
+synchronization issues, where multiple threads may be mutating shared
+state at the same time.  To illustrate, let's write a program with two
+threads that increment a shared reference cell concurrently.
 
-## TODO
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let value = ref 0
 
-0. Queues.
-1. Splay trees.
-2. Lazy.
-3. Concurrent collections.
-4. Iteration.
+let loop () =
+   for i = 1 to 3 do
+     let i = !value in
+     Printf.printf "i = %d\n" i;
+     flush stdout;
+     value := i + 1
+   done
+
+let thread1 = Thread.create loop ();;
+let thread2 = Thread.create loop ();;
+
+Thread.join thread1;;
+Thread.join thread2;;
+
+Printf.printf "value = %d\n" !value
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The reference cell `value` holds a shared value that is incremented 10
+times, in a loop, by the `loop` function.  Each iteration of the loop
+prints the current value, then assigns the new value.  We create two
+threads with the `Thread.create` expressions, then use `Thread.join`
+to block until the threads terminate.
+
+The exact behavior of the program is nondeterminstic -- it depends on
+the relative sopeed of the two theads.  One output is listed below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+i = 0
+ii  ==  01
+
+ii  ==  12
+
+i = 2
+value = 3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This represents a nearly perfect interleaving of the thread
+executions.  Each thread fetches the value from the `value` reference
+cell, prints the value, then performs the assignment.  Since both
+threads effectively run in lockstep, the final value in the `value`
+reference cell is the same as if there were just one thread running.
+
+If this is not the behavior that was expected, one solution is to use
+a `Mutex` to ensure that the increment operation is atomic.  We can
+allocate a lock with `Mutex.create`, then acquire the lock in the loop
+body.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+let value = ref 0
+let mutex = Mutex.create ()
+
+let loop () =
+   for i = 1 to 3 do
+     Mutex.lock mutex;
+     let i = !value in
+     Printf.printf "i = %d\n" i;
+     flush stdout;
+     value := i + 1;
+     Mutex.unlock mutex
+   done
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When we run this program, it produces a determinstic output.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+i = 0
+i = 1
+i = 2
+i = 3
+i = 4
+i = 5
+value = 6
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Dealing with concurrency
+
+In general it is the interaction of concurrency with imperative
+programs that causes problems.  There are many techniques you can use
+to address the issue.
+
+* Do not use assignment, mutable data structures, or perform
+  input/output in threads.
+
+* Use _cooperative_ multitasking, where only one thread runs at a
+  time, and context switches are _voluntary_.  This is the dominant
+  model in `Async`.
+
+* Do not share mutable data between threads.  In practice, this
+  usually includes explicit communication channels between threads
+  that otherwise have isolated state.
+
+* Give in, and use threads, and the standard synchronization toolkit
+  that comes with OCaml, including locks (`Mutex`), condition
+  variables, etc.
+
+Out of all of these choices, the simplest one is to use the `Async`
+model and cooperative multitasking.  However, let's go ahead and work
+through some examples of using traditional concurrent programming
+using locks and other synchronization primitives to build a
+concurrency library.
+
+### Concurrent hash tables
+
+Let's extend our hash table example to support concurrency.  To begin,
+let's first give the signature of the module we will implement.  The
+table has operations to add, remove, and find elements, and it also
+supports imperative iterators.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+module ConcurrentHashMap : sig
+  type ('a, 'b) t
+
+  val create : unit -> ('a, 'b) t
+  val add : ('a, 'b) t -> key:'a -> data:'b -> unit
+  val find : ('a, 'b) t -> key:'a -> 'b
+  val remove : ('a, 'b) t -> key:'a -> unit
+  val iterator : ('a, 'b) t -> ('a * 'b) iterator
+end = struct
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We'll use the same basic construction that we used to implement the
+`HashMap` -- a hash table contains an array of buckets.  In addition
+we'll add locking to ensure that concurrent operations do not
+interfere.  In addition, to reduce lock contention, we'll use an array
+of locks to partition the table into multiple parts.  If operations
+are randomly disitribted, this should reduce lock contention.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  type ('a, 'b) element = {
+    key : 'a;
+    mutable value : 'b
+  }
+  type ('a, 'b) t = {
+    locks : Mutex.t array;
+    mutable buckets : ('a, 'b) element list array
+  }
+
+  let num_locks = 32
+  let num_buckets = 256
+
+  let create () = {
+    locks = Array.init num_locks (fun _ -> Mutex.create ());
+    buckets = Array.create num_buckets []
+  }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each `element` is a key/value pair, where the value is mutable so that
+the `add` function can mutate it in place.  For this implementation,
+we'll use 32 locks, and start with 256 buckets.
+
+Each bucket is an _association list_, meaning that it is list of
+key/value pairs that implement a dictionary.  We can start the
+implementation by defining dictionary operations for association
+lists.  The function `find_assoc` finds the value associated with a
+key, and `remove_assoc` removes an association.  Both functions raise
+an exception `Not_found` if the list does not contain the association.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let rec find_assoc key = function
+  | { key = key' } as element :: _ when key' = key -> element
+  | _ :: tl -> find_assoc key tl
+  | [] -> raise Not_found
+
+  let rec remove_assoc key = function
+  | { key = key' } :: tl when key' = key -> tl
+  | hd :: tl -> hd :: remove_assoc key tl
+  | [] -> raise Not_found
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The locks are intended to partition the table into multiple sub-parts,
+where each lock provides synchronization for a contiguous range of
+buckets.  To make synchronization each we define a function
+`synchronize` that takes a bucket index and a function, and evaluates
+the function with the bucket lock acquired, releasing the lock before
+returning.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let synchronize table index f =
+    let lock = table.locks.(index * num_locks / num_buckets) in
+    Mutex.lock lock;
+    let result = f () in
+    Mutex.unlock lock;
+    result
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that the `synchronize` function is _not_ exception-safe, meaning
+that if evaluation of `f ()` raises an exception, the lock will not be
+released.  An exception-safe version would catch all exceptions; when
+an exception is raised, the lock would be released, and the exception
+re-raised.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let synchronize_exn table index f =
+    let lock = table.locks.(index * num_locks / num_buckets) in
+    Mutex.lock lock;
+    try let result = f () in Mutex.unlock lock; result with
+      exn -> Mutex.unlock lock; raise exn
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To add a new entry to the table, the `add` function acquires the
+bucket lock, then uses `find_assoc` to look for an existing
+association.  If one is found, the `value` is updated in-place to the
+new value.  Otherwise, a new entry is added to the beginning of the
+bucket.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let add table ~key ~data =
+    let hash = Hashtbl.hash key in
+    let index = hash mod num_buckets in
+    let buckets = table.buckets in
+    synchronize table index (fun () ->
+      try (find_assoc key buckets.(index)).value <- data with
+        Not_found ->
+          buckets.(index) <- { key = key; value = data } :: buckets.(index))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Removing an element from the table is similar.  If here is a previous
+entry in the table, the entry is removed.  Otherwise, the table is
+left unchanged.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let remove table ~key =
+    let hash = Hashtbl.hash key in
+    let index = hash mod num_buckets in
+    let buckets = table.buckets in
+    synchronize table index (fun () ->
+      try buckets.(index) <- remove_assoc key buckets.(index) with
+        Not_found -> ())
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The function to find an association in the table is similar -- we jsut
+find the entry in the table and return the value part.  However, this
+particular implementation is somewhat more subtle, because it omits
+the synchronization step, examining the bucket _without_ acquiring the
+lock.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let find table ~key =
+    let hash = Hashtbl.hash key in
+    let index = hash mod num_buckets in
+	(* Unsynchronized! *)
+    (find_assoc key table.buckets.(index)).value
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From a performance perspective, this is clearly a win, because
+retrieving elements from the table has no locking at all.  But why is
+it valid?
+
+The reasoning has to do with two things: 1) the semantics we expect
+from the table, and 2) the OCaml memory model.  Ideally, the semantics
+we would expect is _sequential semantics_, meaning that all memory
+operations are processed in _some_ sequence that is compatible with
+the order in which they were performed in each thread.  Thus, if some
+thread adds two entries for keys `K1` and `K2` in sequential order,
+then all other threads will see either, 1) neither entry, or 2) a
+entry for `K1`, or 3) a entry for both `K1` and `K2`, but it will
+_not_ see an entry for `K2` without also having an entry for `K1`.
+
+Unfortunately, for some processor architectures, primary memory does
+not have sequential semantics, due to caching and other effects.
+Fortunately for us, OCaml does provide sequential memory semantics due
+to its threading model where: 1) only one thread executes at a time,
+and 2) there is a memory barrier the prevents reordering of thread
+context switches and memort operations, and 3) the compiler does not
+reorder memory operations in ways that would violate sequential memory
+semantics.
+
+Note, OCaml does not a _guarantee_ this semantics.  The OCaml
+implementation may change to support parallelism.  If it does, the
+memory semantics will change accordingly.  The simplest fix is just to
+synchronize the access.  Performance of `find` operations will
+decrease somewhat due to contention.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let synchronized_find table ~key =
+    let hash = Hashtbl.hash key in
+    let index = hash mod num_buckets in
+    synchronize table index (fun () ->
+      (find_assoc key table.buckets.(index)).value)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the final part of the implementation, let's define imperative
+iteration.  The iterator object contains a bucket index, and the field
+`elements` refers to some suffix of the list stored in the bucket.
+The `value` method returns the current elements, and the `next` method
+advances the `elements` field.  The method `normalize` is used to
+maintain the invariant that the `elements` field always refers to a
+value in the table unless the iterator has advanced past the final
+element.  The `remove` method removes the current element from the
+bucket in which it is stored.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+  let rec remove_element elements = function
+  | (_ :: tl) as elements' when elements' == elements -> tl
+  | hd :: tl -> hd :: remove_element elements tl
+  | [] -> raise Not_found
+
+  let iterator table =
+    let buckets = table.buckets in
+    object (self)
+      val mutable index = 0
+      val mutable elements = buckets.(0)
+      method has_value = elements <> []
+      method value =
+        match elements with
+        | { key = key; value = value } :: _ -> key, value
+        | [] -> raise (Invalid_argument "value")
+      method next =
+        elements <- List.tl elements;
+        self#normalize
+      method remove =
+        synchronize table index (fun () ->
+          try buckets.(index) <- remove_element elements buckets.(index) with
+            Not_found -> ());
+        self#next
+      method private normalize =
+        while elements = [] && index < num_buckets do
+          index <- index + 1;
+	  elements <- buckets.(index)
+        done
+      initializer self#normalize
+    end
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All method are unsychronized except the method `remove`, which mutates
+the bucket.  As a consequence, it means that hash operations that add
+and remove elements from the list can happen concurrently with
+iteration.  Again, this is great from a performance perspective, but
+it means that iteration has non-sequential semantics.  In particular,
+whenever iteration enters a new bucket, subsequent concurrent
+operations that add new elements or remove old ones have _no effect_
+on the iteration.  Iteration advances through that bucket as if it
+were unchanged.
+
+One advantage of this relaxed iteration semantics is peformance, since
+iteration is largely unsynchronized.  Another advantage is that
+deadlock is less likely.  If we were to _lock_ the bucket during
+iteration, then changes to that bucket would not be allowed during
+iteration (even by the iterating thread).  We might allow lock
+recursion to allow mutations by the iterating thread, but in general
+the synchronization might involve multiple threads, resulting in
+deadlock.  Lock-free iteration ensures that the `ConcurrentHashMap`
+will not be involved in a deadlock cycle.
+
+## Summary
+
+The OCaml language supports a fairly standard imperative programming
+model, with looping, assignment, mutable arrays, records, and objects.
+If desired, we can write programs that correspond directly to what we
+would have written in some other imperative language like C or Java.  Of course, doing so is really not the best match -- if you want to write imperative programs, you should probably use an imperative programming language.
+
+However, there are times when imperative programming might provide
+efficiency (as with lazy evaluation, or memoization), or you might
+require techniques or data structures that are traditional imperative
+(like graphs represented with adjacency lists), and in these cases
+OCaml usually shines.  Used with discretion, imperative programming
+can lead to smaller, simpler programs.

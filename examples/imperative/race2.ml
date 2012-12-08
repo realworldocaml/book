@@ -24,22 +24,23 @@
  * @end[license]
  *)
 let value = ref 0
-
-let add1 i =
-   Printf.printf "i = %d\n" i;
-   flush stdout;
-   i + 1
+let mutex = Mutex.create ()
 
 let loop () =
-   for i = 1 to 10 do
-      value := add1 !value
+   for i = 1 to 3 do
+     Mutex.lock mutex;
+     let i = !value in
+     Printf.printf "i = %d\n" i;
+     flush stdout;
+     value := i + 1;
+     Mutex.unlock mutex
    done
 
-let threads = Array.init 10 (fun i -> Thread.create loop ());;
+let thread1 = Thread.create loop ();;
+let thread2 = Thread.create loop ();;
 
-for i = 0 to 9 do
-  Thread.join threads.(i)
-done;;
+Thread.join thread1;;
+Thread.join thread2;;
 
 Printf.printf "value = %d\n" !value
 
