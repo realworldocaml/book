@@ -1,23 +1,22 @@
 # Imperative Programming
 
-The OCaml programming language is _functional_, meaning that functions
-are first-class values that can be passed around like any other.
-However, this doesn't mean that OCaml programs are _pure_.  The
-language includes assignment, mutable values like arrays and strings.
-Evaluation order is strict and sequential.  In principle, you can port
-many imperative programs directly to OCaml.  If you find yourself
-doing this a lot, then OCaml may not be the right programming language
-for your problem.  However, there are times when imperative
-programming is both appropriate and efficient, and OCaml shines at
-supporting programs with both functional and imperative aspects.
+The OCaml programming language is _functional_, meaning that functions are
+first-class values that can be passed around like any other.  However, this
+doesn't mean that OCaml programs are _pure_.  The language includes assignment,
+mutable values like arrays and strings.  Evaluation order is strict and
+sequential.  In principle, you can port many imperative programs directly to
+OCaml.  If you find yourself doing this a lot, then OCaml may not be the right
+programming language for your problem.  However, there are times when imperative
+programming is both appropriate and efficient, and OCaml shines at supporting
+programs with both functional and imperative aspects.
 
 To illustrate imperative programming, let's start by implementing a hash table.
 Hash tables are an efficient way to implement imperative _dictionaries_.  There
 are full-featured implementations of hash tables in Core as well as in the OCaml
 standard library.  For illustration, we'll construct just a basic dictionary
-using _open hashing_, where there are an array of buckets, each of which contain
-a linked list of elements.  We'll use regular (pure) OCaml lists, and an array
-for the buckets.
+using _open hashing_, where the hash table consists of an array of buckets, each
+of which contain a linked list of elements.  We'll use regular (pure) OCaml
+lists, and an array for the buckets.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 module HashMap : sig
@@ -54,29 +53,30 @@ end = struct
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The signature for the `HashMap` declares the type of dictionaries
-`('a, 'b) t`, with keys of type `'a` and associated values of type
-`'b`.  It also includes three functions.  The `create` function
-constructs an empty dictionary.  The `add` function adds a key/value
-association in the dictionary, by _side-effect_.  That is, the hash
-table is modified _in place_, and any references to the table will be
-able to observe the change.  Furthermore, the `add` method doesn't
-return a useful value; the type `unit` contains just the trivial value
-`()`, which is used by convention to represent "nothing."  The `find`
-function returns the value associated with a key, raising the
-exception `Not_found` if the table does not contain the key.  The
-`iter` function iterates through all of the elements in the table.
+The signature for the `HashMap` declares the type of dictionaries `('a, 'b) t`,
+with keys of type `'a` and associated values of type `'b`.  It also includes
+three functions.  The `create` function constructs an empty dictionary.  The
+`add` function adds a key/value association in the dictionary, by _side-effect_.
+That is, the hash table is modified _in place_, and any references to the table
+will be able to observe the change.  Furthermore, the `add` method doesn't
+return a useful value; the type `unit` contains just the trivial value `()`,
+which is used by convention to represent "nothing."  The `find` function returns
+the value associated with a key, raising the exception `Not_found` if the table
+does not contain the key.  The `iter` function iterates through all of the
+elements in the table, applying the function `f` to each element in turn.
 
-The hash table is implemented as an array of buckets (fixed-size, in this
-example).  The OCaml runtime provides a builtin polymorphic hash function
-`Hashtbl.hash` that works for almost any value in OCaml, excluding functions and
-abstract values like C data.  The `create` function create a new array where all
-buckets are empty.  The `add` function uses the hash function to determine the
-appropriate bucket, then adds a new key/value association to the bucket through
-an array _assignment_ `table.(index) <- (key, data) :: table.(index)`, which
-_replaces_ the bucket with a new one where the new key/value pair is added to
-the front of the list.  The `find` function performs a linear search through the
-appropriate bucket to find the value associated with a key.
+The hash table is implemented as an array of buckets (the array is fixed-size,
+in this example).  The OCaml runtime provides a builtin polymorphic hash
+function `Hashtbl.hash` that works for almost any value in OCaml, excluding
+functions and abstract values like C data.  The `create` function creates a new
+array where all buckets are empty.  The `add` function uses the hash function to
+determine the appropriate bucket, then adds a new key/value association to the
+bucket through an array _assignment_ `table.(index) <- (key, data) ::
+table.(index)`, which _replaces_ the bucket with a new one where the new
+key/value pair is added to the front of the list.  The `find` function performs
+a linear search through the appropriate bucket to find the value associated with
+a key.  The `iter` function iterates through each of the elements in the
+buckets.
 
 ## Imperative operations
 
@@ -133,8 +133,9 @@ type 'a ref = { mutable contents : 'a };;
 
 ## Looping
 
-The `iter` function iterates through all of the elements in the table
-using a `for` loop.  There are two kinds of loops in OCaml, `for` loops and `while` loops.
+The `iter` function iterates through all of the elements in the table using a
+`for` loop.  There are two kinds of loops in OCaml, `for` loops and `while`
+loops.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 for index = <initial> to <final> do <body> done
@@ -280,12 +281,12 @@ let front = function
 
 let pop_front l =
   match !l with
-   | Some { value = v; next = None } -> l := None; v
-   | Some { value = v; next = (Some el) as next } ->
-     l := next;
-     el.previous <- None;
-     v
-   | None -> raise (Invalid_argument "pop_front")
+  | Some { value = v; next = None } -> l := None; v
+  | Some { value = v; next = (Some el) as next } ->
+    l := next;
+    el.previous <- None;
+    v
+  | None -> raise (Invalid_argument "pop_front")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For illustration the `front` function uses pattern matching on the reference
@@ -308,12 +309,12 @@ these iteration functions takes a function that will be applied to each of the
 elements in order.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
-# List.iter (fun i -> Printf.printf "Element: %d\n" i) [1; 2; 3];;
+# List.iter  [1; 2; 3] ~f:(fun i -> Printf.printf "Element: %d\n" i);;
 Element: 1
 Element: 2
 Element: 3
 - : unit = ()
-# List.map ((+) 10) [1; 2; 3];;
+# List.map [1; 2; 3] ~f:((+) 10);;
 - : int list = [11; 12; 13]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -321,7 +322,7 @@ Defining this for doubly-linked lists is simple enough.  The following function
 iterates through the list, applying the function `f` to each element in turn.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
-let iter f l =
+let iter l ~f =
   let rec loop = function
    | Some { value = v; next = next } -> f v; loop next
    | None -> ()
@@ -332,13 +333,13 @@ let iter f l =
   push_front l 1;
   push_front l 2;
   push_front l 3;
-  DList.iter (Printf.printf "Item: %d\n") l;;
+  DList.iter l ~f:(Printf.printf "Item: %d\n");;
 Item: 3
 Item: 2
 Item: 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This style of iteration is concise, and completely general.  However, with
+This style of iteration is concise and completely general.  However, with
 imperative containers, we often want more control.  We may not want to iterate
 through all elements, and we often want to mutate the container as we iterate.
 One conventional way to do this is to define a generic `iterator` type that can
@@ -349,7 +350,7 @@ Library.
 Let's define a Java-style kind of generic iterator object that allows manual
 enumeration and mutation of the container.  Here is the Java interface.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {Java}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {java}
 public iterface Iterator {
   public boolean hasNext();
   public Object next();
@@ -366,9 +367,8 @@ When we define a similar iterator concept in OCaml, we need to choose how to
 represent it.  We _could_ define a separate iterator type for each kind of
 container, but this would be inconvenient, since iterators have similar behavior
 for many different kinds of containers.  To define a _generic_ iterator, there
-are two reasonable choices: we can use first-class modules, or objects.  The
-first-class modules chapter explores this concept, so let's look at an
-implementation using objects.
+are several reasonable choices: we can use first-class modules, or we can use
+objects.  The simpler approach is to use objects.
 
 You can skip forward to the Objects chapter for more informatation about
 objects, but we'll be using basic objects, which are just collections of
@@ -376,9 +376,9 @@ methods, similar to having a record of functions -- we could also implement the
 iterator as a record of functions, but the code would be somewhat more verbose.
 
 First, we need to define a generic iterator type.  For clarity, we'll use a more
-verbose type where retreiving a value is separate from advacing to the next
-element.  The object type is specified like a record type, but using angle
-brackets `< ... >`.
+verbose type than in Java.  We'll separate retrieving a value from advacing to
+the next element.  The object type is specified like a record type, but using
+angle brackets `< ... >`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
 type 'a iterator =
@@ -492,7 +492,7 @@ module DList : sig
 end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We have seen the definition of all of the functions except `find`, which seaches
+We have seen the definition of all of the functions except `find`, which searches
 for an element in the list (sequentially), returning an iterator that refers to
 that element if it exists.  The implementation simply creates an iterator, then
 uses a loop to search sequentially for the element.  If the element is found,
@@ -633,7 +633,7 @@ There are many instances where imperative programming is used to change or
 improve the performance characteristics of a program, without otherwise changing
 the behavior.  In other words, the program could be written without
 side-effects, but performance is improved by techniques like lazy computation,
-caching or memoization, etc.
+caching, memoization, etc.
 
 One of the simplest of these is the builtin lazy computation.  The keyword
 `lazy` can be used to prefix any expression, returning a value of type `'a
@@ -951,7 +951,7 @@ producing output, etc.
 The OCaml standard library supports threads, where individual threads
 of control can be created that run concurrently (but only one thread
 at a time), and context switches are _involuntary_, meaning that a
-thread may be suspended at any time.
+thread may be preempted at any time.
 
 When threads share imperative state, this gives rise to the standard
 synchronization issues, where multiple threads may be mutating shared
@@ -1023,7 +1023,7 @@ let loop () =
    done
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When we run this program, it produces a determinstic output.
+When we run this program, it produces a deterministic output.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 i = 0
@@ -1037,9 +1037,9 @@ value = 6
 
 ### Dealing with concurrency
 
-In general it is the interaction of concurrency with imperative
-programs that causes problems.  There are many techniques you can use
-to address the issue.
+In general the interaction of concurrency with imperative programs causes
+problems with races.  There are many techniques you can use to address the
+issue.
 
 * Do not use assignment, mutable data structures, or perform
   input/output in threads.
@@ -1307,10 +1307,12 @@ will not be involved in a deadlock cycle.
 
 ## Summary
 
-The OCaml language supports a fairly standard imperative programming
-model, with looping, assignment, mutable arrays, records, and objects.
-If desired, we can write programs that correspond directly to what we
-would have written in some other imperative language like C or Java.  Of course, doing so is really not the best match -- if you want to write imperative programs, you should probably use an imperative programming language.
+The OCaml language supports a fairly standard imperative programming model, with
+looping, assignment, mutable arrays, records, and objects.  If desired, we can
+write programs that correspond directly to what we would have written in some
+other imperative language like C or Java.  Of course, doing so is really not the
+best match -- if you want to write imperative programs, you should probably use
+an imperative programming language.
 
 However, there are times when imperative programming might provide
 efficiency (as with lazy evaluation, or memoization), or you might
