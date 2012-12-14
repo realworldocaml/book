@@ -55,9 +55,12 @@ body {
     margin-bottom: 2px;
 }
 
-.navigation > ul > li:first-child > a {
+.navigation > ul > li:first-child > a,
+.navigation > ul > li:first-child > a.here,
+.navigation > ul > li:first-child > a:hover {
     font-size: 17px;
     border-bottom: 1px #8E8880 solid;
+    color: #4E443C;
     display: table;
     padding-bottom: 1px;
 }

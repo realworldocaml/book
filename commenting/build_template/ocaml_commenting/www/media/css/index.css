@@ -3,6 +3,10 @@
     margin-left: 40px;
 }
 
+.index a {
+    color: #4E443C;
+}
+
 .index > ul {
     margin-left: 25px;
 }
