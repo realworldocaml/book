@@ -110,7 +110,7 @@ body {
     border-radius: 5px;
     width: 656px;
     position: relative;
-    padding: 22px;
+    padding: 12px 22px;
     float: left;
 }
 
@@ -118,24 +118,23 @@ body {
 /* Sectioning. */
 
 .page > h1 {
-    font-size: 36px;
-    line-height: 44px;
-    margin-bottom: 20px;
-    font-weight: normal;
+    font-size: 32px;
+    line-height: normal;
+    margin-bottom: 16px;
+    font-weight: bold;
 }
 
 .page section > h1 {
     font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 11px;
+    margin-top: 18px;
+    margin-bottom: 14px;
 }
 
 .page section > h1 + section {
-    margin-top: -9px;
+    margin-top: -4px;
 }
 
 .page > section > h1 {
-    color: #F14E32;
     font-size: 18px;
     text-transform: uppercase;
 }
@@ -151,14 +150,14 @@ body {
     padding: 14px 14px 0 76px;
     border: 1px #E2E0D8 solid;
     overflow: hidden;
-    margin: 0 0 11px 0;
+    margin: 0 0 15px 0;
     background-position: 14px 14px;
     background-repeat: no-repeat;
     background-size: 48px 48px;
 }
 
 .page aside > h1 {
-    margin-bottom: 11px;
+    margin-bottom: 14px;
 }
 
 .page aside.note {
@@ -187,7 +186,7 @@ ul,
 li,
 table,
 pre {
-    margin-bottom: 11px;
+    margin-bottom: 15px;
 }
 
 
