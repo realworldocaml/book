@@ -20,53 +20,24 @@ body {
 
 .body {
     width: 960px;
-    margin: 0 auto;
+    margin: 40px auto 0 auto;
     overflow: hidden;
 }
 
 
 /* Header. */
 
-.header {
-    padding-top: 30px;
-}
-
-.header h1 {
-    font-size: 36px;
-    font-weight: bold;
-    display: inline;
-    line-height: 44px;
-}
-
-.header h2 {
-    font-size: 18px;
-    color: #9A9994;
-    font-weight: normal;
-    display: inline;
-    margin-left: 11px;
-    vertical-align: 4px;
-}
-
-.header p {
-    margin: 0;
-    font-size: 12px;
-    position: absolute;
-    top: 70px;
-}
-
-.header p a {
-    color: #9A9994;
+.header,
+.navigation {
+    position: fixed;
+    width: 214px;
 }
 
 
 /* Navigation. */
 
 .navigation {
-    margin-top: 30px;
-    margin-bottom: 40px;
-    width: 214px;
-    padding-right: 44px;
-    float: left;
+    margin-top: 73px;
 }
 
 .navigation ul {
@@ -75,16 +46,26 @@ body {
 }
 
 .navigation > ul > li {
-    margin-bottom: 6px;
+    font-size: 15px;
+    line-height: 22px;
+    margin-bottom: 0;
 }
 
-.navigation > ul > li > a {
-    font-size: 16px;
-    line-height: 22px;
+.navigation > ul > li:first-child {
+    margin-bottom: 2px;
+}
+
+.navigation > ul > li:first-child > a {
+    font-size: 17px;
+    border-bottom: 1px #8E8880 solid;
+    display: table;
+    padding-bottom: 1px;
 }
 
 .navigation > ul > li > ul > li {
     margin-left: 12px;
+    font-size: 14px;
+    line-height: 22px;
     margin-bottom: 0;
 }
 
@@ -96,14 +77,14 @@ body {
 
 .navigation a:hover,
 .navigation a.here {
-    color: #F14E32;
+    color: #3F48FA;
+    text-decoration: none;
 }
 
 
 /* Main content area. */
 
 .page {
-    margin-top: 30px;
     margin-bottom: 40px;
     background: #FCFCFA;
     border: 1px #E2E0D8 solid;
@@ -111,7 +92,7 @@ body {
     width: 656px;
     position: relative;
     padding: 12px 22px;
-    float: left;
+    margin-left: 258px;
 }
 
 
@@ -229,17 +210,13 @@ table td {
 }
 
 a {
-    color: #0388A6;
+    color: #3F48FA;
     text-decoration: none;
-    -webkit-transition: color 0.15s;
-    -moz-transition: color 0.15s;
-    -ms-transition: color 0.15s;
-    -o-transition: color 0.15s;
-    transition: color 0.15s;
 }
 
 a:hover {
-    color: #04ADD3;
+    color: #5F68FF;
+    text-decoration: underline;
 }
 
 a > img {
@@ -284,6 +261,5 @@ a > img {
     border-top: 1px #E2E0D8 solid;
     color: #9A9994;
     font-size: 12px;
-    clear: both;
-    padding: 20px;
+    padding: 20px 20px 0 20px;
 }

@@ -1,3 +1,40 @@
+/* Github login. */
+
+.navigation > p > a.github-login {
+    margin-top: 15px;
+    display: block;
+    color: #fff;
+    font-family: sans-serif;
+    text-align: center;
+    line-height: 15px;
+    font-size: 13px;
+    border: 1px #549300 solid;
+    text-shadow: rgba(0, 0, 0, 0.3) 2px 1px 1px;
+    box-shadow: inset 1px 1px 1px #B0D74F;
+    border-radius: 4px;
+    padding: 6px 30px 7px 30px;
+    -webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+    -ms-font-smoothing: antialiased;
+    -o-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+    background: #8cc400; /* Old browsers */
+    background: -moz-linear-gradient(top,  #8cc400 0%, #61a701 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#8cc400), color-stop(100%,#61a701)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #8cc400 0%,#61a701 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #8cc400 0%,#61a701 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #8cc400 0%,#61a701 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #8cc400 0%,#61a701 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#8cc400', endColorstr='#61a701',GradientType=0 ); /* IE6-9 */
+}
+
+.navigation > p > a.github-login:hover {
+    text-decoration: none;
+}
+
+
+/* Commenting links. */
+
 .comment-action {
     font-size: 13px;
     text-decoration: underline;

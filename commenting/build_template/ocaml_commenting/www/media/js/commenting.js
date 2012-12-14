@@ -140,10 +140,11 @@ define([
             });
         } else {
             // Start the authenticate process.
-            var header = $(".header");
-            header.append($("<p/>").append($("<a/>", {
+            var navigation = $(".navigation");
+            navigation.append($("<p/>").append($("<a/>", {
                 href: gitHub.getOAuth2RedirectURL(),
-                text: "Click here to login with GitHub and view the comments!"
+                text: "Login with GitHub to view and add comments",
+                "class": "github-login"
             })).hide().fadeIn("fast"));
         }
     }
