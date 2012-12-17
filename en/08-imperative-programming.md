@@ -86,7 +86,8 @@ a string can be mutated, and so can record and object fields that have
 been declared as `mutable`.
 
 * `array.(index) <- expr`: Array field assignment.  See also the `Array.blit`
-  functions for mutating multiple fields at once.
+  functions for mutating multiple fields at once.  Bigarray values can be
+  mutated with the syntax `bigarray.{index} <- expr`.
 
 * `string.[index] <- char`: String element assignment.  See also the
   `String.blit` functions for mutating substrings.
@@ -1285,15 +1286,14 @@ bucket in which it is stored.
     end
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-All method are unsychronized except the method `remove`, which mutates
-the bucket.  As a consequence, it means that hash operations that add
-and remove elements from the list can happen concurrently with
-iteration.  Again, this is great from a performance perspective, but
-it means that iteration has non-sequential semantics.  In particular,
-whenever iteration enters a new bucket, subsequent concurrent
-operations that add new elements or remove old ones have _no effect_
-on the iteration.  Iteration advances through that bucket as if it
-were unchanged.
+All method are unsychronized except the method `remove`, which mutates the
+bucket.  As a consequence, it means that hash operations that add and remove
+elements from the list can happen concurrently with iteration.  Again, this is
+great from a performance perspective, but it means that iteration has
+non-sequential semantics.  In particular, whenever iteration enters a new
+bucket, subsequent concurrent operations that add new elements or remove old
+ones from that bucket have _no effect_ on the iteration.  Iteration advances
+through that bucket as if it were unchanged.
 
 One advantage of this relaxed iteration semantics is peformance, since
 iteration is largely unsynchronized.  Another advantage is that
@@ -1305,6 +1305,206 @@ the synchronization might involve multiple threads, resulting in
 deadlock.  Lock-free iteration ensures that the `ConcurrentHashMap`
 will not be involved in a deadlock cycle.
 
+## Input and output
+
+Input and output I/O is another kind of imperative operation, where the purpose
+is to either read input from a file, stream, or device, _consuming_ the input by
+side-effect; or write output to a file, stream, or device, _modifying_ the
+output by side-effect.  There are several I/O libraries in OCaml.  There is the
+basic builtin I/O library in the `Pervasives` module, and there are moe advanced
+I/O libraries in the `Unix` and `Async` modules.  Let's look at the basic
+library -- the advanced libraries will be described elsewhere.
+
+For basic I/O OCaml models input and output with _channels_.  An `in_channel` is
+used for reading input, and and `out_channel` for producing output.  Each OCaml
+process has three standard channels, similar to the three standard files in Unix.
+
+* `stdin : in_channel`.  The "standard input" channel.  By default, input comes
+  from the terminal, which handles keyboard input.
+
+* `stdout : out_channel`.  The "standard output" channel.  By default, output
+  written to `stdout` appears on the user terminal.
+
+* `stderr : out_channel`.  The "standard error" channel.  This is similar to
+  `stdout`, but it is intended for error messages.
+
+The standard library has several functions for reading from and writing to the
+standard channels.
+
+* `print_char : char -> unit` prints a single character to `stdout`.
+
+* `print_string : string -> unit` prints a `string` to `stdout` as a sequence of
+  characters, without quotes.
+
+* `print_int : int -> unit` prints an integer to `stdout`.
+
+* `print_float : float -> unit` prints a floating-point number to `stdout`.
+
+Functions to write to `stderr` have similar names, using the prefix `prerr_`
+rather than `print_` (for example, `prerr_string`).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let i = 1;;
+val i : int = 1
+# print_string "The value of i is "; print_int i; print_string ".\n";;
+The value of i is 1.
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Input is similar, but there are only a few functions.
+
+* `read_line : unit -> string` reads a line of input from `stdin`.
+
+* `read_int : unit -> int` reads a decimal integer from `stdin`.
+
+* `read_float : unit -> float` reads a floating-point number from `stdin`.
+
+These functions raise the exception `End_of_file` if the input channel is
+terminated before the input is read.
+
+Here is a function to read a sequence of integers from `stdin`, sorting them and
+printing the result to `stdout`.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let collate_input () =
+   let rec read_input items =
+      let item = try Some (read_int ()) with End_of_file -> None in
+      match item with
+       | Some i -> read_input (i :: items)
+       | None -> items
+   in
+   let items = read_input [] in
+   let sorted = List.sort (-) items in
+   List.iter (fun i -> print_int i; print_char ' ') sorted;
+   print_string "\n";;
+val collate_input : unit -> unit = <fun>
+#   collate_input ();;
+8
+56
+2
+34
+-120
+19
+-120 2 8 19 34 56 
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using exceptions to signal the end of input is a little awkward.  The
+`read_input` loop above converts the exception into an `int option`, so that
+matching can be performed with `match` and the function is tail-recursive.  The
+following function is _not_ tail recursive, and should be avoided.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+  (* AVOID -- non tail-recursive input reader *)
+# let rec read_input items =
+   try read_input (read_int () :: items) with
+      End_of_file -> items;;
+val read_input : int list -> int list = <fun>
+# read_input [];;
+34
+45
+56
+-1
+- : int list = [-1; 56; 45; 34]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Another way to address the input issue is to use iteration, rather than
+recursion.  This requires collecting the input in a container than can be
+mutated by side-effect.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let read_input () =
+   let items = ref [] in
+   try
+      while true do
+         items := read_int () :: !items
+      done;
+      []  (* not reached *)
+   with End_of_file ->
+      !items;;
+val read_input : unit -> int list = <fun>
+# read_input ();;
+45
+78
+-345
+- : int list = [-345; 78; 45]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this loop, the value returns from a successful call to `read_int ()` is added
+to the `items` list by side-effect.  When `read_int ()` reaches the end of
+input, it raises the `End_of_file` exception, terminating the loop.  The `while`
+loop never terminates; the `[]` value afterward is only to satisfy the type
+checker.
+
+### Basic file input and output
+
+It isn't necessary to perform all input through the standard channels.  There
+are also functions to open files for reading and writing.
+
+* `open_out : string -> out_channel` open a file for writing.
+
+* `open_in : string -> in_channel` open a file for reading.
+
+* `close_out : out_channel -> unit` close an output channel, flushing any pending
+  output to the file.
+
+* `close_in : in_channel -> unit` close an input channel.
+
+The functions for input and output are similar to the `print_...` and `read_...`
+functions, but they use the prefix `output_` and `input_` and they take a
+channel as an argument.  Let's write a function to print the contents of a file.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let cat filename =
+   let inx = open_in filename in
+   try
+      while true do
+         print_string (input_line inx); print_char '\n'
+      done
+   with End_of_file ->
+      close_in inx;;
+val cat : string -> unit = <fun>
+# let outf = open_out "file.txt";;
+val outf : out_channel = <abstr>
+# output_string outf "Hello world\n1\n2\n3\n";;
+- : unit = ()
+# close_out outf;;
+- : unit = ()
+# cat "file.txt";;
+Hello world
+1
+2
+3
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is important to close channels when you are finished with them, for two
+reasons.  One reason is that the runtime system will usually have a limit on the
+number of channels that may be open simultaneously.  To avoid problems, you
+should close channels you are not using.  In addition, for efficiency, output is
+buffered and written to output channels in larger blocks.  The output may not
+actually be written to the file unless the `out_channel` is closed, or with an
+explicit call to the `flush` function.
+
+* `flush : out_channel -> unit`
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let outf = open_out "file.txt";;
+val outf : out_channel = <abstr>
+# output_string outf "Hello world\n1\n2\n3\n";;
+- : unit = ()
+# cat "file.txt";;
+- : unit = ()
+# flush outf;;
+- : unit = ()
+# cat "file.txt";;
+Hello world
+1
+2
+3
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Summary
 
 The OCaml language supports a fairly standard imperative programming model, with
@@ -1314,9 +1514,8 @@ other imperative language like C or Java.  Of course, doing so is really not the
 best match -- if you want to write imperative programs, you should probably use
 an imperative programming language.
 
-However, there are times when imperative programming might provide
-efficiency (as with lazy evaluation, or memoization), or you might
-require techniques or data structures that are traditional imperative
-(like graphs represented with adjacency lists), and in these cases
-OCaml usually shines.  Used with discretion, imperative programming
-can lead to smaller, simpler programs.
+However, there are times when imperative programming might provide efficiency
+(as with lazy evaluation, or memoization), or you might require techniques or
+data structures that are traditional imperative (like graphs represented with
+adjacency lists), and in these cases OCaml usually shines.  Used with
+discretion, imperative programming can lead to smaller, simpler programs.
