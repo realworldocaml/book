@@ -1,0 +1,5 @@
+python-bs4
+python-django
+python-gevent
+python-greenlet
+gunicorn

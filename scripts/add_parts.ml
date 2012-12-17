@@ -32,9 +32,9 @@ let advanced = [
 ]
 
 let parts = [
-  "basic-concepts","Basic Concepts", basic;
-  "practical-examples","Practical Examples", practical;
-  "advanced-topics","Advanced Topics", advanced
+  "I","Basic Concepts", basic;
+  "II","Practical Examples", practical;
+  "III","Advanced Topics", advanced
 ]
 
 open Xml_tree
