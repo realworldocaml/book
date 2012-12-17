@@ -1,0 +1,13 @@
+.DS_Store
+.project
+.pydevproject
+.settings
+*.pyc
+*.pyo
+.bzr
+.bzrignore
+Thumbs.db
+dist
+build
+MANIFEST
+venv
