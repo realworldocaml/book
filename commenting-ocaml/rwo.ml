@@ -19,10 +19,14 @@ open Lwt
 open Printf
 open Cohttp
 open Cohttp_lwt_unix
-open Config
 
 let docroot = "../commenting-build/ocaml_commenting/www"
-let scopes = [`Public_repo] 
+let auth = Auth.Basic ("rwo", "Whirly2")
+
+let check_auth req =
+  match Header.get_authorization (Request.headers req) with
+  |Some a when a = auth -> true
+  |Some _ | None -> false
 
 (* detect Github code and set a cookie if so, otherwise serve static file *)
 let dispatch req =
@@ -42,9 +46,8 @@ let dispatch req =
     let fname = Server.resolve_file ~docroot ~uri:(Request.uri req) in
     Server.respond_file ~headers ~fname ()
   |Some code -> begin 
-    prerr_endline "found code header";
     (* talk to Github and get a client id and set the cookie *)
-    lwt token = Github.Token.of_code ~client_id ~client_secret ~code () in
+    lwt token = Config.(Github.Token.of_code ~client_id ~client_secret ~code ()) in
     match token with
     |None -> Server.respond_error ~status:`Internal_server_error ~body:"no token" ()
     |Some token ->
@@ -52,18 +55,11 @@ let dispatch req =
       let token = Github.Token.to_string token in
       let cookie = Cookie.Set_cookie_hdr.make ("github_access_token", token) in
       let cookie_hdr, cookie_val = Cookie.Set_cookie_hdr.serialize cookie in
-      (* Strip out the code GET param and redirect to the original URL *)
-      let new_uri = 
-        (* TODO URI module has no `remove_query_key`, only `add_query_key`. oops *)
-        let uri = Request.uri req in
-        let query = List.filter (fun (k,_) -> k <> "code") (Uri.query uri) in
-        Uri.with_query uri query 
-      in
-      (* Construct Headers with a Location field added for redirect *)
-      let headers = Header.add headers "Location" (Uri.to_string new_uri) in
       let headers = Header.add headers cookie_hdr cookie_val in
-      Server.respond ~headers ~status:`Found ~body:None ()
-end
+      (* Strip out the code GET param and redirect to the original URL *)
+      let new_uri = Uri.remove_query_param (Request.uri req) "code" in
+      Server.respond_redirect ~headers ~uri:new_uri ()
+  end
 
 (* main callback function *)
 let callback con_id ?body req =
@@ -71,12 +67,12 @@ let callback con_id ?body req =
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
       (Request.params req)));
-  dispatch req
+  (* Check for auth *)
+  match check_auth req with
+  |false -> Server.respond_need_auth (`Basic "Real World OCaml") ()
+  |true -> dispatch req
 
 let server_t =
-  let port = 80 in
   let conn_closed con_id () = () in
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
-  Cohttp_lwt_unix.server ~address:"0.0.0.0" ~port spec
-
-let _ = Lwt_main.run server_t
+  Lwt_main.run (Cohttp_lwt_unix.server ~address:"0.0.0.0" ~port:80 spec)
