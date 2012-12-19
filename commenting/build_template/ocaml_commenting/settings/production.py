@@ -19,9 +19,9 @@ PREPEND_WWW = False
 
 # GitHub settings.
 
-GITHUB_CLIENT_ID = "0d3f42d377adb03650e0"
+GITHUB_CLIENT_ID = "1605562d79611cd6d8bc"
 
-GITHUB_CLIENT_SECRET = "cfbc90cd86b76161859372f72fb80d9f9fc80957"
+GITHUB_CLIENT_SECRET = "1cd154a261b6240827b89cd3a0461790ac27be85"
 
 
 # Database settings.
@@ -34,7 +34,7 @@ DATABASES = {
 # Error reporting settings.  Use these to set up automatic error notifications.
 
 ADMINS = (
-    ("Onespacemedia Error Reporting", "errors@onespacemedia.com"),
+    ("Anil Madhavapeddy", "anil@recoil.org"),
 )
 
 MANAGERS = ()
