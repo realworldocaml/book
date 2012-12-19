@@ -17,6 +17,9 @@ all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LIN
      build/$(LINGUA)/html/figures
 	@ :
 
+comments: all
+	python commenting/bin/generate_commenting_site.py --github-milestone alpha1
+
 pdf: build/$(LINGUA)/pdf/rwo.pdf
 	@ :
 
