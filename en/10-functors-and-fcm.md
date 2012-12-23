@@ -40,19 +40,19 @@ a single integer variable `x`, and returns a new module with `x`
 incremented by one.  The first step is to define a module type which
 will describe the input and output of the functor.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now, we can use that module type to write the increment functor.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Increment (M:X_int) : X_int = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -> X_int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 One thing that immediately jumps out about functors is that they're
 considerably more heavyweight syntactically than ordinary functions.
@@ -65,12 +65,12 @@ both.
 The following shows what happens when we omit the module type for the
 output of the functor.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Increment (M:X_int) = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -> sig val x : int end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can see that the inferred module type of the output is now written
 out explicitly, rather than being a reference to the named signature
@@ -78,14 +78,14 @@ out explicitly, rather than being a reference to the named signature
 
 Here's what `Increment` looks like in action.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Three = struct let x = 3 end;;
   module Three : sig val x : int end
 # module Four = Increment(Three);;
 module Four : sig val x : int end
 # Four.x - Three.x;;
 - : int = 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this case, we applied `Increment` to a module whose signature is
 exactly equal to `X_int`.  But we can apply `Increment` to any module
@@ -93,7 +93,7 @@ that satisfies `X_int`.  So, for example, `Increment` can take as its
 input a module that has more fields than are contemplated in `X_int`,
 as shown below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Three_and_more = struct
     let x = 3
     let y = "three"
@@ -101,7 +101,7 @@ as shown below.
 module Three_and_more : sig val x : int val x_string : string end
 # module Four = Increment(Three_and_more);;
 module Four : sig val x : int end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### A bigger example: computing with intervals
 
@@ -116,12 +116,12 @@ need about the endpoint type.  This interface, which we'll call
 `Comparable`, contains just two things: a comparison function, and the
 type of the values to be compared.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module type Comparable = sig
     type t
     val compare : t -> t -> int
   end ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The comparison function follows the standard OCaml idiom for such
 functions, returning `0` if the two elements are equal, a positive
@@ -130,18 +130,18 @@ number if the first element is smaller than the second.  Thus, we
 could rewrite the standard comparison functions on top of `compare` as
 shown below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 compare x y < 0     (* x < y *)
 compare x y = 0     (* x = y *)
 compare x y > 0     (* x > y *)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now that we have the `Comparable` interface, we can write the
 implementation of our interval module.  In this module, we'll
 represent an interval with a variant type, which is either `Empty` or
 `Interval (x,y)`, where `x` and `y` are the bounds of the interval.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Make_interval(Endpoint : Comparable) = struct
 
     type t = | Interval of Endpoint.t * Endpoint.t
@@ -178,13 +178,13 @@ module Make_interval :
       val contains : t -> Endpoint.t -> bool
       val intersect : t -> t -> t
     end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can instantiate the functor by applying it to a module with the
 right signature.  In the following, we provide the functor input as an
 anonymous module.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # module Int_interval =
     Make_interval(struct
       type t = int
@@ -197,17 +197,17 @@ module Int_interval :
     val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If we choose our interfaces to be aligned with the standards of our
 libraries, then we often don't have to construct a custom module for a
 given functor.  In this case, for example, we can directly use the
 `Int` or `String` modules provided by Core.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Int_interval = Make_interval(Int) ;;
 # module String_interval = Make_interval(String) ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This works because many modules in Core, including `Int` and `String`,
 satisfy an extended version of the `Comparable` signature described
@@ -218,43 +218,43 @@ and because it makes functors easier to use.
 Now we can use the newly defined `Int_interval` module like any
 ordinary module.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let i1 = Int_interval.create 3 8;;
 val i1 : Int_interval.t = Int_interval.Interval (3, 8)
 # let i2 = Int_interval.create 4 10;;
 val i2 : Int_interval.t = Int_interval.Interval (4, 10)
 # Int_interval.intersect i1 i2;;
 - : Int_interval.t = Int_interval.Interval (4, 8)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This design gives us the freedom to use any comparison function we
 want for comparing the endpoints.  We could, for example, create a
 type of int interval with the order of the comparison reversed, as
 follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Rev_int_interval =
     Make_interval(struct
       type t = int
       let compare x y = Int.compare y x
     end);;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The behavior of `Rev_int_interval` is of course different from
 `Int_interval`, as we can see below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let interval = Int_interval.create 4 3;;
 val interval : Int_interval.t = Int_interval.Empty
 # let rev_interval = Rev_int_interval.create 4 3;;
 val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Importantly, `Rev_int_interval.t` is a different type than
 `Int_interval.t`, even though its physical representation is the same.
 Indeed, the type system will prevent us from confusing them.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Int_interval.contains rev_interval 3;;
 Characters 22-34:
   Int_interval.contains rev_interval 3;;
@@ -262,7 +262,7 @@ Characters 22-34:
 Error: This expression has type Rev_int_interval.t
        but an expression was expected of type
          Int_interval.t = Make_interval(Int).t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is important, because confusing the two kinds of intervals would
 be a semantic error, and it's an easy one to make.  The ability of
@@ -276,18 +276,18 @@ lower bound, but that invariant can be violated.  The invariant is
 enforced by the create function, but because `Interval.t` is not
 abstract, we can bypass the `create` function.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Int_interval.create 4 3;; (* going through create *)
 - : Int_interval.t = Int_interval.Empty
 # Int_interval.Interval (4,3);; (* bypassing create *)
 - : Int_interval.t = Int_interval.Interval (4, 3)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 To make `Int_interval.t` abstract, we need to apply an interface to
 the output of the `Make_interval`.  Here's an explicit interface that
 we can use for that purpose.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module type Interval_intf = sig
    type t
    type endpoint
@@ -296,7 +296,7 @@ we can use for that purpose.
    val contains : t -> endpoint -> bool
    val intersect : t -> t -> t
   end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This interface includes the type `endpoint` to represent the type of
 the endpoints of the interval.  Given this interface, we can redo our
@@ -304,7 +304,7 @@ definition of `Make_interval`, as follows.  Notice that we added the
 type `endpoint` to the implementation of the module to make the
 implementation match `Interval_intf`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Make_interval(Endpoint : Comparable) : Interval_intf = struct
 
     type endpoint = Endpoint.t
@@ -315,7 +315,7 @@ implementation match `Interval_intf`.
 
   end ;;
 module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### Sharing constraints
 
@@ -323,7 +323,7 @@ The resulting module is abstract, but unfortunately, it's too
 abstract.  In particular, we haven't exposed the type `endpoint`,
 which means that we can't even construct an interval anymore.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Int_interval = Make_interval(Int);;
 module Int_interval : Interval_intf
 # Int_interval.create 3 4;;
@@ -332,7 +332,7 @@ Characters 20-21:
                       ^
 Error: This expression has type int but an expression was expected of type
          Int_interval.endpoint
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 To fix this, we need to expose the fact that `endpoint` is equal to
 `Int.t` (or more generally, `Endpoint.t`, where `Endpoint` is the
@@ -341,9 +341,9 @@ constraint_, which allows you to tell the compiler to expose the fact
 that a given type is equal to some other type.  The syntax for a
 sharing constraint on a module type is as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 S with type t = s
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 where `S` is a module type, `t` is a type inside of `S`, and `s` is a
 different type.  The result of this expression is a new signature
@@ -351,7 +351,7 @@ that's been modified so that it exposes the fact that `t` is equal to
 `s`.  We can use a sharing constraint to create a specialized version
 of `Interval_intf` for integer intervals.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module type Int_interval_intf = Interval_intf with type endpoint = int;;
 module type Int_interval_intf =
   sig
@@ -362,7 +362,7 @@ module type Int_interval_intf =
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And we can also use it in the context of a functor, where the
 right-hand side of the sharing constraint is an element of the functor
@@ -370,7 +370,7 @@ argument.  Thus, we expose an equality between a type in the output of
 the functor (in this case, the type `endpoint`) and a type in its
 input (`Endpoint.t`).
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Make_interval(Endpoint : Comparable)
       : Interval_intf with type endpoint = Endpoint.t = struct
 
@@ -391,18 +391,18 @@ module Make_interval :
       val contains : t -> endpoint -> bool
       val intersect : t -> t -> t
     end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 So now, the interface is as it was, except that `endpoint` is now
 known to be equal to `Endpoint.t`.  As a result of that type equality,
 we can now do things like construct intervals again.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let i = Int_interval.create 3 4;;
 val i : Int_interval.t = <abstr>
 # Int_interval.contains i 5;;
 - : bool = false
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### Destructive substitution
 
@@ -415,9 +415,9 @@ everywhere it shows up, making `endpoint` unnecessary.  We can do just
 this using what's called _destructive substitution_.  Here's the basic
 syntax.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 S with type t := s
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 where `S` is a signature, `t` is a type inside of `S`, and `s` is a
 different type.  The following shows how we could use this with
@@ -426,7 +426,7 @@ different type.  The following shows how we could use this with
 Here's an example of what we get if we use destructive substitution to
 specialize the `Interval_intf` interface to integer intervals.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module type Int_interval_intf = Interval_intf with type endpoint := int;;
 module type Int_interval_intf =
   sig
@@ -436,13 +436,13 @@ module type Int_interval_intf =
     val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 There's now no mention of n `endpoint`, all occurrences of that type
 having been replaced by `int`.  As with sharing constraints, we can
 also use this in the context of a functor.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Make_interval(Endpoint : Comparable)
     : Interval_intf with type endpoint := Endpoint.t =
   struct
@@ -462,7 +462,7 @@ module Make_interval :
       val contains : t -> Endpoint.t -> bool
       val intersect : t -> t -> t
     end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The interface is precisely what we want, and we didn't need to define
 the `endpoint` type alias in the body of the module.  If we
@@ -471,7 +471,7 @@ construct new intervals, but `t` is abstract, and so we can't directly
 access the constructors and violate the invariants of the data
 structure.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Int_interval = Make_interval(Int);;
 # Int_interval.create 3 4;;
 - : Int_interval.t = <abstr>
@@ -480,7 +480,7 @@ Characters 0-27:
   Int_interval.Interval (4,3);;
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: Unbound constructor Int_interval.Interval
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### Using multiple interfaces
 
@@ -489,7 +489,7 @@ ability to serialize the type, in particular, by converting to
 s-expressions.  If we simply invoke the `sexplib` macros by adding
 `with sexp` to the definition of `t`, though, we'll get an error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Make_interval(Endpoint : Comparable)
     : Interval_intf with type endpoint := Endpoint.t = struct
 
@@ -504,7 +504,7 @@ Characters 120-123:
         type t = | Interval of Endpoint.t * Endpoint.t
                                ^^^^^^^^^^
 Error: Unbound value Endpoint.t_of_sexp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem is that `with sexp` adds code for defining the
 s-expression converters, and that code assumes that `Endpoint` has the
@@ -515,13 +515,13 @@ doesn't say anything about s-expressions.
 Happily, Core comes with a built in interface for just this purpose
 called `Sexpable`, which is defined as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module type Sexpable = sig
   type t = int
   val sexp_of_t : t -> Sexp.t
   val t_of_sexp : Sexp.t -> t
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can modify `Make_interval` to use the `Sexpable` interface, for
 both its input and its output.  Note the use of destructive
@@ -533,7 +533,7 @@ Also note that we have been careful to override the sexp-converter
 here to ensure that the datastructures invariants are still maintained
 when reading in from an s-expression.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module type Interval_intf_with_sexp = sig
    type t
    include Interval_intf with type t := t
@@ -580,17 +580,17 @@ module Make_interval :
       val sexp_of_t : t -> Sexplib.Sexp.t
       val t_of_sexp : Sexplib.Sexp.t -> t
     end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And now, we can use that sexp-converter in the ordinary way:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Int = Make_interval(Int) ;;
 # Int_interval.sexp_of_t (Int_interval.create 3 4);;
 - : Sexplib.Sexp.t = (Interval 3 4)
 # Int_interval.sexp_of_t (Int_interval.create 4 3);;
 - : Sexplib.Sexp.t = Empty
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Extending modules
 
@@ -603,7 +603,7 @@ functional queue is simply a functional version of a FIFO (first-in,
 first-out) queue.  Being functional, operations on the queue return
 new queues, rather than modifying the queues that were passed in.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: fqueue.mli *)
 
 type 'a t
@@ -612,7 +612,7 @@ val enqueue : 'a t -> 'a -> 'a t
 (** [dequeue q] returns None if the [q] is empty *)
 val dequeue : 'a t -> ('a * 'a t) option
 val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A standard trick for implementing functional queues efficiently is to
 maintain both an input and an output list, where the input list is
@@ -624,7 +624,7 @@ here.
 
 Here's a concrete implementation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: fqueue.ml *)
 
 type 'a t = 'a list * 'a list
@@ -644,7 +644,7 @@ let dequeue (in_list,out_list) =
 let fold (in_list,out_list) ~init ~f =
   List.fold ~init:(List.fold ~init ~f out_list) ~f
      (List.rev in_list)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The code above works fine, but the interface it implements is
 unfortunately quite skeletal; there are lots of useful helper
@@ -663,21 +663,21 @@ Let's create a new module, `Foldable`, that contains support for this.
 The first thing we'll need is a signature to describe a container that
 supports fold.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: foldable.ml *)
 
 module type S = sig
   type 'a t
   val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We'll also need a signature for the helper functions we're going to
 generate.  This just represents some of the helper functions we can
 derive from fold, but it's enough to give you a flavor of what you can
 do.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module type Extension = sig
   type 'a t
   val iter    : 'a t -> f:('a -> unit) -> unit
@@ -686,11 +686,11 @@ module type Extension = sig
   val for_all : 'a t -> f:('a -> bool) -> bool
   val exists  : 'a t -> f:('a -> bool) -> bool
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Finally, we can define the functor itself.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Extend(Container : S)
   : Extension with type 'a t := 'a C.t =
 struct
@@ -710,11 +710,11 @@ struct
     try iter c ~f:(fun x -> if f x then raise Short_circuit); false
     with Short_circuit -> true
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now we can apply this to `Fqueue`.  First, we can extend the interface:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: fqueue.mli, 2nd version *)
 
 type 'a t
@@ -724,13 +724,13 @@ val dequeue : 'a t -> ('a * 'a t) option
 val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
 
 include Foldable.Extension with type 'a t := 'a t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In order to apply the functor, we'll put the definition of `Fqueue` in
 a sub-module called `T`, and then call `Foldable.Extend` on `T`.
 Here's how that code would look.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module T = struct
   type 'a t = 'a list * 'a list
 
@@ -743,7 +743,7 @@ module T = struct
 end
 include T
 include Foldable.Extend(T)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This pattern comes up quite a bit in Core.  It's used to implement
 various standard bits of functionality, including:
@@ -826,21 +826,21 @@ A first-class module is created by packaging up a module with a
 signature that it satisfies.  The following defines a simple signature
 and a module that matches it.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
 # module Three : X_int = struct let x = 3 end;;
 module Three : X_int
 # Three.x;;
 - : int = 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can then create a first-class module using the `module` keyword.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let three = (module Three : X_int);;
 val three : (module X_int) = <module>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the type of the first-class module, `(module X_int)`, is
 based on the name of the signature that we used in constructing it.
@@ -848,12 +848,12 @@ based on the name of the signature that we used in constructing it.
 To get at the contents of `three`, we need to unpack it into a module
 again, which we can do using the `val` keyword.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module New_three = (val three : X_int) ;;
 module New_three : X_int
 # New_three.x;;
 - : int = 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Using these conversions as building blocks, we can create tools for
 working with first-class modules in a natural way.  The following
@@ -861,7 +861,7 @@ shows the definition of two function, `to_int`, which converts a
 `(module X_int)` into an `int`.  And `plus`, which adds two `(module
 X_int)`s.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let to_int m =
     let module M = (val m : X_int) in
     M.x
@@ -873,18 +873,18 @@ val to_int : (module X_int) -> int = <fun>
      end : X_int)
   ;;
 val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 With these functions in hand, we can start operating on our `(module
 X_int)`'s in a more natural style, taking full advantage of the
 concision and simplicity of the core language.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let six = plus three three;;
 val six : (module X_int) = <module>
 # to_int (List.fold ~init:six ~f:plus [three;three]);;
 - : int = 12
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Of course, all we've really done with this example is come up with a
 more cumbersome way of working with integers.  Let's see what happens
@@ -909,7 +909,7 @@ the values of type `t`.  In the following code, the module type
 `Shape` defines the type of generic shape, and the modules
 `Rectangle` and `Line` implement some concrete shapes.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 module type Shape = sig
   type t
   val area : t -> int
@@ -930,14 +930,14 @@ module Line = struct
    let area _ = 0
    let position { x = x; y = y } = (x, y)
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Next, if we want to define a generic shape that is either a rectangle
 or a line, we would probably use a variant type.  The following module
 `Shapes` is entirely boilerplate.  We define the variant type, then
 functions to perform a dynamic dispatch based on the type of object.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module Shapes = struct
    type t = [ `Rect of Rectangle.t | `Line of Line.t ]
    let make_rectangle = Rectangle.make
@@ -949,7 +949,7 @@ module Shapes = struct
       `Rect r -> Rectangle.position r
     | `Line l -> Line.position l
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In fact, confronted with this boilerplate, we would probably choose
 not use modules at all, but simply define a single module with a
@@ -961,7 +961,7 @@ With first-class modules, the situation changes, but we have to
 dispense with the representation type altogether.  For immutable
 shapes, the implementation is now trivial.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # module type Shape = sig
     val area : int
     val position : int * int
@@ -982,7 +982,7 @@ val make_rectangle :
    end in
    (module Line : Shape);;
 val make_line : x:int -> y:int -> dx:'a -> dy:'b -> (module Shape) = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 For mutable shapes, it isn't much different, but we have to include
 the state as values in the module implementations.  For this, we'll
@@ -990,7 +990,7 @@ define a representation type `t` in the module implementation, and for
 rectangles, a value `rect` of that type.  The code for lines is
 similar.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # module type Shape = sig
      val area : unit -> int
      val position : unit -> int * int
@@ -1015,7 +1015,7 @@ module type Shape = ...
     (module Rectangle : Shape);;
 val make_rectangle :
   x:int -> y:int -> width:int -> height:int -> (module Shape) = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### A more complete example -- containers
 
@@ -1038,7 +1038,7 @@ some elements of type `elt`, and functions to examine and iterate
 through the contents.  For convenience, we also define a normal type
 `'a container` to represent containers with elements of type `'a`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module type Container = sig
    type elt
    val empty : unit -> bool
@@ -1047,7 +1047,7 @@ module type Container = sig
 end;;
 
 type 'a container = (module Container with type elt = 'a)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### Imperative containers
 
@@ -1057,7 +1057,7 @@ implemented as a module `Stack` that includes all the functions in the
 generic `Container` module, as well as functions to push and pop
 elements.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module type Stack = sig
    include Container
    val push : elt -> unit
@@ -1065,14 +1065,14 @@ module type Stack = sig
 end;;
 
 type 'a stack = (module Stack with type elt = 'a)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now that the types are defined, the next step is to define a concrete
 container implementation.  For this simple example, we'll use a list
 to represent a stack.  The function `make_list_stack` constructs module
 implementation using a `let module` construction, then returns the result.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let make_list_stack (type element) () : element stack =
     let module ListStack = struct
       type elt = element
@@ -1088,7 +1088,7 @@ implementation using a `let module` construction, then returns the result.
     end in
     (module ListStack : Stack with type elt = element);;
 val make_list_stack : unit -> 'a stack = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	
+```	
 
 
 Note the use of the explicit type parameter `element`.  This is
@@ -1096,7 +1096,7 @@ required because the use of a type variable in the module definition
 (like `type elt = 'a`) would be rejected by the compiler.  The
 construction and use of the stack is straightforward.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let demo (s : int stack) =
     let module S = (val s) in
     S.push 5;
@@ -1107,7 +1107,7 @@ val demo : int stack -> unit = <fun>
 Element: 17
 Element: 5
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `demo` function is entirely oblivious to the implementation of the
 stack.  Instead of passing a module implementation based on lists, we
@@ -1125,7 +1125,7 @@ because the return type of imperative functions is just `unit`.  When
 we look at pure functional data structures, we immediately run into a
 problem with type recursion.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # module type Container = sig
     type elt
     val empty : bool
@@ -1137,7 +1137,7 @@ Characters 160-178:
      val add : elt -> (module Container)
                       ^^^^^^^^^^^^^^^^^^
 Error: Unbound module type Container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem here is that module type definitions are not recursive --
 we can't use the type being defined in its own definition.
@@ -1148,7 +1148,7 @@ type definitions, and the only purpose of the outer recursive module
 is to allow the recursion in the definition.  While we're at it, let's
 include a `map` function with the usual semantics.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 module rec Container : sig
    module type T = sig
       type elt
@@ -1160,7 +1160,7 @@ module rec Container : sig
    end
    type 'a t = (module Container.T with type elt = 'a)
 end = Container;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 There are several ways to write this model, but this definition is
 convenient because it defines both a module type `Container.T` and a
@@ -1175,7 +1175,7 @@ the stack, we used a function `make_list_stack`.  We want to do the
 same here, but the function definition must be both recursive and
 polymorphic.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let make_stack () =
     let rec make : 'a. 'a list -> 'a Container.t = fun
       (type element) (contents : element list) ->
@@ -1191,7 +1191,7 @@ polymorphic.
    in
    make [];;
 val make_stack : unit -> 'a Container.t = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The recursion here is particularly important.  The functions `map` and
 `add` return new collections, so they call the function `make`
@@ -1202,7 +1202,7 @@ so that the `map` function is polymorphic.
 Now that the construction is done, the usage is similar to the
 imperative case, except that now the data structure is functional.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let demo (s : int Container.t) =
     let module S = (val s) in
     let module S = (val (S.add 5)) in
@@ -1219,7 +1219,7 @@ Int Element: 5
 Float Element: 17.100000
 Float Element: 5.100000
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The syntactic load here is pretty high, requiring a `let module`
 expression to name every intermediate value.  First-class modules are
@@ -1251,7 +1251,7 @@ To do this, you'd first need an interface `S` that all of the
 different multiplexer implementations would need to match, and then an
 implementation of each multiplexer.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: multiplexer.ml *)
 
 (* An interface the OS-specific functionality *)
@@ -1261,12 +1261,12 @@ module type S = sig ... end
 module Select : S = struct ... end  
 module Epoll  : S = struct ... end
 module Libev  : S = struct ... end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can choose the first-class module that we want based on looking up
 an environment variable.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let multiplexer =
   match Sys.getenv "MULTIPLEXER" with
   | None
@@ -1274,16 +1274,16 @@ let multiplexer =
   | Some "epoll"  -> (module Epoll : S)
   | Some "libev"  -> (module Libev : S)
   | Some other -> failwithf "Unknown multiplexer: %s" other ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Finally, we can convert the resulting first-class module back to an
 ordinary module, and then include that so it becomes part of the body
 of our module.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* The final, dynamically chosen, implementation *)
 include (val multiplexer : S)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Example: A service bundle
 
@@ -1298,7 +1298,7 @@ module, which contains both a module type `S`, which is the interface
 that a service should meet, as well as a `Bundle` module which is for
 combining multiple services.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: service.mli *)
 
 open Core.Std
@@ -1318,7 +1318,7 @@ module Bundle : sig
   val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
   val service_names  : t -> string list
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, a service has a state, represented by the type `t`, a name by
 which the service can be referenced, a function `create` for
@@ -1327,9 +1327,9 @@ actually handle a request.  Here, requests and responses are delivered
 as s-expressions.  At the `Bundle` level, the s-expression of a
 request is expected to be formatted as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 (<service-name> <body>)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 where `<service_name>` is the service that should handle the request,
 and `<body>` is the body of the request.
@@ -1345,7 +1345,7 @@ The first part of `service.ml` is just the preliminaries: the
 definition of the module type `S`, and the definition of the type
 `Bundle.t`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: service.ml *)
 
 open Core.Std
@@ -1359,7 +1359,7 @@ end
 
 module Bundle = struct
   type t = { handlers: (Sexp.t -> Sexp.t Or_error.t) String.Table.t; }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The next thing we need is a function for creating a `Bundle.t`.  This
 `create` function builds a table to hold the request handlers, and
@@ -1367,7 +1367,7 @@ then iterates through the services, unpacking each module,
 constructing the request handler, and then putting that request
 handler in the table.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
   (** Creates a handler given a list of services *)
   let create services =
     let handlers = String.Table.create () in
@@ -1380,7 +1380,7 @@ handler in the table.
         ~data:(fun sexp -> Service.handle_request service sexp)
     );
     {handlers}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the `Service.t` that is created is referenced by the
 corresponding request handler, so that it is effectively hidden behind
@@ -1391,7 +1391,7 @@ handler will examine the s-expression to determine the body of the
 query and the name of the service to dispatch to.  It then looks up
 the handler calls it to generate the response.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
   let handle_request t sexp =
     match sexp with
     | Sexp.List [Sexp.Atom name;query] ->
@@ -1402,16 +1402,16 @@ the handler calls it to generate the response.
         with exn -> Error (Error.of_exn exn)
       end
     | _ -> Or_error.error_string "Malformed query"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Last of all, we define a function for looking up the names of the
 available services.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
   let service_names t = Hashtbl.keys t.handlers
 
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 To see this system in action, we need to define some services, create
 the corresponding bundle, and then hook that bundle up to some kind of
@@ -1420,7 +1420,7 @@ There are two functions below: `handle_one`, which handles a single
 interaction; and `handle_loop`, which creates the bundle and then runs
 `handle_one` in a loop.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: service_client.ml *)
 
 open Core.Std
@@ -1451,14 +1451,14 @@ let handle_loop services =
     | `Continue -> loop ()
   in
   loop ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now we'll create a couple of toy services.  One service is a counter
 that can be updated by query; and the other service lists a directory.
 The last line then kicks off the shell with the services we've
 defined.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Counter : Service.S = struct
   type t = int ref
 
@@ -1487,11 +1487,11 @@ end
 
 let () =
   handle_loop [(module List_dir : Service.S); (module Counter : Service.S)]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And now we can go ahead and start up the client.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ ./service_client.byte
 >>> (update-counter 1)
 (Ok 1)
@@ -1502,7 +1502,7 @@ $ ./service_client.byte
  (_build _tags service.ml service.mli service.mli~ service.ml~
   service_client.byte service_client.ml service_client.ml~))
 >>>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now, let's consider what happens to the design when we want to make
 the interface of a service a bit more realistic.  In particular, right

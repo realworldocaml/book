@@ -26,7 +26,7 @@ key/value pairs, and an ordered list of values.  Values can be strings,
 booleans, floats, integers or null.  Let's see what an example JSON record for
 a book description looks like:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .json }
+```json
 {
   "title": "Real World OCaml",
   "tags" : [ "functional programming", "ocaml", "algorithms" ],
@@ -38,7 +38,7 @@ a book description looks like:
   ],
   "is_online": true
 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 JSON values usually start with an object at the top level that contains a set
 of key/value pairs.  The keys must be strings, but values can be any JSON type.
@@ -78,7 +78,7 @@ express any valid JSON structure. Note that some of the types are recursive, so
 that fields can contain references to more JSON fields, and that it also
 specifically includes a `Null` variant for empty fields.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -87,12 +87,12 @@ type json = [
   | `List of json list
   | `Null
   | `String of string ] 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Let's parse the earlier JSON string example into this type now.  The first stop
 is the `Yojson.Basic` documentation, where we find these helpful functions:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 (* Read a JSON value from a string.
   [buf] : use this buffer at will during parsing instead of creating a new one.
@@ -106,18 +106,18 @@ val from_channel : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> in_channel 
 val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 (* Read a JSON value from a file. See [from_string] for the meaning of the optional
    arguments. *)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 When first reading these interfaces, you can generally ignore the optional
 arguments (which have the question marks in the type signature), as they will
 be filled in with sensible values. The signature for these values with the
 optional elements removed makes their purpose quite clear:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 val from_string : string -> json
 val from_file : string -> json
 val from_channel : in_channel -> json
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `in_channel` constructor is from the original OCaml standard library, and
 its use is considered deprecated when using the Core standard library.  This
@@ -125,7 +125,7 @@ leaves us with two ways of parsing the JSON: either from a string buffer, or
 from a file on a filesystem.  The next example shows both in action, assuming
 the JSON record is stored in a file called *book.json*:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 open Core.Std
 
 let _ =
@@ -141,7 +141,7 @@ let _ =
   (* Test that the two values are the same *)
   print_endline (if json1 = json2 then "OK" else "FAIL")
   print_endline (if phys_equal json1 json2 then "FAIL" else "OK")
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `from_file` function accepts an input filename and takes care of opening
 and closing it for you. It's far more common to use `from_string` to construct
@@ -177,18 +177,18 @@ It's quite easy to mix up the use of `=` and `==`, so Core disables the `==`
 operator and provides `phys_equal` instead.  You'll see a type error if you use
 `==` anywhere:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # 1 == 2;;
 Error: This expression has type int but an expression was expected of type
          [ `Consider_using_phys_equal ]
 # phys_equal 1 2;;
 - : bool = false
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If you feel like hanging your OCaml interpreter, you can verify what happens
 with recursive values for yourself:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
 type t1 = { foo1 : int; bar1 : t2; }
 and t2 = { foo2 : int; bar2 : t1; }
@@ -200,7 +200,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 - : bool = true
 # v1 = v1 ;;
 <press ^Z and kill the process now>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 </sidebar>
 
@@ -209,7 +209,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 Now that we've figured out how to parse the example JSON, lets see how we can
 manipulate it from OCaml code with a more complete example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 open Core.Std
 open Async.Std
 open Printf
@@ -239,7 +239,7 @@ let _ =
     | Some false -> "no" in
   printf "Online: %s\n" (string_of_bool_option is_online);
   printf "Translated: %s\n" (string_of_bool_option is_translated)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This introduces the `Yojson.Basic.Util` module, which contains *combinator*
 functions for JSON manipulation.  Combinators are a style of function that can
@@ -262,7 +262,7 @@ To build and print JSON values, you can just construct values of type `json`
 and call the `to_string` function.  There are also pretty-printing functions
 that lay out the output in a more human-readable style:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let x = `Assoc [ ("key", `String "value") ] ;;
 val x : [> `Assoc of (string * [> `String of string ]) list ] =
   `Assoc [("key", `String "value")]
@@ -273,7 +273,7 @@ val x : [> `Assoc of (string * [> `String of string ]) list ] =
 # Yojson.Basic.pretty_to_channel stdout x ;;
 { "key": "value" }
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In the example above, although the value that `x` has is compatible with the
 type `json`, it's not explicitly defined as such.  The type inference engine
@@ -283,7 +283,7 @@ will encounter is that type errors involving polymorphic variants can be quite
 verbose if you make a mistake in your code.  For example, suppose you build an
 `Assoc` and include a single value instead of a list of keys:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let x = `Assoc ("key", `String "value");;
 val x : [> `Assoc of string * [> `String of string ] ] =
   `Assoc ("key", `String "value")
@@ -293,18 +293,18 @@ Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
        Types for tag `Assoc are incompatible
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The type error above isn't *wrong* as such, but can be inconvenient to wade
 through for larger values.  An easy way to narrow down this sort of type error
 is to add explicit type annotations as a compiler hint about your intentions:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let (x:Yojson.Basic.json) = `Assoc ("key", `String "value");;
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this case, we've marked the `x` as being of type `Yojson.Basic.json`, and
 the compiler immediately spots that the argument to the `Assoc` variant has the
@@ -324,7 +324,7 @@ not interoperating with external systems and just want a convenient
 human-readable local format.  The `Yojson.Safe.json` type is a superset of the
 `Basic` polymorphic variant, and looks like this:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type json = [ 
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -338,7 +338,7 @@ type json = [
   | `Stringlit of string
   | `Tuple of json list
   | `Variant of string * json option ] 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You should immediately be able to spot a benefit of using polymorphic variants
 here.  A standard JSON type such as a `String` will type-check against both the
@@ -356,7 +356,7 @@ The only purpose of these extensions is to make the data representation more
 expressive without having to refer to the original OCaml types.  You can always
 cast a `Safe.json` to a `Basic.json` type by using the `to_basic` function as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 val to_basic : json -> Yojson.Basic.json
 (** Tuples are converted to JSON arrays, Variants are converted to JSON strings
 or arrays of a string (constructor) and a json value (argument). Long integers
@@ -367,7 +367,7 @@ are converted to JSON strings.  Examples:
 `Variant ("B", Some x)          ->    `List [ `String "B", x ]
 `Intlit "12345678901234567890"  ->    `String "12345678901234567890"
  *)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Automatically mapping JSON to OCaml types
 
@@ -388,7 +388,7 @@ ATD code fragment below describes the Github authorization API.  It is based on
 a pseudo-standard web protocol known as OAuth, and is used to authorized users
 to access Github services.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type scope = [
     User <json name="user">
   | Public_repo <json name="public_repo">
@@ -417,7 +417,7 @@ type authorization_response = {
   ?note: string option;
   ?note_url: string option;
 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ATD is (deliberately) similar to OCaml type definitions.  Each field can
 include extra annotations to customise the parsing code for a particular
@@ -428,16 +428,16 @@ versions).
 The ATD spec can be compiled to a number of OCaml targets. Let's run the
 compiler twice, to generate some OCaml type definitions, and a JSON serialiser.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .sh }
+```console
 $ atdgen -t github.atd
 $ atdgen -j github.atd
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This will generate some new files in your current directory. `Github_t.ml` and
 `Github_t.mli` will contain an OCaml module with types defines that correspond
 to the ATD file.  It looks like this:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type scope = [
   | `User | `Public_repo | `Repo | `Repo_status 
   | `Delete_repo | `Gist
@@ -462,7 +462,7 @@ type authorization_response = {
   note: string option;
   note_url: string option
 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 There is an obvious correspondence to the ATD definition.  Note in particular
 that field names in separate OCaml records cannot shadow each other, and so we
@@ -477,7 +477,7 @@ a concrete serialization module to and from JSON.  You can read the
 uses are the conversion functions to and from a string.  For our example above,
 this looks like:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 val string_of_authorization_response :
   ?len:int -> authorization_response -> string
   (** Serialize a value of type {!authorization_response}
@@ -488,7 +488,7 @@ val string_of_authorization_response :
 
 val authorization_response_of_string :
   string -> authorization_response
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is pretty convenient! We've written a single ATD file, and all the OCaml
 boilerplate to convert between JSON and a strongly typed record has been
@@ -539,7 +539,7 @@ how to use the live API later in [xref](#concurrent-programming-with-async),
 but for now here's what a shortened XML search response from DuckDuckGo looks
 like:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 <DuckDuckGoResponse version="1.0">
 <Heading>DuckDuckGo</Heading>
 <AbstractText>DuckDuckGo is an Internet search engine.</AbstractText>
@@ -566,7 +566,7 @@ like:
  </RelatedTopic>
 </RelatedTopics>
 </DuckDuckGoResponse>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The XML document is structured as a series of `<tags>` that are closed by an
 end `</tag>`.  The opening tags have an optional set of key/value attributes
@@ -591,14 +591,14 @@ library.  It tells us that:
 The type of a `signal` reveals the basic structure of the streaming API in
 XMLM:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type signal = [
   | `Data of string
   | `Dtd of dtd
   | `El_end 
   | `El_start of tag 
 ]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 XMLM outputs an ordered sequence of these signals to your code as it parses the
 document.  The first `signal` when inputting an XML document is always a `Dtd`.
@@ -613,7 +613,7 @@ Let's take a shot at handling signals by writing the XML identity function that
 parses some XML and outputs it again.  There is no explicit buffering required
 since this uses the XMLM streaming API.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let xml_id i o =
   let rec pull i o depth =
     Xmlm.output o (Xmlm.peek i);
@@ -631,7 +631,7 @@ let _ =
   let i = Xmlm.make_input (`Channel (open_in "ddg.xml")) in
   let o = Xmlm.make_output (`Channel stdout) in
   xml_id i o
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Let's start at the bottom, where we open up input and output channels to pass
 to `Xmlm` parser.  The `input` and `output` constructor functions use a
@@ -639,13 +639,13 @@ polymorphic variant to define the mechanism that the library should use to read
 the document.  `Channel` is the simplest, but there are several others
 available.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type source = [
   | `Channel of in_channel
   | `Fun of unit -> int
   | `String of int * string 
 ] 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `Fun` channel returns one character at a time as an integer, and `String`
 starts parsing an OCaml string from the given integer offset.  Both of these
@@ -669,7 +669,7 @@ complete XML documents directly in-memory as an OCaml data structure.  You can
 convert a signal stream into an OCaml structure by defining the following data
 type and helper functions:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type tree = 
   | Element of Xmlm.tag * tree list
   | Data of string
@@ -685,14 +685,14 @@ let out_tree o t =
   | Data d -> `Data d 
   in
   Xmlm.output_doc_tree frag o t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The type `tree` can be pattern-matched and traversed like a normal OCaml data
 structure.  Let's see how this works by extracting out all the "Related Topics"
 in the example document.  First, we'll need a few helper combinator functions
 to filter through tags and trees, with the following signature:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* Extract a textual name from an XML tag.
    Discards the namespace information. *)
 val name : Xmlm.tag -> string
@@ -704,13 +704,13 @@ val filter_tag : string -> tree list -> tree list
 (* Given a list of [trees], concatenate all of the data contents               
    into a string, and discard any sub-tags within it *)
 val concat_data : tree list -> string
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The implementation of these signatures fold over the `tree` structure to filter
 the tags which match the desired tag name.  A similar version that matches on
 tag attributes is left as an exercise for you to try.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let name ((_,n),_) = n
 
 let filter_tag n =
@@ -727,7 +727,7 @@ let concat_data =
     |Data s -> acc ^ s
     |_ -> acc                           
   )
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 (_avsm_: have we explained `fold_left` before this section or does it need a full intro?)
 
@@ -739,7 +739,7 @@ Once we have these helper functions, the selection of all the `<Text>` tags is
 a matter of chaining the combinators together to peform the selection over the
 `tree` data structure.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let topics trees =
   filter_tag "DuckDuckGoResponse" trees |!
   filter_tag "RelatedTopics" |!
@@ -751,7 +751,7 @@ let _ =
   let i = Xmlm.make_input (`Channel (open_in "ddg.xml")) in
   let (_,it) = in_tree i in
   topics [it]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `filter_tag` combinator accepts a `tree list` parameter and outputs a `tree
 list`. This lets us easily chain together the results of one filter to another,
@@ -781,7 +781,7 @@ downloaded versions to determine which contents are available.
 
 Here's an example of an Atom feed:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .xml }
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
  <title>Example Feed</title>
@@ -805,7 +805,7 @@ Here's an example of an Atom feed:
   </author>
  </entry>
 </feed>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We want to build this by minimising the amount of repetitive XML generation
 code.  The "Caml on the Web" (COW) library provides a syntax extension that is
@@ -827,13 +827,13 @@ and so you must use the syntax extension before opening the Core modules.
 Let's start to build up an Atom specification using Cow.  First, the `<author>`
 tag can be represented with the following type:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type author = {
   name: string;
   uri: string option;
   email: string option;
 } with xml
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is a standard record type definition with the addition of `with xml` at
 the end.  This uses a syntax extension to signify that we wish to generate
@@ -849,7 +849,7 @@ compiler. You don't normally need to specify this flag yourself. Use the
 Here's a small shell script which preprocesses a source file with the COW
 syntax extension:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .sh }
+```console
 #!/bin/sh -x
 
 file=$1
@@ -857,7 +857,7 @@ lib=cow.syntax
 bin=ocamlfind
 args=`$bin query -predicates syntax,preprocessor -r -format '-I %d %a' $lib`
 camlp4o -printer o $args $file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You can supply `ocamlfind` with a number of different predicates to define the
 type of build you are running (preprocessing, compilation or linking).  The
@@ -869,7 +869,7 @@ and outputs the transformed source code to your terminal.
 Let's see the OCaml code that has been generated for our `author` record after
 it has been preprocessed:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type author = {
   name: string;
   uri: string option;
@@ -902,7 +902,7 @@ let rec xml_of_author author : Cow.Xml.t =
        | _ ->
          [ `El (((("", "name"), []) : Cow.Xml.tag), 
          [ `Data author.name ]) ]) ]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Notice that the `with xml` clause has been replaced with a new `xml_of_author`
 function that has been generated for you.  It accepts an `author` value and
@@ -913,7 +913,7 @@ human-readable, but you don't normally see it when using the syntax extension
 If we run `xml_of_author` and convert the result to a human-readable string,
 our complete example looks like:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type author = {
   name: string;
   uri: string option;
@@ -927,23 +927,23 @@ let anil = {
 }
 
 let _ = print_endline (Cow.Xml.to_string (xml_of_author anil))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This will generate the following XML output on the terminal when you execute
 it:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .xml }
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <email>anil@recoil.org</email>
 <uri>http://anil.recoil.org</uri>
 <name>Anil Madhavapeddy</name>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is convenient, but just one small portion of Atom.  How do we express the
 full Atom scheme from earlier?  The answer is with just a few more records that
 match the Atom XML schema.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type author = {
   name: string;
   uri: string option;
@@ -966,7 +966,7 @@ type meta = {
   rights: string option;
   updated: date;
 } with xml
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We've now filled in more of the Atom schema with these records. The first
 problem we run into is that occasionally there is a mismatch between the syntax
@@ -1006,34 +1006,34 @@ S-expressions are nested paranthetical strings whose atomic values are strings.
 They were first popularized by the Lisp programming language in the 1960s, and
 have remained a simple way to encode data structures since then.
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Sexp : sig
   type t = Atom of string | List of t list
 end
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 An s-expression is in essence a nested parenthetical list whose atomic
 values are strings.  The `Sexp` module comes with functionality for
 parsing and printing s-expressions.
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let sexp =
     let a x = Sexp.Atom x and l x = Sexp.List x in
     l [a "this";l [a "is"; a "an"]; l [a "s"; a "expression"]];;
 val sexp : Sexp.t = (this (is an) (s expression))
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In addition, most of the base types in Core support conversion to and
 from s-expressions.  For example, we can write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Int.sexp_of_t 3;;
 - : Sexp.t = 3
 # List.sexp_of_t;;
 - : ('a -> Sexp.t) -> 'a List.t -> Sexp.t = <fun>
 # List.sexp_of_t Int.sexp_of_t [1;2;3];;
 - : Sexp.t = (1 2 3)
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Notice that `List.sexp_of_t` is polymorphic, and takes as its first
 argument another conversion function to handle the elements of the
@@ -1043,7 +1043,7 @@ defining sexp-converters for polymorphic types.
 But what if you want a function to convert some brand new type to an
 s-expression?  You can of course write it yourself:
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { foo: int; bar: float };;
 # let sexp_of_t t =
     let a x = Sexp.Atom x and l x = Sexp.List x in
@@ -1053,7 +1053,7 @@ s-expression?  You can of course write it yourself:
 val sexp_of_t : t -> Core.Std.Sexp.t = <fun>
 # sexp_of_t { foo = 3; bar = -5.5 };;
 - : Core.Std.Sexp.t = ((foo 3) (bar -5.5))
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is somewhat tiresome to write, and it gets more so when you
 consider the parser, _i.e._, `t_of_sexp`, which is considerably more
@@ -1066,7 +1066,7 @@ code for you.  That is precisely where syntax extensions come in.
 Using Sexplib and adding `with sexp` as an annotation to our type
 definition, we get the functions we want for free.
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { foo: int; bar: float } with sexp;;
 type t = { foo : int; bar : float; }
 val t_of_sexp__ : Sexplib.Sexp.t -> t = <fun>
@@ -1074,7 +1074,7 @@ val t_of_sexp : Sexplib.Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
 # t_of_sexp (Sexp.of_string "((bar 35) (foo 3))");;
 - : t = {foo = 3; bar = 35.}
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 (You can ignore `t_of_sexp__`, which is a helper function that is
 needed in very rare cases.)
@@ -1115,19 +1115,19 @@ atoms that contain parenthesis or spaces themselves, backslash is the
 escape character, and semicolons are used to introduce comments.
 Thus, if you create the following file:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 ;; foo.scm
 
 ((foo 3.3) ;; Shall I compare thee  to a summer's dream?
  (bar "this is () an \" atom"))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 we can load it up and print it back out again:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Sexp.load_sexp "foo.scm";;
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the comments were dropped from the file upon reading.  This
 is expected, since there's no place in the `Sexp.t` type to store
@@ -1136,7 +1136,7 @@ comments.
 If we introduce an error into our s-expression, by, say, deleting the
 open-paren in front of `bar`, we'll get a parse error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Exn.handle_uncaught ~exit:false (fun () ->
     ignore (Sexp.load_sexp "foo.scm"));;
   Uncaught exception:
@@ -1144,7 +1144,7 @@ open-paren in front of `bar`, we'll get a parse error:
   (Sexplib.Sexp.Parse_error
    ((location parse) (err_msg "unexpected character: ')'") (text_line 4)
     (text_char 29) (global_offset 94) (buf_pos 94)))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 (In the above, we use `Exn.handle_uncaught` to make sure that the
 exception gets printed out in full detail.)
@@ -1157,7 +1157,7 @@ this works already, but let's walk through a complete example.  Here's
 the source for the beginning of a library for representing integer
 intervals.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: int_interval.ml *)
 (* Module for representing closed integer intervals *)
 
@@ -1173,11 +1173,11 @@ let create x y = if x > y then Empty else Range (x,y)
 let contains i x = match i with
    | Empty -> false
    | Range (low,high) -> x >= low && x <= high
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can now use this module as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: test_interval.ml *)
 
 open Core.Std
@@ -1195,13 +1195,13 @@ let () =
   |! List.sexp_of_t Int_interval.sexp_of_t
   |! Sexp.to_string_hum
   |! print_endline
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But we're still missing something: we haven't created an `mli` for
 `Int_interval` yet.  Note that we need to explicitly export the
 s-expression converters that were created within the ml.  If we don't:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: int_interval.mli *)
 (* Module for representing closed integer intervals *)
 
@@ -1210,38 +1210,38 @@ type t
 val is_empty : t -> bool
 val create : int -> int -> t
 val contains : t -> int -> bool
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 then we'll get the following error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 File "test_interval.ml", line 15, characters 20-42:
 Error: Unbound value Int_interval.sexp_of_t
 Command exited with code 2.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We could export the types by hand:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type t
 val sexp_of_t : Sexp.t -> t
 val t_of_sexp : t -> Sexp.t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But Sexplib has a shorthand for this as well, so that we can instead
 write simply:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type t with sexp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 at which point `test_interval.ml` will compile again, and if we run
 it, we'll get the following output:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ ./test_interval.native
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 <sidebar> <title>Preserving invariants</title>
 
@@ -1256,7 +1256,7 @@ not.
 We can fix this problem by writing a custom sexp-converter, in this
 case, using the sexp-converter that we already have:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type t = | Range of int * int
          | Empty
 with sexp
@@ -1271,7 +1271,7 @@ let t_of_sexp sexp =
   | Empty | Range _ -> ()
   end;
   t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
@@ -1287,7 +1287,7 @@ second, converting that s-expression into the type in question.  One
 problem with this is that it can be hard to localize errors to the
 right place using this scheme.  Consider the following example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: read_foo.ml *)
 
 open Core.Std
@@ -1303,26 +1303,26 @@ let run () =
 
 let () =
   Exn.handle_uncaught ~exit:true run
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If you were to run this on a malformatted file, say, this one:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 ;; foo.scm
 ((a not-an-integer)
  (b not-an-integer)
  (c ()))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 you'll get the following error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 read_foo $ ./read_foo.native
 Uncaught exception:
 
   (Sexplib.Conv.Of_sexp_error
    (Failure "int_of_sexp: (Failure int_of_string)") not-an-integer)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If all you have is the error message and the string, it's not terribly
 informative.  In particular, you know that the parsing error-ed out on
@@ -1332,16 +1332,16 @@ file, this kind of bad error message can be pure misery.
 But there's hope!  If we make small change to the `run` function as
 follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let run () =
   let t = Sexp.load_sexp_conv_exn "foo.scm" t_of_sexp in
   printf "b is: %d\n%!" t.b
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 and run it again, we'll get the following much more helpful error
 message:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 read_foo $ ./read_foo.native
 Uncaught exception:
 
@@ -1349,7 +1349,7 @@ Uncaught exception:
    (Sexplib.Sexp.Annotated.Conv_exn foo.scm:3:4
     (Failure "int_of_sexp: (Failure int_of_string)"))
    not-an-integer)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In the above error, "foo.scm:3:4" tells us that the error occurred on
 "foo.scm", line 3, character 4, which is a much better start for
@@ -1374,7 +1374,7 @@ opaque doesn't need to have a sexp-converter defined.  Here, if we
 define a type without a sexp-converter, and then try to use it another
 type with a sexp-converter, we'll error out:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type no_converter = int * int;;
 type no_converter = int * int
 # type t = { a: no_converter; b: string } with sexp;;
@@ -1382,25 +1382,25 @@ Characters 14-26:
   type t = { a: no_converter; b: string } with sexp;;
                 ^^^^^^^^^^^^
 Error: Unbound value no_converter_of_sexp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But with `sexp_opaque`, we won't:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { a: no_converter sexp_opaque; b: string } with sexp;;
 type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
 val t_of_sexp__ : Sexplib.Sexp.t -> t = <fun>
 val t_of_sexp : Sexplib.Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And if we now convert a value of this type to an s-expression, we'll
 see the contents of field `a` marked as opaque:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # sexp_of_t { a = (3,4); b = "foo" };;
 - : Sexp.t = ((a <opaque>) (b foo))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### `sexp_option`
 
@@ -1411,25 +1411,25 @@ option in a record field, then the record field will always be
 required, and its value will be presented in the way an ordinary
 optional value would.  For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { a: int option; b: string } with sexp;;
 # sexp_of_t { a = None; b = "hello" };;
 - : Sexp.t = ((a ()) (b hello))
 # sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a (3)) (b hello))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But what if we want a field to be optional, _i.e._, we want to allow
 it to be omitted from the record entirely?  In that case, we can mark
 it with `sexp_option`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # type t = { a: int sexp_option; b: string } with sexp;;
 # sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a 3) (b hello))
 # sexp_of_t { a = None; b = "hello" };;
 - : Sexp.t = ((b hello))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### `sexp_list`
 
@@ -1437,25 +1437,25 @@ One problem with the auto-generated sexp-converters is that they can
 have more parentheses than one would ideally like.  Consider, for
 example, the following variant type:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type compatible_versions = | Specific of string list
                              | All
   with sexp;;
 # sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You might prefer to make the syntax a bit less parenthesis-laden by
 dropping the parentheses around the list.  `sexp_list` gives us this
 alternate syntax:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type compatible_versions = | Specific of string sexp_list
                              | All
   with sexp;;
 # sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Bin_prot
 
@@ -1482,7 +1482,7 @@ values using bin-io.  Here, the serialization is of types that might
 be used as part of a message-queue, where each message has a topic,
 some content, and a source, which is in turn a hostname and a port.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: message_example.ml *)
 
 open Core.Std
@@ -1556,14 +1556,14 @@ let read_messages () =
 
 let () =
   write_messages (); read_messages ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Fieldslib
 
 One common idiom when using records is to provide field accessor
 functions for a particular record.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 type t = { topic: string;
            content: string;
            source: Source.t;
@@ -1572,7 +1572,7 @@ type t = { topic: string;
 let topic   t = t.topic
 let content t = t.content
 let source  t = t.source
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Similarly, sometimes you simultaneously want an accessor to a field of
 a record and a textual representation of the name of that field.  This
@@ -1582,7 +1582,7 @@ scaffold a form in a GUI automatically based on the fields of a
 record.  Fieldslib provides a module `Field` for this purpose.  Here's
 some code for creating `Field.t`'s for all the fields of our type `t`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # module Fields = struct
     let topic =
       { Field.
@@ -1612,5 +1612,5 @@ module Fields :
     val content : (t, string) Core.Std.Field.t
     val source : (t, Source.t) Core.Std.Field.t
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 

@@ -24,13 +24,13 @@ Before proceeding, make sure you have the Core library installed. You can do
 this easily via the OPAM package manager, which is explained in
 [xref](#installation).  In a nutshell, you need to:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ opam init
 $ opam switch 4.00.1+short-types
 $ opam install utop async core_extended
 $ eval `opam config -env`
 $ utop
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You can exit utop by pressing `control-D` and return.
 
@@ -42,15 +42,15 @@ Let's spin up the toplevel and open the `Core.Std` module to get
 access to Core's libraries.  Don't forget to open `Core.Std`, since
 without it, many of the examples below will fail.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 $ utop
 # open Core.Std;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now that we have Core open, let's try a few simple numerical
 calculations.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # 3 + 4;;
 - : int = 7
 # 8 / 3;;
@@ -59,7 +59,7 @@ calculations.
 - : float = 9.5
 # sqrt 9.;;
 - : float = 3.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 By and large, this is pretty similar to what you'd find in any
 programming language, but there are a few things that jump right out
@@ -84,12 +84,12 @@ at you.
 We can also create variables to name the value of a given expression,
 using the `let` syntax.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let x = 3 + 4;;
 val x : int = 7
 # let y = x + x;;
 val y : int = 14
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 After a new variable is created, the toplevel tells us the name of the
 variable, in addition to its type and value.
@@ -98,12 +98,12 @@ variable, in addition to its type and value.
 
 The `let` syntax can also be used for creating functions:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let square x = x * x ;;
 val square : int -> int = <fun>
 # square (square 2);;
 - : int = 16
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 When using `let` to define a function, the first identifier after the
 `let` is the function name, and each subsequent identifier is a
@@ -116,14 +116,14 @@ type, in this case indicating a function that takes an `int` and
 returns an `int`.  We can also write functions that take multiple
 arguments.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let ratio x y =
      Float.of_int x /. Float.of_int y
   ;;
 val ratio : int -> int -> float = <fun>
 # ratio 4 7;;
 - : float = 0.571428571428571397
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The notation for the type-signature of a multi-argument functions may
 be a little surprising at first, but we'll explain where it comes from
@@ -132,9 +132,9 @@ For the moment, think of the arrows as separating different arguments
 of the function, with the type after the final arrow being the return
 value of the function.  Thus,
 
-~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 int -> int -> float
-~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 describes a function that takes two `int` arguments and returns a
 `float`.
@@ -144,27 +144,27 @@ Here's an example of a function that takes three arguments: a test
 function and two integer arguments.  The function returns the sum of
 the integers that pass the test.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let sum_if_true test x y =
      if test x then x else 0
      + if test y then y else 0
   ;;
 val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If we look at the inferred type signature in detail, we see that the
 first argument is a function that takes an int and returns a boolean,
 and that the remaining two arguments are integers.  Here's an example
 of this function in action.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let even x = x mod 2 = 0 ;;
 val even : int -> bool = <fun>
 # sum_if_true even 3 4;;
 - : int = 4
 # sum_if_true even 2 4;;
 - : int = 6
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Type inference
 
@@ -203,13 +203,13 @@ OCaml program, but they can serve as useful documentation, as well as
 catch unintended type changes.  Here's an annotated version of
 `sum_if_true`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let sum_if_true (test : int -> bool) (x:int) (y:int) : int =
      if test x then x else 0
      + if test y then y else 0
   ;;
 val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In the above, we've marked every argument to the function with its
 type, with the final annotation indicating the type of the return
@@ -222,11 +222,11 @@ is failing to compile.
 Sometimes, there isn't enough information to fully determine the
 concrete type of a given value.  Consider this function.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let first_if_true test x y =
     if test x then x else y
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `first_if_true` takes as its arguments a function `test`, and two
 values, `x` and `y`, where `x` is to be returned if `test x` evaluates
@@ -236,9 +236,9 @@ tell you what the type of `x` and `y` are.  That makes it seem like
 one could use this `first_if_true` on values of any type.  Indeed, if
 we look at the type returned by the toplevel:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 we see that rather than choose a single concrete type, OCaml has
 introduced a _type variable_ `'a` to express that the type is generic.
@@ -250,21 +250,21 @@ arguments, `x` and `y`.
 
 This genericity means that we can write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let long_string s = String.length s > 6;;
 val long_string : string -> bool = <fun>
 # first_if_true long_string "short" "loooooong";;
 - : string = "loooooong"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And we can also write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let big_number x = x > 3;;
 val big_number : int -> bool = <fun>
 # first_if_true big_number 4 3;;
 - : int = 4
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Both `long_string` and `big_number` are functions, and each is passed
 to `first_if_true` with two other arguments of the appropriate type
@@ -272,14 +272,14 @@ to `first_if_true` with two other arguments of the appropriate type
 can't mix and match two different concrete types for `'a` in the same
 use of `first_if_true`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # first_if_true big_number "short" "loooooong";;
 Characters 25-30:
   first_if_true big_number "short" "loooooong";;
                            ^^^^^^^
 Error: This expression has type string but
     an expression was expected of type int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this example, `big_number` requires that `'a` be of type `int`,
 whereas `"short"` and `"loooooong"` require that `'a` be of type
@@ -299,43 +299,43 @@ Working in the top-level somewhat obscures the difference between
 run-time and compile time errors, but that difference is still there.
 Generally, type errors, like this one:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # 3 + "potato";;
 Characters 4-12:
   3 + "potato";;
       ^^^^^^^^
 Error: This expression has type string but an expression was expected of type
          int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 are compile-time errors, whereas an error that can't be caught by the
 type system, like division by zero, leads to a runtime exception.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # 3 / 0;;
 Exception: Division_by_zero.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 One important distinction is that type errors will stop you whether or
 not the offending code is ever actually executed.  Thus, you get an
 error from typing in this code:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # if 3 < 4 then 0 else 3 + "potato";;
 Characters 25-33:
   if 3 < 4 then 0 else 3 + "potato";;
                            ^^^^^^^^
 Error: This expression has type string but an expression was expected of type
          int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 but this code works fine, even though it contains an branch that would
 throw an exception if it were ever reached.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # if 3 < 4 then 0 else 3 / 0;;
 - : int = 0
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 </sidebar>
 
@@ -349,10 +349,10 @@ haven't yet talked about any data structures.  We'll start by looking
 at a particularly simple data structure, the tuple.  You can create a
 tuple by joining values together with a comma:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let tup = (3,"three");;
 val tup : int * string = (3, "three")
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 For the mathematically inclined, the `*` character is used because the
 set of all pairs of type `t * s` corresponds to the Cartesian product
@@ -362,11 +362,11 @@ of the set of elements of type `t` and the set of elements of type
 You can extract the components of a tuple using OCaml's
 pattern-matching syntax. For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let (x,y) = tup;;
 val x : int = 3
 val y : string = "three"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, the `(x,y)` on the left-hand side of the `let` is the pattern.
 This pattern lets us mint the new variables `x` and `y`, each bound to
@@ -380,11 +380,11 @@ where each point is represented as a pair of `float`s.  The pattern
 matching syntax lets us get at the values we need with a minimum of
 fuss.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let distance (x1,y1) (x2,y2) =
     sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
 ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is just a first taste of pattern matching.  Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
@@ -395,22 +395,22 @@ Where tuples let you combine a fixed number of items, potentially of
 different types, lists let you hold any number of items of the same
 type.  For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let languages = ["OCaml";"Perl";"C"];;
 val languages : string list = ["OCaml"; "Perl"; "C"]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that you can't mix elements of different types on the same list,
 as we did with tuples.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let numbers = [3;"four";5];;
 Characters 17-23:
   let numbers = [3;"four";5];;
                    ^^^^^^
 Error: This expression has type string but an expression was expected of type
          int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### The `List` module
 
@@ -419,18 +419,18 @@ functions for working with lists.  We can access values from within a
 module by using dot-notation.  Here, for example, is how we compute
 the length of a list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # List.length languages;;
 - : int = 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here's something a little more complicated.  We can compute the list
 of the lengths of each language as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # List.map languages ~f:String.length;;
 - : int list = [5; 4; 1]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `List.map` takes two arguments: a list, and a function for
 transforming the elements of that list.  Note that `List.map` creates
@@ -442,10 +442,10 @@ arguments by name rather than by position.  As you can see below, we
 can change the order of labeled arguments without changing the
 function's behavior.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # List.map ~f:String.length languages;;
 - : int list = [5; 4; 1]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We'll learn more about labeled arguments and why they're important in
 [xref](#variables-and-functions).
@@ -456,31 +456,31 @@ We'll learn more about labeled arguments and why they're important in
 In addition to constructing lists using brackets, we can use the
 operator `::` for adding elements to the front of a list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # "French" :: "Spanish" :: languages;;
 - : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, we're creating a new extended list, not changing the list we
 started with, as you can see below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # languages;;
 - : string list = ["OCaml"; "Perl"; "C"]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The bracket notation for lists is really just syntactic sugar for
 `::`.  Thus, the following declarations are all equivalent.  Note that
 `[]` is used to represent the empty list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # [1; 2; 3];;
 - : int list = [1; 2; 3]
 # 1 :: (2 :: (3 :: []));;
 - : int list = [1; 2; 3]
 # 1 :: 2 :: 3 :: [];;
 - : int list = [1; 2; 3]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### List patterns using `match`
 
@@ -488,11 +488,11 @@ The elements of a list can be accessed through pattern-matching.  List
 patterns are based on the two list constructors, `[]` and `::`.
 Here's a simple example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let my_favorite_language (my_favorite :: the_rest) =
      my_favorite
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 By pattern matching using `::`, we've broken off the first element of
 `languages` from the rest of the list.  If you know Lisp or Scheme,
@@ -502,7 +502,7 @@ element of a list.
 If you try the above example in the toplevel, however, you'll see that
 it spits out an error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
     Characters 25-69:
   .........................(my_favorite :: the_rest) =
        my_favorite
@@ -510,19 +510,19 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
 val my_favorite_language : 'a list -> 'a = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The warning comes because the compiler can't be certain that the
 pattern match won't lead to a runtime error.  Indeed, the warning
 gives an example of a pattern that won't match, the empty list, `[]`.
 We can see this in action below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # my_favorite_language ["English";"Spanish";"French"];;
 - : string = "English"
 # my_favorite_language [];;
 Exception: Match_failure ("//toplevel//", 11, 10).
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You can avoid these warnings, and more importantly make sure that your
 code actually handles all of the possible cases, by using a `match`
@@ -539,7 +539,7 @@ sub-structures of the value being matched.
 Here's a new version of `my_favorite_language` that uses `match`, and
 doesn't trigger a compiler warning.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let my_favorite_language languages =
     match languages with
     | first :: the_rest -> first
@@ -550,7 +550,7 @@ val my_favorite_language : string list -> string = <fun>
 - : string = "English"
 # my_favorite_language [];;
 - : string = "OCaml"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that we included a comment in the above code.  OCaml comments are
 bounded by `(*` and `*)`, and can be nested arbitrarily and cover
@@ -580,7 +580,7 @@ base cases and the inductive cases is often done using pattern
 matching.  Here's a simple example of a function that sums the
 elements of a list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rec sum l =
     match l with
     | [] -> 0
@@ -589,7 +589,7 @@ elements of a list.
 val sum : int list -> int
 # sum [1;2;3;4;5];;
 - : int = 15
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that we had to use the `rec` keyword to allow `sum` to refer to
 itself.  And, as you might imagine, the base case and inductive case
@@ -601,7 +601,7 @@ We can introduce more complicated list patterns as well.  Here's a
 function for destuttering a list, _i.e._, for removing sequential
 duplicates.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rec destutter list =
     match list with
     | [] -> []
@@ -609,23 +609,23 @@ duplicates.
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Again, the first arm of the match is the base case, and the second is
 the inductive.  Unfortunately, this code has a problem.  If you type
 it into the top-level, you'll see this error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 _::[]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This indicates that we're missing a case, in particular we don't
 handle one-element lists.  That's easy enough to fix by adding another
 case to the match:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rec destutter list =
     match list with
     | [] -> []
@@ -637,7 +637,7 @@ case to the match:
 val destutter : 'a list -> 'a list = <fun>
 # destutter ["hey";"hey";"hey";"man!"];;
 - : string list = ["hey"; "man!"]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that this code used another variant of the list pattern, `[hd]`,
 to match a list with a single element.  We can do this to match a list
@@ -658,11 +658,11 @@ Another common data structure in OCaml is the option.  An option is
 used to express that a value might or might not be present.  For
 example,
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let divide x y =
     if y = 0 then None else Some (x/y) ;;
 val divide : int -> int -> int option = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `Some` and `None` are constructors, like `::` and `[]` for lists,
 which let you build optional values.  You can think of an option as a
@@ -674,7 +674,7 @@ printing a log entry given an optional time and a message.  If no time
 is provided (_i.e._, if the time is `None`), the current time is
 computed and used in its place.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let print_log_entry maybe_time message =
     let time =
       match maybe_time with
@@ -683,7 +683,7 @@ computed and used in its place.
     in
     printf "%s: %s\n" (Time.to_string time) message ;;
 val print_log_entry : Time.t option -> string -> unit
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, we again use a `match` statement for handling the two possible
 states of an option.  It's worth noting that we don't necessarily need
@@ -696,11 +696,11 @@ In this case, we can rewrite `print_log_entry` using `Option.value`,
 which returns the content of an option if the option is `Some`, or a
 default value if the option is `None`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let print_log_entry maybe_time message =
     let time = Option.value ~default:(Time.now ()) maybe_time in
     printf "%s: %s\n" (Time.to_string time) message ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Options are important because they are the standard way in OCaml to
 encode a value that might not be there.  This is different from most
@@ -724,67 +724,67 @@ the language, like lists and tuples.  But OCaml also allows us to
 define new datatypes.  Here's a toy example of a datatype representing
 a point in 2-dimensional space:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type point2d = { x : float; y : float };;
 type point2d = { x : float; y : float; }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `point2d` is a _record_ type, which you can think of as a tuple where
 the individual fields are named, rather than being defined
 positionally.  Record types are easy enough to construct:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let p = { x = 3.; y = -4. };;
 val p : point2d = {x = 3.; y = -4.}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And we can get access to the contents of these types using pattern
 matching:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let magnitude { x = x_pos; y = y_pos } = sqrt (x_pos ** 2. +. y_pos ** 2.);;
 val magnitude : point2d -> float = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can write the pattern match even more tersely, using what's called
 _field punning_.  In particular, when the name of the field and the
 name of the variable coincide, we don't have to write them both down.
 Thus, the magnitude function can be rewritten as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can also use dot-notation for accessing record fields:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let distance v1 v2 =
      magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 val distance : point2d -> point2d -> float = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And we can of course include our newly defined types as components in
 larger types, as in the following types, each of which is a
 description of a different geometric object.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type circle_desc  = { center: point2d; radius: float } ;;
 # type rect_desc    = { lower_left: point2d; width: float; height: float } ;;
 # type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now, imagine that you want to combine multiple objects of these types
 together as a description of a multi-object scene.  You need some
 unified way of representing these objects together in a single type.
 One way of doing this is using a _variant_ type:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type scene_element =
     | Circle  of circle_desc
     | Rect    of rect_desc
     | Segment of segment_desc
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `|` character separates the different cases of the variant (the
 first `|` is optional), and each case has a tag, like `Circle`, `Rect`
@@ -792,7 +792,7 @@ and `Scene`, to distinguish that case from the others.  Here's how we
 might write a function for testing whether a point is in the interior
 of some element of a list of `scene_element`s.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let is_inside_scene_element point scene_element =
      match scene_element with
      | Circle { center; radius } ->
@@ -809,7 +809,7 @@ val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
      in
      List.for_all scene ~f:point_is_inside_scene_element;;
 val is_inside_shapes : point2d -> scene_element list -> bool = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You might at this point notice that the use of `match` here is
 reminiscent of how we used `match` with `option` and `list`.  This is
@@ -843,14 +843,14 @@ list, but only one per element of an array.
 
 Here's an example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let numbers = [| 1;2;3;4 |];;
 val numbers : int array = [|1; 2; 3; 4|]
 # numbers.(2) <- 4;;
 - : unit = ()
 # numbers;;
 - : int array = [|1; 2; 4; 4|]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 the `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
@@ -864,31 +864,31 @@ specific fields as being mutable.  Here's a small example of a
 datastructure for storing a running statistical summary of a
 collection of numbers.  Here's the basic data structure:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type running_sum =
    { mutable sum: float;
      mutable sum_sq: float; (* sum of squares *)
      mutable samples: int;
    }
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The fields in `running_sum` are designed to be easy to extend
 incrementally, and sufficient to compute means and standard
 deviations, as shown below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let mean rsum = rsum.sum /. float rsum.samples
   let stdev rsum =
      sqrt (rsum.sum_sq /. float rsum.samples
            -. (rsum.sum /. float rsum.samples) ** 2.) ;;
 val mean : running_sum -> float = <fun>
 val stdev : running_sum -> float = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We also need functions to create and update `running_sum`s:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
   let update rsum x =
      rsum.samples <- rsum.samples + 1;
@@ -897,7 +897,7 @@ We also need functions to create and update `running_sum`s:
   ;;
 val create : unit -> running_sum = <fun>
 val update : running_sum -> float -> unit = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `create` returns a `running_sum` corresponding to the empty set, and
 `update rsum x` changes `rsum` to reflect the addition of `x` to its
@@ -923,7 +923,7 @@ passed into it in order to run.
 
 Here's an example of `create` and `update` in action.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rsum = create ();;
 val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
@@ -932,7 +932,7 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 - : float = 1.33333333333333326
 # stdev rsum;;
 - : float = 3.94405318873307698
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Refs
 
@@ -940,19 +940,19 @@ We can declare a single mutable value by using a `ref`, which is a
 record type with a single mutable field that is defined in the
 standard library.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let x = { contents = 0 };;
 val x : int ref = {contents = 0}
 # x.contents <- x.contents + 1;;
 - : unit = ()
 # x;;
 - : int ref = {contents = 1}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 There are a handful of useful functions and operators defined for refs
 to make them more convenient to work with.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
 val x : int ref = {contents = 0}
 # !x ;;            (* get the contents of a ref, i.e., x.contents *)
@@ -963,7 +963,7 @@ val x : int ref = {contents = 0}
 - : unit = ()
 # !x ;;
 - : int = 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A ref is really just an example of a mutable record, but in practice,
 it's the standard way of dealing with a single mutable value in a
@@ -978,7 +978,7 @@ the `Random` module as our source of randomness.  (`Random` starts out
 with a deterministic seed, but you can call `Random.self_init` to get
 a new random seed chosen.)
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let permute ar =
     for i = 0 to Array.length ar - 2 do
        (* pick a j that is after i and before the end of the list *)
@@ -990,7 +990,7 @@ a new random seed chosen.)
     done
   ;;
 val permute : 'a array -> unit = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the semi-colon after the first array assignment doesn't
 terminate the scope of the let-binding, so the variable `j` remains in
@@ -998,7 +998,7 @@ scope until the end of the body of the for loop.
 
 Here's an example run of this code.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let ar = Array.init 20 ~f:(fun i -> i);;
 val ar : int array =
   [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
@@ -1007,7 +1007,7 @@ val ar : int array =
 # ar;;
 - : int array =
 [|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## A complete program
 
@@ -1018,7 +1018,7 @@ UNIX standard input.
 
 Here's the code, which you can save in a file called `sum.ml`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: sum.ml *)
 
 open Core.Std
@@ -1031,7 +1031,7 @@ let rec read_and_accumulate accum =
 
 let () =
   printf "Total: %F\n" (read_and_accumulate 0.)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is our first use of OCaml's input and output routines.  The
 function `read_and_accumulate` uses `In_channel.input_line` to read in
@@ -1057,16 +1057,16 @@ a file, in the same directory as `sum.ml`, called `_tags`.  We can put
 the following in `_tags` to indicate that we're building against Core,
 and that threads should be enabled, which is a required by Core.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 true:package(core),thread
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 With our `_tags` file in place, we can build our executable by issuing
 this command.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 ocamlbuild -use-ocamlfind sum.native
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `.native` suffix indicates that we're building a native-code
 executable, which we'll discuss more in
@@ -1075,14 +1075,14 @@ use the resulting program like any command-line utility.  In this
 example, we can just type in a sequence of numbers, one per line,
 hitting control-d to exit when the input is complete.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 max $ ./sum.native
 1
 2
 3
 94.5
 Total: 100.5
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 More work is needed to make a really usable command-line programming,
 including a proper command-line parsing interface and better error

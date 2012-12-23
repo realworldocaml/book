@@ -86,7 +86,7 @@ are not types.  Instead, objects have _object types_, and if you want
 to use objects, you aren't required to use classes at all.  Here is an
 example of a simple object.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let p =
   object
     val mutable x = 0
@@ -94,7 +94,7 @@ example of a simple object.
     method set i = x <- i
   end;;
 val p : < get : int; set : int -> unit > = <obj>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The object has an integer value `x`, a method `get` that returns x,
 and a method `set` that updates the value of x.
@@ -105,20 +105,20 @@ public interface of an object.  All interaction with an object is
 through its methods.  The syntax for a method invocation (also called
 "sending a message" to the object) uses the `#` character.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # p#get;
 - : int = 0
 # p#set 17;;
 - : unit = ()
 # p#get;;
 - : int = 17
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Objects can also be constructed by functions.  If we want to specify
 the initial value of the object, we can define a function that takes
 the initial value and produces an object.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let make i =
   object
     val mutable x = i
@@ -130,7 +130,7 @@ val make : 'a -> < get : 'a; set : 'a -> unit > = <fun>
 val p : < get : int; set : int -> unit > = <obj>
 # p#get;;
 - : int = 5
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the types of the function `make` and the returned object now
 use the polymorphic type `'a`.  When make is invoked on a concrete
@@ -146,7 +146,7 @@ Functions can also take object arguments.  Let's construct a new
 object `average` that's the average of any two objects with a
 `get` method.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let average p1 p2 =
   object
     method get = (p1#get + p2#get) / 2
@@ -160,7 +160,7 @@ val average : < get : int; .. > -> < get : int; .. > -> < get : int > = <fun>
 # p2#set 25;;
 # a#get;;
 - : int = 15
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the type for `average` uses the object type `< get : int;
 .. >`.  The `..` are ellipsis, standing for any other methods.  The
@@ -169,12 +169,12 @@ type `< get : int; .. >` specifies an object that must have at least a
 exact type `< get : int >` for an object with more methods, type
 inference will fail.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let (p : < get : int >) = make 5;;
 Error: This expression has type < get : int; set : int -> unit >
        but an expression was expected of type < get : int >
        The second object type has no method set
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 <sidebar>
 <title>Elisions are polymorphic</title>
@@ -184,21 +184,21 @@ more methods."  It may not be apparent from the syntax, but an elided
 object type is actually polymorphic.  If we try to write a type
 definition, we get an obscure error.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # type point = < get:int; .. >;;
 Error: A type variable is unbound in this type declaration.
 In type < get : int; .. > as 'a the variable 'a is unbound
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A `..` in an object type is called a _row variable_ and this typing
 scheme is called _row polymorphism_.  Even though `..` doesn't look
 like a type variable, it actually is.  The error message suggests a
 solution, which is to add the `as 'a` type constraint.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # type 'a point = < get:int; .. > as 'a;;
 type 'a point = 'a constraint 'a = < get : int; .. >
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In other words, the type `'a point` is equal to `'a`, where `'a = <
 get : int; .. >`.  That may seem like an odd way to say it, and in
@@ -213,14 +213,14 @@ constructed two objects with that type; the function `make`
 constructed one, and so did `average`.  When the method `#get` is
 invoked, the actual method that is run is determined by the object.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let print_point p = Printf.printf "Point: %d\n" p#get;;
 val print_point : < get : int; .. > -> unit = <fun>
 # print_point (make 5);;
 Point: 5
 # print_point (average (make 5) (make 15));;
 Point: 10
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Classes ##
 
@@ -236,7 +236,7 @@ a module.  A class is not an object, and a class definition is not an
 expression.  The syntax for a class definition uses the keyword
 `class`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class point =
   object
     val mutable x = 0
@@ -249,7 +249,7 @@ class point :
     method get : int
     method set : int -> unit
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The type `class point : ... end` is a _class type_.  This particular
 type specifies that the `point` class defines a mutable field `x`, a
@@ -258,7 +258,7 @@ method `get` that returns an `int`, and a method `set` with type `int
 
 To produce an object, classes are instantiated with the keyword `new`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let p = new point;;
 val p : point = <obj>
 # p#get;;
@@ -267,7 +267,7 @@ val p : point = <obj>
 - : unit = ()
 # p#get;;
 - : int = 5
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 _(yminsky: You say that inheritance uses an existing class to define a
 new one, but the example below looks like using an existing class to
@@ -283,13 +283,13 @@ that moves the point by a relative amount.  This also makes use of the
 the type variable `'self` stands for the type of the current object
 (which in general is a subtype of `movable_point`).
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class movable_point =
   object (self : 'self)
     inherit point
     method moveby dx = self#set (self#get + dx)
   end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Class parameters and polymorphism ##
 
@@ -304,7 +304,7 @@ a value of type `'a`.  When defining the class, the type parameters
 are placed in square brackets before the class name in the class
 definition.  We also need a parameter `x` for the initial value.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class ['a] node x =
 object
   val mutable value : 'a = x
@@ -316,7 +316,7 @@ object
   method next = next_node
   method set_next node = next_node <- node
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `value` is the value stored in the node, and it can be retrieved
 and changed with the `get` and `set` methods.  The `next_node` field
@@ -330,7 +330,7 @@ type inference.  If we omit these annotations, the type inferred for
 the class will be "too polymorphic," `x` could have some type `'b` and
 `next_node` some type `'c option`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   class ['a] node x =
   object
     val mutable value = x
@@ -354,7 +354,7 @@ Error: Some type variables are unbound in this type:
              method set_next : 'c option -> unit
            end
        The method get has type 'b where 'b is unbound
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In general, we need to provide enough constraints so that the compiler
 will infer the correct type.  We can add type constraints to the
@@ -369,7 +369,7 @@ refers to the first element in the list, and `last` refers to the
 final element in the list.  The method `insert` adds an element to the
 end of the list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class ['a] slist =
 object
    val mutable first : ('a) node option = None
@@ -387,7 +387,7 @@ object
             first <- new_node;
             last <- new_node
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Object types ##
 
@@ -406,7 +406,7 @@ without interfaces, like C++, the specification would normally use
 _abstract_ classes to specify the methods without implementing them
 (C++ uses the "= 0" definition to mean "not implemented").
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 // Java-style iterator, specified as an interface.
 interface <T> iterator {
   T Get();
@@ -423,7 +423,7 @@ class Iterator {
   virtual bool has_value() const = 0;
   virtual void next() = 0;
 };
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 OCaml support both styles.  In fact, OCaml is more flexible than these
 approaches because an object type can be implemented by any object
@@ -434,15 +434,15 @@ Let's demonstrate the technique using object types.
 First, we'll define an object type `iterator` that specifies the
 methods in an iterator.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type 'a iterator = < get : 'a; has_value : bool; next : unit >;;`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Next, we'll define an actual iterator for the class `slist`.  We can
 represent the position in the list with a field `current`, following
 links as we traverse the list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class ['a] slist_iterator cur =
 object
   val mutable current : 'a node option = cur
@@ -459,7 +459,7 @@ object
         Some node -> current <- node#next
       | None -> raise (Invalid_argument "no value")
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Finally, we add a method `iterator` to the slist class to produce an
 iterator.  To do so, we construct an `slist_iterator` that refers to
@@ -467,7 +467,7 @@ the first node in the list, but we want to return a value with the
 object type `iterator`.  This requires an explicit coercion using the
 `:>` operator.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class ['a] slist = object
 ...
    method iterator = (new slist_iterator first :> 'a iterator)
@@ -487,19 +487,19 @@ end
 - : unit = ()
 # it#has_value;;
 - : bool = false
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We may also wish to define functional-style methods, `iter f` takes a
 function `f` and applies it to each of the elements of the list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 method iter f =
   let it = self#iterator in
   while it#has_value do
     f it#get
     it#next
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 What about functional operations similar to `List.map` or `List.fold`?
 In general, these methods take a function that produces a value of
@@ -514,7 +514,7 @@ example.  The method type must be specified directly after the method
 name, which means that method parameters must be expressed using a
 `fun` or `function` expression.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
    (fun f x ->
          let y = ref x in
@@ -524,7 +524,7 @@ method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
             it#next
          done;
          !y)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Immutable objects ##
 
@@ -539,7 +539,7 @@ the imperative list above.  We'll implement it with a regular list
 type `'a list`, and insertion will be to the beginning of the list
 instead of to the end.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class ['a] flist =
 object (self : 'self)
    val elements : 'a list = []
@@ -556,7 +556,7 @@ object (self : 'self)
    method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
       (fun f x -> List.fold_left f x elements)
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A key part of the implementation is the definition of the method
 `insert`.  The expression `{< ... >}` produces a copy of the current
@@ -573,7 +573,7 @@ the object is created, they cannot be changed dynamically.
 We use the same object type `iterator` for iterators, but implement it
 differently.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class ['a] flist_iterator l =
 object
    val mutable elements : 'a list = l
@@ -590,7 +590,7 @@ object
          _ :: l -> elements <- l
        | [] -> raise (Invalid_argument "list is empty")
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Class types ##
 
@@ -604,7 +604,7 @@ is similar when we want to define a `.mli` file).  In keeping with the
 usual style for modules, we define a type `'a t` to represent the type
 of list values.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module SList = struct
    type 'a iterator = < get : 'a; has_value : bool; next : unit >
    type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
@@ -615,21 +615,21 @@ module SList = struct
    
    let make () = new slist
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
    
 We have multiple choices in definining the module type, depending on
 how much of the implementation we want to expose.  At one extreme, a
 maximally-abstract signature would completely hide the class
 definitions.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module AbstractSList : sig
    type 'a iterator = < get : 'a; has_value : bool; next : unit >
    type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
 
    val make : unit -> 'a t
 end = SList
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The abstract signature is simple because we ignore the classes.  But
 what if we want to include them in the signature, so that other modules
@@ -642,7 +642,7 @@ including both fields and methods.  Just like for module types, you
 don't have to give a type for everything; anything you omit will be
 hidden.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module VisibleSList : sig
   type 'a iterator = < get : 'a; has_value : bool; next : unit >
   type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
@@ -673,7 +673,7 @@ module VisibleSList : sig
 
   val make : unit -> 'a slist
 end = SList
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this signature, we've chosen to make nearly everything visible.
 The class type for `slist` specifies the types of the fields `first`
@@ -705,7 +705,7 @@ To explore this, let's define some simple classes for geometric
 shapes.  The generic type `shape` has a method to compute the area,
 and a `square` is a specific kind of shape.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type shape = < area : float >;;
 
 class square w =
@@ -713,13 +713,13 @@ object (self : 'self)
   method area = self#width *. self#width
   method width = w
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A `square` has a method `area` just like a `shape`, and an additional
 method `width`.  Still, we expect a `square` to be a `shape`, and it
 is.  The coercion `:>` must be explicit.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let new_square x : shape = new square x;;
 Characters 27-39:
   let new_square x : shape = new square x;;
@@ -728,7 +728,7 @@ Error: This expression has type square but an expression was expected of type sh
 The second object type has no method width
 # let new_square x : shape = (new square x :> shape);;
 val new_square : float -> shape = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 What are the rules for subtyping?  In general, object subtyping has
 two general forms, called _width_ and _depth_ subtyping.  Width
@@ -742,7 +742,7 @@ object semantics.  We can define a class `rectangle` that has all of
 the methods of a `square`, so it is a subtype of square and can be
 used wherever a `square` is expected.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class rectangle h w =
   object (self : 'self)
      inherit square w
@@ -751,7 +751,7 @@ used wherever a `square` is expected.
   end;;
 # let square_rectangle h w : square = (new rectangle h w :> square);;
 val square_rectangle : float -> float -> square = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This may seem absurd, but this concept is expressible in all
 object-oriented languages.  The contradiction is semantic -- we know
@@ -765,14 +765,14 @@ Next, let's take a seemingly tiny step forward, and start building
 collections of shapes.  It is easy enough to define a `slist` of
 squares.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let squares =
      let l = SList.make () in
      l#insert (new square 1.0);
      l#insert (new square 2.0);
      l;;
 val squares : square slist = <obj>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can also define a function to calculate the total area of a list of
 shapes.  There is no reason to restrict this to squares, it should
@@ -781,7 +781,7 @@ that doing so raises some serious typing questions -- can a `square
 slist` be passed to a function that expects a `shape slist`?  If we
 try it, the compiler produces a verbose error message.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let total_area (l : shape slist) : float =
      let total = ref 0.0 in
      let it = l#iterator in
@@ -806,7 +806,7 @@ Error: This expression has type
        Type square = < area : float; width : float >
        is not compatible with type shape = < area : float > 
        The second object type has no method width
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 It might seem tempting to give up at this point, especially because
 the subtyping is not even true -- the type `square slist` is not a
@@ -825,7 +825,7 @@ going to be mutating the list.  We define a type
 `readonly_shape_slist` and confirm that we can coerce the list of
 squares.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # type readonly_shape_slist = < iterator : shape iterator >;;
 type readonly_shape_slist = < iterator : shape iterator >
 # (squares :> readonly_shape_slist);;
@@ -834,7 +834,7 @@ type readonly_shape_slist = < iterator : shape iterator >
 val total_area : readonly_shape_slist -> float = <fun>
 #   total_area (squares :> readonly_shape_slist);;
 - : float = 5.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Why does this work, why is a `square slist` a subtype of
 `readonly_shape_slist`.  The reasoning is in two steps.  First, the
@@ -877,12 +877,12 @@ A solution is to use an elided type.  Instead of `shape`, we can use
 the elided type `< area : float; .. >`.  In fact, once we do this, it
 also becomes possible to use the `slist` type.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let total_area (l : < area : float; .. > slist) : float = ...;;
 val total_area : < area : float; .. > slist -> float = <fun>
 # total_area squares;;
 - : float = 5.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This works, and it removes the need for explicit coercions.  This type
 is still fairly simple, but it does have the drawback that the
@@ -898,14 +898,14 @@ class definition is available, this
 abbreviation can be useful.  The following definition is exactly
 equivalent to the preceeding.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class cshape = object method area = 0.0 end;;
 class cshape : object method area : float end
 # let total_area (l : #cshape list) : float = ...;;
 val total_area : #cshape slist -> float = <fun>
 # total_area squares;;
 - : float = 5.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Narrowing ###
 
@@ -936,7 +936,7 @@ More commonly, narrowing leads to poor object-oriented style.
 Consider the following Java code, which returns the name of a shape
 object.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 String GetShapeName(Shape s) {
   if (s instanceof Square) {
     return "Square";
@@ -946,7 +946,7 @@ String GetShapeName(Shape s) {
     return "Other";
   }
 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Most programmers would consider this code to be "wrong."  Instead
 of performing a case analysis on the type of object, it would be better
@@ -958,31 +958,31 @@ checks whether an array of shapes looks like a "barbell," composed to
 two `Circle` objects separated by a `Line`, where the circles have the
 same radius.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 boolean IsBarBell(Shape[] s) {
   return s.length == 3 && (s[0] instanceof Circle) &&
     (s[1] instanceof Line) && (s[2] instanceof Circle) &&
 	((Circle) s[0]).radius() == ((Circle) s[2]).radius();
 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this case, it is much less clear how to augment the `Shape` class
 to support this kind of pattern analysis.  It is also not obvious that
 object-oriented programming is well-suited for this situation.
 Pattern matching seems like a better fit.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let is_bar_bell = function
  | [Circle r1; Line _; Circle r2] when r1 == r2 -> true
  | _ -> false;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
  
 Regardless, there is a solution if you find yourself in this
 situation, which is to augment the classes with variants.  You can
 define a method `variant` that injects the actual object into a
 variant type.
  
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type shape = < variant : repr; area : float>
 and circle = < variant : repr; area : float; radius : float >
 and line = < variant : repr; area : float; length : float >
@@ -996,7 +996,7 @@ let is_bar_bell = function
      | Circle c1, Line _, Circle c2 when c1#radius == c2#radius -> true
 	 | _ -> false)
  | _ -> false;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This pattern works, but it has drawbacks.  In particular, the
 recursive type definition should make it clear that this pattern is
@@ -1008,7 +1008,7 @@ provide much value here.
 A _binary method_ is a method that takes an object of `self` type.
 One common example is defining a method for equality.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class square w =
   object (self : 'self) 
     method width = w
@@ -1033,14 +1033,14 @@ class square : int ->
 - : bool = true
 # (new rectangle 5 6)#equals (new rectangle 5 7);;
 - : bool = false
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This works, but there is a problem lurking here.  The method `equals`
 takes an object of the exact type `square` or `rectangle`.  Because of
 this, we can't define a common base class `shape` that also includes
 an equality method.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # type shape = < equals : shape -> bool; area : int >;;
 # let sq = new square 5;;
 # (sq :> shape);;
@@ -1051,7 +1051,7 @@ Error: Type square = < area : int; equals : square -> bool; width : int >
        is not a subtype of shape = < area : int; equals : shape -> bool > 
 Type shape = < area : int; equals : shape -> bool > is not a subtype of
   square = < area : int; equals : square -> bool; width : int > 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem is that a `square` expects to be compared with a `square`,
 not an arbitrary shape; similarly for `rectangle`.
@@ -1065,10 +1065,10 @@ equality, why not just drop it from the base type `shape` and use
 polymorphic equality instead?  Unfortunately, the builtin equality
 has very poor behavior when applied to objects.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # (object method area = 5 end) = (object method area = 5 end);;
 - : bool = false
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem here is that the builtin polymorphic equality compares the
 method implementations, not their return values.  The method
@@ -1082,7 +1082,7 @@ solution is to use the same approach as we described for narrowing.
 That is, introduce a _representation_ type implemented using variants,
 and implement the comparison based on the representation type.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type shape_repr =
  | Square of int
  | Circle of int
@@ -1097,7 +1097,7 @@ object (self : 'self)
   method repr = Square self#width
   method equals (other : shape) = self#repr = other#repr
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The binary method `equals` is now implemented in terms of the concrete
 type `shape_repr`.  In fact, the objects are now isomorphic to the
@@ -1105,7 +1105,7 @@ type `shape_repr`.  In fact, the objects are now isomorphic to the
 hide the `repr` method, but you can hide the type definition using the
 module system.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module Shapes : sig
   type shape_repr
   type shape = < repr : shape_repr; equals : shape -> bool; area -> int >
@@ -1121,7 +1121,7 @@ end = struct
   type shape_repr = Square of int | Circle of int | Rectangle of int * int
   ...
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Private methods ##
 
@@ -1136,7 +1136,7 @@ implement the array access.  For clarity, the resizing operation is
 implemented as a private method `ensure_capacity` that resizes the
 array if necessary.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class vector =
   object (self : 'self)
      val mutable values : int array = [||]
@@ -1163,7 +1163,7 @@ Characters 0-1:
   ^
 Error: This expression has type vector
        It has no method ensure_capacity
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 To be precise, the method `ensure_capacity` is part of the class type,
 but it is not part of the object type.  This means the object `v` has
@@ -1171,7 +1171,7 @@ no method `ensure_capacity`.  However, it is available to subclasses.
 We can extend the class, for example, to include a method `swap` that
 swaps two elements.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class swappable_vector =
   object (self : 'self)
      inherit vector
@@ -1182,7 +1182,7 @@ swaps two elements.
         values.(i) <- values.(j);
         values.(j) <- tmp
   end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Yet another reason for private methods is to factor the implementation
 and support recursion.  Moving along with this example, let's build a
@@ -1194,7 +1194,7 @@ index `i` are at indexes `2 * i` and `2 * i + 1`.  To insert a node
 into the tree, we add it as a leaf, and then recursively move it up
 the tree until we restore heap order.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class binary_heap =
 object (self : 'self)
    val values = new swappable_vector
@@ -1217,7 +1217,7 @@ object (self : 'self)
                self#move_up parent
             end
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The method `move_up` implements the process of restoring heap order as
 a recursive method (though it would be straightforward avoid the
@@ -1230,7 +1230,7 @@ you can use an explicit typing that omits the method.  In the following
 code, the `move_up` method is explicitly omitted from the object type,
 and it can't be invoked in subclasses.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class binary_heap :
   object
     method min : int
@@ -1240,7 +1240,7 @@ and it can't be invoked in subclasses.
     ...
 	method private move_up i = ...
   end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Virtual classes and methods ##
 
@@ -1260,7 +1260,7 @@ One way to do this is to declare the `swappable_vector` abstractly,
 declaring the methods `get` and `set`, but leaving the implementation
 for later.  However, the `swap` method can be defined immediately.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class virtual abstract_swappable_vector =
 object (self : 'self)
    method virtual get : int -> int
@@ -1270,13 +1270,13 @@ object (self : 'self)
       self#set i (self#get j);
       self#set j tmp
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 At some future time, we may settle on a concrete implementation for the vector.
 We can inherit from the `abstract_swappable_bvector` to get the `swap` method "for free."
 Here's one implementation using arrays.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class array_vector =
 object (self : 'self)
    inherit abstract_swappable_vector
@@ -1294,11 +1294,11 @@ object (self : 'self)
             Array.blit values 0 new_values 0 (Array.length values);
             values <- new_values
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here's a different implementation using `HashTbl`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class hash_vector =
 object (self : 'self)
    inherit abstract_swappable_vector
@@ -1311,7 +1311,7 @@ object (self : 'self)
 
    method set = Hashtbl.add table
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 One way to view a `virtual` class is that it is like a functor, where
 the "inputs" are the declared, but not defined, virtual methods and
@@ -1322,7 +1322,7 @@ We've been mentioning that fields can be virtual too.  Here is another
 implementation of the swapper, this time with direct access to the
 array of values.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class virtual abstract_swappable_array_vector =
 object (self : 'self)
    val mutable virtual values : int array
@@ -1334,7 +1334,7 @@ object (self : 'self)
       values.(i) <- values.(j);
       values.(j) <- tmp
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This level of dependency on the implementation details is possible,
 but it is hard to justify the use of a virtual class -- why not just
@@ -1367,7 +1367,7 @@ First, let's consider what happens when we define a method more than
 once.  In the following example, the method `get` is defined twice;
 the second definition "wins," meaning that it overrides the first one.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class m1 =
 object (self : 'self)
    method get = 1
@@ -1377,12 +1377,12 @@ end;;
 class m1 : object method f : int method get : int end
 # (new m1)#f;;
 - : int = 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Fields have similar behavior, though the compiler produces a warning
 message about the override.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class m2 =
 # class m2 =
   object (self : 'self)
@@ -1398,7 +1398,7 @@ The behaviour changed in ocaml 3.10 (previous behaviour was hiding.)
 class m2 : object val x : int method f : int end
 # (new m2)#f;;
 - : int = 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Of course, it is unlikely that you will define two methods or two
 fields of the same name in the same class.  However, the rules for
@@ -1407,7 +1407,7 @@ following definition, the `inherit` declaration comes last, so the
 method definition `method get = 2` overrides the previous definition,
 always returning 2.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class m4 = object method get = 2 end;;
 # class m5 =
   object
@@ -1423,7 +1423,7 @@ val x : m5 = <obj>
 - : unit = ()
 # x#get;;
 - : int = 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 To reiterate, to understand what inheritance means, replace each
 `inherit` directive with its definition, and take the last definition
@@ -1434,7 +1434,7 @@ the following definitions, there are three definitions of the private
 method `g`.  However, the definition of `g` in `m8` is not overridden,
 because it is not part of the class type for `m8`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class m6 =
   object (self : 'self)
      method f1 = self#g
@@ -1472,7 +1472,7 @@ val x : m9 = <obj>
 - : int = 2
 # x#f3;;
 - : int = 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Mixins ###
 
@@ -1498,21 +1498,21 @@ where an _iterator_ object is used to enumerate the elements of a
 collection.  Lots of containers can have iterators, singly-linked
 lists, dictionaries, vectors, etc.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
 class ['a] slist : object ... method iterator : 'a iterator end;;
 class ['a] vector : object ... method iterator : 'a iterator end;;
 class ['a] deque : object ... method iterator : 'a iterator end;;
 class ['a, 'b] map : object ... method iterator : 'b iterator end;;
 ...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The collections are different is some ways, but they share a common
 pattern for iteration that we can re-use.  For a simple example, let's
 define a mixin that implements an arithmetic sum for a collection of
 integers.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # class virtual int_sum_mixin =
   object (self : 'self)
      method virtual iterator : int iterator
@@ -1541,7 +1541,7 @@ val l : int_slist = <obj>
      inherit [int] deque
 	 inherit int_sum_mixin
   end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this particular case, the mixin works only for a collection of
 integers, so we can't add the mixin to the polymorphic class
@@ -1555,7 +1555,7 @@ We can use it to implement generic features as well.  The following
 mixin defines functional-style iteration in terms of the imperative
 iterator pattern.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 class virtual ['a] fold_mixin =
 object (self : 'self)
    method virtual iterator : 'a iterator
@@ -1575,7 +1575,7 @@ object
    inherit ['a] slist
    inherit ['a] fold_mixin
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 
   

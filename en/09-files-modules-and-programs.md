@@ -22,7 +22,7 @@ out.  Here's a simple implementation, which we'll save as the file
 `List.Assoc` module, which provides utility functions for interacting
 with association lists, _i.e._, lists of key/value pairs.
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* freq.ml: basic implementation *)
 
 open Core.Std
@@ -51,7 +51,7 @@ let () =
   (* Print out the 10 highest frequency entries *)
   List.iter (List.take 10 sorted_counts) ~f:(fun (line,count) ->
     printf "%3d: %s\n" count line)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 <sidebar><title>Where is the main function?</title>
 
@@ -69,17 +69,17 @@ sense the full codebase is one big `main` function.
 If we weren't using Core or any other external libraries, we could
 build the executable like this:
 
-~~~~~~~~~~~~~~~
+```
 ocamlc freq.ml -o freq
-~~~~~~~~~~~~~~~
+```
 
 But in this case, this command will fail with the error `Unbound
 module Core`.  We need a somewhat more complex invocation to get Core
 linked in:
 
-~~~~~~~~~~~~~~~
+```
 ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
-~~~~~~~~~~~~~~~
+```
 
 Here we're using `ocamlfind`, a tool which itself invokes other parts
 of the ocaml toolchain (in this case, `ocamlc`) with the appropriate
@@ -97,9 +97,9 @@ compiler.  We'll talk more about `ocamlbuild` in
 through the steps required for this simple application.  First, create
 a `_tags` file, containing the following lines.
 
-~~~~~~~~~~~~~~~
+```
 true:package(core),thread,annot,debugging
-~~~~~~~~~~~~~~~
+```
 
 The purpose of the `_tags` file is to specify which compilation
 options are required for which files.  In this case, we're telling
@@ -110,9 +110,9 @@ project.)
 
 We can then invoke `ocamlbuild` to build the executable in question.
 
-~~~~~~~~~~~~~~~
+```
 $ ocamlbuild -use-ocamlfind freq.byte
-~~~~~~~~~~~~~~~
+```
 
 If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
 `freq.byte`, we would have gotten native-code instead.
@@ -121,7 +121,7 @@ We can now run the our program from the command-line.  The following
 line extracts strings from the `ocamlopt` executable, and then reports
 the most frequently occurring ones.
 
-~~~~~~~~~~~~~~~~~
+```
 $ strings `which ocamlopt` | ./freq.byte
  13: movq
  10: cmpq
@@ -133,7 +133,7 @@ $ strings `which ocamlopt` | ./freq.byte
   5: .long
   5: .quad
   4: ", '
-~~~~~~~~~~~~~~~~~
+```
 
 <sidebar><title>Byte-code vs native-code</title>
 
@@ -189,7 +189,7 @@ for maintaining the association list used to describe the counts.  The
 key function, called `touch`, updates the association list with the
 information that a given line should be added to the frequency counts.
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* counter.ml: first version *)
 
 open Core.Std
@@ -201,14 +201,14 @@ let touch t s =
     | Some x -> x
   in
   List.Assoc.add t s (count + 1)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can now rewrite `freq.ml` to use `Counter`.  Note that the
 resulting code can still be built with `build.sh`, since `ocamlbuild`
 will discover dependencies and realize that `counter.ml` needs to be
 compiled.
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* freq.ml: using Counter *)
 
 open Core.Std
@@ -225,7 +225,7 @@ let () =
   in
   List.iter (List.take sorted_counts 10)
     ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 
 ### Signatures and Abstract Types ###
@@ -234,9 +234,9 @@ While we've pushed some of the logic to the `Counter` module, the code
 in `freq.ml` can still depend on the details of the implementation of
 `Counter`.  Indeed, if you look at the invocation of `build_counts`:
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
   let counts = build_counts [] in
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 you'll see that it depends on the fact that the empty set of frequency
 counts is represented as an empty list.  We'd like to prevent this
@@ -252,20 +252,20 @@ descriptive interface, _i.e._, an interface that describes what's
 currently available in `Counter` without hiding anything.  We'll use
 `val` declarations in the `mli`, which have the following syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 val <identifier> : <type>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 and are used to expose the existence of a given value in the module.
 Here's an interface that describes the current contents of `Counter`.
 We can save this as `counter.mli` and compile, and the program will
 build as before.
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* counter.mli: descriptive interface *)
 
 val touch : (string * int) list -> string -> (string * int) list
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 To actually hide the fact that frequency counts are represented as
 association lists, we need to make the type of frequency counts
@@ -273,7 +273,7 @@ _abstract_.  A type is abstract if its name is exposed in the
 interface, but its definition is not.  Here's an abstract interface
 for `Counter`:
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* counter.mli: abstract interface *)
 
 open Core.Std
@@ -283,7 +283,7 @@ type t
 val empty : t
 val to_list : t -> (string * int) list
 val touch : t -> string -> t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that we needed to add `empty` and `to_list` to `Counter`, since
 otherwise, there would be no way to create a `Counter.t` or get data
@@ -291,7 +291,7 @@ out of one.
 
 Here's a rewrite of `counter.ml` to match this signature.
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* counter.ml: implementation matching abstract interface *)
 
 open Core.Std
@@ -309,15 +309,15 @@ let touch t s =
     | Some x -> x
   in
   List.Assoc.add t s (count + 1)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If we now try to compile `freq.ml`, we'll get the following error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 File "freq.ml", line 11, characters 20-22:
 Error: This expression has type 'a list
        but an expression was expected of type Counter.t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is because `freq.ml` depends on the fact that frequency counts
 are represented as association lists, a fact that we've just hidden.
@@ -329,7 +329,7 @@ Now we can turn to optimizing the implementation of `Counter`.  Here's
 an alternate and far more efficient implementation, based on the `Map`
 datastructure in Core.
 
-~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* counter.ml: efficient version *)
 
 open Core.Std
@@ -347,7 +347,7 @@ let touch t s =
   Map.add t s (count + 1)
 
 let to_list t = Map.to_alist t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## More on modules and signatures
 
@@ -365,7 +365,7 @@ return the two lines before and after the median instead.  We'll use a
 custom type to represent the fact that there are two possible return
 values.  Here's a possible implementation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type median = | Median of string
               | Before_and_after of string * string
 
@@ -379,18 +379,18 @@ let median t =
   if len mod 2 = 1
   then Median (nth (len/2))
   else Before_and_after (nth (len/2), nth (len/2 + 1));;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now, to expose this usefully in the interface, we need to expose both
 the function and the type `median` with its definition.  We'd do that
 by adding these lines to the `counter.mli`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type median = | Median of string
               | Before_and_after of string * string
 
 val get_median : t -> median
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The decision of whether a given type should be abstract or concrete is
 an important one.  Abstract types give you more control over how
@@ -411,7 +411,7 @@ an extended version of the `List` module, where you've added some
 functionality not present in the module as distributed in Core.  We
 can do this easily using `include`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* ext_list.ml: an extended list module *)
 
 open Core.Std
@@ -424,7 +424,7 @@ let rec intersperse list el =
 
 (* The remainder of the list module *)
 include List
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now, what about the interface of this new module?  It turns out that
 include works on the signature language as well, so we can pull
@@ -432,7 +432,7 @@ essentially the same trick to write an `mli` for this new module.  The
 only trick is that we need to get our hands on the signature for the
 list module, which can be done using `module type of`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* ext_list.mli: an extended list module *)
 
 open Core.Std
@@ -442,17 +442,17 @@ include (module type of List)
 
 (* Signature of function we're adding *)
 val intersperse : 'a list -> 'a -> 'a list
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And we can now use `Ext_list` as a replacement for `List`.  If we want
 to use `Ext_list` in preference to `List` in our project, we can
 create a file of common definitions:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* common.ml *)
 
 module List = Ext_list
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And if we then put `open Common` after `open Core.Std` at the top of
 each file in our project, then references to `List` will automatically
@@ -470,7 +470,7 @@ usernames with other string data that is floating around your program.
 
 Here's how you might create such a type, within a module:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 open Core.Std
 
 module Username : sig
@@ -482,20 +482,20 @@ end = struct
   let of_string x = x
   let to_string x = x
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The basic structure of a module declaration like this is:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module <name> : <signature> = <implementation>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We could have written this slightly differently, by giving the
 signature its own top-level `module type` declaration, making it
 possible to in a lightweight way create multiple distinct types with
 the same underlying implementation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module type ID = sig
   type t
   val of_string : string -> t
@@ -519,7 +519,7 @@ type session_info = { user: Username.t;
 
 let sessions_have_same_user s1 s2 =
   s1.user = s2.user
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can also combine this with the use of the include directive to add
 some extra functionality to such a module.  Thus, we could have
@@ -527,7 +527,7 @@ rewritten the definition of `Hostname` above as follows to add a
 function `Hostname.mine` that returns the hostname of the present
 machine.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Hostname : sig
   include ID
   val mine : unit -> t
@@ -535,7 +535,7 @@ end = struct
   include String_id
   let mine = Unix.gethostname
 end  
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Opening modules ###
 
@@ -567,24 +567,24 @@ Here's some general advice on how to deal with opens.
     giving up on explicitness is to locally rebind the name of a
     module.  So, instead of writing:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    ```ocaml
     let print_median m =
        match m with
        | Counter.Median string -> printf "True median:\n   %s\n"
        | Counter.Before_and_after of before * after ->
          printf "Before and after median:\n   %s\n   %s\n" before after
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ```
 
-    you could write
+    ...you could write
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    ```ocaml
     let print_median m =
        let module C = Counter in
        match m with
        | C.Median string -> printf "True median:\n   %s\n"
        | C.Before_and_after of before * after ->
          printf "Before and after median:\n   %s\n   %s\n" before after
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ```
 
     Because the module name `C` only exists for a short scope, it's
     easy to read and remember what `C` stands for.  Rebinding modules
@@ -594,11 +594,11 @@ Here's some general advice on how to deal with opens.
   * If you do need to do an open, it's better to do a _local open_.
     There are two syntaxes for local opens.  For example, you can write:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    ```ocaml
     let average x y =
       let open Int64 in
       x + y / of_int 2
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ```
 
     In the above, `of_int` and the infix operators are the ones from
     `Int64` module.
@@ -606,10 +606,10 @@ Here's some general advice on how to deal with opens.
     There's another even more lightweight syntax for local opens, which
     is particularly useful for small expressions:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+    ```ocaml
     let average x y =
       Int64.(x + y / of_int 2)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ```
 
 
 ### Common errors with modules
@@ -625,14 +625,14 @@ signature does not match up with the type in the implementation of the
 module.  As an example, if we replace the `val` declaration in
 `counter.mli` by swapping the types of the first two arguments:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 val touch : string -> t -> t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 and then try to compile `Counter` (by writing `ocamlbuild
 -use-ocamlfind counter.cmo`), we'll get the following error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 File "counter.ml", line 1, characters 0-1:
 Error: The implementation counter.ml
        does not match the interface counter.cmi:
@@ -641,7 +641,7 @@ Error: The implementation counter.ml
            ('a, int) Core.Std.Map.t -> 'a -> ('a, int) Core.Std.Map.t
        is not included in
          val touch : string -> t -> t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This error message is a bit intimidating at first, and it takes a bit
 of thought to see where the first type, which is the type of [touch]
@@ -657,19 +657,19 @@ We might decide that we want a new function in `Counter` for pulling
 out the frequency count of a given string.  We can update the `mli` by
 adding the following line.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 val count : t -> string -> int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now, if we try to compile without actually adding the implementation,
 we'll get this error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 File "counter.ml", line 1, characters 0-1:
 Error: The implementation counter.ml
        does not match the interface counter.cmi:
        The field `count' is required but not provided
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A missing type definition will lead to a similar error.
 
@@ -681,14 +681,14 @@ the type `median`.  The order of the declaration of variants matters
 to the OCaml compiler so, if the definition of `median` in the
 implementation lists those options in a different order:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type median = | Before_and_after of line * line
               | Median of line
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 that will lead to a compilation error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 File "counter.ml", line 1, characters 0-1:
 Error: The implementation counter.ml
        does not match the interface counter.cmi:
@@ -697,7 +697,7 @@ Error: The implementation counter.ml
        is not included in
          type median = Median of string | Before_and_after of string * string
        Their first fields have different names, Before_and_after and Median.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Order is similarly important in other parts of the signature,
 including the order in which record fields are declared and the order
@@ -721,30 +721,30 @@ itself (although definitions within a module can refer to each other
 in the ordinary way).  So, if we tried to add a reference to `Counter`
 from within `counter.ml`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let singleton l = Counter.touch Counter.empty
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 then when we try to build, we'll get this error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 File "counter.ml", line 17, characters 18-31:
 Error: Unbound module Counter
 Command exited with code 2.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem manifests in a different way if we create circular
 references between files.  We could create such a situation by adding
 a reference to Freq from `counter.ml`, _e.g._, by adding the following
 line:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let build_counts = Freq.build_counts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this case, `ocamlbuild` will notice the error and complain:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 Circular dependencies: "freq.cmo" already seen in
   [ "counter.cmo"; "freq.cmo" ]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
