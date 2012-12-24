@@ -27,6 +27,9 @@ site: all
 	for i in commenting-build/en/html/*.html; do \
 	  cat $$i | ./scripts/html_code_highlight.native > commenting-build/en/$(MILESTONE)/`basename $$i`; done
 
+server:
+	cd commenting-ocaml && ocamlbuild -use-ocamlfind rwo.native
+
 pdf: build/$(LINGUA)/pdf/rwo.pdf
 	@ :
 
