@@ -25,7 +25,7 @@ site: all
 	python commenting/bin/generate_commenting_site.py --github-milestone $(MILESTONE)
 	mkdir -p commenting-build/ocaml_commenting/www/en/$(MILESTONE)
 	for i in commenting-build/ocaml_commenting/www/en/html/*.html; do \
-	  ./scripts/html_code_highlight.native < $$i > commenting-build/ocaml_commenting/www/en/$(MILESTONE)/`basename $$i`; done
+	  cat $$i | ./scripts/html_code_highlight.native > commenting-build/ocaml_commenting/www/en/$(MILESTONE)/`basename $$i`; done
 
 pdf: build/$(LINGUA)/pdf/rwo.pdf
 	@ :

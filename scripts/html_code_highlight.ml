@@ -27,9 +27,9 @@ let rec filter i =
 let _ =
   try
     let i = Xmlm.make_input ~entity:Xhtml.entity (`Channel stdin) in
-    let o = Xmlm.make_output (`Channel stdout) in
+    let o = Xmlm.make_output ~decl:false (`Channel stdout) in
     let (dtd,it) = in_tree i in
     let ot = filter it in
-    out_tree o (dtd,ot)
+    out_tree o (None,ot)
   with Xmlm.Error (p,e) -> print_endline (Xmlm.error_message e)
 
