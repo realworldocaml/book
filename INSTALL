@@ -1,0 +1,11 @@
+To build the Docbook, you will need:
+
+* OCaml 4.00.1+
+* OPAM http://opam.ocamlpro.com
+* Install the `core` and `xmlm` packages.
+
+To build the HTML site:
+* xsltproc
+* Python packages: beautifulsoup4 and django
+
+Just do `make clean && make && make site`, and the HTML will be in `commenting/en/alpha1/index.html`
