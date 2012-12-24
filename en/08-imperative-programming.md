@@ -18,7 +18,7 @@ using _open hashing_, where the hash table consists of an array of buckets, each
 of which contain a linked list of elements.  We'll use regular (pure) OCaml
 lists, and an array for the buckets.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module HashMap : sig
   type ('a, 'b) t
 
@@ -51,7 +51,7 @@ end = struct
       List.iter table.(i) ~f:(fun (key, data) -> f ~key ~data)
     done
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The signature for the `HashMap` declares the type of dictionaries `('a, 'b) t`,
 with keys of type `'a` and associated values of type `'b`.  It also includes
@@ -107,7 +107,7 @@ mutated.
 * `! refcell` returns the contents of the reference cell.
 * `refcell := expr` replaces the contents of the reference cell.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let x = ref 1;;
 val x : int ref = {contents = 1}
 # x := 7;;
@@ -120,16 +120,16 @@ val x : int ref = {contents = 1}
 - : int = 12
 # !x;;
 - : int = 12
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 As the example shows, reference cells are actually just a short form for record
 operations.  The `ref` type is a record with a single mutable field `contents`,
 with the following definition.  The expression `!x` is equivalent to
 `x.contents`, and `x := e` is equivalent to `x.contents <- e`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type 'a ref = { mutable contents : 'a };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Looping
 
@@ -137,17 +137,17 @@ The `iter` function iterates through all of the elements in the table using a
 `for` loop.  There are two kinds of loops in OCaml, `for` loops and `while`
 loops.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 for index = <initial> to <final> do <body> done
 for index = <initial> downto <final> do <body> done
 while <condition> do <body> done
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A loop `for index = <initial> to <final> do <body> done` advances by
 from the `<initial>` integer to the `<final>` one (inclusive).  The
 iterations are evaluated if `<final>` is smaller than `<initial>`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # for i = 0 to 3 do
     Printf.printf "i = %d\n" i
   done;;
@@ -156,23 +156,23 @@ i = 1
 i = 2
 i = 3
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A downto loop `for = <initial> downto <final> do <body> done` advances
 downward by 1 on each iteration.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # for i = 3 downto 0 do Printf.printf "i = %d\n" i done;;
 i = 3
 i = 2
 i = 1
 i = 0
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A while-loop iterates until the condition is false.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let i = ref 0;;
 val i : int ref = {contents = 0}
 # while !i < 3 do Printf.printf "i = %d\n" !i; i := !i + 1 done;;
@@ -184,7 +184,7 @@ i = 2
 - : unit = ()
 # !i;;  
 - : int = 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Doubly-linked lists
 
@@ -208,7 +208,7 @@ We use the type `type 'a dlist = 'a element option ref`; the `ref` allows the
 list to be mutated, and the value is either `None` for the empty list, or `Some
 first_element` if the list is non-empty.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type 'a element =
   { mutable value : 'a;
     mutable next : 'a element option;
@@ -220,7 +220,7 @@ type 'a dlist = 'a element option ref
 let create () = ref None
 
 let is_empty l = (!l = None)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The function `create` creates an empty list.  The function `is_empty l`
 dereferences the list using the `!` operator, returning true if the value is
@@ -230,7 +230,7 @@ Next, let's define the function that inserts a value onto the front of the list
 as a new first element.  We define a new element `new_front`, link in the new
 element, and set the list references.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let push_front l ~data =
   let new_front = { value = data; next = None; previous = None } in
   begin match !l with
@@ -241,7 +241,7 @@ let push_front l ~data =
      ()
   end;
   l := Some new_front
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This example introduces the _sequencing_ operator `;`.  In the case where the
 list is non-empty (the `Some el` case in the `match`), we first set
@@ -259,11 +259,11 @@ a terminator, like it is in C or Java.  The compiler is somewhat relaxed about
 parsing a terminating semicolon, so it may work for you, but you should not rely
 on it.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let i = print_string "Hello world\n"; 2; in i;;
 Hello world
 - : int = 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Also note, the precedence of a `match` expression is very low, so to separate it
 from the following assignment `l := Some new_front`, we surround the match in a
@@ -274,7 +274,7 @@ we want.
 To complete this initial part of the implementation, let's define function
 `front` to return the first element, and `pop_front` to remove it.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let front = function
  | { contents = Some { value = v } } -> v
  | { contents = None } -> raise (Invalid_argument "front")
@@ -287,7 +287,7 @@ let pop_front l =
     el.previous <- None;
     v
   | None -> raise (Invalid_argument "pop_front")
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 For illustration the `front` function uses pattern matching on the reference
 cell -- it would be equivalent to write an explicit dereference `let front l =
@@ -308,7 +308,7 @@ this is normaly done with functions like `iter`, `map`, and `fold`.  Each of
 these iteration functions takes a function that will be applied to each of the
 elements in order.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # List.iter  [1; 2; 3] ~f:(fun i -> Printf.printf "Element: %d\n" i);;
 Element: 1
 Element: 2
@@ -316,12 +316,12 @@ Element: 3
 - : unit = ()
 # List.map [1; 2; 3] ~f:((+) 10);;
 - : int list = [11; 12; 13]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Defining this for doubly-linked lists is simple enough.  The following function
 iterates through the list, applying the function `f` to each element in turn.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let iter l ~f =
   let rec loop = function
    | Some { value = v; next = next } -> f v; loop next
@@ -337,7 +337,7 @@ let iter l ~f =
 Item: 3
 Item: 2
 Item: 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This style of iteration is concise and completely general.  However, with
 imperative containers, we often want more control.  We may not want to iterate
@@ -350,13 +350,13 @@ Library.
 Let's define a Java-style kind of generic iterator object that allows manual
 enumeration and mutation of the container.  Here is the Java interface.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {java}
+```java
 public iterface Iterator {
   public boolean hasNext();
   public Object next();
   public void remove();
 };
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 At any time, a `Iterator` object refers (optionally) to some element of a
 container.  The `hasNext()` method returns true if the iterator refers to an
@@ -380,10 +380,10 @@ verbose type than in Java.  We'll separate retrieving a value from advacing to
 the next element.  The object type is specified like a record type, but using
 angle brackets `< ... >`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 type 'a iterator =
    < has_value : bool; value : 'a; next : unit; remove : unit >
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Each of the labeled parts `has_value`, `value`, etc. are object _methods_.  This
 object type corresponds to an _interface_ consisting of a set of methods.
@@ -391,7 +391,7 @@ object type corresponds to an _interface_ consisting of a set of methods.
 Next, to define the iterator implementation, we implement each of the methods,
 bracketed by `object ... end`, declaring each method with the `method` keyword.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let iterator (list : 'a t) =
   let current = ref !list in
   object
@@ -416,7 +416,7 @@ let iterator (list : 'a t) =
             current := next
        | None -> raise (Invalid_argument "remove")
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The reference cell `current` holds the current position in the list.  The method
 `has_value` returns true if `current` refers to an element, `value` returns the
@@ -425,7 +425,7 @@ element, and `next` advances the iterator.  The method `remove` unlinks the
 next's elements `previous` pointer, then advancing `current` to the next
 element.  The following example illustrates the semantics.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 # let l = create ();;
 val l : '_a dlist
 # push_front l 1;
@@ -455,12 +455,12 @@ val it : int iterator = <obj>
 3
 1
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the doubly-linked list is a _cyclic_ data structure.  Most notably,
 the builtin equality _does not work_ in general with cyclic values.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let l2 = create();
 val l2 : '_a dlist
 # push_front l2 1; push_front l2 3;;
@@ -469,7 +469,7 @@ val l2 : '_a dlist
 - : bool = false
 # l = l2;;
 Out of memory during evaluation.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Doubly-linked list module
 
@@ -477,7 +477,7 @@ Now that we have defined iterators, let's declare the complete signature for
 doubly-linked lists as a module.  The type of elements `'a element` is internal
 to the implementation, and the type of lists `'a DList.t` is abstract.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module DList : sig
    type 'a t
 
@@ -490,7 +490,7 @@ module DList : sig
    val iterator : 'a t -> 'a iterator
    val find : 'a t -> data:'a -> 'a iterator
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We have seen the definition of all of the functions except `find`, which searches
 for an element in the list (sequentially), returning an iterator that refers to
@@ -499,7 +499,7 @@ uses a loop to search sequentially for the element.  If the element is found,
 the returned iterator refers to that value, otherwise the iterator does not have
 a value.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module DList = struct
    ...
 
@@ -510,7 +510,7 @@ module DList = struct
      done;
      it
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Hash tables with iterators
 
@@ -521,7 +521,7 @@ The signature changes slightly, the main change being tat the `find` function
 returns an iterator.  This allows retrieval of the value associated with a key,
 and it also allows the entry to be deleted.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module IterableHashMap : sig
   type ('a, 'b) t
 
@@ -530,14 +530,14 @@ module IterableHashMap : sig
   val iterator : ('a, 'b) t -> ('a * 'b) iterator
   val find : ('a, 'b) t -> key:'a -> ('a * 'b) iterator
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The implementation of `IterableHashMap` is similar to the original `HashMap`
 using lists, except now we will use doubly-linked lists.  The `create` function
 creates an array of doubly-linked lists.  The `add` function first removes any
 existing entry, then add the new element to the front of the bucket.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module IterableHashMap = struct
   type ('a, 'b) t = ('a * 'b) DList.t array
 
@@ -554,7 +554,7 @@ module IterableHashMap = struct
 
   ...
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can define iterators in the hash table as a pair of a bucket index and
 `DList` iterator into the bucket.  To define this as an object, we'll introduce
@@ -562,7 +562,7 @@ a few more object concepts, including mutable fields, private methods, and
 initializers.  The function `make_iterator table index_ dlist_it_` returns an
 iterator for the bucket with index `index_` and list iterator `dlist_it_`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let make_iterator table index_ dlist_it_ =
     object (self)
       val mutable index = index_
@@ -582,7 +582,7 @@ iterator for the bucket with index `index_` and list iterator `dlist_it_`.
         done
       initializer self#normalize
     end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The iterator implementation relies on a "normal" form, where the list iterator
 _always_ refers to an element.  This is handled by the `normalize` method, which
@@ -606,7 +606,7 @@ is first created, in this case normalizing the iterator.
 Now that the iterator is defined, we can complete the `IterableHashMap`
 implementation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let iterator table =
     make_iterator table 0 (DList.iterator table.(0))
 
@@ -620,7 +620,7 @@ implementation.
        make_iterator table index it
     else
        make_iterator table num_buckets it
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `iterator` function returns in iterator that refers to the first element in
 the table (if the table is non-empty).  The `find` function searches for an
@@ -640,7 +640,7 @@ One of the simplest of these is the builtin lazy computation.  The keyword
 Lazy.t`.  The computation is delayed until forced with the `Lazy.force`
 function, and then saved thereafter.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let v = lazy (print_string "performing lazy computation\n"; 1);;
 val v : int lazy_t = <lazy>
 # Lazy.force v;;
@@ -648,12 +648,12 @@ performing lazy computation
 - : int = 1
 # Lazy.force v;;
 - : int = 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The builtin `lazy` computation has a nice syntax, but the technique is pretty
 generic, and we can implement it with a mutable value.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module ImpLazy : sig
    type 'a t
 
@@ -673,7 +673,7 @@ end = struct
       | Value x ->
            x
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `'a delayed` type contains a delayed value represented as a function, or
 else an actual value.  The `ImpLazy.force` function forces the computation; if
@@ -690,7 +690,7 @@ We can generalize lazy computations to function _memoization_, where we save the
 result of function applications to avoid their recomputation.  One simple
 implementation is to use a hash table to save the values by side effect.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module Memo : sig
    type ('a, 'b) t
 
@@ -707,7 +707,7 @@ end = struct
             HashMap.add table ~key:arg ~data:x;
             x
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Memoization is useful for _dynamic programming_, where problems are solved by
 breraking them down into simpler subproblems.  If subproblems occur more than
@@ -716,16 +716,16 @@ example of this is the Fibonacci sequence, which is defined by the following
 program, which produces the sequence _0, 1, 1, 2, 3, 5, 8, 13, 21, ..._ starting
 from 0.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let rec fib i = if i <= 1 then i else fib (i - 1) + fib (i - 2);;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The complexity of this function is exponential _O(2^i)_, because for large
 inputs the function computes two similar-sized subproblems.  To illustrate,
 let's time the computation using the `Sys.time` function to measure the wall
 clock.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let time f x =
     let start = Sys.time () in
     let y = f x in
@@ -735,14 +735,14 @@ val time : ('a -> 'b) -> 'a -> 'b = <fun>
 # time fib 40;;
 Time: 5.53724 sec
 - : int = 102334155
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Next, let's construct a memoized version of the function, where the recursive
 calls are made through a memo table.  This makes a dramatic improvement in
 performance.  Since the recursive calls are computed just once, the complexity
 is linear, and the computation is fast.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let memo_fib =
     let memo = Memo.create () in
     let rec fib i =
@@ -757,7 +757,7 @@ val memo_fib : int -> int = <fun>
 # time memo_fib 40;;
 Time: 3.7e-05 sec
 - : int = 102334155
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that this use of memoization relies on side-effects to cache intermediate
 computations, but it doesn't change the values of the function.  Its purpose is
@@ -784,7 +784,7 @@ without explicitly using the constructors `num`, `var`, `plus`, `times` provided
 by the `Exp` module.  These functions enforce the hash-consing, ensuring that
 structurally equal expressions are mapped to physically equal representations.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module Exp : sig
   type t = private
    | Num of int
@@ -815,7 +815,7 @@ end = struct
   let plus e1 e2 = merge (Plus (e1, e2))
   let times e1 e2 = merge (Times (e1, e2))
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The implementation defines a hash table `table`, and a `merge` function that
 merges an expression into the table, returning the previous value if there was
@@ -825,19 +825,19 @@ merge function to memoize the value.
 
 Note that expressions that are structurally equal are now also physically equal.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let e1 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "x") (Exp.var "y"));;
 val e1 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "x", Exp.Var "y"))
 # let e2 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "x") (Exp.var "y"));;
 val e2 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "x", Exp.Var "y"))
 # e1 == e2;;
 - : bool = true
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Expressions that are not equal are equal are not physically equal either,
 however common subexpressions are equal.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let e3 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "z") (Exp.var "y"));;
 val e3 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "z", Exp.Var "y"))
 # e1 == e3;;
@@ -852,7 +852,7 @@ val b2 : Exp.t = Exp.Var "y"
 - : bool = true
 # a2 == b2;;
 - : bool = true
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Weak hash consing
 
@@ -885,7 +885,7 @@ The module `WeakHash` has the semantics of a set of elements.  The
 `WeakHash.merge` function retrieves an element if it already exists, or adds it
 otherwise.  The constructors are much as before.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module WExp : sig
   type t = private
    | Num of int
@@ -937,7 +937,7 @@ end = struct
      let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0xdeadbeef in
      merge (Times (hash, e1, e2))
 end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Concurrency
 
@@ -958,7 +958,7 @@ synchronization issues, where multiple threads may be mutating shared
 state at the same time.  To illustrate, let's write a program with two
 threads that increment a shared reference cell concurrently.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let value = ref 0
 
 let loop () =
@@ -976,7 +976,7 @@ Thread.join thread1;;
 Thread.join thread2;;
 
 Printf.printf "value = %d\n" !value
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The reference cell `value` holds a shared value that is incremented 10
 times, in a loop, by the `loop` function.  Each iteration of the loop
@@ -987,7 +987,7 @@ to block until the threads terminate.
 The exact behavior of the program is nondeterminstic -- it depends on
 the relative sopeed of the two theads.  One output is listed below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 i = 0
 ii  ==  01
 
@@ -995,7 +995,7 @@ ii  ==  12
 
 i = 2
 value = 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This represents a nearly perfect interleaving of the thread
 executions.  Each thread fetches the value from the `value` reference
@@ -1008,7 +1008,7 @@ a `Mutex` to ensure that the increment operation is atomic.  We can
 allocate a lock with `Mutex.create`, then acquire the lock in the loop
 body.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 let value = ref 0
 let mutex = Mutex.create ()
 
@@ -1021,11 +1021,11 @@ let loop () =
      value := i + 1;
      Mutex.unlock mutex
    done
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 When we run this program, it produces a deterministic output.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 i = 0
 i = 1
 i = 2
@@ -1033,7 +1033,7 @@ i = 3
 i = 4
 i = 5
 value = 6
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Dealing with concurrency
 
@@ -1069,7 +1069,7 @@ let's first give the signature of the module we will implement.  The
 table has operations to add, remove, and find elements, and it also
 supports imperative iterators.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 module ConcurrentHashMap : sig
   type ('a, 'b) t
 
@@ -1079,7 +1079,7 @@ module ConcurrentHashMap : sig
   val remove : ('a, 'b) t -> key:'a -> unit
   val iterator : ('a, 'b) t -> ('a * 'b) iterator
 end = struct
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We'll use the same basic construction that we used to implement the
 `HashMap` -- a hash table contains an array of buckets.  In addition
@@ -1088,7 +1088,7 @@ interfere.  In addition, to reduce lock contention, we'll use an array
 of locks to partition the table into multiple parts.  If operations
 are randomly disitribted, this should reduce lock contention.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   type ('a, 'b) element = {
     key : 'a;
     mutable value : 'b
@@ -1105,7 +1105,7 @@ are randomly disitribted, this should reduce lock contention.
     locks = Array.init num_locks (fun _ -> Mutex.create ());
     buckets = Array.create num_buckets []
   }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Each `element` is a key/value pair, where the value is mutable so that
 the `add` function can mutate it in place.  For this implementation,
@@ -1118,7 +1118,7 @@ lists.  The function `find_assoc` finds the value associated with a
 key, and `remove_assoc` removes an association.  Both functions raise
 an exception `Not_found` if the list does not contain the association.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let rec find_assoc key = function
   | { key = key' } as element :: _ when key' = key -> element
   | _ :: tl -> find_assoc key tl
@@ -1128,7 +1128,7 @@ an exception `Not_found` if the list does not contain the association.
   | { key = key' } :: tl when key' = key -> tl
   | hd :: tl -> hd :: remove_assoc key tl
   | [] -> raise Not_found
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The locks are intended to partition the table into multiple sub-parts,
 where each lock provides synchronization for a contiguous range of
@@ -1137,14 +1137,14 @@ buckets.  To make synchronization each we define a function
 the function with the bucket lock acquired, releasing the lock before
 returning.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let synchronize table index f =
     let lock = table.locks.(index * num_locks / num_buckets) in
     Mutex.lock lock;
     let result = f () in
     Mutex.unlock lock;
     result
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the `synchronize` function is _not_ exception-safe, meaning
 that if evaluation of `f ()` raises an exception, the lock will not be
@@ -1152,13 +1152,13 @@ released.  An exception-safe version would catch all exceptions; when
 an exception is raised, the lock would be released, and the exception
 re-raised.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let synchronize_exn table index f =
     let lock = table.locks.(index * num_locks / num_buckets) in
     Mutex.lock lock;
     try let result = f () in Mutex.unlock lock; result with
       exn -> Mutex.unlock lock; raise exn
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 To add a new entry to the table, the `add` function acquires the
 bucket lock, then uses `find_assoc` to look for an existing
@@ -1166,7 +1166,7 @@ association.  If one is found, the `value` is updated in-place to the
 new value.  Otherwise, a new entry is added to the beginning of the
 bucket.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let add table ~key ~data =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
@@ -1175,13 +1175,13 @@ bucket.
       try (find_assoc key buckets.(index)).value <- data with
         Not_found ->
           buckets.(index) <- { key = key; value = data } :: buckets.(index))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Removing an element from the table is similar.  If here is a previous
 entry in the table, the entry is removed.  Otherwise, the table is
 left unchanged.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let remove table ~key =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
@@ -1189,7 +1189,7 @@ left unchanged.
     synchronize table index (fun () ->
       try buckets.(index) <- remove_assoc key buckets.(index) with
         Not_found -> ())
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The function to find an association in the table is similar -- we jsut
 find the entry in the table and return the value part.  However, this
@@ -1197,13 +1197,13 @@ particular implementation is somewhat more subtle, because it omits
 the synchronization step, examining the bucket _without_ acquiring the
 lock.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let find table ~key =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
 	(* Unsynchronized! *)
     (find_assoc key table.buckets.(index)).value
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 From a performance perspective, this is clearly a win, because
 retrieving elements from the table has no locking at all.  But why is
@@ -1234,13 +1234,13 @@ memory semantics will change accordingly.  The simplest fix is just to
 synchronize the access.  Performance of `find` operations will
 decrease somewhat due to contention.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let synchronized_find table ~key =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
     synchronize table index (fun () ->
       (find_assoc key table.buckets.(index)).value)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 For the final part of the implementation, let's define imperative
 iteration.  The iterator object contains a bucket index, and the field
@@ -1252,7 +1252,7 @@ value in the table unless the iterator has advanced past the final
 element.  The `remove` method removes the current element from the
 bucket in which it is stored.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
   let rec remove_element elements = function
   | (_ :: tl) as elements' when elements' == elements -> tl
   | hd :: tl -> hd :: remove_element elements tl
@@ -1283,7 +1283,7 @@ bucket in which it is stored.
         done
       initializer self#normalize
     end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 All method are unsychronized except the method `remove`, which mutates
 the bucket.  As a consequence, it means that hash operations that add

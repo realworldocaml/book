@@ -36,9 +36,9 @@ words in RAM) to represent many of the values that it deals with such as
 tuples, records, closures or arrays.  An OCaml program implicitly allocates a
 block of memory when such a value is created. 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 # let x = { foo = 13; bar = 14 } ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 An expression such as the record above requires a new block of memory with two
 words of available space. One word holds the `foo` field and the second word
@@ -148,12 +148,12 @@ interprete the subsequent data as opaque or OCaml fields.
 (_avsm_: pointers to blocks actually point 4/8 bytes into it, for some efficiency
 reason that I cannot recall right now).
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 +------------------------+-------+----------+----------+----------+----
 | size of block in words |  col  | tag byte | value[0] | value[1] | ...
 +------------------------+-------+----------+----------+----------+----
  <-either 22 or 54 bits-> <2 bit> <--8 bit-->
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The size field records the length of the block in memory words. Note that it is
 limited to 22-bits on 32-bit platforms, which is the reason why OCaml strings
@@ -224,11 +224,11 @@ overall program.
 
 ### Tuples, records and arrays
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 +---------+----------+----------- - - - - 
 | header  | value[0] | value[1] | ....
 +---------+----------+----------+- - - - -
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Tuples, records and arrays are all represented identically at runtime, with a
 block with tag `0`.  Tuples and records have constant sizes determined at
@@ -240,12 +240,12 @@ You can check the difference between a block and a direct integer yourself
 using the `Obj` module, which exposes the internal representation of values to
 OCaml code.
 
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Obj.is_block (Obj.repr (1,2,3)) ;;
 - : bool = true
 # Obj.is_block (Obj.repr 1) ;;
 - : bool = false
-~~~~~~~~~~~~~~~~
+```
 
 The `Obj.repr` function retrieves the runtime representation of any OCaml
 value.  `Obj.is_block` checks the bottom bit to determine if the value is
@@ -258,12 +258,12 @@ values.  Individual floating point values are stored as a block with a single
 field that contains the number.  This block has the `Double_tag` set which
 signals to the collector that the floating point value is not to be scanned.
 
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Obj.tag (Obj.repr 1.0) = Obj.double_tag ;;
 - : int = 253
 # Obj.double_tag ;;
 - : int = 253
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 
 Since each floating-point value is boxed in a separate memory block, it can be
 inefficient to handle large arrays of floats in comparison to unboxed integers.
@@ -272,17 +272,17 @@ types. These are stored in a block that contains the floats packed directly in
 the data section, with the `Double_array_tag` set to signal to the collector
 that the contents are not OCaml values.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 +---------+----------+----------- - - - - 
 | header  | float[0] | float[1] | ....
 +---------+----------+----------+- - - - -
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You can test this for yourself using the `Obj.tag` function to check that the
 allocated block has the expected runtime tag, and `Obj.double_field` to
 retrieve a float from within the block.
 
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # open Obj ;;
 # tag (repr [| 1.0; 2.0; 3.0 |]) ;;
 - : int = 254
@@ -292,7 +292,7 @@ retrieve a float from within the block.
 - : float = 2.2
 # Obj.double_field (Obj.repr 1.234) 0;;
 - : float = 1.234
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 
 Notice that float tuples are *not* optimized in the same way as float records
 or arrays, and so they have the usual tuple tag value of `0`. Only records
@@ -305,7 +305,7 @@ Basic variant types with no extra parameters for any of their branches are
 simply stored as an OCaml integer, starting with `0` for the first option and
 in ascending order. 
 
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # open Obj ;;
 # type t = Apple | Orange | Pear ;;
 type t = Apple | Orange | Pear
@@ -315,7 +315,7 @@ type t = Apple | Orange | Pear
 - : int = 2
 # is_block (repr Apple) ;;
 - : bool = false
-~~~~~~~~~~~~~~~~
+```
 
 `Obj.magic` unsafely forces a type cast between any two OCaml types; in this
 example the `int` type hint retrieves the runtime integer value. The
@@ -327,7 +327,7 @@ stored as blocks, with the value *tags* ascending from 0 (counting from
 leftmost variants with parameters).  The parameters are stored as words in the
 block.
 
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = Apple | Orange of int | Pear of string | Kiwi ;;
 type t = Apple | Orange of int | Pear of string | Kiwi
 # is_block (repr (Orange 1234)) ;;
@@ -340,7 +340,7 @@ type t = Apple | Orange of int | Pear of string | Kiwi
 - : int = 1234
 (magic (field (repr (Pear "xyz")) 0) : string) ;;
 - : string = "xyz"
-~~~~~~~~~~~~~~~~
+```
 
 In the above example, the `Apple` and `Kiwi` values are still stored as normal
 OCaml integers with values `0` and `1` respectively.  The `Orange` and `Pear`
@@ -388,13 +388,13 @@ function to the *name* of the variant.  The hash function isn't exposed
 directly by the compiler, but the `type_conv` library from Core provides an
 alternative implementation.
 
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # #require "type_conv" ;;
 # Pa_type_conv.hash_variant "Foo" ;;
 - : int = 3505894
 # (Obj.magic (Obj.repr `Foo) : int) ;;
 - : int = 3505894
-~~~~~~~~~~~~~~~~
+```
 
 The hash function is designed to give the same results on 32-bit and 64-bit
 architectures, so the memory representation is stable across different CPUs and
@@ -423,12 +423,12 @@ of the string in machine words. The `String_tag` (252) is higher than the
 collector.  The block contents are the contents of the string, with padding
 bytes to align the block on a word boundary.
 
-~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 +---------------+----------------+--------+-----------+
 | header        | 'a' 'b' 'c' 'd' 'e' 'f' | '\O' '\1' |
 +---------------+----------------+--------+-----------+
                 L data                    L padding
-~~~~~~~~~~~~~~~~
+```
 
 On a 32-bit machine, the padding is calculated based on the modulo of the
 string length and word size to ensure the result is word-aligned.  A
@@ -445,9 +445,9 @@ This string representation is a clever way to ensure that the string contents
 are always zero-terminated by the padding word, and still compute its length
 efficiently without scanning the whole string.  The following formula is used:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The guaranteed NULL-termination comes in handy when passing a string to C, but
 is not relied upon to compute the length from OCaml code. Thus, OCaml strings
@@ -466,7 +466,7 @@ The first word of the data within the custom block is a C pointer to a `struct`
 of custom operations. The custom block cannot have pointers to OCaml blocks and
 is opaque to the garbage collector.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 struct custom_operations {
   char *identifier;
   void (*finalize)(value v);
@@ -478,7 +478,7 @@ struct custom_operations {
   uintnat (*deserialize)(void * dst);
   int (*compare_ext)(value v1, value v2);
 };
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The custom operations specify how the runtime should perform polymorphic
 comparison, hashing and binary marshalling.  They also optionally contain a
@@ -504,14 +504,14 @@ to the memory layout for OCaml values described earlier.
 Let's define a simple "Hello World" C binding to see how this works.
 First create a `hello.ml` that contains the external declaration:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 external hello_world: unit -> unit = "caml_hello_world"
 let _ = hello_world ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If you try to compile this module now, you should receive a linker error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ ocamlopt -o hello hello.ml
 Undefined symbols for architecture x86_64:
   "_caml_hello_world", referenced from:
@@ -521,13 +521,13 @@ ld: symbol(s) not found for architecture x86_64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 File "caml_startup", line 1:
 Error: Error during linking
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is the system linker telling you that there is a missing
 `caml_hello_world` symbol that must be provided before a binary can be linked.
 Now create a file called `hello_stubs.c` which contains the C function.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .c }
+```c
 #include <stdio.h>
 #include <caml/mlvalues.h>
 
@@ -537,16 +537,16 @@ caml_hello_world(value v_unit)
   printf("Hello OCaml World!\n");
   return Val_unit;
 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now attempt to recompile the `hello` binary with the C file also included
 in the compiler invocation, and it should succeed:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ ocamlopt -o hello hello.ml hello_stubs.c
 $ ./hello
 Hello OCaml World!
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The compiler uses the file extensions to determine how to compile each file.
 In the case of the `.c` extension, it passes it to the system C compiler and
@@ -558,14 +558,14 @@ in your system by using `ocamlc -where` to find your system OCaml installation.
 It defines a few important typedefs early on that should be familiar after
 the earlier explanations:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .h }
+```c
 typedef intnat value;
 
 #define Is_long(x)   (((x) & 1) != 0)
 #define Is_block(x)  (((x) & 1) == 0)
 
 #define Val_unit Val_int(0)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `value` typedef is a word that can either be an integer if `Is_long` is
 true, or a heap block if `Is_block` is true.  Our C function definition of
@@ -589,7 +589,7 @@ the program near the point of corruption and helps track it down quickly.
 
 To use this, just recompile with `-runtime-variant d` set:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
 $ ./hello 
 ### OCaml runtime: debug mode ###
@@ -600,7 +600,7 @@ Initial max overhead: 500%
 Initial heap increment: 992k bytes
 Initial allocation policy: 0
 Hello OCaml World!
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 </tip>
 

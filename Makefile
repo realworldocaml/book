@@ -6,6 +6,7 @@ DOCBOOK_XSL_PATH ?= $(DOCBOOK_XSL_PATH_$(OS))
 
 LINGUA:=en
 CSS=rwobook
+MILESTONE=alpha1
 
 # update this if a new chapter shows up in en/
 SRC=	$(addprefix $(LINGUA)/,$(shell cat chapters.$(LINGUA)))
@@ -16,6 +17,15 @@ XMLSRCS=$(SRC:%.md=build/$(LINGUA)/source/%.xml)
 all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LINGUA)/html/support/.stamp\
      build/$(LINGUA)/html/figures
 	@ :
+
+site: all
+	(cd scripts && ./build.sh)
+	# generate the code hilight css
+	pygmentize -S trac -O linenos=1 -a .highlight -f html > commenting/build_template/ocaml_commenting/www/media/css/code.css
+	python commenting/bin/generate_commenting_site.py --github-milestone $(MILESTONE)
+	mkdir -p commenting-build/ocaml_commenting/www/en/$(MILESTONE)
+	for i in commenting-build/ocaml_commenting/www/en/html/*.html; do \
+	  cat $$i | ./scripts/html_code_highlight.native > commenting-build/ocaml_commenting/www/en/$(MILESTONE)/`basename $$i`; done
 
 pdf: build/$(LINGUA)/pdf/rwo.pdf
 	@ :
@@ -42,7 +52,8 @@ build/$(LINGUA)/source/.stamp:
 build/$(LINGUA)/source/rwo.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
 	cd scripts && ./build.sh
-	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ | ./scripts/_build/filter_book.native > $@
+	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ > tmp.xml
+	./scripts/_build/filter_book.native < tmp.xml > $@
 
 build/$(LINGUA)/source/rwo-oreilly.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source

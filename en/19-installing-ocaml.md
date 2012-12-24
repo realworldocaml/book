@@ -33,22 +33,22 @@ copies of `ocamlfind` before installing OPAM, and use the OPAM version instead.
 The easiest way to install OCaml on MacOS X is via the `homebrew` package
 manager, available from [http://github.com/mxcl/homebrew].
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ brew install ocaml
 $ brew install opam
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### Linux
 
 On Debian Linux, you should install OCaml via binary packages, and then install
 the latest OPAM release from source.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
  tar -jxvf opam-<version>.tar.gz
 $ cd opam-<version>.tar.gz
 $ ./configure && make && sudo make install
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 On Fedora/RHEL...?
 
@@ -62,11 +62,11 @@ All of the OPAM state is held in the `.opam` directory in your home directory,
 including compiler installations. You should never need to switch to an admin
 user to install packages. 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ opam init
 $ opam install utop async core_extra
 $ eval `opam config -env`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This will initialise OPAM with the default package set from
 `opam.ocamlpro.com`, and install the `utop` interactive top-level and the
@@ -83,12 +83,12 @@ with a different set of libraries or new compiler versions. For instance, one
 of the alternate compilers is patched to simplify the types that are output
 in the top-level. You can switch it to by:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ opam switch -list
 $ opam switch 4.00.1+short-types
 $ eval `opam config -env`
 $ opam install utop async_extra
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The new compiler will be compiled and installed into
 `~/.opam/4.00.1+short-types` and the libraries will be tracked separately from
@@ -104,7 +104,7 @@ history, command macros and module name completion.  An `.ocamlinit` file in
 your home directory will initialise `utop` with common libraries and syntax
 extensions open, e.g.:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 #use "topfind"
 #camlp4o
 #thread
@@ -112,7 +112,7 @@ extensions open, e.g.:
 #require "async";;
 open Core.Std
 open Async.Std
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 TODO: the `.ocamlinit` handling in OPAM is being finalised and is tracked in [issue 185](https://github.com/OCamlPro/opam/issues/185).
 
