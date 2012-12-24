@@ -428,7 +428,7 @@ versions).
 The ATD spec can be compiled to a number of OCaml targets. Let's run the
 compiler twice, to generate some OCaml type definitions, and a JSON serialiser.
 
-```console
+```bash
 $ atdgen -t github.atd
 $ atdgen -j github.atd
 ```
@@ -849,7 +849,7 @@ compiler. You don't normally need to specify this flag yourself. Use the
 Here's a small shell script which preprocesses a source file with the COW
 syntax extension:
 
-```console
+```bash
 #!/bin/sh -x
 
 file=$1
@@ -1115,7 +1115,7 @@ atoms that contain parenthesis or spaces themselves, backslash is the
 escape character, and semicolons are used to introduce comments.
 Thus, if you create the following file:
 
-```
+```scheme
 ;; foo.scm
 
 ((foo 3.3) ;; Shall I compare thee  to a summer's dream?
