@@ -361,7 +361,7 @@ def process_locale(src_dir, dst_dir, locale, args):
     locale_src_dir = os.path.join(src_dir, locale, "html")
     logging.debug("Locale source directory is {}".format(locale_src_dir))
     # Process the dst dir.
-    locale_dst_dir = os.path.join(dst_dir, "ocaml_commenting", "www", locale, "html")
+    locale_dst_dir = os.path.join(dst_dir, locale, "html")
     logging.debug("Locale destination directory is {}".format(locale_dst_dir))
     # Create the dst dir.
     logging.debug("Creating locale destination directory")

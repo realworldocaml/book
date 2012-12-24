@@ -21,11 +21,11 @@ all: build/$(LINGUA)/html/index.html build/$(LINGUA)/html/$(CSS).css build/$(LIN
 site: all
 	(cd scripts && ./build.sh)
 	# generate the code hilight css
-	pygmentize -S trac -O linenos=1 -a .highlight -f html > commenting/build_template/ocaml_commenting/www/media/css/code.css
+	pygmentize -S trac -O linenos=1 -a .highlight -f html > commenting/build_template/media/css/code.css
 	python commenting/bin/generate_commenting_site.py --github-milestone $(MILESTONE)
-	mkdir -p commenting-build/ocaml_commenting/www/en/$(MILESTONE)
-	for i in commenting-build/ocaml_commenting/www/en/html/*.html; do \
-	  cat $$i | ./scripts/html_code_highlight.native > commenting-build/ocaml_commenting/www/en/$(MILESTONE)/`basename $$i`; done
+	mkdir -p commenting-build/en/$(MILESTONE)
+	for i in commenting-build/en/html/*.html; do \
+	  cat $$i | ./scripts/html_code_highlight.native > commenting-build/en/$(MILESTONE)/`basename $$i`; done
 
 pdf: build/$(LINGUA)/pdf/rwo.pdf
 	@ :

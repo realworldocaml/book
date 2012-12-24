@@ -1,6 +1,0 @@
-Django==1.4.2
-distribute==0.6.32
-gevent==0.13.8
-greenlet==0.4.0
-gunicorn==0.16.1
-wsgiref==0.1.2
