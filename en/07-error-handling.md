@@ -526,7 +526,7 @@ let () =
 If we build and run this program, we'll get a pretty uninformative
 error:
 
-```console
+```bash
 $ ./exn
 3
 Fatal error: exception Exn.Empty_list
@@ -541,7 +541,7 @@ We can get more information from OCaml if we turn on stack traces.
 This can be done by setting the `OCAMLRUNPARAM` environment variable,
 as shown:
 
-```console
+```bash
 exn $ export OCAMLRUNPARAM=b
 exn $ ./exn
 3
