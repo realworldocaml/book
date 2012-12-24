@@ -20,13 +20,16 @@ open Printf
 open Cohttp
 open Cohttp_lwt_unix
 
-let docroot = "../commenting-build/ocaml_commenting/www"
+let docroot = "../commenting-build"
 let auth = Auth.Basic ("rwo", "Whirly2")
 
 let check_auth req =
   match Header.get_authorization (Request.headers req) with
   |Some a when a = auth -> true
   |Some _ | None -> false
+
+let is_directory path =
+  try Sys.is_directory path with _ -> false
 
 (* detect Github code and set a cookie if so, otherwise serve static file *)
 let dispatch req =
@@ -42,9 +45,20 @@ let dispatch req =
   in
   (* See if we have a code in the GET header (signifying a Github redirect)  *)
   match Request.get_param req "code" with
-  |None -> (* serve static file *)
-    let fname = Server.resolve_file ~docroot ~uri:(Request.uri req) in
-    Server.respond_file ~headers ~fname ()
+  |None -> begin (* serve static file *)
+    let uri = Request.uri req in
+    let fname = Server.resolve_file ~docroot ~uri in
+    let path = Uri.path uri in
+    let pathlen = String.length path in
+    match Uri.path uri with
+    |path when pathlen>0 && path.[pathlen-1] = '/' ->
+      let fname = fname ^ "index.html" in
+      Server.respond_file ~headers ~fname ()
+    |path when is_directory fname ->
+      Server.respond_redirect ~headers ~uri:(Uri.with_path uri (path ^ "/")) ()
+    |path ->
+      Server.respond_file ~headers ~fname ()
+  end
   |Some code -> begin 
     (* talk to Github and get a client id and set the cookie *)
     lwt token = Config.(Github.Token.of_code ~client_id ~client_secret ~code ()) in
