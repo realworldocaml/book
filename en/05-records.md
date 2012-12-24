@@ -11,32 +11,32 @@ A record represents a collection of values stored together as one,
 where each component is identified by a different field name.  The
 basic syntax for a record type declaration is as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
+```ocaml
 type <record-name> =
   { <field-name> : <type-name> ;
     <field-name> : <type-name> ;
     ...
   }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here's a simple example, a `host_info` record that summarizes
 information about a given computer.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type host_info =
     { hostname   : string;
       os_name    : string;
       os_release : string;
       cpu_arch   : string;
     };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can construct a `host_info` just as easily.  The following code
 uses the `Shell` module from `Core_extended` to dispatch commands to
 the shell to extract the information we need about the computer we're
 running on.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # open Core_extended.Std;;
 # let my_host = { hostname   = Shell.sh_one "hostname";
                   os_name    = Shell.sh_one "uname -s";
@@ -46,7 +46,7 @@ running on.
 val my_host : host_info =
   {hostname = "Yarons-MacBook-Air.local"; os_name = "Darwin";
    os_release = "11.4.0"; cpu_arch = "i386"}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You might wonder how the compiler inferred that `my_host` is of type
 `host_info`.  The hook that the compiler uses in this case to figure
@@ -58,24 +58,24 @@ to have the same record fields in multiple records.
 Once we have a record value in hand, we can extract elements from the
 record field using dot-notation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # my_host.cpu_arch;;
 - : string = "i386"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Patterns and exhaustiveness
 
 Another way of getting information out of a record is by using a
 pattern match, as in the definition of `host_info_to_string` below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let host_info_to_string { hostname = h; os_name = os;
                             os_release = r; cpu_arch = c } =
        sprintf "%s (%s %s / %s)" h os r c;;
     val host_info_to_string : host_info -> string = <fun>
 # host_info_to_string my_host;;
 - : string = "Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the pattern that we used had only a single case, rather than
 using several cases separated by `|`s.  We only needed a single
@@ -95,7 +95,7 @@ those new fields will not be flagged by the compiler.
 As an example, imagine that we wanted to add a new field to our
 `host_info` record called `os_version`, as shown below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type host_info =
     { hostname   : string;
       os_name    : string;
@@ -103,7 +103,7 @@ As an example, imagine that we wanted to add a new field to our
       cpu_arch   : string;
       os_version : string;
     };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The code for `host_info_to_string` would continue to compile without
 change.  In this particular case, it's pretty clear that you might
@@ -116,7 +116,7 @@ record pattern.  With that warning turned on (which you can do in the
 toplevel by typing `#warnings "+9" `), the compiler will warn about
 the missing field.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # warnings "+9";;
 # let host_info_to_string { hostname = h; os_name = os;
                             os_release = r; cpu_arch = c } =
@@ -128,18 +128,18 @@ Warning 9: the following labels are not bound in this record pattern:
 os_version
 Either bind these labels explicitly or add '; _' to the pattern.
 val host_info_to_string : host_info -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can disable the warning for a given pattern by explicitly
 acknowledging that we are ignoring extra fields.  This is done by
 adding an underscore to the pattern, as shown below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let host_info_to_string { hostname = h; os_name = os;
                             os_release = r; cpu_arch = c; _ } =
        sprintf "%s (%s %s / %s)" h os r c;;
     val host_info_to_string : host_info -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Generally, the right default is to turn the warning for incomplete
 record matches on, and to explicitly disable it with an `_` where
@@ -152,16 +152,16 @@ OCaml provides some handy syntactic shortcuts.  For example, the
 pattern in the following function binds all of the fields in question
 to variables of the same name.  This is called _field punning_.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let host_info_to_string { hostname; os_name; os_release; cpu_arch } =
      sprintf "%s (%s %s / %s)" hostname os_name os_release cpu_arch;;
   val host_info_to_string : host_info -> string = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Field punning can also be used to construct a record.  Consider the
 following code for generating a `host_info` record.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let my_host =
     let hostname   = Shell.sh_one "hostname" in
     let os_name    = Shell.sh_one "uname -s" in
@@ -171,7 +171,7 @@ following code for generating a `host_info` record.
 val my_host : host_info =
   {hostname = "Yarons-MacBook-Air.local"; os_name = "Darwin";
    os_release = "11.4.0"; cpu_arch = "i386"}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In the above code, we defined variables corresponding to the record
 fields first, and then the record declaration itself simply listed the
@@ -181,22 +181,22 @@ You can take advantage of both field punning and label punning when
 writing a function for constructing a record from labeled arguments,
 as shown below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
     let hostname = String.lowercase hostname in
     { hostname; os_name; os_release; cpu_arch };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is considerably more concise than what you would get without
 punning at all.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 let create_host_info ~hostname:hostname ~os_name:os_name
    ~os_release:os_release ~cpu_arch:cpu_arch =
     let hostname = String.lowercase hostname in
     { hostname = hostname ; os_name = os_name;
       os_release = os_release; cpu_arch = cpu_arch };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Together, labeled arguments, field names, and field and label punning,
 encourage a style where you propagate the same names throughout your
@@ -219,7 +219,7 @@ connecting and credentials used for authentication.  Finally, the
 to the server that the client is alive and connected.  All of these
 messages include a session id and the time the message was generated.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # type log_entry =
     { session_id: string;
       time: Time.t;
@@ -238,12 +238,12 @@ messages include a session id and the time the message was generated.
       credentials: string;
     }
 ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The fact that we reused field names will cause trouble when we try to
 construct a message.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let create_log_entry ~session_id ~important message =
      { time = Time.now (); session_id; important; message }
   ;;
@@ -252,7 +252,7 @@ construct a message.
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: The record field label important belongs to the type log_entry
        but is mixed here with labels of type logon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem is that the declaration of `logon` (and `heartbeat`)
 shadowed some of the fields of `log_entry`.  As a result, the fields
@@ -265,7 +265,7 @@ types.
 There are two common solutions to this problem.  The first is to add a
 prefix to each field name to make it unique, as shown below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type log_entry =
     { log_entry_session_id: string;
       log_entry_time: Time.t;
@@ -284,7 +284,7 @@ prefix to each field name to make it unique, as shown below.
       logon_credentials: string;
     }
 ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This eliminates the collisions and is simple enough to do.  But it
 leaves you with awkwardly named record fields, and adds needless
@@ -294,7 +294,7 @@ Another approach is to mint a module for each type.  This is actually
 a broadly useful idiom, providing for each type a namespace within
 which to put related values.  Using this style we would write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Log_entry = struct
     type t =
       { session_id: string;
@@ -318,31 +318,31 @@ which to put related values.  Using this style we would write:
         credentials: string;
       }
   end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now, our heartbeat-creation function can be rendered as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let create_log_entry ~session_id ~important message =
      { Log_entry.time = Time.now (); Log_entry.session_id;
        Log_entry.important; Log_entry.message }
   ;;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The module name `Log_entry` is required to qualify the fields, because
 this function is outside of the `Log_entry` module where the record
 was defined.  OCaml only requires the module qualification for one
 record field, however, so we can write this more concisely.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let create_log_entry ~session_id ~important message =
      { Log_entry. time = Time.now (); session_id; important; message }
   ;;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 For functions defined within the module where a given record is
 defined, the module qualification goes away entirely.  And indeed, for
@@ -359,7 +359,7 @@ heartbeat was received from that client.  The following defines a type
 for representing this information, as well as a function for updating
 the client information when a new heartbeat arrives.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type client_info =
    { addr: Unix.Inet_addr.t;
      port: int;
@@ -375,29 +375,29 @@ the client information when a new heartbeat arrives.
         last_heartbeat_time = hb.Heartbeat.time;
       };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is fairly verbose, given that there's only one field that we
 actually want to change, and all the others are just being copied over
 from `t`.  We can use OCaml's _functional update_ syntax to do this
 more tersely.  The syntax of a functional update is as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
+```ocaml
 { <record-value> with <field> = <value>;
                       <field> = <value>;
                       ...
 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The purpose of the functional update is to create a new record based
 on an existing one, with a set of field changes layered on top.
 
 Given this, we can rewrite `register_heartbeat` more concisely.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let register_heartbeat t hb =
     { t with last_heartbeat_time = hb.Heartbeat.time };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Functional updates make your code independent of the identity of the
 fields in the record that are not changing.  This is often what you
@@ -407,7 +407,7 @@ not prompt you to reconsider whether your update code should affect
 those fields.  Consider what happens if we decided to add a field for
 the status message received on the last heartbeat.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type client_info =
    { addr: Unix.Inet_addr.t;
      port: int;
@@ -416,7 +416,7 @@ the status message received on the last heartbeat.
      last_heartbeat_time: Time.t;
      last_heartbeat_status: string;
    };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The original implementation of `register_heartbeat` would now be
 invalid, and thus the compiler would warn us to think about how to
@@ -425,12 +425,12 @@ continues to compile as is, even though it incorrectly ignores the new
 field.  The correct thing to do would be to update the code as
 follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let register_heartbeat t hb =
     { t with last_heartbeat_time   = hb.Heartbeat.time;
              last_heartbeat_status = hb.Heartbeat.status_message;
     };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Mutable fields
 
@@ -439,7 +439,7 @@ however, declare individual record fields as mutable.  For example, we
 could take the `client_info` type and make the fields that may need to
 change over time mutable, as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type client_info =
    { addr: Unix.Inet_addr.t;
      port: int;
@@ -448,19 +448,19 @@ change over time mutable, as follows.
      mutable last_heartbeat_time: Time.t;
      mutable last_heartbeat_status: string;
    };;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We then use the `<-` operator for actually changing the state.  The
 side-effecting version of `register_heartbeat` would be written as
 follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let register_heartbeat t hb =
     t.last_heartbeat_time   <- hb.Heartbeat.time;
     t.last_heartbeat_status <- hb.Heartbeat.status_message
   ;;
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that `<-` is not needed for initialization, because all fields of
 a record, including mutable ones, must be specified when the record is
@@ -476,11 +476,11 @@ when) to use OCaml's imperative features in
 Consider the following function for extracting the usernames from a
 list of `Logon` messages.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let get_users logons =
      List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
   val get_hostnames : Logon.t list -> string list = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, we wrote a small function `(fun x -> x.Logon.user)` to access
 the `user` field.  This kind of accessor function is a common enough
@@ -492,7 +492,7 @@ automatically.  The `fieldslib` syntax extension that ships with
 end of the declaration of a record type.  So, for example, we could
 have defined `Logon` as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # module Logon = struct
     type t =
       { session_id: string;
@@ -502,15 +502,15 @@ have defined `Logon` as follows.
       }
     with fields
   end;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Given that definition, we can use the function `Logon.user` to extract
 the user field from a logon message.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
 val get_users : Logon.t list -> string list = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In addition to generating field accessor functions, `fieldslib` also
 creates a sub-module called `Fields` that contains a first class
@@ -529,16 +529,16 @@ function for displaying a record field.  The function `show_field`
 takes three arguments: the `Field.t`, a function for converting the
 contents of the field in question to a string, and the record type.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let show_field field to_string record =
      sprintf "%s: %s" (Field.name field) (Field.get field record |! to_string);;
 val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string =
   <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here's an example of `show_field` in action.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let logon = { Logon.
                 session_id = "26685";
                 time = Time.now ();
@@ -549,14 +549,14 @@ Here's an example of `show_field` in action.
 - : string = "user: yminsky"
 # show_field Logon.Fields.time Time.to_string logon;;
 - : string = "time: 2012-06-26 18:44:13.807826"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `fieldslib` also provides higher-level operators, like `Fields.fold`
 and `Fields.iter`, which let you iterate over all the fields of a
 record.  The following function uses `Logon.Fields.iter` and
 `show_field` to print out all the fields of a `Logon` record.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let print_logon logon =
     let print to_string field =
       printf "%s\n" (show_field field to_string logon)
@@ -574,7 +574,7 @@ time: 2012-06-26 18:44:13.807826
 user: yminsky
 credentials: Xy2d9W
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The advantage of using field iterators is that when the definition of
 `Logon` changes, `iter` will change along with it, prompting you to

@@ -15,34 +15,34 @@ Core comes with good support for _s-expressions_, which are a
 convenient general-purpose serialization format.  The type of an
 s-expression is as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Sexp : sig
   type t = Atom of string | List of t list
 end
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 An s-expression is in essence a nested parenthetical list whose atomic
 values are strings.  The `Sexp` module comes with functionality for
 parsing and printing s-expressions.
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let sexp =
     let a x = Sexp.Atom x and l x = Sexp.List x in
     l [a "this";l [a "is"; a "an"]; l [a "s"; a "expression"]];;
 val sexp : Sexp.t = (this (is an) (s expression))
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In addition, most of the base types in Core support conversion to and
 from s-expressions.  For example, we can write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Int.sexp_of_t 3;;
 - : Sexp.t = 3
 # List.sexp_of_t;;
 - : ('a -> Sexp.t) -> 'a List.t -> Sexp.t = <fun>
 # List.sexp_of_t Int.sexp_of_t [1;2;3];;
 - : Sexp.t = (1 2 3)
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Notice that `List.sexp_of_t` is polymorphic, and takes as its first
 argument another conversion function to handle the elements of the
@@ -52,7 +52,7 @@ defining sexp-converters for polymorphic types.
 But what if you want a function to convert some brand new type to an
 s-expression?  You can of course write it yourself:
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { foo: int; bar: float };;
 # let sexp_of_t t =
     let a x = Sexp.Atom x and l x = Sexp.List x in
@@ -62,7 +62,7 @@ s-expression?  You can of course write it yourself:
 val sexp_of_t : t -> Core.Std.Sexp.t = <fun>
 # sexp_of_t { foo = 3; bar = -5.5 };;
 - : Core.Std.Sexp.t = ((foo 3) (bar -5.5))
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is somewhat tiresome to write, and it gets more so when you
 consider the parser, _i.e._, `t_of_sexp`, which is considerably more
@@ -75,7 +75,7 @@ code for you.  That is precisely where syntax extensions come in.
 Using Sexplib and adding `with sexp` as an annotation to our type
 definition, we get the functions we want for free.
 
-~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { foo: int; bar: float } with sexp;;
 type t = { foo : int; bar : float; }
 val t_of_sexp__ : Sexplib.Sexp.t -> t = <fun>
@@ -83,7 +83,7 @@ val t_of_sexp : Sexplib.Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
 # t_of_sexp (Sexp.of_string "((bar 35) (foo 3))");;
 - : t = {foo = 3; bar = 35.}
-~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 (You can ignore `t_of_sexp__`, which is a helper function that is
 needed in very rare cases.)
@@ -124,19 +124,19 @@ atoms that contain parenthesis or spaces themselves, backslash is the
 escape character, and semicolons are used to introduce comments.
 Thus, if you create the following file:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 ;; foo.scm
 
 ((foo 3.3) ;; Shall I compare thee  to a summer's dream?
  (bar "this is () an \" atom"))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 we can load it up and print it back out again:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Sexp.load_sexp "foo.scm";;
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the comments were dropped from the file upon reading.  This
 is expected, since there's no place in the `Sexp.t` type to store
@@ -145,7 +145,7 @@ comments.
 If we introduce an error into our s-expression, by, say, deleting the
 open-paren in front of `bar`, we'll get a parse error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Exn.handle_uncaught ~exit:false (fun () ->
     ignore (Sexp.load_sexp "foo.scm"));;
   Uncaught exception:
@@ -153,7 +153,7 @@ open-paren in front of `bar`, we'll get a parse error:
   (Sexplib.Sexp.Parse_error
    ((location parse) (err_msg "unexpected character: ')'") (text_line 4)
     (text_char 29) (global_offset 94) (buf_pos 94)))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 (In the above, we use `Exn.handle_uncaught` to make sure that the
 exception gets printed out in full detail.)
@@ -166,7 +166,7 @@ this works already, but let's walk through a complete example.  Here's
 the source for the beginning of a library for representing integer
 intervals.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: int_interval.ml *)
 (* Module for representing closed integer intervals *)
 
@@ -182,11 +182,11 @@ let create x y = if x > y then Empty else Range (x,y)
 let contains i x = match i with
    | Empty -> false
    | Range (low,high) -> x >= low && x <= high
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can now use this module as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: test_interval.ml *)
 
 open Core.Std
@@ -204,13 +204,13 @@ let () =
   |! List.sexp_of_t Int_interval.sexp_of_t
   |! Sexp.to_string_hum
   |! print_endline
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But we're still missing something: we haven't created an `mli` for
 `Int_interval` yet.  Note that we need to explicitly export the
 s-expression converters that were created within the ml.  If we don't:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: int_interval.mli *)
 (* Module for representing closed integer intervals *)
 
@@ -219,38 +219,38 @@ type t
 val is_empty : t -> bool
 val create : int -> int -> t
 val contains : t -> int -> bool
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 then we'll get the following error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 File "test_interval.ml", line 15, characters 20-42:
 Error: Unbound value Int_interval.sexp_of_t
 Command exited with code 2.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We could export the types by hand:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type t
 val sexp_of_t : Sexp.t -> t
 val t_of_sexp : t -> Sexp.t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But Sexplib has a shorthand for this as well, so that we can instead
 write simply:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type t with sexp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 at which point `test_interval.ml` will compile again, and if we run
 it, we'll get the following output:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 $ ./test_interval.native
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 <sidebar> <title>Preserving invariants</title>
 
@@ -265,7 +265,7 @@ not.
 We can fix this problem by writing a custom sexp-converter, in this
 case, using the sexp-converter that we already have:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type t = | Range of int * int
          | Empty
 with sexp
@@ -280,7 +280,7 @@ let t_of_sexp sexp =
   | Empty | Range _ -> ()
   end;
   t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
@@ -296,7 +296,7 @@ second, converting that s-expression into the type in question.  One
 problem with this is that it can be hard to localize errors to the
 right place using this scheme.  Consider the following example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: read_foo.ml *)
 
 open Core.Std
@@ -312,26 +312,26 @@ let run () =
 
 let () =
   Exn.handle_uncaught ~exit:true run
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If you were to run this on a malformatted file, say, this one:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 ;; foo.scm
 ((a not-an-integer)
  (b not-an-integer)
  (c ()))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 you'll get the following error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 read_foo $ ./read_foo.native
 Uncaught exception:
 
   (Sexplib.Conv.Of_sexp_error
    (Failure "int_of_sexp: (Failure int_of_string)") not-an-integer)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If all you have is the error message and the string, it's not terribly
 informative.  In particular, you know that the parsing error-ed out on
@@ -341,16 +341,16 @@ file, this kind of bad error message can be pure misery.
 But there's hope!  If we make small change to the `run` function as
 follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let run () =
   let t = Sexp.load_sexp_conv_exn "foo.scm" t_of_sexp in
   printf "b is: %d\n%!" t.b
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 and run it again, we'll get the following much more helpful error
 message:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 read_foo $ ./read_foo.native
 Uncaught exception:
 
@@ -358,7 +358,7 @@ Uncaught exception:
    (Sexplib.Sexp.Annotated.Conv_exn foo.scm:3:4
     (Failure "int_of_sexp: (Failure int_of_string)"))
    not-an-integer)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In the above error, "foo.scm:3:4" tells us that the error occurred on
 "foo.scm", line 3, character 4, which is a much better start for
@@ -383,7 +383,7 @@ opaque doesn't need to have a sexp-converter defined.  Here, if we
 define a type without a sexp-converter, and then try to use it another
 type with a sexp-converter, we'll error out:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type no_converter = int * int;;
 type no_converter = int * int
 # type t = { a: no_converter; b: string } with sexp;;
@@ -391,25 +391,25 @@ Characters 14-26:
   type t = { a: no_converter; b: string } with sexp;;
                 ^^^^^^^^^^^^
 Error: Unbound value no_converter_of_sexp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But with `sexp_opaque`, we won't:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { a: no_converter sexp_opaque; b: string } with sexp;;
 type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
 val t_of_sexp__ : Sexplib.Sexp.t -> t = <fun>
 val t_of_sexp : Sexplib.Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And if we now convert a value of this type to an s-expression, we'll
 see the contents of field `a` marked as opaque:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # sexp_of_t { a = (3,4); b = "foo" };;
 - : Sexp.t = ((a <opaque>) (b foo))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### `sexp_option`
 
@@ -420,25 +420,25 @@ option in a record field, then the record field will always be
 required, and its value will be presented in the way an ordinary
 optional value would.  For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type t = { a: int option; b: string } with sexp;;
 # sexp_of_t { a = None; b = "hello" };;
 - : Sexp.t = ((a ()) (b hello))
 # sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a (3)) (b hello))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But what if we want a field to be optional, _i.e._, we want to allow
 it to be omitted from the record entirely?  In that case, we can mark
 it with `sexp_option`:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # type t = { a: int sexp_option; b: string } with sexp;;
 # sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a 3) (b hello))
 # sexp_of_t { a = None; b = "hello" };;
 - : Sexp.t = ((b hello))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 #### `sexp_list`
 
@@ -446,25 +446,25 @@ One problem with the auto-generated sexp-converters is that they can
 have more parentheses than one would ideally like.  Consider, for
 example, the following variant type:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type compatible_versions = | Specific of string list
                              | All
   with sexp;;
 # sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 You might prefer to make the syntax a bit less parenthesis-laden by
 dropping the parentheses around the list.  `sexp_list` gives us this
 alternate syntax:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type compatible_versions = | Specific of string sexp_list
                              | All
   with sexp;;
 # sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Bin_prot
 
@@ -491,7 +491,7 @@ values using bin-io.  Here, the serialization is of types that might
 be used as part of a message-queue, where each message has a topic,
 some content, and a source, which is in turn a hostname and a port.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: message_example.ml *)
 
 open Core.Std
@@ -565,14 +565,14 @@ let read_messages () =
 
 let () =
   write_messages (); read_messages ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Fieldslib
 
 One common idiom when using records is to provide field accessor
 functions for a particular record.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 type t = { topic: string;
            content: string;
            source: Source.t;
@@ -581,7 +581,7 @@ type t = { topic: string;
 let topic   t = t.topic
 let content t = t.content
 let source  t = t.source
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Similarly, sometimes you simultaneously want an accessor to a field of
 a record and a textual representation of the name of that field.  This
@@ -591,7 +591,7 @@ scaffold a form in a GUI automatically based on the fields of a
 record.  Fieldslib provides a module `Field` for this purpose.  Here's
 some code for creating `Field.t`'s for all the fields of our type `t`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # module Fields = struct
     let topic =
       { Field.
@@ -621,5 +621,5 @@ module Fields :
     val content : (t, string) Core.Std.Field.t
     val source : (t, Source.t) Core.Std.Field.t
   end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 

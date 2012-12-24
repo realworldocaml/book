@@ -1,2 +1,3 @@
 true:package(xmlm)
 true:thread,debug,annot
+<html_code_highlight.*>: package(core,threads)
