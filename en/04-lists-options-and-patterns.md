@@ -221,7 +221,7 @@ cons-cells, `5 :: 3 :: 7 :: []`.  Each cell has two parts: 1) a value,
 and 2) a pointer to the rest of the list.  The final pointer refers to
 the special value `[]` representing the empty list.
 
-![List](figures/04-list-01.svg)
+TODO: IMAGE figures/04-list-01.svg
 
 ## Pattern matching
 
