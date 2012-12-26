@@ -1,3 +1,5 @@
 true:package(xmlm)
 true:thread,debug,annot
-<html_code_highlight.*>: package(core,threads)
+true: package(core,threads,sexplib.syntax)
+true:syntax(camlp4o)
+<githubbot.*>:package(lwt.unix,github.unix)
