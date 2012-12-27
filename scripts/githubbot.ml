@@ -12,6 +12,7 @@ type ts = (string * t) list with sexp
 let user = "ocamllabs"
 let repo = "rwo-comments"
 
+let comment_header = "This comment references this paragraph: "
 let run_gh fn = Lwt_main.run (Github.Monad.run (fn ()))
 
 let extract_id_from_issue i =
@@ -26,13 +27,24 @@ let github_comments (ids:(string * t) list) token milestone =
   List.filter ~f:(fun i ->
     match i.issue_milestone with
     |None -> false
-    |Some m -> m.milestone_title = milestone
-  ) |!
+    |Some m -> m.milestone_title = milestone) |!
   List.filter_map ~f:extract_id_from_issue |!
   List.iter ~f:(fun (id,i) ->
     match List.Assoc.find ids id with
     |None -> prerr_endline  ("WARNING: couldnt find id " ^ id)
-    |Some t -> prerr_endline "ok"
+    |Some t ->
+      (* See if any of the issue comments match our header *)
+      run_gh (Github.Issues.comments ~token ~user ~repo ~issue_number:i.issue_number) |!
+      List.filter ~f:(fun {issue_comment_body} ->
+        String.is_prefix issue_comment_body ~prefix:comment_header
+      ) |!
+      function
+      |[] -> (* No comments from us, so create a new one *)
+        let url = sprintf "http://www.realworldocaml.org/en/%s/%s#%s" milestone t.file id in
+        let body = sprintf "%s [%s](%s)\n\nContext:\n\n%s" comment_header url url t.html in
+        let _ = run_gh (Github.Issues.create_comment ~token ~user ~repo ~issue_number:i.issue_number ~body) in
+        ()
+      |_ -> eprintf "We have already commented on issue %s, so skipping it.\n" id
   )
     
 let _ =
