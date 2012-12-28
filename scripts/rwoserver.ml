@@ -36,9 +36,12 @@ module Comment = struct
     let ms = Lwt_main.run (Github.Monad.run (
       Github.Milestone.for_repo ~user ~repo ()
     )) in
+    print_endline "Known milestones\n";
     List.fold_left (fun acc m ->
-      Github_t.((m.milestone_number, (m.milestone_title, m.milestone_description)))::acc
-    ) [] ms 
+      let open Github_t in
+      printf "  %d: %s (%s)\n%!" m.milestone_number m.milestone_title m.milestone_description;
+      (m.milestone_number, (m.milestone_title, m.milestone_description))::acc
+    ) [] ms
 
   let our_token =
     Lwt_main.run (
