@@ -26,6 +26,7 @@ let dataroot = "./fragments"
 let user = "ocamllabs"
 let repo = "rwo-comments"
 
+
 module Comment = struct
 
   let assoc_opt l id =
@@ -43,6 +44,16 @@ module Comment = struct
       (m.milestone_number, (m.milestone_title, m.milestone_description))::acc
     ) [] ms
 
+  (* Generate the index.html *)
+  let index =
+    let tmpl = Core.Std.In_channel.read_all "index.html.in" in
+    let ms = String.concat "\n" (
+      List.map (fun (id,(name,descr)) ->
+        sprintf "<li><a href=\"%s/en/html/\">%s</a>: %s</li>" name name descr;
+      ) milestones)
+    in
+    Re_str.(global_replace (regexp_string "@MILESTONES@") ms tmpl )
+     
   let our_token =
     Lwt_main.run (
       match_lwt Github_cookie_jar.get "rwo" with
@@ -194,16 +205,18 @@ let callback con_id ?body req =
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
       (Request.params req)));
-  (* Check for auth *)
   match Request.meth req with
   |`POST -> dispatch_post ?body req
-  |_ -> begin
-    match check_auth req with
-    |false ->
-      Server.respond_need_auth (`Basic "Real World OCaml") ()
-    |true -> 
-       dispatch req
-  end
+  |`GET -> begin
+    match Uri.path (Request.uri req) with
+    |"" |"/" -> Server.respond_string ~status:`OK ~body:Comment.index ()
+    |_ -> begin
+      match check_auth req with
+      |false -> Server.respond_need_auth (`Basic "Real World OCaml") ()
+      |true -> dispatch req
+     end
+    end
+  |_ -> Server.respond_not_found ()
 
 let server_t =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;

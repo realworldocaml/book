@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW" />
+        <title>Real World OCaml</title>
+        <link rel="stylesheet" href="media/css/main.css" />
+    </head>
+    <body>
+        <div class="body">
+            <header class="header">
+                <h1><img src="media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky" /></h1>
+                <h1><img src="media/img/oreilly-cover.gif" alt="OReilly" /></h1>
+            </header>
+            <article class="page">
+                <h1>Index</h1>
+            
+                <p>Welcome to the online version of the Real World OCaml website.  The book is currently under heavy development, and this site provides a
+                   place for proof-readers to give us online comments of the book.</p>
+                <p>We are developing the book via a series of <i>milestones</i> which have completed chapters that are ready for review.  Each milestone
+                   is a standalone HTML version of the book.  We can provide an O'Reilly PDF copy on request for a given milestone.</p>
+                <h2>Github</h2>
+                <p>To login and view the book, you will need a free <a href="http://github.com/">Github</a> id to authenticate with.  When you visit a 
+                   book milestone, it has a <i>login via Github</i> button on the bottom-left of the menu.  When you login, you temporarily grant us
+                   access to look at your public repositories.  However, we do not store your authorization tokens on the server side, and instead use
+                   a cookie on your browser.  To log out, you simply delete the cookie <i>(TODO: we will modify our HTML to have a logout button)</i>.</p>
+                <p>Once you have authenticated, you will see that every paragraph has a comments link beside it.  Simply enter your feedback
+                   in there, and a Github issue will automatically be created on your behalf.  We will follow up via e-mail that you will receive through
+                   Github, thus ensuring that all feedback can be tracked and dealt with easily.</p>
+                <p>If you have any questions about all this, please get in touch with <a href="mailto:anil@recoil.org">Anil</a>.
+                <h1>Milestones</h1>
+                  <p><ul>@MILESTONES@
+                  </ul></p>
+            </article>
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+        </div>
+    </body>
+</html>
