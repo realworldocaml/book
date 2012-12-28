@@ -21,7 +21,6 @@ open Cohttp
 open Cohttp_lwt_unix
 
 let docroot = "../commenting-build"
-let auth = Auth.Basic ("rwo", "Whirly2")
 
 let user = "ocamllabs"
 let repo = "rwo-comments"
@@ -35,7 +34,7 @@ let our_token =
 
 let check_auth req =
   match Header.get_authorization (Request.headers req) with
-  |Some a when a = auth -> true
+  |Some a when a = Config.auth -> true
   |Some _ | None -> false
 
 let is_directory path =
