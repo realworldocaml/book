@@ -26,7 +26,6 @@ let dataroot = "./fragments"
 let user = "ocamllabs"
 let repo = "rwo-comments"
 
-
 module Comment = struct
 
   let assoc_opt l id =
@@ -40,8 +39,8 @@ module Comment = struct
     print_endline "Known milestones\n";
     List.fold_left (fun acc m ->
       let open Github_t in
-      printf "  %d: %s (%s)\n%!" m.milestone_number m.milestone_title m.milestone_description;
-      (m.milestone_number, (m.milestone_title, m.milestone_description))::acc
+      printf " %d: %s (%s)\n%!" m.milestone_number m.milestone_title m.milestone_description;
+      (m.milestone_number,(m.milestone_title, m.milestone_description))::acc
     ) [] ms
 
   (* Generate the index.html *)
@@ -208,12 +207,16 @@ let callback con_id ?body req =
   match Request.meth req with
   |`POST -> dispatch_post ?body req
   |`GET -> begin
+    let path = Uri.path (Request.uri req) in
+    let is_index =
+       (path = "") || (path = "/") ||
+      Core.Std.String.is_prefix ~prefix:"/media" path in
     match Uri.path (Request.uri req) with
-    |"" |"/" -> Server.respond_string ~status:`OK ~body:Comment.index ()
+    |""|"/" -> Server.respond_string ~status:`OK ~body:Comment.index ()
     |_ -> begin
-      match check_auth req with
-      |false -> Server.respond_need_auth (`Basic "Real World OCaml") ()
-      |true -> dispatch req
+      match is_index, (check_auth req) with
+      |true,_ | _,true -> dispatch req
+      |false, false -> Server.respond_need_auth (`Basic "Real World OCaml") ()
      end
     end
   |_ -> Server.respond_not_found ()
