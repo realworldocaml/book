@@ -31,13 +31,12 @@ done
 mkdir -p data/fragments
 ./scripts/_build/dump_paragraph_fragments.native data/fragments/${MILESTONE} ./commenting-build/en/${MILESTONE}/*.html
 
-mkdir -p data/live_site/${MILESTONE}/html
-cp ./commenting-build/en/${MILESTONE}/* data/live_site/${MILESTONE}/html/
+mkdir -p data/live_site/${MILESTONE}/${LINGUA}/html
+cp ./commenting-build/en/${MILESTONE}/* data/live_site/${MILESTONE}/${LINGUA}/html/
 cp -r ./commenting-build/media data/live_site/${MILESTONE}/
 
 # at this point, we have:
 # - a syntax highlighted HTML set in data/live_site/<milestone>
 # - the sexp dumps of the id->paragraph fragment in data/fragments/<milestone>
 # the webserver looks up the sexp data to map issue comments correctly.
-
 
