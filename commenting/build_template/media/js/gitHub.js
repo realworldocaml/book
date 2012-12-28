@@ -112,7 +112,7 @@ define([
      * Creates an issue from the given comment.
      */
     function createIssue(title, body, milestone, onSuccess) {
-        $.post("https://api.github.com/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/issues?access_token=" + encodeURIComponent(gitHubAccessToken), JSON.stringify({
+        $.post("/repos/" + encodeURIComponent(gitHubUser) + "/" + encodeURIComponent(gitHubRepo) + "/issues?access_token=" + encodeURIComponent(gitHubAccessToken), JSON.stringify({
             title: title,
             body: body,
             milestone: milestone.number,

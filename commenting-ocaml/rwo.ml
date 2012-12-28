@@ -23,6 +23,16 @@ open Cohttp_lwt_unix
 let docroot = "../commenting-build"
 let auth = Auth.Basic ("rwo", "Whirly2")
 
+let user = "ocamllabs"
+let repo = "rwo-comments"
+
+let our_token =
+  Lwt_main.run (
+    match_lwt Github_cookie_jar.get "rwo" with
+    |None -> failwith "No 'rwo' github cookie found: add with git-jar`"
+    |Some auth -> return (Github.Token.of_auth auth)
+  )
+
 let check_auth req =
   match Header.get_authorization (Request.headers req) with
   |Some a when a = auth -> true
@@ -30,6 +40,27 @@ let check_auth req =
 
 let is_directory path =
   try Sys.is_directory path with _ -> false
+
+(* Proxy issue creation so that we can set milestones *)
+let dispatch_post ?body req =
+  lwt body = Body.string_of_body body in
+  match Request.get_param req "access_token" with
+  |None -> print_endline "no access token"; Server.respond_not_found ()
+  |Some token -> begin
+    let open Github_t in
+    let user_token = Github.Token.of_string token in
+    let new_issue = Github_j.new_issue_of_string body in
+    lwt () = Github.(Monad.(run (
+      (* This creation will probably not include milestone/labels if the user isnt authorized *)
+      Issues.create ~token:user_token ~user ~repo ~issue:new_issue ()
+      >>= fun issue ->
+      (* Edit the issue to add a milestone using our builtin token *)
+      Issues.edit ~token:our_token ~user ~repo ~issue_number:issue.issue_number ~issue:new_issue ()
+      >>= fun _ -> return ()
+    ))) in
+    let body = Body.body_of_string (Github_j.string_of_new_issue new_issue) in
+    Server.respond ~status:`Created ~body ()  
+  end
 
 (* detect Github code and set a cookie if so, otherwise serve static file *)
 let dispatch req =
@@ -82,11 +113,18 @@ let callback con_id ?body req =
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
       (Request.params req)));
   (* Check for auth *)
-  match check_auth req with
-  |false -> Server.respond_need_auth (`Basic "Real World OCaml") ()
-  |true -> dispatch req
+  match Request.meth req with
+  |`POST -> dispatch_post ?body req
+  |_ -> begin
+    match check_auth req with
+    |false ->
+      Server.respond_need_auth (`Basic "Real World OCaml") ()
+    |true -> 
+       dispatch req
+  end
 
 let server_t =
+  Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let conn_closed con_id () = () in
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
   Lwt_main.run (Cohttp_lwt_unix.server ~address:"0.0.0.0" ~port:80 spec)

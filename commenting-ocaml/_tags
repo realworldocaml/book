@@ -1,3 +1,3 @@
-true: package(github,lwt.syntax)
+true: package(github.unix,lwt.syntax)
 true: syntax(camlp4o)
 true: annot
