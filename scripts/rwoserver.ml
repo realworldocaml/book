@@ -20,17 +20,88 @@ open Printf
 open Cohttp
 open Cohttp_lwt_unix
 
-let docroot = "../commenting-build"
+let docroot = "./live_site"
+let dataroot = "./fragments"
 
 let user = "ocamllabs"
 let repo = "rwo-comments"
 
-let our_token =
-  Lwt_main.run (
-    match_lwt Github_cookie_jar.get "rwo" with
-    |None -> failwith "No 'rwo' github cookie found: add with git-jar`"
-    |Some auth -> return (Github.Token.of_auth auth)
-  )
+module Comment = struct
+
+  let assoc_opt l id =
+    try Some (List.assoc id l) with Not_found -> None
+
+  (* Add start of day, make a milestone number -> name mapping *)
+  let milestones =
+    let ms = Lwt_main.run (Github.Monad.run (
+      Github.Milestone.for_repo ~user ~repo ()
+    )) in
+    List.fold_left (fun acc m ->
+      Github_t.((m.milestone_number, (m.milestone_title, m.milestone_description)))::acc
+    ) [] ms 
+
+  let our_token =
+    Lwt_main.run (
+      match_lwt Github_cookie_jar.get "rwo" with
+      |None -> failwith "No 'rwo' github cookie found: add with git-jar`"
+      |Some auth -> return (Github.Token.of_auth auth)
+    )
+
+  let t = Hashtbl.create 1
+  (* Read in a milestone into our memory cache *)
+  let init ~milestone =
+    match Hashtbl.mem t milestone with
+    |true -> Some (Hashtbl.find t milestone)
+    |false -> begin
+       try
+         let ids = Core.Std.Sexp.load_sexp_conv_exn 
+           (Filename.concat dataroot milestone) Para_frag.ts_of_sexp in
+         Hashtbl.add t milestone ids;
+         Some ids
+       with _ -> None
+    end
+
+  (* Get fragment info for an ID *)
+  let get ~milestone_number ~id =
+    match assoc_opt milestones milestone_number with
+    |None -> eprintf "Unknown milestone %d\n%!" milestone_number; None
+    |Some (milestone,_) -> begin
+      match init ~milestone with
+      |None -> eprintf "No milestone dump data for %s\n%!" milestone; None
+      |Some ids -> begin
+         match assoc_opt ids id with
+         |None -> None
+         |Some frag -> Some (milestone, frag)
+      end
+    end
+
+  (* Parse out an ID from the issue title *)
+  let extract_id title =
+    try
+      let id = Scanf.sscanf title "New comment on block [block-%s@]" (fun s -> s) in
+      Some id
+    with _ -> None
+
+  (* HTML comment for context *)
+  let context_comment ~milestone ~id ~frag =
+    let comment_header = sprintf "This comment references this from milestone %s:" milestone in
+    let url = sprintf "http://www.realworldocaml.org/%s/en/html/%s#%s" milestone frag.Para_frag.file id in
+    sprintf "%s [%s](%s)\n\nContext:\n\n%s" comment_header url url frag.Para_frag.html 
+    
+  (* Create and edit issue on Github *)
+  let create_issue ~context ~user_token ~new_issue =
+    Github.(Monad.(run (
+      (* This creation will not include milestone/labels if the user isnt authorized *)
+      Issues.create ~token:user_token ~user ~repo ~issue:new_issue ()
+      >>= fun issue ->
+      let issue_number = issue.Github_t.issue_number in
+      (* Edit the issue to add a milestone using our builtin token *)
+      Issues.edit ~token:our_token ~user ~repo ~issue_number ~issue:new_issue ()
+      >>= fun _ ->
+      (* Add our context comment *)
+      Github.Issues.create_comment ~token:our_token ~user ~repo ~issue_number ~body:context ()
+    )))
+end
 
 let check_auth req =
   match Header.get_authorization (Request.headers req) with
@@ -49,16 +120,25 @@ let dispatch_post ?body req =
     let open Github_t in
     let user_token = Github.Token.of_string token in
     let new_issue = Github_j.new_issue_of_string body in
-    lwt () = Github.(Monad.(run (
-      (* This creation will probably not include milestone/labels if the user isnt authorized *)
-      Issues.create ~token:user_token ~user ~repo ~issue:new_issue ()
-      >>= fun issue ->
-      (* Edit the issue to add a milestone using our builtin token *)
-      Issues.edit ~token:our_token ~user ~repo ~issue_number:issue.issue_number ~issue:new_issue ()
-      >>= fun _ -> return ()
-    ))) in
-    let body = Body.body_of_string (Github_j.string_of_new_issue new_issue) in
-    Server.respond ~status:`Created ~body ()  
+    let milestone_number = new_issue.new_issue_milestone in
+    match milestone_number, (Comment.extract_id new_issue.new_issue_title) with
+    |_,None ->
+       eprintf "unable to extract comment\n%!";
+       Server.respond_not_found ()
+    |None,_ ->
+       eprintf "no milestone number\n";
+       Server.respond_not_found ()
+    |Some milestone_number, Some id -> begin
+      match Comment.get ~milestone_number ~id with
+      |None ->
+        eprintf "unknown comment %s milestone %d\n%!" id milestone_number;
+        Server.respond_not_found ()
+      |Some (milestone,frag) ->
+        let context = Comment.context_comment ~milestone ~id ~frag in
+        lwt _ = Comment.create_issue ~context ~user_token ~new_issue in
+        let body = Body.body_of_string (Github_j.string_of_new_issue new_issue) in
+        Server.respond ~status:`Created ~body ()  
+    end
   end
 
 (* detect Github code and set a cookie if so, otherwise serve static file *)

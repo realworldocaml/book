@@ -2,13 +2,7 @@
 (* Usage: cmd output-file [input file1] [input file2...] *)
 open Core.Std
 open Xml_tree
-
-type t = {
-  file: string;
-  html: string;
-} with sexp
-
-type ts = (string * t) list with sexp
+open Para_frag
 
 let odir, files =
   match Array.to_list Sys.argv with
