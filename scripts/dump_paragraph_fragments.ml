@@ -38,7 +38,7 @@ let filter dtd file i =
   in aux i
 
 let _ =
-  Printf.printf "output dir: %s\n" odir;
+  Printf.printf "output file: %s\n" odir;
   Printf.printf "to read: %s\n%!" (String.concat ~sep:", " files);
   List.iter files ~f:(fun file ->
     let buf = In_channel.read_all file in
@@ -46,6 +46,9 @@ let _ =
       let i = Xmlm.make_input ~entity:Xhtml.entity (`String (0,buf)) in
       let (dtd,it) = in_tree i in
       filter dtd file it
-    with Xmlm.Error (p,e) -> print_endline (Xmlm.error_message e)
+    with Xmlm.Error (p,e) -> begin
+      Printf.eprintf "FATAL: %s\n" (Xmlm.error_message e);
+      exit 1
+    end
   );
   Sexp.save_hum odir (sexp_of_ts !ts);
