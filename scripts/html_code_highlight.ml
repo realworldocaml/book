@@ -1,4 +1,3 @@
-(* Figure out all the paragraph identifiers and comment on github issues with them (for context) *)
 open Core.Std
 open Xml_tree
 
@@ -24,6 +23,7 @@ let rec filter i =
   |Element (p,c) -> Element (p, List.map ~f:filter c)
   |Data _ as d -> d
 
+(* Run each file through Pygments *)
 let _ =
   try
     let i = Xmlm.make_input ~entity:Xhtml.entity (`Channel stdin) in
@@ -32,4 +32,3 @@ let _ =
     let ot = filter it in
     out_tree o (None,ot)
   with Xmlm.Error (p,e) -> print_endline (Xmlm.error_message e)
-

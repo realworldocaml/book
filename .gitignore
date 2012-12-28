@@ -26,3 +26,4 @@ stylesheets/system-xsl
 .bzrignore
 Thumbs.db
 /commenting-build
+commenting/build_template/media/css/code.css

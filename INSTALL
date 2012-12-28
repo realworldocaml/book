@@ -8,4 +8,5 @@ To build the HTML site:
 * xsltproc
 * Python packages: beautifulsoup4 and django
 
-Just do `make clean && make && make site`, and the HTML will be in `commenting/en/alpha1/index.html`
+Just do `make clean && make && make site`, and the HTML will be in
+`commenting/en/alpha1/index.html`
