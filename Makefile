@@ -33,8 +33,7 @@ build/$(LINGUA)/source/.stamp:
 build/$(LINGUA)/source/rwo.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
 	cd scripts && ./build.sh
-	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ > tmp.xml
-	./scripts/_build/filter_book.native < tmp.xml > $@
+	pandoc -f markdown -t docbook --chapters --template rwo.docbook -s $^ | ./scripts/_build/filter_book.native > $@
 
 build/$(LINGUA)/source/rwo-oreilly.xml: $(FULLSRCS)
 	mkdir -p build/$(LINGUA)/source
