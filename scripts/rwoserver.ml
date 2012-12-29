@@ -110,9 +110,10 @@ module Comment = struct
       let issue_number = issue.Github_t.issue_number in
       (* Edit the issue to add a milestone using our builtin token *)
       Issues.edit ~token:our_token ~user ~repo ~issue_number ~issue:new_issue ()
-      >>= fun _ ->
+      >>= fun issue ->
       (* Add our context comment *)
       Github.Issues.create_comment ~token:our_token ~user ~repo ~issue_number ~body:context ()
+      >>= fun _ -> return issue
     )))
 end
 
@@ -148,9 +149,10 @@ let dispatch_post ?body req =
         Server.respond_not_found ()
       |Some (milestone,frag) ->
         let context = Comment.context_comment ~milestone ~id ~frag in
-        lwt _ = Comment.create_issue ~context ~user_token ~new_issue in
-        let body = Body.body_of_string (Github_j.string_of_new_issue new_issue) in
-        Server.respond ~status:`Created ~body ()  
+        lwt created_issue = Comment.create_issue ~context ~user_token ~new_issue in
+        let body = Body.body_of_string (Github_j.string_of_issue created_issue) in
+        let headers = Header.init_with "content-type" "application/json" in
+        Server.respond ~headers ~status:`Created ~body ()  
     end
   end
 
