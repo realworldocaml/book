@@ -67,7 +67,8 @@ at you.
 
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  This is a peculiarity of the toplevel that
-  is not required in stand-alone programs.
+  is not required in stand-alone programs (though it is sometimes
+  helpful to include `;;` to improve OCaml's error reporting.)
 - After evaluating an expression, the toplevel spits out both the type
   of the result and the result itself.
 - Function arguments are separated by spaces, instead of by
