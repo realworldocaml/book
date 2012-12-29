@@ -46,6 +46,15 @@ module Auth = struct
       let login = user_info.Github_t.user_info_login in
       Hashtbl.add sessions token login; 
       return login
+
+  let check ~milestone ~login =
+    let allowed_users = Config.allowed_users milestone in
+    List.mem login allowed_users
+
+  let denied =
+    let tmpl = Core.Std.In_channel.read_all "forbidden.html.in" in
+    fun ~login ->
+      Re_str.(global_replace (regexp_string "@USER@") login tmpl)
 end
 
 module Comment = struct
@@ -180,7 +189,7 @@ let dispatch_static req =
   Server.respond_file ~fname ()
   
 (* detect Github code and set a cookie if so, otherwise serve static file *)
-let dispatch req =
+let dispatch ~milestone req =
   let current_cookies = Cookie.Cookie_hdr.extract (Request.headers req) in
   (* Extract the access_token so we can do an ACL check *)
   let access_token =
@@ -202,20 +211,24 @@ let dispatch req =
   match access_token, code with
   (* Have access token and no code, so serve file *)
   |Some access_token, None -> begin 
-    lwt userid = Auth.lookup access_token in
-    print_endline userid;
-    let uri = Request.uri req in
-    let fname = Server.resolve_file ~docroot ~uri in
-    let path = Uri.path uri in
-    let pathlen = String.length path in
-    match Uri.path uri with
-    |path when pathlen>0 && path.[pathlen-1] = '/' ->
-      let fname = fname ^ "index.html" in
-      Server.respond_file ~headers ~fname ()
-    |path when is_directory fname ->
-      Server.respond_redirect ~headers ~uri:(Uri.with_path uri (path ^ "/")) ()
-    |path ->
-      Server.respond_file ~headers ~fname ()
+    (* Check that the user is allowed to access this page *)
+    lwt login = Auth.lookup access_token in
+    match Auth.check ~milestone ~login with
+    |false -> Server.respond_string ~status:`Forbidden ~body:(Auth.denied ~login) ()
+    |true -> begin
+      let uri = Request.uri req in
+      let fname = Server.resolve_file ~docroot ~uri in
+      let path = Uri.path uri in
+      let pathlen = String.length path in
+      match Uri.path uri with
+      |path when pathlen>0 && path.[pathlen-1] = '/' ->
+        let fname = fname ^ "index.html" in
+        Server.respond_file ~headers ~fname ()
+      |path when is_directory fname ->
+        Server.respond_redirect ~headers ~uri:(Uri.with_path uri (path ^ "/")) ()
+      |path ->
+        Server.respond_file ~headers ~fname ()
+    end
   end
   (* No access token and no code, so redirect to Github oAuth login *)
   |None, None ->
@@ -260,8 +273,8 @@ let callback con_id ?body req =
       |[] -> Server.respond_string ~status:`OK ~body:Comment.index ()
       |"media"::_ -> dispatch_static req (* No auth required for support files *)
       |_::"media"::_ -> dispatch_static req (* No auth required for support files *)
-      |hd::_ when List.mem hd Comment.all_milestones ->
-        if check_auth req then dispatch req else Server.respond_need_auth (`Basic "Real World OCaml") ()
+      |milestone::_ when List.mem milestone Comment.all_milestones ->
+        dispatch ~milestone req
       |_ -> Server.respond_not_found ()
     end
     |_ -> Server.respond_not_found ()
