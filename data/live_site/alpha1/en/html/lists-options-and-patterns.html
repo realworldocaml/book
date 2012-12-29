@@ -1,0 +1,726 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 4. Lists, Options and Patterns / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha1',
+                        page: 'lists\u002Doptions\u002Dand\u002Dpatterns.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Basic Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="prologue.html">1. Prologue</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">2. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">3. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-options-and-patterns.html" class="here">4. Lists, Options and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Practical Examples</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. Advanced Topics</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 4. Lists, Options and Patterns</h1>
+                
+                
+
+    <p id="idp7376752">
+<span><em>(Note, this chapter is incomplete. jyh is working on
+    it.)</em></span>
+</p><section><h1 id="lists-1">Lists</h1><p id="idp7378480">
+      As with any programming language, we need a way to represent
+      <span><em>data</em></span>, things like numbers, words, images,
+      etc., and we need a way to define <span><em>aggregates</em></span>
+      that bring together related values that represent some concept.
+    </p><p id="idp7379920">
+      Lists are one of the most common ways to aggregate data in OCaml;
+      they are simple, and they are extensively supported by the
+      standard library.
+    </p><p id="idp7380480">
+<span><em>(yminsky: I would point out that they are the most
+      commonly used aggregate, rather than just that they're supported
+      by the standard library. Also, that way we avoid confusion in the
+      sentence. between the standard library and Core.)</em></span>
+</p><section><h1 id="example-pretty-printing-a-table">Example: pretty-printing a table</h1><p id="idp7382400">
+<span><em>(yminsky: I wonder if the whole example should go
+        later in the section, after we've done more of the basis of
+        lists in this chapter.)</em></span>
+</p><p id="idp7383328">
+        One common programming task is displaying tabular data. In this
+        example, we will go over the design of a simple library to do
+        just that.
+      </p><p id="idp7383904">
+<span><em>(yminsky: This is the first appearance of an mli file.
+        If we're going to introduce it here, we need to do a little more
+        explanation.)</em></span>
+</p><p id="idp7384832">
+        We'll start with the interface. The code will go in a new module
+        called <code>Text_table</code> whose
+        <code>.mli</code> contains just the following function:
+      </p><div class="highlight"><pre><span class="c">(* [render headers rows] returns a string containing a formatted</span>
+<span class="c">   text table, using Unix-style newlines as separators *)</span>
+<span class="k">val</span> <span class="n">render</span>
+   <span class="o">:</span>  <span class="kt">string</span> <span class="kt">list</span>         <span class="c">(* header *)</span>
+   <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span> <span class="kt">list</span>    <span class="c">(* data *)</span>
+   <span class="o">-&gt;</span> <span class="kt">string</span>
+</pre></div><p id="idp7387808">
+        If you invoke <code>render</code> as follows:
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">print_string</span> <span class="o">(</span><span class="nn">Text_table</span><span class="p">.</span><span class="n">render</span>
+     <span class="o">[</span><span class="s2">&quot;language&quot;</span><span class="o">;</span><span class="s2">&quot;architect&quot;</span><span class="o">;</span><span class="s2">&quot;first release&quot;</span><span class="o">]</span>
+     <span class="o">[</span> <span class="o">[</span><span class="s2">&quot;Lisp&quot;</span> <span class="o">;</span><span class="s2">&quot;John McCarthy&quot;</span> <span class="o">;</span><span class="s2">&quot;1958&quot;</span><span class="o">]</span> <span class="o">;</span>
+       <span class="o">[</span><span class="s2">&quot;C&quot;</span>    <span class="o">;</span><span class="s2">&quot;Dennis Ritchie&quot;</span><span class="o">;</span><span class="s2">&quot;1969&quot;</span><span class="o">]</span> <span class="o">;</span>
+       <span class="o">[</span><span class="s2">&quot;ML&quot;</span>   <span class="o">;</span><span class="s2">&quot;Robin Milner&quot;</span>  <span class="o">;</span><span class="s2">&quot;1973&quot;</span><span class="o">]</span> <span class="o">;</span>
+       <span class="o">[</span><span class="s2">&quot;OCaml&quot;</span><span class="o">;</span><span class="s2">&quot;Xavier Leroy&quot;</span>  <span class="o">;</span><span class="s2">&quot;1996&quot;</span><span class="o">]</span> <span class="o">;</span>
+     <span class="o">])</span>
+</pre></div><p id="idp7390112">
+        you'll get the following output:
+      </p><pre id="idp7390496">
+| language | architect      | first release |
+|----------+----------------+---------------|
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
+</pre><p id="idp7391408">
+        Now that we know what <code>render</code> is supposed to
+        do, let's dive into the implementation.
+      </p><section><h1 id="computing-the-widths">Computing the widths</h1><p id="idp7393376">
+          To render the rows of the table, we'll first need the width of
+          the widest entry in each column. The following function does
+          just that.
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">max_widths</span> <span class="n">header</span> <span class="n">rows</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">to_lengths</span> <span class="n">l</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">length</span> <span class="n">l</span> <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">rows</span>
+    <span class="o">~</span><span class="n">init</span><span class="o">:(</span><span class="n">to_lengths</span> <span class="n">header</span><span class="o">)</span>
+    <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">acc</span> <span class="n">row</span> <span class="o">-&gt;</span>
+      <span class="nn">List</span><span class="p">.</span><span class="n">map2_exn</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Int</span><span class="p">.</span><span class="n">max</span> <span class="n">acc</span> <span class="o">(</span><span class="n">to_lengths</span> <span class="n">row</span><span class="o">))</span>
+</pre></div><p id="idp7395136">
+          In the above we define a helper function,
+          <code>to_lengths</code> which uses
+          <code>List.map</code> and
+          <code>String.length</code> to convert a list of strings
+          to a list of string lengths. Then, starting with the lengths
+          of the headers, we use <code>List.fold</code> to join in
+          the lengths of the elements of each row by
+          <code>max</code>'ing them together element-wise.
+        </p><p id="idp7398960">
+          Note that this code will throw an exception if any of the rows
+          has a different number of entries than the header. In
+          particular, <code>List.map2_exn</code> throws an
+          exception when its arguments have mismatched lengths.
+        </p></section><section><h1 id="rendering-the-rows">Rendering the rows</h1><p id="idp7401248">
+          Now we need to write the code to render a single row. There
+          are really two different kinds of rows that need to be
+          rendered; an ordinary row:
+        </p><pre id="idp7401824">
+| Lisp     | John McCarthy  | 1962          |
+</pre><p id="idp7402448">
+          and a separator row:
+        </p><pre id="idp7402832">
+|----------+----------------+---------------|
+</pre><p id="idp7403456">
+          Let's start with the separator row, which we can generate as
+          follows:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">render_separator</span> <span class="n">widths</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">pieces</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">widths</span>
+    <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">w</span> <span class="o">-&gt;</span> <span class="nn">String</span><span class="p">.</span><span class="n">make</span> <span class="o">(</span><span class="n">w</span> <span class="o">+</span> <span class="mi">2</span><span class="o">)</span> <span class="sc">'-'</span><span class="o">)</span>
+  <span class="k">in</span>
+  <span class="s2">&quot;|&quot;</span> <span class="o">^</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;+&quot;</span> <span class="n">pieces</span> <span class="o">^</span> <span class="s2">&quot;|&quot;</span>
+</pre></div><p id="idp7404992">
+          We need the extra two-characters for each entry to account for
+          the one character of padding on each side of a string in the
+          table.
+        </p><section><h1><b>
+        Performance of <code>String.concat</code> and
+        <code>^</code>
+</b></h1><p id="idp7407456">
+          In the above, we're using two different ways of concatenating
+          strings, <code>String.concat</code>, which operates on
+          lists of strings, and <code>^</code>, which is a
+          pairwise operator. You should avoid <code>^</code> for
+          joining long numbers of strings, since, it allocates a new
+          string every time it runs. Thus, the following code:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span> <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>
+</pre></div><p id="idp7411056">
+          will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas
+          this code:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">[</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">]</span>
+</pre></div><p id="idp7412544">
+          allocates one string of size 7, as well as a list of length 7.
+          At these small sizes, the differences don't amount to much,
+          but for assembling of large strings, it can be a serious
+          performance issue.
+        </p></section><p id="idp7413328">
+          We can write a very similar piece of code for rendering the
+          data in an ordinary row.
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">pad</span> <span class="n">s</span> <span class="n">length</span> <span class="o">=</span>
+  <span class="k">if</span> <span class="nn">String</span><span class="p">.</span><span class="n">length</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="n">length</span> <span class="k">then</span> <span class="n">s</span>
+  <span class="k">else</span> <span class="n">s</span> <span class="o">^</span> <span class="nn">String</span><span class="p">.</span><span class="n">make</span> <span class="o">(</span><span class="n">length</span> <span class="o">-</span> <span class="nn">String</span><span class="p">.</span><span class="n">length</span> <span class="n">s</span><span class="o">)</span> <span class="sc">' '</span>
+
+<span class="k">let</span> <span class="n">render_row</span> <span class="n">row</span> <span class="n">widths</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">pieces</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">map2</span> <span class="n">row</span> <span class="n">widths</span>
+    <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">s</span> <span class="n">width</span> <span class="o">-&gt;</span> <span class="s2">&quot; &quot;</span> <span class="o">^</span> <span class="n">pad</span> <span class="n">s</span> <span class="n">width</span> <span class="o">^</span> <span class="s2">&quot; &quot;</span><span class="o">)</span>
+  <span class="k">in</span>
+  <span class="s2">&quot;|&quot;</span> <span class="o">^</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;|&quot;</span> <span class="n">pieces</span> <span class="o">^</span> <span class="s2">&quot;|&quot;</span>
+</pre></div><p id="idp7415200">
+          You might note that <code>render_row</code> and
+          <code>render_separator</code> share a bit of structure.
+          We can improve the code a bit by factoring that repeated
+          structure out:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">decorate_row</span> <span class="o">~</span><span class="n">sep</span> <span class="n">row</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span> <span class="o">^</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span> <span class="n">row</span> <span class="o">^</span> <span class="s2">&quot;|&quot;</span>
+
+<span class="k">let</span> <span class="n">render_row</span> <span class="n">widths</span> <span class="n">row</span> <span class="o">=</span>
+  <span class="n">decorate_row</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;|&quot;</span>
+    <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map2_exn</span> <span class="n">row</span> <span class="n">widths</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">s</span> <span class="n">w</span> <span class="o">-&gt;</span> <span class="s2">&quot; &quot;</span> <span class="o">^</span> <span class="n">pad</span> <span class="n">s</span> <span class="n">w</span> <span class="o">^</span> <span class="s2">&quot; &quot;</span><span class="o">))</span>
+
+<span class="k">let</span> <span class="n">render_separator</span> <span class="n">widths</span> <span class="o">=</span>
+  <span class="n">decorate_row</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;+&quot;</span>
+    <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">widths</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">width</span> <span class="o">-&gt;</span> <span class="nn">String</span><span class="p">.</span><span class="n">make</span> <span class="o">(</span><span class="n">width</span> <span class="o">+</span> <span class="mi">2</span><span class="o">)</span> <span class="sc">'-'</span><span class="o">))</span>
+</pre></div><p id="idp7418192">
+          And now we can write the function for rendering a full table.
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">render</span> <span class="n">header</span> <span class="n">rows</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">widths</span> <span class="o">=</span> <span class="n">max_widths</span> <span class="n">header</span> <span class="n">rows</span> <span class="k">in</span>
+  <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="o">(</span><span class="n">render_row</span> <span class="n">widths</span> <span class="n">header</span>
+     <span class="o">::</span> <span class="n">render_separator</span> <span class="n">widths</span>
+     <span class="o">::</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">rows</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">row</span> <span class="o">-&gt;</span> <span class="n">render_row</span> <span class="n">widths</span> <span class="n">row</span><span class="o">)</span>
+    <span class="o">)</span>
+</pre></div></section></section></section><section><h1 id="list-basics">List basics</h1><p id="idp7421376">
+<span><em>(yminsky: I wonder if this should come before the
+      example. The example kind of assumes a lot of information, some of
+      which was given in the guided tour, and some of which
+      wasn't.)</em></span>
+</p><p id="idp7422352">
+      In the example, we see calls to <code>List</code> functions
+      in the standard library, in particular
+      <code>List.map</code>. How does this all work? To
+      understand, we need to consider first how lists are
+      <span><em>represented</em></span> internally, which follows from
+      the type definition and the way lists are constructed. Let's look
+      at the constructors first.
+    </p><p id="idp7424720">
+      We have seen how square brackets can be used to construct a list
+      of values, but there are really just two ways to construct a list
+      value.
+    </p><ul><li><p id="idp7425792">
+          [] is the <span><em>empty</em></span> list.
+        </p></li><li><p id="idp7426944">
+          If <code>x</code> is a value and <code>l</code> is
+          a list, then the expression <code>x :: l</code>
+          constructs a new list where the first element is
+          <code>x</code>, and the rest is <code>l</code>.
+          The value corresponding to <code>x :: l</code> is
+          commonly called a <span><em>cons</em></span>-cell (the term
+          comes from Lisp, where <span><em>cons</em></span> is short for
+          &quot;constructor&quot;).
+        </p></li></ul><p id="idp7432176">
+      The bracket syntax <code>[5; 3; 7]</code> is syntactic sugar
+      for a list with 3 cons-cells,
+      <code>5 :: 3 :: 7 :: []</code>. Each cell has two parts: 1)
+      a value, and 2) a pointer to the rest of the list. The final
+      pointer refers to the special value <code>[]</code>
+      representing the empty list.
+    </p><p id="idp7434672">
+      TODO: IMAGE figures/04-list-01.svg
+    </p></section><section><h1 id="pattern-matching">Pattern matching</h1><p id="idp7436064">
+      Constructing a list is really only half the story -- it would be
+      pretty useless to construct lists unless we can also pull them
+      apart. We need <span><em>destructors</em></span>, and for this we
+      use <span><em>pattern matching</em></span>, like we saw in the
+      previous chapter.
+    </p><p id="idp7437392">
+      For a list, there are two possible shapes: the empty list
+      <code>[]</code> or a cons-cell <code>h :: t</code>. We
+      can use a <code>match</code> expression to perform the
+      pattern matching. In the case of a cons-cell, the variables
+      <code>h</code> and <code>t</code> in the pattern are
+      bound to the corresponding values in the list when the match is
+      performed.
+    </p><p id="idp7441216">
+      For example, suppose we want to define a function to add 1 to each
+      element of a list. We have to consider both cases, 1) where the
+      list is empty, or 2) where it is a cons-cell.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">add1</span> <span class="n">l</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">l</span> <span class="k">with</span>
+     <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+     <span class="o">|</span> <span class="n">h</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">h</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">::</span> <span class="o">(</span><span class="n">add1</span> <span class="n">t</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">add1</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">add1</span> <span class="o">[</span><span class="mi">5</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">7</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">6</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">8</span><span class="o">]</span>
+</pre></div><p id="idp7442992">
+      The functions in the standard library can implemented in similar
+      ways. A straightforward, but inefficient, version of the
+      <code>List.map</code> function is as follows.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">map</span> <span class="n">l</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">l</span> <span class="k">with</span>
+     <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+     <span class="o">|</span> <span class="n">h</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">h</span> <span class="o">::</span> <span class="n">map</span> <span class="o">~</span><span class="n">f</span> <span class="n">t</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">map</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">string_of_int</span> <span class="o">[</span><span class="mi">5</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">7</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;5&quot;</span><span class="o">;</span> <span class="s2">&quot;3&quot;</span><span class="o">;</span> <span class="s2">&quot;7&quot;</span><span class="o">]</span>
+</pre></div></section><section><h1 id="list-performance">List performance</h1><p id="idp7446336">
+      Lists are ubiquitous in OCaml programs. They are easy to use and
+      reasonably efficient for small lists, but large lists can have
+      significant performance problems. The issue is that lists are
+      formed from separately allocated cons-cells. This has space
+      overhead because each value in the list is paired with a pointer
+      to the rest of the list. The separate allocation also reduces
+      locality, so it can result in poor cache behavior.
+    </p><p id="idp7447680">
+      Perhaps more important than those concerns is that naive list
+      traversal takes time linear in the length of the list. For
+      example, the following <code>length</code> function takes
+      linear time to count the number of elements in the list.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="k">rec</span> <span class="n">length</span> <span class="o">=</span> <span class="k">function</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="mi">0</span> <span class="o">|</span> <span class="o">_</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">length</span> <span class="n">t</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;;</span>
+</pre></div><p id="idp7449904">
+      In fact, this implementation of the function
+      <code>length</code> is worse than that, because the function
+      is recursive. In this implementation of the function, the
+      recursive call to <code>length t</code> is active at the
+      same time as the outer call, with the result that the runtime
+      needs to allocate stack frames for each recursive call, so this
+      function also takes linear space. For large lists, this is not
+      only inefficient, it can also result in stack overflow.
+    </p><section><h1 id="tail-recursion">Tail-recursion</h1><p id="idp7452944">
+        We can't do anything about <code>length</code> taking
+        linear time -- singly-linked lists of this kind don't have an
+        efficient <code>length</code> operation. However, we can
+        address the space problem using <span><em>tail
+        recursion</em></span>.
+      </p><p id="idp7455152">
+        Tail recursion occurs whenever the result of the recursive call
+        is returned immediately by the calling function. In this case,
+        the compiler optimizes the call by skipping the allocation of a
+        new stack frame, instead branching directly to the called
+        procedure.
+      </p><p id="idp7455856">
+        In the definition of <code>length</code> above, the
+        expression containing the recursive call
+        <code>(length t) + 1</code> is <span><em>not</em></span>
+        tail recursive because 1 is added to the result. However, it is
+        easy to transform the function so that it is properly tail
+        recursive.
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">length</span> <span class="n">l</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">tail_recursive_length</span> <span class="n">len</span> <span class="o">=</span> <span class="k">function</span>
+    <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="n">len</span>
+    <span class="o">|</span> <span class="o">_</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">tail_recursive_length</span> <span class="o">(</span><span class="n">len</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="n">t</span>
+  <span class="k">in</span> <span class="n">tail_recursive_length</span> <span class="mi">0</span> <span class="n">l</span><span class="o">;;</span>
+</pre></div><p id="idp7459440">
+        To preserve the type of the <code>length</code> function,
+        we hide the tail-recursive implementation by nesting it. The
+        tail-recursive implementation performs the addition
+        <span><em>before</em></span> the recursive call, instead of
+        afterwards. Since the result of the recursive call is returned
+        without modification, the compiler branches directly to the
+        called procedure rather than allocating a new stack frame.
+      </p><p id="idp7461248">
+        In other cases, it can be more problematic to use
+        tail-recursion. For example, consider the non tail-recursive
+        implemenation of <code>map</code> function, listed above.
+        The code is simple, but not efficient.
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="k">rec</span> <span class="n">map</span> <span class="n">f</span> <span class="o">=</span> <span class="k">function</span>
+ <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+ <span class="o">|</span> <span class="n">h</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">h</span> <span class="o">::</span> <span class="n">map</span> <span class="n">f</span> <span class="n">t</span><span class="o">;;</span>
+</pre></div><p id="idp7463472">
+        If we use the same trick as we used for the
+        <code>length</code> method, we need to accumulate the
+        result <span><em>before</em></span> the recursive call, but this
+        collects the result in reverse order. One way to address it is
+        to construct the reserved result, then explicitly correct it
+        before returning.
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">rev</span> <span class="n">l</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">tail_recursive_rev</span> <span class="n">result</span> <span class="o">=</span> <span class="k">function</span>
+   <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="n">result</span>
+   <span class="o">|</span> <span class="n">h</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">tail_recursive_rev</span> <span class="o">(</span><span class="n">h</span> <span class="o">::</span> <span class="n">result</span><span class="o">)</span> <span class="n">t</span>
+  <span class="k">in</span> <span class="n">tail_recursive_rev</span> <span class="bp">[]</span> <span class="n">l</span><span class="o">;;</span>
+   
+<span class="k">let</span> <span class="n">rev_map</span> <span class="n">l</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">rmap</span> <span class="n">accu</span> <span class="o">=</span> <span class="k">function</span>
+   <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="n">accu</span>
+   <span class="o">|</span> <span class="n">h</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">rmap</span> <span class="o">(</span><span class="n">f</span> <span class="n">h</span> <span class="o">::</span> <span class="n">accu</span><span class="o">)</span> <span class="n">l</span>
+  <span class="k">in</span> <span class="n">rmap</span> <span class="bp">[]</span> <span class="n">l</span><span class="o">;;</span>
+
+<span class="k">let</span> <span class="n">map</span> <span class="n">l</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span> <span class="n">rev</span> <span class="o">(</span><span class="n">rev_map</span> <span class="n">l</span> <span class="o">~</span><span class="n">f</span><span class="o">);;</span>
+</pre></div><p id="idp7466592">
+        The functions <code>tail_recursive_rev</code> and
+        <code>rev_map</code> are both tail-recursive, which means
+        that the function <code>map</code> is tail-recursive also.
+        The cost of doing so is that we construct an intermediate
+        reversed list that is immediately discarded. One way to think of
+        it is that instead of allocating a linear number of stack
+        frames, we allocate a linear number of cons-cells.
+      </p><p id="idp7469232">
+        Allocation of short-lived data in OCaml is quite cheap, so the
+        intermediate list is not very expensive. The performance of the
+        two implementations is not significantly different, with one
+        exception: the tail-recursive implementation will not cause a
+        stack overflow for large lists, while the simple
+        non-tail-recursive implementation will have problems with large
+        lists.
+      </p></section><section><h1 id="hybrid-recursion">Hybrid recursion</h1><p id="idp7471072">
+        In general, the choice of whether to use regular recursion vs.
+        tail recursion is not immediately obvious. Regular recursion is
+        often better for small lists (and other data structures), but it
+        is better to use tail recursion for very large lists --
+        especially because stack sizes limit the number of recursive
+        calls.
+      </p><p id="idp7471840">
+        Core takes a hybrid approach that can be illustrated with the
+        implementation of the function <code>Core_list.map</code>.
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">map_slow</span> <span class="n">l</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span> <span class="n">rev</span> <span class="o">(</span><span class="n">rev_map</span> <span class="n">l</span> <span class="o">~</span><span class="n">f</span><span class="o">);;</span>
+
+<span class="k">let</span> <span class="k">rec</span> <span class="n">count_map</span> <span class="o">~</span><span class="n">f</span> <span class="n">l</span> <span class="n">ctr</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="n">l</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+  <span class="o">|</span> <span class="o">[</span><span class="n">x1</span><span class="o">]</span> <span class="o">-&gt;</span> <span class="k">let</span> <span class="n">f1</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x1</span> <span class="k">in</span> <span class="o">[</span><span class="n">f1</span><span class="o">]</span>
+  <span class="o">|</span> <span class="o">[</span><span class="n">x1</span><span class="o">;</span> <span class="n">x2</span><span class="o">]</span> <span class="o">-&gt;</span> <span class="k">let</span> <span class="n">f1</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x1</span> <span class="k">in</span> <span class="k">let</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x2</span> <span class="k">in</span> <span class="o">[</span><span class="n">f1</span><span class="o">;</span> <span class="n">f2</span><span class="o">]</span>
+  <span class="o">|</span> <span class="o">[</span><span class="n">x1</span><span class="o">;</span> <span class="n">x2</span><span class="o">;</span> <span class="n">x3</span><span class="o">]</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">f1</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x1</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x2</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f3</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x3</span> <span class="k">in</span>
+    <span class="o">[</span><span class="n">f1</span><span class="o">;</span> <span class="n">f2</span><span class="o">;</span> <span class="n">f3</span><span class="o">]</span>
+  <span class="o">|</span> <span class="o">[</span><span class="n">x1</span><span class="o">;</span> <span class="n">x2</span><span class="o">;</span> <span class="n">x3</span><span class="o">;</span> <span class="n">x4</span><span class="o">]</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">f1</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x1</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x2</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f3</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x3</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f4</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x4</span> <span class="k">in</span>
+    <span class="o">[</span><span class="n">f1</span><span class="o">;</span> <span class="n">f2</span><span class="o">;</span> <span class="n">f3</span><span class="o">;</span> <span class="n">f4</span><span class="o">]</span>
+  <span class="o">|</span> <span class="n">x1</span> <span class="o">::</span> <span class="n">x2</span> <span class="o">::</span> <span class="n">x3</span> <span class="o">::</span> <span class="n">x4</span> <span class="o">::</span> <span class="n">x5</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">f1</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x1</span> <span class="k">in</span> 
+    <span class="k">let</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x2</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f3</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x3</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f4</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x4</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">f5</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x5</span> <span class="k">in</span>
+    <span class="n">f1</span> <span class="o">::</span> <span class="n">f2</span> <span class="o">::</span> <span class="n">f3</span> <span class="o">::</span> <span class="n">f4</span> <span class="o">::</span> <span class="n">f5</span> <span class="o">::</span>
+      <span class="o">(</span><span class="k">if</span> <span class="n">ctr</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="k">then</span> <span class="n">map_slow</span> <span class="o">~</span><span class="n">f</span> <span class="n">tl</span> <span class="k">else</span> <span class="n">count_map</span> <span class="o">~</span><span class="n">f</span> <span class="n">tl</span> <span class="o">(</span><span class="n">ctr</span> <span class="o">+</span> <span class="mi">1</span><span class="o">));;</span>
+
+<span class="k">let</span> <span class="n">map</span> <span class="n">l</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span> <span class="n">count_map</span> <span class="o">~</span><span class="n">f</span> <span class="n">l</span> <span class="mi">0</span><span class="o">;;</span>
+</pre></div><p id="idp7475184">
+        For performance, there are separate patterns for small lists
+        with up to 4 elements, then a recursive case for lists with five
+        or more elements. The <code>ctr</code> value limits the
+        recursion -- regular recursion is used for up to 1000 recursive
+        calls (which includes lists with up to 4000 elements), then the
+        tail-recursive function <code>map_slow</code> is used for
+        any remainder.
+      </p><p id="idp7477216">
+        As an aside, you might wonder why this implementation uses
+        explicit let-definitions for the result values
+        <code>f1</code>, <code>f2</code>, etc. The reason is
+        to force the order of evaluation, so that the the function
+        <code>f</code> is always applied to the list values
+        left-to-right (starting with the first element in the list). In
+        an expression like <code>[f x1; f x2; f x3]</code> the
+        order of evaluation is not specified by the language, any of the
+        subexpressions might be evaluated first (though we would often
+        expect evaluation order to be either left-to-right or
+        right-to-left). For functions that perform I/O, or have other
+        side-effects, left-to-right evaluation order is important (and
+        required).
+      </p></section></section><section><h1 id="heterogenous-values">Heterogenous values</h1><p id="idp7482048">
+      Lists are fairly general, but there are several reasons why you
+      might not want to use them.
+    </p><ul><li><p id="idp7483072">
+          Large lists often have poor performance.
+        </p></li><li><p id="idp7483920">
+          The list length is variable, not fixed.
+        </p></li><li><p id="idp7484768">
+          The data in a list must have the same type.
+        </p></li></ul><p id="idp7485488">
+      In the tabulaton example that we used to start this chapter, the
+      <code>List</code> is not a good choice for each entry in the
+      table. Now, let's think about how you might actually use this
+      interface in practice. Usually, when you have data to render in a
+      table, the data entries are described more precisely by a record.
+      So, imagine that you start off with a record type for representing
+      information about a given programming language:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">style</span> <span class="o">=</span>
+    <span class="nc">Object_oriented</span> <span class="o">|</span> <span class="nc">Functional</span> <span class="o">|</span> <span class="nc">Imperative</span> <span class="o">|</span> <span class="nc">Logic</span>
+
+<span class="k">type</span> <span class="n">prog_lang</span> <span class="o">=</span> <span class="o">{</span> <span class="n">name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+                   <span class="n">architect</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+                   <span class="n">year_released</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+                   <span class="n">style</span><span class="o">:</span> <span class="n">style</span> <span class="kt">list</span><span class="o">;</span>
+                 <span class="o">}</span>
+</pre></div><p id="idp7488112">
+      If we then wanted to render a table from a list of languages, we
+      might write something like this:
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">print_langs</span> <span class="n">langs</span> <span class="o">=</span>
+   <span class="k">let</span> <span class="n">headers</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;name&quot;</span><span class="o">;</span><span class="s2">&quot;architect&quot;</span><span class="o">;</span><span class="s2">&quot;year released&quot;</span><span class="o">]</span> <span class="k">in</span>
+   <span class="k">let</span> <span class="n">to_row</span> <span class="n">lang</span> <span class="o">=</span>
+     <span class="o">[</span><span class="n">lang</span><span class="o">.</span><span class="n">name</span><span class="o">;</span> <span class="n">lang</span><span class="o">.</span><span class="n">architect</span><span class="o">;</span> <span class="nn">Int</span><span class="p">.</span><span class="n">to_string</span> <span class="n">lang</span><span class="o">.</span><span class="n">year_released</span> <span class="o">]</span>
+   <span class="k">in</span>
+   <span class="n">print_string</span> <span class="o">(</span><span class="nn">Text_table</span><span class="p">.</span><span class="n">render</span> <span class="n">headers</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">to_row</span> <span class="n">langs</span><span class="o">))</span>
+</pre></div><p id="idp7490032">
+      This is OK, but as you consider more complicated tables with more
+      columns, it becomes easier to make the mistake of having a
+      mismatch in between <code>headers</code> and
+      <code>to_row</code>. Also, adding, removing and reordering
+      columns becomes awkward, because changes need to be made in two
+      places.
+    </p><p id="idp7491984">
+      We can improve the table API by adding a type that is a
+      first-class representative for a column. We'd add the following to
+      the interface of <code>Text_table</code>:
+    </p><div class="highlight"><pre><span class="c">(** An ['a column] is a specification of a column for rending a table</span>
+<span class="c">    of values of type ['a] *)</span>
+<span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">column</span>
+
+<span class="c">(** [column header to_entry] returns a new column given a header and a</span>
+<span class="c">    function for extracting the text entry from the data associated</span>
+<span class="c">    with a row *)</span>
+<span class="k">val</span> <span class="n">column</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">string</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">column</span>
+
+<span class="c">(** [column_render columns rows] Renders a table with the specified</span>
+<span class="c">    columns and rows *)</span>
+<span class="k">val</span> <span class="n">column_render</span> <span class="o">:</span>
+  <span class="k">'</span><span class="n">a</span> <span class="n">column</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+</pre></div><p id="idp7494640">
+      Thus, the <code>column</code> functions creates a
+      <code>column</code> from a header string and a function for
+      extracting the text for that column associated with a given row.
+      Implementing this interface is quite simple:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">column</span> <span class="o">=</span> <span class="kt">string</span> <span class="o">*</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">string</span><span class="o">)</span>
+<span class="k">let</span> <span class="n">column</span> <span class="n">header</span> <span class="n">to_string</span> <span class="o">=</span> <span class="o">(</span><span class="n">header</span><span class="o">,</span><span class="n">to_string</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="n">column_render</span> <span class="n">columns</span> <span class="n">rows</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">header</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">columns</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">fst</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">rows</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">rows</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">row</span> <span class="o">-&gt;</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">columns</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(_,</span><span class="n">to_string</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">to_string</span> <span class="n">row</span><span class="o">))</span>
+  <span class="k">in</span>
+  <span class="n">render</span> <span class="n">header</span> <span class="n">rows</span>
+</pre></div><p id="idp7497808">
+      And we can rewrite <code>print_langs</code> to use this new
+      interface as follows.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">columns</span> <span class="o">=</span>
+  <span class="o">[</span> <span class="nn">Text_table</span><span class="p">.</span><span class="n">column</span> <span class="s2">&quot;Name&quot;</span>      <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">);</span>
+    <span class="nn">Text_table</span><span class="p">.</span><span class="n">column</span> <span class="s2">&quot;Architect&quot;</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">architect</span><span class="o">);</span>
+    <span class="nn">Text_table</span><span class="p">.</span><span class="n">column</span> <span class="s2">&quot;Year Released&quot;</span>
+       <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="nn">Int</span><span class="p">.</span><span class="n">to_string</span> <span class="n">x</span><span class="o">.</span><span class="n">year_released</span><span class="o">);</span>
+  <span class="o">]</span>
+
+<span class="k">let</span> <span class="n">print_langs</span> <span class="n">langs</span> <span class="o">=</span>
+  <span class="n">print_string</span> <span class="o">(</span><span class="nn">Text_table</span><span class="p">.</span><span class="n">column_render</span> <span class="n">columns</span> <span class="n">langs</span><span class="o">)</span>
+</pre></div><p id="idp7500368">
+      The code is a bit longer, but it's also less error prone. In
+      particular, several errors that might be made by the user are now
+      ruled out by the type system. For example, it's no longer possible
+      for the length of the header and the lengths of the rows to be
+      mismatched.
+    </p><p id="idp7501072">
+      The simple column-based interface described here is also a good
+      starting for building a richer API. You could for example build
+      specialized columns with different formatting and alignment rules,
+      which is easier to do with this interface than with the original
+      one based on passing in lists-of-lists.
+    </p></section><section><h1 id="options-1">Options</h1><p id="idp7502816">
+      OCaml has no &quot;NULL&quot; or &quot;nil&quot; values.
+      Programmers coming from other languages are often surprised and
+      annoyed by this -- it seems really convenient to have a special
+      <code>NULL</code> value that represents concepts like
+      &quot;end of list&quot; or &quot;leaf node in a tree.&quot; The
+      possible benefit is that <span><em>every</em></span> pointer type
+      has a extra NULL value; the problem is that using the NULL value
+      as if it were a real value has weak or undefined semantics.
+    </p><p id="idp7505072">
+      How do we get similar semantics in OCaml? The ubiquitous technique
+      is to use the <code>option</code> type, which has the
+      following definition.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">None</span> <span class="o">|</span> <span class="nc">Some</span> <span class="k">of</span> <span class="k">'</span><span class="n">a</span><span class="o">;;</span>
+</pre></div><p id="idp7507056">
+      That is, a value of type <code>'a option</code> is either
+      <code>None</code>, which means &quot;no value;&quot; or it
+      is <code>Some v</code>, which represents a value
+      <code>v</code>. There is nothing special about the
+      <code>option</code> type -- it is a variant type just like
+      any other. What it means is that checking for
+      <code>None</code> is <span><em>explicit</em></span>, it is
+      not possible to use <code>None</code> in a place where
+      <code>Some x</code> is expected.
+    </p><p id="idp7513040">
+      In the most direct form, we can use an <code>option</code>
+      wherever some value is &quot;optional,&quot; with the usual
+      meaning. For example, if the architect of a programming language
+      is not always known, we could use a special string like
+      <code>&quot;unknown&quot;</code> to represent the
+      architect's name, but we might accidentally confuse it with the
+      name of a person. The more explicit alternative is to use an
+      option.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">prog_lang</span> <span class="o">=</span> <span class="o">{</span> <span class="n">name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+                   <span class="n">architect</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+                   <span class="n">year_released</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+                   <span class="n">style</span><span class="o">:</span> <span class="n">style</span> <span class="kt">list</span><span class="o">;</span>
+                 <span class="o">}</span>
+
+<span class="k">let</span> <span class="n">x86</span> <span class="o">=</span> <span class="o">{</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;x86 assembly&quot;</span><span class="o">;</span>
+            <span class="n">architect</span> <span class="o">=</span> <span class="nc">None</span><span class="o">;</span>
+            <span class="n">year_released</span> <span class="o">=</span> <span class="mi">1980</span><span class="o">;</span>
+            <span class="n">style</span> <span class="o">=</span> <span class="nc">Imperative</span>
+          <span class="o">};;</span>
+</pre></div><p id="idp7516592">
+      We can also represent a data structure with NULL-pointers using
+      the <code>option</code> type. For example, let's build an
+      imperative singly-linked list, where new values are added to the
+      <span><em>end</em></span> of the list. In a standard imperative
+      language (like in the C++ Standard Template Library), NULL is used
+      to represent &quot;end of list.&quot; We'll use the
+      <code>option</code> type instead.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">slist</span> <span class="o">=</span> <span class="o">{</span> <span class="k">mutable</span> <span class="n">head</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">elem</span> <span class="n">option</span><span class="o">;</span> <span class="k">mutable</span> <span class="n">tail</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">elem</span> <span class="n">option</span> <span class="o">}</span>
+<span class="ow">and</span> <span class="k">'</span><span class="n">a</span> <span class="n">elem</span> <span class="o">=</span> <span class="o">{</span> <span class="n">value</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span><span class="o">;</span> <span class="k">mutable</span> <span class="n">next</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">elem</span> <span class="n">option</span> <span class="o">};;</span>
+
+<span class="k">let</span> <span class="n">new_slist</span> <span class="bp">()</span> <span class="o">=</span> <span class="o">{</span> <span class="n">head</span> <span class="o">=</span> <span class="nc">None</span><span class="o">;</span> <span class="n">tail</span> <span class="o">=</span> <span class="nc">None</span> <span class="o">};;</span>
+
+<span class="k">let</span> <span class="n">push_back</span> <span class="n">l</span> <span class="n">x</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">elem</span> <span class="o">=</span> <span class="o">{</span> <span class="n">value</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span> <span class="n">next</span> <span class="o">=</span> <span class="nc">None</span> <span class="o">}</span> <span class="k">in</span>
+  <span class="k">match</span> <span class="n">l</span><span class="o">.</span><span class="n">tail</span> <span class="k">with</span>
+   <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">head</span> <span class="o">&lt;-</span> <span class="nc">Some</span> <span class="n">elem</span><span class="o">;</span> <span class="n">l</span><span class="o">.</span><span class="n">tail</span> <span class="o">&lt;-</span> <span class="nc">Some</span> <span class="n">elem</span>
+   <span class="o">|</span> <span class="nc">Some</span> <span class="n">last</span> <span class="o">-&gt;</span> <span class="n">last</span><span class="o">.</span><span class="n">next</span> <span class="o">&lt;-</span> <span class="nc">Some</span> <span class="n">elem</span><span class="o">;;</span>
+</pre></div><p id="idp7520576">
+      Similarly, if we're defining a type of binary trees, one choice is
+      to use <code>option</code> for the child node references. In
+      a binary search tree, each node in the tree is labeled with a
+      value and it has up to two children. The nodes in the tree follow
+      <span><em>prefix</em></span> order, meaning that the label of the
+      left child is smaller than the label of its parent, and the label
+      of the right child is larger than the label of the parent.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">node</span> <span class="o">=</span> <span class="o">{</span> <span class="n">label</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span><span class="o">;</span> <span class="n">left</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span><span class="o">;</span> <span class="n">right</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span> <span class="o">}</span>
+<span class="ow">and</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span> <span class="o">=</span> <span class="k">'</span><span class="n">a</span> <span class="n">node</span> <span class="n">option</span><span class="o">;;</span>
+
+<span class="k">let</span> <span class="n">new_binary_tree</span> <span class="bp">()</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span> <span class="o">=</span> <span class="nc">None</span><span class="o">;;</span>
+
+<span class="k">let</span> <span class="k">rec</span> <span class="n">insert</span> <span class="n">x</span> <span class="o">=</span> <span class="k">function</span>
+ <span class="o">|</span> <span class="nc">Some</span> <span class="o">{</span> <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">;</span> <span class="n">left</span> <span class="o">=</span> <span class="n">left</span><span class="o">;</span> <span class="n">right</span> <span class="o">=</span> <span class="n">right</span> <span class="o">}</span> <span class="k">as</span> <span class="n">tree</span> <span class="o">-&gt;</span>
+   <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">label</span> <span class="k">then</span>
+     <span class="nc">Some</span> <span class="o">{</span> <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">;</span> <span class="n">left</span> <span class="o">=</span> <span class="n">insert</span> <span class="n">x</span> <span class="n">left</span><span class="o">;</span> <span class="n">right</span> <span class="o">=</span> <span class="n">right</span> <span class="o">}</span>
+   <span class="k">else</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">label</span> <span class="k">then</span>
+     <span class="nc">Some</span> <span class="o">{</span> <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">;</span> <span class="n">left</span> <span class="o">=</span> <span class="n">left</span><span class="o">;</span> <span class="n">right</span> <span class="o">=</span> <span class="n">insert</span> <span class="n">x</span> <span class="n">right</span> <span class="o">}</span>
+   <span class="k">else</span> 
+     <span class="n">tree</span>
+ <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="nc">Some</span> <span class="o">{</span> <span class="n">label</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span> <span class="n">left</span> <span class="o">=</span> <span class="nc">None</span><span class="o">;</span> <span class="n">right</span> <span class="o">=</span> <span class="nc">None</span> <span class="o">};;</span>
+</pre></div><p id="idp7523840">
+      This representation is perfectly adequate, but many OCaml
+      programmers would prefer a representation where the
+      <code>option</code> is &quot;hoisted&quot; to the
+      <code>node</code> type, meaning that we have two kinds of
+      nodes. In this case, the code is somewhat more succinct. In the
+      end, of course, the two versions are isomorphic.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span> <span class="o">=</span>
+ <span class="o">|</span> <span class="nc">Leaf</span>
+ <span class="o">|</span> <span class="nc">Interior</span> <span class="k">of</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span><span class="o">;;</span>
+ 
+<span class="k">let</span> <span class="n">new_binary_tree</span> <span class="bp">()</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">binary_tree</span> <span class="o">=</span> <span class="nc">Leaf</span><span class="o">;;</span>
+
+<span class="k">let</span> <span class="k">rec</span> <span class="n">insert</span> <span class="n">x</span> <span class="o">=</span> <span class="k">function</span>
+ <span class="o">|</span> <span class="nc">Interior</span> <span class="o">(</span><span class="n">label</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">)</span> <span class="k">as</span> <span class="n">tree</span> <span class="o">-&gt;</span>
+   <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">label</span> <span class="k">then</span> <span class="nc">Interior</span> <span class="o">(</span><span class="n">label</span><span class="o">,</span> <span class="n">insert</span> <span class="n">x</span> <span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">)</span>
+   <span class="k">else</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">label</span> <span class="k">then</span> <span class="nc">Interior</span> <span class="o">(</span><span class="n">label</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">insert</span> <span class="n">x</span> <span class="n">right</span><span class="o">)</span>
+   <span class="k">else</span> <span class="n">tree</span>
+ <span class="o">|</span> <span class="nc">Leaf</span> <span class="o">-&gt;</span> <span class="nc">Interior</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Leaf</span><span class="o">,</span> <span class="nc">Leaf</span><span class="o">);;</span>
+</pre></div></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="variables-and-functions.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="records.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

@@ -1,0 +1,236 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 19. Packaging and Build Systems / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha1',
+                        page: 'packaging\u002Dand\u002Dbuild\u002Dsystems.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Basic Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Practical Examples</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. Advanced Topics</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="understanding-the-runtime-system.html">15. Understanding the runtime system</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="managing-external-memory-with-bigarrays.html">16. Managing external memory with Bigarrays</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="inside-the-runtime.html">17. Inside the Runtime</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="performance-tuning-and-profiling.html">18. Performance Tuning and Profiling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="packaging-and-build-systems.html" class="here">19. Packaging and Build Systems</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-with-ocamllex-and-ocamlyacc.html">20. Parsing with OCamllex and OCamlyacc</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="installation.html">21. Installation</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 19. Packaging and Build Systems</h1>
+                
+                
+
+    <p id="idp10160656">
+    The OCaml toolchain is structured much like a C compiler, with
+    several tools that generate intermediate files and finally link
+    against a runtime. The final outputs don't have to be just
+    executables. Many people embed OCaml code as object files that are
+    called from other applications, or even compile it to Javascript and
+    other esoteric targets. Let's start by covering some of the standard
+    OCaml tools, and then move on to some of the higher level methods
+    for packaging and publishing your code online.
+  </p><section><h1 id="the-ocaml-toolchain">The OCaml toolchain</h1><p id="idp10162752">
+      There are two distinct compilers for OCaml code included in the
+      standard distribution. The first outputs bytecode that is
+      interpreted at runtime, and the second generates fast, efficient
+      native code directly. Both of these share the front-end
+      type-checking logic, and only diverge when it comes to code
+      generation.
+    </p><section><h1 id="the-ocamlc-bytecode-compiler">The <code>ocamlc</code> bytecode compiler</h1><p id="idp10165344">
+        The simplest code generator is the <code>ocamlc</code>
+        compiler, which outputs bytecode that is interpreted via the
+        <code>ocamlrun</code> runtime. The OCaml bytecode virtual
+        machine is a stack machine (much like the Java Virtual Machine),
+        with the exception of a single register that stores the most
+        recent result. This provides a simple runtime model that is easy
+        to implement or embed within other systems, but executes rather
+        slowly due to being interpreted.
+      </p><p id="idp10167648">
+        Here are some of the intermediate files generated by
+        <code>ocamlc</code>:
+      </p><table><thead><tr><th>
+                Extension
+              </th><th>
+                Purpose
+              </th></tr></thead><tbody><tr><td>
+                .ml
+              </td><td>
+                Source files for compilation unit module
+                implementations.
+              </td></tr><tr><td>
+                .mli
+              </td><td>
+                Source files for compilation unit module interfaces. If
+                missing, generated from the <code>.ml</code> file.
+              </td></tr><tr><td>
+                .cmi
+              </td><td>
+                Compiled module interface from a corresponding
+                <code>.mli</code> source file.
+              </td></tr><tr><td>
+                .cmo
+              </td><td>
+                Compiled bytecode object file of the module
+                implementation.
+              </td></tr><tr><td>
+                .cma
+              </td><td>
+                Library of bytecode object files packed into a single
+                file.
+              </td></tr><tr><td>
+                .o
+              </td><td>
+                C source files are compiled into native object files by
+                the system <code>cc</code>.
+              </td></tr></tbody></table><p id="idp10182912">
+        To obtain a bytecode executable, you need to compile a set of
+        <code>cmo</code> object files, and then link them into an
+        executable
+      </p></section><section><h1 id="the-ocamlopt-native-code-compiler">The <code>ocamlopt</code> native code
+      compiler</h1><table><thead><tr><th>
+                Extension
+              </th><th>
+                Purpose
+              </th></tr></thead><tbody><tr><td>
+                .cmi
+              </td><td>
+                Compiled module interface from a corresponding
+                <code>.mli</code> source file.
+                (<span><em>avsm</em></span>: this is not compatible with
+                the ocamlc version iirc)
+              </td></tr><tr><td>
+                .o
+              </td><td>
+                Compiled native object file of the module
+                implementation.
+              </td></tr><tr><td>
+                .cmx
+              </td><td>
+                Contains extra information for linking and cross-module
+                optimization of the object file.
+              </td></tr><tr><td>
+                .cmxa/.a
+              </td><td>
+                Library of <code>cmx</code> and
+                <code>o</code> units, stored in the
+                <code>cmxa</code> and <code>a</code> files
+                respectively.
+              </td></tr></tbody></table></section><section><h1 id="the-ocaml-top-level-loop">The <code>ocaml</code> top-level loop</h1><p id="idp10201712">
+</p></section></section><section><h1 id="the-findlib-compiler-frontend">The Findlib compiler frontend</h1><p id="idp10203504">
+</p></section><section><h1 id="packaging-applications-with-oasis">Packaging applications with OASIS</h1><section><h1 id="ocamlbuild">ocamlbuild</h1><p id="idp10206256">
+</p></section></section><section><h1 id="distributing-applications-with-opam">Distributing applications with OPAM</h1><p id="idp10208032">
+</p></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="performance-tuning-and-profiling.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="parsing-with-ocamllex-and-ocamlyacc.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

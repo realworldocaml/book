@@ -1,0 +1,200 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 16. Managing external memory with Bigarrays / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha1',
+                        page: 'managing\u002Dexternal\u002Dmemory\u002Dwith\u002Dbigarrays.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Basic Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Practical Examples</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. Advanced Topics</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="understanding-the-runtime-system.html">15. Understanding the runtime system</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="managing-external-memory-with-bigarrays.html" class="here">16. Managing external memory with Bigarrays</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="inside-the-runtime.html">17. Inside the Runtime</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="performance-tuning-and-profiling.html">18. Performance Tuning and Profiling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="packaging-and-build-systems.html">19. Packaging and Build Systems</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-with-ocamllex-and-ocamlyacc.html">20. Parsing with OCamllex and OCamlyacc</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="installation.html">21. Installation</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 16. Managing external memory with Bigarrays</h1>
+                
+                
+
+    <section><h1 id="bigarrays-for-external-memory-blocks">Bigarrays for external memory blocks</h1><p id="idp9953376">
+      An OCaml bigarray is a useful custom block provided as standard to
+      manipulate memory blocks outside the OCaml heap. It has
+      <code>Custom_tag</code> in the header, and the first word
+      points to the <code>custom_operations</code> struct for
+      bigarrays. Following this is a <code>caml_ba_array</code>
+      struct.
+    </p><pre id="idp9956144">
+struct caml_ba_array {
+  void * data;                  /* Pointer to raw data */
+  intnat num_dims;              /* Number of dimensions */
+  intnat flags;                 /* Kind of element array + memory layout + allocation status */
+  struct caml_ba_proxy * proxy; /* The proxy for sub-arrays, or NULL */
+  intnat dim[]  /*[num_dims]*/; /* Size in each dimension */
+};
+</pre><p id="idp9957184">
+      The <code>data</code> is usually a pointer to a
+      <code>malloc</code>'ed chunk of memory, which the custom
+      finalizer operation <code>free</code>'s when the block is
+      free. The <code>flags</code> field encodes three values,
+      located in the bits as specified by three masks:
+    </p><pre id="idp9960640">
+CAML_BA_KIND_MASK = 0xFF     /* Mask for kind in flags field */
+CAML_BA_LAYOUT_MASK = 0x100  /* Mask for layout in flags field */
+CAML_BA_MANAGED_MASK = 0x600 /* Mask for &quot;managed&quot; bits in flags field */
+</pre><p id="idp9961664">
+      The <code>CAML_BA_KIND_MASK</code> bits hold a value of the
+      <code>caml_ba_kind</code> enum that identifies the kind of
+      value in the bigarray <code>data</code>.
+    </p><pre id="idp9964304">
+enum caml_ba_kind {
+  CAML_BA_FLOAT32,             /* Single-precision floats */
+  CAML_BA_FLOAT64,             /* Double-precision floats */
+  CAML_BA_SINT8,               /* Signed 8-bit integers */
+  CAML_BA_UINT8,               /* Unsigned 8-bit integers */
+  CAML_BA_SINT16,              /* Signed 16-bit integers */
+  CAML_BA_UINT16,              /* Unsigned 16-bit integers */
+  CAML_BA_INT32,               /* Signed 32-bit integers */
+  CAML_BA_INT64,               /* Signed 64-bit integers */
+  CAML_BA_CAML_INT,            /* OCaml-style integers (signed 31 or 63 bits) */
+  CAML_BA_NATIVE_INT,          /* Platform-native long integers (32 or 64 bits) */
+  CAML_BA_COMPLEX32,           /* Single-precision complex */
+  CAML_BA_COMPLEX64,           /* Double-precision complex */
+}
+</pre><p id="idp9965776">
+      The <code>CAML_BA_LAYOUT_MASK</code> bit says whether
+      multi-dimensional arrays are layed out C or Fortran style.
+    </p><pre id="idp9966976">
+enum caml_ba_layout {
+  CAML_BA_C_LAYOUT = 0,           /* Row major, indices start at 0 */
+  CAML_BA_FORTRAN_LAYOUT = 0x100, /* Column major, indices start at 1 */
+};
+</pre><p id="idp9967824">
+      The <code>CAML_BA_MANAGED_MASK</code> bits hold a value of
+      the <code>caml_ba_managed</code> enum that identifies
+      whether OCaml is responsible for freeing the
+      <code>data</code> or some other code is.
+    </p><pre id="idp9970496">
+enum caml_ba_managed {
+  CAML_BA_EXTERNAL = 0,        /* Data is not allocated by OCaml */
+  CAML_BA_MANAGED = 0x200,     /* Data is allocated by OCaml */
+  CAML_BA_MAPPED_FILE = 0x400, /* Data is a memory mapped file */
+};
+</pre></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="understanding-the-runtime-system.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="inside-the-runtime.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
