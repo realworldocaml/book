@@ -1,37 +1,25 @@
 # Variants
 
-Variant types are used to represent multiple different possibilities,
-where each possibility is identified by a different _constructor_.
-The syntax of a variant type declaration is as follows.
+Variant types are one of the most useful features of OCaml, and also
+one of the most unusual.  Variants allow you to represent data that
+may take on multiple different forms, where each form is marked by an
+explicit tag.  Let's consider a simple concrete example of how to use
+variant types: dealing with terminal colors.
 
-```ocaml
-type <variant-name> =
-  | <Constructor1> [of <arg1> * .. * <argn>]?
-  | <Constructor2> [of <arg1> * .. * <argn>]?
-  ...
-```
-
-The basic purpose of variants is to effectively represent data that
-may have multiple different cases.  We can give a better sense of the
-utility of variants by walking through a concrete example, which we'll
-do by thinking about how to represent terminal colors.
-
-## Example: terminal colors
-
-Almost all terminals support a set of 8 basic colors, which we can
-represent with the following variant type.
+Almost all terminals support a set of 8 basic colors.  We can
+represent these with the following variant type.
 
 ```ocaml
 # type basic_color =
-    Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
+    Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
 ```
 
-This is a particularly simple form of variant, in that the
-constructors don't have arguments.  Such variants are very similar to
+Here, the different cases of the variant are separated by pipes, and
+each case is a simple tag with no associated data.  This is similar to
 the enumerations found in many languages, including C and Java.
 
-We can construct instances of `basic_color` by simply writing out the
-constructors in question.
+We can construct instances of `basic_color` by simply writing down the
+tags.
 
 ```ocaml
 # [Black;Blue;Red];;
@@ -68,8 +56,6 @@ Hello Blue World!
 
 On most terminals, that last line is printed in blue.
 
-### Full terminal colors
-
 The simple enumeration of `basic_color` isn't enough to fully describe
 the set of colors that a modern terminal can display.  Many terminals,
 including the venerable `xterm`, support 256 different colors, broken
@@ -80,7 +66,7 @@ up into the following groups.
 - A 24-level grayscale ramp
 
 We can represent this more complicated color-space as a variant, but
-this time, the different constructors will have arguments, to describe
+this time, the different tags will have arguments, to describe
 the data available in each case.
 
 ```ocaml
@@ -92,8 +78,10 @@ the data available in each case.
 ;;
 ```
 
-In order to compute the color code for a `color`, we use pattern
-matching to break down the `color` variant into the appropriate cases.
+The definition of `color` uses more of the power of variants by
+attaching data to the different tags.  In order to compute the color
+code for a `color`, we use pattern matching to break down the `color`
+variant into the appropriate cases.
 
 ```ocaml
 # let color_to_int = function
@@ -142,10 +130,10 @@ Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 ```
 
-Here, the compiler is complaining that the `Basic` constructor is
+Here, the compiler is complaining that the `Basic` tag is
 assumed to have the wrong number of arguments.  If we fix that,
 however, the compiler flag will flag a second problem, which is that
-we haven't handled the new `Bold` constructor.
+we haven't handled the new `Bold` tag.
 
 ```ocaml
 # let color_to_int = function
@@ -404,7 +392,7 @@ through a simple example: designing a Boolean expression evaluator.
 Such a language can be useful anywhere you need to specify filters,
 which are used in everything from packet analyzers to mail clients.
 Below, we define a variant called `blang` (short for "binary
-language") with one constructor for each kind of expression we want to
+language") with one tag for each kind of expression we want to
 support.
 
 ```ocaml
@@ -421,7 +409,7 @@ Note that the definition of the type `blang` is recursive, meaning
 that a `blang` may contain other `blang`s.
 
 The only mysterious bit about `blang` is the role of `Base`.  The
-`Base` constructor is to let the language include a set of base
+`Base` tag is to let the language include a set of base
 predicates.  These base predicates tie the expressions in question to
 whatever our application is.  Thus, if you were writing a filter
 language for an email processor, your base predicates might specify
@@ -683,10 +671,10 @@ Error: This expression has type extended_color
 
 The problem is that `extended_color` and `color` are in the compiler's
 view distinct and unrelated types.  The compiler doesn't, for example,
-recognize any equality between the `Basic` constructor in the two
+recognize any equality between the `Basic` tag in the two
 types.
 
-What we essentially want to do is to share constructors between two
+What we essentially want to do is to share tags between two
 different types, and polymorphic variants let us do this.  First,
 let's rewrite `basic_color_to_int` and `color_to_int` using
 polymorphic variants.  The translation here is entirely
@@ -801,7 +789,7 @@ that uses `is_positive_permissive` passes in `Float` misspelled as
 ```
 
 With ordinary variants, such a typo would have been caught as an
-unknown constructor.  As a general matter, one should be wary about
+unknown tag.  As a general matter, one should be wary about
 mixing catch-all cases and polymorphic variants.
 
 </sidebar>
@@ -954,3 +942,4 @@ ties into OCaml's support for subtyping.  As we'll discuss further
 when we cover objects in [xref](#object-oriented-programming),
 subtyping brings in a lot of complexity, and most of the time, that's
 complexity you want to avoid.
+
