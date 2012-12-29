@@ -367,7 +367,7 @@ def process_locale(src_dir, dst_dir, locale, args):
     logging.debug("Creating locale destination directory")
     os.makedirs(locale_dst_dir)
     # Copy over figures.
-    copy_locale_dir(locale_src_dir, locale_dst_dir, "figures")
+    # copy_locale_dir(locale_src_dir, locale_dst_dir, "figures")
     # Process the index.
     logging.debug("Parsing table of contents")
     navigation_list = parse_locale_toc(locale_src_dir)
