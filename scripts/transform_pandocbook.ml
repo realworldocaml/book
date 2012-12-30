@@ -75,6 +75,9 @@ let _ =
     ~doc:"Docbook source to transform with the $(i,<part>) tags. This file should have been output from $(b,pandoc).") in
   let public = Arg.(value & flag & info ["public"] ~doc:"Filter the chapter list to only output the ones marked as $(i,public) in the $(i,CHAPTERS) file.") in
   let info = Term.info "transform_pandocbook" ~version:"1.0.0" ~doc:"customise the Real World OCaml Docbook" in
-  let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
-  match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
+  try
+    let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
+    match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
+  with Xmlm.Error ((line,col),e) ->
+    Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e)
 
