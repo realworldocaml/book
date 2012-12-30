@@ -3,15 +3,7 @@
    private chapters to hide them for certain builds (such as the website) *)
 
 open Core.Std
-
-type part =
-  |Basic
-  |Practical
-  |Advanced
-and chapter = {
-  part: part;
-  name: string;
-} with sexp
+open Chapter
 
 let part_to_string = function
   |Basic -> "I", "Basic Concepts"
@@ -65,8 +57,9 @@ module Transform = struct
     mk_tag "book"
 end
 
-let apply_transform parts_file book =
+let apply_transform parts_file book public =
   let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
+  let parts = if public then List.filter parts ~f:(fun c -> c.public) else parts in
   let o = Xmlm.make_output (`Channel stdout) in
   Xmlm.make_input (`Channel (open_in book)) |!
   in_tree |!
@@ -80,7 +73,8 @@ let _ =
      ~doc:"Sexp list of chapters and the parts that they map onto. See $(b,type chapter) in $(i,add_parts.ml) for the format of this file.") in
   let book = Arg.(required & pos 1 (some non_dir_file) None & info [] ~docv:"DOCBOOK"
     ~doc:"Docbook source to transform with the $(i,<part>) tags. This file should have been output from $(b,pandoc).") in
-  let info = Term.info "add_parts" ~version:"1.0.0" ~doc:"customise the Real World OCaml Docbook" in
-  let cmd_t = Term.(pure apply_transform $ parts $ book) in
+  let public = Arg.(value & flag & info ["public"] ~doc:"Filter the chapter list to only output the ones marked as $(i,public) in the $(i,CHAPTERS) file.") in
+  let info = Term.info "transform_pandocbook" ~version:"1.0.0" ~doc:"customise the Real World OCaml Docbook" in
+  let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
   match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
 
