@@ -1,8 +1,5 @@
 open Core.Std
 
-type 'a iterator =
-   < has_value : bool; value : 'a; next : unit; remove : unit >
-
 module Iterator : sig
   type 'a t
   val create
@@ -33,13 +30,13 @@ module DList : sig
    val is_empty : 'a t -> bool
 
    val push_front : 'a t -> data:'a -> unit
-   val front : 'a t -> 'a
-   val pop_front : 'a t -> 'a
+   val front      : 'a t -> 'a option
+   val pop_front  : 'a t -> 'a option
 
    val iter : ('a -> unit) -> 'a t -> unit
 
    val iterator : 'a t -> 'a Iterator.t
-   val find : 'a t -> data:'a -> 'a Iterator.t option
+   val find     : 'a t -> data:'a -> 'a Iterator.t option
 end = struct
   type 'a element =
     { value : 'a;
@@ -67,17 +64,17 @@ end = struct
       l := Some new_front
 
    let front = function
-    | { contents = Some { value; _ } } -> value
-    | { contents = None } -> raise (Invalid_argument "front")
+    | { contents = Some { value; _ } } -> Some value
+    | { contents = None } -> None
 
    let pop_front l =
      match !l with
-      | Some { value; next = None; _ } -> l := None; value
+      | Some { value; next = None; _ } -> l := None; Some value
       | Some { value; next = (Some el) as next; _ } ->
         l := next;
         el.previous <- None;
-        value
-      | None -> raise (Invalid_argument "pop_front")
+        Some value
+      | None -> None
 
    let iterator t =
      let current = ref !t in
