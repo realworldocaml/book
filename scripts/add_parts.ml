@@ -1,92 +1,86 @@
-(*
- Add <part> tags to organise the <chapter> tags better
-*)
+(* This script rewrites the RWO Docbook file (originally generated
+   by Pandoc, and adds <part> tags.  It can also filter public or
+   private chapters to hide them for certain builds (such as the website) *)
 
-let basic = [
- "prologue"; 
- "a-guided-tour";
- "variables-and-functions"; 
- "lists-options-and-patterns";
- "records";
- "variants" ]
+open Core.Std
 
-let practical = [
- "data-serialization-with-json-xml-and-s-expressions";
- "error-handling";
- "imperative-programming-1";
- "files-modules-and-programs";
- "functors-and-first-class-modules";
- "input-and-output";
- "concurrent-programming-with-async";
- "object-oriented-programming"
-]
+type part =
+  |Basic
+  |Practical
+  |Advanced
+and chapter = {
+  part: part;
+  name: string;
+} with sexp
 
-let advanced = [
- "understanding-the-runtime-system";
- "managing-external-memory-with-bigarrays";
- "inside-the-runtime";
- "performance-tuning-and-profiling";
- "packaging-and-build-systems";
- "parsing-with-ocamllex-and-ocamlyacc";
- "installation"
-]
+let part_to_string = function
+  |Basic -> "I", "Basic Concepts"
+  |Practical -> "II", "Practical Examples"
+  |Advanced -> "III", "Advanced Topics"
 
-let parts = [
-  "I","Basic Concepts", basic;
-  "II","Practical Examples", practical;
-  "III","Advanced Topics", advanced
-]
+let all_parts = [ Basic; Practical; Advanced ]
 
 open Xml_tree
+module Transform = struct
 
-let transform it =
-  let rec aux = function
+  (* Turn a <linkend> tag from Pandoc into an <xref> tag that OReilly want *)
+  let rewrite_linkend it =
+    let rec aux = function
     | Element ( (("","link"),[("","linkend"),v]), [Data "xref"]) ->
         Element ( (("","xref"),[("","linkend"),v]), [])
     | Element (tag, children) ->
-        Element (tag, List.map aux children)
+        Element (tag, List.map ~f:aux children)
     | x -> x
-  in
-  aux it
+    in aux it
 
-let get_chapters i =
-  let chapters = Hashtbl.create 13 in
-  match i with
-  |Element (((_,"book"),_), children) ->
-    let others = List.filter (
-      function
-      |Element ((("","chapter"),[("","id"),id]), contents) as chapter ->
-         Hashtbl.add chapters id chapter;
-         false
-      |_ -> true
-    ) children in
-    chapters, others
-  |_ -> failwith "<book> tag not found"
+  (* Assemble all the chapter tags separately from other tags.
+   * Returns a tuple of the (id*chapter) and other tags. *)
+  let split_chapters i =
+    match i with
+    |Element (((_,"book"),_), children) ->
+      List.partition_map ~f:(function
+        |Element ((("","chapter"),[("","id"),id]), _) as chapter ->
+           `Fst (id,chapter)
+        |other -> `Snd other
+      ) children
+    |_ -> failwith "<book> tag not found"
 
-(* Output the new XML with the <part> tags added *)
-let output_book chapters others =
-  (* Consume a chapter tag from the list of chapters *)
-  let mk_chapter id =
-    let chapter = Hashtbl.find chapters id in
-    Hashtbl.remove chapters id;
-    chapter
-  in
-  (* Construct a <part> tag *)
-  let mk_part (label,title,ids) = 
-    let title = mk_tag "title" [Data title] in
-    mk_tag ~attrs:["label",label] "part"  
-    (title :: (List.map mk_chapter ids))
-  in
-  (* Build the book and include the misc tags from the original parse *)
-  let contents = others @ (List.map mk_part parts) in
-  (* Verify that the chapters list is empty, or something is left over *)
-  if Hashtbl.length chapters > 0 then begin
-    prerr_endline "WARNING! We found some chapters that aren't in the add_parts.ml scripts";
-    Hashtbl.iter (fun k v -> prerr_endline k) chapters;
-    exit 1;
-  end;
-  mk_tag "book" contents
+  (* Given a list of input chapters and the book XML, output
+   * a book with <part> tags and the desired chapters *)
+  let add_parts parts i =
+    let chapters, other_tags = split_chapters i in
+    let mk_chapter id =
+      List.Assoc.find chapters id |! fun x ->
+      Option.value_exn ~message:("Unable to find " ^ id) x
+    in
+    (* Construct a <part> tag *)
+    let mk_part part =
+      let label_num,label_name = part_to_string part in
+      let title = mk_tag "title" [Data label_name] in
+      let chapters = List.filter_map parts ~f:(fun c ->
+        if c.part = part then Some (mk_chapter c.name) else None) in
+      mk_tag ~attrs:["label",label_num] "part" (title :: chapters)
+    in
+    other_tags @ (List.map ~f:mk_part all_parts) |!
+    mk_tag "book"
+end
 
-let t it =
-  let chapters, others = get_chapters it in
-  output_book chapters others
+let apply_transform parts_file book =
+  let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
+  let o = Xmlm.make_output (`Channel stdout) in
+  Xmlm.make_input (`Channel (open_in book)) |!
+  in_tree |!
+  fun (dtd, t) -> Transform.rewrite_linkend t |!
+  Transform.add_parts parts |!
+  fun t -> out_tree o (dtd, t)
+
+open Cmdliner
+let _ = 
+  let parts = Arg.(required & pos 0 (some non_dir_file) None & info [] ~docv:"CHAPTERS"
+     ~doc:"Sexp list of chapters and the parts that they map onto. See $(b,type chapter) in $(i,add_parts.ml) for the format of this file.") in
+  let book = Arg.(required & pos 1 (some non_dir_file) None & info [] ~docv:"DOCBOOK"
+    ~doc:"Docbook source to transform with the $(i,<part>) tags. This file should have been output from $(b,pandoc).") in
+  let info = Term.info "add_parts" ~version:"1.0.0" ~doc:"customise the Real World OCaml Docbook" in
+  let cmd_t = Term.(pure apply_transform $ parts $ book) in
+  match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
+
