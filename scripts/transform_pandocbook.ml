@@ -58,14 +58,18 @@ module Transform = struct
 end
 
 let apply_transform parts_file book public =
-  let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
-  let parts = if public then List.filter parts ~f:(fun c -> c.public) else parts in
-  let o = Xmlm.make_output (`Channel stdout) in
-  Xmlm.make_input (`Channel (open_in book)) |!
-  in_tree |!
-  fun (dtd, t) -> Transform.rewrite_linkend t |!
-  Transform.add_parts parts |!
-  fun t -> out_tree o (dtd, t)
+  try
+    let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
+    let parts = if public then List.filter parts ~f:(fun c -> c.public) else parts in
+    let o = Xmlm.make_output (`Channel stdout) in
+    Xmlm.make_input (`Channel (open_in book)) |!
+    in_tree |!
+    fun (dtd, t) -> Transform.rewrite_linkend t |!
+    Transform.add_parts parts |!
+    fun t -> out_tree o (dtd, t)
+  with Xmlm.Error ((line,col),e) -> (
+    Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e);
+    exit 1)
 
 open Cmdliner
 let _ = 
@@ -75,11 +79,5 @@ let _ =
     ~doc:"Docbook source to transform with the $(i,<part>) tags. This file should have been output from $(b,pandoc).") in
   let public = Arg.(value & flag & info ["public"] ~doc:"Filter the chapter list to only output the ones marked as $(i,public) in the $(i,CHAPTERS) file.") in
   let info = Term.info "transform_pandocbook" ~version:"1.0.0" ~doc:"customise the Real World OCaml Docbook" in
-  try
-    let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
-    match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
-  with Xmlm.Error ((line,col),e) -> (
-    Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e);
-    exit 1
-  )
-
+  let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
+  match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
