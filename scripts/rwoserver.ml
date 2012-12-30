@@ -26,8 +26,38 @@ let dataroot = "./fragments"
 let user = "ocamllabs"
 let repo = "rwo-comments"
 
-module Comment = struct
+let our_token =
+  Lwt_main.run (
+    match_lwt Github_cookie_jar.get "rwo" with
+    |None -> failwith "No 'rwo' github cookie found: add with git-jar`"
+    |Some auth -> return (Github.Token.of_auth auth)
+  )
 
+module Auth = struct
+  (* Keep an in-memory list of access token to usernames *)
+  let sessions = Hashtbl.create 1
+
+  let lookup (token:Github.Token.t) =
+    match Hashtbl.mem sessions token with
+    |true -> return (Hashtbl.find sessions token)
+    |false -> (* query Github for the user info *)
+      Github.(Monad.run (User.current_info ~token ()))
+      >>= fun user_info ->
+      let login = user_info.Github_t.user_info_login in
+      Hashtbl.add sessions token login; 
+      return login
+
+  let check ~milestone ~login =
+    let allowed_users = Config.allowed_users milestone in
+    List.mem login allowed_users
+
+  let denied =
+    let tmpl = Core.Std.In_channel.read_all "forbidden.html.in" in
+    fun ~login ->
+      Re_str.(global_replace (regexp_string "@USER@") login tmpl)
+end
+
+module Comment = struct
   let assoc_opt l id =
     try Some (List.assoc id l) with Not_found -> None
 
@@ -43,6 +73,8 @@ module Comment = struct
       (m.milestone_number,(m.milestone_title, m.milestone_description))::acc
     ) [] ms
 
+  let all_milestones = List.fold_left (fun a (_,(n,_)) -> n :: a) [] milestones
+
   (* Generate the index.html *)
   let index =
     let tmpl = Core.Std.In_channel.read_all "index.html.in" in
@@ -53,13 +85,6 @@ module Comment = struct
     in
     Re_str.(global_replace (regexp_string "@MILESTONES@") ms tmpl )
      
-  let our_token =
-    Lwt_main.run (
-      match_lwt Github_cookie_jar.get "rwo" with
-      |None -> failwith "No 'rwo' github cookie found: add with git-jar`"
-      |Some auth -> return (Github.Token.of_auth auth)
-    )
-
   let t = Hashtbl.create 1
   (* Read in a milestone into our memory cache *)
   let init ~milestone =
@@ -156,11 +181,24 @@ let dispatch_post ?body req =
     end
   end
 
+(* Server static file with no auth checks or anything special.
+ * Meant for the javascript/etc that is always needed without auth *)
+let dispatch_static req =
+  let uri = Request.uri req in
+  let fname = Server.resolve_file ~docroot ~uri in
+  Server.respond_file ~fname ()
+  
 (* detect Github code and set a cookie if so, otherwise serve static file *)
-let dispatch req =
-  let headers =
-    (* Always set the github_client_id Cookie if not already set *)
-    let current_cookies = Cookie.Cookie_hdr.extract (Request.headers req) in
+let dispatch ~milestone req =
+  let current_cookies = Cookie.Cookie_hdr.extract (Request.headers req) in
+  (* Extract the access_token so we can do an ACL check *)
+  let access_token =
+    match List.mem_assoc "github_access_token" current_cookies with
+    |false -> None
+    |true -> Some (Github.Token.of_string (List.assoc "github_access_token" current_cookies))
+  in
+  (* Always set the github_client_id Cookie if not already set *)
+  let headers = 
     match List.mem_assoc "github_client_id" current_cookies with
     |false -> 
       let t = Cookie.Set_cookie_hdr.make ("github_client_id", Config.client_id) in
@@ -168,23 +206,39 @@ let dispatch req =
       Header.init_with k v
     |true -> Header.init ()
   in
-  (* See if we have a code in the GET header (signifying a Github redirect)  *)
-  match Request.get_param req "code" with
-  |None -> begin (* serve static file *)
-    let uri = Request.uri req in
-    let fname = Server.resolve_file ~docroot ~uri in
-    let path = Uri.path uri in
-    let pathlen = String.length path in
-    match Uri.path uri with
-    |path when pathlen>0 && path.[pathlen-1] = '/' ->
-      let fname = fname ^ "index.html" in
-      Server.respond_file ~headers ~fname ()
-    |path when is_directory fname ->
-      Server.respond_redirect ~headers ~uri:(Uri.with_path uri (path ^ "/")) ()
-    |path ->
-      Server.respond_file ~headers ~fname ()
+  (* See if we have a code in the GET header (signifying a Github redirect) *)
+  let code = Request.get_param req "code" in
+  match access_token, code with
+  (* Have access token and no code, so serve file *)
+  |Some access_token, None -> begin 
+    (* Check that the user is allowed to access this page *)
+    lwt login = Auth.lookup access_token in
+    match Auth.check ~milestone ~login with
+    |false -> Server.respond_string ~status:`Forbidden ~body:(Auth.denied ~login) ()
+    |true -> begin
+      let uri = Request.uri req in
+      let fname = Server.resolve_file ~docroot ~uri in
+      let path = Uri.path uri in
+      let pathlen = String.length path in
+      match Uri.path uri with
+      |path when pathlen>0 && path.[pathlen-1] = '/' ->
+        let fname = fname ^ "index.html" in
+        Server.respond_file ~headers ~fname ()
+      |path when is_directory fname ->
+        Server.respond_redirect ~headers ~uri:(Uri.with_path uri (path ^ "/")) ()
+      |path ->
+        Server.respond_file ~headers ~fname ()
+    end
   end
-  |Some code -> begin 
+  (* No access token and no code, so redirect to Github oAuth login *)
+  |None, None ->
+    let redirect_uri = Uri.(with_path (of_string "http://www.realworldocaml.org") (Request.path req)) in
+    let uri = Github.URI.authorize ~scopes:[`Public_repo] ~redirect_uri 
+      ~client_id:Config.client_id () in
+    printf "Redirect for auth to %s\n%!" (Uri.to_string uri);
+    Server.respond_redirect ~headers ~uri ()
+  (* Have a code parameter, signifying a Github redirect *)
+  |_, Some code -> begin 
     (* talk to Github and get a client id and set the cookie *)
     lwt token = Config.(Github.Token.of_code ~client_id ~client_secret ~code ()) in
     match token with
@@ -206,24 +260,31 @@ let callback con_id ?body req =
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
       (Request.params req)));
-  match Request.meth req with
-  |`POST -> dispatch_post ?body req
-  |`GET -> begin
-    let path = Uri.path (Request.uri req) in
-    let is_index =
-       (path = "") || (path = "/") ||
-      Core.Std.String.is_prefix ~prefix:"/media" path in
-    match Uri.path (Request.uri req) with
-    |""|"/" -> Server.respond_string ~status:`OK ~body:Comment.index ()
-    |_ -> begin
-      match is_index, (check_auth req) with
-      |true,_ | _,true -> dispatch req
-      |false, false -> Server.respond_need_auth (`Basic "Real World OCaml") ()
-     end
+  (* Check that the host is www.realworldocaml.org, as the Github redirect requires
+   * the exact match, or it'll reject the cross-domain Javascript *)
+  match Request.header req "host" with
+  |Some "www.realworldocaml.org" -> begin
+    match Request.meth req with
+    |`POST -> dispatch_post ?body req
+    |`GET -> begin
+      let path = Uri.path (Request.uri req) in
+      let bits = Re_str.(split (regexp_string "/") path) in
+      match bits with
+      |[] -> Server.respond_string ~status:`OK ~body:Comment.index ()
+      |"media"::_ -> dispatch_static req (* No auth required for support files *)
+      |_::"media"::_ -> dispatch_static req (* No auth required for support files *)
+      |milestone::_ when List.mem milestone Comment.all_milestones ->
+        dispatch ~milestone req
+      |_ -> Server.respond_not_found ()
     end
-  |_ -> Server.respond_not_found ()
+    |_ -> Server.respond_not_found ()
+  end
+  |Some _ | None -> (* redirect to www.realworldocaml.org *)
+    print_endline "redirecting to www.realworldocaml.org";
+    let uri = Uri.with_host (Request.uri req) (Some "www.realworldocaml.org") in
+    Server.respond_redirect ~uri ()
 
-let server_t =
+let _ =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let conn_closed con_id () = () in
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
