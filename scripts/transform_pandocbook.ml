@@ -78,6 +78,8 @@ let _ =
   try
     let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
     match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
-  with Xmlm.Error ((line,col),e) ->
-    Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e)
+  with Xmlm.Error ((line,col),e) -> (
+    Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e);
+    exit 1
+  )
 
