@@ -30,18 +30,18 @@ and modules, functors, and algebraic data types offer a wide range of
 ways to express program structure.  In fact, many seasoned OCaml
 programmers rarely use classes and objects, if at all.
 
-What exactly is object-oriented programming?  Mitchell [6] points out
+What exactly is object-oriented programming?  Mitchell (TODO: xref) points out
 four fundamental properties.
 
 * _Abstraction_: the details of the implementation are hidden in the
   object; the interface is just the set of publically-accessible
   methods.
-* _Subtyping_: if an object `a` has all the functionality of an object
-  `b`, then we may use `a` in any context where `b` is expected.
 * _Dynamic lookup_: when a message is sent to an object, the method to
   be executed is determined by the implementation of the object, not
   by some static property of the program.  In other words, different
   objects may react to the same message in different ways.
+* _Subtyping_: if an object `a` has all the functionality of an object
+  `b`, then we may use `a` in any context where `b` is expected.
 * _Inheritance_: the definition of one kind of object can be re-used
   to produce a new kind of object.
 
@@ -58,14 +58,18 @@ parameterize your module code so that some part of it can be
 implemented later, you would write a function/functor.  This is more
 explicit, but often more verbose than overriding a method in a class.
 
-In general, a rule of thumb might be: use classes and objects in
-situations where dynamic binding is a big win, for example if you have
-many similar variations in the implementation of a concept.  Real
-world examples are fairly rare, but one good example is Xavier Leroy's
-[Cryptokit][Cryptokit], which provides a variety of cryptographic
-primitives that can be combined in building-block style.
+In general, a rule of thumb might be: use classes and objects in situations
+where dynamic binding is a big win, for example if you have many similar
+variations in the implementation of a concept.  Two good examples is Xavier
+Leroy's [Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit),
+which provides a variety of cryptographic primitives that can be combined in
+building-block style, and the [Camlgraphics](TODO XREF) library which
+manipulates various graphical file formats.
 
-[Cryptokit]: http://gallium.inria.fr/~xleroy/software.html#cryptokit
+In this chapter, we'll introduce you to the basics of object definition and use
+in OCaml, and then demonstrate their use with an example using Cryptokit.
+We'll return to the more advanced areas of object use later on in the book in
+[xref](#object-subtyping-and-inheritance).
 
 ## OCaml objects ##
 
