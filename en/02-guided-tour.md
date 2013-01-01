@@ -5,24 +5,21 @@ small examples that cover most of the major features of the language.
 This should give a sense of what OCaml can do, without getting too
 deep in any one topic.
 
-We'll present this guided tour using the `utop` OCaml toplevel, an
-interactive shell that lets you type in expressions and evaluate them
+We'll present this guided tour using the `utop` OCaml toplevel, a
+shell that lets you type in expressions and evaluate them
 interactively.  When you get to the point of running real programs,
 you'll want to leave the toplevel behind, but it's a great tool for
 getting to know the language.
 
-You should have a working toplevel as you go through this chapter, so
-you can try out the examples as you go.  There is a zero-configuration
-browser-based toplevel that you can use for this, which you can find here:
-
-     http://realworldocaml.org/TODO
+Make sure you have a working toplevel as you go through this chapter, so
+you can try out the examples as you go.
 
 <note>
-<title>Getting the interactive top-level</title>
+<title>Installing the interactive top-level</title>
 
-Before proceeding, make sure you have the Core library installed. You can do
-this easily via the OPAM package manager, which is explained in
-[xref](#installation).  In a nutshell, you need to:
+The easiest way to get `utop` is via the OPAM package manager, which is
+explained in [xref](#installation).  You'll need to also have the Core standard
+library installed.  In a nutshell, you need to:
 
 ```
 $ opam init
@@ -32,7 +29,7 @@ $ eval `opam config -env`
 $ utop
 ```
 
-You can exit utop by pressing `control-D` and return.
+You can exit `utop` by pressing `control-D` and return.
 
 </note>
 
