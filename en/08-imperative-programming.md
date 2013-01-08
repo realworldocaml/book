@@ -1,4 +1,4 @@
-# Imperative Programming
+# Imperative Programming and Input/Output
 
 The OCaml programming language is _functional_, meaning that functions are
 first-class values that can be passed around like any other.  However, this
@@ -1502,6 +1502,132 @@ Hello world
 1
 2
 3
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Formatted output with Printf
+
+Output with the standard library functions like `output_char`, `output_int`,
+`output_string`, etc. is simple, but there is little flexibility, and it is
+often verbose.  OCaml also supports _formatted_ output using the `printf`
+function, which is modeled after `printf` in the C standard library.  The
+`printf` function takes a _format string_ that describe what to print and how to
+format it, as well as arguments to be printed.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+printf format arg1 ... argN
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The format string can contain character literals, which are printed without
+change, as well as conversion specifications, which specify how to print an
+value that is provided as an argument.  A conversion specification begins with a
+percent (`%`) character, some flags, and a type specification.  For example,
+`%d` is a conversion specification for printing an integer, `%s` prints a
+string, and `%f` prints a floating-point value.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# open Printf;;
+# printf "int=%d string=%s float=%f\n" 10 "abc" 1e5;;
+int=10 string=abc float=100000.000000
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Conversions can also specify additional parameters for formatting the value.
+The general form has flags, width specified in number of characters, and decimal
+precision used for printing floating-point values.  These parameters are
+optional.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+% [flags] [width] [.precision] type
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are several flags of interest, the flag `'-'` left-justifies the output,
+and the flag `'0'` pads numerical values with leading zeroes.
+Let's write a program to print a price list in a tabular form.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let print_prices prices =
+    print_string "--------------------------------\n\
+                  | Size   | Hexcode    | Price  |\n\
+                  --------------------------------\n";
+    List.iter (fun (size, code, price) ->
+          printf "| %-6s | 0x%08x | %6.2f |\n" size code price) prices;
+    print_string "--------------------------------\n";;
+val print_prices : (string * int * float) list -> unit = <fun>
+# print_prices
+   [("small", 0x35, 1.02);
+    ("medium", 0x7a1, 50.75);
+    ("large", 0xbad, 400.8);
+    ("vente", 0x11, 4136.);
+    ("enormous", 100000, 100.)];;
+--------------------------------
+| Size   | Hexcode    | Price  |
+--------------------------------
+| small  | 0x00000035 |   1.02 |
+| medium | 0x000007a1 |  50.75 |
+| large  | 0x00000bad | 400.80 |
+| vente  | 0x00000011 | 4136.00 |
+| enormous | 0x000186a0 | 100.00 |
+--------------------------------
+- : unit = ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The format specification `"| %-6s | 0x%08x | %6.2f |\n"` specifies that the
+first argument is a string that is to be left-justified and printed six
+characters wide; the second argument is an integer that should be printed in
+hexidecimal (format type `x`) eight characters wide with leading zeroes; and the
+third argument is a floating point value that should be printed right-justified,
+six characters wide, with two digits after the decimal point.
+
+Note that the width specifies a _minimum_ width.  If the value requires more width to print completely the width is increased.  The price `4136.00` and the size `enormous` both overflow the width, breaking the tabular form.
+
+### Strong typing and format strings
+
+In OCaml, `printf` is type safe.  The format is checked against the arguments at
+compile time, and rejected if the format string is malformed, or if the format
+does not match the arguments.  In the following examples, `%v` is not a valid
+conversion specification, and floating-point values can't be printed with a
+decimal conversion specification.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# printf "Hello %v" 1;;
+Characters 7-17:
+  printf "Hello %v" 1;;
+         ^^^^^^^^^^
+Error: Bad conversion %v, at char number 6 in format string ``Hello %v''
+# printf "Hello %d" 1.;;
+Characters 18-20:
+  printf "Hello %d" 1.;;
+                    ^^
+Error: This expression has type float but an expression was expected of type
+         int
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A consequence of strong typing is that the format string must ultimately be a
+string _literal_, known at compile time.  It can't be computed by the program at
+runtime.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let fmt = "%s";;
+val fmt : string = "%s"
+# printf fmt "Hello";;
+Characters 7-10:
+  printf fmt "Hello";;
+         ^^^
+Error: This expression has type string but an expression was expected of type
+         ('a -> 'b, out_channel, unit) format =
+           ('a -> 'b, out_channel, unit, unit, unit, unit) format6
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Actually, this is not entirely true.  The `printf` function takes a format
+string of type `('a, 'b, 'c) format` and it is only the type conversion from
+`string` to `format` where the string is required to be a literal.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+# let fmt : ('a, 'b, 'c) format = "Size: %s.\n";;
+val fmt : (string -> 'c, 'b, 'c) format = <abstr>
+# printf fmt "small";;
+Size: small
 - : unit = ()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
