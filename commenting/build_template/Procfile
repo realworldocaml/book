@@ -1,1 +1,0 @@
-web: gunicorn ocaml_commenting.wsgi:application -c gunicorn.conf

@@ -1,2 +1,5 @@
-true:package(xmlm)
+true:package(xmlm,cmdliner)
 true:thread,debug,annot
+<*.ml{,i}>:syntax(camlp4o)
+true: package(core,threads,sexplib.syntax)
+<githubbot.*> or <config.*> or <rwoserver.*>:package(lwt.unix,github.unix,lwt.syntax)

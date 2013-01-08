@@ -76,12 +76,12 @@ def parse_args():
     )
     parser.add_argument("--github-user",
         dest = "github_user",
-        default = "etianen",  # TODO: Make the public repo owner default.
+        default = "ocamllabs",  # TODO: Make the public repo owner default.
         help = "The user that owns the GitHub repo to use for issues.",
     )
     parser.add_argument("--github-repo",
         dest = "github_repo",
-        default = "OCaml-Book",
+        default = "rwo-comments",
         help = "The name of the GitHub repo to use for issues.",
     )
     parser.add_argument("--github-milestone",
@@ -361,13 +361,13 @@ def process_locale(src_dir, dst_dir, locale, args):
     locale_src_dir = os.path.join(src_dir, locale, "html")
     logging.debug("Locale source directory is {}".format(locale_src_dir))
     # Process the dst dir.
-    locale_dst_dir = os.path.join(dst_dir, "ocaml_commenting", "www", locale, "html")
+    locale_dst_dir = os.path.join(dst_dir, locale, "html")
     logging.debug("Locale destination directory is {}".format(locale_dst_dir))
     # Create the dst dir.
     logging.debug("Creating locale destination directory")
     os.makedirs(locale_dst_dir)
     # Copy over figures.
-    copy_locale_dir(locale_src_dir, locale_dst_dir, "figures")
+    # copy_locale_dir(locale_src_dir, locale_dst_dir, "figures")
     # Process the index.
     logging.debug("Parsing table of contents")
     navigation_list = parse_locale_toc(locale_src_dir)

@@ -1,53 +1,41 @@
 # Variants
 
-Variant types are used to represent multiple different possibilities,
-where each possibility is identified by a different _constructor_.
-The syntax of a variant type declaration is as follows.
+Variant types are one of the most useful features of OCaml, and also
+one of the most unusual.  Variants allow you to represent data that
+may take on multiple different forms, where each form is marked by an
+explicit tag.  Let's consider a simple concrete example of how to use
+variant types: dealing with terminal colors.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
-type <variant-name> =
-  | <Constructor1> [of <arg1> * .. * <argn>]?
-  | <Constructor2> [of <arg1> * .. * <argn>]?
-  ...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Almost all terminals support a set of 8 basic colors.  We can
+represent these with the following variant type.
 
-The basic purpose of variants is to effectively represent data that
-may have multiple different cases.  We can give a better sense of the
-utility of variants by walking through a concrete example, which we'll
-do by thinking about how to represent terminal colors.
-
-## Example: terminal colors
-
-Almost all terminals support a set of 8 basic colors, which we can
-represent with the following variant type.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type basic_color =
-    Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
+```
 
-This is a particularly simple form of variant, in that the
-constructors don't have arguments.  Such variants are very similar to
+Here, the different cases of the variant are separated by pipes, and
+each case is a simple tag with no associated data.  This is similar to
 the enumerations found in many languages, including C and Java.
 
-We can construct instances of `basic_color` by simply writing out the
-constructors in question.
+We can construct instances of `basic_color` by simply writing down the
+tags.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # [Black;Blue;Red];;
 - : basic_color list = [Black; Blue; Red]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Pattern matching can be used to process a variant.  The following
 function uses pattern matching to convert `basic_color` to a
 corresponding integer for use in creating color-setting escape codes.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
 val basic_color_to_int : basic_color -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the exhaustiveness checking on pattern matches means that
 the compiler will warn us if we miss a color.
@@ -55,7 +43,7 @@ the compiler will warn us if we miss a color.
 Using this function, we can generate the escape codes to change the
 color of a given string.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let color_by_number number text =
     sprintf "\027[38;5;%dm%s\027[0m" number text;;
   val color_by_number : int -> string -> string = <fun>
@@ -64,11 +52,9 @@ val s : string = "\027[38;5;4mHello Blue World!\027[0m"
 # printf "%s\n" s;;
 Hello Blue World!
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 On most terminals, that last line is printed in blue.
-
-### Full terminal colors
 
 The simple enumeration of `basic_color` isn't enough to fully describe
 the set of colors that a modern terminal can display.  Many terminals,
@@ -80,22 +66,24 @@ up into the following groups.
 - A 24-level grayscale ramp
 
 We can represent this more complicated color-space as a variant, but
-this time, the different constructors will have arguments, to describe
+this time, the different tags will have arguments, to describe
 the data available in each case.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type weight = Regular | Bold
   type color =
   | Basic of basic_color * weight (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color cube *)
   | Gray  of int                   (* 24 grayscale levels *)
 ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
-In order to compute the color code for a `color`, we use pattern
-matching to break down the `color` variant into the appropriate cases.
+The definition of `color` uses more of the power of variants by
+attaching data to the different tags.  In order to compute the color
+code for a `color`, we use pattern matching to break down the `color`
+variant into the appropriate cases.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
@@ -103,7 +91,7 @@ matching to break down the `color` variant into the appropriate cases.
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i ;;
 val color_to_int : color -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 <sidebar><title>Catch-all cases and refactoring</title>
 
@@ -115,14 +103,14 @@ with variant types.
 Consider what would happen if we were to change the definition of
 `color` to the following.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type color =
   | Basic of basic_color     (* basic colors *)
   | Bold  of basic_color     (* bold basic colors *)
   | RGB   of int * int * int (* 6x6x6 color cube *)
   | Gray  of int             (* 24 grayscale levels *)
 ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We've essentially broken out the `Basic` case into two cases, `Basic`
 and `Bold`, and `Basic` has changed from having two arguments to one.
@@ -130,7 +118,7 @@ and `Bold`, and `Basic` has changed from having two arguments to one.
 variant, and if we try to compile that same code again, the compiler
 will notice the discrepancy.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
@@ -140,14 +128,14 @@ will notice the discrepancy.
 Characters 40-60:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
-Here, the compiler is complaining that the `Basic` constructor is
+Here, the compiler is complaining that the `Basic` tag is
 assumed to have the wrong number of arguments.  If we fix that,
 however, the compiler flag will flag a second problem, which is that
-we haven't handled the new `Bold` constructor.
+we haven't handled the new `Bold` tag.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
@@ -157,18 +145,18 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 Bold _
 val color_to_int : color -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Fixing this now leads us to the correct implementation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
     | Bold  basic_color -> 8 + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i ;;
 val color_to_int : color -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 As you can see, the type system identified for us the places in our
 code that needed to be fixed.  This refactoring isn't entirely free,
@@ -183,14 +171,14 @@ the first 16 colors (the 8 `basic_color`s in regular and bold) in the
 normal way, but rendering everything else as white.  We might have
 written the function as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let oldschool_color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | _ -> basic_color_to_int White;;
 val oldschool_color_to_int : color -> int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But because the catch-all case encompasses all possibilities, the type
 system will no longer warn us that we have missed the new `Bold` case
@@ -203,7 +191,7 @@ behavior of the code, but we have improved our robustness to change.
 Using the above function, we can print text using the full set of
 available colors.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let color_print color s =
      printf "%s\n" (color_by_number (color_to_int color) s);;
 val color_print : color -> string -> unit = <fun>
@@ -213,7 +201,7 @@ A bold red!
 # color_print (Gray 4) "A muted gray...";;
 A muted gray...
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Combining records and variants
 
@@ -221,7 +209,7 @@ Records and variants are most effective when used in concert.
 Consider again the type `Log_entry.t` from section [[REUSING FIELD
 NAMES]]:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -230,7 +218,7 @@ module Log_entry = struct
       message: string;
     }
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This record type combines multiple pieces of data into one value.  In
 particular, a single `Log_entry.t` has a `session_id` _and_ a `time`
@@ -239,11 +227,11 @@ think of record types as acting as conjunctions.  Variants, on the
 other hand, are disjunctions, letting you represent multiple
 possibilities, as in the following example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type client_message = | Logon of Logon.t
                       | Heartbeat of Heartbeat.t
                       | Log_entry of Log_entry.t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a `Log_entry`.
 If we want to write code that processes messages generically, rather
@@ -265,7 +253,7 @@ accumulator is a pair of:
 
 Here's the concrete code.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let messages_for_user user messages =
   let (user_messages,_) =
     List.fold messages ~init:([],String.Set.empty)
@@ -287,19 +275,19 @@ let messages_for_user user messages =
       )
   in
   List.rev user_messages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 There's one awkward bit about the code above, which is the calculation
 of the session ids.  In particular, we have the following repetitive
 snippet of code:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
   let session_id = match message with
     | Logon     m -> m.Logon.session_id
     | Heartbeat m -> m.Heartbeat.session_id
     | Log_entry m -> m.Log_entry.session_id
   in
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This code effectively computes the session id for each underlying
 message type.  The repetition in this case isn't that bad, but would
@@ -310,7 +298,7 @@ separate which parts are shared and which are common.  The first step
 is to cut down the definitions of the per-message records to just
 contain the unique components of each message.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Log_entry = struct
   type t = { important: bool;
              message: string;
@@ -326,33 +314,33 @@ module Logon = struct
              credentials: string;
            }
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can then define a variant type that covers the different possible
 unique components.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type details =
 | Logon of Logon.t
 | Heartbeat of Heartbeat.t
 | Log_entry of Log_entry.t
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Separately, we need a record that contains the fields that are common
 across all messages.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Common = struct
   type t = { session_id: string;
              time: Time.t;
            }
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A full message can then represented as a pair of a `Common.t` and a
 `details`.  Using this, we can rewrite our example above as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let messages_for_user user messages =
   let (user_messages,_) =
     List.fold messages ~init:([],String.Set.empty)
@@ -370,7 +358,7 @@ let messages_for_user user messages =
       )
   in
   List.rev user_messages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the more complex match statement for computing the session
 id has been replaced with the simple expression
@@ -384,13 +372,13 @@ message, we can use `Common.t * Logon.t` to represent a logon message.
 Thus, if we had functions for handling individual message types, we
 could write a dispatch function as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let handle_message server_state (common,details) =
   match details with
   | Log_entry m -> handle_log_entry server_state (common,m)
   | Logon     m -> handle_logon     server_state (common,m)
   | Heartbeat m -> handle_heartbeat server_state (common,m)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And it's explicit at the type level that `handle_log_entry` sees only
 `Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
@@ -404,10 +392,10 @@ through a simple example: designing a Boolean expression evaluator.
 Such a language can be useful anywhere you need to specify filters,
 which are used in everything from packet analyzers to mail clients.
 Below, we define a variant called `blang` (short for "binary
-language") with one constructor for each kind of expression we want to
+language") with one tag for each kind of expression we want to
 support.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type 'a blang =
   | Base  of 'a
   | Const of bool
@@ -415,30 +403,30 @@ support.
   | Or    of 'a blang list
   | Not   of 'a blang
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that the definition of the type `blang` is recursive, meaning
 that a `blang` may contain other `blang`s.
 
 The only mysterious bit about `blang` is the role of `Base`.  The
-`Base` constructor is to let the language include a set of base
+`Base` tag is to let the language include a set of base
 predicates.  These base predicates tie the expressions in question to
 whatever our application is.  Thus, if you were writing a filter
 language for an email processor, your base predicates might specify
 the tests you would run against an email.  Here's a simple example of
 how you might define a base predicate type.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type mail_field = To | From | CC | Date | Subject
   type mail_predicate = { field: mail_field;
                           contains: string }
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And now, we can construct a simple expression that uses
 `mail_predicate` for its base predicate.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # And [ Or [ Base { field = To; contains = "doligez" } ;
              Base { field = CC; contains = "doligez" } ];
         Base { field = Subject; contains = "runtime" } ];;
@@ -448,13 +436,13 @@ And
    [Base {field = To; contains = "doligez"};
     Base {field = CC; contains = "doligez"}];
   Base {field = Subject; contains = "runtime"}]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Being able to construct such expressions is all well and good, but to
 do any real work, we need some way to evaluate an expression.  Here's
 a piece of code to do just that.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rec eval blang base_eval =
     let eval' blang = eval blang base_eval in
     match blang with
@@ -465,7 +453,7 @@ a piece of code to do just that.
     | Not   blang  -> not (eval' blang)
   ;;
 val eval : 'a blang  -> ('a -> bool) -> bool = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The structure of the code is pretty straightforward --- we're just
 walking over the structure of the data, doing the appropriate thing at
@@ -477,7 +465,7 @@ boilerplate from the recursive calls to `eval`.
 We can also write code to transform an expression, for example, by
 simplifying it.  Here's a function to does just that.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rec simplify = function
     | Base _ | Const _ as x -> x
     | And blangs ->
@@ -495,30 +483,30 @@ simplifying it.  Here's a function to does just that.
       | blang -> Not blang
   ;;
 val simplify : 'a blang -> 'a blang = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 One thing to notice about the above code is that it uses a catch-all
 case in the very last line within the `Not` case.  It's generally
 better to be explicit about the cases you're ignoring.  Indeed, if we
 change this snippet of code to be more explicit:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
     | Not blang ->
       match simplify blang with
       | Const bool -> Const (not bool)
       | (And _ | Or _ | Base _ | Not _) -> Not blang
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 we can immediately notice that we've missed an important
 simplification.  Really, we should have simplified double negation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
     | Not blang ->
       match simplify blang with
       | Const b -> Const (not b)
       | Not blang -> blang
       | (And _ | Or _ | Base _ ) -> Not blang
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This example is more than a toy.  There's a module very much in this
 spirit already exists as part of Core, and gets a lot of practical use
@@ -539,7 +527,7 @@ variants by the leading backtick.  Pleasantly enough, you can create a
 polymorphic variant without first writing an explicit type
 declaration.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let three = `Int 3;;
 val three : [> `Int of int ] = `Int 3
 # let four = `Float 4.;;
@@ -549,7 +537,7 @@ val nan : [> `Not_a_number ] = `Not_a_number
 # [three; four; nan];;
 - : [> `Float of float | `Int of int | `Not_a_number ] list =
 [`Int 3; `Float 4.; `Not_a_number]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Variant types are inferred automatically from their use, and when we
 combine variants whose types contemplate different tags, the compiler
@@ -558,7 +546,7 @@ infers a new type that knows about both all those tags.
 The type system will complain, however, if it sees incompatible uses
 of the same tag:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let five = `Int "five";;
 val five : [> `Int of string ] = `Int "five"
 # [three; four; five];;
@@ -569,7 +557,7 @@ Error: This expression has type [> `Int of string ]
        but an expression was expected of type
          [> `Float of float | `Int of int ]
        Types for tag `Int are incompatible
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `>` at the beginning of the variant types above is critical,
 because it marks the types as being open to combination with other
@@ -581,13 +569,13 @@ can roughly translate `>` to "these tags or more".
 OCaml will in some cases infer a variant type with ` <`, to indicate
 "these tags or less", as in the following example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let is_positive = function
      | `Int   x -> x > 0
      | `Float x -> x > 0.
   ;;
 val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `<` is there because `is_positive` has no way of dealing with
 values that have tags other than `` `Float of float`` or `` `Int of
@@ -598,11 +586,11 @@ lower bounds.  If the same type is both an upper and a lower bound, we
 end up with an _exact_ polymorphic variant type, which has neither
 marker.  For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let exact = List.filter ~f:is_positive [three;four];;
 val exact : [ `Float of float | `Int of int ] list
    = [`Int 3; `Float 4.]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 <sidebar><title>Polymorphic variants and casts</title>
 
@@ -611,15 +599,15 @@ variant types that work without any extra help from the user.  In some
 cases, however, OCaml can't figure out how to make the types work on
 its own, and requires some extra annotations.  
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```ocaml
+```
 
 </sidebar>
 
 Perhaps surprisingly, we can also create polymorphic variant types
 that have different lower and upper bounds.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 let is_positive = function
      | `Int   x -> Ok (x > 0)
      | `Float x -> Ok (x > 0.)
@@ -632,7 +620,7 @@ val is_positive :
   - : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ]
     List.t
 = [`Int 3; `Float 4.]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, the inferred type states that the tags can be no more than ``
 `Float``, `` `Int`` and `` `Not_a_number``, and must contain at least
@@ -649,50 +637,50 @@ have a new terminal type that adds yet more colors, say, by adding an
 alpha channel so you can specify translucent colors.  We could model
 this extended set of colors as follows, using an ordinary variant.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # type extended_color =
   | Basic of basic_color * weight  (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color space *)
   | Gray  of int                   (* 24 grayscale levels *)
   | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We want to write a function `extended_color_to_int`, that works like
 `color_to_int` for all of the old kinds of colors, with new logic only
 for handling colors that include an alpha channel.  We might think we
 could write the function to do this as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let extended_color_to_int = function
     | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
   ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This looks reasonable enough, but it leads to the following type
 error.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 Characters 93-98:
     | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
                                                           ^^^^^
 Error: This expression has type extended_color
        but an expression was expected of type color
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem is that `extended_color` and `color` are in the compiler's
 view distinct and unrelated types.  The compiler doesn't, for example,
-recognize any equality between the `Basic` constructor in the two
+recognize any equality between the `Basic` tag in the two
 types.
 
-What we essentially want to do is to share constructors between two
+What we essentially want to do is to share tags between two
 different types, and polymorphic variants let us do this.  First,
 let's rewrite `basic_color_to_int` and `color_to_int` using
 polymorphic variants.  The translation here is entirely
 straightforward.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let basic_color_to_int = function
     | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
     | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
@@ -715,7 +703,7 @@ val color_to_int :
    | `Gray of int
    | `RGB of int * int * int ] ->
   int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Now we can try writing `extended_color_to_int`.  The key issue with
 this code is that `extended_color_to_int` needs to invoke
@@ -725,7 +713,7 @@ match.  In particular, in the following code, the type of the variable
 `color` includes only the tags `` `Basic``, `` `RGB`` and `` `Gray``,
 and not `` `RGBA``.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
@@ -739,14 +727,14 @@ val extended_color_to_int :
    | `RGB of int * int * int
    | `RGBA of int * int * int * int ] ->
   int = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The above code is more delicately balanced than one might imagine.
 In particular, if we use a catch-all case instead of an explicit
 enumeration of the cases, the type is no longer narrowed, and so
 compilation fails.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | color -> color_to_int color
@@ -763,7 +751,7 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
           | `Gray of int
           | `RGB of int * int * int ]
        The second variant type does not allow tag(s) `RGBA
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 <sidebar><title>Polymorphic variants and catch-all cases</title>
 
@@ -773,7 +761,7 @@ the possible tags to those that can be handled by the match.  If we
 add a catch-all case to our match statement, we end up with a function
 with a lower bound.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let is_positive_permissive = function
      | `Int   x -> Ok (x > 0)
      | `Float x -> Ok (x > 0.)
@@ -786,7 +774,7 @@ val is_positive_permissive :
 - : (bool, string) Result.t = Ok false
 # is_positive_permissive (`Ratio (3,4));;
 - : (bool, string) Result.t = Error "Unknown number type"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Catch-all cases are error-prone even with ordinary variants, but they
 are especially so with polymorphic variants.  That's because you have
@@ -795,13 +783,13 @@ Such code is particularly vulnerable to typos.  For instance, if code
 that uses `is_positive_permissive` passes in `Float` misspelled as
 `Floot`, the erroneous code will compile without complaint.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # is_positive_permissive (`Floot 3.5);;
 - : (bool, string) Result.t = Error "Unknown number type"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 With ordinary variants, such a typo would have been caught as an
-unknown constructor.  As a general matter, one should be wary about
+unknown tag.  As a general matter, one should be wary about
 mixing catch-all cases and polymorphic variants.
 
 </sidebar>
@@ -811,7 +799,7 @@ vulnerable to typos.  Let's consider how we might write this code as a
 proper library, including a proper `mli`.  The interface might look
 something like this:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* file: terminal_color.mli *)
 
 open Core.Std
@@ -831,13 +819,13 @@ type extended_color =
 
 val color_to_int          : color -> int
 val extended_color_to_int : extended_color -> int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, `extended_color` is defined as an explicit extension of
 `color`.  Also, notice that we defined all of these types as exact
 variants.   Now here's what the implementation might look like.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 open Core.Std
 
 type basic_color =
@@ -868,7 +856,7 @@ let extended_color_to_int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Grey x -> 2000 + x
   | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this case, a change was made to `extended_color_to_int`, to add
 special-case handling for the color gray, rather than using
@@ -880,31 +868,31 @@ the compiler didn't complain.  It just inferred a bigger type for
 If we add an explicit type annotation to the code itself (rather than
 just in the mli), then the compiler has enough information to warn us.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Grey x -> 2000 + x
   | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In particular, the compiler will complain that the `` `Grey`` case as
 unused.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 File "terminal_color.ml", line 29, characters 4-11:
 Warning 11: this match case is unused.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Once we have type definitions at our disposal, we can revisit the
 question of how we write the pattern-match that narrows the type.  In
 particular, we can explicitly use the type name as part of the pattern
 match, by prefixing it with a `#`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | #color as color -> color_to_int color
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This is useful when you want to narrow down to a type whose definition
 is long, and you don't want the verbosity of writing the tags down
@@ -954,3 +942,4 @@ ties into OCaml's support for subtyping.  As we'll discuss further
 when we cover objects in [xref](#object-oriented-programming),
 subtyping brings in a lot of complexity, and most of the time, that's
 complexity you want to avoid.
+

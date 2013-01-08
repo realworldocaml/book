@@ -49,12 +49,12 @@ size is 256k.
 The range of memory usable for allocation goes from the `caml_young_start` to
 `caml_young_end` C variables managed by the runtime.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
                 <---- size ---->
  base --- start ---------------- end
           limit      ptr <------
                           blocks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In a fresh minor heap, the `limit` will equal the `start`, and the current
 `ptr` will equal the `end`.  As blocks are allocated, `caml_young_ptr` will
@@ -187,7 +187,7 @@ in the major heap unless this "remembered" set is empty.  The set is maintained
 as a dynamically resized array of pointers, which is itself maintained via a
 collection of pointers known as the `caml_ref_table`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .c }
+```c
 struct caml_ref_table {
   value **base;
   value **end;
@@ -197,16 +197,16 @@ struct caml_ref_table {
   asize_t size;
   asize_t reserve;
 };
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The relationships of the pointers are as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
                    limit
    base <= ptr     threshold          end
      |----------------|----------------|
            size            reserve
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 An address is added to `caml_ref_table` when all of these conditions are satisfied:
 
@@ -235,7 +235,7 @@ fast minor heap.
 
 Let's see this for ourselves with a simple test program:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type t1 = { mutable iters1: int; mutable count1: float }
 type t2 = { iters2: int; count2: float }
 
@@ -269,7 +269,7 @@ let _ =
   let iters = 1000000000 in
   time "mutable" test_mutable { iters1=iters; count1=0.0 };
   time "immutable" test_immutable { iters2=iters; count2=0.0 }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This program defines a type `t1` that is mutable, and `t2` that is immutable.
 The main loop iterates over both fields and runs a simple counter.  It measures
@@ -277,10 +277,10 @@ two things: the wallclock time that all the iterations take, and the number of
 minor garbage collections that occurred during the test.  The results should
 look something like this:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 mutable: 8.6923s (7629 minor collections)
 immutable: 2.6186s (19073 minor collections)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Notice the space/time tradeoff here. The mutable version runs almost 4 times
 slower than the immutable one, but has significantly fewer garbage collection
@@ -334,7 +334,7 @@ those blocks can also be forwarded.  The collector maintains a linked list
 (called the `oldify_todo_list`) of forwarded objects that it still needs to
 scan.  That linked list looks like:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
                 oldify_todo_list
                    |
                    |
@@ -345,7 +345,7 @@ scan.  That linked list looks like:
                      v      |                v      |
    major heap    | h | f0 | ^ | ... |    | h | f0 | ^
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Each value on the `oldify_todo_list` is marked as forwarded, and the
 first word points to the new block in the major heap.

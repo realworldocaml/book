@@ -21,20 +21,20 @@ The best way in OCaml to signal an error is to include that error in
 your return value.  Consider the type of the `find` function in the
 list module.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # List.find;;
 - : 'a list -> f:('a -> bool) -> 'a option
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The option in the return type indicates that the function may not
 succeed in finding a suitable element, as you can see below.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # List.find [1;2;3] ~f:(fun x -> x >= 2) ;;
 - : int option = Some 2
 # List.find [1;2;3] ~f:(fun x -> x >= 10) ;;
 - : int option = None
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Having errors be explicit in the return values of your functions tells
 the caller that there is an error that needs to be handled. The caller
@@ -49,7 +49,7 @@ and `List.last`, which return `None` when they encounter an empty
 list, are used to extract the largest and smallest element of the
 list.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # let compute_bounds ~cmp list =
     let sorted = List.sort ~cmp list in
     let smallest = List.hd sorted in
@@ -60,7 +60,7 @@ list.
   ;;
 val compute_bounds :
   cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The match statement is used to handle the error cases, propagating an
 error in `hd` or `last` into the return value of `compute_bounds`.  On
@@ -70,7 +70,7 @@ the computation do not propagate to the return value of the function.
 find keys that are stored in both.  As such, a failure to find a key
 in one of the tables isn't really an error.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # let find_mismatches table1 table2 =
      Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data errors ->
         match Hashtbl.find table2 key with
@@ -80,7 +80,7 @@ in one of the tables isn't really an error.
  ;;
 val find_mismatches :
   ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The use of options to encode errors underlines the fact that it's not
 clear whether a particular outcome, like not finding something on a
@@ -98,24 +98,24 @@ say anything about the nature of the error.
 `Result.t` is meant to address this deficiency.  Here's the
 definition:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 module Result : sig
    type ('a,'b) t = | Ok of 'a
                     | Error of 'b
 end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A `Result.t` is essentially an option augmented with the ability to
 store other information in the error case.  Like `Some` and `None` for
 options, the constructors `Ok` and `Error` are promoted to the
 top-level by `Core.Std`.  As such, we can write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # [ Ok 3; Error "abject failure"; Ok 4 ];;
 [Ok 3; Error "abject failure"; Ok 4]
 - : (int, string) Result.t list =
 [Ok 3; Error "abject failure"; Ok 4]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 without first opening the `Result` module.
 
@@ -144,19 +144,19 @@ until you actually need, which means a lot of the time you never have
 to construct it at all. You can of course construct an error directly
 from a string:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Error.of_string "something went wrong";;
 - : Core.Std.Error.t = "something went wrong"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A more interesting construction message from a performance point of
 view is to construct an `Error.t` from a thunk:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Error.of_thunk (fun () ->
     sprintf "something went wrong: %f" 32.3343);;
   - : Core.Std.Error.t = "something went wrong: 32.334300"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this case, we can benefit from the laziness of `Error`, since the
 thunk won't be called until the `Error.t` is converted to a string.
@@ -164,11 +164,11 @@ thunk won't be called until the `Error.t` is converted to a string.
 We can also create an `Error.t` based on an s-expression converter.
 This is probably the most common idiom in Core.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
 - : Core.Std.Error.t =
 "Something failed a long time ago: (1969-12-31 19:00:00.000000)"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, the value `Time.epoch` is included in the error, but
 `Time.sexp_of_t`, which is used for converting the time to an
@@ -178,12 +178,12 @@ in chapter {{SYNTAX}}, we can inline create an s-expression converter
 for a collection of types, thus allowing us to register multiple
 pieces of data in an `Error.t`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Error.create "Something went terribly wrong"
     (3.5, ["a";"b";"c"],6034)
     <:sexp_of<float * string list * int>> ;;
 - : Core.Std.Error.t = "Something went terribly wrong: (3.5(a b c)6034)"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, the declaration `<:sexp_of<float * string list * int>>` asks
 Sexplib to generate the sexp-converter for the tuple.
@@ -206,9 +206,9 @@ particularly useful one is built around the function `bind`, which is
 both an ordinary function and an infix operator `>>=`, both with the
 same type signature:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 val (>>=) : 'a option -> ('a -> 'b option) -> 'b option
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `bind` is a way of sequencing together error-producing functions so
 that that the first one to produce an error terminates the
@@ -217,14 +217,14 @@ calling `f`, and `Some x >>= f` returns `f x`.  We can use a nested
 sequence of these binds to express a multi-stage computation that can
 fail at any stage.  Here's a rewrite `compute_bounds` in this style.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let compute_bounds ~cmp list =
     let open Option.Monad_infix in
     let sorted = List.sort ~cmp list in
     List.hd sorted >>= (fun first ->
       List.last sorted >>= (fun last ->
         Some (first,last)))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that we locally open the `Option.Monad_infix` module to get
 access to the infix operator `>>=`.  The module is called
@@ -235,14 +235,14 @@ called `Monad`, which we'll talk about more in
 This is a bit easier to read if we write it with fewer parentheses and
 less indentation, as follows.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let compute_bounds ~cmp list =
     let open Option.Monad_infix in
     let sorted = List.sort ~cmp list in
     List.hd sorted   >>= fun first ->
     List.last sorted >>= fun last  ->
     Some (first,last)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 There are other useful idioms encoded in the functions in `Option`.
 Another example is `Option.both`, which takes two optional values and
@@ -250,11 +250,11 @@ produces a new optional pair that is `None` if either of its arguments
 are `None`.  Using `Option.both`, we can make `compute_bounds` even
 shorter.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let compute_bounds ~cmp list =
     let sorted = List.sort ~cmp list in
     Option.both (List.hd sorted) (List.last sorted)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 These error-handling functions are valuable because they let you
 express your error handling both explicitly and concisely.  We've only
@@ -272,34 +272,34 @@ from) exceptions that are triggered by sub-computations.
 We'll see an exception triggered in OCaml if, for example, we try to
 divide an integer by zero:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # 3 / 0;;
 Exception: Division_by_zero.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And an exception can terminate a computation even if it happens nested
 a few levels deep in a computation.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
 Exception: Division_by_zero.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In addition to built-in exceptions like `Divide_by_zero`, OCaml lets
 you define your own.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # exception Key_not_found of string;;
 exception Key_not_found of string
 # Key_not_found "a";;
 - : exn = Key_not_found("a")
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here's an example of a function for looking up a key in an
 _association list_, _i.e._ a list of key/value pairs which uses this
 newly-defined exception:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rec find_exn alist key = match alist with
     | [] -> raise (Key_not_found key)
     | (key',data) :: tl -> if key = key' then data else find_exn tl key
@@ -311,7 +311,7 @@ val alist : (string * int) list = [("a", 1); ("b", 2)]
 - : int = 1
 # find_exn alist "c";;
 Exception: Key_not_found("c").
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Note that we named the function `find_exn` to warn the user that the
 function routinely throws exceptions, a convention that is used
@@ -321,10 +321,10 @@ In the above example, `raise` throws the exception, thus terminating
 the computation.  The type of raise is a bit surprising when you first
 see it:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # raise;;
 - : exn -> 'a = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Having the return type be an otherwise unused type variable `'a`
 suggests that `raise` could return a value of any type.  That seems
@@ -333,10 +333,10 @@ at all. This behavior isn't restricted to functions like `raise` that
 terminate by throwing exceptions.  Here's another example of a
 function that doesn't return a value.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let rec forever () = forever ();;
 val forever : unit -> 'a = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `forever` doesn't return a value for a different reason: it is an
 infinite loop.
@@ -352,23 +352,23 @@ program.
 OCaml can't always generate a useful textual representation of your
 exception, for example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # exception Wrong_date of Date.t;;
 exception Wrong_date of Date.t
 # Wrong_date (Date.of_string "2011-02-23");;
 - : exn = Wrong_date(_)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 But if you declare the exception using `with sexp` (and the
 constituent types have sexp converters), we'll get something with more
 information.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # exception Wrong_date of Date.t with sexp;;
 exception Wrong_date of Core.Std.Date.t
 # Wrong_date (Date.of_string "2011-02-23");;
 - : exn = (.Wrong_date 2011-02-23)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The period in front of `Wrong_date` is there because the
 representation generated by `with sexp` includes the full module path
@@ -389,12 +389,12 @@ _exception handlers_.
 In OCaml, an exception handler is declared using a `try`/`with`
 statement.  Here's the basic syntax.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-syntax }
+```ocaml
 try <expr> with
 | <pat1> -> <expr1>
 | <pat2> -> <expr2>
 ...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A `try`/`with` clause would first evaluate `<expr>`, and if that
 evaluation completes without returning an exception, then the value of
@@ -414,13 +414,13 @@ One headache with exceptions is that they can terminate your execution
 at unexpected places, leaving your program in an awkward state.
 Consider the following code snippet:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let load_config filename =
   let inc = In_channel.create filename in
   let config = Config.t_of_sexp (Sexp.input_sexp inc) in
   In_channel.close inc;
   config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The problem with this code is that the function that loads the
 s-expression and parses it into a `Config.t` might throw an exception
@@ -433,12 +433,12 @@ We can fix this using Core's `protect` function.  The basic purpose of
 `f` exits, whether it exited normally or with an exception.  Here's
 how it could be used to fix `load_config`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 let load_config filename =
   let inc = In_channel.create filename in
   protect ~f:(fun () -> Config.t_of_sexp (Sexp.input_sexp inc)
     ~finally:(fun () -> In_channel.close inc)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Catching specific exceptions
 
@@ -448,7 +448,7 @@ example, `List.find_exn` always throws `Not_found`.  You can take
 advantage of this in your code, for example, let's define a function
 called `lookup_weight`, with the following signature:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (** [lookup_weight ~compute_weight alist key] Looks up a
     floating-point weight by applying [compute_weight] to the data
     associated with [key] by [alist].  If [key] is not found, then
@@ -456,11 +456,11 @@ called `lookup_weight`, with the following signature:
 *)
 val lookup_weight :
   compute_weight:('data -> float) -> ('key * 'data) list -> 'key -> float
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 We can implement such a function using exceptions as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let lookup_weight ~compute_weight alist key =
     try
       let data = List.Assoc.find_exn alist key in
@@ -470,18 +470,18 @@ We can implement such a function using exceptions as follows:
 val lookup_weight :
   compute_weight:('a -> float) -> ('b * 'a) list -> 'b -> float =
   <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This implementation is more problematic than it looks.  In particular,
 what happens if `compute_weight` itself throws an exception?  Ideally,
 `lookup_weight` should propagate that exception on, but if the
 exception happens to be `Not_found`, then that's not what will happen:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # lookup_weight ~compute_weight:(fun _ -> raise Not_found)
     ["a",3; "b",4] "a" ;;
 - : float = 0.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This kind of problem is hard to detect in advance, because the type
 system doesn't tell us what kinds of exceptions a given function might
@@ -489,7 +489,7 @@ throw.  Because of this kind of confusion, it's usually better to
 avoid catching specific exceptions.  In this case, we can improve the
 code by catching the exception in a narrower scope.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 # let lookup_weight ~compute_weight alist key =
     match
       try Some (List.Assoc.find_exn alist key) with
@@ -497,7 +497,7 @@ code by catching the exception in a narrower scope.
     with
     | None -> 0.
     | Some data -> compute_weight data ;;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 At which point, it makes sense to simply use the non-exception
 throwing function, `List.Assoc.find`, instead.
@@ -508,7 +508,7 @@ A big part of the point of exceptions is to give useful debugging
 information.  But at first glance, OCaml's exceptions can be less than
 informative.   Consider the following simple program.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* exn.ml *)
 
 open Core.Std
@@ -521,16 +521,16 @@ let list_max = function
 let () =
   printf "%d\n" (list_max [1;2;3]);
   printf "%d\n" (list_max [])
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If we build and run this program, we'll get a pretty uninformative
 error:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .shell }
+```bash
 $ ./exn
 3
 Fatal error: exception Exn.Empty_list
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The example in question is short enough that it's quite easy to see
 where the error came from.  But in a complex program, simply knowing
@@ -541,14 +541,14 @@ We can get more information from OCaml if we turn on stack traces.
 This can be done by setting the `OCAMLRUNPARAM` environment variable,
 as shown:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .shell }
+```bash
 exn $ export OCAMLRUNPARAM=b
 exn $ ./exn
 3
 Fatal error: exception Exn.Empty_list
 Raised at file "exn.ml", line 7, characters 16-26
 Called from file "exn.ml", line 12, characters 17-28
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Backtraces can also be obtained at runtime.  In particular,
 `Exn.backtrace` will return the backtrace of the most recently thrown
@@ -565,7 +565,7 @@ help you do just that.  For example, given a piece of code that can
 throw an exception, you can capture that exception into an option as
 follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let find alist key =
     Option.try_with (fun () -> find_exn alist key) ;;
 val find : (string * 'a) list -> string -> 'a option = <fun>
@@ -573,24 +573,24 @@ val find : (string * 'a) list -> string -> 'a option = <fun>
 - : int Core.Std.Option.t = None
 # find ["a",1; "b",2] "b";;
 - : int Core.Std.Option.t = Some 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And `Result` and `Or_error` have similar `try_with` functions.  So, we
 could write:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let find alist key =
     Result.try_with (fun () -> find_exn alist key) ;;
 val find : (string * 'a) list -> string -> ('a, exn) Result.t = <fun>
 # find ["a",1; "b",2] "c";;
 - : (int, exn) Result.t = Result.Error Key_not_found("c")
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 And then we can re-raise that exception:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Result.ok_exn (find ["a",1; "b",2] "b");;
 - : int = 2
 # Result.ok_exn (find ["a",1; "b",2] "c");;
 Exception: Key_not_found("c").
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```

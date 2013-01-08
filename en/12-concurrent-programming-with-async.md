@@ -26,14 +26,14 @@ A DuckDuckGo search is executed by making an HTTP request to `api.duckduckgo.com
 
 Before we can make the HTTP calls, we need a couple of helper functions with the following signature.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* Generate a DuckDuckGo API search URI for [query] *)
 val make_ddg_uri : query:string -> Uri.t
 
 (* Extract the Definition field from the DuckDuckGo search
    response, or return [None] if it doesn't exist *)
 val get_definition_from_json: string -> string option
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This code uses a couple of new libraries we haven't seen before.
 You will need to OPAM install `uri` and `yojson` (refer to chapter {{{installation}}} if you need help).  Let's see how to implement them first.
@@ -44,14 +44,14 @@ You're hopefully familiar with HTTP URLs, which identify endpoints across the Wo
 as Uniform Resource Identifiers (URIs). The full URI specification is defined in [RFC3986](http://tools.ietf.org/html/rfc3986) (and is rather complicated!).
 Luckily, the `ocaml-uri` library provides a strongly-typed interface which takes care of much of the hassle.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* Generate a DuckDuckGo search URI from a query string *)
 let make_ddg_uri =
   let base_uri = "http://api.duckduckgo.com/?format=json" in
   let uri = Uri.of_string base_uri in
   fun ~query ->
     Uri.add_query_param uri ("q", [query])
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A `Uri.t` is constructed from the `Uri.of_string` function, and a query parameter `q` is added with the desired search query.  The library takes care of encoding the URI correctly when outputting it in the network protocol.
 
@@ -66,7 +66,7 @@ There are a few non-standard extensions to JSON, so Yojson exposes them as the `
 The input `string` is parsed using `Yojson.Safe.from_string` into an OCaml data type. The JSON values are represented using polymorphic
 variants, and can thus be pattern matched more easily once they have been parsed by Yojson.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -77,12 +77,12 @@ type json = [
   | `String of string
   | `Tuple of json list
 ]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
  
 We're expecting the DuckDuckGo response to be a record, with an optional `Description` field being one of the keys in the record. 
 The `get_definition_from_json` does a pattern match on this, and returns an optional string if a definition is found within the result.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* Extract the Definition field from the DuckDuckGo search
    response, or return [None] if it doesn't exist *)
 let get_definition_from_json (json:string) =
@@ -92,7 +92,7 @@ let get_definition_from_json (json:string) =
       List.Assoc.find kv_list "Definition" >>|
       Yojson.Safe.to_string
   |_ -> None
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Notice that we use options here instead of throwing exceptions on an error.
 When the `Option` module is opened, it provides a `map` operator (`>>|`) which 
@@ -103,7 +103,7 @@ If no result is found, then the `Yojson.Safe.to_string` conversion function is s
 
 Now that we've written those utility functions, let's look at the Async code that performs the actual search:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* Execute the DuckDuckGo search *)
 (* TODO: This client API is being simplified in Cohttp *)
 let do_ddg_query query =
@@ -117,7 +117,7 @@ let do_ddg_query query =
       Option.value ~default:"???"
   | Some (_, None) | None ->
       failwith "no body in response"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 For this code, you'll need to OPAM install the `cohttp` library.  The `Cohttp_async.Client` module executes the HTTP call, and returns a status and response body wrapped.  This whole result is wrapped in a type you haven't seen before: `Async.Deferred.t`.
 
@@ -129,14 +129,14 @@ The `ddg_query` function invokes the HTTP client call, and returns a tuple conta
 In this case, the HTTP body probably isn't very large, so we just iterate over the Pipe's contents until we have the full HTTP body in a `Buffer.t`.
 Once the full body has been retrieved into our buffer, the next callback passes it through the JSON parser and returns a human-readable string of the search description that DuckDuckGo gave us.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* Run a single search *)
 let run_one_search =
   do_ddg_query "Camel" >>| prerr_endline
 
 (* Start the Async scheduler *)
 let _ = Scheduler.go ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Let's actually use the search function to run a real query now. The fragment above spawns a single search, and then fires up the Async scheduler.  The scheduler is where all the work happens, and must be started in every application that uses Async.  Without it, logging won't be output, nor will blocked functions ever wake up.
 When the scheduler is active, it is waiting for incoming I/O events and waking up function callbacks that were sleeping on that particular file descriptor or timeout.
@@ -144,13 +144,13 @@ When the scheduler is active, it is waiting for incoming I/O events and waking u
 A single connection isn't that interesting from a concurrency perspective.
 Luckily, Async makes it very easy to run multiple parallel searches:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml }
+```ocaml
 (* Run many searches in parallel *)
 let run_many_searches =
   let searches = ["Duck"; "Sheep"; "Cow"; "Llama"; "Camel"] in
   Deferred.List.map ~how:`Parallel searches ~f:do_ddg_query >>|
   List.iter ~f:print_endline
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `Deferred.List` module lets you specify exactly how to map over a collection of futures.  The searches will be executed simultaneously, and the map thread will complete once all of the sub-threads are complete. If you replace the `Parallel` parameter with `Serial`, the map will wait for each search to fully complete before issuing the next one.
 
@@ -180,12 +180,12 @@ and provides an `Async.Std` that provides threaded variants of many standard
 library functions.  The examples throughout this chapter assume that `Async.Std`
 is open in your environment.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # require "async.unix" ;;
 # open Async.Std ;;
 # return 5 ;;
 - : int Deferred.t = <abstr>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The basic type of an Async thread is a `Deferred.t`, which can be constructed
 by the `return` function.  The type parameter (in this case `int`) represents
@@ -194,12 +194,12 @@ return value cannot be used directly while it is wrapped in a `Deferred.t` as
 it may not be available yet.  Instead, we `bind` a function closure that is
 called once the value is eventually ready.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let x = return 5 ;;
 val x : int Deferred.t = <abstr>
 # let y = Deferred.bind x (fun a -> return (string_of_int a)) ;;
 val y : string Deferred.t = <abstr>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Here, we've bound a function to `x` that will convert the `int` to a `string`.
 Notice that while both `x` and `y` share a common `Deferred.t` type, their type
@@ -210,12 +210,12 @@ in the signature.
 
 Let's examine the function signatures of `bind` and `return` more closely.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # return ;;
 - : 'a -> 'a Deferred.t = <fun>
 # Deferred.bind ;;
 - : 'a Deferred.t -> ('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 `return`, `bind` and the `Deferred.t` type all contain polymorphic type
 variables (the `'a`) which represent the type of the thread, and are inferred
@@ -233,14 +233,14 @@ blocking operations, and inline operators are provided to make it easier to use.
 In the fragment below, we see `>>=` and `>>|` used in similar ways to convert
 an integer into a string:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let x = return 5 ;;
 val x : int Deferred.t = <abstr>
 # x >>= fun y -> return (string_of_int y) ;;
 val - : string Deferred.t = <abstr>
 # x >>| string_of_int ;;
 val - : string Deferred.t = <abstr>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `>>=` operator is exactly the same as `bind` and unpacks the integer future
 into the `y` variable. The subsequent closure receives the unpacked integer and
@@ -255,14 +255,14 @@ a result is available.  The `utop` top-level automatically detects `Deferred.t`
 types that are entered interactively and wraps them in this function for you
 automatically.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let fn () = return 5 >>| string_of_int ;;
 val fn : unit -> string Deferred.t = <abstr>
 # Thread_safe.block_on_async_exn fn ;;
 - : string = "5"
 # fn () ;;
 - : string = "5"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In the second evaluation of `fn`, the top-level detected the return type of
 a future and evaluated the result into a concrete string.
@@ -276,7 +276,7 @@ coordinate multiple threads and timeouts.  Let's write a program that spawns
 two threads, each of which sleep for some random time and return either
 "Heads" or "Tails", and the quickest thread returns its value.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # let flip () =
   let span = Time.Span.of_sec 3.0 in
   let span_heads = Time.Span.randomize span ~percent:0.75 in
@@ -293,7 +293,7 @@ two threads, each of which sleep for some random time and return either
   in
   Deferred.any [coin_heads; coin_tails] ;;
 val flip : unit -> (string * Time.Span.t * Time.Span.t) Deferred.t = <fun>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 This introduces a couple of new time-related Async functions. The `Time` module
 contains functions to express both absolute and relative temporal
@@ -308,12 +308,12 @@ can can easily verify the calculations (you could also simply print the time
 spans to the console as they are calculated and simplify the return types).
 You can see this by executing the `flip` function at the toplevel a few times.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ { .ocaml-toplevel }
+```ocaml
 # Thread_safe.block_on_async_exn flip ;;
 # - : string * Time.Span.t * Time.Span.t = ("Heads!", 2.86113s, 3.64635s) 
 # Thread_safe.block_on_async_exn flip ;;
 # - : string * Time.Span.t * Time.Span.t = ("Tails!", 4.44979s, 2.14977s)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The `Deferred` module has a number of other ways to select between multiple
 threads, such as:

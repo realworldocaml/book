@@ -3,23 +3,23 @@
 
     <head>
     
-        <meta charset="utf-8">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW">
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW" />
         
         <title>{% if title %}{{title}} / {% endif %}Real World OCaml</title>
         
-        <link rel="stylesheet" href="../../media/css/main.css">
+        <link rel="stylesheet" href="../../media/css/main.css" />
         
-        <script src="../../media/js/require.js" data-main="../../media/js/main.js"></script>
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
         <script>
             require.config({
                 config: {
                     gitHub: {
-                        user: "{{github_user|escapejs}}",
-                        repo: "{{github_repo|escapejs}}",
-                        milestone: "{{github_milestone|escapejs}}",
-                        page: "{{html_name|escapejs}}"
+                        user: '{{github_user|escapejs}}',
+                        repo: '{{github_repo|escapejs}}',
+                        milestone: '{{github_milestone|escapejs}}',
+                        page: '{{html_name|escapejs}}'
                     }
                 }
             });
@@ -27,7 +27,7 @@
         {% if debug %}
             <script>
                 require.config({
-                    urlArgs: "bust=" +  Date.now()
+                    urlArgs: 'bust=' +  Date.now()
                 });
             </script>
         {% endif %}
@@ -39,7 +39,7 @@
         <div class="body">
         
             <header class="header">
-                <h1><img src="../../media/img/header.png" width=213 height=59 alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"></h1>
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky" /></h1>
             </header>
     
             <nav class="navigation">
@@ -79,12 +79,12 @@
                 <nav class="pagination">
                     {% if prev_page %}
                         <a rel="previous" href="{{prev_page}}">
-                            &lsaquo; Previous
+                            &lt; Previous
                         </a>
                     {% endif %}
                     {% if next_page %}
                         <a rel="next" href="{{next_page}}">
-                            Next &rsaquo;
+                            Next &gt;
                         </a>
                     {% endif %}
                 </nav>
@@ -92,7 +92,7 @@
             {% endif %}
             
             <footer class="footer">
-                <p>Copyright 2011, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
             </footer>
             
         </div>
