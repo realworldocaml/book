@@ -1,4 +1,5 @@
-# Imperative Programming and Input/Output
+Imperative Programming and Input/Output
+===========================
 
 The OCaml programming language is _functional_, meaning that functions are
 first-class values that can be passed around like any other.  However, this
