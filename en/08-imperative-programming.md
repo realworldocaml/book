@@ -1203,7 +1203,7 @@ lock.
   let find table ~key =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
-	(* Unsynchronized! *)
+    (* Unsynchronized! *)
     (find_assoc key table.buckets.(index)).value
 ```
 
@@ -1281,7 +1281,7 @@ bucket in which it is stored.
       method private normalize =
         while elements = [] && index < num_buckets do
           index <- index + 1;
-	  elements <- buckets.(index)
+      elements <- buckets.(index)
         done
       initializer self#normalize
     end
@@ -1630,6 +1630,73 @@ val fmt : (string -> 'c, 'b, 'c) format = <abstr>
 # printf fmt "small";;
 Size: small
 - : unit = ()
+```
+
+### Output to channels, strings, and buffers
+
+The function `printf` prints to the standard output channel `stdout`.  There are alse several variations.
+
+* `eprintf format arg1 ... argN`.  Print to the standard error channel `stderr`.
+
+* `fprintf channel format arg1 ... argN`.  Print to the channel `channel`.
+
+* `sprintf format arg1 ... argN`.  Produce a string as output.
+
+* `bprintf buffer format arg1 ... argN`.  Print to a string buffer
+  `buffer` of type `Buffer.t`.
+  
+```ocaml
+# sprintf "The number is %10d." 123;;
+- : string = "The number is        123."
+# let buf = Buffer.create 32;;
+val buf : Buffer.t = <abstr>
+# bprintf buf "%s\n" "First line";;
+- : unit = ()
+# bprintf buf "%20s.\n" "Second line";;
+- : unit = ()
+# Buffer.contents buf;;
+- : string = "First line\n         Second line.\n"
+```
+
+### Formatted input with Scanf
+
+The `scanf` function can be used for reading input, similar to
+`printf`.  The general form takes a format string and a "receiver"
+function that is applied to the input.  The format string contains
+literal characters, which must be read literally, and conversion
+specifications similar to `printf`.  The result of the receiver
+function is returned as the result of `scanf`.
+
+```ocaml
+# scanf "%d" (fun i -> i);;
+1871
+- : int = 1871
+```
+
+For another example, consider the parsing a date string that might be
+in one of two forms, _month day, year_ or _month/day/year_.  The
+`scanf` functions raise the exception `Scan_failure` on error, so we
+can read a date string by trying both kinds of format.
+
+```ocaml
+# type month = String of string | Int of int;;
+type month = String of string | Int of int
+# let scan_date_string s =
+    try
+      sscanf s "%s %d, %d" (fun month day year ->
+             year, String month, day)
+    with Scan_failure _ | End_of_file ->
+      sscanf s "%d/%d/%d" (fun month day year ->
+             year, Int month, day);;
+val scan_date_string : string -> int * month * int = <fun>
+# scan_date_string "May 3, 1921";;
+- : int * month * int = (1921, String "May", 3)
+# scan_date_string "10/11/2001";;
+- : int * month * int = (2001, Int 10, 11)
+# scan_date_string "May 3";;
+Exception:
+Scanf.Scan_failure
+ "scanf: bad input at char number 0: ``character 'M' is not a decimal digit''".
 ```
 
 ## Summary
