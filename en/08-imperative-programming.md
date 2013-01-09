@@ -1,5 +1,5 @@
-Imperative Programming and Input/Output
-===========================
+Imperative Programming
+================================================
 
 The OCaml programming language is _functional_, meaning that functions are
 first-class values that can be passed around like any other.  However, this
@@ -1306,7 +1306,7 @@ the synchronization might involve multiple threads, resulting in
 deadlock.  Lock-free iteration ensures that the `ConcurrentHashMap`
 will not be involved in a deadlock cycle.
 
-## Input and output
+## Input and output (fix this chapter heading)
 
 Input and output I/O is another kind of imperative operation, where the purpose
 is to either read input from a file, stream, or device, _consuming_ the input by
@@ -1344,13 +1344,13 @@ standard channels.
 Functions to write to `stderr` have similar names, using the prefix `prerr_`
 rather than `print_` (for example, `prerr_string`).
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let i = 1;;
 val i : int = 1
 # print_string "The value of i is "; print_int i; print_string ".\n";;
 The value of i is 1.
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Input is similar, but there are only a few functions.
 
@@ -1366,7 +1366,7 @@ terminated before the input is read.
 Here is a function to read a sequence of integers from `stdin`, sorting them and
 printing the result to `stdout`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let collate_input () =
    let rec read_input items =
       let item = try Some (read_int ()) with End_of_file -> None in
@@ -1388,14 +1388,14 @@ val collate_input : unit -> unit = <fun>
 19
 -120 2 8 19 34 56 
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Using exceptions to signal the end of input is a little awkward.  The
 `read_input` loop above converts the exception into an `int option`, so that
 matching can be performed with `match` and the function is tail-recursive.  The
 following function is _not_ tail recursive, and should be avoided.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
   (* AVOID -- non tail-recursive input reader *)
 # let rec read_input items =
    try read_input (read_int () :: items) with
@@ -1407,13 +1407,13 @@ val read_input : int list -> int list = <fun>
 56
 -1
 - : int list = [-1; 56; 45; 34]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Another way to address the input issue is to use iteration, rather than
 recursion.  This requires collecting the input in a container than can be
 mutated by side-effect.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let read_input () =
    let items = ref [] in
    try
@@ -1429,7 +1429,7 @@ val read_input : unit -> int list = <fun>
 78
 -345
 - : int list = [-345; 78; 45]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 In this loop, the value returns from a successful call to `read_int ()` is added
 to the `items` list by side-effect.  When `read_int ()` reaches the end of
@@ -1455,7 +1455,7 @@ The functions for input and output are similar to the `print_...` and `read_...`
 functions, but they use the prefix `output_` and `input_` and they take a
 channel as an argument.  Let's write a function to print the contents of a file.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let cat filename =
    let inx = open_in filename in
    try
@@ -1477,7 +1477,7 @@ Hello world
 2
 3
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 It is important to close channels when you are finished with them, for two
 reasons.  One reason is that the runtime system will usually have a limit on the
@@ -1489,7 +1489,7 @@ explicit call to the `flush` function.
 
 * `flush : out_channel -> unit`
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let outf = open_out "file.txt";;
 val outf : out_channel = <abstr>
 # output_string outf "Hello world\n1\n2\n3\n";;
@@ -1504,7 +1504,7 @@ Hello world
 2
 3
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ### Formatted output with Printf
 
@@ -1515,9 +1515,9 @@ function, which is modeled after `printf` in the C standard library.  The
 `printf` function takes a _format string_ that describe what to print and how to
 format it, as well as arguments to be printed.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 printf format arg1 ... argN
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The format string can contain character literals, which are printed without
 change, as well as conversion specifications, which specify how to print an
@@ -1526,27 +1526,27 @@ percent (`%`) character, some flags, and a type specification.  For example,
 `%d` is a conversion specification for printing an integer, `%s` prints a
 string, and `%f` prints a floating-point value.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # open Printf;;
 # printf "int=%d string=%s float=%f\n" 10 "abc" 1e5;;
 int=10 string=abc float=100000.000000
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Conversions can also specify additional parameters for formatting the value.
 The general form has flags, width specified in number of characters, and decimal
 precision used for printing floating-point values.  These parameters are
 optional.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml}
+```ocaml
 % [flags] [width] [.precision] type
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 There are several flags of interest, the flag `'-'` left-justifies the output,
 and the flag `'0'` pads numerical values with leading zeroes.
 Let's write a program to print a price list in a tabular form.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let print_prices prices =
     print_string "--------------------------------\n\
                   | Size   | Hexcode    | Price  |\n\
@@ -1571,7 +1571,7 @@ val print_prices : (string * int * float) list -> unit = <fun>
 | enormous | 0x000186a0 | 100.00 |
 --------------------------------
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 The format specification `"| %-6s | 0x%08x | %6.2f |\n"` specifies that the
 first argument is a string that is to be left-justified and printed six
@@ -1590,7 +1590,7 @@ does not match the arguments.  In the following examples, `%v` is not a valid
 conversion specification, and floating-point values can't be printed with a
 decimal conversion specification.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # printf "Hello %v" 1;;
 Characters 7-17:
   printf "Hello %v" 1;;
@@ -1602,13 +1602,13 @@ Characters 18-20:
                     ^^
 Error: This expression has type float but an expression was expected of type
          int
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 A consequence of strong typing is that the format string must ultimately be a
 string _literal_, known at compile time.  It can't be computed by the program at
 runtime.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let fmt = "%s";;
 val fmt : string = "%s"
 # printf fmt "Hello";;
@@ -1618,19 +1618,19 @@ Characters 7-10:
 Error: This expression has type string but an expression was expected of type
          ('a -> 'b, out_channel, unit) format =
            ('a -> 'b, out_channel, unit, unit, unit, unit) format6
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 Actually, this is not entirely true.  The `printf` function takes a format
 string of type `('a, 'b, 'c) format` and it is only the type conversion from
 `string` to `format` where the string is required to be a literal.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.ocaml-toplevel}
+```ocaml
 # let fmt : ('a, 'b, 'c) format = "Size: %s.\n";;
 val fmt : (string -> 'c, 'b, 'c) format = <abstr>
 # printf fmt "small";;
 Size: small
 - : unit = ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 ## Summary
 
