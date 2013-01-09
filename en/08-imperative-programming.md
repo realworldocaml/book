@@ -3,21 +3,32 @@ Imperative Programming
 
 The OCaml programming language is _functional_, meaning that functions are
 first-class values that can be passed around like any other.  However, this
-doesn't mean that OCaml programs are _pure_.  The language includes assignment,
+doesn't mean that OCaml programs are _pure_.
+
+_Pure_ functions behave like mathematical functions, which means that they
+always evaluate to the same result on the same arguments, without any
+side-effects on the state or input/output.  In pure programs, evaluation order
+may affect performance, but it doesn't affect correctness.  In contrast,
+_imperative_ programs operate through side-effects on the state (as well as
+input/output).  Imperative programs define sequences of commands for the
+computer to perform, and evaluation order is strict.
+
+While the majority of code you write in OCaml may be pure, imperative
+programming can be used effectively.  The language includes assignment and
 mutable values like arrays and strings.  Evaluation order is strict and
 sequential.  In principle, you can port many imperative programs directly to
-OCaml.  If you find yourself doing this a lot, then OCaml may not be the right
-programming language for your problem.  However, there are times when imperative
-programming is both appropriate and efficient, and OCaml shines at supporting
-programs with both functional and imperative aspects.
+OCaml.  If you find yourself using imperative features a lot, then you're
+probably not using OCaml to its fullest.  However, there are times when
+imperative programming is both appropriate and efficient, and OCaml shines at
+supporting programs with both functional and imperative aspects.
 
 To illustrate imperative programming, let's start by implementing a hash table.
-Hash tables are an efficient way to implement imperative _dictionaries_.  There
-are full-featured implementations of hash tables in Core as well as in the OCaml
-standard library.  For illustration, we'll construct just a basic dictionary
-using _open hashing_, where the hash table consists of an array of buckets, each
-of which contain a linked list of elements.  We'll use regular (pure) OCaml
-lists, and an array for the buckets.
+Hash tables are an efficient way to implement imperative _dictionaries_, which
+implement a map from keys to values.  There are full-featured implementations of
+hash tables in Core as well as in the OCaml standard library.  For illustration,
+we'll construct just a basic dictionary using _open hashing_, where the hash
+table consists of an array of buckets, each of which contain a linked list of
+elements.  We'll use regular (pure) OCaml lists, and an array for the buckets.
 
 ```ocaml
 module HashMap : sig
@@ -25,7 +36,7 @@ module HashMap : sig
 
   val create : unit -> ('a, 'b) t
   val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val find : ('a, 'b) t -> key:'a -> 'b
+  val find : ('a, 'b) t -> key:'a -> 'b option
   val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 end = struct
   type ('a, 'b) t = ('a * 'b) list array
@@ -41,9 +52,8 @@ end = struct
 
   let find table ~key =
     let rec find = function
-    | (k, d) :: _ when k = key -> d
-    | _ :: t -> find t
-    | [] -> raise Not_found
+     | (k, d) :: t -> if k = key then Some d else find t
+     | [] -> None
     in
     find table.(hash_bucket key)
 
@@ -56,52 +66,48 @@ end
 
 The signature for the `HashMap` declares the type of dictionaries `('a, 'b) t`,
 with keys of type `'a` and associated values of type `'b`.  It also includes
-three functions.  The `create` function constructs an empty dictionary.  The
-`add` function adds a key/value association in the dictionary, by _side-effect_.
-That is, the hash table is modified _in place_, and any references to the table
-will be able to observe the change.  Furthermore, the `add` method doesn't
-return a useful value; the type `unit` contains just the trivial value `()`,
-which is used by convention to represent "nothing."  The `find` function returns
-the value associated with a key, raising the exception `Not_found` if the table
-does not contain the key.  The `iter` function iterates through all of the
-elements in the table, applying the function `f` to each element in turn.
+functions for add, removing, and enumerating entries in the dictionary.
 
-The hash table is implemented as an array of buckets (the array is fixed-size,
+The table is implemented as an array of buckets (the array is fixed-size,
 in this example).  The OCaml runtime provides a builtin polymorphic hash
 function `Hashtbl.hash` that works for almost any value in OCaml, excluding
-functions and abstract values like C data.  The `create` function creates a new
-array where all buckets are empty.  The `add` function uses the hash function to
-determine the appropriate bucket, then adds a new key/value association to the
-bucket through an array _assignment_ `table.(index) <- (key, data) ::
-table.(index)`, which _replaces_ the bucket with a new one where the new
-key/value pair is added to the front of the list.  The `find` function performs
-a linear search through the appropriate bucket to find the value associated with
-a key.  The `iter` function iterates through each of the elements in the
-buckets.
+functions and values from C libraries that live outside the heap.
+
+* The `create` function creates a new array where all buckets are empty.
+
+* The `add` function uses the hash function to determine the appropriate bucket,
+  then adds a new key/value association to the bucket through an array
+  _assignment_ `table.(index) <- (key, data) :: table.(index)`, which _replaces_
+  the bucket with a new one where the new key/value pair is added to the front
+  of the list.
+
+* The `find` function performs a linear search through the appropriate bucket to
+  find the value associated with a key.
+
+* The `iter` function iterates through each of the elements in the buckets.
 
 ## Imperative operations
 
-This example illustrates _one_ of the mutating operations in OCaml:
-array field assignment.  There are just three others: the contents of
-a string can be mutated, and so can record and object fields that have
-been declared as `mutable`.
+This example illustrates one of the mutating operations in OCaml: array element
+assignment.  There are a handful of other mutable data types.
 
-* `array.(index) <- expr`: Array field assignment.  See also the `Array.blit`
-  functions for mutating multiple fields at once.  Bigarray values can be
-  mutated with the syntax `bigarray.{index} <- expr`.
+* Arrays.  Array elements can be assigned with the expression `array.(index) <-
+  expr`.  See the `Array` module for other imperative operations.  Bigarray
+  elements can be mutated with the syntax `bigarray.{index} <- expr`.
 
-* `string.[index] <- char`: String element assignment.  See also the
-  `String.blit` functions for mutating substrings.
+* Strings.  String elements can be mutated with the expression `string.[index]
+  <- char`.  See the `String` module for other imperative operations.
 
-* `record.label <- expr`: Record field assignment.  The field `label` must
-   be declared as `mutable`.
+* Record fields can be mutated with the expression `record.label <- expr`.  The
+  field `label` must be declared as `mutable` in the type definition for the
+  record.
    
-* `object.label <- expr`: Object field assignment.  The field `label` must
-  be declared as `mutable`.
+* Object fields can be mutated with the expression `object.label <- expr`. The
+  field `label` must be declared as `mutable` in the object definition.
 
-Note that _variables are not mutable_.  Variables can refer to mutable data, but
+Note that variables are not mutable.  Variables can refer to mutable data, but
 the binding of a variable cannot be changed.  For convenience, OCaml defines a
-type of "reference cell," that is a like a "box" where the contents can be
+type of "reference cell," which is a like a "box" where the contents can be
 mutated.
 
 * `ref expr` constructs a reference cell containing the value defined by the
@@ -192,18 +198,19 @@ i = 2
 
 Another common imperative data structure is the doubly-linked list, which allows
 traversal in both directions, as well as O(1) deletion of any element.
-Doubly-linked lists are a _cyclic_ data structure, meaning that it is possible
-to follow a nontrivial sequence of references from an element, through other
-elements, back to itself.  Cyclic data structures can be constructed only
-through side-effects, by constructing a set of data elements first, then using
-assignment to set up the references.  (Some kinds of cyclic data structures can
-also be constructed with `let rec`.)
+Doubly-linked lists are a cyclic data structure, meaning that it is possible to
+follow a nontrivial sequence of references from an element, through other
+elements, back to itself.  In general, building cyclic data structures requires
+the use of side-effects (although in some limited cases, they can be constructed
+using `let rec`). This is done by constructing a set of data first, and then
+adding cycles using assignment afterwards.
 
-For doubly-linked lists, we define an element `'a element` with a reference both
-to the previous and next elements.  The elements at the ends have nothing to
-refer to, so we use an option to allow the reference to be `None`.  The element
-record fields are declared as `mutable` to allow them to be modified when the
-list is mutated.
+Core defines a standard doubly-linked list, but let's define our own
+implementation for illustration.  First, we define an element `'a element` with
+a reference both to the previous and next elements.  The elements at the ends
+have nothing to refer to, so we use an option to allow the reference to be
+`None`.  The element record fields are declared as `mutable` to allow them to be
+modified when the list is mutated.
 
 The list itself is either empty, or it refers to the first element of the list.
 We use the type `type 'a dlist = 'a element option ref`; the `ref` allows the
