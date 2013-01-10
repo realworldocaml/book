@@ -48,14 +48,21 @@ let find_milestone_num name =
 
 (* Get context from comments on an issue. We assume bactrian-bot is enough here. *)
 let find_context i =
-  run_gh (fun () -> Github.Issues.comments ~user ~repo ~issue_number:i.issue_number ()) |!
+  run_gh (fun () -> Github.Issues.comments ~token ~user ~repo ~issue_number:i.issue_number ()) |!
   List.find ~f:(fun c -> c.issue_comment_user.user_login = "bactrian")
 
 let pandoc ?(output="plain") buf =
   let ic,oc = Unix.open_process (sprintf "pandoc -f markdown -t %s" output) in
   Out_channel.output_string oc buf;
   Out_channel.close oc;
-  In_channel.input_all ic
+  (* If output is "plain" then blockquote the context *)
+  match output with
+  |"plain" ->
+     In_channel.input_all ic |!
+     String.split ~on:'\n' |!
+     List.map ~f:(fun l -> "> " ^ l) |!
+     String.concat ~sep:"\n"
+  |_ -> In_channel.input_all ic
 
 (* List comments from Github *)
 let list_comments filter_user (milestone:string option) output =
@@ -68,12 +75,15 @@ let list_comments filter_user (milestone:string option) output =
   let assignee = Option.bind filter_user (fun u -> Some (`Login u)) in
   run_gh (fun () -> Github.Issues.for_repo ~token ~milestone ?assignee ~user ~repo ()) |!
   List.filter_map ~f:id_from_issue |!
+  List.sort ~cmp:(fun (id1,_) (id2,_) -> compare id1 id2) |!
   List.iter ~f:(fun (id,i) ->
     let context = find_context i in
     printf "### %s %s\n" id (sprintf "http://github.com/%s/%s/issues/%d" user repo i.issue_number);
     match context with
     |None -> printf "<no context>\n\n"
-    |Some c -> printf "%s\n\n" (pandoc ~output c.issue_comment_body)
+    |Some c -> 
+      let body = Re_str.(replace_first (regexp ".*\n\nContext:\n\n") "" c.issue_comment_body) in
+      printf "%s\n%s\n" (pandoc ~output body) i.issue_body
   )
  
 module Flag = struct
