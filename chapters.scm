@@ -5,7 +5,7 @@
 ((part Basic) (name "records") (file "05-records") (public true))
 ((part Basic) (name "variants") (file "06-variants") (public true))
 ((part Basic) (name "error-handling") (file "07-error-handling") (public true))
-((part Basic) (name "functors-and-first-class-modules") (file "10-functors-and-fcm") (public false))
+((part Basic) (name "functors-and-first-class-modules") (file "10-functors-and-fcm") (public true))
 ((part Basic) (name "imperative-programming-1") (file "08-imperative-programming") (public true))
 ((part Basic) (name "object-oriented-programming") (file "08a-objects") (public true))
 ((part Practical) (name "data-serialization-with-json-xml-and-s-expressions") (file "12a-parsing-json-and-xml") (public true))
