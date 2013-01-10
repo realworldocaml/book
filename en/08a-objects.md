@@ -694,4 +694,20 @@ used to stand for types.  When the compiler sees a class name in type
 position, it automatically constructs an object type from it by
 erasing all the fields and keeping only the method types.  In this
 case, the type expression `'a slist` is exactly equivalent to `'a t`.
-  
+ 
+## Cryptokit
+
+Let's take a break from describing the object system with a more
+practical example.  
+
+<note>
+<title>Installing the Cryptokit library</title>
+
+The Cryptokit library can be installed via OPAM by `opam install cryptokit`.
+The OCamlfind package also has the same name, so you just need to `#require
+"cryptokit"` in your toplevel to load the library and make the modules
+available.
+
+</note>
+
+TODO: example 
