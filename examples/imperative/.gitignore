@@ -1,7 +1,11 @@
+*.opt
+.#*
 .omakedb
 concurrent_hash_map
 concurrent_hash_map.opt
+dlist
 hash
 hashmap
 hashmap.opt
 race2
+tabulate

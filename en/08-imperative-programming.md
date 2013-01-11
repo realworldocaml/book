@@ -5,7 +5,7 @@ The OCaml programming language is _functional_, meaning that functions are
 first-class values that can be passed around like any other.  However, this
 doesn't mean that OCaml programs are _pure_.
 
-_Pure_ functions behave like mathematical functions, which means that they
+Pure functions behave like mathematical functions, which means that they
 always evaluate to the same result on the same arguments, without any
 side-effects on the state or input/output.  In pure programs, evaluation order
 may affect performance, but it doesn't affect correctness.  In contrast,
@@ -151,23 +151,23 @@ for index = <initial> downto <final> do <body> done
 while <condition> do <body> done
 ```
 
-A loop `for index = <initial> to <final> do <body> done` advances by
-from the `<initial>` integer to the `<final>` one (inclusive).  The
-iterations are evaluated if `<final>` is smaller than `<initial>`.
+A loop using `to` advances by from the `<initial>` integer to the `<final>` one
+(inclusive).  No iterations are evaluated if `<final>` is smaller than
+`<initial>`.
 
 ```ocaml
 # for i = 0 to 3 do
     Printf.printf "i = %d\n" i
   done;;
-  i = 0
+i = 0
 i = 1
 i = 2
 i = 3
 - : unit = ()
 ```
 
-A downto loop `for = <initial> downto <final> do <body> done` advances
-downward by 1 on each iteration.
+A `downto` loop advances downward by 1 on each iteration.  Again, the bounds
+`<initial>` and `<final>` are inclusive.
 
 ```ocaml
 # for i = 3 downto 0 do Printf.printf "i = %d\n" i done;;
@@ -181,17 +181,15 @@ i = 0
 A while-loop iterates until the condition is false.
 
 ```ocaml
-# let i = ref 0;;
-val i : int ref = {contents = 0}
-# while !i < 3 do Printf.printf "i = %d\n" !i; i := !i + 1 done;;
-i = 0
-i = 1
-i = 2
-- : unit = ()
-# while !i < 3 do Printf.printf "i = %d\n" !i; i := !i + 1 done;;
-- : unit = ()
-# !i;;  
-- : int = 3
+(* reverses an array in place. *)
+let rev_inplace t =
+  let i = ref 0 in
+  let j = ref (length t - 1) in
+  while !i < !j; do
+    swap t !i !j;
+    incr i;
+    decr j;
+  done;;
 ```
 
 ## Doubly-linked lists
@@ -202,7 +200,7 @@ Doubly-linked lists are a cyclic data structure, meaning that it is possible to
 follow a nontrivial sequence of references from an element, through other
 elements, back to itself.  In general, building cyclic data structures requires
 the use of side-effects (although in some limited cases, they can be constructed
-using `let rec`). This is done by constructing a set of data first, and then
+using `let rec`). This is done by constructing the data elements first, and then
 adding cycles using assignment afterwards.
 
 Core defines a standard doubly-linked list, but let's define our own
@@ -229,39 +227,42 @@ type 'a dlist = 'a element option ref
 let create () = ref None
 
 let is_empty l = (!l = None)
+
+let value elt = elt.value
+
+let first l = !l
+let next elt = elt.next
+let previous elt = elt.previous
 ```
 
 The function `create` creates an empty list.  The function `is_empty l`
 dereferences the list using the `!` operator, returning true if the value is
-`None`, or false otherwise.
+`None`, or false otherwise.  The `value` function returns the value stored in an
+element.  The `first`, `next`, and `previous` functions allow navigation through
+the list.
 
-Next, let's define the function that inserts a value onto the front of the list
-as a new first element.  We define a new element `new_front`, link in the new
-element, and set the list references.
+Next, let's define the function that inserts a value into the list as a new
+first element.  We define a new element `elt`, link it into the list, and set
+the list reference.
 
 ```ocaml
-let push_front l ~data =
-  let new_front = { value = data; next = None; previous = None } in
-  begin match !l with
-   | Some el ->
-     el.previous <- Some new_front;
-     new_front.next <- Some el
-   | None ->
-     ()
-  end;
-  l := Some new_front
+   let insert_first l value =
+     let elt = { previous = None; next = !l; value } in
+     begin match !l with
+     | Some old_first -> old_first.previous <- Some elt
+     | None -> ()
+     end;
+     l := Some elt;
+     elt
 ```
 
-This example introduces the _sequencing_ operator `;`.  In the case where the
-list is non-empty (the `Some el` case in the `match`), we first set
-`el.previous` to refer to the `new_front` element, and next set `new_front.next`
-to refer to `el`.
+This example introduces the sequencing operator `;` to separate the steps to be executed in order: first, create the new element `elt`; then set `old_first.previous` to point to it; then set the list `l` to refer to the `elt` element; then return the element `elt`.
 
 In general, when a sequence expression `expr1; expr2` is evaluated, `expr1` is
 evaluated first, and then `expr2`.  The expression `expr1` must have type
 `unit`, and the the value of `expr2` is returned as the value of the entire
-sequence.  So, for example, the sequence `print_string "hello world"; 1 + 2`
-first prints the string `"hello world"`, then returns the integer `3`.
+sequence.  For example, the sequence `print_string "hello world"; 1 + 2` first
+prints the string `"hello world"`, then returns the integer `3`.
 
 There are a few more things to note.  First, semicolon `;` is a _separator_, not
 a terminator, like it is in C or Java.  The compiler is somewhat relaxed about
@@ -280,33 +281,34 @@ from the following assignment `l := Some new_front`, we surround the match in a
 final assignment would become part of the `None -> ...` case, which is not what
 we want.
 
-To complete this initial part of the implementation, let's define function
-`front` to return the first element, and `pop_front` to remove it.
+To complete this initial part of the implementation, let's define a function for
+removal.
 
 ```ocaml
-let front = function
- | { contents = Some { value = v } } -> v
- | { contents = None } -> raise (Invalid_argument "front")
-
-let pop_front l =
-  match !l with
-  | Some { value = v; next = None } -> l := None; v
-  | Some { value = v; next = (Some el) as next } ->
-    l := next;
-    el.previous <- None;
-    v
-  | None -> raise (Invalid_argument "pop_front")
+   let remove l elt =
+     let { previous = previous; next = next } = elt in
+     (match previous with
+      | Some p -> p.next <- next
+      | None -> check_is_first_element l elt; l := next);
+     (match next with
+      | Some n -> n.previous <- previous;
+      | None -> ());
+     elt.previous <- None;
+     elt.next <- None
 ```
 
-For illustration the `front` function uses pattern matching on the reference
-cell -- it would be equivalent to write an explicit dereference `let front l =
-match !l with Some { value = v } -> v | None -> ...`.
+The `remove` function unlinks the element from the list, the resets the
+`previous` and `next` links to `None`.  For safety, we detect duplicate removals
+with a check.  In the case where the previous element is `None`, the element
+must be first in the list.  Here is the implementation of the
+`check_is_first_element` function.
 
-The function `pop_front` performs the unlinking.  There are three cases, 1) the
-list has one element, so it becomes empty, 2) the list has more than one
-element, so the second element is relinked, or 3) the list is empty, which is an
-error.  In the second case, the list `l` is set to point to the second element,
-the `previous` field is set to `None`, and `v` is returned.
+```ocaml
+   let check_is_first_element l elt1 =
+      match !l with
+      | Some elt2 when elt1 == elt2 -> ()
+      | _ -> raise (Invalid_argument "element has already been removed")
+```
 
 ## Iteration
 
@@ -333,8 +335,8 @@ iterates through the list, applying the function `f` to each element in turn.
 ```ocaml
 let iter l ~f =
   let rec loop = function
-   | Some { value = v; next = next } -> f v; loop next
-   | None -> ()
+  | Some { value = v; next = next } -> f v; loop next
+  | None -> ()
   in
   loop !l;;
 
@@ -342,7 +344,7 @@ let iter l ~f =
   push_front l 1;
   push_front l 2;
   push_front l 3;
-  DList.iter l ~f:(Printf.printf "Item: %d\n");;
+  iter l ~f:(Printf.printf "Item: %d\n");;
 Item: 3
 Item: 2
 Item: 1
@@ -377,7 +379,7 @@ represent it.  We _could_ define a separate iterator type for each kind of
 container, but this would be inconvenient, since iterators have similar behavior
 for many different kinds of containers.  To define a _generic_ iterator, there
 are several reasonable choices: we can use first-class modules, or we can use
-objects.  The simpler approach is to use objects.
+objects.  One of the simpler approaches is to use objects.
 
 You can skip forward to the Objects chapter for more informatation about
 objects, but we'll be using basic objects, which are just collections of
