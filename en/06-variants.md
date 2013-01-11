@@ -1,72 +1,71 @@
 # Variants
 
 Variant types are one of the most useful features of OCaml, and also
-one of the most unusual.  Variants allow you to represent data that
-may take on multiple different forms, where each form is marked by an
-explicit tag.  Let's consider a simple concrete example of how to use
-variant types: dealing with terminal colors.
+one of the most unusual.  They let you represent data that may take on
+multiple different forms, where each form is marked by an explicit
+tag.  As we'll see, when combined with pattern matching, variants give
+you a powerful way of representing complex data and of organizing the
+case-analysis on that information.
 
-Almost all terminals support a set of 8 basic colors.  We can
-represent these with the following variant type.
+Let's consider a concrete example of how variants can be useful.
+Almost all terminals support a set of 8 basic colors, and we can
+represent those colors using a variant.  Each color is declared as a
+simple tag, with pipes used to separate the different cases.
 
 ```ocaml
 # type basic_color =
     Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
+# Cyan ;;
+- : basic_color = Cyan
+# [Blue; Magenta; Red] ;;
+- : basic_color list = [Blue; Magenta; Red]
 ```
 
-Here, the different cases of the variant are separated by pipes, and
-each case is a simple tag with no associated data.  This is similar to
-the enumerations found in many languages, including C and Java.
-
-We can construct instances of `basic_color` by simply writing down the
-tags.
-
-```ocaml
-# [Black;Blue;Red];;
-- : basic_color list = [Black; Blue; Red]
-```
-
-Pattern matching can be used to process a variant.  The following
-function uses pattern matching to convert `basic_color` to a
-corresponding integer for use in creating color-setting escape codes.
+The following function uses pattern matching to convert a
+`basic_color` to a corresponding integer.  Note that the
+exhaustiveness checking on pattern matches means that the compiler
+will warn us if we miss a color.
 
 ```ocaml
 # let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
 val basic_color_to_int : basic_color -> int = <fun>
+# List.map ~f:basic_color_to_int [Blue;Red];;
+- : int list = [4; 1]
 ```
 
-Note that the exhaustiveness checking on pattern matches means that
-the compiler will warn us if we miss a color.
-
-Using this function, we can generate the escape codes to change the
-color of a given string.
+Using the above, we can generate escape codes to change the color of a
+given string displayed in a terminal.
 
 ```ocaml
 # let color_by_number number text =
     sprintf "\027[38;5;%dm%s\027[0m" number text;;
   val color_by_number : int -> string -> string = <fun>
-# let s = color_by_number (basic_color_to_int Blue) "Hello Blue World!";;
-val s : string = "\027[38;5;4mHello Blue World!\027[0m"
-# printf "%s\n" s;;
+# let blue = color_by_number (basic_color_to_int Blue) "Blue";;
+val blue : string = "\027[38;5;4mBlue\027[0m"
+# printf "Hello %s World!\n" blue;;
 Hello Blue World!
 - : unit = ()
 ```
 
-On most terminals, that last line is printed in blue.
+On most terminals, that word "Blue" will be rendered in blue.
 
-The simple enumeration of `basic_color` isn't enough to fully describe
-the set of colors that a modern terminal can display.  Many terminals,
-including the venerable `xterm`, support 256 different colors, broken
-up into the following groups.
+In this example, the cases of the variant are simple tag with no
+associated data.  This is substantively the same as the enumerations
+found in languages like C and Java.  But as we'll see, variants can do
+considerably more than represent a simple enumeration.  Indeed, an
+enumeration isn't enough to effectively describe the full set of
+colors that a modern terminal can display.  Many terminals, including
+the venerable `xterm`, support 256 different colors, broken up into
+the following groups.
 
 - The 8 basic colors, in regular and bold versions.
 - A $6 \times 6 \times 6$ RGB color cube
 - A 24-level grayscale ramp
 
-We can represent this more complicated color-space as a variant, but
-this time, the different tags will have arguments, to describe
+We'll also represent this more complicated color-space as a variant,
+but this time, the different tags will have arguments which describe
 the data available in each case.
 
 ```ocaml
@@ -76,12 +75,14 @@ the data available in each case.
   | RGB   of int * int * int       (* 6x6x6 color cube *)
   | Gray  of int                   (* 24 grayscale levels *)
 ;;
+# [RGB (250,70,70); Basic (Green, Regular)];;
+- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
 ```
 
-The definition of `color` uses more of the power of variants by
-attaching data to the different tags.  In order to compute the color
-code for a `color`, we use pattern matching to break down the `color`
-variant into the appropriate cases.
+Once again, we'll use pattern matching to convert a color to a
+corresponding integer.  But in this case, the pattern matching does
+more than separate out the different cases; it also allows us to
+extract the data associated with each tag.
 
 ```ocaml
 # let color_to_int = function
@@ -93,12 +94,25 @@ variant into the appropriate cases.
 val color_to_int : color -> int = <fun>
 ```
 
+Now, we can print text using the full set of available colors.
+
+```ocaml
+# let color_print color s =
+     printf "%s\n" (color_by_number (color_to_int color) s);;
+val color_print : color -> string -> unit = <fun>
+# color_print (Basic (Red,Bold)) "A bold red!";;
+A bold red!
+- : unit = ()
+# color_print (Gray 4) "A muted gray...";;
+A muted gray...
+- : unit = ()
+```
+
 <sidebar><title>Catch-all cases and refactoring</title>
 
-OCaml's type system can act as a form of refactoring tool, where the
-compiler warns you of places where your code needs to be adapted to
-changes made elsewhere.  This is particularly valuable when working
-with variant types.
+OCaml's type system can act as a refactoring tool, by warning you of
+places where your code needs to be updated to match an interface
+change.  This is particularly valuable in the context of variants.
 
 Consider what would happen if we were to change the definition of
 `color` to the following.
@@ -130,10 +144,10 @@ Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 ```
 
-Here, the compiler is complaining that the `Basic` tag is
-assumed to have the wrong number of arguments.  If we fix that,
-however, the compiler flag will flag a second problem, which is that
-we haven't handled the new `Bold` tag.
+Here, the compiler is complaining that the `Basic` tag is used with
+the wrong number of arguments.  If we fix that, however, the compiler
+flag will flag a second problem, which is that we haven't handled the
+new `Bold` tag.
 
 ```ocaml
 # let color_to_int = function
@@ -158,11 +172,12 @@ Fixing this now leads us to the correct implementation.
 val color_to_int : color -> int = <fun>
 ```
 
-As you can see, the type system identified for us the places in our
-code that needed to be fixed.  This refactoring isn't entirely free,
-however.  To really take advantage of it, you need to write your code
-in a way that maximizes the compiler's chances of helping you find
-your bugs.  One important rule is to avoid catch-all cases in pattern
+As we've seen, the type errors identified the things that needed to be
+fixed to complete the refactoring of the code.  This is fantastically
+useful, but for it to work well and reliably, you need to write your
+code in a way that maximizes the compiler's chances of helping you
+find the bugs.  One important rule of thumb to follow to maximize what
+the compiler can do for you is to avoid catch-all cases in pattern
 matches.
 
 Here's an example of how a catch-all case plays in.  Imagine we wanted
@@ -188,26 +203,10 @@ behavior of the code, but we have improved our robustness to change.
 
 </sidebar>
 
-Using the above function, we can print text using the full set of
-available colors.
-
-```ocaml
-# let color_print color s =
-     printf "%s\n" (color_by_number (color_to_int color) s);;
-val color_print : color -> string -> unit = <fun>
-# color_print (Basic (Red,Bold)) "A bold red!";;
-A bold red!
-- : unit = ()
-# color_print (Gray 4) "A muted gray...";;
-A muted gray...
-- : unit = ()
-```
-
 ## Combining records and variants
 
 Records and variants are most effective when used in concert.
-Consider again the type `Log_entry.t` from section [[REUSING FIELD
-NAMES]]:
+Consider again the type `Log_entry.t` [xref](#records):
 
 ```ocaml
 module Log_entry = struct
@@ -240,12 +239,11 @@ than code specialized to a fixed message type, we need something like
 possible messages.
 
 You can increase the precision of your types by using variants to
-represent structural differences between types, and records to
-represent structure that is shared.  As an example, consider the
-following function that takes a list of `client_message`s and returns
-all messages generated by a given user.  The code in question is
-implemented by folding over the list of messages, where the
-accumulator is a pair of:
+represent differences between types, and records to represent shared
+structure.  Consider the following function that takes a list of
+`client_message`s and returns all messages generated by a given user.
+The code in question is implemented by folding over the list of
+messages, where the accumulator is a pair of:
 
   - the set of session identifiers for the user that have been seen
     thus far.
@@ -364,13 +362,13 @@ Note that the more complex match statement for computing the session
 id has been replaced with the simple expression
 `common.Common.session_id`.
 
-This basic design is good in another way: it allows us to essentially
-downcast to the specific message type once we know what it is, and
-then dispatch code to handle just that message type.  In particular,
-while we use the type `Common.t * details` to represent an arbitrary
-message, we can use `Common.t * Logon.t` to represent a logon message.
-Thus, if we had functions for handling individual message types, we
-could write a dispatch function as follows.
+In addition, this design allows us to essentially downcast to the
+specific message type once we know what it is, and then dispatch code
+to handle just that message type.  In particular, while we use the
+type `Common.t * details` to represent an arbitrary message, we can
+use `Common.t * Logon.t` to represent a logon message.  Thus, if we
+had functions for handling individual message types, we could write a
+dispatch function as follows.
 
 ```ocaml
 let handle_message server_state (common,details) =
@@ -386,14 +384,14 @@ And it's explicit at the type level that `handle_log_entry` sees only
 ## Variants and recursive data structures
 
 Another common application of variants is to represent tree-like
-recursive data-structures.  Let's see how this works by working
-through a simple example: designing a Boolean expression evaluator.
+recursive data-structures.  We'll show how this can be done by walking
+through the design of a simple Boolean expression language.  Such a
+language can be useful anywhere you need to specify filters, which are
+used in everything from packet analyzers to mail clients.  
 
-Such a language can be useful anywhere you need to specify filters,
-which are used in everything from packet analyzers to mail clients.
-Below, we define a variant called `blang` (short for "binary
-language") with one tag for each kind of expression we want to
-support.
+An expression in this language will be defined by the variant `blang`
+(short for "boolean language") with one tag for each kind of
+expression we want to support.
 
 ```ocaml
 # type 'a blang =
@@ -408,13 +406,16 @@ support.
 Note that the definition of the type `blang` is recursive, meaning
 that a `blang` may contain other `blang`s.
 
-The only mysterious bit about `blang` is the role of `Base`.  The
-`Base` tag is to let the language include a set of base
-predicates.  These base predicates tie the expressions in question to
-whatever our application is.  Thus, if you were writing a filter
-language for an email processor, your base predicates might specify
-the tests you would run against an email.  Here's a simple example of
-how you might define a base predicate type.
+The purpose of each tag is pretty straightforward.  `And`, `Or` and
+`Not` are the basic operators for building up boolean expression, and
+`Const` lets you enter constants `true` and `false`.  
+
+The `Base` tag is what allows you to tie the `blang` to your
+application, by letting you specify an element of some base predicate
+type, whose whose truth or falsehood is determined by your
+application.  If you were writing a filter language for an email
+processor, your base predicates might specify the tests you would run
+against an email, as in the following example.
 
 ```ocaml
 # type mail_field = To | From | CC | Date | Subject
@@ -423,14 +424,17 @@ how you might define a base predicate type.
   ;;
 ```
 
-And now, we can construct a simple expression that uses
-`mail_predicate` for its base predicate.
+Using the above, we can construct a simple expression with
+`mail_predicate` as its base predicate.
 
 ```ocaml
-# And [ Or [ Base { field = To; contains = "doligez" } ;
-             Base { field = CC; contains = "doligez" } ];
-        Base { field = Subject; contains = "runtime" } ];;
-    - : mail_predicate blang =
+# let test field contains = Base { field; contains };;
+val test : mail_field -> string -> mail_predicate blang = <fun>
+# And [ Or [ test To "doligez"; test CC "doligez" ];
+        test Subject "runtime";
+      ]
+  ;;
+- : mail_predicate blang =
 And
  [Or
    [Base {field = To; contains = "doligez"};
@@ -438,12 +442,14 @@ And
   Base {field = Subject; contains = "runtime"}]
 ```
 
-Being able to construct such expressions is all well and good, but to
-do any real work, we need some way to evaluate an expression.  Here's
-a piece of code to do just that.
+Being able to construct such expressions isn't enough: we also need to
+be able to evaluate such an expression.  The following code shows how
+you could write a general-purpose evaluator for `blang`'s.
 
 ```ocaml
 # let rec eval blang base_eval =
+    (* a shortcut, so we don't need to repeatedly pass [base_eval]
+       explicitly to [eval] *)
     let eval' blang = eval blang base_eval in
     match blang with
     | Base  base   -> base_eval base
@@ -456,14 +462,15 @@ val eval : 'a blang  -> ('a -> bool) -> bool = <fun>
 ```
 
 The structure of the code is pretty straightforward --- we're just
-walking over the structure of the data, doing the appropriate thing at
-each state, which sometimes requires a recursive call and sometimes
-doesn't.  We did define a helper function, `eval'`, which is just
-`eval` specialized to use `base_eval`, and is there to remove some
-boilerplate from the recursive calls to `eval`.
+pattern-matching over the structure of the data, doing the appropriate
+calculation based on which tag we see.  To use this evaluator on a
+concrete example, we just need to write the `base_eval` function which
+is capable of evaluating a base predicate.
 
-We can also write code to transform an expression, for example, by
-simplifying it.  Here's a function to does just that.
+Another useful operation to be able to do on expressions is
+simplification.  The following function applies some basic
+simplification rules, most of the simplifications being driven by the
+presence of constants.
 
 ```ocaml
 # let rec simplify = function
@@ -497,8 +504,7 @@ change this snippet of code to be more explicit:
       | (And _ | Or _ | Base _ | Not _) -> Not blang
 ```
 
-we can immediately notice that we've missed an important
-simplification.  Really, we should have simplified double negation.
+it's easy to see that we've missed an important case: double-negation.
 
 ```ocaml
     | Not blang ->
@@ -510,22 +516,22 @@ simplification.  Really, we should have simplified double negation.
 
 This example is more than a toy.  There's a module very much in this
 spirit already exists as part of Core, and gets a lot of practical use
-in a variety of applications.  More generally, using variants to build
-recursive data-structures is a common technique, and shows up
-everywhere from designing little languages to building efficient
-data-structures like red-black trees.
+in a variety of applications.  
+
+More generally, using variants to build recursive data-structures is a
+common technique, and shows up everywhere from designing little
+languages to building efficient data-structures.
 
 ## Polymorphic variants
 
 In addition to the ordinary variants we've seen so far, OCaml also
 supports so-called _polymorphic variants_.  As we'll see, polymorphic
 variants are more flexible and syntactically more lightweight than
-ordinary variants, but that extra power comes at a cost, as we'll see.
+ordinary variants, but that extra power comes at a cost.
 
 Syntactically, polymorphic variants are distinguished from ordinary
-variants by the leading backtick.  Pleasantly enough, you can create a
-polymorphic variant without first writing an explicit type
-declaration.
+variants by the leading backtick.  And unlike ordinary variants,
+polymorphic variants can be used without an explicit type declaration.
 
 ```ocaml
 # let three = `Int 3;;
@@ -539,9 +545,9 @@ val nan : [> `Not_a_number ] = `Not_a_number
 [`Int 3; `Float 4.; `Not_a_number]
 ```
 
-Variant types are inferred automatically from their use, and when we
-combine variants whose types contemplate different tags, the compiler
-infers a new type that knows about both all those tags.
+As you can see, polymorphic variant types are inferred automatically,
+and when we combine variants with different tags, the compiler infers
+a new type that knows about all of those tags.
 
 The type system will complain, however, if it sees incompatible uses
 of the same tag:
@@ -563,8 +569,9 @@ The `>` at the beginning of the variant types above is critical,
 because it marks the types as being open to combination with other
 variant types.  We can read the type ``[> `Int of string | `Float of
 float]`` as describing a variant whose tags include `` `Int of string
-`` and `` `Float of float ``, but may include more tags as well.  You
-can roughly translate `>` to "these tags or more".
+`` and `` `Float of float ``, but may include more tags as well.  In
+other words, you can roughly translate `>` to mean: "these tags or
+more".
 
 OCaml will in some cases infer a variant type with ` <`, to indicate
 "these tags or less", as in the following example.
@@ -582,9 +589,9 @@ values that have tags other than `` `Float of float`` or `` `Int of
 int``.
 
 We can think of these `<` and `>` markers as indications of upper and
-lower bounds.  If the same type is both an upper and a lower bound, we
-end up with an _exact_ polymorphic variant type, which has neither
-marker.  For example:
+lower bounds on the tags involved.  If the same set of tags are both
+an upper and a lower bound, we end up with an _exact_ polymorphic
+variant type, which has neither marker.  For example:
 
 ```ocaml
 # let exact = List.filter ~f:is_positive [three;four];;
@@ -592,20 +599,8 @@ val exact : [ `Float of float | `Int of int ] list
    = [`Int 3; `Float 4.]
 ```
 
-<sidebar><title>Polymorphic variants and casts</title>
-
-Most of the time, the inference system is able to infer polymorphic
-variant types that work without any extra help from the user.  In some
-cases, however, OCaml can't figure out how to make the types work on
-its own, and requires some extra annotations.  
-
-```ocaml
-```
-
-</sidebar>
-
 Perhaps surprisingly, we can also create polymorphic variant types
-that have different lower and upper bounds.
+that have different upper and lower bounds.
 
 ```ocaml
 let is_positive = function
@@ -627,15 +622,13 @@ Here, the inferred type states that the tags can be no more than ``
 `` `Float`` and `` `Int``.  As you can already start to see,
 polymorphic variants can lead to fairly complex inferred types.
 
-
-
 ### Example: Terminal colors redux
 
-To see how to use polymorphic variants in practice, let's go back to
-the terminal color example that we discussed earlier.  Imagine that we
-have a new terminal type that adds yet more colors, say, by adding an
-alpha channel so you can specify translucent colors.  We could model
-this extended set of colors as follows, using an ordinary variant.
+To see how to use polymorphic variants in practice, we'll return to
+terminal colors.  Imagine that we have a new terminal type that adds
+yet more colors, say, by adding an alpha channel so you can specify
+translucent colors.  We could model this extended set of colors as
+follows, using an ordinary variant.
 
 ```ocaml
 # type extended_color =
@@ -648,8 +641,8 @@ this extended set of colors as follows, using an ordinary variant.
 
 We want to write a function `extended_color_to_int`, that works like
 `color_to_int` for all of the old kinds of colors, with new logic only
-for handling colors that include an alpha channel.  We might think we
-could write the function to do this as follows.
+for handling colors that include an alpha channel.  One might try to
+write such a function as follows.
 
 ```ocaml
 # let extended_color_to_int = function
@@ -674,11 +667,10 @@ view distinct and unrelated types.  The compiler doesn't, for example,
 recognize any equality between the `Basic` tag in the two
 types.
 
-What we essentially want to do is to share tags between two
-different types, and polymorphic variants let us do this.  First,
-let's rewrite `basic_color_to_int` and `color_to_int` using
-polymorphic variants.  The translation here is entirely
-straightforward.
+What we want to do is to share tags between two different variant
+types, and polymorphic variants let us do this in a natural way.
+First, let's rewrite `basic_color_to_int` and `color_to_int` using
+polymorphic variants.  The translation here is pretty straightforward.
 
 ```ocaml
 # let basic_color_to_int = function
@@ -791,13 +783,10 @@ that uses `is_positive_permissive` passes in `Float` misspelled as
 With ordinary variants, such a typo would have been caught as an
 unknown tag.  As a general matter, one should be wary about
 mixing catch-all cases and polymorphic variants.
-
 </sidebar>
 
-The code here is fragile in a different way, in that it's too
-vulnerable to typos.  Let's consider how we might write this code as a
-proper library, including a proper `mli`.  The interface might look
-something like this:
+Let's consider how we might turn our code into a proper library with
+an `mli`.  Here's what the interface to this file might look like.
 
 ```ocaml
 (* file: terminal_color.mli *)
@@ -821,9 +810,9 @@ val color_to_int          : color -> int
 val extended_color_to_int : extended_color -> int
 ```
 
-Here, `extended_color` is defined as an explicit extension of
-`color`.  Also, notice that we defined all of these types as exact
-variants.   Now here's what the implementation might look like.
+Here, `extended_color` is defined as an explicit extension of `color`.
+Also, notice that we defined all of these types as exact variants.
+We can implement this library as follows.
 
 ```ocaml
 open Core.Std
@@ -858,12 +847,16 @@ let extended_color_to_int = function
   | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
 ```
 
-In this case, a change was made to `extended_color_to_int`, to add
-special-case handling for the color gray, rather than using
-`color_to_int`.  Unfortunately, `Gray` was misspelled as `Grey`, and
-the compiler didn't complain.  It just inferred a bigger type for
+In the above code, we did something funny to the definition of
+`extended_color_to_int`, that underlines some of the downsides of
+polymorphic variants.  In particular, we added some special-case
+handling for the color gray, rather than using `color_to_int`.
+Unfortunately, we misspelled `Gray` as `Grey`.  This is exactly the
+kind of error that the compiler would catch with ordinary variants,
+but with polymorphic variants, this compiles without issue.  All that
+happened was that the compiler inferred a wider type for
 `extended_color_to_int`, which happens to be compatible with the
-`mli`, and so it compiles without incident.
+narrower type that was listed in the mli.
 
 If we add an explicit type annotation to the code itself (rather than
 just in the mli), then the compiler has enough information to warn us.
@@ -908,19 +901,19 @@ In reality, regular variants are the more pragmatic choice most of the
 time.  That's because the flexibility of polymorphic variants comes at
 a price.  Here are some of the downsides.
 
-- _Efficiency:_ This isn't a huge effect, but polymorphic variants are
-  somewhat heavier than regular variants, and OCaml can't generate
-  code for matching on polymorphic variants that is quite as efficient
-  as what is generated for regular variants.
-- _Error-finding:_ Polymorphic variants are type-safe, but the typing
-  discipline that they impose is, by dint of its flexibility, less
-  likely to catch bugs in your program.
 - _Complexity:_ As we've seen, the typing rules for polymorphic
   variants are a lot more complicated than they are for regular
   variants.  This means that heavy use of polymorphic variants can
   leave you scratching your head trying to figure out why a given
   piece of code did or didn't compile.  It can also lead to absurdly
   long and hard to decode error messages.
+- _Error-finding:_ Polymorphic variants are type-safe, but the typing
+  discipline that they impose is, by dint of its flexibility, less
+  likely to catch bugs in your program.
+- _Efficiency:_ This isn't a huge effect, but polymorphic variants are
+  somewhat heavier than regular variants, and OCaml can't generate
+  code for matching on polymorphic variants that is quite as efficient
+  as what is generated for regular variants.
 
 All that said, polymorphic variants are still a useful and powerful
 feature, but it's worth understanding their limitations, and how to
