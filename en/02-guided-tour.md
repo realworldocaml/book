@@ -79,8 +79,8 @@ at you.
   prevents some kinds of bugs that arise in other languages due to
   unexpected differences between the behavior of `int` and `float`.
 
-We can also create variables to name the value of a given expression,
-using the `let` syntax.
+We can also a create variable to name the value of a given expression,
+using a `let` binding.
 
 ```ocaml
 # let x = 3 + 4;;
