@@ -171,7 +171,7 @@ how OCaml is able to figure them out, given that we didn't write down
 any explicit type information.
 
 OCaml determines the type of an expression using a technique called
-_type-inference_, by which it infers the type of a given expression
+_type inference_, by which it infers the type of a given expression
 based on what it already knows about the types of other related
 variables, and on constraints on the types that arise from the
 structure of the code.
