@@ -662,9 +662,11 @@ example,
 val divide : int -> int -> int option = <fun>
 ```
 
-`Some` and `None` are constructors, like `::` and `[]` for lists,
-which let you build optional values.  You can think of an option as a
-specialized list that can only have zero or one element.
+The function `divide` either returns `None`, if the divisor is zero,
+or `Some` of the result of the division, otherwise.  `Some` and `None`
+are constructors, like `::` and `[]` for lists, which let you build
+optional values.  You can think of an option as a specialized list
+that can only have zero or one element.
 
 To get a value out of an option, we use pattern matching, as we did
 with tuples and lists.  Consider the following simple function for
