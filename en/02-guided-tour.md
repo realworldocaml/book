@@ -740,7 +740,8 @@ And we can get access to the contents of these types using pattern
 matching:
 
 ```ocaml
-# let magnitude { x = x_pos; y = y_pos } = sqrt (x_pos ** 2. +. y_pos ** 2.);;
+# let magnitude { x = x_pos; y = y_pos } =
+    sqrt (x_pos ** 2. +. y_pos ** 2.);;
 val magnitude : point2d -> float = <fun>
 ```
 
@@ -766,9 +767,9 @@ larger types, as in the following types, each of which is a
 description of a different geometric object.
 
 ```ocaml
-# type circle_desc  = { center: point2d; radius: float } ;;
-# type rect_desc    = { lower_left: point2d; width: float; height: float } ;;
-# type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
+# type circle_desc  = { center: point2d; radius: float }
+  type rect_desc    = { lower_left: point2d; width: float; height: float }
+  type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
 ```
 
 Now, imagine that you want to combine multiple objects of these types
@@ -799,14 +800,13 @@ of some element of a list of `scene_element`s.
        point.x > lower_left.x && point.x < lower_left.x +. width
        && point.y > lower_left.y && point.y < lower_left.y +. height
      | Segment { endpoint1; endpoint2 } -> false
-     ;;
+  ;;
 val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
 # let is_inside_scene point scene =
-     let point_is_inside_scene_element scene_element =
-       is_inside_scene_element point scene_element
-     in
-     List.for_all scene ~f:point_is_inside_scene_element;;
-val is_inside_shapes : point2d -> scene_element list -> bool = <fun>
+     List.for_all scene
+       ~f:(fun el -> is_inside_scene_element point el)
+   ;;
+val is_inside_scene : point2d -> scene_element list -> bool = <fun>
 ```
 
 You might at this point notice that the use of `match` here is
@@ -814,6 +814,12 @@ reminiscent of how we used `match` with `option` and `list`.  This is
 no accident: `option` and `list` are really just examples of variant
 types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
+
+We also made our first use of an _anonymous function_ in the call to
+`List.forall`.  An anonymous function is a function that is defined
+but not named, in this case, using the `fun` keyword.  Anonymous
+functions are common in OCaml, particularly when using iteration
+functions like like `List.forall`.
 
 ## Imperative programming
 
