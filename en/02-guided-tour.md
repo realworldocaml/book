@@ -327,8 +327,8 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-but this code works fine, even though it contains an branch that would
-throw an exception if it were ever reached.
+but the following code runs incident, even though it contains a branch
+that would throw an exception if it were ever reached.
 
 ```ocaml
 # if 3 < 4 then 0 else 3 / 0;;
