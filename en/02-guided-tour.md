@@ -35,9 +35,11 @@ You can exit `utop` by pressing `control-D` and return.
 
 ## OCaml as a calculator
 
-Let's spin up the toplevel and open the `Core.Std` module to get
-access to Core's libraries.  Don't forget to open `Core.Std`, since
-without it, many of the examples below will fail.
+Let's spin up the toplevel.  Throughout the book we're going to use
+Core, a more full-featured and capable replacement for OCaml's
+standard library.  Accordingly, we'll start by opening the `Core.Std`
+module to get access to Core's libraries.  If you don't open
+`Core.Std` many of the examples below will fail.
 
 ```ocaml
 $ utop
