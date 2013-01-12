@@ -17,9 +17,9 @@ you can try out the examples as you go.
 <note>
 <title>Installing the interactive top-level</title>
 
-The easiest way to get `utop` is via the OPAM package manager, which is
-explained in [xref](#installation).  You'll need to also have the Core standard
-library installed.  In a nutshell, you need to:
+The easiest way to get `utop` is via the OPAM package manager, which
+is explained in [xref](#installation).  You'll need to also have the
+Core standard library installed.  In a nutshell, you need to:
 
 ```
 $ opam init
