@@ -261,7 +261,7 @@ Or pass it to another function.
 - : int list = [2; 3; 4]
 ```
 
-Or even stuff then into a datastructure.
+Or even stuff them into a datastructure.
 
 ```ocaml
 # let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
