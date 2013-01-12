@@ -328,7 +328,7 @@ in a monadic style, as we'll see in chapter {{ASYNC}}.
 ### Multi-argument functions ###
 
 OCaml of course also supports multi-argument functions.  Here's an
-example that came up in chapter {{TOUR}}.
+example that came up in [xref](a-guided-tour).
 
 ```ocaml
 # let abs_diff x y = abs (x - y);;
