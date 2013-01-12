@@ -909,8 +909,8 @@ side-effect.
 
 A new and somewhat odd type has cropped up in this example: `unit`.
 What makes `unit` different is that there is only one value of type
-`unit`, which is written `()`.  Because `unit` has only one
-inhabitant, a value of type `unit` can't convey any information.
+`unit`, which is written `()`.  Because there is only one value of
+type `unit` that value doesn't really convey any information.
 
 If it doesn't convey any information, then what is `unit` good for?
 Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
