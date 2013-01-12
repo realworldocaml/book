@@ -141,8 +141,8 @@ Characters 126-128:
 Warning 26: unused variable pi.
 ```
 
-In OCaml, let bindings are immutable.  As we'll see in chapter
-{{{imperative-programming}}}, there are mutable values in OCaml, but
+In OCaml, let bindings are immutable.  As we'll see in
+[xref](imperative-programming), there are mutable values in OCaml, but
 no mutable variables.
 
 ### Pattern matching and `let` ###
@@ -321,7 +321,8 @@ nearly equivalent:
 ```
 
 This connection is important, and will come up more when programming
-in a monadic style, as we'll see in chapter {{ASYNC}}.
+in a monadic style, as we'll see in
+[xref](concurrent-programming-with-async).
 
 </sidebar>
 

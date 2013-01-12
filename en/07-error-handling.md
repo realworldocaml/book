@@ -174,9 +174,10 @@ Here, the value `Time.epoch` is included in the error, but
 `Time.sexp_of_t`, which is used for converting the time to an
 s-expression, isn't run until the error is converted to a string.
 Using the Sexplib syntax-extension, which is discussed in more detail
-in chapter {{SYNTAX}}, we can inline create an s-expression converter
-for a collection of types, thus allowing us to register multiple
-pieces of data in an `Error.t`.
+in chapter [xref](data-serialization-with-json-xml-and-s-expressions),
+we can inline create an s-expression converter for a collection of
+types, thus allowing us to register multiple pieces of data in an
+`Error.t`.
 
 ```ocaml
 # Error.create "Something went terribly wrong"
