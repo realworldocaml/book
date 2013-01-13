@@ -108,7 +108,7 @@ A muted gray...
 - : unit = ()
 ```
 
-<sidebar><title>Catch-all cases and refactoring</title>
+<note><title>Catch-all cases and refactoring</title>
 
 OCaml's type system can act as a refactoring tool, by warning you of
 places where your code needs to be updated to match an interface
@@ -201,7 +201,7 @@ when we change the type to include it.  We can get this check back by
 being more explicit about what we're ignoring.  We haven't changed the
 behavior of the code, but we have improved our robustness to change.
 
-</sidebar>
+</note>
 
 ## Combining records and variants
 
@@ -745,7 +745,7 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
        The second variant type does not allow tag(s) `RGBA
 ```
 
-<sidebar><title>Polymorphic variants and catch-all cases</title>
+<note><title>Polymorphic variants and catch-all cases</title>
 
 As we saw with the definition of `is_positive`, a match statement can
 lead to the inference of an upper bound on a variant type, limiting
@@ -783,7 +783,7 @@ that uses `is_positive_permissive` passes in `Float` misspelled as
 With ordinary variants, such a typo would have been caught as an
 unknown tag.  As a general matter, one should be wary about
 mixing catch-all cases and polymorphic variants.
-</sidebar>
+</note>
 
 Let's consider how we might turn our code into a proper library with
 an `mli`.  Here's what the interface to this file might look like.

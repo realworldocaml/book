@@ -347,7 +347,7 @@ be whatever it needs to be to fit in to the context it is called in.
 Thus, the type system will let us throw an exception anywhere in a
 program.
 
-<sidebar>
+<note>
 <title>Declaring exceptions with `with sexp`</title>
 
 OCaml can't always generate a useful textual representation of your
@@ -378,7 +378,7 @@ quite useful in tracking down which precise exception is being
 reported.  In this case, since we've declared the exception at the
 toplevel, that module path is trivial.
 
-</sidebar>
+</note>
 
 ### Exception handlers
 

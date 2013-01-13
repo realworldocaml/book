@@ -165,7 +165,7 @@ Error: This expression has type < get : int; set : int -> unit >
        The second object type has no method set
 ```
 
-<sidebar>
+<note>
 <title>Elisions are polymorphic</title>
 
 The `..` in an object type is an elision, standing for "possibly
@@ -194,7 +194,7 @@ get : int; .. >`.  That may seem like an odd way to say it, and in
 fact, this type definition is not really an abbreviation because `'a`
 refers to the entire type.
 
-</sidebar>
+</note>
 
 An object of type `< get:int; .. >` can be any object with a method
 `get:int`, it doesn't matter how it is implemented.  So far, we've

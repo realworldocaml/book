@@ -53,7 +53,7 @@ let () =
     printf "%3d: %s\n" count line)
 ```
 
-<sidebar><title>Where is the main function?</title>
+<note><title>Where is the main function?</title>
 
 Unlike C, programs in OCaml do not have a unique `main` function. When
 an OCaml program is evaluated, all the statements in the
@@ -64,7 +64,7 @@ plays the role of the `main` declaration, kicking off the processing.
 But really the entire file is evaluated at startup, and so in some
 sense the full codebase is one big `main` function.
 
-</sidebar>
+</note>
 
 If we weren't using Core or any other external libraries, we could
 build the executable like this:
@@ -135,7 +135,7 @@ $ strings `which ocamlopt` | ./freq.byte
   4: ", '
 ```
 
-<sidebar><title>Byte-code vs native-code</title>
+<note><title>Byte-code vs native-code</title>
 
 OCaml ships with two compilers---the `ocamlc` byte-code compiler, and
 the `ocamlopt` native-code compiler.  Programs compiled with `ocamlc`
@@ -159,7 +159,7 @@ using the native-code compiler, but it sometimes makes sense to use
 bytecode for development builds.  And, of course, bytecode makes sense
 when targeting a platform not supported by the native code compiler.
 
-</sidebar>
+</note>
 
 
 ## Multi-file programs and modules ##

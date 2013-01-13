@@ -305,7 +305,7 @@ This is the most common and convenient way to declare a function, but
 syntactic niceties aside, the two styles of function definition are
 entirely equivalent.
 
-<sidebar>
+<note>
 <title>`let` and `fun`</title>
 
 Functions and let bindings have a lot to do with each other.  In some
@@ -324,7 +324,7 @@ This connection is important, and will come up more when programming
 in a monadic style, as we'll see in
 [xref](concurrent-programming-with-async).
 
-</sidebar>
+</note>
 
 ### Multi-argument functions ###
 

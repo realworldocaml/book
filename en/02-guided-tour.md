@@ -287,7 +287,7 @@ whereas `"short"` and `"loooooong"` require that `'a` be of type
 genericity is called _parametric polymorphism_, and is very similar to
 generics in C# and Java.
 
-<sidebar><title>Type errors vs exceptions</title>
+<note><title>Type errors vs exceptions</title>
 
 There's a big difference in OCaml (and really in any compiled
 language) between errors that are caught at compile time and those
@@ -337,7 +337,7 @@ that would throw an exception if it were ever reached.
 - : int = 0
 ```
 
-</sidebar>
+</note>
 
 ## Tuples, Lists, Options and Pattern-matching
 

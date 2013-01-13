@@ -341,10 +341,10 @@ thread joining functions above, such as `Deferred.both`.
 
 Show how we can use a monadic style to bind to the Github API and make simple JSON requests/responses.
 
-<sidebar><title>A Note on Portability</title>
+<note><title>A Note on Portability</title>
 
 Explain libev and why its needed here.
 
-</sidebar>
+</note>
 
 

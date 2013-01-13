@@ -151,7 +151,7 @@ connection (we'll see more of this in
 example checks that the two input mechanisms actually resulted in the same
 OCaml data structure.
 
-<sidebar>
+<note>
 <title>The difference between `=` and `==`, and `phys_equal` in Core</title>
 
 If you come from a C/C++ background, you will probably reflexively use `==` to
@@ -202,7 +202,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 <press ^Z and kill the process now>
 ```
 
-</sidebar>
+</note>
 
 #### Selecting values from JSON structures
 
@@ -839,7 +839,7 @@ This is a standard record type definition with the addition of `with xml` at
 the end.  This uses a syntax extension to signify that we wish to generate
 boilerplate code for handling this record as an XML document.
 
-<sidebar>
+<note>
 <title>Invoking `camlp4` syntax extensions</title>
 
 The OCaml compiler can call `camlp4` automatically during a compilation to
@@ -864,7 +864,7 @@ type of build you are running (preprocessing, compilation or linking).  The
 final part of the script invokes the `camlp4o` binary on your ML source file
 and outputs the transformed source code to your terminal.
 
-</sidebar>
+</note>
 
 Let's see the OCaml code that has been generated for our `author` record after
 it has been preprocessed:
@@ -1243,7 +1243,7 @@ $ ./test_interval.native
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
 ```
 
-<sidebar> <title>Preserving invariants</title>
+<note> <title>Preserving invariants</title>
 
 One easy mistake to make when dealing with sexp converters is to
 ignore the fact that those converters can violate the invariants of
@@ -1277,7 +1277,7 @@ We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
 conversion fails.
 
-</sidebar>
+</note>
 
 ### Getting good error messages
 
