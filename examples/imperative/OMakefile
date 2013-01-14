@@ -34,34 +34,4 @@ OCAML_LIBS +=
 
 OCAMLFLAGS = -thread
 
-.DEFAULT:\
-  $(OCamlProgram concurrent_hash_map, concurrent_hash_map)\
-  $(OCamlProgram hashmap, hashmap dlist)
-
-################################################
-# Build an OCaml library
-#
-
-# FILES[] =
-#    file1
-#    file2
-#
-# LIB = main
-#
-# .DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
-
-################################################
-# Build an OCaml program
-#
-
-# FILES[] =
-#    file1
-#    file2
-#
-# PROGRAM =
-# OCAML_LIBS +=
-# OCAML_CLIBS +=
-# OCAML_OTHER_LIBS +=
-# OCAML_LIB_FLAGS +=
-#
-# .DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+.DEFAULT: $(OCamlProgram dlist, dlist)

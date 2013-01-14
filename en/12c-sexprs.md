@@ -1,8 +1,16 @@
 # Data Serialization with S-Expressions
 
-So far, we've talked about interoperating with formats that are usually defined
-by third-parties.  It's also very common to just exchange and persist OCaml
-values safely, so we'll discuss how to do this now.
+Data serialization, _i.e._ reading and writing program data to a sequence
+of bytes, is an important and common programming task.  Sometimes you
+need to match someone else's data format (such as XML), and other times
+you just want to quickly dump some values to disk and read them
+back later.  To this end, OCaml comes with several techniques for
+data serialization depending on what your problem is.
+
+We'll start by introducing some features in Core that make it really easy to
+manipulate s-expressions and safe binary serialisers directly from OCaml types.
+After this section, we'll move onto interoperating with other third-party
+formats in [xref](handling-json-data) and [xref](xml-streams-and-trees).
 
 S-expressions are nested paranthetical strings whose atomic values are strings.
 They were first popularized by the Lisp programming language in the 1960s, and

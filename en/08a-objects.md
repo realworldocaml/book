@@ -1,21 +1,6 @@
 Object Oriented Programming
 ===========================
 
-_(yminsky: If we don't feel like these are "great" tools, maybe we
-shouldn't say it!)_
-
-_(yminsky: I wonder if it's worth emphasizing what makes objects
-unique early on.  I think of them as no better of an encapsulation
-tool than closures.  What makes them unique in my mind is that they
-are some combination of lighter weight and more dynamic than the
-alternatives (modules, records of closures, etc.))_
-
-_(yminsky: I'm not sure where we should say it, but OCaml's object
-system is strikingly different from those that most people are used
-to.  It would be nice if we could call those differences out clearly
-somewhere.  The main difference I see is the fact that subtyping and
-inheritance are not tied together, and that subtyping is structural.)_
-
 We've already seen several tools that OCaml provides for organizing
 programs, particularly first-class modules.  In addition, OCaml also
 supports object-oriented programming.  There are objects, classes, and
@@ -180,7 +165,7 @@ Error: This expression has type < get : int; set : int -> unit >
        The second object type has no method set
 ```
 
-<sidebar>
+<note>
 <title>Elisions are polymorphic</title>
 
 The `..` in an object type is an elision, standing for "possibly
@@ -209,7 +194,7 @@ get : int; .. >`.  That may seem like an odd way to say it, and in
 fact, this type definition is not really an abbreviation because `'a`
 refers to the entire type.
 
-</sidebar>
+</note>
 
 An object of type `< get:int; .. >` can be any object with a method
 `get:int`, it doesn't matter how it is implemented.  So far, we've

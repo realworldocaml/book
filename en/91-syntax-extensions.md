@@ -252,7 +252,7 @@ $ ./test_interval.native
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
 ```
 
-<sidebar> <title>Preserving invariants</title>
+<note> <title>Preserving invariants</title>
 
 One easy mistake to make when dealing with sexp converters is to
 ignore the fact that those converters can violate the invariants of
@@ -286,7 +286,7 @@ We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
 conversion fails.
 
-</sidebar>
+</note>
 
 ### Getting good error messages
 

@@ -141,8 +141,8 @@ Characters 126-128:
 Warning 26: unused variable pi.
 ```
 
-In OCaml, let bindings are immutable.  As we'll see in chapter
-{{{imperative-programming}}}, there are mutable values in OCaml, but
+In OCaml, let bindings are immutable.  As we'll see in
+[xref](imperative-programming), there are mutable values in OCaml, but
 no mutable variables.
 
 ### Pattern matching and `let` ###
@@ -261,7 +261,7 @@ Or pass it to another function.
 - : int list = [2; 3; 4]
 ```
 
-Or even stuff then into a datastructure.
+Or even stuff them into a datastructure.
 
 ```ocaml
 # let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
@@ -305,7 +305,7 @@ This is the most common and convenient way to declare a function, but
 syntactic niceties aside, the two styles of function definition are
 entirely equivalent.
 
-<sidebar>
+<note>
 <title>`let` and `fun`</title>
 
 Functions and let bindings have a lot to do with each other.  In some
@@ -321,14 +321,15 @@ nearly equivalent:
 ```
 
 This connection is important, and will come up more when programming
-in a monadic style, as we'll see in chapter {{ASYNC}}.
+in a monadic style, as we'll see in
+[xref](concurrent-programming-with-async).
 
-</sidebar>
+</note>
 
 ### Multi-argument functions ###
 
 OCaml of course also supports multi-argument functions.  Here's an
-example that came up in chapter {{TOUR}}.
+example that came up in [xref](a-guided-tour).
 
 ```ocaml
 # let abs_diff x y = abs (x - y);;
@@ -416,6 +417,10 @@ the time, one should stick to currying, since it's the default style
 in the OCaml world.
 
 ### Recursive functions ###
+
+A function is _recursive_ if it refers to itself in its definition.
+Recursion is important in any programming language, but is
+particularly important in functional languages.
 
 In order to define a recursive function, you need to mark the let
 binding as recursive with the `rec` keyword, as shown in this example:

@@ -31,7 +31,7 @@ module HashMap : sig
 
   val create : unit -> ('a, 'b) t
   val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val find : ('a, 'b) t -> key:'a -> 'b
+  val find : ('a, 'b) t -> key:'a -> 'b option
   val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 end = struct
   type ('a, 'b) t = ('a * 'b) list array
@@ -47,9 +47,8 @@ end = struct
 
   let find table ~key =
     let rec find = function
-     | [] -> raise Not_found
-     | (k, d) :: _ when k = key -> d
-     | _ :: t -> find t
+     | (k, d) :: t -> if k = key then Some d else find t
+     | [] -> None
     in
     find table.(hash_bucket key)
 

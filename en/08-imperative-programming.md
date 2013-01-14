@@ -1,22 +1,34 @@
-# Imperative Programming
+Imperative Programming
+================================================
 
 The OCaml programming language is _functional_, meaning that functions are
 first-class values that can be passed around like any other.  However, this
-doesn't mean that OCaml programs are _pure_.  The language includes assignment,
+doesn't mean that OCaml programs are _pure_.
+
+Pure functions behave like mathematical functions, which means that they
+always evaluate to the same result on the same arguments, without any
+side-effects on the state or input/output.  In pure programs, evaluation order
+may affect performance, but it doesn't affect correctness.  In contrast,
+_imperative_ programs operate through side-effects on the state (as well as
+input/output).  Imperative programs define sequences of commands for the
+computer to perform, and evaluation order is strict.
+
+While the majority of code you write in OCaml may be pure, imperative
+programming can be used effectively.  The language includes assignment and
 mutable values like arrays and strings.  Evaluation order is strict and
 sequential.  In principle, you can port many imperative programs directly to
-OCaml.  If you find yourself doing this a lot, then OCaml may not be the right
-programming language for your problem.  However, there are times when imperative
-programming is both appropriate and efficient, and OCaml shines at supporting
-programs with both functional and imperative aspects.
+OCaml.  If you find yourself using imperative features a lot, then you're
+probably not using OCaml to its fullest.  However, there are times when
+imperative programming is both appropriate and efficient, and OCaml shines at
+supporting programs with both functional and imperative aspects.
 
 To illustrate imperative programming, let's start by implementing a hash table.
-Hash tables are an efficient way to implement imperative _dictionaries_.  There
-are full-featured implementations of hash tables in Core as well as in the OCaml
-standard library.  For illustration, we'll construct just a basic dictionary
-using _open hashing_, where the hash table consists of an array of buckets, each
-of which contain a linked list of elements.  We'll use regular (pure) OCaml
-lists, and an array for the buckets.
+Hash tables are an efficient way to implement imperative _dictionaries_, which
+implement a map from keys to values.  There are full-featured implementations of
+hash tables in Core as well as in the OCaml standard library.  For illustration,
+we'll construct just a basic dictionary using _open hashing_, where the hash
+table consists of an array of buckets, each of which contain a linked list of
+elements.  We'll use regular (pure) OCaml lists, and an array for the buckets.
 
 ```ocaml
 module HashMap : sig
@@ -24,7 +36,7 @@ module HashMap : sig
 
   val create : unit -> ('a, 'b) t
   val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val find : ('a, 'b) t -> key:'a -> 'b
+  val find : ('a, 'b) t -> key:'a -> 'b option
   val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 end = struct
   type ('a, 'b) t = ('a * 'b) list array
@@ -40,9 +52,8 @@ end = struct
 
   let find table ~key =
     let rec find = function
-    | (k, d) :: _ when k = key -> d
-    | _ :: t -> find t
-    | [] -> raise Not_found
+     | (k, d) :: t -> if k = key then Some d else find t
+     | [] -> None
     in
     find table.(hash_bucket key)
 
@@ -55,51 +66,48 @@ end
 
 The signature for the `HashMap` declares the type of dictionaries `('a, 'b) t`,
 with keys of type `'a` and associated values of type `'b`.  It also includes
-three functions.  The `create` function constructs an empty dictionary.  The
-`add` function adds a key/value association in the dictionary, by _side-effect_.
-That is, the hash table is modified _in place_, and any references to the table
-will be able to observe the change.  Furthermore, the `add` method doesn't
-return a useful value; the type `unit` contains just the trivial value `()`,
-which is used by convention to represent "nothing."  The `find` function returns
-the value associated with a key, raising the exception `Not_found` if the table
-does not contain the key.  The `iter` function iterates through all of the
-elements in the table, applying the function `f` to each element in turn.
+functions for add, removing, and enumerating entries in the dictionary.
 
-The hash table is implemented as an array of buckets (the array is fixed-size,
+The table is implemented as an array of buckets (the array is fixed-size,
 in this example).  The OCaml runtime provides a builtin polymorphic hash
 function `Hashtbl.hash` that works for almost any value in OCaml, excluding
-functions and abstract values like C data.  The `create` function creates a new
-array where all buckets are empty.  The `add` function uses the hash function to
-determine the appropriate bucket, then adds a new key/value association to the
-bucket through an array _assignment_ `table.(index) <- (key, data) ::
-table.(index)`, which _replaces_ the bucket with a new one where the new
-key/value pair is added to the front of the list.  The `find` function performs
-a linear search through the appropriate bucket to find the value associated with
-a key.  The `iter` function iterates through each of the elements in the
-buckets.
+functions and values from C libraries that live outside the heap.
+
+* The `create` function creates a new array where all buckets are empty.
+
+* The `add` function uses the hash function to determine the appropriate bucket,
+  then adds a new key/value association to the bucket through an array
+  _assignment_ `table.(index) <- (key, data) :: table.(index)`, which _replaces_
+  the bucket with a new one where the new key/value pair is added to the front
+  of the list.
+
+* The `find` function performs a linear search through the appropriate bucket to
+  find the value associated with a key.
+
+* The `iter` function iterates through each of the elements in the buckets.
 
 ## Imperative operations
 
-This example illustrates _one_ of the mutating operations in OCaml:
-array field assignment.  There are just three others: the contents of
-a string can be mutated, and so can record and object fields that have
-been declared as `mutable`.
+This example illustrates one of the mutating operations in OCaml: array element
+assignment.  There are a handful of other mutable data types.
 
-* `array.(index) <- expr`: Array field assignment.  See also the `Array.blit`
-  functions for mutating multiple fields at once.
+* Arrays.  Array elements can be assigned with the expression `array.(index) <-
+  expr`.  See the `Array` module for other imperative operations.  Bigarray
+  elements can be mutated with the syntax `bigarray.{index} <- expr`.
 
-* `string.[index] <- char`: String element assignment.  See also the
-  `String.blit` functions for mutating substrings.
+* Strings.  String elements can be mutated with the expression `string.[index]
+  <- char`.  See the `String` module for other imperative operations.
 
-* `record.label <- expr`: Record field assignment.  The field `label` must
-   be declared as `mutable`.
+* Record fields can be mutated with the expression `record.label <- expr`.  The
+  field `label` must be declared as `mutable` in the type definition for the
+  record.
    
-* `object.label <- expr`: Object field assignment.  The field `label` must
-  be declared as `mutable`.
+* Object fields can be mutated with the expression `object.label <- expr`. The
+  field `label` must be declared as `mutable` in the object definition.
 
-Note that _variables are not mutable_.  Variables can refer to mutable data, but
+Note that variables are not mutable.  Variables can refer to mutable data, but
 the binding of a variable cannot be changed.  For convenience, OCaml defines a
-type of "reference cell," that is a like a "box" where the contents can be
+type of "reference cell," which is a like a "box" where the contents can be
 mutated.
 
 * `ref expr` constructs a reference cell containing the value defined by the
@@ -143,23 +151,23 @@ for index = <initial> downto <final> do <body> done
 while <condition> do <body> done
 ```
 
-A loop `for index = <initial> to <final> do <body> done` advances by
-from the `<initial>` integer to the `<final>` one (inclusive).  The
-iterations are evaluated if `<final>` is smaller than `<initial>`.
+A loop using `to` advances by from the `<initial>` integer to the `<final>` one
+(inclusive).  No iterations are evaluated if `<final>` is smaller than
+`<initial>`.
 
 ```ocaml
 # for i = 0 to 3 do
     Printf.printf "i = %d\n" i
   done;;
-  i = 0
+i = 0
 i = 1
 i = 2
 i = 3
 - : unit = ()
 ```
 
-A downto loop `for = <initial> downto <final> do <body> done` advances
-downward by 1 on each iteration.
+A `downto` loop advances downward by 1 on each iteration.  Again, the bounds
+`<initial>` and `<final>` are inclusive.
 
 ```ocaml
 # for i = 3 downto 0 do Printf.printf "i = %d\n" i done;;
@@ -173,35 +181,34 @@ i = 0
 A while-loop iterates until the condition is false.
 
 ```ocaml
-# let i = ref 0;;
-val i : int ref = {contents = 0}
-# while !i < 3 do Printf.printf "i = %d\n" !i; i := !i + 1 done;;
-i = 0
-i = 1
-i = 2
-- : unit = ()
-# while !i < 3 do Printf.printf "i = %d\n" !i; i := !i + 1 done;;
-- : unit = ()
-# !i;;  
-- : int = 3
+(* reverses an array in place. *)
+let rev_inplace t =
+  let i = ref 0 in
+  let j = ref (length t - 1) in
+  while !i < !j; do
+    swap t !i !j;
+    incr i;
+    decr j;
+  done;;
 ```
 
 ## Doubly-linked lists
 
 Another common imperative data structure is the doubly-linked list, which allows
 traversal in both directions, as well as O(1) deletion of any element.
-Doubly-linked lists are a _cyclic_ data structure, meaning that it is possible
-to follow a nontrivial sequence of references from an element, through other
-elements, back to itself.  Cyclic data structures can be constructed only
-through side-effects, by constructing a set of data elements first, then using
-assignment to set up the references.  (Some kinds of cyclic data structures can
-also be constructed with `let rec`.)
+Doubly-linked lists are a cyclic data structure, meaning that it is possible to
+follow a nontrivial sequence of references from an element, through other
+elements, back to itself.  In general, building cyclic data structures requires
+the use of side-effects (although in some limited cases, they can be constructed
+using `let rec`). This is done by constructing the data elements first, and then
+adding cycles using assignment afterwards.
 
-For doubly-linked lists, we define an element `'a element` with a reference both
-to the previous and next elements.  The elements at the ends have nothing to
-refer to, so we use an option to allow the reference to be `None`.  The element
-record fields are declared as `mutable` to allow them to be modified when the
-list is mutated.
+Core defines a standard doubly-linked list, but let's define our own
+implementation for illustration.  First, we define an element `'a element` with
+a reference both to the previous and next elements.  The elements at the ends
+have nothing to refer to, so we use an option to allow the reference to be
+`None`.  The element record fields are declared as `mutable` to allow them to be
+modified when the list is mutated.
 
 The list itself is either empty, or it refers to the first element of the list.
 We use the type `type 'a dlist = 'a element option ref`; the `ref` allows the
@@ -220,39 +227,42 @@ type 'a dlist = 'a element option ref
 let create () = ref None
 
 let is_empty l = (!l = None)
+
+let value elt = elt.value
+
+let first l = !l
+let next elt = elt.next
+let previous elt = elt.previous
 ```
 
 The function `create` creates an empty list.  The function `is_empty l`
 dereferences the list using the `!` operator, returning true if the value is
-`None`, or false otherwise.
+`None`, or false otherwise.  The `value` function returns the value stored in an
+element.  The `first`, `next`, and `previous` functions allow navigation through
+the list.
 
-Next, let's define the function that inserts a value onto the front of the list
-as a new first element.  We define a new element `new_front`, link in the new
-element, and set the list references.
+Next, let's define the function that inserts a value into the list as a new
+first element.  We define a new element `elt`, link it into the list, and set
+the list reference.
 
 ```ocaml
-let push_front l ~data =
-  let new_front = { value = data; next = None; previous = None } in
-  begin match !l with
-   | Some el ->
-     el.previous <- Some new_front;
-     new_front.next <- Some el
-   | None ->
-     ()
-  end;
-  l := Some new_front
+   let insert_first l value =
+     let elt = { previous = None; next = !l; value } in
+     begin match !l with
+     | Some old_first -> old_first.previous <- Some elt
+     | None -> ()
+     end;
+     l := Some elt;
+     elt
 ```
 
-This example introduces the _sequencing_ operator `;`.  In the case where the
-list is non-empty (the `Some el` case in the `match`), we first set
-`el.previous` to refer to the `new_front` element, and next set `new_front.next`
-to refer to `el`.
+This example introduces the sequencing operator `;` to separate the steps to be executed in order: first, create the new element `elt`; then set `old_first.previous` to point to it; then set the list `l` to refer to the `elt` element; then return the element `elt`.
 
 In general, when a sequence expression `expr1; expr2` is evaluated, `expr1` is
 evaluated first, and then `expr2`.  The expression `expr1` must have type
 `unit`, and the the value of `expr2` is returned as the value of the entire
-sequence.  So, for example, the sequence `print_string "hello world"; 1 + 2`
-first prints the string `"hello world"`, then returns the integer `3`.
+sequence.  For example, the sequence `print_string "hello world"; 1 + 2` first
+prints the string `"hello world"`, then returns the integer `3`.
 
 There are a few more things to note.  First, semicolon `;` is a _separator_, not
 a terminator, like it is in C or Java.  The compiler is somewhat relaxed about
@@ -271,33 +281,34 @@ from the following assignment `l := Some new_front`, we surround the match in a
 final assignment would become part of the `None -> ...` case, which is not what
 we want.
 
-To complete this initial part of the implementation, let's define function
-`front` to return the first element, and `pop_front` to remove it.
+To complete this initial part of the implementation, let's define a function for
+removal.
 
 ```ocaml
-let front = function
- | { contents = Some { value = v } } -> v
- | { contents = None } -> raise (Invalid_argument "front")
-
-let pop_front l =
-  match !l with
-  | Some { value = v; next = None } -> l := None; v
-  | Some { value = v; next = (Some el) as next } ->
-    l := next;
-    el.previous <- None;
-    v
-  | None -> raise (Invalid_argument "pop_front")
+   let remove l elt =
+     let { previous = previous; next = next } = elt in
+     (match previous with
+      | Some p -> p.next <- next
+      | None -> check_is_first_element l elt; l := next);
+     (match next with
+      | Some n -> n.previous <- previous;
+      | None -> ());
+     elt.previous <- None;
+     elt.next <- None
 ```
 
-For illustration the `front` function uses pattern matching on the reference
-cell -- it would be equivalent to write an explicit dereference `let front l =
-match !l with Some { value = v } -> v | None -> ...`.
+The `remove` function unlinks the element from the list, the resets the
+`previous` and `next` links to `None`.  For safety, we detect duplicate removals
+with a check.  In the case where the previous element is `None`, the element
+must be first in the list.  Here is the implementation of the
+`check_is_first_element` function.
 
-The function `pop_front` performs the unlinking.  There are three cases, 1) the
-list has one element, so it becomes empty, 2) the list has more than one
-element, so the second element is relinked, or 3) the list is empty, which is an
-error.  In the second case, the list `l` is set to point to the second element,
-the `previous` field is set to `None`, and `v` is returned.
+```ocaml
+   let check_is_first_element l elt1 =
+      match !l with
+      | Some elt2 when elt1 == elt2 -> ()
+      | _ -> raise (Invalid_argument "element has already been removed")
+```
 
 ## Iteration
 
@@ -324,8 +335,8 @@ iterates through the list, applying the function `f` to each element in turn.
 ```ocaml
 let iter l ~f =
   let rec loop = function
-   | Some { value = v; next = next } -> f v; loop next
-   | None -> ()
+  | Some { value = v; next = next } -> f v; loop next
+  | None -> ()
   in
   loop !l;;
 
@@ -333,7 +344,7 @@ let iter l ~f =
   push_front l 1;
   push_front l 2;
   push_front l 3;
-  DList.iter l ~f:(Printf.printf "Item: %d\n");;
+  iter l ~f:(Printf.printf "Item: %d\n");;
 Item: 3
 Item: 2
 Item: 1
@@ -368,7 +379,7 @@ represent it.  We _could_ define a separate iterator type for each kind of
 container, but this would be inconvenient, since iterators have similar behavior
 for many different kinds of containers.  To define a _generic_ iterator, there
 are several reasonable choices: we can use first-class modules, or we can use
-objects.  The simpler approach is to use objects.
+objects.  One of the simpler approaches is to use objects.
 
 You can skip forward to the Objects chapter for more informatation about
 objects, but we'll be using basic objects, which are just collections of
@@ -1201,7 +1212,7 @@ lock.
   let find table ~key =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
-	(* Unsynchronized! *)
+    (* Unsynchronized! *)
     (find_assoc key table.buckets.(index)).value
 ```
 
@@ -1279,21 +1290,20 @@ bucket in which it is stored.
       method private normalize =
         while elements = [] && index < num_buckets do
           index <- index + 1;
-	  elements <- buckets.(index)
+      elements <- buckets.(index)
         done
       initializer self#normalize
     end
 ```
 
-All method are unsychronized except the method `remove`, which mutates
-the bucket.  As a consequence, it means that hash operations that add
-and remove elements from the list can happen concurrently with
-iteration.  Again, this is great from a performance perspective, but
-it means that iteration has non-sequential semantics.  In particular,
-whenever iteration enters a new bucket, subsequent concurrent
-operations that add new elements or remove old ones have _no effect_
-on the iteration.  Iteration advances through that bucket as if it
-were unchanged.
+All method are unsychronized except the method `remove`, which mutates the
+bucket.  As a consequence, it means that hash operations that add and remove
+elements from the list can happen concurrently with iteration.  Again, this is
+great from a performance perspective, but it means that iteration has
+non-sequential semantics.  In particular, whenever iteration enters a new
+bucket, subsequent concurrent operations that add new elements or remove old
+ones from that bucket have _no effect_ on the iteration.  Iteration advances
+through that bucket as if it were unchanged.
 
 One advantage of this relaxed iteration semantics is peformance, since
 iteration is largely unsynchronized.  Another advantage is that
@@ -1305,6 +1315,399 @@ the synchronization might involve multiple threads, resulting in
 deadlock.  Lock-free iteration ensures that the `ConcurrentHashMap`
 will not be involved in a deadlock cycle.
 
+## Input and output (fix this chapter heading)
+
+Input and output I/O is another kind of imperative operation, where the purpose
+is to either read input from a file, stream, or device, _consuming_ the input by
+side-effect; or write output to a file, stream, or device, _modifying_ the
+output by side-effect.  There are several I/O libraries in OCaml.  There is the
+basic builtin I/O library in the `Pervasives` module, and there are moe advanced
+I/O libraries in the `Unix` and `Async` modules.  Let's look at the basic
+library -- the advanced libraries will be described elsewhere.
+
+For basic I/O OCaml models input and output with _channels_.  An `in_channel` is
+used for reading input, and and `out_channel` for producing output.  Each OCaml
+process has three standard channels, similar to the three standard files in Unix.
+
+* `stdin : in_channel`.  The "standard input" channel.  By default, input comes
+  from the terminal, which handles keyboard input.
+
+* `stdout : out_channel`.  The "standard output" channel.  By default, output
+  written to `stdout` appears on the user terminal.
+
+* `stderr : out_channel`.  The "standard error" channel.  This is similar to
+  `stdout`, but it is intended for error messages.
+
+The standard library has several functions for reading from and writing to the
+standard channels.
+
+* `print_char : char -> unit` prints a single character to `stdout`.
+
+* `print_string : string -> unit` prints a `string` to `stdout` as a sequence of
+  characters, without quotes.
+
+* `print_int : int -> unit` prints an integer to `stdout`.
+
+* `print_float : float -> unit` prints a floating-point number to `stdout`.
+
+Functions to write to `stderr` have similar names, using the prefix `prerr_`
+rather than `print_` (for example, `prerr_string`).
+
+```ocaml
+# let i = 1;;
+val i : int = 1
+# print_string "The value of i is "; print_int i; print_string ".\n";;
+The value of i is 1.
+- : unit = ()
+```
+
+Input is similar, but there are only a few functions.
+
+* `read_line : unit -> string` reads a line of input from `stdin`.
+
+* `read_int : unit -> int` reads a decimal integer from `stdin`.
+
+* `read_float : unit -> float` reads a floating-point number from `stdin`.
+
+These functions raise the exception `End_of_file` if the input channel is
+terminated before the input is read.
+
+Here is a function to read a sequence of integers from `stdin`, sorting them and
+printing the result to `stdout`.
+
+```ocaml
+# let collate_input () =
+   let rec read_input items =
+      let item = try Some (read_int ()) with End_of_file -> None in
+      match item with
+       | Some i -> read_input (i :: items)
+       | None -> items
+   in
+   let items = read_input [] in
+   let sorted = List.sort (-) items in
+   List.iter (fun i -> print_int i; print_char ' ') sorted;
+   print_string "\n";;
+val collate_input : unit -> unit = <fun>
+#   collate_input ();;
+8
+56
+2
+34
+-120
+19
+-120 2 8 19 34 56 
+- : unit = ()
+```
+
+Using exceptions to signal the end of input is a little awkward.  The
+`read_input` loop above converts the exception into an `int option`, so that
+matching can be performed with `match` and the function is tail-recursive.  The
+following function is _not_ tail recursive, and should be avoided.
+
+```ocaml
+  (* AVOID -- non tail-recursive input reader *)
+# let rec read_input items =
+   try read_input (read_int () :: items) with
+      End_of_file -> items;;
+val read_input : int list -> int list = <fun>
+# read_input [];;
+34
+45
+56
+-1
+- : int list = [-1; 56; 45; 34]
+```
+
+Another way to address the input issue is to use iteration, rather than
+recursion.  This requires collecting the input in a container than can be
+mutated by side-effect.
+
+```ocaml
+# let read_input () =
+   let items = ref [] in
+   try
+      while true do
+         items := read_int () :: !items
+      done;
+      []  (* not reached *)
+   with End_of_file ->
+      !items;;
+val read_input : unit -> int list = <fun>
+# read_input ();;
+45
+78
+-345
+- : int list = [-345; 78; 45]
+```
+
+In this loop, the value returns from a successful call to `read_int ()` is added
+to the `items` list by side-effect.  When `read_int ()` reaches the end of
+input, it raises the `End_of_file` exception, terminating the loop.  The `while`
+loop never terminates; the `[]` value afterward is only to satisfy the type
+checker.
+
+### Basic file input and output
+
+It isn't necessary to perform all input through the standard channels.  There
+are also functions to open files for reading and writing.
+
+* `open_out : string -> out_channel` open a file for writing.
+
+* `open_in : string -> in_channel` open a file for reading.
+
+* `close_out : out_channel -> unit` close an output channel, flushing any pending
+  output to the file.
+
+* `close_in : in_channel -> unit` close an input channel.
+
+The functions for input and output are similar to the `print_...` and `read_...`
+functions, but they use the prefix `output_` and `input_` and they take a
+channel as an argument.  Let's write a function to print the contents of a file.
+
+```ocaml
+# let cat filename =
+   let inx = open_in filename in
+   try
+      while true do
+         print_string (input_line inx); print_char '\n'
+      done
+   with End_of_file ->
+      close_in inx;;
+val cat : string -> unit = <fun>
+# let outf = open_out "file.txt";;
+val outf : out_channel = <abstr>
+# output_string outf "Hello world\n1\n2\n3\n";;
+- : unit = ()
+# close_out outf;;
+- : unit = ()
+# cat "file.txt";;
+Hello world
+1
+2
+3
+- : unit = ()
+```
+
+It is important to close channels when you are finished with them, for two
+reasons.  One reason is that the runtime system will usually have a limit on the
+number of channels that may be open simultaneously.  To avoid problems, you
+should close channels you are not using.  In addition, for efficiency, output is
+buffered and written to output channels in larger blocks.  The output may not
+actually be written to the file unless the `out_channel` is closed, or with an
+explicit call to the `flush` function.
+
+* `flush : out_channel -> unit`
+
+```ocaml
+# let outf = open_out "file.txt";;
+val outf : out_channel = <abstr>
+# output_string outf "Hello world\n1\n2\n3\n";;
+- : unit = ()
+# cat "file.txt";;
+- : unit = ()
+# flush outf;;
+- : unit = ()
+# cat "file.txt";;
+Hello world
+1
+2
+3
+- : unit = ()
+```
+
+### Formatted output with Printf
+
+Output with the standard library functions like `output_char`, `output_int`,
+`output_string`, etc. is simple, but there is little flexibility, and it is
+often verbose.  OCaml also supports _formatted_ output using the `printf`
+function, which is modeled after `printf` in the C standard library.  The
+`printf` function takes a _format string_ that describe what to print and how to
+format it, as well as arguments to be printed.
+
+```ocaml
+printf format arg1 ... argN
+```
+
+The format string can contain character literals, which are printed without
+change, as well as conversion specifications, which specify how to print an
+value that is provided as an argument.  A conversion specification begins with a
+percent (`%`) character, some flags, and a type specification.  For example,
+`%d` is a conversion specification for printing an integer, `%s` prints a
+string, and `%f` prints a floating-point value.
+
+```ocaml
+# open Printf;;
+# printf "int=%d string=%s float=%f\n" 10 "abc" 1e5;;
+int=10 string=abc float=100000.000000
+- : unit = ()
+```
+
+Conversions can also specify additional parameters for formatting the value.
+The general form has flags, width specified in number of characters, and decimal
+precision used for printing floating-point values.  These parameters are
+optional.
+
+```ocaml
+% [flags] [width] [.precision] type
+```
+
+There are several flags of interest, the flag `'-'` left-justifies the output,
+and the flag `'0'` pads numerical values with leading zeroes.
+Let's write a program to print a price list in a tabular form.
+
+```ocaml
+# let print_prices prices =
+    print_string "--------------------------------\n\
+                  | Size   | Hexcode    | Price  |\n\
+                  --------------------------------\n";
+    List.iter (fun (size, code, price) ->
+          printf "| %-6s | 0x%08x | %6.2f |\n" size code price) prices;
+    print_string "--------------------------------\n";;
+val print_prices : (string * int * float) list -> unit = <fun>
+# print_prices
+   [("small", 0x35, 1.02);
+    ("medium", 0x7a1, 50.75);
+    ("large", 0xbad, 400.8);
+    ("vente", 0x11, 4136.);
+    ("enormous", 100000, 100.)];;
+--------------------------------
+| Size   | Hexcode    | Price  |
+--------------------------------
+| small  | 0x00000035 |   1.02 |
+| medium | 0x000007a1 |  50.75 |
+| large  | 0x00000bad | 400.80 |
+| vente  | 0x00000011 | 4136.00 |
+| enormous | 0x000186a0 | 100.00 |
+--------------------------------
+- : unit = ()
+```
+
+The format specification `"| %-6s | 0x%08x | %6.2f |\n"` specifies that the
+first argument is a string that is to be left-justified and printed six
+characters wide; the second argument is an integer that should be printed in
+hexidecimal (format type `x`) eight characters wide with leading zeroes; and the
+third argument is a floating point value that should be printed right-justified,
+six characters wide, with two digits after the decimal point.
+
+Note that the width specifies a _minimum_ width.  If the value requires more width to print completely the width is increased.  The price `4136.00` and the size `enormous` both overflow the width, breaking the tabular form.
+
+### Strong typing and format strings
+
+In OCaml, `printf` is type safe.  The format is checked against the arguments at
+compile time, and rejected if the format string is malformed, or if the format
+does not match the arguments.  In the following examples, `%v` is not a valid
+conversion specification, and floating-point values can't be printed with a
+decimal conversion specification.
+
+```ocaml
+# printf "Hello %v" 1;;
+Characters 7-17:
+  printf "Hello %v" 1;;
+         ^^^^^^^^^^
+Error: Bad conversion %v, at char number 6 in format string ``Hello %v''
+# printf "Hello %d" 1.;;
+Characters 18-20:
+  printf "Hello %d" 1.;;
+                    ^^
+Error: This expression has type float but an expression was expected of type
+         int
+```
+
+A consequence of strong typing is that the format string must ultimately be a
+string _literal_, known at compile time.  It can't be computed by the program at
+runtime.
+
+```ocaml
+# let fmt = "%s";;
+val fmt : string = "%s"
+# printf fmt "Hello";;
+Characters 7-10:
+  printf fmt "Hello";;
+         ^^^
+Error: This expression has type string but an expression was expected of type
+         ('a -> 'b, out_channel, unit) format =
+           ('a -> 'b, out_channel, unit, unit, unit, unit) format6
+```
+
+Actually, this is not entirely true.  The `printf` function takes a format
+string of type `('a, 'b, 'c) format` and it is only the type conversion from
+`string` to `format` where the string is required to be a literal.
+
+```ocaml
+# let fmt : ('a, 'b, 'c) format = "Size: %s.\n";;
+val fmt : (string -> 'c, 'b, 'c) format = <abstr>
+# printf fmt "small";;
+Size: small
+- : unit = ()
+```
+
+### Output to channels, strings, and buffers
+
+The function `printf` prints to the standard output channel `stdout`.  There are alse several variations.
+
+* `eprintf format arg1 ... argN`.  Print to the standard error channel `stderr`.
+
+* `fprintf channel format arg1 ... argN`.  Print to the channel `channel`.
+
+* `sprintf format arg1 ... argN`.  Produce a string as output.
+
+* `bprintf buffer format arg1 ... argN`.  Print to a string buffer
+  `buffer` of type `Buffer.t`.
+  
+```ocaml
+# sprintf "The number is %10d." 123;;
+- : string = "The number is        123."
+# let buf = Buffer.create 32;;
+val buf : Buffer.t = <abstr>
+# bprintf buf "%s\n" "First line";;
+- : unit = ()
+# bprintf buf "%20s.\n" "Second line";;
+- : unit = ()
+# Buffer.contents buf;;
+- : string = "First line\n         Second line.\n"
+```
+
+### Formatted input with Scanf
+
+The `scanf` function can be used for reading input, similar to
+`printf`.  The general form takes a format string and a "receiver"
+function that is applied to the input.  The format string contains
+literal characters, which must be read literally, and conversion
+specifications similar to `printf`.  The result of the receiver
+function is returned as the result of `scanf`.
+
+```ocaml
+# scanf "%d" (fun i -> i);;
+1871
+- : int = 1871
+```
+
+For another example, consider the parsing a date string that might be
+in one of two forms, _month day, year_ or _month/day/year_.  The
+`scanf` functions raise the exception `Scan_failure` on error, so we
+can read a date string by trying both kinds of format.
+
+```ocaml
+# type month = String of string | Int of int;;
+type month = String of string | Int of int
+# let scan_date_string s =
+    try
+      sscanf s "%s %d, %d" (fun month day year ->
+             year, String month, day)
+    with Scan_failure _ | End_of_file ->
+      sscanf s "%d/%d/%d" (fun month day year ->
+             year, Int month, day);;
+val scan_date_string : string -> int * month * int = <fun>
+# scan_date_string "May 3, 1921";;
+- : int * month * int = (1921, String "May", 3)
+# scan_date_string "10/11/2001";;
+- : int * month * int = (2001, Int 10, 11)
+# scan_date_string "May 3";;
+Exception:
+Scanf.Scan_failure
+ "scanf: bad input at char number 0: ``character 'M' is not a decimal digit''".
+```
+
 ## Summary
 
 The OCaml language supports a fairly standard imperative programming model, with
@@ -1314,9 +1717,8 @@ other imperative language like C or Java.  Of course, doing so is really not the
 best match -- if you want to write imperative programs, you should probably use
 an imperative programming language.
 
-However, there are times when imperative programming might provide
-efficiency (as with lazy evaluation, or memoization), or you might
-require techniques or data structures that are traditional imperative
-(like graphs represented with adjacency lists), and in these cases
-OCaml usually shines.  Used with discretion, imperative programming
-can lead to smaller, simpler programs.
+However, there are times when imperative programming might provide efficiency
+(as with lazy evaluation, or memoization), or you might require techniques or
+data structures that are traditional imperative (like graphs represented with
+adjacency lists), and in these cases OCaml usually shines.  Used with
+discretion, imperative programming can lead to smaller, simpler programs.
