@@ -5,6 +5,9 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
 let cambridge = ["amirmc";"lpw25";"djs55";"mcclurmc"]
+let from_yminsky =
+  [ "naftul"; "fbsATcsDOTcornellDOTedu" ]
 let allowed_users = function
-  |"alpha1" -> authors @ cambridge
+  | "alpha1" -> authors @ cambridge
+  | "alpha2" -> authors @ cambridge @ from_yminsky
   |_ -> authors
