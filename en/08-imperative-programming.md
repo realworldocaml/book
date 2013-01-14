@@ -213,11 +213,11 @@ modified when the list is mutated.
 The list itself is either empty, or it refers to the first element of the list.
 We use the type `type 'a dlist = 'a element option ref`; the `ref` allows the
 list to be mutated, and the value is either `None` for the empty list, or `Some
-first_element` if the list is non-empty.
+first_element` when the list is non-empty.
 
 ```ocaml
 type 'a element =
-  { mutable value : 'a;
+  { value : 'a;
     mutable next : 'a element option;
     mutable previous : 'a element option
   }
@@ -225,7 +225,6 @@ type 'a element =
 type 'a dlist = 'a element option ref
 
 let create () = ref None
-
 let is_empty l = (!l = None)
 
 let value elt = elt.value
@@ -256,7 +255,10 @@ the list reference.
      elt
 ```
 
-This example introduces the sequencing operator `;` to separate the steps to be executed in order: first, create the new element `elt`; then set `old_first.previous` to point to it; then set the list `l` to refer to the `elt` element; then return the element `elt`.
+This example introduces the sequencing operator `;` to separate the steps to be
+executed in order: first, create the new element `elt`; then set
+`old_first.previous` to point to it; then set the list `l` to refer to the `elt`
+element; then return the element `elt`.
 
 In general, when a sequence expression `expr1; expr2` is evaluated, `expr1` is
 evaluated first, and then `expr2`.  The expression `expr1` must have type
@@ -310,7 +312,7 @@ must be first in the list.  Here is the implementation of the
       | _ -> raise (Invalid_argument "element has already been removed")
 ```
 
-## Iteration
+### Iteration
 
 When defining containers like lists, dictionaries, trees, etc. it is
 conventional to define some kind of iteration to allow the elements of the
@@ -350,16 +352,34 @@ Item: 2
 Item: 1
 ```
 
-This style of iteration is concise and completely general.  However, with
-imperative containers, we often want more control.  We may not want to iterate
-through all elements, and we often want to mutate the container as we iterate.
-One conventional way to do this is to define a generic `iterator` type that can
-be used to enumerate and/or mutate the elements in a container.  This is a style
-seen, for example, in Java (type `Iterator`) or the C++ Standard Template
-Library.
+This style of iteration is concise and completely general when you want to
+iterate through all of the elements of the list.  In some cases, you may wish to
+iterate through only part of the list, for example when searching for a
+particular element.  In this case, you can use the functions `next` and `prev`
+to navigate through the list.
 
-Let's define a Java-style kind of generic iterator object that allows manual
-enumeration and mutation of the container.  Here is the Java interface.
+```ocaml
+   (* Find the element containing x, using = for comparison *)
+   let find l x : 'a element option =
+      let rec search = function
+      | None -> None
+      | Some elt ->
+           if value elt = x then
+              Some elt
+           else
+              search (next elt)
+      in
+      search !l
+```
+
+### Java-style iteration
+
+One possible issue with navagation using the `next` and `prev` functions is that
+code is tied specifically to the doubly-linked list code we have just defined.
+It won't work for iteration through a hash-table, for example.  Another
+technique used in other imperative languages like Java or C++ is to define a
+generic `iterator` type that can be used to enumerate and/or mutate the elements
+in multiple different kinds of containers.  Here is the Java interface.
 
 ```java
 public iterface Iterator {
@@ -392,8 +412,13 @@ the next element.  The object type is specified like a record type, but using
 angle brackets `< ... >`.
 
 ```ocaml
-type 'a iterator =
-   < has_value : bool; value : 'a; next : unit; remove : unit >
+   type 'a iterator =
+      < has_value : bool;
+        value : 'a;
+        next : unit;
+        remove : unit;
+        insert_after : 'a -> unit
+      >
 ```
 
 Each of the labeled parts `has_value`, `value`, etc. are object _methods_.  This
@@ -403,30 +428,29 @@ Next, to define the iterator implementation, we implement each of the methods,
 bracketed by `object ... end`, declaring each method with the `method` keyword.
 
 ```ocaml
-let iterator (list : 'a t) =
-  let current = ref !list in
-  object
-    method has_value = !current <> None
-    method value =
-      match !current with
-       | Some { value = v } -> v
-       | None -> raise (Invalid_argument "next")
-    method next =
-      match !current with
-       | Some { next = next } -> current := next
-       | None -> raise (Invalid_argument "next")
-    method remove =
-      match !current with
-       | Some { previous = previous; next = next } ->
-            (match previous with
-              | Some el -> el.next <- next
-              | None -> list := next);
-            (match next with
-              | Some el -> el.previous <- previous;
-              | None -> ());
-            current := next
-       | None -> raise (Invalid_argument "remove")
-  end
+   let iterator (list : 'a dlist) : 'a iterator =
+     let current = ref !list in
+     object
+       method has_value = !current <> None
+       method value =
+         match !current with
+         | Some { value = v } -> v
+         | None -> raise (Invalid_argument "next")
+       method next =
+         match !current with
+         | Some { next = next } -> current := next
+         | None -> raise (Invalid_argument "next")
+       method remove =
+         match !current with
+         | Some elt ->
+              current := elt.next;
+              remove list elt  (* This is the 'remove' function above *)
+         | None -> raise (Invalid_argument "remove")
+       method insert_after value =
+          match !current with
+          | Some elt -> ignore (insert_after elt value)  (* 'insert_after' above *)
+          | None -> raise (Invalid_argument "insert_after")
+     end
 ```
 
 The reference cell `current` holds the current position in the list.  The method
@@ -437,34 +461,21 @@ next's elements `previous` pointer, then advancing `current` to the next
 element.  The following example illustrates the semantics.
 
 ```ocaml
-# let l = create ();;
-val l : '_a dlist
-# push_front l 1;
-  push_front l 2;
-  push_front l 3;
-  iter (Printf.printf "Item: %d\n") l;;
+# let () =
+    Printf.printf "\nDList2\n";
+    let l = create () in
+    let _ = insert_first l 1 in
+    let _ = insert_first l 2 in
+    let _ = insert_first l 3 in
+
+    let it = iterator l in
+    while it#has_value do
+      Printf.printf "Item: %d\n" it#value;
+      it#next
+    done;;
 Item: 3
 Item: 2
 Item: 1
-# let it = iterator l;;
-val it : int iterator = <obj>
-# it#value;;
-- : int = 3
-# it#next;;
-- : unit = ()
-# it#value;;
-- : int = 2
-# it#remove;;
-- : unit = ()
-# it#value;;
-- : int = 1
-# it#next;;
-- : unit = ()
-# it#has_value;;
-- : bool = false
-# iter (Printf.printf "%d\n") l;;
-3
-1
 - : unit = ()
 ```
 
@@ -474,7 +485,7 @@ the builtin equality _does not work_ in general with cyclic values.
 ```ocaml
 # let l2 = create();
 val l2 : '_a dlist
-# push_front l2 1; push_front l2 3;;
+# insert_first l2 1; insert_first l2 3;;
 - : unit = ()
 # l == l2;;
 - : bool = false
@@ -482,53 +493,12 @@ val l2 : '_a dlist
 Out of memory during evaluation.
 ```
 
-## Doubly-linked list module
-
-Now that we have defined iterators, let's declare the complete signature for
-doubly-linked lists as a module.  The type of elements `'a element` is internal
-to the implementation, and the type of lists `'a DList.t` is abstract.
-
-```ocaml
-module DList : sig
-   type 'a t
-
-   val create : unit -> 'a t
-   val is_empty : 'a t -> bool
-   val push_front : 'a t -> data:'a -> unit
-   val front : 'a t -> 'a
-   val pop_front : 'a t -> 'a
-   val iter : ('a -> unit) -> 'a t -> unit
-   val iterator : 'a t -> 'a iterator
-   val find : 'a t -> data:'a -> 'a iterator
-end
-```
-
-We have seen the definition of all of the functions except `find`, which searches
-for an element in the list (sequentially), returning an iterator that refers to
-that element if it exists.  The implementation simply creates an iterator, then
-uses a loop to search sequentially for the element.  If the element is found,
-the returned iterator refers to that value, otherwise the iterator does not have
-a value.
-
-```ocaml
-module DList = struct
-   ...
-
-   let find l ~data =
-     let it = iterator l in
-     while it#has_value && it#value <> data do
-        it#next
-     done;
-     it
-end
-```
-
 ## Hash tables with iterators
 
 Let's return to the example of hash tables, but this time let's define an
-iterator-style interface.  We'll use the same `iterator` object type as we did
+iterator-style interface.  We'll use a similar `iterator` object type like we did
 for doubly-linked lists, but this time the iteration is over key/value pairs.
-The signature changes slightly, the main change being tat the `find` function
+The signature changes slightly, the main change being that the `find` function
 returns an iterator.  This allows retrieval of the value associated with a key,
 and it also allows the entry to be deleted.
 
@@ -561,7 +531,7 @@ module IterableHashMap = struct
     let index = hash_bucket key in
     let it = DList.find table.(index) ~data:(key, data) in
     if it#has_value then it#remove;
-    DList.push_front table.(index) (key, value)
+    DList.insert_first table.(index) (key, value)
 
   ...
 end
@@ -600,8 +570,8 @@ _always_ refers to an element.  This is handled by the `normalize` method, which
 advances past empty buckets until either a non-empty bucket is found, or the end
 of the table is reached.
 
-The `normalize` method is declared a `private`, so that it does not appear as
-part of the iterator type.  The `has_value` and `value` methods delagate
+The `normalize` method is declared as `private`, so that it does not appear as
+part of the iterator type.  The `has_value` and `value` methods delegate
 directly to the list iterator.  The `next` and `remove` methods also delagate to
 the list iterator; however, since the iterator has been mutated, the `normalize`
 method is called to advance to the next element.
@@ -637,6 +607,46 @@ The `iterator` function returns in iterator that refers to the first element in
 the table (if the table is non-empty).  The `find` function searches for an
 element in the table, returning an iterator referring to that value if found, or
 else the an iterator at the end of the table.
+
+Iteration over the hash table is much the same as through a doubly-linked list.
+Note that the elements are reordered in the hash table.
+
+```ocaml
+# let () =
+  let module IHM = IterableHashMap in
+  let table = IHM.create () in
+  IHM.add table ~key:"small" ~data:1.00;
+  IHM.add table ~key:"medium" ~data:1.50;
+  IHM.add table ~key:"large" ~data:2.25;
+  IHM.add table ~key:"enormous" ~data:5.00;
+
+  let it = IHM.iterator table in
+  while it#has_value do
+    let size, price = it#value in
+    Printf.printf "Size %s is $%.02f\n" size price;
+    it#next
+  done;;
+Size large is $2.25
+Size medium is $1.50
+Size small is $1.00
+Size enormous is $5.00
+- : unit = ()
+
+# let () =
+  let it = IHM.find table "enormous" in
+  it#remove;
+
+  let it = IHM.iterator table in
+  while it#has_value do
+    let size, price = it#value in
+    Printf.printf "Size %s is $%.02f\n" size price;
+    it#next
+  done;;
+Size large is $2.25
+Size medium is $1.50
+Size small is $1.00
+- : unit = ()
+```
 
 ## Lazy computation
 

@@ -8,28 +8,36 @@
  * @end[license]
  *)
 
-(************************************************************************
- * Core-style
- *)
-
-module DList1 : sig
-   type 'a t
+(* The text doesn't use modules, so use the typename "dlist" *)
+module DListX : sig
+   type 'a dlist
    type 'a element
 
-   val create : unit -> 'a t
-   val is_empty : 'a t -> bool
+   val create : unit -> 'a dlist
+   val is_empty : 'a dlist -> bool
 
    val value : 'a element -> 'a
 
-   val first : 'a t -> 'a element option
+   val first : 'a dlist -> 'a element option
    val next : 'a element -> 'a element option
    val previous : 'a element -> 'a element option
 
-   val insert_first : 'a t -> 'a -> 'a element
+   val insert_first : 'a dlist -> 'a -> 'a element
    val insert_after : 'a element -> 'a -> 'a element
-   val remove : 'a t -> 'a element -> unit
+   val remove : 'a dlist -> 'a element -> unit
 
-   val iter : ('a -> unit) -> 'a t -> unit
+   val iter : 'a dlist -> f:('a -> unit) -> unit
+
+   type 'a iterator =
+      < has_value : bool;
+        value : 'a;
+        next : unit;
+        remove : unit;
+        insert_after : 'a -> unit
+      >
+
+   val iterator : 'a dlist -> 'a iterator
+   val find_it : 'a dlist -> data:'a -> 'a iterator
 end = struct
    type 'a element =
       { value : 'a;
@@ -37,7 +45,7 @@ end = struct
         mutable previous : 'a element option
       }
 
-   type 'a t = 'a element option ref
+   type 'a dlist = 'a element option ref
 
    let create () = ref None
    let is_empty l = (!l = None)
@@ -66,7 +74,7 @@ end = struct
      elt.next <- Some new_elt;
      new_elt
 
-   let check_is_first l elt1 =
+   let check_is_first_element l elt1 =
       match !l with
       | Some elt2 when elt1 == elt2 -> ()
       | _ -> raise (Invalid_argument "element has already been removed")
@@ -82,144 +90,96 @@ end = struct
      elt.previous <- None;
      elt.next <- None
 
-   let iter f l =
+   let iter l ~f =
      let rec loop = function
      | Some { value; next = next } -> f value; loop next
      | None -> ()
      in
      loop !l
-end
 
-let () =
-   let l = DList1.create () in
-   let e1 = DList1.insert_first l 10 in
-   Printf.printf "Item: %d\n" (DList1.value e1);
-   ignore (DList1.insert_after (DList1.insert_after e1 20) 30);
-
-   let item = ref (DList1.first l) in
-   while !item <> None do
-      match !item with
+   (* Find the element containing x, using = for comparison *)
+   let find l x : 'a element option =
+      let rec search = function
+      | None -> None
       | Some elt ->
-           Printf.printf "Item: %d\n" (DList1.value elt);
-           item := DList1.next elt
-      | None ->
-           ()
-   done
+           if value elt = x then
+              Some elt
+           else
+              search (next elt)
+      in
+      search !l
 
-(************************************************************************
- * Iterator
- *)
+   let () =
+      Printf.printf "DList1\n";
+      let l = create () in
+      let e1 = insert_first l 10 in
+      Printf.printf "Item: %d\n" (value e1);
+      ignore (insert_after (insert_after e1 20) 30);
 
-type 'a iterator =
-   < has_value : bool; value : 'a; next : unit; remove : unit >
+      let item = ref (first l) in
+      while !item <> None do
+        match !item with
+        | Some elt ->
+             Printf.printf "Item: %d\n" (value elt);
+             item := next elt
+        | None ->
+             ()
+      done
 
-module DList : sig
-   type 'a t
+   (* Defining iterators *)
+   type 'a iterator =
+      < has_value : bool;
+        value : 'a;
+        next : unit;
+        remove : unit;
+        insert_after : 'a -> unit
+      >
 
-   val create : unit -> 'a t
-   val is_empty : 'a t -> bool
-
-   val push_front : 'a t -> data:'a -> unit
-   val front : 'a t -> 'a
-   val pop_front : 'a t -> 'a
-
-   val iter : ('a -> unit) -> 'a t -> unit
-
-   val iterator : 'a t -> 'a iterator
-   val find : 'a t -> data:'a -> 'a iterator
-end = struct
-   type 'a element =
-      { value : 'a;
-        mutable next : 'a element option;
-        mutable previous : 'a element option
-      }
-
-   type 'a t = 'a element option ref
-
-   let create () = ref None
-
-   let is_empty l = !l = None
-
-   let push_front l ~data =
-     let new_front = { value = data; next = None; previous = None } in
-     begin match !l with
-      | Some el ->
-        el.previous <- Some new_front;
-        new_front.next <- Some el
-      | None ->
-        ()
-      end;
-      l := Some new_front
-
-   let front = function
-    | { contents = Some { value = v } } -> v
-    | { contents = None } -> raise (Invalid_argument "front")
-
-   let pop_front l =
-     match !l with
-      | Some { value = v; next = None } -> l := None; v
-      | Some { value = v; next = (Some el) as next } ->
-        l := next;
-        el.previous <- None;
-        v
-      | None -> raise (Invalid_argument "pop_front")
-
-   let iterator (list : 'a t) =
+   let iterator (list : 'a dlist) : 'a iterator =
      let current = ref !list in
      object
        method has_value = !current <> None
        method value =
          match !current with
-          | Some { value = v } -> v
-          | None -> raise (Invalid_argument "next")
+         | Some { value = v } -> v
+         | None -> raise (Invalid_argument "next")
        method next =
          match !current with
-          | Some { next = next } -> current := next
-          | None -> raise (Invalid_argument "next")
+         | Some { next = next } -> current := next
+         | None -> raise (Invalid_argument "next")
        method remove =
          match !current with
-          | Some { previous = previous; next = next } ->
-               (match previous with
-                 | Some el -> el.next <- next
-                 | None -> list := next);
-               (match next with
-                 | Some el -> el.previous <- previous;
-                 | None -> ());
-               current := next
-          | None -> raise (Invalid_argument "remove")
+         | Some elt ->
+              current := elt.next;
+              remove list elt
+         | None -> raise (Invalid_argument "remove")
+       method insert_after value =
+          match !current with
+          | Some elt -> ignore (insert_after elt value)
+          | None -> raise (Invalid_argument "insert_after")
      end
 
-   let iter f l =
-     let rec loop = function
-      | Some { value = v; next = next } -> f v; loop next
-      | None -> ()
-     in
-     loop !l
-
-   let find l ~data =
-      let it = iterator l in
+   let find_it list ~data =
+      let it = iterator list in
       while it#has_value && it#value <> data do
          it#next
       done;
       it
+
+   let () =
+      Printf.printf "\nDList2\n";
+      let l = create () in
+      let _ = insert_first l 1 in
+      let _ = insert_first l 2 in
+      let _ = insert_first l 3 in
+      iter ~f:(Printf.printf "%d\n") l;
+
+      let it = iterator l in
+      while it#has_value do
+         Printf.printf "Item: %d\n" it#value;
+         it#next
+      done
 end
-
-let l = DList.create ();;
-DList.push_front l 1;;
-DList.push_front l 2;;
-DList.push_front l 3;;
-DList.iter (Printf.printf "%d\n") l;;
-
-let it = DList.iterator l;;
-
-Printf.printf "Item: %d\n" it#value;
-it#next;
-Printf.printf "Item: %d\n" it#value;
-it#remove;
-Printf.printf "Item: %d\n" it#value;
-it#next;
-Printf.printf "has_value=%b\n" it#has_value;
-DList.iter (Printf.printf "%d\n") l;;
 
 (*
  * -*-
