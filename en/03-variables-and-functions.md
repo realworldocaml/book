@@ -142,7 +142,7 @@ Warning 26: unused variable pi.
 ```
 
 In OCaml, let bindings are immutable.  As we'll see in
-[xref](imperative-programming), there are mutable values in OCaml, but
+[xref](#imperative-programming), there are mutable values in OCaml, but
 no mutable variables.
 
 ### Pattern matching and `let` ###
@@ -322,14 +322,14 @@ nearly equivalent:
 
 This connection is important, and will come up more when programming
 in a monadic style, as we'll see in
-[xref](concurrent-programming-with-async).
+[xref](#concurrent-programming-with-async).
 
 </note>
 
 ### Multi-argument functions ###
 
 OCaml of course also supports multi-argument functions.  Here's an
-example that came up in [xref](a-guided-tour).
+example that came up in [xref](#a-guided-tour).
 
 ```ocaml
 # let abs_diff x y = abs (x - y);;

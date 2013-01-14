@@ -10,7 +10,7 @@ data serialization depending on what your problem is.
 We'll start by introducing some features in Core that make it really easy to
 manipulate s-expressions and safe binary serialisers directly from OCaml types.
 After this section, we'll move onto interoperating with other third-party
-formats in [xref](handling-json-data) and [xref](xml-streams-and-trees).
+formats in [xref](#handling-json-data) and [xref](#xml-streams-and-trees).
 
 S-expressions are nested paranthetical strings whose atomic values are strings.
 They were first popularized by the Lisp programming language in the 1960s, and
