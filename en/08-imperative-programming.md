@@ -650,7 +650,7 @@ Size small is $1.00
 
 ## Lazy computation
 
-There are many instances where imperative programming is used to change or
+There are many instances where imperative programming is used to modify or
 improve the performance characteristics of a program, without otherwise changing
 the behavior.  In other words, the program could be written without
 side-effects, but performance is improved by techniques like lazy computation,
@@ -687,12 +687,12 @@ end = struct
    let create f = ref (Delayed f)
    let force v =
      match !v with
-      | Delayed f ->
-           let x = f () in
-           v := Value x;
-           x
-      | Value x ->
-           x
+     | Delayed f ->
+          let x = f () in
+          v := Value x;
+          x
+     | Value x ->
+          x
 end;;
 ```
 
@@ -722,11 +722,13 @@ end = struct
 
    let create = HashMap.create
    let apply table ~func ~arg =
-      try HashMap.find table ~key:arg with
-         Not_found ->
-            let x = func arg in
-            HashMap.add table ~key:arg ~data:x;
-            x
+     match HashMap.find table ~key:arg with
+     | Some x -> x
+     | None ->
+         let x = func arg in
+         HashMap.add table ~key:arg ~data:x;
+         x
+
 end;;
 ```
 
@@ -808,10 +810,10 @@ structurally equal expressions are mapped to physically equal representations.
 ```ocaml
 module Exp : sig
   type t = private
-   | Num of int
-   | Var of string
-   | Plus of t * t
-   | Times of t * t
+  | Num of int
+  | Var of string
+  | Plus of t * t
+  | Times of t * t
 
   val num : int -> t
   val var : string -> t
@@ -819,17 +821,18 @@ module Exp : sig
   val times : t -> t -> t
 end = struct
   type t =
-   | Num of int
-   | Var of string
-   | Plus of t * t
-   | Times of t * t
+  | Num of int
+  | Var of string
+  | Plus of t * t
+  | Times of t * t
 
   let table = HashMap.create ()
   let merge exp =
-     try HashMap.find table ~key:exp with
-        Not_found ->
-           HashMap.add table ~key:exp ~data:exp;
-           exp
+    match HashMap.find table ~key:exp with
+    | Some x -> x
+    | None ->
+         HashMap.add table ~key:exp ~data:exp;
+         exp
 
   let num i = merge (Num i)
   let var s = merge (Var s)
@@ -909,10 +912,10 @@ otherwise.  The constructors are much as before.
 ```ocaml
 module WExp : sig
   type t = private
-   | Num of int
-   | Var of string
-   | Plus of int * t * t
-   | Times of int * t * t
+  | Num of int
+  | Var of string
+  | Plus of int * t * t
+  | Times of int * t * t
 
   val num : int -> t
   val var : string -> t
@@ -920,27 +923,27 @@ module WExp : sig
   val times : t -> t -> t
 end = struct
   type t =
-   | Num of int
-   | Var of string
-   | Plus of int * t * t
-   | Times of int * t * t
+  | Num of int
+  | Var of string
+  | Plus of int * t * t
+  | Times of int * t * t
 
   module HashExp = struct
     type exp = t
     type t = exp
     let equal e1 e2 =
       match e1, e2 with
-       | Num i1, Num i2 -> i1 = i2
-       | Var v1, Var v2 -> v1 = v2
-       | Plus (_, a1, a2), Plus (_, b1, b2)
-       | Times (_, a1, a2), Times (_, b1, b2) ->
-            a1 == b1 && a2 == b2
-       | _ -> false
+      | Num i1, Num i2 -> i1 = i2
+      | Var v1, Var v2 -> v1 = v2
+      | Plus (_, a1, a2), Plus (_, b1, b2)
+      | Times (_, a1, a2), Times (_, b1, b2) ->
+           a1 == b1 && a2 == b2
+      | _ -> false
     let hash = function
-     | Num i -> i lxor 0xabababab
-     | Var v -> (Hashtbl.hash v) lxor 0xcdcdcdcdc
-     | Plus (hash, _, _)
-     | Times (hash, _, _) -> hash
+    | Num i -> i lxor 0xabababab
+    | Var v -> (Hashtbl.hash v) lxor 0xcdcdcdcdc
+    | Plus (hash, _, _)
+    | Times (hash, _, _) -> hash
   end
 
   module WeakHash = Weak.Make (HashExp);;
@@ -1096,18 +1099,18 @@ module ConcurrentHashMap : sig
 
   val create : unit -> ('a, 'b) t
   val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val find : ('a, 'b) t -> key:'a -> 'b
+  val find : ('a, 'b) t -> key:'a -> 'b option
   val remove : ('a, 'b) t -> key:'a -> unit
   val iterator : ('a, 'b) t -> ('a * 'b) iterator
-end = struct
+end
 ```
 
-We'll use the same basic construction that we used to implement the
-`HashMap` -- a hash table contains an array of buckets.  In addition
-we'll add locking to ensure that concurrent operations do not
-interfere.  In addition, to reduce lock contention, we'll use an array
-of locks to partition the table into multiple parts.  If operations
-are randomly disitribted, this should reduce lock contention.
+We'll use the same basic construction that we used to implement the `HashMap`,
+where a hash table contains an array of buckets.  In addition we'll add locking
+to ensure that concurrent operations do not interfere.  To reduce lock
+contention, we'll use an array of locks to partition the table into multiple
+parts.  If operations are uniformly distributed, this should reduce lock
+contention.
 
 ```ocaml
   type ('a, 'b) element = {
@@ -1132,31 +1135,36 @@ Each `element` is a key/value pair, where the value is mutable so that
 the `add` function can mutate it in place.  For this implementation,
 we'll use 32 locks, and start with 256 buckets.
 
-Each bucket is an _association list_, meaning that it is list of
-key/value pairs that implement a dictionary.  We can start the
-implementation by defining dictionary operations for association
-lists.  The function `find_assoc` finds the value associated with a
-key, and `remove_assoc` removes an association.  Both functions raise
-an exception `Not_found` if the list does not contain the association.
+Each bucket is an _association list_, meaning that it is list of key/value pairs
+that implement a dictionary.  We can start the implementation by defining
+dictionary operations for association lists.  The function `find_assoc` finds
+the value associated with a key, and `remove_assoc_exn` removes an association.
+The remove function raises an exception `Not_found` if the list does not contain
+the association.  We'll use this to optimize removal.
 
 ```ocaml
   let rec find_assoc key = function
-  | { key = key' } as element :: _ when key' = key -> element
-  | _ :: tl -> find_assoc key tl
-  | [] -> raise Not_found
+  | element :: tl ->
+       if element.key = key then
+          Some element
+       else
+          find_assoc key tl
+  | [] -> None
 
-  let rec remove_assoc key = function
-  | { key = key' } :: tl when key' = key -> tl
-  | hd :: tl -> hd :: remove_assoc key tl
+  let rec remove_assoc_exn key = function
+  | element :: tl ->
+       if element.key = key then
+          tl
+       else
+          element :: remove_assoc_exn key tl
   | [] -> raise Not_found
 ```
 
-The locks are intended to partition the table into multiple sub-parts,
-where each lock provides synchronization for a contiguous range of
-buckets.  To make synchronization each we define a function
-`synchronize` that takes a bucket index and a function, and evaluates
-the function with the bucket lock acquired, releasing the lock before
-returning.
+The locks are intended to partition the table into multiple sub-parts, where
+each lock provides synchronization for a contiguous range of buckets.  For
+synchronization we define a function `synchronize` that takes a bucket index and
+a function, and evaluates the function with the bucket lock acquired, releasing
+the lock before returning.
 
 ```ocaml
   let synchronize table index f =
@@ -1193,14 +1201,17 @@ bucket.
     let index = hash mod num_buckets in
     let buckets = table.buckets in
     synchronize table index (fun () ->
-      try (find_assoc key buckets.(index)).value <- data with
-        Not_found ->
-          buckets.(index) <- { key = key; value = data } :: buckets.(index))
+          match find_assoc key buckets.(index) with
+          | Some element ->
+               element.value <- data
+          | None ->
+               buckets.(index) <- { key = key; value = data } :: buckets.(index))
 ```
 
-Removing an element from the table is similar.  If here is a previous
-entry in the table, the entry is removed.  Otherwise, the table is
-left unchanged.
+Removing an element from the table is similar.  If here is a previous entry in
+the table, the entry is removed.  Otherwise, the `remove_assoc_exn` function
+raises `Not_found`, and we leave the bucket unchanged.  The exception is an
+optimization to avoid copying the entire list in this case.
 
 ```ocaml
   let remove table ~key =
@@ -1208,8 +1219,8 @@ left unchanged.
     let index = hash mod num_buckets in
     let buckets = table.buckets in
     synchronize table index (fun () ->
-      try buckets.(index) <- remove_assoc key buckets.(index) with
-        Not_found -> ())
+      try buckets.(index) <- remove_assoc_exn key buckets.(index) with
+      | Not_found -> ())
 ```
 
 The function to find an association in the table is similar -- we jsut
@@ -1222,8 +1233,10 @@ lock.
   let find table ~key =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
-    (* Unsynchronized! *)
-    (find_assoc key table.buckets.(index)).value
+    (* Unsynchronized *)
+    match find_assoc key table.buckets.(index) with
+    | Some element -> Some element.value
+    | None -> None
 ```
 
 From a performance perspective, this is clearly a win, because
@@ -1274,9 +1287,12 @@ element.  The `remove` method removes the current element from the
 bucket in which it is stored.
 
 ```ocaml
-  let rec remove_element elements = function
-  | (_ :: tl) as elements' when elements' == elements -> tl
-  | hd :: tl -> hd :: remove_element elements tl
+  let rec remove_element_exn elements = function
+  | (hd :: tl) as elements' ->
+       if elements' == elements then
+          tl
+       else
+          hd :: remove_element_exn elements tl
   | [] -> raise Not_found
 
   let iterator table =
@@ -1294,23 +1310,23 @@ bucket in which it is stored.
         self#normalize
       method remove =
         synchronize table index (fun () ->
-          try buckets.(index) <- remove_element elements buckets.(index) with
+          try buckets.(index) <- remove_element_exn elements buckets.(index) with
             Not_found -> ());
         self#next
       method private normalize =
         while elements = [] && index < num_buckets do
           index <- index + 1;
-      elements <- buckets.(index)
+	  elements <- buckets.(index)
         done
       initializer self#normalize
     end
 ```
 
-All method are unsychronized except the method `remove`, which mutates the
-bucket.  As a consequence, it means that hash operations that add and remove
-elements from the list can happen concurrently with iteration.  Again, this is
-great from a performance perspective, but it means that iteration has
-non-sequential semantics.  In particular, whenever iteration enters a new
+The iterator methods are all unsychronized except the method `remove`, which
+mutates the bucket.  As a consequence, it means that hash operations that add
+and remove elements from the list can happen concurrently with iteration.
+Again, this is great from a performance perspective, but it means that iteration
+has non-sequential semantics.  In particular, whenever iteration enters a new
 bucket, subsequent concurrent operations that add new elements or remove old
 ones from that bucket have _no effect_ on the iteration.  Iteration advances
 through that bucket as if it were unchanged.

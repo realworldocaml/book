@@ -24,7 +24,7 @@
  * @end[license]
  *)
 open Core.Std
-open Dlist
+open Dlist_example
 
 module HashMap : sig
   type ('a, 'b) t

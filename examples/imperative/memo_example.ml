@@ -23,7 +23,7 @@
  * @email{jyh@cs.caltech.edu}
  * @end[license]
  *)
-open Hashmap
+open Hashmap_example
 
 module Memo : sig
    type ('a, 'b) t
@@ -35,11 +35,12 @@ end = struct
 
    let create = HashMap.create
    let apply table ~func ~arg =
-      try HashMap.find table ~key:arg with
-         Not_found ->
-            let x = func arg in
-            HashMap.add table ~key:arg ~data:x;
-            x
+     match HashMap.find table ~key:arg with
+     | Some x -> x
+     | None ->
+         let x = func arg in
+         HashMap.add table ~key:arg ~data:x;
+         x
 end;;
 
 let rec fib i =

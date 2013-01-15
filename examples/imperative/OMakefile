@@ -24,7 +24,10 @@ OCAML_LIBS +=
 
 OCAMLFLAGS = -thread
 
-OCamlProgram(dlist, dlist)
-OCamlProgram(hashmap, hashmap dlist)
+OCamlProgram(dlist, dlist_example)
+OCamlProgram(hashmap, hashmap_example dlist_example)
+OCamlProgram(memo, memo_example hashmap_example dlist_example)
+OCamlProgram(hashcons, hashcons hashmap_example dlist_example)
+OCamlProgram(concurrent_hash_map, concurrent_hash_map)
 
-.DEFAULT: dlist hashmap
+.DEFAULT: dlist hashmap memo hashcons concurrent_hash_map

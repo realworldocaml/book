@@ -23,6 +23,7 @@
  * @email{jasonh@gmail.com}
  * @end[license]
  *)
+open Core
 
 type 'a iterator =
    < has_value : bool; value : 'a; next : unit; remove : unit >
@@ -32,7 +33,7 @@ module ConcurrentHashMap : sig
 
   val create : unit -> ('a, 'b) t
   val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val find : ('a, 'b) t -> key:'a -> 'b
+  val find : ('a, 'b) t -> key:'a -> 'b option
   val remove : ('a, 'b) t -> key:'a -> unit
   val iterator : ('a, 'b) t -> ('a * 'b) iterator
 end = struct
@@ -46,7 +47,7 @@ end = struct
   }
 
   let num_locks = 32
-  let num_buckets = 257
+  let num_buckets = 256
 
   let create () = {
     locks = Array.init num_locks (fun _ -> Mutex.create ());
@@ -54,13 +55,19 @@ end = struct
   }
 
   let rec find_assoc key = function
-  | { key = key' } as element :: _ when key' = key -> element
-  | _ :: tl -> find_assoc key tl
-  | [] -> raise Not_found
+  | element :: tl ->
+       if element.key = key then
+          Some element
+       else
+          find_assoc key tl
+  | [] -> None
 
-  let rec remove_assoc key = function
-  | { key = key' } :: tl when key' = key -> tl
-  | hd :: tl -> hd :: remove_assoc key tl
+  let rec remove_assoc_exn key = function
+  | element :: tl ->
+       if element.key = key then
+          tl
+       else
+          element :: remove_assoc_exn key tl
   | [] -> raise Not_found
 
   let synchronize table index f =
@@ -74,33 +81,41 @@ end = struct
     let lock = table.locks.(index * num_locks / num_buckets) in
     Mutex.lock lock;
     try let result = f () in Mutex.unlock lock; result with
-      exn -> Mutex.unlock lock; raise exn
+    | exn -> Mutex.unlock lock; raise exn
 
   let add table ~key ~data =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
     let buckets = table.buckets in
     synchronize table index (fun () ->
-      try (find_assoc key buckets.(index)).value <- data with
-        Not_found ->
-          buckets.(index) <- { key = key; value = data } :: buckets.(index))
-
-  let find table ~key =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    (find_assoc key table.buckets.(index)).value
+          match find_assoc key buckets.(index) with
+          | Some element ->
+               element.value <- data
+          | None ->
+               buckets.(index) <- { key = key; value = data } :: buckets.(index))
 
   let remove table ~key =
     let hash = Hashtbl.hash key in
     let index = hash mod num_buckets in
     let buckets = table.buckets in
     synchronize table index (fun () ->
-      try buckets.(index) <- remove_assoc key buckets.(index) with
-        Not_found -> ())
+      try buckets.(index) <- remove_assoc_exn key buckets.(index) with
+      | Not_found -> ())
 
-  let rec remove_element elements = function
-  | (_ :: tl) as elements' when elements' == elements -> tl
-  | hd :: tl -> hd :: remove_element elements tl
+  let find table ~key =
+    let hash = Hashtbl.hash key in
+    let index = hash mod num_buckets in
+    (* Unsynchronized *)
+    match find_assoc key table.buckets.(index) with
+    | Some element -> Some element.value
+    | None -> None
+
+  let rec remove_element_exn elements = function
+  | (hd :: tl) as elements' ->
+       if elements' == elements then
+          tl
+       else
+          hd :: remove_element_exn elements tl
   | [] -> raise Not_found
 
   let iterator table =
@@ -118,7 +133,7 @@ end = struct
         self#normalize
       method remove =
         synchronize table index (fun () ->
-          try buckets.(index) <- remove_element elements buckets.(index) with
+          try buckets.(index) <- remove_element_exn elements buckets.(index) with
             Not_found -> ());
         self#next
       method private normalize =
@@ -134,7 +149,8 @@ let table = ConcurrentHashMap.create ();;
 
 ConcurrentHashMap.add table ~key:"hello" ~data:"world";;
 
-Printf.printf "Value: %s\n" (ConcurrentHashMap.find table ~key:"hello");;
+Printf.printf "Value: %s\n"
+    (Option.value_exn (ConcurrentHashMap.find table ~key:"hello"));;
 
 
 (*
