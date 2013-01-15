@@ -4,13 +4,45 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
-let cambridge = ["amirmc";"lpw25";"djs55";"mcclurmc"]
+let support = ["jamescotton"] 
+
+let from_anil =
+  [ "mcclurmc"                (* Mike McClurg <mike.mcclurg@citrix.com> *)
+  ; "djs55"                   (* David Scott <dave.scott@citrix.com> *)
+  ; "lpw25"                   (* Leo White <lpw25@cam.ac.uk> *)
+  ; "arb33"                   (* arb33@cam.ac.uk *)
+  ; "amirmc"                  (* Amir Chaudhry <amirmc@gmail.com> *)
+  ; "heidi-ann"               (* Heidi Howard <hh360@cam.ac.uk> *)
+  ; "samoht"                  (* Thomas Gazagnaire <thomas@ocamlpro.com> *)
+  ; "udita12"                 (* Udita Gangwal <psxug2@nottingham.ac.uk> *)
+  ; "bishneet"                (* Bishneet Kaur <psxbk3@nottingham.ac.uk> *)
+  ; "mor1"                    (* Richard Mortier <richard.mortier@nottingham.ac.uk> *)
+  ; "jamesbulpin"             (* James Bulpin <james.bulpin@citrix.com> *)
+  ; "raphael-proust"          (* Raphael Proust <rp452@cam.ac.uk> *)
+]
+
 let from_yminsky =
   [ "naftul"                  (* nminsky@gmail.com    *)
   ; "fbsATcsDOTcornellDOTedu" (* fbs@cs.cornell.edu   *)
   ; "zdancewic"               (* stevez@cis.upenn.edu *)
   ]
+
+let from_email = 
+  [ "JakubOboza "             (* jakub.oboza@gmail.com *)
+  ; "gour"                    (* gour@atmarama.net *)
+  ; "getauvi"                 (* getauvi@gmail.com *)
+  ; "pdonadeo"                (* Paolo Donadeo <p.donadeo@gmail.com>  *)
+  ; "braibant"                (* Thomas Braibant <thomas.braibant@gmail.com> *)
+  ; "xmonader"                (* Ahmed Youssef <xmonader@gmail.com> *)
+]
+
+let internal_reviewers =
+  authors @ support
+
+let external_reviewers =
+  internal_reviewers @ from_anil @ from_yminsky @ from_email
+
 let allowed_users = function
-  | "alpha1" -> authors @ cambridge
-  | "alpha2" -> authors @ cambridge @ from_yminsky
+  | "alpha1" -> internal_reviewers
+  | "alpha2" -> external_reviewers
   |_ -> authors
