@@ -6,7 +6,10 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
 let cambridge = ["amirmc";"lpw25";"djs55";"mcclurmc"]
 let from_yminsky =
-  [ "naftul"; "fbsATcsDOTcornellDOTedu" ]
+  [ "naftul"                  (* nminsky@gmail.com    *)
+  ; "fbsATcsDOTcornellDOTedu" (* fbs@cs.cornell.edu   *)
+  ; "zdancewic"               (* stevez@cis.upenn.edu *)
+  ]
 let allowed_users = function
   | "alpha1" -> authors @ cambridge
   | "alpha2" -> authors @ cambridge @ from_yminsky
