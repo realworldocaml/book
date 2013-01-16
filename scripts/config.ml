@@ -34,6 +34,7 @@ let from_email =
   ; "pdonadeo"                (* Paolo Donadeo <p.donadeo@gmail.com>  *)
   ; "braibant"                (* Thomas Braibant <thomas.braibant@gmail.com> *)
   ; "xmonader"                (* Ahmed Youssef <xmonader@gmail.com> *)
+  ; "gildor478"               (* Sylvain Le Gall <sylvain@le-gall.net> *)
 ]
 
 let internal_reviewers =

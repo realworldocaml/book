@@ -1,0 +1,661 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 10. Handling JSON data / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha2',
+                        page: 'handling\u002Djson\u002Ddata.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Basic Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Practical Examples</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="data-serialization-with-s-expressions.html">9. Data Serialization with S-Expressions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="handling-json-data.html" class="here">10. Handling JSON data</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="xml-streams-and-trees.html">11. XML Streams and Trees</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. Advanced Topics</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 10. Handling JSON data</h1>
+                
+                
+
+    <p id="idp8644160">
+    Data serialization, <span><em>i.e.</em></span> reading and writing
+    program data to a sequence of bytes, is an important and common
+    programming task. Sometimes you need to match someone else's data
+    format (such as XML), and other times you just want to quickly dump
+    some values to disk and read them back later. To this end, OCaml
+    comes with several techniques for data serialization depending on
+    what your problem is.
+  </p><p id="idp8645344">
+    We'll start off by looking at JSON and XML first, as they are very
+    common third-party data formats. After that, we'll introduce some
+    syntax extensions in Core that make it really easy to manipulate
+    s-expressions and safe binary serialisers directly from OCaml types.
+  </p><p id="idp8646032">
+    JSON is a lightweight data-interchange format often used in web
+    services and browsers. It is described in
+    <a href="http://www.ietf.org/rfc/rfc4627.txt" target="_top">RFC4627</a>,
+    and is designed to be easy to parse and generate. You'll run into
+    JSON very often when working with modern APIs, and so we'll cover
+    several different ways to manipulate it in this chapter. Along the
+    way we'll introduce new libraries and syntax extensions which make
+    the job easier.
+  </p><p id="idp8647488">
+    JSON consists of just two basic structures: an unordered collection
+    of key/value pairs, and an ordered list of values. Values can be
+    strings, booleans, floats, integers or null. Let's see what an
+    example JSON record for a book description looks like:
+  </p><div class="highlight"><pre><span class="p">{</span>
+  <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Real World OCaml&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;tags&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;functional programming&quot;</span><span class="p">,</span> <span class="s2">&quot;ocaml&quot;</span><span class="p">,</span> <span class="s2">&quot;algorithms&quot;</span> <span class="p">],</span>
+  <span class="nt">&quot;pages&quot;</span><span class="p">:</span> <span class="mi">450</span><span class="p">,</span>
+  <span class="nt">&quot;authors&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jason Hickey&quot;</span><span class="p">,</span> <span class="nt">&quot;affiliation&quot;</span><span class="p">:</span> <span class="s2">&quot;Google&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Anil Madhavapeddy&quot;</span><span class="p">,</span> <span class="nt">&quot;affiliation&quot;</span><span class="p">:</span> <span class="s2">&quot;Cambridge&quot;</span><span class="p">},</span>
+    <span class="p">{</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Yaron Minsky&quot;</span><span class="p">,</span> <span class="nt">&quot;affiliation&quot;</span><span class="p">:</span> <span class="s2">&quot;Jane Street&quot;</span><span class="p">}</span>
+  <span class="p">],</span>
+  <span class="nt">&quot;is_online&quot;</span><span class="p">:</span> <span class="kc">true</span>
+<span class="p">}</span>
+</pre></div><p id="idp8649408">
+    JSON values usually start with an object at the top level that
+    contains a set of key/value pairs. The keys must be strings, but
+    values can be any JSON type. In the example above,
+    <code>tags</code> is a string list, while the
+    <code>authors</code> field contains a list of records. Unlike
+    OCaml lists, JSON lists can contain completely different JSON types
+    within them.
+  </p><p id="idp8651392">
+    This free-form nature of JSON types is both a blessing and a curse.
+    It's very easy to generate JSON values, but code parsing them also
+    has to cope with handling subtle variations in how values are
+    represented. For example, what if the <code>pages</code> value
+    above is actually represented as a string value of
+    <code>&quot;450&quot;</code> instead of an integer?
+  </p><p id="idp8653376">
+    Our first task is to parse the JSON into a more structured OCaml
+    type so that we can use static typing more effectively. When
+    manipulating JSON in Python or Ruby, you might write unit tests to
+    check that you have handled unusual inputs. The OCaml model prefers
+    compile-time static checking as well as unit tests. For example,
+    using pattern matching can warn you if you've not checked that a
+    value can be <code>Null</code> as well as contain an actual
+    value.
+  </p><aside class="note"><h1>
+  Installing the Yojson library
+  </h1><p id="idp8655472">
+    There are several JSON libraries available for OCaml. For this
+    chapter, we've picked the
+    <a href="http://mjambon.com/yojson.html" target="_top"><code>Yojson</code></a>
+    library. The easiest way to install it is by using the OPAM package
+    manager (see <a href="">???</a>
+    for installation instructions). Once OPAM is working, you will need
+    to run <code>opam install yojson</code>.
+  </p></aside><section><h1 id="parsing-standard-json-with-yojson">Parsing standard JSON with Yojson</h1><p id="idp8659296">
+      The JSON specification has very few data types, and Yojson
+      implements these in the <code>Yojson.Basic</code> module.
+      The <code>json</code> type shown below is sufficient to
+      express any valid JSON structure. Note that some of the types are
+      recursive, so that fields can contain references to more JSON
+      fields, and that it also specifically includes a
+      <code>Null</code> variant for empty fields.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">json</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="k">of</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="n">json</span><span class="o">)</span> <span class="kt">list</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Bool</span> <span class="k">of</span> <span class="kt">bool</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Float</span> <span class="k">of</span> <span class="kt">float</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Int</span> <span class="k">of</span> <span class="kt">int</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">List</span> <span class="k">of</span> <span class="n">json</span> <span class="kt">list</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Null</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">]</span> 
+</pre></div><p id="idp8662960">
+      Let's parse the earlier JSON string example into this type now.
+      The first stop is the <code>Yojson.Basic</code>
+      documentation, where we find these helpful functions:
+    </p><div class="highlight"><pre><span class="k">val</span> <span class="n">from_string</span> <span class="o">:</span> <span class="o">?</span><span class="n">buf</span><span class="o">:</span><span class="nn">Bi_outbuf</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">fname</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">lnum</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">json</span>
+<span class="c">(* Read a JSON value from a string.</span>
+<span class="c">  [buf] : use this buffer at will during parsing instead of creating a new one.</span>
+<span class="c">  [fname] : data file name to be used in error messages. It does not have to be a real file.</span>
+<span class="c">  [lnum] : number of the first line of input. Default is 1.</span>
+
+<span class="c">val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; in_channel -&gt; json</span>
+<span class="c">(* Read a JSON value from a channel. See [from_string] for the meaning of the </span>
+<span class="c">   optional arguments. *)</span>
+
+<span class="c">val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json</span>
+<span class="c">(* Read a JSON value from a file. See [from_string] for the meaning of the optional</span>
+<span class="c">   arguments. *)</span>
+</pre></div><p id="idp8665984">
+      When first reading these interfaces, you can generally ignore the
+      optional arguments (which have the question marks in the type
+      signature), as they will be filled in with sensible values. The
+      signature for these values with the optional elements removed
+      makes their purpose quite clear:
+    </p><div class="highlight"><pre><span class="k">val</span> <span class="n">from_string</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">json</span>
+<span class="k">val</span> <span class="n">from_file</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">json</span>
+<span class="k">val</span> <span class="n">from_channel</span> <span class="o">:</span> <span class="n">in_channel</span> <span class="o">-&gt;</span> <span class="n">json</span>
+</pre></div><p id="idp8667760">
+      The <code>in_channel</code> constructor is from the original
+      OCaml standard library, and its use is considered deprecated when
+      using the Core standard library. This leaves us with two ways of
+      parsing the JSON: either from a string buffer, or from a file on a
+      filesystem. The next example shows both in action, assuming the
+      JSON record is stored in a file called
+      <span><em>book.json</em></span>:
+    </p><div class="highlight"><pre><span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="o">_</span> <span class="o">=</span>
+  <span class="c">(* Read JSON file into an OCaml string *)</span>
+  <span class="k">let</span> <span class="n">buf</span> <span class="o">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">read_all</span> <span class="s2">&quot;book.json&quot;</span> <span class="k">in</span>
+
+  <span class="c">(* Use the string JSON constructor *)</span>
+  <span class="k">let</span> <span class="n">json1</span> <span class="o">=</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">from_string</span> <span class="n">buf</span> <span class="k">in</span>
+
+  <span class="c">(* Use the file JSON constructor *)</span>
+  <span class="k">let</span> <span class="n">json2</span> <span class="o">=</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">from_file</span> <span class="s2">&quot;book.json&quot;</span> <span class="k">in</span>
+
+  <span class="c">(* Test that the two values are the same *)</span>
+  <span class="n">print_endline</span> <span class="o">(</span><span class="k">if</span> <span class="n">json1</span> <span class="o">=</span> <span class="n">json2</span> <span class="k">then</span> <span class="s2">&quot;OK&quot;</span> <span class="k">else</span> <span class="s2">&quot;FAIL&quot;</span><span class="o">)</span>
+  <span class="n">print_endline</span> <span class="o">(</span><span class="k">if</span> <span class="n">phys_equal</span> <span class="n">json1</span> <span class="n">json2</span> <span class="k">then</span> <span class="s2">&quot;FAIL&quot;</span> <span class="k">else</span> <span class="s2">&quot;OK&quot;</span><span class="o">)</span>
+</pre></div><p id="idp8671152">
+      The <code>from_file</code> function accepts an input
+      filename and takes care of opening and closing it for you. It's
+      far more common to use <code>from_string</code> to construct
+      a JSON value from an OCaml <code>string</code>. These
+      strings can come from a network connection (we'll see more of this
+      in <a href="">???</a>)
+      or even a database. Finally, the example checks that the two input
+      mechanisms actually resulted in the same OCaml data structure.
+    </p><section><h1><b>
+    The difference between <code>=</code> and
+    <code>==</code>, and <code>phys_equal</code> in Core
+    </b></h1><p id="idp8676832">
+      If you come from a C/C++ background, you will probably reflexively
+      use <code>==</code> to test two values for equality. In
+      OCaml, <code>==</code> tests for
+      <span><em>physical</em></span> equality, and <code>=</code>
+      tests for <span><em>structural</em></span> equality.
+    </p><p id="idp8679952">
+      The <code>==</code> physical equality test will match if two
+      data structures have precisely the same pointer in memory. Two
+      data structures that have identical contents, but are constructed
+      separately, will not match using this operator. In the JSON
+      example, the <code>json1</code> and <code>json2</code>
+      values are not identical and so would fail the physical equality
+      test.
+    </p><p id="idp8682608">
+      The <code>=</code> structural equality operator recursively
+      inspects each field in the two values and tests them individually
+      for equality. In the JSON parsing example, every field will be
+      traversed and checked, and they will check out as equal.
+      Crucially, if your data structure is cyclical (that is, a value
+      recursively points back to another field within the same
+      structure), the <code>=</code> operator will never
+      terminate, and your program will hang! In this situation, you must
+      use the physical equality operator, or write a custom comparison
+      function that breaks the recursion.
+    </p><p id="idp8684880">
+      It's quite easy to mix up the use of <code>=</code> and
+      <code>==</code>, so Core disables the <code>==</code>
+      operator and provides <code>phys_equal</code> instead.
+      You'll see a type error if you use <code>==</code> anywhere:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">2</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">int</span> <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
+         <span class="o">[</span> <span class="o">`</span><span class="nc">Consider_using_phys_equal</span> <span class="o">]</span>
+<span class="o">#</span> <span class="n">phys_equal</span> <span class="mi">1</span> <span class="mi">2</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">false</span>
+</pre></div><p id="idp8689424">
+      If you feel like hanging your OCaml interpreter, you can verify
+      what happens with recursive values for yourself:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">t1</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo1</span><span class="o">:</span><span class="kt">int</span><span class="o">;</span> <span class="n">bar1</span><span class="o">:</span><span class="n">t2</span> <span class="o">}</span> <span class="ow">and</span> <span class="n">t2</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo2</span><span class="o">:</span><span class="kt">int</span><span class="o">;</span> <span class="n">bar2</span><span class="o">:</span><span class="n">t1</span> <span class="o">}</span> <span class="o">;;</span>
+<span class="k">type</span> <span class="n">t1</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo1</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar1</span> <span class="o">:</span> <span class="n">t2</span><span class="o">;</span> <span class="o">}</span>
+<span class="ow">and</span> <span class="n">t2</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo2</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar2</span> <span class="o">:</span> <span class="n">t1</span><span class="o">;</span> <span class="o">}</span>
+<span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">v1</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo1</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span> <span class="n">bar1</span><span class="o">=</span><span class="n">v2</span> <span class="o">}</span> <span class="ow">and</span> <span class="n">v2</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo2</span><span class="o">=</span><span class="mi">2</span><span class="o">;</span> <span class="n">bar2</span><span class="o">=</span><span class="n">v1</span> <span class="o">};;</span> 
+<span class="o">&lt;</span><span class="n">lots</span> <span class="k">of</span> <span class="n">text</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">v1</span> <span class="o">==</span> <span class="n">v1</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
+<span class="o">#</span> <span class="n">phys_equal</span> <span class="n">v1</span> <span class="n">v1</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
+<span class="o">#</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">v1</span> <span class="o">;;</span>
+<span class="o">&lt;</span><span class="n">press</span> <span class="o">^</span><span class="nc">Z</span> <span class="ow">and</span> <span class="n">kill</span> <span class="n">the</span> <span class="n">process</span> <span class="n">now</span><span class="o">&gt;</span>
+</pre></div></section><section><h1 id="selecting-values-from-json-structures">Selecting values from JSON structures</h1><p id="idp8692256">
+        Now that we've figured out how to parse the example JSON, lets
+        see how we can manipulate it from OCaml code with a more
+        complete example.
+      </p><div class="highlight"><pre><span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">open</span> <span class="nn">Async</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">open</span> <span class="nc">Printf</span>
+
+<span class="k">let</span> <span class="o">_</span> <span class="o">=</span>
+  <span class="c">(* Read the JSON file *)</span>
+  <span class="k">let</span> <span class="n">json</span> <span class="o">=</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">from_file</span> <span class="s2">&quot;book.json&quot;</span> <span class="k">in</span>
+
+  <span class="c">(* Locally open the JSON manipulation functions *)</span>
+  <span class="k">let</span> <span class="k">open</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="nc">Util</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">title</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|!</span> <span class="n">member</span> <span class="s2">&quot;title&quot;</span> <span class="o">|!</span> <span class="n">to_string</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">tags</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|!</span> <span class="n">member</span> <span class="s2">&quot;tags&quot;</span> <span class="o">|!</span> <span class="n">to_list</span> <span class="o">|!</span> <span class="n">filter_string</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">pages</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|!</span> <span class="n">member</span> <span class="s2">&quot;pages&quot;</span> <span class="o">|!</span> <span class="n">to_int</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">is_online</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|!</span> <span class="n">member</span> <span class="s2">&quot;is_online&quot;</span> <span class="o">|!</span> <span class="n">to_bool_option</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">is_translated</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|!</span> <span class="n">member</span> <span class="s2">&quot;is_translated&quot;</span> <span class="o">|!</span> <span class="n">to_bool_option</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">authors</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|!</span> <span class="n">member</span> <span class="s2">&quot;authors&quot;</span> <span class="o">|!</span> <span class="n">to_list</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">names</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">authors</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">json</span> <span class="o">-&gt;</span> <span class="n">member</span> <span class="s2">&quot;name&quot;</span> <span class="n">json</span> <span class="o">|!</span> <span class="n">to_string</span><span class="o">)</span> <span class="k">in</span>
+
+  <span class="c">(* Print the results of the parsing *)</span>
+  <span class="n">printf</span> <span class="s2">&quot;Title: %s (%d)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">title</span> <span class="n">pages</span><span class="o">;</span>
+  <span class="n">printf</span> <span class="s2">&quot;Authors: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;, &quot;</span> <span class="n">names</span><span class="o">);</span>
+  <span class="n">printf</span> <span class="s2">&quot;Tags: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;, &quot;</span> <span class="n">tags</span><span class="o">);</span>
+  <span class="k">let</span> <span class="n">string_of_bool_option</span> <span class="o">=</span>
+    <span class="k">function</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="s2">&quot;&lt;none&gt;&quot;</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="bp">true</span> <span class="o">-&gt;</span> <span class="s2">&quot;yes&quot;</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="bp">false</span> <span class="o">-&gt;</span> <span class="s2">&quot;no&quot;</span> <span class="k">in</span>
+  <span class="n">printf</span> <span class="s2">&quot;Online: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">string_of_bool_option</span> <span class="n">is_online</span><span class="o">);</span>
+  <span class="n">printf</span> <span class="s2">&quot;Translated: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">string_of_bool_option</span> <span class="n">is_translated</span><span class="o">)</span>
+</pre></div><p id="idp8695264">
+        This introduces the <code>Yojson.Basic.Util</code> module,
+        which contains <span><em>combinator</em></span> functions for
+        JSON manipulation. Combinators are a style of function that can
+        be chained together using the <code>|!</code> pipe
+        operator to select and convert values out of the JSON structure.
+        Let's examine some of them in more detail:
+      </p><ul><li><p id="idp8698096">
+            For the <code>title</code> string, the
+            <code>member</code> combinator extracts the key from
+            the array, and casts it to an OCaml string. An exception is
+            raised if the JSON value is not a string.
+          </p></li><li><p id="idp8700304">
+            The <code>tags</code> field is similar to
+            <code>title</code>, but are passed through the
+            <code>to_list</code> combinator since they are a JSON
+            list. The <code>filter_string</code> combinator folds
+            all of the strings in the JSON list into an OCaml list (any
+            non-strings also in there are simply ignored).
+          </p></li><li><p id="idp8703824">
+            The <code>is_online</code> and
+            <code>is_translated</code> fields are optional in our
+            JSON schema, and no error is raised if they are not present
+            in the JSON array. The resulting OCaml type is a
+            <code>string option</code> to reflect this. In our
+            example, only <code>is_online</code> is present and
+            <code>is_translated</code> will be
+            <code>None</code>.
+          </p></li></ul><p id="idp8708400">
+        In the last part of the example, we simply print the parsed
+        fields since they are just normal OCaml values. This technique
+        of using chained parsing functions is very powerful in
+        combination with the OCaml type system. Many errors that don't
+        make sense at runtime (for example, mixing up lists and objects)
+        will be caught statically via a type error.
+      </p></section></section><section><h1 id="constructing-json-values">Constructing JSON values</h1><p id="idp8710336">
+      To build and print JSON values, you can just construct values of
+      type <code>json</code> and call the
+      <code>to_string</code> function. There are also
+      pretty-printing functions that lay out the output in a more
+      human-readable style:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="o">[</span> <span class="o">(</span><span class="s2">&quot;key&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">String</span> <span class="s2">&quot;value&quot;</span><span class="o">)</span> <span class="o">]</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="k">of</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">])</span> <span class="kt">list</span> <span class="o">]</span> <span class="o">=</span>
+  <span class="o">`</span><span class="nc">Assoc</span> <span class="o">[(</span><span class="s2">&quot;key&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">String</span> <span class="s2">&quot;value&quot;</span><span class="o">)]</span>
+
+<span class="o">#</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">pretty_to_string</span> <span class="n">x</span> <span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;{ </span><span class="se">\&quot;</span><span class="s2">key</span><span class="se">\&quot;</span><span class="s2">: </span><span class="se">\&quot;</span><span class="s2">value</span><span class="se">\&quot;</span><span class="s2"> }&quot;</span>
+
+<span class="o">#</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">pretty_to_channel</span> <span class="n">stdout</span> <span class="n">x</span> <span class="o">;;</span>
+<span class="o">{</span> <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="s2">&quot;value&quot;</span> <span class="o">}</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
+</pre></div><p id="idp8713424">
+      In the example above, although the value that <code>x</code>
+      has is compatible with the type <code>json</code>, it's not
+      explicitly defined as such. The type inference engine will figure
+      out a type that is based on how the value <code>x</code> is
+      used, and in this case only the <code>Assoc</code> and
+      <code>String</code> variants are present. One difficulty you
+      will encounter is that type errors involving polymorphic variants
+      can be quite verbose if you make a mistake in your code. For
+      example, suppose you build an <code>Assoc</code> and include
+      a single value instead of a list of keys:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="o">(</span><span class="s2">&quot;key&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">String</span> <span class="s2">&quot;value&quot;</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">*</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">]</span> <span class="o">]</span> <span class="o">=</span>
+  <span class="o">`</span><span class="nc">Assoc</span> <span class="o">(</span><span class="s2">&quot;key&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">String</span> <span class="s2">&quot;value&quot;</span><span class="o">)</span>
+
+<span class="o">#</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">pretty_to_string</span> <span class="n">x</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span>
+         <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">*</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">]</span> <span class="o">]</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">json</span>
+       <span class="nc">Types</span> <span class="k">for</span> <span class="n">tag</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="n">are</span> <span class="n">incompatible</span>
+</pre></div><p id="idp8719744">
+      The type error above isn't <span><em>wrong</em></span> as such, but
+      can be inconvenient to wade through for larger values. An easy way
+      to narrow down this sort of type error is to add explicit type
+      annotations as a compiler hint about your intentions:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(</span><span class="n">x</span><span class="o">:</span><span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">json</span><span class="o">)</span> <span class="o">=</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="o">(</span><span class="s2">&quot;key&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">String</span> <span class="s2">&quot;value&quot;</span><span class="o">);;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">b</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
+         <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">json</span><span class="o">)</span> <span class="kt">list</span>
+</pre></div><p id="idp8722064">
+      In this case, we've marked the <code>x</code> as being of
+      type <code>Yojson.Basic.json</code>, and the compiler
+      immediately spots that the argument to the
+      <code>Assoc</code> variant has the incorrect type. This
+      illustrates the strengths and drawbacks of using polymorphic
+      variants: they make it possible to easily subtype across module
+      boundaries (the <code>Basic</code> and
+      <code>Safe</code> in Yojson's case), but the error messages
+      can be more confusing. However, a bit of careful manual type
+      annotation is all it takes to make tracking down such issues much
+      easier.
+    </p><p id="idp8726096">
+<span><em>avsm</em></span>: segway into memory representation of
+      polyvariants here?
+    </p><section><h1 id="using-non-standard-json-extensions">Using non-standard JSON extensions</h1><p id="idp8727824">
+        The standard JSON types are <span><em>really</em></span> basic,
+        and OCaml types are far more expressive. Yojson supports an
+        extended JSON format for those times when you're not
+        interoperating with external systems and just want a convenient
+        human-readable local format. The
+        <code>Yojson.Safe.json</code> type is a superset of the
+        <code>Basic</code> polymorphic variant, and looks like
+        this:
+      </p><div class="highlight"><pre><span class="k">type</span> <span class="n">json</span> <span class="o">=</span> <span class="o">[</span> 
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="k">of</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="n">json</span><span class="o">)</span> <span class="kt">list</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Bool</span> <span class="k">of</span> <span class="kt">bool</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Float</span> <span class="k">of</span> <span class="kt">float</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Floatlit</span> <span class="k">of</span> <span class="kt">string</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Int</span> <span class="k">of</span> <span class="kt">int</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Intlit</span> <span class="k">of</span> <span class="kt">string</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">List</span> <span class="k">of</span> <span class="n">json</span> <span class="kt">list</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Null</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Stringlit</span> <span class="k">of</span> <span class="kt">string</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Tuple</span> <span class="k">of</span> <span class="n">json</span> <span class="kt">list</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Variant</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">*</span> <span class="n">json</span> <span class="n">option</span> <span class="o">]</span> 
+</pre></div><p id="idp8731360">
+        You should immediately be able to spot a benefit of using
+        polymorphic variants here. A standard JSON type such as a
+        <code>String</code> will type-check against both the
+        <code>Basic</code> module and also the non-standard
+        <code>Safe</code> module. However, if you use extension
+        values such as <code>Tuple</code> with the
+        <code>Basic</code> module, they will not be a valid
+        sub-type and the compiler will complain.
+      </p><p id="idp8735216">
+        The extensions includes with Yojson include:
+      </p><ul><li><p id="idp8736192">
+            The <code>lit</code> suffix denotes that the value is
+            stored as a JSON string. For example, a
+            <code>Floatlit</code> will be stored as
+            <code>&quot;1.234&quot;</code> instead of
+            <code>1.234</code>.
+          </p></li><li><p id="idp8739568">
+            The <code>Tuple</code> type is stored as
+            <code>(&quot;abc&quot;, 123)</code> instead of a list.
+          </p></li><li><p id="idp8741584">
+            The <code>Variant</code> type encodes OCaml variants
+            more explicitly, as
+            <code>&lt;&quot;Foo&quot;&gt;</code> or
+            <code>&lt;&quot;Bar&quot;:123&gt;</code> for a variant
+            with parameters.
+          </p></li></ul><p id="idp8744192">
+        The only purpose of these extensions is to make the data
+        representation more expressive without having to refer to the
+        original OCaml types. You can always cast a
+        <code>Safe.json</code> to a <code>Basic.json</code>
+        type by using the <code>to_basic</code> function as
+        follows:
+      </p><div class="highlight"><pre><span class="k">val</span> <span class="n">to_basic</span> <span class="o">:</span> <span class="n">json</span> <span class="o">-&gt;</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">json</span>
+<span class="c">(** Tuples are converted to JSON arrays, Variants are converted to JSON strings</span>
+<span class="c">or arrays of a string (constructor) and a json value (argument). Long integers</span>
+<span class="c">are converted to JSON strings.  Examples: </span>
+
+<span class="c">`Tuple [ `Int 1; `Float 2.3 ]   -&gt;    `List [ `Int 1; `Float 2.3 ]</span>
+<span class="c">`Variant (&quot;A&quot;, None)            -&gt;    `String &quot;A&quot;</span>
+<span class="c">`Variant (&quot;B&quot;, Some x)          -&gt;    `List [ `String &quot;B&quot;, x ]</span>
+<span class="c">`Intlit &quot;12345678901234567890&quot;  -&gt;    `String &quot;12345678901234567890&quot;</span>
+<span class="c"> *)</span>
+</pre></div></section></section><section><h1 id="automatically-mapping-json-to-ocaml-types">Automatically mapping JSON to OCaml types</h1><p id="idp8749280">
+      The combinators described earlier make it fairly easy to extract
+      fields from JSON records, but the process is still pretty manual.
+      We'll talk about how to do larger-scale JSON parsing now, using a
+      domain-specific language known as
+      <a href="http://oss.wink.com/atdgen/" target="_top">ATD</a>.
+    </p><p id="idp8750560">
+      The idea behind ATD is to specify the format of the JSON in a
+      separate file, and then run a compiler (<code>atdgen</code>)
+      that outputs OCaml code to construct and parse JSON values. This
+      means that you don't need to write any OCaml parsing code at all,
+      as it will all be auto-generated for you.
+    </p><p id="idp8751904">
+      Let's go straight into looking at an example of how this works, by
+      using a small portion of the Github API. Github is a popular code
+      hosting and sharing website that provides a JSON-based web
+      <a href="http://developer.github.com" target="_top">API</a>. The ATD code
+      fragment below describes the Github authorization API. It is based
+      on a pseudo-standard web protocol known as OAuth, and is used to
+      authorized users to access Github services.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">scope</span> <span class="o">=</span> <span class="o">[</span>
+    <span class="nc">User</span> <span class="o">&lt;</span><span class="n">json</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="o">&gt;</span>
+  <span class="o">|</span> <span class="nc">Public_repo</span> <span class="o">&lt;</span><span class="n">json</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;public_repo&quot;</span><span class="o">&gt;</span>
+  <span class="o">|</span> <span class="nc">Repo</span> <span class="o">&lt;</span><span class="n">json</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;repo&quot;</span><span class="o">&gt;</span>
+  <span class="o">|</span> <span class="nc">Repo_status</span> <span class="o">&lt;</span><span class="n">json</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;repo_status&quot;</span><span class="o">&gt;</span>
+  <span class="o">|</span> <span class="nc">Delete_repo</span> <span class="o">&lt;</span><span class="n">json</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;delete_repo&quot;</span><span class="o">&gt;</span>
+  <span class="o">|</span> <span class="nc">Gist</span> <span class="o">&lt;</span><span class="n">json</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;gist&quot;</span><span class="o">&gt;</span>
+<span class="o">]</span>
+
+<span class="k">type</span> <span class="n">app</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">url</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+<span class="o">}</span>  <span class="o">&lt;</span><span class="n">ocaml</span> <span class="n">field_prefix</span><span class="o">=</span><span class="s2">&quot;app_&quot;</span><span class="o">&gt;</span>
+
+<span class="k">type</span> <span class="n">authorization_request</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">scopes</span><span class="o">:</span> <span class="n">scope</span> <span class="kt">list</span><span class="o">;</span>
+  <span class="n">note</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+<span class="o">}</span> <span class="o">&lt;</span><span class="n">ocaml</span> <span class="n">field_prefix</span><span class="o">=</span><span class="s2">&quot;auth_req_&quot;</span><span class="o">&gt;</span>
+
+<span class="k">type</span> <span class="n">authorization_response</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">scopes</span><span class="o">:</span> <span class="n">scope</span> <span class="kt">list</span><span class="o">;</span>
+  <span class="n">token</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">app</span><span class="o">:</span> <span class="n">app</span><span class="o">;</span>
+  <span class="n">url</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">id</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+  <span class="o">?</span><span class="n">note</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="o">?</span><span class="n">note_url</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+<span class="o">}</span>
+</pre></div><p id="idp8754864">
+      ATD is (deliberately) similar to OCaml type definitions. Each
+      field can include extra annotations to customise the parsing code
+      for a particular backend. For example, the Github
+      <code>scope</code> field above is defined as a variant type,
+      but with the actual JSON values being defined explicitly (as
+      lower-case versions).
+    </p><p id="idp8756256">
+      The ATD spec can be compiled to a number of OCaml targets. Let's
+      run the compiler twice, to generate some OCaml type definitions,
+      and a JSON serialiser.
+    </p><div class="highlight"><pre><span class="nv">$ </span>atdgen -t github.atd
+<span class="nv">$ </span>atdgen -j github.atd
+</pre></div><p id="idp8757696">
+      This will generate some new files in your current directory.
+      <code>Github_t.ml</code> and <code>Github_t.mli</code>
+      will contain an OCaml module with types defines that correspond to
+      the ATD file. It looks like this:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">scope</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">User</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Public_repo</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Repo</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Repo_status</span> 
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Delete_repo</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Gist</span>
+<span class="o">]</span>
+
+<span class="k">type</span> <span class="n">app</span> <span class="o">=</span> <span class="o">{</span> 
+  <span class="n">app_name</span> <span class="c">(*atd name *)</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> 
+  <span class="n">app_url</span> <span class="c">(*atd url *)</span><span class="o">:</span> <span class="kt">string</span> 
+<span class="o">}</span>
+
+<span class="k">type</span> <span class="n">authorization_request</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">auth_req_scopes</span> <span class="c">(*atd scopes *)</span><span class="o">:</span> <span class="n">scope</span> <span class="kt">list</span><span class="o">;</span>
+  <span class="n">auth_req_note</span> <span class="c">(*atd note *)</span><span class="o">:</span> <span class="kt">string</span>
+<span class="o">}</span>
+
+<span class="k">type</span> <span class="n">authorization_response</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">scopes</span><span class="o">:</span> <span class="n">scope</span> <span class="kt">list</span><span class="o">;</span>
+  <span class="n">token</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">app</span><span class="o">:</span> <span class="n">app</span><span class="o">;</span>
+  <span class="n">url</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">id</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+  <span class="n">note</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">note_url</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span>
+<span class="o">}</span>
+</pre></div><p id="idp8760896">
+      There is an obvious correspondence to the ATD definition. Note in
+      particular that field names in separate OCaml records cannot
+      shadow each other, and so we specifically prefix every field with
+      a prefix to distinguish it from other records. For example,
+      <code>&lt;ocaml field_prefix=&quot;auth_req_&quot;&gt;</code>
+      in the ATD spec prefixes every field name in the generated
+      <code>authorization_request</code> record with
+      <code>auth_req</code>.
+    </p><p id="idp8763552">
+      The <code>Github_t</code> module only contains the type
+      definitions, while <code>Github_j</code> has a concrete
+      serialization module to and from JSON. You can read the
+      <code>github_j.mli</code> to see the full interface, but the
+      important functions for most uses are the conversion functions to
+      and from a string. For our example above, this looks like:
+    </p><div class="highlight"><pre><span class="k">val</span> <span class="n">string_of_authorization_response</span> <span class="o">:</span>
+  <span class="o">?</span><span class="n">len</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">authorization_response</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+  <span class="c">(** Serialize a value of type {!authorization_response}</span>
+<span class="c">      into a JSON string.</span>
+<span class="c">      @param len specifies the initial length </span>
+<span class="c">                 of the buffer used internally.</span>
+<span class="c">                 Default: 1024. *)</span>
+
+<span class="k">val</span> <span class="n">authorization_response_of_string</span> <span class="o">:</span>
+  <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">authorization_response</span>
+</pre></div><p id="idp8767808">
+      This is pretty convenient! We've written a single ATD file, and
+      all the OCaml boilerplate to convert between JSON and a strongly
+      typed record has been generated for us. You can control various
+      aspects of the serializer by passing flags to
+      <code>atdgen</code>. The important ones for JSON are:
+    </p><ul><li><p id="idp8769616">
+<code>-j-std</code>: work in standard JSON mode, and
+          never print non-standard JSON extensions.
+        </p></li><li><p id="idp8771120">
+<code>-j-custom-fields FUNCTION</code>: call a custom
+          function for every unknown field encountered, instead of
+          raising a parsing exception.
+        </p></li><li><p id="idp8772656">
+<code>-j-defaults</code>: force the output a JSON value
+          even if the specification defines it as the default value for
+          that field.
+        </p></li></ul><p id="idp8774064">
+      The full ATD specification is quite sophisticated (and well
+      documented online at its homepage). The ATD compiler can also
+      target formats other than JSON, and also outputs code for other
+      languages such as Java if you need more interoperability. There
+      are also several similar projects you can investigate which
+      automate the code generation process:
+      <a href="http://piqi.org" target="_top">Piqi</a> uses the Google protobuf
+      format, and <a href="http://thrift.apache.org" target="_top">Thrift</a>
+      supports a huge variety of other programming languages.
+    </p><p id="idp8776176">
+      We'll also return to the Github example here later in the book
+      when discussing the Async networking library, and you can find the
+      full ATD specification for Github in the
+      <a href="http://github.com/avsm/ocaml-github" target="_top"><code>ocaml-github</code></a>
+      repository.
+    </p></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="data-serialization-with-s-expressions.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="xml-streams-and-trees.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
