@@ -394,8 +394,8 @@ container.  The `hasNext()` method returns true if the iterator refers to an
 element; the method `next()` returns the element, and also advances to the next
 one; and `remove()` removes the last element returned by the iterator.
 
-When we define a similar iterator concept in OCaml, we need to choose how to
-represent it.  We _could_ define a separate iterator type for each kind of
+If we want to define a similar iterator concept in OCaml, we need to choose how
+to represent it.  We _could_ define a separate iterator type for each kind of
 container, but this would be inconvenient, since iterators have similar behavior
 for many different kinds of containers.  To define a _generic_ iterator, there
 are several reasonable choices: we can use first-class modules, or we can use
@@ -493,7 +493,7 @@ val l2 : '_a dlist
 Out of memory during evaluation.
 ```
 
-## Hash tables with iterators
+### Hash tables with iterators
 
 Let's return to the example of hash tables, but this time let's define an
 iterator-style interface.  We'll use a similar `iterator` object type like we did
