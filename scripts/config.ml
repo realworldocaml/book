@@ -19,6 +19,8 @@ let from_anil =
   ; "mor1"                    (* Richard Mortier <richard.mortier@nottingham.ac.uk> *)
   ; "jamesbulpin"             (* James Bulpin <james.bulpin@citrix.com> *)
   ; "raphael-proust"          (* Raphael Proust <rp452@cam.ac.uk> *)
+  ; "mariusaeriksen"          (* Marius Eriksen <marius@twitter.com> *)
+  ; "jaked"                   (* Jake Donham <jake@donham.org> *)
 ]
 
 let from_yminsky =
