@@ -25,6 +25,7 @@ let from_yminsky =
   [ "naftul"                  (* nminsky@gmail.com    *)
   ; "fbsATcsDOTcornellDOTedu" (* fbs@cs.cornell.edu   *)
   ; "zdancewic"               (* stevez@cis.upenn.edu *)
+  ; "bolinfest"               (* mbolin@gmail.com *)
   ]
 
 let from_email = 
