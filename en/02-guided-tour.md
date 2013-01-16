@@ -17,9 +17,9 @@ you can try out the examples as you go.
 <note>
 <title>Installing the interactive top-level</title>
 
-The easiest way to get `utop` is via the OPAM package manager, which is
-explained in [xref](#installation).  You'll need to also have the Core standard
-library installed.  In a nutshell, you need to:
+The easiest way to get `utop` is via the OPAM package manager, which
+is explained in [xref](#installation).  You'll need to also have the
+Core standard library installed.  In a nutshell, you need to:
 
 ```
 $ opam init
@@ -35,9 +35,11 @@ You can exit `utop` by pressing `control-D` and return.
 
 ## OCaml as a calculator
 
-Let's spin up the toplevel and open the `Core.Std` module to get
-access to Core's libraries.  Don't forget to open `Core.Std`, since
-without it, many of the examples below will fail.
+Let's spin up the toplevel.  Throughout the book we're going to use
+Core, a more full-featured and capable replacement for OCaml's
+standard library.  Accordingly, we'll start by opening the `Core.Std`
+module to get access to Core's libraries.  If you don't open
+`Core.Std` many of the examples below will fail.
 
 ```ocaml
 $ utop
@@ -79,8 +81,8 @@ at you.
   prevents some kinds of bugs that arise in other languages due to
   unexpected differences between the behavior of `int` and `float`.
 
-We can also create variables to name the value of a given expression,
-using the `let` syntax.
+We can also a create variable to name the value of a given expression,
+using a `let` binding.
 
 ```ocaml
 # let x = 3 + 4;;
@@ -171,7 +173,7 @@ how OCaml is able to figure them out, given that we didn't write down
 any explicit type information.
 
 OCaml determines the type of an expression using a technique called
-_type-inference_, by which it infers the type of a given expression
+_type inference_, by which it infers the type of a given expression
 based on what it already knows about the types of other related
 variables, and on constraints on the types that arise from the
 structure of the code.
@@ -285,7 +287,7 @@ whereas `"short"` and `"loooooong"` require that `'a` be of type
 genericity is called _parametric polymorphism_, and is very similar to
 generics in C# and Java.
 
-<sidebar><title>Type errors vs exceptions</title>
+<note><title>Type errors vs exceptions</title>
 
 There's a big difference in OCaml (and really in any compiled
 language) between errors that are caught at compile time and those
@@ -327,15 +329,15 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-but this code works fine, even though it contains an branch that would
-throw an exception if it were ever reached.
+but the following code runs incident, even though it contains a branch
+that would throw an exception if it were ever reached.
 
 ```ocaml
 # if 3 < 4 then 0 else 3 / 0;;
 - : int = 0
 ```
 
-</sidebar>
+</note>
 
 ## Tuples, Lists, Options and Pattern-matching
 
@@ -366,11 +368,11 @@ val x : int = 3
 val y : string = "three"
 ```
 
-Here, the `(x,y)` on the left-hand side of the `let` is the pattern.
-This pattern lets us mint the new variables `x` and `y`, each bound to
-different components of the value being matched.  Note that the same
-syntax is used both for constructing and for pattern-matching on
-tuples.
+Here, the `(x,y)` on the left-hand side of the `let` binding is the
+pattern.  This pattern lets us mint the new variables `x` and `y`,
+each bound to different components of the value being matched.  Note
+that the same syntax is used both for constructing and for
+pattern-matching on tuples.
 
 Pattern matching can also show up in function arguments.  Here's a
 function for computing the distance between two points on the plane,
@@ -662,9 +664,11 @@ example,
 val divide : int -> int -> int option = <fun>
 ```
 
-`Some` and `None` are constructors, like `::` and `[]` for lists,
-which let you build optional values.  You can think of an option as a
-specialized list that can only have zero or one element.
+The function `divide` either returns `None`, if the divisor is zero,
+or `Some` of the result of the division, otherwise.  `Some` and `None`
+are constructors, like `::` and `[]` for lists, which let you build
+optional values.  You can think of an option as a specialized list
+that can only have zero or one element.
 
 To get a value out of an option, we use pattern matching, as we did
 with tuples and lists.  Consider the following simple function for
@@ -740,7 +744,8 @@ And we can get access to the contents of these types using pattern
 matching:
 
 ```ocaml
-# let magnitude { x = x_pos; y = y_pos } = sqrt (x_pos ** 2. +. y_pos ** 2.);;
+# let magnitude { x = x_pos; y = y_pos } =
+    sqrt (x_pos ** 2. +. y_pos ** 2.);;
 val magnitude : point2d -> float = <fun>
 ```
 
@@ -766,9 +771,9 @@ larger types, as in the following types, each of which is a
 description of a different geometric object.
 
 ```ocaml
-# type circle_desc  = { center: point2d; radius: float } ;;
-# type rect_desc    = { lower_left: point2d; width: float; height: float } ;;
-# type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
+# type circle_desc  = { center: point2d; radius: float }
+  type rect_desc    = { lower_left: point2d; width: float; height: float }
+  type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
 ```
 
 Now, imagine that you want to combine multiple objects of these types
@@ -799,14 +804,13 @@ of some element of a list of `scene_element`s.
        point.x > lower_left.x && point.x < lower_left.x +. width
        && point.y > lower_left.y && point.y < lower_left.y +. height
      | Segment { endpoint1; endpoint2 } -> false
-     ;;
+  ;;
 val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
 # let is_inside_scene point scene =
-     let point_is_inside_scene_element scene_element =
-       is_inside_scene_element point scene_element
-     in
-     List.for_all scene ~f:point_is_inside_scene_element;;
-val is_inside_shapes : point2d -> scene_element list -> bool = <fun>
+     List.for_all scene
+       ~f:(fun el -> is_inside_scene_element point el)
+   ;;
+val is_inside_scene : point2d -> scene_element list -> bool = <fun>
 ```
 
 You might at this point notice that the use of `match` here is
@@ -814,6 +818,12 @@ reminiscent of how we used `match` with `option` and `list`.  This is
 no accident: `option` and `list` are really just examples of variant
 types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
+
+We also made our first use of an _anonymous function_ in the call to
+`List.forall`.  An anonymous function is a function that is defined
+but not named, in this case, using the `fun` keyword.  Anonymous
+functions are common in OCaml, particularly when using iteration
+functions like like `List.forall`.
 
 ## Imperative programming
 
@@ -909,8 +919,8 @@ side-effect.
 
 A new and somewhat odd type has cropped up in this example: `unit`.
 What makes `unit` different is that there is only one value of type
-`unit`, which is written `()`.  Because `unit` has only one
-inhabitant, a value of type `unit` can't convey any information.
+`unit`, which is written `()`.  Because there is only one value of
+type `unit` that value doesn't really convey any information.
 
 If it doesn't convey any information, then what is `unit` good for?
 Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`

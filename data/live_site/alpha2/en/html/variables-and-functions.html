@@ -1,0 +1,1096 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 2. Variables and Functions / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha2',
+                        page: 'variables\u002Dand\u002Dfunctions.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Basic Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html" class="here">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">3. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">4. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">5. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">6. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">7. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="object-oriented-programming.html">8. Object Oriented Programming</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Practical Examples</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. Advanced Topics</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 2. Variables and Functions</h1>
+                
+                
+
+    <p id="idp7008032">
+    Variables and functions are fundamental ideas that show up in
+    virtually all programming languages. But OCaml has a different take
+    on these basic concepts, and so we'll spend some time digging into
+    the details of OCaml's variables and functions differ from what you
+    may have seen elsewhere.
+  </p><section><h1 id="variables">Variables</h1><p id="idp7009632">
+      At its simplest, a variable is an identifier whose meaning is
+      bound to a particular value. In OCaml these bindings are often
+      introduced using the <code>let</code> keyword. When typed in
+      at the prompt of the interpreter, a let binding has the following
+      syntax.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">expr</span><span class="o">&gt;</span>
+</pre></div><p id="idp7011808">
+      As we'll see when we get to the module system in
+      <a href="">???</a>, this same
+      syntax is used for top-level definitions in a module.
+    </p><p id="idp7012864">
+      Every variable binding has a <span><em>scope</em></span>, which is
+      the portion of the code that can refer to that binding. The scope
+      of a top-level let binding is everything that follows it in the
+      top-level session (or in the remainder of the module).
+    </p><p id="idp7013872">
+      Here's a simple example.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">z</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
+</pre></div><p id="idp7015232">
+<code>let</code> can also be used to create a variable
+      binding whose scope is limited to a particular expression, using
+      the following syntax.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">expr1</span><span class="o">&gt;</span> <span class="k">in</span> <span class="o">&lt;</span><span class="n">expr2</span><span class="o">&gt;</span>
+</pre></div><p id="idp7017264">
+      This first evaluates <span><em><code>expr1</code></em></span>
+      and then evaluates <span><em><code>expr2</code></em></span>
+      with <span><em><code>identifier</code></em></span> bound to
+      whatever value was produced by the evaluation of
+      <span><em><code>expr1</code></em></span>. Here's how it looks
+      in practice.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">languages</span> <span class="o">=</span> <span class="s2">&quot;OCaml,Perl,C++,C&quot;</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">languages</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml,Perl,C++,C&quot;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">dashed_languages</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">language_list</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="n">languages</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">','</span> <span class="k">in</span>
+    <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;-&quot;</span> <span class="n">language_list</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">dashed_languages</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml-Perl-C++-C&quot;</span>
+</pre></div><p id="idp7022112">
+      Note that the scope of <code>language_list</code> is just
+      the expression
+      <code>String.concat ~sep:&quot;-&quot; language_list</code>,
+      and is not available at the top-level, as we can see if we try to
+      access it now.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="n">language_list</span><span class="o">;;</span>
+<span class="nc">Characters</span> <span class="mi">0</span><span class="o">-</span><span class="mi">13</span><span class="o">:</span>
+  <span class="n">language_list</span><span class="o">;;</span>
+  <span class="o">^^^^^^^^^^^^^</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">Unbound</span> <span class="n">value</span> <span class="n">language_list</span>
+</pre></div><p id="idp7024848">
+      A let binding in an inner scope can <span><em>shadow</em></span>,
+      or hide, the definition from an outer scope. So, for example, we
+      could have written the <code>dashed_languages</code> example
+      as follows:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">languages</span> <span class="o">=</span> <span class="s2">&quot;OCaml,Perl,C++,C&quot;</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">languages</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml,Perl,C++,C&quot;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">dashed_languages</span> <span class="o">=</span>
+     <span class="k">let</span> <span class="n">languages</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="n">languages</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">','</span> <span class="k">in</span>
+     <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;-&quot;</span> <span class="n">languages</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">dashed_languages</span> <span class="o">:</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">String</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;OCaml-Perl-C++-C&quot;</span>
+</pre></div><p id="idp7027728">
+      This time, in the inner scope we called the list of strings
+      <code>languages</code> instead of
+      <code>language_list</code>, thus hiding the original
+      definition of <code>languages</code>. But once the
+      definition of <code>dashed_languages</code> is complete, the
+      inner scope has closed and the original definition of languages
+      reappears.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="n">languages</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml,Perl,C++,C&quot;</span>
+</pre></div><p id="idp7031776">
+      One common idiom is to use a series of nested
+      <code>let</code>/<code>in</code> expressions to build
+      up the components of a larger computation. Thus, we might write:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">area_of_ring</span> <span class="n">inner_radius</span> <span class="n">outer_radius</span> <span class="o">=</span>
+     <span class="k">let</span> <span class="n">pi</span> <span class="o">=</span> <span class="n">acos</span> <span class="o">(-</span><span class="mi">1</span><span class="o">.)</span> <span class="k">in</span>
+     <span class="k">let</span> <span class="n">area_of_circle</span> <span class="n">r</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*.</span> <span class="n">r</span> <span class="o">*.</span> <span class="n">r</span> <span class="k">in</span>
+     <span class="n">area_of_circle</span> <span class="n">outer_radius</span> <span class="o">-.</span> <span class="n">area_of_circle</span> <span class="n">inner_radius</span>
+  <span class="o">;;</span>
+<span class="o">#</span> <span class="n">area_of_ring</span> <span class="mi">1</span><span class="o">.</span> <span class="mi">3</span><span class="o">.;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">25</span><span class="o">.</span><span class="mi">1327412287183449</span>
+</pre></div><p id="idp7034720">
+      It's important not to confuse this sequence of let bindings with
+      the modification of a mutable variable. How would
+      <code>area_of_ring</code> be different, for example, if we
+      had instead written this purposefully confusing bit of code:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">area_of_ring</span> <span class="n">inner_radius</span> <span class="n">outer_radius</span> <span class="o">=</span>
+     <span class="k">let</span> <span class="n">pi</span> <span class="o">=</span> <span class="n">acos</span> <span class="o">(-</span><span class="mi">1</span><span class="o">.)</span> <span class="k">in</span>
+     <span class="k">let</span> <span class="n">area_of_circle</span> <span class="n">r</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*.</span> <span class="n">r</span> <span class="o">*.</span> <span class="n">r</span> <span class="k">in</span>
+     <span class="k">let</span> <span class="n">pi</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span> <span class="k">in</span>
+     <span class="n">area_of_circle</span> <span class="n">outer_radius</span> <span class="o">-.</span> <span class="n">area_of_circle</span> <span class="n">inner_radius</span>
+  <span class="o">;;</span>
+</pre></div><p id="idp7037088">
+      Here, we redefined <code>pi</code> to be zero after the
+      definition of <code>area_of_circle</code>. You might think
+      that this would mean that the result of the computation would now
+      be zero, but you'd be wrong. In fact, the behavior of the function
+      is unchanged. That's because the original definition of
+      <code>pi</code> wasn't changed, it was just shadowed, so
+      that any subsequent reference to <code>pi</code> would see
+      the new definition of <code>pi</code> as zero. But there is
+      no later use of <code>pi</code>, so the binding doesn't make
+      a difference. Indeed, if you type the example I gave above into
+      the toplevel, OCaml will warn you that the definition is unused.
+    </p><div class="highlight"><pre><span class="nc">Characters</span> <span class="mi">126</span><span class="o">-</span><span class="mi">128</span><span class="o">:</span>
+    <span class="k">let</span> <span class="n">pi</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span> <span class="k">in</span>
+        <span class="o">^^</span>
+<span class="nc">Warning</span> <span class="mi">26</span><span class="o">:</span> <span class="n">unused</span> <span class="n">variable</span> <span class="n">pi</span><span class="o">.</span>
+</pre></div><p id="idp7042704">
+      In OCaml, let bindings are immutable. As we'll see in
+      <a href="a-guided-tour.html#imperative-programming">the section called “Imperative programming”</a>, there are
+      mutable values in OCaml, but no mutable variables.
+    </p><section><h1 id="pattern-matching-and-let">Pattern matching and <code>let</code></h1><p id="idp7045136">
+        Another useful feature of let bindings is that they support the
+        use of patterns on the left-hand side of the bind. Consider the
+        following code, which uses <code>List.unzip</code>, a
+        function for converting a list of pairs into a pair of lists.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(</span><span class="n">ints</span><span class="o">,</span><span class="n">strings</span><span class="o">)</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">unzip</span> <span class="o">[(</span><span class="mi">1</span><span class="o">,</span><span class="s2">&quot;one&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">2</span><span class="o">,</span><span class="s2">&quot;two&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="s2">&quot;three&quot;</span><span class="o">)]</span>
+<span class="k">val</span> <span class="n">ints</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
+<span class="k">val</span> <span class="n">strings</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;one&quot;</span><span class="o">;</span> <span class="s2">&quot;two&quot;</span><span class="o">;</span> <span class="s2">&quot;three&quot;</span><span class="o">]</span>
+</pre></div><p id="idp7047600">
+        This actually binds two variables, one for each element of the
+        pair. Using a pattern in a let-binding makes the most sense for
+        a pattern that is <span><em>irrefutable</em></span>,
+        <span><em>i.e.</em></span>, where any value of the type in
+        question is guaranteed to match the pattern. Tuple and record
+        patterns are irrefutable, but list patterns are not. Consider
+        the following code that implements a function for up-casing the
+        first element of a comma-separate list.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">upcase_first_entry</span> <span class="n">line</span> <span class="o">=</span>
+     <span class="k">let</span> <span class="o">(</span><span class="n">key</span> <span class="o">::</span> <span class="n">values</span><span class="o">)</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">','</span> <span class="n">line</span> <span class="k">in</span>
+     <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;,&quot;</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">key</span> <span class="o">::</span> <span class="n">values</span><span class="o">)</span>
+  <span class="o">;;</span>
+      <span class="nc">Characters</span> <span class="mi">40</span><span class="o">-</span><span class="mi">53</span><span class="o">:</span>
+       <span class="k">let</span> <span class="o">(</span><span class="n">key</span> <span class="o">::</span> <span class="n">values</span><span class="o">)</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">','</span> <span class="n">line</span> <span class="k">in</span>
+            <span class="o">^^^^^^^^^^^^^</span>
+<span class="nc">Warning</span> <span class="mi">8</span><span class="o">:</span> <span class="n">this</span> <span class="n">pattern</span><span class="o">-</span><span class="n">matching</span> <span class="n">is</span> <span class="n">not</span> <span class="n">exhaustive</span><span class="o">.</span>
+<span class="nc">Here</span> <span class="n">is</span> <span class="n">an</span> <span class="n">example</span> <span class="k">of</span> <span class="n">a</span> <span class="n">value</span> <span class="n">that</span> <span class="n">is</span> <span class="n">not</span> <span class="n">matched</span><span class="o">:</span>
+<span class="bp">[]</span>
+<span class="k">val</span> <span class="n">upcase_first_entry</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7051168">
+        This case can't really come up in practice, because
+        <code>String.split</code> always returns a list with at
+        least one element. But the compiler doesn't know this, and so it
+        emits the warning. It's generally better to use a match
+        statement to handle such cases explicitly:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">upcase_first_entry</span> <span class="n">line</span> <span class="o">=</span>
+     <span class="k">match</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">','</span> <span class="n">line</span> <span class="k">with</span>
+     <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="k">assert</span> <span class="bp">false</span> <span class="c">(* String.split returns at least one element *)</span>
+     <span class="o">|</span> <span class="n">first</span> <span class="o">::</span> <span class="n">rest</span> <span class="o">-&gt;</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;,&quot;</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">first</span> <span class="o">::</span> <span class="n">rest</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">upcase_first_entry</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div></section><section><h1 id="letand-bindings"><code>let</code>/<code>and</code>
+      bindings</h1><p id="idp7055888">
+        Another variant on the let binding is the use of
+        <code>and</code> to join multiple variable definitions
+        into a single declaration. For example, we can write:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">val</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
+</pre></div><p id="idp7058048">
+        This can be useful when you want to create a number of new let
+        bindings at once, without having each definition affect the
+        next. So, if we wanted to create new bindings that swapped the
+        values of <code>x</code> and <code>y</code>, we
+        could write:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span>
+<span class="k">val</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">100</span>
+</pre></div><p id="idp7060864">
+        This use-case doesn't come up that often. Most of the time that
+        <code>and</code> comes into play, it's used to define
+        multiple mutually recursive values, which we'll learn about
+        later in the chapter.
+      </p><p id="idp7062128">
+        Note that when doing a
+        <code>let</code>/<code>and</code> style declaration,
+        the order of execution of the right-hand side of the binds is
+        undefined by the language definition, so one should not write
+        code that relies on it.
+      </p></section></section><section><h1 id="functions">Functions</h1><p id="idp7065104">
+      OCaml being a functional language, it's no surprise that functions
+      are an important and pervasive element of programming in OCaml.
+      Indeed, we've seen functions pop up already in many of the
+      examples we've looked at thus far. But while we've introduced the
+      basics of functions, we're now going to cover them in more depth,
+      starting from the foundations.
+    </p><section><h1 id="anonymous-functions">Anonymous Functions</h1><p id="idp7066784">
+        We'll start by looking at the most basic form of OCaml function,
+        the <span><em>anonymous</em></span> function. Anonymous functions
+        are declared using the <code>fun</code> keyword, as
+        follows.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7069328">
+        Anonymous functions aren't named, but they can be used for many
+        different purposes nonetheless. You can, for example, apply an
+        anonymous function to an argument:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="mi">7</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
+</pre></div><p id="idp7070896">
+        Or pass it to another function.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
+</pre></div><p id="idp7072352">
+        Or even stuff them into a datastructure.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">increments</span> <span class="o">=</span> <span class="o">[</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="o">)</span> <span class="o">]</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">increments</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="k">fun</span><span class="o">&gt;;</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;]</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">f</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="mi">5</span><span class="o">)</span> <span class="n">increments</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">6</span><span class="o">;</span> <span class="mi">7</span><span class="o">]</span>
+</pre></div><p id="idp7073888">
+        It's worth stopping for a moment to puzzle this example out,
+        since this kind of higher-order use of functions can be a bit
+        obscure at first. The first thing to understand is the function
+        <code>(fun f -&gt; f 5)</code>, which takes a function as
+        its argument and applies that function to the number
+        <code>5</code>. The invocation of
+        <code>List.map</code> applies
+        <code>(fun f -&gt; f 5)</code> to the elements of the
+        <code>increments</code> list (which are themselves
+        functions) and returns the list containing the results of these
+        function applications.
+      </p><p id="idp7077904">
+        The key thing to understand is that functions are ordinary
+        values in OCaml, and you can do everything with them that you'd
+        do with an ordinary value, including passing them to and
+        returning them from other functions and storing them in
+        datastructures. We even name functions in the same way that we
+        name other values, by using a let binding.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">plusone</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">plusone</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">plusone</span> <span class="mi">3</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div><p id="idp7079744">
+        Defining named functions is so common that there is some built
+        in syntactic sugar for it. Thus, we can write:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">plusone</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">plusone</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7081248">
+        This is the most common and convenient way to declare a
+        function, but syntactic niceties aside, the two styles of
+        function definition are entirely equivalent.
+      </p><aside class="note"><h1>
+let and fun
+</h1><p id="idp7083728">
+        Functions and let bindings have a lot to do with each other. In
+        some sense, you can think of the argument of a function as a
+        variable being bound to its argument. Indeed, the following two
+        expressions are nearly equivalent:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="mi">7</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">7</span> <span class="k">in</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
+</pre></div><p id="idp7085440">
+        This connection is important, and will come up more when
+        programming in a monadic style, as we'll see in
+        <a href="">???</a>.
+      </p></aside></section><section><h1 id="multi-argument-functions">Multi-argument functions</h1><p id="idp7087600">
+        OCaml of course also supports multi-argument functions. Here's
+        an example that came up in
+        <a href="a-guided-tour.html">Chapter 1, <i>A Guided Tour</i></a>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">abs_diff</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="n">abs</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">abs_diff</span> <span class="mi">3</span> <span class="mi">4</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div><p id="idp7089600">
+        You may find the type signature of <code>abs_diff</code>
+        with all of its arrows a little hard to parse. To understand
+        what's going on, let's rewrite <code>abs_diff</code> in an
+        equivalent form, using the <code>fun</code> keyword:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">abs_diff</span> <span class="o">=</span>
+    <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">fun</span> <span class="n">y</span> <span class="o">-&gt;</span> <span class="n">abs</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="o">)));;</span>
+<span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7093072">
+        This rewrite makes it explicit that <code>abs_diff</code>
+        is actually a function of one argument that returns another
+        function of one argument, which itself returns the final
+        computation. Because the functions are nested, the inner
+        expression <code>abs (x - y)</code> has access to both
+        <code>x</code>, which was captured by the first function
+        application, and <code>y</code>, which was captured by the
+        second one.
+      </p><p id="idp7096272">
+        This style of function is called a <span><em>curried</em></span>
+        function. (Currying is named after Haskell Curry, a famous
+        logician who had a significant impact on the design and theory
+        of programming languages.) The key to interpreting the type
+        signature of a curried function is the observation that
+        <code>-&gt;</code> is right-associative. The type
+        signature of <code>abs_diff</code> can therefore be
+        parenthesized as follows. This doesn't change the meaning of the
+        signature, but it makes it easier to see how the currying fits
+        in.
+      </p><div class="highlight"><pre><span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span>
+</pre></div><p id="idp7099632">
+        Currying is more than just a theoretical curiosity. You can make
+        use of currying to specialize a function by feeding in some of
+        the arguments. Here's an example where we create a specialized
+        version of <code>abs_diff</code> that measures the
+        distance of a given number from <code>3</code>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">dist_from_3</span> <span class="o">=</span> <span class="n">abs_diff</span> <span class="mi">3</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">dist_from_3</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">dist_from_3</span> <span class="mi">8</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="o">#</span> <span class="n">dist_from_3</span> <span class="o">(-</span><span class="mi">1</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div><p id="idp7102848">
+        The practice of applying some of the arguments of a curried
+        function to get a new function is called <span><em>partial
+        application</em></span>.
+      </p><p id="idp7103744">
+        Note that the <code>fun</code> keyword supports its own
+        syntactic sugar for currying, so we could also have written
+        <code>abs_diff</code> as follows.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">abs_diff</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="n">y</span> <span class="o">-&gt;</span> <span class="n">abs</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="o">));;</span>
+</pre></div><p id="idp7106432">
+        You might worry that curried functions are terribly expensive,
+        but this is not the case. In OCaml, there is no penalty for
+        calling a curried function with all of its arguments. (Partial
+        application, unsurprisingly, does have a small extra cost.)
+      </p><p id="idp7107120">
+        Currying is not the only way of writing a multi-argument
+        function in OCaml. It's also possible to use the different arms
+        of a tuple as different arguments. So, we could write:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">abs_diff</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="o">)</span> <span class="o">=</span> <span class="n">abs</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">abs_diff</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div><p id="idp7108736">
+        OCaml handles this calling convention efficiently as well. In
+        particular it does not generally have to allocate a tuple just
+        for the purpose of sending arguments to a tuple-style function.
+      </p><p id="idp7109360">
+        There are small tradeoffs between these two approaches, but most
+        of the time, one should stick to currying, since it's the
+        default style in the OCaml world.
+      </p></section><section><h1 id="recursive-functions">Recursive functions</h1><p id="idp7110960">
+        A function is <span><em>recursive</em></span> if it refers to
+        itself in its definition. Recursion is important in any
+        programming language, but is particularly important in
+        functional languages.
+      </p><p id="idp7111920">
+        In order to define a recursive function, you need to mark the
+        let binding as recursive with the <code>rec</code>
+        keyword, as shown in this example:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">find_first_stutter</span> <span class="o">=</span> <span class="k">function</span>
+     <span class="o">|</span> <span class="bp">[]</span> <span class="o">|</span> <span class="o">[_]</span> <span class="o">-&gt;</span>
+       <span class="c">(* only zero or one elements, so no repeats *)</span>
+       <span class="nc">None</span>
+     <span class="o">|</span> <span class="n">x</span> <span class="o">::</span> <span class="n">y</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span>
+       <span class="k">if</span> <span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="k">then</span> <span class="nc">Some</span> <span class="n">x</span> <span class="k">else</span> <span class="n">find_first_stutter</span> <span class="o">(</span><span class="n">y</span><span class="o">::</span><span class="n">tl</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">find_first_stutter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7114352">
+        We can also define multiple mutually recursive values by using
+        <code>let rec</code> and <code>and</code> together,
+        as in this (gratuitously inefficient) example.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">is_even</span> <span class="n">x</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">true</span> <span class="k">else</span> <span class="n">is_odd</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+  <span class="ow">and</span> <span class="n">is_odd</span> <span class="n">x</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">false</span> <span class="k">else</span> <span class="n">is_even</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+ <span class="o">;;</span>
+<span class="k">val</span> <span class="n">is_even</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">is_odd</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">is_even</span> <span class="o">[</span><span class="mi">0</span><span class="o">;</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">List</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">[</span><span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">]</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">is_odd</span> <span class="o">[</span><span class="mi">0</span><span class="o">;</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">List</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">[</span><span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">]</span>
+</pre></div><p id="idp7118080">
+        Note that in the above example, we take advantage of the fact
+        that the right hand side of <code>||</code> is evaluated
+        lazily, only being executed if the left hand side evaluates to
+        false.
+      </p></section><section><h1 id="prefix-and-infix-operators">Prefix and Infix operators</h1><p id="idp7120352">
+        So far, we've seen examples of functions used in both prefix and
+        infix style:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Int</span><span class="p">.</span><span class="n">max</span> <span class="mi">3</span> <span class="mi">4</span><span class="o">;;</span>  <span class="c">(* prefix *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="o">#</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span><span class="o">;;</span>        <span class="c">(* infix  *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
+</pre></div><p id="idp7121808">
+        You might not have thought of the second example as an ordinary
+        function, but it very much is. Infix operators like
+        <code>+</code> really only differ syntactically from other
+        functions. In fact, if we put parenthesis around an infix
+        operator, you can use it as an ordinary prefix function.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(+)</span> <span class="mi">3</span> <span class="mi">4</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:((+)</span> <span class="mi">3</span><span class="o">)</span> <span class="o">[</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">;</span><span class="mi">6</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">7</span><span class="o">;</span> <span class="mi">8</span><span class="o">;</span> <span class="mi">9</span><span class="o">]</span>
+</pre></div><p id="idp7124128">
+        In the second expression above, we've partially applied
+        <code>(+)</code> to gain a function that increments its
+        single argument by <code>3</code>, and then applied that
+        to all the elements of a list.
+      </p><p id="idp7126016">
+        A function is treated syntactically as an operator if the name
+        of that function is chosen from one of a specialized set of
+        identifiers. This set includes any identifier that is a sequence
+        of characters from the following set
+      </p><pre id="idp7126688">
+! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~
+</pre><p id="idp7127392">
+        or is one of a handful of pre-determined strings, including
+        <code>mod</code>, the modulus operator, and
+        <code>lsl</code>, for &quot;logical shift left&quot;, a
+        bit-shifting operation.
+      </p><p id="idp7129360">
+        We can define (or redefine) the meaning of an operator as
+        follows. Here's an example of a simple vector-addition operator
+        on int pairs.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(+!)</span> <span class="o">(</span><span class="n">x1</span><span class="o">,</span><span class="n">y1</span><span class="o">)</span> <span class="o">(</span><span class="n">x2</span><span class="o">,</span><span class="n">y2</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span><span class="o">,</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">y2</span><span class="o">)</span>
+<span class="k">val</span> <span class="o">(</span> <span class="o">+!</span> <span class="o">)</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">*</span><span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">2</span><span class="o">)</span> <span class="o">+!</span> <span class="o">(-</span><span class="mi">2</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">6</span><span class="o">)</span>
+</pre></div><p id="idp7130944">
+        The syntactic role of an operator work is determined by its
+        first character. This table describes how, and lists the
+        operators from highest to lowest precedence.
+      </p><table><thead><tr><th>
+                First character
+              </th><th>
+                Usage
+              </th></tr></thead><tbody><tr><td>
+<code>!</code> <code>?</code>
+<code>~</code>
+</td><td>
+                Prefix and unary
+              </td></tr><tr><td>
+<code>**</code>
+</td><td>
+                Infix, right associative
+              </td></tr><tr><td>
+<code>+</code> <code>-</code>
+</td><td>
+                Infix, left associative
+              </td></tr><tr><td>
+<code>@</code> <code>^</code>
+</td><td>
+                Infix, right associative
+              </td></tr><tr><td>
+<code>=</code> <code>&lt;</code>
+<code>&gt;</code> <code>|</code>
+<code>&amp;</code> <code>$</code>
+</td><td>
+                Infix, left associative
+              </td></tr></tbody></table><p id="idp7150816">
+        Here's an example of a very useful operator that's defined in
+        Core, following these rules. Here's the definition:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(|!)</span> <span class="n">x</span> <span class="n">f</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="o">(</span> <span class="o">|!</span> <span class="o">)</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7152320">
+        It's not quite obvious at first what the purpose of this
+        operator is: it just takes some value and a function, and
+        applies the function to the value. But its utility is clearer
+        when you see it in action. It works as a kind of sequencing
+        operator, similar in spirit to using pipe in the UNIX shell.
+        Consider, for example, the following code for printing out the
+        unique elements of your <code>PATH</code>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Sys</span><span class="p">.</span><span class="n">getenv_exn</span> <span class="s2">&quot;PATH&quot;</span>
+  <span class="o">|!</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">':'</span>
+  <span class="o">|!</span> <span class="nn">List</span><span class="p">.</span><span class="n">dedup</span> <span class="o">~</span><span class="n">compare</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">compare</span>
+  <span class="o">|!</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span>
+  <span class="o">;;</span>
+<span class="o">/</span><span class="n">bin</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
+</pre></div><p id="idp7155072">
+        An important part of what's happening here is partial
+        application. Normally, <code>List.iter</code> takes two
+        arguments: a function to be called on each element of the list,
+        and the list to iterate over. We can call
+        <code>List.iter</code> with all it's arguments:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span> <span class="o">[</span><span class="s2">&quot;Two&quot;</span><span class="o">;</span> <span class="s2">&quot;lines&quot;</span><span class="o">];;</span>
+<span class="nc">Two</span>
+<span class="n">lines</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
+</pre></div><p id="idp7158048">
+        Or, we can pass it just the function argument, leaving us with a
+        function for printing out a list of strings.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7159552">
+        It is this later form that we're using in the
+        <code>|!</code> pipeline above.
+      </p><p id="idp7160640">
+        Note that <code>|!</code> only works in the intended way
+        because it is left-associative. Indeed, let's see what happens
+        if we try using a right associative operator, like (^!).
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(^!)</span> <span class="o">=</span> <span class="o">(|!);;</span>
+<span class="k">val</span> <span class="o">(</span> <span class="o">^!</span> <span class="o">)</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="nn">Sys</span><span class="p">.</span><span class="n">getenv_exn</span> <span class="s2">&quot;PATH&quot;</span>
+  <span class="o">^!</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">':'</span>
+  <span class="o">^!</span> <span class="nn">List</span><span class="p">.</span><span class="n">dedup</span> <span class="o">~</span><span class="n">compare</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">compare</span>
+  <span class="o">^!</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span>
+  <span class="o">;;</span>
+        <span class="nc">Characters</span> <span class="mi">93</span><span class="o">-</span><span class="mi">119</span><span class="o">:</span>
+    <span class="o">^!</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span>
+       <span class="o">^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
+         <span class="o">(</span><span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span>
+</pre></div><p id="idp7163600">
+        The above type error is a little bewildering at first glance.
+        What's going on is that, because <code>^!</code> is right
+        associative, the operator is trying to feed the value
+        <code>List.dedup ~compare:String.compare</code> to the
+        function <code>List.iter ~f:print_endline</code>. But
+        <code>List.iter ~f:print_endline</code> expects a list of
+        strings as its input, not a function.
+      </p><p id="idp7166784">
+        The type error aside, this example highlights the importance of
+        choosing the operator you use with care, particularly with
+        respect to associativity.
+      </p></section><section><h1 id="declaring-functions-with-function">Declaring functions with
+      <code>function</code></h1><p id="idp7168864">
+        Another way to define a function is using the
+        <code>function</code> keyword. Instead of having syntactic
+        support for declaring curried functions,
+        <code>function</code> has built-in pattern matching.
+        Here's an example:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">some_or_zero</span> <span class="o">=</span> <span class="k">function</span>
+     <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+     <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">some_or_zero</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">some_or_zero</span> <span class="o">[</span><span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">None</span><span class="o">;</span> <span class="nc">Some</span> <span class="mi">4</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span> <span class="mi">0</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
+</pre></div><p id="idp7171920">
+        This is equivalent to combining a <code>fun</code> with
+        <code>match</code>, as follows:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">some_or_zero</span> <span class="n">num_opt</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">num_opt</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">some_or_zero</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7174576">
+        We can also combine the different styles of function declaration
+        together, as in the following example where we declare a two
+        argument function with a pattern-match on the second argument.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">some_or_default</span> <span class="n">default</span> <span class="o">=</span> <span class="k">function</span>
+     <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+     <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="n">default</span>
+  <span class="o">;;</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="n">some_or_default</span> <span class="mi">100</span><span class="o">)</span> <span class="o">[</span><span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">None</span><span class="o">;</span> <span class="nc">Some</span> <span class="mi">4</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">List</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span> <span class="mi">100</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
+</pre></div><p id="idp7176544">
+        Also, note the use of partial application to generate the
+        function passed to <code>List.map</code>
+</p></section><section><h1 id="labeled-arguments">Labeled Arguments</h1><p id="idp7178672">
+        Up until now, we've written functions where the arguments are
+        specified positionally, <span><em>i.e.</em></span>, by the order
+        in which the arguments are passed to the function. OCaml also
+        supports labeled arguments, which let you identify a function
+        argument by name. Labeled arguments are declared by putting a
+        tilde in front of the label.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">f</span> <span class="o">~</span><span class="n">foo</span><span class="o">:</span><span class="n">a</span> <span class="o">~</span><span class="n">bar</span><span class="o">:</span><span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">f</span> <span class="o">:</span> <span class="n">foo</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">bar</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7180816">
+        We can then provide a labeled argument using a similar
+        convention. As you can see, the arguments can be provided in any
+        order.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="n">f</span> <span class="o">~</span><span class="n">foo</span><span class="o">:</span><span class="mi">3</span> <span class="o">~</span><span class="n">bar</span><span class="o">:</span><span class="mi">10</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">13</span>
+<span class="o">#</span> <span class="n">f</span> <span class="o">~</span><span class="n">bar</span><span class="o">:</span><span class="mi">10</span> <span class="o">~</span><span class="n">foo</span><span class="o">:</span><span class="mi">3</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">13</span>
+</pre></div><p id="idp7182320">
+        OCaml also supports <span><em>label punning</em></span>, meaning
+        that you get to drop the text after the <code>:</code> if
+        the name of the label and the name of the variable being used
+        are the same. Label punning works in both function declaration
+        and function invocation, as shown in these examples:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">bar</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;;</span>
+<span class="o">#</span> <span class="n">f</span> <span class="o">~</span><span class="n">foo</span> <span class="o">~</span><span class="n">bar</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
+</pre></div><p id="idp7184960">
+        Labeled arguments are useful in a few different cases:
+      </p><ul><li><p id="idp7185936">
+            When defining a function with lots of arguments. Beyond a
+            certain number, arguments are easier to remember by name
+            than by position.
+          </p></li><li><p id="idp7186896">
+            When defining functions that have multiple arguments that
+            might get confused with each other. This is most at issue
+            when the arguments are of the same type. For example,
+            consider this signature for a function for extracting a
+            substring of another string.
+          </p><div class="highlight"><pre><span class="k">val</span> <span class="n">substring</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+</pre></div><p id="idp7188480">
+            where the two ints are the starting position and length of
+            the substring to extract. Labeled arguments can make this
+            signature clearer:
+          </p><div class="highlight"><pre><span class="k">val</span> <span class="n">substring</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">pos</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">len</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+</pre></div><p id="idp7190048">
+            This improves the readability of both the signature and of
+            client code that makes use of <code>substring</code>,
+            and makes it harder to accidentally swap the position and
+            the length.
+          </p></li><li><p id="idp7191696">
+            When the meaning of a particular argument is unclear from
+            the type alone. For example, consider a function for
+            creating a hashtable where the first argument is the initial
+            size of the table, and the second argument is a flag which,
+            when true, indicates that the hashtable will reduce its size
+            when the hashtable contains few elements. The following
+            signature doesn't give you much of a hint as to the meaning
+            of the arguments.
+          </p><div class="highlight"><pre><span class="k">val</span> <span class="n">create_hashtable</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span><span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtable</span><span class="p">.</span><span class="n">t</span>
+</pre></div><p id="idp7194112">
+            but with labeled arguments, we can make the intent much
+            clearer.
+          </p><div class="highlight"><pre><span class="k">val</span> <span class="n">create_hashtable</span> <span class="o">:</span> <span class="n">init_size</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">allow_shrinking</span><span class="o">:</span><span class="kt">bool</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span><span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtable</span><span class="p">.</span><span class="n">t</span>
+</pre></div></li><li><p id="idp7196080">
+            When you want flexibility on the order in which arguments
+            are passed. Consider a function like
+            <code>List.iter</code>, that takes two arguments: a
+            function, and a list of elements to call that function on. A
+            common pattern is to partially apply
+            <code>List.iter</code> by giving it just the function,
+            as in the following example from earlier in the chapter.
+            This requires putting the function argument first.
+          </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Sys</span><span class="p">.</span><span class="n">getenv_exn</span> <span class="s2">&quot;PATH&quot;</span>
+  <span class="o">|!</span> <span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">':'</span>
+  <span class="o">|!</span> <span class="nn">List</span><span class="p">.</span><span class="n">dedup</span> <span class="o">~</span><span class="n">compare</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">compare</span>
+  <span class="o">|!</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span>
+  <span class="o">;;</span>
+</pre></div><p id="idp7199392">
+            In other cases, you want to put the function argument
+            second. One common reason is readability. In particular, a
+            function that spans multiple lines is easiest to read when
+            it's the last argument provided.
+          </p></li></ul><section><h1 id="higher-order-functions-and-labels">Higher-order functions and labels</h1><p id="idp7201200">
+          One surprising gotcha with labeled arguments is that while
+          order doesn't matter when calling a function with labeled
+          arguments, it does matter in a higher-order context,
+          <span><em>e.g.</em></span>, when passing a function with
+          labeled arguments to another function. Here's an example.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">apply_to_tuple</span> <span class="n">f</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">second</span><span class="o">)</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">first</span> <span class="o">~</span><span class="n">second</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">apply_to_tuple</span> <span class="o">:</span> <span class="o">(</span><span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7203392">
+          Here, the definition of <code>apply_to_tuple</code> sets
+          up the expectation that its first argument is a function with
+          two labeled arguments, <code>first</code> and
+          <code>second</code>, listed in that order. We could have
+          defined <code>apply_to_tuple</code> differently to
+          change the order in which the labeled arguments were listed.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">apply_to_tuple</span> <span class="n">f</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">second</span><span class="o">)</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">second</span> <span class="o">~</span><span class="n">first</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">apply_to_tuple</span> <span class="o">:</span> <span class="o">(</span><span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7207664">
+          It turns out this order of listing matters. In particular, if
+          we define a function that has a different order
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">divide</span> <span class="o">~</span><span class="n">first</span> <span class="o">~</span><span class="n">second</span> <span class="o">=</span> <span class="n">first</span> <span class="o">/</span> <span class="n">second</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">divide</span> <span class="o">:</span> <span class="n">first</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7209232">
+          we'll find that it can't be passed in to
+          <code>apply_to_tuple</code>.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="n">apply_to_tuple</span> <span class="n">divide</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
+<span class="nc">Characters</span> <span class="mi">15</span><span class="o">-</span><span class="mi">21</span><span class="o">:</span>
+  <span class="n">apply_to_tuple</span> <span class="n">divide</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
+                 <span class="o">^^^^^^</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="n">first</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span>
+</pre></div><p id="idp7211504">
+          But, if we go back to the original definition of
+          <code>apply_to_tuple</code>, things will work smoothly.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">apply_to_tuple</span> <span class="n">f</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">second</span><span class="o">)</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">first</span> <span class="o">~</span><span class="n">second</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">apply_to_tuple</span> <span class="o">:</span> <span class="o">(</span><span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">apply_to_tuple</span> <span class="n">divide</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div><p id="idp7213664">
+          So, even though the order of labeled arguments usually doesn't
+          matter, it will sometimes bite you in higher-ordered contexts,
+          where you're doing things like passing functions as arguments
+          to other functions.
+        </p></section></section><section><h1 id="optional-arguments">Optional arguments</h1><p id="idp7215456">
+        An optional argument is like a labeled argument that the caller
+        can choose whether or not to provide. Optional arguments are
+        passed in using the same syntax as labeled arguments, and,
+        similarly to labeled arguments, optional arguments can be
+        provided in any order.
+      </p><p id="idp7216176">
+        Here's an example of a string concatenation function with an
+        optional separator.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">concat</span> <span class="o">?</span><span class="n">sep</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span>
+     <span class="k">let</span> <span class="n">sep</span> <span class="o">=</span> <span class="k">match</span> <span class="n">sep</span> <span class="k">with</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="s2">&quot;&quot;</span> <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="k">in</span>
+     <span class="n">x</span> <span class="o">^</span> <span class="n">sep</span> <span class="o">^</span> <span class="n">y</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">concat</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">concat</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span>             <span class="c">(* without the optional argument *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foobar&quot;</span>
+<span class="o">#</span> <span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;:&quot;</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span>    <span class="c">(* with the optional argument    *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foo:bar&quot;</span>
+</pre></div><p id="idp7217920">
+        Here, <code>?</code> is used to mark
+        <code>sep</code> as optional. And while the caller can
+        pass a value of type <code>string</code> for
+        <code>sep</code>, internally to the function,
+        <code>sep</code> is seen as a
+        <code>string option</code>, with <code>None</code>
+        appearing when <code>sep</code> is not provided by the
+        caller.
+      </p><p id="idp7223376">
+        In the above example, we had a bit of code to substitute in the
+        empty string when no argument was provided. This is a common
+        enough pattern that there's an explicit syntax for providing a
+        default value, which allows us to write
+        <code>concat</code> even more concisely.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">concat</span> <span class="o">?(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">)</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">^</span> <span class="n">sep</span> <span class="o">^</span> <span class="n">y</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">concat</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7225744">
+        Optional arguments are very useful, but they're also easy to
+        abuse. The key advantage of optional arguments is that they let
+        you write functions with multiple arguments that users can
+        ignore most of the time, only worrying about them when they
+        specifically want to invoke those options.
+      </p><p id="idp7226480">
+        The downside is that the caller may be unaware that there is a
+        choice to be made, and so may unknowingly (and wrongly) pick
+        that default behavior. Optional arguments really only make sense
+        when the extra concision of omitting the argument overwhelms the
+        corresponding loss of explicitness.
+      </p><p id="idp7227216">
+        This means that rarely used functions should not have optional
+        arguments. A good rule of thumb for optional arguments is that
+        you should never use an optional argument for internal functions
+        of a module, only for functions that are exposed as part of the
+        module's interface.
+      </p><section><h1 id="explicit-passing-of-an-optional-argument">Explicit passing of an optional argument</h1><p id="idp7228816">
+          Under the covers, a function with an optional argument
+          receives <code>None</code> when the caller doesn't
+          provide the argument, and <code>Some</code> when it
+          does. But the <code>Some</code> and
+          <code>None</code> are normally not explicitly passed in
+          by the caller.
+        </p><p id="idp7231968">
+          But sometimes, passing in <code>Some</code> or
+          <code>None</code> explicitly is exactly what you want.
+          OCaml lets you do this by using <code>?</code> instead
+          of <code>~</code> to mark the argument. Thus, the
+          following two lines are equivalent ways of specifying the
+          <code>sep</code> argument to concat.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;:&quot;</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span> <span class="c">(* provide the optional argument *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foo:bar&quot;</span>
+<span class="o">#</span> <span class="n">concat</span> <span class="o">?</span><span class="n">sep</span><span class="o">:(</span><span class="nc">Some</span> <span class="s2">&quot;:&quot;</span><span class="o">)</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span> <span class="c">(* pass an explicit [Some] *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foo:bar&quot;</span>
+</pre></div><p id="idp7237008">
+          And the following two lines are equivalent ways of calling
+          <code>concat</code> without specifying
+          <code>sep</code>.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="n">concat</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span> <span class="c">(* don't provide the optional argument *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foobar&quot;</span>
+<span class="o">#</span> <span class="n">concat</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="nc">None</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span> <span class="c">(* explicitly pass `None` *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foobar&quot;</span>
+</pre></div><p id="idp7239952">
+          One use-case for this is when you want to define a wrapper
+          function that mimics the optional arguments of the function
+          it's wrapping. For example, imagine we wanted to create a
+          function called <code>uppercase_concat</code>, which is
+          the same as <code>concat</code> except that it converts
+          the first string that it's passed to uppercase. We could write
+          the function as follows.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">uppercase_concat</span> <span class="o">?(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">)</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="n">concat</span> <span class="o">~</span><span class="n">sep</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">a</span><span class="o">)</span> <span class="n">b</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">uppercase_concat</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">uppercase_concat</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;FOObar&quot;</span>
+<span class="o">#</span> <span class="n">uppercase_concat</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;:&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;FOO:bar&quot;</span>
+</pre></div><p id="idp7243168">
+          In the way we've written it, we've been forced to separately
+          make the decision as to what the default separator is. Thus,
+          if we later change <code>concat</code>'s default
+          behavior, we'll need to remember to change
+          <code>uppercase_concat</code> to match it.
+        </p><p id="idp7245088">
+          Instead, we can have <code>uppercase_concat</code>
+          simply pass through the optional argument to
+          <code>concat</code> using the <code>?</code>
+          syntax.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">uppercase_concat</span> <span class="o">?</span><span class="n">sep</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="n">concat</span> <span class="o">?</span><span class="n">sep</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">a</span><span class="o">)</span> <span class="n">b</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">uppercase_concat</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7248528">
+          Now, if someone calls <code>uppercase_concat</code>
+          without an argument, an explicit <code>None</code> will
+          be passed to <code>concat</code>, leaving
+          <code>concat</code> to decide what the default behavior
+          should be.
+        </p></section><section><h1 id="inference-of-labeled-and-optional-arguments">Inference of labeled and optional arguments</h1><p id="idp7252496">
+<span><em>(yminsky: This is too abstract of an
+          example.)</em></span>
+</p><p id="idp7253344">
+          One subtle aspect of labeled and optional arguments is how
+          they are inferred by the type system. Consider the following
+          example for computing numerical derivatives of a function of
+          two dimensions. The function takes an argument
+          <code>delta</code> which determines the scale at which
+          to compute the derivative, values <code>x</code> and
+          <code>y</code> which determine which point to compute
+          the derivative at, and the function <code>f</code> whose
+          derivative is being computed. The function
+          <code>f</code> itself takes two labeled arguments
+          <code>x</code> and <code>y</code>.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">numeric_deriv</span> <span class="o">~</span><span class="n">delta</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">x'</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">y'</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">base</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">dx</span> <span class="o">=</span> <span class="o">(</span><span class="n">f</span> <span class="o">~</span><span class="n">x</span><span class="o">:</span><span class="n">x'</span> <span class="o">~</span><span class="n">y</span> <span class="o">-.</span> <span class="n">base</span><span class="o">)</span> <span class="o">/.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">dy</span> <span class="o">=</span> <span class="o">(</span><span class="n">f</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span><span class="o">:</span><span class="n">y'</span> <span class="o">-.</span> <span class="n">base</span><span class="o">)</span> <span class="o">/.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="o">(</span><span class="n">dx</span><span class="o">,</span><span class="n">dy</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">numeric_deriv</span> <span class="o">:</span>
+  <span class="n">delta</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span>
+  <span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7260064">
+          In principle, it's not obvious how the order of the arguments
+          to <code>f</code> should be chosen. Since optional
+          arguments can be passed in arbitrary order, it seems like it
+          could as well be
+          <code>y:float -&gt; x:float -&gt; float</code> as it is
+          <code>x:float -&gt; y:float -&gt; float</code>.
+        </p><p id="idp7262576">
+          Even worse, it would be perfectly consistent for
+          <code>f</code> to take an optional argument instead of a
+          labeled one, which could lead to this type signature for
+          <code>numeric_deriv</code>:
+        </p><div class="highlight"><pre><span class="k">val</span> <span class="n">numeric_deriv</span> <span class="o">:</span>
+  <span class="n">delta</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span>
+  <span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(?</span><span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7265472">
+          Since there are multiple plausible types to choose from, OCaml
+          needs some heuristic for choosing between them. The heuristic
+          the compiler uses is to prefer labels to options, and to
+          choose the order of arguments that shows up in the source
+          code.
+        </p><p id="idp7266176">
+          Note that these heuristics might at different points in the
+          source suggest different types. Here's a version of
+          <code>numeric_deriv</code> where the invocations of
+          <code>f</code> were changes so they list the arguments
+          in different orders.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">numeric_deriv</span> <span class="o">~</span><span class="n">delta</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">x'</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">y'</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">base</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">dx</span> <span class="o">=</span> <span class="o">(</span><span class="n">f</span> <span class="o">~</span><span class="n">y</span> <span class="o">~</span><span class="n">x</span><span class="o">:</span><span class="n">x'</span> <span class="o">-.</span> <span class="n">base</span><span class="o">)</span> <span class="o">/.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">dy</span> <span class="o">=</span> <span class="o">(</span><span class="n">f</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span><span class="o">:</span><span class="n">y'</span> <span class="o">-.</span> <span class="n">base</span><span class="o">)</span> <span class="o">/.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="o">(</span><span class="n">dx</span><span class="o">,</span><span class="n">dy</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="nc">Characters</span> <span class="mi">131</span><span class="o">-</span><span class="mi">132</span><span class="o">:</span>
+      <span class="k">let</span> <span class="n">dx</span> <span class="o">=</span> <span class="o">(</span><span class="n">f</span> <span class="o">~</span><span class="n">y</span> <span class="o">~</span><span class="n">x</span><span class="o">:</span><span class="n">x'</span> <span class="o">-.</span> <span class="n">base</span><span class="o">)</span> <span class="o">/.</span> <span class="n">delta</span> <span class="k">in</span>
+                <span class="o">^</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="k">function</span> <span class="n">is</span> <span class="n">applied</span> <span class="k">to</span> <span class="n">arguments</span>
+<span class="k">in</span> <span class="n">an</span> <span class="n">order</span> <span class="n">different</span> <span class="n">from</span> <span class="n">other</span> <span class="n">calls</span><span class="o">.</span>
+<span class="nc">This</span> <span class="n">is</span> <span class="n">only</span> <span class="n">allowed</span> <span class="k">when</span> <span class="n">the</span> <span class="n">real</span> <span class="k">type</span> <span class="n">is</span> <span class="n">known</span><span class="o">.</span>
+</pre></div><p id="idp7269392">
+          As suggested by the error message, we can get OCaml to accept
+          the fact that <code>f</code> is used with different
+          argument orders if we provide explicit type information. Thus,
+          we can write:
+        </p><p id="idp7270656">
+          Note that if we provide an explicit type constraint for
+          <code>g</code>, that constraint decides the question of
+          what <code>g</code>'s type is, and the error disappears.
+          In the following, we do this by providing an explicit type
+          annotation.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">numeric_deriv</span> <span class="o">~</span><span class="n">delta</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span> <span class="o">~(</span><span class="n">f</span><span class="o">:</span> <span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">x'</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">y'</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">base</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">dx</span> <span class="o">=</span> <span class="o">(</span><span class="n">f</span> <span class="o">~</span><span class="n">y</span> <span class="o">~</span><span class="n">x</span><span class="o">:</span><span class="n">x'</span> <span class="o">-.</span> <span class="n">base</span><span class="o">)</span> <span class="o">/.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">dy</span> <span class="o">=</span> <span class="o">(</span><span class="n">f</span> <span class="o">~</span><span class="n">x</span> <span class="o">~</span><span class="n">y</span><span class="o">:</span><span class="n">y'</span> <span class="o">-.</span> <span class="n">base</span><span class="o">)</span> <span class="o">/.</span> <span class="n">delta</span> <span class="k">in</span>
+    <span class="o">(</span><span class="n">dx</span><span class="o">,</span><span class="n">dy</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">numeric_deriv</span> <span class="o">:</span>
+  <span class="n">delta</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span>
+  <span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div></section><section><h1 id="optional-arguments-and-partial-application">Optional arguments and partial application</h1><p id="idp7275184">
+          Optional arguments can be tricky to think about in the
+          presence of partial application. We can of course partially
+          apply the optional argument itself:
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">colon_concat</span> <span class="o">=</span> <span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;:&quot;</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">colon_concat</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">colon_concat</span> <span class="s2">&quot;a&quot;</span> <span class="s2">&quot;b&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;a:b&quot;</span>
+</pre></div><p id="idp7276816">
+          But what happens if we partially apply just the first
+          argument?
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">prepend_pound</span> <span class="o">=</span> <span class="n">concat</span> <span class="s2">&quot;# &quot;</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">prepend_pound</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">prepend_pound</span> <span class="s2">&quot;a BASH comment&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;# a BASH comment&quot;</span>
+</pre></div><p id="idp7278384">
+          Note that the optional argument <code>?sep</code> has
+          now disappeared, or <span><em>erased</em></span>. So when does
+          OCaml decide to erase an optional argument?
+        </p><p id="idp7279872">
+          The rule is: an optional argument is erased as soon as the
+          first positional argument defined <span><em>after</em></span>
+          the optional argument is passed in. That explains the behavior
+          of <code>prepend_pound</code> above. But if we had
+          instead defined <code>concat</code> with the optional
+          argument in the second position:
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">concat</span> <span class="n">x</span> <span class="o">?(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">)</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">^</span> <span class="n">sep</span> <span class="o">^</span> <span class="n">y</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">concat</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7283248">
+          then application of the first argument would not cause the
+          optional argument to be erased.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">prepend_pound</span> <span class="o">=</span> <span class="n">concat</span> <span class="s2">&quot;# &quot;</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">prepend_pound</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">prepend_pound</span> <span class="s2">&quot;a BASH comment&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;# a BASH comment&quot;</span>
+<span class="o">#</span> <span class="n">prepend_pound</span> <span class="s2">&quot;a BASH comment&quot;</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;--- &quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;# --- a BASH comment&quot;</span>
+</pre></div><p id="idp7285072">
+          However, if all arguments to a function are presented at once,
+          then erasure of optional arguments isn't applied until all of
+          the arguments are passed in. This preserves our ability to
+          pass in optional arguments anywhere on the argument list.
+          Thus, we can write:
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="n">concat</span> <span class="s2">&quot;a&quot;</span> <span class="s2">&quot;b&quot;</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;=&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;a=b&quot;</span>
+</pre></div><p id="idp7286656">
+          An optional argument that doesn't have any following
+          positional arguments can't be erased at all, which leads to a
+          compiler warning.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">concat</span> <span class="n">x</span> <span class="n">y</span> <span class="o">?(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">)</span> <span class="o">=</span> <span class="n">x</span> <span class="o">^</span> <span class="n">sep</span> <span class="o">^</span> <span class="n">y</span> <span class="o">;;</span>
+<span class="nc">Characters</span> <span class="mi">15</span><span class="o">-</span><span class="mi">38</span><span class="o">:</span>
+  <span class="k">let</span> <span class="n">concat</span> <span class="n">x</span> <span class="n">y</span> <span class="o">?(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">)</span> <span class="o">=</span> <span class="n">x</span> <span class="o">^</span> <span class="n">sep</span> <span class="o">^</span> <span class="n">y</span> <span class="o">;;</span>
+                 <span class="o">^^^^^^^^^^^^^^^^^^^^^^^</span>
+<span class="nc">Warning</span> <span class="mi">16</span><span class="o">:</span> <span class="n">this</span> <span class="n">optional</span> <span class="n">argument</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">erased</span><span class="o">.</span>
+<span class="k">val</span> <span class="n">concat</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp7288576">
+          And indeed, when we provide the two positions arguments, the
+          <code>sep</code> argument is not erased, instead
+          returning a function that expects the <code>sep</code>
+          argument to be provided.
+        </p><div class="highlight"><pre><span class="o">#</span> <span class="n">concat</span> <span class="s2">&quot;a&quot;</span> <span class="s2">&quot;b&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div></section></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="a-guided-tour.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="records.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

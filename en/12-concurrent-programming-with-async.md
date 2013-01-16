@@ -35,8 +35,9 @@ val make_ddg_uri : query:string -> Uri.t
 val get_definition_from_json: string -> string option
 ```
 
-This code uses a couple of new libraries we haven't seen before.
-You will need to OPAM install `uri` and `yojson` (refer to chapter {{{installation}}} if you need help).  Let's see how to implement them first.
+This code uses a couple of new libraries we haven't seen before.  You will need
+to OPAM install `uri` and `yojson` (refer to [xref](#installation) if you need
+help).  Let's see how to implement them first.
 
 ### URI handling
 
@@ -339,10 +340,10 @@ thread joining functions above, such as `Deferred.both`.
 
 Show how we can use a monadic style to bind to the Github API and make simple JSON requests/responses.
 
-<sidebar><title>A Note on Portability</title>
+<note><title>A Note on Portability</title>
 
 Explain libev and why its needed here.
 
-</sidebar>
+</note>
 
 

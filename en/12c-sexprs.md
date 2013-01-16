@@ -1,19 +1,20 @@
-# Syntax Extensions
+# Data Serialization with S-Expressions
 
-_(yminsky: still very very rough)_
+Data serialization, _i.e._ reading and writing program data to a sequence
+of bytes, is an important and common programming task.  Sometimes you
+need to match someone else's data format (such as XML), and other times
+you just want to quickly dump some values to disk and read them
+back later.  To this end, OCaml comes with several techniques for
+data serialization depending on what your problem is.
 
-This chapter covers several extensions to OCaml's syntax that are
-distributed with Core.  Before diving into the details of the syntax
-extensions, let's take a small detour that will explain the motivation
-behind creating them in the first place.
+We'll start by introducing some features in Core that make it really easy to
+manipulate s-expressions and safe binary serialisers directly from OCaml types.
+After this section, we'll move onto interoperating with other third-party
+formats in [xref](#handling-json-data) and [xref](#xml-streams-and-trees).
 
-## Serialization with s-expressions
-
-Serialization, _i.e._ reading and writing program data to a sequence
-of bytes, is an important and common programming task.  To this end,
-Core comes with good support for _s-expressions_, which are a
-convenient general-purpose serialization format.  The type of an
-s-expression is as follows:
+S-expressions are nested paranthetical strings whose atomic values are strings.
+They were first popularized by the Lisp programming language in the 1960s, and
+have remained a simple way to encode data structures since then.
 
 ```ocaml
 module Sexp : sig
@@ -124,7 +125,7 @@ atoms that contain parenthesis or spaces themselves, backslash is the
 escape character, and semicolons are used to introduce comments.
 Thus, if you create the following file:
 
-```
+```scheme
 ;; foo.scm
 
 ((foo 3.3) ;; Shall I compare thee  to a summer's dream?
@@ -252,7 +253,7 @@ $ ./test_interval.native
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
 ```
 
-<note> <title>Preserving invariants</title>
+<sidebar> <title>Preserving invariants</title>
 
 One easy mistake to make when dealing with sexp converters is to
 ignore the fact that those converters can violate the invariants of
@@ -286,7 +287,7 @@ We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
 conversion fails.
 
-</note>
+</sidebar>
 
 ### Getting good error messages
 

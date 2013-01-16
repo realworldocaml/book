@@ -125,7 +125,7 @@ let render_separator widths =
 We need the extra two-characters for each entry to account for the one
 character of padding on each side of a string in the table.
 
-<sidebar>
+<note>
 <title>Performance of `String.concat` and `^`</title>
 
 In the above, we're using two different ways of concatenating
@@ -149,7 +149,7 @@ allocates one string of size 7, as well as a list of length 7.  At
 these small sizes, the differences don't amount to much, but for
 assembling of large strings, it can be a serious performance issue.
 
-</sidebar>
+</note>
 
 We can write a very similar piece of code for rendering the data in
 an ordinary row.

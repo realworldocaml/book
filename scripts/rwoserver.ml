@@ -73,7 +73,8 @@ module Comment = struct
       (m.milestone_number,(m.milestone_title, m.milestone_description))::acc
     ) [] ms
 
-  let all_milestones = List.fold_left (fun a (_,(n,_)) -> n :: a) [] milestones
+  let all_milestones =
+    List.rev (List.fold_left (fun a (_,(n,_)) -> n :: a) [] milestones )
 
   (* Generate the index.html *)
   let index =

@@ -44,7 +44,7 @@ On Debian Linux, you should install OCaml via binary packages, and then install
 the latest OPAM release from source.
 
 ```
-$ sudo apt-get install build-essential ocaml ocaml-native-compilers camlp4-extra git
+$ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra git
  tar -jxvf opam-<version>.tar.gz
 $ cd opam-<version>.tar.gz
 $ ./configure && make && sudo make install
@@ -64,8 +64,8 @@ user to install packages.
 
 ```
 $ opam init
-$ opam install utop async core_extra
-$ eval `opam config -env`
+$ opam install utop async core_extended
+$ eval `opam config env`
 ```
 
 This will initialise OPAM with the default package set from
