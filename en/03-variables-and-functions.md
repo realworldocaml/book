@@ -671,8 +671,9 @@ function that was created by feeding just the first argument to
 Up until now, we've written functions where the arguments are
 specified positionally, _i.e._, by the order in which the arguments
 are passed to the function.  OCaml also supports labeled arguments,
-which let you identify a function argument by name.  Labeled arguments
-are declared by putting a tilde in front of the label.
+which let you identify a function argument by name.  Labels are marked
+by a leading tilde, and a label (followed by a colon) are put in front
+of the variable to be labeled.
 
 ```ocaml
 # let f ~foo:a ~bar:b = a + b;;
