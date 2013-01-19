@@ -662,7 +662,9 @@ together, as in the following example where we declare a two argument
 ```
 
 Also, note the use of partial application to generate the function
-passed to `List.map`
+passed to `List.map`.  In other words, `some_or_default 100` is a
+function that was created by feeding just the first argument to
+`some_or_default`.
 
 ### Labeled Arguments ###
 
