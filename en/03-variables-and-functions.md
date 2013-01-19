@@ -530,6 +530,11 @@ First character    Usage
 
 -------------------------------------------------------------
 
+There's one important special case: `-` and `-.`, which are the
+integer and floating point subtraction operators, can act as both
+prefix operators (for negation) and infix operators (for subtraction),
+So, you both `-x` and `x - y` are meaningful expressions.
+
 Here's an example of a very useful operator that's defined in Core,
 following these rules.  Here's the definition:
 
