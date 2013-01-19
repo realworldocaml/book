@@ -23,15 +23,15 @@
  * @email{jyh@cs.caltech.edu}
  * @end[license]
  *)
-
-open Hashmap
+open Core
+open Hashmap_example
 
 module Exp : sig
   type t = private
-   | Num of int
-   | Var of string
-   | Plus of t * t
-   | Times of t * t
+  | Num of int
+  | Var of string
+  | Plus of t * t
+  | Times of t * t
 
   val num : int -> t
   val var : string -> t
@@ -39,17 +39,18 @@ module Exp : sig
   val times : t -> t -> t
 end = struct
   type t =
-   | Num of int
-   | Var of string
-   | Plus of t * t
-   | Times of t * t
+  | Num of int
+  | Var of string
+  | Plus of t * t
+  | Times of t * t
 
   let table = HashMap.create ()
   let merge exp =
-     try HashMap.find table ~key:exp with
-        Not_found ->
-           HashMap.add table ~key:exp ~data:exp;
-           exp
+    match HashMap.find table ~key:exp with
+    | Some x -> x
+    | None ->
+         HashMap.add table ~key:exp ~data:exp;
+         exp
 
   let num i = merge (Num i)
   let var s = merge (Var s)
@@ -59,16 +60,16 @@ end;;
 
 let rec eval env = function
  | Exp.Num i -> i
- | Exp.Var v -> HashMap.find env ~key:v
+ | Exp.Var v -> Option.value_exn (HashMap.find env ~key:v)
  | Exp.Plus (e1, e2) -> eval env e1 + eval env e2
  | Exp.Times (e1, e2) -> eval env e1 * eval env e2
 
 module WExp : sig
   type t = private
-   | Num of int
-   | Var of string
-   | Plus of int * t * t
-   | Times of int * t * t
+  | Num of int
+  | Var of string
+  | Plus of int * t * t
+  | Times of int * t * t
 
   val num : int -> t
   val var : string -> t
@@ -76,27 +77,27 @@ module WExp : sig
   val times : t -> t -> t
 end = struct
   type t =
-   | Num of int
-   | Var of string
-   | Plus of int * t * t
-   | Times of int * t * t
+  | Num of int
+  | Var of string
+  | Plus of int * t * t
+  | Times of int * t * t
 
   module HashExp = struct
     type exp = t
     type t = exp
     let equal e1 e2 =
       match e1, e2 with
-       | Num i1, Num i2 -> i1 = i2
-       | Var v1, Var v2 -> v1 = v2
-       | Plus (_, a1, a2), Plus (_, b1, b2)
-       | Times (_, a1, a2), Times (_, b1, b2) ->
-            a1 == b1 && a2 == b2
-       | _ -> false
+      | Num i1, Num i2 -> i1 = i2
+      | Var v1, Var v2 -> v1 = v2
+      | Plus (_, a1, a2), Plus (_, b1, b2)
+      | Times (_, a1, a2), Times (_, b1, b2) ->
+           a1 == b1 && a2 == b2
+      | _ -> false
     let hash = function
-     | Num i -> i lxor 0xabababab
-     | Var v -> (Hashtbl.hash v) lxor 0xcdcdcdcdc
-     | Plus (hash, _, _)
-     | Times (hash, _, _) -> hash
+    | Num i -> i lxor 0xabababab
+    | Var v -> (Hashtbl.hash v) lxor 0xcdcdcdcdc
+    | Plus (hash, _, _)
+    | Times (hash, _, _) -> hash
   end
 
   module WeakHash = Weak.Make (HashExp);;
@@ -114,8 +115,6 @@ end = struct
      let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0xdeadbeef in
      merge (Times (hash, e1, e2))
 end;;
-
-
 
 (*
  * -*-

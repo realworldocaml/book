@@ -24,7 +24,7 @@
  * @end[license]
  *)
 open Core.Std
-open Dlist
+open Dlist_example
 
 module HashMap : sig
   type ('a, 'b) t
@@ -59,6 +59,7 @@ end = struct
 end
 
 module IterableHashMap : sig
+  type 'a iterator = < has_value : bool; value : 'a; next : unit; remove : unit >
   type ('a, 'b) t
 
   val create : unit -> ('a, 'b) t
@@ -66,18 +67,19 @@ module IterableHashMap : sig
   val iterator : ('a, 'b) t -> ('a * 'b) iterator
   val find : ('a, 'b) t -> key:'a -> ('a * 'b) iterator
 end = struct
-  type ('a, 'b) t = ('a * 'b) DList.t array
+  type 'a iterator = < has_value : bool; value : 'a; next : unit; remove : unit >
+  type ('a, 'b) t = ('a * 'b) DListX.dlist array
 
   let num_buckets = 17
   let hash_bucket key = (Hashtbl.hash key) mod num_buckets
 
-  let create () = Array.init num_buckets (fun _ -> DList.create ())
+  let create () = Array.init num_buckets (fun _ -> DListX.create ())
 
   let add table ~key ~data =
     let index = hash_bucket key in
-    let it = DList.find table.(index) ~data:(key, data) in
+    let it = DListX.find_it table.(index) ~data:(key, data) in
     if it#has_value then it#remove;
-    DList.push_front table.(index) (key, data)
+    ignore (DListX.insert_first table.(index) (key, data))
 
   let make_iterator table index_ dlist_it_ =
     object (self)
@@ -94,17 +96,17 @@ end = struct
       method private normalize =
         while not dlist_it#has_value && index < num_buckets - 1 do
           index <- index + 1;
-          dlist_it <- DList.iterator table.(index)
+          dlist_it <- DListX.iterator table.(index)
         done
       initializer self#normalize
     end
 
   let iterator table =
-    make_iterator table 0 (DList.iterator table.(0))
+    make_iterator table 0 (DListX.iterator table.(0))
 
   let find table ~key =
     let index = hash_bucket key in
-    let it = DList.iterator table.(index) in
+    let it = DListX.iterator table.(index) in
     while it#has_value && fst it#value <> key do
       it#next
     done;
@@ -113,6 +115,32 @@ end = struct
     else
        make_iterator table num_buckets it
 end
+
+
+let () =
+  let module IHM = IterableHashMap in
+  let table = IHM.create () in
+  IHM.add table ~key:"small" ~data:1.00;
+  IHM.add table ~key:"medium" ~data:1.50;
+  IHM.add table ~key:"large" ~data:2.25;
+  IHM.add table ~key:"enormous" ~data:5.00;
+
+  let it = IHM.iterator table in
+  while it#has_value do
+    let size, price = it#value in
+    Printf.printf "Size %s is $%.02f\n" size price;
+    it#next
+  done;
+
+  let it = IHM.find table "enormous" in
+  it#remove;
+
+  let it = IHM.iterator table in
+  while it#has_value do
+    let size, price = it#value in
+    Printf.printf "Size %s is $%.02f\n" size price;
+    it#next
+  done;;
 
 (*
  * -*-

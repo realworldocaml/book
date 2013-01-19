@@ -22,16 +22,12 @@ OCAML_LIBS +=
     foreach(name => ..., $(OPAM_DIR_NAMES))
         value $(OPAM_DIR)/$(name)/$(name)
 
-#
-# Various options
-#
-# OCAMLFLAGS    +=
-# OCAMLCFLAGS   +=
-# OCAMLOPTFLAGS +=
-# OCAML_LINK_FLAGS +=
-# OCAML_BYTE_LINK_FLAGS +=
-# OCAML_NATIVE_LINK_FLAGS +=
-
 OCAMLFLAGS = -thread
 
-.DEFAULT: $(OCamlProgram dlist, dlist)
+OCamlProgram(dlist, dlist_example)
+OCamlProgram(hashmap, hashmap_example dlist_example)
+OCamlProgram(memo, memo_example hashmap_example dlist_example)
+OCamlProgram(hashcons, hashcons hashmap_example dlist_example)
+OCamlProgram(concurrent_hash_map, concurrent_hash_map)
+
+.DEFAULT: dlist hashmap memo hashcons concurrent_hash_map

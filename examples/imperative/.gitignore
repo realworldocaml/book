@@ -5,7 +5,9 @@ concurrent_hash_map
 concurrent_hash_map.opt
 dlist
 hash
+hashcons
 hashmap
 hashmap.opt
+memo
 race2
 tabulate
