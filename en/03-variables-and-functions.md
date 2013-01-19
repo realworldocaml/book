@@ -621,8 +621,9 @@ associativity.
 ### Declaring functions with `function` ###
 
 Another way to define a function is using the `function` keyword.
-Instead of having syntactic support for declaring curried functions,
-`function` has built-in pattern matching.  Here's an example:
+Instead of having syntactic support for declaring multi-argument
+(curried) functions, `function` has built-in pattern matching.  Here's
+an example:
 
 ```ocaml
 # let some_or_zero = function
@@ -647,15 +648,17 @@ val some_or_zero : int option -> int = <fun>
 
 We can also combine the different styles of function declaration
 together, as in the following example where we declare a two argument
-function with a pattern-match on the second argument.
+(curried) function with a pattern-match on the second argument.
 
 ```ocaml
 # let some_or_default default = function
      | Some x -> x
      | None -> default
   ;;
+# some_or_default 3 (Some 5);;
+- : int = 5
 # List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
-- : int Core.Std.List.t = [3; 100; 4]
+- : int list = [3; 100; 4]
 ```
 
 Also, note the use of partial application to generate the function
