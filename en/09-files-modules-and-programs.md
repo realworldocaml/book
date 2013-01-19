@@ -179,7 +179,7 @@ the list, meaning that the time complexity of processing a file is
 quadratic in the number of distinct lines in the file.
 
 We can fix this problem by replacing association lists with a more
-efficient datastructure.  To do that, we'll first factor out the key
+efficient data structure.  To do that, we'll first factor out the key
 functionality into a separate module with an explicit interface.  We
 can consider alternative (and more efficient) implementations once we
 have a clear interface to program against.

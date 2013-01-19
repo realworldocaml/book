@@ -523,7 +523,7 @@ important because it stops the `type t`'s from the different
 signatures from interfering with each other.
 
 Also note that we have been careful to override the sexp-converter
-here to ensure that the datastructures invariants are still maintained
+here to ensure that the data structures invariants are still maintained
 when reading in from an s-expression.
 
 ```ocaml
@@ -547,7 +547,7 @@ when reading in from an s-expression.
          ...
 
       (* put a wrapper round the auto-generated sexp_of_t to enforce
-         the invariants of the datastructure *)
+         the invariants of the data structure *)
       let t_of_sexp sexp =
         match t_of_sexp sexp with
         | Empty -> Empty
@@ -753,9 +753,9 @@ include Foldable.Extend(T)
 This pattern comes up quite a bit in Core, and is used to for a
 variety of purposes.
 
-- Adding comparison-based datastructures like maps and sets, based on
+- Adding comparison-based data structures like maps and sets, based on
   the `Comparable` interface.
-- Adding hash-based datastructures like hash sets and hash heaps.
+- Adding hash-based data structures like hash sets and hash heaps.
 - Support for so-called monadic libraries, like the ones discussed in
   [xref](#error-handling) and
   [xref](#concurrent-programming-with-async).  Here, the functor is
