@@ -238,7 +238,8 @@ the foundations.
 
 We'll start by looking at the most basic form of OCaml function, the
 _anonymous_ function.  Anonymous functions are declared using the
-`fun` keyword, as follows.
+`fun` keyword.  Here's a simple anonymous function for incrementing an
+integer.
 
 ```ocaml
 # (fun x -> x + 1);;
@@ -261,7 +262,7 @@ Or pass it to another function.
 - : int list = [2; 3; 4]
 ```
 
-Or even stuff them into a datastructure.
+Or even stuff them into a data structure.
 
 ```ocaml
 # let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
@@ -282,7 +283,7 @@ function applications.
 The key thing to understand is that functions are ordinary values in
 OCaml, and you can do everything with them that you'd do with an
 ordinary value, including passing them to and returning them from
-other functions and storing them in datastructures.  We even name
+other functions and storing them in data structures.  We even name
 functions in the same way that we name other values, by using a let
 binding.
 
@@ -310,8 +311,8 @@ entirely equivalent.
 
 Functions and let bindings have a lot to do with each other.  In some
 sense, you can think of the argument of a function as a variable being
-bound to its argument.  Indeed, the following two expressions are
-nearly equivalent:
+bound to the value passed by the caller.  Indeed, the following two
+expressions are nearly equivalent:
 
 ```ocaml
 # (fun x -> x + 1) 7;;
@@ -542,7 +543,9 @@ it just takes some value and a function, and applies the function to
 the value.  But its utility is clearer when you see it in action.  It
 works as a kind of sequencing operator, similar in spirit to using
 pipe in the UNIX shell.  Consider, for example, the following code for
-printing out the unique elements of your `PATH`.
+printing out the unique elements of your `PATH`.  Note that
+`List.dedup` below removes duplicates from a list by sorting the list
+using the provided comparison function.
 
 ```ocaml
 # Sys.getenv_exn "PATH"
