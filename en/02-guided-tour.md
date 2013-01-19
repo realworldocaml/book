@@ -834,14 +834,14 @@ _imperative_ programming, where computations are structured as
 sequences of instructions that operate by modifying state as they go.
 
 Functional code is the default in OCaml, with variable bindings and
-most datastructures being immutable.  But OCaml also has excellent
+most data structures being immutable.  But OCaml also has excellent
 support for imperative programming, including mutable data structures
 like arrays and hashtables and control-flow constructs like for and
 while loops.
 
 ### Arrays
 
-Perhaps the simplest mutable datastructure in OCaml is the array.
+Perhaps the simplest mutable data structure in OCaml is the array.
 Arrays in OCaml are very similar to arrays in other languages like C:
 they are fixed width, indexing starts at 0, and accessing or modifying
 an array element is a constant-time operation.  Arrays are more
@@ -866,10 +866,10 @@ counted starting at zero, element `.(2)` is the third element.
 
 ### Mutable record fields
 
-The array is an important mutable datastructure, but it's not the only
+The array is an important mutable data structure, but it's not the only
 one.  Records, which are immutable by default, can be declared with
 specific fields as being mutable.  Here's a small example of a
-datastructure for storing a running statistical summary of a
+data structure for storing a running statistical summary of a
 collection of numbers.  Here's the basic data structure:
 
 ```ocaml
