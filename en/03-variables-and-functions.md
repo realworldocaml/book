@@ -1011,9 +1011,10 @@ in an order different from other calls.
 This is only allowed when the real type is known.
 ```
 
-As suggested by the error message, we can get OCaml to accept the
-fact that `f` is used with different argument orders if we provide
-explicit type information.  Thus, we can write:
+As suggested by the error message, we can get OCaml to accept the fact
+that `f` is used with different argument orders if we provide explicit
+type information.  Thus, the following code compiles without error,
+due to the type annotation on `f`.
 
 ```ocaml
 # let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
@@ -1030,8 +1031,6 @@ val numeric_deriv :
   <fun>
 ```
 
-The explicit type constraint for `g` determine what `g`'s type is,
-which makes the errors go away.
 
 #### Optional arguments and partial application ###
 
