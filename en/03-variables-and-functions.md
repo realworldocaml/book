@@ -847,10 +847,10 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 - : string = "foo:bar"
 ```
 
-Here, `?` is used to mark `sep` as optional.  And while the caller can
-pass a value of type `string` for `sep`, internally to the function,
-`sep` is seen as a `string option`, with `None` appearing when `sep`
-is not provided by the caller.
+Here, `?` is used in the definition of the function to mark `sep` as
+optional.  And while the caller can pass a value of type `string` for
+`sep`, internally to the function, `sep` is seen as a `string option`,
+with `None` appearing when `sep` is not provided by the caller.
 
 In the above example, we had a bit of code to substitute in the empty
 string when no argument was provided.  This is a common enough pattern
@@ -875,10 +875,9 @@ concision of omitting the argument overwhelms the corresponding loss
 of explicitness.
 
 This means that rarely used functions should not have optional
-arguments.  A good rule of thumb for optional arguments is that you
-should never use an optional argument for internal functions of a
-module, only for functions that are exposed as part of the module's
-interface.
+arguments.  A good rule of thumb is not to use optional arguments for
+functions internal to a module, _i.e._, functions that are not
+included in the `mli`.
 
 #### Explicit passing of an optional argument ###
 
@@ -944,8 +943,6 @@ what the default behavior should be.
 
 #### Inference of labeled and optional arguments
 
-_(yminsky: This is too abstract of an example.)_
-
 One subtle aspect of labeled and optional arguments is how they are
 inferred by the type system.  Consider the following example for
 computing numerical derivatives of a function of two dimensions.  The
@@ -953,7 +950,8 @@ function takes an argument `delta` which determines the scale at which
 to compute the derivative, values `x` and `y` which determine which
 point to compute the derivative at, and the function `f` whose
 derivative is being computed.  The function `f` itself takes two
-labeled arguments `x` and `y`.
+labeled arguments `x` and `y`.  Note that you can use an apostrophe as
+part of a variable name, so `x'` and `y'` are just ordinary variables.
 
 ```ocaml
 # let numeric_deriv ~delta ~x ~y ~f =
