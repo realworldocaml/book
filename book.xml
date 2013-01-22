@@ -34,6 +34,7 @@
 
 
 
+
 <part label="I"><title>Basic Concepts</title><chapter id="prologue">
   <title>Prologue</title>
   <para>
@@ -6891,6 +6892,875 @@ include Foldable.Extend(T)
         </para>
       </listitem>
     </itemizedlist>
+  </sect1>
+</chapter><chapter id="files-modules-and-programs">
+  <title>Files, Modules and Programs</title>
+  <para>
+    We've so far experienced OCaml largely through the toplevel. As you
+    move from exercises to real-world programs, you'll need to leave the
+    toplevel behind and start building programs from files. Files are
+    more than just a convenient way to store and manage your code; in
+    OCaml, they also act as boundaries that divide your program into
+    conceptual units.
+  </para>
+  <para>
+    In this chapter, we'll show you how to build an OCaml program from a
+    collection of files, as well as the basics of working with modules
+    and module signatures.
+  </para>
+  <sect1 id="single-file-programs">
+    <title>Single File Programs</title>
+    <para>
+      We'll start with an example: a utility that reads lines from
+      <literal>stdin</literal>, computing a frequency count of the lines
+      that have been read in. At the end, the 10 lines with the highest
+      frequency counts are written out. Here's a simple implementation,
+      which we'll save as the file <literal>freq.ml</literal>. Note that
+      we're using several functions from the
+      <literal>List.Assoc</literal> module, which provides utility
+      functions for interacting with association lists,
+      <emphasis>i.e.</emphasis>, lists of key/value pairs.
+    </para>
+    <programlisting language="ocaml">
+(* freq.ml: basic implementation *)
+
+open Core.Std
+
+(* build_counts recursively builds up a mapping from lines to
+   number of occurrences of that line. *)
+let rec build_counts counts =
+  match In_channel.input_line stdin with
+  | None -&gt; counts (* EOF, so return the counts accumulated so far *)
+  | Some line -&gt;
+    (* get the number of times this line has been seen before,
+       inferring 0 if the line doesn't show up in [counts] *)
+    let count =
+      match List.Assoc.find counts line with
+      | None -&gt; 0
+      | Some x -&gt; x
+    in
+    (* increment the count for line by 1, and recurse *)
+    build_counts (List.Assoc.add counts line (count + 1))
+
+let () =
+  (* Compute the line counts *)
+  let counts = build_counts [] in
+  (* Sort the line counts in descending order of frequency *)
+  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -&gt; descending x y) counts  in
+  (* Print out the 10 highest frequency entries *)
+  List.iter (List.take 10 sorted_counts) ~f:(fun (line,count) -&gt;
+    printf &quot;%3d: %s\n&quot; count line)
+</programlisting>
+    <note><title>
+    Where is the main function?
+    </title>
+    <para>
+      Unlike C, programs in OCaml do not have a unique
+      <literal>main</literal> function. When an OCaml program is
+      evaluated, all the statements in the implementation files are
+      evaluated in order. These implementation files can contain
+      arbitrary expressions, not just function definitions. In this
+      example, the declaration starting with <literal>let () =</literal>
+      plays the role of the <literal>main</literal> declaration, kicking
+      off the processing. But really the entire file is evaluated at
+      startup, and so in some sense the full codebase is one big
+      <literal>main</literal> function.
+    </para>
+    </note>
+    <para>
+      If we weren't using Core or any other external libraries, we could
+      build the executable like this:
+    </para>
+    <programlisting>
+ocamlc freq.ml -o freq
+</programlisting>
+    <para>
+      But in this case, this command will fail with the error
+      <literal>Unbound module Core</literal>. We need a somewhat more
+      complex invocation to get Core linked in:
+    </para>
+    <programlisting>
+ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
+</programlisting>
+    <para>
+      Here we're using <literal>ocamlfind</literal>, a tool which itself
+      invokes other parts of the ocaml toolchain (in this case,
+      <literal>ocamlc</literal>) with the appropriate flags to link in
+      particular libraries and packages. Here,
+      <literal>-package core</literal> is asking
+      <literal>ocamlfind</literal> to link in the Core library,
+      <literal>-linkpkg</literal> is required to do the final linking in
+      of packages for building a runnable executable, and
+      <literal>-thread</literal> turns on threading support, which is
+      required for Core.
+    </para>
+    <para>
+      While this works well enough for a one-file project, more
+      complicated builds will require a tool to orchestrate the build.
+      One great tool for this task is <literal>ocamlbuild</literal>,
+      which is shipped with the OCaml compiler. We'll talk more about
+      <literal>ocamlbuild</literal> in
+      <xref linkend="packaging-and-build-systems"/>, but for
+      now, we'll just walk through the steps required for this simple
+      application. First, create a <literal>_tags</literal> file,
+      containing the following lines.
+    </para>
+    <programlisting>
+true:package(core),thread,annot,debugging
+</programlisting>
+    <para>
+      The purpose of the <literal>_tags</literal> file is to specify
+      which compilation options are required for which files. In this
+      case, we're telling <literal>ocamlbuild</literal> to link in the
+      <literal>core</literal> package and to turn on threading, output
+      of annotation files, and debugging support for all files (the
+      condition <literal>true</literal> causes the options to be applied
+      to every file in the project.)
+    </para>
+    <para>
+      We can then invoke <literal>ocamlbuild</literal> to build the
+      executable in question.
+    </para>
+    <programlisting>
+$ ocamlbuild -use-ocamlfind freq.byte
+</programlisting>
+    <para>
+      If we'd invoked <literal>ocamlbuild</literal> with a target of
+      <literal>freq.native</literal> instead of
+      <literal>freq.byte</literal>, we would have gotten native-code
+      instead.
+    </para>
+    <para>
+      We can now run the our program from the command-line. The
+      following line extracts strings from the
+      <literal>ocamlopt</literal> executable, and then reports the most
+      frequently occurring ones.
+    </para>
+    <programlisting>
+$ strings `which ocamlopt` | ./freq.byte
+ 13: movq
+ 10: cmpq
+  8: &quot;, &amp;
+  7: .globl
+  6: addq
+  6: leaq
+  5: &quot;, $
+  5: .long
+  5: .quad
+  4: &quot;, '
+</programlisting>
+    <note><title>
+    Byte-code vs native-code
+    </title>
+    <para>
+      OCaml ships with two compilers---the <literal>ocamlc</literal>
+      byte-code compiler, and the <literal>ocamlopt</literal>
+      native-code compiler. Programs compiled with
+      <literal>ocamlc</literal> are interpreted by a virtual machine,
+      while programs compiled with <literal>ocamlopt</literal> are
+      compiled to native machine code to be run on a specific operating
+      system and processor architecture.
+    </para>
+    <para>
+      Aside from performance, executables generated by the two compilers
+      have nearly identical behavior. There are a few things to be aware
+      of. First, the byte-code compiler can be used on more
+      architectures, and has some better tool support; in particular,
+      the OCaml debugger only works with byte-code. Also, the byte-code
+      compiler compiles faster than the native code compiler. Also, in
+      order to run a bytecode executable you typically need to have
+      OCaml installed on the system in question. That's not strictly
+      required, though, since you can a byte-code executable with an
+      embedded runtime, using the <literal>-custom</literal> compiler
+      flag.
+    </para>
+    <para>
+      As a general matter, production executables should usually be
+      built using the native-code compiler, but it sometimes makes sense
+      to use bytecode for development builds. And, of course, bytecode
+      makes sense when targeting a platform not supported by the native
+      code compiler.
+    </para>
+    </note>
+
+  </sect1>
+  <sect1 id="multi-file-programs-and-modules">
+    <title>Multi-file programs and modules</title>
+    <para>
+      Source files in OCaml are tied into the module system, with each
+      file compiling down into a module whose name is derived from the
+      name of the file. We've encountered modules before, for example,
+      when we used functions like <literal>find</literal> and
+      <literal>add</literal> from the <literal>List.Assoc</literal>
+      module. At it's simplest, you can think of a module as a
+      collection of definitions that are stored within a namespace.
+    </para>
+    <para>
+      Let's consider how we can use modules to refactor the
+      implementation of <literal>freq.ml</literal>. Remember that the
+      variable <literal>counts</literal> contains an association list
+      representing the counts of the lines seen so far. But updating an
+      association list takes time linear in the length of the list,
+      meaning that the time complexity of processing a file is quadratic
+      in the number of distinct lines in the file.
+    </para>
+    <para>
+      We can fix this problem by replacing association lists with a more
+      efficient data structure. To do that, we'll first factor out the
+      key functionality into a separate module with an explicit
+      interface. We can consider alternative (and more efficient)
+      implementations once we have a clear interface to program against.
+    </para>
+    <para>
+      We'll start by creating a file, <literal>counter.ml</literal>,
+      that contains the logic for maintaining the association list used
+      to describe the counts. The key function, called
+      <literal>touch</literal>, updates the association list with the
+      information that a given line should be added to the frequency
+      counts.
+    </para>
+    <programlisting language="ocaml">
+(* counter.ml: first version *)
+
+open Core.Std
+
+let touch t s =
+  let count =
+    match List.Assoc.find t s with
+    | None -&gt; 0
+    | Some x -&gt; x
+  in
+  List.Assoc.add t s (count + 1)
+</programlisting>
+    <para>
+      We can now rewrite <literal>freq.ml</literal> to use
+      <literal>Counter</literal>. Note that the resulting code can still
+      be built with <literal>build.sh</literal>, since
+      <literal>ocamlbuild</literal> will discover dependencies and
+      realize that <literal>counter.ml</literal> needs to be compiled.
+    </para>
+    <programlisting language="ocaml">
+(* freq.ml: using Counter *)
+
+open Core.Std
+
+let rec build_counts counts =
+  match In_channel.input_line stdin with
+  | None -&gt; counts
+  | Some line -&gt; build_counts (Counter.touch counts line)
+
+let () =
+  let counts = build_counts [] in
+  let sorted_counts = List.sort counts
+    ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  in
+  List.iter (List.take sorted_counts 10)
+    ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
+</programlisting>
+    <sect2 id="signatures-and-abstract-types">
+      <title>Signatures and Abstract Types</title>
+      <para>
+        While we've pushed some of the logic to the
+        <literal>Counter</literal> module, the code in
+        <literal>freq.ml</literal> can still depend on the details of
+        the implementation of <literal>Counter</literal>. Indeed, if you
+        look at the invocation of <literal>build_counts</literal>:
+      </para>
+      <programlisting language="ocaml">
+  let counts = build_counts [] in
+</programlisting>
+      <para>
+        you'll see that it depends on the fact that the empty set of
+        frequency counts is represented as an empty list. We'd like to
+        prevent this kind of dependency, so that we can change the
+        implementation of <literal>Counter</literal> without needing to
+        change client code like that in <literal>freq.ml</literal>.
+      </para>
+      <para>
+        The first step towards hiding the implementation details of
+        <literal>Counter</literal> is to create an interface file,
+        <literal>counter.mli</literal>, which controls how
+        <literal>counter</literal> is accessed. Let's start by writing
+        down a simple descriptive interface, <emphasis>i.e.</emphasis>,
+        an interface that describes what's currently available in
+        <literal>Counter</literal> without hiding anything. We'll use
+        <literal>val</literal> declarations in the
+        <literal>mli</literal>, which have the following syntax
+      </para>
+      <programlisting>
+val &lt;identifier&gt; : &lt;type&gt;
+</programlisting>
+      <para>
+        and are used to expose the existence of a given value in the
+        module. Here's an interface that describes the current contents
+        of <literal>Counter</literal>. We can save this as
+        <literal>counter.mli</literal> and compile, and the program will
+        build as before.
+      </para>
+      <programlisting language="ocaml">
+(* counter.mli: descriptive interface *)
+
+val touch : (string * int) list -&gt; string -&gt; (string * int) list
+</programlisting>
+      <para>
+        To actually hide the fact that frequency counts are represented
+        as association lists, we need to make the type of frequency
+        counts <emphasis>abstract</emphasis>. A type is abstract if its
+        name is exposed in the interface, but its definition is not.
+        Here's an abstract interface for <literal>Counter</literal>:
+      </para>
+      <programlisting language="ocaml">
+(* counter.mli: abstract interface *)
+
+open Core.Std
+
+type t
+
+val empty : t
+val to_list : t -&gt; (string * int) list
+val touch : t -&gt; string -&gt; t
+</programlisting>
+      <para>
+        Note that we needed to add <literal>empty</literal> and
+        <literal>to_list</literal> to <literal>Counter</literal>, since
+        otherwise, there would be no way to create a
+        <literal>Counter.t</literal> or get data out of one.
+      </para>
+      <para>
+        Here's a rewrite of <literal>counter.ml</literal> to match this
+        signature.
+      </para>
+      <programlisting language="ocaml">
+(* counter.ml: implementation matching abstract interface *)
+
+open Core.Std
+
+type t = (string * int) list
+
+let empty = []
+
+let to_list x = x
+
+let touch t s =
+  let count =
+    match List.Assoc.find t s with
+    | None -&gt; 0
+    | Some x -&gt; x
+  in
+  List.Assoc.add t s (count + 1)
+</programlisting>
+      <para>
+        If we now try to compile <literal>freq.ml</literal>, we'll get
+        the following error:
+      </para>
+      <programlisting>
+File &quot;freq.ml&quot;, line 11, characters 20-22:
+Error: This expression has type 'a list
+       but an expression was expected of type Counter.t
+</programlisting>
+      <para>
+        This is because <literal>freq.ml</literal> depends on the fact
+        that frequency counts are represented as association lists, a
+        fact that we've just hidden. We just need to fix the code to use
+        <literal>Counter.empty</literal> instead of
+        <literal>[]</literal> and <literal>Counter.to_list</literal> to
+        get the association list out at the end for processing and
+        printing.
+      </para>
+      <para>
+        Now we can turn to optimizing the implementation of
+        <literal>Counter</literal>. Here's an alternate and far more
+        efficient implementation, based on the <literal>Map</literal>
+        datastructure in Core.
+      </para>
+      <programlisting language="ocaml">
+(* counter.ml: efficient version *)
+
+open Core.Std
+
+type t = string Int.Map.t
+
+let empty = Map.empty
+
+let touch t s =
+  let count =
+    match Map.find t s with
+    | None -&gt; 0
+    | Some x -&gt; x
+  in
+  Map.add t s (count + 1)
+
+let to_list t = Map.to_alist t
+</programlisting>
+    </sect2>
+  </sect1>
+  <sect1 id="more-on-modules-and-signatures">
+    <title>More on modules and signatures</title>
+    <sect2 id="concrete-types-in-signatures">
+      <title>Concrete types in signatures</title>
+      <para>
+        In our frequency-count example, the module
+        <literal>Counter</literal> had an abstract type
+        <literal>Counter.t</literal> for representing a collection of
+        frequency counts. Sometimes, you'll want to make a type in your
+        interface <emphasis>concrete</emphasis>, by including the type
+        definition in the interface.
+      </para>
+      <para>
+        For example, imagine we wanted to add a function to
+        <literal>Counter</literal> for returning the line with the
+        median frequency count. If the number of lines is even, then
+        there is no precise median, so the function would return the two
+        lines before and after the median instead. We'll use a custom
+        type to represent the fact that there are two possible return
+        values. Here's a possible implementation.
+      </para>
+      <programlisting language="ocaml">
+type median = | Median of string
+              | Before_and_after of string * string
+
+let median t =
+  let sorted_strings = List.sort (Map.to_alist t)
+      ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  in
+  let len = List.length sorted_strings in
+  if len = 0 then failwith &quot;median: empty frequency count&quot;;
+  let nth n = fst (List.nth_exn sorted_strings n) in
+  if len mod 2 = 1
+  then Median (nth (len/2))
+  else Before_and_after (nth (len/2), nth (len/2 + 1));;
+</programlisting>
+      <para>
+        Now, to expose this usefully in the interface, we need to expose
+        both the function and the type <literal>median</literal> with
+        its definition. We'd do that by adding these lines to the
+        <literal>counter.mli</literal>:
+      </para>
+      <programlisting language="ocaml">
+type median = | Median of string
+              | Before_and_after of string * string
+
+val get_median : t -&gt; median
+</programlisting>
+      <para>
+        The decision of whether a given type should be abstract or
+        concrete is an important one. Abstract types give you more
+        control over how values are created and accessed, and makes it
+        easier to enforce invariants beyond the what's enforced by the
+        type itself; concrete types let you expose more detail and
+        structure to client code in a lightweight way. The right choice
+        depends very much on the context.
+      </para>
+    </sect2>
+    <sect2 id="the-include-directive">
+      <title>The <literal>include</literal> directive</title>
+      <para>
+        OCaml provides a number of tools for manipulating modules. One
+        particularly useful one is the <literal>include</literal>
+        directive, which is used to include the contents of one module
+        into another.
+      </para>
+      <para>
+        One natural application of <literal>include</literal> is to
+        create one module which is an extension of another one. For
+        example, imagine you wanted to build an extended version of the
+        <literal>List</literal> module, where you've added some
+        functionality not present in the module as distributed in Core.
+        We can do this easily using <literal>include</literal>:
+      </para>
+      <programlisting language="ocaml">
+(* ext_list.ml: an extended list module *)
+
+open Core.Std
+
+(* The new function we're going to add *)
+let rec intersperse list el =
+  match list with
+  | [] | [ _ ]   -&gt; list
+  | x :: y :: tl -&gt; x :: el :: intersperse (y::tl) el
+
+(* The remainder of the list module *)
+include List
+</programlisting>
+      <para>
+        Now, what about the interface of this new module? It turns out
+        that include works on the signature language as well, so we can
+        pull essentially the same trick to write an
+        <literal>mli</literal> for this new module. The only trick is
+        that we need to get our hands on the signature for the list
+        module, which can be done using
+        <literal>module type of</literal>.
+      </para>
+      <programlisting language="ocaml">
+(* ext_list.mli: an extended list module *)
+
+open Core.Std
+
+(* Include the interface of the list module from Core *)
+include (module type of List)
+
+(* Signature of function we're adding *)
+val intersperse : 'a list -&gt; 'a -&gt; 'a list
+</programlisting>
+      <para>
+        And we can now use <literal>Ext_list</literal> as a replacement
+        for <literal>List</literal>. If we want to use
+        <literal>Ext_list</literal> in preference to
+        <literal>List</literal> in our project, we can create a file of
+        common definitions:
+      </para>
+      <programlisting language="ocaml">
+(* common.ml *)
+
+module List = Ext_list
+</programlisting>
+      <para>
+        And if we then put <literal>open Common</literal> after
+        <literal>open Core.Std</literal> at the top of each file in our
+        project, then references to <literal>List</literal> will
+        automatically go to <literal>Ext_list</literal> instead.
+      </para>
+    </sect2>
+    <sect2 id="modules-within-a-file">
+      <title>Modules within a file</title>
+      <para>
+        Up until now, we've only considered modules that correspond to
+        files, like <literal>counter.ml</literal>. But modules (and
+        module signatures) can be nested inside other modules. As a
+        simple example, consider a program that needs to deal with some
+        class of identifier like a username. Rather than just keeping
+        usernames as strings, you might want to mint an abstract type,
+        so that the type-system will help you to not confuse usernames
+        with other string data that is floating around your program.
+      </para>
+      <para>
+        Here's how you might create such a type, within a module:
+      </para>
+      <programlisting language="ocaml">
+open Core.Std
+
+module Username : sig
+  type t
+  val of_string : string -&gt; t
+  val to_string : t -&gt; string
+end = struct
+  type t = string
+  let of_string x = x
+  let to_string x = x
+end
+</programlisting>
+      <para>
+        The basic structure of a module declaration like this is:
+      </para>
+      <programlisting language="ocaml">
+module &lt;name&gt; : &lt;signature&gt; = &lt;implementation&gt;
+</programlisting>
+      <para>
+        We could have written this slightly differently, by giving the
+        signature its own top-level <literal>module type</literal>
+        declaration, making it possible to in a lightweight way create
+        multiple distinct types with the same underlying implementation.
+      </para>
+      <programlisting language="ocaml">
+module type ID = sig
+  type t
+  val of_string : string -&gt; t
+  val to_string : t -&gt; string
+end
+
+module String_id = struct
+  type t = string
+  let of_string x = x
+  let to_string x = x
+end
+
+module Username : ID = String_id
+module Hostname : ID = String_id
+
+(* Now the following buggy code won't compile *)
+type session_info = { user: Username.t;
+                      host: Hostname.t;
+                      when_started: Time.t;
+                    }
+
+let sessions_have_same_user s1 s2 =
+  s1.user = s2.user
+</programlisting>
+      <para>
+        We can also combine this with the use of the include directive
+        to add some extra functionality to such a module. Thus, we could
+        have rewritten the definition of <literal>Hostname</literal>
+        above as follows to add a function
+        <literal>Hostname.mine</literal> that returns the hostname of
+        the present machine.
+      </para>
+      <programlisting language="ocaml">
+module Hostname : sig
+  include ID
+  val mine : unit -&gt; t
+end = struct
+  include String_id
+  let mine = Unix.gethostname
+end  
+</programlisting>
+    </sect2>
+    <sect2 id="opening-modules">
+      <title>Opening modules</title>
+      <para>
+        One useful primitive in OCaml's module language is the
+        <literal>open</literal> directive. We've seen that already in
+        the <literal>open Core.Std</literal> that has been at the top of
+        our source files.
+      </para>
+      <para>
+        The basic purpose of <literal>open</literal> is to extend the
+        namespaces that OCaml searches when trying to resolve an
+        identifier. Roughly, if you open a module <literal>M</literal>,
+        then every subsequent time you look for an identifier
+        <literal>foo</literal>, the module system will look in
+        <literal>M</literal> for a value named <literal>foo</literal>.
+        This is true for all kinds of identifiers, including types, type
+        constructors, values and modules.
+      </para>
+      <para>
+        <literal>open</literal> is essential when dealing with something
+        like a standard library, but it's generally good style to keep
+        opening of modules to a minimum. Opening a module is basically a
+        tradeoff between terseness and explicitness - the more modules
+        you open, the harder it is to look at an identifier and figure
+        out where it's defined.
+      </para>
+      <para>
+        Here's some general advice on how to deal with opens.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Opening modules at the top-level of a module should be done
+            quite sparingly, and generally only with modules that have
+            been specifically designed to be opened, like
+            <literal>Core.Std</literal> or
+            <literal>Option.Monad_infix</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            One alternative to local opens that makes your code terser
+            without giving up on explicitness is to locally rebind the
+            name of a module. So, instead of writing:
+          </para>
+          <programlisting language="ocaml">
+let print_median m =
+   match m with
+   | Counter.Median string -&gt; printf &quot;True median:\n   %s\n&quot;
+   | Counter.Before_and_after of before * after -&gt;
+     printf &quot;Before and after median:\n   %s\n   %s\n&quot; before after
+</programlisting>
+          <para>
+            ...you could write
+          </para>
+          <programlisting language="ocaml">
+let print_median m =
+   let module C = Counter in
+   match m with
+   | C.Median string -&gt; printf &quot;True median:\n   %s\n&quot;
+   | C.Before_and_after of before * after -&gt;
+     printf &quot;Before and after median:\n   %s\n   %s\n&quot; before after
+</programlisting>
+          <para>
+            Because the module name <literal>C</literal> only exists for
+            a short scope, it's easy to read and remember what
+            <literal>C</literal> stands for. Rebinding modules to very
+            short names at the top-level of your module is usually a
+            mistake.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            If you do need to do an open, it's better to do a
+            <emphasis>local open</emphasis>. There are two syntaxes for
+            local opens. For example, you can write:
+          </para>
+          <programlisting language="ocaml">
+let average x y =
+  let open Int64 in
+  x + y / of_int 2
+</programlisting>
+          <para>
+            In the above, <literal>of_int</literal> and the infix
+            operators are the ones from <literal>Int64</literal> module.
+          </para>
+          <para>
+            There's another even more lightweight syntax for local
+            opens, which is particularly useful for small expressions:
+          </para>
+          <programlisting language="ocaml">
+let average x y =
+  Int64.(x + y / of_int 2)
+</programlisting>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    <sect2 id="common-errors-with-modules">
+      <title>Common errors with modules</title>
+      <para>
+        When OCaml compiles a program with an <literal>ml</literal> and
+        an <literal>mli</literal>, it will complain if it detects a
+        mismatch between the two. Here are some of the common errors
+        you'll run into.
+      </para>
+      <sect3 id="type-mismatches">
+        <title>Type mismatches</title>
+        <para>
+          The simplest kind of error is where the type specified in the
+          signature does not match up with the type in the
+          implementation of the module. As an example, if we replace the
+          <literal>val</literal> declaration in
+          <literal>counter.mli</literal> by swapping the types of the
+          first two arguments:
+        </para>
+        <programlisting language="ocaml">
+val touch : string -&gt; t -&gt; t
+</programlisting>
+        <para>
+          and then try to compile <literal>Counter</literal> (by writing
+          <literal>ocamlbuild -use-ocamlfind counter.cmo</literal>),
+          we'll get the following error:
+        </para>
+        <programlisting>
+File &quot;counter.ml&quot;, line 1, characters 0-1:
+Error: The implementation counter.ml
+       does not match the interface counter.cmi:
+       Values do not match:
+         val touch :
+           ('a, int) Core.Std.Map.t -&gt; 'a -&gt; ('a, int) Core.Std.Map.t
+       is not included in
+         val touch : string -&gt; t -&gt; t
+</programlisting>
+        <para>
+          This error message is a bit intimidating at first, and it
+          takes a bit of thought to see where the first type, which is
+          the type of [touch] in the implementation, doesn't match the
+          second one, which is the type of [touch] in the interface. You
+          need to recognize that [t] is in fact a [Core.Std.Map.t], and
+          the problem is that in the first type, the first argument is a
+          map while the second is the key to that map, but the order is
+          swapped in the second type.
+        </para>
+      </sect3>
+      <sect3 id="missing-definitions">
+        <title>Missing definitions</title>
+        <para>
+          We might decide that we want a new function in
+          <literal>Counter</literal> for pulling out the frequency count
+          of a given string. We can update the <literal>mli</literal> by
+          adding the following line.
+        </para>
+        <programlisting language="ocaml">
+val count : t -&gt; string -&gt; int
+</programlisting>
+        <para>
+          Now, if we try to compile without actually adding the
+          implementation, we'll get this error:
+        </para>
+        <programlisting>
+File &quot;counter.ml&quot;, line 1, characters 0-1:
+Error: The implementation counter.ml
+       does not match the interface counter.cmi:
+       The field `count' is required but not provided
+</programlisting>
+        <para>
+          A missing type definition will lead to a similar error.
+        </para>
+      </sect3>
+      <sect3 id="type-definition-mismatches">
+        <title>Type definition mismatches</title>
+        <para>
+          Type definitions that show up in an <literal>mli</literal>
+          need to match up with corresponding definitions in the
+          <literal>ml</literal>. Consider again the example of the type
+          <literal>median</literal>. The order of the declaration of
+          variants matters to the OCaml compiler so, if the definition
+          of <literal>median</literal> in the implementation lists those
+          options in a different order:
+        </para>
+        <programlisting language="ocaml">
+type median = | Before_and_after of line * line
+              | Median of line
+</programlisting>
+        <para>
+          that will lead to a compilation error:
+        </para>
+        <programlisting>
+File &quot;counter.ml&quot;, line 1, characters 0-1:
+Error: The implementation counter.ml
+       does not match the interface counter.cmi:
+       Type declarations do not match:
+         type median = Before_and_after of string * string | Median of string
+       is not included in
+         type median = Median of string | Before_and_after of string * string
+       Their first fields have different names, Before_and_after and Median.
+</programlisting>
+        <para>
+          Order is similarly important in other parts of the signature,
+          including the order in which record fields are declared and
+          the order of arguments (including labeled and optional
+          arguments) to a function.
+        </para>
+      </sect3>
+      <sect3 id="cyclic-dependencies">
+        <title>Cyclic dependencies</title>
+        <para>
+          In most cases, OCaml doesn't allow circular dependencies,
+          <emphasis>i.e.</emphasis>, a collection of definitions that
+          all refer to each other. If you want to create such
+          definitions, you typically have to mark them specially. For
+          example, when defining a set of mutually recursive values, you
+          need to define them using <literal>let rec</literal> rather
+          than ordinary <literal>let</literal>.
+        </para>
+        <para>
+          The same is true at the module level. By default, circular
+          dependencies between modules is not allowed, and indeed,
+          circular dependencies among files is never allowed.
+        </para>
+        <para>
+          The simplest case of this is that a module can not directly
+          refer to itself (although definitions within a module can
+          refer to each other in the ordinary way). So, if we tried to
+          add a reference to <literal>Counter</literal> from within
+          <literal>counter.ml</literal>:
+        </para>
+        <programlisting language="ocaml">
+let singleton l = Counter.touch Counter.empty
+</programlisting>
+        <para>
+          then when we try to build, we'll get this error:
+        </para>
+        <programlisting>
+File &quot;counter.ml&quot;, line 17, characters 18-31:
+Error: Unbound module Counter
+Command exited with code 2.
+</programlisting>
+        <para>
+          The problem manifests in a different way if we create circular
+          references between files. We could create such a situation by
+          adding a reference to Freq from <literal>counter.ml</literal>,
+          <emphasis>e.g.</emphasis>, by adding the following line:
+        </para>
+        <programlisting language="ocaml">
+let build_counts = Freq.build_counts
+</programlisting>
+        <para>
+          In this case, <literal>ocamlbuild</literal> will notice the
+          error and complain:
+        </para>
+        <programlisting>
+Circular dependencies: &quot;freq.cmo&quot; already seen in
+  [ &quot;counter.cmo&quot;; &quot;freq.cmo&quot; ]
+</programlisting>
+      </sect3>
+    </sect2>
   </sect1>
 </chapter><chapter id="imperative-programming-1">
   <title>Imperative Programming</title>
