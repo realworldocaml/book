@@ -28,6 +28,7 @@ let from_yminsky =
   ; "fbsATcsDOTcornellDOTedu" (* fbs@cs.cornell.edu   *)
   ; "zdancewic"               (* stevez@cis.upenn.edu *)
   ; "bolinfest"               (* mbolin@gmail.com *)
+  ; "bnigito"                 (* bnigito@janestreet.com *)
   ]
 
 let from_email = 
