@@ -5119,7 +5119,8 @@ Error: This expression has type [&gt; `RGBA of int * int * int * int ]
           | `RGB of int * int * int ]
        The second variant type does not allow tag(s) `RGBA
 </programlisting>
-      <note><title>
+      <note>
+      <title>
       Polymorphic variants and catch-all cases
       </title>
       <para>
@@ -5157,9 +5158,11 @@ val is_positive_permissive :
 # is_positive_permissive (`Floot 3.5);;
 - : (bool, string) Result.t = Error &quot;Unknown number type&quot;
 </programlisting>
-      With ordinary variants, such a typo would have been caught as an
-      unknown tag. As a general matter, one should be wary about mixing
-      catch-all cases and polymorphic variants.
+      <para>
+        With ordinary variants, such a typo would have been caught as an
+        unknown tag. As a general matter, one should be wary about
+        mixing catch-all cases and polymorphic variants.
+      </para>
       </note>
       <para>
         Let's consider how we might turn our code into a proper library
