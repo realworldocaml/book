@@ -9,5 +9,6 @@ hashcons
 hashmap
 hashmap.opt
 memo
+ocamltop
 race2
 tabulate

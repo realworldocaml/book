@@ -9,14 +9,50 @@ things like numbers, words, images, etc., and we need a way to define
 _aggregates_ that bring together related values that represent some
 concept.
 
-Lists are one of the most common ways to aggregate data in OCaml; they
-are simple, and they are extensively supported by the standard
-library. 
+Lists are one of the most common ways to aggregate data in OCaml.  You can
+construct a list of values by enclosing them in square brackets, and separating
+the elements with semicolons.  The list elements must all have the same type.
 
-_(yminsky: I would point out that they are the most commonly used
-aggregate, rather than just that they're supported by the standard
-library.  Also, that way we avoid confusion in the sentence. between
-the standard library and Core.)_
+```ocaml
+# let l1 = ["Chicago"; "Paris"; "Tokyo"];;
+val l1 : string list = ["Chicago"; "Paris"; "Tokyo"]
+# List.nth l1 1;;
+- : string = "Paris"
+# List.nth l1 2;;
+- : string = "Tokyo"
+```
+
+The square bracker syntax is really just a shorthand.  There are really just two
+ways to construct a list value.
+
+* [] is the _empty_ list.
+* If `x` is a value and `l` is a list, then the expression `x :: l`
+  constructs a new list where the first element is `x`, and the rest
+  is `l`.  The value corresponding to `x :: l` is commonly called a
+  _cons_-cell (the term comes from Lisp, where _cons_ is short for
+  "constructor").
+
+The bracket syntax `["Chicago"; "Paris"; "Tokyo"]` is syntactic sugar for a list
+with 3 cons-cells, `"Chicago" :: "Paris" :: "Tokyo" :: []`.  Each cell has two
+parts: 1) a value, and 2) a pointer to the rest of the list.  The final pointer
+refers to the special value `[]` representing the empty list.
+
+TODO: IMAGE figures/04-list-01.svg
+
+```ocaml
+# let l2 = "Chicago" :: "Paris" :: "Tokyo" :: [];;
+val l1 : string list = ["Chicago"; "Paris"; "Tokyo"]
+# l2 = l1;;
+- : bool = true
+# List.hd l2;;
+- : string = "Chicago"
+# List.tl l2;;
+- : string list = ["Paris"; "Tokyo"]
+# List.hd (List.tl l2);;
+- : string = "Paris"
+# "New York" :: List.tl l2;;
+- : string list = ["New York"; "Paris"; "Tokyo"]
+```
 
 ### Example: pretty-printing a table
 
