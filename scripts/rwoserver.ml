@@ -82,7 +82,7 @@ module Comment = struct
     let tmpl = Core.Std.In_channel.read_all "index.html.in" in
     let ms = String.concat "\n" (
       List.map (fun (id,(name,descr)) ->
-        sprintf "<li><b><a href=\"%s/en/html/\">%s</a></b>: %s</li>" name name descr;
+        sprintf "<li><b><a href=\"%s/en/html/\">%s</a></b>: %s <br/><a href=\"%s/en/html/\"><img src=\"media/img/html_icon_small.gif\" /> <a href=\"%s/rwo-snapshot.pdf\"><img src=\"media/img/pdf_icon_small.gif\" /></a> </li>" name name descr name name;
       ) milestones)
     in
     Re_str.(global_replace (regexp_string "@MILESTONES@") ms tmpl )
