@@ -22,4 +22,4 @@
 ((part Advanced) (name "performance-tuning-and-profiling") (file "16b-tuning-and-profiling")                    (public false))
 ((part Advanced) (name "packaging-and-build-systems") (file "17-packaging-and-build-systems")                   (public false))
 ((part Advanced) (name "parsing-with-ocamllex-and-ocamlyacc") (file "18-parsing-with-ocamllex-and-ocamlyacc")   (public false))
-((part Advanced) (name "installation") (file "19-installing-ocaml")                                             (public true))
+((part Appendix) (name "installation") (file "19-installing-ocaml")                                             (public true))
