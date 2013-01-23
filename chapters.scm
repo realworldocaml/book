@@ -6,6 +6,7 @@
 ((part Basic) (name "variants") (file "06-variants")                                                            (public true))
 ((part Basic) (name "error-handling") (file "07-error-handling")                                                (public true))
 ((part Basic) (name "functors") (file "10-functors")                                                            (public true))
+((part Basic) (name "files-modules-and-programs") (file "09-files-modules-and-programs")                        (public true))
 ((part Basic) (name "imperative-programming-1") (file "08-imperative-programming")                              (public true))
 ((part Basic) (name "object-oriented-programming") (file "08a-objects")                                         (public true))
 ((part Practical) (name "data-serialization-with-s-expressions") (file "12c-sexprs")                            (public true))

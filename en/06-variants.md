@@ -745,7 +745,8 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
        The second variant type does not allow tag(s) `RGBA
 ```
 
-<note><title>Polymorphic variants and catch-all cases</title>
+<note>
+<title>Polymorphic variants and catch-all cases</title>
 
 As we saw with the definition of `is_positive`, a match statement can
 lead to the inference of an upper bound on a variant type, limiting
@@ -783,6 +784,7 @@ that uses `is_positive_permissive` passes in `Float` misspelled as
 With ordinary variants, such a typo would have been caught as an
 unknown tag.  As a general matter, one should be wary about
 mixing catch-all cases and polymorphic variants.
+
 </note>
 
 Let's consider how we might turn our code into a proper library with
