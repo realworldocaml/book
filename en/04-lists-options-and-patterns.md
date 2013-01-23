@@ -4,10 +4,9 @@ _(Note, this chapter is incomplete.  jyh is working on it.)_
 
 ## Lists
 
-As with any programming language, we need a way to represent _data_,
-things like numbers, words, images, etc., and we need a way to define
-_aggregates_ that bring together related values that represent some
-concept.
+As with any programming language, we need a way to represent _data_, things like
+numbers, words, images, etc., and we need a way to define _aggregates_ that
+bring together related values that represent some concept.
 
 Lists are one of the most common ways to aggregate data in OCaml.  You can
 construct a list of values by enclosing them in square brackets, and separating
@@ -17,12 +16,12 @@ the elements with semicolons.  The list elements must all have the same type.
 # let l1 = ["Chicago"; "Paris"; "Tokyo"];;
 val l1 : string list = ["Chicago"; "Paris"; "Tokyo"]
 # List.nth l1 1;;
-- : string = "Paris"
+- : string option = Some "Paris"
 # List.nth l1 2;;
-- : string = "Tokyo"
+- : string option = Some "Tokyo"
 ```
 
-The square bracker syntax is really just a shorthand.  There are really just two
+The square bracket syntax is really just a shorthand.  There are really just two
 ways to construct a list value.
 
 * [] is the _empty_ list.
@@ -34,23 +33,21 @@ ways to construct a list value.
 
 The bracket syntax `["Chicago"; "Paris"; "Tokyo"]` is syntactic sugar for a list
 with 3 cons-cells, `"Chicago" :: "Paris" :: "Tokyo" :: []`.  Each cell has two
-parts: 1) a value, and 2) a pointer to the rest of the list.  The final pointer
-refers to the special value `[]` representing the empty list.
+parts: a value, and a pointer to the rest of the list.  The final pointer refers
+to the special value `[]` representing the empty list.
 
 TODO: IMAGE figures/04-list-01.svg
 
 ```ocaml
 # let l2 = "Chicago" :: "Paris" :: "Tokyo" :: [];;
-val l1 : string list = ["Chicago"; "Paris"; "Tokyo"]
-# l2 = l1;;
-- : bool = true
+val l2 : string list = ["Chicago"; "Paris"; "Tokyo"]
 # List.hd l2;;
-- : string = "Chicago"
+- : string option = Some "Chicago"
 # List.tl l2;;
-- : string list = ["Paris"; "Tokyo"]
-# List.hd (List.tl l2);;
-- : string = "Paris"
-# "New York" :: List.tl l2;;
+- : string list option = Some ["Paris"; "Tokyo"]
+# List.hd (Option.value_exn (List.tl l2));;
+- : string option = Some "Paris"
+# "New York" :: (Option.value_exn (List.tl l2));;
 - : string list = ["New York"; "Paris"; "Tokyo"]
 ```
 

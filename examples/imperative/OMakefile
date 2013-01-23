@@ -32,26 +32,4 @@ OCamlProgram(memo, memo_example hashmap_example dlist_example)
 OCamlProgram(hashcons, hashcons hashmap_example dlist_example)
 OCamlProgram(concurrent_hash_map, concurrent_hash_map)
 
-OCAML_TOP_OTHER_LIBS[] = $(addsuffix .cma, $(OCAML_OTHER_LIBS))
-
-OCAML_TOP_NAMES[] =
-	res
-	fieldslib
-	oUnit
-	sexplib
-	bin_prot
-	variantslib
-	core
-
-OCAML_TOP_LIBS =
-    foreach(name => ..., $(OCAML_TOP_NAMES))
-        file($(OPAM_DIR)/$(name)/$(name).cma)
-
-OCAML_TOP_LIBS[] +=
-	$(OPAM_DIR)/findlib/findlib.cma
-	$(OPAM_DIR)/findlib/findlib_top.cma
-
-ocamltop: $(OCAML_TOP_LIBS)
-	ocamlmktop -thread -o $@ $(OCAML_TOP_OTHER_LIBS) $(OCAML_TOP_LIBS)
-
-.DEFAULT: dlist hashmap memo hashcons concurrent_hash_map ocamltop
+.DEFAULT: dlist hashmap memo hashcons concurrent_hash_map
