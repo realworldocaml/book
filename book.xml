@@ -17203,7 +17203,7 @@ immutable: 2.6186s (19073 minor collections)
   <title>Parsing with OCamllex and OCamlyacc</title>
   <para>
   </para>
-</chapter><chapter id="installation">
+</chapter></part><appendix id="installation">
   <title>Installation</title>
   <para>
     The easiest way to install OCaml is via the binary packages
@@ -17261,7 +17261,7 @@ $ brew install opam
       </para>
       <programlisting>
 $ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra git
- tar -jxvf opam-&lt;version&gt;.tar.gz
+$ tar -zxvf opam-&lt;version&gt;.tar.gz
 $ cd opam-&lt;version&gt;.tar.gz
 $ ./configure &amp;&amp; make &amp;&amp; sudo make install
 </programlisting>
@@ -17278,7 +17278,7 @@ $ ./configure &amp;&amp; make &amp;&amp; sudo make install
     <sect2 id="using-the-opam-top-level">
       <title>Using the OPAM top-level</title>
       <para>
-        All of the OPAM state is held in the <literal>.opam</literal>
+        All the OPAM state is held in the <literal>.opam</literal>
         directory in your home directory, including compiler
         installations. You should never need to switch to an admin user
         to install packages.
@@ -17315,7 +17315,7 @@ $ eval `opam config env`
       <programlisting>
 $ opam switch -list
 $ opam switch 4.00.1+short-types
-$ eval `opam config -env`
+$ eval `opam config env`
 $ opam install utop async_extra
 </programlisting>
       <para>
@@ -17379,4 +17379,4 @@ open Async.Std
       installation instructions and URLs.
     </para>
   </sect1>
-</chapter></part></book>
+</appendix></book>
