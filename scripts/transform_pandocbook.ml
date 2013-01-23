@@ -29,7 +29,7 @@ module Transform = struct
   (* Turn a <chapter> tag into an <appendix> tag *)
   let rewrite_chapter_to_appendix it =
     let rec aux = function
-    | Element ((("","chapter"),_), c) -> Element ((("","appendix"),[]),c)
+    | Element ((("","chapter"),i), c) -> Element ((("","appendix"),i),c)
     | Element (tag, children) ->
         Element (tag, List.map ~f:aux children)
     | x -> x
