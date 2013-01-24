@@ -4,6 +4,7 @@ type part =
   |Basic
   |Practical
   |Advanced
+  |Appendix
 and chapter = {
   part: part;
   name: string;
