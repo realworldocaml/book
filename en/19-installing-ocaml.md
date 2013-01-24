@@ -45,7 +45,7 @@ the latest OPAM release from source.
 
 ```
 $ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra git
- tar -jxvf opam-<version>.tar.gz
+$ tar -zxvf opam-<version>.tar.gz
 $ cd opam-<version>.tar.gz
 $ ./configure && make && sudo make install
 ```
@@ -58,7 +58,7 @@ Investigate Protzenko's Windows installer.
 
 ### Using the OPAM top-level
 
-All of the OPAM state is held in the `.opam` directory in your home directory,
+All the OPAM state is held in the `.opam` directory in your home directory,
 including compiler installations. You should never need to switch to an admin
 user to install packages. 
 
@@ -86,7 +86,7 @@ in the top-level. You can switch it to by:
 ```
 $ opam switch -list
 $ opam switch 4.00.1+short-types
-$ eval `opam config -env`
+$ eval `opam config env`
 $ opam install utop async_extra
 ```
 
@@ -128,5 +128,3 @@ Eclipse plugins: which one is maintained?
 
 Package listings are obtained by adding *remotes* that provide package
 descriptions, installation instructions and URLs.
-
-

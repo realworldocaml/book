@@ -228,7 +228,7 @@ def process_locale_chapter_page_section(html_name, section):
     titlepage.extract()
     
     
-def render_locale_chapter_page(html_name, soup, navigation_list, args):
+def render_locale_chapter_page(html_name, chapter_tag, soup, navigation_list, args):
     """Processes a chaper page, returning a string of processed HTML."""
     logging.debug("Processing {} as a chapter page".format(html_name))
     # Get the title.
@@ -236,7 +236,7 @@ def render_locale_chapter_page(html_name, soup, navigation_list, args):
     # Get the part.
     part_html_name = find_required(html_name, soup, "link", attrs={"rel": "up"})["href"]
     # Find the chapter root element.
-    chapter_root = soup.find("div", "chapter")
+    chapter_root = soup.find("div", chapter_tag)
     # Strip out some unneccesary elements.
     [e.extract() for e in chapter_root.find_all("div", "titlepage", recursive=False)]
     [e.extract() for e in chapter_root.find_all("div", "toc", recursive=False)]
@@ -317,7 +317,9 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_li
     elif soup.find("div", "part"):
         locale_dst_html = render_locale_part_html(html_name, soup, navigation_list, args)
     elif soup.find("div", "chapter"):
-        locale_dst_html = render_locale_chapter_page(html_name, soup, navigation_list, args)
+        locale_dst_html = render_locale_chapter_page(html_name, "chapter", soup, navigation_list, args)
+    elif soup.find("div", "appendix"):
+        locale_dst_html = render_locale_chapter_page(html_name, "appendix", soup, navigation_list, args)
     else:
         panic("Unknown page type: {}".format(html_name))
     # Write the destination HTML to disc.

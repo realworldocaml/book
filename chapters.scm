@@ -6,6 +6,7 @@
 ((part Basic) (name "variants") (file "06-variants")                                                            (public true))
 ((part Basic) (name "error-handling") (file "07-error-handling")                                                (public true))
 ((part Basic) (name "functors") (file "10-functors")                                                            (public true))
+((part Basic) (name "files-modules-and-programs") (file "09-files-modules-and-programs")                        (public true))
 ((part Basic) (name "imperative-programming-1") (file "08-imperative-programming")                              (public true))
 ((part Basic) (name "object-oriented-programming") (file "08a-objects")                                         (public true))
 ((part Practical) (name "data-serialization-with-s-expressions") (file "12c-sexprs")                            (public true))
@@ -21,4 +22,4 @@
 ((part Advanced) (name "performance-tuning-and-profiling") (file "16b-tuning-and-profiling")                    (public false))
 ((part Advanced) (name "packaging-and-build-systems") (file "17-packaging-and-build-systems")                   (public false))
 ((part Advanced) (name "parsing-with-ocamllex-and-ocamlyacc") (file "18-parsing-with-ocamllex-and-ocamlyacc")   (public false))
-((part Advanced) (name "installation") (file "19-installing-ocaml")                                             (public true))
+((part Appendix) (name "installation") (file "19-installing-ocaml")                                             (public true))
