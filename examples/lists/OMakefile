@@ -1,0 +1,31 @@
+BYTE_ENABLED = true
+
+#
+# Include path
+#
+OPAM_DIR = $(dir $(HOME)/.opam/4.00.1+short-types/lib)
+OPAM_DIR_NAMES[] =
+	res
+	fieldslib
+	oUnit
+	sexplib
+	bin_prot
+	variantslib
+	core
+	async_core
+	async_extra
+	async_unix
+	async
+
+OCAMLINCLUDES += $(dir $(addprefix $(OPAM_DIR)/, $(OPAM_DIR_NAMES)))
+
+OCAML_OTHER_LIBS[] += unix threads nums bigarray
+OCAML_LIBS +=
+    foreach(name => ..., $(OPAM_DIR_NAMES))
+        value $(OPAM_DIR)/$(name)/$(name)
+
+OCAMLFLAGS = -thread
+
+OCamlProgram(match, match)
+
+.DEFAULT: match
