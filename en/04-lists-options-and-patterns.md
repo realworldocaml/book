@@ -73,16 +73,12 @@ val add1 : int list -> int list = <fun>
 - : int list = [6; 4; 8]
 ```
 
-Patterns are not limited to just one constructor.  They can be
-aribitrarily nested.  For example, if we want to extract the third element of a
-list, we can use a pattern `_ :: _ :: x :: _`.  The underscore `_` is a special
-pattern that matches (and ignores) anything.  The first two underscores match
-the first two elements of the list, the `x` matches the third element, and the
-final underscore matches the rest of the list.
-
-The pattern `_ :: _ :: x :: _` is not exhaustive, because it doesn't match lists
-with fewer than three elements.  For now, we'll include a second "wildcard"
-pattern, a single underscore `_`, that matches anything else.
+Patterns are not limited to just one constructor.  They can be aribitrarily
+nested.  For example, if we want to extract the third element of a list, we can
+use a pattern `_ :: _ :: x :: _`.  The underscore `_` is a special pattern that
+matches (and ignores) anything.  The first two underscores match the first two
+elements of the list, the `x` matches the third element, and the final
+underscore matches the rest of the list.
 
 ```ocaml
 # let third l =
@@ -95,6 +91,13 @@ val third : 'a list -> 'a option = <fun>
 # third ["A"; "B"];;
 - : string option = None
 ```
+
+The pattern `_ :: _ :: x :: _` is not exhaustive, because it doesn't match lists
+with fewer than three elements, so we have included a second "wildcard" pattern,
+a single underscore `_`, that matches anything else.  We're using the `option`
+type for the return value, where `Some x` means that the third element of
+the list was `x`, and `None` means that the list had fewer than three elements.
+We'll discuss options more in the next section.
 
 Patterns are matched in left-to-right order (or top-to-bottom, in this case), so
 the result is determined by the first pattern to match.  If we had listed the
@@ -204,9 +207,9 @@ val optional_default : default:'a -> 'a option -> 'a = <fun>
 ```
 
 One annoying thing about the use of options is that functions do not compose
-well.  For example, if we want the third element of a list, we might try to
-compose the `List.hd` and `List.tl` functions.  However, this doesn't work
-because the functions return options, not lists.
+directly.  For example, if we wanted to compute the third element of a list
+using the `List.hd` and `List.tl` functions, we might try to compose them like
+this.
 
 ```ocaml
 # let third l = List.hd (List.tl (List.tl l));;
@@ -217,20 +220,63 @@ Error: This expression has type 'a list option
        but an expression was expected of type 'b list
 ```
 
-We can use pattern matching to perform the composition, but the code is pretty
+Unfortunately, this doesn't work because the functions return options, not lists.  We
+can use pattern matching to perform the composition, but the code is pretty
 tedious.
 
 ```ocaml
+# let tedious_third l1 =
+    match List.tl l1 with
+    | None -> None
+    | Some l2 ->
+      match List.tl l2 with
+      | None -> None
+      | Some l3 ->
+        List.hd l3;;
+val tedious_third : 'a list -> 'a option = <fun>
+# tedious_third [7; 21; 12; 19];;
+- : int option = Some 12
+# tedious_third [1; 2];;
+- : int option = None
+```
 
-# let third l =
-  let (>>=) = Option.(>>=) in
-  Some l >>= List.tl >>= List.tl >>= List.hd;;
+One solution for abbreviating the code is to define a composition operator `v
+>>= f` that takes an option value `v`, performs the pattern match, and passes
+the value to function `f` if there is one. 
+
+```ocaml
+# let (>>=) v f =
+    match v with
+    | None -> None
+    | Some x -> f x;;
+val ( >>= ) : 'a option -> ('a -> 'b option) -> 'b option = <fun>
+# let third l = Some l >>= List.tl >>= List.tl >>= List.hd;;
 val third : 'a list -> 'a option = <fun>
-# third ["Chicago"; "Paris"; "Milan"];;
-- : string option = Some "Milan"
-# third ["New York"];;
-- : string option = None
+# third [7; 21; 12; 19];;
+- : int option = Some 12
+# third [7; 21];;
+- : int option = None
+```
 
+The operator `>>=` has infix syntax, and the expression `Some l >>= List.tl >>=
+List.tl >>= List.hd` should be read left-to-right: pass `Some l` to the
+`List.tl` function, then to another `List.tl`, then to `List.hd`.  Since `>>=`
+is an infix operator, the function definition uses parenthesis `(>>=)` to define
+the function in prefix form.
+
+All we have done here is to hoist the pattern matching into a separate function
+`>>=`, but the result has a convenient left-to-right sequential reading.  This
+is a common pattern in Core, captured by the `Monad.S` module signature.  In
+fact, The `Core.Std.Option` module already implements the `Monad.S` signature.
+A more conventional way to write the function would be to use function
+`Option.(>>=)` directly.
+
+```ocaml
+# let third l =
+    let (>>=) = Option.(>>=) in
+    Some l >>= List.tl >>= List.tl >>= List.hd;;
+val third : 'a list -> 'a option = <fun>
+```
 
 
 ### Example: pretty-printing a table

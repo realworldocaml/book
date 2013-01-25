@@ -68,6 +68,10 @@ let (>>=) v f =
 let third l =
   Some l >>= List.tl >>= List.tl >>= List.hd;;
 
+let third l =
+  let (>>=) = Option.(>>=) in
+  Some l >>= List.tl >>= List.tl >>= List.hd;;
+
 (*
  * -*-
  * Local Variables:
