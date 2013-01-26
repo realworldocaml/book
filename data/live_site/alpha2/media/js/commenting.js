@@ -55,12 +55,17 @@ define([
         $.each(issues, function(_, issue) {
             var article = $("<article/>").appendTo(container);
             var userURL = "https://github.com/" + issue.user.login;
+            var issueURL = "https://github.com/" + gitHub.getIssueURL(issue);
             $("<h1/>").append(
                 $("<a/>", {
                     href: userURL,
                     text: issue.user.login
                 }),
-                " commented " + formatDate(new Date(issue.created_at))
+                " commented " + formatDate(new Date(issue.created_at)) + "  ",
+                $("<a/>", {
+                    href: issueURL,
+                    html: "(github)"
+                })
             ).appendTo(article);
             var commentText = $("<p/>", {
                 html: $.trim(issue.body).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")
