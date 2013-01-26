@@ -4,6 +4,7 @@ type part =
 | Basic
 | Practical
 | Advanced
+| Appendix
 with sexp
 
 type chapter = {

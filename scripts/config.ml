@@ -28,6 +28,7 @@ let from_yminsky =
   ; "fbsATcsDOTcornellDOTedu" (* fbs@cs.cornell.edu   *)
   ; "zdancewic"               (* stevez@cis.upenn.edu *)
   ; "bolinfest"               (* mbolin@gmail.com *)
+  ; "bnigito"                 (* bnigito@janestreet.com *)
   ]
 
 let from_email = 
@@ -38,6 +39,8 @@ let from_email =
   ; "braibant"                (* Thomas Braibant <thomas.braibant@gmail.com> *)
   ; "xmonader"                (* Ahmed Youssef <xmonader@gmail.com> *)
   ; "gildor478"               (* Sylvain Le Gall <sylvain@le-gall.net> *)
+  ; "voila"                   (* manu delab <manu.delab@gmail.com> *)
+  ; "thadmeyer"               (* Thad Meyer <tmeyer@members.fsf.org> *)
 ]
 
 let internal_reviewers =
@@ -49,4 +52,5 @@ let external_reviewers =
 let allowed_users = function
   | "alpha1" -> internal_reviewers
   | "alpha2" -> external_reviewers
+  | "trunk"  -> authors
   |_ -> authors

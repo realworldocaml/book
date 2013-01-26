@@ -66,6 +66,7 @@ module Comment = struct
     let ms = Lwt_main.run (Github.Monad.run (
       Github.Milestone.for_repo ~user ~repo ()
     )) in
+    let ms = List.sort (fun a b -> Github_t.(Pervasives.compare a.milestone_due_on b.milestone_due_on)) ms in
     print_endline "Known milestones\n";
     List.fold_left (fun acc m ->
       let open Github_t in
@@ -81,7 +82,8 @@ module Comment = struct
     let tmpl = Core.Std.In_channel.read_all "index.html.in" in
     let ms = String.concat "\n" (
       List.map (fun (id,(name,descr)) ->
-        sprintf "<li><a href=\"%s/en/html/\">%s</a>: %s</li>" name name descr;
+        let pdf = if Sys.file_exists (docroot ^ "/" ^ name ^ "/rwo-snapshot.pdf") then sprintf "<a href=\"%s/rwo-snapshot.pdf\"><img src=\"media/img/pdf_icon_small.gif\" /></a>" name else "" in
+        sprintf "<li><b><a href=\"%s/en/html/\">%s</a></b>: %s <br/><a href=\"%s/en/html/\"><img src=\"media/img/html_icon_small.gif\" /> %s</li>" name name descr name pdf;
       ) milestones)
     in
     Re_str.(global_replace (regexp_string "@MILESTONES@") ms tmpl )

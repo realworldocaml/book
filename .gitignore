@@ -10,7 +10,6 @@
 *.omakedb.lock
 *.omc
 *.out
-*.pdf
 *.pyc
 *.pyo
 *.tmp
