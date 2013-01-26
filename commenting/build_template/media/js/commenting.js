@@ -110,6 +110,8 @@ define([
      * Initializes the commenting system.
      */
     function init() {
+        // If the milestone is trunk, then disable commenting.
+        if (gitHub.isTrunk()) return;
         // Check if we are authenticated.
         if (gitHub.isAuthenticated()) {
             // Load the list of GitHub issues.

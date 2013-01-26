@@ -25,7 +25,14 @@ define([
     function isAuthenticated() {
         return !!gitHubAccessToken;
     }
-    
+
+    /**
+     * Tests if the current milestone is the trunk.
+     */
+    function isTrunk() {
+        return (gitHubMilestone == "trunk");
+    }
+   
     function getOAuth2RedirectURL() {
         return "https://github.com/login/oauth/authorize?scope=public_repo&client_id=" + encodeURIComponent(gitHubClientId) + "&redirect_uri=" + encodeURIComponent(String(window.location));
     }
@@ -124,6 +131,7 @@ define([
     
     return {
         isAuthenticated: isAuthenticated,
+        isTrunk: isTrunk,
         getOAuth2RedirectURL: getOAuth2RedirectURL,
         getIssues: getIssues,
         createIssue: createIssue
