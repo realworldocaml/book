@@ -1,12 +1,15 @@
 open Core.Std
 
 type part =
-  |Basic
-  |Practical
-  |Advanced
-and chapter = {
+| Basic
+| Practical
+| Advanced
+with sexp
+
+type chapter = {
   part: part;
   name: string;
   file: string;
   public: bool;
+  note: string;
 } with sexp
