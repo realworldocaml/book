@@ -44,6 +44,14 @@
     white-space: nowrap;
 }
 
+.comment-action-open {
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+    color: #9A5555;
+    white-space: nowrap;
+}
+
 .comment-action:hover {
     text-decoration: none;
 }

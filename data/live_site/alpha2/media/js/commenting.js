@@ -123,12 +123,23 @@ define([
                             issues.push(issue);
                         }
                     });
+                    var num_open = 0;
+                    $.each(issues, function(_, issue) {
+                       if (issue.state == "open") num_open++;
+                    });
                     // Add in a button to initialize comments.
                     function getButtonText() {
-                        return issues.length + " comment" + (issues.length == 1 ? "" : "s");
+                        var t = issues.length + " comment" + (issues.length == 1 ? "" : "s");
+                        if (issues.length != num_open)
+                          t += " (" + num_open + " open)";
+                        return t;
                     }
+                    function getButtonClass() {
+                        if (num_open > 0) { return "comment-action-open"; }
+                        else { return "comment-action"; }
+                    } 
                     var button = $("<span/>", {
-                        "class": "comment-action",
+                        "class": getButtonClass(),
                         text: getButtonText()
                     }).appendTo(element).click(function() {
                         createOverlay(milestone, elementTag, issues, function(newIssue) {
