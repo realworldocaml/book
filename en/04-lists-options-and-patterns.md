@@ -278,8 +278,9 @@ A more conventional way to write the function would be to use function
 val third : 'a list -> 'a option = <fun>
 ```
 
+## Example: pretty-printing a table
 
-### Example: pretty-printing a table
+_(jyh: I'm revising the examples.  This section is temporary.)
 
 _(yminsky: I wonder if the whole example should go later in the
 section, after we've done more of the basis of lists in this
@@ -454,35 +455,6 @@ let render header rows =
      :: List.map rows ~f:(fun row -> render_row widths row)
     )
 ```
-
-## List basics
-
-_(yminsky: I wonder if this should come before the example.  The
-example kind of assumes a lot of information, some of which was given
-in the guided tour, and some of which wasn't.)_
-
-In the example, we see calls to `List` functions in the standard
-library, in particular `List.map`.  How does this all work?  To
-understand, we need to consider first how lists are _represented_
-internally, which follows from the type definition and the way lists
-are constructed.  Let's look at the constructors first.
-
-We have seen how square brackets can be used to construct a list of
-values, but there are really just two ways to construct a list value.
-
-* [] is the _empty_ list.
-* If `x` is a value and `l` is a list, then the expression `x :: l`
-  constructs a new list where the first element is `x`, and the rest
-  is `l`.  The value corresponding to `x :: l` is commonly called a
-  _cons_-cell (the term comes from Lisp, where _cons_ is short for
-  "constructor").
-
-The bracket syntax `[5; 3; 7]` is syntactic sugar for a list with 3
-cons-cells, `5 :: 3 :: 7 :: []`.  Each cell has two parts: 1) a value,
-and 2) a pointer to the rest of the list.  The final pointer refers to
-the special value `[]` representing the empty list.
-
-TODO: IMAGE figures/04-list-01.svg
 
 ## List performance
 
