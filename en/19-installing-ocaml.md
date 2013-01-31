@@ -56,7 +56,8 @@ On Debian Linux, you should install OCaml via binary packages, and then install
 the latest OPAM release from source.
 
 ```
-$ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra git
+$ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra
+$ sudo apt-get install git libpcre3-dev curl
 $ tar -zxvf opam-<version>.tar.gz
 $ cd opam-<version>.tar.gz
 $ ./configure && make && sudo make install
@@ -87,12 +88,26 @@ $ opam install utop async core_extended
 $ eval `opam config env`
 ```
 
-This will initialise OPAM with the default package set from
-`opam.ocamlpro.com`, and install the `utop` interactive top-level and the
-`Async` library.  OPAM figures out the minimal set of dependencies required,
-and installs those too.  The `eval` command is sets your `PATH` variable to
-point to the current active compiler, and you should add this to your shell
-`.profile` to run every time you open a new command shell.
+This will initialise OPAM with a default package set
+and install some packages to augment the OCaml distribution.
+
+The `utop` package is an interactive command-line interface to OCaml that has
+tab-completion, persistent history and integration with Emacs so that you can
+run it within your editing environment.  We use `utop` instead of the more
+spartan default OCaml top-level throughout the book.
+
+The other two packages are `async` and `core_extended`, which are libraries
+from the Jane Street Core standard library.  These will take a few minutes to
+compile on a modern machine (particularly `core_extended`) as they contain a
+large number of modules to help with day-to-day programming.  We use Core throughout
+the examples in this book.
+
+OPAM figures out the minimal set of dependencies required for thse packages
+and installs them too.  The `eval` command sets your `PATH` variable to point
+to the current active compiler, and you should add this to your local shell
+`.profile` to run every time you open a new command shell.  It won't affect
+any other commands, as OPAM makes sure to preserve any custom extensions you
+may already have to your `PATH` variable.
 
 ### Switching compiler versions
 
