@@ -42,6 +42,14 @@ The Perl-compatible Regular Expression library (PCRE) is used by the Core
 suite.  It's a commonly used library that you may already have installed for
 some other reason.
 
+Another popular package manager is [MacPorts](http://macports.org):
+
+```
+$ port install ocaml
+$ port install ocaml-pcre
+$ port install opam
+```
+
 #### Linux
 
 On Debian Linux, you should install OCaml via binary packages, and then install
