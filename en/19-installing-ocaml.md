@@ -62,11 +62,18 @@ $ cd opam-<version>.tar.gz
 $ ./configure && make && sudo make install
 ```
 
-On Fedora/RHEL...?
+*Note to reviewers:* The OPAM instructions will be simplified when integrated
+upstream into Debian and Fedora.  Until then, the source installation
+instructions above may require a few more packages, so please leave a comment
+with any amended instructions.
+
+Fedora/RHEL: TODO
 
 #### Windows
 
-Investigate Protzenko's Windows installer.
+Windows is not currently supported, although it is being worked on.  Until that's
+ready, we recommend using a virtual machine running Debian Linux on your local
+machine.
 
 ### Using the OPAM top-level
 
