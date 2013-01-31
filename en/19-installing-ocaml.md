@@ -30,13 +30,17 @@ copies of `ocamlfind` before installing OPAM, and use the OPAM version instead.
 
 #### MacOS X
 
-The easiest way to install OCaml on MacOS X is via the `homebrew` package
-manager, available from [http://github.com/mxcl/homebrew].
+The easiest way to install OCaml on MacOS X is via [Homebrew](http://github.com/mxcl/homebrew).
 
 ```
 $ brew install ocaml
+$ brew install pcre
 $ brew install opam
 ```
+
+The Perl-compatible Regular Expression library (PCRE) is used by the Core
+suite.  It's a commonly used library that you may already have installed for
+some other reason.
 
 #### Linux
 
