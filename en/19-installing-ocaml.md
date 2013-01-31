@@ -79,8 +79,10 @@ machine.
 ### Using the OPAM top-level
 
 All the OPAM state is held in the `.opam` directory in your home directory,
-including compiler installations. You should never need to switch to an admin
-user to install packages. 
+including compiler installations. On Linux and MacOS X, this will be the
+`~/.opam` directory.  You shouldn't switch to an admin user to install packages;
+if you run into problems, just delete the whole `.opam` directory and follow
+the installations instructions from the `opam init` stage again.
 
 ```
 $ opam init
