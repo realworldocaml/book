@@ -84,12 +84,13 @@ user to install packages.
 
 ```
 $ opam init
+$ opam switch 4.00.1+short-types
 $ opam install utop async core_extended
 $ eval `opam config env`
 ```
 
-This will initialise OPAM with a default package set
-and install some packages to augment the OCaml distribution.
+This will initialise OPAM with a default package set, and install some packages
+to augment the OCaml distribution.
 
 The `utop` package is an interactive command-line interface to OCaml that has
 tab-completion, persistent history and integration with Emacs so that you can
@@ -112,22 +113,23 @@ may already have to your `PATH` variable.
 ### Switching compiler versions
 
 The default compiler installed by OPAM uses the system OCaml installation. You
-can use `opam switch` to swap between different compiler versions, or experiment
-with a different set of libraries or new compiler versions. For instance, one
-of the alternate compilers is patched to simplify the types that are output
-in the top-level. You can switch it to by:
+can use `opam switch` to swap between different compiler versions, or
+experiment with a different set of libraries or new compiler versions. For
+instance, one of the alternate compilers is patched to simplify the types that
+are output in the top-level. You can switch it to by:
 
 ```
-$ opam switch -list
+$ opam switch list
 $ opam switch 4.00.1+short-types
 $ eval `opam config env`
-$ opam install utop async_extra
+$ opam install utop async
 ```
 
 The new compiler will be compiled and installed into
 `~/.opam/4.00.1+short-types` and the libraries will be tracked separately from
 your system installation.  You can have any number of compilers installed
-simultaneously, but only one can be active at any time.
+simultaneously, but only one can be active at any time.  You can find all the
+available compilers by running `opam switch list`.
 
 ## Editing Environment
 
@@ -148,13 +150,15 @@ open Core.Std
 open Async.Std
 ```
 
-TODO: the `.ocamlinit` handling in OPAM is being finalised and is tracked in [issue 185](https://github.com/OCamlPro/opam/issues/185).
+TODO: the `.ocamlinit` handling in OPAM is being finalised and is tracked in
+[issue 185](https://github.com/OCamlPro/opam/issues/185).
 
 ### Editors
 
 Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 
-Vim users can use the built-in style, and [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
+Vim users can use the built-in style, and
+[ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
 
 Eclipse plugins: which one is maintained?
 
