@@ -3,7 +3,7 @@ BYTE_ENABLED = true
 #
 # Include path
 #
-OPAM_DIR = $(dir $(HOME)/.opam/system/lib)
+OPAM_DIR = $(dir $(HOME)/.opam/4.00.1+short-types/lib)
 OPAM_DIR_NAMES[] =
 	res
 	fieldslib
@@ -26,10 +26,6 @@ OCAML_LIBS +=
 
 OCAMLFLAGS = -thread
 
-OCamlProgram(dlist, dlist_example)
-OCamlProgram(hashmap, hashmap_example dlist_example)
-OCamlProgram(memo, memo_example hashmap_example dlist_example)
-OCamlProgram(hashcons, hashcons hashmap_example dlist_example)
-OCamlProgram(concurrent_hash_map, concurrent_hash_map)
+OCamlProgram(match, match)
 
-.DEFAULT: dlist hashmap memo hashcons concurrent_hash_map
+.DEFAULT: match
