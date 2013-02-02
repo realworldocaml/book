@@ -1,21 +1,12 @@
-(*
- *
- * ----------------------------------------------------------------
- *
- * @begin[license]
- * Author: Jason Hickey
- * @email{jasonh@gmail.com}
- * @end[license]
- *)
+open Core.Std
 
-(* The text doesn't use modules, so use the typename "dlist" *)
 type 'a element =
   { value : 'a;
     mutable next : 'a element option;
     mutable previous : 'a element option
   }
 
-type 'a dlist = 'a element option ref
+type 'a t = 'a element option ref
 
 let create () = ref None
 let is_empty l = (!l = None)
@@ -27,13 +18,13 @@ let next elt = elt.next
 let previous elt = elt.previous
 
 let insert_first l value =
-  let elt = { previous = None; next = !l; value } in
+  let new_elt = { previous = None; next = !l; value } in
   begin match !l with
-  | Some old_first -> old_first.previous <- Some elt
+  | Some old_first -> old_first.previous <- Some new_elt
   | None -> ()
   end;
-  l := Some elt;
-  elt
+  l := Some new_elt;
+  new_elt
 
 let insert_after elt value =
   let new_elt = { value; previous = Some elt; next = elt.next } in
@@ -46,7 +37,7 @@ let insert_after elt value =
 
 let check_is_first_element l elt1 =
   match !l with
-  | Some elt2 when elt1 == elt2 -> ()
+  | Some elt2 when phys_equal elt1 elt2 -> ()
   | _ -> raise (Invalid_argument "element has already been removed")
 
 let remove l elt =
@@ -103,7 +94,7 @@ type 'a iterator =
   insert_after : 'a -> unit
                  >
 
-    let iterator (list : 'a dlist) : 'a iterator =
+    let iterator (list : 'a t) : 'a iterator =
       let current = ref !list in
 object
   method has_value = !current <> None
@@ -137,9 +128,9 @@ let find_it list ~data =
 let () =
   Printf.printf "\nDList2\n";
   let l = create () in
-  let _ = insert_first l 1 in
-  let _ = insert_first l 2 in
-  let _ = insert_first l 3 in
+  ignore (insert_first l 1);
+  ignore (insert_first l 2);
+  ignore (insert_first l 3);
   iter ~f:(Printf.printf "%d\n") l;
 
   let it = iterator l in
@@ -147,13 +138,3 @@ let () =
     Printf.printf "Item: %d\n" it#value;
     it#next
   done
-
-
-(*
- * -*-
- * Local Variables:
- * Fill-column: 100
- * End:
- * -*-
- * vim:ts=3:et:tw=100
- *)

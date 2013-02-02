@@ -1,164 +1,361 @@
-Imperative Programming
-================================================
+# Imperative Programming
 
-The OCaml programming language is _functional_, meaning that functions are
-first-class values that can be passed around like any other.  However, this
-doesn't mean that OCaml programs are _pure_.
+Most of the code shown so far in this book, and indeed, most OCaml
+code in general, is _pure_.  Pure code works without mutating the
+program's internal state, performing I/O, reading the clock, or in any
+other way interacting with changeable parts of the world.  Thus, a
+pure function behaves like a mathematical function, always returning
+the same results when given the same inputs.  _Imperative_ code, on
+the other hand, operates by side-effects that modify a program's
+internal state or interacts with the outside world, and so can have a
+different effect, and return different results, every time they're
+called.
 
-Pure functions behave like mathematical functions, which means that they
-always evaluate to the same result on the same arguments, without any
-side-effects on the state or input/output.  In pure programs, evaluation order
-may affect performance, but it doesn't affect correctness.  In contrast,
-_imperative_ programs operate through side-effects on the state (as well as
-input/output).  Imperative programs define sequences of commands for the
-computer to perform, and evaluation order is strict.
+Pure code is the default in OCaml, and for good reason --- it's
+generally easier to reason about, less error prone and more
+composeable.  But imperative code is of fundamental importance to any
+practical programming language because real-world tasks require that
+you interact with the outside world, whether by receiving a network
+packet or by writing data to a file.  Imperative programming can also
+be important for performance.  While pure code is quite efficient in
+OCaml, there are many algorithms that can only be implemented
+efficiently using imperative techniques.
 
-While the majority of code you write in OCaml may be pure, imperative
-programming can be used effectively.  The language includes assignment and
-mutable values like arrays and strings.  Evaluation order is strict and
-sequential.  In principle, you can port many imperative programs directly to
-OCaml.  If you find yourself using imperative features a lot, then you're
-probably not using OCaml to its fullest.  However, there are times when
-imperative programming is both appropriate and efficient, and OCaml shines at
-supporting programs with both functional and imperative aspects.
+OCaml offers a happy compromise here, making it easy and natural to
+program in a pure style, but also providing great support for
+imperative programming where you need it.  This chapter will walk you
+through OCaml's imperative features, and help you use them to their
+fullest.
 
-To illustrate imperative programming, let's start by implementing a hash table.
-Hash tables are an efficient way to implement imperative _dictionaries_, which
-implement a map from keys to values.  There are full-featured implementations of
-hash tables in Core as well as in the OCaml standard library.  For illustration,
-we'll construct just a basic dictionary using _open hashing_, where the hash
-table consists of an array of buckets, each of which contain a linked list of
-elements.  We'll use regular (pure) OCaml lists, and an array for the buckets.
+## A simple dictionary
+
+We'll walk through the implementation of a simple imperative
+dictionary, _i.e._, a mutable mapping from keys to values.  Both Core
+and OCaml's standard library provide multiple data structures for
+implementing such dictionaries, and for most real world tasks, you
+should use one of those.  But we'll walk through this nonetheless as a
+way of seeing OCaml's imperative constructs in action.
+
+We'll implement our dictionary as a hash table, based on an _open
+hashing_ scheme, which is to say it will be structured as an array of
+buckets, with each bucket containing a list of key/value pairs that
+have been hashed into that bucket.  For simplicity's sake, we'll use a
+fixed-length bucket array, though growing the bucket array as more
+elements are added would be necessary for a practical implementation.
+
+First, we'll write down the `mli` for our dictionary.
 
 ```ocaml
-module HashMap : sig
-  type ('a, 'b) t
+(* file: dictionary.mli *)
+open Core.Std
 
-  val create : unit -> ('a, 'b) t
-  val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val find : ('a, 'b) t -> key:'a -> 'b option
-  val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
-end = struct
-  type ('a, 'b) t = ('a * 'b) list array
+type ('a, 'b) t
 
-  let num_buckets = 17
-  let hash_bucket key = (Hashtbl.hash key) mod num_buckets
-
-  let create () = Array.create num_buckets []
-
-  let add table ~key ~data =
-    let index = hash_bucket key in
-    table.(index) <- (key, data) :: table.(index)
-
-  let find table ~key =
-    let rec find = function
-     | (k, d) :: t -> if k = key then Some d else find t
-     | [] -> None
-    in
-    find table.(hash_bucket key)
-
-  let iter table ~f =
-    for i = 0 to num_buckets - 1 do
-      List.iter table.(i) ~f:(fun (key, data) -> f ~key ~data)
-    done
-end
+val create : unit -> ('a, 'b) t
+val length : ('a, 'b) t -> int
+val add    : ('a, 'b) t -> key:'a -> data:'b -> unit
+val find   : ('a, 'b) t -> 'a -> 'b option
+val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
+val remove : ('a, 'b) t -> 'a -> unit
 ```
 
-The signature for the `HashMap` declares the type of dictionaries `('a, 'b) t`,
-with keys of type `'a` and associated values of type `'b`.  It also includes
-functions for add, removing, and enumerating entries in the dictionary.
+The type `('a, 'b) t` is used to represent a dictionary with keys of
+type `'a` and data of type `'b`.  The `mli` also includes a collection
+of helper functions.  Notice that a number of the functions, in
+particular, ones like `add` that modify the dictionary, return unit.
+This is typical of functions that act by side-effect.
 
-The table is implemented as an array of buckets (the array is fixed-size,
-in this example).  The OCaml runtime provides a builtin polymorphic hash
-function `Hashtbl.hash` that works for almost any value in OCaml, excluding
-functions and values from C libraries that live outside the heap.
+The implementation is shown below.  We'll walk through the
+implementation, function by function, and as we do so we'll walk
+through some of OCaml's imperative features.
 
-* The `create` function creates a new array where all buckets are empty.
+First, we'll define the basic data structure, which is a record with
+two fields.  The first field, `length` is a mutable record field.
+Records are immutable by default, but will be mutable when explicitly
+marked as such.  The second field, `buckets`, is itself immutable, but
+contains an array, which is itself a mutable data structure, as we'll
+see.
 
-* The `add` function uses the hash function to determine the appropriate bucket,
-  then adds a new key/value association to the bucket through an array
-  _assignment_ `table.(index) <- (key, data) :: table.(index)`, which _replaces_
-  the bucket with a new one where the new key/value pair is added to the front
-  of the list.
+```ocaml
+(* file: dictionary.ml *)
+open Core.Std
 
-* The `find` function performs a linear search through the appropriate bucket to
-  find the value associated with a key.
+type ('a, 'b) t = { mutable length: int;
+                    buckets: ('a * 'b) list array;
+                  }
+```
 
-* The `iter` function iterates through each of the elements in the buckets.
+This next piece of code uses the function `Hashtbl.hash` to compute a
+hash value for a key.  This function is a polymorphic hash function
+provided by the OCaml runtime, which works for almost any value in
+OCaml, excluding functions and values from C libraries that live
+outside the heap.
 
-## Imperative operations
+Also, we have the creation function which allocates the initial array,
+and the function `length` which simply reads the length from the
+corresponding record field.
 
-This example illustrates one of the mutating operations in OCaml: array element
-assignment.  There are a handful of other mutable data types.
+```ocaml
+let num_buckets = 17
+let hash_bucket key = (Hashtbl.hash key) mod num_buckets
 
-* Arrays.  Array elements can be assigned with the expression `array.(index) <-
-  expr`.  See the `Array` module for other imperative operations.  Bigarray
-  elements can be mutated with the syntax `bigarray.{index} <- expr`.
+let create () =
+  { length = 0;
+    buckets = Array.create ~len:num_buckets [];
+  }
 
-* Strings.  String elements can be mutated with the expression `string.[index]
-  <- char`.  See the `String` module for other imperative operations.
+let length t = t.length
+```
 
-* Record fields can be mutated with the expression `record.label <- expr`.  The
-  field `label` must be declared as `mutable` in the type definition for the
-  record.
-   
-* Object fields can be mutated with the expression `object.label <- expr`. The
-  field `label` must be declared as `mutable` in the object definition.
+The definition of the `iter` function, below, shows two different
+forms of iteration working in concert.  First, we use a `for` loop for
+iterating over the array of buckets.  Within that for loop, we iterate
+over the members of the bucket using `List.iter`.  For loops are a
+convenient bit of syntax (and one that is more familiar to imperative
+programmers), but they are not of fundamental importance to the
+language: we could just as well have implemented the outer loop using
+the `Array.iter`.
 
-Note that variables are not mutable.  Variables can refer to mutable data, but
-the binding of a variable cannot be changed.  For convenience, OCaml defines a
-type of "reference cell," which is a like a "box" where the contents can be
-mutated.
+It's worth noting that in an iteration function like `List.iter`, the
+function that is passed in is expected to return unit, because it is
+expected to operate by side effect.
+
+```ocaml
+let iter t ~f =
+  for i = 0 to Array.length t.buckets - 1 do
+    List.iter t.buckets.(i) ~f:(fun (key, data) -> f ~key ~data)
+  done
+```
+
+The following code shows how to add an element to the dictionary.
+This code is made complicated by the fact that we need to detect
+whether we are replacing an existing binding, or putting in a new one.
+The `bucket_has_key` function is used to answer this question.  We
+need to distinguish these cases because in one case, we need to
+increment `t.length`, and in the other we don't.
+
+In this code, you can see the arrow syntax that is used both for
+updating an element of an array (`array.(i) <- expr`) and for updating
+a record field (`record.field <- expression`).  In addition, we see
+the use of the semicolon to sequence the imperative operations that
+are the last two lines of the function.
+
+
+```ocaml
+let bucket_has_key t i key =
+  List.exists t.buckets.(i) ~f:(fun (key',_) -> key' = key)
+
+let add t ~key ~data =
+  let i = hash_bucket key in
+  let replace = bucket_has_key t i key in
+  let filtered_bucket =
+    if replace then List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
+    else t.buckets.(i)
+  in
+  t.buckets.(i) <- (key, data) :: filtered_bucket;
+  if not replace then t.length <- t.length + 1
+```
+
+```ocaml
+let find t key =
+  List.find_map t.buckets.(hash_bucket key)
+    ~f:(fun (key',data) -> if key' = key then Some data else None)
+
+let remove t key =
+  let rec find_bucket i =
+    if i >= Array.length t.buckets then None
+    else if List.exists t.buckets.(i) ~f:(fun (key',_) -> key' = key) then Some i
+    else find_bucket (i+1)
+  in
+  match find_bucket 0 with
+  | None -> () (* nothing to remove, so do nothing *)
+  | Some i ->
+    t.length <- t.length - 1;
+    t.buckets.(i) <-
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
+```
+
+## Mutating data structures
+
+There's a new piece of syntax here, which shows up in the `add`
+function.  In particular, the last line of
+
+The `add` function uses this hash function to determine the
+appropriate bucket, then adds a new key/value association to the
+bucket through an array assignment:
+
+```ocaml
+table.(index) <- (key, data) :: table.(index)
+```
+
+
+
+So far, we've seen mutation in the context of arrays, but there are
+more ways than that to create mutable data.  Indeed, OCaml has a
+number of different built-in imperative data-structures, upon which
+other data-structures can be built.
+
+### Array-like data
+
+These data-structures are all integer-indexed containers where
+individual elements can be read or written.  We've already seen
+arrays.  The array module comes with a variety of mutable operations
+on arrays, including `Array.set`, which modifies an individual
+element, and `Array.blit`, which efficiently copies a range of values
+from one array to another.
+
+Arrays also come with a special syntax for getting an element from an
+array, `array.(index)`; and for setting an element, `array.(index) <-
+expr`.
+
+Strings are essentially specialized byte-arrays, with some extra
+useful functions in the `String` module for dealing with textual data
+in this form.  The main reason to use a `String.t` rather than a
+`Char.t array` (a `Char.t` is an 8-bit character) is that the former
+is considerably more space efficient; an array uses one word --- 8
+bytes on a 64-bit machine --- to store a single character, whereas
+strings use one byte per character.
+
+Strings also come with a specialized getting and setting syntax;
+`string.[index]` and `string.[index] <- expr` respectively.
+
+A bigarray is a handle to a block of memory stored outside of the
+OCaml heap.  These are mostly useful for interacting with things like
+C or Fortran libraries.  They're discussed more in
+[xref](#managing-external-memory-with-bigarrays).
+
+Bigarrays also have their own syntax: `bigarray.{index}` and
+`bigarray.{index} <- expr`.
+
+### Mutable record and object fields
+
+By default, records in OCaml are immutable, but individual record
+fields can be declared as mutable.  Here's a simple example of how
+you'd build an imperative stack using mutable records.
+
+```ocaml
+# type 'a stack = { mutable elements: 'a list;
+                    mutable length: int;
+                  }
+type 'a stack = { mutable elements : 'a list; mutable length : int; }
+```
+
+Note that the actual linked list of elements is an ordinary immutable
+list, but the field `elements` is a mutable reference to the current
+top of the stack.  We can straightforwardly write functions for
+creating a stack, and inspecting the length:
+
+```ocaml
+# let create () = { elements = []; length = 0 };;
+val create : unit -> 'a stack = <fun>
+# let length stack = stack.length;;
+val length : 'a stack -> int = <fun>
+```
+
+Pushing an element on the stack, however, requires mutation.  As with
+arrays, the `<-` operator is used for assignment.  Here's the
+implementation of push and pop:
+
+```ocaml
+# let push stack el =
+     stack.elements <- el :: stack.elements;
+     stack.length <- stack.length + 1
+  ;;
+val push : 'a stack -> 'a -> unit = <fun>
+# let pop stack =
+    match stack.elements with
+    | [] -> None
+    | hd::tl ->
+      stack.elements <- tl;
+      stack.length <- stack.length - 1;
+      Some hd
+  ;;
+val pop : 'a stack -> 'a option = <fun>
+```
+
+As we'll see in [xref](#object-oriented-programming), fields of an
+object can similarly be declared as mutable, and can then be modified
+in much the same way as with records.
+
+### Ref cells
+
+Variables in OCaml are never mutable --- they can refer to mutable
+data, but what the variable points to can't be changed.  Sometimes,
+though, you want to do exactly what you would do with a mutable
+variable in another language: define a single, mutable value. In OCaml
+this is typically achieved using a `ref`, which is essentially a
+container with a single, mutable value.
+
+The standard library defines the following operators for working with
+refs.
 
 * `ref expr` constructs a reference cell containing the value defined by the
   expression `expr`.
 * `! refcell` returns the contents of the reference cell.
 * `refcell := expr` replaces the contents of the reference cell.
 
+You can see these in action below.
+
 ```ocaml
 # let x = ref 1;;
 val x : int ref = {contents = 1}
-# x := 7;;
+# !x;;
+- : int = 1
+# x := !x + 1;;
 - : unit = ()
 # !x;;
-- : int = 7
-# x.contents <- 12;;
-- : unit = ()
-# x.contents;;
-- : int = 12
-# !x;;
-- : int = 12
+- : int = 2
 ```
 
-As the example shows, reference cells are actually just a short form for record
-operations.  The `ref` type is a record with a single mutable field `contents`,
-with the following definition.  The expression `!x` is equivalent to
-`x.contents`, and `x := e` is equivalent to `x.contents <- e`.
+As you might have guessed from the above, a `ref` is really just a
+record.  We could define the `ref` type and its associated operations
+as follows.
 
 ```ocaml
-type 'a ref = { mutable contents : 'a };;
+type 'a ref = { mutable contents : 'a }
+
+let ref x = { contents = x }
+let (!) r = r.contents
+let (:=) r x = r.contents <- x
 ```
 
-## Looping
+### External resources
 
-The `iter` function iterates through all of the elements in the table using a
-`for` loop.  There are two kinds of loops in OCaml, `for` loops and `while`
-loops.
+Another source of imperative operations in OCaml is data structures
+and other resources that come from outside of the language proper.
+These operations could be things that are implemented by the operating
+system like the `Time.now` call that lets you read the system clock,
+to features provided by a C library like the Gnu Scientific Library.
+
+More generally, whenever you wrap a library from another language for
+use in OCaml, you're often introducing new imperative operations to
+the language.
+
+## `for` and `while` loops
+
+When programming in a pure style, iteration is at the lowest-level
+implemented by recursive functions.  These recursive functions are
+then used to build various kinds of iteration functions, like
+`List.map`.  Most of the time, you'll end up using such iteration
+functions rather than writing direct recursive iteration functions.
+
+You can take the same basic approach when writing imperative code;
+indeed, the function `List.iter` is really only useful for imperative
+programming, and is itself built on top of recursive functions.  And
+you can build recursive functions for iterating over an array much as
+you can do that for iterating over a list.
+
+While recursive functions are one way (and often a good way) of
+iterating over imperative data structures, there is still room for the
+traditional `for` and `while` loops found in traditional imperative
+programming languages, and OCaml supports both of them.
+
+The `for` loop is the simpler of the two.  Indeed, we've already seen
+the `for` loop in action --- the `iter` function in `Dictionary` is built
+using it.   Here's a simple example of `for` in action.
 
 ```ocaml
-for index = <initial> to <final> do <body> done
-for index = <initial> downto <final> do <body> done
-while <condition> do <body> done
-```
-
-A loop using `to` advances by from the `<initial>` integer to the `<final>` one
-(inclusive).  No iterations are evaluated if `<final>` is smaller than
-`<initial>`.
-
-```ocaml
-# for i = 0 to 3 do
-    Printf.printf "i = %d\n" i
-  done;;
+# for i = 0 to 3 do Printf.printf "i = %d\n" i done;;
 i = 0
 i = 1
 i = 2
@@ -166,8 +363,8 @@ i = 3
 - : unit = ()
 ```
 
-A `downto` loop advances downward by 1 on each iteration.  Again, the bounds
-`<initial>` and `<final>` are inclusive.
+Note that the upper and lower bounds are inclusive.  We can also use
+`downto` to iterate in the other direction.
 
 ```ocaml
 # for i = 3 downto 0 do Printf.printf "i = %d\n" i done;;
@@ -178,19 +375,36 @@ i = 0
 - : unit = ()
 ```
 
-A while-loop iterates until the condition is false.
+A `while`-loop on the other hand iterates until the condition is
+false.  Here's a simple example of a function for reversing an array
+in-place.
 
 ```ocaml
-(* reverses an array in place. *)
-let rev_inplace t =
-  let i = ref 0 in
-  let j = ref (length t - 1) in
-  while !i < !j; do
-    swap t !i !j;
-    incr i;
-    decr j;
-  done;;
+# let rev_inplace ar =
+    let i = ref 0 in
+    let j = ref (Array.length ar - 1) in
+    (* terminate when the upper and lower indices meet *)
+    while !i < !j do
+      (* swap the two elements *)
+      let tmp = ar.(!i) in
+      ar.(!i) <- ar.(!j);
+      ar.(!j) <- tmp;
+      (* bump the indices *)
+      incr i;
+      decr j
+    done
+  ;;
+val rev_inplace : 'a array -> unit = <fun>
+# let nums = [|1;2;3;4;5|];;
+val nums : int array = [|1; 2; 3; 4; 5|]
+# rev_inplace nums;;
+- : unit = ()
+# nums;;
+- : int array = [|5; 4; 3; 2; 1|]
 ```
+
+In the above, we used `incr` and `decr`, which are functions for
+incrementing and decrementing an `int ref` by one, respectively.
 
 ## Doubly-linked lists
 
@@ -503,7 +717,7 @@ returns an iterator.  This allows retrieval of the value associated with a key,
 and it also allows the entry to be deleted.
 
 ```ocaml
-module IterableHashMap : sig
+module Iterable_dictionary : sig
   type ('a, 'b) t
 
   val create : unit -> ('a, 'b) t
@@ -513,13 +727,13 @@ module IterableHashMap : sig
 end
 ```
 
-The implementation of `IterableHashMap` is similar to the original `HashMap`
+The implementation of `Iterable_dictionary` is similar to the original `Dictionary`
 using lists, except now we will use doubly-linked lists.  The `create` function
 creates an array of doubly-linked lists.  The `add` function first removes any
 existing entry, then add the new element to the front of the bucket.
 
 ```ocaml
-module IterableHashMap = struct
+module Iterable_dictionary = struct
   type ('a, 'b) t = ('a * 'b) DList.t array
 
   let num_buckets = 17
@@ -584,7 +798,7 @@ by assignment using the `<-` syntax seen in the `normalize` method.  Finally,
 the object also has an `initializer` expression, which is called when the object
 is first created, in this case normalizing the iterator.
 
-Now that the iterator is defined, we can complete the `IterableHashMap`
+Now that the iterator is defined, we can complete the `Iterable_dictionary`
 implementation.
 
 ```ocaml
@@ -613,7 +827,7 @@ Note that the elements are reordered in the hash table.
 
 ```ocaml
 # let () =
-  let module IHM = IterableHashMap in
+  let module IHM = Iterable_dictionary in
   let table = IHM.create () in
   IHM.add table ~key:"small" ~data:1.00;
   IHM.add table ~key:"medium" ~data:1.50;
@@ -718,15 +932,15 @@ module Memo : sig
    val create : unit -> ('a, 'b) t
    val apply : ('a, 'b) t -> func:('a -> 'b) -> arg:'a -> 'b
 end = struct
-   type ('a, 'b) t = ('a, 'b) HashMap.t
+   type ('a, 'b) t = ('a, 'b) Dictionary.t
 
-   let create = HashMap.create
+   let create = Dictionary.create
    let apply table ~func ~arg =
-     match HashMap.find table ~key:arg with
+     match Dictionary.find table ~key:arg with
      | Some x -> x
      | None ->
          let x = func arg in
-         HashMap.add table ~key:arg ~data:x;
+         Dictionary.add table ~key:arg ~data:x;
          x
 
 end;;
@@ -826,12 +1040,12 @@ end = struct
   | Plus of t * t
   | Times of t * t
 
-  let table = HashMap.create ()
+  let table = Dictionary.create ()
   let merge exp =
-    match HashMap.find table ~key:exp with
+    match Dictionary.find table ~key:exp with
     | Some x -> x
     | None ->
-         HashMap.add table ~key:exp ~data:exp;
+         Dictionary.add table ~key:exp ~data:exp;
          exp
 
   let num i = merge (Num i)
@@ -1094,7 +1308,7 @@ table has operations to add, remove, and find elements, and it also
 supports imperative iterators.
 
 ```ocaml
-module ConcurrentHashMap : sig
+module Concurrent_dictionary : sig
   type ('a, 'b) t
 
   val create : unit -> ('a, 'b) t
@@ -1105,7 +1319,7 @@ module ConcurrentHashMap : sig
 end
 ```
 
-We'll use the same basic construction that we used to implement the `HashMap`,
+We'll use the same basic construction that we used to implement the `Dictionary`,
 where a hash table contains an array of buckets.  In addition we'll add locking
 to ensure that concurrent operations do not interfere.  To reduce lock
 contention, we'll use an array of locks to partition the table into multiple
@@ -1338,8 +1552,8 @@ iteration, then changes to that bucket would not be allowed during
 iteration (even by the iterating thread).  We might allow lock
 recursion to allow mutations by the iterating thread, but in general
 the synchronization might involve multiple threads, resulting in
-deadlock.  Lock-free iteration ensures that the `ConcurrentHashMap`
-will not be involved in a deadlock cycle.
+deadlock.  Lock-free iteration ensures that the
+`Concurrent_dictionary` will not be involved in a deadlock cycle.
 
 ## Input and output (fix this chapter heading)
 
@@ -1421,7 +1635,7 @@ val collate_input : unit -> unit = <fun>
 34
 -120
 19
--120 2 8 19 34 56 
+-120 2 8 19 34 56
 - : unit = ()
 ```
 
@@ -1679,7 +1893,7 @@ The function `printf` prints to the standard output channel `stdout`.  There are
 
 * `bprintf buffer format arg1 ... argN`.  Print to a string buffer
   `buffer` of type `Buffer.t`.
-  
+
 ```ocaml
 # sprintf "The number is %10d." 123;;
 - : string = "The number is        123."
