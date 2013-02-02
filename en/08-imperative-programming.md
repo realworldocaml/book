@@ -1,34 +1,49 @@
 Imperative Programming
-================================================
+======================
 
-The OCaml programming language is _functional_, meaning that functions are
-first-class values that can be passed around like any other.  However, this
-doesn't mean that OCaml programs are _pure_.
+Most of the code shown so far in this book, and indeed, most OCaml
+code in general, is _pure_, which is to say that it works without
+mutating the program's internal state, performing I/O, reading the
+clock, or in any other way interacting with changeable parts of the
+world.  Thus, a pure function behaves like a mathematical function,
+always returning the same results when given the same inputs.
+_Imperative_ code, on the other hand, operates precisely by
+side-effects that modify a programs internal state or with the outside
+world.
 
-Pure functions behave like mathematical functions, which means that they
-always evaluate to the same result on the same arguments, without any
-side-effects on the state or input/output.  In pure programs, evaluation order
-may affect performance, but it doesn't affect correctness.  In contrast,
-_imperative_ programs operate through side-effects on the state (as well as
-input/output).  Imperative programs define sequences of commands for the
-computer to perform, and evaluation order is strict.
+Pure code is the default in OCaml, and for good reason --- it's
+generally easier to reason about, less error prone and more
+composeable.  But imperative code is of fundamental importance to any
+practical programming language, functional languages like OCaml
+included.  That's because real-world tasks require that you interact
+with the outside world, whether by receiving a network packet or by
+writing data to a file.  Imperative programming can also be important
+for performance.  While pure code is quite efficient in OCaml, there
+are many algorithms that can only be implemented efficiently using
+imperative techniques.
 
-While the majority of code you write in OCaml may be pure, imperative
-programming can be used effectively.  The language includes assignment and
-mutable values like arrays and strings.  Evaluation order is strict and
-sequential.  In principle, you can port many imperative programs directly to
-OCaml.  If you find yourself using imperative features a lot, then you're
-probably not using OCaml to its fullest.  However, there are times when
-imperative programming is both appropriate and efficient, and OCaml shines at
-supporting programs with both functional and imperative aspects.
+OCaml offers a happy compromise here, making it easy and natural to
+program in a pure style, but also providing great support for
+imperative programming where you need it.  This chapter will walk you
+through OCaml's imperative features, and help you use them to their
+fullest.
 
-To illustrate imperative programming, let's start by implementing a hash table.
-Hash tables are an efficient way to implement imperative _dictionaries_, which
-implement a map from keys to values.  There are full-featured implementations of
-hash tables in Core as well as in the OCaml standard library.  For illustration,
-we'll construct just a basic dictionary using _open hashing_, where the hash
-table consists of an array of buckets, each of which contain a linked list of
-elements.  We'll use regular (pure) OCaml lists, and an array for the buckets.
+## Example: a simple hash table
+
+Hash tables are an extremely common and important tool in imperative
+programming.  A hash table is essentially an efficient imperative
+dictionary, _i.e._, a map from keys to values to which bindings of
+keys to values can be added and removed.  Both Core and OCaml's
+standard library come with hash tables, but we'll walk through the
+design of a very simple-minded hash table nonetheless, as an
+introduction to OCaml's imperative constructs.
+
+The hash table we're going to build will use _open hashing_, where the
+hash table consists of an array of buckets, with each bucket
+containing the list of elements that have been hashed into that
+bucket.  For simplicity's sake, we'll use a fixed-length bucket array,
+though we'd need to add the ability for growing the bucket array to
+make a more practical implementation.
 
 ```ocaml
 module HashMap : sig
@@ -64,36 +79,39 @@ end = struct
 end
 ```
 
-The signature for the `HashMap` declares the type of dictionaries `('a, 'b) t`,
-with keys of type `'a` and associated values of type `'b`.  It also includes
-functions for add, removing, and enumerating entries in the dictionary.
+The signature for the `HashMap` declares the type of dictionaries
+`('a, 'b) t`, with keys of type `'a` and associated values of type
+`'b`.  It also includes functions for adding, removing, and
+enumerating entries in the dictionary.
 
-The table is implemented as an array of buckets (the array is fixed-size,
-in this example).  The OCaml runtime provides a builtin polymorphic hash
-function `Hashtbl.hash` that works for almost any value in OCaml, excluding
-functions and values from C libraries that live outside the heap.
+The OCaml runtime provides a built-in polymorphic hash function,
+`Hashtbl.hash`, that works for almost any value in OCaml, excluding
+functions and values from C libraries that live outside the heap.  The
+`add` function uses this hash function to determine the appropriate
+bucket, then adds a new key/value association to the bucket through an
+array assignment:
 
-* The `create` function creates a new array where all buckets are empty.
+```ocaml
+table.(index) <- (key, data) :: table.(index)
+```
 
-* The `add` function uses the hash function to determine the appropriate bucket,
-  then adds a new key/value association to the bucket through an array
-  _assignment_ `table.(index) <- (key, data) :: table.(index)`, which _replaces_
-  the bucket with a new one where the new key/value pair is added to the front
-  of the list.
+which replaces the bucket with a new one where the new key/value pair
+is added to the front of the list.
 
-* The `find` function performs a linear search through the appropriate bucket to
-  find the value associated with a key.
+The `find` function uses the same hash function to find the bucket in
+which to look for the value in question, performing a linear search
+through the list stored in that bucket.
 
-* The `iter` function iterates through each of the elements in the buckets.
+The `create` function creates a new array where all buckets are empty,
+and the `iter` function iterates over the bucket array, and then for
+each bucket iterates over the elements in that bucket.
 
 ## Imperative operations
 
-This example illustrates one of the mutating operations in OCaml: array element
-assignment.  There are a handful of other mutable data types.
-
-* Arrays.  Array elements can be assigned with the expression `array.(index) <-
-  expr`.  See the `Array` module for other imperative operations.  Bigarray
-  elements can be mutated with the syntax `bigarray.{index} <- expr`.
+The above example illustrates one primitive mutable data structure in
+OCaml (arrays), and one mutating operations (array assignment).  There
+are just a handful of primitive mutable data structures in OCaml,
+which are listed below.
 
 * Strings.  String elements can be mutated with the expression `string.[index]
   <- char`.  See the `String` module for other imperative operations.
@@ -101,9 +119,18 @@ assignment.  There are a handful of other mutable data types.
 * Record fields can be mutated with the expression `record.label <- expr`.  The
   field `label` must be declared as `mutable` in the type definition for the
   record.
-   
+
 * Object fields can be mutated with the expression `object.label <- expr`. The
   field `label` must be declared as `mutable` in the object definition.
+
+* Arrays.  As we've seen, array elements can be assigned with the
+  expression `array.(index) <- expr`.  The `Array` module has other
+  imperative operations as well.
+
+* Bigarrays.  A bigarray is a handle to a block of memory stored
+  outside of the OCaml heap.  These are mostly useful for interacting
+  with things like C or Fortran libraries.  They're discussed more in
+  [xref](#managing-external-memory-with-bigarrays).
 
 Note that variables are not mutable.  Variables can refer to mutable data, but
 the binding of a variable cannot be changed.  For convenience, OCaml defines a

@@ -1,0 +1,4 @@
+*.opt
+.#*
+.omakedb
+match

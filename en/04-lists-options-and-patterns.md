@@ -4,21 +4,283 @@ _(Note, this chapter is incomplete.  jyh is working on it.)_
 
 ## Lists
 
-As with any programming language, we need a way to represent _data_,
-things like numbers, words, images, etc., and we need a way to define
-_aggregates_ that bring together related values that represent some
-concept.
+As with any programming language, we need a way to represent _data_, things like
+numbers, words, images, etc., and we need a way to define _aggregates_ that
+bring together related values that represent some concept.
 
-Lists are one of the most common ways to aggregate data in OCaml; they
-are simple, and they are extensively supported by the standard
-library. 
+Lists are one of the most common ways to aggregate data in OCaml.  You can
+construct a list of values by enclosing them in square brackets, and separating
+the elements with semicolons.  The list elements must all have the same type.
 
-_(yminsky: I would point out that they are the most commonly used
-aggregate, rather than just that they're supported by the standard
-library.  Also, that way we avoid confusion in the sentence. between
-the standard library and Core.)_
+```ocaml
+# let l1 = ["Chicago"; "Paris"; "Tokyo"];;
+val l1 : string list = ["Chicago"; "Paris"; "Tokyo"]
+# List.nth l1 1;;
+- : string option = Some "Paris"
+# List.nth l1 2;;
+- : string option = Some "Tokyo"
+```
 
-### Example: pretty-printing a table
+The square bracket syntax is really just a shorthand.  There are really just two
+ways to construct a list value.
+
+* [] is the _empty_ list.
+* If `x` is a value and `l` is a list, then the expression `x :: l`
+  constructs a new list where the first element is `x`, and the rest
+  is `l`.  The value corresponding to `x :: l` is commonly called a
+  _cons_-cell (the term comes from Lisp, where "cons" is short for
+  "constructor").
+
+The bracket syntax `["Chicago"; "Paris"; "Tokyo"]` is just another way to write
+a list with 3 cons-cells, `"Chicago" :: "Paris" :: "Tokyo" :: []`.  Each cell
+has two parts: a value, and a pointer to the rest of the list.  The final
+pointer refers to the special value `[]` representing the empty list.
+
+TODO: IMAGE figures/04-list-01.svg
+
+```ocaml
+# let l2 = "Chicago" :: "Paris" :: "Tokyo" :: [];;
+val l2 : string list = ["Chicago"; "Paris"; "Tokyo"]
+# List.hd l2;;
+- : string option = Some "Chicago"
+# List.tl l2;;
+- : string list option = Some ["Paris"; "Tokyo"]
+```
+
+## Pattern matching
+
+Constructing a list is really only half the story -- it would be pretty useless
+to construct lists unless we can also pull them apart.  We need destructors, and
+for this we use _pattern matching_.
+
+For a list, there are two possible shapes: the empty list `[]` or a cons-cell `h
+:: t`.  We can use a `match` expression to perform the pattern matching.  In the
+case of a cons-cell, the variables `h` and `t` in the pattern are bound to the
+corresponding values in the list when the match is performed.
+
+For example, suppose we want to define a function to add 1 to each element of a
+list.  We have to consider two cases, where the list is empty, or where it is a
+cons-cell `h :: t`.  In the latter case, we add one to `h`, and then recursively
+compute over the tail of the list `t`.
+
+```ocaml
+# let rec add1 l =
+    match l with
+    | [] -> []
+    | h :: t -> (h + 1) :: (add1 t);;
+val add1 : int list -> int list = <fun>
+# add1 [5; 3; 7];;
+- : int list = [6; 4; 8]
+```
+
+Patterns are not limited to just one constructor.  They can be aribitrarily
+nested.  For example, if we want to extract the third element of a list, we can
+use a pattern `_ :: _ :: x :: _`.  The underscore `_` is a special pattern that
+matches (and ignores) anything.  The first two underscores match the first two
+elements of the list, the `x` matches the third element, and the final
+underscore matches the rest of the list.
+
+```ocaml
+# let third l =
+    match l with
+    | _ :: _ :: x :: _ -> Some x
+    | _ -> None;;
+val third : 'a list -> 'a option = <fun>
+# third ["A"; "B"; "C"; "D"];;
+- : string option = Some "C"
+# third ["A"; "B"];;
+- : string option = None
+```
+
+The pattern `_ :: _ :: x :: _` is not exhaustive, because it doesn't match lists
+with fewer than three elements, so we have included a second "wildcard" pattern,
+a single underscore `_`, that matches anything else.  We're using the `option`
+type for the return value, where `Some x` means that the third element of
+the list was `x`, and `None` means that the list had fewer than three elements.
+We'll discuss options more in the next section.
+
+Patterns are matched in left-to-right order (or top-to-bottom, in this case), so
+the result is determined by the first pattern to match.  If we had listed the
+patterns in opposite order, the wildcard pattern would match everything, and the
+second pattern would be ignored.
+
+```ocaml
+# let broken_third l =
+    match l with
+    | _ -> None
+    | _ :: _ :: x :: _ -> Some x;;
+Characters 47-63:
+    | _ :: _ :: x :: _ -> Some x;;
+      ^^^^^^^^^^^^^^^^
+Warning 11: this match case is unused.
+val broken_third : 'a list -> 'a option = <fun>
+# broken_third [17; 21; 7; 34];;
+- : int option = None
+```
+
+Pattern ordering can be an issue, but a more important concern is that pure
+wildcard patterns match anything, making it easier to forget "important" cases.
+When a pattern matching is compiled, OCaml performs an exhaustiveness check,
+printing a warning if it is not exhaustive, along with an example of a missing
+pattern.
+
+```ocaml
+# let inexhaustive_third l =
+    match l with
+    | _ :: _ :: x :: _ -> Some x;;
+    Characters 24-68:
+  ...match l with
+     | _ :: _ :: x :: _ -> Some x..
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val inexhaustive_third : 'a list -> 'a option = <fun>
+# inexhaustive_third [1; 2; 3; 4];;
+- : int option = Some 3
+# inexhaustive_third [1; 2];;
+Exception: (Match_failure //toplevel// 14 3).
+```
+
+This exhaustiveness checking can be tremendously useful in ensuring that the
+appropriate cases are all considered.  Generally speaking, it is usually better
+to be as specific as possible when writing patterns.  This helps exhaustiveness
+checking point out missing cases if they exist, and also means that pattern
+ordering is not as important.
+
+```ocaml
+# let third l =
+    match l with
+    | [] | [_] | [_; _] -> None
+    | _ :: _ :: x :: _ -> Some x;;
+val third : 'a list -> 'a option = <fun>
+```
+
+## Options
+
+Note that the `List` functions like `List.hd` (for "head" of the list),
+`List.tl` (for "tail" of the list), and `List.nth` return values of `option`
+type.  That's because, in some cases, there is no value to return.  For example,
+the empty list has no head or tail.
+
+```ocaml
+# List.hd ["Chicago"; "Paris"; "Tokyo"];;
+- : string option = Some "Chicago"
+# List.tl ["Chicago"; "Paris"; "Tokyo"];;
+- : string list option = Some ["Paris"; "Tokyo"]
+# List.nth ["Chicago"; "Paris"; "Tokyo"] 2;;
+- : string option = Some "Tokyo"
+# List.hd [];;
+- : 'a option = None
+# List.tl [];;
+- : 'a list option = None
+# List.nth ["Chicago"; "Paris"; "Tokyo"] 5;;
+- : string option = None
+```
+
+A value of `option` type is "optional" -- it is either `None`, meaning "no
+value"; or `Some v` for some value `v`.  For example, `List.hd ["Chicago";
+"Paris"; "Tokyo"]` is `Some "Chicago"` because the head of the list exists
+("Chicago"), but `List.hd []` is `None` because there is no head of the empty
+list.
+
+The type definition for `option` has the following form.
+
+```ocaml
+type 'a option =
+  | Some of 'a
+  | None
+```
+
+As with lists, the way to take apart an `option` value is to use pattern
+matching, with patterns for the two cases.
+
+```ocaml
+# let optional_default ~default opt =
+    match opt with
+    | Some v -> v
+    | None -> default;;
+val optional_default : default:'a -> 'a option -> 'a = <fun>
+# optional_default ~default:10 (Some 17);;
+- : int = 17
+# optional_default ~default:10 None;;
+- : int = 10
+```
+
+One annoying thing about the use of options is that functions do not compose
+directly.  For example, if we wanted to compute the third element of a list
+using the `List.hd` and `List.tl` functions, we might try to compose them like
+this.
+
+```ocaml
+# let third l = List.hd (List.tl (List.tl l));;
+Characters 32-41:
+  let third l = List.hd (List.tl (List.tl l));;
+                                  ^^^^^^^^^
+Error: This expression has type 'a list option
+       but an expression was expected of type 'b list
+```
+
+Unfortunately, this doesn't work because the functions return options, not lists.  We
+can use pattern matching to perform the composition, but the code is pretty
+tedious.
+
+```ocaml
+# let tedious_third l1 =
+    match List.tl l1 with
+    | None -> None
+    | Some l2 ->
+      match List.tl l2 with
+      | None -> None
+      | Some l3 ->
+        List.hd l3;;
+val tedious_third : 'a list -> 'a option = <fun>
+# tedious_third [7; 21; 12; 19];;
+- : int option = Some 12
+# tedious_third [1; 2];;
+- : int option = None
+```
+
+One solution for abbreviating the code is to define a composition operator `v
+>>= f` that takes an option value `v`, performs the pattern match, and passes
+the value to function `f` if there is one. 
+
+```ocaml
+# let (>>=) v f =
+    match v with
+    | None -> None
+    | Some x -> f x;;
+val ( >>= ) : 'a option -> ('a -> 'b option) -> 'b option = <fun>
+# let third l = Some l >>= List.tl >>= List.tl >>= List.hd;;
+val third : 'a list -> 'a option = <fun>
+# third [7; 21; 12; 19];;
+- : int option = Some 12
+# third [7; 21];;
+- : int option = None
+```
+
+The operator `>>=` has infix syntax, and the expression `Some l >>= List.tl >>=
+List.tl >>= List.hd` should be read left-to-right: pass `Some l` to the
+`List.tl` function, then to another `List.tl`, then to `List.hd`.  Since `>>=`
+is an infix operator, the function definition uses parenthesis `(>>=)` to define
+the function in prefix form.
+
+All we have done here is to hoist the pattern matching into a separate function
+`>>=`, but the result has a convenient left-to-right sequential reading.  This
+is a common pattern in Core, captured by the `Monad.S` module signature.  In
+fact, The `Core.Std.Option` module already implements the `Monad.S` signature.
+A more conventional way to write the function would be to use function
+`Option.(>>=)` directly.
+
+```ocaml
+# let third l =
+    let (>>=) = Option.(>>=) in
+    Some l >>= List.tl >>= List.tl >>= List.hd;;
+val third : 'a list -> 'a option = <fun>
+```
+
+## Example: pretty-printing a table
+
+_(jyh: I'm revising the examples.  This section is temporary.)
 
 _(yminsky: I wonder if the whole example should go later in the
 section, after we've done more of the basis of lists in this
@@ -192,76 +454,6 @@ let render header rows =
      :: render_separator widths
      :: List.map rows ~f:(fun row -> render_row widths row)
     )
-```
-
-## List basics
-
-_(yminsky: I wonder if this should come before the example.  The
-example kind of assumes a lot of information, some of which was given
-in the guided tour, and some of which wasn't.)_
-
-In the example, we see calls to `List` functions in the standard
-library, in particular `List.map`.  How does this all work?  To
-understand, we need to consider first how lists are _represented_
-internally, which follows from the type definition and the way lists
-are constructed.  Let's look at the constructors first.
-
-We have seen how square brackets can be used to construct a list of
-values, but there are really just two ways to construct a list value.
-
-* [] is the _empty_ list.
-* If `x` is a value and `l` is a list, then the expression `x :: l`
-  constructs a new list where the first element is `x`, and the rest
-  is `l`.  The value corresponding to `x :: l` is commonly called a
-  _cons_-cell (the term comes from Lisp, where _cons_ is short for
-  "constructor").
-
-The bracket syntax `[5; 3; 7]` is syntactic sugar for a list with 3
-cons-cells, `5 :: 3 :: 7 :: []`.  Each cell has two parts: 1) a value,
-and 2) a pointer to the rest of the list.  The final pointer refers to
-the special value `[]` representing the empty list.
-
-TODO: IMAGE figures/04-list-01.svg
-
-## Pattern matching
-
-Constructing a list is really only half the story -- it would be
-pretty useless to construct lists unless we can also pull them apart.
-We need _destructors_, and for this we use _pattern matching_, like we
-saw in the previous chapter.
-
-For a list, there are two possible shapes: the empty list `[]` or a
-cons-cell `h :: t`.  We can use a `match` expression to perform the
-pattern matching.  In the case of a cons-cell, the variables `h` and
-`t` in the pattern are bound to the corresponding values in the list
-when the match is performed.
-
-For example, suppose we want to define a function to add 1 to each
-element of a list.  We have to consider both cases, 1) where the list
-is empty, or 2) where it is a cons-cell.
-
-```ocaml
-# let rec add1 l =
-    match l with
-     | [] -> []
-	 | h :: t -> (h + 1) :: (add1 t);;
-val add1 : int list -> int list = <fun>
-# add1 [5; 3; 7];;
-- : int list = [6; 4; 8]
-```
-
-The functions in the standard library can implemented in similar ways.
-A straightforward, but inefficient, version of the `List.map` function
-is as follows.
-
-```ocaml
-# let rec map l ~f =
-    match l with
-     | [] -> []
-     | h :: t -> f h :: map ~f t;;
-val map : 'a list -> f:('a -> 'b) -> 'b list = <fun>
-# map ~f:string_of_int [5; 3; 7];;
-- : string list = ["5"; "3"; "7"]
 ```
 
 ## List performance
