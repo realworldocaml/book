@@ -14,6 +14,10 @@ let create () =
 
 let length t = t.length
 
+let find t key =
+  List.find_map t.buckets.(hash_bucket key)
+    ~f:(fun (key',data) -> if key' = key then Some data else None)
+
 let iter t ~f =
   for i = 0 to Array.length t.buckets - 1 do
     List.iter t.buckets.(i) ~f:(fun (key, data) -> f ~key ~data)
@@ -32,19 +36,13 @@ let add t ~key ~data =
   t.buckets.(i) <- (key, data) :: filtered_bucket;
   if not replace then t.length <- t.length + 1
 
-let find t key =
-  List.find_map t.buckets.(hash_bucket key)
-    ~f:(fun (key',data) -> if key' = key then Some data else None)
-
 let remove t key =
-  let rec find_bucket i =
-    if i >= Array.length t.buckets then None
-    else if List.exists t.buckets.(i) ~f:(fun (key',_) -> key' = key) then Some i
-    else find_bucket (i+1)
-  in
-  match find_bucket 0 with
-  | None -> () (* nothing to remove, so do nothing *)
-  | Some i ->
-    t.length <- t.length - 1;
-    t.buckets.(i) <-
+  let i = hash_bucket key in
+  if not (bucket_has_key t i key) then ()
+  else (
+    let filtered_bucket =
       List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
+    in
+    t.buckets.(i) <- filtered_bucket;
+    t.length <- t.length - 1
+  )
