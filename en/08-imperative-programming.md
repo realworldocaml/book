@@ -119,7 +119,7 @@ let find t key =
 
 The `iter` function, shown below, is designed to walk over all the
 entries in the dictionary.  In particular, `iter d ~f` will call `f`
-for each key/value pair in dictionary `d`.  
+for each key/value pair in dictionary `d`.
 
 The code for `iter` uses two forms of iteration: a `for` loop is used
 to iterate over the array of buckets; and within that loop,
@@ -358,57 +358,91 @@ incrementing and decrementing an `int ref` by one, respectively.
 ## Doubly-linked lists
 
 Another common imperative data structure is the doubly-linked list,
-which allows traversal in both directions, as well as O(1) deletion of
-any element.  Doubly-linked lists are a cyclic data structure, meaning
-that it is possible to follow a nontrivial sequence of references from
-an element, through other elements, back to itself.  In general,
-building cyclic data structures requires the use of side-effects
-(although in some limited cases, they can be constructed using `let
-rec`). This is done by constructing the data elements first, and then
-adding cycles using assignment afterwards.
+which allows traversal in both directions, as well as constant-time
+deletion of any element.  Doubly-linked lists are a cyclic data
+structure, meaning that it is possible to follow a nontrivial sequence
+of pointers from an element, through other elements, back to itself.
+In general, building cyclic data structures requires the use of
+side-effects (although in some limited cases, they can be constructed
+using `let rec`). This is done by constructing the data elements
+first, and then adding cycles using assignment afterwards.
 
 Core defines a standard doubly-linked list, but let's define our own
-implementation for illustration.  First, we define an element `'a
-element` with a reference both to the previous and next elements.  The
-elements at the ends have nothing to refer to, so we use an option to
-allow the reference to be `None`.  The element record fields are
-declared as `mutable` to allow them to be modified when the list is
-mutated.
-
-The list itself is either empty, or it refers to the first element of
-the list.  We use the type `type 'a dlist = 'a element option ref`;
-the `ref` allows the list to be mutated, and the value is either
-`None` for the empty list, or `Some first_element` when the list is
-non-empty.
+implementation for illustration.  Here's the `mli` we'll start out
+with.  Note that there are two types defined here: `'a t`, the type of
+a list, and `'a element`, the type of an individual element of a list.
+Elements act as pointers to the interior of a list, and allow us to
+navigate the list and give us a point at which to apply mutating
+operations.
 
 ```ocaml
+(* file: dlist.mli *)
+open Core.Std
+
+type 'a t
+type 'a element
+
+(** Basic list operations  *)
+val create   : unit -> 'a t
+val is_empty : 'a t -> bool
+
+(** navigating the [elements] of a list *)
+val first : 'a t -> 'a element option
+val next  : 'a element -> 'a element option
+val prev  : 'a element -> 'a element option
+val value : 'a element -> 'a
+
+(** Simple iteration functions *)
+val find : 'a t -> 'a -> 'a element option
+val iter : 'a t -> f:('a -> unit) -> unit
+
+(** mutators *)
+val insert_first : 'a t -> 'a -> 'a element
+val insert_after : 'a element -> 'a -> 'a element
+val remove : 'a t -> 'a element -> unit
+```
+
+Now let's look at the implementation.  We'll start by defining our two
+types.  An `'a element` is a record containing the value to be stored
+in that node as well as optional (and mutable) fields pointing to the
+previous and next elements.  These fields are optional so that at the
+beginning of the list, the `prev` field can be `None`, and at the end
+of the list, the `next` field can be `None`.
+
+The type of the list itself, `'a t`, is an optional, mutable reference
+to an `element`.  This reference is `None` if the list is empty, and
+`Some` otherwise.
+
+```ocaml
+open Core.Std
+
 type 'a element =
   { value : 'a;
     mutable next : 'a element option;
     mutable previous : 'a element option
   }
 
-type 'a dlist = 'a element option ref
+type 'a t = 'a element option ref
+```
 
+Now we can define some functions using our list type.  The following
+functions are all relatively straight-forward, largely following from
+our type definitions.
+
+```ocaml
 let create () = ref None
-let is_empty l = (!l = None)
+let is_empty l = !l = None
 
 let value elt = elt.value
 
 let first l = !l
 let next elt = elt.next
-let previous elt = elt.previous
+let prev elt = elt.prev
 ```
 
-The function `create` creates an empty list.  The function `is_empty l`
-dereferences the list using the `!` operator, returning true if the value is
-`None`, or false otherwise.  The `value` function returns the value stored in an
-element.  The `first`, `next`, and `previous` functions allow navigation through
-the list.
-
-Next, let's define the function that inserts a value into the list as a new
-first element.  We define a new element `elt`, link it into the list, and set
-the list reference.
+Next, let's define the function that inserts a value into the list as
+a new first element.  We define a new element `elt`, link it into the
+list, and set the list reference.
 
 ```ocaml
    let insert_first l value =
@@ -421,10 +455,10 @@ the list reference.
      elt
 ```
 
-This example introduces the sequencing operator `;` to separate the steps to be
-executed in order: first, create the new element `elt`; then set
-`old_first.previous` to point to it; then set the list `l` to refer to the `elt`
-element; then return the element `elt`.
+This example uses the sequencing operator `;` to separate the steps to
+be executed in order: first, create the new element `elt`; then set
+`old_first.previous` to point to it; then set the list `l` to refer to
+the `elt` element; then return the element `elt`.
 
 In general, when a sequence expression `expr1; expr2` is evaluated, `expr1` is
 evaluated first, and then `expr2`.  The expression `expr1` must have type
@@ -432,10 +466,10 @@ evaluated first, and then `expr2`.  The expression `expr1` must have type
 sequence.  For example, the sequence `print_string "hello world"; 1 + 2` first
 prints the string `"hello world"`, then returns the integer `3`.
 
-There are a few more things to note.  First, semicolon `;` is a _separator_, not
-a terminator, like it is in C or Java.  The compiler is somewhat relaxed about
-parsing a terminating semicolon, so it may work for you, but you should not rely
-on it.
+There are a few more things to note.  First, `;` is a _separator_ in
+OCaml, not a terminator as it is in C or Java.  The compiler is
+somewhat relaxed about parsing a terminating semicolon, so it may work
+for you, but you should not rely on it.
 
 ```ocaml
 # let i = print_string "Hello world\n"; 2; in i;;
