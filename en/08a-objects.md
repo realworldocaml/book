@@ -285,19 +285,9 @@ val p : point = <obj>
 - : int = 5
 ```
 
-_(yminsky: You say that inheritance uses an existing class to define a
-new one, but the example below looks like using an existing class to
-define a new module.  Is that what's going on?  Or is a new class
-being created implicitly?  If the latter, it might be better to be
-more explicit in this example and name the new class.)_
-
 Inheritance uses an existing class to define a new one.  For example,
 the following class definition supports an addition method `moveby`
-that moves the point by a relative amount.  This also makes use of the
-`(self : 'self)` binding after the `object` keyword.  The variable
-`self` stands for the current object, allowing self-invocation, and
-the type variable `'self` stands for the type of the current object
-(which in general is a subtype of `movable_point`).
+that moves the point by a relative amount.
 
 ```ocaml
 # class movable_point =
@@ -305,7 +295,20 @@ the type variable `'self` stands for the type of the current object
     inherit point
     method moveby dx = self#set (self#get + dx)
   end;;
+class movable_point :
+  object
+    val mutable x : int
+    method get : int
+    method moveby : int -> unit
+    method set : int -> unit
+  end
 ```
+
+This new `movable_point` class also makes use of the
+`(self : 'self)` binding after the `object` keyword.  The variable
+`self` stands for the current object, allowing self-invocation, and
+the type variable `'self` stands for the type of the current object
+(which in general is a subtype of `movable_point`).
 
 ## Class parameters and polymorphism ##
 
@@ -422,7 +425,7 @@ without interfaces, like C++, the specification would normally use
 _abstract_ classes to specify the methods without implementing them
 (C++ uses the "= 0" definition to mean "not implemented").
 
-```
+```java
 // Java-style iterator, specified as an interface.
 interface <T> iterator {
   T Get();
