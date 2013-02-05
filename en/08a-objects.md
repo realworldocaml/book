@@ -7,19 +7,21 @@ supports object-oriented programming.  There are objects, classes, and
 their associated types.  Objects are good for encapsulation and
 abstraction, and classes are good for code re-use.
 
-## When to use objects ##
+<note>
+<title>What is Object-Oriented Programming?</title>
 
-You might wonder when to use objects.  First-class modules are more
-expressive (a module can include types, classes and objects cannot),
-and modules, functors, and algebraic data types offer a wide range of
-ways to express program structure.  In fact, many seasoned OCaml
-programmers rarely use classes and objects, if at all.
+Object-oriented programming (often shorted to OOP) is a programming style
+that encapsulates computation and data within logical *objects*.  Each
+object contains some data stored in *fields*, and has
+*method* functions that can be invoked against the data within the object.
+The code definition behind an object is called a *class*, and objects are
+constructed from a class definition by calling a constructor with the
+data that the object will use to build itself.
 
-What exactly is object-oriented programming?  Mitchell (TODO: xref) points out
-four fundamental properties.
+There are four fundamental properties that differentiate OOP from other styles:
 
 * _Abstraction_: the details of the implementation are hidden in the
-  object; the interface is just the set of publically-accessible
+  object, and the external interface is just the set of publically-accessible
   methods.
 * _Dynamic lookup_: when a message is sent to an object, the method to
   be executed is determined by the implementation of the object, not
@@ -28,7 +30,23 @@ four fundamental properties.
 * _Subtyping_: if an object `a` has all the functionality of an object
   `b`, then we may use `a` in any context where `b` is expected.
 * _Inheritance_: the definition of one kind of object can be re-used
-  to produce a new kind of object.
+  to produce a new kind of object.  This new definition can override
+  some behaviour, but also share code with its parent.
+
+Almost every notable modern programming language has been influenced
+by OOP, and you'll have run across these terms if you've ever used
+C++, Java, C#, Ruby, Python or Javascript.
+
+</note>
+
+## When to use objects ##
+
+You might wonder when to use objects in OCaml, which has a multitude
+of alternative mechanisms to express the same concept.
+First-class modules are more expressive (a module can include types, while classes and objects cannot).
+Modules, functors, and algebraic data types also offer a wide range of
+ways to express program structure.  In fact, many seasoned OCaml
+programmers rarely use classes and objects, if at all.
 
 Modules already provide these features in some form, but the main
 focus of classes is on code re-use through inheritance and late
@@ -40,15 +58,15 @@ methods without knowing statically how they will be implemented.
 
 In contrast, modules use static (lexical) scoping.  If you want to
 parameterize your module code so that some part of it can be
-implemented later, you would write a function/functor.  This is more
+implemented later, you would write a function or functor.  This is more
 explicit, but often more verbose than overriding a method in a class.
 
-In general, a rule of thumb might be: use classes and objects in situations
+In general, a rule of thumb is: use classes and objects in situations
 where dynamic binding is a big win, for example if you have many similar
-variations in the implementation of a concept.  Two good examples is Xavier
+variations in the implementation of a concept.  Two good examples are Xavier
 Leroy's [Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit),
 which provides a variety of cryptographic primitives that can be combined in
-building-block style, and the [Camlgraphics](TODO XREF) library which
+building-block style, and the [Camlimages](http://cristal.inria.fr/camlimages/) library which
 manipulates various graphical file formats.
 
 In this chapter, we'll introduce you to the basics of object definition and use
