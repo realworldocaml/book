@@ -90,7 +90,7 @@ it).
 OCaml is entirely different.  Classes are used to construct objects
 and support inheritance, including non-subtyping inheritance.  Classes
 are not types.  Instead, objects have _object types_, and if you want
-to use objects, you aren't required to use classes at all.  Here is an
+to use objects, you aren't required to use classes at all.  Here's an
 example of a simple object.
 
 ```ocaml
@@ -104,10 +104,10 @@ val p : < get : int; set : int -> unit > = <obj>
 ```
 
 The object has an integer value `x`, a method `get` that returns x,
-and a method `set` that updates the value of x.
+and a method `set` that updates the value of `x`.
 
 The object type is enclosed in angle brackets `< ... >`, containing
-just the types of the methods.  Fields, like x, are not part of the
+just the types of the methods.  Fields, like `x`, are not part of the
 public interface of an object.  All interaction with an object is
 through its methods.  The syntax for a method invocation (also called
 "sending a message" to the object) uses the `#` character.
@@ -123,7 +123,7 @@ through its methods.  The syntax for a method invocation (also called
 
 Objects can also be constructed by functions.  If we want to specify
 the initial value of the object, we can define a function that takes
-the initial value and produces an object.
+the value and returns an object.
 
 ```ocaml
 # let make i =
@@ -146,11 +146,8 @@ the value.
 
 ## Object Polymorphism ##
 
-_(yminsky: Maybe this is a good time to talk about the nature of
-object subtyping?)_
-
 Functions can also take object arguments.  Let's construct a new
-object `average` that's the average of any two objects with a
+object `average` that returns the average of any two objects with a
 `get` method.
 
 ```ocaml
@@ -158,7 +155,21 @@ object `average` that's the average of any two objects with a
   object
     method get = (p1#get + p2#get) / 2
   end;;
-val average : < get : int; .. > -> < get : int; .. > -> < get : int > = <fun>
+val average : 
+  < get : int; .. > -> 
+  < get : int; .. > ->
+  < get : int > = <fun>
+```
+
+There's some new syntax in the type that's been inferred for `average` here.
+The parameters have the object type `< get : int; .. >`. 
+The `..` are ellipsis, standing for any other methods.  The
+type `< get : int; .. >` specifies an object that must have at least a
+`get` method, and possibly some others as well.
+
+We can use the `average` using the normal object invocation syntax:
+
+```ocaml
 # let p1 = make 5;;
 # let p2 = make 15;;
 # let a = average p1 p2;;
@@ -169,11 +180,9 @@ val average : < get : int; .. > -> < get : int; .. > -> < get : int > = <fun>
 - : int = 15
 ```
 
-Note that the type for `average` uses the object type `< get : int;
-.. >`.  The `..` are ellipsis, standing for any other methods.  The
-type `< get : int; .. >` specifies an object that must have at least a
-`get` method, and possibly some others as well.  If we try using the
-exact type `< get : int >` for an object with more methods, type
+The potential extra parameters defined by the object are carefully
+tracked by the OCaml type checker. If we manually try and constrain
+the  exact type `< get : int >` for an object with more methods, type
 inference will fail.
 
 ```ocaml
