@@ -7,19 +7,21 @@ supports object-oriented programming.  There are objects, classes, and
 their associated types.  Objects are good for encapsulation and
 abstraction, and classes are good for code re-use.
 
-## When to use objects ##
+<note>
+<title>What is Object-Oriented Programming?</title>
 
-You might wonder when to use objects.  First-class modules are more
-expressive (a module can include types, classes and objects cannot),
-and modules, functors, and algebraic data types offer a wide range of
-ways to express program structure.  In fact, many seasoned OCaml
-programmers rarely use classes and objects, if at all.
+Object-oriented programming (often shorted to OOP) is a programming style
+that encapsulates computation and data within logical *objects*.  Each
+object contains some data stored in *fields*, and has
+*method* functions that can be invoked against the data within the object.
+The code definition behind an object is called a *class*, and objects are
+constructed from a class definition by calling a constructor with the
+data that the object will use to build itself.
 
-What exactly is object-oriented programming?  Mitchell (TODO: xref) points out
-four fundamental properties.
+There are four fundamental properties that differentiate OOP from other styles:
 
 * _Abstraction_: the details of the implementation are hidden in the
-  object; the interface is just the set of publically-accessible
+  object, and the external interface is just the set of publically-accessible
   methods.
 * _Dynamic lookup_: when a message is sent to an object, the method to
   be executed is determined by the implementation of the object, not
@@ -28,7 +30,23 @@ four fundamental properties.
 * _Subtyping_: if an object `a` has all the functionality of an object
   `b`, then we may use `a` in any context where `b` is expected.
 * _Inheritance_: the definition of one kind of object can be re-used
-  to produce a new kind of object.
+  to produce a new kind of object.  This new definition can override
+  some behaviour, but also share code with its parent.
+
+Almost every notable modern programming language has been influenced
+by OOP, and you'll have run across these terms if you've ever used
+C++, Java, C#, Ruby, Python or Javascript.
+
+</note>
+
+## When to use objects ##
+
+You might wonder when to use objects in OCaml, which has a multitude
+of alternative mechanisms to express the same concept.
+First-class modules are more expressive (a module can include types, while classes and objects cannot).
+Modules, functors, and algebraic data types also offer a wide range of
+ways to express program structure.  In fact, many seasoned OCaml
+programmers rarely use classes and objects, if at all.
 
 Modules already provide these features in some form, but the main
 focus of classes is on code re-use through inheritance and late
@@ -40,15 +58,15 @@ methods without knowing statically how they will be implemented.
 
 In contrast, modules use static (lexical) scoping.  If you want to
 parameterize your module code so that some part of it can be
-implemented later, you would write a function/functor.  This is more
+implemented later, you would write a function or functor.  This is more
 explicit, but often more verbose than overriding a method in a class.
 
-In general, a rule of thumb might be: use classes and objects in situations
+In general, a rule of thumb is: use classes and objects in situations
 where dynamic binding is a big win, for example if you have many similar
-variations in the implementation of a concept.  Two good examples is Xavier
+variations in the implementation of a concept.  Two good examples are Xavier
 Leroy's [Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit),
 which provides a variety of cryptographic primitives that can be combined in
-building-block style, and the [Camlgraphics](TODO XREF) library which
+building-block style, and the [Camlimages](http://cristal.inria.fr/camlimages/) library which
 manipulates various graphical file formats.
 
 In this chapter, we'll introduce you to the basics of object definition and use
@@ -72,7 +90,7 @@ it).
 OCaml is entirely different.  Classes are used to construct objects
 and support inheritance, including non-subtyping inheritance.  Classes
 are not types.  Instead, objects have _object types_, and if you want
-to use objects, you aren't required to use classes at all.  Here is an
+to use objects, you aren't required to use classes at all.  Here's an
 example of a simple object.
 
 ```ocaml
@@ -86,10 +104,10 @@ val p : < get : int; set : int -> unit > = <obj>
 ```
 
 The object has an integer value `x`, a method `get` that returns x,
-and a method `set` that updates the value of x.
+and a method `set` that updates the value of `x`.
 
 The object type is enclosed in angle brackets `< ... >`, containing
-just the types of the methods.  Fields, like x, are not part of the
+just the types of the methods.  Fields, like `x`, are not part of the
 public interface of an object.  All interaction with an object is
 through its methods.  The syntax for a method invocation (also called
 "sending a message" to the object) uses the `#` character.
@@ -105,7 +123,7 @@ through its methods.  The syntax for a method invocation (also called
 
 Objects can also be constructed by functions.  If we want to specify
 the initial value of the object, we can define a function that takes
-the initial value and produces an object.
+the value and returns an object.
 
 ```ocaml
 # let make i =
@@ -128,11 +146,8 @@ the value.
 
 ## Object Polymorphism ##
 
-_(yminsky: Maybe this is a good time to talk about the nature of
-object subtyping?)_
-
 Functions can also take object arguments.  Let's construct a new
-object `average` that's the average of any two objects with a
+object `average` that returns the average of any two objects with a
 `get` method.
 
 ```ocaml
@@ -140,7 +155,21 @@ object `average` that's the average of any two objects with a
   object
     method get = (p1#get + p2#get) / 2
   end;;
-val average : < get : int; .. > -> < get : int; .. > -> < get : int > = <fun>
+val average : 
+  < get : int; .. > -> 
+  < get : int; .. > ->
+  < get : int > = <fun>
+```
+
+There's some new syntax in the type that's been inferred for `average` here.
+The parameters have the object type `< get : int; .. >`. 
+The `..` are ellipsis, standing for any other methods.  The
+type `< get : int; .. >` specifies an object that must have at least a
+`get` method, and possibly some others as well.
+
+We can use the `average` using the normal object invocation syntax:
+
+```ocaml
 # let p1 = make 5;;
 # let p2 = make 15;;
 # let a = average p1 p2;;
@@ -151,11 +180,9 @@ val average : < get : int; .. > -> < get : int; .. > -> < get : int > = <fun>
 - : int = 15
 ```
 
-Note that the type for `average` uses the object type `< get : int;
-.. >`.  The `..` are ellipsis, standing for any other methods.  The
-type `< get : int; .. >` specifies an object that must have at least a
-`get` method, and possibly some others as well.  If we try using the
-exact type `< get : int >` for an object with more methods, type
+The potential extra parameters defined by the object are carefully
+tracked by the OCaml type checker. If we manually try and constrain
+the  exact type `< get : int >` for an object with more methods, type
 inference will fail.
 
 ```ocaml
@@ -258,19 +285,9 @@ val p : point = <obj>
 - : int = 5
 ```
 
-_(yminsky: You say that inheritance uses an existing class to define a
-new one, but the example below looks like using an existing class to
-define a new module.  Is that what's going on?  Or is a new class
-being created implicitly?  If the latter, it might be better to be
-more explicit in this example and name the new class.)_
-
 Inheritance uses an existing class to define a new one.  For example,
 the following class definition supports an addition method `moveby`
-that moves the point by a relative amount.  This also makes use of the
-`(self : 'self)` binding after the `object` keyword.  The variable
-`self` stands for the current object, allowing self-invocation, and
-the type variable `'self` stands for the type of the current object
-(which in general is a subtype of `movable_point`).
+that moves the point by a relative amount.
 
 ```ocaml
 # class movable_point =
@@ -278,7 +295,159 @@ the type variable `'self` stands for the type of the current object
     inherit point
     method moveby dx = self#set (self#get + dx)
   end;;
+class movable_point :
+  object
+    val mutable x : int
+    method get : int
+    method moveby : int -> unit
+    method set : int -> unit
+  end
 ```
+
+This new `movable_point` class also makes use of the
+`(self : 'self)` binding after the `object` keyword.  The variable
+`self` stands for the current object, allowing self-invocation, and
+the type variable `'self` stands for the type of the current object
+(which in general is a subtype of `movable_point`).
+
+
+##  An Example: Cryptokit
+
+Let's take a break from describing the object system with a more
+practical example that uses the OCaml cryptographic library.
+
+<note>
+<title>Installing the Cryptokit library</title>
+
+The Cryptokit library can be installed via OPAM via `opam install cryptokit`.
+Once that's finished compiling and installing, you just need to `#require
+"cryptokit"` in your toplevel to load the library and make the modules
+available.
+
+</note>
+
+Our first example mimics the `md5` command, which reads in an input
+file and returns a hexadecimal representation of its MD5 cryptographic hash.
+Cryptokit defines a number of different functions and collects them together
+under the `Cryptokit.hash` class type:
+
+```ocaml
+class type hash = object
+  method add_byte : int -> unit
+  method add_char : char -> unit
+  method add_string : string -> unit
+  method add_substring : string -> int -> int -> unit
+  method hash_size : int
+  method result : string
+  method wipe : unit
+end
+
+val hash_string : hash -> string -> string
+```
+
+Concrete hash objects can be instantiated from various sub-modules in Cryptokit.  The simplest ones such as MD5 or SHA1 do not take any special input parameters to build the object. The `hmac_sha1` takes a string key to initialise the Message Authenticate Code for that particular hash function.
+
+```ocaml
+# Cryptokit.Hash.md5;;
+- : unit -> Cryptokit.hash = <fun>
+# Cryptokit.Hash.sha1;;
+- : unit -> Cryptokit.hash = <fun>
+# Cryptokit.MAC.hmac_sha1;;
+- : string -> Cryptokit.hash = <fun>
+```
+
+Hash objects hold state and are thus naturally imperative. Once instantiated, data is fed into them by the addition functions, the `result` is computed and finally the contents erased via `wipe`.
+The `hash_string` convenience function applies the hash function fully to a string, and returns the result.
+The `md5` command is quite straight-forward now:
+
+```ocaml
+open Core.Std
+open Cryptokit
+
+let _ =
+  In_channel.(input_all stdin) |!
+  hash_string (Hash.md5 ()) |!
+  transform_string (Hexa.encode ()) |!
+  print_endline
+```
+
+After opening the right modules, we read in the entire standard input into an OCaml string.
+This is then passed onto the MD5 hash function, which returns a binary string.
+This binary is passed through the `Hexa` hexadecimal encoder, which returns an ASCII
+representation of the input.  The output of this command will be the same as the `md5` command (or `md5sum` in some systems).
+
+We can extend this simple example by selecting either the `md5` or `sha1` hash function at runtime depending on the name of our binary.  `Sys.argv` is an array containing the arguments the command was invoked with, and the first entry is the name of the binary itself.
+
+```ocaml
+open Core.Std
+open Cryptokit
+
+let _ =
+  let hash_fn =
+    match Filename.basename Sys.argv.(0) with
+    |"md5" -> Hash.md5 ()
+    |"sha1" -> Hash.sha1 ()
+    |_ -> Hash.md5 ()
+  in
+  In_channel.(input_all stdin) |!
+  hash_string hash_fn |!
+  transform_string (Hexa.encode ()) |!
+  print_endline
+```
+
+Now let's try something more advanced.  The `openssl` library is installed on most systems, and can be used to encrypt plaintext using several encryption strategies.  At its simplest, it will take a secret phrase and derive an appropriate key and initialisation vector.
+
+```
+$ openssl enc -nosalt -aes-128-cbc -base64 -k "ocaml" -P
+key=6217C07FF169F6AB2EB2731F855095F1
+iv =8164D5477E66E6A9EC99A8D58ACAADAF
+```
+
+We've selected the `-nosalt` option here to make the output deterministic, and the `-P` option prints out the derived key and IV and exits.  The algorithm used to derive these results is described in the `man EVP_BytesToKey` manual page (you may need to install the OpenSSL documentation packages on your system first).  We can implement this derivation function using an imperative style:
+
+```ocaml
+let md5 s = hash_string (Hash.md5 ()) s
+
+let evp_byte_to_key password tlen =
+  let o = Hexa.encode () in
+  let v = ref (md5 password) in
+  o#put_string !v;
+  while o#available_output/2 < tlen do
+    let n = md5 (!v ^ password) in
+    o#put_string n;
+    v := n;
+  done;
+  String.uppercase o#get_string
+
+let _ =
+  let secret = "ocaml" in
+  let key_len = 16 * 2 in
+  let iv_len = 16 * 2 in
+  let x = evp_byte_to_key secret (key_len+iv_len) in
+  let key = String.sub x ~pos:0 ~len:key_len in
+  let iv = String.sub x ~pos:key_len ~len:iv_len in
+  Printf.printf "key=%s\niv =%s\n%!" key iv
+```
+
+The derivation algorithm takes an input password and desired total length (the addition of the key and IV length).
+It initialises a `Hexa.encode` transformer, which will accept arbitrary binary data and output a hexadecimal string (with two output bytes per input byte).  A reference stores the last digest that's been calculated, and then the algorithm iterates until it has sufficient data to satisfy the required key length.
+
+Notice how the encoder object is used as an accumulator, by using the `put_string` and `available_output` to keep track of progress.  Objects don't *require* an imperative style though, and the same algorithm can be written more functionally:
+
+```ocaml
+let evp_byte_to_key password tlen =
+  let rec aux acc v =
+    match String.length acc < tlen with
+    |true ->
+      let v = md5 (v ^ password) in
+      aux (acc^v) v
+    |false -> acc
+  in
+  let v = md5 password in
+  String.uppercase (transform_string (Hexa.encode ()) (aux v v))
+```
+
+In this version, we don't use any references, and instead a recursive function keeps track of the last digest in use and the accumulated result string.  This version isn't quite as efficient as the previous one due to the careless use of string concatenation for the accumulator, but this can easily be fixed by using the `Buffer` module instead.
 
 ## Class parameters and polymorphism ##
 
@@ -395,7 +564,7 @@ without interfaces, like C++, the specification would normally use
 _abstract_ classes to specify the methods without implementing them
 (C++ uses the "= 0" definition to mean "not implemented").
 
-```
+```java
 // Java-style iterator, specified as an interface.
 interface <T> iterator {
   T Get();
@@ -606,7 +775,7 @@ module SList = struct
 end;;
 ```
    
-We have multiple choices in definining the module type, depending on
+We have multiple choices in defining the module type, depending on
 how much of the implementation we want to expose.  At one extreme, a
 maximally-abstract signature would completely hide the class
 definitions.
@@ -679,20 +848,3 @@ used to stand for types.  When the compiler sees a class name in type
 position, it automatically constructs an object type from it by
 erasing all the fields and keeping only the method types.  In this
 case, the type expression `'a slist` is exactly equivalent to `'a t`.
- 
-## Cryptokit
-
-Let's take a break from describing the object system with a more
-practical example.  
-
-<note>
-<title>Installing the Cryptokit library</title>
-
-The Cryptokit library can be installed via OPAM by `opam install cryptokit`.
-The OCamlfind package also has the same name, so you just need to `#require
-"cryptokit"` in your toplevel to load the library and make the modules
-available.
-
-</note>
-
-TODO: example 

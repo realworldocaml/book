@@ -9,8 +9,7 @@ fail due to poor error handling code is worse.
 Thankfully, OCaml has powerful tools for handling errors reliably and
 with a minimum of pain.  In this chapter we'll discuss some of the
 different approaches in OCaml to handling errors, and give some advice
-on how to design interfaces that help rather than hinder error
-handling.
+on how to design interfaces that make error handling easier.
 
 We'll start by describing the two basic approaches for reporting
 errors in OCaml: error-aware return types and exceptions.
@@ -19,7 +18,7 @@ errors in OCaml: error-aware return types and exceptions.
 
 The best way in OCaml to signal an error is to include that error in
 your return value.  Consider the type of the `find` function in the
-list module.
+`List` module.
 
 ```ocaml
 # List.find;;
@@ -41,20 +40,17 @@ the caller that there is an error that needs to be handled. The caller
 can then handle the error explicitly, either recovering from the error
 or propagating it onward.
 
-The function `compute_bounds` below is an example of how you can
-handle errors in this style.  The function takes a list and a
-comparison function, and returns upper and lower bounds for the list
-by finding the smallest and largest element on the list.  `List.hd`
-and `List.last`, which return `None` when they encounter an empty
-list, are used to extract the largest and smallest element of the
-list.
+Consider the `compute_bounds` function defined below.  The function
+takes a list and a comparison function, and returns upper and lower
+bounds for the list by finding the smallest and largest element on the
+list.  `List.hd` and `List.last`, which return `None` when they
+encounter an empty list, are used to extract the largest and smallest
+element of the list.
 
 ```ocaml
 # let compute_bounds ~cmp list =
     let sorted = List.sort ~cmp list in
-    let smallest = List.hd sorted in
-    let largest = List.last sorted in
-    match smallest, largest with
+    match List.hd sorted, List.last sorted with
     | None,_ | _, None -> None
     | Some x, Some y -> Some (x,y)
   ;;
@@ -62,8 +58,8 @@ val compute_bounds :
   cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option = <fun>
 ```
 
-The match statement is used to handle the error cases, propagating an
-error in `hd` or `last` into the return value of `compute_bounds`.  On
+The match statement is used to handle the error cases, propagating a
+None in `hd` or `last` into the return value of `compute_bounds`.  On
 the other hand, in `find_mismatches` below, errors encountered during
 the computation do not propagate to the return value of the function.
 `find_mismatches` takes two hashtables as its arguments and tries to
@@ -72,10 +68,10 @@ in one of the tables isn't really an error.
 
 ```ocaml
 # let find_mismatches table1 table2 =
-     Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data errors ->
+     Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data mismatches ->
         match Hashtbl.find table2 key with
-        | Some data' when data' <> data -> key :: errors
-        | _ -> errors
+        | Some data' when data' <> data -> key :: mismatches
+        | _ -> mismatches
      )
  ;;
 val find_mismatches :
@@ -95,8 +91,8 @@ Options aren't always a sufficiently expressive way to report errors.
 Specifically, when you encode an error as `None`, there's nowhere to
 say anything about the nature of the error.
 
-`Result.t` is meant to address this deficiency.  Here's the
-definition:
+`Result.t` is meant to address this deficiency.  The type is defined
+as follows.
 
 ```ocaml
 module Result : sig
@@ -112,9 +108,7 @@ top-level by `Core.Std`.  As such, we can write:
 
 ```ocaml
 # [ Ok 3; Error "abject failure"; Ok 4 ];;
-[Ok 3; Error "abject failure"; Ok 4]
-- : (int, string) Result.t list =
-[Ok 3; Error "abject failure"; Ok 4]
+- : (int, string) Core.Result.t list = [Ok 3; Error "abject failure"; Ok 4]
 ```
 
 without first opening the `Result` module.
@@ -135,14 +129,14 @@ over the presentation of errors.
 
 It might not be obvious at first why efficiency is an issue at all.
 But generating error messages is an expensive business.  An ASCII
-representation of a type can be quite time-consuming to construct,
-particularly if it includes expensive-to-convert numerical datatypes.
+representation of a value can be quite time-consuming to construct,
+particularly if it includes expensive-to-convert numerical data.
 
 `Error` gets around this issue through laziness.  In particular, an
-`Error.t` allows you to put off generation of the actual error string
-until you actually need, which means a lot of the time you never have
-to construct it at all. You can of course construct an error directly
-from a string:
+`Error.t` allows you to put off generation of the error string until
+you need it, which means a lot of the time you never have to construct
+it at all. You can of course construct an error directly from a
+string:
 
 ```ocaml
 # Error.of_string "something went wrong";;
@@ -170,29 +164,28 @@ This is probably the most common idiom in Core.
 "Something failed a long time ago: (1969-12-31 19:00:00.000000)"
 ```
 
-Here, the value `Time.epoch` is included in the error, but
-`Time.sexp_of_t`, which is used for converting the time to an
-s-expression, isn't run until the error is converted to a string.
+Here, the value `Time.epoch` is included in the error, but that value
+isn't converted into an s-expression until the error is printed out.
 Using the Sexplib syntax-extension, which is discussed in more detail
 in chapter [xref](data-serialization-with-json-xml-and-s-expressions),
-we can inline create an s-expression converter for a collection of
-types, thus allowing us to register multiple pieces of data in an
-`Error.t`.
+we can create an s-expression converter for a new type, thus allowing
+us to conveniently register multiple pieces of data in an `Error.t` as
+a tuple.
 
 ```ocaml
 # Error.create "Something went terribly wrong"
-    (3.5, ["a";"b";"c"],6034)
+    (3.5, ["a";"b";"c"], 6034)
     <:sexp_of<float * string list * int>> ;;
 - : Core.Std.Error.t = "Something went terribly wrong: (3.5(a b c)6034)"
 ```
 
-Here, the declaration `<:sexp_of<float * string list * int>>` asks
-Sexplib to generate the sexp-converter for the tuple.
+The above declaration of `<:sexp_of<float * string list * int>>` is
+interpreted by sexplib as a sexp-converter for the tuple.
 
-Error also has operations for transforming errors.  For example, it's
-often useful to augment an error with some extra information about the
-context of the error, or to combine multiplier errors together.
-`Error.of_list` and `Error.tag` fill these roles.
+`Error` also supports operations for transforming errors.  For
+example, it's often useful to augment an error with some extra
+information about the context of the error, or to combine multiplier
+errors together.  `Error.tag` and `Error.of_list` fulfill these roles.
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
 Result.t`, and it is, after `option`, the most common way of returning
@@ -200,41 +193,42 @@ errors in Core.
 
 ### `bind` and other error-handling idioms
 
-As you write more error handling code, you'll discover that certain
-patterns start to emerge.  A number of these common patterns been
-codified in the interfaces of modules like `Option` and `Result`.  One
-particularly useful one is built around the function `bind`, which is
-both an ordinary function and an infix operator `>>=`, both with the
-same type signature:
+As you write more error handling code in OCaml, you'll discover that
+certain patterns start to emerge.  A number of these common patterns
+been codified in the interfaces of modules like `Option` and `Result`.
+One particularly useful one is built around the function `bind`, which
+is both an ordinary function and an infix operator `>>=`, both with
+the same type signature:
 
 ```ocaml
-val (>>=) : 'a option -> ('a -> 'b option) -> 'b option
+val bind : 'a option -> ('a -> 'b option) -> 'b option
 ```
 
 `bind` is a way of sequencing together error-producing functions so
-that that the first one to produce an error terminates the
-computation.  In particular, `None >>= f` returns `None` without
-calling `f`, and `Some x >>= f` returns `f x`.  We can use a nested
-sequence of these binds to express a multi-stage computation that can
-fail at any stage.  Here's a rewrite `compute_bounds` in this style.
+that the first one to produce an error terminates the computation.  In
+particular, `bind None f` returns `None` without calling `f`, and
+`bind (Some x) f` returns `f x`.  We can use a nested sequence of
+these binds to express a multi-stage computation that can fail at any
+stage.  Here's a rewrite `compute_bounds` in this style.
 
 ```ocaml
 # let compute_bounds ~cmp list =
-    let open Option.Monad_infix in
     let sorted = List.sort ~cmp list in
-    List.hd sorted >>= (fun first ->
-      List.last sorted >>= (fun last ->
+    Option.bind (List.hd sorted) (fun first ->
+      Option.bind (List.last sorted) (fun last ->
         Some (first,last)))
+  ;;
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 ```
 
-Note that we locally open the `Option.Monad_infix` module to get
-access to the infix operator `>>=`.  The module is called
-`Monad_infix` because the bind operator is part of a sub-interface
-called `Monad`, which we'll talk about more in
-[xref](#concurrent-programming-with-async).
-
-This is a bit easier to read if we write it with fewer parentheses and
-less indentation, as follows.
+The above code is a little bit hard to swallow, however, on a
+syntactic level.  We can make it a bit easier to read, and drop some
+of the parenthesis, by using the infix operator form of bind.  Note
+that we locally open the `Option.Monad_infix` module to get access to
+the operators.  (The module is called `Monad_infix` because the bind
+operator is part of a sub-interface called `Monad`, which we'll talk
+about more in [xref](#concurrent-programming-with-async).
 
 ```ocaml
 # let compute_bounds ~cmp list =
@@ -265,13 +259,13 @@ similar functionality is available in both `Result` and `Or_error`.
 ## Exceptions
 
 Exceptions in OCaml are not that different from exceptions in many
-other languages, like Java, C# and Python.  In all these cases,
-exceptions are a way to terminate a computation and report an error,
-while providing a mechanism to catch and handle (and possibly recover
-from) exceptions that are triggered by sub-computations.
+other languages, like Java, C# and Python.  Exceptions are a way to
+terminate a computation and report an error, while providing a
+mechanism to catch and handle (and possibly recover from) exceptions
+that are triggered by sub-computations.
 
-We'll see an exception triggered in OCaml if, for example, we try to
-divide an integer by zero:
+You can trigger an exception triggered in OCaml by, for example,
+dividing an integer by zero:
 
 ```ocaml
 # 3 / 0;;
@@ -286,14 +280,25 @@ a few levels deep in a computation.
 Exception: Division_by_zero.
 ```
 
+```ocaml
+If we put a `printf` in the middle of the computation, we can see that
+the `List.map` is interrupted part way through it's execution:
+
+# List.map ~f:(fun x -> printf "%d\n%!" x; 100 / x) [1;3;0;4];;
+1
+3
+0
+Exception: Division_by_zero.
+```
+
 In addition to built-in exceptions like `Divide_by_zero`, OCaml lets
 you define your own.
 
 ```ocaml
 # exception Key_not_found of string;;
 exception Key_not_found of string
-# Key_not_found "a";;
-- : exn = Key_not_found("a")
+# raise (Key_not_found "a");;
+Exception: Key_not_found("a").
 ```
 
 Here's an example of a function for looking up a key in an
@@ -327,12 +332,11 @@ see it:
 - : exn -> 'a = <fun>
 ```
 
-Having the return type be an otherwise unused type variable `'a`
-suggests that `raise` could return a value of any type.  That seems
-impossible, and it is.  `raise` has this type because it never returns
-at all. This behavior isn't restricted to functions like `raise` that
-terminate by throwing exceptions.  Here's another example of a
-function that doesn't return a value.
+The return type of `'a` suggests that `raise` could return a value of
+any type.  That seems impossible, and it is.  Really, `raise` has this
+type because it never returns at all. This behavior isn't restricted
+to functions like `raise` that terminate by throwing exceptions.
+Here's another example of a function that doesn't return a value.
 
 ```ocaml
 # let rec forever () = forever ();;

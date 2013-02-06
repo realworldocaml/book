@@ -18,7 +18,14 @@ define([
     var gitHubPageLabel = "page-" + config.page.split(".")[0];
     var gitHubClientId = $.cookie("github_client_id");
     var gitHubAccessToken = $.cookie("github_access_token");
-    
+
+    /**
+     * Return URL for a Github issue 
+     */
+    function getIssueURL(issue) {
+        return (gitHubUser+"/"+gitHubRepo+"/issues/"+issue.number);
+    }
+        
     /**
      * Tests if the user is currently authenticated.
      */
@@ -126,6 +133,7 @@ define([
         isAuthenticated: isAuthenticated,
         getOAuth2RedirectURL: getOAuth2RedirectURL,
         getIssues: getIssues,
+        getIssueURL: getIssueURL,
         createIssue: createIssue
     };
     
