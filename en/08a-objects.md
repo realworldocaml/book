@@ -326,7 +326,7 @@ available.
 
 </note>
 
-Let's build a command to mimic the `md5` command, which reads in an input
+Our first example mimics the `md5` command, which reads in an input
 file and returns a hexadecimal representation of its MD5 cryptographic hash.
 Cryptokit defines a number of different functions and collects them together
 under the `Cryptokit.hash` class type:
@@ -345,7 +345,18 @@ end
 val hash_string : hash -> string -> string
 ```
 
-Hash objects are clearly imperative. Once instantiated, data is fed into them by the addition functions, and then the `result` is computed and then the contents erased via `wipe`.
+Concrete hash objects can be instantiated from various sub-modules in Cryptokit.  The simplest ones such as MD5 or SHA1 do not take any special input parameters to build the object. The `hmac_sha1` takes a string key to initialise the Message Authenticate Code for that particular hash function.
+
+```ocaml
+# Cryptokit.Hash.md5;;
+- : unit -> Cryptokit.hash = <fun>
+# Cryptokit.Hash.sha1;;
+- : unit -> Cryptokit.hash = <fun>
+# Cryptokit.MAC.hmac_sha1;;
+- : string -> Cryptokit.hash = <fun>
+```
+
+Hash objects hold state and are thus naturally imperative. Once instantiated, data is fed into them by the addition functions, the `result` is computed and finally the contents erased via `wipe`.
 The `hash_string` convenience function applies the hash function fully to a string, and returns the result.
 The `md5` command is quite straight-forward now:
 
