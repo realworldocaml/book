@@ -32,7 +32,14 @@ mechanism used by the rest of this chapter.
 
 S-expressions are nested paranthetical strings whose atomic values are strings.
 They were first popularized by the Lisp programming language in the 1960s, and
-have remained a simple way to encode data structures since then.
+have remained a simple way to encode data structures since then.  An example
+s-expression might look like this:
+
+```scheme
+(this (is an) (s expression))
+```
+
+The corresponding OCaml type for an s-expression is quite simple:
 
 ```ocaml
 module Sexp : sig
@@ -41,8 +48,8 @@ end
 ```
 
 An s-expression is in essence a nested parenthetical list whose atomic
-values are strings.  The `Sexp` module comes with functionality for
-parsing and printing s-expressions.
+values are strings.  The `Sexp` module in Core comes with functionality
+for parsing and printing s-expressions.
 
 ```ocaml
 # let sexp =
@@ -69,7 +76,7 @@ list to be converted.  Core uses this scheme more generally for
 defining sexp-converters for polymorphic types.
 
 But what if you want a function to convert some brand new type to an
-s-expression?  You can of course write it yourself:
+s-expression?  You can of course write it yourself manually:
 
 ```ocaml
 # type t = { foo: int; bar: float };;
@@ -91,8 +98,8 @@ mechanical and error prone, not to mention a drag.
 Given how mechanical the code is, you could imagine writing a program
 that inspected the type definition and auto-generated the conversion
 code for you.  That is precisely where syntax extensions come in.
-Using Sexplib and adding `with sexp` as an annotation to our type
-definition, we get the functions we want for free.
+Using `Sexplib` (part of Core) and adding `with sexp` as an annotation to our
+type definition, we get the functions we want for free.
 
 ```ocaml
 # type t = { foo: int; bar: float } with sexp;;
@@ -104,44 +111,24 @@ val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
 - : t = {foo = 3; bar = 35.}
 ```
 
-(You can ignore `t_of_sexp__`, which is a helper function that is
-needed in very rare cases.)
+The `with sexp` is detected by a `Sexplib` grammar extension to the normal
+OCaml syntax, and replaced with the extra conversion functions you see
+above. You can ignore `t_of_sexp__`, which is a helper function that is
+needed in very rare cases.
 
-The syntax-extensions in Core that we're going to discuss all have
-this same basic structure: they auto-generate code based on type
-definitions, implementing functionality that you could in theory have
-implemented by hand, but with far less programmer effort.
-
-There are several syntax extensions distributed with Core, including:
-
-- **Sexplib**: provides serialization for s-expressions.
-- **Bin_prot**: provides serialization to an efficient binary
-  format.
-- **Fieldslib**: generates first-class values that represent fields of
-  a record, as well as accessor functions and setters for mutable
-  record fields.
-- **Variantslib**: like Fieldslib for variants, producing first-class
-  variants and other helper functions for interacting with variant
-  types.
-- **Pa_compare**: generates efficient, type-specialized comparison
-  functions.
-- **Pa_typehash**: generates a hash value for a type definition,
-  _i.e._, an integer that is highly unlikely to be the same for two
-  distinct types.
-
-We'll discuss each of these syntax extensions in detail, starting with
-Sexplib.
+The syntax extensions in Core all have this same basic structure: they
+auto-generate code based on type definitions, implementing functionality
+that you could in theory have implemented by hand, but with far less
+programmer effort.
 
 ## Sexplib
 
-### Formatting of s-expressions
-
-Sexplib's format for s-expressions is pretty straightforward: an
+Sexplib's format for s-expressions is pretty straightforward. An
 s-expression is written down as a nested parenthetical expression,
 with whitespace-separated strings as the atoms.  Quotes are used for
 atoms that contain parenthesis or spaces themselves, backslash is the
 escape character, and semicolons are used to introduce comments.
-Thus, if you create the following file:
+Thus, if you create the following `foo.scm` file:
 
 ```scheme
 ;; foo.scm
@@ -174,8 +161,10 @@ open-paren in front of `bar`, we'll get a parse error:
     (text_char 29) (global_offset 94) (buf_pos 94)))
 ```
 
-(In the above, we use `Exn.handle_uncaught` to make sure that the
-exception gets printed out in full detail.)
+In the above, we use `Exn.handle_uncaught` to make sure that the
+exception gets printed out in full detail.  You should generally wrap
+every Core program in this handler to get good error messages for any
+unexpected exceptions.
 
 ### Sexp converters
 
@@ -225,8 +214,8 @@ let () =
   |! print_endline
 ```
 
-But we're still missing something: we haven't created an `mli` for
-`Int_interval` yet.  Note that we need to explicitly export the
+But we're still missing something: we haven't created an `mli` signature 
+for `Int_interval` yet.  Note that we need to explicitly export the
 s-expression converters that were created within the ml.  If we don't:
 
 ```ocaml
@@ -248,7 +237,7 @@ Error: Unbound value Int_interval.sexp_of_t
 Command exited with code 2.
 ```
 
-We could export the types by hand:
+We could export the types by hand in the signature:
 
 ```ocaml
 type t
@@ -256,8 +245,8 @@ val sexp_of_t : Sexp.t -> t
 val t_of_sexp : t -> Sexp.t
 ```
 
-But Sexplib has a shorthand for this as well, so that we can instead
-write simply:
+But Sexplib has a shorthand for this as well, so that we can just
+use the same `with` shorthand in the `mli` signature:
 
 ```ocaml
 type t with sexp
@@ -281,8 +270,9 @@ correctness of the `is_empty` check on the fact that for any value
 function preserves this invariant, but the `t_of_sexp` function does
 not.
 
-We can fix this problem by writing a custom sexp-converter, in this
-case, using the sexp-converter that we already have:
+We can fix this problem by overriding the autogenerated function
+and writing a custom sexp-converter, but still using the sexp-converter
+that we already have:
 
 ```ocaml
 type t = | Range of int * int
@@ -300,6 +290,12 @@ let t_of_sexp sexp =
   end;
   t
 ```
+
+This trick of overriding an existing function definition with a new
+one is perfectly acceptable in OCaml.  Function definitions are only
+recursive if the `rec` keyword is specified, and so in this case the
+inner `t_of_sexp` call will go to the earlier auto-generated definition
+that resulted from the `type t with sexp` definition.
 
 We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
@@ -642,3 +638,23 @@ module Fields :
   end
 ```
 
+
+There are several syntax extensions distributed with Core, including:
+
+- **Sexplib**: provides serialization for s-expressions.
+- **Bin_prot**: provides serialization to an efficient binary
+  format.
+- **Fieldslib**: generates first-class values that represent fields of
+  a record, as well as accessor functions and setters for mutable
+  record fields.
+- **Variantslib**: like Fieldslib for variants, producing first-class
+  variants and other helper functions for interacting with variant
+  types.
+- **Pa_compare**: generates efficient, type-specialized comparison
+  functions.
+- **Pa_typehash**: generates a hash value for a type definition,
+  _i.e._, an integer that is highly unlikely to be the same for two
+  distinct types.
+
+We'll discuss each of these syntax extensions in detail, starting with
+Sexplib.
