@@ -17,6 +17,7 @@
 ((part Advanced) (name "first-class-modules") (file "10a-fcm")                                                  (public false))
 ((part Advanced) (name "understanding-the-runtime-system") (file "14-interfacing-with-C")                       (public false))
 ((part Advanced) (name "object-subtyping-and-inheritance") (file "13-advanced-objects")                         (public true))
+((part Advanced) (name "advanced-topics") (file "13b-advanced-topics")                                          (public false))
 ((part Advanced) (name "managing-external-memory-with-bigarrays") (file "15-bigarrays")                         (public false))
 ((part Advanced) (name "inside-the-runtime") (file "16a-inside-the-runtime")                                    (public false))
 ((part Advanced) (name "performance-tuning-and-profiling") (file "16b-tuning-and-profiling")                    (public false))

@@ -26,6 +26,9 @@ OCAML_LIBS +=
 
 OCAMLFLAGS = -thread
 
-OCamlProgram(match, match)
+OCamlProgram(forth, forth)
+OCamlProgram(uniq, uniq)
+OCamlProgram(op, op)
+OCamlProgram(list_set, list_set)
 
-.DEFAULT: match
+.DEFAULT: forth uniq op list_set
