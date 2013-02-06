@@ -12,6 +12,24 @@ manipulate s-expressions and safe binary serialisers directly from OCaml types.
 After this section, we'll move onto interoperating with other third-party
 formats in [xref](#handling-json-data) and [xref](#xml-streams-and-trees).
 
+<note>
+<title>The `camlp4` preprocessor and `type_conv`</title>
+
+OCaml doesn't directly support converting static type definitions to and 
+from other data formats.  Instead, it supplies a powerful syntax extension
+mechanism known as `camlp4`.  This lets you extend the grammar of the language
+to mark types as requiring special action, and then mechanically generate
+boilerplate code over those types (such as converting to and from other data
+formats).
+
+Many of the examples in the subsequent chapters depend on `camlp4`, but
+the examples all invoke it automatically for you via the `-pp` flag to the
+OCaml compiler.  If you're interested in building your own generators,
+investigate the `type_conv` library which provides the basic extension
+mechanism used by the rest of this chapter.
+
+</note>
+
 S-expressions are nested paranthetical strings whose atomic values are strings.
 They were first popularized by the Lisp programming language in the 1960s, and
 have remained a simple way to encode data structures since then.
