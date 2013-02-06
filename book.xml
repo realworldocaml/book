@@ -1203,11 +1203,12 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
     </para>
     <para>
       We also made our first use of an <emphasis>anonymous
-      function</emphasis> in the call to <literal>List.forall</literal>.
-      An anonymous function is a function that is defined but not named,
-      in this case, using the <literal>fun</literal> keyword. Anonymous
-      functions are common in OCaml, particularly when using iteration
-      functions like like <literal>List.forall</literal>.
+      function</emphasis> in the call to
+      <literal>List.for_all</literal>. An anonymous function is a
+      function that is defined but not named, in this case, using the
+      <literal>fun</literal> keyword. Anonymous functions are common in
+      OCaml, particularly when using iteration functions like like
+      <literal>List.for_all</literal>.
     </para>
   </sect1>
   <sect1 id="imperative-programming">
@@ -2867,236 +2868,22 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       that bring together related values that represent some concept.
     </para>
     <para>
-      Lists are one of the most common ways to aggregate data in OCaml;
-      they are simple, and they are extensively supported by the
-      standard library.
+      Lists are one of the most common ways to aggregate data in OCaml.
+      You can construct a list of values by enclosing them in square
+      brackets, and separating the elements with semicolons. The list
+      elements must all have the same type.
     </para>
+    <programlisting language="ocaml">
+# let l1 = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;];;
+val l1 : string list = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;]
+# List.nth l1 1;;
+- : string option = Some &quot;Paris&quot;
+# List.nth l1 2;;
+- : string option = Some &quot;Tokyo&quot;
+</programlisting>
     <para>
-      <emphasis>(yminsky: I would point out that they are the most
-      commonly used aggregate, rather than just that they're supported
-      by the standard library. Also, that way we avoid confusion in the
-      sentence. between the standard library and Core.)</emphasis>
-    </para>
-    <sect2 id="example-pretty-printing-a-table">
-      <title>Example: pretty-printing a table</title>
-      <para>
-        <emphasis>(yminsky: I wonder if the whole example should go
-        later in the section, after we've done more of the basis of
-        lists in this chapter.)</emphasis>
-      </para>
-      <para>
-        One common programming task is displaying tabular data. In this
-        example, we will go over the design of a simple library to do
-        just that.
-      </para>
-      <para>
-        <emphasis>(yminsky: This is the first appearance of an mli file.
-        If we're going to introduce it here, we need to do a little more
-        explanation.)</emphasis>
-      </para>
-      <para>
-        We'll start with the interface. The code will go in a new module
-        called <literal>Text_table</literal> whose
-        <literal>.mli</literal> contains just the following function:
-      </para>
-      <programlisting language="ocaml">
-(* [render headers rows] returns a string containing a formatted
-   text table, using Unix-style newlines as separators *)
-val render
-   :  string list         (* header *)
-   -&gt; string list list    (* data *)
-   -&gt; string
-</programlisting>
-      <para>
-        If you invoke <literal>render</literal> as follows:
-      </para>
-      <programlisting language="ocaml">
-let () =
-  print_string (Text_table.render
-     [&quot;language&quot;;&quot;architect&quot;;&quot;first release&quot;]
-     [ [&quot;Lisp&quot; ;&quot;John McCarthy&quot; ;&quot;1958&quot;] ;
-       [&quot;C&quot;    ;&quot;Dennis Ritchie&quot;;&quot;1969&quot;] ;
-       [&quot;ML&quot;   ;&quot;Robin Milner&quot;  ;&quot;1973&quot;] ;
-       [&quot;OCaml&quot;;&quot;Xavier Leroy&quot;  ;&quot;1996&quot;] ;
-     ])
-</programlisting>
-      <para>
-        you'll get the following output:
-      </para>
-      <programlisting>
-| language | architect      | first release |
-|----------+----------------+---------------|
-| Lisp     | John McCarthy  | 1958          |
-| C        | Dennis Ritchie | 1969          |
-| ML       | Robin Milner   | 1973          |
-| OCaml    | Xavier Leroy   | 1996          |
-</programlisting>
-      <para>
-        Now that we know what <literal>render</literal> is supposed to
-        do, let's dive into the implementation.
-      </para>
-      <sect3 id="computing-the-widths">
-        <title>Computing the widths</title>
-        <para>
-          To render the rows of the table, we'll first need the width of
-          the widest entry in each column. The following function does
-          just that.
-        </para>
-        <programlisting language="ocaml">
-let max_widths header rows =
-  let to_lengths l = List.map ~f:String.length l in
-  List.fold rows
-    ~init:(to_lengths header)
-    ~f:(fun acc row -&gt;
-      List.map2_exn ~f:Int.max acc (to_lengths row))
-</programlisting>
-        <para>
-          In the above we define a helper function,
-          <literal>to_lengths</literal> which uses
-          <literal>List.map</literal> and
-          <literal>String.length</literal> to convert a list of strings
-          to a list of string lengths. Then, starting with the lengths
-          of the headers, we use <literal>List.fold</literal> to join in
-          the lengths of the elements of each row by
-          <literal>max</literal>'ing them together element-wise.
-        </para>
-        <para>
-          Note that this code will throw an exception if any of the rows
-          has a different number of entries than the header. In
-          particular, <literal>List.map2_exn</literal> throws an
-          exception when its arguments have mismatched lengths.
-        </para>
-      </sect3>
-      <sect3 id="rendering-the-rows">
-        <title>Rendering the rows</title>
-        <para>
-          Now we need to write the code to render a single row. There
-          are really two different kinds of rows that need to be
-          rendered; an ordinary row:
-        </para>
-        <programlisting>
-| Lisp     | John McCarthy  | 1962          |
-</programlisting>
-        <para>
-          and a separator row:
-        </para>
-        <programlisting>
-|----------+----------------+---------------|
-</programlisting>
-        <para>
-          Let's start with the separator row, which we can generate as
-          follows:
-        </para>
-        <programlisting language="ocaml">
-let render_separator widths =
-  let pieces = List.map widths
-    ~f:(fun w -&gt; String.make (w + 2) '-')
-  in
-  &quot;|&quot; ^ String.concat ~sep:&quot;+&quot; pieces ^ &quot;|&quot;
-</programlisting>
-        <para>
-          We need the extra two-characters for each entry to account for
-          the one character of padding on each side of a string in the
-          table.
-        </para>
-        <note>
-        <title>
-        Performance of <literal>String.concat</literal> and
-        <literal>^</literal>
-        </title>
-        <para>
-          In the above, we're using two different ways of concatenating
-          strings, <literal>String.concat</literal>, which operates on
-          lists of strings, and <literal>^</literal>, which is a
-          pairwise operator. You should avoid <literal>^</literal> for
-          joining long numbers of strings, since, it allocates a new
-          string every time it runs. Thus, the following code:
-        </para>
-        <programlisting language="ocaml">
-let s = &quot;.&quot; ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;
-</programlisting>
-        <para>
-          will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas
-          this code:
-        </para>
-        <programlisting language="ocaml">
-let s = String.concat [&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;]
-</programlisting>
-        <para>
-          allocates one string of size 7, as well as a list of length 7.
-          At these small sizes, the differences don't amount to much,
-          but for assembling of large strings, it can be a serious
-          performance issue.
-        </para>
-        </note>
-        <para>
-          We can write a very similar piece of code for rendering the
-          data in an ordinary row.
-        </para>
-        <programlisting language="ocaml">
-let pad s length =
-  if String.length s &gt;= length then s
-  else s ^ String.make (length - String.length s) ' '
-
-let render_row row widths =
-  let pieces = List.map2 row widths
-    ~f:(fun s width -&gt; &quot; &quot; ^ pad s width ^ &quot; &quot;)
-  in
-  &quot;|&quot; ^ String.concat ~sep:&quot;|&quot; pieces ^ &quot;|&quot;
-</programlisting>
-        <para>
-          You might note that <literal>render_row</literal> and
-          <literal>render_separator</literal> share a bit of structure.
-          We can improve the code a bit by factoring that repeated
-          structure out:
-        </para>
-        <programlisting language="ocaml">
-let decorate_row ~sep row = &quot;|&quot; ^ String.concat ~sep row ^ &quot;|&quot;
-
-let render_row widths row =
-  decorate_row ~sep:&quot;|&quot;
-    (List.map2_exn row widths ~f:(fun s w -&gt; &quot; &quot; ^ pad s w ^ &quot; &quot;))
-
-let render_separator widths =
-  decorate_row ~sep:&quot;+&quot;
-    (List.map widths ~f:(fun width -&gt; String.make (width + 2) '-'))
-</programlisting>
-        <para>
-          And now we can write the function for rendering a full table.
-        </para>
-        <programlisting language="ocaml">
-let render header rows =
-  let widths = max_widths header rows in
-  String.concat ~sep:&quot;\n&quot;
-    (render_row widths header
-     :: render_separator widths
-     :: List.map rows ~f:(fun row -&gt; render_row widths row)
-    )
-</programlisting>
-      </sect3>
-    </sect2>
-  </sect1>
-  <sect1 id="list-basics">
-    <title>List basics</title>
-    <para>
-      <emphasis>(yminsky: I wonder if this should come before the
-      example. The example kind of assumes a lot of information, some of
-      which was given in the guided tour, and some of which
-      wasn't.)</emphasis>
-    </para>
-    <para>
-      In the example, we see calls to <literal>List</literal> functions
-      in the standard library, in particular
-      <literal>List.map</literal>. How does this all work? To
-      understand, we need to consider first how lists are
-      <emphasis>represented</emphasis> internally, which follows from
-      the type definition and the way lists are constructed. Let's look
-      at the constructors first.
-    </para>
-    <para>
-      We have seen how square brackets can be used to construct a list
-      of values, but there are really just two ways to construct a list
-      value.
+      The square bracket syntax is really just a shorthand. There are
+      really just two ways to construct a list value.
     </para>
     <itemizedlist>
       <listitem>
@@ -3112,31 +2899,39 @@ let render header rows =
           <literal>x</literal>, and the rest is <literal>l</literal>.
           The value corresponding to <literal>x :: l</literal> is
           commonly called a <emphasis>cons</emphasis>-cell (the term
-          comes from Lisp, where <emphasis>cons</emphasis> is short for
+          comes from Lisp, where &quot;cons&quot; is short for
           &quot;constructor&quot;).
         </para>
       </listitem>
     </itemizedlist>
     <para>
-      The bracket syntax <literal>[5; 3; 7]</literal> is syntactic sugar
-      for a list with 3 cons-cells,
-      <literal>5 :: 3 :: 7 :: []</literal>. Each cell has two parts: 1)
-      a value, and 2) a pointer to the rest of the list. The final
-      pointer refers to the special value <literal>[]</literal>
-      representing the empty list.
+      The bracket syntax
+      <literal>[&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;]</literal>
+      is just another way to write a list with 3 cons-cells,
+      <literal>&quot;Chicago&quot; :: &quot;Paris&quot; :: &quot;Tokyo&quot; :: []</literal>.
+      Each cell has two parts: a value, and a pointer to the rest of the
+      list. The final pointer refers to the special value
+      <literal>[]</literal> representing the empty list.
     </para>
     <para>
       TODO: IMAGE figures/04-list-01.svg
     </para>
+    <programlisting language="ocaml">
+# let l2 = &quot;Chicago&quot; :: &quot;Paris&quot; :: &quot;Tokyo&quot; :: [];;
+val l2 : string list = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;]
+# List.hd l2;;
+- : string option = Some &quot;Chicago&quot;
+# List.tl l2;;
+- : string list option = Some [&quot;Paris&quot;; &quot;Tokyo&quot;]
+</programlisting>
   </sect1>
   <sect1 id="pattern-matching">
     <title>Pattern matching</title>
     <para>
       Constructing a list is really only half the story -- it would be
       pretty useless to construct lists unless we can also pull them
-      apart. We need <emphasis>destructors</emphasis>, and for this we
-      use <emphasis>pattern matching</emphasis>, like we saw in the
-      previous chapter.
+      apart. We need destructors, and for this we use <emphasis>pattern
+      matching</emphasis>.
     </para>
     <para>
       For a list, there are two possible shapes: the empty list
@@ -3149,32 +2944,456 @@ let render header rows =
     </para>
     <para>
       For example, suppose we want to define a function to add 1 to each
-      element of a list. We have to consider both cases, 1) where the
-      list is empty, or 2) where it is a cons-cell.
+      element of a list. We have to consider two cases, where the list
+      is empty, or where it is a cons-cell <literal>h :: t</literal>. In
+      the latter case, we add one to <literal>h</literal>, and then
+      recursively compute over the tail of the list
+      <literal>t</literal>.
     </para>
     <programlisting language="ocaml">
 # let rec add1 l =
     match l with
-     | [] -&gt; []
-     | h :: t -&gt; (h + 1) :: (add1 t);;
+    | [] -&gt; []
+    | h :: t -&gt; (h + 1) :: (add1 t);;
 val add1 : int list -&gt; int list = &lt;fun&gt;
 # add1 [5; 3; 7];;
 - : int list = [6; 4; 8]
 </programlisting>
     <para>
-      The functions in the standard library can implemented in similar
-      ways. A straightforward, but inefficient, version of the
-      <literal>List.map</literal> function is as follows.
+      Patterns are not limited to just one constructor. They can be
+      aribitrarily nested. For example, if we want to extract the third
+      element of a list, we can use a pattern
+      <literal>_ :: _ :: x :: _</literal>. The underscore
+      <literal>_</literal> is a special pattern that matches (and
+      ignores) anything. The first two underscores match the first two
+      elements of the list, the <literal>x</literal> matches the third
+      element, and the final underscore matches the rest of the list.
     </para>
     <programlisting language="ocaml">
-# let rec map l ~f =
+# let third l =
     match l with
-     | [] -&gt; []
-     | h :: t -&gt; f h :: map ~f t;;
-val map : 'a list -&gt; f:('a -&gt; 'b) -&gt; 'b list = &lt;fun&gt;
-# map ~f:string_of_int [5; 3; 7];;
-- : string list = [&quot;5&quot;; &quot;3&quot;; &quot;7&quot;]
+    | _ :: _ :: x :: _ -&gt; Some x
+    | _ -&gt; None;;
+val third : 'a list -&gt; 'a option = &lt;fun&gt;
+# third [&quot;A&quot;; &quot;B&quot;; &quot;C&quot;; &quot;D&quot;];;
+- : string option = Some &quot;C&quot;
+# third [&quot;A&quot;; &quot;B&quot;];;
+- : string option = None
 </programlisting>
+    <para>
+      The pattern <literal>_ :: _ :: x :: _</literal> is not exhaustive,
+      because it doesn't match lists with fewer than three elements, so
+      we have included a second &quot;wildcard&quot; pattern, a single
+      underscore <literal>_</literal>, that matches anything else. We're
+      using the <literal>option</literal> type for the return value,
+      where <literal>Some x</literal> means that the third element of
+      the list was <literal>x</literal>, and <literal>None</literal>
+      means that the list had fewer than three elements. We'll discuss
+      options more in the next section.
+    </para>
+    <para>
+      Patterns are matched in left-to-right order (or top-to-bottom, in
+      this case), so the result is determined by the first pattern to
+      match. If we had listed the patterns in opposite order, the
+      wildcard pattern would match everything, and the second pattern
+      would be ignored.
+    </para>
+    <programlisting language="ocaml">
+# let broken_third l =
+    match l with
+    | _ -&gt; None
+    | _ :: _ :: x :: _ -&gt; Some x;;
+Characters 47-63:
+    | _ :: _ :: x :: _ -&gt; Some x;;
+      ^^^^^^^^^^^^^^^^
+Warning 11: this match case is unused.
+val broken_third : 'a list -&gt; 'a option = &lt;fun&gt;
+# broken_third [17; 21; 7; 34];;
+- : int option = None
+</programlisting>
+    <para>
+      Pattern ordering can be an issue, but a more important concern is
+      that pure wildcard patterns match anything, making it easier to
+      forget &quot;important&quot; cases. When a pattern matching is
+      compiled, OCaml performs an exhaustiveness check, printing a
+      warning if it is not exhaustive, along with an example of a
+      missing pattern.
+    </para>
+    <programlisting language="ocaml">
+# let inexhaustive_third l =
+    match l with
+    | _ :: _ :: x :: _ -&gt; Some x;;
+    Characters 24-68:
+  ...match l with
+     | _ :: _ :: x :: _ -&gt; Some x..
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val inexhaustive_third : 'a list -&gt; 'a option = &lt;fun&gt;
+# inexhaustive_third [1; 2; 3; 4];;
+- : int option = Some 3
+# inexhaustive_third [1; 2];;
+Exception: (Match_failure //toplevel// 14 3).
+</programlisting>
+    <para>
+      This exhaustiveness checking can be tremendously useful in
+      ensuring that the appropriate cases are all considered. Generally
+      speaking, it is usually better to be as specific as possible when
+      writing patterns. This helps exhaustiveness checking point out
+      missing cases if they exist, and also means that pattern ordering
+      is not as important.
+    </para>
+    <programlisting language="ocaml">
+# let third l =
+    match l with
+    | [] | [_] | [_; _] -&gt; None
+    | _ :: _ :: x :: _ -&gt; Some x;;
+val third : 'a list -&gt; 'a option = &lt;fun&gt;
+</programlisting>
+  </sect1>
+  <sect1 id="options-1">
+    <title>Options</title>
+    <para>
+      Note that the <literal>List</literal> functions like
+      <literal>List.hd</literal> (for &quot;head&quot; of the list),
+      <literal>List.tl</literal> (for &quot;tail&quot; of the list), and
+      <literal>List.nth</literal> return values of
+      <literal>option</literal> type. That's because, in some cases,
+      there is no value to return. For example, the empty list has no
+      head or tail.
+    </para>
+    <programlisting language="ocaml">
+# List.hd [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;];;
+- : string option = Some &quot;Chicago&quot;
+# List.tl [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;];;
+- : string list option = Some [&quot;Paris&quot;; &quot;Tokyo&quot;]
+# List.nth [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;] 2;;
+- : string option = Some &quot;Tokyo&quot;
+# List.hd [];;
+- : 'a option = None
+# List.tl [];;
+- : 'a list option = None
+# List.nth [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;] 5;;
+- : string option = None
+</programlisting>
+    <para>
+      A value of <literal>option</literal> type is &quot;optional&quot;
+      -- it is either <literal>None</literal>, meaning &quot;no
+      value&quot;; or <literal>Some v</literal> for some value
+      <literal>v</literal>. For example,
+      <literal>List.hd [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;]</literal>
+      is <literal>Some &quot;Chicago&quot;</literal> because the head of
+      the list exists (&quot;Chicago&quot;), but
+      <literal>List.hd []</literal> is <literal>None</literal> because
+      there is no head of the empty list.
+    </para>
+    <para>
+      The type definition for <literal>option</literal> has the
+      following form.
+    </para>
+    <programlisting language="ocaml">
+type 'a option =
+  | Some of 'a
+  | None
+</programlisting>
+    <para>
+      As with lists, the way to take apart an <literal>option</literal>
+      value is to use pattern matching, with patterns for the two cases.
+    </para>
+    <programlisting language="ocaml">
+# let optional_default ~default opt =
+    match opt with
+    | Some v -&gt; v
+    | None -&gt; default;;
+val optional_default : default:'a -&gt; 'a option -&gt; 'a = &lt;fun&gt;
+# optional_default ~default:10 (Some 17);;
+- : int = 17
+# optional_default ~default:10 None;;
+- : int = 10
+</programlisting>
+    <para>
+      One annoying thing about the use of options is that functions do
+      not compose directly. For example, if we wanted to compute the
+      third element of a list using the <literal>List.hd</literal> and
+      <literal>List.tl</literal> functions, we might try to compose them
+      like this.
+    </para>
+    <programlisting language="ocaml">
+# let third l = List.hd (List.tl (List.tl l));;
+Characters 32-41:
+  let third l = List.hd (List.tl (List.tl l));;
+                                  ^^^^^^^^^
+Error: This expression has type 'a list option
+       but an expression was expected of type 'b list
+</programlisting>
+    <para>
+      Unfortunately, this doesn't work because the functions return
+      options, not lists. We can use pattern matching to perform the
+      composition, but the code is pretty tedious.
+    </para>
+    <programlisting language="ocaml">
+# let tedious_third l1 =
+    match List.tl l1 with
+    | None -&gt; None
+    | Some l2 -&gt;
+      match List.tl l2 with
+      | None -&gt; None
+      | Some l3 -&gt;
+        List.hd l3;;
+val tedious_third : 'a list -&gt; 'a option = &lt;fun&gt;
+# tedious_third [7; 21; 12; 19];;
+- : int option = Some 12
+# tedious_third [1; 2];;
+- : int option = None
+</programlisting>
+    <para>
+      One solution for abbreviating the code is to define a composition
+      operator <literal>v &gt;&gt;= f</literal> that takes an option
+      value <literal>v</literal>, performs the pattern match, and passes
+      the value to function <literal>f</literal> if there is one.
+    </para>
+    <programlisting language="ocaml">
+# let (&gt;&gt;=) v f =
+    match v with
+    | None -&gt; None
+    | Some x -&gt; f x;;
+val ( &gt;&gt;= ) : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
+# let third l = Some l &gt;&gt;= List.tl &gt;&gt;= List.tl &gt;&gt;= List.hd;;
+val third : 'a list -&gt; 'a option = &lt;fun&gt;
+# third [7; 21; 12; 19];;
+- : int option = Some 12
+# third [7; 21];;
+- : int option = None
+</programlisting>
+    <para>
+      The operator <literal>&gt;&gt;=</literal> has infix syntax, and
+      the expression
+      <literal>Some l &gt;&gt;= List.tl &gt;&gt;= List.tl &gt;&gt;= List.hd</literal>
+      should be read left-to-right: pass <literal>Some l</literal> to
+      the <literal>List.tl</literal> function, then to another
+      <literal>List.tl</literal>, then to <literal>List.hd</literal>.
+      Since <literal>&gt;&gt;=</literal> is an infix operator, the
+      function definition uses parenthesis
+      <literal>(&gt;&gt;=)</literal> to define the function in prefix
+      form.
+    </para>
+    <para>
+      All we have done here is to hoist the pattern matching into a
+      separate function <literal>&gt;&gt;=</literal>, but the result has
+      a convenient left-to-right sequential reading. This is a common
+      pattern in Core, captured by the <literal>Monad.S</literal> module
+      signature. In fact, The <literal>Core.Std.Option</literal> module
+      already implements the <literal>Monad.S</literal> signature. A
+      more conventional way to write the function would be to use
+      function <literal>Option.(&gt;&gt;=)</literal> directly.
+    </para>
+    <programlisting language="ocaml">
+# let third l =
+    let (&gt;&gt;=) = Option.(&gt;&gt;=) in
+    Some l &gt;&gt;= List.tl &gt;&gt;= List.tl &gt;&gt;= List.hd;;
+val third : 'a list -&gt; 'a option = &lt;fun&gt;
+</programlisting>
+  </sect1>
+  <sect1 id="example-pretty-printing-a-table">
+    <title>Example: pretty-printing a table</title>
+    <para>
+      _(jyh: I'm revising the examples. This section is temporary.)
+    </para>
+    <para>
+      <emphasis>(yminsky: I wonder if the whole example should go later
+      in the section, after we've done more of the basis of lists in
+      this chapter.)</emphasis>
+    </para>
+    <para>
+      One common programming task is displaying tabular data. In this
+      example, we will go over the design of a simple library to do just
+      that.
+    </para>
+    <para>
+      <emphasis>(yminsky: This is the first appearance of an mli file.
+      If we're going to introduce it here, we need to do a little more
+      explanation.)</emphasis>
+    </para>
+    <para>
+      We'll start with the interface. The code will go in a new module
+      called <literal>Text_table</literal> whose <literal>.mli</literal>
+      contains just the following function:
+    </para>
+    <programlisting language="ocaml">
+(* [render headers rows] returns a string containing a formatted
+   text table, using Unix-style newlines as separators *)
+val render
+   :  string list         (* header *)
+   -&gt; string list list    (* data *)
+   -&gt; string
+</programlisting>
+    <para>
+      If you invoke <literal>render</literal> as follows:
+    </para>
+    <programlisting language="ocaml">
+let () =
+  print_string (Text_table.render
+     [&quot;language&quot;;&quot;architect&quot;;&quot;first release&quot;]
+     [ [&quot;Lisp&quot; ;&quot;John McCarthy&quot; ;&quot;1958&quot;] ;
+       [&quot;C&quot;    ;&quot;Dennis Ritchie&quot;;&quot;1969&quot;] ;
+       [&quot;ML&quot;   ;&quot;Robin Milner&quot;  ;&quot;1973&quot;] ;
+       [&quot;OCaml&quot;;&quot;Xavier Leroy&quot;  ;&quot;1996&quot;] ;
+     ])
+</programlisting>
+    <para>
+      you'll get the following output:
+    </para>
+    <programlisting>
+| language | architect      | first release |
+|----------+----------------+---------------|
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
+</programlisting>
+    <para>
+      Now that we know what <literal>render</literal> is supposed to do,
+      let's dive into the implementation.
+    </para>
+    <sect2 id="computing-the-widths">
+      <title>Computing the widths</title>
+      <para>
+        To render the rows of the table, we'll first need the width of
+        the widest entry in each column. The following function does
+        just that.
+      </para>
+      <programlisting language="ocaml">
+let max_widths header rows =
+  let to_lengths l = List.map ~f:String.length l in
+  List.fold rows
+    ~init:(to_lengths header)
+    ~f:(fun acc row -&gt;
+      List.map2_exn ~f:Int.max acc (to_lengths row))
+</programlisting>
+      <para>
+        In the above we define a helper function,
+        <literal>to_lengths</literal> which uses
+        <literal>List.map</literal> and <literal>String.length</literal>
+        to convert a list of strings to a list of string lengths. Then,
+        starting with the lengths of the headers, we use
+        <literal>List.fold</literal> to join in the lengths of the
+        elements of each row by <literal>max</literal>'ing them together
+        element-wise.
+      </para>
+      <para>
+        Note that this code will throw an exception if any of the rows
+        has a different number of entries than the header. In
+        particular, <literal>List.map2_exn</literal> throws an exception
+        when its arguments have mismatched lengths.
+      </para>
+    </sect2>
+    <sect2 id="rendering-the-rows">
+      <title>Rendering the rows</title>
+      <para>
+        Now we need to write the code to render a single row. There are
+        really two different kinds of rows that need to be rendered; an
+        ordinary row:
+      </para>
+      <programlisting>
+| Lisp     | John McCarthy  | 1962          |
+</programlisting>
+      <para>
+        and a separator row:
+      </para>
+      <programlisting>
+|----------+----------------+---------------|
+</programlisting>
+      <para>
+        Let's start with the separator row, which we can generate as
+        follows:
+      </para>
+      <programlisting language="ocaml">
+let render_separator widths =
+  let pieces = List.map widths
+    ~f:(fun w -&gt; String.make (w + 2) '-')
+  in
+  &quot;|&quot; ^ String.concat ~sep:&quot;+&quot; pieces ^ &quot;|&quot;
+</programlisting>
+      <para>
+        We need the extra two-characters for each entry to account for
+        the one character of padding on each side of a string in the
+        table.
+      </para>
+      <note>
+      <title>
+      Performance of <literal>String.concat</literal> and
+      <literal>^</literal>
+      </title>
+      <para>
+        In the above, we're using two different ways of concatenating
+        strings, <literal>String.concat</literal>, which operates on
+        lists of strings, and <literal>^</literal>, which is a pairwise
+        operator. You should avoid <literal>^</literal> for joining long
+        numbers of strings, since, it allocates a new string every time
+        it runs. Thus, the following code:
+      </para>
+      <programlisting language="ocaml">
+let s = &quot;.&quot; ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;
+</programlisting>
+      <para>
+        will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas
+        this code:
+      </para>
+      <programlisting language="ocaml">
+let s = String.concat [&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;]
+</programlisting>
+      <para>
+        allocates one string of size 7, as well as a list of length 7.
+        At these small sizes, the differences don't amount to much, but
+        for assembling of large strings, it can be a serious performance
+        issue.
+      </para>
+      </note>
+      <para>
+        We can write a very similar piece of code for rendering the data
+        in an ordinary row.
+      </para>
+      <programlisting language="ocaml">
+let pad s length =
+  if String.length s &gt;= length then s
+  else s ^ String.make (length - String.length s) ' '
+
+let render_row row widths =
+  let pieces = List.map2 row widths
+    ~f:(fun s width -&gt; &quot; &quot; ^ pad s width ^ &quot; &quot;)
+  in
+  &quot;|&quot; ^ String.concat ~sep:&quot;|&quot; pieces ^ &quot;|&quot;
+</programlisting>
+      <para>
+        You might note that <literal>render_row</literal> and
+        <literal>render_separator</literal> share a bit of structure. We
+        can improve the code a bit by factoring that repeated structure
+        out:
+      </para>
+      <programlisting language="ocaml">
+let decorate_row ~sep row = &quot;|&quot; ^ String.concat ~sep row ^ &quot;|&quot;
+
+let render_row widths row =
+  decorate_row ~sep:&quot;|&quot;
+    (List.map2_exn row widths ~f:(fun s w -&gt; &quot; &quot; ^ pad s w ^ &quot; &quot;))
+
+let render_separator widths =
+  decorate_row ~sep:&quot;+&quot;
+    (List.map widths ~f:(fun width -&gt; String.make (width + 2) '-'))
+</programlisting>
+      <para>
+        And now we can write the function for rendering a full table.
+      </para>
+      <programlisting language="ocaml">
+let render header rows =
+  let widths = max_widths header rows in
+  String.concat ~sep:&quot;\n&quot;
+    (render_row widths header
+     :: render_separator widths
+     :: List.map rows ~f:(fun row -&gt; render_row widths row)
+    )
+</programlisting>
+    </sect2>
   </sect1>
   <sect1 id="list-performance">
     <title>List performance</title>
@@ -3498,7 +3717,7 @@ let print_langs langs =
       one based on passing in lists-of-lists.
     </para>
   </sect1>
-  <sect1 id="options-1">
+  <sect1 id="options-2">
     <title>Options</title>
     <para>
       OCaml has no &quot;NULL&quot; or &quot;nil&quot; values.
@@ -5362,8 +5581,7 @@ let extended_color_to_int : extended_color -&gt; int = function
     Thankfully, OCaml has powerful tools for handling errors reliably
     and with a minimum of pain. In this chapter we'll discuss some of
     the different approaches in OCaml to handling errors, and give some
-    advice on how to design interfaces that help rather than hinder
-    error handling.
+    advice on how to design interfaces that make error handling easier.
   </para>
   <para>
     We'll start by describing the two basic approaches for reporting
@@ -5374,7 +5592,8 @@ let extended_color_to_int : extended_color -&gt; int = function
     <para>
       The best way in OCaml to signal an error is to include that error
       in your return value. Consider the type of the
-      <literal>find</literal> function in the list module.
+      <literal>find</literal> function in the <literal>List</literal>
+      module.
     </para>
     <programlisting language="ocaml">
 # List.find;;
@@ -5397,21 +5616,18 @@ let extended_color_to_int : extended_color -&gt; int = function
       from the error or propagating it onward.
     </para>
     <para>
-      The function <literal>compute_bounds</literal> below is an example
-      of how you can handle errors in this style. The function takes a
-      list and a comparison function, and returns upper and lower bounds
-      for the list by finding the smallest and largest element on the
-      list. <literal>List.hd</literal> and <literal>List.last</literal>,
-      which return <literal>None</literal> when they encounter an empty
-      list, are used to extract the largest and smallest element of the
-      list.
+      Consider the <literal>compute_bounds</literal> function defined
+      below. The function takes a list and a comparison function, and
+      returns upper and lower bounds for the list by finding the
+      smallest and largest element on the list.
+      <literal>List.hd</literal> and <literal>List.last</literal>, which
+      return <literal>None</literal> when they encounter an empty list,
+      are used to extract the largest and smallest element of the list.
     </para>
     <programlisting language="ocaml">
 # let compute_bounds ~cmp list =
     let sorted = List.sort ~cmp list in
-    let smallest = List.hd sorted in
-    let largest = List.last sorted in
-    match smallest, largest with
+    match List.hd sorted, List.last sorted with
     | None,_ | _, None -&gt; None
     | Some x, Some y -&gt; Some (x,y)
   ;;
@@ -5420,7 +5636,7 @@ val compute_bounds :
 </programlisting>
     <para>
       The match statement is used to handle the error cases, propagating
-      an error in <literal>hd</literal> or <literal>last</literal> into
+      a None in <literal>hd</literal> or <literal>last</literal> into
       the return value of <literal>compute_bounds</literal>. On the
       other hand, in <literal>find_mismatches</literal> below, errors
       encountered during the computation do not propagate to the return
@@ -5431,10 +5647,10 @@ val compute_bounds :
     </para>
     <programlisting language="ocaml">
 # let find_mismatches table1 table2 =
-     Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data errors -&gt;
+     Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data mismatches -&gt;
         match Hashtbl.find table2 key with
-        | Some data' when data' &lt;&gt; data -&gt; key :: errors
-        | _ -&gt; errors
+        | Some data' when data' &lt;&gt; data -&gt; key :: mismatches
+        | _ -&gt; mismatches
      )
  ;;
 val find_mismatches :
@@ -5458,7 +5674,7 @@ val find_mismatches :
       </para>
       <para>
         <literal>Result.t</literal> is meant to address this deficiency.
-        Here's the definition:
+        The type is defined as follows.
       </para>
       <programlisting language="ocaml">
 module Result : sig
@@ -5476,9 +5692,7 @@ end
       </para>
       <programlisting language="ocaml">
 # [ Ok 3; Error &quot;abject failure&quot;; Ok 4 ];;
-[Ok 3; Error &quot;abject failure&quot;; Ok 4]
-- : (int, string) Result.t list =
-[Ok 3; Error &quot;abject failure&quot;; Ok 4]
+- : (int, string) Core.Result.t list = [Ok 3; Error &quot;abject failure&quot;; Ok 4]
 </programlisting>
       <para>
         without first opening the <literal>Result</literal> module.
@@ -5506,17 +5720,17 @@ end
       <para>
         It might not be obvious at first why efficiency is an issue at
         all. But generating error messages is an expensive business. An
-        ASCII representation of a type can be quite time-consuming to
+        ASCII representation of a value can be quite time-consuming to
         construct, particularly if it includes expensive-to-convert
-        numerical datatypes.
+        numerical data.
       </para>
       <para>
         <literal>Error</literal> gets around this issue through
         laziness. In particular, an <literal>Error.t</literal> allows
-        you to put off generation of the actual error string until you
-        actually need, which means a lot of the time you never have to
-        construct it at all. You can of course construct an error
-        directly from a string:
+        you to put off generation of the error string until you need it,
+        which means a lot of the time you never have to construct it at
+        all. You can of course construct an error directly from a
+        string:
       </para>
       <programlisting language="ocaml">
 # Error.of_string &quot;something went wrong&quot;;;
@@ -5549,32 +5763,32 @@ end
 </programlisting>
       <para>
         Here, the value <literal>Time.epoch</literal> is included in the
-        error, but <literal>Time.sexp_of_t</literal>, which is used for
-        converting the time to an s-expression, isn't run until the
-        error is converted to a string. Using the Sexplib
-        syntax-extension, which is discussed in more detail in chapter
+        error, but that value isn't converted into an s-expression until
+        the error is printed out. Using the Sexplib syntax-extension,
+        which is discussed in more detail in chapter
         <ulink url="data-serialization-with-json-xml-and-s-expressions">xref</ulink>,
-        we can inline create an s-expression converter for a collection
-        of types, thus allowing us to register multiple pieces of data
-        in an <literal>Error.t</literal>.
+        we can create an s-expression converter for a new type, thus
+        allowing us to conveniently register multiple pieces of data in
+        an <literal>Error.t</literal> as a tuple.
       </para>
       <programlisting language="ocaml">
 # Error.create &quot;Something went terribly wrong&quot;
-    (3.5, [&quot;a&quot;;&quot;b&quot;;&quot;c&quot;],6034)
+    (3.5, [&quot;a&quot;;&quot;b&quot;;&quot;c&quot;], 6034)
     &lt;:sexp_of&lt;float * string list * int&gt;&gt; ;;
 - : Core.Std.Error.t = &quot;Something went terribly wrong: (3.5(a b c)6034)&quot;
 </programlisting>
       <para>
-        Here, the declaration
+        The above declaration of
         <literal>&lt;:sexp_of&lt;float * string list * int&gt;&gt;</literal>
-        asks Sexplib to generate the sexp-converter for the tuple.
+        is interpreted by sexplib as a sexp-converter for the tuple.
       </para>
       <para>
-        Error also has operations for transforming errors. For example,
-        it's often useful to augment an error with some extra
-        information about the context of the error, or to combine
-        multiplier errors together. <literal>Error.of_list</literal> and
-        <literal>Error.tag</literal> fill these roles.
+        <literal>Error</literal> also supports operations for
+        transforming errors. For example, it's often useful to augment
+        an error with some extra information about the context of the
+        error, or to combine multiplier errors together.
+        <literal>Error.tag</literal> and
+        <literal>Error.of_list</literal> fulfill these roles.
       </para>
       <para>
         The type <literal>'a Or_error.t</literal> is just a shorthand
@@ -5587,8 +5801,8 @@ end
       <title><literal>bind</literal> and other error-handling
       idioms</title>
       <para>
-        As you write more error handling code, you'll discover that
-        certain patterns start to emerge. A number of these common
+        As you write more error handling code in OCaml, you'll discover
+        that certain patterns start to emerge. A number of these common
         patterns been codified in the interfaces of modules like
         <literal>Option</literal> and <literal>Result</literal>. One
         particularly useful one is built around the function
@@ -5597,15 +5811,15 @@ end
         same type signature:
       </para>
       <programlisting language="ocaml">
-val (&gt;&gt;=) : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
+val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
 </programlisting>
       <para>
         <literal>bind</literal> is a way of sequencing together
-        error-producing functions so that that the first one to produce
-        an error terminates the computation. In particular,
-        <literal>None &gt;&gt;= f</literal> returns
-        <literal>None</literal> without calling <literal>f</literal>,
-        and <literal>Some x &gt;&gt;= f</literal> returns
+        error-producing functions so that the first one to produce an
+        error terminates the computation. In particular,
+        <literal>bind None f</literal> returns <literal>None</literal>
+        without calling <literal>f</literal>, and
+        <literal>bind (Some x) f</literal> returns
         <literal>f x</literal>. We can use a nested sequence of these
         binds to express a multi-stage computation that can fail at any
         stage. Here's a rewrite <literal>compute_bounds</literal> in
@@ -5613,24 +5827,25 @@ val (&gt;&gt;=) : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
       </para>
       <programlisting language="ocaml">
 # let compute_bounds ~cmp list =
-    let open Option.Monad_infix in
     let sorted = List.sort ~cmp list in
-    List.hd sorted &gt;&gt;= (fun first -&gt;
-      List.last sorted &gt;&gt;= (fun last -&gt;
+    Option.bind (List.hd sorted) (fun first -&gt;
+      Option.bind (List.last sorted) (fun last -&gt;
         Some (first,last)))
+  ;;
+val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
+  &lt;fun&gt;
 </programlisting>
       <para>
-        Note that we locally open the
+        The above code is a little bit hard to swallow, however, on a
+        syntactic level. We can make it a bit easier to read, and drop
+        some of the parenthesis, by using the infix operator form of
+        bind. Note that we locally open the
         <literal>Option.Monad_infix</literal> module to get access to
-        the infix operator <literal>&gt;&gt;=</literal>. The module is
-        called <literal>Monad_infix</literal> because the bind operator
-        is part of a sub-interface called <literal>Monad</literal>,
-        which we'll talk about more in
+        the operators. (The module is called
+        <literal>Monad_infix</literal> because the bind operator is part
+        of a sub-interface called <literal>Monad</literal>, which we'll
+        talk about more in
         <xref linkend="concurrent-programming-with-async"/>.
-      </para>
-      <para>
-        This is a bit easier to read if we write it with fewer
-        parentheses and less indentation, as follows.
       </para>
       <programlisting language="ocaml">
 # let compute_bounds ~cmp list =
@@ -5668,15 +5883,14 @@ val (&gt;&gt;=) : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
     <title>Exceptions</title>
     <para>
       Exceptions in OCaml are not that different from exceptions in many
-      other languages, like Java, C# and Python. In all these cases,
-      exceptions are a way to terminate a computation and report an
-      error, while providing a mechanism to catch and handle (and
-      possibly recover from) exceptions that are triggered by
-      sub-computations.
+      other languages, like Java, C# and Python. Exceptions are a way to
+      terminate a computation and report an error, while providing a
+      mechanism to catch and handle (and possibly recover from)
+      exceptions that are triggered by sub-computations.
     </para>
     <para>
-      We'll see an exception triggered in OCaml if, for example, we try
-      to divide an integer by zero:
+      You can trigger an exception triggered in OCaml by, for example,
+      dividing an integer by zero:
     </para>
     <programlisting language="ocaml">
 # 3 / 0;;
@@ -5690,6 +5904,16 @@ Exception: Division_by_zero.
 # List.map ~f:(fun x -&gt; 100 / x) [1;3;0;4];;
 Exception: Division_by_zero.
 </programlisting>
+    <programlisting language="ocaml">
+If we put a `printf` in the middle of the computation, we can see that
+the `List.map` is interrupted part way through it's execution:
+
+# List.map ~f:(fun x -&gt; printf &quot;%d\n%!&quot; x; 100 / x) [1;3;0;4];;
+1
+3
+0
+Exception: Division_by_zero.
+</programlisting>
     <para>
       In addition to built-in exceptions like
       <literal>Divide_by_zero</literal>, OCaml lets you define your own.
@@ -5697,8 +5921,8 @@ Exception: Division_by_zero.
     <programlisting language="ocaml">
 # exception Key_not_found of string;;
 exception Key_not_found of string
-# Key_not_found &quot;a&quot;;;
-- : exn = Key_not_found(&quot;a&quot;)
+# raise (Key_not_found &quot;a&quot;);;
+Exception: Key_not_found(&quot;a&quot;).
 </programlisting>
     <para>
       Here's an example of a function for looking up a key in an
@@ -5733,13 +5957,13 @@ Exception: Key_not_found(&quot;c&quot;).
 - : exn -&gt; 'a = &lt;fun&gt;
 </programlisting>
     <para>
-      Having the return type be an otherwise unused type variable
-      <literal>'a</literal> suggests that <literal>raise</literal> could
-      return a value of any type. That seems impossible, and it is.
-      <literal>raise</literal> has this type because it never returns at
-      all. This behavior isn't restricted to functions like
-      <literal>raise</literal> that terminate by throwing exceptions.
-      Here's another example of a function that doesn't return a value.
+      The return type of <literal>'a</literal> suggests that
+      <literal>raise</literal> could return a value of any type. That
+      seems impossible, and it is. Really, <literal>raise</literal> has
+      this type because it never returns at all. This behavior isn't
+      restricted to functions like <literal>raise</literal> that
+      terminate by throwing exceptions. Here's another example of a
+      function that doesn't return a value.
     </para>
     <programlisting language="ocaml">
 # let rec forever () = forever ();;
@@ -7768,244 +7992,398 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
 </chapter><chapter id="imperative-programming-1">
   <title>Imperative Programming</title>
   <para>
-    The OCaml programming language is <emphasis>functional</emphasis>,
-    meaning that functions are first-class values that can be passed
-    around like any other. However, this doesn't mean that OCaml
-    programs are <emphasis>pure</emphasis>.
+    Most of the code shown so far in this book, and indeed, most OCaml
+    code in general, is <emphasis>pure</emphasis>. Pure code works
+    without mutating the program's internal state, performing I/O,
+    reading the clock, or in any other way interacting with changeable
+    parts of the world. Thus, a pure function behaves like a
+    mathematical function, always returning the same results when given
+    the same inputs. <emphasis>Imperative</emphasis> code, on the other
+    hand, operates by side-effects that modify a program's internal
+    state or interacts with the outside world, and so can have a
+    different effect, and return different results, every time they're
+    called.
   </para>
   <para>
-    Pure functions behave like mathematical functions, which means that
-    they always evaluate to the same result on the same arguments,
-    without any side-effects on the state or input/output. In pure
-    programs, evaluation order may affect performance, but it doesn't
-    affect correctness. In contrast, <emphasis>imperative</emphasis>
-    programs operate through side-effects on the state (as well as
-    input/output). Imperative programs define sequences of commands for
-    the computer to perform, and evaluation order is strict.
+    Pure code is the default in OCaml, and for good reason --- it's
+    generally easier to reason about, less error prone and more
+    composeable. But imperative code is of fundamental importance to any
+    practical programming language because real-world tasks require that
+    you interact with the outside world, whether by receiving a network
+    packet or by writing data to a file. Imperative programming can also
+    be important for performance. While pure code is quite efficient in
+    OCaml, there are many algorithms that can only be implemented
+    efficiently using imperative techniques.
   </para>
   <para>
-    While the majority of code you write in OCaml may be pure,
-    imperative programming can be used effectively. The language
-    includes assignment and mutable values like arrays and strings.
-    Evaluation order is strict and sequential. In principle, you can
-    port many imperative programs directly to OCaml. If you find
-    yourself using imperative features a lot, then you're probably not
-    using OCaml to its fullest. However, there are times when imperative
-    programming is both appropriate and efficient, and OCaml shines at
-    supporting programs with both functional and imperative aspects.
+    OCaml offers a happy compromise here, making it easy and natural to
+    program in a pure style, but also providing great support for
+    imperative programming where you need it. This chapter will walk you
+    through OCaml's imperative features, and help you use them to their
+    fullest.
   </para>
-  <para>
-    To illustrate imperative programming, let's start by implementing a
-    hash table. Hash tables are an efficient way to implement imperative
-    <emphasis>dictionaries</emphasis>, which implement a map from keys
-    to values. There are full-featured implementations of hash tables in
-    Core as well as in the OCaml standard library. For illustration,
-    we'll construct just a basic dictionary using <emphasis>open
-    hashing</emphasis>, where the hash table consists of an array of
-    buckets, each of which contain a linked list of elements. We'll use
-    regular (pure) OCaml lists, and an array for the buckets.
-  </para>
-  <programlisting language="ocaml">
-module HashMap : sig
-  type ('a, 'b) t
+  <sect1 id="a-simple-dictionary">
+    <title>A simple dictionary</title>
+    <para>
+      We'll walk through the implementation of a simple imperative
+      dictionary, <emphasis>i.e.</emphasis>, a mutable mapping from keys
+      to values. Both Core and OCaml's standard library provide multiple
+      data structures for implementing such dictionaries, and for most
+      real world tasks, you should use one of those. But we'll walk
+      through this nonetheless as a way of seeing OCaml's imperative
+      constructs in action.
+    </para>
+    <para>
+      We'll implement our dictionary as a hash table, based on an
+      <emphasis>open hashing</emphasis> scheme, which is to say it will
+      be structured as an array of buckets, with each bucket containing
+      a list of key/value pairs that have been hashed into that bucket.
+      For simplicity's sake, we'll use a fixed-length bucket array,
+      though growing the bucket array as more elements are added would
+      be necessary for a practical implementation.
+    </para>
+    <para>
+      First, we'll write down the <literal>mli</literal> for our
+      dictionary.
+    </para>
+    <programlisting language="ocaml">
+(* file: dictionary.mli *)
+open Core.Std
 
-  val create : unit -&gt; ('a, 'b) t
-  val add : ('a, 'b) t -&gt; key:'a -&gt; data:'b -&gt; unit
-  val find : ('a, 'b) t -&gt; key:'a -&gt; 'b option
-  val iter : ('a, 'b) t -&gt; f:(key:'a -&gt; data:'b -&gt; unit) -&gt; unit
-end = struct
-  type ('a, 'b) t = ('a * 'b) list array
+type ('a, 'b) t
 
-  let num_buckets = 17
-  let hash_bucket key = (Hashtbl.hash key) mod num_buckets
+val create : unit -&gt; ('a, 'b) t
+val length : ('a, 'b) t -&gt; int
+val add    : ('a, 'b) t -&gt; key:'a -&gt; data:'b -&gt; unit
+val find   : ('a, 'b) t -&gt; 'a -&gt; 'b option
+val iter   : ('a, 'b) t -&gt; f:(key:'a -&gt; data:'b -&gt; unit) -&gt; unit
+val remove : ('a, 'b) t -&gt; 'a -&gt; unit
+</programlisting>
+    <para>
+      The type <literal>('a, 'b) t</literal> is used to represent a
+      dictionary with keys of type <literal>'a</literal> and data of
+      type <literal>'b</literal>. The <literal>mli</literal> also
+      includes a collection of helper functions. Notice that a number of
+      the functions, in particular, ones like <literal>add</literal>
+      that modify the dictionary, return unit. This is typical of
+      functions that act by side-effect.
+    </para>
+    <para>
+      The implementation is shown below. We'll go through the code bit
+      by bit, explaining different imperative constructs as they show
+      up.
+    </para>
+    <para>
+      First, we define the type of a dictionary as a record with two
+      fields. The first field, <literal>length</literal> is declared as
+      mutable; records are immutable by default, but individual fields
+      are mutable when explicitly marked as such. The second field,
+      <literal>buckets</literal>, is immutable, but contains an array,
+      which is itself a mutable data structure, as we'll see.
+    </para>
+    <programlisting language="ocaml">
+(* file: dictionary.ml *)
+open Core.Std
 
-  let create () = Array.create num_buckets []
+type ('a, 'b) t = { mutable length: int;
+                    buckets: ('a * 'b) list array;
+                  }
+</programlisting>
+    <para>
+      Next, we'll define the function for choosing a hash-bucket based
+      on the key. We do this using <literal>Hashtbl.hash</literal> to
+      compute a hash value for a key. <literal>Hashtbl.hash</literal> is
+      a special polymorphic function (meaning it can take an input of
+      any type) provided by the OCaml runtime that can compute a hash
+      for almost any OCaml value. (While it can be applied to any type
+      as far as the type-system is concerned, it won't always succeed.
+      <literal>Hashtbl.hash</literal> will throw an exception if given a
+      value it can't handle, like a function or a value from a C
+      libraries that lives outside the OCaml heap.)
+    </para>
+    <para>
+      There's also code for <literal>create</literal>, which creates an
+      empty dictionary, <literal>length</literal>, which grabs the
+      length from the corresponding record field, and
+      <literal>find</literal>, which looks for a matching key in the
+      table using <literal>List.find_map</literal> on the corresponding
+      bucket. In <literal>find</literal>, you'll notice that we make use
+      of the <literal>array.(index)</literal> syntax for looking up a
+      value in an array.
+    </para>
+    <programlisting language="ocaml">
+let num_buckets = 17
+let hash_bucket key = (Hashtbl.hash key) mod num_buckets
 
-  let add table ~key ~data =
-    let index = hash_bucket key in
-    table.(index) &lt;- (key, data) :: table.(index)
+let create () =
+  { length = 0;
+    buckets = Array.create ~len:num_buckets [];
+  }
 
-  let find table ~key =
-    let rec find = function
-     | (k, d) :: t -&gt; if k = key then Some d else find t
-     | [] -&gt; None
+let length t = t.length
+
+let find t key =
+  List.find_map t.buckets.(hash_bucket key)
+    ~f:(fun (key',data) -&gt; if key' = key then Some data else None)
+</programlisting>
+    <para>
+      The <literal>iter</literal> function, shown below, is designed to
+      walk over all the entries in the dictionary. In particular,
+      <literal>iter d ~f</literal> will call <literal>f</literal> for
+      each key/value pair in dictionary <literal>d</literal>.
+    </para>
+    <para>
+      The code for <literal>iter</literal> uses two forms of iteration:
+      a <literal>for</literal> loop is used to iterate over the array of
+      buckets; and within that loop, <literal>List.iter</literal> is
+      used to walk over the list of values in a given bucket.
+      <literal>for</literal> loops are syntactically convenient, and are
+      more familiar for someone coming from an imperative language. But
+      they're not of fundamental importance to the language: instead of
+      using <literal>for</literal>, we could have implemented the outer
+      loop using the <literal>Array.iter</literal>, which in turn could
+      be implemented as a recursive function.
+    </para>
+    <programlisting language="ocaml">
+let iter t ~f =
+  for i = 0 to Array.length t.buckets - 1 do
+    List.iter t.buckets.(i) ~f:(fun (key, data) -&gt; f ~key ~data)
+  done
+</programlisting>
+    <para>
+      It's worth noting that in such an iteration function, the function
+      <literal>f</literal> is expected to return unit, because it is
+      supposed to operate by side effect rather than by returning a
+      value.
+    </para>
+    <para>
+      Next, we have the code for adding and removing mappings from the
+      dictionary. The code is made more complicated by the fact that we
+      need to detect whether we are overwriting or removing an existing
+      binding, so we can decide whether <literal>t.length</literal>
+      needs to be changed. The helper function
+      <literal>bucket_has_key</literal> is used to answer this question.
+    </para>
+    <para>
+      This code uses the <literal>&lt;-</literal> operator for updating
+      elements of an array (<literal>array.(i) &lt;- expr</literal>) and
+      for updating a record field
+      (<literal>record.field &lt;- expression</literal>). In addition,
+      we see the use of the semicolon to sequence the imperative
+      operations that are the last two lines of the function.
+    </para>
+    <para>
+      Note also that we do all of the side-effecting operations at the
+      very end of each function. This is good practice because it
+      minimizes the chance that such operations will be interrupted with
+      an exception, leaving the data structure in an inconsistent state.
+    </para>
+    <programlisting language="ocaml">
+let bucket_has_key t i key =
+  List.exists t.buckets.(i) ~f:(fun (key',_) -&gt; key' = key)
+
+let add t ~key ~data =
+  let i = hash_bucket key in
+  let replace = bucket_has_key t i key in
+  let filtered_bucket =
+    if replace then
+      List.filter t.buckets.(i) ~f:(fun (key',_) -&gt; key' &lt;&gt; key)
+    else
+      t.buckets.(i)
+  in
+  t.buckets.(i) &lt;- (key, data) :: filtered_bucket;
+  if not replace then t.length &lt;- t.length + 1
+
+let remove t key =
+  let i = hash_bucket key in
+  if not (bucket_has_key t i key) then ()
+  else (
+    let filtered_bucket =
+      List.filter t.buckets.(i) ~f:(fun (key',_) -&gt; key' &lt;&gt; key)
     in
-    find table.(hash_bucket key)
-
-  let iter table ~f =
-    for i = 0 to num_buckets - 1 do
-      List.iter table.(i) ~f:(fun (key, data) -&gt; f ~key ~data)
-    done
-end
-</programlisting>
-  <para>
-    The signature for the <literal>HashMap</literal> declares the type
-    of dictionaries <literal>('a, 'b) t</literal>, with keys of type
-    <literal>'a</literal> and associated values of type
-    <literal>'b</literal>. It also includes functions for add, removing,
-    and enumerating entries in the dictionary.
-  </para>
-  <para>
-    The table is implemented as an array of buckets (the array is
-    fixed-size, in this example). The OCaml runtime provides a builtin
-    polymorphic hash function <literal>Hashtbl.hash</literal> that works
-    for almost any value in OCaml, excluding functions and values from C
-    libraries that live outside the heap.
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        The <literal>create</literal> function creates a new array where
-        all buckets are empty.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        The <literal>add</literal> function uses the hash function to
-        determine the appropriate bucket, then adds a new key/value
-        association to the bucket through an array
-        <emphasis>assignment</emphasis>
-        <literal>table.(index) &lt;- (key, data) :: table.(index)</literal>,
-        which <emphasis>replaces</emphasis> the bucket with a new one
-        where the new key/value pair is added to the front of the list.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        The <literal>find</literal> function performs a linear search
-        through the appropriate bucket to find the value associated with
-        a key.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        The <literal>iter</literal> function iterates through each of
-        the elements in the buckets.
-      </para>
-    </listitem>
-  </itemizedlist>
-  <sect1 id="imperative-operations">
-    <title>Imperative operations</title>
-    <para>
-      This example illustrates one of the mutating operations in OCaml:
-      array element assignment. There are a handful of other mutable
-      data types.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          Arrays. Array elements can be assigned with the expression
-          <literal>array.(index) &lt;-   expr</literal>. See the
-          <literal>Array</literal> module for other imperative
-          operations. Bigarray elements can be mutated with the syntax
-          <literal>bigarray.{index} &lt;- expr</literal>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Strings. String elements can be mutated with the expression
-          <literal>string.[index]   &lt;- char</literal>. See the
-          <literal>String</literal> module for other imperative
-          operations.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Record fields can be mutated with the expression
-          <literal>record.label &lt;- expr</literal>. The field
-          <literal>label</literal> must be declared as
-          <literal>mutable</literal> in the type definition for the
-          record.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Object fields can be mutated with the expression
-          <literal>object.label &lt;- expr</literal>. The field
-          <literal>label</literal> must be declared as
-          <literal>mutable</literal> in the object definition.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      Note that variables are not mutable. Variables can refer to
-      mutable data, but the binding of a variable cannot be changed. For
-      convenience, OCaml defines a type of &quot;reference cell,&quot;
-      which is a like a &quot;box&quot; where the contents can be
-      mutated.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>ref expr</literal> constructs a reference cell
-          containing the value defined by the expression
-          <literal>expr</literal>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>! refcell</literal> returns the contents of the
-          reference cell.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>refcell := expr</literal> replaces the contents of
-          the reference cell.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <programlisting language="ocaml">
-# let x = ref 1;;
-val x : int ref = {contents = 1}
-# x := 7;;
-- : unit = ()
-# !x;;
-- : int = 7
-# x.contents &lt;- 12;;
-- : unit = ()
-# x.contents;;
-- : int = 12
-# !x;;
-- : int = 12
-</programlisting>
-    <para>
-      As the example shows, reference cells are actually just a short
-      form for record operations. The <literal>ref</literal> type is a
-      record with a single mutable field <literal>contents</literal>,
-      with the following definition. The expression
-      <literal>!x</literal> is equivalent to
-      <literal>x.contents</literal>, and <literal>x := e</literal> is
-      equivalent to <literal>x.contents &lt;- e</literal>.
-    </para>
-    <programlisting language="ocaml">
-type 'a ref = { mutable contents : 'a };;
+    t.buckets.(i) &lt;- filtered_bucket;
+    t.length &lt;- t.length - 1
+  )
 </programlisting>
   </sect1>
-  <sect1 id="looping">
-    <title>Looping</title>
+  <sect1 id="mutable-data-structures">
+    <title>Mutable data structures</title>
     <para>
-      The <literal>iter</literal> function iterates through all of the
-      elements in the table using a <literal>for</literal> loop. There
-      are two kinds of loops in OCaml, <literal>for</literal> loops and
-      <literal>while</literal> loops.
+      We've already encountered two different forms of mutable data:
+      records with mutable fields, and arrays. We'll discuss those, and
+      a few other forms of mutable data, in more detail now.
     </para>
-    <programlisting language="ocaml">
-for index = &lt;initial&gt; to &lt;final&gt; do &lt;body&gt; done
-for index = &lt;initial&gt; downto &lt;final&gt; do &lt;body&gt; done
-while &lt;condition&gt; do &lt;body&gt; done
+    <sect2 id="array-like-data">
+      <title>Array-like data</title>
+      <para>
+        OCaml supports a number of array-like data structures;
+        <emphasis>i.e.</emphasis>, integer-indexed containers. The
+        <literal>array</literal> type is one example, and the
+        <literal>Array</literal> module comes with a variety of mutable
+        operations on arrays, including <literal>Array.set</literal>,
+        which modifies an individual element, and
+        <literal>Array.blit</literal>, which efficiently copies a range
+        of values in an array.
+      </para>
+      <para>
+        Arrays also come with a special syntax for getting an element
+        from an array: <literal>array.(index)</literal>; and for setting
+        an element: <literal>array.(index) &lt;- expr</literal>. Literal
+        arrays can be declared using <literal>[|</literal> and
+        <literal>|]</literal> as delimiters. Thus,
+        <literal>[| 1; 2; 3 |]</literal> is an integer array.
+      </para>
+      <para>
+        Strings are essentially byte-arrays, with some extra useful
+        functions in the <literal>String</literal> module for dealing
+        with textual data in this form. The main reason to use a
+        <literal>String.t</literal> rather than a
+        <literal>Char.t array</literal> (a <literal>Char.t</literal> is
+        an 8-bit character) is that the former is considerably more
+        space efficient; an array uses one word --- 8 bytes on a 64-bit
+        machine --- to store a single entry, whereas strings use one
+        byte per character.
+      </para>
+      <para>
+        Strings also come with their own syntax for getting and setting
+        values: <literal>string.[index]</literal> and
+        <literal>string.[index] &lt;- expr</literal> respectively, and
+        string literals are bounded by quotes.
+      </para>
+      <para>
+        A bigarray is a handle to a block of memory stored outside of
+        the OCaml heap. These are mostly useful for interacting with C
+        or Fortran libraries, and are discussed in
+        <xref linkend="managing-external-memory-with-bigarrays"/>.
+        Bigarrays too have their own getting and setting syntax:
+        <literal>bigarray.{index}</literal> and
+        <literal>bigarray.{index} &lt;- expr</literal>.
+      </para>
+    </sect2>
+    <sect2 id="mutable-record-and-object-fields-and-ref-cells">
+      <title>Mutable record and object fields and ref cells</title>
+      <para>
+        As we've seen, records are immutable by default, but individual
+        record fields can be declared as mutable. These mutable fields
+        can be set using the <literal>&lt;-</literal> operator,
+        <emphasis>i.e.</emphasis>,
+        <literal>record.field &lt;- expr</literal>.
+      </para>
+      <para>
+        As we'll see in
+        <xref linkend="object-oriented-programming"/>, fields
+        of an object can similarly be declared as mutable, and can then
+        be modified in much the same way as with records.
+      </para>
+      <sect3 id="ref-cells">
+        <title>Ref Cells</title>
+        <para>
+          Variables in OCaml are never mutable --- they can refer to
+          mutable data, but what the variable points to can't be
+          changed. Sometimes, though, you want to do exactly what you
+          would do with a mutable variable in another language: define a
+          single, mutable value. In OCaml this is typically achieved
+          using a <literal>ref</literal>, which is essentially a
+          container with a single, mutable value.
+        </para>
+        <para>
+          The standard library defines the following operators for
+          working with refs.
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              <literal>ref expr</literal> constructs a reference cell
+              containing the value defined by the expression
+              <literal>expr</literal>.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>! refcell</literal> returns the contents of the
+              reference cell.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>refcell := expr</literal> replaces the contents
+              of the reference cell.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          You can see these in action below.
+        </para>
+        <programlisting language="ocaml">
+# let x = ref 1;;
+val x : int ref = {contents = 1}
+# !x;;
+- : int = 1
+# x := !x + 1;;
+- : unit = ()
+# !x;;
+- : int = 2
 </programlisting>
+        <para>
+          There's nothing magic about a <literal>ref</literal>: it's
+          really just a record. The <literal>ref</literal> type and its
+          associated operations are defined as follows.
+        </para>
+        <programlisting language="ocaml">
+type 'a ref = { mutable contents : 'a }
+
+let ref x = { contents = x }
+let (!) r = r.contents
+let (:=) r x = r.contents &lt;- x
+</programlisting>
+      </sect3>
+    </sect2>
+    <sect2 id="foreign-functions">
+      <title>Foreign functions</title>
+      <para>
+        Another source of imperative operations in OCaml is resources
+        that come from interfacing with some external library through
+        OCaml's foreign function interface (FFI). The FFI opens OCaml up
+        to any imperative construct that is exported by a system call, a
+        C library, or any other external resource that you connect to.
+        Many of these come built in, like access to the
+        <literal>write</literal> system call, or to the
+        <literal>clock</literal>; while others come from user libraries,
+        like LAPACK bindings.
+      </para>
+      <para>
+        More generally, when you wrap a library for use in OCaml, you'll
+        often find yourself introducing new imperative operations to the
+        language.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="for-and-while-loops-1">
+    <title><literal>for</literal> and <literal>while</literal>
+    loops</title>
     <para>
-      A loop using <literal>to</literal> advances by from the
-      <literal>&lt;initial&gt;</literal> integer to the
-      <literal>&lt;final&gt;</literal> one (inclusive). No iterations
-      are evaluated if <literal>&lt;final&gt;</literal> is smaller than
-      <literal>&lt;initial&gt;</literal>.
+      OCaml provides support for traditional imperative looping
+      constructs, in particular, <literal>for</literal> and
+      <literal>while</literal> loops, even though neither of them is
+      strictly necessary. Anything you can do with such a loop you can
+      also do with a recursive function, and you can also write
+      higher-order functions like <literal>Array.iter</literal> that
+      cover much of the same ground.
+    </para>
+    <para>
+      Nonetheless, explicit <literal>for</literal> and
+      <literal>while</literal> loops are both more idiomatic for
+      imperative programming and often more concise.
+    </para>
+    <para>
+      The <literal>for</literal> loop is the simpler of the two. Indeed,
+      we've already seen the <literal>for</literal> loop in action ---
+      the <literal>iter</literal> function in
+      <literal>Dictionary</literal> is built using it. Here's a simple
+      example of <literal>for</literal>.
     </para>
     <programlisting language="ocaml">
-# for i = 0 to 3 do
-    Printf.printf &quot;i = %d\n&quot; i
-  done;;
+# for i = 0 to 3 do Printf.printf &quot;i = %d\n&quot; i done;;
 i = 0
 i = 1
 i = 2
@@ -8013,9 +8391,9 @@ i = 3
 - : unit = ()
 </programlisting>
     <para>
-      A <literal>downto</literal> loop advances downward by 1 on each
-      iteration. Again, the bounds <literal>&lt;initial&gt;</literal>
-      and <literal>&lt;final&gt;</literal> are inclusive.
+      As you can see, the upper and lower bounds are inclusive. We can
+      also use <literal>downto</literal> to iterate in the other
+      direction.
     </para>
     <programlisting language="ocaml">
 # for i = 3 downto 0 do Printf.printf &quot;i = %d\n&quot; i done;;
@@ -8026,80 +8404,133 @@ i = 0
 - : unit = ()
 </programlisting>
     <para>
-      A while-loop iterates until the condition is false.
+      A <literal>while</literal>-loop on the other hand, takes a
+      condition and a body, and repeatedly runs the body until the
+      condition is false. Here's a simple example of a function for
+      reversing an array in-place.
     </para>
     <programlisting language="ocaml">
-(* reverses an array in place. *)
-let rev_inplace t =
-  let i = ref 0 in
-  let j = ref (length t - 1) in
-  while !i &lt; !j; do
-    swap t !i !j;
-    incr i;
-    decr j;
-  done;;
+# let rev_inplace ar =
+    let i = ref 0 in
+    let j = ref (Array.length ar - 1) in
+    (* terminate when the upper and lower indices meet *)
+    while !i &lt; !j do
+      (* swap the two elements *)
+      let tmp = ar.(!i) in
+      ar.(!i) &lt;- ar.(!j);
+      ar.(!j) &lt;- tmp;
+      (* bump the indices *)
+      incr i;
+      decr j
+    done
+  ;;
+val rev_inplace : 'a array -&gt; unit = &lt;fun&gt;
+# let nums = [|1;2;3;4;5|];;
+val nums : int array = [|1; 2; 3; 4; 5|]
+# rev_inplace nums;;
+- : unit = ()
+# nums;;
+- : int array = [|5; 4; 3; 2; 1|]
 </programlisting>
+    <para>
+      In the above, we used <literal>incr</literal> and
+      <literal>decr</literal>, which are functions for incrementing and
+      decrementing an <literal>int ref</literal> by one, respectively.
+    </para>
   </sect1>
   <sect1 id="doubly-linked-lists">
     <title>Doubly-linked lists</title>
     <para>
       Another common imperative data structure is the doubly-linked
-      list, which allows traversal in both directions, as well as O(1)
-      deletion of any element. Doubly-linked lists are a cyclic data
-      structure, meaning that it is possible to follow a nontrivial
-      sequence of references from an element, through other elements,
-      back to itself. In general, building cyclic data structures
-      requires the use of side-effects (although in some limited cases,
-      they can be constructed using <literal>let rec</literal>). This is
-      done by constructing the data elements first, and then adding
-      cycles using assignment afterwards.
+      list, which allows traversal in both directions, as well as
+      constant-time deletion of any element. Doubly-linked lists are a
+      cyclic data structure, meaning that it is possible to follow a
+      nontrivial sequence of pointers from an element, through other
+      elements, back to itself. In general, building cyclic data
+      structures requires the use of side-effects (although in some
+      limited cases, they can be constructed using
+      <literal>let rec</literal>). This is done by constructing the data
+      elements first, and then adding cycles using assignment
+      afterwards.
     </para>
     <para>
       Core defines a standard doubly-linked list, but let's define our
-      own implementation for illustration. First, we define an element
-      <literal>'a element</literal> with a reference both to the
-      previous and next elements. The elements at the ends have nothing
-      to refer to, so we use an option to allow the reference to be
-      <literal>None</literal>. The element record fields are declared as
-      <literal>mutable</literal> to allow them to be modified when the
-      list is mutated.
-    </para>
-    <para>
-      The list itself is either empty, or it refers to the first element
-      of the list. We use the type
-      <literal>type 'a dlist = 'a element option ref</literal>; the
-      <literal>ref</literal> allows the list to be mutated, and the
-      value is either <literal>None</literal> for the empty list, or
-      <literal>Some first_element</literal> when the list is non-empty.
+      own implementation for illustration. Here's the
+      <literal>mli</literal> we'll start out with. Note that there are
+      two types defined here: <literal>'a t</literal>, the type of a
+      list, and <literal>'a element</literal>, the type of an individual
+      element of a list. Elements act as pointers to the interior of a
+      list, and allow us to navigate the list and give us a point at
+      which to apply mutating operations.
     </para>
     <programlisting language="ocaml">
+(* file: dlist.mli *)
+open Core.Std
+
+type 'a t
+type 'a element
+
+(** Basic list operations  *)
+val create   : unit -&gt; 'a t
+val is_empty : 'a t -&gt; bool
+
+(** navigating the [elements] of a list *)
+val first : 'a t -&gt; 'a element option
+val next  : 'a element -&gt; 'a element option
+val prev  : 'a element -&gt; 'a element option
+val value : 'a element -&gt; 'a
+
+(** Simple iteration functions *)
+val find : 'a t -&gt; 'a -&gt; 'a element option
+val iter : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
+
+(** mutators *)
+val insert_first : 'a t -&gt; 'a -&gt; 'a element
+val insert_after : 'a element -&gt; 'a -&gt; 'a element
+val remove : 'a t -&gt; 'a element -&gt; unit
+</programlisting>
+    <para>
+      Now let's look at the implementation. We'll start by defining our
+      two types. An <literal>'a element</literal> is a record containing
+      the value to be stored in that node as well as optional (and
+      mutable) fields pointing to the previous and next elements. These
+      fields are optional so that at the beginning of the list, the
+      <literal>prev</literal> field can be <literal>None</literal>, and
+      at the end of the list, the <literal>next</literal> field can be
+      <literal>None</literal>.
+    </para>
+    <para>
+      The type of the list itself, <literal>'a t</literal>, is an
+      optional, mutable reference to an <literal>element</literal>. This
+      reference is <literal>None</literal> if the list is empty, and
+      <literal>Some</literal> otherwise.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
 type 'a element =
   { value : 'a;
     mutable next : 'a element option;
     mutable previous : 'a element option
   }
 
-type 'a dlist = 'a element option ref
-
+type 'a t = 'a element option ref
+</programlisting>
+    <para>
+      Now we can define some functions using our list type. The
+      following functions are all relatively straight-forward, largely
+      following from our type definitions.
+    </para>
+    <programlisting language="ocaml">
 let create () = ref None
-let is_empty l = (!l = None)
+let is_empty l = !l = None
 
 let value elt = elt.value
 
 let first l = !l
 let next elt = elt.next
-let previous elt = elt.previous
+let prev elt = elt.prev
 </programlisting>
-    <para>
-      The function <literal>create</literal> creates an empty list. The
-      function <literal>is_empty l</literal> dereferences the list using
-      the <literal>!</literal> operator, returning true if the value is
-      <literal>None</literal>, or false otherwise. The
-      <literal>value</literal> function returns the value stored in an
-      element. The <literal>first</literal>, <literal>next</literal>,
-      and <literal>previous</literal> functions allow navigation through
-      the list.
-    </para>
     <para>
       Next, let's define the function that inserts a value into the list
       as a new first element. We define a new element
@@ -8117,13 +8548,12 @@ let previous elt = elt.previous
      elt
 </programlisting>
     <para>
-      This example introduces the sequencing operator
-      <literal>;</literal> to separate the steps to be executed in
-      order: first, create the new element <literal>elt</literal>; then
-      set <literal>old_first.previous</literal> to point to it; then set
-      the list <literal>l</literal> to refer to the
-      <literal>elt</literal> element; then return the element
-      <literal>elt</literal>.
+      This example uses the sequencing operator <literal>;</literal> to
+      separate the steps to be executed in order: first, create the new
+      element <literal>elt</literal>; then set
+      <literal>old_first.previous</literal> to point to it; then set the
+      list <literal>l</literal> to refer to the <literal>elt</literal>
+      element; then return the element <literal>elt</literal>.
     </para>
     <para>
       In general, when a sequence expression
@@ -8139,11 +8569,11 @@ let previous elt = elt.previous
       integer <literal>3</literal>.
     </para>
     <para>
-      There are a few more things to note. First, semicolon
-      <literal>;</literal> is a <emphasis>separator</emphasis>, not a
-      terminator, like it is in C or Java. The compiler is somewhat
-      relaxed about parsing a terminating semicolon, so it may work for
-      you, but you should not rely on it.
+      There are a few more things to note. First, <literal>;</literal>
+      is a <emphasis>separator</emphasis> in OCaml, not a terminator as
+      it is in C or Java. The compiler is somewhat relaxed about parsing
+      a terminating semicolon, so it may work for you, but you should
+      not rely on it.
     </para>
     <programlisting language="ocaml">
 # let i = print_string &quot;Hello world\n&quot;; 2; in i;;
@@ -8417,7 +8847,7 @@ Out of memory during evaluation.
         key, and it also allows the entry to be deleted.
       </para>
       <programlisting language="ocaml">
-module IterableHashMap : sig
+module Iterable_dictionary : sig
   type ('a, 'b) t
 
   val create : unit -&gt; ('a, 'b) t
@@ -8427,16 +8857,16 @@ module IterableHashMap : sig
 end
 </programlisting>
       <para>
-        The implementation of <literal>IterableHashMap</literal> is
-        similar to the original <literal>HashMap</literal> using lists,
-        except now we will use doubly-linked lists. The
+        The implementation of <literal>Iterable_dictionary</literal> is
+        similar to the original <literal>Dictionary</literal> using
+        lists, except now we will use doubly-linked lists. The
         <literal>create</literal> function creates an array of
         doubly-linked lists. The <literal>add</literal> function first
         removes any existing entry, then add the new element to the
         front of the bucket.
       </para>
       <programlisting language="ocaml">
-module IterableHashMap = struct
+module Iterable_dictionary = struct
   type ('a, 'b) t = ('a * 'b) DList.t array
 
   let num_buckets = 17
@@ -8519,7 +8949,7 @@ end
       </para>
       <para>
         Now that the iterator is defined, we can complete the
-        <literal>IterableHashMap</literal> implementation.
+        <literal>Iterable_dictionary</literal> implementation.
       </para>
       <programlisting language="ocaml">
   let iterator table =
@@ -8550,7 +8980,7 @@ end
       </para>
       <programlisting language="ocaml">
 # let () =
-  let module IHM = IterableHashMap in
+  let module IHM = Iterable_dictionary in
   let table = IHM.create () in
   IHM.add table ~key:&quot;small&quot; ~data:1.00;
   IHM.add table ~key:&quot;medium&quot; ~data:1.50;
@@ -8669,15 +9099,15 @@ module Memo : sig
    val create : unit -&gt; ('a, 'b) t
    val apply : ('a, 'b) t -&gt; func:('a -&gt; 'b) -&gt; arg:'a -&gt; 'b
 end = struct
-   type ('a, 'b) t = ('a, 'b) HashMap.t
+   type ('a, 'b) t = ('a, 'b) Dictionary.t
 
-   let create = HashMap.create
+   let create = Dictionary.create
    let apply table ~func ~arg =
-     match HashMap.find table ~key:arg with
+     match Dictionary.find table ~key:arg with
      | Some x -&gt; x
      | None -&gt;
          let x = func arg in
-         HashMap.add table ~key:arg ~data:x;
+         Dictionary.add table ~key:arg ~data:x;
          x
 
 end;;
@@ -8792,12 +9222,12 @@ end = struct
   | Plus of t * t
   | Times of t * t
 
-  let table = HashMap.create ()
+  let table = Dictionary.create ()
   let merge exp =
-    match HashMap.find table ~key:exp with
+    match Dictionary.find table ~key:exp with
     | Some x -&gt; x
     | None -&gt;
-         HashMap.add table ~key:exp ~data:exp;
+         Dictionary.add table ~key:exp ~data:exp;
          exp
 
   let num i = merge (Num i)
@@ -9110,7 +9540,7 @@ value = 6
         elements, and it also supports imperative iterators.
       </para>
       <programlisting language="ocaml">
-module ConcurrentHashMap : sig
+module Concurrent_dictionary : sig
   type ('a, 'b) t
 
   val create : unit -&gt; ('a, 'b) t
@@ -9122,9 +9552,9 @@ end
 </programlisting>
       <para>
         We'll use the same basic construction that we used to implement
-        the <literal>HashMap</literal>, where a hash table contains an
-        array of buckets. In addition we'll add locking to ensure that
-        concurrent operations do not interfere. To reduce lock
+        the <literal>Dictionary</literal>, where a hash table contains
+        an array of buckets. In addition we'll add locking to ensure
+        that concurrent operations do not interfere. To reduce lock
         contention, we'll use an array of locks to partition the table
         into multiple parts. If operations are uniformly distributed,
         this should reduce lock contention.
@@ -9383,8 +9813,8 @@ end
         allow mutations by the iterating thread, but in general the
         synchronization might involve multiple threads, resulting in
         deadlock. Lock-free iteration ensures that the
-        <literal>ConcurrentHashMap</literal> will not be involved in a
-        deadlock cycle.
+        <literal>Concurrent_dictionary</literal> will not be involved in
+        a deadlock cycle.
       </para>
     </sect2>
   </sect1>
@@ -9529,7 +9959,7 @@ val collate_input : unit -&gt; unit = &lt;fun&gt;
 34
 -120
 19
--120 2 8 19 34 56 
+-120 2 8 19 34 56
 - : unit = ()
 </programlisting>
     <para>
@@ -9958,52 +10388,76 @@ Scanf.Scan_failure
     and their associated types. Objects are good for encapsulation and
     abstraction, and classes are good for code re-use.
   </para>
+  <note>
+  <title>
+  What is Object-Oriented Programming?
+  </title>
+  <para>
+    Object-oriented programming (often shorted to OOP) is a programming
+    style that encapsulates computation and data within logical
+    <emphasis>objects</emphasis>. Each object contains some data stored
+    in <emphasis>fields</emphasis>, and has <emphasis>method</emphasis>
+    functions that can be invoked against the data within the object.
+    The code definition behind an object is called a
+    <emphasis>class</emphasis>, and objects are constructed from a class
+    definition by calling a constructor with the data that the object
+    will use to build itself.
+  </para>
+  <para>
+    There are four fundamental properties that differentiate OOP from
+    other styles:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <emphasis>Abstraction</emphasis>: the details of the
+        implementation are hidden in the object, and the external
+        interface is just the set of publically-accessible methods.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Dynamic lookup</emphasis>: when a message is sent to
+        an object, the method to be executed is determined by the
+        implementation of the object, not by some static property of the
+        program. In other words, different objects may react to the same
+        message in different ways.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Subtyping</emphasis>: if an object
+        <literal>a</literal> has all the functionality of an object
+        <literal>b</literal>, then we may use <literal>a</literal> in
+        any context where <literal>b</literal> is expected.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Inheritance</emphasis>: the definition of one kind of
+        object can be re-used to produce a new kind of object. This new
+        definition can override some behaviour, but also share code with
+        its parent.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Almost every notable modern programming language has been influenced
+    by OOP, and you'll have run across these terms if you've ever used
+    C++, Java, C#, Ruby, Python or Javascript.
+  </para>
+  </note>
   <sect1 id="when-to-use-objects">
     <title>When to use objects</title>
     <para>
-      You might wonder when to use objects. First-class modules are more
-      expressive (a module can include types, classes and objects
-      cannot), and modules, functors, and algebraic data types offer a
-      wide range of ways to express program structure. In fact, many
-      seasoned OCaml programmers rarely use classes and objects, if at
-      all.
+      You might wonder when to use objects in OCaml, which has a
+      multitude of alternative mechanisms to express the same concept.
+      First-class modules are more expressive (a module can include
+      types, while classes and objects cannot). Modules, functors, and
+      algebraic data types also offer a wide range of ways to express
+      program structure. In fact, many seasoned OCaml programmers rarely
+      use classes and objects, if at all.
     </para>
-    <para>
-      What exactly is object-oriented programming? Mitchell (TODO: xref)
-      points out four fundamental properties.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <emphasis>Abstraction</emphasis>: the details of the
-          implementation are hidden in the object; the interface is just
-          the set of publically-accessible methods.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis>Dynamic lookup</emphasis>: when a message is sent to
-          an object, the method to be executed is determined by the
-          implementation of the object, not by some static property of
-          the program. In other words, different objects may react to
-          the same message in different ways.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis>Subtyping</emphasis>: if an object
-          <literal>a</literal> has all the functionality of an object
-          <literal>b</literal>, then we may use <literal>a</literal> in
-          any context where <literal>b</literal> is expected.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis>Inheritance</emphasis>: the definition of one kind
-          of object can be re-used to produce a new kind of object.
-        </para>
-      </listitem>
-    </itemizedlist>
     <para>
       Modules already provide these features in some form, but the main
       focus of classes is on code re-use through inheritance and late
@@ -10017,20 +10471,20 @@ Scanf.Scan_failure
     <para>
       In contrast, modules use static (lexical) scoping. If you want to
       parameterize your module code so that some part of it can be
-      implemented later, you would write a function/functor. This is
+      implemented later, you would write a function or functor. This is
       more explicit, but often more verbose than overriding a method in
       a class.
     </para>
     <para>
-      In general, a rule of thumb might be: use classes and objects in
+      In general, a rule of thumb is: use classes and objects in
       situations where dynamic binding is a big win, for example if you
       have many similar variations in the implementation of a concept.
-      Two good examples is Xavier Leroy's
+      Two good examples are Xavier Leroy's
       <ulink url="http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</ulink>,
       which provides a variety of cryptographic primitives that can be
       combined in building-block style, and the
-      <ulink url="TODO%20XREF">Camlgraphics</ulink> library which
-      manipulates various graphical file formats.
+      <ulink url="http://cristal.inria.fr/camlimages/">Camlimages</ulink>
+      library which manipulates various graphical file formats.
     </para>
     <para>
       In this chapter, we'll introduce you to the basics of object
@@ -10059,7 +10513,7 @@ Scanf.Scan_failure
       and support inheritance, including non-subtyping inheritance.
       Classes are not types. Instead, objects have <emphasis>object
       types</emphasis>, and if you want to use objects, you aren't
-      required to use classes at all. Here is an example of a simple
+      required to use classes at all. Here's an example of a simple
       object.
     </para>
     <programlisting language="ocaml">
@@ -10074,16 +10528,17 @@ val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
     <para>
       The object has an integer value <literal>x</literal>, a method
       <literal>get</literal> that returns x, and a method
-      <literal>set</literal> that updates the value of x.
+      <literal>set</literal> that updates the value of
+      <literal>x</literal>.
     </para>
     <para>
       The object type is enclosed in angle brackets
       <literal>&lt; ... &gt;</literal>, containing just the types of the
-      methods. Fields, like x, are not part of the public interface of
-      an object. All interaction with an object is through its methods.
-      The syntax for a method invocation (also called &quot;sending a
-      message&quot; to the object) uses the <literal>#</literal>
-      character.
+      methods. Fields, like <literal>x</literal>, are not part of the
+      public interface of an object. All interaction with an object is
+      through its methods. The syntax for a method invocation (also
+      called &quot;sending a message&quot; to the object) uses the
+      <literal>#</literal> character.
     </para>
     <programlisting language="ocaml">
 # p#get;
@@ -10096,7 +10551,7 @@ val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
     <para>
       Objects can also be constructed by functions. If we want to
       specify the initial value of the object, we can define a function
-      that takes the initial value and produces an object.
+      that takes the value and returns an object.
     </para>
     <programlisting language="ocaml">
 # let make i =
@@ -10122,20 +10577,34 @@ val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
   <sect1 id="object-polymorphism">
     <title>Object Polymorphism</title>
     <para>
-      <emphasis>(yminsky: Maybe this is a good time to talk about the
-      nature of object subtyping?)</emphasis>
-    </para>
-    <para>
       Functions can also take object arguments. Let's construct a new
-      object <literal>average</literal> that's the average of any two
-      objects with a <literal>get</literal> method.
+      object <literal>average</literal> that returns the average of any
+      two objects with a <literal>get</literal> method.
     </para>
     <programlisting language="ocaml">
 # let average p1 p2 =
   object
     method get = (p1#get + p2#get) / 2
   end;;
-val average : &lt; get : int; .. &gt; -&gt; &lt; get : int; .. &gt; -&gt; &lt; get : int &gt; = &lt;fun&gt;
+val average : 
+  &lt; get : int; .. &gt; -&gt; 
+  &lt; get : int; .. &gt; -&gt;
+  &lt; get : int &gt; = &lt;fun&gt;
+</programlisting>
+    <para>
+      There's some new syntax in the type that's been inferred for
+      <literal>average</literal> here. The parameters have the object
+      type <literal>&lt; get : int; .. &gt;</literal>. The
+      <literal>..</literal> are ellipsis, standing for any other
+      methods. The type <literal>&lt; get : int; .. &gt;</literal>
+      specifies an object that must have at least a
+      <literal>get</literal> method, and possibly some others as well.
+    </para>
+    <para>
+      We can use the <literal>average</literal> using the normal object
+      invocation syntax:
+    </para>
+    <programlisting language="ocaml">
 # let p1 = make 5;;
 # let p2 = make 15;;
 # let a = average p1 p2;;
@@ -10146,15 +10615,10 @@ val average : &lt; get : int; .. &gt; -&gt; &lt; get : int; .. &gt; -&gt; &lt; g
 - : int = 15
 </programlisting>
     <para>
-      Note that the type for <literal>average</literal> uses the object
-      type <literal>&lt; get : int; .. &gt;</literal>. The
-      <literal>..</literal> are ellipsis, standing for any other
-      methods. The type <literal>&lt; get : int; .. &gt;</literal>
-      specifies an object that must have at least a
-      <literal>get</literal> method, and possibly some others as well.
-      If we try using the exact type
-      <literal>&lt; get : int &gt;</literal> for an object with more
-      methods, type inference will fail.
+      The potential extra parameters defined by the object are carefully
+      tracked by the OCaml type checker. If we manually try and
+      constrain the exact type <literal>&lt; get : int &gt;</literal>
+      for an object with more methods, type inference will fail.
     </para>
     <programlisting language="ocaml">
 # let (p : &lt; get : int &gt;) = make 5;;
@@ -10271,24 +10735,10 @@ val p : point = &lt;obj&gt;
 - : int = 5
 </programlisting>
     <para>
-      <emphasis>(yminsky: You say that inheritance uses an existing
-      class to define a new one, but the example below looks like using
-      an existing class to define a new module. Is that what's going on?
-      Or is a new class being created implicitly? If the latter, it
-      might be better to be more explicit in this example and name the
-      new class.)</emphasis>
-    </para>
-    <para>
       Inheritance uses an existing class to define a new one. For
       example, the following class definition supports an addition
       method <literal>moveby</literal> that moves the point by a
-      relative amount. This also makes use of the
-      <literal>(self : 'self)</literal> binding after the
-      <literal>object</literal> keyword. The variable
-      <literal>self</literal> stands for the current object, allowing
-      self-invocation, and the type variable <literal>'self</literal>
-      stands for the type of the current object (which in general is a
-      subtype of <literal>movable_point</literal>).
+      relative amount.
     </para>
     <programlisting language="ocaml">
 # class movable_point =
@@ -10296,7 +10746,195 @@ val p : point = &lt;obj&gt;
     inherit point
     method moveby dx = self#set (self#get + dx)
   end;;
+class movable_point :
+  object
+    val mutable x : int
+    method get : int
+    method moveby : int -&gt; unit
+    method set : int -&gt; unit
+  end
 </programlisting>
+    <para>
+      This new <literal>movable_point</literal> class also makes use of
+      the <literal>(self : 'self)</literal> binding after the
+      <literal>object</literal> keyword. The variable
+      <literal>self</literal> stands for the current object, allowing
+      self-invocation, and the type variable <literal>'self</literal>
+      stands for the type of the current object (which in general is a
+      subtype of <literal>movable_point</literal>).
+    </para>
+  </sect1>
+  <sect1 id="an-example-cryptokit">
+    <title>An Example: Cryptokit</title>
+    <para>
+      Let's take a break from describing the object system with a more
+      practical example that uses the OCaml cryptographic library.
+    </para>
+    <note>
+    <title>
+    Installing the Cryptokit library
+    </title>
+    <para>
+      The Cryptokit library can be installed via OPAM via
+      <literal>opam install cryptokit</literal>. Once that's finished
+      compiling and installing, you just need to
+      <literal>#require &quot;cryptokit&quot;</literal> in your toplevel
+      to load the library and make the modules available.
+    </para>
+    </note>
+    <para>
+      Let's build a command to mimic the <literal>md5</literal> command,
+      which reads in an input file and returns a hexadecimal
+      representation of its MD5 cryptographic hash. Cryptokit defines a
+      number of different functions and collects them together under the
+      <literal>Cryptokit.hash</literal> class type:
+    </para>
+    <programlisting language="ocaml">
+class type hash = object
+  method add_byte : int -&gt; unit
+  method add_char : char -&gt; unit
+  method add_string : string -&gt; unit
+  method add_substring : string -&gt; int -&gt; int -&gt; unit
+  method hash_size : int
+  method result : string
+  method wipe : unit
+end
+
+val hash_string : hash -&gt; string -&gt; string
+</programlisting>
+    <para>
+      Hash objects are clearly imperative. Once instantiated, data is
+      fed into them by the addition functions, and then the
+      <literal>result</literal> is computed and then the contents erased
+      via <literal>wipe</literal>. The <literal>hash_string</literal>
+      convenience function applies the hash function fully to a string,
+      and returns the result. The <literal>md5</literal> command is
+      quite straight-forward now:
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+open Cryptokit
+
+let _ =
+  In_channel.(input_all stdin) |!
+  hash_string (Hash.md5 ()) |!
+  transform_string (Hexa.encode ()) |!
+  print_endline
+</programlisting>
+    <para>
+      After opening the right modules, we read in the entire standard
+      input into an OCaml string. This is then passed onto the MD5 hash
+      function, which returns a binary string. This binary is passed
+      through the <literal>Hexa</literal> hexadecimal encoder, which
+      returns an ASCII representation of the input. The output of this
+      command will be the same as the <literal>md5</literal> command (or
+      <literal>md5sum</literal> in some systems).
+    </para>
+    <para>
+      We can extend this simple example by selecting either the
+      <literal>md5</literal> or <literal>sha1</literal> hash function at
+      runtime depending on the name of our binary.
+      <literal>Sys.argv</literal> is an array containing the arguments
+      the command was invoked with, and the first entry is the name of
+      the binary itself.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+open Cryptokit
+
+let _ =
+  let hash_fn =
+    match Filename.basename Sys.argv.(0) with
+    |&quot;md5&quot; -&gt; Hash.md5 ()
+    |&quot;sha1&quot; -&gt; Hash.sha1 ()
+    |_ -&gt; Hash.md5 ()
+  in
+  In_channel.(input_all stdin) |!
+  hash_string hash_fn |!
+  transform_string (Hexa.encode ()) |!
+  print_endline
+</programlisting>
+    <para>
+      Now let's try something more advanced. The
+      <literal>openssl</literal> library is installed on most systems,
+      and can be used to encrypt plaintext using several encryption
+      strategies. At its simplest, it will take a secret phrase and
+      derive an appropriate key and initialisation vector.
+    </para>
+    <programlisting>
+$ openssl enc -nosalt -aes-128-cbc -base64 -k &quot;ocaml&quot; -P
+key=6217C07FF169F6AB2EB2731F855095F1
+iv =8164D5477E66E6A9EC99A8D58ACAADAF
+</programlisting>
+    <para>
+      We've selected the <literal>-nosalt</literal> option here to make
+      the output deterministic, and the <literal>-P</literal> option
+      prints out the derived key and IV and exits. The algorithm used to
+      derive these results is described in the
+      <literal>man EVP_BytesToKey</literal> manual page (you may need to
+      install the OpenSSL documentation packages on your system first).
+      We can implement this derivation function using an imperative
+      style:
+    </para>
+    <programlisting language="ocaml">
+let md5 s = hash_string (Hash.md5 ()) s
+
+let evp_byte_to_key password tlen =
+  let o = Hexa.encode () in
+  let v = ref (md5 password) in
+  o#put_string !v;
+  while o#available_output/2 &lt; tlen do
+    let n = md5 (!v ^ password) in
+    o#put_string n;
+    v := n;
+  done;
+  String.uppercase o#get_string
+
+let _ =
+  let secret = &quot;ocaml&quot; in
+  let key_len = 16 * 2 in
+  let iv_len = 16 * 2 in
+  let x = evp_byte_to_key secret (key_len+iv_len) in
+  let key = String.sub x ~pos:0 ~len:key_len in
+  let iv = String.sub x ~pos:key_len ~len:iv_len in
+  Printf.printf &quot;key=%s\niv =%s\n%!&quot; key iv
+</programlisting>
+    <para>
+      The derivation algorithm takes an input password and desired total
+      length (the addition of the key and IV length). It initialises a
+      <literal>Hexa.encode</literal> transformer, which will accept
+      arbitrary binary data and output a hexadecimal string (with two
+      output bytes per input byte). A reference stores the last digest
+      that's been calculated, and then the algorithm iterates until it
+      has sufficient data to satisfy the required key length.
+    </para>
+    <para>
+      Notice how the encoder object is used as an accumulator, by using
+      the <literal>put_string</literal> and
+      <literal>available_output</literal> to keep track of progress.
+      Objects don't <emphasis>require</emphasis> an imperative style
+      though, and the same algorithm can be written more functionally:
+    </para>
+    <programlisting language="ocaml">
+let evp_byte_to_key password tlen =
+  let rec aux acc v =
+    match String.length acc &lt; tlen with
+    |true -&gt;
+      let v = md5 (v ^ password) in
+      aux (acc^v) v
+    |false -&gt; acc
+  in
+  let v = md5 password in
+  String.uppercase (transform_string (Hexa.encode ()) (aux v v))
+</programlisting>
+    <para>
+      In this version, we don't use any references, and instead a
+      recursive function keeps track of the last digest in use and the
+      accumulated result string. This version isn't quite as efficient
+      as the previous one due to the careless use of string
+      concatenation for the accumulator, but this can easily be fixed by
+      using the <literal>Buffer</literal> module instead.
+    </para>
   </sect1>
   <sect1 id="class-parameters-and-polymorphism">
     <title>Class parameters and polymorphism</title>
@@ -10430,7 +11068,7 @@ end;;
       without implementing them (C++ uses the &quot;= 0&quot; definition
       to mean &quot;not implemented&quot;).
     </para>
-    <programlisting>
+    <programlisting language="java">
 // Java-style iterator, specified as an interface.
 interface &lt;T&gt; iterator {
   T Get();
@@ -10662,10 +11300,10 @@ module SList = struct
 end;;
 </programlisting>
     <para>
-      We have multiple choices in definining the module type, depending
-      on how much of the implementation we want to expose. At one
-      extreme, a maximally-abstract signature would completely hide the
-      class definitions.
+      We have multiple choices in defining the module type, depending on
+      how much of the implementation we want to expose. At one extreme,
+      a maximally-abstract signature would completely hide the class
+      definitions.
     </para>
     <programlisting language="ocaml">
 module AbstractSList : sig
@@ -10741,28 +11379,6 @@ end = SList
       by erasing all the fields and keeping only the method types. In
       this case, the type expression <literal>'a slist</literal> is
       exactly equivalent to <literal>'a t</literal>.
-    </para>
-  </sect1>
-  <sect1 id="cryptokit">
-    <title>Cryptokit</title>
-    <para>
-      Let's take a break from describing the object system with a more
-      practical example.
-    </para>
-    <note>
-    <title>
-    Installing the Cryptokit library
-    </title>
-    <para>
-      The Cryptokit library can be installed via OPAM by
-      <literal>opam install cryptokit</literal>. The OCamlfind package
-      also has the same name, so you just need to
-      <literal>#require &quot;cryptokit&quot;</literal> in your toplevel
-      to load the library and make the modules available.
-    </para>
-    </note>
-    <para>
-      TODO: example
     </para>
   </sect1>
 </chapter></part><part label="II"><title>Practical Examples</title><chapter id="data-serialization-with-s-expressions">
@@ -17244,13 +17860,27 @@ immutable: 2.6186s (19073 minor collections)
     <sect2 id="macos-x">
       <title>MacOS X</title>
       <para>
-        The easiest way to install OCaml on MacOS X is via the
-        <literal>homebrew</literal> package manager, available from
-        [http://github.com/mxcl/homebrew].
+        The easiest way to install OCaml on MacOS X is via
+        <ulink url="http://github.com/mxcl/homebrew">Homebrew</ulink>.
       </para>
       <programlisting>
 $ brew install ocaml
+$ brew install pcre
 $ brew install opam
+</programlisting>
+      <para>
+        The Perl-compatible Regular Expression library (PCRE) is used by
+        the Core suite. It's a commonly used library that you may
+        already have installed for some other reason.
+      </para>
+      <para>
+        Another popular package manager is
+        <ulink url="http://macports.org">MacPorts</ulink>:
+      </para>
+      <programlisting>
+$ port install ocaml
+$ port install ocaml-pcre
+$ port install opam
 </programlisting>
     </sect2>
     <sect2 id="linux">
@@ -17260,19 +17890,29 @@ $ brew install opam
         and then install the latest OPAM release from source.
       </para>
       <programlisting>
-$ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra git
+$ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra
+$ sudo apt-get install git libpcre3-dev curl
 $ tar -zxvf opam-&lt;version&gt;.tar.gz
 $ cd opam-&lt;version&gt;.tar.gz
 $ ./configure &amp;&amp; make &amp;&amp; sudo make install
 </programlisting>
       <para>
-        On Fedora/RHEL...?
+        <emphasis>Note to reviewers:</emphasis> The OPAM instructions
+        will be simplified when integrated upstream into Debian and
+        Fedora. Until then, the source installation instructions above
+        may require a few more packages, so please leave a comment with
+        any amended instructions.
+      </para>
+      <para>
+        Fedora/RHEL: TODO
       </para>
     </sect2>
     <sect2 id="windows">
       <title>Windows</title>
       <para>
-        Investigate Protzenko's Windows installer.
+        Windows is not currently supported, although it is being worked
+        on. Until that's ready, we recommend using a virtual machine
+        running Debian Linux on your local machine.
       </para>
     </sect2>
     <sect2 id="using-the-opam-top-level">
@@ -17280,25 +17920,49 @@ $ ./configure &amp;&amp; make &amp;&amp; sudo make install
       <para>
         All the OPAM state is held in the <literal>.opam</literal>
         directory in your home directory, including compiler
-        installations. You should never need to switch to an admin user
-        to install packages.
+        installations. On Linux and MacOS X, this will be the
+        <literal>~/.opam</literal> directory. You shouldn't switch to an
+        admin user to install packages; if you run into problems, just
+        delete the whole <literal>.opam</literal> directory and follow
+        the installations instructions from the
+        <literal>opam init</literal> stage again.
       </para>
       <programlisting>
 $ opam init
+$ opam switch 4.00.1+short-types
 $ opam install utop async core_extended
 $ eval `opam config env`
 </programlisting>
       <para>
-        This will initialise OPAM with the default package set from
-        <literal>opam.ocamlpro.com</literal>, and install the
-        <literal>utop</literal> interactive top-level and the
-        <literal>Async</literal> library. OPAM figures out the minimal
-        set of dependencies required, and installs those too. The
-        <literal>eval</literal> command is sets your
-        <literal>PATH</literal> variable to point to the current active
-        compiler, and you should add this to your shell
-        <literal>.profile</literal> to run every time you open a new
-        command shell.
+        This will initialise OPAM with a default package set, and
+        install some packages to augment the OCaml distribution.
+      </para>
+      <para>
+        The <literal>utop</literal> package is an interactive
+        command-line interface to OCaml that has tab-completion,
+        persistent history and integration with Emacs so that you can
+        run it within your editing environment. We use
+        <literal>utop</literal> instead of the more spartan default
+        OCaml top-level throughout the book.
+      </para>
+      <para>
+        The other two packages are <literal>async</literal> and
+        <literal>core_extended</literal>, which are libraries from the
+        Jane Street Core standard library. These will take a few minutes
+        to compile on a modern machine (particularly
+        <literal>core_extended</literal>) as they contain a large number
+        of modules to help with day-to-day programming. We use Core
+        throughout the examples in this book.
+      </para>
+      <para>
+        OPAM figures out the minimal set of dependencies required for
+        thse packages and installs them too. The <literal>eval</literal>
+        command sets your <literal>PATH</literal> variable to point to
+        the current active compiler, and you should add this to your
+        local shell <literal>.profile</literal> to run every time you
+        open a new command shell. It won't affect any other commands, as
+        OPAM makes sure to preserve any custom extensions you may
+        already have to your <literal>PATH</literal> variable.
       </para>
     </sect2>
     <sect2 id="switching-compiler-versions">
@@ -17313,17 +17977,19 @@ $ eval `opam config env`
         by:
       </para>
       <programlisting>
-$ opam switch -list
+$ opam switch list
 $ opam switch 4.00.1+short-types
 $ eval `opam config env`
-$ opam install utop async_extra
+$ opam install utop async
 </programlisting>
       <para>
         The new compiler will be compiled and installed into
         <literal>~/.opam/4.00.1+short-types</literal> and the libraries
         will be tracked separately from your system installation. You
         can have any number of compilers installed simultaneously, but
-        only one can be active at any time.
+        only one can be active at any time. You can find all the
+        available compilers by running
+        <literal>opam switch list</literal>.
       </para>
     </sect2>
   </sect1>
