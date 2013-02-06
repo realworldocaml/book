@@ -10783,10 +10783,10 @@ class movable_point :
     </para>
     </note>
     <para>
-      Let's build a command to mimic the <literal>md5</literal> command,
-      which reads in an input file and returns a hexadecimal
-      representation of its MD5 cryptographic hash. Cryptokit defines a
-      number of different functions and collects them together under the
+      Our first example mimics the <literal>md5</literal> command, which
+      reads in an input file and returns a hexadecimal representation of
+      its MD5 cryptographic hash. Cryptokit defines a number of
+      different functions and collects them together under the
       <literal>Cryptokit.hash</literal> class type:
     </para>
     <programlisting language="ocaml">
@@ -10803,13 +10803,28 @@ end
 val hash_string : hash -&gt; string -&gt; string
 </programlisting>
     <para>
-      Hash objects are clearly imperative. Once instantiated, data is
-      fed into them by the addition functions, and then the
-      <literal>result</literal> is computed and then the contents erased
-      via <literal>wipe</literal>. The <literal>hash_string</literal>
-      convenience function applies the hash function fully to a string,
-      and returns the result. The <literal>md5</literal> command is
-      quite straight-forward now:
+      Concrete hash objects can be instantiated from various sub-modules
+      in Cryptokit. The simplest ones such as MD5 or SHA1 do not take
+      any special input parameters to build the object. The
+      <literal>hmac_sha1</literal> takes a string key to initialise the
+      Message Authenticate Code for that particular hash function.
+    </para>
+    <programlisting language="ocaml">
+# Cryptokit.Hash.md5;;
+- : unit -&gt; Cryptokit.hash = &lt;fun&gt;
+# Cryptokit.Hash.sha1;;
+- : unit -&gt; Cryptokit.hash = &lt;fun&gt;
+# Cryptokit.MAC.hmac_sha1;;
+- : string -&gt; Cryptokit.hash = &lt;fun&gt;
+</programlisting>
+    <para>
+      Hash objects hold state and are thus naturally imperative. Once
+      instantiated, data is fed into them by the addition functions, the
+      <literal>result</literal> is computed and finally the contents
+      erased via <literal>wipe</literal>. The
+      <literal>hash_string</literal> convenience function applies the
+      hash function fully to a string, and returns the result. The
+      <literal>md5</literal> command is quite straight-forward now:
     </para>
     <programlisting language="ocaml">
 open Core.Std
