@@ -310,6 +310,134 @@ This new `movable_point` class also makes use of the
 the type variable `'self` stands for the type of the current object
 (which in general is a subtype of `movable_point`).
 
+
+##  An Example: Cryptokit
+
+Let's take a break from describing the object system with a more
+practical example that uses the OCaml cryptographic library.
+
+<note>
+<title>Installing the Cryptokit library</title>
+
+The Cryptokit library can be installed via OPAM via `opam install cryptokit`.
+Once that's finished compiling and installing, you just need to `#require
+"cryptokit"` in your toplevel to load the library and make the modules
+available.
+
+</note>
+
+Let's build a command to mimic the `md5` command, which reads in an input
+file and returns a hexadecimal representation of its MD5 cryptographic hash.
+Cryptokit defines a number of different functions and collects them together
+under the `Cryptokit.hash` class type:
+
+```ocaml
+class type hash = object
+  method add_byte : int -> unit
+  method add_char : char -> unit
+  method add_string : string -> unit
+  method add_substring : string -> int -> int -> unit
+  method hash_size : int
+  method result : string
+  method wipe : unit
+end
+
+val hash_string : hash -> string -> string
+```
+
+Hash objects are clearly imperative. Once instantiated, data is fed into them by the addition functions, and then the `result` is computed and then the contents erased via `wipe`.
+The `hash_string` convenience function applies the hash function fully to a string, and returns the result.
+The `md5` command is quite straight-forward now:
+
+```ocaml
+open Core.Std
+open Cryptokit
+
+let _ =
+  In_channel.(input_all stdin) |!
+  hash_string (Hash.md5 ()) |!
+  transform_string (Hexa.encode ()) |!
+  print_endline
+```
+
+After opening the right modules, we read in the entire standard input into an OCaml string.
+This is then passed onto the MD5 hash function, which returns a binary string.
+This binary is passed through the `Hexa` hexadecimal encoder, which returns an ASCII
+representation of the input.  The output of this command will be the same as the `md5` command (or `md5sum` in some systems).
+
+We can extend this simple example by selecting either the `md5` or `sha1` hash function at runtime depending on the name of our binary.  `Sys.argv` is an array containing the arguments the command was invoked with, and the first entry is the name of the binary itself.
+
+```ocaml
+open Core.Std
+open Cryptokit
+
+let _ =
+  let hash_fn =
+    match Filename.basename Sys.argv.(0) with
+    |"md5" -> Hash.md5 ()
+    |"sha1" -> Hash.sha1 ()
+    |_ -> Hash.md5 ()
+  in
+  In_channel.(input_all stdin) |!
+  hash_string hash_fn |!
+  transform_string (Hexa.encode ()) |!
+  print_endline
+```
+
+Now let's try something more advanced.  The `openssl` library is installed on most systems, and can be used to encrypt plaintext using several encryption strategies.  At its simplest, it will take a secret phrase and derive an appropriate key and initialisation vector.
+
+```
+$ openssl enc -nosalt -aes-128-cbc -base64 -k "ocaml" -P
+key=6217C07FF169F6AB2EB2731F855095F1
+iv =8164D5477E66E6A9EC99A8D58ACAADAF
+```
+
+We've selected the `-nosalt` option here to make the output deterministic, and the `-P` option prints out the derived key and IV and exits.  The algorithm used to derive these results is described in the `man EVP_BytesToKey` manual page (you may need to install the OpenSSL documentation packages on your system first).  We can implement this derivation function using an imperative style:
+
+```ocaml
+let md5 s = hash_string (Hash.md5 ()) s
+
+let evp_byte_to_key password tlen =
+  let o = Hexa.encode () in
+  let v = ref (md5 password) in
+  o#put_string !v;
+  while o#available_output/2 < tlen do
+    let n = md5 (!v ^ password) in
+    o#put_string n;
+    v := n;
+  done;
+  String.uppercase o#get_string
+
+let _ =
+  let secret = "ocaml" in
+  let key_len = 16 * 2 in
+  let iv_len = 16 * 2 in
+  let x = evp_byte_to_key secret (key_len+iv_len) in
+  let key = String.sub x ~pos:0 ~len:key_len in
+  let iv = String.sub x ~pos:key_len ~len:iv_len in
+  Printf.printf "key=%s\niv =%s\n%!" key iv
+```
+
+The derivation algorithm takes an input password and desired total length (the addition of the key and IV length).
+It initialises a `Hexa.encode` transformer, which will accept arbitrary binary data and output a hexadecimal string (with two output bytes per input byte).  A reference stores the last digest that's been calculated, and then the algorithm iterates until it has sufficient data to satisfy the required key length.
+
+Notice how the encoder object is used as an accumulator, by using the `put_string` and `available_output` to keep track of progress.  Objects don't *require* an imperative style though, and the same algorithm can be written more functionally:
+
+```ocaml
+let evp_byte_to_key password tlen =
+  let rec aux acc v =
+    match String.length acc < tlen with
+    |true ->
+      let v = md5 (v ^ password) in
+      aux (acc^v) v
+    |false -> acc
+  in
+  let v = md5 password in
+  String.uppercase (transform_string (Hexa.encode ()) (aux v v))
+```
+
+In this version, we don't use any references, and instead a recursive function keeps track of the last digest in use and the accumulated result string.  This version isn't quite as efficient as the previous one due to the careless use of string concatenation for the accumulator, but this can easily be fixed by using the `Buffer` module instead.
+
 ## Class parameters and polymorphism ##
 
 A class definition serves as the _constructor_ for the class.  In
@@ -636,7 +764,7 @@ module SList = struct
 end;;
 ```
    
-We have multiple choices in definining the module type, depending on
+We have multiple choices in defining the module type, depending on
 how much of the implementation we want to expose.  At one extreme, a
 maximally-abstract signature would completely hide the class
 definitions.
@@ -709,20 +837,3 @@ used to stand for types.  When the compiler sees a class name in type
 position, it automatically constructs an object type from it by
 erasing all the fields and keeping only the method types.  In this
 case, the type expression `'a slist` is exactly equivalent to `'a t`.
- 
-## Cryptokit
-
-Let's take a break from describing the object system with a more
-practical example.  
-
-<note>
-<title>Installing the Cryptokit library</title>
-
-The Cryptokit library can be installed via OPAM by `opam install cryptokit`.
-The OCamlfind package also has the same name, so you just need to `#require
-"cryptokit"` in your toplevel to load the library and make the modules
-available.
-
-</note>
-
-TODO: example 
