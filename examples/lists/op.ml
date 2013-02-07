@@ -3,7 +3,7 @@
  * ----------------------------------------------------------------
  *
  * @begin[license]
- * Copyright (C) 2012 Jason Hickey
+ * Copyright (C) 2013 Jason Hickey
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,63 +23,45 @@
  * @email{jyh@cs.caltech.edu}
  * @end[license]
  *)
-open Core.Std
 
-let rec add1 l =
-  match l with
+let rec my_append l1 l2 =
+  match l1 with
+  | [] -> l2
+  | h :: t -> h :: my_append t l2;;
+
+my_append ["a"; "b"] ["x"; "y"; "z"];;
+
+let rec my_map ~f = function
   | [] -> []
-  | h :: t -> (h + 1) :: (add1 t);;
+  | h :: t -> f h :: my_map ~f t;;
 
-let optional_default ~default opt =
-  match opt with
-  | Some v -> v
-  | None -> default;;
+my_map ~f:(fun i -> string_of_int (i * 10)) [1; 2; 3];;
 
-let broken_third l =
-  match l with
-  | _ :: _ :: x :: _ -> Some x;;
+let my_length l =
+  let rec length i = function
+    | [] -> i
+    | _ :: t -> length (i + 1) t
+  in
+  length 0 l;;
 
-let third l =
-  match l with
-  | _ :: _ :: x :: _ -> Some x
-  | _ -> None;;
-
-let third l =
-  match l with
-  | _ :: _ :: x :: _ -> Some x
-  | []
-  | [_]
-  | [_; _] -> None;;
-
-let third l1 =
-  match List.tl l1 with
-  | None -> None
-  | Some l2 ->
-    match List.tl l2 with
-    | None -> None
-    | Some l3 ->
-      List.hd l3;;
-
-let (>>=) v f =
-  match v with
-  | None -> None
-  | Some x -> f x;;
-
-let third l =
-  Some l >>= List.tl >>= List.tl >>= List.hd;;
-
-let third l =
-  let (>>=) = Option.(>>=) in
-  Some l >>= List.tl >>= List.tl >>= List.hd;;
-
-let head1 l =
+let rec my_nth l i =
   match l with
   | [] -> None
-  | h :: _ -> Some h;;
+  | h :: t -> if i = 0 then Some h else my_nth t (i - 1);;
 
-let head2 = function
-  | [] -> None
-  | h :: _ -> Some h;;
+let rec my_fold_left ~init ~f = function
+  | [] -> init
+  | h :: t -> my_fold_left ~init:(f init h) ~f t;;
+
+let my_exists ~f l =
+  List.fold_left ~init:false ~f:(fun result x -> result || f x) l;;
+
+let my_for_all ~f l =
+  List.fold_left ~init:true ~f:(fun result x -> result && f x) l;;
+
+let rec my_exists ~f = function
+  | [] -> false
+  | h :: t -> f h || my_exists ~f t;;
 
 (*
  * -*-
