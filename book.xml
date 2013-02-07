@@ -35,6 +35,8 @@
 
 
 
+
+
 <part label="I"><title>Basic Concepts</title><chapter id="prologue">
   <title>Prologue</title>
   <para>
@@ -2855,10 +2857,6 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
   </sect1>
 </chapter><chapter id="lists-options-and-patterns">
   <title>Lists, Options and Patterns</title>
-  <para>
-    <emphasis>(Note, this chapter is incomplete. jyh is working on
-    it.)</emphasis>
-  </para>
   <sect1 id="lists-1">
     <title>Lists</title>
     <para>
@@ -2870,7 +2868,7 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
     <para>
       Lists are one of the most common ways to aggregate data in OCaml.
       You can construct a list of values by enclosing them in square
-      brackets, and separating the elements with semicolons. The list
+      brackets, separating the elements with semicolons. The list
       elements must all have the same type.
     </para>
     <programlisting language="ocaml">
@@ -2899,8 +2897,8 @@ val l1 : string list = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot
           <literal>x</literal>, and the rest is <literal>l</literal>.
           The value corresponding to <literal>x :: l</literal> is
           commonly called a <emphasis>cons</emphasis>-cell (the term
-          comes from Lisp, where &quot;cons&quot; is short for
-          &quot;constructor&quot;).
+          comes from the Lisp programming language, where
+          &quot;cons&quot; is short for &quot;constructor&quot;).
         </para>
       </listitem>
     </itemizedlist>
@@ -3194,25 +3192,506 @@ val third : 'a list -&gt; 'a option = &lt;fun&gt;
 val third : 'a list -&gt; 'a option = &lt;fun&gt;
 </programlisting>
   </sect1>
+  <sect1 id="pattern-matching-with-function">
+    <title>Pattern matching with <literal>function</literal></title>
+    <para>
+      Pattern matching can be used anyplace where a regular binding is
+      performed. For a trivial example, we can use an underscore to
+      ignore a value. This is often useful when defining functions that
+      ignore one or more of their arguments.
+    </para>
+    <programlisting language="ocaml">
+# let f _ = 5;;
+val f : 'a -&gt; int = &lt;fun&gt;
+# f 3;;
+- : int = 5
+# f &quot;three&quot;;;
+- : int = 5
+</programlisting>
+    <para>
+      Tuple patterns can be used to break apart of components of a
+      tuple. For example, we can bind the parts of a triple to separate
+      variables, or define projection functions that can be used to
+      return components of the tuple.
+    </para>
+    <programlisting language="ocaml">
+# let x, y, z = 1, 2, 3;;
+val x : int = 1
+val y : int = 2
+val z : int = 3
+# let first_of_three (x, _, _) = x;;
+val first_of_three : 'a * 'b * 'c -&gt; 'a = &lt;fun&gt;
+# first_of_three (&quot;a&quot;, &quot;b&quot;, &quot;c&quot;);;
+- : string = &quot;a&quot;
+</programlisting>
+    <para>
+      Lists are a little different when using normal patterns, because
+      in general the patterns will not be exhaustive. The compiler
+      requires that patterns match all possible values of a type,
+      regardless of the actual value being matched.
+    </para>
+    <programlisting language="ocaml">
+# let h :: t = [1; 2];;
+Characters 4-10:
+  let h :: t = [1; 2];;
+      ^^^^^^
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val h : int = 1
+val t : int list = [2]
+</programlisting>
+    <para>
+      When matching values with multiple different cases, like with
+      lists or variants, you will usually want to use a
+      <literal>match</literal> to perform a case analysis. For
+      functions, there is an alternative form
+      <literal>function p1 -&gt; e1 | p2 -&gt; e2 | ... | pN -&gt; eN</literal>,
+      where the cases are just like a <literal>match</literal>.
+    </para>
+    <programlisting language="ocaml">
+# let head1 l =
+    match l with
+    | [] -&gt; None
+    | h :: _ -&gt; Some h;;
+val head1 : 'a list -&gt; 'a option = &lt;fun&gt;
+# head1 [1; 2; 3];;
+- : int option = Some 1
+# let head2 = function
+    | [] -&gt; None
+    | h :: _ -&gt; Some h;;
+val head2 : 'a list -&gt; 'a option = &lt;fun&gt;
+# head2 [1; 2; 3];;
+- : int option = Some 1
+</programlisting>
+    <para>
+      In fact, the <literal>function</literal> expression is equivalent
+      to an anonyous function that performs an explicit match,
+      <literal>(fun x -&gt; match x with p1 -&gt; e1 | p2 -&gt; e2 | ... | pN -&gt; eN)</literal>.
+      For example, the following functions <literal>head1</literal> and
+      <literal>head2</literal> are equivalent; they return the first
+      element of the list if it exists. The <literal>function</literal>
+      form is a little more concise, but otherwise equivalent.
+    </para>
+    <sect2 id="using-when-and-as-in-patterns">
+      <title>Using <literal>when</literal> and <literal>as</literal> in
+      patterns</title>
+      <para>
+        Let's return to the example introduction, where we defined a
+        function to remove adjacent duplicate elements in a list. There
+        are several cases to consider. If the list is empty or has one
+        element, we can return it unchanged. Otherwise, compare the
+        first two elements of the list, keeping the first one if, and
+        only if, it is different from the second.
+      </para>
+      <programlisting language="ocaml">
+# let rec uniq = function
+   | ([] | [_]) as l -&gt; l
+   | i1 :: ((i2 :: _) as t) -&gt;
+        if i1 = i2 then
+           uniq t
+        else
+           i1 :: uniq t;;
+val uniq : 'a list -&gt; 'a list = &lt;fun&gt;
+# uniq [1; 3; 3; 3; 2];;
+- : int list = [1; 3; 2]
+</programlisting>
+      <para>
+        In this example, we're using <literal>as</literal> patterns,
+        which have the form &quot;<emphasis>pattern</emphasis>
+        <literal>as</literal> <emphasis>variable</emphasis>&quot;. If
+        the <emphasis>pattern</emphasis> matches, the value is also
+        bound to the variable. For the first case, the pattern
+        <literal>([] | [_]) as l</literal> matches lists that are empty
+        or have one element, and the list is bound to the variable
+        <literal>l</literal>.
+      </para>
+      <para>
+        The second pattern is somewhat more interesting,
+        <literal>i1 :: ((i2 :: _) as t)</literal> binds
+        <literal>t</literal> to the tail of the list. This would be
+        harder (or at least more verbose) if we did not have
+        <literal>as</literal> patterns.
+      </para>
+      <programlisting language="ocaml">
+# let rec inefficient_uniq l =
+    match l with
+    | ([] | [_]) -&gt; l
+    | i1 :: i2 :: t -&gt;
+      if i1 = i2 then
+        inefficient_uniq (i2 :: t)
+      else
+        i1 :: inefficient_uniq (i2 :: t);;
+val inefficient_uniq : 'a list -&gt; 'a list = &lt;fun&gt;
+</programlisting>
+      <para>
+        In the <literal>inefficient_uniq</literal> version, the tail
+        <literal>(i2 :: t)</literal> is reconstructed for the recursive
+        call, possibly allocating a new cons-cell. The compiler may or
+        may not optimize the recursive call. The form using
+        <literal>as</literal> is more concise and possibly more
+        efficient.
+      </para>
+      <para>
+        OCaml also supports <emphasis>guarded</emphasis> patterns using
+        <emphasis>pattern</emphasis> <literal>when</literal>
+        <emphasis>expression</emphasis>, where the
+        <emphasis>expression</emphasis> is a predicate. The predicate is
+        allowed to use variables bound by the pattern, and the pattern
+        matches only of the expression evaluates to
+        <literal>true</literal>. Another way to write the
+        <literal>uniq</literal> function is to split the equality case
+        using a <literal>when</literal> pattern.
+      </para>
+      <programlisting language="ocaml">
+# let rec broken_uniq = function
+   | ([] | [_]) as l -&gt; l
+   | i1 :: ((i2 :: _) as t) when i1 = i2 -&gt;
+     broken_uniq t
+   | i1 :: ((i2 :: _) as t) when i1 &lt;&gt; i2 -&gt;
+     i1 :: broken_uniq t;;
+...
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::_::_
+(However, some guarded clause may match this value.)
+val broken_uniq : 'a list -&gt; 'a list = &lt;fun&gt;
+</programlisting>
+      <para>
+        Unfortunately, there is a problem here, because the compiler
+        complains about an inexhaustive match. The problem is that
+        guarded patterns (patterns with <literal>when</literal> clauses)
+        are not included in the exhaustiveness analysis because, in
+        general, the compiler can't infer when the guards consider all
+        values. Of course, in this particular case, we can remove the
+        second guard and rely on pattern ordering, but the result is not
+        as obvious as the original form without guards. You will
+        generally find that <literal>when</literal> clauses are used
+        only infrequently.
+      </para>
+      <programlisting language="ocaml">
+# let rec subtle_uniq = function
+    | ([] | [_]) as l -&gt; l
+    | i1 :: ((i2 :: _) as t) when i1 = i2 -&gt; subtle_uniq t
+    | i1 :: t -&gt; i1 :: subtle_uniq t;;
+val subtle_uniq : 'a list -&gt; 'a list = &lt;fun&gt;
+# subtle_uniq [1; 3; 3; 3; 4];;
+- : int list = [1; 3; 4]
+</programlisting>
+    </sect2>
+  </sect1>
+  <sect1 id="list-operations">
+    <title>List operations</title>
+    <para>
+      Abstractly, a list is an ordered collection of elements, where
+      access is sequential, and the list length is not fixed. There are
+      other kinds of standard collections in OCaml, including sets,
+      implemented by the <literal>Set</literal> module; dictionaries,
+      implemented by the <literal>Map</literal> module; arrays,
+      implemented by the <literal>Array</literal> module; and many
+      others. The different collections have different properties, for
+      example sets support efficient membership testing, but do not
+      preserve ordering; and arrays support efficient random access but
+      have fixed size.
+    </para>
+    <para>
+      However, all collections support some standard operations for
+      computing over the elements in the collection. Let's look at some
+      of the operations for lists, including some possible
+      implementations.
+    </para>
+    <sect2 id="list-length-and-random-access">
+      <title>List length and random access</title>
+      <para>
+        Lists do not have a constant-time operation that returns the
+        number of elements in the list. The function
+        <literal>List.length</literal> calculates the length by
+        iterating through the elements of the list. The
+        <literal>List.nth</literal> function is similar, used for random
+        access into the list.
+      </para>
+      <programlisting language="ocaml">
+# List.length [&quot;a&quot;; &quot;b&quot;; &quot;c&quot;];;
+- : int = 3
+# List.nth [&quot;a&quot;; &quot;b&quot;; &quot;c&quot;; &quot;d&quot;] 2;;
+- : string option = Some &quot;c&quot;
+</programlisting>
+      <para>
+        Since lists support only sequential acccess, the implementations
+        of these functions iterate through the elements of the list one
+        at a time.
+      </para>
+      <programlisting language="ocaml">
+# let my_length l =
+    let rec length i = function
+      | [] -&gt; i
+      | _ :: t -&gt; length (i + 1) t
+    in
+    length 0 l;;
+val my_length : 'a list -&gt; int = &lt;fun&gt;
+# my_length [&quot;a&quot;; &quot;b&quot;; &quot;c&quot;; &quot;d&quot;];;
+- : int = 4
+</programlisting>
+      <para>
+        The <literal>nth</literal> function is similar. The computation
+        iterates through the list sequentially, stopping when the index
+        reaches zero.
+      </para>
+      <para>
+        <literal>ocaml # let rec my_nth l i =     match l with     | [] -&gt; None     | h :: t -&gt; if i = 0 then Some h else my_nth t (i - 1);; val my_nth : 'a list -&gt; int -&gt; 'a option = &lt;fun&gt; # my_nth [&quot;a&quot;; &quot;b&quot;; &quot;c&quot;; &quot;d&quot;] 2;; - : string option = Some &quot;c&quot;</literal>
+        #### Appending (concatenating) lists
+      </para>
+      <para>
+        Another basic list operation is to concatenate two lists,
+        forming a new list from the results. This can be written
+        explicitly using the <literal>List.append</literal> function, or
+        with the infix operator <literal>@</literal>; the two ways are
+        equivalent.
+      </para>
+      <programlisting language="ocaml">
+# List.append [1; 2; 3] [12; 13];;
+- : int list = [1; 2; 3; 12; 13]
+# [1; 2; 3] @ [21; 32];;
+- : int list = [1; 2; 3; 21; 32]
+</programlisting>
+      <para>
+        The implementation of the <literal>append</literal> function
+        requires iterating through the first list to find the last
+        element, then replacing it with the second list.
+      </para>
+      <programlisting language="ocaml">
+# let rec my_append l1 l2 =
+   match l1 with
+    | [] -&gt; l2
+    | h :: t -&gt; h :: my_append t l2;;
+val my_append : 'a list -&gt; 'a list -&gt; 'a list = &lt;fun&gt;
+# my_append [&quot;a&quot;; &quot;b&quot;] [&quot;x&quot;; &quot;y&quot;; &quot;z&quot;];;
+- : string list = [&quot;a&quot;; &quot;b&quot;; &quot;x&quot;; &quot;y&quot;; &quot;z&quot;]
+</programlisting>
+      <para>
+        The <literal>Core.Std.List</literal> module contains a somewhat
+        more efficient tail-recursive implementation of the append
+        function (tail-recursion is discussed later in this chapter).
+        However, one thing to note is that the associativity of append
+        has an important effect on performance. If we append three or
+        more lists, it is most efficient to associate to the right. The
+        expressions
+        <literal>List.append l1 (List.append l2 l3)</literal> and
+        <literal>List.append (List.append l1 l2) l3</literal> produce
+        equal results, but the first is more efficient in general.
+      </para>
+    </sect2>
+    <sect2 id="map">
+      <title>Map</title>
+      <para>
+        The <literal>List.map</literal> function creates a new list by
+        mapping a function over the elements of one list, forming a new
+        list from the results. Given a function <literal>f</literal>,
+        and a list <literal>l = [a1; a2; ...; aN]</literal>, the
+        function <literal>List.map ~f l</literal> returns the new list
+        <literal>[f a1; f a2; ...; f aN]</literal>.
+      </para>
+      <programlisting language="ocaml">
+# List.map;;
+- : 'a list -&gt; f:('a -&gt; 'b) -&gt; 'b list = &lt;fun&gt;
+# List.map ~f:(fun i -&gt; string_of_int (i + 1)) [10; 21; 12];;
+- : string list = [&quot;11&quot;; &quot;22&quot;; &quot;13&quot;]
+</programlisting>
+      <para>
+        A simple way to compute the map is simply to use pattern
+        matching to iterate over the elements of the list (the
+        <literal>Core.Std.List</literal> module uses a more efficient
+        tail-recursive implementation, discussed later in this chapter).
+      </para>
+      <programlisting language="ocaml">
+# let rec my_map ~f = function
+   | [] -&gt; []
+   | h :: t -&gt; f h :: map ~f t;;
+val my_map : f:('a -&gt; 'b) -&gt; 'a list -&gt; 'b list = &lt;fun&gt;
+# my_map ~f:(fun i -&gt; string_of_int (i * 10)) [1; 2; 3];;
+- : string list = [&quot;10&quot;; &quot;20&quot;; &quot;30&quot;]
+</programlisting>
+    </sect2>
+    <sect2 id="folding">
+      <title>Folding</title>
+      <para>
+        The <literal>List.fold_left</literal> function has a form
+        similar to <literal>map</literal>, but it composes a function
+        over the elements of the list. The expression
+        <literal>List.fold_left ~init ~f [a1; a2; a3]</literal> applies
+        <literal>f</literal> to each element of the list, composing the
+        results as <literal>f (f (f init a1) a2) a3</literal>.
+      </para>
+      <para>
+        For example, if we want to sum up the elements in a list, we can
+        fold the <literal>+</literal> function over the elements.
+      </para>
+      <programlisting language="ocaml">
+# List.fold_left;;
+- : 'a list -&gt; init:'b -&gt; f:('b -&gt; 'a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
+# List.fold_left ~init:0 ~f:(+) [14; 21; 1];;
+- : int = 36
+</programlisting>
+      <para>
+        The implementation is straightforward, applying the function
+        <literal>f</literal> to each element of the list from left to
+        right, composing the results.
+      </para>
+      <programlisting language="ocaml">
+# let rec my_fold_left ~init ~f = function
+    | [] -&gt; init
+    | h :: t -&gt; my_fold_left ~init:(f init h) ~f t;;
+val my_fold_left : init:'a -&gt; f:('a -&gt; 'b -&gt; 'a) -&gt; 'b list -&gt; 'a = &lt;fun&gt;
+# my_fold_left ~init:[&quot;d&quot;] ~f:(fun t h -&gt; h :: t) [&quot;a&quot;; &quot;b&quot;; &quot;c&quot;];;
+- : string list = [&quot;c&quot;; &quot;b&quot;; &quot;a&quot;; &quot;d&quot;]
+</programlisting>
+    </sect2>
+    <sect2 id="predicates-exists-and-for_all">
+      <title>Predicates <literal>exists</literal> and
+      <literal>for_all</literal></title>
+      <para>
+        Given a predicate function <literal>f</literal> on the element
+        of a list, the function <literal>List.exists</literal> tests
+        whether <literal>f</literal> is true on any element of the list,
+        and the function <literal>List.for_all</literal> tests whether
+        <literal>f</literal> is true on all elements of the list.
+      </para>
+      <programlisting language="ocaml">
+# List.exists ~f:(fun i -&gt; i &gt; 5) [1; 7; 3];;
+- : bool = true
+# List.for_all ~f:(fun i -&gt; i &gt; 5) [1; 7; 3];;
+- : bool = false
+</programlisting>
+      <para>
+        These functions can be implemented using the folding functions,
+        but a consequence is that the computation iterates through all
+        of the elements of the list, even if the answer is already
+        known.
+      </para>
+      <programlisting>
+# let my_exists ~f l =
+    List.fold_left ~init:false ~f:(fun result x -&gt; result || f x) l;;
+val my_exists : f:('a -&gt; bool) -&gt; 'a list -&gt; bool = &lt;fun&gt;
+</programlisting>
+      <para>
+        A better implementation is to compute the result directly, using
+        the shirt-circuit property of the logical connectives
+        <literal>&amp;&amp;</literal> and <literal>||</literal> to
+        terminate the computation as soon as the result is known.
+      </para>
+      <programlisting language="ocaml">
+# let rec my_exists ~f = function
+   | [] -&gt; false
+   | h :: t -&gt; f h || my_exists ~f t;;
+val my_exists : f:('a -&gt; bool) -&gt; 'a list -&gt; bool = &lt;fun&gt;
+</programlisting>
+      <para>
+        In the <literal>my_exists</literal> function, once
+        <literal>f h</literal> is true, the disjunction
+        <literal>f h || my_exists ~f t</literal> returns immediately
+        without evaluating the expression
+        <literal>my_exists ~f t</literal>.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="example-implementing-a-set-from-a-list">
+    <title>Example: Implementing a set from a list</title>
+    <para>
+      To pull all this together, let's implement a set data structure
+      using a list. This is not necessarily an efficient implementation
+      (unless the set is small), because testing for set membership will
+      take time linear in the size of the set. However, it gives a
+      pretty good illustration of list computations. First, let's give
+      the signature of the module we are going to implement.
+    </para>
+    <programlisting language="ocaml">
+  type 'a t
+
+  val empty : 'a t
+  val of_list : 'a list -&gt; 'a t
+  val insert : 'a -&gt; 'a t -&gt; 'a t
+  val member : 'a -&gt; 'a t -&gt; bool
+  val union : 'a t -&gt; 'a t -&gt; 'a t
+  val isect : 'a t -&gt; 'a t -&gt; 'a t
+</programlisting>
+    <para>
+      For the implementation, we'll order the elements in the set to be
+      in ascending order, which will improve performance, especially for
+      the intersection <literal>isect</literal> function. Given this,
+      the implementation of many of the funcitons is straightforward.
+      The empty set is implemented as the empty list. For the
+      <literal>of_list</literal> function, we sort the set with the
+      <literal>List.sort</literal> function. For sorting, we use the
+      builtin comparison function <literal>Pervasives.compare</literal>,
+      which can compare most OCaml values except functions and
+      externally allocated values like C values. The
+      <literal>union</literal> function is similar, we can just use the
+      <literal>List.merge</literal> function.
+    </para>
+    <programlisting language="ocaml">
+  let empty = []
+  let of_list l = List.sort ~cmp:Pervasives.compare l
+  let member x l = List.exists ~f:((=) x) l
+  let union = List.merge ~cmp:Pervasives.compare
+</programlisting>
+    <para>
+      We'll implement the <literal>insert</literal> function directly,
+      advancing through the list until the insertion point is found (a
+      version of bubble sort).
+    </para>
+    <programlisting language="ocaml">
+  let rec insert x = function
+    | [] -&gt; [x]
+    | (h :: t) as l -&gt;
+      if h &lt; x then
+        h :: insert x t
+      else if h &gt; x then
+        x :: l
+      else (* x = h *)
+        l
+</programlisting>
+    <para>
+      For the intersection, the implementation is like a merging of the
+      two lists, but we keep only the elements that are in both lists.
+      For the pattern matching, we match on both lists simultaneously by
+      matching against a list pair.
+    </para>
+    <programlisting language="ocaml">
+  let rec isect l1 l2 =
+    match l1, l2 with
+    | i1 :: t1, i2 :: t2 -&gt;
+      if i1 &lt; i2 then
+        isect t1 l2
+      else if i1 &gt; i2 then
+        isect l1 t2
+      else (* i1 = i2 *)
+        i1 :: isect t1 t2
+    | [], _
+    | _, [] -&gt; []
+</programlisting>
+    <para>
+      There are two important cases. The pattern ([], _ | _, []) matches
+      the case where one of the lists is empty, and the pattern
+      <literal>i1 :: t1, i2 :: t2</literal> matches the case where both
+      lists are nonempty. We keep the first element if
+      <literal>i1</literal> and <literal>i2</literal> are the same;
+      otherwise, we discard the smaller value and continue recursively.
+    </para>
+  </sect1>
   <sect1 id="example-pretty-printing-a-table">
     <title>Example: pretty-printing a table</title>
-    <para>
-      _(jyh: I'm revising the examples. This section is temporary.)
-    </para>
-    <para>
-      <emphasis>(yminsky: I wonder if the whole example should go later
-      in the section, after we've done more of the basis of lists in
-      this chapter.)</emphasis>
-    </para>
     <para>
       One common programming task is displaying tabular data. In this
       example, we will go over the design of a simple library to do just
       that.
     </para>
     <para>
-      <emphasis>(yminsky: This is the first appearance of an mli file.
-      If we're going to introduce it here, we need to do a little more
-      explanation.)</emphasis>
+      _(yminsky: This is the first appearance of an mli file. If we're
+      going to introduce it here, we need to do a little more
+      explanation.
+    </para>
+    <para>
+      jyh: I agree, let's discuss.)_
     </para>
     <para>
       We'll start with the interface. The code will go in a new module
@@ -3417,13 +3896,12 @@ let rec length = function [] -&gt; 0 | _ :: t -&gt; (length t) + 1;;
 </programlisting>
     <para>
       In fact, this implementation of the function
-      <literal>length</literal> is worse than that, because the function
-      is recursive. In this implementation of the function, the
-      recursive call to <literal>length t</literal> is active at the
-      same time as the outer call, with the result that the runtime
-      needs to allocate stack frames for each recursive call, so this
-      function also takes linear space. For large lists, this is not
-      only inefficient, it can also result in stack overflow.
+      <literal>length</literal> has a worse problem. When the function
+      runs, each recursive call is active at the same time as the
+      caller. The runtime needs to allocate a stack frame for each
+      active call, so this function also takes linear space. For large
+      lists, this is not only inefficient, it can also result in stack
+      overflow.
     </para>
     <sect2 id="tail-recursion">
       <title>Tail-recursion</title>
@@ -3472,16 +3950,16 @@ let length l =
         The code is simple, but not efficient.
       </para>
       <programlisting language="ocaml">
-let rec map f = function
+let rec map ~f = function
  | [] -&gt; []
- | h :: t -&gt; f h :: map f t;;
+ | h :: t -&gt; f h :: map ~f t;;
 </programlisting>
       <para>
         If we use the same trick as we used for the
         <literal>length</literal> method, we need to accumulate the
         result <emphasis>before</emphasis> the recursive call, but this
         collects the result in reverse order. One way to address it is
-        to construct the reserved result, then explicitly correct it
+        to construct the reversed result, then explicitly correct it
         before returning.
       </para>
       <programlisting language="ocaml">
@@ -3518,75 +3996,6 @@ let map l ~f = rev (rev_map l ~f);;
         lists.
       </para>
     </sect2>
-    <sect2 id="hybrid-recursion">
-      <title>Hybrid recursion</title>
-      <para>
-        In general, the choice of whether to use regular recursion vs.
-        tail recursion is not immediately obvious. Regular recursion is
-        often better for small lists (and other data structures), but it
-        is better to use tail recursion for very large lists --
-        especially because stack sizes limit the number of recursive
-        calls.
-      </para>
-      <para>
-        Core takes a hybrid approach that can be illustrated with the
-        implementation of the function <literal>Core_list.map</literal>.
-      </para>
-      <programlisting language="ocaml">
-let map_slow l ~f = rev (rev_map l ~f);;
-
-let rec count_map ~f l ctr =
-  match l with
-  | [] -&gt; []
-  | [x1] -&gt; let f1 = f x1 in [f1]
-  | [x1; x2] -&gt; let f1 = f x1 in let f2 = f x2 in [f1; f2]
-  | [x1; x2; x3] -&gt;
-    let f1 = f x1 in
-    let f2 = f x2 in
-    let f3 = f x3 in
-    [f1; f2; f3]
-  | [x1; x2; x3; x4] -&gt;
-    let f1 = f x1 in
-    let f2 = f x2 in
-    let f3 = f x3 in
-    let f4 = f x4 in
-    [f1; f2; f3; f4]
-  | x1 :: x2 :: x3 :: x4 :: x5 :: tl -&gt;
-    let f1 = f x1 in 
-    let f2 = f x2 in
-    let f3 = f x3 in
-    let f4 = f x4 in
-    let f5 = f x5 in
-    f1 :: f2 :: f3 :: f4 :: f5 ::
-      (if ctr &gt; 1000 then map_slow ~f tl else count_map ~f tl (ctr + 1));;
-
-let map l ~f = count_map ~f l 0;;
-</programlisting>
-      <para>
-        For performance, there are separate patterns for small lists
-        with up to 4 elements, then a recursive case for lists with five
-        or more elements. The <literal>ctr</literal> value limits the
-        recursion -- regular recursion is used for up to 1000 recursive
-        calls (which includes lists with up to 4000 elements), then the
-        tail-recursive function <literal>map_slow</literal> is used for
-        any remainder.
-      </para>
-      <para>
-        As an aside, you might wonder why this implementation uses
-        explicit let-definitions for the result values
-        <literal>f1</literal>, <literal>f2</literal>, etc. The reason is
-        to force the order of evaluation, so that the the function
-        <literal>f</literal> is always applied to the list values
-        left-to-right (starting with the first element in the list). In
-        an expression like <literal>[f x1; f x2; f x3]</literal> the
-        order of evaluation is not specified by the language, any of the
-        subexpressions might be evaluated first (though we would often
-        expect evaluation order to be either left-to-right or
-        right-to-left). For functions that perform I/O, or have other
-        side-effects, left-to-right evaluation order is important (and
-        required).
-      </para>
-    </sect2>
   </sect1>
   <sect1 id="heterogenous-values">
     <title>Heterogenous values</title>
@@ -3612,13 +4021,13 @@ let map l ~f = count_map ~f l 0;;
       </listitem>
     </itemizedlist>
     <para>
-      In the tabulaton example that we used to start this chapter, the
-      <literal>List</literal> is not a good choice for each entry in the
-      table. Now, let's think about how you might actually use this
-      interface in practice. Usually, when you have data to render in a
-      table, the data entries are described more precisely by a record.
-      So, imagine that you start off with a record type for representing
-      information about a given programming language:
+      In the tabulaton example above, the <literal>List</literal> is not
+      a good choice for each entry in the table. Now, let's think about
+      how you might actually use this interface in practice. Usually,
+      when you have data to render in a table, the data entries are
+      described more precisely by a record. So, imagine that you start
+      off with a record type for representing information about a given
+      programming language:
     </para>
     <programlisting language="ocaml">
 type style =
@@ -3717,8 +4126,8 @@ let print_langs langs =
       one based on passing in lists-of-lists.
     </para>
   </sect1>
-  <sect1 id="options-2">
-    <title>Options</title>
+  <sect1 id="options-and-null-values">
+    <title>Options and NULL values</title>
     <para>
       OCaml has no &quot;NULL&quot; or &quot;nil&quot; values.
       Programmers coming from other languages are often surprised and
@@ -3768,36 +4177,17 @@ type prog_lang = { name: string;
 let x86 = { name = &quot;x86 assembly&quot;;
             architect = None;
             year_released = 1980;
-            style = Imperative
+            style = [Imperative]
           };;
 </programlisting>
     <para>
-      We can also represent a data structure with NULL-pointers using
-      the <literal>option</literal> type. For example, let's build an
-      imperative singly-linked list, where new values are added to the
-      <emphasis>end</emphasis> of the list. In a standard imperative
-      language (like in the C++ Standard Template Library), NULL is used
-      to represent &quot;end of list.&quot; We'll use the
-      <literal>option</literal> type instead.
-    </para>
-    <programlisting language="ocaml">
-type 'a slist = { mutable head : 'a elem option; mutable tail : 'a elem option }
-and 'a elem = { value : 'a; mutable next : 'a elem option };;
-
-let new_slist () = { head = None; tail = None };;
-
-let push_back l x =
-  let elem = { value = x; next = None } in
-  match l.tail with
-   | None -&gt; l.head &lt;- Some elem; l.tail &lt;- Some elem
-   | Some last -&gt; last.next &lt;- Some elem;;
-</programlisting>
-    <para>
-      Similarly, if we're defining a type of binary trees, one choice is
-      to use <literal>option</literal> for the child node references. In
-      a binary search tree, each node in the tree is labeled with a
-      value and it has up to two children. The nodes in the tree follow
-      <emphasis>prefix</emphasis> order, meaning that the label of the
+      We can also represent data structures with NULL-pointers using the
+      <literal>option</literal> type. For example, if we're defining a
+      type of binary trees, one choice is to use
+      <literal>option</literal> for the child node references. In a
+      binary search tree, each node in the tree is labeled with a value
+      and it has up to two children. The nodes in the tree follow
+      <emphasis>infix</emphasis> order, meaning that the label of the
       left child is smaller than the label of its parent, and the label
       of the right child is larger than the label of the parent.
     </para>
@@ -6259,867 +6649,6 @@ Exception: Key_not_found(&quot;c&quot;).
 </programlisting>
     </sect2>
   </sect1>
-</chapter><chapter id="functors">
-  <title>Functors</title>
-  <para>
-    Up until now, we've seen OCaml's module system play an important but
-    limited role. In particular, we've seen them as a mechanism for
-    organizing code into units with specified interfaces. But modules
-    can do much more than that, acting as a powerful toolset for
-    building generic code and structuring large-scale systems. Much of
-    that power comes from functors.
-  </para>
-  <para>
-    Functors are, roughly speaking, functions from modules to modules,
-    and they can be used to solve a variety of code-structuring
-    problems, including:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        <emphasis>Dependency injection</emphasis>, or making the
-        implementations of some components of a system swappable. This
-        is particularly useful when you want to mock up parts of your
-        system for testing and simulation purposes.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis>Auto-extension of modules</emphasis>. Sometimes, there
-        is some functionality that you want to build in a standard way
-        for different types, in each case based on a some piece of
-        type-specific logic. For example, you might want to add a slew
-        of comparison operators derived from a base comparison function.
-        To do this by hand would require a lot of repetitive code for
-        each type, but functors let you write this logic just once and
-        apply it to many different types.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis>Instantiating modules with state</emphasis>. Modules
-        can contain mutable state, and that means that you'll
-        occasionally want to have multiple instantiations of a
-        particular module, each with its own separate and independent
-        mutable state. Functors let you automate the construction of
-        such modules.
-      </para>
-    </listitem>
-  </itemizedlist>
-  <sect1 id="a-trivial-example">
-    <title>A trivial example</title>
-    <para>
-      We'll start by considering the simplest possible example: a
-      functor for incrementing an integer.
-    </para>
-    <para>
-      More precisely, we'll create a functor that takes a module
-      containing a single integer variable <literal>x</literal>, and
-      returns a new module with <literal>x</literal> incremented by one.
-    </para>
-    <programlisting language="ocaml">
-# module type X_int = sig val x : int end;;
-module type X_int = sig val x : int end
-# module Increment (M:X_int) : X_int = struct
-    let x = M.x + 1
-  end;;
-module Increment : functor (M : X_int) -&gt; X_int
-</programlisting>
-    <para>
-      One thing that immediately jumps out about functors is that
-      they're considerably more heavyweight syntactically than ordinary
-      functions. For one thing, functors require explicit (module) type
-      annotations, which ordinary functions do not. Here, we've
-      specified the module type <literal>X_int</literal> for both the
-      input and output of the functor. Technically, only the type on the
-      input is mandatory, although in practice, one often specifies
-      both.
-    </para>
-    <para>
-      The following shows what happens when we omit the module type for
-      the output of the functor.
-    </para>
-    <programlisting language="ocaml">
-# module Increment (M:X_int) = struct
-    let x = M.x + 1
-  end;;
-module Increment : functor (M : X_int) -&gt; sig val x : int end
-</programlisting>
-    <para>
-      We can see that the inferred module type of the output is now
-      written out explicitly, rather than being a reference to the named
-      signature <literal>X_int</literal>.
-    </para>
-    <para>
-      We can now use <literal>Increment</literal> to define new modules.
-    </para>
-    <programlisting language="ocaml">
-# module Three = struct let x = 3 end;;
-  module Three : sig val x : int end
-# module Four = Increment(Three);;
-module Four : sig val x : int end
-# Four.x - Three.x;;
-- : int = 1
-</programlisting>
-    <para>
-      In this case, we applied <literal>Increment</literal> to a module
-      whose signature is exactly equal to <literal>X_int</literal>. But
-      we can apply <literal>Increment</literal> to any module that
-      satisfies the interface <literal>X_int</literal>, in the same way
-      that a the contents of an <literal>ml</literal> file can satisfy
-      the <literal>mli</literal>. That means that the module type can
-      omit some information available in the module, either by dropping
-      fields or by leaving some fields abstract. Here's an example:
-    </para>
-    <programlisting language="ocaml">
-# module Three_and_more = struct
-    let x = 3
-    let y = &quot;three&quot;
-  end;;
-module Three_and_more : sig val x : int val x_string : string end
-# module Four = Increment(Three_and_more);;
-module Four : sig val x : int end
-</programlisting>
-  </sect1>
-  <sect1 id="a-bigger-example-computing-with-intervals">
-    <title>A bigger example: computing with intervals</title>
-    <para>
-      Let's now consider a more realistic example of how to use
-      functors: a library for computing with intervals. This library
-      will be functorized over the type of the endpoints of the
-      intervals and the ordering of those endpoints.
-    </para>
-    <para>
-      First we'll define a module type that captures the information
-      we'll need about the endpoint type. This interface, which we'll
-      call <literal>Comparable</literal>, contains just two things: a
-      comparison function, and the type of the values to be compared.
-    </para>
-    <programlisting language="ocaml">
-# module type Comparable = sig
-    type t
-    val compare : t -&gt; t -&gt; int
-  end ;;
-module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
-</programlisting>
-    <para>
-      The comparison function follows the standard OCaml idiom for such
-      functions, returning <literal>0</literal> if the two elements are
-      equal, a positive number if the first element is larger than the
-      second, and a negative number if the first element is smaller than
-      the second. Thus, we could rewrite the standard comparison
-      functions on top of <literal>compare</literal> as shown below.
-    </para>
-    <programlisting language="ocaml">
-compare x y &lt; 0     (* x &lt; y *)
-compare x y = 0     (* x = y *)
-compare x y &gt; 0     (* x &gt; y *)
-</programlisting>
-    <para>
-      The functor for creating the interval module is shown below. We
-      represent an interval with a variant type, which is either
-      <literal>Empty</literal> or <literal>Interval (x,y)</literal>,
-      where <literal>x</literal> and <literal>y</literal> are the bounds
-      of the interval.
-    </para>
-    <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable) = struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    let create low high =
-      if Endpoint.compare low high &gt; 0 then Empty
-      else Interval (low,high)
-
-    let is_empty = function
-      | Empty -&gt; true
-      | Interval _ -&gt; false
-
-    let contains t x =
-      match t with
-      | Empty -&gt; false
-      | Interval (l,h) -&gt;
-        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0
-
-    let intersect t1 t2 =
-      let min x y = if Endpoint.compare x y &lt;= 0 then x else y in
-      let max x y = if Endpoint.compare x y &gt;= 0 then x else y in
-      match t1,t2 with
-      | Empty, _ | _, Empty -&gt; Empty
-      | Interval (l1,h1), Interval (l2,h2) -&gt;
-        create (max l1 l2) (min h1 h2)
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) -&gt;
-    sig
-      type t = Interval of Endpoint.t * Endpoint.t | Empty
-      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; Endpoint.t -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-    end
-</programlisting>
-    <para>
-      We can instantiate the functor by applying it to a module with the
-      right signature. In the following, we provide the functor input as
-      an anonymous module.
-    </para>
-    <programlisting language="ocaml">
-# module Int_interval =
-    Make_interval(struct
-      type t = int
-      let compare = Int.compare
-    end);;
-module Int_interval :
-  sig
-    type t = Interval of int * int | Empty
-    val create : int -&gt; int -&gt; t
-    val is_empty : t -&gt; bool
-    val contains : t -&gt; int -&gt; bool
-    val intersect : t -&gt; t -&gt; t
-  end
-</programlisting>
-    <para>
-      When we choose our interfaces that are aligned with the standards
-      of our libraries, we don't need to construct a custom module to
-      feed to the functor. In this case, for example, we can directly
-      use the <literal>Int</literal> or <literal>String</literal>
-      modules provided by Core.
-    </para>
-    <programlisting language="ocaml">
-# module Int_interval = Make_interval(Int) ;;
-# module String_interval = Make_interval(String) ;;
-</programlisting>
-    <para>
-      This works because many modules in Core, including
-      <literal>Int</literal> and <literal>String</literal>, satisfy an
-      extended version of the <literal>Comparable</literal> signature
-      described above. Standardized signatures are generally good
-      practice, both because they makes functors easier to use, and
-      because they make the codebase generally easier to navigate.
-    </para>
-    <para>
-      Now we can use the newly defined <literal>Int_interval</literal>
-      module like any ordinary module.
-    </para>
-    <programlisting language="ocaml">
-# let i1 = Int_interval.create 3 8;;
-val i1 : Int_interval.t = Int_interval.Interval (3, 8)
-# let i2 = Int_interval.create 4 10;;
-val i2 : Int_interval.t = Int_interval.Interval (4, 10)
-# Int_interval.intersect i1 i2;;
-- : Int_interval.t = Int_interval.Interval (4, 8)
-</programlisting>
-    <para>
-      This design gives us the freedom to use any comparison function we
-      want for comparing the endpoints. We could, for example, create a
-      type of int interval with the order of the comparison reversed, as
-      follows:
-    </para>
-    <programlisting language="ocaml">
-# module Rev_int_interval =
-    Make_interval(struct
-      type t = int
-      let compare x y = Int.compare y x
-    end);;
-</programlisting>
-    <para>
-      The behavior of <literal>Rev_int_interval</literal> is of course
-      different from <literal>Int_interval</literal>, as we can see
-      below.
-    </para>
-    <programlisting language="ocaml">
-# let interval = Int_interval.create 4 3;;
-val interval : Int_interval.t = Int_interval.Empty
-# let rev_interval = Rev_int_interval.create 4 3;;
-val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
-</programlisting>
-    <para>
-      Importantly, <literal>Rev_int_interval.t</literal> is a different
-      type than <literal>Int_interval.t</literal>, even though its
-      physical representation is the same. Indeed, the type system will
-      prevent us from confusing them.
-    </para>
-    <programlisting language="ocaml">
-# Int_interval.contains rev_interval 3;;
-Characters 22-34:
-  Int_interval.contains rev_interval 3;;
-                        ^^^^^^^^^^^^
-Error: This expression has type Rev_int_interval.t
-       but an expression was expected of type
-         Int_interval.t = Make_interval(Int).t
-</programlisting>
-    <para>
-      This is important, because confusing the two kinds of intervals
-      would be a semantic error, and it's an easy one to make. The
-      ability of functors to mint new types is a useful trick that comes
-      up a lot.
-    </para>
-    <sect2 id="making-the-functor-abstract">
-      <title>Making the functor abstract</title>
-      <para>
-        There's a problem with <literal>Make_interval</literal>. The
-        code we wrote depends on the invariant that the upper bound of
-        an interval is greater than its lower bound, but that invariant
-        can be violated. The invariant is enforced by the create
-        function, but because <literal>Interval.t</literal> is not
-        abstract, we can bypass the <literal>create</literal> function.
-      </para>
-      <programlisting language="ocaml">
-# Int_interval.create 4 3;; (* going through create *)
-- : Int_interval.t = Int_interval.Empty
-# Int_interval.Interval (4,3);; (* bypassing create *)
-- : Int_interval.t = Int_interval.Interval (4, 3)
-</programlisting>
-      <para>
-        To make <literal>Int_interval.t</literal> abstract, we need to
-        apply an interface to the output of the
-        <literal>Make_interval</literal>. Here's an explicit interface
-        that we can use for that purpose.
-      </para>
-      <programlisting language="ocaml">
-# module type Interval_intf = sig
-   type t
-   type endpoint
-   val create : endpoint -&gt; endpoint -&gt; t
-   val is_empty : t -&gt; bool
-   val contains : t -&gt; endpoint -&gt; bool
-   val intersect : t -&gt; t -&gt; t
-  end;;
-</programlisting>
-      <para>
-        This interface includes the type <literal>endpoint</literal> to
-        represent the type of the endpoints of the interval. Given this
-        interface, we can redo our definition of
-        <literal>Make_interval</literal>. Notice that we added the type
-        <literal>endpoint</literal> to the implementation of the module
-        to make the implementation match
-        <literal>Interval_intf</literal>.
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable) : Interval_intf = struct
-
-    type endpoint = Endpoint.t
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ....
-
-  end ;;
-module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf
-</programlisting>
-    </sect2>
-    <sect2 id="sharing-constraints">
-      <title>Sharing constraints</title>
-      <para>
-        The resulting module is abstract, but unfortunately, it's too
-        abstract. In particular, we haven't exposed the type
-        <literal>endpoint</literal>, which means that we can't even
-        construct an interval anymore.
-      </para>
-      <programlisting language="ocaml">
-# module Int_interval = Make_interval(Int);;
-module Int_interval : Interval_intf
-# Int_interval.create 3 4;;
-Characters 20-21:
-  Int_interval.create 3 4;;
-                      ^
-Error: This expression has type int but an expression was expected of type
-         Int_interval.endpoint
-</programlisting>
-      <para>
-        To fix this, we need to expose the fact that
-        <literal>endpoint</literal> is equal to <literal>Int.t</literal>
-        (or more generally, <literal>Endpoint.t</literal>, where
-        <literal>Endpoint</literal> is the argument to the functor). One
-        way of doing this is through a <emphasis>sharing
-        constraint</emphasis>, which allows you to tell the compiler to
-        expose the fact that a given type is equal to some other type.
-        The syntax for a sharing constraint on a module type is as
-        follows.
-      </para>
-      <programlisting language="ocaml">
-S with type s = t
-</programlisting>
-      <para>
-        where <literal>S</literal> is a module type,
-        <literal>s</literal> is a type inside of <literal>S</literal>,
-        and <literal>t</literal> is a type defined outside of
-        <literal>S</literal>. The result of this expression is a new
-        signature that's been modified so that it exposes the fact that
-        <literal>s</literal> is equal to <literal>t</literal>. We can
-        use a sharing constraint to create a specialized version of
-        <literal>Interval_intf</literal> for integer intervals.
-      </para>
-      <programlisting language="ocaml">
-# module type Int_interval_intf = Interval_intf with type endpoint = int;;
-module type Int_interval_intf =
-  sig
-    type t
-    type endpoint = int
-    val create : endpoint -&gt; endpoint -&gt; t
-    val is_empty : t -&gt; bool
-    val contains : t -&gt; endpoint -&gt; bool
-    val intersect : t -&gt; t -&gt; t
-  end
-</programlisting>
-      <para>
-        And we can also use it in the context of a functor, where the
-        right-hand side of the sharing constraint is an element of the
-        functor argument. Thus, we expose an equality between a type in
-        the output of the functor (in this case, the type
-        <literal>endpoint</literal>) and a type in its input
-        (<literal>Endpoint.t</literal>).
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable)
-      : Interval_intf with type endpoint = Endpoint.t = struct
-
-    type endpoint = Endpoint.t
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ...
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) -&gt;
-    sig
-      type t
-      type endpoint = Endpoint.t
-      val create : endpoint -&gt; endpoint -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; endpoint -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-    end
-</programlisting>
-      <para>
-        So now, the interface is as it was, except that
-        <literal>endpoint</literal> is now known to be equal to
-        <literal>Endpoint.t</literal>. As a result of that type
-        equality, we can now do things like construct intervals again.
-      </para>
-      <programlisting language="ocaml">
-# let i = Int_interval.create 3 4;;
-val i : Int_interval.t = &lt;abstr&gt;
-# Int_interval.contains i 5;;
-- : bool = false
-</programlisting>
-    </sect2>
-    <sect2 id="destructive-substitution">
-      <title>Destructive substitution</title>
-      <para>
-        Sharing constraints basically do the job, but they have some
-        downsides. In particular, we've now been stuck with the useless
-        type declaration of <literal>endpoint</literal> that clutters up
-        both the interface and the implementation. A better solution
-        would be to modify the <literal>Interval_intf</literal>
-        signature by replacing <literal>endpoint</literal> with
-        <literal>Endpoint.t</literal> everywhere it shows up, and
-        deleting the definition of <literal>endpoint</literal> from the
-        signature. We can do just this using what's called
-        <emphasis>destructive substitution</emphasis>. Here's the basic
-        syntax.
-      </para>
-      <programlisting language="ocaml">
-S with type s := t
-</programlisting>
-      <para>
-        The following shows how we could use this with
-        <literal>Make_interval</literal>.
-      </para>
-      <para>
-        Here's an example of what we get if we use destructive
-        substitution to specialize the <literal>Interval_intf</literal>
-        interface to integer intervals.
-      </para>
-      <programlisting language="ocaml">
-# module type Int_interval_intf = Interval_intf with type endpoint := int;;
-module type Int_interval_intf =
-  sig
-    type t
-    val create : int -&gt; int -&gt; t
-    val is_empty : t -&gt; bool
-    val contains : t -&gt; int -&gt; bool
-    val intersect : t -&gt; t -&gt; t
-  end
-</programlisting>
-      <para>
-        There's now no mention of n <literal>endpoint</literal>, all
-        occurrences of that type having been replaced by
-        <literal>int</literal>. As with sharing constraints, we can also
-        use this in the context of a functor.
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable)
-    : Interval_intf with type endpoint := Endpoint.t =
-  struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ....
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) -&gt;
-    sig
-      type t
-      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; Endpoint.t -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-    end
-</programlisting>
-      <para>
-        The interface is precisely what we want, and we didn't need to
-        define the <literal>endpoint</literal> type alias in the body of
-        the module. If we instantiate this module, we'll see that it
-        works properly: we can construct new intervals, but
-        <literal>t</literal> is abstract, and so we can't directly
-        access the constructors and violate the invariants of the data
-        structure.
-      </para>
-      <programlisting language="ocaml">
-# module Int_interval = Make_interval(Int);;
-# Int_interval.create 3 4;;
-- : Int_interval.t = &lt;abstr&gt;
-# Int_interval.Interval (4,3);;
-Characters 0-27:
-  Int_interval.Interval (4,3);;
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Unbound constructor Int_interval.Interval
-</programlisting>
-    </sect2>
-    <sect2 id="using-multiple-interfaces">
-      <title>Using multiple interfaces</title>
-      <para>
-        Another feature that we might want for our interval module is
-        the ability to serialize the type, in particular, by converting
-        to s-expressions. If we simply invoke the
-        <literal>sexplib</literal> macros by adding
-        <literal>with sexp</literal> to the definition of
-        <literal>t</literal>, though, we'll get an error:
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable)
-    : Interval_intf with type endpoint := Endpoint.t = struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-    with sexp
-
-    ....
-
-  end ;;
-Characters 120-123:
-        type t = | Interval of Endpoint.t * Endpoint.t
-                               ^^^^^^^^^^
-Error: Unbound value Endpoint.t_of_sexp
-</programlisting>
-      <para>
-        The problem is that <literal>with sexp</literal> adds code for
-        defining the s-expression converters, and that code assumes that
-        <literal>Endpoint</literal> has the appropriate sexp-conversion
-        functions for <literal>Endpoint.t</literal>. But all we know
-        about <literal>Endpoint</literal> is that it satisfies the
-        <literal>Comparable</literal> interface, which doesn't say
-        anything about s-expressions.
-      </para>
-      <para>
-        Happily, Core comes with a built in interface for just this
-        purpose called <literal>Sexpable</literal>, which is defined as
-        follows:
-      </para>
-      <programlisting language="ocaml">
-module type Sexpable = sig
-  type t = int
-  val sexp_of_t : t -&gt; Sexp.t
-  val t_of_sexp : Sexp.t -&gt; t
-end
-</programlisting>
-      <para>
-        We can modify <literal>Make_interval</literal> to use the
-        <literal>Sexpable</literal> interface, for both its input and
-        its output. Note the use of destructive substitution to combine
-        multiple signatures together. This is important because it stops
-        the <literal>type t</literal>'s from the different signatures
-        from interfering with each other.
-      </para>
-      <para>
-        Also note that we have been careful to override the
-        sexp-converter here to ensure that the data structures
-        invariants are still maintained when reading in from an
-        s-expression.
-      </para>
-      <programlisting language="ocaml">
-# module type Interval_intf_with_sexp = sig
-   type t
-   include Interval_intf with type t := t
-   include Sexpable      with type t := t
-  end;;
-# module Make_interval(Endpoint : sig
-    type t
-    include Comparable with type t := t
-    include Sexpable   with type t := t
-  end) : Interval_intf_with_sexp with type endpoint := Endpoint.t =
-  struct
-
-      type t = | Interval of Endpoint.t * Endpoint.t
-               | Empty
-      with sexp
-
-      let create low high =
-         ...
-
-      (* put a wrapper round the auto-generated sexp_of_t to enforce
-         the invariants of the data structure *)
-      let t_of_sexp sexp =
-        match t_of_sexp sexp with
-        | Empty -&gt; Empty
-        | Interval (x,y) -&gt; create x y
-
-      ....
-
-     end ;;
-module Make_interval :
-  functor
-    (Endpoint : sig
-           type t
-           val compare : t -&gt; t -&gt; int
-           val sexp_of_t : t -&gt; Sexplib.Sexp.t
-           val t_of_sexp : Sexplib.Sexp.t -&gt; t
-         end) -&gt;
-    sig
-      type t
-      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; Endpoint.t -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-      val sexp_of_t : t -&gt; Sexplib.Sexp.t
-      val t_of_sexp : Sexplib.Sexp.t -&gt; t
-    end
-</programlisting>
-      <para>
-        And now, we can use that sexp-converter in the ordinary way:
-      </para>
-      <programlisting language="ocaml">
-# module Int = Make_interval(Int) ;;
-# Int_interval.sexp_of_t (Int_interval.create 3 4);;
-- : Sexplib.Sexp.t = (Interval 3 4)
-# Int_interval.sexp_of_t (Int_interval.create 4 3);;
-- : Sexplib.Sexp.t = Empty
-</programlisting>
-    </sect2>
-  </sect1>
-  <sect1 id="extending-modules">
-    <title>Extending modules</title>
-    <para>
-      Another common use of functors is to generate type-specific
-      functionality for a given module in a standardized way. Let's see
-      how this works in the context of a functional queue, which is just
-      a functional version of a FIFO (first-in, first-out) queue. Being
-      functional, operations on the queue return new queues, rather than
-      modifying the queues that were passed in.
-    </para>
-    <para>
-      Here's a reasonable mli
-    </para>
-    <programlisting language="ocaml">
-(* file: fqueue.mli *)
-
-type 'a t
-
-val empty : 'a t
-
-val enqueue : 'a t -&gt; 'a -&gt; 'a t
-
-(** [dequeue q] returns None if the [q] is empty *)
-val dequeue : 'a t -&gt; ('a * 'a t) option
-
-val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
-</programlisting>
-    <para>
-      Now let's implement <literal>Fqueue</literal>. A standard trick is
-      for the <literal>Fqueue</literal> to maintain an input and an
-      output list, so that one can efficiently
-      <literal>enqueue</literal> on the first list, and can efficiently
-      dequeue from the out list. If you attempt to dequeue when the
-      output list is empty, the input list is reversed and becomes the
-      new output list. Here's an implementation that uses that trick.
-    </para>
-    <programlisting language="ocaml">
-(* file: fqueue.ml *)
-open Core.Std
-
-type 'a t = 'a list * 'a list
-
-let empty = ([],[])
-
-let enqueue (l1,l2) x = (x :: l1,l2)
-
-let dequeue (in_list,out_list) =
-  match out_list with
-  | hd :: tl -&gt; Some (hd, (in_list,tl))
-  | [] -&gt;
-    match List.rev in_list with
-    | [] -&gt; None
-    | hd::tl -&gt; Some (hd, ([], tl))
-
-let fold (in_list,out_list) ~init ~f =
-  List.fold ~init:(List.fold ~init ~f out_list) ~f
-    (List.rev in_list)
-</programlisting>
-    <para>
-      One problem with our <literal>Fqueue</literal> is that the
-      interface is quite skeletal. There are lots of useful helper
-      functions that one might want that aren't there. For example, for
-      lists we have <literal>List.iter</literal> which runs a function
-      on each node; and a <literal>List.find</literal> that finds the
-      first element on the list that matches a given predicate. Such
-      helper functions come up for pretty much every container type, and
-      implementing them over and over is a bit of a dull and repetitive
-      affair.
-    </para>
-    <para>
-      As it happens, many of these helper functions can be derived
-      mechanically from just the fold function we already implemented.
-      Rather than write all of these helper functions by hand for every
-      new container type, we can instead use a functor that will let us
-      add this functionality to any container that has a
-      <literal>fold</literal> function.
-    </para>
-    <para>
-      We'll create a new module, <literal>Foldable</literal> that
-      automates the process of adding helper functions to a
-      fold-supporting container. As you can see,
-      <literal>Foldable</literal> contains a module signature
-      <literal>S</literal> which defines the signature that is required
-      to support folding; and a functor <literal>Extend</literal> that
-      allows one to extend any module that matches
-      <literal>Foldable.S</literal>.
-    </para>
-    <programlisting language="ocaml">
-(* file: foldable.ml *)
-
-open Core.Std
-
-module type S = sig
-  type 'a t
-  val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
-end
-
-module type Extension = sig
-  type 'a t
-  val iter    : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
-  val length  : 'a t -&gt; int
-  val count   : 'a t -&gt; f:('a -&gt; bool) -&gt; int
-  val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-  val exists  : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-end
-
-(* For extending a Foldable module *)
-module Extend(Arg : S)
-  : Extension with type 'a t := 'a Arg.t =
-struct
-  open Arg
-
-  let iter t ~f =
-    fold t ~init:() ~f:(fun () a -&gt; f a)
-
-  let length t =
-    fold t ~init:0  ~f:(fun acc _ -&gt; acc + 1)
-
-  let count t ~f =
-    fold t ~init:0  ~f:(fun count x -&gt; count + if f x then 1 else 0)
-
-  exception Short_circuit
-
-  let for_all c ~f =
-    try iter c ~f:(fun x -&gt; if not (f x) then raise Short_circuit); true
-    with Short_circuit -&gt; false
-
-  let exists c ~f =
-    try iter c ~f:(fun x -&gt; if f x then raise Short_circuit); false
-    with Short_circuit -&gt; true
-end
-</programlisting>
-    <para>
-      Now we can apply this to <literal>Fqueue</literal>. We can rewrite
-      the interface of <literal>Fqueue</literal> as follows.
-    </para>
-    <programlisting language="ocaml">
-(* file: fqueue.mli *)
-open Core.Std
-
-type 'a t
-val empty : 'a t
-val enqueue : 'a t -&gt; 'a -&gt; 'a t
-val dequeue : 'a t -&gt; ('a * 'a t) option
-val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
-
-include Foldable.Extension with type 'a t := 'a t
-</programlisting>
-    <para>
-      In order to apply the functor, we'll put the definition of
-      <literal>Fqueue</literal> in a sub-module called
-      <literal>T</literal>, and then call
-      <literal>Foldable.Extend</literal> on <literal>T</literal>.
-    </para>
-    <programlisting language="ocaml">
-open Core.Std
-
-module T = struct
-  type 'a t = 'a list * 'a list
-
-  let empty = [],[]
-
-  let enqueue (l1,l2) x =
-    (x :: l1,l2)
-
-  let rec dequeue (in_list,out_list) =
-    match out_list with
-    | hd :: tl -&gt; Some (hd, (in_list,tl))
-    | [] -&gt; dequeue ([], List.rev in_list)
-
-  let fold (in_list,out_list) ~init ~f =
-    List.fold ~init:(List.fold ~init ~f out_list) ~f
-      (List.rev in_list)
-end
-include T
-include Foldable.Extend(T)
-</programlisting>
-    <para>
-      This pattern comes up quite a bit in Core, and is used to for a
-      variety of purposes.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          Adding comparison-based data structures like maps and sets,
-          based on the <literal>Comparable</literal> interface.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Adding hash-based data structures like hash sets and hash
-          heaps.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Support for so-called monadic libraries, like the ones
-          discussed in <xref linkend="error-handling"/> and
-          <xref linkend="concurrent-programming-with-async"/>.
-          Here, the functor is used to provide a collection of standard
-          helper functions based on the core <literal>bind</literal> and
-          <literal>return</literal> operators.
-        </para>
-      </listitem>
-    </itemizedlist>
-  </sect1>
 </chapter><chapter id="files-modules-and-programs">
   <title>Files, Modules and Programs</title>
   <para>
@@ -7988,6 +7517,867 @@ Circular dependencies: &quot;freq.cmo&quot; already seen in
 </programlisting>
       </sect3>
     </sect2>
+  </sect1>
+</chapter><chapter id="functors">
+  <title>Functors</title>
+  <para>
+    Up until now, we've seen OCaml's module system play an important but
+    limited role. In particular, we've seen them as a mechanism for
+    organizing code into units with specified interfaces. But modules
+    can do much more than that, acting as a powerful toolset for
+    building generic code and structuring large-scale systems. Much of
+    that power comes from functors.
+  </para>
+  <para>
+    Functors are, roughly speaking, functions from modules to modules,
+    and they can be used to solve a variety of code-structuring
+    problems, including:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <emphasis>Dependency injection</emphasis>, or making the
+        implementations of some components of a system swappable. This
+        is particularly useful when you want to mock up parts of your
+        system for testing and simulation purposes.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Auto-extension of modules</emphasis>. Sometimes, there
+        is some functionality that you want to build in a standard way
+        for different types, in each case based on a some piece of
+        type-specific logic. For example, you might want to add a slew
+        of comparison operators derived from a base comparison function.
+        To do this by hand would require a lot of repetitive code for
+        each type, but functors let you write this logic just once and
+        apply it to many different types.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Instantiating modules with state</emphasis>. Modules
+        can contain mutable state, and that means that you'll
+        occasionally want to have multiple instantiations of a
+        particular module, each with its own separate and independent
+        mutable state. Functors let you automate the construction of
+        such modules.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <sect1 id="a-trivial-example">
+    <title>A trivial example</title>
+    <para>
+      We'll start by considering the simplest possible example: a
+      functor for incrementing an integer.
+    </para>
+    <para>
+      More precisely, we'll create a functor that takes a module
+      containing a single integer variable <literal>x</literal>, and
+      returns a new module with <literal>x</literal> incremented by one.
+    </para>
+    <programlisting language="ocaml">
+# module type X_int = sig val x : int end;;
+module type X_int = sig val x : int end
+# module Increment (M:X_int) : X_int = struct
+    let x = M.x + 1
+  end;;
+module Increment : functor (M : X_int) -&gt; X_int
+</programlisting>
+    <para>
+      One thing that immediately jumps out about functors is that
+      they're considerably more heavyweight syntactically than ordinary
+      functions. For one thing, functors require explicit (module) type
+      annotations, which ordinary functions do not. Here, we've
+      specified the module type <literal>X_int</literal> for both the
+      input and output of the functor. Technically, only the type on the
+      input is mandatory, although in practice, one often specifies
+      both.
+    </para>
+    <para>
+      The following shows what happens when we omit the module type for
+      the output of the functor.
+    </para>
+    <programlisting language="ocaml">
+# module Increment (M:X_int) = struct
+    let x = M.x + 1
+  end;;
+module Increment : functor (M : X_int) -&gt; sig val x : int end
+</programlisting>
+    <para>
+      We can see that the inferred module type of the output is now
+      written out explicitly, rather than being a reference to the named
+      signature <literal>X_int</literal>.
+    </para>
+    <para>
+      We can now use <literal>Increment</literal> to define new modules.
+    </para>
+    <programlisting language="ocaml">
+# module Three = struct let x = 3 end;;
+  module Three : sig val x : int end
+# module Four = Increment(Three);;
+module Four : sig val x : int end
+# Four.x - Three.x;;
+- : int = 1
+</programlisting>
+    <para>
+      In this case, we applied <literal>Increment</literal> to a module
+      whose signature is exactly equal to <literal>X_int</literal>. But
+      we can apply <literal>Increment</literal> to any module that
+      satisfies the interface <literal>X_int</literal>, in the same way
+      that a the contents of an <literal>ml</literal> file can satisfy
+      the <literal>mli</literal>. That means that the module type can
+      omit some information available in the module, either by dropping
+      fields or by leaving some fields abstract. Here's an example:
+    </para>
+    <programlisting language="ocaml">
+# module Three_and_more = struct
+    let x = 3
+    let y = &quot;three&quot;
+  end;;
+module Three_and_more : sig val x : int val x_string : string end
+# module Four = Increment(Three_and_more);;
+module Four : sig val x : int end
+</programlisting>
+  </sect1>
+  <sect1 id="a-bigger-example-computing-with-intervals">
+    <title>A bigger example: computing with intervals</title>
+    <para>
+      Let's now consider a more realistic example of how to use
+      functors: a library for computing with intervals. This library
+      will be functorized over the type of the endpoints of the
+      intervals and the ordering of those endpoints.
+    </para>
+    <para>
+      First we'll define a module type that captures the information
+      we'll need about the endpoint type. This interface, which we'll
+      call <literal>Comparable</literal>, contains just two things: a
+      comparison function, and the type of the values to be compared.
+    </para>
+    <programlisting language="ocaml">
+# module type Comparable = sig
+    type t
+    val compare : t -&gt; t -&gt; int
+  end ;;
+module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
+</programlisting>
+    <para>
+      The comparison function follows the standard OCaml idiom for such
+      functions, returning <literal>0</literal> if the two elements are
+      equal, a positive number if the first element is larger than the
+      second, and a negative number if the first element is smaller than
+      the second. Thus, we could rewrite the standard comparison
+      functions on top of <literal>compare</literal> as shown below.
+    </para>
+    <programlisting language="ocaml">
+compare x y &lt; 0     (* x &lt; y *)
+compare x y = 0     (* x = y *)
+compare x y &gt; 0     (* x &gt; y *)
+</programlisting>
+    <para>
+      The functor for creating the interval module is shown below. We
+      represent an interval with a variant type, which is either
+      <literal>Empty</literal> or <literal>Interval (x,y)</literal>,
+      where <literal>x</literal> and <literal>y</literal> are the bounds
+      of the interval.
+    </para>
+    <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable) = struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    let create low high =
+      if Endpoint.compare low high &gt; 0 then Empty
+      else Interval (low,high)
+
+    let is_empty = function
+      | Empty -&gt; true
+      | Interval _ -&gt; false
+
+    let contains t x =
+      match t with
+      | Empty -&gt; false
+      | Interval (l,h) -&gt;
+        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0
+
+    let intersect t1 t2 =
+      let min x y = if Endpoint.compare x y &lt;= 0 then x else y in
+      let max x y = if Endpoint.compare x y &gt;= 0 then x else y in
+      match t1,t2 with
+      | Empty, _ | _, Empty -&gt; Empty
+      | Interval (l1,h1), Interval (l2,h2) -&gt;
+        create (max l1 l2) (min h1 h2)
+
+  end ;;
+module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t = Interval of Endpoint.t * Endpoint.t | Empty
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</programlisting>
+    <para>
+      We can instantiate the functor by applying it to a module with the
+      right signature. In the following, we provide the functor input as
+      an anonymous module.
+    </para>
+    <programlisting language="ocaml">
+# module Int_interval =
+    Make_interval(struct
+      type t = int
+      let compare = Int.compare
+    end);;
+module Int_interval :
+  sig
+    type t = Interval of int * int | Empty
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+    <para>
+      When we choose our interfaces that are aligned with the standards
+      of our libraries, we don't need to construct a custom module to
+      feed to the functor. In this case, for example, we can directly
+      use the <literal>Int</literal> or <literal>String</literal>
+      modules provided by Core.
+    </para>
+    <programlisting language="ocaml">
+# module Int_interval = Make_interval(Int) ;;
+# module String_interval = Make_interval(String) ;;
+</programlisting>
+    <para>
+      This works because many modules in Core, including
+      <literal>Int</literal> and <literal>String</literal>, satisfy an
+      extended version of the <literal>Comparable</literal> signature
+      described above. Standardized signatures are generally good
+      practice, both because they makes functors easier to use, and
+      because they make the codebase generally easier to navigate.
+    </para>
+    <para>
+      Now we can use the newly defined <literal>Int_interval</literal>
+      module like any ordinary module.
+    </para>
+    <programlisting language="ocaml">
+# let i1 = Int_interval.create 3 8;;
+val i1 : Int_interval.t = Int_interval.Interval (3, 8)
+# let i2 = Int_interval.create 4 10;;
+val i2 : Int_interval.t = Int_interval.Interval (4, 10)
+# Int_interval.intersect i1 i2;;
+- : Int_interval.t = Int_interval.Interval (4, 8)
+</programlisting>
+    <para>
+      This design gives us the freedom to use any comparison function we
+      want for comparing the endpoints. We could, for example, create a
+      type of int interval with the order of the comparison reversed, as
+      follows:
+    </para>
+    <programlisting language="ocaml">
+# module Rev_int_interval =
+    Make_interval(struct
+      type t = int
+      let compare x y = Int.compare y x
+    end);;
+</programlisting>
+    <para>
+      The behavior of <literal>Rev_int_interval</literal> is of course
+      different from <literal>Int_interval</literal>, as we can see
+      below.
+    </para>
+    <programlisting language="ocaml">
+# let interval = Int_interval.create 4 3;;
+val interval : Int_interval.t = Int_interval.Empty
+# let rev_interval = Rev_int_interval.create 4 3;;
+val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
+</programlisting>
+    <para>
+      Importantly, <literal>Rev_int_interval.t</literal> is a different
+      type than <literal>Int_interval.t</literal>, even though its
+      physical representation is the same. Indeed, the type system will
+      prevent us from confusing them.
+    </para>
+    <programlisting language="ocaml">
+# Int_interval.contains rev_interval 3;;
+Characters 22-34:
+  Int_interval.contains rev_interval 3;;
+                        ^^^^^^^^^^^^
+Error: This expression has type Rev_int_interval.t
+       but an expression was expected of type
+         Int_interval.t = Make_interval(Int).t
+</programlisting>
+    <para>
+      This is important, because confusing the two kinds of intervals
+      would be a semantic error, and it's an easy one to make. The
+      ability of functors to mint new types is a useful trick that comes
+      up a lot.
+    </para>
+    <sect2 id="making-the-functor-abstract">
+      <title>Making the functor abstract</title>
+      <para>
+        There's a problem with <literal>Make_interval</literal>. The
+        code we wrote depends on the invariant that the upper bound of
+        an interval is greater than its lower bound, but that invariant
+        can be violated. The invariant is enforced by the create
+        function, but because <literal>Interval.t</literal> is not
+        abstract, we can bypass the <literal>create</literal> function.
+      </para>
+      <programlisting language="ocaml">
+# Int_interval.create 4 3;; (* going through create *)
+- : Int_interval.t = Int_interval.Empty
+# Int_interval.Interval (4,3);; (* bypassing create *)
+- : Int_interval.t = Int_interval.Interval (4, 3)
+</programlisting>
+      <para>
+        To make <literal>Int_interval.t</literal> abstract, we need to
+        apply an interface to the output of the
+        <literal>Make_interval</literal>. Here's an explicit interface
+        that we can use for that purpose.
+      </para>
+      <programlisting language="ocaml">
+# module type Interval_intf = sig
+   type t
+   type endpoint
+   val create : endpoint -&gt; endpoint -&gt; t
+   val is_empty : t -&gt; bool
+   val contains : t -&gt; endpoint -&gt; bool
+   val intersect : t -&gt; t -&gt; t
+  end;;
+</programlisting>
+      <para>
+        This interface includes the type <literal>endpoint</literal> to
+        represent the type of the endpoints of the interval. Given this
+        interface, we can redo our definition of
+        <literal>Make_interval</literal>. Notice that we added the type
+        <literal>endpoint</literal> to the implementation of the module
+        to make the implementation match
+        <literal>Interval_intf</literal>.
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable) : Interval_intf = struct
+
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ....
+
+  end ;;
+module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf
+</programlisting>
+    </sect2>
+    <sect2 id="sharing-constraints">
+      <title>Sharing constraints</title>
+      <para>
+        The resulting module is abstract, but unfortunately, it's too
+        abstract. In particular, we haven't exposed the type
+        <literal>endpoint</literal>, which means that we can't even
+        construct an interval anymore.
+      </para>
+      <programlisting language="ocaml">
+# module Int_interval = Make_interval(Int);;
+module Int_interval : Interval_intf
+# Int_interval.create 3 4;;
+Characters 20-21:
+  Int_interval.create 3 4;;
+                      ^
+Error: This expression has type int but an expression was expected of type
+         Int_interval.endpoint
+</programlisting>
+      <para>
+        To fix this, we need to expose the fact that
+        <literal>endpoint</literal> is equal to <literal>Int.t</literal>
+        (or more generally, <literal>Endpoint.t</literal>, where
+        <literal>Endpoint</literal> is the argument to the functor). One
+        way of doing this is through a <emphasis>sharing
+        constraint</emphasis>, which allows you to tell the compiler to
+        expose the fact that a given type is equal to some other type.
+        The syntax for a sharing constraint on a module type is as
+        follows.
+      </para>
+      <programlisting language="ocaml">
+S with type s = t
+</programlisting>
+      <para>
+        where <literal>S</literal> is a module type,
+        <literal>s</literal> is a type inside of <literal>S</literal>,
+        and <literal>t</literal> is a type defined outside of
+        <literal>S</literal>. The result of this expression is a new
+        signature that's been modified so that it exposes the fact that
+        <literal>s</literal> is equal to <literal>t</literal>. We can
+        use a sharing constraint to create a specialized version of
+        <literal>Interval_intf</literal> for integer intervals.
+      </para>
+      <programlisting language="ocaml">
+# module type Int_interval_intf = Interval_intf with type endpoint = int;;
+module type Int_interval_intf =
+  sig
+    type t
+    type endpoint = int
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+      <para>
+        And we can also use it in the context of a functor, where the
+        right-hand side of the sharing constraint is an element of the
+        functor argument. Thus, we expose an equality between a type in
+        the output of the functor (in this case, the type
+        <literal>endpoint</literal>) and a type in its input
+        (<literal>Endpoint.t</literal>).
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable)
+      : Interval_intf with type endpoint = Endpoint.t = struct
+
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ...
+
+  end ;;
+module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      type endpoint = Endpoint.t
+      val create : endpoint -&gt; endpoint -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; endpoint -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</programlisting>
+      <para>
+        So now, the interface is as it was, except that
+        <literal>endpoint</literal> is now known to be equal to
+        <literal>Endpoint.t</literal>. As a result of that type
+        equality, we can now do things like construct intervals again.
+      </para>
+      <programlisting language="ocaml">
+# let i = Int_interval.create 3 4;;
+val i : Int_interval.t = &lt;abstr&gt;
+# Int_interval.contains i 5;;
+- : bool = false
+</programlisting>
+    </sect2>
+    <sect2 id="destructive-substitution">
+      <title>Destructive substitution</title>
+      <para>
+        Sharing constraints basically do the job, but they have some
+        downsides. In particular, we've now been stuck with the useless
+        type declaration of <literal>endpoint</literal> that clutters up
+        both the interface and the implementation. A better solution
+        would be to modify the <literal>Interval_intf</literal>
+        signature by replacing <literal>endpoint</literal> with
+        <literal>Endpoint.t</literal> everywhere it shows up, and
+        deleting the definition of <literal>endpoint</literal> from the
+        signature. We can do just this using what's called
+        <emphasis>destructive substitution</emphasis>. Here's the basic
+        syntax.
+      </para>
+      <programlisting language="ocaml">
+S with type s := t
+</programlisting>
+      <para>
+        The following shows how we could use this with
+        <literal>Make_interval</literal>.
+      </para>
+      <para>
+        Here's an example of what we get if we use destructive
+        substitution to specialize the <literal>Interval_intf</literal>
+        interface to integer intervals.
+      </para>
+      <programlisting language="ocaml">
+# module type Int_interval_intf = Interval_intf with type endpoint := int;;
+module type Int_interval_intf =
+  sig
+    type t
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+      <para>
+        There's now no mention of n <literal>endpoint</literal>, all
+        occurrences of that type having been replaced by
+        <literal>int</literal>. As with sharing constraints, we can also
+        use this in the context of a functor.
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t =
+  struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ....
+
+  end ;;
+module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</programlisting>
+      <para>
+        The interface is precisely what we want, and we didn't need to
+        define the <literal>endpoint</literal> type alias in the body of
+        the module. If we instantiate this module, we'll see that it
+        works properly: we can construct new intervals, but
+        <literal>t</literal> is abstract, and so we can't directly
+        access the constructors and violate the invariants of the data
+        structure.
+      </para>
+      <programlisting language="ocaml">
+# module Int_interval = Make_interval(Int);;
+# Int_interval.create 3 4;;
+- : Int_interval.t = &lt;abstr&gt;
+# Int_interval.Interval (4,3);;
+Characters 0-27:
+  Int_interval.Interval (4,3);;
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: Unbound constructor Int_interval.Interval
+</programlisting>
+    </sect2>
+    <sect2 id="using-multiple-interfaces">
+      <title>Using multiple interfaces</title>
+      <para>
+        Another feature that we might want for our interval module is
+        the ability to serialize the type, in particular, by converting
+        to s-expressions. If we simply invoke the
+        <literal>sexplib</literal> macros by adding
+        <literal>with sexp</literal> to the definition of
+        <literal>t</literal>, though, we'll get an error:
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t = struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+    with sexp
+
+    ....
+
+  end ;;
+Characters 120-123:
+        type t = | Interval of Endpoint.t * Endpoint.t
+                               ^^^^^^^^^^
+Error: Unbound value Endpoint.t_of_sexp
+</programlisting>
+      <para>
+        The problem is that <literal>with sexp</literal> adds code for
+        defining the s-expression converters, and that code assumes that
+        <literal>Endpoint</literal> has the appropriate sexp-conversion
+        functions for <literal>Endpoint.t</literal>. But all we know
+        about <literal>Endpoint</literal> is that it satisfies the
+        <literal>Comparable</literal> interface, which doesn't say
+        anything about s-expressions.
+      </para>
+      <para>
+        Happily, Core comes with a built in interface for just this
+        purpose called <literal>Sexpable</literal>, which is defined as
+        follows:
+      </para>
+      <programlisting language="ocaml">
+module type Sexpable = sig
+  type t = int
+  val sexp_of_t : t -&gt; Sexp.t
+  val t_of_sexp : Sexp.t -&gt; t
+end
+</programlisting>
+      <para>
+        We can modify <literal>Make_interval</literal> to use the
+        <literal>Sexpable</literal> interface, for both its input and
+        its output. Note the use of destructive substitution to combine
+        multiple signatures together. This is important because it stops
+        the <literal>type t</literal>'s from the different signatures
+        from interfering with each other.
+      </para>
+      <para>
+        Also note that we have been careful to override the
+        sexp-converter here to ensure that the data structures
+        invariants are still maintained when reading in from an
+        s-expression.
+      </para>
+      <programlisting language="ocaml">
+# module type Interval_intf_with_sexp = sig
+   type t
+   include Interval_intf with type t := t
+   include Sexpable      with type t := t
+  end;;
+# module Make_interval(Endpoint : sig
+    type t
+    include Comparable with type t := t
+    include Sexpable   with type t := t
+  end) : Interval_intf_with_sexp with type endpoint := Endpoint.t =
+  struct
+
+      type t = | Interval of Endpoint.t * Endpoint.t
+               | Empty
+      with sexp
+
+      let create low high =
+         ...
+
+      (* put a wrapper round the auto-generated sexp_of_t to enforce
+         the invariants of the data structure *)
+      let t_of_sexp sexp =
+        match t_of_sexp sexp with
+        | Empty -&gt; Empty
+        | Interval (x,y) -&gt; create x y
+
+      ....
+
+     end ;;
+module Make_interval :
+  functor
+    (Endpoint : sig
+           type t
+           val compare : t -&gt; t -&gt; int
+           val sexp_of_t : t -&gt; Sexplib.Sexp.t
+           val t_of_sexp : Sexplib.Sexp.t -&gt; t
+         end) -&gt;
+    sig
+      type t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+      val sexp_of_t : t -&gt; Sexplib.Sexp.t
+      val t_of_sexp : Sexplib.Sexp.t -&gt; t
+    end
+</programlisting>
+      <para>
+        And now, we can use that sexp-converter in the ordinary way:
+      </para>
+      <programlisting language="ocaml">
+# module Int = Make_interval(Int) ;;
+# Int_interval.sexp_of_t (Int_interval.create 3 4);;
+- : Sexplib.Sexp.t = (Interval 3 4)
+# Int_interval.sexp_of_t (Int_interval.create 4 3);;
+- : Sexplib.Sexp.t = Empty
+</programlisting>
+    </sect2>
+  </sect1>
+  <sect1 id="extending-modules">
+    <title>Extending modules</title>
+    <para>
+      Another common use of functors is to generate type-specific
+      functionality for a given module in a standardized way. Let's see
+      how this works in the context of a functional queue, which is just
+      a functional version of a FIFO (first-in, first-out) queue. Being
+      functional, operations on the queue return new queues, rather than
+      modifying the queues that were passed in.
+    </para>
+    <para>
+      Here's a reasonable mli
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.mli *)
+
+type 'a t
+
+val empty : 'a t
+
+val enqueue : 'a t -&gt; 'a -&gt; 'a t
+
+(** [dequeue q] returns None if the [q] is empty *)
+val dequeue : 'a t -&gt; ('a * 'a t) option
+
+val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+</programlisting>
+    <para>
+      Now let's implement <literal>Fqueue</literal>. A standard trick is
+      for the <literal>Fqueue</literal> to maintain an input and an
+      output list, so that one can efficiently
+      <literal>enqueue</literal> on the first list, and can efficiently
+      dequeue from the out list. If you attempt to dequeue when the
+      output list is empty, the input list is reversed and becomes the
+      new output list. Here's an implementation that uses that trick.
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.ml *)
+open Core.Std
+
+type 'a t = 'a list * 'a list
+
+let empty = ([],[])
+
+let enqueue (l1,l2) x = (x :: l1,l2)
+
+let dequeue (in_list,out_list) =
+  match out_list with
+  | hd :: tl -&gt; Some (hd, (in_list,tl))
+  | [] -&gt;
+    match List.rev in_list with
+    | [] -&gt; None
+    | hd::tl -&gt; Some (hd, ([], tl))
+
+let fold (in_list,out_list) ~init ~f =
+  List.fold ~init:(List.fold ~init ~f out_list) ~f
+    (List.rev in_list)
+</programlisting>
+    <para>
+      One problem with our <literal>Fqueue</literal> is that the
+      interface is quite skeletal. There are lots of useful helper
+      functions that one might want that aren't there. For example, for
+      lists we have <literal>List.iter</literal> which runs a function
+      on each node; and a <literal>List.find</literal> that finds the
+      first element on the list that matches a given predicate. Such
+      helper functions come up for pretty much every container type, and
+      implementing them over and over is a bit of a dull and repetitive
+      affair.
+    </para>
+    <para>
+      As it happens, many of these helper functions can be derived
+      mechanically from just the fold function we already implemented.
+      Rather than write all of these helper functions by hand for every
+      new container type, we can instead use a functor that will let us
+      add this functionality to any container that has a
+      <literal>fold</literal> function.
+    </para>
+    <para>
+      We'll create a new module, <literal>Foldable</literal> that
+      automates the process of adding helper functions to a
+      fold-supporting container. As you can see,
+      <literal>Foldable</literal> contains a module signature
+      <literal>S</literal> which defines the signature that is required
+      to support folding; and a functor <literal>Extend</literal> that
+      allows one to extend any module that matches
+      <literal>Foldable.S</literal>.
+    </para>
+    <programlisting language="ocaml">
+(* file: foldable.ml *)
+
+open Core.Std
+
+module type S = sig
+  type 'a t
+  val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+end
+
+module type Extension = sig
+  type 'a t
+  val iter    : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
+  val length  : 'a t -&gt; int
+  val count   : 'a t -&gt; f:('a -&gt; bool) -&gt; int
+  val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+  val exists  : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+end
+
+(* For extending a Foldable module *)
+module Extend(Arg : S)
+  : Extension with type 'a t := 'a Arg.t =
+struct
+  open Arg
+
+  let iter t ~f =
+    fold t ~init:() ~f:(fun () a -&gt; f a)
+
+  let length t =
+    fold t ~init:0  ~f:(fun acc _ -&gt; acc + 1)
+
+  let count t ~f =
+    fold t ~init:0  ~f:(fun count x -&gt; count + if f x then 1 else 0)
+
+  exception Short_circuit
+
+  let for_all c ~f =
+    try iter c ~f:(fun x -&gt; if not (f x) then raise Short_circuit); true
+    with Short_circuit -&gt; false
+
+  let exists c ~f =
+    try iter c ~f:(fun x -&gt; if f x then raise Short_circuit); false
+    with Short_circuit -&gt; true
+end
+</programlisting>
+    <para>
+      Now we can apply this to <literal>Fqueue</literal>. We can rewrite
+      the interface of <literal>Fqueue</literal> as follows.
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.mli *)
+open Core.Std
+
+type 'a t
+val empty : 'a t
+val enqueue : 'a t -&gt; 'a -&gt; 'a t
+val dequeue : 'a t -&gt; ('a * 'a t) option
+val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+
+include Foldable.Extension with type 'a t := 'a t
+</programlisting>
+    <para>
+      In order to apply the functor, we'll put the definition of
+      <literal>Fqueue</literal> in a sub-module called
+      <literal>T</literal>, and then call
+      <literal>Foldable.Extend</literal> on <literal>T</literal>.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
+module T = struct
+  type 'a t = 'a list * 'a list
+
+  let empty = [],[]
+
+  let enqueue (l1,l2) x =
+    (x :: l1,l2)
+
+  let rec dequeue (in_list,out_list) =
+    match out_list with
+    | hd :: tl -&gt; Some (hd, (in_list,tl))
+    | [] -&gt; dequeue ([], List.rev in_list)
+
+  let fold (in_list,out_list) ~init ~f =
+    List.fold ~init:(List.fold ~init ~f out_list) ~f
+      (List.rev in_list)
+end
+include T
+include Foldable.Extend(T)
+</programlisting>
+    <para>
+      This pattern comes up quite a bit in Core, and is used to for a
+      variety of purposes.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Adding comparison-based data structures like maps and sets,
+          based on the <literal>Comparable</literal> interface.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Adding hash-based data structures like hash sets and hash
+          heaps.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Support for so-called monadic libraries, like the ones
+          discussed in <xref linkend="error-handling"/> and
+          <xref linkend="concurrent-programming-with-async"/>.
+          Here, the functor is used to provide a collection of standard
+          helper functions based on the core <literal>bind</literal> and
+          <literal>return</literal> operators.
+        </para>
+      </listitem>
+    </itemizedlist>
   </sect1>
 </chapter><chapter id="imperative-programming-1">
   <title>Imperative Programming</title>
@@ -11415,11 +11805,40 @@ end = SList
     <xref linkend="handling-json-data"/> and
     <xref linkend="xml-streams-and-trees"/>.
   </para>
+  <note>
+  <title>
+  The <literal>camlp4</literal> preprocessor and
+  <literal>type_conv</literal>
+  </title>
+  <para>
+    OCaml doesn't directly support converting static type definitions to
+    and from other data formats. Instead, it supplies a powerful syntax
+    extension mechanism known as <literal>camlp4</literal>. This lets
+    you extend the grammar of the language to mark types as requiring
+    special action, and then mechanically generate boilerplate code over
+    those types (such as converting to and from other data formats).
+  </para>
+  <para>
+    Many of the examples in the subsequent chapters depend on
+    <literal>camlp4</literal>, but the examples all invoke it
+    automatically for you via the <literal>-pp</literal> flag to the
+    OCaml compiler. If you're interested in building your own
+    generators, investigate the <literal>type_conv</literal> library
+    which provides the basic extension mechanism used by the rest of
+    this chapter.
+  </para>
+  </note>
   <para>
     S-expressions are nested paranthetical strings whose atomic values
     are strings. They were first popularized by the Lisp programming
     language in the 1960s, and have remained a simple way to encode data
-    structures since then.
+    structures since then. An example s-expression might look like this:
+  </para>
+  <programlisting language="scheme">
+(this (is an) (s expression))
+</programlisting>
+  <para>
+    The corresponding OCaml type for an s-expression is quite simple:
   </para>
   <programlisting language="ocaml">
 module Sexp : sig
@@ -11428,8 +11847,9 @@ end
 </programlisting>
   <para>
     An s-expression is in essence a nested parenthetical list whose
-    atomic values are strings. The <literal>Sexp</literal> module comes
-    with functionality for parsing and printing s-expressions.
+    atomic values are strings. The <literal>Sexp</literal> module in
+    Core comes with functionality for parsing and printing
+    s-expressions.
   </para>
   <programlisting language="ocaml">
 # let sexp =
@@ -11457,7 +11877,7 @@ val sexp : Sexp.t = (this (is an) (s expression))
   </para>
   <para>
     But what if you want a function to convert some brand new type to an
-    s-expression? You can of course write it yourself:
+    s-expression? You can of course write it yourself manually:
   </para>
   <programlisting language="ocaml">
 # type t = { foo: int; bar: float };;
@@ -11481,9 +11901,9 @@ val sexp_of_t : t -&gt; Core.Std.Sexp.t = &lt;fun&gt;
     Given how mechanical the code is, you could imagine writing a
     program that inspected the type definition and auto-generated the
     conversion code for you. That is precisely where syntax extensions
-    come in. Using Sexplib and adding <literal>with sexp</literal> as an
-    annotation to our type definition, we get the functions we want for
-    free.
+    come in. Using <literal>Sexplib</literal> (part of Core) and adding
+    <literal>with sexp</literal> as an annotation to our type
+    definition, we get the functions we want for free.
   </para>
   <programlisting language="ocaml">
 # type t = { foo: int; bar: float } with sexp;;
@@ -11495,102 +11915,53 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
 - : t = {foo = 3; bar = 35.}
 </programlisting>
   <para>
-    (You can ignore <literal>t_of_sexp__</literal>, which is a helper
-    function that is needed in very rare cases.)
+    The <literal>with sexp</literal> is detected by a
+    <literal>Sexplib</literal> grammar extension to the normal OCaml
+    syntax, and replaced with the extra conversion functions you see
+    above. You can ignore <literal>t_of_sexp__</literal>, which is a
+    helper function that is needed in very rare cases.
   </para>
   <para>
-    The syntax-extensions in Core that we're going to discuss all have
-    this same basic structure: they auto-generate code based on type
-    definitions, implementing functionality that you could in theory
-    have implemented by hand, but with far less programmer effort.
+    The syntax extensions in Core all have this same basic structure:
+    they auto-generate code based on type definitions, implementing
+    functionality that you could in theory have implemented by hand, but
+    with far less programmer effort.
   </para>
-  <para>
-    There are several syntax extensions distributed with Core,
-    including:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        <emphasis role="strong">Sexplib</emphasis>: provides
-        serialization for s-expressions.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis role="strong">Bin_prot</emphasis>: provides
-        serialization to an efficient binary format.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis role="strong">Fieldslib</emphasis>: generates
-        first-class values that represent fields of a record, as well as
-        accessor functions and setters for mutable record fields.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis role="strong">Variantslib</emphasis>: like Fieldslib
-        for variants, producing first-class variants and other helper
-        functions for interacting with variant types.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis role="strong">Pa_compare</emphasis>: generates
-        efficient, type-specialized comparison functions.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis role="strong">Pa_typehash</emphasis>: generates a hash
-        value for a type definition, <emphasis>i.e.</emphasis>, an
-        integer that is highly unlikely to be the same for two distinct
-        types.
-      </para>
-    </listitem>
-  </itemizedlist>
-  <para>
-    We'll discuss each of these syntax extensions in detail, starting
-    with Sexplib.
-  </para>
-  <sect1 id="sexplib">
-    <title>Sexplib</title>
-    <sect2 id="formatting-of-s-expressions">
-      <title>Formatting of s-expressions</title>
-      <para>
-        Sexplib's format for s-expressions is pretty straightforward: an
-        s-expression is written down as a nested parenthetical
-        expression, with whitespace-separated strings as the atoms.
-        Quotes are used for atoms that contain parenthesis or spaces
-        themselves, backslash is the escape character, and semicolons
-        are used to introduce comments. Thus, if you create the
-        following file:
-      </para>
-      <programlisting language="scheme">
+  <sect1 id="sexp-basics">
+    <title>Sexp basics</title>
+    <para>
+      Sexplib's format for s-expressions is pretty straightforward. An
+      s-expression is written down as a nested parenthetical expression,
+      with whitespace-separated strings as the atoms. Quotes are used
+      for atoms that contain parenthesis or spaces themselves, backslash
+      is the escape character, and semicolons are used to introduce
+      comments. Thus, if you create the following
+      <literal>foo.scm</literal> file:
+    </para>
+    <programlisting language="scheme">
 ;; foo.scm
 
 ((foo 3.3) ;; Shall I compare thee  to a summer's dream?
  (bar &quot;this is () an \&quot; atom&quot;))
 </programlisting>
-      <para>
-        we can load it up and print it back out again:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      we can load it up and print it back out again:
+    </para>
+    <programlisting language="ocaml">
 # Sexp.load_sexp &quot;foo.scm&quot;;;
 - : Sexp.t = ((foo 3.3) (bar &quot;this is () an \&quot; atom&quot;))
 </programlisting>
-      <para>
-        Note that the comments were dropped from the file upon reading.
-        This is expected, since there's no place in the
-        <literal>Sexp.t</literal> type to store comments.
-      </para>
-      <para>
-        If we introduce an error into our s-expression, by, say,
-        deleting the open-paren in front of <literal>bar</literal>,
-        we'll get a parse error:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      Note that the comments were dropped from the file upon reading.
+      This is expected, since there's no place in the
+      <literal>Sexp.t</literal> type to store comments.
+    </para>
+    <para>
+      If we introduce an error into our s-expression, by, say, deleting
+      the open-paren in front of <literal>bar</literal>, we'll get a
+      parse error:
+    </para>
+    <programlisting language="ocaml">
 # Exn.handle_uncaught ~exit:false (fun () -&gt;
     ignore (Sexp.load_sexp &quot;foo.scm&quot;));;
   Uncaught exception:
@@ -11599,21 +11970,23 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
    ((location parse) (err_msg &quot;unexpected character: ')'&quot;) (text_line 4)
     (text_char 29) (global_offset 94) (buf_pos 94)))
 </programlisting>
-      <para>
-        (In the above, we use <literal>Exn.handle_uncaught</literal> to
-        make sure that the exception gets printed out in full detail.)
-      </para>
-    </sect2>
-    <sect2 id="sexp-converters">
-      <title>Sexp converters</title>
-      <para>
-        The most important functionality provided by Sexplib is the
-        auto-generation of converters for new types. We've seen a bit of
-        how this works already, but let's walk through a complete
-        example. Here's the source for the beginning of a library for
-        representing integer intervals.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      In the above, we use <literal>Exn.handle_uncaught</literal> to
+      make sure that the exception gets printed out in full detail. You
+      should generally wrap every Core program in this handler to get
+      good error messages for any unexpected exceptions.
+    </para>
+  </sect1>
+  <sect1 id="sexp-converters">
+    <title>Sexp converters</title>
+    <para>
+      The most important functionality provided by Sexplib is the
+      auto-generation of converters for new types. We've seen a bit of
+      how this works already, but let's walk through a complete example.
+      Here's the source for the beginning of a library for representing
+      integer intervals.
+    </para>
+    <programlisting language="ocaml">
 (* file: int_interval.ml *)
 (* Module for representing closed integer intervals *)
 
@@ -11630,10 +12003,10 @@ let contains i x = match i with
    | Empty -&gt; false
    | Range (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
 </programlisting>
-      <para>
-        We can now use this module as follows:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      We can now use this module as follows:
+    </para>
+    <programlisting language="ocaml">
 (* file: test_interval.ml *)
 
 open Core.Std
@@ -11652,13 +12025,14 @@ let () =
   |! Sexp.to_string_hum
   |! print_endline
 </programlisting>
-      <para>
-        But we're still missing something: we haven't created an
-        <literal>mli</literal> for <literal>Int_interval</literal> yet.
-        Note that we need to explicitly export the s-expression
-        converters that were created within the ml. If we don't:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      But we're still missing something: we haven't created an
+      <literal>mli</literal> signature for
+      <literal>Int_interval</literal> yet. Note that we need to
+      explicitly export the s-expression converters that were created
+      within the ml. If we don't:
+    </para>
+    <programlisting language="ocaml">
 (* file: int_interval.mli *)
 (* Module for representing closed integer intervals *)
 
@@ -11668,56 +12042,58 @@ val is_empty : t -&gt; bool
 val create : int -&gt; int -&gt; t
 val contains : t -&gt; int -&gt; bool
 </programlisting>
-      <para>
-        then we'll get the following error:
-      </para>
-      <programlisting>
+    <para>
+      then we'll get the following error:
+    </para>
+    <programlisting>
 File &quot;test_interval.ml&quot;, line 15, characters 20-42:
 Error: Unbound value Int_interval.sexp_of_t
 Command exited with code 2.
 </programlisting>
-      <para>
-        We could export the types by hand:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      We could export the types by hand in the signature:
+    </para>
+    <programlisting language="ocaml">
 type t
 val sexp_of_t : Sexp.t -&gt; t
 val t_of_sexp : t -&gt; Sexp.t
 </programlisting>
-      <para>
-        But Sexplib has a shorthand for this as well, so that we can
-        instead write simply:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      But Sexplib has a shorthand for this as well, so that we can just
+      use the same <literal>with</literal> shorthand in the
+      <literal>mli</literal> signature:
+    </para>
+    <programlisting language="ocaml">
 type t with sexp
 </programlisting>
-      <para>
-        at which point <literal>test_interval.ml</literal> will compile
-        again, and if we run it, we'll get the following output:
-      </para>
-      <programlisting>
+    <para>
+      at which point <literal>test_interval.ml</literal> will compile
+      again, and if we run it, we'll get the following output:
+    </para>
+    <programlisting>
 $ ./test_interval.native
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
 </programlisting>
-      <sidebar> <title>
-      Preserving invariants
-      </title>
-      <para>
-        One easy mistake to make when dealing with sexp converters is to
-        ignore the fact that those converters can violate the invariants
-        of your code. For example, the <literal>Int_interval</literal>
-        module depends for the correctness of the
-        <literal>is_empty</literal> check on the fact that for any value
-        <literal>Range (x,y)</literal>, <literal>y</literal> is greater
-        than or equal to <literal>x</literal>. The
-        <literal>create</literal> function preserves this invariant, but
-        the <literal>t_of_sexp</literal> function does not.
-      </para>
-      <para>
-        We can fix this problem by writing a custom sexp-converter, in
-        this case, using the sexp-converter that we already have:
-      </para>
-      <programlisting language="ocaml">
+    <sidebar> <title>
+    Preserving invariants
+    </title>
+    <para>
+      One easy mistake to make when dealing with sexp converters is to
+      ignore the fact that those converters can violate the invariants
+      of your code. For example, the <literal>Int_interval</literal>
+      module depends for the correctness of the
+      <literal>is_empty</literal> check on the fact that for any value
+      <literal>Range (x,y)</literal>, <literal>y</literal> is greater
+      than or equal to <literal>x</literal>. The
+      <literal>create</literal> function preserves this invariant, but
+      the <literal>t_of_sexp</literal> function does not.
+    </para>
+    <para>
+      We can fix this problem by overriding the autogenerated function
+      and writing a custom sexp-converter, but still using the
+      sexp-converter that we already have:
+    </para>
+    <programlisting language="ocaml">
 type t = | Range of int * int
          | Empty
 with sexp
@@ -11733,24 +12109,31 @@ let t_of_sexp sexp =
   end;
   t
 </programlisting>
-      <para>
-        We call the function <literal>of_sexp_error</literal> to raise
-        an exception because that improves the error reporting that
-        Sexplib can provide when a conversion fails.
-      </para>
-      </sidebar>
-    </sect2>
-    <sect2 id="getting-good-error-messages">
-      <title>Getting good error messages</title>
-      <para>
-        There are two steps to deserializing a type from an
-        s-expression: first, converting the bytes in a file to an
-        s-expression, and the second, converting that s-expression into
-        the type in question. One problem with this is that it can be
-        hard to localize errors to the right place using this scheme.
-        Consider the following example:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      This trick of overriding an existing function definition with a
+      new one is perfectly acceptable in OCaml. Function definitions are
+      only recursive if the <literal>rec</literal> keyword is specified,
+      and so in this case the inner <literal>t_of_sexp</literal> call
+      will go to the earlier auto-generated definition that resulted
+      from the <literal>type t with sexp</literal> definition.
+    </para>
+    <para>
+      We call the function <literal>of_sexp_error</literal> to raise an
+      exception because that improves the error reporting that Sexplib
+      can provide when a conversion fails.
+    </para>
+    </sidebar>
+  </sect1>
+  <sect1 id="getting-good-error-messages">
+    <title>Getting good error messages</title>
+    <para>
+      There are two steps to deserializing a type from an s-expression:
+      first, converting the bytes in a file to an s-expression, and the
+      second, converting that s-expression into the type in question.
+      One problem with this is that it can be hard to localize errors to
+      the right place using this scheme. Consider the following example:
+    </para>
+    <programlisting language="ocaml">
 (* file: read_foo.ml *)
 
 open Core.Std
@@ -11767,46 +12150,46 @@ let run () =
 let () =
   Exn.handle_uncaught ~exit:true run
 </programlisting>
-      <para>
-        If you were to run this on a malformatted file, say, this one:
-      </para>
-      <programlisting>
+    <para>
+      If you were to run this on a malformatted file, say, this one:
+    </para>
+    <programlisting>
 ;; foo.scm
 ((a not-an-integer)
  (b not-an-integer)
  (c ()))
 </programlisting>
-      <para>
-        you'll get the following error:
-      </para>
-      <programlisting>
+    <para>
+      you'll get the following error:
+    </para>
+    <programlisting>
 read_foo $ ./read_foo.native
 Uncaught exception:
 
   (Sexplib.Conv.Of_sexp_error
    (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) not-an-integer)
 </programlisting>
-      <para>
-        If all you have is the error message and the string, it's not
-        terribly informative. In particular, you know that the parsing
-        error-ed out on the atom &quot;not-an-integer&quot;, but you
-        don't know which one! In a large file, this kind of bad error
-        message can be pure misery.
-      </para>
-      <para>
-        But there's hope! If we make small change to the
-        <literal>run</literal> function as follows:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      If all you have is the error message and the string, it's not
+      terribly informative. In particular, you know that the parsing
+      error-ed out on the atom &quot;not-an-integer&quot;, but you don't
+      know which one! In a large file, this kind of bad error message
+      can be pure misery.
+    </para>
+    <para>
+      But there's hope! If we make small change to the
+      <literal>run</literal> function as follows:
+    </para>
+    <programlisting language="ocaml">
 let run () =
   let t = Sexp.load_sexp_conv_exn &quot;foo.scm&quot; t_of_sexp in
   printf &quot;b is: %d\n%!&quot; t.b
 </programlisting>
-      <para>
-        and run it again, we'll get the following much more helpful
-        error message:
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      and run it again, we'll get the following much more helpful error
+      message:
+    </para>
+    <programlisting language="ocaml">
 read_foo $ ./read_foo.native
 Uncaught exception:
 
@@ -11815,37 +12198,36 @@ Uncaught exception:
     (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;))
    not-an-integer)
 </programlisting>
+    <para>
+      In the above error, &quot;foo.scm:3:4&quot; tells us that the
+      error occurred on &quot;foo.scm&quot;, line 3, character 4, which
+      is a much better start for figuring out what has gone wrong.
+    </para>
+  </sect1>
+  <sect1 id="sexp-conversion-directives">
+    <title>Sexp-conversion directives</title>
+    <para>
+      Sexplib supports a collection of directives for modifying the
+      default behavior of the auto-generated sexp-converters. These
+      directives allow you to customize the way in which types are
+      represented as s-expressions without having to write a custom
+      parser.
+    </para>
+    <sect2 id="sexp-opaque">
+      <title><literal>sexp-opaque</literal></title>
       <para>
-        In the above error, &quot;foo.scm:3:4&quot; tells us that the
-        error occurred on &quot;foo.scm&quot;, line 3, character 4,
-        which is a much better start for figuring out what has gone
-        wrong.
+        The most commonly used directive is
+        <literal>sexp_opaque</literal>, whose purpose is to mark a given
+        component of a type as being unconvertible. Anything marked with
+        <literal>sexp_opaque</literal> will be presented as the atom
+        <literal>&lt;opaque&gt;</literal> by the to-sexp converter, and
+        will trigger an exception from the from-sexp converter. Note
+        that the type of a component marked as opaque doesn't need to
+        have a sexp-converter defined. Here, if we define a type without
+        a sexp-converter, and then try to use it another type with a
+        sexp-converter, we'll error out:
       </para>
-    </sect2>
-    <sect2 id="sexp-conversion-directives">
-      <title>Sexp-conversion directives</title>
-      <para>
-        Sexplib supports a collection of directives for modifying the
-        default behavior of the auto-generated sexp-converters. These
-        directives allow you to customize the way in which types are
-        represented as s-expressions without having to write a custom
-        parser. We describe these directives below.
-      </para>
-      <sect3 id="sexp-opaque">
-        <title><literal>sexp-opaque</literal></title>
-        <para>
-          The most commonly used directive is
-          <literal>sexp_opaque</literal>, whose purpose is to mark a
-          given component of a type as being unconvertible. Anything
-          marked with <literal>sexp_opaque</literal> will be presented
-          as the atom <literal>&lt;opaque&gt;</literal> by the to-sexp
-          converter, and will trigger an exception from the from-sexp
-          converter. Note that the type of a component marked as opaque
-          doesn't need to have a sexp-converter defined. Here, if we
-          define a type without a sexp-converter, and then try to use it
-          another type with a sexp-converter, we'll error out:
-        </para>
-        <programlisting language="ocaml">
+      <programlisting language="ocaml">
 # type no_converter = int * int;;
 type no_converter = int * int
 # type t = { a: no_converter; b: string } with sexp;;
@@ -11854,254 +12236,86 @@ Characters 14-26:
                 ^^^^^^^^^^^^
 Error: Unbound value no_converter_of_sexp
 </programlisting>
-        <para>
-          But with <literal>sexp_opaque</literal>, we won't:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        But with <literal>sexp_opaque</literal>, we won't:
+      </para>
+      <programlisting language="ocaml">
 # type t = { a: no_converter sexp_opaque; b: string } with sexp;;
 type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
 val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
 val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
 val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
 </programlisting>
-        <para>
-          And if we now convert a value of this type to an s-expression,
-          we'll see the contents of field <literal>a</literal> marked as
-          opaque:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        And if we now convert a value of this type to an s-expression,
+        we'll see the contents of field <literal>a</literal> marked as
+        opaque:
+      </para>
+      <programlisting language="ocaml">
 # sexp_of_t { a = (3,4); b = &quot;foo&quot; };;
 - : Sexp.t = ((a &lt;opaque&gt;) (b foo))
 </programlisting>
-      </sect3>
-      <sect3 id="sexp_option">
-        <title><literal>sexp_option</literal></title>
-        <para>
-          Another common directive is <literal>sexp_opaque</literal>,
-          which is used to make an optional field in a record. Ordinary
-          optional values are represented either as
-          <literal>()</literal> for <literal>None</literal>, or as
-          <literal>(x)</literal> for <literal>Some x</literal>. If you
-          put an option in a record field, then the record field will
-          always be required, and its value will be presented in the way
-          an ordinary optional value would. For example:
-        </para>
-        <programlisting language="ocaml">
+    </sect2>
+    <sect2 id="sexp_option">
+      <title><literal>sexp_option</literal></title>
+      <para>
+        Another common directive is <literal>sexp_opaque</literal>,
+        which is used to make an optional field in a record. Ordinary
+        optional values are represented either as <literal>()</literal>
+        for <literal>None</literal>, or as <literal>(x)</literal> for
+        <literal>Some x</literal>. If you put an option in a record
+        field, then the record field will always be required, and its
+        value will be presented in the way an ordinary optional value
+        would. For example:
+      </para>
+      <programlisting language="ocaml">
 # type t = { a: int option; b: string } with sexp;;
 # sexp_of_t { a = None; b = &quot;hello&quot; };;
 - : Sexp.t = ((a ()) (b hello))
 # sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
 - : Sexp.t = ((a (3)) (b hello))
 </programlisting>
-        <para>
-          But what if we want a field to be optional,
-          <emphasis>i.e.</emphasis>, we want to allow it to be omitted
-          from the record entirely? In that case, we can mark it with
-          <literal>sexp_option</literal>:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        But what if we want a field to be optional,
+        <emphasis>i.e.</emphasis>, we want to allow it to be omitted
+        from the record entirely? In that case, we can mark it with
+        <literal>sexp_option</literal>:
+      </para>
+      <programlisting language="ocaml">
 # type t = { a: int sexp_option; b: string } with sexp;;
 # sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
 - : Sexp.t = ((a 3) (b hello))
 # sexp_of_t { a = None; b = &quot;hello&quot; };;
 - : Sexp.t = ((b hello))
 </programlisting>
-      </sect3>
-      <sect3 id="sexp_list">
-        <title><literal>sexp_list</literal></title>
-        <para>
-          One problem with the auto-generated sexp-converters is that
-          they can have more parentheses than one would ideally like.
-          Consider, for example, the following variant type:
-        </para>
-        <programlisting language="ocaml">
+    </sect2>
+    <sect2 id="sexp_list">
+      <title><literal>sexp_list</literal></title>
+      <para>
+        One problem with the auto-generated sexp-converters is that they
+        can have more parentheses than one would ideally like. Consider,
+        for example, the following variant type:
+      </para>
+      <programlisting language="ocaml">
 # type compatible_versions = | Specific of string list
                              | All
   with sexp;;
 # sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
 - : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
 </programlisting>
-        <para>
-          You might prefer to make the syntax a bit less
-          parenthesis-laden by dropping the parentheses around the list.
-          <literal>sexp_list</literal> gives us this alternate syntax:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        You might prefer to make the syntax a bit less parenthesis-laden
+        by dropping the parentheses around the list.
+        <literal>sexp_list</literal> gives us this alternate syntax:
+      </para>
+      <programlisting language="ocaml">
 # type compatible_versions = | Specific of string sexp_list
                              | All
   with sexp;;
 # sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
 </programlisting>
-      </sect3>
     </sect2>
-  </sect1>
-  <sect1 id="bin_prot">
-    <title>Bin_prot</title>
-    <para>
-      S-expressions are a good serialization format when you need
-      something machine-parseable as well as human readable and
-      editable. But Sexplib's s-expressions are not particularly
-      performant. There are a number of reasons for this. For one thing,
-      s-expression serialization goes through an intermediate type,
-      <literal>Sexp.t</literal>, which must be allocated and is then
-      typically thrown away, putting non-trivial pressure on the GC. In
-      addition, parsing and printing to strings in an ASCII format can
-      be expensive for types like <literal>int</literal>s,
-      <literal>float</literal>s and <literal>Time.t</literal>s where
-      some real computation needs to be done to produce or parse the
-      ASCII representation.
-    </para>
-    <para>
-      Bin_prot is a library designed to address these issues by
-      providing fast serialization in a compact binary format. Kicking
-      off the syntax extension is done by putting
-      <literal>with bin_io</literal>. (This looks a bit unsightly in the
-      top-level because of all the definitions that are generated. We'll
-      elide those definitions here, but you can see it for yourself in
-      the toplevel.)
-    </para>
-    <para>
-      Here's a small complete example of a program that can read and
-      write values using bin-io. Here, the serialization is of types
-      that might be used as part of a message-queue, where each message
-      has a topic, some content, and a source, which is in turn a
-      hostname and a port.
-    </para>
-    <programlisting language="ocaml">
-(* file: message_example.ml *)
-
-open Core.Std
-
-(* The type of a message *)
-module Message = struct
-  module Source = struct
-    type t = { hostname: string;
-               port: int;
-             }
-    with bin_io
-  end
-
-  type t = { topic: string;
-             content: string;
-             source: Source.t;
-           }
-  with bin_io
-end
-
-(* Create the 1st-class module providing the binability of messages *)
-let binable = (module Message : Binable.S with type t = Message.t)
-
-(* Saves a message to an output channel.  The message is serialized to
-   a bigstring before being written out to the channel.  Also, a
-   binary encoding of an integer is written out to tell the reader how
-   long of a message to expect.  *)
-let save_message outc msg =
-  let s = Binable.to_bigstring binable msg in
-  let len = Bigstring.length s in
-  Out_channel.output_binary_int outc len;
-  Bigstring.really_output outc s
-
-(* Loading the message is done by first reading in the length, and by
-   then reading in the appropriate number of bytes into a Bigstring
-   created for that purpose. *)
-let load_message inc =
-  match In_channel.input_binary_int inc with
-  | None -&gt; failwith &quot;Couldn't load message: length missing from header&quot;
-  | Some len -&gt;
-    let buf = Bigstring.create len in
-    Bigstring.really_input ~pos:0 ~len inc buf;
-    Binable.of_bigstring binable buf
-
-(* To generate some example messages *)
-let example content =
-  let source =
-    { Message.Source.
-      hostname = &quot;ocaml.org&quot;; port = 2322 }
-  in
-  { Message.
-    topic = &quot;rwo-example&quot;; content; source; }
-
-(* write out three messages... *)
-let write_messages () =
-  let outc = Out_channel.create &quot;tmp.bin&quot; in
-  List.iter ~f:(save_message outc) [
-    example &quot;a wonderful&quot;;
-    example &quot;trio&quot;;
-    example &quot;of messages&quot;;
-  ];
-  Out_channel.close outc
-
-(* ... and read them back in *)
-let read_messages () =
-  let inc = In_channel.create &quot;tmp.bin&quot; in
-  for i = 1 to 3 do
-    let msg = load_message inc in
-    printf &quot;msg %d: %s\n&quot; i msg.Message.content
-  done
-
-let () =
-  write_messages (); read_messages ()
-</programlisting>
-  </sect1>
-  <sect1 id="fieldslib">
-    <title>Fieldslib</title>
-    <para>
-      One common idiom when using records is to provide field accessor
-      functions for a particular record.
-    </para>
-    <programlisting language="ocaml">
-type t = { topic: string;
-           content: string;
-           source: Source.t;
-         }
-
-let topic   t = t.topic
-let content t = t.content
-let source  t = t.source
-</programlisting>
-    <para>
-      Similarly, sometimes you simultaneously want an accessor to a
-      field of a record and a textual representation of the name of that
-      field. This might come up if you were validating a field and
-      needed the string representation to generate an error message, or
-      if you wanted to scaffold a form in a GUI automatically based on
-      the fields of a record. Fieldslib provides a module
-      <literal>Field</literal> for this purpose. Here's some code for
-      creating <literal>Field.t</literal>'s for all the fields of our
-      type <literal>t</literal>.
-    </para>
-    <programlisting language="ocaml">
-# module Fields = struct
-    let topic =
-      { Field.
-        name   = &quot;topic&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.topic);
-        fset   = (fun t topic -&gt; { t with topic });
-      }
-    let content =
-      { Field.
-        name   = &quot;content&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.content);
-        fset   = (fun t content -&gt; { t with content });
-      }
-    let source =
-      { Field.
-        name   = &quot;source&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.source);
-        fset   = (fun t source -&gt; { t with source });
-      }
-  end ;;
-module Fields :
-  sig
-    val topic : (t, string list) Core.Std.Field.t
-    val content : (t, string) Core.Std.Field.t
-    val source : (t, Source.t) Core.Std.Field.t
-  end
-</programlisting>
   </sect1>
 </chapter><chapter id="handling-json-data">
   <title>Handling JSON data</title>
@@ -13955,6 +14169,309 @@ val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&
     </note>
 
 
+  </sect1>
+</chapter><chapter id="fast-binary-serialization-with-bin_prot">
+  <title>Fast Binary Serialization with bin_prot</title>
+  <para>
+    S-expressions are a good serialization format when you need
+    something machine-parseable as well as human readable and editable.
+    But Sexplib's s-expressions are not particularly performant for a
+    couple of reasons:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        s-expression serialization goes through an intermediate type,
+        <literal>Sexp.t</literal>, which must be allocated and is then
+        typically thrown away, putting non-trivial pressure on the
+        garbage collector.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        parsing and printing to strings in an ASCII format can be
+        expensive for types like <literal>int</literal>s,
+        <literal>float</literal>s and <literal>Time.t</literal>s where
+        some real computation needs to be done to produce or parse the
+        ASCII representation.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    <literal>Bin_prot</literal> is a library that addresses these issues
+    by providing fast serialization in a compact binary format. We'll
+    also introduce the Core <literal>Bigstring</literal> library for
+    handling large binary strings efficiently during this chapter.
+  </para>
+  <note>
+  <title>
+  Using <literal>bin_prot</literal> in the top-level
+  </title>
+  <para>
+    The <literal>bin_prot</literal> syntax extension isn't activated by
+    default in the toplevel, but is easily available if you add this to
+    your <literal>~/.ocamlinit</literal> file:
+  </para>
+  <programlisting>
+#require &quot;bin_prot.syntax&quot;
+</programlisting>
+  <para>
+    You can also just type this in directly into <literal>utop</literal>
+    (with <literal>;;</literal> to finish the line) instead. The
+    extension is activated by putting <literal>with bin_io</literal>
+    after the type declaration. This looks a bit unsightly in the
+    top-level because of all the definitions that are generated. We'll
+    elide those definitions in the book, but you can see them for
+    yourself in the toplevel.
+  </para>
+  </note>
+  <sect1 id="defining-a-message-broker">
+    <title>Defining a message broker</title>
+    <para>
+      Here's a small complete example of a program that can read and
+      write values using <literal>bin_io</literal>. Here, the
+      serialization is of types that might be used as part of a
+      message-queue, where each message has a topic, some content, and a
+      source, which is in turn a hostname and a port.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
+module Message = struct
+  module Source = struct
+    type t = { hostname: string;
+               port: int;
+             }
+    with bin_io
+  end
+
+  type t = { topic: string;
+             content: string;
+             source: Source.t;
+           }
+  with bin_io
+end
+</programlisting>
+    <para>
+      You can can combine multiple syntax generators in the same type
+      declaration by comma-separating them, so you could generate both
+      formats via <literal>with bin_io,sexp</literal> above.
+    </para>
+    <para>
+      Next we need to define how to marshal and unmarshal these
+      messages. The interface is a little more complex than for
+      s-expressions since we don't just want to serialise from the
+      normal OCaml <literal>string</literal>, but also to the
+      <literal>bigstring</literal> type. We'll explain what this is in
+      more detail shortly, but for now think of it as a more efficient
+      alternative for large binary data.
+    </para>
+    <programlisting language="ocaml">
+let binable =
+  (module Message : Binable.S with type t = Message.t)
+
+let save_message outc msg =
+  let s = Binable.to_bigstring binable msg in
+  let len = Bigstring.length s in
+  Out_channel.output_binary_int outc len;
+  Bigstring.really_output outc s
+</programlisting>
+    <para>
+      The <literal>binable</literal> value above captures all the
+      auto-generated <literal>bin_io</literal> functions into a
+      first-class module of type <literal>Binable.S</literal>. This
+      module has the low-level reader and writer functions which we
+      don't want to have to manually construct.
+    </para>
+    <para>
+      The <literal>save_message</literal> is then responsible for
+      writing the binary content out to a <literal>bigstring</literal>.
+      It first invokes the <literal>Binable.to_bigstring</literal> on a
+      <literal>Message.t</literal> value to retrieve a marshalled
+      string. It then determines the length of this string, and writes
+      out the length and the string to the output channel.
+    </para>
+    <para>
+      The <literal>Binable</literal> interface in Core is pretty simple:
+      <literal>type 'a m = (module Binable.S with type t = 'a)  val of_bigstring : 'a m -&gt; bigstring -&gt; 'a val to_bigstring : ?prefix_with_length:bool -&gt; 'a m -&gt; 'a -&gt; bigstring val of_string : 'a m -&gt; string -&gt; 'a val to_string : 'a m -&gt; 'a -&gt; string</literal>
+    </para>
+    <para>
+      Since the <literal>Binable.S</literal> module values are generated
+      for you automatically, the only functions you'll need to regularly
+      use are the conversion functions above.
+    </para>
+    <para>
+      Reading back the binary value we've just defined is quite similar.
+      We read in the length field, read that much data into a
+      <literal>bigstring</literal>, and convert it to our type using
+      <literal>Binable.of_bigstring</literal>.
+    </para>
+    <programlisting language="ocaml">
+let load_message inc =
+  match In_channel.input_binary_int inc with
+  | None -&gt; failwith &quot;length missing from header&quot;
+  | Some len -&gt;
+    let buf = Bigstring.create len in
+    Bigstring.really_input ~pos:0 ~len inc buf;
+    Binable.of_bigstring binable buf
+</programlisting>
+    <para>
+      The code to generate and read and write these messages now just
+      uses the static <literal>Message.t</literal> type, with no need to
+      worry about the marshalling mechanism.
+    </para>
+    <programlisting language="ocaml">
+(* Generate some example messages *)
+let example content =
+  let source =
+    { Message.Source.
+      hostname = &quot;ocaml.org&quot;; port = 2322 }
+  in
+  { Message.
+    topic = &quot;rwo-example&quot;; content; source; }
+
+(* write out three messages... *)
+let write_messages () =
+  let outc = Out_channel.create &quot;tmp.bin&quot; in
+  List.iter ~f:(save_message outc) [
+    example &quot;a wonderful&quot;;
+    example &quot;trio&quot;;
+    example &quot;of messages&quot;;
+  ];
+  Out_channel.close outc
+
+(* ... and read them back in *)
+let read_messages () =
+  let inc = In_channel.create &quot;tmp.bin&quot; in
+  for i = 1 to 3 do
+    let msg = load_message inc in
+    printf &quot;msg %d: %s\n&quot; i msg.Message.content
+  done
+
+let () =
+  write_messages (); read_messages ()
+</programlisting>
+  </sect1>
+  <sect1 id="bigstring">
+    <title>Bigstring</title>
+    <para>
+      We earlier mentioned that <literal>bigstring</literal> is a more
+      efficient version of <literal>string</literal>. Understanding the
+      difference requires some understanding of how OCaml allocates
+      values. TODO.
+    </para>
+  </sect1>
+  <sect1 id="fieldslib">
+    <title>Fieldslib</title>
+    <para>
+      TODO: out of place
+    </para>
+    <para>
+      One common idiom when using records is to provide field accessor
+      functions for a particular record.
+    </para>
+    <programlisting language="ocaml">
+type t = { topic: string;
+           content: string;
+           source: Source.t;
+         }
+
+let topic   t = t.topic
+let content t = t.content
+let source  t = t.source
+</programlisting>
+    <para>
+      Similarly, sometimes you simultaneously want an accessor to a
+      field of a record and a textual representation of the name of that
+      field. This might come up if you were validating a field and
+      needed the string representation to generate an error message, or
+      if you wanted to scaffold a form in a GUI automatically based on
+      the fields of a record. Fieldslib provides a module
+      <literal>Field</literal> for this purpose. Here's some code for
+      creating <literal>Field.t</literal>'s for all the fields of our
+      type <literal>t</literal>.
+    </para>
+    <programlisting language="ocaml">
+# module Fields = struct
+    let topic =
+      { Field.
+        name   = &quot;topic&quot;;
+        setter = None;
+        getter = (fun t -&gt; t.topic);
+        fset   = (fun t topic -&gt; { t with topic });
+      }
+    let content =
+      { Field.
+        name   = &quot;content&quot;;
+        setter = None;
+        getter = (fun t -&gt; t.content);
+        fset   = (fun t content -&gt; { t with content });
+      }
+    let source =
+      { Field.
+        name   = &quot;source&quot;;
+        setter = None;
+        getter = (fun t -&gt; t.source);
+        fset   = (fun t source -&gt; { t with source });
+      }
+  end ;;
+module Fields :
+  sig
+    val topic : (t, string list) Core.Std.Field.t
+    val content : (t, string) Core.Std.Field.t
+    val source : (t, Source.t) Core.Std.Field.t
+  end
+</programlisting>
+    <para>
+      There are several syntax extensions distributed with Core,
+      including:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <emphasis role="strong">Sexplib</emphasis>: provides
+          serialization for s-expressions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Bin_prot</emphasis>: provides
+          serialization to an efficient binary format.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Fieldslib</emphasis>: generates
+          first-class values that represent fields of a record, as well
+          as accessor functions and setters for mutable record fields.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Variantslib</emphasis>: like Fieldslib
+          for variants, producing first-class variants and other helper
+          functions for interacting with variant types.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Pa_compare</emphasis>: generates
+          efficient, type-specialized comparison functions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Pa_typehash</emphasis>: generates a
+          hash value for a type definition, <emphasis>i.e.</emphasis>,
+          an integer that is highly unlikely to be the same for two
+          distinct types.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      We'll discuss each of these syntax extensions in detail, starting
+      with Sexplib.
+    </para>
   </sect1>
 </chapter></part><part label="III"><title>Advanced Topics</title><chapter id="first-class-modules">
   <title>First class modules</title>
@@ -16772,6 +17289,80 @@ end;;
 </programlisting>
     </sect2>
   </sect1>
+</chapter><chapter id="advanced-topics">
+  <title>Advanced Topics</title>
+  <para>
+    <emphasis>(jyh: This is a placeholder chapter for extra
+    material.)</emphasis>
+  </para>
+  <sect1 id="hybrid-recursion">
+    <title>Hybrid recursion</title>
+    <para>
+      In general, the choice of whether to use regular recursion vs.
+      tail recursion is not immediately obvious. Regular recursion is
+      often better for small lists (and other data structures), but it
+      is better to use tail recursion for very large lists -- especially
+      because stack sizes limit the number of recursive calls.
+    </para>
+    <para>
+      Core takes a hybrid approach that can be illustrated with the
+      implementation of the function <literal>Core_list.map</literal>.
+    </para>
+    <programlisting language="ocaml">
+let map_slow l ~f = rev (rev_map l ~f);;
+
+let rec count_map ~f l ctr =
+  match l with
+  | [] -&gt; []
+  | [x1] -&gt; let f1 = f x1 in [f1]
+  | [x1; x2] -&gt; let f1 = f x1 in let f2 = f x2 in [f1; f2]
+  | [x1; x2; x3] -&gt;
+    let f1 = f x1 in
+    let f2 = f x2 in
+    let f3 = f x3 in
+    [f1; f2; f3]
+  | [x1; x2; x3; x4] -&gt;
+    let f1 = f x1 in
+    let f2 = f x2 in
+    let f3 = f x3 in
+    let f4 = f x4 in
+    [f1; f2; f3; f4]
+  | x1 :: x2 :: x3 :: x4 :: x5 :: tl -&gt;
+    let f1 = f x1 in 
+    let f2 = f x2 in
+    let f3 = f x3 in
+    let f4 = f x4 in
+    let f5 = f x5 in
+    f1 :: f2 :: f3 :: f4 :: f5 ::
+      (if ctr &gt; 1000 then map_slow ~f tl else count_map ~f tl (ctr + 1));;
+
+let map l ~f = count_map ~f l 0;;
+</programlisting>
+    <para>
+      For performance, there are separate patterns for small lists with
+      up to 4 elements, then a recursive case for lists with five or
+      more elements. The <literal>ctr</literal> value limits the
+      recursion -- regular recursion is used for up to 1000 recursive
+      calls (which includes lists with up to 4000 elements), then the
+      tail-recursive function <literal>map_slow</literal> is used for
+      any remainder.
+    </para>
+    <para>
+      As an aside, you might wonder why this implementation uses
+      explicit let-definitions for the result values
+      <literal>f1</literal>, <literal>f2</literal>, etc. The reason is
+      to force the order of evaluation, so that the the function
+      <literal>f</literal> is always applied to the list values
+      left-to-right (starting with the first element in the list). In an
+      expression like <literal>[f x1; f x2; f x3]</literal> the order of
+      evaluation is not specified by the language, any of the
+      subexpressions might be evaluated first (though we would often
+      expect evaluation order to be either left-to-right or
+      right-to-left). For functions that perform I/O, or have other
+      side-effects, left-to-right evaluation order is important (and
+      required).
+    </para>
+  </sect1>
 </chapter><chapter id="managing-external-memory-with-bigarrays">
   <title>Managing external memory with Bigarrays</title>
   <sect1 id="bigarrays-for-external-memory-blocks">
@@ -17601,6 +18192,9 @@ immutable: 2.6186s (19073 minor collections)
   </sect1>
 </chapter><chapter id="performance-tuning-and-profiling">
   <title>Performance Tuning and Profiling</title>
+  <para>
+    Read http://janestreet.github.com/ocaml-perf-notes.html
+  </para>
   <sect1 id="byte-code-profiling">
     <title>Byte code Profiling</title>
     <para>
