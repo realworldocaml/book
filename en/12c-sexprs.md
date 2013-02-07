@@ -121,7 +121,7 @@ auto-generate code based on type definitions, implementing functionality
 that you could in theory have implemented by hand, but with far less
 programmer effort.
 
-## Sexplib
+## Sexp basics
 
 Sexplib's format for s-expressions is pretty straightforward. An
 s-expression is written down as a nested parenthetical expression,
@@ -166,7 +166,7 @@ exception gets printed out in full detail.  You should generally wrap
 every Core program in this handler to get good error messages for any
 unexpected exceptions.
 
-### Sexp converters
+## Sexp converters
 
 The most important functionality provided by Sexplib is the
 auto-generation of converters for new types.  We've seen a bit of how
@@ -303,7 +303,7 @@ conversion fails.
 
 </sidebar>
 
-### Getting good error messages
+## Getting good error messages
 
 There are two steps to deserializing a type from an s-expression:
 first, converting the bytes in a file to an s-expression, and the
@@ -379,15 +379,14 @@ In the above error, "foo.scm:3:4" tells us that the error occurred on
 "foo.scm", line 3, character 4, which is a much better start for
 figuring out what has gone wrong.
 
-### Sexp-conversion directives
+## Sexp-conversion directives
 
 Sexplib supports a collection of directives for modifying the default
 behavior of the auto-generated sexp-converters.  These directives allow
 you to customize the way in which types are represented as
-s-expressions without having to write a custom parser.  We describe
-these directives below.
+s-expressions without having to write a custom parser. 
 
-#### `sexp-opaque`
+### `sexp-opaque`
 
 The most commonly used directive is `sexp_opaque`, whose purpose is to
 mark a given component of a type as being unconvertible.  Anything
@@ -426,7 +425,7 @@ see the contents of field `a` marked as opaque:
 - : Sexp.t = ((a <opaque>) (b foo))
 ```
 
-#### `sexp_option`
+### `sexp_option`
 
 Another common directive is `sexp_opaque`, which is used to make an
 optional field in a record.  Ordinary optional values are represented
@@ -455,7 +454,7 @@ it with `sexp_option`:
 - : Sexp.t = ((b hello))
 ```
 
-#### `sexp_list`
+### `sexp_list`
 
 One problem with the auto-generated sexp-converters is that they can
 have more parentheses than one would ideally like.  Consider, for
@@ -480,181 +479,3 @@ alternate syntax:
 # sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
 ```
-
-## Bin_prot
-
-S-expressions are a good serialization format when you need something
-machine-parseable as well as human readable and editable.  But
-Sexplib's s-expressions are not particularly performant.  There are a
-number of reasons for this.  For one thing, s-expression serialization
-goes through an intermediate type, `Sexp.t`, which must be allocated
-and is then typically thrown away, putting non-trivial pressure on the
-GC.  In addition, parsing and printing to strings in an ASCII format
-can be expensive for types like `int`s, `float`s and `Time.t`s where
-some real computation needs to be done to produce or parse the ASCII
-representation.
-
-Bin_prot is a library designed to address these issues by providing
-fast serialization in a compact binary format.  Kicking off the syntax
-extension is done by putting `with bin_io`.  (This looks a bit
-unsightly in the top-level because of all the definitions that are
-generated.  We'll elide those definitions here, but you can see it for
-yourself in the toplevel.)
-
-Here's a small complete example of a program that can read and write
-values using bin-io.  Here, the serialization is of types that might
-be used as part of a message-queue, where each message has a topic,
-some content, and a source, which is in turn a hostname and a port.
-
-```ocaml
-(* file: message_example.ml *)
-
-open Core.Std
-
-(* The type of a message *)
-module Message = struct
-  module Source = struct
-    type t = { hostname: string;
-               port: int;
-             }
-    with bin_io
-  end
-
-  type t = { topic: string;
-             content: string;
-             source: Source.t;
-           }
-  with bin_io
-end
-
-(* Create the 1st-class module providing the binability of messages *)
-let binable = (module Message : Binable.S with type t = Message.t)
-
-(* Saves a message to an output channel.  The message is serialized to
-   a bigstring before being written out to the channel.  Also, a
-   binary encoding of an integer is written out to tell the reader how
-   long of a message to expect.  *)
-let save_message outc msg =
-  let s = Binable.to_bigstring binable msg in
-  let len = Bigstring.length s in
-  Out_channel.output_binary_int outc len;
-  Bigstring.really_output outc s
-
-(* Loading the message is done by first reading in the length, and by
-   then reading in the appropriate number of bytes into a Bigstring
-   created for that purpose. *)
-let load_message inc =
-  match In_channel.input_binary_int inc with
-  | None -> failwith "Couldn't load message: length missing from header"
-  | Some len ->
-    let buf = Bigstring.create len in
-    Bigstring.really_input ~pos:0 ~len inc buf;
-    Binable.of_bigstring binable buf
-
-(* To generate some example messages *)
-let example content =
-  let source =
-    { Message.Source.
-      hostname = "ocaml.org"; port = 2322 }
-  in
-  { Message.
-    topic = "rwo-example"; content; source; }
-
-(* write out three messages... *)
-let write_messages () =
-  let outc = Out_channel.create "tmp.bin" in
-  List.iter ~f:(save_message outc) [
-    example "a wonderful";
-    example "trio";
-    example "of messages";
-  ];
-  Out_channel.close outc
-
-(* ... and read them back in *)
-let read_messages () =
-  let inc = In_channel.create "tmp.bin" in
-  for i = 1 to 3 do
-    let msg = load_message inc in
-    printf "msg %d: %s\n" i msg.Message.content
-  done
-
-let () =
-  write_messages (); read_messages ()
-```
-
-## Fieldslib
-
-One common idiom when using records is to provide field accessor
-functions for a particular record.
-
-```ocaml
-type t = { topic: string;
-           content: string;
-           source: Source.t;
-         }
-
-let topic   t = t.topic
-let content t = t.content
-let source  t = t.source
-```
-
-Similarly, sometimes you simultaneously want an accessor to a field of
-a record and a textual representation of the name of that field.  This
-might come up if you were validating a field and needed the string
-representation to generate an error message, or if you wanted to
-scaffold a form in a GUI automatically based on the fields of a
-record.  Fieldslib provides a module `Field` for this purpose.  Here's
-some code for creating `Field.t`'s for all the fields of our type `t`.
-
-```ocaml
-# module Fields = struct
-    let topic =
-      { Field.
-        name   = "topic";
-        setter = None;
-        getter = (fun t -> t.topic);
-        fset   = (fun t topic -> { t with topic });
-      }
-    let content =
-      { Field.
-        name   = "content";
-        setter = None;
-        getter = (fun t -> t.content);
-        fset   = (fun t content -> { t with content });
-      }
-    let source =
-      { Field.
-        name   = "source";
-        setter = None;
-        getter = (fun t -> t.source);
-        fset   = (fun t source -> { t with source });
-      }
-  end ;;
-module Fields :
-  sig
-    val topic : (t, string list) Core.Std.Field.t
-    val content : (t, string) Core.Std.Field.t
-    val source : (t, Source.t) Core.Std.Field.t
-  end
-```
-
-
-There are several syntax extensions distributed with Core, including:
-
-- **Sexplib**: provides serialization for s-expressions.
-- **Bin_prot**: provides serialization to an efficient binary
-  format.
-- **Fieldslib**: generates first-class values that represent fields of
-  a record, as well as accessor functions and setters for mutable
-  record fields.
-- **Variantslib**: like Fieldslib for variants, producing first-class
-  variants and other helper functions for interacting with variant
-  types.
-- **Pa_compare**: generates efficient, type-specialized comparison
-  functions.
-- **Pa_typehash**: generates a hash value for a type definition,
-  _i.e._, an integer that is highly unlikely to be the same for two
-  distinct types.
-
-We'll discuss each of these syntax extensions in detail, starting with
-Sexplib.
