@@ -1,6 +1,5 @@
-# Lists, Options and Patterns
-
-_(Note, this chapter is incomplete.  jyh is working on it.)_
+Lists, Options and Patterns
+================================================
 
 ## Lists
 
@@ -9,7 +8,7 @@ numbers, words, images, etc., and we need a way to define _aggregates_ that
 bring together related values that represent some concept.
 
 Lists are one of the most common ways to aggregate data in OCaml.  You can
-construct a list of values by enclosing them in square brackets, and separating
+construct a list of values by enclosing them in square brackets, separating
 the elements with semicolons.  The list elements must all have the same type.
 
 ```ocaml
@@ -25,11 +24,11 @@ The square bracket syntax is really just a shorthand.  There are really just two
 ways to construct a list value.
 
 * [] is the _empty_ list.
-* If `x` is a value and `l` is a list, then the expression `x :: l`
-  constructs a new list where the first element is `x`, and the rest
-  is `l`.  The value corresponding to `x :: l` is commonly called a
-  _cons_-cell (the term comes from Lisp, where "cons" is short for
-  "constructor").
+
+* If `x` is a value and `l` is a list, then the expression `x :: l` constructs a
+  new list where the first element is `x`, and the rest is `l`.  The value
+  corresponding to `x :: l` is commonly called a _cons_-cell (the term comes
+  from the Lisp programming language, where "cons" is short for "constructor").
 
 The bracket syntax `["Chicago"; "Paris"; "Tokyo"]` is just another way to write
 a list with 3 cons-cells, `"Chicago" :: "Paris" :: "Tokyo" :: []`.  Each cell
@@ -278,19 +277,432 @@ A more conventional way to write the function would be to use function
 val third : 'a list -> 'a option = <fun>
 ```
 
+## Pattern matching with `function`
+
+Pattern matching can be used anyplace where a regular binding is performed.  For
+a trivial example, we can use an underscore to ignore a value.  This is often
+useful when defining functions that ignore one or more of their arguments.
+
+```ocaml
+# let f _ = 5;;
+val f : 'a -> int = <fun>
+# f 3;;
+- : int = 5
+# f "three";;
+- : int = 5
+```
+
+Tuple patterns can be used to break apart of components of a tuple.  For
+example, we can bind the parts of a triple to separate variables, or define
+projection functions that can be used to return components of the tuple.
+
+```ocaml
+# let x, y, z = 1, 2, 3;;
+val x : int = 1
+val y : int = 2
+val z : int = 3
+# let first_of_three (x, _, _) = x;;
+val first_of_three : 'a * 'b * 'c -> 'a = <fun>
+# first_of_three ("a", "b", "c");;
+- : string = "a"
+```
+
+Lists are a little different when using normal patterns, because in general the
+patterns will not be exhaustive.  The compiler requires that patterns match all
+possible values of a type, regardless of the actual value being matched.
+
+```ocaml
+# let h :: t = [1; 2];;
+Characters 4-10:
+  let h :: t = [1; 2];;
+      ^^^^^^
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val h : int = 1
+val t : int list = [2]
+```
+
+When matching values with multiple different cases, like with lists or variants,
+you will usually want to use a `match` to perform a case analysis.  For
+functions, there is an alternative form `function p1 -> e1 | p2 -> e2 | ... | pN
+-> eN`, where the cases are just like a `match`.
+
+```ocaml
+# let head1 l =
+    match l with
+    | [] -> None
+    | h :: _ -> Some h;;
+val head1 : 'a list -> 'a option = <fun>
+# head1 [1; 2; 3];;
+- : int option = Some 1
+# let head2 = function
+    | [] -> None
+    | h :: _ -> Some h;;
+val head2 : 'a list -> 'a option = <fun>
+# head2 [1; 2; 3];;
+- : int option = Some 1
+```
+
+In fact, the `function` expression is equivalent to an anonyous function that
+performs an explicit match, `(fun x -> match x with p1 -> e1 | p2 -> e2 | ... |
+pN -> eN)`.  For example, the following functions `head1` and `head2` are
+equivalent; they return the first element of the list if it exists.  The
+`function` form is a little more concise, but otherwise equivalent.
+
+### Using `when` and `as` in patterns
+
+Let's return to the example introduction, where we defined a function to remove
+adjacent duplicate elements in a list.  There are several cases to consider.  If
+the list is empty or has one element, we can return it unchanged.  Otherwise,
+compare the first two elements of the list, keeping the first one if, and only
+if, it is different from the second.
+
+```ocaml
+# let rec uniq = function
+   | ([] | [_]) as l -> l
+   | i1 :: ((i2 :: _) as t) ->
+        if i1 = i2 then
+           uniq t
+        else
+           i1 :: uniq t;;
+val uniq : 'a list -> 'a list = <fun>
+# uniq [1; 3; 3; 3; 2];;
+- : int list = [1; 3; 2]
+```
+
+In this example, we're using `as` patterns, which have the form "_pattern_ `as`
+_variable_".  If the _pattern_ matches, the value is also bound to the variable.
+For the first case, the pattern `([] | [_]) as l` matches lists that are empty
+or have one element, and the list is bound to the variable `l`.
+
+The second pattern is somewhat more interesting, `i1 :: ((i2 :: _) as t)` binds
+`t` to the tail of the list.  This would be harder (or at least more verbose) if
+we did not have `as` patterns.
+
+```ocaml
+# let rec inefficient_uniq l =
+    match l with
+    | ([] | [_]) -> l
+    | i1 :: i2 :: t ->
+      if i1 = i2 then
+        inefficient_uniq (i2 :: t)
+      else
+        i1 :: inefficient_uniq (i2 :: t);;
+val inefficient_uniq : 'a list -> 'a list = <fun>
+```
+
+In the `inefficient_uniq` version, the tail `(i2 :: t)` is reconstructed for the
+recursive call, possibly allocating a new cons-cell.  The compiler may or may
+not optimize the recursive call.  The form using `as` is more concise and
+possibly more efficient.
+
+OCaml also supports _guarded_ patterns using _pattern_ `when` _expression_,
+where the _expression_ is a predicate.  The predicate is allowed to use
+variables bound by the pattern, and the pattern matches only of the expression
+evaluates to `true`.  Another way to write the `uniq` function is to split the
+equality case using a `when` pattern.
+
+```ocaml
+# let rec broken_uniq = function
+   | ([] | [_]) as l -> l
+   | i1 :: ((i2 :: _) as t) when i1 = i2 ->
+     broken_uniq t
+   | i1 :: ((i2 :: _) as t) when i1 <> i2 ->
+     i1 :: broken_uniq t;;
+...
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::_::_
+(However, some guarded clause may match this value.)
+val broken_uniq : 'a list -> 'a list = <fun>
+```
+
+Unfortunately, there is a problem here, because the compiler complains about an
+inexhaustive match.  The problem is that guarded patterns (patterns with `when`
+clauses) are not included in the exhaustiveness analysis because, in general,
+the compiler can't infer when the guards consider all values.  Of course, in
+this particular case, we can remove the second guard and rely on pattern
+ordering, but the result is not as obvious as the original form without guards.
+You will generally find that `when` clauses are used only infrequently.
+
+```ocaml
+# let rec subtle_uniq = function
+    | ([] | [_]) as l -> l
+    | i1 :: ((i2 :: _) as t) when i1 = i2 -> subtle_uniq t
+    | i1 :: t -> i1 :: subtle_uniq t;;
+val subtle_uniq : 'a list -> 'a list = <fun>
+# subtle_uniq [1; 3; 3; 3; 4];;
+- : int list = [1; 3; 4]
+```
+
+## List operations
+
+Abstractly, a list is an ordered collection of elements, where access is
+sequential, and the list length is not fixed.  There are other kinds of standard
+collections in OCaml, including sets, implemented by the `Set` module;
+dictionaries, implemented by the `Map` module; arrays, implemented by the
+`Array` module; and many others.  The different collections have different
+properties, for example sets support efficient membership testing, but do not
+preserve ordering; and arrays support efficient random access but have fixed
+size.
+
+However, all collections support some standard operations for computing over the
+elements in the collection.  Let's look at some of the operations for lists,
+including some possible implementations.
+
+### List length and random access
+
+Lists do not have a constant-time operation that returns the number of elements
+in the list.  The function `List.length` calculates the length by iterating
+through the elements of the list.  The `List.nth` function is similar, used for
+random access into the list.
+
+```ocaml
+# List.length ["a"; "b"; "c"];;
+- : int = 3
+# List.nth ["a"; "b"; "c"; "d"] 2;;
+- : string option = Some "c"
+```
+
+Since lists support only sequential acccess, the implementations of these
+functions iterate through the elements of the list one at a time.
+
+```ocaml
+# let my_length l =
+    let rec length i = function
+      | [] -> i
+      | _ :: t -> length (i + 1) t
+    in
+    length 0 l;;
+val my_length : 'a list -> int = <fun>
+# my_length ["a"; "b"; "c"; "d"];;
+- : int = 4
+```
+
+The `nth` function is similar.  The computation iterates through the list
+sequentially, stopping when the index reaches zero.
+
+```ocaml
+# let rec my_nth l i =
+    match l with
+    | [] -> None
+    | h :: t -> if i = 0 then Some h else my_nth t (i - 1);;
+val my_nth : 'a list -> int -> 'a option = <fun>
+# my_nth ["a"; "b"; "c"; "d"] 2;;
+- : string option = Some "c"
+```
+#### Appending (concatenating) lists
+
+Another basic list operation is to concatenate two lists, forming a new list
+from the results.  This can be written explicitly using the `List.append`
+function, or with the infix operator `@`; the two ways are equivalent.
+
+```ocaml
+# List.append [1; 2; 3] [12; 13];;
+- : int list = [1; 2; 3; 12; 13]
+# [1; 2; 3] @ [21; 32];;
+- : int list = [1; 2; 3; 21; 32]
+```
+
+The implementation of the `append` function requires iterating through the first
+list to find the last element, then replacing it with the second list.
+
+```ocaml
+# let rec my_append l1 l2 =
+   match l1 with
+    | [] -> l2
+    | h :: t -> h :: my_append t l2;;
+val my_append : 'a list -> 'a list -> 'a list = <fun>
+# my_append ["a"; "b"] ["x"; "y"; "z"];;
+- : string list = ["a"; "b"; "x"; "y"; "z"]
+```
+
+The `Core.Std.List` module contains a somewhat more efficient tail-recursive
+implementation of the append function (tail-recursion is discussed later in this
+chapter).  However, one thing to note is that the associativity of append has an
+important effect on performance.  If we append three or more lists, it is most
+efficient to associate to the right.  The expressions `List.append l1
+(List.append l2 l3)` and `List.append (List.append l1 l2) l3` produce equal
+results, but the first is more efficient in general.
+
+### Map
+
+The `List.map` function creates a new list by mapping a function over the
+elements of one list, forming a new list from the results.  Given a function
+`f`, and a list `l = [a1; a2; ...; aN]`, the function `List.map ~f l` returns
+the new list `[f a1; f a2; ...; f aN]`.
+
+```ocaml
+# List.map;;
+- : 'a list -> f:('a -> 'b) -> 'b list = <fun>
+# List.map ~f:(fun i -> string_of_int (i + 1)) [10; 21; 12];;
+- : string list = ["11"; "22"; "13"]
+```
+
+A simple way to compute the map is simply to use pattern matching to iterate
+over the elements of the list (the `Core.Std.List` module uses a more efficient
+tail-recursive implementation, discussed later in this chapter).
+
+```ocaml
+# let rec my_map ~f = function
+   | [] -> []
+   | h :: t -> f h :: map ~f t;;
+val my_map : f:('a -> 'b) -> 'a list -> 'b list = <fun>
+# my_map ~f:(fun i -> string_of_int (i * 10)) [1; 2; 3];;
+- : string list = ["10"; "20"; "30"]
+```
+
+### Folding
+
+The `List.fold_left` function has a form similar to `map`, but it composes a
+function over the elements of the list.  The expression `List.fold_left ~init ~f
+[a1; a2; a3]` applies `f` to each element of the list, composing the results as
+`f (f (f init a1) a2) a3`.
+
+For example, if we want to sum up the elements in a list, we can fold the `+`
+function over the elements.
+
+```ocaml
+# List.fold_left;;
+- : 'a list -> init:'b -> f:('b -> 'a -> 'b) -> 'b = <fun>
+# List.fold_left ~init:0 ~f:(+) [14; 21; 1];;
+- : int = 36
+```
+
+The implementation is straightforward, applying the function `f` to each element
+of the list from left to right, composing the results.
+
+```ocaml
+# let rec my_fold_left ~init ~f = function
+    | [] -> init
+    | h :: t -> my_fold_left ~init:(f init h) ~f t;;
+val my_fold_left : init:'a -> f:('a -> 'b -> 'a) -> 'b list -> 'a = <fun>
+# my_fold_left ~init:["d"] ~f:(fun t h -> h :: t) ["a"; "b"; "c"];;
+- : string list = ["c"; "b"; "a"; "d"]
+```
+
+### Predicates `exists` and `for_all`
+
+Given a predicate function `f` on the element of a list, the function
+`List.exists` tests whether `f` is true on any element of the list, and the
+function `List.for_all` tests whether `f` is true on all elements of the list.
+
+```ocaml
+# List.exists ~f:(fun i -> i > 5) [1; 7; 3];;
+- : bool = true
+# List.for_all ~f:(fun i -> i > 5) [1; 7; 3];;
+- : bool = false
+```
+
+These functions can be implemented using the folding functions, but a
+consequence is that the computation iterates through all of the elements of the
+list, even if the answer is already known.
+
+```
+# let my_exists ~f l =
+    List.fold_left ~init:false ~f:(fun result x -> result || f x) l;;
+val my_exists : f:('a -> bool) -> 'a list -> bool = <fun>
+```
+
+A better implementation is to compute the result directly, using the
+shirt-circuit property of the logical connectives `&&` and `||` to terminate the
+computation as soon as the result is known.
+
+```ocaml
+# let rec my_exists ~f = function
+   | [] -> false
+   | h :: t -> f h || my_exists ~f t;;
+val my_exists : f:('a -> bool) -> 'a list -> bool = <fun>
+```
+
+In the `my_exists` function, once `f h` is true, the disjunction `f h ||
+my_exists ~f t` returns immediately without evaluating the expression `my_exists
+~f t`.
+
+## Example: Implementing a set from a list
+
+To pull all this together, let's implement a set data structure using a list.
+This is not necessarily an efficient implementation (unless the set is small),
+because testing for set membership will take time linear in the size of the set.
+However, it gives a pretty good illustration of list computations.  First, let's
+give the signature of the module we are going to implement.
+
+```ocaml
+  type 'a t
+
+  val empty : 'a t
+  val of_list : 'a list -> 'a t
+  val insert : 'a -> 'a t -> 'a t
+  val member : 'a -> 'a t -> bool
+  val union : 'a t -> 'a t -> 'a t
+  val isect : 'a t -> 'a t -> 'a t
+```
+
+For the implementation, we'll order the elements in the set to be in ascending
+order, which will improve performance, especially for the intersection `isect`
+function.  Given this, the implementation of many of the funcitons is
+straightforward.  The empty set is implemented as the empty list.  For the
+`of_list` function, we sort the set with the `List.sort` function.  For sorting,
+we use the builtin comparison function `Pervasives.compare`, which can compare
+most OCaml values except functions and externally allocated values like C
+values.  The `union` function is similar, we can just use the `List.merge` function.
+
+```ocaml
+  let empty = []
+  let of_list l = List.sort ~cmp:Pervasives.compare l
+  let member x l = List.exists ~f:((=) x) l
+  let union = List.merge ~cmp:Pervasives.compare
+```
+
+We'll implement the `insert` function directly, advancing through the list until
+the insertion point is found (a version of bubble sort).
+
+```ocaml
+  let rec insert x = function
+    | [] -> [x]
+    | (h :: t) as l ->
+      if h < x then
+        h :: insert x t
+      else if h > x then
+        x :: l
+      else (* x = h *)
+        l
+```
+
+For the intersection, the implementation is like a merging of the two lists, but
+we keep only the elements that are in both lists.  For the pattern matching, we
+match on both lists simultaneously by matching against a list pair.
+
+```ocaml
+  let rec isect l1 l2 =
+    match l1, l2 with
+    | i1 :: t1, i2 :: t2 ->
+      if i1 < i2 then
+        isect t1 l2
+      else if i1 > i2 then
+        isect l1 t2
+      else (* i1 = i2 *)
+        i1 :: isect t1 t2
+    | [], _
+    | _, [] -> []
+```
+
+There are two important cases.  The pattern ([], _ | _, []) matches the case
+where one of the lists is empty, and the pattern `i1 :: t1, i2 :: t2` matches
+the case where both lists are nonempty.  We keep the first element if `i1` and
+`i2` are the same; otherwise, we discard the smaller value and continue
+recursively.
+
 ## Example: pretty-printing a table
-
-_(jyh: I'm revising the examples.  This section is temporary.)
-
-_(yminsky: I wonder if the whole example should go later in the
-section, after we've done more of the basis of lists in this
-chapter.)_
 
 One common programming task is displaying tabular data.  In this
 example, we will go over the design of a simple library to do just that.
 
 _(yminsky: This is the first appearance of an mli file.  If we're
-going to introduce it here, we need to do a little more explanation.)_
+going to introduce it here, we need to do a little more explanation.
+
+jyh: I agree, let's discuss.)_
 
 We'll start with the interface.  The code will go in a new
 module called `Text_table` whose `.mli` contains just the following
@@ -475,13 +887,11 @@ of elements in the list.
 let rec length = function [] -> 0 | _ :: t -> (length t) + 1;;
 ```
 
-In fact, this implementation of the function `length` is worse than
-that, because the function is recursive.  In this implementation of
-the function, the recursive call to `length t` is active at the same
-time as the outer call, with the result that the runtime needs to
-allocate stack frames for each recursive call, so this function also
-takes linear space.  For large lists, this is not only inefficient,
-it can also result in stack overflow.
+In fact, this implementation of the function `length` has a worse problem.  When
+the function runs, each recursive call is active at the same time as the caller.
+The runtime needs to allocate a stack frame for each active call, so this
+function also takes linear space.  For large lists, this is not only
+inefficient, it can also result in stack overflow.
 
 ### Tail-recursion
 
@@ -520,15 +930,15 @@ example, consider the non tail-recursive implemenation of `map`
 function, listed above.  The code is simple, but not efficient.
 
 ```ocaml
-let rec map f = function
+let rec map ~f = function
  | [] -> []
- | h :: t -> f h :: map f t;;
+ | h :: t -> f h :: map ~f t;;
 ```
 
 If we use the same trick as we used for the `length` method, we need
 to accumulate the result _before_ the recursive call, but this
 collects the result in reverse order.  One way to address it is to
-construct the reserved result, then explicitly correct it before
+construct the reversed result, then explicitly correct it before
 returning.
 
 ```ocaml
@@ -561,67 +971,6 @@ the tail-recursive implementation will not cause a stack overflow for
 large lists, while the simple non-tail-recursive implementation will
 have problems with large lists.
 
-### Hybrid recursion
-
-In general, the choice of whether to use regular recursion vs. tail
-recursion is not immediately obvious.  Regular recursion is often
-better for small lists (and other data structures), but it is better
-to use tail recursion for very large lists -- especially because stack
-sizes limit the number of recursive calls.
-
-Core takes a hybrid approach that can be illustrated with the
-implementation of the function `Core_list.map`.
-
-```ocaml
-let map_slow l ~f = rev (rev_map l ~f);;
-
-let rec count_map ~f l ctr =
-  match l with
-  | [] -> []
-  | [x1] -> let f1 = f x1 in [f1]
-  | [x1; x2] -> let f1 = f x1 in let f2 = f x2 in [f1; f2]
-  | [x1; x2; x3] ->
-    let f1 = f x1 in
-	let f2 = f x2 in
-	let f3 = f x3 in
-	[f1; f2; f3]
-  | [x1; x2; x3; x4] ->
-    let f1 = f x1 in
-	let f2 = f x2 in
-	let f3 = f x3 in
-	let f4 = f x4 in
-	[f1; f2; f3; f4]
-  | x1 :: x2 :: x3 :: x4 :: x5 :: tl ->
-    let f1 = f x1 in 
-	let f2 = f x2 in
-	let f3 = f x3 in
-	let f4 = f x4 in
-	let f5 = f x5 in
-	f1 :: f2 :: f3 :: f4 :: f5 ::
-      (if ctr > 1000 then map_slow ~f tl else count_map ~f tl (ctr + 1));;
-
-let map l ~f = count_map ~f l 0;;
-```
-
-For performance, there are separate patterns for small lists with up
-to 4 elements, then a recursive case for lists with five or more
-elements.  The `ctr` value limits the recursion -- regular recursion
-is used for up to 1000 recursive calls (which includes lists with up
-to 4000 elements), then the tail-recursive function `map_slow` is used
-for any remainder.
-
-As an aside, you might wonder why this implementation uses explicit
-let-definitions for the result values `f1`, `f2`, etc.  The reason is
-to force the order of evaluation, so that the the function `f` is
-always applied to the list values left-to-right (starting with the
-first element in the list).  In an expression like
-`[f x1; f x2; f x3]` the order of evaluation is not specified by the
-language, any of the subexpressions might be evaluated first (though
-we would often expect evaluation order to be either left-to-right or
-right-to-left).  For functions that perform I/O, or have other
-side-effects, left-to-right evaluation order is important (and
-required).
-
 ## Heterogenous values
 
 Lists are fairly general, but there are several reasons why you might
@@ -631,7 +980,7 @@ not want to use them.
 * The list length is variable, not fixed.
 * The data in a list must have the same type.
 
-In the tabulaton example that we used to start this chapter, the
+In the tabulaton example above, the
 `List` is not a good choice for each entry in the table.  Now, let's
 think about how you might actually use this interface in practice.
 Usually, when you have data to render in a table, the data entries are
@@ -730,7 +1079,7 @@ specialized columns with different formatting and alignment rules,
 which is easier to do with this interface than with the original one
 based on passing in lists-of-lists.
 
-## Options
+## Options and NULL values
 
 OCaml has no "NULL" or "nil" values.  Programmers coming from other
 languages are often surprised and annoyed by this -- it seems really
@@ -771,37 +1120,17 @@ type prog_lang = { name: string;
 let x86 = { name = "x86 assembly";
             architect = None;
             year_released = 1980;
-			style = Imperative
-		  };;
+            style = [Imperative]
+          };;
 ```
 
-We can also represent a data structure with NULL-pointers using the
-`option` type.  For example, let's build an imperative singly-linked
-list, where new values are added to the _end_ of the list.  In a
-standard imperative language (like in the C++ Standard Template
-Library), NULL is used to represent "end of list."  We'll use the
-`option` type instead.
-
-```ocaml
-type 'a slist = { mutable head : 'a elem option; mutable tail : 'a elem option }
-and 'a elem = { value : 'a; mutable next : 'a elem option };;
-
-let new_slist () = { head = None; tail = None };;
-
-let push_back l x =
-  let elem = { value = x; next = None } in
-  match l.tail with
-   | None -> l.head <- Some elem; l.tail <- Some elem
-   | Some last -> last.next <- Some elem;;
-```
-
-Similarly, if we're defining a type of binary trees, one choice is to
-use `option` for the child node references.  In a binary search tree,
-each node in the tree is labeled with a value and it has up to two
-children.  The nodes in the tree follow _prefix_ order, meaning that
-the label of the left child is smaller than the label of its parent,
-and the label of the right child is larger than the label of the
-parent.
+We can also represent data structures with NULL-pointers using the `option`
+type.  For example, if we're defining a type of binary trees, one choice is to
+use `option` for the child node references.  In a binary search tree, each node
+in the tree is labeled with a value and it has up to two children.  The nodes in
+the tree follow _infix_ order, meaning that the label of the left child is
+smaller than the label of its parent, and the label of the right child is larger
+than the label of the parent.
 
 ```ocaml
 type 'a node = { label : 'a; left : 'a binary_tree; right : 'a binary_tree }

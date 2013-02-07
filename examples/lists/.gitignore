@@ -1,4 +1,7 @@
 *.opt
 .#*
 .omakedb
-match
+list_set
+op
+forth
+uniq

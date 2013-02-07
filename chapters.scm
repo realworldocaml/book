@@ -113,6 +113,11 @@
  (note "Largely complete")
  )
 ((part Advanced)
+ (name "advanced-topics")
+ (file "13b-advanced-topics")
+ (public false)
+ (note "Contains various advanced material from other chapters, 0% complete"))
+((part Advanced)
  (name "managing-external-memory-with-bigarrays")
  (file "15-bigarrays")
  (public false)
@@ -148,3 +153,4 @@
  (public true)
  (note "50% done, on Anil's stack")
  )
+>>>>>>> upstream/master
