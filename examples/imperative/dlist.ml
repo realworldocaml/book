@@ -35,36 +35,31 @@ let insert_after elt value =
   elt.next <- Some new_elt;
   new_elt
 
-let check_is_first_element l elt1 =
-  match !l with
-  | Some elt2 when phys_equal elt1 elt2 -> ()
-  | _ -> raise (Invalid_argument "element has already been removed")
-
 let remove l elt =
   let { prev; next; _ } = elt in
-  (match prev with
-  | Some p -> p.next <- next
-  | None -> check_is_first_element l elt; l := next);
-  (match next with
-  | Some n -> n.prev <- prev;
-  | None -> ());
+  begin match prev with
+  | Some prev -> prev.next <- next
+  | None -> l := next
+  end;
+  begin match next with
+  | Some next -> next.prev <- prev;
+  | None -> ()
+  end;
   elt.prev <- None;
   elt.next <- None
 
 let iter l ~f =
   let rec loop = function
-    | Some { value; next; _ } -> f value; loop next
     | None -> ()
+    | Some { value; next; _ } -> f value; loop next
   in
   loop !l
 
-(* Find the element containing x, using = for comparison *)
-let find l x : 'a element option =
-  let rec search = function
+let find_el l ~f =
+  let rec loop = function
     | None -> None
     | Some elt ->
-      if value elt = x then Some elt
-      else search (next elt)
+      if f (value elt) then Some elt
+      else loop (next elt)
   in
-  search !l
-
+  loop !l

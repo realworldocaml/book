@@ -68,13 +68,6 @@ This is typical of functions that act by side-effect.
 The implementation is shown below.  We'll go through the code bit by
 bit, explaining different imperative constructs as they show up.
 
-First, we define the type of a dictionary as a record with two fields.
-The first field, `length` is declared as mutable; records are
-immutable by default, but individual fields are mutable when
-explicitly marked as such.  The second field, `buckets`, is immutable,
-but contains an array, which is itself a mutable data structure, as
-we'll see.
-
 ```ocaml
 (* file: dictionary.ml *)
 open Core.Std
@@ -84,22 +77,12 @@ type ('a, 'b) t = { mutable length: int;
                   }
 ```
 
-Next, we'll define the function for choosing a hash-bucket based on
-the key.  We do this using `Hashtbl.hash` to compute a hash value for
-a key.  `Hashtbl.hash` is a special polymorphic function (meaning it
-can take an input of any type) provided by the OCaml runtime that can
-compute a hash for almost any OCaml value.  (While it can be applied
-to any type as far as the type-system is concerned, it won't always
-succeed.  `Hashtbl.hash` will throw an exception if given a value it
-can't handle, like a function or a value from a C libraries that lives
-outside the OCaml heap.)
-
-There's also code for `create`, which creates an empty dictionary,
-`length`, which grabs the length from the corresponding record field,
-and `find`, which looks for a matching key in the table using
-`List.find_map` on the corresponding bucket.  In `find`, you'll notice
-that we make use of the `array.(index)` syntax for looking up a value
-in an array.
+Our first step is to define the type of a dictionary as a record with
+two fields.  The first field, `length` is declared as mutable.  In
+OCaml, records are immutable by default, but individual fields are
+mutable when marked as such.  The second field, `buckets`, is
+immutable, but contains an array, which is itself a mutable data
+structure, as we'll see.
 
 ```ocaml
 let num_buckets = 17
@@ -117,18 +100,24 @@ let find t key =
     ~f:(fun (key',data) -> if key' = key then Some data else None)
 ```
 
-The `iter` function, shown below, is designed to walk over all the
-entries in the dictionary.  In particular, `iter d ~f` will call `f`
-for each key/value pair in dictionary `d`.
+Now we define the function for choosing a hash-bucket based on the
+key.  We do this using `Hashtbl.hash` to compute hash values.
+`Hashtbl.hash` is a special function provided by the OCaml runtime
+that can compute a hash for almost any OCaml value.  It's type is `'a
+-> int`, so it can be applied to a value of any type.  (While it can
+be applied to any type, it won't succeed for all values.
+`Hashtbl.hash` will throw an exception if it encounters a value it
+can't handle, like a function or a value from a C libraries that lives
+outside the OCaml heap.)
 
-The code for `iter` uses two forms of iteration: a `for` loop is used
-to iterate over the array of buckets; and within that loop,
-`List.iter` is used to walk over the list of values in a given bucket.
-`for` loops are syntactically convenient, and are more familiar for
-someone coming from an imperative language.  But they're not of
-fundamental importance to the language: instead of using `for`, we
-could have implemented the outer loop using the `Array.iter`, which in
-turn could be implemented as a recursive function.
+There's also code for `create`, which creates an empty dictionary,
+`length`, which grabs the length from the corresponding record field,
+and `find`, which looks for a matching key in the table using
+`List.find_map` on the corresponding bucket.  (`List.find_map` takes a
+list, and a function for transforming the list elements to options,
+returning a list of the contents of the returned `Some`s.)  In `find`,
+you'll notice that we make use of the `array.(index)` syntax for
+looking up a value in an array.
 
 ```ocaml
 let iter t ~f =
@@ -137,26 +126,19 @@ let iter t ~f =
   done
 ```
 
-It's worth noting that in such an iteration function, the function `f`
-is expected to return unit, because it is supposed to operate by side
-effect rather than by returning a value.
+`iter` is designed to walk over all the entries in the dictionary.  In
+particular, `iter d ~f` will call `f` for each key/value pair in
+dictionary `d`.  Note that `f` is expected to return `unit`, since it
+is expected to work by side effect rather than by returning a value.
 
-Next, we have the code for adding and removing mappings from the
-dictionary.  The code is made more complicated by the fact that we
-need to detect whether we are overwriting or removing an existing
-binding, so we can decide whether `t.length` needs to be changed.  The
-helper function `bucket_has_key` is used to answer this question.
-
-This code uses the `<-` operator for updating elements of an array
-(`array.(i) <- expr`) and for updating a record field (`record.field
-<- expression`).  In addition, we see the use of the semicolon to
-sequence the imperative operations that are the last two lines of the
-function.
-
-Note also that we do all of the side-effecting operations at the very
-end of each function.  This is good practice because it minimizes the
-chance that such operations will be interrupted with an exception,
-leaving the data structure in an inconsistent state.
+The code for `iter` uses two forms of iteration: a `for` loop to
+iterate over the array of buckets; and within that loop, and a call to
+`List.iter` to walk over the list of values in a given bucket.  `for`
+loops are not of fundamental importance to the language: instead of
+using `for`, we could have implemented the outer loop using the
+`Array.iter`, which in turn could be implemented as a recursive
+function.  But `for` is syntactically convenient, and is often more
+familiar and idiomatic when coding imperatively.
 
 ```ocaml
 let bucket_has_key t i key =
@@ -185,6 +167,58 @@ let remove t key =
     t.length <- t.length - 1
   )
 ```
+
+The above code is for adding and removing mappings from the
+dictionary.  This section is made more complicated by the fact that we
+need to detect whether we are overwriting or removing an existing
+binding, so we can decide whether `t.length` needs to be changed.  The
+helper function `bucket_has_key` is used for this purpose.
+
+We use the `<-` operator for updating elements of an array (`array.(i)
+<- expr`) and for updating a record field (`record.field <-
+expression`).  
+
+We also use a single semicolon, `;`, as a sequencing operator, to
+allow us to do two side-effecting operations in a row: first, update
+the bucket, then update the count.  We could have done this using let
+bindings:
+
+```ocaml
+    let () = t.buckets.(i) <- filtered_bucket in
+    let () = t.length <- t.length - 1 in
+```
+but `;` is more idiomatic.
+
+In general, when a sequence expression `expr1; expr2` is evaluated,
+`expr1` is evaluated first, and then `expr2`.  The expression `expr1`
+must have type `unit`, and the the value of `expr2` is returned as the
+value of the entire sequence.  For example, the sequence `print_string
+"hello world"; 1 + 2` first prints the string `"hello world"`, then
+returns the integer `3`.
+
+It's also worth noting that `;` is a _separator_, not a terminator as
+it is in C or Java.  The compiler is somewhat relaxed about parsing a
+terminating semicolon, so it may work for you, but you should not rely
+on it.  Here is an example where we're using `;` as if it were a
+terminator
+
+```ocaml
+# let i = print_string "Hello world\n"; 2; in i;;
+Hello world
+- : int = 2
+```
+
+Also note, the precedence of a `match` expression is very low, so to separate it
+from the following assignment `l := Some new_front`, we surround the match in a
+`begin ... end` bracketing (we could also use parentheses).  If we did not, the
+final assignment would become part of the `None -> ...` case, which is not what
+we want.
+
+
+Note also that we do all of the side-effecting operations at the very
+end of each function.  This is good practice because it minimizes the
+chance that such operations will be interrupted with an exception,
+leaving the data structure in an inconsistent state.
 
 ## Mutable data structures
 
@@ -357,23 +391,15 @@ incrementing and decrementing an `int ref` by one, respectively.
 
 ## Doubly-linked lists
 
-Another common imperative data structure is the doubly-linked list,
-which allows traversal in both directions, as well as constant-time
-deletion of any element.  Doubly-linked lists are a cyclic data
-structure, meaning that it is possible to follow a nontrivial sequence
-of pointers from an element, through other elements, back to itself.
-In general, building cyclic data structures requires the use of
-side-effects (although in some limited cases, they can be constructed
-using `let rec`). This is done by constructing the data elements
-first, and then adding cycles using assignment afterwards.
+Another common imperative data structure is the doubly-linked list.
+Doubly-linked lists can be traversed in both directions and elements
+can be added and removed from the list in constant time.  Core defines
+a doubly-linked list (the module is called `Doubly_linked`) which is a
+good choice for real work, but we'll define our own as an
+illustration.
 
-Core defines a standard doubly-linked list, but let's define our own
-implementation for illustration.  Here's the `mli` we'll start out
-with.  Note that there are two types defined here: `'a t`, the type of
-a list, and `'a element`, the type of an individual element of a list.
-Elements act as pointers to the interior of a list, and allow us to
-navigate the list and give us a point at which to apply mutating
-operations.
+Here's the `mli` of the module we'll build.
+
 
 ```ocaml
 (* file: dlist.mli *)
@@ -386,7 +412,7 @@ type 'a element
 val create   : unit -> 'a t
 val is_empty : 'a t -> bool
 
-(** navigating the [elements] of a list *)
+(** navigating the [element]s of a list *)
 val first : 'a t -> 'a element option
 val next  : 'a element -> 'a element option
 val prev  : 'a element -> 'a element option
@@ -402,18 +428,15 @@ val insert_after : 'a element -> 'a -> 'a element
 val remove : 'a t -> 'a element -> unit
 ```
 
-Now let's look at the implementation.  We'll start by defining our two
-types.  An `'a element` is a record containing the value to be stored
-in that node as well as optional (and mutable) fields pointing to the
-previous and next elements.  These fields are optional so that at the
-beginning of the list, the `prev` field can be `None`, and at the end
-of the list, the `next` field can be `None`.
+Note that there are two types defined here: `'a t`, the type of a
+list, and `'a element`, the type of an element.  Elements act as
+pointers to the interior of a list, and allow us to navigate the list
+and give us a point at which to apply mutating operations.
 
-The type of the list itself, `'a t`, is an optional, mutable reference
-to an `element`.  This reference is `None` if the list is empty, and
-`Some` otherwise.
+Now let's look at the implementation.  
 
 ```ocaml
+(* file: dlist.ml *)
 open Core.Std
 
 type 'a element =
@@ -425,9 +448,18 @@ type 'a element =
 type 'a t = 'a element option ref
 ```
 
-Now we can define some functions using our list type.  The following
-functions are all relatively straight-forward, largely following from
-our type definitions.
+We'll start by defining our two types.  An `'a element` is a record
+containing the value to be stored in that node as well as optional
+(and mutable) fields pointing to the previous and next elements.  At
+the beginning of the list, the `prev` field is `None`, and at the end
+of the list, the `next` field is `None`.
+
+The type of the list itself, `'a t`, is an optional, mutable reference
+to an `element`.  This reference is `None` if the list is empty, and
+`Some` otherwise.
+
+Now we can define a few basic functions that operate on lists and
+elements.
 
 ```ocaml
 let create () = ref None
@@ -440,19 +472,40 @@ let next elt = elt.next
 let prev elt = elt.prev
 ```
 
-Next, let's define the function that inserts a value into the list as
-a new first element.  We define a new element `elt`, link it into the
-list, and set the list reference.
+The above are all relatively straight-forward, largely following from
+the type definitions above.
+
+At this point, we can start looking at operations that mutate the
+list.
 
 ```ocaml
-   let insert_first l value =
-     let elt = { previous = None; next = !l; value } in
-     begin match !l with
-     | Some old_first -> old_first.previous <- Some elt
-     | None -> ()
-     end;
-     l := Some elt;
-     elt
+let insert_first l value =
+  let new_elt = { prev = None; next = !l; value } in
+  begin match !l with
+  | Some old_first -> old_first.prev <- Some new_elt
+  | None -> ()
+  end;
+  l := Some new_elt;
+  new_elt
+``` 
+
+Above, we define the function that inserts a value into the list as a
+new first element.  We define a new element `elt`, link it into the
+list, and set the list reference.
+
+This allows us to modify lists from the front, but we may want to
+insert elements internally in the list as well.  That's what the
+`insert_after` function is for.
+
+```ocaml
+let insert_after elt value =
+  let new_elt = { value; prev = Some elt; next = elt.next } in
+  begin match elt.next with
+  | Some old_next -> old_next.prev <- Some new_elt
+  | None -> ()
+  end;
+  elt.next <- Some new_elt;
+  new_elt
 ```
 
 This example uses the sequencing operator `;` to separate the steps to
@@ -483,80 +536,88 @@ from the following assignment `l := Some new_front`, we surround the match in a
 final assignment would become part of the `None -> ...` case, which is not what
 we want.
 
-To complete this initial part of the implementation, let's define a function for
-removal.
+To complete this initial part of the implementation, we need a removal
+function.  The logic is fairly straightforward: you change the next
+element to point to the previous and the previous to point to the
+next, and then clears its own references.
 
 ```ocaml
-   let remove l elt =
-     let { previous = previous; next = next } = elt in
-     (match previous with
-      | Some p -> p.next <- next
-      | None -> check_is_first_element l elt; l := next);
-     (match next with
-      | Some n -> n.previous <- previous;
-      | None -> ());
-     elt.previous <- None;
-     elt.next <- None
+let remove l elt =
+  let { prev; next; _ } = elt in
+  begin match prev with
+  | Some prev -> prev.next <- next
+  | None -> l := next
+  end;
+  begin match next with
+  | Some next -> next.prev <- prev;
+  | None -> ()
+  end;
+  elt.prev <- None;
+  elt.next <- None
 ```
 
-The `remove` function unlinks the element from the list, the resets the
-`previous` and `next` links to `None`.  For safety, we detect duplicate removals
-with a check.  In the case where the previous element is `None`, the element
-must be first in the list.  Here is the implementation of the
-`check_is_first_element` function.
+One problem with the above code is that it doesn't detect error cases
+as effectively as one might like.  For example, if you delete an
+element from a list more than once, or delete an element from a list
+that it doesn't belong to, you can end up leaving the list in an
+inconsistent state.  If you want to see how to catch these cases
+before they invalidate the list, you should look at the
+`Doubly_linked` module in Core.
+
+
+<note><title> Cyclic data structures </title>
+
+Doubly-linked lists are a cyclic data structure, meaning that it is
+possible to follow a nontrivial sequence of pointers that closes in on
+itself.  In general, building cyclic data structures requires the use
+of side-effects.  This is done by constructing the data elements
+first, and then adding cycles using assignment afterwards.
+
+There is an exception to this, though: you can construct fixed-size
+cyclic data-structures using `let rec`.
 
 ```ocaml
-   let check_is_first_element l elt1 =
-      match !l with
-      | Some elt2 when elt1 == elt2 -> ()
-      | _ -> raise (Invalid_argument "element has already been removed")
+# let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
+val endless_loop : int list =
+  [1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1;
+   2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;
+   ...]
 ```
 
-### Iteration
+This approach is quite limited, however.  General purpose cyclic data
+structures require mutation.
 
-When defining containers like lists, dictionaries, trees, etc. it is
-conventional to define some kind of iteration to allow the elements of the
-collection to be enumerated.  When the containers are immutable, like `'a list`,
-this is normaly done with functions like `iter`, `map`, and `fold`.  Each of
-these iteration functions takes a function that will be applied to each of the
-elements in order.
+</note>
 
-```ocaml
-# List.iter  [1; 2; 3] ~f:(fun i -> Printf.printf "Element: %d\n" i);;
-Element: 1
-Element: 2
-Element: 3
-- : unit = ()
-# List.map [1; 2; 3] ~f:((+) 10);;
-- : int list = [11; 12; 13]
-```
+### Iteration functions
 
-Defining this for doubly-linked lists is simple enough.  The following function
-iterates through the list, applying the function `f` to each element in turn.
+When defining containers like lists, dictionaries and trees, you'll
+typically want to define a set of iteration functions, like `iter`,
+`map`, and `fold`, all of which iterate through the list in order.
+
+Our `Dlist` interface has an `iter` function, the goal of which is to
+call a `unit` producing function on every element of the list, in
+order.  The implementation is shown below.
 
 ```ocaml
 let iter l ~f =
   let rec loop = function
-  | Some { value = v; next = next } -> f v; loop next
-  | None -> ()
+    | None -> ()
+    | Some { value; next; _ } -> f value; loop next
   in
-  loop !l;;
-
-# let l = create ();
-  push_front l 1;
-  push_front l 2;
-  push_front l 3;
-  iter l ~f:(Printf.printf "Item: %d\n");;
-Item: 3
-Item: 2
-Item: 1
+  loop !l
 ```
 
-This style of iteration is concise and completely general when you want to
-iterate through all of the elements of the list.  In some cases, you may wish to
-iterate through only part of the list, for example when searching for a
-particular element.  In this case, you can use the functions `next` and `prev`
-to navigate through the list.
+Sometimes, you want more control over your iteration, and `element`s
+are there to give you that.  Given an element, you can navigate
+through the list using `next` and `prev`,
+
+
+This style of iteration is great when you want to iterate through the
+entire list, but sometimes you want more control of the
+of the list, for example when searching for a particular element.  In
+this case, you can use the functions `next` and `prev` to navigate
+through the list.
 
 ```ocaml
    (* Find the element containing x, using = for comparison *)

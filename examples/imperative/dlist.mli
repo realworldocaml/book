@@ -14,8 +14,8 @@ val prev  : 'a element -> 'a element option
 val value : 'a element -> 'a
 
 (** Simple iteration functions *)
-val find : 'a t -> 'a -> 'a element option
-val iter : 'a t -> f:('a -> unit) -> unit
+val iter    : 'a t -> f:('a -> unit) -> unit
+val find_el : 'a t -> f:('a -> bool) -> 'a element option
 
 (** mutators *)
 val insert_first : 'a t -> 'a -> 'a element
