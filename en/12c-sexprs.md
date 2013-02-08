@@ -12,9 +12,34 @@ manipulate s-expressions and safe binary serialisers directly from OCaml types.
 After this section, we'll move onto interoperating with other third-party
 formats in [xref](#handling-json-data) and [xref](#xml-streams-and-trees).
 
+<note>
+<title>The `camlp4` preprocessor and `type_conv`</title>
+
+OCaml doesn't directly support converting static type definitions to and 
+from other data formats.  Instead, it supplies a powerful syntax extension
+mechanism known as `camlp4`.  This lets you extend the grammar of the language
+to mark types as requiring special action, and then mechanically generate
+boilerplate code over those types (such as converting to and from other data
+formats).
+
+Many of the examples in the subsequent chapters depend on `camlp4`, but
+the examples all invoke it automatically for you via the `-pp` flag to the
+OCaml compiler.  If you're interested in building your own generators,
+investigate the `type_conv` library which provides the basic extension
+mechanism used by the rest of this chapter.
+
+</note>
+
 S-expressions are nested paranthetical strings whose atomic values are strings.
 They were first popularized by the Lisp programming language in the 1960s, and
-have remained a simple way to encode data structures since then.
+have remained a simple way to encode data structures since then.  An example
+s-expression might look like this:
+
+```scheme
+(this (is an) (s expression))
+```
+
+The corresponding OCaml type for an s-expression is quite simple:
 
 ```ocaml
 module Sexp : sig
@@ -23,8 +48,8 @@ end
 ```
 
 An s-expression is in essence a nested parenthetical list whose atomic
-values are strings.  The `Sexp` module comes with functionality for
-parsing and printing s-expressions.
+values are strings.  The `Sexp` module in Core comes with functionality
+for parsing and printing s-expressions.
 
 ```ocaml
 # let sexp =
@@ -51,7 +76,7 @@ list to be converted.  Core uses this scheme more generally for
 defining sexp-converters for polymorphic types.
 
 But what if you want a function to convert some brand new type to an
-s-expression?  You can of course write it yourself:
+s-expression?  You can of course write it yourself manually:
 
 ```ocaml
 # type t = { foo: int; bar: float };;
@@ -73,8 +98,8 @@ mechanical and error prone, not to mention a drag.
 Given how mechanical the code is, you could imagine writing a program
 that inspected the type definition and auto-generated the conversion
 code for you.  That is precisely where syntax extensions come in.
-Using Sexplib and adding `with sexp` as an annotation to our type
-definition, we get the functions we want for free.
+Using `Sexplib` (part of Core) and adding `with sexp` as an annotation to our
+type definition, we get the functions we want for free.
 
 ```ocaml
 # type t = { foo: int; bar: float } with sexp;;
@@ -86,44 +111,24 @@ val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
 - : t = {foo = 3; bar = 35.}
 ```
 
-(You can ignore `t_of_sexp__`, which is a helper function that is
-needed in very rare cases.)
+The `with sexp` is detected by a `Sexplib` grammar extension to the normal
+OCaml syntax, and replaced with the extra conversion functions you see
+above. You can ignore `t_of_sexp__`, which is a helper function that is
+needed in very rare cases.
 
-The syntax-extensions in Core that we're going to discuss all have
-this same basic structure: they auto-generate code based on type
-definitions, implementing functionality that you could in theory have
-implemented by hand, but with far less programmer effort.
+The syntax extensions in Core all have this same basic structure: they
+auto-generate code based on type definitions, implementing functionality
+that you could in theory have implemented by hand, but with far less
+programmer effort.
 
-There are several syntax extensions distributed with Core, including:
+## Sexp basics
 
-- **Sexplib**: provides serialization for s-expressions.
-- **Bin_prot**: provides serialization to an efficient binary
-  format.
-- **Fieldslib**: generates first-class values that represent fields of
-  a record, as well as accessor functions and setters for mutable
-  record fields.
-- **Variantslib**: like Fieldslib for variants, producing first-class
-  variants and other helper functions for interacting with variant
-  types.
-- **Pa_compare**: generates efficient, type-specialized comparison
-  functions.
-- **Pa_typehash**: generates a hash value for a type definition,
-  _i.e._, an integer that is highly unlikely to be the same for two
-  distinct types.
-
-We'll discuss each of these syntax extensions in detail, starting with
-Sexplib.
-
-## Sexplib
-
-### Formatting of s-expressions
-
-Sexplib's format for s-expressions is pretty straightforward: an
+Sexplib's format for s-expressions is pretty straightforward. An
 s-expression is written down as a nested parenthetical expression,
 with whitespace-separated strings as the atoms.  Quotes are used for
 atoms that contain parenthesis or spaces themselves, backslash is the
 escape character, and semicolons are used to introduce comments.
-Thus, if you create the following file:
+Thus, if you create the following `foo.scm` file:
 
 ```scheme
 ;; foo.scm
@@ -156,10 +161,12 @@ open-paren in front of `bar`, we'll get a parse error:
     (text_char 29) (global_offset 94) (buf_pos 94)))
 ```
 
-(In the above, we use `Exn.handle_uncaught` to make sure that the
-exception gets printed out in full detail.)
+In the above, we use `Exn.handle_uncaught` to make sure that the
+exception gets printed out in full detail.  You should generally wrap
+every Core program in this handler to get good error messages for any
+unexpected exceptions.
 
-### Sexp converters
+## Sexp converters
 
 The most important functionality provided by Sexplib is the
 auto-generation of converters for new types.  We've seen a bit of how
@@ -207,8 +214,8 @@ let () =
   |! print_endline
 ```
 
-But we're still missing something: we haven't created an `mli` for
-`Int_interval` yet.  Note that we need to explicitly export the
+But we're still missing something: we haven't created an `mli` signature 
+for `Int_interval` yet.  Note that we need to explicitly export the
 s-expression converters that were created within the ml.  If we don't:
 
 ```ocaml
@@ -230,7 +237,7 @@ Error: Unbound value Int_interval.sexp_of_t
 Command exited with code 2.
 ```
 
-We could export the types by hand:
+We could export the types by hand in the signature:
 
 ```ocaml
 type t
@@ -238,8 +245,8 @@ val sexp_of_t : Sexp.t -> t
 val t_of_sexp : t -> Sexp.t
 ```
 
-But Sexplib has a shorthand for this as well, so that we can instead
-write simply:
+But Sexplib has a shorthand for this as well, so that we can just
+use the same `with` shorthand in the `mli` signature:
 
 ```ocaml
 type t with sexp
@@ -263,8 +270,9 @@ correctness of the `is_empty` check on the fact that for any value
 function preserves this invariant, but the `t_of_sexp` function does
 not.
 
-We can fix this problem by writing a custom sexp-converter, in this
-case, using the sexp-converter that we already have:
+We can fix this problem by overriding the autogenerated function
+and writing a custom sexp-converter, but still using the sexp-converter
+that we already have:
 
 ```ocaml
 type t = | Range of int * int
@@ -283,13 +291,19 @@ let t_of_sexp sexp =
   t
 ```
 
+This trick of overriding an existing function definition with a new
+one is perfectly acceptable in OCaml.  Function definitions are only
+recursive if the `rec` keyword is specified, and so in this case the
+inner `t_of_sexp` call will go to the earlier auto-generated definition
+that resulted from the `type t with sexp` definition.
+
 We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
 conversion fails.
 
 </sidebar>
 
-### Getting good error messages
+## Getting good error messages
 
 There are two steps to deserializing a type from an s-expression:
 first, converting the bytes in a file to an s-expression, and the
@@ -365,15 +379,14 @@ In the above error, "foo.scm:3:4" tells us that the error occurred on
 "foo.scm", line 3, character 4, which is a much better start for
 figuring out what has gone wrong.
 
-### Sexp-conversion directives
+## Sexp-conversion directives
 
 Sexplib supports a collection of directives for modifying the default
 behavior of the auto-generated sexp-converters.  These directives allow
 you to customize the way in which types are represented as
-s-expressions without having to write a custom parser.  We describe
-these directives below.
+s-expressions without having to write a custom parser. 
 
-#### `sexp-opaque`
+### `sexp-opaque`
 
 The most commonly used directive is `sexp_opaque`, whose purpose is to
 mark a given component of a type as being unconvertible.  Anything
@@ -412,7 +425,7 @@ see the contents of field `a` marked as opaque:
 - : Sexp.t = ((a <opaque>) (b foo))
 ```
 
-#### `sexp_option`
+### `sexp_option`
 
 Another common directive is `sexp_opaque`, which is used to make an
 optional field in a record.  Ordinary optional values are represented
@@ -441,7 +454,7 @@ it with `sexp_option`:
 - : Sexp.t = ((b hello))
 ```
 
-#### `sexp_list`
+### `sexp_list`
 
 One problem with the auto-generated sexp-converters is that they can
 have more parentheses than one would ideally like.  Consider, for
@@ -466,161 +479,3 @@ alternate syntax:
 # sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
 ```
-
-## Bin_prot
-
-S-expressions are a good serialization format when you need something
-machine-parseable as well as human readable and editable.  But
-Sexplib's s-expressions are not particularly performant.  There are a
-number of reasons for this.  For one thing, s-expression serialization
-goes through an intermediate type, `Sexp.t`, which must be allocated
-and is then typically thrown away, putting non-trivial pressure on the
-GC.  In addition, parsing and printing to strings in an ASCII format
-can be expensive for types like `int`s, `float`s and `Time.t`s where
-some real computation needs to be done to produce or parse the ASCII
-representation.
-
-Bin_prot is a library designed to address these issues by providing
-fast serialization in a compact binary format.  Kicking off the syntax
-extension is done by putting `with bin_io`.  (This looks a bit
-unsightly in the top-level because of all the definitions that are
-generated.  We'll elide those definitions here, but you can see it for
-yourself in the toplevel.)
-
-Here's a small complete example of a program that can read and write
-values using bin-io.  Here, the serialization is of types that might
-be used as part of a message-queue, where each message has a topic,
-some content, and a source, which is in turn a hostname and a port.
-
-```ocaml
-(* file: message_example.ml *)
-
-open Core.Std
-
-(* The type of a message *)
-module Message = struct
-  module Source = struct
-    type t = { hostname: string;
-               port: int;
-             }
-    with bin_io
-  end
-
-  type t = { topic: string;
-             content: string;
-             source: Source.t;
-           }
-  with bin_io
-end
-
-(* Create the 1st-class module providing the binability of messages *)
-let binable = (module Message : Binable.S with type t = Message.t)
-
-(* Saves a message to an output channel.  The message is serialized to
-   a bigstring before being written out to the channel.  Also, a
-   binary encoding of an integer is written out to tell the reader how
-   long of a message to expect.  *)
-let save_message outc msg =
-  let s = Binable.to_bigstring binable msg in
-  let len = Bigstring.length s in
-  Out_channel.output_binary_int outc len;
-  Bigstring.really_output outc s
-
-(* Loading the message is done by first reading in the length, and by
-   then reading in the appropriate number of bytes into a Bigstring
-   created for that purpose. *)
-let load_message inc =
-  match In_channel.input_binary_int inc with
-  | None -> failwith "Couldn't load message: length missing from header"
-  | Some len ->
-    let buf = Bigstring.create len in
-    Bigstring.really_input ~pos:0 ~len inc buf;
-    Binable.of_bigstring binable buf
-
-(* To generate some example messages *)
-let example content =
-  let source =
-    { Message.Source.
-      hostname = "ocaml.org"; port = 2322 }
-  in
-  { Message.
-    topic = "rwo-example"; content; source; }
-
-(* write out three messages... *)
-let write_messages () =
-  let outc = Out_channel.create "tmp.bin" in
-  List.iter ~f:(save_message outc) [
-    example "a wonderful";
-    example "trio";
-    example "of messages";
-  ];
-  Out_channel.close outc
-
-(* ... and read them back in *)
-let read_messages () =
-  let inc = In_channel.create "tmp.bin" in
-  for i = 1 to 3 do
-    let msg = load_message inc in
-    printf "msg %d: %s\n" i msg.Message.content
-  done
-
-let () =
-  write_messages (); read_messages ()
-```
-
-## Fieldslib
-
-One common idiom when using records is to provide field accessor
-functions for a particular record.
-
-```ocaml
-type t = { topic: string;
-           content: string;
-           source: Source.t;
-         }
-
-let topic   t = t.topic
-let content t = t.content
-let source  t = t.source
-```
-
-Similarly, sometimes you simultaneously want an accessor to a field of
-a record and a textual representation of the name of that field.  This
-might come up if you were validating a field and needed the string
-representation to generate an error message, or if you wanted to
-scaffold a form in a GUI automatically based on the fields of a
-record.  Fieldslib provides a module `Field` for this purpose.  Here's
-some code for creating `Field.t`'s for all the fields of our type `t`.
-
-```ocaml
-# module Fields = struct
-    let topic =
-      { Field.
-        name   = "topic";
-        setter = None;
-        getter = (fun t -> t.topic);
-        fset   = (fun t topic -> { t with topic });
-      }
-    let content =
-      { Field.
-        name   = "content";
-        setter = None;
-        getter = (fun t -> t.content);
-        fset   = (fun t content -> { t with content });
-      }
-    let source =
-      { Field.
-        name   = "source";
-        setter = None;
-        getter = (fun t -> t.source);
-        fset   = (fun t source -> { t with source });
-      }
-  end ;;
-module Fields :
-  sig
-    val topic : (t, string list) Core.Std.Field.t
-    val content : (t, string) Core.Std.Field.t
-    val source : (t, Source.t) Core.Std.Field.t
-  end
-```
-

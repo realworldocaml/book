@@ -3,7 +3,7 @@
  * ----------------------------------------------------------------
  *
  * @begin[license]
- * Copyright (C) 2012 Jason Hickey
+ * Copyright (C) 2013 Jason Hickey
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,63 +23,50 @@
  * @email{jyh@cs.caltech.edu}
  * @end[license]
  *)
-open Core.Std
 
-let rec add1 l =
-  match l with
+let rec uniq = function
   | [] -> []
-  | h :: t -> (h + 1) :: (add1 t);;
+  | [_] as l -> l
+  | i1 :: ((i2 :: _) as t) ->
+    if i1 = i2 then
+      uniq t
+    else
+      i1 :: uniq t;;
 
-let optional_default ~default opt =
-  match opt with
-  | Some v -> v
-  | None -> default;;
+uniq [1; 3; 3; 3; 2];;
 
-let broken_third l =
+let rec uniq = function
+  | ([] | [_]) as l -> l
+  | i1 :: ((i2 :: _) as t) ->
+    if i1 = i2 then
+      uniq t
+    else
+      i1 :: uniq t;;
+
+let rec inefficient_uniq l =
   match l with
-  | _ :: _ :: x :: _ -> Some x;;
+  | ([] | [_]) -> l
+  | i1 :: i2 :: t ->
+    if i1 = i2 then
+      inefficient_uniq (i2 :: t)
+    else
+      i1 :: inefficient_uniq (i2 :: t);;
 
-let third l =
-  match l with
-  | _ :: _ :: x :: _ -> Some x
-  | _ -> None;;
+uniq [1; 3; 3; 3; 2];;
 
-let third l =
-  match l with
-  | _ :: _ :: x :: _ -> Some x
-  | []
-  | [_]
-  | [_; _] -> None;;
+(*
+let rec broken_uniq = function
+  | ([] | [_]) as l -> l
+  | i1 :: ((i2 :: _) as t) when i1 = i2 ->
+    broken_uniq t
+  | i1 :: ((i2 :: _) as t) when i1 <> i2 ->
+    i1 :: broken_uniq t;;
+*)
 
-let third l1 =
-  match List.tl l1 with
-  | None -> None
-  | Some l2 ->
-    match List.tl l2 with
-    | None -> None
-    | Some l3 ->
-      List.hd l3;;
-
-let (>>=) v f =
-  match v with
-  | None -> None
-  | Some x -> f x;;
-
-let third l =
-  Some l >>= List.tl >>= List.tl >>= List.hd;;
-
-let third l =
-  let (>>=) = Option.(>>=) in
-  Some l >>= List.tl >>= List.tl >>= List.hd;;
-
-let head1 l =
-  match l with
-  | [] -> None
-  | h :: _ -> Some h;;
-
-let head2 = function
-  | [] -> None
-  | h :: _ -> Some h;;
+let rec subtle_uniq = function
+  | ([] | [_]) as l -> l
+  | i1 :: ((i2 :: _) as t) when i1 = i2 -> subtle_uniq t
+  | i1 :: t -> i1 :: subtle_uniq t;;
 
 (*
  * -*-

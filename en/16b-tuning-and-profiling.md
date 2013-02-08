@@ -1,5 +1,7 @@
 # Performance Tuning and Profiling
 
+Read http://janestreet.github.com/ocaml-perf-notes.html
+
 ## Byte code Profiling
 
 ocamlcp and call trace information
