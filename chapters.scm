@@ -1,4 +1,4 @@
-((part Basic)
+((part Preface)
  (name "prologue")
  (file "01-prologue")
  (public true)

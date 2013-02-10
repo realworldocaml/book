@@ -5,6 +5,7 @@ type part =
 | Practical
 | Advanced
 | Appendix
+| Preface
 with sexp
 
 type chapter = {

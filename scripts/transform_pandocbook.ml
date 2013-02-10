@@ -9,7 +9,7 @@ let part_to_string = function
   |Basic -> "I", "Basic Concepts"
   |Practical -> "II", "Practical Examples"
   |Advanced -> "III", "Advanced Topics"
-  |Appendix -> assert false
+  |Appendix |Preface -> assert false
 
 let all_parts = [ Basic; Practical; Advanced ]
 
@@ -26,10 +26,10 @@ module Transform = struct
     | x -> x
     in aux it
 
-  (* Turn a <chapter> tag into an <appendix> tag *)
-  let rewrite_chapter_to_appendix it =
+  (* Turn a <chapter> tag into a new (e.g. <appendix> or <preface> tag *)
+  let rewrite_chapter_to_other_tag new_tag it =
     let rec aux = function
-    | Element ((("","chapter"),i), c) -> Element ((("","appendix"),i),c)
+    | Element ((("","chapter"),i), c) -> Element ((("",new_tag),i),c)
     | Element (tag, children) ->
         Element (tag, List.map ~f:aux children)
     | x -> x
@@ -55,10 +55,8 @@ module Transform = struct
       List.Assoc.find chapters id |! fun x ->
       Option.value_exn ~message:("Unable to find " ^ id) x
     in
-    let mk_appendix id =
-      mk_chapter id |!
-      rewrite_chapter_to_appendix
-    in
+    let mk_appendix id = mk_chapter id |! rewrite_chapter_to_other_tag "appendix" in
+    let mk_preface id = mk_chapter id |! rewrite_chapter_to_other_tag "preface" in
     (* Construct a <part> tag *)
     let mk_part part =
       let label_num,label_name = part_to_string part in
@@ -70,7 +68,10 @@ module Transform = struct
     let appendices =
       List.filter_map parts ~f:(fun c ->
         if c.part = Appendix then Some (mk_appendix c.name) else None) in
-    other_tags @ (List.map ~f:mk_part all_parts) @ appendices |!
+    let prefaces =
+      List.filter_map parts ~f:(fun c ->
+        if c.part = Preface then Some (mk_preface c.name) else None) in
+    other_tags @ prefaces @ (List.map ~f:mk_part all_parts) @ appendices |!
     mk_tag "book"
 end
 
