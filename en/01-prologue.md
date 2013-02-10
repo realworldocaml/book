@@ -2,8 +2,6 @@
 
 ## Why OCaml?
 
-Programming languages matter.
-
 The programming languages that you use affect your productivity.  They affect
 how reliable your software is, how efficient it is, how easy it is to read, to
 refactor, and to extend.  And the languages you know and use can deeply affect
@@ -11,7 +9,7 @@ how you think about programming and software design.
 
 But not all ideas about how to design a programming language are created equal.
 Over the last 40 years, a few key language features have emerged that together
-form a kind of sweet-spot in language design.  These features include:
+form a kind of sweet-spot in language design.  These features include
 
 * Garbage collection
 * First-class and higher-order functions
@@ -21,15 +19,16 @@ form a kind of sweet-spot in language design.  These features include:
 * Algebraic datatypes and pattern-matching
 * Type inference
 
-Some of you will know and love these features, and others will be new to them.
-But as we'll demonstrate over the course of this book, it turns out that there
-is something transformative about having them all together and able to interact
-with each other in a single language.  Despite their importance, these ideas
-have made only limited inroads into mainstream languages. And when they do
-arrive there, like higher-order functions in C# or parametric polymorphism in
-Java, it's typically in a limited and awkward form.  The only languages that
-support these ideas well are statically-typed functional programming languages
-like OCaml, F#, Haskell, Scala and Standard-ML.
+Some of you will know and love these features, and others will be completely
+new to them.  Most of you will have seen _some_ of them in other languages that
+you've used.  As we'll demonstrate over the course of this book, it turns out
+that there is something transformative about having them all together and able
+to interact in a single language.  Despite their importance, these ideas have
+made only limited inroads into mainstream languages. And when they do arrive
+there, like higher-order functions in C# or parametric polymorphism in Java,
+it's typically in a limited and awkward form.  The only languages that support
+these ideas well are statically-typed functional programming languages like
+OCaml, F#, Haskell, Scala and Standard-ML.
 
 Among this worthy set of languages, OCaml stands apart because it manages to
 provide a great deal of power while remaining highly pragmatic, highly
@@ -37,7 +36,7 @@ performant, and comparatively simple to use and understand.  It is this that
 makes OCaml a great choice for programmers who want to step up to a better
 programming language, and at the same time want to get practical work done.
 
-## The Core Standard Library
+### The Core Standard Library
 
 A language on its own isn't enough.  You also need a rich set of libraries to
 base your applications on.  A common source of frustration for those learning
@@ -54,7 +53,7 @@ Core is also distributed with syntax extensions which provide essential new
 functionality to OCaml; and there are additional libraries such as the `Async`
 network communications library that provide even more useful functionality.
 
-## The OCaml Platform
+### The OCaml Platform
 
 Core is a very comprehensive standard library, but there's also a large
 community of programmers who have used OCaml since its first release in 1996.
@@ -74,7 +73,7 @@ the book instead of the normal OCaml toplevel.  It can, of course, be
 installed using OPAM, and [xref](#installation) guides you through that
 that process.
 
-## About the book
+## About this book
 
 Real World OCaml is aimed at programmers who have some experience with
 conventional programming languages, but not specifically with _statically typed
@@ -103,7 +102,7 @@ available to learn that.  Real World OCaml focuses on the techniques the
 authors have used in their personal experience to construct scalable, robust
 computer systems.
 
-### Structure
+## What to expect
 
 Real World OCaml is split into three parts and appendices:
 
