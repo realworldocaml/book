@@ -36,13 +36,10 @@
 
 
 
-<part label="I"><title>Basic Concepts</title><chapter id="prologue">
-  <title>Prologue</title>
+<preface id="preface">
+  <title>Preface</title>
   <sect1 id="why-ocaml">
     <title>Why OCaml?</title>
-    <para>
-      Programming languages matter.
-    </para>
     <para>
       The programming languages that you use affect your productivity.
       They affect how reliable your software is, how efficient it is,
@@ -54,7 +51,7 @@
       But not all ideas about how to design a programming language are
       created equal. Over the last 40 years, a few key language features
       have emerged that together form a kind of sweet-spot in language
-      design. These features include:
+      design. These features include
     </para>
     <itemizedlist>
       <listitem>
@@ -95,16 +92,18 @@
     </itemizedlist>
     <para>
       Some of you will know and love these features, and others will be
-      new to them. But as we'll demonstrate over the course of this
-      book, it turns out that there is something transformative about
-      having them all together and able to interact with each other in a
-      single language. Despite their importance, these ideas have made
-      only limited inroads into mainstream languages. And when they do
-      arrive there, like higher-order functions in C# or parametric
-      polymorphism in Java, it's typically in a limited and awkward
-      form. The only languages that support these ideas well are
-      statically-typed functional programming languages like OCaml, F#,
-      Haskell, Scala and Standard-ML.
+      completely new to them. Most of you will have seen
+      <emphasis>some</emphasis> of them in other languages that you've
+      used. As we'll demonstrate over the course of this book, it turns
+      out that there is something transformative about having them all
+      together and able to interact in a single language. Despite their
+      importance, these ideas have made only limited inroads into
+      mainstream languages. And when they do arrive there, like
+      higher-order functions in C# or parametric polymorphism in Java,
+      it's typically in a limited and awkward form. The only languages
+      that support these ideas well are statically-typed functional
+      programming languages like OCaml, F#, Haskell, Scala and
+      Standard-ML.
     </para>
     <para>
       Among this worthy set of languages, OCaml stands apart because it
@@ -114,58 +113,58 @@
       programmers who want to step up to a better programming language,
       and at the same time want to get practical work done.
     </para>
+    <sect2 id="the-core-standard-library">
+      <title>The Core Standard Library</title>
+      <para>
+        A language on its own isn't enough. You also need a rich set of
+        libraries to base your applications on. A common source of
+        frustration for those learning OCaml is that the standard
+        library that ships with the OCaml compiler is not ideal. While
+        it's well implemented, it is really intended for use within the
+        compiler itself, and covers only a small subset of the
+        functionality you expect for more general-purpose use.
+      </para>
+      <para>
+        But all is not lost! There is an effective alternative to the
+        OCaml standard library called Core. Jane Street, a company that
+        has been using OCaml for nearly a decade, developed Core for its
+        own internal use, but it was designed from the start with an eye
+        towards being a general-purpose standard library. Core is also
+        distributed with syntax extensions which provide essential new
+        functionality to OCaml; and there are additional libraries such
+        as the <literal>Async</literal> network communications library
+        that provide even more useful functionality.
+      </para>
+    </sect2>
+    <sect2 id="the-ocaml-platform">
+      <title>The OCaml Platform</title>
+      <para>
+        Core is a very comprehensive standard library, but there's also
+        a large community of programmers who have used OCaml since its
+        first release in 1996. In Real World OCaml, we'll also introduce
+        some of these libraries for you to experiment with realistic
+        examples. The installation and management of these third-party
+        libraries is made much easier via a package management tool
+        known as OPAM. We'll explain more about OPAM as the book
+        unfolds, but it forms the basis of the Platform, which is a set
+        of tools and libraries that, along with the OCaml compiler, let
+        you build realistic applications quickly and effectively.
+      </para>
+      <para>
+        Another big improvement over the standard library is the
+        <literal>utop</literal> interactive top level. This is a modern
+        interactive tool that supports command history, macro expansion,
+        module completion, and other niceties that make it much more
+        pleasant to work with the language. We'll be using
+        <literal>utop</literal> throughout the book instead of the
+        normal OCaml toplevel. It can, of course, be installed using
+        OPAM, and <xref linkend="installation"/> guides you
+        through that that process.
+      </para>
+    </sect2>
   </sect1>
-  <sect1 id="the-core-standard-library">
-    <title>The Core Standard Library</title>
-    <para>
-      A language on its own isn't enough. You also need a rich set of
-      libraries to base your applications on. A common source of
-      frustration for those learning OCaml is that the standard library
-      that ships with the OCaml compiler is not ideal. While it's well
-      implemented, it is really intended for use within the compiler
-      itself, and covers only a small subset of the functionality you
-      expect for more general-purpose use.
-    </para>
-    <para>
-      But all is not lost! There is an effective alternative to the
-      OCaml standard library called Core. Jane Street, a company that
-      has been using OCaml for nearly a decade, developed Core for its
-      own internal use, but it was designed from the start with an eye
-      towards being a general-purpose standard library. Core is also
-      distributed with syntax extensions which provide essential new
-      functionality to OCaml; and there are additional libraries such as
-      the <literal>Async</literal> network communications library that
-      provide even more useful functionality.
-    </para>
-  </sect1>
-  <sect1 id="the-ocaml-platform">
-    <title>The OCaml Platform</title>
-    <para>
-      Core is a very comprehensive standard library, but there's also a
-      large community of programmers who have used OCaml since its first
-      release in 1996. In Real World OCaml, we'll also introduce some of
-      these libraries for you to experiment with realistic examples. The
-      installation and management of these third-party libraries is made
-      much easier via a package management tool known as OPAM. We'll
-      explain more about OPAM as the book unfolds, but it forms the
-      basis of the Platform, which is a set of tools and libraries that,
-      along with the OCaml compiler, let you build realistic
-      applications quickly and effectively.
-    </para>
-    <para>
-      Another big improvement over the standard library is the
-      <literal>utop</literal> interactive top level. This is a modern
-      interactive tool that supports command history, macro expansion,
-      module completion, and other niceties that make it much more
-      pleasant to work with the language. We'll be using
-      <literal>utop</literal> throughout the book instead of the normal
-      OCaml toplevel. It can, of course, be installed using OPAM, and
-      <xref linkend="installation"/> guides you through that
-      that process.
-    </para>
-  </sect1>
-  <sect1 id="about-the-book">
-    <title>About the book</title>
+  <sect1 id="about-this-book">
+    <title>About this book</title>
     <para>
       Real World OCaml is aimed at programmers who have some experience
       with conventional programming languages, but not specifically with
@@ -199,79 +198,76 @@
       on the techniques the authors have used in their personal
       experience to construct scalable, robust computer systems.
     </para>
-    <sect2 id="structure">
-      <title>Structure</title>
-      <para>
-        Real World OCaml is split into three parts and appendices:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            Part I covers the basic concepts you'll need to know when
-            building OCaml programs. You won't need to memorise all of
-            this (objects, for example, are used rarely in practise),
-            but understanding the concepts and examples is important.
-            This part opens up with a guided tour to give you a quick
-            overview of the language. It then moves onto modules,
-            functors and objects, which may take some time to digest.
-            Persevere though, as while these concepts may be difficult
-            initially, they will stand you in good stead even when
-            switching to other languages (many of which have drawn
-            inspiration from ML).
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Part II builds on the basics to construct more complete
-            examples. This is where you'll pick up some useful
-            techniques for building networked systems, as well as some
-            functional design patterns that glue together OCaml language
-            elements in useful ways. The theme throughout this chapter
-            is on networked systems, and we build a running example that
-            will perform Internet queries using the DuckDuckGo search
-            engine.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Part III is all about understanding the runtime system in
-            OCaml. It's a remarkably simple system in comparison to
-            other language runtimes (such as Java or the .NET CLR), and
-            you'll need to read this to build very high performance
-            systems that have to minimise resource usage or interface to
-            C libraries. This is also where we talk about profiling and
-            debugging techniques using tools such as GNU
-            <literal>gdb</literal> and <literal>gprof</literal>.
-            Contributing your code back to the community is also
-            important (if only to get bug fixes from other people!), and
-            this part also explains how to do this via OPAM and Github.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <note>
-      <title>
-      Note to reviewers
-      </title>
-      <para>
-        Real World OCaml uses some tools that we've developed while
-        writing this book. Some of these resulted in improvements to the
-        OCaml compiler, which means that you will need to ensure that
-        you have an up-to-date development environment (using the 4.01.0
-        compiler). We've automated everything you need via the OPAM
-        package manager, so please do follow the installation
-        instructions in <xref linkend="installation"/>
-        carefully.
-      </para>
-      <para>
-        At this stage, the Windows operating system is also unsupported,
-        and only MacOS X, Linux, FreeBSD and OpenBSD can be expected to
-        work reliably. We realize this is a concern; there are no
-        fundamental barriers to Windows support, but we're focussed on
-        getting the main content finished before getting stuck into the
-        porting effort.
-      </para>
-      </note>
-    </sect2>
+  </sect1>
+  <sect1 id="what-to-expect">
+    <title>What to expect</title>
+    <para>
+      Real World OCaml is split into three parts and appendices:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Part I covers the basic concepts you'll need to know when
+          building OCaml programs. You won't need to memorise all of
+          this (objects, for example, are used rarely in practise), but
+          understanding the concepts and examples is important. This
+          part opens up with a guided tour to give you a quick overview
+          of the language. It then moves onto modules, functors and
+          objects, which may take some time to digest. Persevere though,
+          as while these concepts may be difficult initially, they will
+          stand you in good stead even when switching to other languages
+          (many of which have drawn inspiration from ML).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Part II builds on the basics to construct more complete
+          examples. This is where you'll pick up some useful techniques
+          for building networked systems, as well as some functional
+          design patterns that glue together OCaml language elements in
+          useful ways. The theme throughout this chapter is on networked
+          systems, and we build a running example that will perform
+          Internet queries using the DuckDuckGo search engine.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Part III is all about understanding the runtime system in
+          OCaml. It's a remarkably simple system in comparison to other
+          language runtimes (such as Java or the .NET CLR), and you'll
+          need to read this to build very high performance systems that
+          have to minimise resource usage or interface to C libraries.
+          This is also where we talk about profiling and debugging
+          techniques using tools such as GNU <literal>gdb</literal> and
+          <literal>gprof</literal>. Contributing your code back to the
+          community is also important (if only to get bug fixes from
+          other people!), and this part also explains how to do this via
+          OPAM and Github.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <note>
+    <title>
+    Note to reviewers
+    </title>
+    <para>
+      Real World OCaml uses some tools that we've developed while
+      writing this book. Some of these resulted in improvements to the
+      OCaml compiler, which means that you will need to ensure that you
+      have an up-to-date development environment (using the 4.01.0
+      compiler). We've automated everything you need via the OPAM
+      package manager, so please do follow the installation instructions
+      in <xref linkend="installation"/> carefully.
+    </para>
+    <para>
+      At this stage, the Windows operating system is also unsupported,
+      and only MacOS X, Linux, FreeBSD and OpenBSD can be expected to
+      work reliably. We realize this is a concern; there are no
+      fundamental barriers to Windows support, but we're focussed on
+      getting the main content finished before getting stuck into the
+      porting effort.
+    </para>
+    </note>
   </sect1>
   <sect1 id="about-the-authors">
     <title>About the Authors</title>
@@ -343,7 +339,7 @@
       </para>
     </sect2>
   </sect1>
-</chapter><chapter id="a-guided-tour">
+</preface><part label="I"><title>Basic Concepts</title><chapter id="a-guided-tour">
   <title>A Guided Tour</title>
   <para>
     This chapter gives an overview of OCaml by walking through a series
