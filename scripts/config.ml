@@ -21,6 +21,8 @@ let from_anil =
   ; "raphael-proust"          (* Raphael Proust <rp452@cam.ac.uk> *)
   ; "mariusaeriksen"          (* Marius Eriksen <marius@twitter.com> *)
   ; "jaked"                   (* Jake Donham <jake@donham.org> *)
+  ; "georgeparisis"           (* TODO George Parisis <george.parissis@gmail.com> *)
+  ; "nc6"                     (* TODO Nick Clarke <nicholas.clarke@gmail.com> *)
 ]
 
 let from_yminsky =
@@ -41,6 +43,10 @@ let from_email =
   ; "gildor478"               (* Sylvain Le Gall <sylvain@le-gall.net> *)
   ; "voila"                   (* manu delab <manu.delab@gmail.com> *)
   ; "thadmeyer"               (* Thad Meyer <tmeyer@members.fsf.org> *)
+  ; "Gtower1X"                (* TODO Gregory Tsipenyuk <gregtsip@gmail.com> *)
+  ; "andreby"                 (* TODO Andre Bjarby <andre.bjarby@gmail.com> *)
+  ; "artemkin"                (* TODO Stanislav Artemkin <artemkin@gmail.com> *)
+  ; "tautologico"             (* TODO Andrei de Arajo Formiga <andrei@ci.ufpb.br> *)
 ]
 
 let internal_reviewers =
