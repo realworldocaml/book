@@ -18622,27 +18622,156 @@ immutable: 2.6186s (19073 minor collections)
   <title>Installation</title>
   <para>
     The easiest way to install OCaml is via the binary packages
-    available in many operating systems. For day-to-day code
-    development, it is easier to use a source-based manager that lets
-    you recompile individual libraries easily.
+    available in many operating systems. For day-to-day code development
+    however, it's much easier to use a source-based manager that lets
+    you modify individual libraries and automatically recompile all the
+    dependencies.
   </para>
   <para>
-    For the purposes of this book, we'll use the OPAM source manager.
-    There are other alternatives available such as GODI and ODB, but not
-    covered here. Let's get started with OPAM now, as you will need it
-    to run the examples in the rest of the book. OPAM manages multiple
-    simultaneous OCaml compiler and library installations, tracks
-    library versions across upgrades, and recompiles dependencies
-    automatically if they get out of date.
+    An important difference between OCaml and scripting languages is
+    that the static type safety in OCaml mean that you can't just
+    mix-and-match compiled libraries. Instead, when an interface is
+    changed, all the dependent libraries must also be recompiled.
+    Source-based package managers automate this process for you and make
+    development life much easier.
   </para>
-  <sect1 id="opam-base-installation">
-    <title>OPAM Base Installation</title>
+  <para>
+    To work through this book, you'll need three major components
+    installed: * The OCaml compiler itself. * The OPAM source package
+    manager, through which we'll install several add-on libraries such
+    as Core and Async. * The <literal>utop</literal> top-level, which is
+    a modern interactive top-level with command history, module
+    completion and so forth.
+  </para>
+  <para>
+    Let's get started with how to install OCaml on various operating
+    systems, and we'll get OPAM and <literal>utop</literal> running
+    after that.
+  </para>
+  <sect1 id="getting-the-ocaml-compiler">
+    <title>Getting the OCaml compiler</title>
     <para>
-      To install OPAM, you will need a working OCaml installation to
-      bootstrap the package manager. Once installed, all of the OPAM
-      state is held in the <literal>$HOME/.opam</literal> directory, and
-      you can reinitialise it by deleting this directory and starting
-      over.
+      The OCaml compiler is available as a binary distribution on many
+      operating systems, and this is the preferred installation route.
+      We'll describe how to do a manual installation too, as a last
+      resort.
+    </para>
+    <sect2 id="macos-x">
+      <title>MacOS X</title>
+      <para>
+        The
+        <ulink url="http://github.com/mxcl/homebrew">Homebrew</ulink>
+        package manager has an OCaml installer, which is usually updated
+        pretty quickly to the latest stable release.
+      </para>
+      <programlisting>
+$ brew install ocaml
+$ brew install pcre
+</programlisting>
+      <para>
+        The Perl-compatible Regular Expression library (PCRE) is used by
+        the Core suite. It's not strictly needed to use OCaml, but is a
+        commonly used library that we're installing now to save time
+        later.
+      </para>
+      <para>
+        Another popular package manager on MacOS X is
+        <ulink url="http://macports.org">MacPorts</ulink>, which also
+        has an OCaml port:
+      </para>
+      <programlisting>
+$ port install ocaml
+$ port install ocaml-pcre
+</programlisting>
+    </sect2>
+    <sect2 id="linux">
+      <title>Linux</title>
+      <para>
+        On Debian Linux, you should install OCaml via binary packages.
+        You'll need at least OCaml version 3.12.1 to bootstrap OPAM,
+        which means using Debian Wheezy or greater. Don't worry about
+        getting the absolute latest version of the compiler, as you just
+        need one new enough to compile the OPAM package manager, after
+        which you use OPAM to manage your compiler installation.
+      </para>
+      <programlisting>
+$ sudo apt-get install ocaml ocaml-native-compilers camlp4-extra
+$ sudo apt-get install git libpcre3-dev curl build-essential m4 
+</programlisting>
+      <para>
+        Notice that we've installed a few more packages than just the
+        OCaml compiler here. The second command line installs enough
+        system packages to let you build your own OCaml packages. You
+        may find that some OCaml libraries require more system libraries
+        (for example, <literal>libssl-dev</literal>), but we'll
+        highlight these in the book when we introduce the library.
+      </para>
+      <para>
+        TODO: Fedora / RHEL
+      </para>
+      <para>
+        TODO: Arch Linux
+      </para>
+    </sect2>
+    <sect2 id="windows">
+      <title>Windows</title>
+      <para>
+        Windows is not currently supported by the examples in Real World
+        OCaml, although it is being worked on. Until that's ready, we
+        recommend using a virtual machine running Debian Linux on your
+        local machine.
+      </para>
+    </sect2>
+    <sect2 id="building-from-source">
+      <title>Building from source</title>
+      <para>
+        To install OCaml from source code, first make sure that you have
+        a C compilation environment (usually either
+        <literal>gcc</literal> or <literal>llvm</literal> installed)
+      </para>
+      <programlisting>
+$ curl -OL http://caml.inria.fr/pub/distrib/ocaml-4.00/ocaml-4.00.1.tar.gz
+$ tar -zxvf ocaml-4.00.1.tar.gz
+$ cd ocaml-4.00.1
+$ ./configure
+$ make world world.opt
+$ sudo make install
+</programlisting>
+      <para>
+        The final step requires administrator privilege to install in
+        your system directory. You can also install it in your home
+        directory by passing the <literal>prefix</literal> option to the
+        configuration script:
+      </para>
+      <programlisting>
+$ ./configure -prefix $HOME/my-ocaml
+</programlisting>
+      <para>
+        Once the installation is completed into this custom location,
+        you will need to add <literal>$HOME/my-ocaml/bin</literal> to
+        your <literal>PATH</literal>, normally by editing the
+        <literal>~/.bash_profile</literal> file. You shouldn't really to
+        do this unless you have special reasons, so try to install
+        binary packages before trying a source installation.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="the-opam-package-manager">
+    <title>The OPAM Package Manager</title>
+    <para>
+      OPAM manages multiple simultaneous OCaml compiler and library
+      installations, tracks library versions across upgrades, and
+      recompiles dependencies automatically if they get out of date.
+      It's used throughout Real World OCaml as the mechanism to retrieve
+      and use third-party libraries.
+    </para>
+    <para>
+      Before installing OPAM, make sure that you have the OCaml compiler
+      installed as described above. Once installed, the entire OPAM
+      database is held in your home directory (normally
+      <literal>$HOME/.opam</literal>). If something goes wrong, just
+      delete this <literal>.opam</literal> directory and start over from
+      a clean slate.
     </para>
     <important>
     <title>
@@ -18652,157 +18781,199 @@ immutable: 2.6186s (19073 minor collections)
       OPAM maintains multiple compiler and library installations, but
       this can clash with a global installation of the
       <literal>ocamlfind</literal> tool. Uninstall any existing copies
-      of <literal>ocamlfind</literal> before installing OPAM, and use
-      the OPAM version instead.
+      of <literal>ocamlfind</literal> before installing OPAM.
+      <emphasis>Reviewers</emphasis>: this has since been fixed in
+      OCaml-4.01.0.
     </para>
     </important>
-    <sect2 id="macos-x">
+    <sect2 id="macos-x-1">
       <title>MacOS X</title>
       <para>
-        The easiest way to install OCaml on MacOS X is via
-        <ulink url="http://github.com/mxcl/homebrew">Homebrew</ulink>.
+        Source installation of OPAM will take a minute or so on a modern
+        machine. There is a Homebrew package for the latest OPAM:
       </para>
       <programlisting>
-$ brew install ocaml
-$ brew install pcre
 $ brew install opam
 </programlisting>
       <para>
-        The Perl-compatible Regular Expression library (PCRE) is used by
-        the Core suite. It's a commonly used library that you may
-        already have installed for some other reason.
-      </para>
-      <para>
-        Another popular package manager is
-        <ulink url="http://macports.org">MacPorts</ulink>:
+        And on MacPorts, install it like this:
       </para>
       <programlisting>
-$ port install ocaml
-$ port install ocaml-pcre
 $ port install opam
 </programlisting>
-    </sect2>
-    <sect2 id="linux">
-      <title>Linux</title>
-      <para>
-        On Debian Linux, you should install OCaml via binary packages,
-        and then install the latest OPAM release from source.
-      </para>
-      <programlisting>
-$ sudo apt-get install build-essential m4 ocaml ocaml-native-compilers camlp4-extra
-$ sudo apt-get install git libpcre3-dev curl
-$ tar -zxvf opam-&lt;version&gt;.tar.gz
-$ cd opam-&lt;version&gt;.tar.gz
-$ ./configure &amp;&amp; make &amp;&amp; sudo make install
+      <sect3 id="linux-1">
+        <title>Linux</title>
+        <note>
+        <title>
+        Note to reviewers
+        </title>
+        <para>
+          The OPAM instructions will be simplified when integrated
+          upstream into Debian and Fedora, which is ongoing. Until then,
+          we're leaving source-code installation instructions. Please
+          leave a comment with any amended instructions you encounter
+        </para>
+        </note>
+        <para>
+          On Debian Linux, you must currently install the latest OPAM
+          release from source. Navigate to the OPAM
+          <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>
+          and download the latest version (we'll assume
+          <literal>0.9.2</literal> for now, but pick the latest one).
+        </para>
+        <programlisting>
+$ curl -OL https://github.com/OCamlPro/opam/archive/0.9.2.tar.gz
+$ tar -zxvf 0.9.2.tar.gz
+$ cd opam-0.9.2
+$ ./configure &amp;&amp; make
+$ sudo make install
 </programlisting>
-      <para>
-        <emphasis>Note to reviewers:</emphasis> The OPAM instructions
-        will be simplified when integrated upstream into Debian and
-        Fedora. Until then, the source installation instructions above
-        may require a few more packages, so please leave a comment with
-        any amended instructions.
-      </para>
-      <para>
-        Fedora/RHEL: TODO
-      </para>
+        <para>
+          Fedora/RHEL: TODO
+        </para>
+        <para>
+          Arch Linux: TODO
+        </para>
+      </sect3>
     </sect2>
-    <sect2 id="windows">
-      <title>Windows</title>
-      <para>
-        Windows is not currently supported, although it is being worked
-        on. Until that's ready, we recommend using a virtual machine
-        running Debian Linux on your local machine.
-      </para>
-    </sect2>
-    <sect2 id="using-the-opam-top-level">
-      <title>Using the OPAM top-level</title>
-      <para>
-        All the OPAM state is held in the <literal>.opam</literal>
-        directory in your home directory, including compiler
-        installations. On Linux and MacOS X, this will be the
-        <literal>~/.opam</literal> directory. You shouldn't switch to an
-        admin user to install packages; if you run into problems, just
-        delete the whole <literal>.opam</literal> directory and follow
-        the installations instructions from the
-        <literal>opam init</literal> stage again.
-      </para>
-      <programlisting>
+  </sect1>
+  <sect1 id="getting-started-with-opam">
+    <title>Getting started with OPAM</title>
+    <para>
+      The entire OPAM package database is held in the
+      <literal>.opam</literal> directory in your home directory,
+      including compiler installations. On Linux and MacOS X, this will
+      be the <literal>~/.opam</literal> directory. You shouldn't switch
+      to an admin user to install packages as nothing will be installed
+      outside of this directory. If you run into problems, just delete
+      the whole <literal>~/.opam</literal> directory and follow the
+      installations instructions from the <literal>opam init</literal>
+      stage again.
+    </para>
+    <para>
+      Begin by initialising the OPAM package database.
+    </para>
+    <programlisting>
 $ opam init
+$ opam list
+</programlisting>
+    <para>
+      This will create the <literal>~/.opam</literal> directory, and
+      give you the current set of packages uploaded to OPAM.
+      <literal>opam list</literal> will show you all of them, but don't
+      install any just yet.
+    </para>
+    <para>
+      The first package to install is Core, which is the replacement
+      standard library that all of the examples in this book use. We've
+      made some minor modifications to the way the OCaml compiler
+      displays type signatures, and the next command will install a
+      patched <literal>4.00.1</literal> compiler with this enabled.
+    </para>
+    <programlisting>
 $ opam switch 4.00.1+short-types
-$ opam install utop async core_extended
+</programlisting>
+    <para>
+      This step will take about 5-10 minutes on a modern machine, and
+      will download and install (within the <literal>~/.opam</literal>
+      directory) a custom OCaml compiler. OPAM supports multiple such
+      installations, and you'll find this very useful if you ever decide
+      to hack on the internals of the compiler itself (or you simply
+      want to experiment with the latest release without sacrificing
+      your current installation).
+    </para>
+    <para>
+      The new compiler will be compiled and installed into
+      <literal>~/.opam/4.00.1+short-types</literal> and any libraries
+      you install for it will be tracked separately from your system
+      installation. You can have any number of compilers installed
+      simultaneously, but only one can be active at any time. You can
+      find all the available compilers by running
+      <literal>opam switch list</literal>.
+    </para>
+    <para>
+      Once that succeeds, you'll see some instructions about environment
+      variables. OPAM can output a set of shell commands which configure
+      your current shell with the right path variables so that packages
+      use the custom compiler you've just built. This is just one
+      command:
+    </para>
+    <programlisting>
 $ eval `opam config env`
 </programlisting>
-      <para>
-        This will initialise OPAM with a default package set, and
-        install some packages to augment the OCaml distribution.
-      </para>
-      <para>
-        The <literal>utop</literal> package is an interactive
-        command-line interface to OCaml that has tab-completion,
-        persistent history and integration with Emacs so that you can
-        run it within your editing environment. We use
-        <literal>utop</literal> instead of the more spartan default
-        OCaml top-level throughout the book.
-      </para>
-      <para>
-        The other two packages are <literal>async</literal> and
-        <literal>core_extended</literal>, which are libraries from the
-        Jane Street Core standard library. These will take a few minutes
-        to compile on a modern machine (particularly
-        <literal>core_extended</literal>) as they contain a large number
-        of modules to help with day-to-day programming. We use Core
-        throughout the examples in this book.
-      </para>
-      <para>
-        OPAM figures out the minimal set of dependencies required for
-        thse packages and installs them too. The <literal>eval</literal>
-        command sets your <literal>PATH</literal> variable to point to
-        the current active compiler, and you should add this to your
-        local shell <literal>.profile</literal> to run every time you
-        open a new command shell. It won't affect any other commands, as
-        OPAM makes sure to preserve any custom extensions you may
-        already have to your <literal>PATH</literal> variable.
-      </para>
-    </sect2>
-    <sect2 id="switching-compiler-versions">
-      <title>Switching compiler versions</title>
-      <para>
-        The default compiler installed by OPAM uses the system OCaml
-        installation. You can use <literal>opam switch</literal> to swap
-        between different compiler versions, or experiment with a
-        different set of libraries or new compiler versions. For
-        instance, one of the alternate compilers is patched to simplify
-        the types that are output in the top-level. You can switch it to
-        by:
-      </para>
-      <programlisting>
-$ opam switch list
-$ opam switch 4.00.1+short-types
-$ eval `opam config env`
-$ opam install utop async
+    <para>
+      This command only works with your current shell, and it can be
+      annoying to have to remember to type it in every time you open a
+      new terminal. Automate it by adding the line to your login shell.
+      On MacOS X or Debian, this is usually the
+      <literal>~/.bash_profile</literal> script if you're using the
+      default shell. If you've switched to another shell, it might be
+      <literal>~/.zshrc</literal> instead. OPAM isn't unusual in this
+      approach; the SSH <literal>ssh-agent</literal> also works
+      similarly, so if you're having any problems just hunt around in
+      your configuration scripts to see how that's being invoked.
+    </para>
+    <para>
+      Finally, we're ready to install the Core libraries. Run this:
+    </para>
+    <programlisting>
+$ opam install core core_extended async
 </programlisting>
-      <para>
-        The new compiler will be compiled and installed into
-        <literal>~/.opam/4.00.1+short-types</literal> and the libraries
-        will be tracked separately from your system installation. You
-        can have any number of compilers installed simultaneously, but
-        only one can be active at any time. You can find all the
-        available compilers by running
-        <literal>opam switch list</literal>.
-      </para>
-    </sect2>
+    <para>
+      This will take about five minutes to install, and the three
+      packages that really matter are:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>core</literal> is the main, well-supported Core
+          distribution from Jane Street.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>core_extended</literal> contains a number of
+          experimental, but useful, extension libraries that are under
+          review for inclusion in Core. We use some of these in places,
+          but much less than Core itself.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>async</literal> is the network programming library
+          that we use in Part II to communicate with other hosts.
+        </para>
+      </listitem>
+    </itemizedlist>
   </sect1>
   <sect1 id="editing-environment">
     <title>Editing Environment</title>
+    <para>
+      There's one last tool you need before getting started on the
+      examples. The default <literal>ocaml</literal> command gives us an
+      interactive command-line to experiment with code without compiling
+      it. However, it's quite a spartan experience and so we use a more
+      modern alternative.
+    </para>
+    <programlisting>
+$ opam install utop
+</programlisting>
+    <para>
+      The <literal>utop</literal> package us an interactive command-line
+      interface to OCaml that has tab-completion, persistent history and
+      integration with Emacs so that you can run it within your editing
+      environment.
+    </para>
     <sect2 id="command-line">
       <title>Command Line</title>
       <para>
         The <literal>utop</literal> tool provides a convenient
         interactive top-level, with full command history, command macros
-        and module name completion. An <literal>.ocamlinit</literal>
-        file in your home directory will initialise
-        <literal>utop</literal> with common libraries and syntax
-        extensions open, e.g.:
+        and module name completion. The <literal>~/.ocamlinit</literal>
+        file in your home directory initialises <literal>utop</literal>
+        with common libraries and syntax extensions, so you don't need
+        to type them in every time. A good default you should create for
+        the examples in this book is:
       </para>
       <programlisting language="ocaml">
 #use &quot;topfind&quot;
@@ -18811,11 +18982,14 @@ $ opam install utop async
 #require &quot;core.top&quot;;;
 #require &quot;async&quot;;;
 open Core.Std
-open Async.Std
 </programlisting>
       <para>
-        TODO: the <literal>.ocamlinit</literal> handling in OPAM is
-        being finalised and is tracked in
+        When you run <literal>utop</literal> with this initialization
+        file, it should start up with Core opened and ready to use.
+      </para>
+      <para>
+        <emphasis>TODO</emphasis>: the <literal>.ocamlinit</literal>
+        handling in OPAM is being finalised and is tracked in
         <ulink url="https://github.com/OCamlPro/opam/issues/185">issue
         185</ulink>.
       </para>
@@ -18823,23 +18997,23 @@ open Async.Std
     <sect2 id="editors">
       <title>Editors</title>
       <para>
-        Emacs users have tuareg and
+        TODO: Emacs users have tuareg and
         <ulink url="http://www.typerex.org/">Typerex</ulink>.
       </para>
       <para>
-        Vim users can use the built-in style, and
+        TODO: Vim users can use the built-in style, and
         <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
         may also be useful.
       </para>
       <para>
-        Eclipse plugins: which one is maintained?
+        TODO: Eclipse plugins: which one is maintained?
       </para>
     </sect2>
   </sect1>
   <sect1 id="developing-with-opam">
     <title>Developing with OPAM</title>
     <para>
-      Package listings are obtained by adding
+      TODO: Package listings are obtained by adding
       <emphasis>remotes</emphasis> that provide package descriptions,
       installation instructions and URLs.
     </para>
