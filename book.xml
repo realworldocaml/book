@@ -36,8 +36,8 @@
 
 
 
-<preface id="preface">
-  <title>Preface</title>
+<preface id="prologue">
+  <title>Prologue</title>
   <sect1 id="why-ocaml">
     <title>Why OCaml?</title>
     <para>
