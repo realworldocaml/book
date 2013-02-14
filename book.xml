@@ -12514,37 +12514,30 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
 </chapter><chapter id="handling-json-data">
   <title>Handling JSON data</title>
   <para>
-    Data serialization, <emphasis>i.e.</emphasis> reading and writing
-    program data to a sequence of bytes, is an important and common
-    programming task. Sometimes you need to match someone else's data
-    format (such as XML), and other times you just want to quickly dump
-    some values to disk and read them back later. To this end, OCaml
-    comes with several techniques for data serialization depending on
-    what your problem is.
+    Now that you've seen how to convert OCaml values into s-expressions,
+    it's time to look at other useful serialization mechanisms. We'll
+    start off by looking at JSON and XML, as they are very common
+    third-party data formats. This chapter also introduces you to some
+    nice uses of polymorphic variants, and also using external tools to
+    auto-generate OCaml code.
   </para>
-  <para>
-    We'll start off by looking at JSON and XML first, as they are very
-    common third-party data formats. After that, we'll introduce some
-    syntax extensions in Core that make it really easy to manipulate
-    s-expressions and safe binary serialisers directly from OCaml types.
-  </para>
-  <para>
-    JSON is a lightweight data-interchange format often used in web
-    services and browsers. It is described in
-    <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>,
-    and is designed to be easy to parse and generate. You'll run into
-    JSON very often when working with modern APIs, and so we'll cover
-    several different ways to manipulate it in this chapter. Along the
-    way we'll introduce new libraries and syntax extensions which make
-    the job easier.
-  </para>
-  <para>
-    JSON consists of just two basic structures: an unordered collection
-    of key/value pairs, and an ordered list of values. Values can be
-    strings, booleans, floats, integers or null. Let's see what an
-    example JSON record for a book description looks like:
-  </para>
-  <programlisting language="json">
+  <sect1 id="json-basics">
+    <title>JSON Basics</title>
+    <para>
+      JSON is a lightweight data-interchange format often used in web
+      services and browsers. It's described in
+      <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>,
+      and is designed to be easy to parse and generate. You'll run into
+      JSON very often when working with modern APIs, so we'll cover
+      several different ways to manipulate it in this chapter.
+    </para>
+    <para>
+      JSON consists of just two basic structures: an unordered
+      collection of key/value pairs, and an ordered list of values.
+      Values can be strings, booleans, floats, integers or null. Let's
+      see what an example JSON record for a book description looks like:
+    </para>
+    <programlisting language="json">
 {
   &quot;title&quot;: &quot;Real World OCaml&quot;,
   &quot;tags&quot; : [ &quot;functional programming&quot;, &quot;ocaml&quot;, &quot;algorithms&quot; ],
@@ -12557,59 +12550,64 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
   &quot;is_online&quot;: true
 }
 </programlisting>
-  <para>
-    JSON values usually start with an object at the top level that
-    contains a set of key/value pairs. The keys must be strings, but
-    values can be any JSON type. In the example above,
-    <literal>tags</literal> is a string list, while the
-    <literal>authors</literal> field contains a list of records. Unlike
-    OCaml lists, JSON lists can contain completely different JSON types
-    within them.
-  </para>
-  <para>
-    This free-form nature of JSON types is both a blessing and a curse.
-    It's very easy to generate JSON values, but code parsing them also
-    has to cope with handling subtle variations in how values are
-    represented. For example, what if the <literal>pages</literal> value
-    above is actually represented as a string value of
-    <literal>&quot;450&quot;</literal> instead of an integer?
-  </para>
-  <para>
-    Our first task is to parse the JSON into a more structured OCaml
-    type so that we can use static typing more effectively. When
-    manipulating JSON in Python or Ruby, you might write unit tests to
-    check that you have handled unusual inputs. The OCaml model prefers
-    compile-time static checking as well as unit tests. For example,
-    using pattern matching can warn you if you've not checked that a
-    value can be <literal>Null</literal> as well as contain an actual
-    value.
-  </para>
-  <note>
-  <title>
-  Installing the Yojson library
-  </title>
-  <para>
-    There are several JSON libraries available for OCaml. For this
-    chapter, we've picked the
-    <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
-    library. The easiest way to install it is by using the OPAM package
-    manager (see <xref linkend="packaging-and-build-systems"/>
-    for installation instructions). Once OPAM is working, you will need
-    to run <literal>opam install yojson</literal>.
-  </para>
-  </note>
-  <sect1 id="parsing-standard-json-with-yojson">
-    <title>Parsing standard JSON with Yojson</title>
     <para>
-      The JSON specification has very few data types, and Yojson
-      implements these in the <literal>Yojson.Basic</literal> module.
-      The <literal>json</literal> type shown below is sufficient to
-      express any valid JSON structure. Note that some of the types are
-      recursive, so that fields can contain references to more JSON
-      fields, and that it also specifically includes a
-      <literal>Null</literal> variant for empty fields.
+      JSON values usually start with an object at the top level that
+      contains a set of key/value pairs. The keys must be strings, but
+      values can be any JSON type. In the example above,
+      <literal>tags</literal> is a string list, while the
+      <literal>authors</literal> field contains a list of records.
+      Unlike OCaml lists, JSON lists can contain completely different
+      JSON types within them.
     </para>
-    <programlisting language="ocaml">
+    <para>
+      This free-form nature of JSON types is both a blessing and a
+      curse. It's very easy to generate JSON values, but code parsing
+      them also has to cope with handling subtle variations in how
+      values are represented. For example, what if the
+      <literal>pages</literal> value above is actually represented as a
+      string value of <literal>&quot;450&quot;</literal> instead of an
+      integer?
+    </para>
+    <para>
+      Our first task is to parse the JSON into a more structured OCaml
+      type so that we can use static typing more effectively. When
+      manipulating JSON in Python or Ruby, you might write unit tests to
+      check that you have handled unusual inputs. The OCaml model
+      prefers compile-time static checking as well as unit tests. For
+      example, using pattern matching can warn you if you've not checked
+      that a value can be <literal>Null</literal> as well as contain an
+      actual value.
+    </para>
+    <note>
+    <title>
+    Installing the Yojson library
+    </title>
+    <para>
+      There are several JSON libraries available for OCaml. For this
+      chapter, we've picked the
+      <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
+      library. Install it by using the OPAM package manager.
+    </para>
+    <programlisting>
+$ opam install yojson
+</programlisting>
+    <para>
+      See <xref linkend="packaging-and-build-systems"/> for
+      installation instructions if you haven't already got OPAM.
+    </para>
+    </note>
+    <sect2 id="parsing-json-with-yojson">
+      <title>Parsing JSON with Yojson</title>
+      <para>
+        The JSON specification has very few data types, and Yojson
+        implements these in the <literal>Yojson.Basic</literal> module.
+        The <literal>json</literal> type shown below is sufficient to
+        express any valid JSON structure. Note that some of the types
+        are recursive, so that fields can contain references to more
+        JSON fields, and that it also specifically includes a
+        <literal>Null</literal> variant for empty fields.
+      </para>
+      <programlisting language="ocaml">
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -12619,12 +12617,12 @@ type json = [
   | `Null
   | `String of string ] 
 </programlisting>
-    <para>
-      Let's parse the earlier JSON string example into this type now.
-      The first stop is the <literal>Yojson.Basic</literal>
-      documentation, where we find these helpful functions:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        Let's parse the earlier JSON string example into this type now.
+        The first stop is the <literal>Yojson.Basic</literal>
+        documentation, where we find these helpful functions:
+      </para>
+      <programlisting language="ocaml">
 val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
 (* Read a JSON value from a string.
   [buf] : use this buffer at will during parsing instead of creating a new one.
@@ -12639,28 +12637,28 @@ val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; strin
 (* Read a JSON value from a file. See [from_string] for the meaning of the optional
    arguments. *)
 </programlisting>
-    <para>
-      When first reading these interfaces, you can generally ignore the
-      optional arguments (which have the question marks in the type
-      signature), as they will be filled in with sensible values. The
-      signature for these values with the optional elements removed
-      makes their purpose quite clear:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        When first reading these interfaces, you can generally ignore
+        the optional arguments (which have the question marks in the
+        type signature), as they will be filled in with sensible values.
+        The signature for these values with the optional elements
+        removed makes their purpose quite clear:
+      </para>
+      <programlisting language="ocaml">
 val from_string : string -&gt; json
 val from_file : string -&gt; json
 val from_channel : in_channel -&gt; json
 </programlisting>
-    <para>
-      The <literal>in_channel</literal> constructor is from the original
-      OCaml standard library, and its use is considered deprecated when
-      using the Core standard library. This leaves us with two ways of
-      parsing the JSON: either from a string buffer, or from a file on a
-      filesystem. The next example shows both in action, assuming the
-      JSON record is stored in a file called
-      <emphasis>book.json</emphasis>:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The <literal>in_channel</literal> constructor is from the
+        original OCaml standard library, and its use is considered
+        deprecated when using the Core standard library. This leaves us
+        with two ways of parsing the JSON: either from a string buffer,
+        or from a file on a filesystem. The next example shows both in
+        action, assuming the JSON record is stored in a file called
+        <emphasis>book.json</emphasis>:
+      </para>
+      <programlisting language="ocaml">
 open Core.Std
 
 let _ =
@@ -12677,67 +12675,70 @@ let _ =
   print_endline (if json1 = json2 then &quot;OK&quot; else &quot;FAIL&quot;)
   print_endline (if phys_equal json1 json2 then &quot;FAIL&quot; else &quot;OK&quot;)
 </programlisting>
-    <para>
-      The <literal>from_file</literal> function accepts an input
-      filename and takes care of opening and closing it for you. It's
-      far more common to use <literal>from_string</literal> to construct
-      a JSON value from an OCaml <literal>string</literal>. These
-      strings can come from a network connection (we'll see more of this
-      in <xref linkend="concurrent-programming-with-async"/>)
-      or even a database. Finally, the example checks that the two input
-      mechanisms actually resulted in the same OCaml data structure.
-    </para>
-    <sidebar>
-    <title>
-    The difference between <literal>=</literal> and
-    <literal>==</literal>, and <literal>phys_equal</literal> in Core
-    </title>
-    <para>
-      If you come from a C/C++ background, you will probably reflexively
-      use <literal>==</literal> to test two values for equality. In
-      OCaml, <literal>==</literal> tests for
-      <emphasis>physical</emphasis> equality, and <literal>=</literal>
-      tests for <emphasis>structural</emphasis> equality.
-    </para>
-    <para>
-      The <literal>==</literal> physical equality test will match if two
-      data structures have precisely the same pointer in memory. Two
-      data structures that have identical contents, but are constructed
-      separately, will not match using this operator. In the JSON
-      example, the <literal>json1</literal> and <literal>json2</literal>
-      values are not identical and so would fail the physical equality
-      test.
-    </para>
-    <para>
-      The <literal>=</literal> structural equality operator recursively
-      inspects each field in the two values and tests them individually
-      for equality. In the JSON parsing example, every field will be
-      traversed and checked, and they will check out as equal.
-      Crucially, if your data structure is cyclical (that is, a value
-      recursively points back to another field within the same
-      structure), the <literal>=</literal> operator will never
-      terminate, and your program will hang! In this situation, you must
-      use the physical equality operator, or write a custom comparison
-      function that breaks the recursion.
-    </para>
-    <para>
-      It's quite easy to mix up the use of <literal>=</literal> and
-      <literal>==</literal>, so Core disables the <literal>==</literal>
-      operator and provides <literal>phys_equal</literal> instead.
-      You'll see a type error if you use <literal>==</literal> anywhere:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The <literal>from_file</literal> function accepts an input
+        filename and takes care of opening and closing it for you. It's
+        far more common to use <literal>from_string</literal> to
+        construct a JSON value from an OCaml <literal>string</literal>.
+        These strings can come from a network connection (we'll see more
+        of this in
+        <xref linkend="concurrent-programming-with-async"/>)
+        or even a database. Finally, the example checks that the two
+        input mechanisms actually resulted in the same OCaml data
+        structure.
+      </para>
+      <sidebar>
+      <title>
+      The difference between <literal>=</literal> and
+      <literal>==</literal>, and <literal>phys_equal</literal> in Core
+      </title>
+      <para>
+        If you come from a C/C++ background, you will probably
+        reflexively use <literal>==</literal> to test two values for
+        equality. In OCaml, <literal>==</literal> tests for
+        <emphasis>physical</emphasis> equality, and <literal>=</literal>
+        tests for <emphasis>structural</emphasis> equality.
+      </para>
+      <para>
+        The <literal>==</literal> physical equality test will match if
+        two data structures have precisely the same pointer in memory.
+        Two data structures that have identical contents, but are
+        constructed separately, will not match using this operator. In
+        the JSON example, the <literal>json1</literal> and
+        <literal>json2</literal> values are not identical and so would
+        fail the physical equality test.
+      </para>
+      <para>
+        The <literal>=</literal> structural equality operator
+        recursively inspects each field in the two values and tests them
+        individually for equality. In the JSON parsing example, every
+        field will be traversed and checked, and they will check out as
+        equal. Crucially, if your data structure is cyclical (that is, a
+        value recursively points back to another field within the same
+        structure), the <literal>=</literal> operator will never
+        terminate, and your program will hang! In this situation, you
+        must use the physical equality operator, or write a custom
+        comparison function that breaks the recursion.
+      </para>
+      <para>
+        It's quite easy to mix up the use of <literal>=</literal> and
+        <literal>==</literal>, so Core disables the
+        <literal>==</literal> operator and provides
+        <literal>phys_equal</literal> instead. You'll see a type error
+        if you use <literal>==</literal> anywhere:
+      </para>
+      <programlisting language="ocaml">
 # 1 == 2;;
 Error: This expression has type int but an expression was expected of type
          [ `Consider_using_phys_equal ]
 # phys_equal 1 2;;
 - : bool = false
 </programlisting>
-    <para>
-      If you feel like hanging your OCaml interpreter, you can verify
-      what happens with recursive values for yourself:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        If you feel like hanging your OCaml interpreter, you can verify
+        what happens with recursive values for yourself:
+      </para>
+      <programlisting language="ocaml">
 # type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
 type t1 = { foo1 : int; bar1 : t2; }
 and t2 = { foo2 : int; bar2 : t1; }
@@ -12750,15 +12751,15 @@ and t2 = { foo2 : int; bar2 : t1; }
 # v1 = v1 ;;
 &lt;press ^Z and kill the process now&gt;
 </programlisting>
-    </sidebar>
-    <sect2 id="selecting-values-from-json-structures">
-      <title>Selecting values from JSON structures</title>
-      <para>
-        Now that we've figured out how to parse the example JSON, lets
-        see how we can manipulate it from OCaml code with a more
-        complete example.
-      </para>
-      <programlisting language="ocaml">
+      </sidebar>
+      <sect3 id="selecting-values-from-json-structures">
+        <title>Selecting values from JSON structures</title>
+        <para>
+          Now that we've figured out how to parse the example JSON, lets
+          see how we can manipulate it from OCaml code with a more
+          complete example.
+        </para>
+        <programlisting language="ocaml">
 open Core.Std
 open Async.Std
 open Printf
@@ -12789,66 +12790,67 @@ let _ =
   printf &quot;Online: %s\n&quot; (string_of_bool_option is_online);
   printf &quot;Translated: %s\n&quot; (string_of_bool_option is_translated)
 </programlisting>
-      <para>
-        This introduces the <literal>Yojson.Basic.Util</literal> module,
-        which contains <emphasis>combinator</emphasis> functions for
-        JSON manipulation. Combinators are a style of function that can
-        be chained together using the <literal>|!</literal> pipe
-        operator to select and convert values out of the JSON structure.
-        Let's examine some of them in more detail:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            For the <literal>title</literal> string, the
-            <literal>member</literal> combinator extracts the key from
-            the array, and casts it to an OCaml string. An exception is
-            raised if the JSON value is not a string.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The <literal>tags</literal> field is similar to
-            <literal>title</literal>, but are passed through the
-            <literal>to_list</literal> combinator since they are a JSON
-            list. The <literal>filter_string</literal> combinator folds
-            all of the strings in the JSON list into an OCaml list (any
-            non-strings also in there are simply ignored).
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The <literal>is_online</literal> and
-            <literal>is_translated</literal> fields are optional in our
-            JSON schema, and no error is raised if they are not present
-            in the JSON array. The resulting OCaml type is a
-            <literal>string option</literal> to reflect this. In our
-            example, only <literal>is_online</literal> is present and
-            <literal>is_translated</literal> will be
-            <literal>None</literal>.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        In the last part of the example, we simply print the parsed
-        fields since they are just normal OCaml values. This technique
-        of using chained parsing functions is very powerful in
-        combination with the OCaml type system. Many errors that don't
-        make sense at runtime (for example, mixing up lists and objects)
-        will be caught statically via a type error.
-      </para>
+        <para>
+          This introduces the <literal>Yojson.Basic.Util</literal>
+          module, which contains <emphasis>combinator</emphasis>
+          functions for JSON manipulation. Combinators are a style of
+          function that can be chained together using the
+          <literal>|!</literal> pipe operator to select and convert
+          values out of the JSON structure. Let's examine some of them
+          in more detail:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              For the <literal>title</literal> string, the
+              <literal>member</literal> combinator extracts the key from
+              the array, and casts it to an OCaml string. An exception
+              is raised if the JSON value is not a string.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <literal>tags</literal> field is similar to
+              <literal>title</literal>, but are passed through the
+              <literal>to_list</literal> combinator since they are a
+              JSON list. The <literal>filter_string</literal> combinator
+              folds all of the strings in the JSON list into an OCaml
+              list (any non-strings also in there are simply ignored).
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <literal>is_online</literal> and
+              <literal>is_translated</literal> fields are optional in
+              our JSON schema, and no error is raised if they are not
+              present in the JSON array. The resulting OCaml type is a
+              <literal>string option</literal> to reflect this. In our
+              example, only <literal>is_online</literal> is present and
+              <literal>is_translated</literal> will be
+              <literal>None</literal>.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          In the last part of the example, we simply print the parsed
+          fields since they are just normal OCaml values. This technique
+          of using chained parsing functions is very powerful in
+          combination with the OCaml type system. Many errors that don't
+          make sense at runtime (for example, mixing up lists and
+          objects) will be caught statically via a type error.
+        </para>
+      </sect3>
     </sect2>
-  </sect1>
-  <sect1 id="constructing-json-values">
-    <title>Constructing JSON values</title>
-    <para>
-      To build and print JSON values, you can just construct values of
-      type <literal>json</literal> and call the
-      <literal>to_string</literal> function. There are also
-      pretty-printing functions that lay out the output in a more
-      human-readable style:
-    </para>
-    <programlisting language="ocaml">
+    <sect2 id="constructing-json-values">
+      <title>Constructing JSON values</title>
+      <para>
+        To build and print JSON values, you can just construct values of
+        type <literal>json</literal> and call the
+        <literal>to_string</literal> function. There are also
+        pretty-printing functions that lay out the output in a more
+        human-readable style:
+      </para>
+      <programlisting language="ocaml">
 # let x = `Assoc [ (&quot;key&quot;, `String &quot;value&quot;) ] ;;
 val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
   `Assoc [(&quot;key&quot;, `String &quot;value&quot;)]
@@ -12860,19 +12862,20 @@ val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
 { &quot;key&quot;: &quot;value&quot; }
 - : unit = ()
 </programlisting>
-    <para>
-      In the example above, although the value that <literal>x</literal>
-      has is compatible with the type <literal>json</literal>, it's not
-      explicitly defined as such. The type inference engine will figure
-      out a type that is based on how the value <literal>x</literal> is
-      used, and in this case only the <literal>Assoc</literal> and
-      <literal>String</literal> variants are present. One difficulty you
-      will encounter is that type errors involving polymorphic variants
-      can be quite verbose if you make a mistake in your code. For
-      example, suppose you build an <literal>Assoc</literal> and include
-      a single value instead of a list of keys:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        In the example above, although the value that
+        <literal>x</literal> has is compatible with the type
+        <literal>json</literal>, it's not explicitly defined as such.
+        The type inference engine will figure out a type that is based
+        on how the value <literal>x</literal> is used, and in this case
+        only the <literal>Assoc</literal> and <literal>String</literal>
+        variants are present. One difficulty you will encounter is that
+        type errors involving polymorphic variants can be quite verbose
+        if you make a mistake in your code. For example, suppose you
+        build an <literal>Assoc</literal> and include a single value
+        instead of a list of keys:
+      </para>
+      <programlisting language="ocaml">
 # let x = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
 val x : [&gt; `Assoc of string * [&gt; `String of string ] ] =
   `Assoc (&quot;key&quot;, `String &quot;value&quot;)
@@ -12883,48 +12886,49 @@ Error: This expression has type
        but an expression was expected of type Yojson.Basic.json
        Types for tag `Assoc are incompatible
 </programlisting>
-    <para>
-      The type error above isn't <emphasis>wrong</emphasis> as such, but
-      can be inconvenient to wade through for larger values. An easy way
-      to narrow down this sort of type error is to add explicit type
-      annotations as a compiler hint about your intentions:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The type error above isn't <emphasis>wrong</emphasis> as such,
+        but can be inconvenient to wade through for larger values. An
+        easy way to narrow down this sort of type error is to add
+        explicit type annotations as a compiler hint about your
+        intentions:
+      </para>
+      <programlisting language="ocaml">
 # let (x:Yojson.Basic.json) = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
 </programlisting>
-    <para>
-      In this case, we've marked the <literal>x</literal> as being of
-      type <literal>Yojson.Basic.json</literal>, and the compiler
-      immediately spots that the argument to the
-      <literal>Assoc</literal> variant has the incorrect type. This
-      illustrates the strengths and drawbacks of using polymorphic
-      variants: they make it possible to easily subtype across module
-      boundaries (the <literal>Basic</literal> and
-      <literal>Safe</literal> in Yojson's case), but the error messages
-      can be more confusing. However, a bit of careful manual type
-      annotation is all it takes to make tracking down such issues much
-      easier.
-    </para>
-    <para>
-      <emphasis>avsm</emphasis>: segway into memory representation of
-      polyvariants here?
-    </para>
-    <sect2 id="using-non-standard-json-extensions">
-      <title>Using non-standard JSON extensions</title>
       <para>
-        The standard JSON types are <emphasis>really</emphasis> basic,
-        and OCaml types are far more expressive. Yojson supports an
-        extended JSON format for those times when you're not
-        interoperating with external systems and just want a convenient
-        human-readable local format. The
-        <literal>Yojson.Safe.json</literal> type is a superset of the
-        <literal>Basic</literal> polymorphic variant, and looks like
-        this:
+        In this case, we've marked the <literal>x</literal> as being of
+        type <literal>Yojson.Basic.json</literal>, and the compiler
+        immediately spots that the argument to the
+        <literal>Assoc</literal> variant has the incorrect type. This
+        illustrates the strengths and drawbacks of using polymorphic
+        variants: they make it possible to easily subtype across module
+        boundaries (the <literal>Basic</literal> and
+        <literal>Safe</literal> in Yojson's case), but the error
+        messages can be more confusing. However, a bit of careful manual
+        type annotation is all it takes to make tracking down such
+        issues much easier.
       </para>
-      <programlisting language="ocaml">
+      <para>
+        <emphasis>avsm</emphasis>: segway into memory representation of
+        polyvariants here?
+      </para>
+      <sect3 id="using-non-standard-json-extensions">
+        <title>Using non-standard JSON extensions</title>
+        <para>
+          The standard JSON types are <emphasis>really</emphasis> basic,
+          and OCaml types are far more expressive. Yojson supports an
+          extended JSON format for those times when you're not
+          interoperating with external systems and just want a
+          convenient human-readable local format. The
+          <literal>Yojson.Safe.json</literal> type is a superset of the
+          <literal>Basic</literal> polymorphic variant, and looks like
+          this:
+        </para>
+        <programlisting language="ocaml">
 type json = [ 
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -12939,54 +12943,55 @@ type json = [
   | `Tuple of json list
   | `Variant of string * json option ] 
 </programlisting>
-      <para>
-        You should immediately be able to spot a benefit of using
-        polymorphic variants here. A standard JSON type such as a
-        <literal>String</literal> will type-check against both the
-        <literal>Basic</literal> module and also the non-standard
-        <literal>Safe</literal> module. However, if you use extension
-        values such as <literal>Tuple</literal> with the
-        <literal>Basic</literal> module, they will not be a valid
-        sub-type and the compiler will complain.
-      </para>
-      <para>
-        The extensions includes with Yojson include:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            The <literal>lit</literal> suffix denotes that the value is
-            stored as a JSON string. For example, a
-            <literal>Floatlit</literal> will be stored as
-            <literal>&quot;1.234&quot;</literal> instead of
-            <literal>1.234</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The <literal>Tuple</literal> type is stored as
-            <literal>(&quot;abc&quot;, 123)</literal> instead of a list.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The <literal>Variant</literal> type encodes OCaml variants
-            more explicitly, as
-            <literal>&lt;&quot;Foo&quot;&gt;</literal> or
-            <literal>&lt;&quot;Bar&quot;:123&gt;</literal> for a variant
-            with parameters.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        The only purpose of these extensions is to make the data
-        representation more expressive without having to refer to the
-        original OCaml types. You can always cast a
-        <literal>Safe.json</literal> to a <literal>Basic.json</literal>
-        type by using the <literal>to_basic</literal> function as
-        follows:
-      </para>
-      <programlisting language="ocaml">
+        <para>
+          You should immediately be able to spot a benefit of using
+          polymorphic variants here. A standard JSON type such as a
+          <literal>String</literal> will type-check against both the
+          <literal>Basic</literal> module and also the non-standard
+          <literal>Safe</literal> module. However, if you use extension
+          values such as <literal>Tuple</literal> with the
+          <literal>Basic</literal> module, they will not be a valid
+          sub-type and the compiler will complain.
+        </para>
+        <para>
+          The extensions includes with Yojson include:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              The <literal>lit</literal> suffix denotes that the value
+              is stored as a JSON string. For example, a
+              <literal>Floatlit</literal> will be stored as
+              <literal>&quot;1.234&quot;</literal> instead of
+              <literal>1.234</literal>.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <literal>Tuple</literal> type is stored as
+              <literal>(&quot;abc&quot;, 123)</literal> instead of a
+              list.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <literal>Variant</literal> type encodes OCaml variants
+              more explicitly, as
+              <literal>&lt;&quot;Foo&quot;&gt;</literal> or
+              <literal>&lt;&quot;Bar&quot;:123&gt;</literal> for a
+              variant with parameters.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          The only purpose of these extensions is to make the data
+          representation more expressive without having to refer to the
+          original OCaml types. You can always cast a
+          <literal>Safe.json</literal> to a
+          <literal>Basic.json</literal> type by using the
+          <literal>to_basic</literal> function as follows:
+        </para>
+        <programlisting language="ocaml">
 val to_basic : json -&gt; Yojson.Basic.json
 (** Tuples are converted to JSON arrays, Variants are converted to JSON strings
 or arrays of a string (constructor) and a json value (argument). Long integers
@@ -12998,34 +13003,35 @@ are converted to JSON strings.  Examples:
 `Intlit &quot;12345678901234567890&quot;  -&gt;    `String &quot;12345678901234567890&quot;
  *)
 </programlisting>
+      </sect3>
     </sect2>
-  </sect1>
-  <sect1 id="automatically-mapping-json-to-ocaml-types">
-    <title>Automatically mapping JSON to OCaml types</title>
-    <para>
-      The combinators described earlier make it fairly easy to extract
-      fields from JSON records, but the process is still pretty manual.
-      We'll talk about how to do larger-scale JSON parsing now, using a
-      domain-specific language known as
-      <ulink url="http://oss.wink.com/atdgen/">ATD</ulink>.
-    </para>
-    <para>
-      The idea behind ATD is to specify the format of the JSON in a
-      separate file, and then run a compiler (<literal>atdgen</literal>)
-      that outputs OCaml code to construct and parse JSON values. This
-      means that you don't need to write any OCaml parsing code at all,
-      as it will all be auto-generated for you.
-    </para>
-    <para>
-      Let's go straight into looking at an example of how this works, by
-      using a small portion of the Github API. Github is a popular code
-      hosting and sharing website that provides a JSON-based web
-      <ulink url="http://developer.github.com">API</ulink>. The ATD code
-      fragment below describes the Github authorization API. It is based
-      on a pseudo-standard web protocol known as OAuth, and is used to
-      authorized users to access Github services.
-    </para>
-    <programlisting language="ocaml">
+    <sect2 id="automatically-mapping-json-to-ocaml-types">
+      <title>Automatically mapping JSON to OCaml types</title>
+      <para>
+        The combinators described earlier make it fairly easy to extract
+        fields from JSON records, but the process is still pretty
+        manual. We'll talk about how to do larger-scale JSON parsing
+        now, using a domain-specific language known as
+        <ulink url="http://oss.wink.com/atdgen/">ATD</ulink>.
+      </para>
+      <para>
+        The idea behind ATD is to specify the format of the JSON in a
+        separate file, and then run a compiler
+        (<literal>atdgen</literal>) that outputs OCaml code to construct
+        and parse JSON values. This means that you don't need to write
+        any OCaml parsing code at all, as it will all be auto-generated
+        for you.
+      </para>
+      <para>
+        Let's go straight into looking at an example of how this works,
+        by using a small portion of the Github API. Github is a popular
+        code hosting and sharing website that provides a JSON-based web
+        <ulink url="http://developer.github.com">API</ulink>. The ATD
+        code fragment below describes the Github authorization API. It
+        is based on a pseudo-standard web protocol known as OAuth, and
+        is used to authorized users to access Github services.
+      </para>
+      <programlisting language="ocaml">
 type scope = [
     User &lt;json name=&quot;user&quot;&gt;
   | Public_repo &lt;json name=&quot;public_repo&quot;&gt;
@@ -13055,30 +13061,31 @@ type authorization_response = {
   ?note_url: string option;
 }
 </programlisting>
-    <para>
-      ATD is (deliberately) similar to OCaml type definitions. Each
-      field can include extra annotations to customise the parsing code
-      for a particular backend. For example, the Github
-      <literal>scope</literal> field above is defined as a variant type,
-      but with the actual JSON values being defined explicitly (as
-      lower-case versions).
-    </para>
-    <para>
-      The ATD spec can be compiled to a number of OCaml targets. Let's
-      run the compiler twice, to generate some OCaml type definitions,
-      and a JSON serialiser.
-    </para>
-    <programlisting language="bash">
+      <para>
+        ATD is (deliberately) similar to OCaml type definitions. Each
+        field can include extra annotations to customise the parsing
+        code for a particular backend. For example, the Github
+        <literal>scope</literal> field above is defined as a variant
+        type, but with the actual JSON values being defined explicitly
+        (as lower-case versions).
+      </para>
+      <para>
+        The ATD spec can be compiled to a number of OCaml targets. Let's
+        run the compiler twice, to generate some OCaml type definitions,
+        and a JSON serialiser.
+      </para>
+      <programlisting language="bash">
 $ atdgen -t github.atd
 $ atdgen -j github.atd
 </programlisting>
-    <para>
-      This will generate some new files in your current directory.
-      <literal>Github_t.ml</literal> and <literal>Github_t.mli</literal>
-      will contain an OCaml module with types defines that correspond to
-      the ATD file. It looks like this:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        This will generate some new files in your current directory.
+        <literal>Github_t.ml</literal> and
+        <literal>Github_t.mli</literal> will contain an OCaml module
+        with types defines that correspond to the ATD file. It looks
+        like this:
+      </para>
+      <programlisting language="ocaml">
 type scope = [
   | `User | `Public_repo | `Repo | `Repo_status 
   | `Delete_repo | `Gist
@@ -13104,25 +13111,26 @@ type authorization_response = {
   note_url: string option
 }
 </programlisting>
-    <para>
-      There is an obvious correspondence to the ATD definition. Note in
-      particular that field names in separate OCaml records cannot
-      shadow each other, and so we specifically prefix every field with
-      a prefix to distinguish it from other records. For example,
-      <literal>&lt;ocaml field_prefix=&quot;auth_req_&quot;&gt;</literal>
-      in the ATD spec prefixes every field name in the generated
-      <literal>authorization_request</literal> record with
-      <literal>auth_req</literal>.
-    </para>
-    <para>
-      The <literal>Github_t</literal> module only contains the type
-      definitions, while <literal>Github_j</literal> has a concrete
-      serialization module to and from JSON. You can read the
-      <literal>github_j.mli</literal> to see the full interface, but the
-      important functions for most uses are the conversion functions to
-      and from a string. For our example above, this looks like:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        There is an obvious correspondence to the ATD definition. Note
+        in particular that field names in separate OCaml records cannot
+        shadow each other, and so we specifically prefix every field
+        with a prefix to distinguish it from other records. For example,
+        <literal>&lt;ocaml field_prefix=&quot;auth_req_&quot;&gt;</literal>
+        in the ATD spec prefixes every field name in the generated
+        <literal>authorization_request</literal> record with
+        <literal>auth_req</literal>.
+      </para>
+      <para>
+        The <literal>Github_t</literal> module only contains the type
+        definitions, while <literal>Github_j</literal> has a concrete
+        serialization module to and from JSON. You can read the
+        <literal>github_j.mli</literal> to see the full interface, but
+        the important functions for most uses are the conversion
+        functions to and from a string. For our example above, this
+        looks like:
+      </para>
+      <programlisting language="ocaml">
 val string_of_authorization_response :
   ?len:int -&gt; authorization_response -&gt; string
   (** Serialize a value of type {!authorization_response}
@@ -13134,53 +13142,55 @@ val string_of_authorization_response :
 val authorization_response_of_string :
   string -&gt; authorization_response
 </programlisting>
-    <para>
-      This is pretty convenient! We've written a single ATD file, and
-      all the OCaml boilerplate to convert between JSON and a strongly
-      typed record has been generated for us. You can control various
-      aspects of the serializer by passing flags to
-      <literal>atdgen</literal>. The important ones for JSON are:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>-j-std</literal>: work in standard JSON mode, and
-          never print non-standard JSON extensions.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>-j-custom-fields FUNCTION</literal>: call a custom
-          function for every unknown field encountered, instead of
-          raising a parsing exception.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>-j-defaults</literal>: force the output a JSON value
-          even if the specification defines it as the default value for
-          that field.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      The full ATD specification is quite sophisticated (and well
-      documented online at its homepage). The ATD compiler can also
-      target formats other than JSON, and also outputs code for other
-      languages such as Java if you need more interoperability. There
-      are also several similar projects you can investigate which
-      automate the code generation process:
-      <ulink url="http://piqi.org">Piqi</ulink> uses the Google protobuf
-      format, and <ulink url="http://thrift.apache.org">Thrift</ulink>
-      supports a huge variety of other programming languages.
-    </para>
-    <para>
-      We'll also return to the Github example here later in the book
-      when discussing the Async networking library, and you can find the
-      full ATD specification for Github in the
-      <ulink url="http://github.com/avsm/ocaml-github"><literal>ocaml-github</literal></ulink>
-      repository.
-    </para>
+      <para>
+        This is pretty convenient! We've written a single ATD file, and
+        all the OCaml boilerplate to convert between JSON and a strongly
+        typed record has been generated for us. You can control various
+        aspects of the serializer by passing flags to
+        <literal>atdgen</literal>. The important ones for JSON are:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>-j-std</literal>: work in standard JSON mode, and
+            never print non-standard JSON extensions.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>-j-custom-fields FUNCTION</literal>: call a custom
+            function for every unknown field encountered, instead of
+            raising a parsing exception.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>-j-defaults</literal>: force the output a JSON
+            value even if the specification defines it as the default
+            value for that field.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        The full ATD specification is quite sophisticated (and well
+        documented online at its homepage). The ATD compiler can also
+        target formats other than JSON, and also outputs code for other
+        languages such as Java if you need more interoperability. There
+        are also several similar projects you can investigate which
+        automate the code generation process:
+        <ulink url="http://piqi.org">Piqi</ulink> uses the Google
+        protobuf format, and
+        <ulink url="http://thrift.apache.org">Thrift</ulink> supports a
+        huge variety of other programming languages.
+      </para>
+      <para>
+        We'll also return to the Github example here later in the book
+        when discussing the Async networking library, and you can find
+        the full ATD specification for Github in the
+        <ulink url="http://github.com/avsm/ocaml-github"><literal>ocaml-github</literal></ulink>
+        repository.
+      </para>
+    </sect2>
   </sect1>
 </chapter><chapter id="xml-streams-and-trees">
   <title>XML Streams and Trees</title>
