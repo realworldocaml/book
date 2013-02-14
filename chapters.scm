@@ -1,5 +1,5 @@
 ((part Preface)
- (name "preface")
+ (name "prologue")
  (file "01-prologue")
  (public true)
  (note "Largely complet")

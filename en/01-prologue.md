@@ -1,4 +1,4 @@
-# Preface
+# Prologue
 
 ## Why OCaml?
 
