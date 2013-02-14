@@ -23,6 +23,7 @@ let from_anil =
   ; "jaked"                   (* Jake Donham <jake@donham.org> *)
   ; "georgeparisis"           (* TODO George Parisis <george.parissis@gmail.com> *)
   ; "nc6"                     (* TODO Nick Clarke <nicholas.clarke@gmail.com> *)
+  ; "stevej"                  (* TODO Steve Jenson <stevej@fruitless.org> *)
 ]
 
 let from_yminsky =
