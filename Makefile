@@ -7,6 +7,9 @@ milestone-%: all
 trunk: all
 	./gen-book.sh -m trunk
 
+pdf: trunk
+	./gen-oreilly-pdf.sh
+
 server:
 	cd scripts && ./buildgh.sh && cd ../live_site && ../scripts/rwoserver.sh
 

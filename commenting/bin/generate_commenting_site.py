@@ -320,6 +320,8 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_li
         locale_dst_html = render_locale_chapter_page(html_name, "chapter", soup, navigation_list, args)
     elif soup.find("div", "appendix"):
         locale_dst_html = render_locale_chapter_page(html_name, "appendix", soup, navigation_list, args)
+    elif soup.find("div", "preface"):
+        locale_dst_html = render_locale_chapter_page(html_name, "preface", soup, navigation_list, args)
     else:
         panic("Unknown page type: {}".format(html_name))
     # Write the destination HTML to disc.
