@@ -833,8 +833,8 @@ previous two.  The classic recursive definition of Fibonacci is as
 follows:
 
 ```ocaml
-let rec fib i =
-  if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
+# let rec fib i =
+    if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
 ```
 
 This is, however, exponentially slow, for the same reason that
@@ -878,7 +878,7 @@ val fib : int -> int = <fun>
 ```
 
 And we can even write a higher-order function that we'll call `fix`
-that ties this not for us for any such function.
+that ties this knot for us for any function of this type.
 
 ```ocaml
 # let rec fix f x = f (fix f) x;;
@@ -908,10 +908,60 @@ Note the use of laziness here, which allows us to define `f'` in terms
 of each other `memo_f'`.  Laziness is generally useful in making it
 possible to make complex recursive definitions.
 
+And now, we can build ourselves an efficient version of Fibonacci.
 
-Note that this use of memoization relies on side-effects to cache intermediate
-computations, but it doesn't change the values of the function.  Its purpose is
-to improve performance.
+```ocaml
+# let fib = memo_fix fib_recur;;
+val fib : int -> int = <fun>
+# time (fun () -> fib 40);;
+Time: 0.236034ms
+```
+
+Now, we can go back to our implementation of `edit_distance`, and pull
+the same trick.  First, here's the version of `edit_server` with the
+recursion taken out.  Note that we also change `edit_server` so that
+it takes the pair of strings to be compared as a single argument,
+since memoization only works sensibly for single-argument functions.
+
+```ocaml
+# let edit_distance_recur recur (s,t) =
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -> x (* if either string is empty, return the length of the
+                            other string. *)
+    | (len_s,len_t) ->
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ recur (s',t ) + 1
+        ; recur (s ,t') + 1
+        ; recur (s',t') + cost_to_drop_both
+        ] ;;
+val edit_distance_recur : (string * string -> int) -> string * string -> int =
+  <fun>
+```
+
+And now, we can use `memo_fix` to create an efficient, memoized
+version of this function.  While we're at it, we'll flip the calling
+convention back to being an ordinary curried function.
+
+```ocaml
+# let edit_distance x y = memo_fix edit_distance_recur (x,y);;
+val edit_distance : string -> string -> int = <fun>
+# time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
+Time: 2.14601ms
+- : int = 2
+```
+
+This is about ten thousand times faster than our original
+implementation.
+
+Note that this use of memoization relies on side-effects to cache
+intermediate computations, but it doesn't change the values of the
+function.  It's all about improving performance, not about changing
+behavior.
 
 ### Hash consing
 
