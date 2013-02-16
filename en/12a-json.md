@@ -1,23 +1,18 @@
 # Handling JSON data
 
-Data serialization, _i.e._ reading and writing program data to a sequence
-of bytes, is an important and common programming task.  Sometimes you
-need to match someone else's data format (such as XML), and other times
-you just want to quickly dump some values to disk and read them
-back later.  To this end, OCaml comes with several techniques for
-data serialization depending on what your problem is.
+Now that you've seen how to convert OCaml values into s-expressions, it's
+time to look at other useful serialization mechanisms. We'll start off by looking
+at JSON and XML, as they are very common third-party data formats.  This chapter
+also introduces you to some nice uses of polymorphic variants, and also using
+external tools to auto-generate OCaml code.
 
-We'll start off by looking at JSON and XML first, as they are very common
-third-party data formats.  After that, we'll introduce some syntax extensions
-in Core that make it really easy to manipulate s-expressions and safe binary
-serialisers directly from OCaml types.
+## JSON Basics 
 
 JSON is a lightweight data-interchange format often used in web services and
-browsers.  It is described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
+browsers.  It's described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
 and is designed to be easy to parse and generate.  You'll run into JSON very
-often when working with modern APIs, and so we'll cover several different ways
-to manipulate it in this chapter. Along the way we'll introduce new libraries
-and syntax extensions which make the job easier.
+often when working with modern APIs, so we'll cover several different ways
+to manipulate it in this chapter.
 
 JSON consists of just two basic structures: an unordered collection of
 key/value pairs, and an ordered list of values.  Values can be strings,
@@ -61,14 +56,19 @@ can be `Null` as well as contain an actual value.
 <title>Installing the Yojson library</title>
 
 There are several JSON libraries available for OCaml.  For this chapter, we've
-picked the [`Yojson`](http://mjambon.com/yojson.html) library.  The easiest way
-to install it is by using the OPAM package manager (see
-[xref](#packaging-and-build-systems) for installation instructions).  Once OPAM
-is working, you will need to run `opam install yojson`.
+picked the [`Yojson`](http://mjambon.com/yojson.html) library. 
+Install it by using the OPAM package manager. 
+
+```
+$ opam install yojson
+```
+
+See [xref](#packaging-and-build-systems) for installation instructions if you haven't
+already got OPAM.
 
 </note>
  
-### Parsing standard JSON with Yojson
+### Parsing JSON with Yojson
 
 The JSON specification has very few data types, and Yojson implements these in
 the `Yojson.Basic` module.  The `json` type shown below is sufficient to
