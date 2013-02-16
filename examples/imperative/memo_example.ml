@@ -1,77 +1,106 @@
-(*
- *
- * ----------------------------------------------------------------
- *
- * @begin[license]
- * Copyright (C) 2012 Jason Hickey
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * Author: Jason Hickey
- * @email{jyh@cs.caltech.edu}
- * @end[license]
- *)
-open Hashmap_example
+open Core.Std
 
-module Memo : sig
-   type ('a, 'b) t
+let fib_num = 20
 
-   val create : unit -> ('a, 'b) t
-   val apply : ('a, 'b) t -> func:('a -> 'b) -> arg:'a -> 'b
-end = struct
-   type ('a, 'b) t = ('a, 'b) HashMap.t
+let memoize f =
+  let table = Hashtbl.Poly.create () in
+  (fun x ->
+    match Hashtbl.find table x with
+    | Some y -> y
+    | None ->
+      let y = f x in
+      Hashtbl.add_exn table ~key:x ~data:y;
+      y
+  )
 
-   let create = HashMap.create
-   let apply table ~func ~arg =
-     match HashMap.find table ~key:arg with
-     | Some x -> x
-     | None ->
-         let x = func arg in
-         HashMap.add table ~key:arg ~data:x;
-         x
-end;;
+let rec fix f x = f (fix f) x
 
-let rec fib i =
-   if i <= 1 then i else fib (i - 1) + fib (i - 2);;
+let memo_fix f x =
+  let rec f' x = f (Lazy.force memo_f) x
+  and memo_f = lazy (memoize f')
+  in
+  f' x
 
-let time f x =
-   let start = Sys.time () in
-   let y = f x in
-   Printf.printf "Time: %g sec\n" (Sys.time () -. start);
-   y;;
+let time f =
+  let start = Time.now () in
+  let y = f () in
+  let stop = Time.now () in
+  printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
+  y
 
-time fib 40;;
+module Bad_fib = struct
+  let rec fib i =
+    if i <= 1 then i else fib (i - 1) + fib (i - 2)
 
-let memo_fib =
-   let memo = Memo.create () in
-   let rec fib i =
-      if i <= 1 then
-         i
-      else
-         Memo.apply memo ~func:fib ~arg:(i - 1) +
-         Memo.apply memo ~func:fib ~arg:(i - 2)
-   in
-      fib;;
+  let () = printf "slow: %d\n" (time (fun () -> fib fib_num))
+end
 
-time memo_fib 40;;
+module Good_fib = struct
 
-(*
- * -*-
- * Local Variables:
- * Fill-column: 100
- * End:
- * -*-
- * vim:ts=3:et:tw=100
- *)
+  let fib rec_fib i =
+    if i <= 1 then i
+    else rec_fib (i - 1) + rec_fib (i - 2)
+
+  let rec slow_fib i = fib slow_fib i
+
+  let () = printf "SLOW: %d\n" (time (fun () -> slow_fib fib_num))
+
+  let fast_fib =
+    let rec fib i =
+      let memo_fib = Lazy.force memo_fib in
+      if i <= 1 then i
+      else memo_fib (i - 1) + memo_fib (i - 2)
+    and memo_fib =
+      lazy (memoize fib)
+    in
+    fib
+
+  let () = printf "fast: %d\n" (time (fun () -> fast_fib fib_num))
+
+  let fast_fib2 = memo_fix fib
+
+  let () = printf "fast2: %d\n" (time (fun () -> fast_fib2 fib_num))
+
+end
+
+module Levenshtein_distance_slow = struct
+
+  let rec edit_distance s t =
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -> x
+    | (len_s,len_t) ->
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ edit_distance s' t  + 1
+        ; edit_distance s  t' + 1
+        ; edit_distance s' t' + cost_to_drop_both
+        ]
+
+end
+
+module Levenshtein_distance = struct
+
+  let edit_distance' recur (s,t) =
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -> x (* if either string is empty, return the length of the
+                            other string. *)
+    | (len_s,len_t) ->
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ recur (s',t ) + 1
+        ; recur (s ,t') + 1
+        ; recur (s',t') + cost_to_drop_both
+        ]
+
+  let edit_distance_fast = memo_fix edit_distance'
+
+end
+

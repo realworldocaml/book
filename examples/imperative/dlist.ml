@@ -1,7 +1,7 @@
 open Core.Std
 
 type 'a element =
-  { value : 'a;
+  { mutable value : 'a;
     mutable next : 'a element option;
     mutable prev : 'a element option
   }
@@ -16,6 +16,7 @@ let value elt = elt.value
 let first l = !l
 let next elt = elt.next
 let prev elt = elt.prev
+let set elt v = elt.value <- v
 
 let insert_first l value =
   let new_elt = { prev = None; next = !l; value } in
@@ -51,7 +52,7 @@ let remove l elt =
 let iter l ~f =
   let rec loop = function
     | None -> ()
-    | Some { value; next; _ } -> f value; loop next
+    | Some el -> f (value el); loop (next el)
   in
   loop !l
 

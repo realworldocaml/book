@@ -14,7 +14,7 @@ end = struct
   let num_buckets = 17
   let hash_bucket key = (Hashtbl.hash key) mod num_buckets
 
-  let create () = Array.create num_buckets []
+  let create () = Array.create ~len:num_buckets []
 
   let add table ~key ~data =
     let index = hash_bucket key in

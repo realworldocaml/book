@@ -176,7 +176,7 @@ helper function `bucket_has_key` is used for this purpose.
 
 We use the `<-` operator for updating elements of an array (`array.(i)
 <- expr`) and for updating a record field (`record.field <-
-expression`).  
+expression`).
 
 We also use a single semicolon, `;`, as a sequencing operator, to
 allow us to do two side-effecting operations in a row: first, update
@@ -214,17 +214,17 @@ from the following assignment `l := Some new_front`, we surround the match in a
 final assignment would become part of the `None -> ...` case, which is not what
 we want.
 
-
 Note also that we do all of the side-effecting operations at the very
 end of each function.  This is good practice because it minimizes the
 chance that such operations will be interrupted with an exception,
 leaving the data structure in an inconsistent state.
 
-## Mutable data structures
+## Primitive mutable data
 
 We've already encountered two different forms of mutable data: records
-with mutable fields, and arrays.  We'll discuss those, and a few other
-forms of mutable data, in more detail now.
+with mutable fields, and arrays.  These are two of the building blocks
+of imperative programming in OCaml.  We discuss those, and a few
+others, below.
 
 ### Array-like data
 
@@ -282,7 +282,7 @@ refs.
 
 * `ref expr` constructs a reference cell containing the value defined by the
   expression `expr`.
-* `! refcell` returns the contents of the reference cell.
+* `!refcell` returns the contents of the reference cell.
 * `refcell := expr` replaces the contents of the reference cell.
 
 You can see these in action below.
@@ -412,17 +412,17 @@ type 'a element
 val create   : unit -> 'a t
 val is_empty : 'a t -> bool
 
-(** navigating the [element]s of a list *)
+(** Navigation using [element]s *)
 val first : 'a t -> 'a element option
 val next  : 'a element -> 'a element option
 val prev  : 'a element -> 'a element option
 val value : 'a element -> 'a
 
-(** Simple iteration functions *)
-val find : 'a t -> 'a -> 'a element option
-val iter : 'a t -> f:('a -> unit) -> unit
+(** Whole-data-structure iteration *)
+val iter    : 'a t -> f:('a -> unit) -> unit
+val find_el : 'a t -> f:('a -> bool) -> 'a element option
 
-(** mutators *)
+(** Mutation *)
 val insert_first : 'a t -> 'a -> 'a element
 val insert_after : 'a element -> 'a -> 'a element
 val remove : 'a t -> 'a element -> unit
@@ -433,7 +433,8 @@ list, and `'a element`, the type of an element.  Elements act as
 pointers to the interior of a list, and allow us to navigate the list
 and give us a point at which to apply mutating operations.
 
-Now let's look at the implementation.  
+Now let's look at the implementation.  We'll start by defining `'a
+element` and `'a t`.
 
 ```ocaml
 (* file: dlist.ml *)
@@ -448,11 +449,12 @@ type 'a element =
 type 'a t = 'a element option ref
 ```
 
-We'll start by defining our two types.  An `'a element` is a record
-containing the value to be stored in that node as well as optional
-(and mutable) fields pointing to the previous and next elements.  At
-the beginning of the list, the `prev` field is `None`, and at the end
-of the list, the `next` field is `None`.
+An `'a element` is a record containing the value to be stored
+in that node as well as optional (and mutable) fields pointing to the
+previous and next elements.  At the beginning of the list, the `prev`
+field is `None`, and at the end of the list, the `next` field is
+`None`.
+
 
 The type of the list itself, `'a t`, is an optional, mutable reference
 to an `element`.  This reference is `None` if the list is empty, and
@@ -472,98 +474,8 @@ let next elt = elt.next
 let prev elt = elt.prev
 ```
 
-The above are all relatively straight-forward, largely following from
-the type definitions above.
-
-At this point, we can start looking at operations that mutate the
-list.
-
-```ocaml
-let insert_first l value =
-  let new_elt = { prev = None; next = !l; value } in
-  begin match !l with
-  | Some old_first -> old_first.prev <- Some new_elt
-  | None -> ()
-  end;
-  l := Some new_elt;
-  new_elt
-``` 
-
-Above, we define the function that inserts a value into the list as a
-new first element.  We define a new element `elt`, link it into the
-list, and set the list reference.
-
-This allows us to modify lists from the front, but we may want to
-insert elements internally in the list as well.  That's what the
-`insert_after` function is for.
-
-```ocaml
-let insert_after elt value =
-  let new_elt = { value; prev = Some elt; next = elt.next } in
-  begin match elt.next with
-  | Some old_next -> old_next.prev <- Some new_elt
-  | None -> ()
-  end;
-  elt.next <- Some new_elt;
-  new_elt
-```
-
-This example uses the sequencing operator `;` to separate the steps to
-be executed in order: first, create the new element `elt`; then set
-`old_first.previous` to point to it; then set the list `l` to refer to
-the `elt` element; then return the element `elt`.
-
-In general, when a sequence expression `expr1; expr2` is evaluated, `expr1` is
-evaluated first, and then `expr2`.  The expression `expr1` must have type
-`unit`, and the the value of `expr2` is returned as the value of the entire
-sequence.  For example, the sequence `print_string "hello world"; 1 + 2` first
-prints the string `"hello world"`, then returns the integer `3`.
-
-There are a few more things to note.  First, `;` is a _separator_ in
-OCaml, not a terminator as it is in C or Java.  The compiler is
-somewhat relaxed about parsing a terminating semicolon, so it may work
-for you, but you should not rely on it.
-
-```ocaml
-# let i = print_string "Hello world\n"; 2; in i;;
-Hello world
-- : int = 2
-```
-
-Also note, the precedence of a `match` expression is very low, so to separate it
-from the following assignment `l := Some new_front`, we surround the match in a
-`begin ... end` bracketing (we could also use parentheses).  If we did not, the
-final assignment would become part of the `None -> ...` case, which is not what
-we want.
-
-To complete this initial part of the implementation, we need a removal
-function.  The logic is fairly straightforward: you change the next
-element to point to the previous and the previous to point to the
-next, and then clears its own references.
-
-```ocaml
-let remove l elt =
-  let { prev; next; _ } = elt in
-  begin match prev with
-  | Some prev -> prev.next <- next
-  | None -> l := next
-  end;
-  begin match next with
-  | Some next -> next.prev <- prev;
-  | None -> ()
-  end;
-  elt.prev <- None;
-  elt.next <- None
-```
-
-One problem with the above code is that it doesn't detect error cases
-as effectively as one might like.  For example, if you delete an
-element from a list more than once, or delete an element from a list
-that it doesn't belong to, you can end up leaving the list in an
-inconsistent state.  If you want to see how to catch these cases
-before they invalidate the list, you should look at the
-`Doubly_linked` module in Core.
-
+These all follow relatively straight-forwardly from our type
+definitions.
 
 <note><title> Cyclic data structures </title>
 
@@ -589,459 +501,413 @@ structures require mutation.
 
 </note>
 
+### Modifying the list
+
+Now, we'll start considering operations that mutate the list, starting
+with `insert_first`, which inserts an element at the front of the
+list.
+
+```ocaml
+let insert_first l value =
+  let new_elt = { prev = None; next = !l; value } in
+  begin match !l with
+  | Some old_first -> old_first.prev <- Some new_elt
+  | None -> ()
+  end;
+  l := Some new_elt;
+  new_elt
+```
+
+`insert_first` first defines a new element `new_elt`, and then links
+it into the list, finally setting the the list itself to point to
+`new_elt`.  Note that the precedence of a `match` expression is very
+low, so to separate it from the following assignment `l := Some
+new_front`, we surround the match in a `begin ... end` bracketing (we
+could also use parentheses).  If we did not, the final assignment
+would become part of the `None -> ...` case, which is not what we
+want.
+
+In order to add elements later in the list, we can use `insert_after`,
+which takes an `element` as an argument, after which it inserts a new
+element.
+
+```ocaml
+let insert_after elt value =
+  let new_elt = { value; prev = Some elt; next = elt.next } in
+  begin match elt.next with
+  | Some old_next -> old_next.prev <- Some new_elt
+  | None -> ()
+  end;
+  elt.next <- Some new_elt;
+  new_elt
+```
+
+Finally, we need to a `remove` function.
+
+```ocaml
+let remove l elt =
+  let { prev; next; _ } = elt in
+  begin match prev with
+  | Some prev -> prev.next <- next
+  | None -> l := next
+  end;
+  begin match next with
+  | Some next -> next.prev <- prev;
+  | None -> ()
+  end;
+  elt.prev <- None;
+  elt.next <- None
+```
+
+Note that the above code is careful to change the `prev` pointer of
+the following element, and the `next` pointer of the previous element,
+if they exist.  If there's no previous element, then the list pointer
+itself is updated.  In any case, the next and previous pointers of the
+element itself are set to `None`.
+
+These functions are more fragile than they may seem.  In particular,
+misuse of the interface may lead to corrupted data.  For example,
+double-removing an element will cause the main list reference to be
+set to `None`, thus emptying the list.  Similar problems arise from
+removing an element from a list it doesn't belong to.
+
+This shouldn't be a big surprise.  Complex imperative data structures
+can be quite tricky; considerably trickier than their pure
+equivalents.  The issues described above can be dealt with by more
+careful error detection, and such error correction is taken care of in
+modules like Core's `Doubly_linked`.  You should use imperative data
+structures from a well-designed library when you can.  And when you
+can't, you should make sure that the code you write is careful about
+error detection.
+
 ### Iteration functions
 
 When defining containers like lists, dictionaries and trees, you'll
 typically want to define a set of iteration functions, like `iter`,
-`map`, and `fold`, all of which iterate through the list in order.
+`map`, and `fold`, which let you concisely express common iteration
+patterns.
 
-Our `Dlist` interface has an `iter` function, the goal of which is to
-call a `unit` producing function on every element of the list, in
-order.  The implementation is shown below.
+`Dlist` has two such iterators: `iter`, the goal of which is to call a
+`unit` producing function on every element of the list, in order; and
+`find_el`, which runs a provided test function on each values stored
+in the list, returning the first `element` that passes the test.  Both
+`iter` and `find_el` are implemented using simple recursive loops that
+use `next` to walk from element to element, and `value` to extract the
+element from a given node.
 
 ```ocaml
 let iter l ~f =
   let rec loop = function
     | None -> ()
-    | Some { value; next; _ } -> f value; loop next
+    | Some el -> f (value el); loop (next el)
+  in
+  loop !l
+
+let find_el l ~f =
+  let rec loop = function
+    | None -> None
+    | Some elt ->
+      if f (value elt) then Some elt
+      else loop (next elt)
   in
   loop !l
 ```
 
-Sometimes, you want more control over your iteration, and `element`s
-are there to give you that.  Given an element, you can navigate
-through the list using `next` and `prev`,
+## Laziness and other unobservable effects
 
+There are many instances where imperative programming is used to
+modify or improve the performance characteristics of a program,
+without otherwise changing the behavior.  In other words, the program
+could be written without side-effects, but performance is improved by
+having some side-effecting functions working behind the scenes.
 
-This style of iteration is great when you want to iterate through the
-entire list, but sometimes you want more control of the
-of the list, for example when searching for a particular element.  In
-this case, you can use the functions `next` and `prev` to navigate
-through the list.
-
-```ocaml
-   (* Find the element containing x, using = for comparison *)
-   let find l x : 'a element option =
-      let rec search = function
-      | None -> None
-      | Some elt ->
-           if value elt = x then
-              Some elt
-           else
-              search (next elt)
-      in
-      search !l
-```
-
-### Java-style iteration
-
-One possible issue with navagation using the `next` and `prev` functions is that
-code is tied specifically to the doubly-linked list code we have just defined.
-It won't work for iteration through a hash-table, for example.  Another
-technique used in other imperative languages like Java or C++ is to define a
-generic `iterator` type that can be used to enumerate and/or mutate the elements
-in multiple different kinds of containers.  Here is the Java interface.
-
-```java
-public iterface Iterator {
-  public boolean hasNext();
-  public Object next();
-  public void remove();
-};
-```
-
-At any time, a `Iterator` object refers (optionally) to some element of a
-container.  The `hasNext()` method returns true if the iterator refers to an
-element; the method `next()` returns the element, and also advances to the next
-one; and `remove()` removes the last element returned by the iterator.
-
-If we want to define a similar iterator concept in OCaml, we need to choose how
-to represent it.  We _could_ define a separate iterator type for each kind of
-container, but this would be inconvenient, since iterators have similar behavior
-for many different kinds of containers.  To define a _generic_ iterator, there
-are several reasonable choices: we can use first-class modules, or we can use
-objects.  One of the simpler approaches is to use objects.
-
-You can skip forward to the Objects chapter for more informatation about
-objects, but we'll be using basic objects, which are just collections of
-methods, similar to having a record of functions -- we could also implement the
-iterator as a record of functions, but the code would be somewhat more verbose.
-
-First, we need to define a generic iterator type.  For clarity, we'll use a more
-verbose type than in Java.  We'll separate retrieving a value from advacing to
-the next element.  The object type is specified like a record type, but using
-angle brackets `< ... >`.
+One of the simplest of these is _laziness_.  A lazy value is one that
+is not computed until it is actually needed.  In OCaml, lazy values
+are created using the `lazy` keyword, which can be used to prefix any
+expression, returning a value of type `'a Lazy.t`.  The computation of
+is delayed until forced with the `Lazy.force` function.
 
 ```ocaml
-   type 'a iterator =
-      < has_value : bool;
-        value : 'a;
-        next : unit;
-        remove : unit;
-        insert_after : 'a -> unit
-      >
-```
-
-Each of the labeled parts `has_value`, `value`, etc. are object _methods_.  This
-object type corresponds to an _interface_ consisting of a set of methods.
-
-Next, to define the iterator implementation, we implement each of the methods,
-bracketed by `object ... end`, declaring each method with the `method` keyword.
-
-```ocaml
-   let iterator (list : 'a dlist) : 'a iterator =
-     let current = ref !list in
-     object
-       method has_value = !current <> None
-       method value =
-         match !current with
-         | Some { value = v } -> v
-         | None -> raise (Invalid_argument "next")
-       method next =
-         match !current with
-         | Some { next = next } -> current := next
-         | None -> raise (Invalid_argument "next")
-       method remove =
-         match !current with
-         | Some elt ->
-              current := elt.next;
-              remove list elt  (* This is the 'remove' function above *)
-         | None -> raise (Invalid_argument "remove")
-       method insert_after value =
-          match !current with
-          | Some elt -> ignore (insert_after elt value)  (* 'insert_after' above *)
-          | None -> raise (Invalid_argument "insert_after")
-     end
-```
-
-The reference cell `current` holds the current position in the list.  The method
-`has_value` returns true if `current` refers to an element, `value` returns the
-element, and `next` advances the iterator.  The method `remove` unlinks the
-`current` element by setting the previous element's `next` pointer, and the
-next's elements `previous` pointer, then advancing `current` to the next
-element.  The following example illustrates the semantics.
-
-```ocaml
-# let () =
-    Printf.printf "\nDList2\n";
-    let l = create () in
-    let _ = insert_first l 1 in
-    let _ = insert_first l 2 in
-    let _ = insert_first l 3 in
-
-    let it = iterator l in
-    while it#has_value do
-      Printf.printf "Item: %d\n" it#value;
-      it#next
-    done;;
-Item: 3
-Item: 2
-Item: 1
-- : unit = ()
-```
-
-Note that the doubly-linked list is a _cyclic_ data structure.  Most notably,
-the builtin equality _does not work_ in general with cyclic values.
-
-```ocaml
-# let l2 = create();
-val l2 : '_a dlist
-# insert_first l2 1; insert_first l2 3;;
-- : unit = ()
-# l == l2;;
-- : bool = false
-# l = l2;;
-Out of memory during evaluation.
-```
-
-### Hash tables with iterators
-
-Let's return to the example of hash tables, but this time let's define an
-iterator-style interface.  We'll use a similar `iterator` object type like we did
-for doubly-linked lists, but this time the iteration is over key/value pairs.
-The signature changes slightly, the main change being that the `find` function
-returns an iterator.  This allows retrieval of the value associated with a key,
-and it also allows the entry to be deleted.
-
-```ocaml
-module Iterable_dictionary : sig
-  type ('a, 'b) t
-
-  val create : unit -> ('a, 'b) t
-  val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val iterator : ('a, 'b) t -> ('a * 'b) iterator
-  val find : ('a, 'b) t -> key:'a -> ('a * 'b) iterator
-end
-```
-
-The implementation of `Iterable_dictionary` is similar to the original `Dictionary`
-using lists, except now we will use doubly-linked lists.  The `create` function
-creates an array of doubly-linked lists.  The `add` function first removes any
-existing entry, then add the new element to the front of the bucket.
-
-```ocaml
-module Iterable_dictionary = struct
-  type ('a, 'b) t = ('a * 'b) DList.t array
-
-  let num_buckets = 17
-  let hash_bucket key = (Hashtbl.hash key) mod num_buckets
-
-  let create () = Array.init num_buckets (fun _ -> DList.create ())
-
-  let add table ~key ~data =
-    let index = hash_bucket key in
-    let it = DList.find table.(index) ~data:(key, data) in
-    if it#has_value then it#remove;
-    DList.insert_first table.(index) (key, value)
-
-  ...
-end
-```
-
-We can define iterators in the hash table as a pair of a bucket index and
-`DList` iterator into the bucket.  To define this as an object, we'll introduce
-a few more object concepts, including mutable fields, private methods, and
-initializers.  The function `make_iterator table index_ dlist_it_` returns an
-iterator for the bucket with index `index_` and list iterator `dlist_it_`.
-
-```ocaml
-  let make_iterator table index_ dlist_it_ =
-    object (self)
-      val mutable index = index_
-      val mutable dlist_it = dlist_it_
-      method has_value = dlist_it#has_value
-      method value = dlist_it#value
-      method next =
-         dlist_it#next;
-         self#normalize
-      method remove =
-         dlist_it#remove;
-         self#normalize
-      method private normalize =
-        while not dlist_it#has_value && index < num_buckets - 1 do
-          index <- index + 1;
-          dlist_it <- DList.iterator table.(index)
-        done
-      initializer self#normalize
-    end
-```
-
-The iterator implementation relies on a "normal" form, where the list iterator
-_always_ refers to an element.  This is handled by the `normalize` method, which
-advances past empty buckets until either a non-empty bucket is found, or the end
-of the table is reached.
-
-The `normalize` method is declared as `private`, so that it does not appear as
-part of the iterator type.  The `has_value` and `value` methods delegate
-directly to the list iterator.  The `next` and `remove` methods also delagate to
-the list iterator; however, since the iterator has been mutated, the `normalize`
-method is called to advance to the next element.
-
-There are several more things to note.  The syntax `object (self) ... end` means
-that the variable `self` refers to the object itself, allowing other method in
-the object to be called (like `self#normalize`).  The fields `index` and
-`dlist_it` are declared as `val mutable`, which means that they can be modified
-by assignment using the `<-` syntax seen in the `normalize` method.  Finally,
-the object also has an `initializer` expression, which is called when the object
-is first created, in this case normalizing the iterator.
-
-Now that the iterator is defined, we can complete the `Iterable_dictionary`
-implementation.
-
-```ocaml
-  let iterator table =
-    make_iterator table 0 (DList.iterator table.(0))
-
-  let find table ~key =
-    let index = hash_bucket key in
-    let it = DList.iterator table.(index) in
-    while it#has_value && fst it#value <> key do
-      it#next
-    done;
-    if it#has_value then
-       make_iterator table index it
-    else
-       make_iterator table num_buckets it
-```
-
-The `iterator` function returns in iterator that refers to the first element in
-the table (if the table is non-empty).  The `find` function searches for an
-element in the table, returning an iterator referring to that value if found, or
-else the an iterator at the end of the table.
-
-Iteration over the hash table is much the same as through a doubly-linked list.
-Note that the elements are reordered in the hash table.
-
-```ocaml
-# let () =
-  let module IHM = Iterable_dictionary in
-  let table = IHM.create () in
-  IHM.add table ~key:"small" ~data:1.00;
-  IHM.add table ~key:"medium" ~data:1.50;
-  IHM.add table ~key:"large" ~data:2.25;
-  IHM.add table ~key:"enormous" ~data:5.00;
-
-  let it = IHM.iterator table in
-  while it#has_value do
-    let size, price = it#value in
-    Printf.printf "Size %s is $%.02f\n" size price;
-    it#next
-  done;;
-Size large is $2.25
-Size medium is $1.50
-Size small is $1.00
-Size enormous is $5.00
-- : unit = ()
-
-# let () =
-  let it = IHM.find table "enormous" in
-  it#remove;
-
-  let it = IHM.iterator table in
-  while it#has_value do
-    let size, price = it#value in
-    Printf.printf "Size %s is $%.02f\n" size price;
-    it#next
-  done;;
-Size large is $2.25
-Size medium is $1.50
-Size small is $1.00
-- : unit = ()
-```
-
-## Lazy computation
-
-There are many instances where imperative programming is used to modify or
-improve the performance characteristics of a program, without otherwise changing
-the behavior.  In other words, the program could be written without
-side-effects, but performance is improved by techniques like lazy computation,
-caching, memoization, etc.
-
-One of the simplest of these is the builtin lazy computation.  The keyword
-`lazy` can be used to prefix any expression, returning a value of type `'a
-Lazy.t`.  The computation is delayed until forced with the `Lazy.force`
-function, and then saved thereafter.
-
-```ocaml
-# let v = lazy (print_string "performing lazy computation\n"; 1);;
-val v : int lazy_t = <lazy>
+# let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
+val v : float lazy_t = <lazy>
 # Lazy.force v;;
 performing lazy computation
-- : int = 1
+- : float = 4.
 # Lazy.force v;;
-- : int = 1
+- : float = 4.
 ```
 
-The builtin `lazy` computation has a nice syntax, but the technique is pretty
-generic, and we can implement it with a mutable value.
+In the above, we stuck a print statement in the middle of the
+expression just to make it clear when the actual computation was
+happening.
+
+You can think of laziness as a form of mutation, where the result of a
+computation is stored the first time that force is called.  Indeed,
+using mutation we can implement our own lazy values directly.
 
 ```ocaml
-module ImpLazy : sig
-   type 'a t
+# module Our_lazy : sig
+     type 'a t
 
-   val create : (unit -> 'a) -> 'a t
-   val force : 'a t -> 'a
-end = struct
-   type 'a delayed = Delayed of (unit -> 'a) | Value of 'a
-   type 'a t = 'a delayed ref
+     val create : (unit -> 'a) -> 'a t
+     val force : 'a t -> 'a
+  end = struct
+     type 'a maybe_delayed = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
+     type 'a t = 'a maybe_delayed ref
 
-   let create f = ref (Delayed f)
-   let force v =
-     match !v with
-     | Delayed f ->
-          let x = f () in
-          v := Value x;
-          x
-     | Value x ->
-          x
-end;;
+     let create f = ref (Delayed f)
+     let force v =
+       match !v with
+       | Value x -> x
+       | Exn e -> raise e
+       | Delayed f ->
+         try
+           let x = f () in
+           v := Value x;
+           x
+         with exn ->
+           v := Exn exn;
+           raise exn
+  end;;
 ```
 
-The `'a delayed` type contains a delayed value represented as a function, or
-else an actual value.  The `ImpLazy.force` function forces the computation; if
-it is delayed, the function is evaluated, and the value is mutated to save the
-resulting value.  Subsequent calls to `ImpLazy.force` will fall into the `Value`
-case, without needing to reevaluate the function.  The main difference between
-our module `ImpLazy` and the builtin module `Lazy` is the nice syntax for the
-latter.  Rather than writing `ImpLazy.create (fun () -> e)`, the builtin syntax
-is just `lazy e`.
+The `'a maybe_delayed` type either contains a delayed value,
+represented as a function, or the result of the execution of that
+function, which may be an ordinary return value, or may be an
+exception.  An `Our_lazy.t` is a `ref` pointing to a `maybe_delayed`
+value, and `Our_lazy.force` will run the delayed function, storing the
+result in the `ref`, or simply returns the result of that function if
+it has been forced previously.  Note that the form of that result may
+be an exception, in which case the exception will be re-raised rather
+than returned.
+
+`Our_lazy` can be used in roughly the same way as the built-in `lazy`:
+
+```ocaml
+# let v = Our_lazy.create
+    (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
+val v : float Our_lazy.t = <abstr>
+# Our_lazy.force v;;
+performing lazy computation
+- : float = 4.
+# Our_lazy.force v;;
+- : float = 4.
+```
+
+The main difference between our implementation of laziness and the
+built-in version is syntax.  Rather than writing `Our_lazy.create (fun
+() -> sqrt 16.)`, we can just write `lazy (sqrt 16.)`.
+
+Laziness lets you do considerably more than just delay a single
+computation.  You can also use laziness to do things like building
+so-called infinite data structures, which are really data-structures
+of unbounded size that expand only to the degree necessary to complete
+a given calculation.  We'll discuss more about how to use laziness in
+[xref](???).
 
 ### Memoization
 
-We can generalize lazy computations to function _memoization_, where we save the
-result of function applications to avoid their recomputation.  One simple
-implementation is to use a hash table to save the values by side effect.
+Another unobservable effect is _memoization_.  A memoized function
+remembers the result of previous invocations of the function so that
+they can be provided without further computation when the same
+arguments are presented again.
+
+Here's a function that takes as an argument an arbitrary
+single-argument function and returns a memoized version of that
+function.  Note that it uses Core's `Hashtbl` module, rather than our
+toy `Dictionary`.
 
 ```ocaml
-module Memo : sig
-   type ('a, 'b) t
-
-   val create : unit -> ('a, 'b) t
-   val apply : ('a, 'b) t -> func:('a -> 'b) -> arg:'a -> 'b
-end = struct
-   type ('a, 'b) t = ('a, 'b) Dictionary.t
-
-   let create = Dictionary.create
-   let apply table ~func ~arg =
-     match Dictionary.find table ~key:arg with
-     | Some x -> x
-     | None ->
-         let x = func arg in
-         Dictionary.add table ~key:arg ~data:x;
-         x
-
-end;;
+# let memoize f =
+    let table = Hashtbl.Poly.create () in
+    (fun x ->
+      match Hashtbl.find table x with
+      | Some y -> y
+      | None ->
+        let y = f x in
+        Hashtbl.add_exn table ~key:x ~data:y;
+        y
+    );;
+val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
-Memoization is useful for _dynamic programming_, where problems are solved by
-breraking them down into simpler subproblems.  If subproblems occur more than
-once, memoization can be used to avoid recomputing the subproblem.  A canonical
-example of this is the Fibonacci sequence, which is defined by the following
-program, which produces the sequence _0, 1, 1, 2, 3, 5, 8, 13, 21, ..._ starting
-from 0.
+Memoization can be useful whenever you have a function that is
+expensive to recompute, and you don't mind caching old values
+indefinitely.  But memoization is also useful for efficiently
+implementing some recursive algorithms.  One good example is the
+algorithm for computing the _edit distance_ (also called the
+Levenshtein distance) between two strings.  The edit distance is the
+number of single-character changes (including letter switches,
+insertions and deletions) required to convert one string to the other.
+This kind of distance metric can be useful for a variety of
+approximate string matching problems, like spell checkers.
+
+Consider the following code for computing the edit distance.
+Understanding the algorithm isn't important here, but you should pay
+attention to the structure of the recursive calls.
 
 ```ocaml
-let rec fib i = if i <= 1 then i else fib (i - 1) + fib (i - 2);;
+# let rec edit_distance s t =
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -> x
+    | (len_s,len_t) ->
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ edit_distance s' t  + 1
+        ; edit_distance s  t' + 1
+        ; edit_distance s' t' + cost_to_drop_both
+        ]
+  ;;
+val edit_distance : string -> string -> int = <fun>
+# edit_distance "OCaml" "ocaml";;
+- : int = 2
 ```
 
-The complexity of this function is exponential _O(2^i)_, because for large
-inputs the function computes two similar-sized subproblems.  To illustrate,
-let's time the computation using the `Sys.time` function to measure the wall
-clock.
+The thing to note is that if you call `edit_distance "OCaml" "ocaml"`,
+then that will in turn dispatch the following calls:
 
 ```ocaml
-# let time f x =
-    let start = Sys.time () in
-    let y = f x in
-    Printf.printf "Time: %g sec\n" (Sys.time () -. start);
-    y;;
-val time : ('a -> 'b) -> 'a -> 'b = <fun>
-# time fib 40;;
-Time: 5.53724 sec
-- : int = 102334155
+edit_distance "OCam" "ocaml"
+edit_distance "OCaml" "ocam"
+edit_distance "OCam" "ocam"
 ```
 
-Next, let's construct a memoized version of the function, where the recursive
-calls are made through a memo table.  This makes a dramatic improvement in
-performance.  Since the recursive calls are computed just once, the complexity
-is linear, and the computation is fast.
+And these calls will in turn dispatch other calls:
 
 ```ocaml
-# let memo_fib =
-    let memo = Memo.create () in
-    let rec fib i =
-      if i <= 1 then
-         i
-      else
-         Memo.apply memo ~func:fib ~arg:(i - 1) +
-         Memo.apply memo ~func:fib ~arg:(i - 2)
+edit_distance "OCam" "ocaml"
+   edit_distance "OCa" "ocaml"
+   edit_distance "OCam" "ocam"
+   edit_distance "OCa" "ocam"
+edit_distance "OCaml" "ocam"
+   edit_distance "OCam" "ocam"
+   edit_distance "OCaml" "oca"
+   edit_distance "OCam" "oca"
+edit_distance "OCam" "ocam"
+   edit_distance "OCa" "ocam"
+   edit_distance "OCam" "oca"
+   edit_distance "OCa" "oca"
+```
+
+As you can see, some of these calls are repeats.  For example,
+there are two different calls to `edit_distance "OCam" "oca"`.  The
+amount of repeated calls grows exponentially with the size of the
+strings, meaning that our implementation of `edit_distance` is
+brutally slow for large strings.  We can see this by writing a small
+timing function.
+
+```ocaml
+# let time f =
+    let start = Time.now () in
+    let y = f () in
+    let stop = Time.now () in
+    printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
+    y ;;
+val time : (unit -> 'a) -> 'a = <fun>
+```
+
+And now we can use this to try out some examples.
+
+```ocaml
+# time (fun () -> edit_distance "OCaml" "ocaml");;
+Time: 5.11003ms
+- : int = 2
+# time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
+Time: 19.3322s
+- : int = 2
+```
+
+Just those few extra characters made it almost 4000 times slower!
+
+Memoization would be a huge help here, but to make any improvement
+here, we need to memoize the calls that `edit_distance` makes to
+itself.  To see how to do this, let's step away from `edit_distance`,
+and instead consider a simpler example: computing the nth element of
+the Fibonacci sequence.  The Fibonacci sequence by definition starts
+out with two `1`'s, with every subsequent element being the sum of the
+previous two.  The classic recursive definition of Fibonacci is as
+follows:
+
+```ocaml
+let rec fib i =
+  if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
+```
+
+This is, however, exponentially slow, for the same reason that
+`edit_distance` was slow, as we can see:
+
+```ocaml
+# time (fun () -> fib 5);;
+Time: 0.0100136ms
+- : int = 8
+# time (fun () -> fib 10);;
+Time: 0.0441074ms
+- : int = 89
+# time (fun () -> fib 20);;
+Time: 5.17392ms
+- : int = 10946
+# time (fun () -> fib 40);;
+Time: 51.4205s
+```
+
+So, how do we memoize the function?  The tricky bit is that we need to
+insert the memoization before the recursive calls, so we can't just do
+the memoization on the outside after `fib` is defined.  The first step
+is to write `fib` in a way that unwinds the recursion, allowing us to
+explicitly pass in the function to call recursively.
+
+```ocaml
+# let fib_recur recur i =
+    if i <= 1 then i
+    else recur (i - 1) + recur (i - 2) ;;
+val fib_recur : (int -> int) -> int -> int = <fun>
+```
+
+We can now turn this back into an ordinary Fibonacci function by tying
+the recursive knot:
+
+```ocaml
+# let rec fib i = fib_recur fib i
+val fib : int -> int = <fun>
+# fib 5;;
+- : int = 8
+```
+
+And we can even write a higher-order function that we'll call `fix`
+that ties this not for us for any such function.
+
+```ocaml
+# let rec fix f x = f (fix f) x;;
+val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+# let fib = fix fib_recur;;
+val fib : int -> int = <fun>
+# fib 5;;
+- : int = 8
+```
+
+But really, we've just done another way of implementing the same old
+slow Fibonacci function.  To make it faster, we need a function like
+`fix` that inserts memoization when it ties the recursive knot.  Here
+is just such a function.
+
+```ocaml
+# let memo_fix f x =
+    let rec f' x = f (Lazy.force memo_f') x
+    and memo_f' = lazy (memoize f')
     in
-    fib;;
-val memo_fib : int -> int = <fun>
-# time memo_fib 40;;
-Time: 3.7e-05 sec
-- : int = 102334155
+    f' x
+ ;;
+val memo_fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 ```
+
+Note the use of laziness here, which allows us to define `f'` in terms
+of each other `memo_f'`.  Laziness is generally useful in making it
+possible to make complex recursive definitions.
+
 
 Note that this use of memoization relies on side-effects to cache intermediate
 computations, but it doesn't change the values of the function.  Its purpose is

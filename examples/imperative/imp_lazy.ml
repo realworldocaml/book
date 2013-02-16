@@ -1,29 +1,3 @@
-(*
- *
- * ----------------------------------------------------------------
- *
- * @begin[license]
- * Copyright (C) 2012 Jason Hickey
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * Author: Jason Hickey
- * @email{jyh@cs.caltech.edu}
- * @end[license]
- *)
-
 module ImpLazy : sig
    type 'a t
 
@@ -46,11 +20,50 @@ end;;
 
 let x = ImpLazy.create (fun () -> print_string "performing computation"; 1);;
 
-(*
- * -*-
- * Local Variables:
- * Fill-column: 100
- * End:
- * -*-
- * vim:ts=3:et:tw=100
- *)
+
+(* Lazy lists *)
+type 'a el = Empty | Cons of 'a * 'a el Lazy.t
+type 'a lazy_list = 'a el Lazy.t
+
+let rec prefix_list l n =
+  if n <= 0 then []
+  else match l with
+  | lazy Empty -> []
+  | lazy (Cons (hd,tl)) -> hd :: prefix_list tl (n - 1)
+
+
+
+
+let repeat_0 =
+  let rec zero = lazy (Cons (0, zero)) in
+  zero
+
+let repeat_01 =
+  let rec zero = lazy (Cons (0,one))
+  and one = lazy (Cons (1,zero)) in
+  zero
+
+let cycle_of_list list =
+  let rec build l rest =
+    match l with
+    | [] -> Lazy.force rest
+    | hd :: tl -> Cons (hd, lazy (build tl rest))
+  in
+  let rec start = lazy (build list start) in
+  start
+
+let rec drop_equal l x =
+  lazy (match l with
+  | lazy Empty -> Empty
+  | lazy (Cons (hd,tl)) ->
+    if hd = x
+    then Lazy.force (drop_equal tl x)
+    else Lazy.force l
+  )
+
+let rec destutter l =
+  lazy (match l with
+  | lazy Empty -> Empty
+  | lazy (Cons (hd,tl)) ->
+    Cons (hd, destutter (drop_equal tl hd))
+  )
