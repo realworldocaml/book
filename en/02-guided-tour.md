@@ -1012,6 +1012,9 @@ let (!) r = r.contents
 let (:=) r x = r.contents <- x
 ```
 
+Here, `!` and `:=` are infix operators that we're defining, where the
+parenthetical syntax is what marks them as such.
+
 Even though a `ref` is just another record type, it's worthy of note
 because it is the standard way of simulating a traditional mutable
 variable from other languages.
