@@ -398,12 +398,16 @@ $ eval `opam config -env`
 #use &quot;topfind&quot;
 #camlp4o
 #thread
-#require &quot;core.top&quot;;;
+#require &quot;core.top&quot;
 </programlisting>
   <para>
-    You can exit <literal>utop</literal> by pressing
-    <literal>control-D</literal> and return. For complete instructions,
-    please refer to <xref linkend="installation"/>.
+    Then type in <literal>utop</literal>, and you'll be in an
+    interactive toplevel environment. OCaml phrases are only evaluated
+    when you enter a double semicolon (<literal>;;</literal>), so you
+    can split your typing over multiple lines. You can exit
+    <literal>utop</literal> by pressing <literal>control-D</literal> and
+    return. For complete instructions, please refer to
+    <xref linkend="installation"/>.
   </para>
   </note>
   <sect1 id="ocaml-as-a-calculator">
@@ -14372,8 +14376,8 @@ $ ./service_client.byte
       changed dynamically, rather than just added at creation time.
     </para>
   </sect1>
-</chapter><chapter id="understanding-the-runtime-system">
-  <title>Understanding the runtime system</title>
+</chapter><chapter id="foreign-function-interface">
+  <title>Foreign Function Interface</title>
   <para>
     Much of the static type information contained within an OCaml
     program is checked and discarded at compilation time, leaving a much
