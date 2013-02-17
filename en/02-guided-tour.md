@@ -5,17 +5,18 @@ small examples that cover most of the major features of the language.
 This should give a sense of what OCaml can do, without getting too
 deep in any one topic.
 
-We'll present this guided tour using the Core standard library and the `utop`
-OCaml toplevel, a shell that lets you type in expressions and evaluate them
-interactively.  When you get to the point of running real programs, you'll want
-to leave the toplevel behind, but it's a great tool for getting to know the
-language.
+We'll present this guided tour using the Core standard library and the
+`utop` OCaml toplevel, a shell that lets you type in expressions and
+evaluate them interactively.  `utop` is an easier-to-use version of
+the toplevel that you get by typing `ocaml` at the command line, and
+these instructions will assume you're using `utop` specifically.
 
-Before getting started, do make sure you have a working OCaml installation and
-toplevel as you read through this chapter so you can try out the examples.
+Before getting started, do make sure you have a working OCaml
+installation and toplevel as you read through this chapter so you can
+try out the examples.
 
 <note>
-<title>Installing the interactive top-level</title>
+<title>Installing `utop`</title>
 
 The easiest way to get the examples running is to set up the OPAM
 package manager, which is explained in [xref](#installation). 
@@ -117,7 +118,8 @@ val square : int -> int = <fun>
 When using `let` to define a function, the first identifier after the
 `let` is the function name, and each subsequent identifier is a
 different argument to the function.  Thus, `square` is a function with
-a single argument.
+a single argument.  If no arguments are given, then we just have the
+ordinary definition of a variable that we saw earlier.
 
 Now that we're creating more interesting values like functions, the
 types have gotten more interesting too.  `int -> int` is a function
@@ -155,8 +157,8 @@ the integers that pass the test.
 
 ```ocaml
 # let sum_if_true test x y =
-     if test x then x else 0
-     + if test y then y else 0
+     (if test x then x else 0)
+     + (if test y then y else 0)
   ;;
 val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ```
