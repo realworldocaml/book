@@ -36,11 +36,14 @@ Then create a file called `~/.ocamlinit` in your home directory:
 #use "topfind"
 #camlp4o
 #thread
-#require "core.top";;
+#require "core.top"
 ```
 
-You can exit `utop` by pressing `control-D` and return.  For complete
-instructions, please refer to [xref](#installation).
+Then type in `utop`, and you'll be in an interactive toplevel environment.
+OCaml phrases are only evaluated when you enter a double semicolon (`;;`), so
+you can split your typing over multiple lines.  You can exit `utop` by pressing
+`control-D` and return. For complete instructions, please refer to
+[xref](#installation).
 
 </note>
 
@@ -93,8 +96,8 @@ at you.
   other languages due to unexpected differences between the behavior
   of `int` and `float`.
 
-We can also a create variable to name the value of a given expression,
-using a `let` binding.
+We can also create a variable to name the value of a given expression,
+using the `let` keyword (also known as a _let binding_).
 
 ```ocaml
 # let x = 3 + 4;;
@@ -104,7 +107,7 @@ val y : int = 14
 ```
 
 After a new variable is created, the toplevel tells us the name of the
-variable, in addition to its type and value.
+variable (`x` or `y`), in addition to its type (`int`) and value (`7` or `14`).
 
 ## Functions and Type Inference
 

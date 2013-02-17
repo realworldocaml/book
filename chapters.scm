@@ -101,7 +101,7 @@
  (note "50% done (Anil)")
  )
 ((part Advanced)
- (name "understanding-the-runtime-system")
+ (name "foreign-function-interface")
  (file "14-interfacing-with-C")
  (public false)
  (note "50%, on Anil's stack")

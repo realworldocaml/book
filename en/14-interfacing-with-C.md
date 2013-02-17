@@ -1,4 +1,4 @@
-# Understanding the runtime system
+# Foreign Function Interface
 
 Much of the static type information contained within an OCaml program is
 checked and discarded at compilation time, leaving a much simpler *runtime*
