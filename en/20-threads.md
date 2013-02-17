@@ -1,4 +1,4 @@
-## Concurrency
+# Threads
 
 Concurrency is another tool OCaml programmers can use to simplify
 programs in certain cases.  In OCaml, threads do not introduce

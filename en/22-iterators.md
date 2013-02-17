@@ -1,4 +1,4 @@
-### Java-style iteration
+# Java-style iteration
 
 One downside of navigating through a list using the `next` and `prev`
 functions is that it ties your code specifically to the `Dlist`
@@ -96,7 +96,7 @@ val l2 : '_a dlist
 Out of memory during evaluation.
 ```
 
-### Hash tables with iterators
+## Hash tables with iterators
 
 Let's return to the example of hash tables, but this time let's define an
 iterator-style interface.  We'll use a similar `iterator` object type like we did

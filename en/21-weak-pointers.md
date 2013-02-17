@@ -1,4 +1,6 @@
-### Hash consing
+# Hash-consing and weak pointers
+
+## Hash consing
 
 "Hash consing" is a technique to share values that are structurally equal.  The
 term comes from Lisp, where the technique is used to share s-expressions that
@@ -90,7 +92,7 @@ val b2 : Exp.t = Exp.Var "y"
 - : bool = true
 ```
 
-### Weak hash consing
+## Weak hash consing
 
 There is two issues with hash-consing as we have just defined it.  A minor
 problem is that hashing is linear in the size of the expression.  This can be
