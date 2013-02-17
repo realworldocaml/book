@@ -207,10 +207,10 @@ to hack on the internals of the compiler itself (or you simply want to experimen
 with the latest release without sacrificing your current installation).
 
 The new compiler will be compiled and installed into
-`~/.opam/4.00.1+short-types` and any libraries you install for it will be tracked separately from
-your system installation.  You can have any number of compilers installed
-simultaneously, but only one can be active at any time.  You can find all the
-available compilers by running `opam switch list`.
+`~/.opam/4.00.1+short-types` and any libraries you install for it will be
+tracked separately from your system installation.  You can have any number of
+compilers installed simultaneously, but only one can be active at any time.
+You can find all the available compilers by running `opam switch list`.
 
 Once that succeeds, you'll see some instructions about environment variables.
 OPAM can output a set of shell commands which configure your current shell with
