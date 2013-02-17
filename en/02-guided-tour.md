@@ -729,11 +729,12 @@ including a function body.  The `in` marks the beginning of the scope
 within which the new variable can be used.
 
 Options are important because they are the standard way in OCaml to
-encode a value that might not be there.  This is different from most
-other languages, including Java and C#, where most if not all
-datatypes are _nullable_, meaning that, whatever their type is, any
-given value also contains the possibility of being a null value.  In
-such languages, null is lurking everywhere.
+encode a value that might not be there --- there's no such thing as a
+`NullPointerException` in OCaml.  This is different from most other
+languages, including Java and C#, where most if not all datatypes are
+_nullable_, meaning that, whatever their type is, any given value also
+contains the possibility of being a null value.  In such languages,
+null is lurking everywhere.
 
 In OCaml, however, nulls are explicit.  A value of type `string *
 string` always actually contains two well-defined values of type
