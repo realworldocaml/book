@@ -348,36 +348,48 @@
     getting too deep in any one topic.
   </para>
   <para>
-    We'll present this guided tour using the <literal>utop</literal>
-    OCaml toplevel, a shell that lets you type in expressions and
-    evaluate them interactively. When you get to the point of running
-    real programs, you'll want to leave the toplevel behind, but it's a
-    great tool for getting to know the language.
+    We'll present this guided tour using the Core standard library and
+    the <literal>utop</literal> OCaml toplevel, a shell that lets you
+    type in expressions and evaluate them interactively. When you get to
+    the point of running real programs, you'll want to leave the
+    toplevel behind, but it's a great tool for getting to know the
+    language.
   </para>
   <para>
-    Make sure you have a working toplevel as you go through this
-    chapter, so you can try out the examples as you go.
+    Before getting started, do make sure you have a working OCaml
+    installation and toplevel as you read through this chapter so you
+    can try out the examples.
   </para>
   <note>
   <title>
   Installing the interactive top-level
   </title>
   <para>
-    The easiest way to get <literal>utop</literal> is via the OPAM
+    The easiest way to get the examples running is to set up the OPAM
     package manager, which is explained in
-    <xref linkend="installation"/>. You'll need to also have
-    the Core standard library installed. In a nutshell, you need to:
+    <xref linkend="installation"/>. In a nutshell, you need
+    to:
   </para>
   <programlisting>
 $ opam init
 $ opam switch 4.00.1+short-types
-$ opam install utop async core_extended
+$ opam install utop core_extended
 $ eval `opam config -env`
-$ utop
+</programlisting>
+  <para>
+    Then create a file called <literal>~/.ocamlinit</literal> in your
+    home directory:
+  </para>
+  <programlisting language="ocaml">
+#use &quot;topfind&quot;
+#camlp4o
+#thread
+#require &quot;core.top&quot;;;
 </programlisting>
   <para>
     You can exit <literal>utop</literal> by pressing
-    <literal>control-D</literal> and return.
+    <literal>control-D</literal> and return. For complete instructions,
+    please refer to <xref linkend="installation"/>.
   </para>
   </note>
   <sect1 id="ocaml-as-a-calculator">
@@ -8757,12 +8769,13 @@ Hello world
       an exception, leaving the data structure in an inconsistent state.
     </para>
   </sect1>
-  <sect1 id="mutable-data-structures">
-    <title>Mutable data structures</title>
+  <sect1 id="primitive-mutable-data">
+    <title>Primitive mutable data</title>
     <para>
       We've already encountered two different forms of mutable data:
-      records with mutable fields, and arrays. We'll discuss those, and
-      a few other forms of mutable data, in more detail now.
+      records with mutable fields, and arrays. These are two of the
+      building blocks of imperative programming in OCaml. We discuss
+      those, and a few others, below.
     </para>
     <sect2 id="array-like-data">
       <title>Array-like data</title>
@@ -8851,7 +8864,7 @@ Hello world
           </listitem>
           <listitem>
             <para>
-              <literal>! refcell</literal> returns the contents of the
+              <literal>!refcell</literal> returns the contents of the
               reference cell.
             </para>
           </listitem>
@@ -9013,17 +9026,17 @@ type 'a element
 val create   : unit -&gt; 'a t
 val is_empty : 'a t -&gt; bool
 
-(** navigating the [element]s of a list *)
+(** Navigation using [element]s *)
 val first : 'a t -&gt; 'a element option
 val next  : 'a element -&gt; 'a element option
 val prev  : 'a element -&gt; 'a element option
 val value : 'a element -&gt; 'a
 
-(** Simple iteration functions *)
-val find : 'a t -&gt; 'a -&gt; 'a element option
-val iter : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
+(** Whole-data-structure iteration *)
+val iter    : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
+val find_el : 'a t -&gt; f:('a -&gt; bool) -&gt; 'a element option
 
-(** mutators *)
+(** Mutation *)
 val insert_first : 'a t -&gt; 'a -&gt; 'a element
 val insert_after : 'a element -&gt; 'a -&gt; 'a element
 val remove : 'a t -&gt; 'a element -&gt; unit
@@ -9037,7 +9050,8 @@ val remove : 'a t -&gt; 'a element -&gt; unit
       operations.
     </para>
     <para>
-      Now let's look at the implementation.
+      Now let's look at the implementation. We'll start by defining
+      <literal>'a element</literal> and <literal>'a t</literal>.
     </para>
     <programlisting language="ocaml">
 (* file: dlist.ml *)
@@ -9052,9 +9066,8 @@ type 'a element =
 type 'a t = 'a element option ref
 </programlisting>
     <para>
-      We'll start by defining our two types. An
-      <literal>'a element</literal> is a record containing the value to
-      be stored in that node as well as optional (and mutable) fields
+      An <literal>'a element</literal> is a record containing the value
+      to be stored in that node as well as optional (and mutable) fields
       pointing to the previous and next elements. At the beginning of
       the list, the <literal>prev</literal> field is
       <literal>None</literal>, and at the end of the list, the
@@ -9081,114 +9094,8 @@ let next elt = elt.next
 let prev elt = elt.prev
 </programlisting>
     <para>
-      The above are all relatively straight-forward, largely following
-      from the type definitions above.
-    </para>
-    <para>
-      At this point, we can start looking at operations that mutate the
-      list.
-    </para>
-    <programlisting language="ocaml">
-let insert_first l value =
-  let new_elt = { prev = None; next = !l; value } in
-  begin match !l with
-  | Some old_first -&gt; old_first.prev &lt;- Some new_elt
-  | None -&gt; ()
-  end;
-  l := Some new_elt;
-  new_elt
-</programlisting>
-    <para>
-      Above, we define the function that inserts a value into the list
-      as a new first element. We define a new element
-      <literal>elt</literal>, link it into the list, and set the list
-      reference.
-    </para>
-    <para>
-      This allows us to modify lists from the front, but we may want to
-      insert elements internally in the list as well. That's what the
-      <literal>insert_after</literal> function is for.
-    </para>
-    <programlisting language="ocaml">
-let insert_after elt value =
-  let new_elt = { value; prev = Some elt; next = elt.next } in
-  begin match elt.next with
-  | Some old_next -&gt; old_next.prev &lt;- Some new_elt
-  | None -&gt; ()
-  end;
-  elt.next &lt;- Some new_elt;
-  new_elt
-</programlisting>
-    <para>
-      This example uses the sequencing operator <literal>;</literal> to
-      separate the steps to be executed in order: first, create the new
-      element <literal>elt</literal>; then set
-      <literal>old_first.previous</literal> to point to it; then set the
-      list <literal>l</literal> to refer to the <literal>elt</literal>
-      element; then return the element <literal>elt</literal>.
-    </para>
-    <para>
-      In general, when a sequence expression
-      <literal>expr1; expr2</literal> is evaluated,
-      <literal>expr1</literal> is evaluated first, and then
-      <literal>expr2</literal>. The expression <literal>expr1</literal>
-      must have type <literal>unit</literal>, and the the value of
-      <literal>expr2</literal> is returned as the value of the entire
-      sequence. For example, the sequence
-      <literal>print_string &quot;hello world&quot;; 1 + 2</literal>
-      first prints the string
-      <literal>&quot;hello world&quot;</literal>, then returns the
-      integer <literal>3</literal>.
-    </para>
-    <para>
-      There are a few more things to note. First, <literal>;</literal>
-      is a <emphasis>separator</emphasis> in OCaml, not a terminator as
-      it is in C or Java. The compiler is somewhat relaxed about parsing
-      a terminating semicolon, so it may work for you, but you should
-      not rely on it.
-    </para>
-    <programlisting language="ocaml">
-# let i = print_string &quot;Hello world\n&quot;; 2; in i;;
-Hello world
-- : int = 2
-</programlisting>
-    <para>
-      Also note, the precedence of a <literal>match</literal> expression
-      is very low, so to separate it from the following assignment
-      <literal>l := Some new_front</literal>, we surround the match in a
-      <literal>begin ... end</literal> bracketing (we could also use
-      parentheses). If we did not, the final assignment would become
-      part of the <literal>None -&gt; ...</literal> case, which is not
-      what we want.
-    </para>
-    <para>
-      To complete this initial part of the implementation, we need a
-      removal function. The logic is fairly straightforward: you change
-      the next element to point to the previous and the previous to
-      point to the next, and then clears its own references.
-    </para>
-    <programlisting language="ocaml">
-let remove l elt =
-  let { prev; next; _ } = elt in
-  begin match prev with
-  | Some prev -&gt; prev.next &lt;- next
-  | None -&gt; l := next
-  end;
-  begin match next with
-  | Some next -&gt; next.prev &lt;- prev;
-  | None -&gt; ()
-  end;
-  elt.prev &lt;- None;
-  elt.next &lt;- None
-</programlisting>
-    <para>
-      One problem with the above code is that it doesn't detect error
-      cases as effectively as one might like. For example, if you delete
-      an element from a list more than once, or delete an element from a
-      list that it doesn't belong to, you can end up leaving the list in
-      an inconsistent state. If you want to see how to catch these cases
-      before they invalidate the list, you should look at the
-      <literal>Doubly_linked</literal> module in Core.
+      These all follow relatively straight-forwardly from our type
+      definitions.
     </para>
     <note><title> 
     Cyclic data structures
@@ -9218,1187 +9125,568 @@ val endless_loop : int list =
       data structures require mutation.
     </para>
     </note>
+    <sect2 id="modifying-the-list">
+      <title>Modifying the list</title>
+      <para>
+        Now, we'll start considering operations that mutate the list,
+        starting with <literal>insert_first</literal>, which inserts an
+        element at the front of the list.
+      </para>
+      <programlisting language="ocaml">
+let insert_first l value =
+  let new_elt = { prev = None; next = !l; value } in
+  begin match !l with
+  | Some old_first -&gt; old_first.prev &lt;- Some new_elt
+  | None -&gt; ()
+  end;
+  l := Some new_elt;
+  new_elt
+</programlisting>
+      <para>
+        <literal>insert_first</literal> first defines a new element
+        <literal>new_elt</literal>, and then links it into the list,
+        finally setting the the list itself to point to
+        <literal>new_elt</literal>. Note that the precedence of a
+        <literal>match</literal> expression is very low, so to separate
+        it from the following assignment
+        <literal>l := Some new_front</literal>, we surround the match in
+        a <literal>begin ... end</literal> bracketing (we could also use
+        parentheses). If we did not, the final assignment would become
+        part of the <literal>None -&gt; ...</literal> case, which is not
+        what we want.
+      </para>
+      <para>
+        In order to add elements later in the list, we can use
+        <literal>insert_after</literal>, which takes an
+        <literal>element</literal> as an argument, after which it
+        inserts a new element.
+      </para>
+      <programlisting language="ocaml">
+let insert_after elt value =
+  let new_elt = { value; prev = Some elt; next = elt.next } in
+  begin match elt.next with
+  | Some old_next -&gt; old_next.prev &lt;- Some new_elt
+  | None -&gt; ()
+  end;
+  elt.next &lt;- Some new_elt;
+  new_elt
+</programlisting>
+      <para>
+        Finally, we need a <literal>remove</literal> function.
+      </para>
+      <programlisting language="ocaml">
+let remove l elt =
+  let { prev; next; _ } = elt in
+  begin match prev with
+  | Some prev -&gt; prev.next &lt;- next
+  | None -&gt; l := next
+  end;
+  begin match next with
+  | Some next -&gt; next.prev &lt;- prev;
+  | None -&gt; ()
+  end;
+  elt.prev &lt;- None;
+  elt.next &lt;- None
+</programlisting>
+      <para>
+        Note that the above code is careful to change the
+        <literal>prev</literal> pointer of the following element, and
+        the <literal>next</literal> pointer of the previous element, if
+        they exist. If there's no previous element, then the list
+        pointer itself is updated. In any case, the next and previous
+        pointers of the element itself are set to
+        <literal>None</literal>.
+      </para>
+      <para>
+        These functions are more fragile than they may seem. In
+        particular, misuse of the interface may lead to corrupted data.
+        For example, double-removing an element will cause the main list
+        reference to be set to <literal>None</literal>, thus emptying
+        the list. Similar problems arise from removing an element from a
+        list it doesn't belong to.
+      </para>
+      <para>
+        This shouldn't be a big surprise. Complex imperative data
+        structures can be quite tricky; considerably trickier than their
+        pure equivalents. The issues described above can be dealt with
+        by more careful error detection, and such error correction is
+        taken care of in modules like Core's
+        <literal>Doubly_linked</literal>. You should use imperative data
+        structures from a well-designed library when you can. And when
+        you can't, you should make sure that the code you write is
+        careful about error detection.
+      </para>
+    </sect2>
     <sect2 id="iteration-functions">
       <title>Iteration functions</title>
       <para>
         When defining containers like lists, dictionaries and trees,
         you'll typically want to define a set of iteration functions,
         like <literal>iter</literal>, <literal>map</literal>, and
-        <literal>fold</literal>, all of which iterate through the list
-        in order.
+        <literal>fold</literal>, which let you concisely express common
+        iteration patterns.
       </para>
       <para>
-        Our <literal>Dlist</literal> interface has an
-        <literal>iter</literal> function, the goal of which is to call a
+        <literal>Dlist</literal> has two such iterators:
+        <literal>iter</literal>, the goal of which is to call a
         <literal>unit</literal> producing function on every element of
-        the list, in order. The implementation is shown below.
+        the list, in order; and <literal>find_el</literal>, which runs a
+        provided test function on each values stored in the list,
+        returning the first <literal>element</literal> that passes the
+        test. Both <literal>iter</literal> and
+        <literal>find_el</literal> are implemented using simple
+        recursive loops that use <literal>next</literal> to walk from
+        element to element, and <literal>value</literal> to extract the
+        element from a given node.
       </para>
       <programlisting language="ocaml">
 let iter l ~f =
   let rec loop = function
     | None -&gt; ()
-    | Some { value; next; _ } -&gt; f value; loop next
+    | Some el -&gt; f (value el); loop (next el)
+  in
+  loop !l
+
+let find_el l ~f =
+  let rec loop = function
+    | None -&gt; None
+    | Some elt -&gt;
+      if f (value elt) then Some elt
+      else loop (next elt)
   in
   loop !l
 </programlisting>
-      <para>
-        Sometimes, you want more control over your iteration, and
-        <literal>element</literal>s are there to give you that. Given an
-        element, you can navigate through the list using
-        <literal>next</literal> and <literal>prev</literal>,
-      </para>
-      <para>
-        This style of iteration is great when you want to iterate
-        through the entire list, but sometimes you want more control of
-        the of the list, for example when searching for a particular
-        element. In this case, you can use the functions
-        <literal>next</literal> and <literal>prev</literal> to navigate
-        through the list.
-      </para>
-      <programlisting language="ocaml">
-   (* Find the element containing x, using = for comparison *)
-   let find l x : 'a element option =
-      let rec search = function
-      | None -&gt; None
-      | Some elt -&gt;
-           if value elt = x then
-              Some elt
-           else
-              search (next elt)
-      in
-      search !l
-</programlisting>
-    </sect2>
-    <sect2 id="java-style-iteration">
-      <title>Java-style iteration</title>
-      <para>
-        One possible issue with navagation using the
-        <literal>next</literal> and <literal>prev</literal> functions is
-        that code is tied specifically to the doubly-linked list code we
-        have just defined. It won't work for iteration through a
-        hash-table, for example. Another technique used in other
-        imperative languages like Java or C++ is to define a generic
-        <literal>iterator</literal> type that can be used to enumerate
-        and/or mutate the elements in multiple different kinds of
-        containers. Here is the Java interface.
-      </para>
-      <programlisting language="java">
-public iterface Iterator {
-  public boolean hasNext();
-  public Object next();
-  public void remove();
-};
-</programlisting>
-      <para>
-        At any time, a <literal>Iterator</literal> object refers
-        (optionally) to some element of a container. The
-        <literal>hasNext()</literal> method returns true if the iterator
-        refers to an element; the method <literal>next()</literal>
-        returns the element, and also advances to the next one; and
-        <literal>remove()</literal> removes the last element returned by
-        the iterator.
-      </para>
-      <para>
-        If we want to define a similar iterator concept in OCaml, we
-        need to choose how to represent it. We
-        <emphasis>could</emphasis> define a separate iterator type for
-        each kind of container, but this would be inconvenient, since
-        iterators have similar behavior for many different kinds of
-        containers. To define a <emphasis>generic</emphasis> iterator,
-        there are several reasonable choices: we can use first-class
-        modules, or we can use objects. One of the simpler approaches is
-        to use objects.
-      </para>
-      <para>
-        You can skip forward to the Objects chapter for more
-        informatation about objects, but we'll be using basic objects,
-        which are just collections of methods, similar to having a
-        record of functions -- we could also implement the iterator as a
-        record of functions, but the code would be somewhat more
-        verbose.
-      </para>
-      <para>
-        First, we need to define a generic iterator type. For clarity,
-        we'll use a more verbose type than in Java. We'll separate
-        retrieving a value from advacing to the next element. The object
-        type is specified like a record type, but using angle brackets
-        <literal>&lt; ... &gt;</literal>.
-      </para>
-      <programlisting language="ocaml">
-   type 'a iterator =
-      &lt; has_value : bool;
-        value : 'a;
-        next : unit;
-        remove : unit;
-        insert_after : 'a -&gt; unit
-      &gt;
-</programlisting>
-      <para>
-        Each of the labeled parts <literal>has_value</literal>,
-        <literal>value</literal>, etc. are object
-        <emphasis>methods</emphasis>. This object type corresponds to an
-        <emphasis>interface</emphasis> consisting of a set of methods.
-      </para>
-      <para>
-        Next, to define the iterator implementation, we implement each
-        of the methods, bracketed by <literal>object ... end</literal>,
-        declaring each method with the <literal>method</literal>
-        keyword.
-      </para>
-      <programlisting language="ocaml">
-   let iterator (list : 'a dlist) : 'a iterator =
-     let current = ref !list in
-     object
-       method has_value = !current &lt;&gt; None
-       method value =
-         match !current with
-         | Some { value = v } -&gt; v
-         | None -&gt; raise (Invalid_argument &quot;next&quot;)
-       method next =
-         match !current with
-         | Some { next = next } -&gt; current := next
-         | None -&gt; raise (Invalid_argument &quot;next&quot;)
-       method remove =
-         match !current with
-         | Some elt -&gt;
-              current := elt.next;
-              remove list elt  (* This is the 'remove' function above *)
-         | None -&gt; raise (Invalid_argument &quot;remove&quot;)
-       method insert_after value =
-          match !current with
-          | Some elt -&gt; ignore (insert_after elt value)  (* 'insert_after' above *)
-          | None -&gt; raise (Invalid_argument &quot;insert_after&quot;)
-     end
-</programlisting>
-      <para>
-        The reference cell <literal>current</literal> holds the current
-        position in the list. The method <literal>has_value</literal>
-        returns true if <literal>current</literal> refers to an element,
-        <literal>value</literal> returns the element, and
-        <literal>next</literal> advances the iterator. The method
-        <literal>remove</literal> unlinks the <literal>current</literal>
-        element by setting the previous element's
-        <literal>next</literal> pointer, and the next's elements
-        <literal>previous</literal> pointer, then advancing
-        <literal>current</literal> to the next element. The following
-        example illustrates the semantics.
-      </para>
-      <programlisting language="ocaml">
-# let () =
-    Printf.printf &quot;\nDList2\n&quot;;
-    let l = create () in
-    let _ = insert_first l 1 in
-    let _ = insert_first l 2 in
-    let _ = insert_first l 3 in
-
-    let it = iterator l in
-    while it#has_value do
-      Printf.printf &quot;Item: %d\n&quot; it#value;
-      it#next
-    done;;
-Item: 3
-Item: 2
-Item: 1
-- : unit = ()
-</programlisting>
-      <para>
-        Note that the doubly-linked list is a
-        <emphasis>cyclic</emphasis> data structure. Most notably, the
-        builtin equality <emphasis>does not work</emphasis> in general
-        with cyclic values.
-      </para>
-      <programlisting language="ocaml">
-# let l2 = create();
-val l2 : '_a dlist
-# insert_first l2 1; insert_first l2 3;;
-- : unit = ()
-# l == l2;;
-- : bool = false
-# l = l2;;
-Out of memory during evaluation.
-</programlisting>
-    </sect2>
-    <sect2 id="hash-tables-with-iterators">
-      <title>Hash tables with iterators</title>
-      <para>
-        Let's return to the example of hash tables, but this time let's
-        define an iterator-style interface. We'll use a similar
-        <literal>iterator</literal> object type like we did for
-        doubly-linked lists, but this time the iteration is over
-        key/value pairs. The signature changes slightly, the main change
-        being that the <literal>find</literal> function returns an
-        iterator. This allows retrieval of the value associated with a
-        key, and it also allows the entry to be deleted.
-      </para>
-      <programlisting language="ocaml">
-module Iterable_dictionary : sig
-  type ('a, 'b) t
-
-  val create : unit -&gt; ('a, 'b) t
-  val add : ('a, 'b) t -&gt; key:'a -&gt; data:'b -&gt; unit
-  val iterator : ('a, 'b) t -&gt; ('a * 'b) iterator
-  val find : ('a, 'b) t -&gt; key:'a -&gt; ('a * 'b) iterator
-end
-</programlisting>
-      <para>
-        The implementation of <literal>Iterable_dictionary</literal> is
-        similar to the original <literal>Dictionary</literal> using
-        lists, except now we will use doubly-linked lists. The
-        <literal>create</literal> function creates an array of
-        doubly-linked lists. The <literal>add</literal> function first
-        removes any existing entry, then add the new element to the
-        front of the bucket.
-      </para>
-      <programlisting language="ocaml">
-module Iterable_dictionary = struct
-  type ('a, 'b) t = ('a * 'b) DList.t array
-
-  let num_buckets = 17
-  let hash_bucket key = (Hashtbl.hash key) mod num_buckets
-
-  let create () = Array.init num_buckets (fun _ -&gt; DList.create ())
-
-  let add table ~key ~data =
-    let index = hash_bucket key in
-    let it = DList.find table.(index) ~data:(key, data) in
-    if it#has_value then it#remove;
-    DList.insert_first table.(index) (key, value)
-
-  ...
-end
-</programlisting>
-      <para>
-        We can define iterators in the hash table as a pair of a bucket
-        index and <literal>DList</literal> iterator into the bucket. To
-        define this as an object, we'll introduce a few more object
-        concepts, including mutable fields, private methods, and
-        initializers. The function
-        <literal>make_iterator table index_ dlist_it_</literal> returns
-        an iterator for the bucket with index <literal>index_</literal>
-        and list iterator <literal>dlist_it_</literal>.
-      </para>
-      <programlisting language="ocaml">
-  let make_iterator table index_ dlist_it_ =
-    object (self)
-      val mutable index = index_
-      val mutable dlist_it = dlist_it_
-      method has_value = dlist_it#has_value
-      method value = dlist_it#value
-      method next =
-         dlist_it#next;
-         self#normalize
-      method remove =
-         dlist_it#remove;
-         self#normalize
-      method private normalize =
-        while not dlist_it#has_value &amp;&amp; index &lt; num_buckets - 1 do
-          index &lt;- index + 1;
-          dlist_it &lt;- DList.iterator table.(index)
-        done
-      initializer self#normalize
-    end
-</programlisting>
-      <para>
-        The iterator implementation relies on a &quot;normal&quot; form,
-        where the list iterator <emphasis>always</emphasis> refers to an
-        element. This is handled by the <literal>normalize</literal>
-        method, which advances past empty buckets until either a
-        non-empty bucket is found, or the end of the table is reached.
-      </para>
-      <para>
-        The <literal>normalize</literal> method is declared as
-        <literal>private</literal>, so that it does not appear as part
-        of the iterator type. The <literal>has_value</literal> and
-        <literal>value</literal> methods delegate directly to the list
-        iterator. The <literal>next</literal> and
-        <literal>remove</literal> methods also delagate to the list
-        iterator; however, since the iterator has been mutated, the
-        <literal>normalize</literal> method is called to advance to the
-        next element.
-      </para>
-      <para>
-        There are several more things to note. The syntax
-        <literal>object (self) ... end</literal> means that the variable
-        <literal>self</literal> refers to the object itself, allowing
-        other method in the object to be called (like
-        <literal>self#normalize</literal>). The fields
-        <literal>index</literal> and <literal>dlist_it</literal> are
-        declared as <literal>val mutable</literal>, which means that
-        they can be modified by assignment using the
-        <literal>&lt;-</literal> syntax seen in the
-        <literal>normalize</literal> method. Finally, the object also
-        has an <literal>initializer</literal> expression, which is
-        called when the object is first created, in this case
-        normalizing the iterator.
-      </para>
-      <para>
-        Now that the iterator is defined, we can complete the
-        <literal>Iterable_dictionary</literal> implementation.
-      </para>
-      <programlisting language="ocaml">
-  let iterator table =
-    make_iterator table 0 (DList.iterator table.(0))
-
-  let find table ~key =
-    let index = hash_bucket key in
-    let it = DList.iterator table.(index) in
-    while it#has_value &amp;&amp; fst it#value &lt;&gt; key do
-      it#next
-    done;
-    if it#has_value then
-       make_iterator table index it
-    else
-       make_iterator table num_buckets it
-</programlisting>
-      <para>
-        The <literal>iterator</literal> function returns in iterator
-        that refers to the first element in the table (if the table is
-        non-empty). The <literal>find</literal> function searches for an
-        element in the table, returning an iterator referring to that
-        value if found, or else the an iterator at the end of the table.
-      </para>
-      <para>
-        Iteration over the hash table is much the same as through a
-        doubly-linked list. Note that the elements are reordered in the
-        hash table.
-      </para>
-      <programlisting language="ocaml">
-# let () =
-  let module IHM = Iterable_dictionary in
-  let table = IHM.create () in
-  IHM.add table ~key:&quot;small&quot; ~data:1.00;
-  IHM.add table ~key:&quot;medium&quot; ~data:1.50;
-  IHM.add table ~key:&quot;large&quot; ~data:2.25;
-  IHM.add table ~key:&quot;enormous&quot; ~data:5.00;
-
-  let it = IHM.iterator table in
-  while it#has_value do
-    let size, price = it#value in
-    Printf.printf &quot;Size %s is $%.02f\n&quot; size price;
-    it#next
-  done;;
-Size large is $2.25
-Size medium is $1.50
-Size small is $1.00
-Size enormous is $5.00
-- : unit = ()
-
-# let () =
-  let it = IHM.find table &quot;enormous&quot; in
-  it#remove;
-
-  let it = IHM.iterator table in
-  while it#has_value do
-    let size, price = it#value in
-    Printf.printf &quot;Size %s is $%.02f\n&quot; size price;
-    it#next
-  done;;
-Size large is $2.25
-Size medium is $1.50
-Size small is $1.00
-- : unit = ()
-</programlisting>
     </sect2>
   </sect1>
-  <sect1 id="lazy-computation">
-    <title>Lazy computation</title>
+  <sect1 id="laziness-and-other-unobservable-effects">
+    <title>Laziness and other unobservable effects</title>
     <para>
-      There are many instances where imperative programming is used to
-      modify or improve the performance characteristics of a program,
-      without otherwise changing the behavior. In other words, the
-      program could be written without side-effects, but performance is
-      improved by techniques like lazy computation, caching,
-      memoization, etc.
+      There are many instances where you basically want to program in a
+      pure style, but you want to make limited use of side-effects to
+      improve the performance of your code, without really changing
+      anything else. Such side effects are sometimes called
+      <emphasis>unobservable effects</emphasis>, and they are a useful
+      way of leveraging OCaml's imperative features while still
+      maintaining most of the benefits of pure programming.
     </para>
     <para>
-      One of the simplest of these is the builtin lazy computation. The
-      keyword <literal>lazy</literal> can be used to prefix any
-      expression, returning a value of type
-      <literal>'a Lazy.t</literal>. The computation is delayed until
-      forced with the <literal>Lazy.force</literal> function, and then
-      saved thereafter.
+      One of the simplest unobservable effect is
+      <emphasis>laziness</emphasis>. A lazy value is one that is not
+      computed until it is actually needed. In OCaml, lazy values are
+      created using the <literal>lazy</literal> keyword, which can be
+      used to prefix any expression, returning a value of type
+      <literal>'a Lazy.t</literal>. The evaluation of that expression is
+      delayed until forced with the <literal>Lazy.force</literal>
+      function.
     </para>
     <programlisting language="ocaml">
-# let v = lazy (print_string &quot;performing lazy computation\n&quot;; 1);;
-val v : int lazy_t = &lt;lazy&gt;
+# let v = lazy (print_string &quot;performing lazy computation\n&quot;; sqrt 16.);;
+val v : float lazy_t = &lt;lazy&gt;
 # Lazy.force v;;
 performing lazy computation
-- : int = 1
+- : float = 4.
 # Lazy.force v;;
-- : int = 1
+- : float = 4.
 </programlisting>
     <para>
-      The builtin <literal>lazy</literal> computation has a nice syntax,
-      but the technique is pretty generic, and we can implement it with
-      a mutable value.
+      You can see from the print statement that the actual computation
+      was performed only once, and only after <literal>force</literal>
+      had been called.
+    </para>
+    <para>
+      To better understand how laziness works, let's walk through the
+      implementation of our own lazy type. We'll start by declaring
+      types to represent a lazy value.
     </para>
     <programlisting language="ocaml">
-module ImpLazy : sig
-   type 'a t
-
-   val create : (unit -&gt; 'a) -&gt; 'a t
-   val force : 'a t -&gt; 'a
-end = struct
-   type 'a delayed = Delayed of (unit -&gt; 'a) | Value of 'a
-   type 'a t = 'a delayed ref
-
-   let create f = ref (Delayed f)
-   let force v =
-     match !v with
-     | Delayed f -&gt;
-          let x = f () in
-          v := Value x;
-          x
-     | Value x -&gt;
-          x
-end;;
+# type 'a lazy_state =
+  | Delayed of (unit -&gt; 'a)
+  | Value of 'a
+  | Exn of exn
+type 'a lazy_state = Delayed of (unit -&gt; 'a) | Value of 'a | Exn of exn
 </programlisting>
     <para>
-      The <literal>'a delayed</literal> type contains a delayed value
-      represented as a function, or else an actual value. The
-      <literal>ImpLazy.force</literal> function forces the computation;
-      if it is delayed, the function is evaluated, and the value is
-      mutated to save the resulting value. Subsequent calls to
-      <literal>ImpLazy.force</literal> will fall into the
-      <literal>Value</literal> case, without needing to reevaluate the
-      function. The main difference between our module
-      <literal>ImpLazy</literal> and the builtin module
-      <literal>Lazy</literal> is the nice syntax for the latter. Rather
-      than writing <literal>ImpLazy.create (fun () -&gt; e)</literal>,
-      the builtin syntax is just <literal>lazy e</literal>.
+      A <literal>lazy_state</literal> represents the possible states of
+      a lazy value. A lazy value is <literal>Delayed</literal> before it
+      has been run, where <literal>Delayed</literal> holds a function
+      for computing the value in question. A lazy value is in the
+      <literal>Value</literal> state when it has been forced and the
+      computation ended normally. The <literal>Exn</literal> case is for
+      when the lazy value has been forced, but the computation ended
+      with an exception. A lazy value is just a reference to a
+      <literal>lazy_state</literal>.
+    </para>
+    <para>
+      We can create a lazy value based on a thunk,
+      <emphasis>i.e.</emphasis>, a function that takes a unit argument.
+      Wrapping an expression in a thunk is another way to suspend the
+      computation of an expression.
+    </para>
+    <programlisting language="ocaml">
+# let create_lazy f = ref (Delayed f);;
+val create_lazy : (unit -&gt; 'a) -&gt; 'a lazy_state ref = &lt;fun&gt;
+# let v = create_lazy
+    (fun () -&gt; print_string &quot;performing lazy computation\n&quot;; sqrt 16.);;
+  val v : float lazy_state ref = {contents = Delayed &lt;fun&gt;}
+</programlisting>
+    <para>
+      Now we just need a way to force a lazy value. The following
+      function does just that.
+    </para>
+    <programlisting language="ocaml">
+# let force v =
+    match !v with
+    | Value x -&gt; x
+    | Exn e -&gt; raise e
+    | Delayed f -&gt;
+      try
+        let x = f () in
+        v := Value x;
+        x
+      with exn -&gt;
+        v := Exn exn;
+        raise exn
+   ;;
+val force : 'a lazy_state ref -&gt; 'a = &lt;fun&gt;
+</programlisting>
+    <para>
+      Which we can use in the same way we used
+      <literal>Lazy.force</literal>:
+    </para>
+    <programlisting language="ocaml">
+# force v;;
+performing lazy computation
+- : float = 4.
+# force v;;
+- : float = 4.
+</programlisting>
+    <para>
+      The main difference between our implementation of laziness and the
+      built-in version is syntax. Rather than writing
+      <literal>create_lazy (fun () -&gt; sqrt 16.)</literal>, we can
+      just write <literal>lazy (sqrt 16.)</literal>.
     </para>
     <sect2 id="memoization">
       <title>Memoization</title>
       <para>
-        We can generalize lazy computations to function
-        <emphasis>memoization</emphasis>, where we save the result of
-        function applications to avoid their recomputation. One simple
-        implementation is to use a hash table to save the values by side
-        effect.
+        Another unobservable effect is <emphasis>memoization</emphasis>.
+        A memoized function remembers the result of previous invocations
+        of the function so that they can be returned without further
+        computation when the same arguments are presented again.
+      </para>
+      <para>
+        Here's a function that takes as an argument an arbitrary
+        single-argument function and returns a memoized version of that
+        function. Here we'll use Core's <literal>Hashtbl</literal>
+        module, rather than our toy <literal>Dictionary</literal>.
       </para>
       <programlisting language="ocaml">
-module Memo : sig
-   type ('a, 'b) t
-
-   val create : unit -&gt; ('a, 'b) t
-   val apply : ('a, 'b) t -&gt; func:('a -&gt; 'b) -&gt; arg:'a -&gt; 'b
-end = struct
-   type ('a, 'b) t = ('a, 'b) Dictionary.t
-
-   let create = Dictionary.create
-   let apply table ~func ~arg =
-     match Dictionary.find table ~key:arg with
-     | Some x -&gt; x
-     | None -&gt;
-         let x = func arg in
-         Dictionary.add table ~key:arg ~data:x;
-         x
-
-end;;
+# let memoize f =
+    let table = Hashtbl.Poly.create () in
+    (fun x -&gt;
+      match Hashtbl.find table x with
+      | Some y -&gt; y
+      | None -&gt;
+        let y = f x in
+        Hashtbl.add_exn table ~key:x ~data:y;
+        y
+    );;
+val memoize : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 </programlisting>
       <para>
-        Memoization is useful for <emphasis>dynamic
-        programming</emphasis>, where problems are solved by breraking
-        them down into simpler subproblems. If subproblems occur more
-        than once, memoization can be used to avoid recomputing the
-        subproblem. A canonical example of this is the Fibonacci
-        sequence, which is defined by the following program, which
-        produces the sequence <emphasis>0, 1, 1, 2, 3, 5, 8, 13, 21,
-        ...</emphasis> starting from 0.
+        Note that we use <literal>Hashtbl.Poly.create</literal> to
+        create a hash table using OCaml's built-in polymorphic hash
+        function. It's also possible to create a hash-table using a hash
+        function specialized to a given type.
+      </para>
+      <para>
+        Memoization can be useful whenever you have a function that is
+        expensive to recompute, and you don't mind caching old values
+        indefinitely. But memoization is also useful for efficiently
+        implementing some recursive algorithms. One good example is the
+        algorithm for computing the <emphasis>edit distance</emphasis>
+        (also called the Levenshtein distance) between two strings. The
+        edit distance is the number of single-character changes
+        (including letter switches, insertions and deletions) required
+        to convert one string to the other. This kind of distance metric
+        can be useful for a variety of approximate string matching
+        problems, like spell checkers.
+      </para>
+      <para>
+        Consider the following code for computing the edit distance.
+        Understanding the algorithm isn't important here, but you should
+        pay attention to the structure of the recursive calls.
       </para>
       <programlisting language="ocaml">
-let rec fib i = if i &lt;= 1 then i else fib (i - 1) + fib (i - 2);;
+# let rec edit_distance s t =
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -&gt; x
+    | (len_s,len_t) -&gt;
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ edit_distance s' t  + 1
+        ; edit_distance s  t' + 1
+        ; edit_distance s' t' + cost_to_drop_both
+        ]
+  ;;
+val edit_distance : string -&gt; string -&gt; int = &lt;fun&gt;
+# edit_distance &quot;OCaml&quot; &quot;ocaml&quot;;;
+- : int = 2
 </programlisting>
       <para>
-        The complexity of this function is exponential
-        <emphasis>O(2^i)</emphasis>, because for large inputs the
-        function computes two similar-sized subproblems. To illustrate,
-        let's time the computation using the <literal>Sys.time</literal>
-        function to measure the wall clock.
+        The thing to note is that if you call
+        <literal>edit_distance &quot;OCaml&quot; &quot;ocaml&quot;</literal>,
+        then that will in turn dispatch the following calls:
       </para>
       <programlisting language="ocaml">
-# let time f x =
-    let start = Sys.time () in
-    let y = f x in
-    Printf.printf &quot;Time: %g sec\n&quot; (Sys.time () -. start);
-    y;;
-val time : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
-# time fib 40;;
-Time: 5.53724 sec
-- : int = 102334155
+edit_distance &quot;OCam&quot; &quot;ocaml&quot;
+edit_distance &quot;OCaml&quot; &quot;ocam&quot;
+edit_distance &quot;OCam&quot; &quot;ocam&quot;
 </programlisting>
       <para>
-        Next, let's construct a memoized version of the function, where
-        the recursive calls are made through a memo table. This makes a
-        dramatic improvement in performance. Since the recursive calls
-        are computed just once, the complexity is linear, and the
-        computation is fast.
+        And these calls will in turn dispatch other calls:
       </para>
       <programlisting language="ocaml">
-# let memo_fib =
-    let memo = Memo.create () in
-    let rec fib i =
-      if i &lt;= 1 then
-         i
-      else
-         Memo.apply memo ~func:fib ~arg:(i - 1) +
-         Memo.apply memo ~func:fib ~arg:(i - 2)
-    in
-    fib;;
-val memo_fib : int -&gt; int = &lt;fun&gt;
-# time memo_fib 40;;
-Time: 3.7e-05 sec
-- : int = 102334155
+edit_distance &quot;OCam&quot; &quot;ocaml&quot;
+   edit_distance &quot;OCa&quot; &quot;ocaml&quot;
+   edit_distance &quot;OCam&quot; &quot;ocam&quot;
+   edit_distance &quot;OCa&quot; &quot;ocam&quot;
+edit_distance &quot;OCaml&quot; &quot;ocam&quot;
+   edit_distance &quot;OCam&quot; &quot;ocam&quot;
+   edit_distance &quot;OCaml&quot; &quot;oca&quot;
+   edit_distance &quot;OCam&quot; &quot;oca&quot;
+edit_distance &quot;OCam&quot; &quot;ocam&quot;
+   edit_distance &quot;OCa&quot; &quot;ocam&quot;
+   edit_distance &quot;OCam&quot; &quot;oca&quot;
+   edit_distance &quot;OCa&quot; &quot;oca&quot;
 </programlisting>
       <para>
-        Note that this use of memoization relies on side-effects to
-        cache intermediate computations, but it doesn't change the
-        values of the function. Its purpose is to improve performance.
-      </para>
-    </sect2>
-    <sect2 id="hash-consing">
-      <title>Hash consing</title>
-      <para>
-        &quot;Hash consing&quot; is a technique to share values that are
-        structurally equal. The term comes from Lisp, where the
-        technique is used to share s-expressions that are equal. In some
-        situations, hash-consing can result in dramatic performance
-        improvements in two ways. First, space can be reduced by using a
-        single physical representation for values that are equal.
-        Second, values can be compared for equality using the
-        constant-time physical equality operator <literal>==</literal>.
-      </para>
-      <para>
-        One of the simplest ways to implement hash-consing is to use a
-        hash-table to remember (memoize) values that have already been
-        created. To illustrate, let's define a kind of numerical
-        expression <literal>Exp.t</literal> consisting of integers,
-        variables, addition, and multiplication (we can define more
-        operators, but let's keep the example simple).
-      </para>
-      <para>
-        The type <literal>Exp.t</literal> is declared as
-        <literal>private</literal>, meaning that pattern matching can be
-        used on the expressions outside the module, but expressions
-        can't be constructed without explicitly using the constructors
-        <literal>num</literal>, <literal>var</literal>,
-        <literal>plus</literal>, <literal>times</literal> provided by
-        the <literal>Exp</literal> module. These functions enforce the
-        hash-consing, ensuring that structurally equal expressions are
-        mapped to physically equal representations.
+        As you can see, some of these calls are repeats. For example,
+        there are two different calls to
+        <literal>edit_distance &quot;OCam&quot; &quot;oca&quot;</literal>.
+        The number of redundant calls grows exponentially with the size
+        of the strings, meaning that our implementation of
+        <literal>edit_distance</literal> is brutally slow for large
+        strings. We can see this by writing a small timing function.
       </para>
       <programlisting language="ocaml">
-module Exp : sig
-  type t = private
-  | Num of int
-  | Var of string
-  | Plus of t * t
-  | Times of t * t
-
-  val num : int -&gt; t
-  val var : string -&gt; t
-  val plus : t -&gt; t -&gt; t
-  val times : t -&gt; t -&gt; t
-end = struct
-  type t =
-  | Num of int
-  | Var of string
-  | Plus of t * t
-  | Times of t * t
-
-  let table = Dictionary.create ()
-  let merge exp =
-    match Dictionary.find table ~key:exp with
-    | Some x -&gt; x
-    | None -&gt;
-         Dictionary.add table ~key:exp ~data:exp;
-         exp
-
-  let num i = merge (Num i)
-  let var s = merge (Var s)
-  let plus e1 e2 = merge (Plus (e1, e2))
-  let times e1 e2 = merge (Times (e1, e2))
-end;;
+# let time f =
+    let start = Time.now () in
+    let y = f () in
+    let stop = Time.now () in
+    printf &quot;Time: %s\n&quot; (Time.Span.to_string (Time.diff stop start));
+    y ;;
+val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;
 </programlisting>
       <para>
-        The implementation defines a hash table
-        <literal>table</literal>, and a <literal>merge</literal>
-        function that merges an expression into the table, returning the
-        previous value if there was one, or inserting a new value if
-        there is not. The constructors can rely on the fact that
-        subexpressions have already been hash-consed, so they simply
-        call the merge function to memoize the value.
-      </para>
-      <para>
-        Note that expressions that are structurally equal are now also
-        physically equal.
+        And now we can use this to try out some examples.
       </para>
       <programlisting language="ocaml">
-# let e1 = Exp.times (Exp.num 10) (Exp.plus (Exp.var &quot;x&quot;) (Exp.var &quot;y&quot;));;
-val e1 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var &quot;x&quot;, Exp.Var &quot;y&quot;))
-# let e2 = Exp.times (Exp.num 10) (Exp.plus (Exp.var &quot;x&quot;) (Exp.var &quot;y&quot;));;
-val e2 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var &quot;x&quot;, Exp.Var &quot;y&quot;))
-# e1 == e2;;
-- : bool = true
+# time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);;
+Time: 5.11003ms
+- : int = 2
+# time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);;
+Time: 19.3322s
+- : int = 2
 </programlisting>
       <para>
-        Expressions that are not equal are equal are not physically
-        equal either, however common subexpressions are equal.
+        Just those few extra characters made it almost 4000 times
+        slower!
+      </para>
+      <para>
+        Memoization would be a huge help here, but to fix the problem,
+        we need to memoize the calls that
+        <literal>edit_distance</literal> makes to itself. To see how to
+        do this, let's step away from <literal>edit_distance</literal>,
+        and instead consider a much simpler example: computing the nth
+        element of the Fibonacci sequence. The Fibonacci sequence by
+        definition starts out with two <literal>1</literal>'s, with
+        every subsequent element being the sum of the previous two. The
+        classic recursive definition of Fibonacci is as follows:
+      </para>
+      <para>
+        <literal>ocaml # let rec fib i =     if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2);;</literal>
+        This is, however, exponentially slow, for the same reason that
+        <literal>edit_distance</literal> was slow: we end up making many
+        redundant calls to <literal>fib</literal>. It shows up quite
+        dramatically in the performance.
       </para>
       <programlisting language="ocaml">
-# let e3 = Exp.times (Exp.num 10) (Exp.plus (Exp.var &quot;z&quot;) (Exp.var &quot;y&quot;));;
-val e3 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var &quot;z&quot;, Exp.Var &quot;y&quot;))
-# e1 == e3;;
-- : bool = false
-# let Exp.Times (a1, Exp.Plus (_, a2)) = e1;;
-val a1 : Exp.t = Exp.Num 10
-val a2 : Exp.t = Exp.Var &quot;y&quot;
-# let Exp.Times (b1, Exp.Plus (_, b2)) = e3;;
-val b1 : Exp.t = Exp.Num 10
-val b2 : Exp.t = Exp.Var &quot;y&quot;
-# a1 == b1;;
-- : bool = true
-# a2 == b2;;
-- : bool = true
+# time (fun () -&gt; fib 5);;
+Time: 0.0100136ms
+- : int = 8
+# time (fun () -&gt; fib 10);;
+Time: 0.0441074ms
+- : int = 89
+# time (fun () -&gt; fib 20);;
+Time: 5.17392ms
+- : int = 10946
+# time (fun () -&gt; fib 40);;
+Time: 51.4205s
 </programlisting>
-    </sect2>
-    <sect2 id="weak-hash-consing">
-      <title>Weak hash consing</title>
       <para>
-        There is two issues with hash-consing as we have just defined
-        it. A minor problem is that hashing is linear in the size of the
-        expression. This can be fixed by storing the hash code in the
-        expression itself, avoiding the recursive computation. If
-        expressions are small, this won't be much of a benefit, but it
-        can save time if large expressions are frequently constructed.
+        Here, <literal>fib 40</literal> takes almost a minute to
+        compute, as opposed to five <emphasis>milliseconds</emphasis>
+        for <literal>fib 20</literal>.
       </para>
       <para>
-        A more serious problem is that the hash table holds onto
-        expressions <emphasis>forever</emphasis>, even if they are no
-        longer used in the program. This can result in a space leak that
-        cancels out any space saving we had in the first place, perhaps
-        making it even worse.
+        So, how can we use memoization to make this faster? The tricky
+        bit is that we need to insert the memoization before the
+        recursive calls within <literal>fib</literal>. We can't just
+        define <literal>fib</literal> in the ordinary way and memoize it
+        after the fact and expect any improvement.
       </para>
       <para>
-        To deal with this problem, we can use &quot;weak&quot; hash
-        tables, implemented in the <literal>Weak</literal> module in the
-        OCaml standard library. The main difference is that a weak table
-        may drop values that are no longer being used elsewhere. Weak
-        tables are tied into the garbage collector, which removes values
-        that are no longer live.
-      </para>
-      <para>
-        We define the type <literal>WExp.t</literal> much as before,
-        except including the hash code for the <literal>Plus</literal>
-        and <literal>Times</literal> expressions.
-      </para>
-      <para>
-        The weak hash table requires that hash and equality functions be
-        provided explicitly, so we construct a module
-        <literal>HashExp</literal> that defines the
-        <literal>equal</literal> and <literal>hash</literal> functions.
-        Note that equality and hashing are both constant-time functions
-        -- equality can rely on physical equality of subexpressions, and
-        hashing can use the explcitly represented hash values.
-      </para>
-      <para>
-        The module <literal>WeakHash</literal> has the semantics of a
-        set of elements. The <literal>WeakHash.merge</literal> function
-        retrieves an element if it already exists, or adds it otherwise.
-        The constructors are much as before.
+        The first step is to write <literal>fib</literal> in a way that
+        partially unwinds the recursion. The following definition of
+        <literal>fib_recur</literal> expects as its first argument to be
+        passed a function that it can use for making its recursive
+        calls.
       </para>
       <programlisting language="ocaml">
-module WExp : sig
-  type t = private
-  | Num of int
-  | Var of string
-  | Plus of int * t * t
-  | Times of int * t * t
-
-  val num : int -&gt; t
-  val var : string -&gt; t
-  val plus : t -&gt; t -&gt; t
-  val times : t -&gt; t -&gt; t
-end = struct
-  type t =
-  | Num of int
-  | Var of string
-  | Plus of int * t * t
-  | Times of int * t * t
-
-  module HashExp = struct
-    type exp = t
-    type t = exp
-    let equal e1 e2 =
-      match e1, e2 with
-      | Num i1, Num i2 -&gt; i1 = i2
-      | Var v1, Var v2 -&gt; v1 = v2
-      | Plus (_, a1, a2), Plus (_, b1, b2)
-      | Times (_, a1, a2), Times (_, b1, b2) -&gt;
-           a1 == b1 &amp;&amp; a2 == b2
-      | _ -&gt; false
-    let hash = function
-    | Num i -&gt; i lxor 0xabababab
-    | Var v -&gt; (Hashtbl.hash v) lxor 0xcdcdcdcdc
-    | Plus (hash, _, _)
-    | Times (hash, _, _) -&gt; hash
-  end
-
-  module WeakHash = Weak.Make (HashExp);;
-
-  let table = WeakHash.create 17
-  let merge e = WeakHash.merge table e
-
-  let num i = merge (Num i)
-  let var s = merge (Var s)
-  let plus e1 e2 =
-     let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0x12345678 in
-     merge (Plus (hash, e1, e2))
-
-  let times e1 e2 =
-     let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0xdeadbeef in
-     merge (Times (hash, e1, e2))
-end;;
+# let fib_recur recur i =
+    if i &lt;= 1 then i
+    else recur (i - 1) + recur (i - 2) ;;
+val fib_recur : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
 </programlisting>
-    </sect2>
-  </sect1>
-  <sect1 id="concurrency">
-    <title>Concurrency</title>
-    <para>
-      Concurrency is another tool OCaml programmers can use to simplify
-      programs in certain cases. In OCaml, threads do not introduce
-      parallelism; only one thread may be running at a time. However,
-      threads can be used to simplify control flow -- a program can
-      devote some threads to reading input, others for performing work,
-      others for producing output, etc.
-    </para>
-    <para>
-      The OCaml standard library supports threads, where individual
-      threads of control can be created that run concurrently (but only
-      one thread at a time), and context switches are
-      <emphasis>involuntary</emphasis>, meaning that a thread may be
-      preempted at any time.
-    </para>
-    <para>
-      When threads share imperative state, this gives rise to the
-      standard synchronization issues, where multiple threads may be
-      mutating shared state at the same time. To illustrate, let's write
-      a program with two threads that increment a shared reference cell
-      concurrently.
-    </para>
-    <programlisting language="ocaml">
-let value = ref 0
-
-let loop () =
-   for i = 1 to 3 do
-     let i = !value in
-     Printf.printf &quot;i = %d\n&quot; i;
-     flush stdout;
-     value := i + 1
-   done
-
-let thread1 = Thread.create loop ();;
-let thread2 = Thread.create loop ();;
-
-Thread.join thread1;;
-Thread.join thread2;;
-
-Printf.printf &quot;value = %d\n&quot; !value
-</programlisting>
-    <para>
-      The reference cell <literal>value</literal> holds a shared value
-      that is incremented 10 times, in a loop, by the
-      <literal>loop</literal> function. Each iteration of the loop
-      prints the current value, then assigns the new value. We create
-      two threads with the <literal>Thread.create</literal> expressions,
-      then use <literal>Thread.join</literal> to block until the threads
-      terminate.
-    </para>
-    <para>
-      The exact behavior of the program is nondeterminstic -- it depends
-      on the relative sopeed of the two theads. One output is listed
-      below.
-    </para>
-    <programlisting language="ocaml">
-i = 0
-ii  ==  01
-
-ii  ==  12
-
-i = 2
-value = 3
-</programlisting>
-    <para>
-      This represents a nearly perfect interleaving of the thread
-      executions. Each thread fetches the value from the
-      <literal>value</literal> reference cell, prints the value, then
-      performs the assignment. Since both threads effectively run in
-      lockstep, the final value in the <literal>value</literal>
-      reference cell is the same as if there were just one thread
-      running.
-    </para>
-    <para>
-      If this is not the behavior that was expected, one solution is to
-      use a <literal>Mutex</literal> to ensure that the increment
-      operation is atomic. We can allocate a lock with
-      <literal>Mutex.create</literal>, then acquire the lock in the loop
-      body.
-    </para>
-    <programlisting language="ocaml">
-let value = ref 0
-let mutex = Mutex.create ()
-
-let loop () =
-   for i = 1 to 3 do
-     Mutex.lock mutex;
-     let i = !value in
-     Printf.printf &quot;i = %d\n&quot; i;
-     flush stdout;
-     value := i + 1;
-     Mutex.unlock mutex
-   done
-</programlisting>
-    <para>
-      When we run this program, it produces a deterministic output.
-    </para>
-    <programlisting>
-i = 0
-i = 1
-i = 2
-i = 3
-i = 4
-i = 5
-value = 6
-</programlisting>
-    <sect2 id="dealing-with-concurrency">
-      <title>Dealing with concurrency</title>
       <para>
-        In general the interaction of concurrency with imperative
-        programs causes problems with races. There are many techniques
-        you can use to address the issue.
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            Do not use assignment, mutable data structures, or perform
-            input/output in threads.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Use <emphasis>cooperative</emphasis> multitasking, where
-            only one thread runs at a time, and context switches are
-            <emphasis>voluntary</emphasis>. This is the dominant model
-            in <literal>Async</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Do not share mutable data between threads. In practice, this
-            usually includes explicit communication channels between
-            threads that otherwise have isolated state.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Give in, and use threads, and the standard synchronization
-            toolkit that comes with OCaml, including locks
-            (<literal>Mutex</literal>), condition variables, etc.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        Out of all of these choices, the simplest one is to use the
-        <literal>Async</literal> model and cooperative multitasking.
-        However, let's go ahead and work through some examples of using
-        traditional concurrent programming using locks and other
-        synchronization primitives to build a concurrency library.
-      </para>
-    </sect2>
-    <sect2 id="concurrent-hash-tables">
-      <title>Concurrent hash tables</title>
-      <para>
-        Let's extend our hash table example to support concurrency. To
-        begin, let's first give the signature of the module we will
-        implement. The table has operations to add, remove, and find
-        elements, and it also supports imperative iterators.
+        We can now turn this back into an ordinary Fibonacci function by
+        tying the recursive knot, as shown below.
       </para>
       <programlisting language="ocaml">
-module Concurrent_dictionary : sig
-  type ('a, 'b) t
-
-  val create : unit -&gt; ('a, 'b) t
-  val add : ('a, 'b) t -&gt; key:'a -&gt; data:'b -&gt; unit
-  val find : ('a, 'b) t -&gt; key:'a -&gt; 'b option
-  val remove : ('a, 'b) t -&gt; key:'a -&gt; unit
-  val iterator : ('a, 'b) t -&gt; ('a * 'b) iterator
-end
+# let rec fib i = fib_recur fib i
+val fib : int -&gt; int = &lt;fun&gt;
+# fib 5;;
+- : int = 8
 </programlisting>
       <para>
-        We'll use the same basic construction that we used to implement
-        the <literal>Dictionary</literal>, where a hash table contains
-        an array of buckets. In addition we'll add locking to ensure
-        that concurrent operations do not interfere. To reduce lock
-        contention, we'll use an array of locks to partition the table
-        into multiple parts. If operations are uniformly distributed,
-        this should reduce lock contention.
+        And we can even write a polymorphic function that we'll call
+        <literal>fix</literal> that can tie the recursive not for any
+        function of this form.
       </para>
       <programlisting language="ocaml">
-  type ('a, 'b) element = {
-    key : 'a;
-    mutable value : 'b
-  }
-  type ('a, 'b) t = {
-    locks : Mutex.t array;
-    mutable buckets : ('a, 'b) element list array
-  }
-
-  let num_locks = 32
-  let num_buckets = 256
-
-  let create () = {
-    locks = Array.init num_locks (fun _ -&gt; Mutex.create ());
-    buckets = Array.create num_buckets []
-  }
+# let fix f =
+    let rec f' x = f f' x in
+    f'
+  ;;
+val fix : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
+# let fib = fix fib_recur;;
+val fib : int -&gt; int = &lt;fun&gt;
+# fib 5;;
+- : int = 8
 </programlisting>
       <para>
-        Each <literal>element</literal> is a key/value pair, where the
-        value is mutable so that the <literal>add</literal> function can
-        mutate it in place. For this implementation, we'll use 32 locks,
-        and start with 256 buckets.
+        This is a pretty strange piece of code, and it may take a few
+        minutes of staring at this to figure out what's going on. Like
+        <literal>fib_recur</literal>, the function <literal>f</literal>
+        passed into <literal>fix</literal> is a function that isn't
+        recursive, but takes as an argument of a function that it will
+        call. What <literal>fix</literal> does is to essentially feed
+        <literal>f</literal> to itself, thus making a true recursive
+        function.
       </para>
       <para>
-        Each bucket is an <emphasis>association list</emphasis>, meaning
-        that it is list of key/value pairs that implement a dictionary.
-        We can start the implementation by defining dictionary
-        operations for association lists. The function
-        <literal>find_assoc</literal> finds the value associated with a
-        key, and <literal>remove_assoc_exn</literal> removes an
-        association. The remove function raises an exception
-        <literal>Not_found</literal> if the list does not contain the
-        association. We'll use this to optimize removal.
+        This is clever enough, but all we've done so far is find a new
+        way to implement the same old slow Fibonacci function. To make
+        it faster, we need a function like <literal>fix</literal> that
+        inserts memoization when it ties the recursive knot. Here is
+        just such a function.
       </para>
       <programlisting language="ocaml">
-  let rec find_assoc key = function
-  | element :: tl -&gt;
-       if element.key = key then
-          Some element
-       else
-          find_assoc key tl
-  | [] -&gt; None
-
-  let rec remove_assoc_exn key = function
-  | element :: tl -&gt;
-       if element.key = key then
-          tl
-       else
-          element :: remove_assoc_exn key tl
-  | [] -&gt; raise Not_found
+# let memo_fix f =
+     let rec f' = lazy (memoize (fun x -&gt; f (Lazy.force f') x)) in
+     Lazy.force f'
+  ;;
+val memo_fix : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 </programlisting>
       <para>
-        The locks are intended to partition the table into multiple
-        sub-parts, where each lock provides synchronization for a
-        contiguous range of buckets. For synchronization we define a
-        function <literal>synchronize</literal> that takes a bucket
-        index and a function, and evaluates the function with the bucket
-        lock acquired, releasing the lock before returning.
+        It's not obvious why we need to use laziness here. It seems like
+        you should be able to get away with just dropping the the
+        <literal>lazy</literal> and the <literal>Lazy.force</literal>
+        from the above code, as follows.
       </para>
       <programlisting language="ocaml">
-  let synchronize table index f =
-    let lock = table.locks.(index * num_locks / num_buckets) in
-    Mutex.lock lock;
-    let result = f () in
-    Mutex.unlock lock;
-    result
+# let memo_fix f =
+     let rec f' = memoize (fun x -&gt; f f' x) in
+     f'
+  ;;
+      Characters 35-60:
+       let rec f' = memoize (fun x -&gt; f f' x) in
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of `let rec'
 </programlisting>
       <para>
-        Note that the <literal>synchronize</literal> function is
-        <emphasis>not</emphasis> exception-safe, meaning that if
-        evaluation of <literal>f ()</literal> raises an exception, the
-        lock will not be released. An exception-safe version would catch
-        all exceptions; when an exception is raised, the lock would be
-        released, and the exception re-raised.
+        OCaml rejects the definition because OCaml, as a strict
+        language, can't safely construct the closure
+        <literal>(fun x -&gt; f f' x)</literal> until
+        <literal>f'</literal> itself is defined, and
+        <literal>f'</literal> can't be defined until
+        <literal>memoize</literal> runs, by which time the closure
+        already needs to exist. Generally, OCaml requires that the right
+        hand side of a <literal>let rec</literal> be either a function,
+        a <literal>lazy</literal> value or a variant or record
+        constructor.
+      </para>
+      <para>
+        In any case, using <literal>memo_fix</literal>, we can now build
+        an efficient version of <literal>fib</literal>.
       </para>
       <programlisting language="ocaml">
-  let synchronize_exn table index f =
-    let lock = table.locks.(index * num_locks / num_buckets) in
-    Mutex.lock lock;
-    try let result = f () in Mutex.unlock lock; result with
-      exn -&gt; Mutex.unlock lock; raise exn
+# let fib = memo_fix fib_recur;;
+val fib : int -&gt; int = &lt;fun&gt;
+# time (fun () -&gt; fib 40);;
+Time: 0.236034ms
 </programlisting>
       <para>
-        To add a new entry to the table, the <literal>add</literal>
-        function acquires the bucket lock, then uses
-        <literal>find_assoc</literal> to look for an existing
-        association. If one is found, the <literal>value</literal> is
-        updated in-place to the new value. Otherwise, a new entry is
-        added to the beginning of the bucket.
+        We can even combine this into one compact form that makes this
+        look as much as possible like an ordinary function declaration.
+        Here, we're essentially using <literal>memo_fix</literal> as a
+        custom form of <literal>let rec</literal>.
       </para>
       <programlisting language="ocaml">
-  let add table ~key ~data =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    let buckets = table.buckets in
-    synchronize table index (fun () -&gt;
-          match find_assoc key buckets.(index) with
-          | Some element -&gt;
-               element.value &lt;- data
-          | None -&gt;
-               buckets.(index) &lt;- { key = key; value = data } :: buckets.(index))
+# let fib = memo_fix (fun fib i -&gt;
+    if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2));;
+val fib : int -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
-        Removing an element from the table is similar. If here is a
-        previous entry in the table, the entry is removed. Otherwise,
-        the <literal>remove_assoc_exn</literal> function raises
-        <literal>Not_found</literal>, and we leave the bucket unchanged.
-        The exception is an optimization to avoid copying the entire
-        list in this case.
+        This very same approach will work for
+        <literal>edit_distance</literal>. The one change we'll need to
+        make is that <literal>edit_server</literal> will now take a pair
+        of strings as a single argument, since
+        <literal>memoize</literal> only works sensibly for
+        single-argument functions. We can always recover the original
+        interface with a wrapper function.
       </para>
       <programlisting language="ocaml">
-  let remove table ~key =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    let buckets = table.buckets in
-    synchronize table index (fun () -&gt;
-      try buckets.(index) &lt;- remove_assoc_exn key buckets.(index) with
-      | Not_found -&gt; ())
+# let edit_distance = memo_fix (fun edit_distance (s,t) -&gt;
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -&gt; x (* if either string is empty, return the length of the
+                            other string. *)
+    | (len_s,len_t) -&gt;
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ edit_distance (s',t ) + 1
+        ; edit_distance (s ,t') + 1
+        ; edit_distance (s',t') + cost_to_drop_both
+        ]) ;;
+val edit_distance : string * string -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
-        The function to find an association in the table is similar --
-        we jsut find the entry in the table and return the value part.
-        However, this particular implementation is somewhat more subtle,
-        because it omits the synchronization step, examining the bucket
-        <emphasis>without</emphasis> acquiring the lock.
-      </para>
-      <programlisting language="ocaml">
-  let find table ~key =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    (* Unsynchronized *)
-    match find_assoc key table.buckets.(index) with
-    | Some element -&gt; Some element.value
-    | None -&gt; None
-</programlisting>
-      <para>
-        From a performance perspective, this is clearly a win, because
-        retrieving elements from the table has no locking at all. But
-        why is it valid?
+        And this new version of <literal>edit_distance</literal> is
+        indeed much more efficient than the one we started with.
       </para>
       <para>
-        The reasoning has to do with two things: 1) the semantics we
-        expect from the table, and 2) the OCaml memory model. Ideally,
-        the semantics we would expect is <emphasis>sequential
-        semantics</emphasis>, meaning that all memory operations are
-        processed in <emphasis>some</emphasis> sequence that is
-        compatible with the order in which they were performed in each
-        thread. Thus, if some thread adds two entries for keys
-        <literal>K1</literal> and <literal>K2</literal> in sequential
-        order, then all other threads will see either, 1) neither entry,
-        or 2) a entry for <literal>K1</literal>, or 3) a entry for both
-        <literal>K1</literal> and <literal>K2</literal>, but it will
-        <emphasis>not</emphasis> see an entry for <literal>K2</literal>
-        without also having an entry for <literal>K1</literal>.
-      </para>
-      <para>
-        Unfortunately, for some processor architectures, primary memory
-        does not have sequential semantics, due to caching and other
-        effects. Fortunately for us, OCaml does provide sequential
-        memory semantics due to its threading model where: 1) only one
-        thread executes at a time, and 2) there is a memory barrier the
-        prevents reordering of thread context switches and memort
-        operations, and 3) the compiler does not reorder memory
-        operations in ways that would violate sequential memory
-        semantics.
-      </para>
-      <para>
-        Note, OCaml does not a <emphasis>guarantee</emphasis> this
-        semantics. The OCaml implementation may change to support
-        parallelism. If it does, the memory semantics will change
-        accordingly. The simplest fix is just to synchronize the access.
-        Performance of <literal>find</literal> operations will decrease
-        somewhat due to contention.
-      </para>
-      <programlisting language="ocaml">
-  let synchronized_find table ~key =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    synchronize table index (fun () -&gt;
-      (find_assoc key table.buckets.(index)).value)
-</programlisting>
-      <para>
-        For the final part of the implementation, let's define
-        imperative iteration. The iterator object contains a bucket
-        index, and the field <literal>elements</literal> refers to some
-        suffix of the list stored in the bucket. The
-        <literal>value</literal> method returns the current elements,
-        and the <literal>next</literal> method advances the
-        <literal>elements</literal> field. The method
-        <literal>normalize</literal> is used to maintain the invariant
-        that the <literal>elements</literal> field always refers to a
-        value in the table unless the iterator has advanced past the
-        final element. The <literal>remove</literal> method removes the
-        current element from the bucket in which it is stored.
-      </para>
-      <programlisting language="ocaml">
-  let rec remove_element_exn elements = function
-  | (hd :: tl) as elements' -&gt;
-       if elements' == elements then
-          tl
-       else
-          hd :: remove_element_exn elements tl
-  | [] -&gt; raise Not_found
-
-  let iterator table =
-    let buckets = table.buckets in
-    object (self)
-      val mutable index = 0
-      val mutable elements = buckets.(0)
-      method has_value = elements &lt;&gt; []
-      method value =
-        match elements with
-        | { key = key; value = value } :: _ -&gt; key, value
-        | [] -&gt; raise (Invalid_argument &quot;value&quot;)
-      method next =
-        elements &lt;- List.tl elements;
-        self#normalize
-      method remove =
-        synchronize table index (fun () -&gt;
-          try buckets.(index) &lt;- remove_element_exn elements buckets.(index) with
-            Not_found -&gt; ());
-        self#next
-      method private normalize =
-        while elements = [] &amp;&amp; index &lt; num_buckets do
-          index &lt;- index + 1;
-      elements &lt;- buckets.(index)
-        done
-      initializer self#normalize
-    end
-</programlisting>
-      <para>
-        The iterator methods are all unsychronized except the method
-        <literal>remove</literal>, which mutates the bucket. As a
-        consequence, it means that hash operations that add and remove
-        elements from the list can happen concurrently with iteration.
-        Again, this is great from a performance perspective, but it
-        means that iteration has non-sequential semantics. In
-        particular, whenever iteration enters a new bucket, subsequent
-        concurrent operations that add new elements or remove old ones
-        from that bucket have <emphasis>no effect</emphasis> on the
-        iteration. Iteration advances through that bucket as if it were
-        unchanged.
-      </para>
-      <para>
-        One advantage of this relaxed iteration semantics is peformance,
-        since iteration is largely unsynchronized. Another advantage is
-        that deadlock is less likely. If we were to
-        <emphasis>lock</emphasis> the bucket during iteration, then
-        changes to that bucket would not be allowed during iteration
-        (even by the iterating thread). We might allow lock recursion to
-        allow mutations by the iterating thread, but in general the
-        synchronization might involve multiple threads, resulting in
-        deadlock. Lock-free iteration ensures that the
-        <literal>Concurrent_dictionary</literal> will not be involved in
-        a deadlock cycle.
+        <literal>ocaml # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));; Time: 2.14601ms - : int = 2</literal>
+        This is about ten thousand times faster than our original
+        implementation.
       </para>
     </sect2>
   </sect1>
@@ -18631,40 +17919,56 @@ immutable: 2.6186s (19073 minor collections)
 </chapter></part><appendix id="installation">
   <title>Installation</title>
   <para>
-    The easiest way to install OCaml is via the binary packages
-    available in many operating systems. For day-to-day code development
-    however, it's much easier to use a source-based manager that lets
-    you modify individual libraries and automatically recompile all the
+    The easiest way to use OCaml is via the binary packages available in
+    many operating systems. For day-to-day code development however,
+    it's much easier to use a source-code manager that lets you modify
+    individual libraries and automatically recompile all the
     dependencies.
   </para>
   <para>
-    An important difference between OCaml and scripting languages is
-    that the static type safety in OCaml mean that you can't just
-    mix-and-match compiled libraries. Instead, when an interface is
-    changed, all the dependent libraries must also be recompiled.
-    Source-based package managers automate this process for you and make
-    development life much easier.
+    An important difference between OCaml and scripting languages such
+    as Python or Ruby is that the static type safety that means that you
+    can't just mix-and-match compiled libraries. Interfaces are checked
+    when libraries are compiled, so when an interface is changed, all
+    the dependent libraries must also be recompiled. Source-based
+    package managers automate this process for you and make development
+    life much easier.
   </para>
   <para>
-    To work through this book, you'll need three major components
-    installed: * The OCaml compiler itself. * The OPAM source package
-    manager, through which we'll install several add-on libraries such
-    as Core and Async. * The <literal>utop</literal> top-level, which is
-    a modern interactive top-level with command history, module
-    completion and so forth.
+    To work through Real World OCaml, you'll need three major components
+    installed:
   </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        The OCaml compiler itself.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The OPAM source package manager, through which we'll install
+        several extra libraries.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The <literal>utop</literal> interactive top-level, a modern
+        interactive top-level with command history and tab completion.
+      </para>
+    </listitem>
+  </itemizedlist>
   <para>
     Let's get started with how to install OCaml on various operating
     systems, and we'll get OPAM and <literal>utop</literal> running
     after that.
   </para>
-  <sect1 id="getting-the-ocaml-compiler">
-    <title>Getting the OCaml compiler</title>
+  <sect1 id="getting-ocaml">
+    <title>Getting OCaml</title>
     <para>
       The OCaml compiler is available as a binary distribution on many
-      operating systems, and this is the preferred installation route.
-      We'll describe how to do a manual installation too, as a last
-      resort.
+      operating systems. This is the simplest and preferred installation
+      route, but we'll also describe how to do a manual installation as
+      a last resort.
     </para>
     <sect2 id="macos-x">
       <title>MacOS X</title>
@@ -18766,8 +18070,8 @@ $ ./configure -prefix $HOME/my-ocaml
       </para>
     </sect2>
   </sect1>
-  <sect1 id="the-opam-package-manager">
-    <title>The OPAM Package Manager</title>
+  <sect1 id="getting-opam">
+    <title>Getting OPAM</title>
     <para>
       OPAM manages multiple simultaneous OCaml compiler and library
       installations, tracks library versions across upgrades, and
@@ -18781,7 +18085,9 @@ $ ./configure -prefix $HOME/my-ocaml
       database is held in your home directory (normally
       <literal>$HOME/.opam</literal>). If something goes wrong, just
       delete this <literal>.opam</literal> directory and start over from
-      a clean slate.
+      a clean slate. If youre using a version of OPAM you've installed
+      previously, please ensure you have at least version 0.9.3 or
+      greater.
     </para>
     <important>
     <title>
@@ -18803,6 +18109,7 @@ $ ./configure -prefix $HOME/my-ocaml
         machine. There is a Homebrew package for the latest OPAM:
       </para>
       <programlisting>
+$ brew update
 $ brew install opam
 </programlisting>
       <para>
@@ -18811,44 +18118,68 @@ $ brew install opam
       <programlisting>
 $ port install opam
 </programlisting>
-      <sect3 id="linux-1">
-        <title>Linux</title>
-        <note>
-        <title>
-        Note to reviewers
-        </title>
-        <para>
-          The OPAM instructions will be simplified when integrated
-          upstream into Debian and Fedora, which is ongoing. Until then,
-          we're leaving source-code installation instructions. Please
-          leave a comment with any amended instructions you encounter
-        </para>
-        </note>
-        <para>
-          On Debian Linux, you must currently install the latest OPAM
-          release from source. Navigate to the OPAM
-          <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>
-          and download the latest version (we'll assume
-          <literal>0.9.2</literal> for now, but pick the latest one).
-        </para>
-        <programlisting>
-$ curl -OL https://github.com/OCamlPro/opam/archive/0.9.2.tar.gz
-$ tar -zxvf 0.9.2.tar.gz
-$ cd opam-0.9.2
+    </sect2>
+    <sect2 id="debian-linux">
+      <title>Debian Linux</title>
+      <para>
+        There are experimental binary packages available for Debian
+        Wheezy/amd64. Just add the following line to your
+        <literal>/etc/apt/sources.list</literal>:
+      </para>
+      <programlisting>
+deb http://www.recoil.org/~avsm/ wheezy main
+</programlisting>
+      <para>
+        When this is done, update your packages and install OPAM. You
+        can ignore the warning about unsigned packages, which will
+        disappear when OPAM is upstreamed into Debian mainline.
+      </para>
+      <programlisting>
+# apt-get update
+# apt-get install opam
+</programlisting>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        The OPAM instructions will be simplified when integrated
+        upstream into Debian and Fedora, which is ongoing. Until then,
+        we're leaving source-code installation instructions here. Please
+        leave a comment with any amended instructions you encounter
+      </para>
+      </note>
+      <para>
+        If the binary packages aren't suitable, you need to install the
+        latest OPAM release from source. The distribution only requires
+        the OCaml compiler to be installed, so this should be pretty
+        straightforward. Download the latest version, which is always
+        marked with a <literal>stable</literal> tag on the project
+        <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>.
+      </para>
+      <programlisting>
+$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
+$ tar -zxvf latest.tar.gz
+$ cd opam-latest
 $ ./configure &amp;&amp; make
 $ sudo make install
 </programlisting>
-        <para>
-          Fedora/RHEL: TODO
-        </para>
-        <para>
-          Arch Linux: TODO
-        </para>
-      </sect3>
+    </sect2>
+    <sect2 id="fedorarhel">
+      <title>Fedora/RHEL</title>
+      <para>
+        TODO
+      </para>
+    </sect2>
+    <sect2 id="arch-linux">
+      <title>Arch Linux</title>
+      <para>
+        TODO
+      </para>
     </sect2>
   </sect1>
-  <sect1 id="getting-started-with-opam">
-    <title>Getting started with OPAM</title>
+  <sect1 id="setting-up-opam">
+    <title>Setting up OPAM</title>
     <para>
       The entire OPAM package database is held in the
       <literal>.opam</literal> directory in your home directory,
@@ -18868,17 +18199,21 @@ $ opam init
 $ opam list
 </programlisting>
     <para>
-      This will create the <literal>~/.opam</literal> directory, and
-      give you the current set of packages uploaded to OPAM.
-      <literal>opam list</literal> will show you all of them, but don't
-      install any just yet.
+      You only need to run this command once, and it will create the
+      <literal>~/.opam</literal> directory and sync with the latest
+      package list from the online OPAM database.
+      <literal>opam list</literal> will list these, but don't install
+      any just yet.
     </para>
     <para>
-      The first package to install is Core, which is the replacement
-      standard library that all of the examples in this book use. We've
-      made some minor modifications to the way the OCaml compiler
-      displays type signatures, and the next command will install a
-      patched <literal>4.00.1</literal> compiler with this enabled.
+      The most important package we need to install is Core, which is
+      the replacement standard library that all of the examples in this
+      book use. Before doing this, let's make sure you have exactly the
+      right compiler version you need. We've made some minor
+      modifications to the way the OCaml compiler displays type
+      signatures, and the next command will install a patched
+      <literal>4.00.1</literal> compiler with this functionality
+      enabled.
     </para>
     <programlisting>
 $ opam switch 4.00.1+short-types
@@ -18888,40 +18223,46 @@ $ opam switch 4.00.1+short-types
       will download and install (within the <literal>~/.opam</literal>
       directory) a custom OCaml compiler. OPAM supports multiple such
       installations, and you'll find this very useful if you ever decide
-      to hack on the internals of the compiler itself (or you simply
-      want to experiment with the latest release without sacrificing
-      your current installation).
+      to hack on the internals of the compiler itself, or you want to
+      experiment with the latest release without sacrificing your
+      current installation. You only need to install this compiler once,
+      and future updates will be much faster as they only recompile
+      libraries within the compiler installation.
     </para>
     <para>
-      The new compiler will be compiled and installed into
+      The new compiler will be installed into
       <literal>~/.opam/4.00.1+short-types</literal> and any libraries
       you install for it will be tracked separately from your system
       installation. You can have any number of compilers installed
-      simultaneously, but only one can be active at any time. You can
-      find all the available compilers by running
+      simultaneously, but only one can be active at any time. Browse
+      through the available compilers by running
       <literal>opam switch list</literal>.
     </para>
     <para>
-      Once that succeeds, you'll see some instructions about environment
-      variables. OPAM can output a set of shell commands which configure
-      your current shell with the right path variables so that packages
-      use the custom compiler you've just built. This is just one
-      command:
+      When the compilation finishes, you'll see some instructions about
+      environment variables. OPAM never installs files into your system
+      directories (which would require administrator privileges).
+      Instead, it puts them into your home directory by default, and can
+      output a set of shell commands which configures your shell with
+      the right <literal>PATH</literal> variables so that packages will
+      just work. This requires just one command:
     </para>
     <programlisting>
 $ eval `opam config env`
 </programlisting>
     <para>
-      This command only works with your current shell, and it can be
-      annoying to have to remember to type it in every time you open a
-      new terminal. Automate it by adding the line to your login shell.
-      On MacOS X or Debian, this is usually the
-      <literal>~/.bash_profile</literal> script if you're using the
-      default shell. If you've switched to another shell, it might be
-      <literal>~/.zshrc</literal> instead. OPAM isn't unusual in this
-      approach; the SSH <literal>ssh-agent</literal> also works
-      similarly, so if you're having any problems just hunt around in
-      your configuration scripts to see how that's being invoked.
+      This evaluates the results of running
+      <literal>opam config env</literal> in your current shell, and sets
+      the variables so that subsequent commands will use them. This only
+      works with your current shell, and it can be automated for all
+      future shells by adding the line to your login scripts. On MacOS X
+      or Debian, this is usually the <literal>~/.bash_profile</literal>
+      file if you're using the default shell. If you've switched to
+      another shell, it might be <literal>~/.zshrc</literal> instead.
+      OPAM isn't unusual in this approach; the SSH
+      <literal>ssh-agent</literal> also works similarly, so if you're
+      having any problems just hunt around in your configuration scripts
+      to see how that's being invoked.
     </para>
     <para>
       Finally, we're ready to install the Core libraries. Run this:
@@ -18930,8 +18271,9 @@ $ eval `opam config env`
 $ opam install core core_extended async
 </programlisting>
     <para>
-      This will take about five minutes to install, and the three
-      packages that really matter are:
+      This will take about five minutes to install, and install a series
+      of packages. OPAM figures out the dependencies you need
+      automatically, but the three packages that really matter are:
     </para>
     <itemizedlist>
       <listitem>
@@ -18951,31 +18293,47 @@ $ opam install core core_extended async
       <listitem>
         <para>
           <literal>async</literal> is the network programming library
-          that we use in Part II to communicate with other hosts.
+          that we use in Part II to communicate with other hosts. You
+          can skip this for the initial installation until you get to
+          Part II, if you prefer.
         </para>
       </listitem>
     </itemizedlist>
-  </sect1>
-  <sect1 id="editing-environment">
-    <title>Editing Environment</title>
-    <para>
-      There's one last tool you need before getting started on the
-      examples. The default <literal>ocaml</literal> command gives us an
-      interactive command-line to experiment with code without compiling
-      it. However, it's quite a spartan experience and so we use a more
-      modern alternative.
-    </para>
-    <programlisting>
+    <sect2 id="editing-environment">
+      <title>Editing Environment</title>
+      <para>
+        There's one last tool you need before getting started on the
+        examples. The default <literal>ocaml</literal> command gives us
+        an interactive command-line to experiment with code without
+        compiling it. However, it's quite a spartan experience and so we
+        use a more modern alternative.
+      </para>
+      <programlisting>
 $ opam install utop
 </programlisting>
-    <para>
-      The <literal>utop</literal> package us an interactive command-line
-      interface to OCaml that has tab-completion, persistent history and
-      integration with Emacs so that you can run it within your editing
-      environment.
-    </para>
+      <para>
+        The <literal>utop</literal> package us an interactive
+        command-line interface to OCaml that has tab-completion,
+        persistent history and integration with Emacs so that you can
+        run it within your editing environment.
+      </para>
+      <para>
+        Remember from earlier that OPAM never installs files directly
+        into your system directories, and this applies to
+        <literal>utop</literal> too. You'll find the binary in
+        <literal>~/.opam/4.00.1+short-types/bin</literal>. However, just
+        typing in <literal>utop</literal> from your shell should just
+        work, due to the <literal>opam config env</literal> step which
+        configures your shell. Don't forget to automate this as
+        described earlier, as it makes life much easier when developing
+        OCaml code!
+      </para>
+    </sect2>
     <sect2 id="command-line">
       <title>Command Line</title>
+      <para>
+        TODO: explain OCamlfind here.
+      </para>
       <para>
         The <literal>utop</literal> tool provides a convenient
         interactive top-level, with full command history, command macros
@@ -18991,7 +18349,6 @@ $ opam install utop
 #thread
 #require &quot;core.top&quot;;;
 #require &quot;async&quot;;;
-open Core.Std
 </programlisting>
       <para>
         When you run <literal>utop</literal> with this initialization
