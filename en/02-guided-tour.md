@@ -854,8 +854,10 @@ functions like like `List.for_all`.
 
 So far, we've only written so-called _pure_ or _functional_ code,
 meaning that we didn't write any code that modified a variable or
-value after its creation.  This is a quite different style from
-_imperative_ programming, where computations are structured as
+value after its creation.  Indeed, almost all of the data structures
+we've encountered so far are _immutable_, meaning there's no way in
+the language to modify them at all.  This is a quite different style
+from _imperative_ programming, where computations are structured as
 sequences of instructions that operate by modifying state as they go.
 
 Functional code is the default in OCaml, with variable bindings and
