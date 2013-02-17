@@ -542,7 +542,7 @@ let insert_after elt value =
   new_elt
 ```
 
-Finally, we need to a `remove` function.
+Finally, we need a `remove` function.
 
 ```ocaml
 let remove l elt =
@@ -615,17 +615,19 @@ let find_el l ~f =
 
 ## Laziness and other unobservable effects
 
-There are many instances where imperative programming is used to
-modify or improve the performance characteristics of a program,
-without otherwise changing the behavior.  In other words, the program
-could be written without side-effects, but performance is improved by
-having some side-effecting functions working behind the scenes.
+There are many instances where you basically want to program in a pure
+style, but you want to make limited use of side-effects to improve the
+performance of your code, without really changing anything else.  Such
+side effects are sometimes called _unobservable effects_, and they are
+a useful way of leveraging OCaml's imperative features while still
+maintaining most of the benefits of pure programming.
 
-One of the simplest of these is _laziness_.  A lazy value is one that
-is not computed until it is actually needed.  In OCaml, lazy values
-are created using the `lazy` keyword, which can be used to prefix any
-expression, returning a value of type `'a Lazy.t`.  The computation of
-is delayed until forced with the `Lazy.force` function.
+One of the simplest unobservable effect is _laziness_.  A lazy value
+is one that is not computed until it is actually needed.  In OCaml,
+lazy values are created using the `lazy` keyword, which can be used to
+prefix any expression, returning a value of type `'a Lazy.t`.  The
+evaluation of that expression is delayed until forced with the
+`Lazy.force` function.
 
 ```ocaml
 # let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
@@ -637,85 +639,86 @@ performing lazy computation
 - : float = 4.
 ```
 
-In the above, we stuck a print statement in the middle of the
-expression just to make it clear when the actual computation was
-happening.
+You can see from the print statement that the actual computation was
+performed only once, and only after `force` had been called.
 
-You can think of laziness as a form of mutation, where the result of a
-computation is stored the first time that force is called.  Indeed,
-using mutation we can implement our own lazy values directly.
+To better understand how laziness works, let's walk through the
+implementation of our own lazy type.  We'll start by declaring types
+to represent a lazy value.
 
 ```ocaml
-# module Our_lazy : sig
-     type 'a t
-
-     val create : (unit -> 'a) -> 'a t
-     val force : 'a t -> 'a
-  end = struct
-     type 'a maybe_delayed = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
-     type 'a t = 'a maybe_delayed ref
-
-     let create f = ref (Delayed f)
-     let force v =
-       match !v with
-       | Value x -> x
-       | Exn e -> raise e
-       | Delayed f ->
-         try
-           let x = f () in
-           v := Value x;
-           x
-         with exn ->
-           v := Exn exn;
-           raise exn
-  end;;
+# type 'a lazy_state =
+  | Delayed of (unit -> 'a)
+  | Value of 'a
+  | Exn of exn
+type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
 ```
 
-The `'a maybe_delayed` type either contains a delayed value,
-represented as a function, or the result of the execution of that
-function, which may be an ordinary return value, or may be an
-exception.  An `Our_lazy.t` is a `ref` pointing to a `maybe_delayed`
-value, and `Our_lazy.force` will run the delayed function, storing the
-result in the `ref`, or simply returns the result of that function if
-it has been forced previously.  Note that the form of that result may
-be an exception, in which case the exception will be re-raised rather
-than returned.
+A `lazy_state` represents the possible states of a lazy value.  A
+lazy value is `Delayed` before it has been run, where `Delayed` holds
+a function for computing the value in question.  A lazy value is in
+the `Value` state when it has been forced and the computation ended
+normally.  The `Exn` case is for when the lazy value has been forced,
+but the computation ended with an exception.  A lazy value is just a
+reference to a `lazy_state`.
 
-`Our_lazy` can be used in roughly the same way as the built-in `lazy`:
+We can create a lazy value based on a thunk, _i.e._, a function that
+takes a unit argument.  Wrapping an expression in a thunk is another
+way to suspend the computation of an expression.
 
 ```ocaml
-# let v = Our_lazy.create
+# let create_lazy f = ref (Delayed f);;
+val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
+# let v = create_lazy
     (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
-val v : float Our_lazy.t = <abstr>
-# Our_lazy.force v;;
+  val v : float lazy_state ref = {contents = Delayed <fun>}
+```
+
+Now we just need a way to force a lazy value.  The following function
+does just that.
+
+```ocaml
+# let force v =
+    match !v with
+    | Value x -> x
+    | Exn e -> raise e
+    | Delayed f ->
+      try
+        let x = f () in
+        v := Value x;
+        x
+      with exn ->
+        v := Exn exn;
+        raise exn
+   ;;
+val force : 'a lazy_state ref -> 'a = <fun>
+```
+
+Which we can use in the same way we used `Lazy.force`:
+
+```ocaml
+# force v;;
 performing lazy computation
 - : float = 4.
-# Our_lazy.force v;;
+# force v;;
 - : float = 4.
 ```
 
 The main difference between our implementation of laziness and the
-built-in version is syntax.  Rather than writing `Our_lazy.create (fun
-() -> sqrt 16.)`, we can just write `lazy (sqrt 16.)`.
-
-Laziness lets you do considerably more than just delay a single
-computation.  You can also use laziness to do things like building
-so-called infinite data structures, which are really data-structures
-of unbounded size that expand only to the degree necessary to complete
-a given calculation.  We'll discuss more about how to use laziness in
-[xref](???).
+built-in version is syntax.  Rather than writing `create_lazy (fun ()
+-> sqrt 16.)`, we can just write `lazy (sqrt 16.)`.
 
 ### Memoization
 
 Another unobservable effect is _memoization_.  A memoized function
 remembers the result of previous invocations of the function so that
-they can be provided without further computation when the same
+they can be returned without further computation when the same
 arguments are presented again.
 
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
-function.  Note that it uses Core's `Hashtbl` module, rather than our
-toy `Dictionary`.
+function.  Here we'll use Core's `Hashtbl` module, rather than our toy
+`Dictionary`.
 
 ```ocaml
 # let memoize f =
@@ -730,6 +733,11 @@ toy `Dictionary`.
     );;
 val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 ```
+
+Note that we use `Hashtbl.Poly.create` to create a hash table using
+OCaml's built-in polymorphic hash function.  It's also possible to
+create a hash-table using a hash function specialized to a given
+type.
 
 Memoization can be useful whenever you have a function that is
 expensive to recompute, and you don't mind caching old values
@@ -793,12 +801,12 @@ edit_distance "OCam" "ocam"
    edit_distance "OCa" "oca"
 ```
 
-As you can see, some of these calls are repeats.  For example,
-there are two different calls to `edit_distance "OCam" "oca"`.  The
-amount of repeated calls grows exponentially with the size of the
-strings, meaning that our implementation of `edit_distance` is
-brutally slow for large strings.  We can see this by writing a small
-timing function.
+As you can see, some of these calls are repeats.  For example, there
+are two different calls to `edit_distance "OCam" "oca"`.  The number
+of redundant calls grows exponentially with the size of the strings,
+meaning that our implementation of `edit_distance` is brutally slow
+for large strings.  We can see this by writing a small timing
+function.
 
 ```ocaml
 # let time f =
@@ -823,22 +831,21 @@ Time: 19.3322s
 
 Just those few extra characters made it almost 4000 times slower!
 
-Memoization would be a huge help here, but to make any improvement
-here, we need to memoize the calls that `edit_distance` makes to
-itself.  To see how to do this, let's step away from `edit_distance`,
-and instead consider a simpler example: computing the nth element of
-the Fibonacci sequence.  The Fibonacci sequence by definition starts
-out with two `1`'s, with every subsequent element being the sum of the
-previous two.  The classic recursive definition of Fibonacci is as
-follows:
+Memoization would be a huge help here, but to fix the problem, we need
+to memoize the calls that `edit_distance` makes to itself.  To see how
+to do this, let's step away from `edit_distance`, and instead consider
+a much simpler example: computing the nth element of the Fibonacci
+sequence.  The Fibonacci sequence by definition starts out with two
+`1`'s, with every subsequent element being the sum of the previous
+two.  The classic recursive definition of Fibonacci is as follows:
 
 ```ocaml
 # let rec fib i =
     if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
 ```
-
 This is, however, exponentially slow, for the same reason that
-`edit_distance` was slow, as we can see:
+`edit_distance` was slow: we end up making many redundant calls to
+`fib`.  It shows up quite dramatically in the performance.
 
 ```ocaml
 # time (fun () -> fib 5);;
@@ -854,11 +861,18 @@ Time: 5.17392ms
 Time: 51.4205s
 ```
 
-So, how do we memoize the function?  The tricky bit is that we need to
-insert the memoization before the recursive calls, so we can't just do
-the memoization on the outside after `fib` is defined.  The first step
-is to write `fib` in a way that unwinds the recursion, allowing us to
-explicitly pass in the function to call recursively.
+Here, `fib 40` takes almost a minute to compute, as opposed to five
+_milliseconds_ for `fib 20`.
+
+So, how can we use memoization to make this faster?  The tricky bit is
+that we need to insert the memoization before the recursive calls
+within `fib`.  We can't just define `fib` in the ordinary way and
+memoize it after the fact and expect any improvement.
+
+The first step is to write `fib` in a way that partially unwinds the
+recursion.  The following definition of `fib_recur` expects as its
+first argument to be passed a function that it can use for making its
+recursive calls.
 
 ```ocaml
 # let fib_recur recur i =
@@ -868,7 +882,7 @@ val fib_recur : (int -> int) -> int -> int = <fun>
 ```
 
 We can now turn this back into an ordinary Fibonacci function by tying
-the recursive knot:
+the recursive knot, as shown below.
 
 ```ocaml
 # let rec fib i = fib_recur fib i
@@ -877,11 +891,14 @@ val fib : int -> int = <fun>
 - : int = 8
 ```
 
-And we can even write a higher-order function that we'll call `fix`
-that ties this knot for us for any function of this type.
+And we can even write a polymorphic function that we'll call `fix`
+that can tie the recursive not for any function of this form.
 
 ```ocaml
-# let rec fix f x = f (fix f) x;;
+# let fix f =
+    let rec f' x = f f' x in
+    f'
+  ;;
 val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 # let fib = fix fib_recur;;
 val fib : int -> int = <fun>
@@ -889,26 +906,50 @@ val fib : int -> int = <fun>
 - : int = 8
 ```
 
-But really, we've just done another way of implementing the same old
-slow Fibonacci function.  To make it faster, we need a function like
-`fix` that inserts memoization when it ties the recursive knot.  Here
-is just such a function.
+This is a pretty strange piece of code, and it may take a few minutes
+of staring at this to figure out what's going on.  Like `fib_recur`,
+the function `f` passed into `fix` is a function that isn't recursive,
+but takes as an argument of a function that it will call.  What `fix`
+does is to essentially feed `f` to itself, thus making a true
+recursive function.
+
+This is clever enough, but all we've done so far is find a new way to
+implement the same old slow Fibonacci function.  To make it faster, we
+need a function like `fix` that inserts memoization when it ties the
+recursive knot.  Here is just such a function.
 
 ```ocaml
-# let memo_fix f x =
-    let rec f' x = f (Lazy.force memo_f') x
-    and memo_f' = lazy (memoize f')
-    in
-    f' x
- ;;
+# let memo_fix f =
+     let rec f' = lazy (memoize (fun x -> f (Lazy.force f') x)) in
+     Lazy.force f'
+  ;;
 val memo_fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 ```
 
-Note the use of laziness here, which allows us to define `f'` in terms
-of each other `memo_f'`.  Laziness is generally useful in making it
-possible to make complex recursive definitions.
+It's not obvious why we need to use laziness here.   It seems like you
+should be able to get away with just dropping the the `lazy` and the
+`Lazy.force` from the above code, as follows.
 
-And now, we can build ourselves an efficient version of Fibonacci.
+```ocaml
+# let memo_fix f =
+     let rec f' = memoize (fun x -> f f' x) in
+     f'
+  ;;
+      Characters 35-60:
+       let rec f' = memoize (fun x -> f f' x) in
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of `let rec'
+```
+
+OCaml rejects the definition because OCaml, as a strict language,
+can't safely construct the closure `(fun x -> f f' x)` until `f'`
+itself is defined, and `f'` can't be defined until `memoize` runs, by
+which time the closure already needs to exist.  Generally, OCaml
+requires that the right hand side of a `let rec` be either a function,
+a `lazy` value or a variant or record constructor.
+
+In any case, using `memo_fix`, we can now build an efficient version
+of `fib`.
 
 ```ocaml
 # let fib = memo_fix fib_recur;;
@@ -917,14 +958,24 @@ val fib : int -> int = <fun>
 Time: 0.236034ms
 ```
 
-Now, we can go back to our implementation of `edit_distance`, and pull
-the same trick.  First, here's the version of `edit_server` with the
-recursion taken out.  Note that we also change `edit_server` so that
-it takes the pair of strings to be compared as a single argument,
-since memoization only works sensibly for single-argument functions.
+We can even combine this into one compact form that makes this look as
+much as possible like an ordinary function declaration.  Here, we're
+essentially using `memo_fix` as a custom form of `let rec`.
 
 ```ocaml
-# let edit_distance_recur recur (s,t) =
+# let fib = memo_fix (fun fib i ->
+    if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
+val fib : int -> int = <fun>
+```
+
+This very same approach will work for `edit_distance`.  The one change
+we'll need to make is that `edit_server` will now take a pair of
+strings as a single argument, since `memoize` only works sensibly for
+single-argument functions.  We can always recover the original
+interface with a wrapper function.
+
+```ocaml
+# let edit_distance = memo_fix (fun edit_distance (s,t) ->
     match String.length s, String.length t with
     | (0,x) | (x,0) -> x (* if either string is empty, return the length of the
                             other string. *)
@@ -935,588 +986,23 @@ since memoization only works sensibly for single-argument functions.
         if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
       in
       List.reduce_exn ~f:Int.min
-        [ recur (s',t ) + 1
-        ; recur (s ,t') + 1
-        ; recur (s',t') + cost_to_drop_both
-        ] ;;
-val edit_distance_recur : (string * string -> int) -> string * string -> int =
-  <fun>
+        [ edit_distance (s',t ) + 1
+        ; edit_distance (s ,t') + 1
+        ; edit_distance (s',t') + cost_to_drop_both
+        ]) ;;
+val edit_distance : string * string -> int = <fun>
 ```
 
-And now, we can use `memo_fix` to create an efficient, memoized
-version of this function.  While we're at it, we'll flip the calling
-convention back to being an ordinary curried function.
+And this new version of `edit_distance` is indeed much more efficient
+than the one we started with.
 
 ```ocaml
-# let edit_distance x y = memo_fix edit_distance_recur (x,y);;
-val edit_distance : string -> string -> int = <fun>
-# time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
+# time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 Time: 2.14601ms
 - : int = 2
 ```
-
 This is about ten thousand times faster than our original
 implementation.
-
-Note that this use of memoization relies on side-effects to cache
-intermediate computations, but it doesn't change the values of the
-function.  It's all about improving performance, not about changing
-behavior.
-
-### Hash consing
-
-"Hash consing" is a technique to share values that are structurally equal.  The
-term comes from Lisp, where the technique is used to share s-expressions that
-are equal.  In some situations, hash-consing can result in dramatic performance
-improvements in two ways.  First, space can be reduced by using a single
-physical representation for values that are equal.  Second, values can be
-compared for equality using the constant-time physical equality operator `==`.
-
-One of the simplest ways to implement hash-consing is to use a hash-table to
-remember (memoize) values that have already been created.  To illustrate, let's
-define a kind of numerical expression `Exp.t` consisting of integers, variables,
-addition, and multiplication (we can define more operators, but let's keep the
-example simple).
-
-The type `Exp.t` is declared as `private`, meaning that pattern matching can be
-used on the expressions outside the module, but expressions can't be constructed
-without explicitly using the constructors `num`, `var`, `plus`, `times` provided
-by the `Exp` module.  These functions enforce the hash-consing, ensuring that
-structurally equal expressions are mapped to physically equal representations.
-
-```ocaml
-module Exp : sig
-  type t = private
-  | Num of int
-  | Var of string
-  | Plus of t * t
-  | Times of t * t
-
-  val num : int -> t
-  val var : string -> t
-  val plus : t -> t -> t
-  val times : t -> t -> t
-end = struct
-  type t =
-  | Num of int
-  | Var of string
-  | Plus of t * t
-  | Times of t * t
-
-  let table = Dictionary.create ()
-  let merge exp =
-    match Dictionary.find table ~key:exp with
-    | Some x -> x
-    | None ->
-         Dictionary.add table ~key:exp ~data:exp;
-         exp
-
-  let num i = merge (Num i)
-  let var s = merge (Var s)
-  let plus e1 e2 = merge (Plus (e1, e2))
-  let times e1 e2 = merge (Times (e1, e2))
-end;;
-```
-
-The implementation defines a hash table `table`, and a `merge` function that
-merges an expression into the table, returning the previous value if there was
-one, or inserting a new value if there is not.  The constructors can rely on the
-fact that subexpressions have already been hash-consed, so they simply call the
-merge function to memoize the value.
-
-Note that expressions that are structurally equal are now also physically equal.
-
-```ocaml
-# let e1 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "x") (Exp.var "y"));;
-val e1 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "x", Exp.Var "y"))
-# let e2 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "x") (Exp.var "y"));;
-val e2 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "x", Exp.Var "y"))
-# e1 == e2;;
-- : bool = true
-```
-
-Expressions that are not equal are equal are not physically equal either,
-however common subexpressions are equal.
-
-```ocaml
-# let e3 = Exp.times (Exp.num 10) (Exp.plus (Exp.var "z") (Exp.var "y"));;
-val e3 : Exp.t = Exp.Times (Exp.Num 10, Exp.Plus (Exp.Var "z", Exp.Var "y"))
-# e1 == e3;;
-- : bool = false
-# let Exp.Times (a1, Exp.Plus (_, a2)) = e1;;
-val a1 : Exp.t = Exp.Num 10
-val a2 : Exp.t = Exp.Var "y"
-# let Exp.Times (b1, Exp.Plus (_, b2)) = e3;;
-val b1 : Exp.t = Exp.Num 10
-val b2 : Exp.t = Exp.Var "y"
-# a1 == b1;;
-- : bool = true
-# a2 == b2;;
-- : bool = true
-```
-
-### Weak hash consing
-
-There is two issues with hash-consing as we have just defined it.  A minor
-problem is that hashing is linear in the size of the expression.  This can be
-fixed by storing the hash code in the expression itself, avoiding the recursive
-computation.  If expressions are small, this won't be much of a benefit, but it
-can save time if large expressions are frequently constructed.
-
-A more serious problem is that the hash table holds onto expressions _forever_,
-even if they are no longer used in the program.  This can result in a space leak
-that cancels out any space saving we had in the first place, perhaps making it
-even worse.
-
-To deal with this problem, we can use "weak" hash tables, implemented in the
-`Weak` module in the OCaml standard library.  The main difference is that a weak
-table may drop values that are no longer being used elsewhere.  Weak tables are
-tied into the garbage collector, which removes values that are no longer live.
-
-We define the type `WExp.t` much as before, except including the hash code for
-the `Plus` and `Times` expressions.
-
-The weak hash table requires that hash and equality functions be provided
-explicitly, so we construct a module `HashExp` that defines the `equal` and
-`hash` functions.  Note that equality and hashing are both constant-time
-functions -- equality can rely on physical equality of subexpressions, and
-hashing can use the explcitly represented hash values.
-
-The module `WeakHash` has the semantics of a set of elements.  The
-`WeakHash.merge` function retrieves an element if it already exists, or adds it
-otherwise.  The constructors are much as before.
-
-```ocaml
-module WExp : sig
-  type t = private
-  | Num of int
-  | Var of string
-  | Plus of int * t * t
-  | Times of int * t * t
-
-  val num : int -> t
-  val var : string -> t
-  val plus : t -> t -> t
-  val times : t -> t -> t
-end = struct
-  type t =
-  | Num of int
-  | Var of string
-  | Plus of int * t * t
-  | Times of int * t * t
-
-  module HashExp = struct
-    type exp = t
-    type t = exp
-    let equal e1 e2 =
-      match e1, e2 with
-      | Num i1, Num i2 -> i1 = i2
-      | Var v1, Var v2 -> v1 = v2
-      | Plus (_, a1, a2), Plus (_, b1, b2)
-      | Times (_, a1, a2), Times (_, b1, b2) ->
-           a1 == b1 && a2 == b2
-      | _ -> false
-    let hash = function
-    | Num i -> i lxor 0xabababab
-    | Var v -> (Hashtbl.hash v) lxor 0xcdcdcdcdc
-    | Plus (hash, _, _)
-    | Times (hash, _, _) -> hash
-  end
-
-  module WeakHash = Weak.Make (HashExp);;
-
-  let table = WeakHash.create 17
-  let merge e = WeakHash.merge table e
-
-  let num i = merge (Num i)
-  let var s = merge (Var s)
-  let plus e1 e2 =
-     let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0x12345678 in
-     merge (Plus (hash, e1, e2))
-
-  let times e1 e2 =
-     let hash = (HashExp.hash e1) lxor (HashExp.hash e2) lxor 0xdeadbeef in
-     merge (Times (hash, e1, e2))
-end;;
-```
-
-## Concurrency
-
-Concurrency is another tool OCaml programmers can use to simplify
-programs in certain cases.  In OCaml, threads do not introduce
-parallelism; only one thread may be running at a time.  However,
-threads can be used to simplify control flow -- a program can devote
-some threads to reading input, others for performing work, others for
-producing output, etc.
-
-The OCaml standard library supports threads, where individual threads
-of control can be created that run concurrently (but only one thread
-at a time), and context switches are _involuntary_, meaning that a
-thread may be preempted at any time.
-
-When threads share imperative state, this gives rise to the standard
-synchronization issues, where multiple threads may be mutating shared
-state at the same time.  To illustrate, let's write a program with two
-threads that increment a shared reference cell concurrently.
-
-```ocaml
-let value = ref 0
-
-let loop () =
-   for i = 1 to 3 do
-     let i = !value in
-     Printf.printf "i = %d\n" i;
-     flush stdout;
-     value := i + 1
-   done
-
-let thread1 = Thread.create loop ();;
-let thread2 = Thread.create loop ();;
-
-Thread.join thread1;;
-Thread.join thread2;;
-
-Printf.printf "value = %d\n" !value
-```
-
-The reference cell `value` holds a shared value that is incremented 10
-times, in a loop, by the `loop` function.  Each iteration of the loop
-prints the current value, then assigns the new value.  We create two
-threads with the `Thread.create` expressions, then use `Thread.join`
-to block until the threads terminate.
-
-The exact behavior of the program is nondeterminstic -- it depends on
-the relative sopeed of the two theads.  One output is listed below.
-
-```ocaml
-i = 0
-ii  ==  01
-
-ii  ==  12
-
-i = 2
-value = 3
-```
-
-This represents a nearly perfect interleaving of the thread
-executions.  Each thread fetches the value from the `value` reference
-cell, prints the value, then performs the assignment.  Since both
-threads effectively run in lockstep, the final value in the `value`
-reference cell is the same as if there were just one thread running.
-
-If this is not the behavior that was expected, one solution is to use
-a `Mutex` to ensure that the increment operation is atomic.  We can
-allocate a lock with `Mutex.create`, then acquire the lock in the loop
-body.
-
-```ocaml
-let value = ref 0
-let mutex = Mutex.create ()
-
-let loop () =
-   for i = 1 to 3 do
-     Mutex.lock mutex;
-     let i = !value in
-     Printf.printf "i = %d\n" i;
-     flush stdout;
-     value := i + 1;
-     Mutex.unlock mutex
-   done
-```
-
-When we run this program, it produces a deterministic output.
-
-```
-i = 0
-i = 1
-i = 2
-i = 3
-i = 4
-i = 5
-value = 6
-```
-
-### Dealing with concurrency
-
-In general the interaction of concurrency with imperative programs causes
-problems with races.  There are many techniques you can use to address the
-issue.
-
-* Do not use assignment, mutable data structures, or perform
-  input/output in threads.
-
-* Use _cooperative_ multitasking, where only one thread runs at a
-  time, and context switches are _voluntary_.  This is the dominant
-  model in `Async`.
-
-* Do not share mutable data between threads.  In practice, this
-  usually includes explicit communication channels between threads
-  that otherwise have isolated state.
-
-* Give in, and use threads, and the standard synchronization toolkit
-  that comes with OCaml, including locks (`Mutex`), condition
-  variables, etc.
-
-Out of all of these choices, the simplest one is to use the `Async`
-model and cooperative multitasking.  However, let's go ahead and work
-through some examples of using traditional concurrent programming
-using locks and other synchronization primitives to build a
-concurrency library.
-
-### Concurrent hash tables
-
-Let's extend our hash table example to support concurrency.  To begin,
-let's first give the signature of the module we will implement.  The
-table has operations to add, remove, and find elements, and it also
-supports imperative iterators.
-
-```ocaml
-module Concurrent_dictionary : sig
-  type ('a, 'b) t
-
-  val create : unit -> ('a, 'b) t
-  val add : ('a, 'b) t -> key:'a -> data:'b -> unit
-  val find : ('a, 'b) t -> key:'a -> 'b option
-  val remove : ('a, 'b) t -> key:'a -> unit
-  val iterator : ('a, 'b) t -> ('a * 'b) iterator
-end
-```
-
-We'll use the same basic construction that we used to implement the `Dictionary`,
-where a hash table contains an array of buckets.  In addition we'll add locking
-to ensure that concurrent operations do not interfere.  To reduce lock
-contention, we'll use an array of locks to partition the table into multiple
-parts.  If operations are uniformly distributed, this should reduce lock
-contention.
-
-```ocaml
-  type ('a, 'b) element = {
-    key : 'a;
-    mutable value : 'b
-  }
-  type ('a, 'b) t = {
-    locks : Mutex.t array;
-    mutable buckets : ('a, 'b) element list array
-  }
-
-  let num_locks = 32
-  let num_buckets = 256
-
-  let create () = {
-    locks = Array.init num_locks (fun _ -> Mutex.create ());
-    buckets = Array.create num_buckets []
-  }
-```
-
-Each `element` is a key/value pair, where the value is mutable so that
-the `add` function can mutate it in place.  For this implementation,
-we'll use 32 locks, and start with 256 buckets.
-
-Each bucket is an _association list_, meaning that it is list of key/value pairs
-that implement a dictionary.  We can start the implementation by defining
-dictionary operations for association lists.  The function `find_assoc` finds
-the value associated with a key, and `remove_assoc_exn` removes an association.
-The remove function raises an exception `Not_found` if the list does not contain
-the association.  We'll use this to optimize removal.
-
-```ocaml
-  let rec find_assoc key = function
-  | element :: tl ->
-       if element.key = key then
-          Some element
-       else
-          find_assoc key tl
-  | [] -> None
-
-  let rec remove_assoc_exn key = function
-  | element :: tl ->
-       if element.key = key then
-          tl
-       else
-          element :: remove_assoc_exn key tl
-  | [] -> raise Not_found
-```
-
-The locks are intended to partition the table into multiple sub-parts, where
-each lock provides synchronization for a contiguous range of buckets.  For
-synchronization we define a function `synchronize` that takes a bucket index and
-a function, and evaluates the function with the bucket lock acquired, releasing
-the lock before returning.
-
-```ocaml
-  let synchronize table index f =
-    let lock = table.locks.(index * num_locks / num_buckets) in
-    Mutex.lock lock;
-    let result = f () in
-    Mutex.unlock lock;
-    result
-```
-
-Note that the `synchronize` function is _not_ exception-safe, meaning
-that if evaluation of `f ()` raises an exception, the lock will not be
-released.  An exception-safe version would catch all exceptions; when
-an exception is raised, the lock would be released, and the exception
-re-raised.
-
-```ocaml
-  let synchronize_exn table index f =
-    let lock = table.locks.(index * num_locks / num_buckets) in
-    Mutex.lock lock;
-    try let result = f () in Mutex.unlock lock; result with
-      exn -> Mutex.unlock lock; raise exn
-```
-
-To add a new entry to the table, the `add` function acquires the
-bucket lock, then uses `find_assoc` to look for an existing
-association.  If one is found, the `value` is updated in-place to the
-new value.  Otherwise, a new entry is added to the beginning of the
-bucket.
-
-```ocaml
-  let add table ~key ~data =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    let buckets = table.buckets in
-    synchronize table index (fun () ->
-          match find_assoc key buckets.(index) with
-          | Some element ->
-               element.value <- data
-          | None ->
-               buckets.(index) <- { key = key; value = data } :: buckets.(index))
-```
-
-Removing an element from the table is similar.  If here is a previous entry in
-the table, the entry is removed.  Otherwise, the `remove_assoc_exn` function
-raises `Not_found`, and we leave the bucket unchanged.  The exception is an
-optimization to avoid copying the entire list in this case.
-
-```ocaml
-  let remove table ~key =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    let buckets = table.buckets in
-    synchronize table index (fun () ->
-      try buckets.(index) <- remove_assoc_exn key buckets.(index) with
-      | Not_found -> ())
-```
-
-The function to find an association in the table is similar -- we jsut
-find the entry in the table and return the value part.  However, this
-particular implementation is somewhat more subtle, because it omits
-the synchronization step, examining the bucket _without_ acquiring the
-lock.
-
-```ocaml
-  let find table ~key =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    (* Unsynchronized *)
-    match find_assoc key table.buckets.(index) with
-    | Some element -> Some element.value
-    | None -> None
-```
-
-From a performance perspective, this is clearly a win, because
-retrieving elements from the table has no locking at all.  But why is
-it valid?
-
-The reasoning has to do with two things: 1) the semantics we expect
-from the table, and 2) the OCaml memory model.  Ideally, the semantics
-we would expect is _sequential semantics_, meaning that all memory
-operations are processed in _some_ sequence that is compatible with
-the order in which they were performed in each thread.  Thus, if some
-thread adds two entries for keys `K1` and `K2` in sequential order,
-then all other threads will see either, 1) neither entry, or 2) a
-entry for `K1`, or 3) a entry for both `K1` and `K2`, but it will
-_not_ see an entry for `K2` without also having an entry for `K1`.
-
-Unfortunately, for some processor architectures, primary memory does
-not have sequential semantics, due to caching and other effects.
-Fortunately for us, OCaml does provide sequential memory semantics due
-to its threading model where: 1) only one thread executes at a time,
-and 2) there is a memory barrier the prevents reordering of thread
-context switches and memort operations, and 3) the compiler does not
-reorder memory operations in ways that would violate sequential memory
-semantics.
-
-Note, OCaml does not a _guarantee_ this semantics.  The OCaml
-implementation may change to support parallelism.  If it does, the
-memory semantics will change accordingly.  The simplest fix is just to
-synchronize the access.  Performance of `find` operations will
-decrease somewhat due to contention.
-
-```ocaml
-  let synchronized_find table ~key =
-    let hash = Hashtbl.hash key in
-    let index = hash mod num_buckets in
-    synchronize table index (fun () ->
-      (find_assoc key table.buckets.(index)).value)
-```
-
-For the final part of the implementation, let's define imperative
-iteration.  The iterator object contains a bucket index, and the field
-`elements` refers to some suffix of the list stored in the bucket.
-The `value` method returns the current elements, and the `next` method
-advances the `elements` field.  The method `normalize` is used to
-maintain the invariant that the `elements` field always refers to a
-value in the table unless the iterator has advanced past the final
-element.  The `remove` method removes the current element from the
-bucket in which it is stored.
-
-```ocaml
-  let rec remove_element_exn elements = function
-  | (hd :: tl) as elements' ->
-       if elements' == elements then
-          tl
-       else
-          hd :: remove_element_exn elements tl
-  | [] -> raise Not_found
-
-  let iterator table =
-    let buckets = table.buckets in
-    object (self)
-      val mutable index = 0
-      val mutable elements = buckets.(0)
-      method has_value = elements <> []
-      method value =
-        match elements with
-        | { key = key; value = value } :: _ -> key, value
-        | [] -> raise (Invalid_argument "value")
-      method next =
-        elements <- List.tl elements;
-        self#normalize
-      method remove =
-        synchronize table index (fun () ->
-          try buckets.(index) <- remove_element_exn elements buckets.(index) with
-            Not_found -> ());
-        self#next
-      method private normalize =
-        while elements = [] && index < num_buckets do
-          index <- index + 1;
-	  elements <- buckets.(index)
-        done
-      initializer self#normalize
-    end
-```
-
-The iterator methods are all unsychronized except the method `remove`, which
-mutates the bucket.  As a consequence, it means that hash operations that add
-and remove elements from the list can happen concurrently with iteration.
-Again, this is great from a performance perspective, but it means that iteration
-has non-sequential semantics.  In particular, whenever iteration enters a new
-bucket, subsequent concurrent operations that add new elements or remove old
-ones from that bucket have _no effect_ on the iteration.  Iteration advances
-through that bucket as if it were unchanged.
-
-One advantage of this relaxed iteration semantics is peformance, since
-iteration is largely unsynchronized.  Another advantage is that
-deadlock is less likely.  If we were to _lock_ the bucket during
-iteration, then changes to that bucket would not be allowed during
-iteration (even by the iterating thread).  We might allow lock
-recursion to allow mutations by the iterating thread, but in general
-the synchronization might involve multiple threads, resulting in
-deadlock.  Lock-free iteration ensures that the
-`Concurrent_dictionary` will not be involved in a deadlock cycle.
 
 ## Input and output (fix this chapter heading)
 
