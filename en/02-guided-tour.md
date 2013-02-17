@@ -348,12 +348,13 @@ the exception.
 So far we've encountered a handful of basic types like `int`, `float`
 and `string` as well as function types like `string -> int`.  But we
 haven't yet talked about any data structures.  We'll start by looking
-at a particularly simple data structure, the tuple.  You can create a
-tuple by joining values together with a comma:
+at a particularly simple data structure, the tuple.  A tuple is an
+ordered collection of values that can each be of different type.  You
+can create a tuple by joining values together with a comma:
 
 ```ocaml
-# let tup = (3,"three");;
-val tup : int * string = (3, "three")
+# let a_tuple = (3,"three");;
+val a_tuple : int * string = (3, "three")
 ```
 
 For the mathematically inclined, the `*` character is used because the
