@@ -1,21 +1,22 @@
 # Installation
 
-The easiest way to install OCaml is via the binary packages available in
+The easiest way to use OCaml is via the binary packages available in
 many operating systems.  For day-to-day code development however, it's much
-easier to use a source-based manager that lets you modify individual libraries
+easier to use a source-code manager that lets you modify individual libraries
 and automatically recompile all the dependencies.
 
-An important difference between OCaml and scripting languages is that the static type
-safety in OCaml mean that you can't just mix-and-match compiled libraries.  Instead,
-when an interface is changed, all the dependent libraries must also be
-recompiled.  Source-based package managers automate this process for you and
-make development life much easier.
+An important difference between OCaml and scripting languages such as Python or
+Ruby is that the static type safety that means that you can't just
+mix-and-match compiled libraries.  Interfaces are checked when libraries are
+compiled, so when an interface is changed, all the dependent libraries must
+also be recompiled.  Source-based package managers automate this process for
+you and make development life much easier.
 
-To work through this book, you'll need three major components installed:
+To work through Real World OCaml, you'll need three major components installed:
 
 * The OCaml compiler itself.
-* The OPAM source package manager, through which we'll install several add-on libraries such as Core and Async.
-* The `utop` top-level, which is a modern interactive top-level with command history, module completion and so forth.
+* The OPAM source package manager, through which we'll install several extra libraries.
+* The `utop` interactive top-level, a modern interactive top-level with command history and tab completion.
 
 Let's get started with how to install OCaml on various operating systems, and
 we'll get OPAM and `utop` running after that.
@@ -197,12 +198,12 @@ TODO
 
 ## Setting up OPAM
 
-The entire OPAM package database is held in the `.opam` directory in your home directory,
-including compiler installations. On Linux and MacOS X, this will be the
-`~/.opam` directory.  You shouldn't switch to an admin user to install packages as
-nothing will be installed outside of this directory.
-If you run into problems, just delete the whole `~/.opam` directory and follow
-the installations instructions from the `opam init` stage again.
+The entire OPAM package database is held in the `.opam` directory in your home
+directory, including compiler installations. On Linux and MacOS X, this will be
+the `~/.opam` directory.  You shouldn't switch to an admin user to install
+packages as nothing will be installed outside of this directory.  If you run
+into problems, just delete the whole `~/.opam` directory and follow the
+installations instructions from the `opam init` stage again.
 
 Begin by initialising the OPAM package database.
 
@@ -211,14 +212,16 @@ $ opam init
 $ opam list
 ```
 
-This will create the `~/.opam` directory, and give you the current set of packages
-uploaded to OPAM.  `opam list` will show you all of them, but don't install any
-just yet.
+You only need to run this command once, and it will create the `~/.opam`
+directory and sync with the latest package list from the online OPAM
+database.  `opam list` will list these, but don't install any just yet.
 
-The first package to install is Core, which is the replacement standard library
-that all of the examples in this book use.  We've made some minor modifications
-to the way the OCaml compiler displays type signatures, and the next command
-will install a patched `4.00.1` compiler with this enabled.
+The most important package we need to install is Core, which is the replacement
+standard library that all of the examples in this book use.  Before doing this,
+let's make sure you have exactly the right compiler version you need.  We've
+made some minor modifications to the way the OCaml compiler displays type
+signatures, and the next command will install a patched `4.00.1` compiler with
+this functionality enabled.
 
 ```
 $ opam switch 4.00.1+short-types
@@ -226,30 +229,39 @@ $ opam switch 4.00.1+short-types
 
 This step will take about 5-10 minutes on a modern machine, and will download
 and install (within the `~/.opam` directory) a custom OCaml compiler.  OPAM supports
-multiple such installations, and you'll find this very useful if you ever decide
-to hack on the internals of the compiler itself (or you simply want to experiment
-with the latest release without sacrificing your current installation).
+multiple such installations, and you'll find this very useful if you ever
+decide to hack on the internals of the compiler itself, or you want to
+experiment with the latest release without sacrificing your current
+installation.  You only need to install this compiler once, and future
+updates will be much faster as they only recompile libraries within the
+compiler installation.
 
-The new compiler will be compiled and installed into
-`~/.opam/4.00.1+short-types` and any libraries you install for it will be
-tracked separately from your system installation.  You can have any number of
-compilers installed simultaneously, but only one can be active at any time.
-You can find all the available compilers by running `opam switch list`.
+The new compiler will be installed into `~/.opam/4.00.1+short-types` and any
+libraries you install for it will be tracked separately from your system
+installation.  You can have any number of compilers installed simultaneously,
+but only one can be active at any time.  Browse through the available
+compilers by running `opam switch list`.
 
-Once that succeeds, you'll see some instructions about environment variables.
-OPAM can output a set of shell commands which configure your current shell with
-the right path variables so that packages use the custom compiler you've just
-built.  This is just one command:
+When the compilation finishes, you'll see some instructions about environment
+variables.  OPAM never installs files into your system directories (which would
+require administrator privileges).  Instead, it puts them into your home
+directory by default, and can output a set of shell commands which configures
+your shell with the right `PATH` variables so that packages will just work.
+This requires just one command:
 
 ```
 $ eval `opam config env`
 ```
 
-This command only works with your current shell, and it can be annoying to have
-to remember to type it in every time you open a new terminal.  Automate it by
-adding the line to your login shell.  On MacOS X or Debian, this is usually the `~/.bash_profile`
-script if you're using the default shell.  If you've switched to another shell, it might be `~/.zshrc` instead.
-OPAM isn't unusual in this approach; the SSH `ssh-agent` also works similarly, so if you're having any problems just hunt around in your configuration scripts to see how that's being invoked.
+This evaluates the results of running `opam config env` in your current shell,
+and sets the variables so that subsequent commands will use them.  This only
+works with your current shell, and it can be automated for all future shells by
+adding the line to your login scripts.  On MacOS X or Debian, this is usually
+the `~/.bash_profile` file if you're using the default shell.  If you've
+switched to another shell, it might be `~/.zshrc` instead.  OPAM isn't unusual
+in this approach; the SSH `ssh-agent` also works similarly, so if you're having
+any problems just hunt around in your configuration scripts to see how that's
+being invoked.
 
 Finally, we're ready to install the Core libraries.  Run this:
 
@@ -257,7 +269,9 @@ Finally, we're ready to install the Core libraries.  Run this:
 $ opam install core core_extended async
 ```
 
-This will take about five minutes to install, and the three packages that really matter are:
+This will take about five minutes to install, and install a series of packages.
+OPAM figures out the dependencies you need automatically, but the three
+packages that really matter are:
 
 * `core` is the main, well-supported Core distribution from Jane Street.
 * `core_extended` contains a number of experimental, but useful, extension libraries that are under review for inclusion in Core.  We use some of these in places, but much less than Core itself.
@@ -278,7 +292,16 @@ The `utop` package us an interactive command-line interface to OCaml that has
 tab-completion, persistent history and integration with Emacs so that you can
 run it within your editing environment.
 
+Remember from earlier that OPAM never installs files directly into your
+system directories, and this applies to `utop` too.  You'll find the binary
+in `~/.opam/4.00.1+short-types/bin`.  However, just typing in `utop` from your
+shell should just work, due to the `opam config env` step which configures
+your shell.  Don't forget to automate this as described earlier, as it makes
+life much easier when developing OCaml code!
+
 ### Command Line
+
+TODO: explain OCamlfind here.
 
 The `utop` tool provides a convenient interactive top-level, with full command
 history, command macros and module name completion.  The `~/.ocamlinit` file in
