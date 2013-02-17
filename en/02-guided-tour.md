@@ -720,14 +720,40 @@ computed and used in its place.
 val print_log_entry : Time.t option -> string -> unit
 ```
 
-We again use a `match` statement for handling the two possible states
-of an option.
+We use a `match` statement for handling the two possible states of an
+option.
+
+<note> <title> Nesting `let`s </title>
 
 As a side note, this is our first use of `let` to define a new
 variable within the body of a function.  A `let` bounded with an `in`
 can be used to introduce a new binding within any local scope,
 including a function body.  The `in` marks the beginning of the scope
-within which the new variable can be used.
+within which the new variable can be used.  Thus, we could write:
+
+```ocaml
+# let x = 7 in
+  x + x
+  ;;
+- : int = 14
+```
+
+And even have multiple let statements in a row, each one adding a new
+variable binding to what came before.
+
+```ocaml
+# let x = 7 in
+  let y = x * x in
+  x + y
+  ;;
+- : int = 56
+```
+
+This kind of nested let binding is a common way of building up a
+complex expression, with each `let` breaking off and naming an
+individual component, and then combining them in one final expression.
+
+</note>
 
 Options are important because they are the standard way in OCaml to
 encode a value that might not be there --- there's no such thing as a
