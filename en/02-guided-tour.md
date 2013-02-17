@@ -156,9 +156,9 @@ function and two integer arguments.  The function returns the sum of
 the integers that pass the test.
 
 ```ocaml
-# let sum_if_true test x y =
-     (if test x then x else 0)
-     + (if test y then y else 0)
+# let sum_if_true test first second =
+    (if test x then x else 0)
+    + (if test y then y else 0)
   ;;
 val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ```
@@ -719,22 +719,14 @@ computed and used in its place.
 val print_log_entry : Time.t option -> string -> unit
 ```
 
-Here, we again use a `match` statement for handling the two possible
-states of an option.  It's worth noting that we don't necessarily need
-to use an explicit `match` statement in this case.  We can instead use
-some built in functions from the `Option` module, which, like the
-`List` module for lists, is a place where you can find a large
-collection of useful functions for working with options.
+We again use a `match` statement for handling the two possible states
+of an option.
 
-In this case, we can rewrite `print_log_entry` using `Option.value`,
-which returns the content of an option if the option is `Some`, or a
-default value if the option is `None`.
-
-```ocaml
-# let print_log_entry maybe_time message =
-    let time = Option.value ~default:(Time.now ()) maybe_time in
-    printf "%s: %s\n" (Time.to_string time) message ;;
-```
+As a side note, this is our first use of `let` to define a new
+variable within the body of a function.  A `let` bounded with an `in`
+can be used to introduce a new binding within any local scope,
+including a function body.  The `in` marks the beginning of the scope
+within which the new variable can be used.
 
 Options are important because they are the standard way in OCaml to
 encode a value that might not be there.  This is different from most
@@ -744,12 +736,12 @@ given value also contains the possibility of being a null value.  In
 such languages, null is lurking everywhere.
 
 In OCaml, however, nulls are explicit.  A value of type `string *
-string` always actually contains two two well-defined values of type
-`string`.  If you want to allow, say, the first of those, to possibly
-be absent, then you need to change the type to something like `string
-option * string`.  As we'll see, this explicitness allows the compiler
-to provide a great deal of help in making sure you're correctly
-handing the possibility of missing data.
+string` always actually contains two well-defined values of type
+`string`.  If you want to allow, say, the first of those to be absent,
+then you need to change the type to `string option * string`.  As
+we'll see, this explicitness allows the compiler to provide a great
+deal of help in making sure you're correctly handing the possibility
+of missing data.
 
 ## Records and Variants
 
