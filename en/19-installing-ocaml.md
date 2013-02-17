@@ -20,7 +20,7 @@ To work through this book, you'll need three major components installed:
 Let's get started with how to install OCaml on various operating systems, and
 we'll get OPAM and `utop` running after that.
 
-## Getting the OCaml compiler
+## Getting OCaml 
 
 The OCaml compiler is available as a binary distribution on many operating
 systems.  This is the simplest and preferred installation route, but we'll also
@@ -105,7 +105,7 @@ need to add `$HOME/my-ocaml/bin` to your `PATH`, normally by editing the
 special reasons, so try to install binary packages before trying a source
 installation.
 
-## The OPAM Package Manager
+## Getting OPAM
 
 OPAM manages multiple simultaneous OCaml compiler and library
 installations, tracks library versions across upgrades, and recompiles
@@ -171,7 +171,7 @@ Fedora/RHEL: TODO
 
 Arch Linux: TODO
 
-## Getting started with OPAM
+## Setting up OPAM
 
 The entire OPAM package database is held in the `.opam` directory in your home directory,
 including compiler installations. On Linux and MacOS X, this will be the
@@ -239,7 +239,7 @@ This will take about five minutes to install, and the three packages that really
 * `core_extended` contains a number of experimental, but useful, extension libraries that are under review for inclusion in Core.  We use some of these in places, but much less than Core itself.
 * `async` is the network programming library that we use in Part II to communicate with other hosts. 
 
-## Editing Environment
+### Editing Environment
 
 There's one last tool you need before getting started on the examples.  The default
 `ocaml` command gives us an interactive command-line to experiment with code
