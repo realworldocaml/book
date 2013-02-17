@@ -51,42 +51,54 @@
       But not all ideas about how to design a programming language are
       created equal. Over the last 40 years, a few key language features
       have emerged that together form a kind of sweet-spot in language
-      design. These features include
+      design. These features include:
     </para>
     <itemizedlist>
       <listitem>
         <para>
-          Garbage collection
+          <emphasis>Garbage collection</emphasis> for automatic memory
+          management, now a feature of almost every modern high-level
+          language.
         </para>
       </listitem>
       <listitem>
         <para>
-          First-class and higher-order functions
+          <emphasis>Higher-order functions</emphasis> that can be passed
+          around as first-class values, and seen in Javascript or Scala.
         </para>
       </listitem>
       <listitem>
         <para>
-          Static type-checking
+          <emphasis>Static type-checking</emphasis> to reduce run-time
+          errors, such as Java class interfaces or Objective-C methods.
         </para>
       </listitem>
       <listitem>
         <para>
-          Parametric polymorphism
+          <emphasis>Generics</emphasis> to enable abstractions to be
+          constructed across different datatypes, available in Java and
+          .NET.
         </para>
       </listitem>
       <listitem>
         <para>
-          Support for programming with immutable values
+          <emphasis>Immutable data structures</emphasis> that cannot be
+          destructively updated, famously enforced in Haskell but also a
+          common feature of many distributed big data frameworks.
         </para>
       </listitem>
       <listitem>
         <para>
-          Algebraic datatypes and pattern-matching
+          <emphasis>Algebraic datatypes</emphasis> and pattern matching
+          to describe values more precisely, available in Miranda, F#
+          and Standard ML.
         </para>
       </listitem>
       <listitem>
         <para>
-          Type inference
+          <emphasis>Automatic type inference</emphasis> to avoid having
+          to laboriously define the type of every single variable in a
+          program and have it inferred based on how a value is used.
         </para>
       </listitem>
     </itemizedlist>
@@ -127,13 +139,13 @@
       <para>
         But all is not lost! There is an effective alternative to the
         OCaml standard library called Core. Jane Street, a company that
-        has been using OCaml for nearly a decade, developed Core for its
-        own internal use, but it was designed from the start with an eye
-        towards being a general-purpose standard library. Core is also
-        distributed with syntax extensions which provide essential new
-        functionality to OCaml; and there are additional libraries such
-        as the <literal>Async</literal> network communications library
-        that provide even more useful functionality.
+        has been using OCaml for more than a decade, developed Core for
+        its own internal use, but it was designed from the start with an
+        eye towards being a general-purpose standard library. Core is
+        also distributed with syntax extensions which provide essential
+        new functionality to OCaml; and there are additional libraries
+        such as the <literal>Async</literal> network communications
+        library that provide even more useful functionality.
       </para>
     </sect2>
     <sect2 id="the-ocaml-platform">
@@ -213,10 +225,10 @@
           understanding the concepts and examples is important. This
           part opens up with a guided tour to give you a quick overview
           of the language. It then moves onto modules, functors and
-          objects, which may take some time to digest. Persevere though,
-          as while these concepts may be difficult initially, they will
-          stand you in good stead even when switching to other languages
-          (many of which have drawn inspiration from ML).
+          objects, which may take some time to digest. Persevere though;
+          even thought these concepts may be difficult at first, they
+          will put you in good stead even when switching to other
+          languages, many of which have drawn inspiration from ML.
         </para>
       </listitem>
       <listitem>
@@ -350,10 +362,11 @@
   <para>
     We'll present this guided tour using the Core standard library and
     the <literal>utop</literal> OCaml toplevel, a shell that lets you
-    type in expressions and evaluate them interactively. When you get to
-    the point of running real programs, you'll want to leave the
-    toplevel behind, but it's a great tool for getting to know the
-    language.
+    type in expressions and evaluate them interactively.
+    <literal>utop</literal> is an easier-to-use version of the toplevel
+    that you get by typing <literal>ocaml</literal> at the command line,
+    and these instructions will assume you're using
+    <literal>utop</literal> specifically.
   </para>
   <para>
     Before getting started, do make sure you have a working OCaml
@@ -362,13 +375,14 @@
   </para>
   <note>
   <title>
-  Installing the interactive top-level
+  Installing <literal>utop</literal>
   </title>
   <para>
     The easiest way to get the examples running is to set up the OPAM
     package manager, which is explained in
-    <xref linkend="installation"/>. In a nutshell, you need
-    to:
+    <xref linkend="installation"/>. In a nutshell, you need to
+    have a working C compilation environment and the PCRE library
+    installed, and then:
   </para>
   <programlisting>
 $ opam init
@@ -453,15 +467,15 @@ $ utop
         <para>
           OCaml carefully distinguishes between
           <literal>float</literal>, the type for floating point numbers
-          and <literal>int</literal>. The types have different literals
-          (<literal>6.</literal> instead of <literal>6</literal>) and
-          different infix operators (<literal>+.</literal> instead of
-          <literal>+</literal>), and OCaml doesn't do any automated
-          casting between the types. This can be a bit of a nuisance,
-          but it has its benefits, since it prevents some kinds of bugs
-          that arise in other languages due to unexpected differences
-          between the behavior of <literal>int</literal> and
-          <literal>float</literal>.
+          and <literal>int</literal> the type for integers. The types
+          have different literals (<literal>6.</literal> instead of
+          <literal>6</literal>) and different infix operators
+          (<literal>+.</literal> instead of <literal>+</literal>), and
+          OCaml doesn't do any automated casting between the types. This
+          can be a bit of a nuisance, but it has its benefits, since it
+          prevents some kinds of bugs that arise in other languages due
+          to unexpected differences between the behavior of
+          <literal>int</literal> and <literal>float</literal>.
         </para>
       </listitem>
     </itemizedlist>
@@ -497,7 +511,8 @@ val square : int -&gt; int = &lt;fun&gt;
       identifier after the <literal>let</literal> is the function name,
       and each subsequent identifier is a different argument to the
       function. Thus, <literal>square</literal> is a function with a
-      single argument.
+      single argument. If no arguments are given, then we just have the
+      ordinary definition of a variable that we saw earlier.
     </para>
     <para>
       Now that we're creating more interesting values like functions,
@@ -538,9 +553,9 @@ int -&gt; int -&gt; float
       returns the sum of the integers that pass the test.
     </para>
     <programlisting language="ocaml">
-# let sum_if_true test x y =
-     if test x then x else 0
-     + if test y then y else 0
+# let sum_if_true test first second =
+    (if test x then x else 0)
+    + (if test y then y else 0)
   ;;
 val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
 </programlisting>
@@ -551,13 +566,22 @@ val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
       an example of this function in action.
     </para>
     <programlisting language="ocaml">
-# let even x = x mod 2 = 0 ;;
+# let even x =
+    x mod 2 = 0 ;;
 val even : int -&gt; bool = &lt;fun&gt;
 # sum_if_true even 3 4;;
 - : int = 4
 # sum_if_true even 2 4;;
 - : int = 6
 </programlisting>
+    <para>
+      Note that in the definition of <literal>even</literal> we used
+      <literal>=</literal> in two different ways: once as an equality
+      test, when comparing <literal>x mod 2</literal> to
+      <literal>0</literal>; and once as the part of the let binding that
+      separates the thing being defined from its definition. These two
+      uses of <literal>=</literal> are basically unrelated.
+    </para>
     <sect2 id="type-inference">
       <title>Type inference</title>
       <para>
@@ -628,8 +652,8 @@ val even : int -&gt; bool = &lt;fun&gt;
       </para>
       <programlisting language="ocaml">
 # let sum_if_true (test : int -&gt; bool) (x:int) (y:int) : int =
-     if test x then x else 0
-     + if test y then y else 0
+     (if test x then x else 0)
+     + (if test y then y else 0)
   ;;
 val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
 </programlisting>
@@ -738,15 +762,16 @@ Error: This expression has type string but
         time is best of all.
       </para>
       <para>
-        Working in the top-level somewhat obscures the difference
-        between run-time and compile time errors, but that difference is
-        still there. Generally, type errors, like this one:
+        Working in the toplevel somewhat obscures the difference between
+        run-time and compile time errors, but that difference is still
+        there. Generally, type errors, like this one:
       </para>
       <programlisting language="ocaml">
-# 3 + &quot;potato&quot;;;
-Characters 4-12:
-  3 + &quot;potato&quot;;;
-      ^^^^^^^^
+# let add_potato x =
+     x + &quot;potato&quot;;;
+  Characters 28-36:
+       x + &quot;potato&quot;;;
+           ^^^^^^^^
 Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
@@ -756,30 +781,22 @@ Error: This expression has type string but an expression was expected of type
         exception.
       </para>
       <programlisting language="ocaml">
-# 3 / 0;;
+# let is_a_multiple x y =
+     x mod y = 0 ;;
+  val is_a_multiple : int -&gt; int -&gt; bool = &lt;fun&gt;
+# is_a_multiple 8 2;;
+- : bool = true
+# is_a_multiple 8 0;;
 Exception: Division_by_zero.
 </programlisting>
       <para>
-        One important distinction is that type errors will stop you
-        whether or not the offending code is ever actually executed.
-        Thus, you get an error from typing in this code:
+        The distinction here is that type errors will stop you whether
+        or not the offending code is ever actually executed. Merely
+        defining <literal>add_potato</literal> is an error, whereas
+        <literal>is_a_multiple</literal> only fails when it's called,
+        and then, only when it's called with an input that triggers the
+        exception.
       </para>
-      <programlisting language="ocaml">
-# if 3 &lt; 4 then 0 else 3 + &quot;potato&quot;;;
-Characters 25-33:
-  if 3 &lt; 4 then 0 else 3 + &quot;potato&quot;;;
-                           ^^^^^^^^
-Error: This expression has type string but an expression was expected of type
-         int
-</programlisting>
-      <para>
-        but the following code runs incident, even though it contains a
-        branch that would throw an exception if it were ever reached.
-      </para>
-      <programlisting language="ocaml">
-# if 3 &lt; 4 then 0 else 3 / 0;;
-- : int = 0
-</programlisting>
       </note>
     </sect2>
   </sect1>
@@ -793,12 +810,13 @@ Error: This expression has type string but an expression was expected of type
         <literal>string</literal> as well as function types like
         <literal>string -&gt; int</literal>. But we haven't yet talked
         about any data structures. We'll start by looking at a
-        particularly simple data structure, the tuple. You can create a
-        tuple by joining values together with a comma:
+        particularly simple data structure, the tuple. A tuple is an
+        ordered collection of values that can each be of different type.
+        You can create a tuple by joining values together with a comma:
       </para>
       <programlisting language="ocaml">
-# let tup = (3,&quot;three&quot;);;
-val tup : int * string = (3, &quot;three&quot;)
+# let a_tuple = (3,&quot;three&quot;);;
+val a_tuple : int * string = (3, &quot;three&quot;)
 </programlisting>
       <para>
         For the mathematically inclined, the <literal>*</literal>
@@ -812,7 +830,7 @@ val tup : int * string = (3, &quot;three&quot;)
         pattern-matching syntax. For example:
       </para>
       <programlisting language="ocaml">
-# let (x,y) = tup;;
+# let (x,y) = a_tuple;;
 val x : int = 3
 val y : string = &quot;three&quot;
 </programlisting>
@@ -821,8 +839,16 @@ val y : string = &quot;three&quot;
         <literal>let</literal> binding is the pattern. This pattern lets
         us mint the new variables <literal>x</literal> and
         <literal>y</literal>, each bound to different components of the
-        value being matched. Note that the same syntax is used both for
-        constructing and for pattern-matching on tuples.
+        value being matched, which can now be used in subsequent
+        expressions.
+      </para>
+      <programlisting language="ocaml">
+# x + String.length y;;
+- : int = 8
+</programlisting>
+      <para>
+        Note that the same syntax is used both for constructing and for
+        pattern-matching on tuples.
       </para>
       <para>
         Pattern matching can also show up in function arguments. Here's
@@ -836,6 +862,10 @@ val y : string = &quot;three&quot;
     sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
 ;;
 </programlisting>
+      <para>
+        The <literal>**</literal> operator used above is for raising a
+        floating-point number to a power.
+      </para>
       <para>
         This is just a first taste of pattern matching. Pattern matching
         is a pervasive tool in OCaml, and as you'll see, it has
@@ -868,7 +898,7 @@ Error: This expression has type string but an expression was expected of type
       <sect3 id="the-list-module">
         <title>The <literal>List</literal> module</title>
         <para>
-          OCaml comes with a <literal>List</literal> module that has a
+          Core comes with a <literal>List</literal> module that has a
           rich collection of functions for working with lists. We can
           access values from within a module by using dot-notation.
           Here, for example, is how we compute the length of a list.
@@ -942,6 +972,21 @@ Error: This expression has type string but an expression was expected of type
 # 1 :: 2 :: 3 :: [];;
 - : int list = [1; 2; 3]
 </programlisting>
+        <para>
+          The <literal>::</literal> operator can only be used for adding
+          one element to the front of the list. There's also a list
+          concatenation operator, <literal>@</literal>, which can
+          concatenate two lists.
+        </para>
+        <programlisting language="ocaml">
+# [1;2;3] @ [4;5;6];;
+- : int list = [1; 2; 3; 4; 5; 6]
+</programlisting>
+        <para>
+          It's important to remember that this is not a constant-time
+          operation. Concatenating two lists takes time proportional to
+          the length of the first list.
+        </para>
       </sect3>
       <sect3 id="list-patterns-using-match">
         <title>List patterns using <literal>match</literal></title>
@@ -1027,7 +1072,9 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
           Note that we included a comment in the above code. OCaml
           comments are bounded by <literal>(*</literal> and
           <literal>*)</literal>, and can be nested arbitrarily and cover
-          multiple lines.
+          multiple lines. There's no equivalent of the C-style single
+          line comment that is prefixed by <literal>//</literal> --- all
+          comments must be bounded on both sides.
         </para>
         <para>
           The first pattern, <literal>first :: the_rest</literal>,
@@ -1062,20 +1109,38 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
         <programlisting language="ocaml">
 # let rec sum l =
     match l with
-    | [] -&gt; 0
-    | hd :: tl -&gt; hd + sum tl
+    | [] -&gt; 0                   (* base case *)
+    | hd :: tl -&gt; hd + sum tl   (* inductive case *)
   ;;
 val sum : int list -&gt; int
-# sum [1;2;3;4;5];;
-- : int = 15
+# sum [1;2;3];;
+- : int = 6
 </programlisting>
         <para>
           Note that we had to use the <literal>rec</literal> keyword to
           allow <literal>sum</literal> to refer to itself. And, as you
           might imagine, the base case and inductive case are different
-          arms of the match. In particular, the base case is that of the
-          empty list, and the inductive case is that of a list of zero
-          or more elements.
+          arms of the match.
+        </para>
+        <para>
+          Logically, you can think of the evaluation of a simple
+          recursive function like <literal>sum</literal> almost as if it
+          were a mathematical equation whose meaning you were unfolding
+          step by step.
+        </para>
+        <programlisting language="ocaml">
+sum [1;2;3]
+1 + sum [2;3]
+1 + (2 + sum [3])
+1 + (2 + (3 + sum []))
+1 + (2 + (3 + 0))
+1 + (2 + 3)
+1 + 5
+6
+</programlisting>
+        <para>
+          This suggests a reasonable mental model for what OCaml is
+          actually doing to evaluate a recursive function.
         </para>
         <para>
           We can introduce more complicated list patterns as well.
@@ -1094,7 +1159,7 @@ val sum : int list -&gt; int
         <para>
           Again, the first arm of the match is the base case, and the
           second is the inductive. Unfortunately, this code has a
-          problem. If you type it into the top-level, you'll see this
+          problem. If you type it into the toplevel, you'll see this
           error:
         </para>
         <programlisting>
@@ -1181,41 +1246,61 @@ val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
 val print_log_entry : Time.t option -&gt; string -&gt; unit
 </programlisting>
       <para>
-        Here, we again use a <literal>match</literal> statement for
-        handling the two possible states of an option. It's worth noting
-        that we don't necessarily need to use an explicit
-        <literal>match</literal> statement in this case. We can instead
-        use some built in functions from the <literal>Option</literal>
-        module, which, like the <literal>List</literal> module for
-        lists, is a place where you can find a large collection of
-        useful functions for working with options.
+        We use a <literal>match</literal> statement for handling the two
+        possible states of an option.
       </para>
+      <note> <title> 
+      Nesting <literal>let</literal>s
+      </title>
       <para>
-        In this case, we can rewrite <literal>print_log_entry</literal>
-        using <literal>Option.value</literal>, which returns the content
-        of an option if the option is <literal>Some</literal>, or a
-        default value if the option is <literal>None</literal>.
+        As a side note, this is our first use of <literal>let</literal>
+        to define a new variable within the body of a function. A
+        <literal>let</literal> bounded with an <literal>in</literal> can
+        be used to introduce a new binding within any local scope,
+        including a function body. The <literal>in</literal> marks the
+        beginning of the scope within which the new variable can be
+        used. Thus, we could write:
       </para>
       <programlisting language="ocaml">
-# let print_log_entry maybe_time message =
-    let time = Option.value ~default:(Time.now ()) maybe_time in
-    printf &quot;%s: %s\n&quot; (Time.to_string time) message ;;
+# let x = 7 in
+  x + x
+  ;;
+- : int = 14
 </programlisting>
       <para>
+        And even have multiple let statements in a row, each one adding
+        a new variable binding to what came before.
+      </para>
+      <programlisting language="ocaml">
+# let x = 7 in
+  let y = x * x in
+  x + y
+  ;;
+- : int = 56
+</programlisting>
+      <para>
+        This kind of nested let binding is a common way of building up a
+        complex expression, with each <literal>let</literal> breaking
+        off and naming an individual component, and then combining them
+        in one final expression.
+      </para>
+      </note>
+      <para>
         Options are important because they are the standard way in OCaml
-        to encode a value that might not be there. This is different
-        from most other languages, including Java and C#, where most if
-        not all datatypes are <emphasis>nullable</emphasis>, meaning
-        that, whatever their type is, any given value also contains the
-        possibility of being a null value. In such languages, null is
-        lurking everywhere.
+        to encode a value that might not be there --- there's no such
+        thing as a <literal>NullPointerException</literal> in OCaml.
+        This is different from most other languages, including Java and
+        C#, where most if not all datatypes are
+        <emphasis>nullable</emphasis>, meaning that, whatever their type
+        is, any given value also contains the possibility of being a
+        null value. In such languages, null is lurking everywhere.
       </para>
       <para>
         In OCaml, however, nulls are explicit. A value of type
         <literal>string * string</literal> always actually contains two
-        two well-defined values of type <literal>string</literal>. If
-        you want to allow, say, the first of those, to possibly be
-        absent, then you need to change the type to something like
+        well-defined values of type <literal>string</literal>. If you
+        want to allow, say, the first of those to be absent, then you
+        need to change the type to
         <literal>string option * string</literal>. As we'll see, this
         explicitness allows the compiler to provide a great deal of help
         in making sure you're correctly handing the possibility of
@@ -1348,10 +1433,12 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
       So far, we've only written so-called <emphasis>pure</emphasis> or
       <emphasis>functional</emphasis> code, meaning that we didn't write
       any code that modified a variable or value after its creation.
-      This is a quite different style from
-      <emphasis>imperative</emphasis> programming, where computations
-      are structured as sequences of instructions that operate by
-      modifying state as they go.
+      Indeed, almost all of the data structures we've encountered so far
+      are <emphasis>immutable</emphasis>, meaning there's no way in the
+      language to modify them at all. This is a quite different style
+      from <emphasis>imperative</emphasis> programming, where
+      computations are structured as sequences of instructions that
+      operate by modifying state as they go.
     </para>
     <para>
       Functional code is the default in OCaml, with variable bindings
@@ -1466,7 +1553,9 @@ val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
         <literal>update</literal> that operates by side effect rather
         than by returning a value, and for the argument to a function
         like <literal>create</literal> that doesn't require any
-        information to be passed into it in order to run.
+        information to be passed into it in order to run. This is
+        similar to the role that <literal>void</literal> plays in
+        languages like C and Java.
       </para>
       <para>
         Here's an example of <literal>create</literal> and
@@ -1509,28 +1598,61 @@ val x : int ref = {contents = 0}
 - : int = 0
 # x := !x + 1 ;;   (* assignment, i.e., x.contents &lt;- ... *)
 - : unit = ()
-# incr x ;;        (* increment, i.e., x := !x + 1 *)
-- : unit = ()
 # !x ;;
 - : int = 2
 </programlisting>
       <para>
-        A ref is really just an example of a mutable record, but in
-        practice, it's the standard way of dealing with a single mutable
-        value in a computation.
+        The definition of all this is quite straightforward. Here is the
+        complete implementation of the <literal>ref</literal> type. The
+        <literal>'a</literal> before the ref indicates that the
+        <literal>ref</literal> type is polymorphic, in the same way that
+        lists are polymorphic, meaning it can contain values of any
+        type.
+      </para>
+      <programlisting language="ocaml">
+type 'a ref = { mutable contents : 'a }
+
+let ref x = { contents = x }
+let (!) r = r.contents
+let (:=) r x = r.contents &lt;- x
+</programlisting>
+      <para>
+        Here, <literal>!</literal> and <literal>:=</literal> are infix
+        operators that we're defining, where the parenthetical syntax is
+        what marks them as such.
+      </para>
+      <para>
+        Even though a <literal>ref</literal> is just another record
+        type, it's notable because it is the standard way of simulating
+        the traditional mutable variable you'll find in most imperative
+        languages. For example, if we wanted to write an imperative loop
+        to sum over the elements of an array, we could do it as follows,
+        using the function <literal>List.iter</literal> to call a simple
+        function on every element of a list, and a ref to accumulate the
+        results.
+      </para>
+      <programlisting language="ocaml">
+# let sum list =
+    let sum = ref 0 in
+    List.iter list ~f:(fun x -&gt; sum := !sum + x);
+    !sum
+</programlisting>
+      <para>
+        This isn't the most idiomatic (or the fastest) way to sum up a
+        list, but it shows how you can use a ref in place of a mutable
+        variable.
       </para>
     </sect2>
     <sect2 id="for-and-while-loops">
       <title>For and while loops</title>
       <para>
         Along with mutable data structures, OCaml gives you constructs
-        like <literal>while</literal> and <literal>for</literal> loops
-        for interacting with them. Here, for example, is a piece of
-        imperative code for permuting an array. Here, we use the
-        <literal>Random</literal> module as our source of randomness.
-        (<literal>Random</literal> starts out with a deterministic seed,
-        but you can call <literal>Random.self_init</literal> to get a
-        new random seed chosen.)
+        like while and for loops for interacting with them. Here, for
+        example, is some code that uses a for loop for permuting an
+        array. We use the <literal>Random</literal> module as our source
+        of randomness. <literal>Random</literal> starts out with a
+        deterministic seed, but you can call
+        <literal>Random.self_init</literal> to choose a new at random.
       </para>
       <programlisting language="ocaml">
 # let permute ar =
@@ -1546,10 +1668,10 @@ val x : int ref = {contents = 0}
 val permute : 'a array -&gt; unit = &lt;fun&gt;
 </programlisting>
       <para>
-        Note that the semi-colon after the first array assignment
-        doesn't terminate the scope of the let-binding, so the variable
-        <literal>j</literal> remains in scope until the end of the body
-        of the for loop.
+        From a syntactic perspective, you should note the keywords that
+        distinguish a for loop: <literal>for</literal>,
+        <literal>to</literal>, <literal>do</literal> and
+        <literal>done</literal>.
       </para>
       <para>
         Here's an example run of this code.
@@ -1584,7 +1706,7 @@ val ar : int array =
 open Core.Std
 
 let rec read_and_accumulate accum =
-  let line = In_channel.input_line stdin in
+  let line = In_channel.input_line In_channel.stdin in
   match line with
   | None -&gt; accum
   | Some x -&gt; read_and_accumulate (accum +. Float.of_string x)
@@ -1594,14 +1716,12 @@ let () =
 </programlisting>
     <para>
       This is our first use of OCaml's input and output routines. The
-      function <literal>read_and_accumulate</literal> uses
-      <literal>In_channel.input_line</literal> to read in lines one by
-      one from the standard input, adding each number to its accumulated
-      sum as it goes. Note that <literal>input_line</literal> returns an
-      optional value, with <literal>None</literal> indicating the end of
-      the input. Note that <literal>read_and_accumulate</literal> is a
-      recursive function, invoking itself to read the next line, until
-      the last line is reached.
+      function <literal>read_and_accumulate</literal> is a recursive
+      function that uses <literal>In_channel.input_line</literal> to
+      read in lines one by one from the standard input, invoking itself
+      at each iteration with its updated accumulated sum. Note that
+      <literal>input_line</literal> returns an optional value, with
+      <literal>None</literal> indicating the end of the input.
     </para>
     <para>
       After <literal>read_and_accumulate</literal> returns, the total
@@ -1610,10 +1730,9 @@ let () =
       type-safe format strings, similar to what you'll find in a variety
       of languages. The format string is parsed by the compiler and used
       to determine the number and type of the remaining arguments that
-      are required for <literal>printf</literal>. In this case, there is
-      a single formatting directive, <literal>%F</literal>, so
-      <literal>printf</literal> expects one additional argument of type
-      <literal>float</literal>.
+      are required. In this case, there is a single formatting
+      directive, <literal>%F</literal>, so <literal>printf</literal>
+      expects one additional argument of type <literal>float</literal>.
     </para>
     <sect2 id="compiling-and-running">
       <title>Compiling and running</title>
@@ -1693,13 +1812,13 @@ let &lt;identifier&gt; = &lt;expr&gt;
     <para>
       As we'll see when we get to the module system in
       <xref linkend="files-modules-and-programs"/>, this same
-      syntax is used for top-level definitions in a module.
+      syntax is used for toplevel definitions in a module.
     </para>
     <para>
       Every variable binding has a <emphasis>scope</emphasis>, which is
       the portion of the code that can refer to that binding. The scope
-      of a top-level let binding is everything that follows it in the
-      top-level session (or in the remainder of the module).
+      of a toplevel let binding is everything that follows it in the
+      toplevel session (or in the remainder of the module).
     </para>
     <para>
       Here's a simple example.
@@ -1741,7 +1860,7 @@ val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
       Note that the scope of <literal>language_list</literal> is just
       the expression
       <literal>String.concat ~sep:&quot;-&quot; language_list</literal>,
-      and is not available at the top-level, as we can see if we try to
+      and is not available at the toplevel, as we can see if we try to
       access it now.
     </para>
     <programlisting language="ocaml">
@@ -4683,9 +4802,11 @@ Error: The record field label important belongs to the type log_entry
     </para>
     <para>
       Another approach is to mint a module for each type. This is
-      actually a broadly useful idiom, providing for each type a
-      namespace within which to put related values. Using this style we
-      would write:
+      actually a broadly useful idiom (and one used quite extensively by
+      Core), providing for each type a name-space within which to put
+      related values. When using this style, it is standard practice to
+      name the type associated with the module <literal>t</literal>.
+      Using this style we would write:
     </para>
     <programlisting language="ocaml">
 # module Log_entry = struct
@@ -4979,6 +5100,12 @@ val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string 
 # show_field Logon.Fields.time Time.to_string logon;;
 - : string = &quot;time: 2012-06-26 18:44:13.807826&quot;
 </programlisting>
+    <para>
+      Note that in the above, the module <literal>Fn</literal> provides
+      a collection of useful primitives for dealing with functions,
+      including <literal>Fn.id</literal>, which is the identity
+      function.
+    </para>
     <para>
       <literal>fieldslib</literal> also provides higher-level operators,
       like <literal>Fields.fold</literal> and
@@ -6206,7 +6333,7 @@ end
         with the ability to store other information in the error case.
         Like <literal>Some</literal> and <literal>None</literal> for
         options, the constructors <literal>Ok</literal> and
-        <literal>Error</literal> are promoted to the top-level by
+        <literal>Error</literal> are promoted to the toplevel by
         <literal>Core.Std</literal>. As such, we can write:
       </para>
       <programlisting language="ocaml">
@@ -7342,7 +7469,7 @@ module &lt;name&gt; : &lt;signature&gt; = &lt;implementation&gt;
 </programlisting>
       <para>
         We could have written this slightly differently, by giving the
-        signature its own top-level <literal>module type</literal>
+        signature its own toplevel <literal>module type</literal>
         declaration, making it possible to in a lightweight way create
         multiple distinct types with the same underlying implementation.
       </para>
@@ -7421,7 +7548,7 @@ end
       <itemizedlist>
         <listitem>
           <para>
-            Opening modules at the top-level of a module should be done
+            Opening modules at the toplevel of a module should be done
             quite sparingly, and generally only with modules that have
             been specifically designed to be opened, like
             <literal>Core.Std</literal> or
@@ -7456,7 +7583,7 @@ let print_median m =
             Because the module name <literal>C</literal> only exists for
             a short scope, it's easy to read and remember what
             <literal>C</literal> stands for. Rebinding modules to very
-            short names at the top-level of your module is usually a
+            short names at the toplevel of your module is usually a
             mistake.
           </para>
         </listitem>
@@ -9690,567 +9817,6 @@ val edit_distance : string * string -&gt; int = &lt;fun&gt;
       </para>
     </sect2>
   </sect1>
-  <sect1 id="input-and-output-fix-this-chapter-heading">
-    <title>Input and output (fix this chapter heading)</title>
-    <para>
-      Input and output I/O is another kind of imperative operation,
-      where the purpose is to either read input from a file, stream, or
-      device, <emphasis>consuming</emphasis> the input by side-effect;
-      or write output to a file, stream, or device,
-      <emphasis>modifying</emphasis> the output by side-effect. There
-      are several I/O libraries in OCaml. There is the basic builtin I/O
-      library in the <literal>Pervasives</literal> module, and there are
-      moe advanced I/O libraries in the <literal>Unix</literal> and
-      <literal>Async</literal> modules. Let's look at the basic library
-      -- the advanced libraries will be described elsewhere.
-    </para>
-    <para>
-      For basic I/O OCaml models input and output with
-      <emphasis>channels</emphasis>. An <literal>in_channel</literal> is
-      used for reading input, and and <literal>out_channel</literal> for
-      producing output. Each OCaml process has three standard channels,
-      similar to the three standard files in Unix.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>stdin : in_channel</literal>. The &quot;standard
-          input&quot; channel. By default, input comes from the
-          terminal, which handles keyboard input.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>stdout : out_channel</literal>. The &quot;standard
-          output&quot; channel. By default, output written to
-          <literal>stdout</literal> appears on the user terminal.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>stderr : out_channel</literal>. The &quot;standard
-          error&quot; channel. This is similar to
-          <literal>stdout</literal>, but it is intended for error
-          messages.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      The standard library has several functions for reading from and
-      writing to the standard channels.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>print_char : char -&gt; unit</literal> prints a
-          single character to <literal>stdout</literal>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>print_string : string -&gt; unit</literal> prints a
-          <literal>string</literal> to <literal>stdout</literal> as a
-          sequence of characters, without quotes.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>print_int : int -&gt; unit</literal> prints an
-          integer to <literal>stdout</literal>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>print_float : float -&gt; unit</literal> prints a
-          floating-point number to <literal>stdout</literal>.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      Functions to write to <literal>stderr</literal> have similar
-      names, using the prefix <literal>prerr_</literal> rather than
-      <literal>print_</literal> (for example,
-      <literal>prerr_string</literal>).
-    </para>
-    <programlisting language="ocaml">
-# let i = 1;;
-val i : int = 1
-# print_string &quot;The value of i is &quot;; print_int i; print_string &quot;.\n&quot;;;
-The value of i is 1.
-- : unit = ()
-</programlisting>
-    <para>
-      Input is similar, but there are only a few functions.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>read_line : unit -&gt; string</literal> reads a line
-          of input from <literal>stdin</literal>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>read_int : unit -&gt; int</literal> reads a decimal
-          integer from <literal>stdin</literal>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>read_float : unit -&gt; float</literal> reads a
-          floating-point number from <literal>stdin</literal>.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      These functions raise the exception <literal>End_of_file</literal>
-      if the input channel is terminated before the input is read.
-    </para>
-    <para>
-      Here is a function to read a sequence of integers from
-      <literal>stdin</literal>, sorting them and printing the result to
-      <literal>stdout</literal>.
-    </para>
-    <programlisting language="ocaml">
-# let collate_input () =
-   let rec read_input items =
-      let item = try Some (read_int ()) with End_of_file -&gt; None in
-      match item with
-       | Some i -&gt; read_input (i :: items)
-       | None -&gt; items
-   in
-   let items = read_input [] in
-   let sorted = List.sort (-) items in
-   List.iter (fun i -&gt; print_int i; print_char ' ') sorted;
-   print_string &quot;\n&quot;;;
-val collate_input : unit -&gt; unit = &lt;fun&gt;
-#   collate_input ();;
-8
-56
-2
-34
--120
-19
--120 2 8 19 34 56
-- : unit = ()
-</programlisting>
-    <para>
-      Using exceptions to signal the end of input is a little awkward.
-      The <literal>read_input</literal> loop above converts the
-      exception into an <literal>int option</literal>, so that matching
-      can be performed with <literal>match</literal> and the function is
-      tail-recursive. The following function is <emphasis>not</emphasis>
-      tail recursive, and should be avoided.
-    </para>
-    <programlisting language="ocaml">
-  (* AVOID -- non tail-recursive input reader *)
-# let rec read_input items =
-   try read_input (read_int () :: items) with
-      End_of_file -&gt; items;;
-val read_input : int list -&gt; int list = &lt;fun&gt;
-# read_input [];;
-34
-45
-56
--1
-- : int list = [-1; 56; 45; 34]
-</programlisting>
-    <para>
-      Another way to address the input issue is to use iteration, rather
-      than recursion. This requires collecting the input in a container
-      than can be mutated by side-effect.
-    </para>
-    <programlisting language="ocaml">
-# let read_input () =
-   let items = ref [] in
-   try
-      while true do
-         items := read_int () :: !items
-      done;
-      []  (* not reached *)
-   with End_of_file -&gt;
-      !items;;
-val read_input : unit -&gt; int list = &lt;fun&gt;
-# read_input ();;
-45
-78
--345
-- : int list = [-345; 78; 45]
-</programlisting>
-    <para>
-      In this loop, the value returns from a successful call to
-      <literal>read_int ()</literal> is added to the
-      <literal>items</literal> list by side-effect. When
-      <literal>read_int ()</literal> reaches the end of input, it raises
-      the <literal>End_of_file</literal> exception, terminating the
-      loop. The <literal>while</literal> loop never terminates; the
-      <literal>[]</literal> value afterward is only to satisfy the type
-      checker.
-    </para>
-    <sect2 id="basic-file-input-and-output">
-      <title>Basic file input and output</title>
-      <para>
-        It isn't necessary to perform all input through the standard
-        channels. There are also functions to open files for reading and
-        writing.
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            <literal>open_out : string -&gt; out_channel</literal> open
-            a file for writing.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>open_in : string -&gt; in_channel</literal> open a
-            file for reading.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>close_out : out_channel -&gt; unit</literal> close
-            an output channel, flushing any pending output to the file.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>close_in : in_channel -&gt; unit</literal> close an
-            input channel.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        The functions for input and output are similar to the
-        <literal>print_...</literal> and <literal>read_...</literal>
-        functions, but they use the prefix <literal>output_</literal>
-        and <literal>input_</literal> and they take a channel as an
-        argument. Let's write a function to print the contents of a
-        file.
-      </para>
-      <programlisting language="ocaml">
-# let cat filename =
-   let inx = open_in filename in
-   try
-      while true do
-         print_string (input_line inx); print_char '\n'
-      done
-   with End_of_file -&gt;
-      close_in inx;;
-val cat : string -&gt; unit = &lt;fun&gt;
-# let outf = open_out &quot;file.txt&quot;;;
-val outf : out_channel = &lt;abstr&gt;
-# output_string outf &quot;Hello world\n1\n2\n3\n&quot;;;
-- : unit = ()
-# close_out outf;;
-- : unit = ()
-# cat &quot;file.txt&quot;;;
-Hello world
-1
-2
-3
-- : unit = ()
-</programlisting>
-      <para>
-        It is important to close channels when you are finished with
-        them, for two reasons. One reason is that the runtime system
-        will usually have a limit on the number of channels that may be
-        open simultaneously. To avoid problems, you should close
-        channels you are not using. In addition, for efficiency, output
-        is buffered and written to output channels in larger blocks. The
-        output may not actually be written to the file unless the
-        <literal>out_channel</literal> is closed, or with an explicit
-        call to the <literal>flush</literal> function.
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            <literal>flush : out_channel -&gt; unit</literal>
-          </para>
-        </listitem>
-      </itemizedlist>
-      <programlisting language="ocaml">
-# let outf = open_out &quot;file.txt&quot;;;
-val outf : out_channel = &lt;abstr&gt;
-# output_string outf &quot;Hello world\n1\n2\n3\n&quot;;;
-- : unit = ()
-# cat &quot;file.txt&quot;;;
-- : unit = ()
-# flush outf;;
-- : unit = ()
-# cat &quot;file.txt&quot;;;
-Hello world
-1
-2
-3
-- : unit = ()
-</programlisting>
-    </sect2>
-    <sect2 id="formatted-output-with-printf">
-      <title>Formatted output with Printf</title>
-      <para>
-        Output with the standard library functions like
-        <literal>output_char</literal>, <literal>output_int</literal>,
-        <literal>output_string</literal>, etc. is simple, but there is
-        little flexibility, and it is often verbose. OCaml also supports
-        <emphasis>formatted</emphasis> output using the
-        <literal>printf</literal> function, which is modeled after
-        <literal>printf</literal> in the C standard library. The
-        <literal>printf</literal> function takes a <emphasis>format
-        string</emphasis> that describe what to print and how to format
-        it, as well as arguments to be printed.
-      </para>
-      <programlisting language="ocaml">
-printf format arg1 ... argN
-</programlisting>
-      <para>
-        The format string can contain character literals, which are
-        printed without change, as well as conversion specifications,
-        which specify how to print an value that is provided as an
-        argument. A conversion specification begins with a percent
-        (<literal>%</literal>) character, some flags, and a type
-        specification. For example, <literal>%d</literal> is a
-        conversion specification for printing an integer,
-        <literal>%s</literal> prints a string, and <literal>%f</literal>
-        prints a floating-point value.
-      </para>
-      <programlisting language="ocaml">
-# open Printf;;
-# printf &quot;int=%d string=%s float=%f\n&quot; 10 &quot;abc&quot; 1e5;;
-int=10 string=abc float=100000.000000
-- : unit = ()
-</programlisting>
-      <para>
-        Conversions can also specify additional parameters for
-        formatting the value. The general form has flags, width
-        specified in number of characters, and decimal precision used
-        for printing floating-point values. These parameters are
-        optional.
-      </para>
-      <programlisting language="ocaml">
-% [flags] [width] [.precision] type
-</programlisting>
-      <para>
-        There are several flags of interest, the flag
-        <literal>'-'</literal> left-justifies the output, and the flag
-        <literal>'0'</literal> pads numerical values with leading
-        zeroes. Let's write a program to print a price list in a tabular
-        form.
-      </para>
-      <programlisting language="ocaml">
-# let print_prices prices =
-    print_string &quot;--------------------------------\n\
-                  | Size   | Hexcode    | Price  |\n\
-                  --------------------------------\n&quot;;
-    List.iter (fun (size, code, price) -&gt;
-          printf &quot;| %-6s | 0x%08x | %6.2f |\n&quot; size code price) prices;
-    print_string &quot;--------------------------------\n&quot;;;
-val print_prices : (string * int * float) list -&gt; unit = &lt;fun&gt;
-# print_prices
-   [(&quot;small&quot;, 0x35, 1.02);
-    (&quot;medium&quot;, 0x7a1, 50.75);
-    (&quot;large&quot;, 0xbad, 400.8);
-    (&quot;vente&quot;, 0x11, 4136.);
-    (&quot;enormous&quot;, 100000, 100.)];;
---------------------------------
-| Size   | Hexcode    | Price  |
---------------------------------
-| small  | 0x00000035 |   1.02 |
-| medium | 0x000007a1 |  50.75 |
-| large  | 0x00000bad | 400.80 |
-| vente  | 0x00000011 | 4136.00 |
-| enormous | 0x000186a0 | 100.00 |
---------------------------------
-- : unit = ()
-</programlisting>
-      <para>
-        The format specification
-        <literal>&quot;| %-6s | 0x%08x | %6.2f |\n&quot;</literal>
-        specifies that the first argument is a string that is to be
-        left-justified and printed six characters wide; the second
-        argument is an integer that should be printed in hexidecimal
-        (format type <literal>x</literal>) eight characters wide with
-        leading zeroes; and the third argument is a floating point value
-        that should be printed right-justified, six characters wide,
-        with two digits after the decimal point.
-      </para>
-      <para>
-        Note that the width specifies a <emphasis>minimum</emphasis>
-        width. If the value requires more width to print completely the
-        width is increased. The price <literal>4136.00</literal> and the
-        size <literal>enormous</literal> both overflow the width,
-        breaking the tabular form.
-      </para>
-    </sect2>
-    <sect2 id="strong-typing-and-format-strings">
-      <title>Strong typing and format strings</title>
-      <para>
-        In OCaml, <literal>printf</literal> is type safe. The format is
-        checked against the arguments at compile time, and rejected if
-        the format string is malformed, or if the format does not match
-        the arguments. In the following examples, <literal>%v</literal>
-        is not a valid conversion specification, and floating-point
-        values can't be printed with a decimal conversion specification.
-      </para>
-      <programlisting language="ocaml">
-# printf &quot;Hello %v&quot; 1;;
-Characters 7-17:
-  printf &quot;Hello %v&quot; 1;;
-         ^^^^^^^^^^
-Error: Bad conversion %v, at char number 6 in format string ``Hello %v''
-# printf &quot;Hello %d&quot; 1.;;
-Characters 18-20:
-  printf &quot;Hello %d&quot; 1.;;
-                    ^^
-Error: This expression has type float but an expression was expected of type
-         int
-</programlisting>
-      <para>
-        A consequence of strong typing is that the format string must
-        ultimately be a string <emphasis>literal</emphasis>, known at
-        compile time. It can't be computed by the program at runtime.
-      </para>
-      <programlisting language="ocaml">
-# let fmt = &quot;%s&quot;;;
-val fmt : string = &quot;%s&quot;
-# printf fmt &quot;Hello&quot;;;
-Characters 7-10:
-  printf fmt &quot;Hello&quot;;;
-         ^^^
-Error: This expression has type string but an expression was expected of type
-         ('a -&gt; 'b, out_channel, unit) format =
-           ('a -&gt; 'b, out_channel, unit, unit, unit, unit) format6
-</programlisting>
-      <para>
-        Actually, this is not entirely true. The
-        <literal>printf</literal> function takes a format string of type
-        <literal>('a, 'b, 'c) format</literal> and it is only the type
-        conversion from <literal>string</literal> to
-        <literal>format</literal> where the string is required to be a
-        literal.
-      </para>
-      <programlisting language="ocaml">
-# let fmt : ('a, 'b, 'c) format = &quot;Size: %s.\n&quot;;;
-val fmt : (string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;
-# printf fmt &quot;small&quot;;;
-Size: small
-- : unit = ()
-</programlisting>
-    </sect2>
-    <sect2 id="output-to-channels-strings-and-buffers">
-      <title>Output to channels, strings, and buffers</title>
-      <para>
-        The function <literal>printf</literal> prints to the standard
-        output channel <literal>stdout</literal>. There are alse several
-        variations.
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            <literal>eprintf format arg1 ... argN</literal>. Print to
-            the standard error channel <literal>stderr</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>fprintf channel format arg1 ... argN</literal>.
-            Print to the channel <literal>channel</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>sprintf format arg1 ... argN</literal>. Produce a
-            string as output.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>bprintf buffer format arg1 ... argN</literal>.
-            Print to a string buffer <literal>buffer</literal> of type
-            <literal>Buffer.t</literal>.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <programlisting language="ocaml">
-# sprintf &quot;The number is %10d.&quot; 123;;
-- : string = &quot;The number is        123.&quot;
-# let buf = Buffer.create 32;;
-val buf : Buffer.t = &lt;abstr&gt;
-# bprintf buf &quot;%s\n&quot; &quot;First line&quot;;;
-- : unit = ()
-# bprintf buf &quot;%20s.\n&quot; &quot;Second line&quot;;;
-- : unit = ()
-# Buffer.contents buf;;
-- : string = &quot;First line\n         Second line.\n&quot;
-</programlisting>
-    </sect2>
-    <sect2 id="formatted-input-with-scanf">
-      <title>Formatted input with Scanf</title>
-      <para>
-        The <literal>scanf</literal> function can be used for reading
-        input, similar to <literal>printf</literal>. The general form
-        takes a format string and a &quot;receiver&quot; function that
-        is applied to the input. The format string contains literal
-        characters, which must be read literally, and conversion
-        specifications similar to <literal>printf</literal>. The result
-        of the receiver function is returned as the result of
-        <literal>scanf</literal>.
-      </para>
-      <programlisting language="ocaml">
-# scanf &quot;%d&quot; (fun i -&gt; i);;
-1871
-- : int = 1871
-</programlisting>
-      <para>
-        For another example, consider the parsing a date string that
-        might be in one of two forms, <emphasis>month day,
-        year</emphasis> or <emphasis>month/day/year</emphasis>. The
-        <literal>scanf</literal> functions raise the exception
-        <literal>Scan_failure</literal> on error, so we can read a date
-        string by trying both kinds of format.
-      </para>
-      <programlisting language="ocaml">
-# type month = String of string | Int of int;;
-type month = String of string | Int of int
-# let scan_date_string s =
-    try
-      sscanf s &quot;%s %d, %d&quot; (fun month day year -&gt;
-             year, String month, day)
-    with Scan_failure _ | End_of_file -&gt;
-      sscanf s &quot;%d/%d/%d&quot; (fun month day year -&gt;
-             year, Int month, day);;
-val scan_date_string : string -&gt; int * month * int = &lt;fun&gt;
-# scan_date_string &quot;May 3, 1921&quot;;;
-- : int * month * int = (1921, String &quot;May&quot;, 3)
-# scan_date_string &quot;10/11/2001&quot;;;
-- : int * month * int = (2001, Int 10, 11)
-# scan_date_string &quot;May 3&quot;;;
-Exception:
-Scanf.Scan_failure
- &quot;scanf: bad input at char number 0: ``character 'M' is not a decimal digit''&quot;.
-</programlisting>
-    </sect2>
-  </sect1>
-  <sect1 id="summary">
-    <title>Summary</title>
-    <para>
-      The OCaml language supports a fairly standard imperative
-      programming model, with looping, assignment, mutable arrays,
-      records, and objects. If desired, we can write programs that
-      correspond directly to what we would have written in some other
-      imperative language like C or Java. Of course, doing so is really
-      not the best match -- if you want to write imperative programs,
-      you should probably use an imperative programming language.
-    </para>
-    <para>
-      However, there are times when imperative programming might provide
-      efficiency (as with lazy evaluation, or memoization), or you might
-      require techniques or data structures that are traditional
-      imperative (like graphs represented with adjacency lists), and in
-      these cases OCaml usually shines. Used with discretion, imperative
-      programming can lead to smaller, simpler programs.
-    </para>
-  </sect1>
 </chapter><chapter id="object-oriented-programming">
   <title>Object Oriented Programming</title>
   <para>
@@ -10565,10 +10131,10 @@ Point: 10
       by modifying existing methods.
     </para>
     <para>
-      In OCaml, class definitions must be defined as top-level
-      statements in a module. A class is not an object, and a class
-      definition is not an expression. The syntax for a class definition
-      uses the keyword <literal>class</literal>.
+      In OCaml, class definitions must be defined as toplevel statements
+      in a module. A class is not an object, and a class definition is
+      not an expression. The syntax for a class definition uses the
+      keyword <literal>class</literal>.
     </para>
     <programlisting language="ocaml">
 # class point =
@@ -13341,8 +12907,8 @@ let run_many_searches =
         Another alternative is to run an Async function in a separate
         system thread. You can do this by wrapping the function in the
         <literal>Async.Thread_safe.block_on_async_exn</literal>. The
-        <literal>utop</literal> top-level does this automatically for
-        you if you attempt to evaluate an Async function interactively.
+        <literal>utop</literal> toplevel does this automatically for you
+        if you attempt to evaluate an Async function interactively.
       </para>
       </note>
     </sect2>
@@ -13462,7 +13028,7 @@ val - : string Deferred.t = &lt;abstr&gt;
       Async threads can be evaluated from the toplevel by wrapping them
       in <literal>Thread_safe.block_on_async_exn</literal>, which spawns
       a system thread that waits until a result is available. The
-      <literal>utop</literal> top-level automatically detects
+      <literal>utop</literal> toplevel automatically detects
       <literal>Deferred.t</literal> types that are entered interactively
       and wraps them in this function for you automatically.
     </para>
@@ -13475,7 +13041,7 @@ val fn : unit -&gt; string Deferred.t = &lt;abstr&gt;
 - : string = &quot;5&quot;
 </programlisting>
     <para>
-      In the second evaluation of <literal>fn</literal>, the top-level
+      In the second evaluation of <literal>fn</literal>, the toplevel
       detected the return type of a future and evaluated the result into
       a concrete string.
     </para>
@@ -13693,7 +13259,7 @@ val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&
   </para>
   <note>
   <title>
-  Using <literal>bin_prot</literal> in the top-level
+  Using <literal>bin_prot</literal> in the toplevel
   </title>
   <para>
     The <literal>bin_prot</literal> syntax extension isn't activated by
@@ -13708,7 +13274,7 @@ val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&
     (with <literal>;;</literal> to finish the line) instead. The
     extension is activated by putting <literal>with bin_io</literal>
     after the type declaration. This looks a bit unsightly in the
-    top-level because of all the definitions that are generated. We'll
+    toplevel because of all the definitions that are generated. We'll
     elide those definitions in the book, but you can see them for
     yourself in the toplevel.
   </para>
@@ -17888,8 +17454,8 @@ immutable: 2.6186s (19073 minor collections)
         </tgroup>
       </informaltable>
     </sect2>
-    <sect2 id="the-ocaml-top-level-loop">
-      <title>The <literal>ocaml</literal> top-level loop</title>
+    <sect2 id="the-ocaml-toplevel-loop">
+      <title>The <literal>ocaml</literal> toplevel loop</title>
       <para>
       </para>
     </sect2>
@@ -17952,8 +17518,8 @@ immutable: 2.6186s (19073 minor collections)
     </listitem>
     <listitem>
       <para>
-        The <literal>utop</literal> interactive top-level, a modern
-        interactive top-level with command history and tab completion.
+        The <literal>utop</literal> interactive toplevel, a modern
+        interactive toplevel with command history and tab completion.
       </para>
     </listitem>
   </itemizedlist>
@@ -18336,7 +17902,7 @@ $ opam install utop
       </para>
       <para>
         The <literal>utop</literal> tool provides a convenient
-        interactive top-level, with full command history, command macros
+        interactive toplevel, with full command history, command macros
         and module name completion. The <literal>~/.ocamlinit</literal>
         file in your home directory initialises <literal>utop</literal>
         with common libraries and syntax extensions, so you don't need
