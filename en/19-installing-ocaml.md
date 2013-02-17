@@ -145,31 +145,10 @@ And on MacPorts, install it like this:
 $ port install opam
 ```
 
-#### Linux
+### Debian Linux
 
-<note>
-<title>Note to reviewers</title>
-
-The OPAM instructions will be simplified when integrated upstream into Debian
-and Fedora, which is ongoing.  Until then, we're leaving source-code installation
-instructions here. Please leave a comment with any amended instructions you
-encounter
-
-</note>
-
-On Debian Linux, you must currently install the latest OPAM release from source.
-Navigate to the OPAM [homepage](https://github.com/OCamlPro/opam/tags) and download
-the latest version (we'll assume `0.9.2` for now, but pick the latest one).
-
-```
-$ curl -OL https://github.com/OCamlPro/opam/archive/0.9.2.tar.gz
-$ tar -zxvf 0.9.2.tar.gz
-$ cd opam-0.9.2
-$ ./configure && make
-$ sudo make install
-```
-
-There are experimental binary packages available for Debian Wheezy/amd64. Just add the following line to your `/etc/apt/sources.list`:
+There are experimental binary packages available for Debian Wheezy/amd64. Just
+add the following line to your `/etc/apt/sources.list`:
 
 ```
 deb http://www.recoil.org/~avsm/ wheezy main
@@ -184,9 +163,37 @@ into Debian mainline.
 # apt-get install opam
 ```
 
-Fedora/RHEL: TODO
+<note>
+<title>Note to reviewers</title>
 
-Arch Linux: TODO
+The OPAM instructions will be simplified when integrated upstream into Debian
+and Fedora, which is ongoing.  Until then, we're leaving source-code installation
+instructions here. Please leave a comment with any amended instructions you
+encounter
+
+</note>
+
+If the binary packages aren't suitable, you need to install the latest OPAM
+release from source.  The distribution only requires the OCaml compiler
+to be installed, so this should be pretty straightforward. Download the
+latest version, which is always marked with a `stable` tag on the project
+[homepage](https://github.com/OCamlPro/opam/tags).
+
+```
+$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
+$ tar -zxvf latest.tar.gz
+$ cd opam-latest
+$ ./configure && make
+$ sudo make install
+```
+
+### Fedora/RHEL
+
+ TODO
+
+### Arch Linux
+
+TODO
 
 ## Setting up OPAM
 
