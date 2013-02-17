@@ -1016,18 +1016,32 @@ let (:=) r x = r.contents <- x
 Here, `!` and `:=` are infix operators that we're defining, where the
 parenthetical syntax is what marks them as such.
 
-Even though a `ref` is just another record type, it's worthy of note
-because it is the standard way of simulating a traditional mutable
-variable from other languages.
+Even though a `ref` is just another record type, it's notable because
+it is the standard way of simulating the traditional mutable variable
+you'll find in most imperative languages.  For example, if we wanted
+to write an imperative loop to sum over the elements of an array, we
+could do it as follows, using the function `List.iter` to call a
+simple function on every element of a list, and a ref to accumulate
+the results.
+
+```ocaml
+# let sum list =
+    let sum = ref 0 in
+    List.iter list ~f:(fun x -> sum := !sum + x);
+    !sum
+```
+
+This isn't the most idiomatic (or the fastest) way to sum up a list,
+but it shows how you can use a ref in place of a mutable variable.
 
 ### For and while loops
 
 Along with mutable data structures, OCaml gives you constructs like
-`while` and `for` loops for interacting with them.  Here, for example,
-is a piece of imperative code for permuting an array.  Here, we use
-the `Random` module as our source of randomness.  (`Random` starts out
-with a deterministic seed, but you can call `Random.self_init` to get
-a new random seed chosen.)
+while and for loops for interacting with them.  Here, for example, is
+some code that uses a for loop for permuting an array.  We use the
+`Random` module as our source of randomness.  `Random` starts out with
+a deterministic seed, but you can call `Random.self_init` to choose a
+new seed.
 
 ```ocaml
 # let permute ar =
@@ -1043,9 +1057,11 @@ a new random seed chosen.)
 val permute : 'a array -> unit = <fun>
 ```
 
-Note that the semi-colon after the first array assignment doesn't
-terminate the scope of the let-binding, so the variable `j` remains in
-scope until the end of the body of the for loop.
+From a syntactic perspective, you should note the keywords that
+distinguish a for loop: `for`, `to`, `do` and `done`.  Note also that
+the semi-colon after the first array assignment doesn't terminate the
+scope of the let-binding, so the variable `j` remains in scope until
+the end of the body of the for loop.
 
 Here's an example run of this code.
 
@@ -1075,7 +1091,7 @@ Here's the code, which you can save in a file called `sum.ml`.
 open Core.Std
 
 let rec read_and_accumulate accum =
-  let line = In_channel.input_line stdin in
+  let line = In_channel.input_line In_channel.stdin in
   match line with
   | None -> accum
   | Some x -> read_and_accumulate (accum +. Float.of_string x)
@@ -1085,21 +1101,19 @@ let () =
 ```
 
 This is our first use of OCaml's input and output routines.  The
-function `read_and_accumulate` uses `In_channel.input_line` to read in
-lines one by one from the standard input, adding each number to its
-accumulated sum as it goes.  Note that `input_line` returns an
-optional value, with `None` indicating the end of the input.  Note
-that `read_and_accumulate` is a recursive function, invoking itself to
-read the next line, until the last line is reached.
+function `read_and_accumulate` is a recursive function that uses
+`In_channel.input_line` to read in lines one by one from the standard
+input, invoking itself at each iteration with its updated accumulated
+sum.  Note that `input_line` returns an optional value, with `None`
+indicating the end of the input.  
 
 After `read_and_accumulate` returns, the total needs to be printed.
 This is done using the `printf` command, which provides support for
 type-safe format strings, similar to what you'll find in a variety of
 languages.  The format string is parsed by the compiler and used to
 determine the number and type of the remaining arguments that are
-required for `printf`.  In this case, there is a single formatting
-directive, `%F`, so `printf` expects one additional argument of type
-`float`.
+required.  In this case, there is a single formatting directive, `%F`,
+so `printf` expects one additional argument of type `float`.
 
 ### Compiling and running
 
