@@ -45,13 +45,14 @@ ideal.  While it's well implemented, it is really intended for use within the
 compiler itself, and covers only a small subset of the functionality you expect
 for more general-purpose use.
 
-But all is not lost!  There is an effective alternative to the OCaml standard
-library called Core.  Jane Street, a company that has been using OCaml for
-nearly a decade, developed Core for its own internal use, but it was designed
-from the start with an eye towards being a general-purpose standard library.
-Core is also distributed with syntax extensions which provide essential new
-functionality to OCaml; and there are additional libraries such as the `Async`
-network communications library that provide even more useful functionality.
+But all is not lost!  There is an effective alternative to the OCaml
+standard library called Core.  Jane Street, a company that has been
+using OCaml for more than a decade, developed Core for its own
+internal use, but it was designed from the start with an eye towards
+being a general-purpose standard library.  Core is also distributed
+with syntax extensions which provide essential new functionality to
+OCaml; and there are additional libraries such as the `Async` network
+communications library that provide even more useful functionality.
 
 ### The OCaml Platform
 
@@ -107,13 +108,14 @@ computer systems.
 Real World OCaml is split into three parts and appendices:
 
 * Part I covers the basic concepts you'll need to know when building
-OCaml programs.  You won't need to memorise all of this (objects, for example,
-are used rarely in practise), but understanding the concepts and examples is
-important.  This part opens up with a guided tour to give you a quick
-overview of the language.  It then moves onto modules, functors and objects,
-which may take some time to digest.  Persevere though, as while these concepts
-may be difficult initially, they will stand you in good stead even when
-switching to other languages (many of which have drawn inspiration from ML).
+OCaml programs.  You won't need to memorise all of this (objects, for
+example, are used rarely in practise), but understanding the concepts
+and examples is important.  This part opens up with a guided tour to
+give you a quick overview of the language.  It then moves onto
+modules, functors and objects, which may take some time to digest.
+Persevere though; even thought these concepts may be difficult at
+first, they will put you in good stead even when switching to other
+languages, many of which have drawn inspiration from ML.
 
 * Part II builds on the basics to construct more complete examples.  This
 is where you'll pick up some useful techniques for building networked systems,
