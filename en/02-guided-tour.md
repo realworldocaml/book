@@ -171,13 +171,20 @@ and that the remaining two arguments are integers.  Here's an example
 of this function in action.
 
 ```ocaml
-# let even x = x mod 2 = 0 ;;
+# let even x =
+    x mod 2 = 0 ;;
 val even : int -> bool = <fun>
 # sum_if_true even 3 4;;
 - : int = 4
 # sum_if_true even 2 4;;
 - : int = 6
 ```
+
+Note that in the definition of `even` we used `=` in two different
+ways: once as an equality test, when comparing `x mod 2` to `0`; and
+once as the part of the let binding that separates the thing being
+defined from its definition.  These two uses of `=` are basically
+unrelated.
 
 ### Type inference
 
