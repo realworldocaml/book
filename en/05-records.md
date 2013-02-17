@@ -517,19 +517,16 @@ val get_users : Logon.t list -> string list = <fun>
 In addition to generating field accessor functions, `fieldslib` also
 creates a sub-module called `Fields` that contains a first class
 representative of each field, in the form of a value of type
-`Field.t`.  A `Field.t` bundles up the following functionality of a
-record filed:
+`Field.t`.  The `Field` module provides the following functions:
 
-* The name of the field as a string
-* The ability to extract the field
-* The ability to do a functional update of that field
-* The (optional) ability to set the record field, which is present
-  only if the field is mutable.
+* `Field.name`, which returns the name of a field
+* `Field.get`, which returns the content of afield
+* `Field.fset`, which does a functional update of a field
+* `Field.setter`, which returns `None` if the field is not mutable or
+  `Some f` if it is, where `f` is a function for mutating that field.
 
 We can use these first class fields to do things like write a generic
-function for displaying a record field.  The function `show_field`
-takes three arguments: the `Field.t`, a function for converting the
-contents of the field in question to a string, and the record type.
+function for displaying a record field. 
 
 ```ocaml
 # let show_field field to_string record =
@@ -537,6 +534,10 @@ contents of the field in question to a string, and the record type.
 val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string =
   <fun>
 ```
+
+This takes three arguments: the `Field.t`, a function for converting
+the contents of the field in question to a string, and the record
+type.
 
 Here's an example of `show_field` in action.
 
@@ -553,9 +554,9 @@ Here's an example of `show_field` in action.
 - : string = "time: 2012-06-26 18:44:13.807826"
 ```
 
-Note that in the above, the module `Fn` provides a collection of
-useful primitives for dealing with functions, including `Fn.id`, which
-is the identity function.
+(As a side note, the above is our first use of the `Fn` module which
+provides a collection of useful primitives for dealing with functions.
+`Fn.id` is the identity function.)
 
 `fieldslib` also provides higher-level operators, like `Fields.fold`
 and `Fields.iter`, which let you iterate over all the fields of a
