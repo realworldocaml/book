@@ -368,15 +368,22 @@ You can extract the components of a tuple using OCaml's
 pattern-matching syntax. For example:
 
 ```ocaml
-# let (x,y) = tup;;
+# let (x,y) = a_tuple;;
 val x : int = 3
 val y : string = "three"
 ```
 
 Here, the `(x,y)` on the left-hand side of the `let` binding is the
 pattern.  This pattern lets us mint the new variables `x` and `y`,
-each bound to different components of the value being matched.  Note
-that the same syntax is used both for constructing and for
+each bound to different components of the value being matched, which
+can now be used in subsequent expressions.
+
+```ocaml
+# x + String.length y;;
+- : int = 8
+```
+
+Note that the same syntax is used both for constructing and for
 pattern-matching on tuples.
 
 Pattern matching can also show up in function arguments.  Here's a
