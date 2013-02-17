@@ -391,6 +391,9 @@ fuss.
 ;;
 ```
 
+The `**` operator used above is for raising a floating-point number to
+a power.
+
 This is just a first taste of pattern matching.  Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
 
