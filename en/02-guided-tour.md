@@ -308,7 +308,7 @@ that are caught at run-time.  It's better to catch errors as early as
 possible in the development process, and compilation time is best of
 all.
 
-Working in the top-level somewhat obscures the difference between
+Working in the toplevel somewhat obscures the difference between
 run-time and compile time errors, but that difference is still there.
 Generally, type errors, like this one:
 
@@ -649,7 +649,7 @@ duplicates.
 
 Again, the first arm of the match is the base case, and the second is
 the inductive.  Unfortunately, this code has a problem.  If you type
-it into the top-level, you'll see this error:
+it into the toplevel, you'll see this error:
 
 ```
 Warning 8: this pattern-matching is not exhaustive.

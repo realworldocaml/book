@@ -47,7 +47,7 @@ Extension  Purpose
 .cmx       Contains extra information for linking and cross-module optimization of the object file.
 .cmxa/.a   Library of `cmx` and `o` units, stored in the `cmxa` and `a` files respectively.
 
-### The `ocaml` top-level loop
+### The `ocaml` toplevel loop
 
 ## The Findlib compiler frontend
 

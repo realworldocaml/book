@@ -15,7 +15,7 @@ fast serialization in a compact binary format.  We'll also introduce the
 Core `Bigstring` library for handling large binary strings efficiently during this chapter.
 
 <note>
-<title>Using `bin_prot` in the top-level</title>
+<title>Using `bin_prot` in the toplevel</title>
 
 The `bin_prot` syntax extension isn't activated by default in the toplevel, but is easily available
 if you add this to your `~/.ocamlinit` file:
@@ -26,7 +26,7 @@ if you add this to your `~/.ocamlinit` file:
 
 You can also just type this in directly into `utop` (with `;;` to finish the line) instead.
 The extension is activated by putting `with bin_io` after the type declaration.
-This looks a bit unsightly in the top-level because of all the definitions that are
+This looks a bit unsightly in the toplevel because of all the definitions that are
 generated.  We'll elide those definitions in the book, but you can see them for yourself in the toplevel.
 
 </note>
