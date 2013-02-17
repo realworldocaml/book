@@ -955,7 +955,8 @@ Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
 for the return value of a function like `update` that operates by side
 effect rather than by returning a value, and for the argument to a
 function like `create` that doesn't require any information to be
-passed into it in order to run.
+passed into it in order to run.  This is similar to the role that
+`void` plays in languages like C and Java.
 
 Here's an example of `create` and `update` in action.
 
