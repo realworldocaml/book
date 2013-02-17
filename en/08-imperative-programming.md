@@ -1004,19 +1004,21 @@ Time: 2.14601ms
 This is about ten thousand times faster than our original
 implementation.
 
-## Input and output (fix this chapter heading)
+## Input and Output
 
-Input and output I/O is another kind of imperative operation, where the purpose
-is to either read input from a file, stream, or device, _consuming_ the input by
-side-effect; or write output to a file, stream, or device, _modifying_ the
-output by side-effect.  There are several I/O libraries in OCaml.  There is the
-basic builtin I/O library in the `Pervasives` module, and there are moe advanced
-I/O libraries in the `Unix` and `Async` modules.  Let's look at the basic
+Input and output is another kind of imperative operation, where the
+purpose is to either read input from a file, stream, or device,
+_consuming_ the input by side-effect; or write output to a file,
+stream, or device, _modifying_ the output by side-effect.  There are
+several I/O libraries in OCaml.  There is the basic builtin I/O
+library in the `Pervasives` module, and there are moe advanced I/O
+libraries in the `Unix` and `Async` modules.  Let's look at the basic
 library -- the advanced libraries will be described elsewhere.
 
-For basic I/O OCaml models input and output with _channels_.  An `in_channel` is
-used for reading input, and and `out_channel` for producing output.  Each OCaml
-process has three standard channels, similar to the three standard files in Unix.
+For basic I/O OCaml models input and output with _channels_.  An
+`in_channel` is used for reading input, and and `out_channel` for
+producing output.  Each OCaml process has three standard channels,
+similar to the three standard files in Unix.
 
 * `stdin : in_channel`.  The "standard input" channel.  By default, input comes
   from the terminal, which handles keyboard input.
@@ -1066,18 +1068,15 @@ printing the result to `stdout`.
 
 ```ocaml
 # let collate_input () =
-   let rec read_input items =
-      let item = try Some (read_int ()) with End_of_file -> None in
-      match item with
-       | Some i -> read_input (i :: items)
-       | None -> items
-   in
-   let items = read_input [] in
-   let sorted = List.sort (-) items in
-   List.iter (fun i -> print_int i; print_char ' ') sorted;
-   print_string "\n";;
+    In_channel.input_lines stdin
+    |> List.map ~f:Int.of_string
+    |> List.sort ~cmp:Int.compare
+    |> List.map ~f:Int.to_string
+    |> String.concat ~sep:" "
+    |> print_endline
+  ;;
 val collate_input : unit -> unit = <fun>
-#   collate_input ();;
+# collate_input ();;
 8
 56
 2
