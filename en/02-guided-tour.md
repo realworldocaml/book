@@ -485,6 +485,19 @@ The bracket notation for lists is really just syntactic sugar for
 - : int list = [1; 2; 3]
 ```
 
+The `::` operator can only be used for adding one element to the front
+of the list.  There's also a list concatenation operator, `@`, which
+can concatenate two lists.
+
+```ocaml
+# [1;2;3] @ [4;5;6];;
+- : int list = [1; 2; 3; 4; 5; 6]
+```
+
+It's important to remember that this is not a constant-time operation.
+Concatenating two lists takes time proportional to the length of the
+first list.
+
 #### List patterns using `match`
 
 The elements of a list can be accessed through pattern-matching.  List
