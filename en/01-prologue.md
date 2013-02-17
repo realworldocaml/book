@@ -9,15 +9,18 @@ how you think about programming and software design.
 
 But not all ideas about how to design a programming language are created equal.
 Over the last 40 years, a few key language features have emerged that together
-form a kind of sweet-spot in language design.  These features include
+form a kind of sweet-spot in language design.  These features include:
 
-* Garbage collection
-* First-class and higher-order functions
-* Static type-checking
-* Parametric polymorphism
-* Support for programming with immutable values
-* Algebraic datatypes and pattern-matching
-* Type inference
+* _Garbage collection_ for automatic memory management, now a feature of almost
+every modern high-level language.
+* _Higher-order functions_ that can be passed around as first-class values, and seen in
+Javascript or Scala.
+* _Static type-checking_ to reduce run-time errors, such as Java class interfaces or
+Objective-C methods.
+* _Generics_ to enable abstractions to be constructed across different datatypes, available in Java and .NET.
+* _Immutable data structures_ that cannot be destructively updated, famously enforced in Haskell but also a common feature of many distributed big data frameworks.
+* _Algebraic datatypes_ and pattern matching to describe values more precisely, available in Miranda, F# and Standard ML.
+* _Automatic type inference_ to avoid having to laboriously define the type of every single variable in a program and have it inferred based on how a value is used.
 
 Some of you will know and love these features, and others will be completely
 new to them.  Most of you will have seen _some_ of them in other languages that
