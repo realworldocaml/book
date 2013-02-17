@@ -995,15 +995,26 @@ val x : int ref = {contents = 0}
 - : int = 0
 # x := !x + 1 ;;   (* assignment, i.e., x.contents <- ... *)
 - : unit = ()
-# incr x ;;        (* increment, i.e., x := !x + 1 *)
-- : unit = ()
 # !x ;;
 - : int = 2
 ```
 
-A ref is really just an example of a mutable record, but in practice,
-it's the standard way of dealing with a single mutable value in a
-computation.
+The definition of all this is quite straightforward.  Here is the
+complete implementation of the `ref` type.  The `'a` before the ref
+indicates that the `ref` type is polymorphic, in the same way that
+lists are polymorphic, meaning it can contain values of any type.
+
+```ocaml
+type 'a ref = { mutable contents : 'a }
+
+let ref x = { contents = x }
+let (!) r = r.contents
+let (:=) r x = r.contents <- x
+```
+
+Even though a `ref` is just another record type, it's worthy of note
+because it is the standard way of simulating a traditional mutable
+variable from other languages.
 
 ### For and while loops
 
