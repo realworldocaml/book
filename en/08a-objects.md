@@ -247,7 +247,7 @@ In object-oriented programming, a class is a "recipe" for creating
 objects.  The recipe can be changed by adding new methods and fields,
 or it can be changed by modifying existing methods.
 
-In OCaml, class definitions must be defined as top-level statements in
+In OCaml, class definitions must be defined as toplevel statements in
 a module.  A class is not an object, and a class definition is not an
 expression.  The syntax for a class definition uses the keyword
 `class`.

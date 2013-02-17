@@ -16,7 +16,7 @@ To work through Real World OCaml, you'll need three major components installed:
 
 * The OCaml compiler itself.
 * The OPAM source package manager, through which we'll install several extra libraries.
-* The `utop` interactive top-level, a modern interactive top-level with command history and tab completion.
+* The `utop` interactive toplevel, a modern interactive toplevel with command history and tab completion.
 
 Let's get started with how to install OCaml on various operating systems, and
 we'll get OPAM and `utop` running after that.
@@ -303,7 +303,7 @@ life much easier when developing OCaml code!
 
 TODO: explain OCamlfind here.
 
-The `utop` tool provides a convenient interactive top-level, with full command
+The `utop` tool provides a convenient interactive toplevel, with full command
 history, command macros and module name completion.  The `~/.ocamlinit` file in
 your home directory initialises `utop` with common libraries and syntax
 extensions, so you don't need to type them in every time.  A good default you

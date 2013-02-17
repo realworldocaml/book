@@ -104,7 +104,7 @@ end
 A `Result.t` is essentially an option augmented with the ability to
 store other information in the error case.  Like `Some` and `None` for
 options, the constructors `Ok` and `Error` are promoted to the
-top-level by `Core.Std`.  As such, we can write:
+toplevel by `Core.Std`.  As such, we can write:
 
 ```ocaml
 # [ Ok 3; Error "abject failure"; Ok 4 ];;

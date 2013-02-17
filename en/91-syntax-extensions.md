@@ -482,7 +482,7 @@ representation.
 Bin_prot is a library designed to address these issues by providing
 fast serialization in a compact binary format.  Kicking off the syntax
 extension is done by putting `with bin_io`.  (This looks a bit
-unsightly in the top-level because of all the definitions that are
+unsightly in the toplevel because of all the definitions that are
 generated.  We'll elide those definitions here, but you can see it for
 yourself in the toplevel.)
 

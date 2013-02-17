@@ -491,7 +491,7 @@ module <name> : <signature> = <implementation>
 ```
 
 We could have written this slightly differently, by giving the
-signature its own top-level `module type` declaration, making it
+signature its own toplevel `module type` declaration, making it
 possible to in a lightweight way create multiple distinct types with
 the same underlying implementation.
 
@@ -558,7 +558,7 @@ look at an identifier and figure out where it's defined.
 
 Here's some general advice on how to deal with opens.
 
-  * Opening modules at the top-level of a module should be done quite
+  * Opening modules at the toplevel of a module should be done quite
     sparingly, and generally only with modules that have been
     specifically designed to be opened, like `Core.Std` or
     `Option.Monad_infix`.
@@ -588,7 +588,7 @@ Here's some general advice on how to deal with opens.
 
     Because the module name `C` only exists for a short scope, it's
     easy to read and remember what `C` stands for.  Rebinding modules
-    to very short names at the top-level of your module is usually a
+    to very short names at the toplevel of your module is usually a
     mistake.
 
   * If you do need to do an open, it's better to do a _local open_.

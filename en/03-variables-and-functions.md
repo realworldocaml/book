@@ -19,11 +19,11 @@ let <identifier> = <expr>
 
 As we'll see when we get to the module system in
 [xref](#files-modules-and-programs), this same syntax is used for
-top-level definitions in a module.
+toplevel definitions in a module.
 
 Every variable binding has a _scope_, which is the portion of the code
-that can refer to that binding.  The scope of a top-level let binding
-is everything that follows it in the top-level session (or in the
+that can refer to that binding.  The scope of a toplevel let binding
+is everything that follows it in the toplevel session (or in the
 remainder of the module).
 
 Here's a simple example.
@@ -60,7 +60,7 @@ val dashed_languages : string = "OCaml-Perl-C++-C"
 
 Note that the scope of `language_list` is just the expression
 `String.concat ~sep:"-" language_list`, and is not available at the
-top-level, as we can see if we try to access it now.
+toplevel, as we can see if we try to access it now.
 
 ```ocaml
 # language_list;;

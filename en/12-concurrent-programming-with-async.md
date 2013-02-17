@@ -161,7 +161,7 @@ The `Deferred.List` module lets you specify exactly how to map over a collection
 When you run the search example, you'll notice that the application doesn't terminate even when all of the searches are complete. The Async scheduler doesn't terminate by default, and so most applications will listen for a signal to exit or simply use `CTRL-C` to interrupt it from a console.
 
 Another alternative is to run an Async function in a separate system
-thread. You can do this by wrapping the function in the `Async.Thread_safe.block_on_async_exn`.  The `utop` top-level does this automatically for you if you attempt to evaluate an Async function interactively.
+thread. You can do this by wrapping the function in the `Async.Thread_safe.block_on_async_exn`.  The `utop` toplevel does this automatically for you if you attempt to evaluate an Async function interactively.
 
 </note>
 
@@ -252,7 +252,7 @@ future value.  In the second example, the future value of `x` is mapped to
 
 Async threads can be evaluated from the toplevel by wrapping them in
 `Thread_safe.block_on_async_exn`, which spawns a system thread that waits until
-a result is available.  The `utop` top-level automatically detects `Deferred.t`
+a result is available.  The `utop` toplevel automatically detects `Deferred.t`
 types that are entered interactively and wraps them in this function for you
 automatically.
 
@@ -265,7 +265,7 @@ val fn : unit -> string Deferred.t = <abstr>
 - : string = "5"
 ```
 
-In the second evaluation of `fn`, the top-level detected the return type of
+In the second evaluation of `fn`, the toplevel detected the return type of
 a future and evaluated the result into a concrete string.
 
 (_avsm_: this utop feature not actually implemented yet for Async, but works for Lwt)
