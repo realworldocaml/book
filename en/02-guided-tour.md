@@ -85,12 +85,13 @@ at you.
   parenthesis and commas, which is more like the UNIX shell than C or
   Java.
 - OCaml carefully distinguishes between `float`, the type for floating
-  point numbers and `int`.  The types have different literals (`6.`
-  instead of `6`) and different infix operators (`+.` instead of `+`),
-  and OCaml doesn't do any automated casting between the types.  This
-  can be a bit of a nuisance, but it has its benefits, since it
-  prevents some kinds of bugs that arise in other languages due to
-  unexpected differences between the behavior of `int` and `float`.
+  point numbers and `int` the type for integers.  The types have
+  different literals (`6.` instead of `6`) and different infix
+  operators (`+.` instead of `+`), and OCaml doesn't do any automated
+  casting between the types.  This can be a bit of a nuisance, but it
+  has its benefits, since it prevents some kinds of bugs that arise in
+  other languages due to unexpected differences between the behavior
+  of `int` and `float`.
 
 We can also a create variable to name the value of a given expression,
 using a `let` binding.
