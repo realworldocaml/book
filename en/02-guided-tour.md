@@ -36,7 +36,7 @@ Then create a file called `~/.ocamlinit` in your home directory:
 #use "topfind"
 #camlp4o
 #thread
-#require "core.top";;
+#require "core.top"
 ```
 
 You can exit `utop` by pressing `control-D` and return.  For complete
