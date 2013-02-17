@@ -571,7 +571,9 @@ val my_favorite_language : string list -> string = <fun>
 
 Note that we included a comment in the above code.  OCaml comments are
 bounded by `(*` and `*)`, and can be nested arbitrarily and cover
-multiple lines.
+multiple lines.  There's no equivalent of the C-style single line
+comment that is prefixed by `//` --- all comments must be bounded on
+both sides.
 
 The first pattern, `first :: the_rest`, covers the case where
 `languages` has at least one element, since every list except for the
