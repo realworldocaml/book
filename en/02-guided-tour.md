@@ -599,19 +599,35 @@ elements of a list.
 ```ocaml
 # let rec sum l =
     match l with
-    | [] -> 0
-    | hd :: tl -> hd + sum tl
+    | [] -> 0                   (* base case *)
+    | hd :: tl -> hd + sum tl   (* inductive case *)
   ;;
 val sum : int list -> int
-# sum [1;2;3;4;5];;
-- : int = 15
+# sum [1;2;3];;
+- : int = 6
 ```
 
 Note that we had to use the `rec` keyword to allow `sum` to refer to
 itself.  And, as you might imagine, the base case and inductive case
-are different arms of the match.  In particular, the base case is that
-of the empty list, and the inductive case is that of a list of zero or
-more elements.
+are different arms of the match.  
+
+Logically, you can think of the evaluation of a simple recursive
+function like `sum` almost as if it were a mathematical equation whose
+meaning you were unfolding step by step.
+
+```ocaml
+sum [1;2;3]
+1 + sum [2;3]
+1 + (2 + sum [3])
+1 + (2 + (3 + sum []))
+1 + (2 + (3 + 0))
+1 + (2 + 3)
+1 + 5
+6
+```
+
+This suggests a reasonable mental model for what OCaml is actually
+doing to evaluate a recursive function.
 
 We can introduce more complicated list patterns as well.  Here's a
 function for destuttering a list, _i.e._, for removing sequential
