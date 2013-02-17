@@ -311,10 +311,11 @@ run-time and compile time errors, but that difference is still there.
 Generally, type errors, like this one:
 
 ```ocaml
-# 3 + "potato";;
-Characters 4-12:
-  3 + "potato";;
-      ^^^^^^^^
+# let add_potato x =
+     x + "potato";;
+  Characters 28-36:
+       x + "potato";;
+           ^^^^^^^^
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -323,30 +324,20 @@ are compile-time errors, whereas an error that can't be caught by the
 type system, like division by zero, leads to a runtime exception.
 
 ```ocaml
-# 3 / 0;;
+# let is_a_multiple x y =
+     x mod y = 0 ;;
+  val is_a_multiple : int -> int -> bool = <fun>
+# is_a_multiple 8 2;;
+- : bool = true
+# is_a_multiple 8 0;;
 Exception: Division_by_zero.
 ```
 
-One important distinction is that type errors will stop you whether or
-not the offending code is ever actually executed.  Thus, you get an
-error from typing in this code:
-
-```ocaml
-# if 3 < 4 then 0 else 3 + "potato";;
-Characters 25-33:
-  if 3 < 4 then 0 else 3 + "potato";;
-                           ^^^^^^^^
-Error: This expression has type string but an expression was expected of type
-         int
-```
-
-but the following code runs incident, even though it contains a branch
-that would throw an exception if it were ever reached.
-
-```ocaml
-# if 3 < 4 then 0 else 3 / 0;;
-- : int = 0
-```
+The distinction here is that type errors will stop you whether or not
+the offending code is ever actually executed.  Merely defining
+`add_potato` is an error, whereas `is_a_multiple` only fails when it's
+called, and then, only when it's called with an input that triggers
+the exception.
 
 </note>
 
