@@ -291,8 +291,10 @@ leaves you with awkwardly named record fields, and adds needless
 repetition and verbosity to your code.
 
 Another approach is to mint a module for each type.  This is actually
-a broadly useful idiom, providing for each type a namespace within
-which to put related values.  Using this style we would write:
+a broadly useful idiom (and one used quite extensively by Core),
+providing for each type a name-space within which to put related
+values.  When using this style, it is standard practice to name the
+type associated with the module `t`.  Using this style we would write:
 
 ```ocaml
 # module Log_entry = struct
