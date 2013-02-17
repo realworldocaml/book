@@ -20,7 +20,8 @@ try out the examples.
 
 The easiest way to get the examples running is to set up the OPAM
 package manager, which is explained in [xref](#installation). 
-In a nutshell, you need to:
+In a nutshell, you need to have a working C compilation environment
+and the PCRE library installed, and then:
 
 ```
 $ opam init
