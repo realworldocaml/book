@@ -39,8 +39,11 @@ Then create a file called `~/.ocamlinit` in your home directory:
 #require "core.top"
 ```
 
-You can exit `utop` by pressing `control-D` and return.  For complete
-instructions, please refer to [xref](#installation).
+Then type in `utop`, and you'll be in an interactive toplevel environment.
+OCaml phrases are only evaluated when you enter a double semicolon (`;;`), so
+you can split your typing over multiple lines.  You can exit `utop` by pressing
+`control-D` and return. For complete instructions, please refer to
+[xref](#installation).
 
 </note>
 
