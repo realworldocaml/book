@@ -275,7 +275,7 @@ packages that really matter are:
 
 * `core` is the main, well-supported Core distribution from Jane Street.
 * `core_extended` contains a number of experimental, but useful, extension libraries that are under review for inclusion in Core.  We use some of these in places, but much less than Core itself.
-* `async` is the network programming library that we use in Part II to communicate with other hosts. 
+* `async` is the network programming library that we use in Part II to communicate with other hosts.  You can skip this for the initial installation until you get to Part II, if you prefer.
 
 ### Editing Environment
 
@@ -315,7 +315,6 @@ should create for the examples in this book is:
 #thread
 #require "core.top";;
 #require "async";;
-open Core.Std
 ```
 
 When you run `utop` with this initialization file, it should start up with
