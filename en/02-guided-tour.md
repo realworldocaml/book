@@ -5,31 +5,40 @@ small examples that cover most of the major features of the language.
 This should give a sense of what OCaml can do, without getting too
 deep in any one topic.
 
-We'll present this guided tour using the `utop` OCaml toplevel, a
-shell that lets you type in expressions and evaluate them
-interactively.  When you get to the point of running real programs,
-you'll want to leave the toplevel behind, but it's a great tool for
-getting to know the language.
+We'll present this guided tour using the Core standard library and the `utop`
+OCaml toplevel, a shell that lets you type in expressions and evaluate them
+interactively.  When you get to the point of running real programs, you'll want
+to leave the toplevel behind, but it's a great tool for getting to know the
+language.
 
-Make sure you have a working toplevel as you go through this chapter, so
-you can try out the examples as you go.
+Before getting started, do make sure you have a working OCaml installation and
+toplevel as you read through this chapter so you can try out the examples.
 
 <note>
 <title>Installing the interactive top-level</title>
 
-The easiest way to get `utop` is via the OPAM package manager, which
-is explained in [xref](#installation).  You'll need to also have the
-Core standard library installed.  In a nutshell, you need to:
+The easiest way to get the examples running is to set up the OPAM
+package manager, which is explained in [xref](#installation). 
+In a nutshell, you need to:
 
 ```
 $ opam init
 $ opam switch 4.00.1+short-types
-$ opam install utop async core_extended
+$ opam install utop core_extended
 $ eval `opam config -env`
-$ utop
 ```
 
-You can exit `utop` by pressing `control-D` and return.
+Then create a file called `~/.ocamlinit` in your home directory:
+
+```ocaml
+#use "topfind"
+#camlp4o
+#thread
+#require "core.top";;
+```
+
+You can exit `utop` by pressing `control-D` and return.  For complete
+instructions, please refer to [xref](#installation).
 
 </note>
 
