@@ -420,9 +420,9 @@ Error: This expression has type string but an expression was expected of type
 #### The `List` module
 
 Core comes with a `List` module that has a rich collection of
-functions for working with lists.  We can access values from within a
-module by using dot-notation.  Here, for example, is how we compute
-the length of a list.
+functions for working with OCaml's singly-linked list data structure.
+We can access values from within a module by using dot-notation.
+Here, for example, is how we compute the length of a list.
 
 ```ocaml
 # List.length languages;;
