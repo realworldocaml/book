@@ -553,6 +553,10 @@ Here's an example of `show_field` in action.
 - : string = "time: 2012-06-26 18:44:13.807826"
 ```
 
+Note that in the above, the module `Fn` provides a collection of
+useful primitives for dealing with functions, including `Fn.id`, which
+is the identity function.
+
 `fieldslib` also provides higher-level operators, like `Fields.fold`
 and `Fields.iter`, which let you iterate over all the fields of a
 record.  The following function uses `Logon.Fields.iter` and
