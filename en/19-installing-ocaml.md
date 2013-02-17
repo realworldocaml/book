@@ -12,20 +12,19 @@ recompiled.  Source-based package managers automate this process for you and
 make development life much easier.
 
 To work through this book, you'll need three major components installed:
+
 * The OCaml compiler itself.
-* The OPAM source package manager, through which we'll install several add-on
-libraries such as Core and Async.
-* The `utop` top-level, which is a modern interactive top-level with command
-history, module completion and so forth.
+* The OPAM source package manager, through which we'll install several add-on libraries such as Core and Async.
+* The `utop` top-level, which is a modern interactive top-level with command history, module completion and so forth.
 
 Let's get started with how to install OCaml on various operating systems, and
 we'll get OPAM and `utop` running after that.
 
 ## Getting the OCaml compiler
 
-The OCaml compiler is available as a binary distribution on many operating systems,
-and this is the preferred installation route.  We'll describe how to do a manual
-installation too, as a last resort.
+The OCaml compiler is available as a binary distribution on many operating
+systems.  This is the simplest and preferred installation route, but we'll also
+describe how to do a manual installation as a last resort.
 
 ### MacOS X
 
