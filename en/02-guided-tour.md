@@ -1041,7 +1041,7 @@ while and for loops for interacting with them.  Here, for example, is
 some code that uses a for loop for permuting an array.  We use the
 `Random` module as our source of randomness.  `Random` starts out with
 a deterministic seed, but you can call `Random.self_init` to choose a
-new seed.
+new at random.
 
 ```ocaml
 # let permute ar =
@@ -1058,10 +1058,7 @@ val permute : 'a array -> unit = <fun>
 ```
 
 From a syntactic perspective, you should note the keywords that
-distinguish a for loop: `for`, `to`, `do` and `done`.  Note also that
-the semi-colon after the first array assignment doesn't terminate the
-scope of the let-binding, so the variable `j` remains in scope until
-the end of the body of the for loop.
+distinguish a for loop: `for`, `to`, `do` and `done`.  
 
 Here's an example run of this code.
 
