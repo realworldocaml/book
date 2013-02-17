@@ -107,16 +107,17 @@ installation.
 
 ## Getting OPAM
 
-OPAM manages multiple simultaneous OCaml compiler and library
-installations, tracks library versions across upgrades, and recompiles
-dependencies automatically if they get out of date.  It's used throughout
-Real World OCaml as the mechanism to retrieve and use third-party libraries.
+OPAM manages multiple simultaneous OCaml compiler and library installations,
+tracks library versions across upgrades, and recompiles dependencies
+automatically if they get out of date.  It's used throughout Real World OCaml
+as the mechanism to retrieve and use third-party libraries.
 
-Before installing OPAM, make sure that you have the OCaml compiler installed
-as described above.
-Once installed, the entire OPAM database is held in your home directory (normally
-`$HOME/.opam`).  If something goes wrong, just delete this `.opam` directory
-and start over from a clean slate.
+Before installing OPAM, make sure that you have the OCaml compiler installed as
+described above.  Once installed, the entire OPAM database is held in your home
+directory (normally `$HOME/.opam`).  If something goes wrong, just delete this
+`.opam` directory and start over from a clean slate.  If youre using a version
+of OPAM you've installed previously, please ensure you have at least version
+0.9.3 or greater.
 
 <important>
 <title>OCamlfind and OPAM</title>
@@ -134,6 +135,7 @@ Source installation of OPAM will take a minute or so on a modern machine.
 There is a Homebrew package for the latest OPAM:
 
 ```
+$ brew update
 $ brew install opam
 ```
 
@@ -150,7 +152,7 @@ $ port install opam
 
 The OPAM instructions will be simplified when integrated upstream into Debian
 and Fedora, which is ongoing.  Until then, we're leaving source-code installation
-instructions. Please leave a comment with any amended instructions you
+instructions here. Please leave a comment with any amended instructions you
 encounter
 
 </note>
@@ -165,6 +167,21 @@ $ tar -zxvf 0.9.2.tar.gz
 $ cd opam-0.9.2
 $ ./configure && make
 $ sudo make install
+```
+
+There are experimental binary packages available for Debian Wheezy/amd64. Just add the following line to your `/etc/apt/sources.list`:
+
+```
+deb http://www.recoil.org/~avsm/ wheezy main
+```
+
+When this is done, update your packages and install OPAM.  You can ignore the
+warning about unsigned packages, which will disappear when OPAM is upstreamed
+into Debian mainline.
+
+```
+# apt-get update
+# apt-get install opam
 ```
 
 Fedora/RHEL: TODO
