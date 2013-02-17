@@ -63,10 +63,20 @@ module Comment = struct
 
   (* Add start of day, make a milestone number -> name mapping *)
   let milestones =
-    let ms = Lwt_main.run (Github.Monad.run (
-      Github.Milestone.for_repo ~user ~repo ()
-    )) in
-    let ms = List.sort (fun a b -> Github_t.(Pervasives.compare a.milestone_due_on b.milestone_due_on)) ms in
+    let ms = Lwt_main.run (Github.Monad.(run (
+      Github.Milestone.for_repo ~user ~repo ~state:`Open ()
+      >>= fun m ->
+      Github.Milestone.for_repo ~user ~repo ~state:`Closed ()
+      >>= fun m' ->
+      return (m' @ m)
+    ))) in
+    let ms = List.sort (fun a b -> 
+      let open Github_t in
+      match a.milestone_title, b.milestone_title with
+      |"trunk",_ -> -1
+      |_,"trunk" -> 1
+      |_ -> Pervasives.compare a.milestone_due_on b.milestone_due_on
+    ) ms in
     print_endline "Known milestones\n";
     List.fold_left (fun acc m ->
       let open Github_t in
