@@ -497,15 +497,29 @@ code by catching the exception in a narrower scope.
 ```ocaml
 # let lookup_weight ~compute_weight alist key =
     match
-      try Some (List.Assoc.find_exn alist key) with
-      | Not_found -> None
+      try Some (List.Assoc.find_exn alist key)
+      with Not_found -> None
     with
     | None -> 0.
     | Some data -> compute_weight data ;;
+val lookup_weight :
+  compute_weight:('a -> float) ->
+  ('b, 'a) Core.Std.List.Assoc.t -> 'b -> float = <fun>
 ```
 
 At which point, it makes sense to simply use the non-exception
 throwing function, `List.Assoc.find`, instead.
+
+```ocaml
+# let lookup_weight ~compute_weight alist key =
+    match List.Assoc.find alist key with
+    | None -> 0.
+    | Some data -> compute_weight data ;;
+val lookup_weight :
+  compute_weight:('a -> float) ->
+  ('b, 'a) Core.Std.List.Assoc.t -> 'b -> float = <fun>
+```
+
 
 ### Backtraces
 
