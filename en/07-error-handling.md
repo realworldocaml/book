@@ -435,8 +435,10 @@ leading to a file-descriptor leak.
 
 We can fix this using Core's `protect` function.  The basic purpose of
 `protect` is to ensure that the `finally` thunk will be called when
-`f` exits, whether it exited normally or with an exception.  Here's
-how it could be used to fix `load_config`.
+`f` exits, whether it exited normally or with an exception.  This is
+similar to the `try/finally` construct available in many programming
+languages, but it is implemented in a library, rather than being a
+built-in primitive.  Here's how it could be used to fix `load_config`.
 
 ```ocaml
 let load_config filename =
