@@ -385,9 +385,9 @@ from `t`.  We can use OCaml's _functional update_ syntax to do this
 more tersely.  The syntax of a functional update is as follows.
 
 ```ocaml
-{ <record-value> with <field> = <value>;
-                      <field> = <value>;
-                      ...
+{ <record> with <field> = <value>;
+                <field> = <value>;
+                ...
 }
 ```
 
