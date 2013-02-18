@@ -197,19 +197,23 @@ As you write more error handling code in OCaml, you'll discover that
 certain patterns start to emerge.  A number of these common patterns
 been codified in the interfaces of modules like `Option` and `Result`.
 One particularly useful one is built around the function `bind`, which
-is both an ordinary function and an infix operator `>>=`, both with
-the same type signature:
+is both an ordinary function and an infix operator `>>=`.  Here's how
+you can define `bind`.
 
 ```ocaml
-val bind : 'a option -> ('a -> 'b option) -> 'b option
+let bind option f =
+    match option with
+    | None -> None
+    | Some x -> f x
+  ;;
+val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>
 ```
 
-`bind` is a way of sequencing together error-producing functions so
-that the first one to produce an error terminates the computation.  In
-particular, `bind None f` returns `None` without calling `f`, and
-`bind (Some x) f` returns `f x`.  We can use a nested sequence of
-these binds to express a multi-stage computation that can fail at any
-stage.  Here's a rewrite `compute_bounds` in this style.
+As you can see, `bind None f` returns `None` without calling `f`, and
+`bind (Some x) f` returns `f x`.  Perhaps surprisingly, `bind` can be
+used as a way of sequencing together error-producing functions so that
+the first one to produce an error terminates the computation.  Here's
+a rewrite of `compute_bounds` to use a nested series of `bind`s.
 
 ```ocaml
 # let compute_bounds ~cmp list =
