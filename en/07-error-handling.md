@@ -559,8 +559,6 @@ Backtraces can also be obtained at runtime.  In particular,
 `Exn.backtrace` will return the backtrace of the most recently thrown
 exception.
 
-### Exceptions for control flow
-
 ### From exceptions to error-aware types and back again ###
 
 Both exceptions and error-aware types are necessary parts of
@@ -599,3 +597,5 @@ And then we can re-raise that exception:
 # Result.ok_exn (find ["a",1; "b",2] "c");;
 Exception: Key_not_found("c").
 ```
+
+
