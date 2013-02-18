@@ -401,17 +401,19 @@ try <expr> with
 ...
 ```
 
-A `try`/`with` clause would first evaluate `<expr>`, and if that
-evaluation completes without returning an exception, then the value of
-the overall expression is the value of `<expr>`.
+A `try/with` clause first evaluates it's body, `<expr>`.  If no
+exception is thrown, then the result of evaluating the body is what
+the entire `try/with` clause evaluates to.
 
-But if evaluating `<expr>` leads to an exception being thrown, then
-the exception will be fed to the pattern match statements following
-the `with`.  If the exception matches a pattern, then the expression
-on the right hand side of that pattern will be evaluated.  Otherwise,
-the original exception continues up the call stack, to be handled by
-the next outer exception handler, or terminate the program if there is
-none.
+But if the evaluation of the body throws an exception, then the
+exception will be fed to the pattern match statements following the
+`with`.  If the exception matches a pattern, then we consider the
+exception caught, and the `try/with` clause evaluates to the
+expression on the right-hand side of the matching pattern.
+
+Otherwise, the original exception continues up the call stack, to be
+handled by the next outer exception handler.  If the exception is
+never caught, it terminates the program.
 
 ### Cleaning up in the presence of exceptions
 
