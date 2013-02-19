@@ -26,7 +26,6 @@ let from_anil =
   ; "stevej"                  (* TODO Steve Jenson <stevej@fruitless.org> *)
   ; "ray1729"                 (* TODO Ray Miller <ray@1729.org.uk> *)
   ; "pikatchu"                (* TODO julien verlaguet <julien.verlaguet@gmail.com> *)
-
 ]
 
 let from_yminsky =
@@ -35,6 +34,7 @@ let from_yminsky =
   ; "zdancewic"               (* stevez@cis.upenn.edu *)
   ; "bolinfest"               (* mbolin@gmail.com *)
   ; "bnigito"                 (* bnigito@janestreet.com *)
+  ; "roshanjames"             (* TODO rjames@janestreet.com *)
   ]
 
 let from_email = 
