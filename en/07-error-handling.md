@@ -144,7 +144,8 @@ string:
 ```
 
 A more interesting construction message from a performance point of
-view is to construct an `Error.t` from a thunk:
+view is to construct an `Error.t` from a _thunk_, _i.e._, a function
+that takes a single argument of type `unit`.
 
 ```ocaml
 # Error.of_thunk (fun () ->
