@@ -217,9 +217,23 @@ val x : float = 3.5
 val y : int = 100
 ```
 
-This use-case doesn't come up that often.  Most of the time that `and`
-comes into play, it's used to define multiple mutually recursive
-values, which we'll learn about later in the chapter.
+Note that this is just shadowing the definitions of `x` and `y`, not
+mutating anything.
+
+Without this trick, we would need to do something like the following:
+
+```ocaml
+# let tmp = x
+  let x = y
+  let y = tmp;;
+val tmp : int = 100
+val x : float = 3.5
+val y : int = 100
+```
+
+This use-case doesn't come up that often, however.  Most of the time
+that `and` comes into play, it's used to define multiple mutually
+recursive values, which we'll learn about later in the chapter.
 
 Note that when doing a `let`/`and` style declaration, the order of
 execution of the right-hand side of the binds is undefined by the
