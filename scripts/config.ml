@@ -54,6 +54,7 @@ let from_email =
   ; "rgrinberg"               (* TODO Rudi Grinberg <rudi.grinberg@gmail.com> *)
   ; "camlspotter"             (* TODO Jun Furuse <jun.furuse@gmail.com> *)
   ; "davidperrin"             (* TODO David Perrin <david.perrin@virtualpv.co.uk> *)
+  ; "chris-taylor"            (* TODO Chris Taylor <Chris.Taylor@gsacapital.com> *)
 ]
 
 let internal_reviewers =
