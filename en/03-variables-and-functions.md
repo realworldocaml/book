@@ -451,6 +451,11 @@ binding as recursive with the `rec` keyword, as shown in this example:
 val find_first_stutter : 'a list -> 'a option = <fun>
 ```
 
+Note that in the above, the pattern `| [] | [_]` is actually the
+combination of two patterns; `[]`, matching the empty list, and `[_]`,
+matching any single element list.  The `_` is there so we don't have
+to put an explicit name on that single element.
+
 We can also define multiple mutually recursive values by using `let
 rec` and `and` together, as in this (gratuitously inefficient)
 example.
