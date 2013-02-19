@@ -66,6 +66,6 @@ let external_reviewers =
 let allowed_users = function
   | "alpha1" -> internal_reviewers
   | "alpha2" -> external_reviewers
-  | "alpha3" -> internal_reviewers
+  | "alpha3" -> external_reviewers
   | "trunk"  -> authors
   |_ -> authors
