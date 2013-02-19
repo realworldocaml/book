@@ -425,7 +425,8 @@ val abs_diff : int * int -> int = <fun>
 
 OCaml handles this calling convention efficiently as well.  In
 particular it does not generally have to allocate a tuple just for the
-purpose of sending arguments to a tuple-style function.
+purpose of sending arguments to a tuple-style function.  (You can't,
+however, use partial application for this style of function.)
 
 There are small tradeoffs between these two approaches, but most of
 the time, one should stick to currying, since it's the default style
@@ -471,6 +472,24 @@ val is_odd : int -> bool = <fun>
 Note that in the above example, we take advantage of the fact that the
 right hand side of `||` is evaluated lazily, only being executed if
 the left hand side evaluates to false.
+
+OCaml distinguishes between non-recursive definitions (using `let`)
+and recursive definitions (using `let rec`) largely for technical
+reasons: the type-inference algorithm needs to know when a set of
+function definitions are mutually recursive, and for some technical
+reasons that don't apply to a pure language like Haskell, these have
+to be marked explicitly by the programmer.
+
+But this decision has some good effects.  For one thing, recursive
+(and especially mutually recursive) definitions are harder to reason
+about than non-recursive definitions that proceed in order, each
+building on top of what has already been defined.  It's therefore
+useful that, in the absence of an explicit marker, new definitions can
+only build upon ones that were previously defined.
+
+In addition, having a non-recursive form makes it easier to create a
+new definition that extends and supersedes an existing one by
+shadowing it.
 
 ### Prefix and Infix operators ###
 
