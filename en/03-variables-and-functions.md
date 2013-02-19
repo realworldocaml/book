@@ -474,10 +474,6 @@ val is_odd : int -> bool = <fun>
 - : bool Core.Std.List.t = [false; true; false; true; false; true]
 ```
 
-Note that in the above example, we take advantage of the fact that the
-right hand side of `||` is evaluated lazily, only being executed if
-the left hand side evaluates to false.
-
 OCaml distinguishes between non-recursive definitions (using `let`)
 and recursive definitions (using `let rec`) largely for technical
 reasons: the type-inference algorithm needs to know when a set of
