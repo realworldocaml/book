@@ -217,9 +217,23 @@ val x : float = 3.5
 val y : int = 100
 ```
 
-This use-case doesn't come up that often.  Most of the time that `and`
-comes into play, it's used to define multiple mutually recursive
-values, which we'll learn about later in the chapter.
+Note that this is just shadowing the definitions of `x` and `y`, not
+mutating anything.
+
+Without this trick, we would need to do something like the following:
+
+```ocaml
+# let tmp = x
+  let x = y
+  let y = tmp;;
+val tmp : int = 100
+val x : float = 3.5
+val y : int = 100
+```
+
+This use-case doesn't come up that often, however.  Most of the time
+that `and` comes into play, it's used to define multiple mutually
+recursive values, which we'll learn about later in the chapter.
 
 Note that when doing a `let`/`and` style declaration, the order of
 execution of the right-hand side of the binds is undefined by the
@@ -411,7 +425,8 @@ val abs_diff : int * int -> int = <fun>
 
 OCaml handles this calling convention efficiently as well.  In
 particular it does not generally have to allocate a tuple just for the
-purpose of sending arguments to a tuple-style function.
+purpose of sending arguments to a tuple-style function.  (You can't,
+however, use partial application for this style of function.)
 
 There are small tradeoffs between these two approaches, but most of
 the time, one should stick to currying, since it's the default style
@@ -436,6 +451,11 @@ binding as recursive with the `rec` keyword, as shown in this example:
 val find_first_stutter : 'a list -> 'a option = <fun>
 ```
 
+Note that in the above, the pattern `| [] | [_]` is actually the
+combination of two patterns; `[]`, matching the empty list, and `[_]`,
+matching any single element list.  The `_` is there so we don't have
+to put an explicit name on that single element.
+
 We can also define multiple mutually recursive values by using `let
 rec` and `and` together, as in this (gratuitously inefficient)
 example.
@@ -454,9 +474,23 @@ val is_odd : int -> bool = <fun>
 - : bool Core.Std.List.t = [false; true; false; true; false; true]
 ```
 
-Note that in the above example, we take advantage of the fact that the
-right hand side of `||` is evaluated lazily, only being executed if
-the left hand side evaluates to false.
+OCaml distinguishes between non-recursive definitions (using `let`)
+and recursive definitions (using `let rec`) largely for technical
+reasons: the type-inference algorithm needs to know when a set of
+function definitions are mutually recursive, and for some technical
+reasons that don't apply to a pure language like Haskell, these have
+to be marked explicitly by the programmer.
+
+But this decision has some good effects.  For one thing, recursive
+(and especially mutually recursive) definitions are harder to reason
+about than non-recursive definitions that proceed in order, each
+building on top of what has already been defined.  It's therefore
+useful that, in the absence of an explicit marker, new definitions can
+only build upon ones that were previously defined.
+
+In addition, having a non-recursive form makes it easier to create a
+new definition that extends and supersedes an existing one by
+shadowing it.
 
 ### Prefix and Infix operators ###
 
