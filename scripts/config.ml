@@ -21,11 +21,12 @@ let from_anil =
   ; "raphael-proust"          (* Raphael Proust <rp452@cam.ac.uk> *)
   ; "mariusaeriksen"          (* Marius Eriksen <marius@twitter.com> *)
   ; "jaked"                   (* Jake Donham <jake@donham.org> *)
-  ; "georgeparisis"           (* TODO George Parisis <george.parissis@gmail.com> *)
-  ; "nc6"                     (* TODO Nick Clarke <nicholas.clarke@gmail.com> *)
-  ; "stevej"                  (* TODO Steve Jenson <stevej@fruitless.org> *)
-  ; "ray1729"                 (* TODO Ray Miller <ray@1729.org.uk> *)
-  ; "pikatchu"                (* TODO julien verlaguet <julien.verlaguet@gmail.com> *)
+  ; "georgeparisis"           (* George Parisis <george.parissis@gmail.com> *)
+  ; "nc6"                     (* Nick Clarke <nicholas.clarke@gmail.com> *)
+  ; "stevej"                  (* Steve Jenson <stevej@fruitless.org> *)
+  ; "ray1729"                 (* Ray Miller <ray@1729.org.uk> *)
+  ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
+  ; "bmatican"                (* Bogdan Alexandru Matican <bogdanmatican@gmail.com> *)
 ]
 
 let from_yminsky =
@@ -34,7 +35,7 @@ let from_yminsky =
   ; "zdancewic"               (* stevez@cis.upenn.edu *)
   ; "bolinfest"               (* mbolin@gmail.com *)
   ; "bnigito"                 (* bnigito@janestreet.com *)
-  ; "roshanjames"             (* TODO rjames@janestreet.com *)
+  ; "roshanjames"             (* rjames@janestreet.com *)
   ]
 
 let from_email = 
@@ -47,14 +48,14 @@ let from_email =
   ; "gildor478"               (* Sylvain Le Gall <sylvain@le-gall.net> *)
   ; "voila"                   (* manu delab <manu.delab@gmail.com> *)
   ; "thadmeyer"               (* Thad Meyer <tmeyer@members.fsf.org> *)
-  ; "Gtower1X"                (* TODO Gregory Tsipenyuk <gregtsip@gmail.com> *)
-  ; "andreby"                 (* TODO Andre Bjarby <andre.bjarby@gmail.com> *)
-  ; "artemkin"                (* TODO Stanislav Artemkin <artemkin@gmail.com> *)
-  ; "tautologico"             (* TODO Andrei de Arajo Formiga <andrei@ci.ufpb.br> *)
-  ; "rgrinberg"               (* TODO Rudi Grinberg <rudi.grinberg@gmail.com> *)
-  ; "camlspotter"             (* TODO Jun Furuse <jun.furuse@gmail.com> *)
-  ; "davidperrin"             (* TODO David Perrin <david.perrin@virtualpv.co.uk> *)
-  ; "chris-taylor"            (* TODO Chris Taylor <Chris.Taylor@gsacapital.com> *)
+  ; "Gtower1X"                (* Gregory Tsipenyuk <gregtsip@gmail.com> *)
+  ; "andreby"                 (* Andre Bjarby <andre.bjarby@gmail.com> *)
+  ; "artemkin"                (* Stanislav Artemkin <artemkin@gmail.com> *)
+  ; "tautologico"             (* Andrei de Arajo Formiga <andrei@ci.ufpb.br> *)
+  ; "rgrinberg"               (* Rudi Grinberg <rudi.grinberg@gmail.com> *)
+  ; "camlspotter"             (* Jun Furuse <jun.furuse@gmail.com> *)
+  ; "davidperrin"             (* David Perrin <david.perrin@virtualpv.co.uk> *)
+  ; "chris-taylor"            (* Chris Taylor <Chris.Taylor@gsacapital.com> *)
 ]
 
 let internal_reviewers =
@@ -66,6 +67,6 @@ let external_reviewers =
 let allowed_users = function
   | "alpha1" -> internal_reviewers
   | "alpha2" -> external_reviewers
-  | "alpha3" -> internal_reviewers
+  | "alpha3" -> external_reviewers
   | "trunk"  -> authors
   |_ -> authors
