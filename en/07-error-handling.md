@@ -36,9 +36,9 @@ succeed in finding a suitable element, as you can see below.
 ```
 
 Having errors be explicit in the return values of your functions tells
-the caller that there is an error that needs to be handled. The caller
-can then handle the error explicitly, either recovering from the error
-or propagating it onward.
+the caller that there is an error that needs to be handled.  The
+caller can then handle the error explicitly, either recovering from
+the error or propagating it onward.
 
 Consider the `compute_bounds` function defined below.  The function
 takes a list and a comparison function, and returns upper and lower
