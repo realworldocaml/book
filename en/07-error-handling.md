@@ -59,12 +59,14 @@ val compute_bounds :
 ```
 
 The match statement is used to handle the error cases, propagating a
-None in `hd` or `last` into the return value of `compute_bounds`.  On
-the other hand, in `find_mismatches` below, errors encountered during
-the computation do not propagate to the return value of the function.
-`find_mismatches` takes two hashtables as its arguments and tries to
-find keys that are stored in both.  As such, a failure to find a key
-in one of the tables isn't really an error.
+None in `hd` or `last` into the return value of `compute_bounds`.  
+
+On the other hand, in `find_mismatches` below, errors encountered
+during the computation do not propagate to the return value of the
+function.  `find_mismatches` takes two hash tables as arguments, and
+searches for keys that have different data in one table than in the
+other.  As such, the failure to find a key in one table isn't a
+failure of any sort.
 
 ```ocaml
 # let find_mismatches table1 table2 =
