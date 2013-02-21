@@ -11532,7 +11532,10 @@ $ opam install yojson
       installed, you can open it in the <literal>utop</literal> toplevel
       by:
     </para>
-    <literal>#require &quot;yojson&quot; ;; open Yojson ;;</literal>
+    <programlisting>
+#require &quot;yojson&quot; ;;
+open Yojson ;;
+</programlisting>
     </note>
     <sect2 id="parsing-json-with-yojson">
       <title>Parsing JSON with Yojson</title>
