@@ -484,8 +484,9 @@ $ utop
       </listitem>
     </itemizedlist>
     <para>
-      We can also a create variable to name the value of a given
-      expression, using a <literal>let</literal> binding.
+      We can also create a variable to name the value of a given
+      expression, using the <literal>let</literal> keyword (also known
+      as a <emphasis>let binding</emphasis>).
     </para>
     <programlisting language="ocaml">
 # let x = 3 + 4;;
@@ -495,7 +496,9 @@ val y : int = 14
 </programlisting>
     <para>
       After a new variable is created, the toplevel tells us the name of
-      the variable, in addition to its type and value.
+      the variable (<literal>x</literal> or <literal>y</literal>), in
+      addition to its type (<literal>int</literal>) and value
+      (<literal>7</literal> or <literal>14</literal>).
     </para>
   </sect1>
   <sect1 id="functions-and-type-inference">
@@ -2032,10 +2035,27 @@ val x : float = 3.5
 val y : int = 100
 </programlisting>
       <para>
-        This use-case doesn't come up that often. Most of the time that
-        <literal>and</literal> comes into play, it's used to define
-        multiple mutually recursive values, which we'll learn about
-        later in the chapter.
+        Note that this is just shadowing the definitions of
+        <literal>x</literal> and <literal>y</literal>, not mutating
+        anything.
+      </para>
+      <para>
+        Without this trick, we would need to do something like the
+        following:
+      </para>
+      <programlisting language="ocaml">
+# let tmp = x
+  let x = y
+  let y = tmp;;
+val tmp : int = 100
+val x : float = 3.5
+val y : int = 100
+</programlisting>
+      <para>
+        This use-case doesn't come up that often, however. Most of the
+        time that <literal>and</literal> comes into play, it's used to
+        define multiple mutually recursive values, which we'll learn
+        about later in the chapter.
       </para>
       <para>
         Note that when doing a
@@ -2254,6 +2274,8 @@ val abs_diff : int * int -&gt; int = &lt;fun&gt;
         OCaml handles this calling convention efficiently as well. In
         particular it does not generally have to allocate a tuple just
         for the purpose of sending arguments to a tuple-style function.
+        (You can't, however, use partial application for this style of
+        function.)
       </para>
       <para>
         There are small tradeoffs between these two approaches, but most
@@ -2284,6 +2306,14 @@ val abs_diff : int * int -&gt; int = &lt;fun&gt;
 val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;
 </programlisting>
       <para>
+        Note that in the above, the pattern
+        <literal>| [] | [_]</literal> is actually the combination of two
+        patterns; <literal>[]</literal>, matching the empty list, and
+        <literal>[_]</literal>, matching any single element list. The
+        <literal>_</literal> is there so we don't have to put an
+        explicit name on that single element.
+      </para>
+      <para>
         We can also define multiple mutually recursive values by using
         <literal>let rec</literal> and <literal>and</literal> together,
         as in this (gratuitously inefficient) example.
@@ -2302,10 +2332,27 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
 - : bool Core.Std.List.t = [false; true; false; true; false; true]
 </programlisting>
       <para>
-        Note that in the above example, we take advantage of the fact
-        that the right hand side of <literal>||</literal> is evaluated
-        lazily, only being executed if the left hand side evaluates to
-        false.
+        OCaml distinguishes between non-recursive definitions (using
+        <literal>let</literal>) and recursive definitions (using
+        <literal>let rec</literal>) largely for technical reasons: the
+        type-inference algorithm needs to know when a set of function
+        definitions are mutually recursive, and for some technical
+        reasons that don't apply to a pure language like Haskell, these
+        have to be marked explicitly by the programmer.
+      </para>
+      <para>
+        But this decision has some good effects. For one thing,
+        recursive (and especially mutually recursive) definitions are
+        harder to reason about than non-recursive definitions that
+        proceed in order, each building on top of what has already been
+        defined. It's therefore useful that, in the absence of an
+        explicit marker, new definitions can only build upon ones that
+        were previously defined.
+      </para>
+      <para>
+        In addition, having a non-recursive form makes it easier to
+        create a new definition that extends and supersedes an existing
+        one by shadowing it.
       </para>
     </sect2>
     <sect2 id="prefix-and-infix-operators">
@@ -4906,9 +4953,9 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
       tersely. The syntax of a functional update is as follows.
     </para>
     <programlisting language="ocaml">
-{ &lt;record-value&gt; with &lt;field&gt; = &lt;value&gt;;
-                      &lt;field&gt; = &lt;value&gt;;
-                      ...
+{ &lt;record&gt; with &lt;field&gt; = &lt;value&gt;;
+                &lt;field&gt; = &lt;value&gt;;
+                ...
 }
 </programlisting>
     <para>
@@ -5050,38 +5097,40 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
       <literal>fieldslib</literal> also creates a sub-module called
       <literal>Fields</literal> that contains a first class
       representative of each field, in the form of a value of type
-      <literal>Field.t</literal>. A <literal>Field.t</literal> bundles
-      up the following functionality of a record filed:
+      <literal>Field.t</literal>. The <literal>Field</literal> module
+      provides the following functions:
     </para>
     <itemizedlist>
       <listitem>
         <para>
-          The name of the field as a string
+          <literal>Field.name</literal>, which returns the name of a
+          field
         </para>
       </listitem>
       <listitem>
         <para>
-          The ability to extract the field
+          <literal>Field.get</literal>, which returns the content of
+          afield
         </para>
       </listitem>
       <listitem>
         <para>
-          The ability to do a functional update of that field
+          <literal>Field.fset</literal>, which does a functional update
+          of a field
         </para>
       </listitem>
       <listitem>
         <para>
-          The (optional) ability to set the record field, which is
-          present only if the field is mutable.
+          <literal>Field.setter</literal>, which returns
+          <literal>None</literal> if the field is not mutable or
+          <literal>Some f</literal> if it is, where <literal>f</literal>
+          is a function for mutating that field.
         </para>
       </listitem>
     </itemizedlist>
     <para>
       We can use these first class fields to do things like write a
-      generic function for displaying a record field. The function
-      <literal>show_field</literal> takes three arguments: the
-      <literal>Field.t</literal>, a function for converting the contents
-      of the field in question to a string, and the record type.
+      generic function for displaying a record field.
     </para>
     <programlisting language="ocaml">
 # let show_field field to_string record =
@@ -5089,6 +5138,11 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
 val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string =
   &lt;fun&gt;
 </programlisting>
+    <para>
+      This takes three arguments: the <literal>Field.t</literal>, a
+      function for converting the contents of the field in question to a
+      string, and the record type.
+    </para>
     <para>
       Here's an example of <literal>show_field</literal> in action.
     </para>
@@ -5105,10 +5159,10 @@ val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string 
 - : string = &quot;time: 2012-06-26 18:44:13.807826&quot;
 </programlisting>
     <para>
-      Note that in the above, the module <literal>Fn</literal> provides
-      a collection of useful primitives for dealing with functions,
-      including <literal>Fn.id</literal>, which is the identity
-      function.
+      (As a side note, the above is our first use of the
+      <literal>Fn</literal> module which provides a collection of useful
+      primitives for dealing with functions. <literal>Fn.id</literal> is
+      the identity function.)
     </para>
     <para>
       <literal>fieldslib</literal> also provides higher-level operators,
@@ -6287,13 +6341,15 @@ val compute_bounds :
     <para>
       The match statement is used to handle the error cases, propagating
       a None in <literal>hd</literal> or <literal>last</literal> into
-      the return value of <literal>compute_bounds</literal>. On the
-      other hand, in <literal>find_mismatches</literal> below, errors
-      encountered during the computation do not propagate to the return
-      value of the function. <literal>find_mismatches</literal> takes
-      two hashtables as its arguments and tries to find keys that are
-      stored in both. As such, a failure to find a key in one of the
-      tables isn't really an error.
+      the return value of <literal>compute_bounds</literal>.
+    </para>
+    <para>
+      On the other hand, in <literal>find_mismatches</literal> below,
+      errors encountered during the computation do not propagate to the
+      return value of the function. <literal>find_mismatches</literal>
+      takes two hash tables as arguments, and searches for keys that
+      have different data in one table than in the other. As such, the
+      failure to find a key in one table isn't a failure of any sort.
     </para>
     <programlisting language="ocaml">
 # let find_mismatches table1 table2 =
@@ -6389,7 +6445,9 @@ end
       <para>
         A more interesting construction message from a performance point
         of view is to construct an <literal>Error.t</literal> from a
-        thunk:
+        <emphasis>thunk</emphasis>, <emphasis>i.e.</emphasis>, a
+        function that takes a single argument of type
+        <literal>unit</literal>.
       </para>
       <programlisting language="ocaml">
 # Error.of_thunk (fun () -&gt;
@@ -6457,23 +6515,27 @@ end
         <literal>Option</literal> and <literal>Result</literal>. One
         particularly useful one is built around the function
         <literal>bind</literal>, which is both an ordinary function and
-        an infix operator <literal>&gt;&gt;=</literal>, both with the
-        same type signature:
+        an infix operator <literal>&gt;&gt;=</literal>. Here's how you
+        can define <literal>bind</literal>.
       </para>
       <programlisting language="ocaml">
-val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option
+let bind option f =
+    match option with
+    | None -&gt; None
+    | Some x -&gt; f x
+  ;;
+val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
 </programlisting>
       <para>
-        <literal>bind</literal> is a way of sequencing together
-        error-producing functions so that the first one to produce an
-        error terminates the computation. In particular,
-        <literal>bind None f</literal> returns <literal>None</literal>
-        without calling <literal>f</literal>, and
-        <literal>bind (Some x) f</literal> returns
-        <literal>f x</literal>. We can use a nested sequence of these
-        binds to express a multi-stage computation that can fail at any
-        stage. Here's a rewrite <literal>compute_bounds</literal> in
-        this style.
+        As you can see, <literal>bind None f</literal> returns
+        <literal>None</literal> without calling <literal>f</literal>,
+        and <literal>bind (Some x) f</literal> returns
+        <literal>f x</literal>. Perhaps surprisingly,
+        <literal>bind</literal> can be used as a way of sequencing
+        together error-producing functions so that the first one to
+        produce an error terminates the computation. Here's a rewrite of
+        <literal>compute_bounds</literal> to use a nested series of
+        <literal>bind</literal>s.
       </para>
       <programlisting language="ocaml">
 # let compute_bounds ~cmp list =
@@ -6658,10 +6720,13 @@ exception Wrong_date of Core.Std.Date.t
       The period in front of <literal>Wrong_date</literal> is there
       because the representation generated by
       <literal>with sexp</literal> includes the full module path of the
-      module where the exception in question is defined. This is quite
-      useful in tracking down which precise exception is being reported.
-      In this case, since we've declared the exception at the toplevel,
-      that module path is trivial.
+      module where the exception in question is defined. We'll talk more
+      about modules in
+      <xref linkend="files-modules-and-programs"/>, but for
+      now, it's enough to know that this is useful in tracking down
+      which precise exception is being reported. In this case, since
+      we've declared the exception at the toplevel, that module path is
+      trivial.
     </para>
     </note>
     <sect2 id="exception-handlers">
@@ -6684,21 +6749,23 @@ try &lt;expr&gt; with
 ...
 </programlisting>
       <para>
-        A <literal>try</literal>/<literal>with</literal> clause would
-        first evaluate <literal>&lt;expr&gt;</literal>, and if that
-        evaluation completes without returning an exception, then the
-        value of the overall expression is the value of
-        <literal>&lt;expr&gt;</literal>.
+        A <literal>try/with</literal> clause first evaluates it's body,
+        <literal>&lt;expr&gt;</literal>. If no exception is thrown, then
+        the result of evaluating the body is what the entire
+        <literal>try/with</literal> clause evaluates to.
       </para>
       <para>
-        But if evaluating <literal>&lt;expr&gt;</literal> leads to an
-        exception being thrown, then the exception will be fed to the
-        pattern match statements following the <literal>with</literal>.
-        If the exception matches a pattern, then the expression on the
-        right hand side of that pattern will be evaluated. Otherwise,
-        the original exception continues up the call stack, to be
-        handled by the next outer exception handler, or terminate the
-        program if there is none.
+        But if the evaluation of the body throws an exception, then the
+        exception will be fed to the pattern match statements following
+        the <literal>with</literal>. If the exception matches a pattern,
+        then we consider the exception caught, and the
+        <literal>try/with</literal> clause evaluates to the expression
+        on the right-hand side of the matching pattern.
+      </para>
+      <para>
+        Otherwise, the original exception continues up the call stack,
+        to be handled by the next outer exception handler. If the
+        exception is never caught, it terminates the program.
       </para>
     </sect2>
     <sect2 id="cleaning-up-in-the-presence-of-exceptions">
@@ -6728,8 +6795,11 @@ let load_config filename =
         function. The basic purpose of <literal>protect</literal> is to
         ensure that the <literal>finally</literal> thunk will be called
         when <literal>f</literal> exits, whether it exited normally or
-        with an exception. Here's how it could be used to fix
-        <literal>load_config</literal>.
+        with an exception. This is similar to the
+        <literal>try/finally</literal> construct available in many
+        programming languages, but it is implemented in a library,
+        rather than being a built-in primitive. Here's how it could be
+        used to fix <literal>load_config</literal>.
       </para>
       <programlisting language="ocaml">
 let load_config filename =
@@ -6795,16 +6865,28 @@ val lookup_weight :
       <programlisting language="ocaml">
 # let lookup_weight ~compute_weight alist key =
     match
-      try Some (List.Assoc.find_exn alist key) with
-      | Not_found -&gt; None
+      try Some (List.Assoc.find_exn alist key)
+      with Not_found -&gt; None
     with
     | None -&gt; 0.
     | Some data -&gt; compute_weight data ;;
+val lookup_weight :
+  compute_weight:('a -&gt; float) -&gt;
+  ('b, 'a) Core.Std.List.Assoc.t -&gt; 'b -&gt; float = &lt;fun&gt;
 </programlisting>
       <para>
         At which point, it makes sense to simply use the non-exception
         throwing function, <literal>List.Assoc.find</literal>, instead.
       </para>
+      <programlisting language="ocaml">
+# let lookup_weight ~compute_weight alist key =
+    match List.Assoc.find alist key with
+    | None -&gt; 0.
+    | Some data -&gt; compute_weight data ;;
+val lookup_weight :
+  compute_weight:('a -&gt; float) -&gt;
+  ('b, 'a) Core.Std.List.Assoc.t -&gt; 'b -&gt; float = &lt;fun&gt;
+</programlisting>
     </sect2>
     <sect2 id="backtraces">
       <title>Backtraces</title>
@@ -6860,11 +6942,6 @@ Called from file &quot;exn.ml&quot;, line 12, characters 17-28
         Backtraces can also be obtained at runtime. In particular,
         <literal>Exn.backtrace</literal> will return the backtrace of
         the most recently thrown exception.
-      </para>
-    </sect2>
-    <sect2 id="exceptions-for-control-flow">
-      <title>Exceptions for control flow</title>
-      <para>
       </para>
     </sect2>
     <sect2 id="from-exceptions-to-error-aware-types-and-back-again">
@@ -11385,15 +11462,16 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
       JSON is a lightweight data-interchange format often used in web
       services and browsers. It's described in
       <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>,
-      and is designed to be easy to parse and generate. You'll run into
-      JSON very often when working with modern APIs, so we'll cover
-      several different ways to manipulate it in this chapter.
+      and is easier to parse and generate than alternatives such as XML.
+      You'll run into JSON very often when working with modern web APIs,
+      so we'll cover several different ways to manipulate it in this
+      chapter.
     </para>
     <para>
-      JSON consists of just two basic structures: an unordered
-      collection of key/value pairs, and an ordered list of values.
-      Values can be strings, booleans, floats, integers or null. Let's
-      see what an example JSON record for a book description looks like:
+      JSON consists of two basic structures: an unordered collection of
+      key/value pairs, and an ordered list of values. Values can be
+      strings, booleans, floats, integers or null. Let's see what a JSON
+      record for an example book description looks like:
     </para>
     <programlisting language="json">
 {
@@ -11409,22 +11487,21 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
 }
 </programlisting>
     <para>
-      JSON values usually start with an object at the top level that
-      contains a set of key/value pairs. The keys must be strings, but
-      values can be any JSON type. In the example above,
-      <literal>tags</literal> is a string list, while the
+      The outermost JSON value is usually a record (delimited by the
+      curly braces) and contains an unordered set of key/value pairs.
+      The keys must be strings but values can be any JSON type. In the
+      example above, <literal>tags</literal> is a string list, while the
       <literal>authors</literal> field contains a list of records.
-      Unlike OCaml lists, JSON lists can contain completely different
-      JSON types within them.
+      Unlike OCaml lists, JSON lists can contain multiple different JSON
+      types within a single list.
     </para>
     <para>
       This free-form nature of JSON types is both a blessing and a
-      curse. It's very easy to generate JSON values, but code parsing
-      them also has to cope with handling subtle variations in how
-      values are represented. For example, what if the
-      <literal>pages</literal> value above is actually represented as a
-      string value of <literal>&quot;450&quot;</literal> instead of an
-      integer?
+      curse. It's very easy to generate JSON values, but code that
+      parses them also has to handling subtle variations in how values
+      are represented. For example, what if the <literal>pages</literal>
+      value above is actually represented as a string value of
+      <literal>&quot;450&quot;</literal> instead of an integer?
     </para>
     <para>
       Our first task is to parse the JSON into a more structured OCaml
@@ -11444,26 +11521,25 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
       There are several JSON libraries available for OCaml. For this
       chapter, we've picked the
       <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
-      library. Install it by using the OPAM package manager.
+      library that is available via OPAM.
     </para>
     <programlisting>
 $ opam install yojson
 </programlisting>
     <para>
       See <xref linkend="packaging-and-build-systems"/> for
-      installation instructions if you haven't already got OPAM.
+      installation instructions if you haven't already got OPAM. Once
+      installed, you can open it in the <literal>utop</literal> toplevel
+      by:
     </para>
+    <literal>#require &quot;yojson&quot; ;; open Yojson ;;</literal>
     </note>
     <sect2 id="parsing-json-with-yojson">
       <title>Parsing JSON with Yojson</title>
       <para>
-        The JSON specification has very few data types, and Yojson
-        implements these in the <literal>Yojson.Basic</literal> module.
-        The <literal>json</literal> type shown below is sufficient to
-        express any valid JSON structure. Note that some of the types
-        are recursive, so that fields can contain references to more
-        JSON fields, and that it also specifically includes a
-        <literal>Null</literal> variant for empty fields.
+        The JSON specification has very few data types, and the
+        <literal>Yojson.Basic.json</literal> type shown below is
+        sufficient to express any valid JSON structure.
       </para>
       <programlisting language="ocaml">
 type json = [
@@ -11476,9 +11552,17 @@ type json = [
   | `String of string ] 
 </programlisting>
       <para>
-        Let's parse the earlier JSON string example into this type now.
-        The first stop is the <literal>Yojson.Basic</literal>
-        documentation, where we find these helpful functions:
+        Note that some of the type definitions above are recursive. This
+        means that some values such as <literal>Assoc</literal> can
+        contain references to more JSON fields. The definition also
+        specifically includes a <literal>Null</literal> variant for
+        empty fields. OCaml doesn't allow null values by default, so
+        this must be encoded like any other value.
+      </para>
+      <para>
+        Let's parse the earlier JSON example into this type now. The
+        first stop is the <literal>Yojson.Basic</literal> documentation,
+        where we find these helpful functions:
       </para>
       <programlisting language="ocaml">
 val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
@@ -11499,8 +11583,13 @@ val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; strin
         When first reading these interfaces, you can generally ignore
         the optional arguments (which have the question marks in the
         type signature), as they will be filled in with sensible values.
-        The signature for these values with the optional elements
-        removed makes their purpose quite clear:
+        In the above type fragment, the optional arguments permit finer
+        control over the memory buffer allocation, and error messages
+        from parsing.
+      </para>
+      <para>
+        The type signature for these functions with the optional
+        elements removed makes their purpose much clearer:
       </para>
       <programlisting language="ocaml">
 val from_string : string -&gt; json
@@ -11511,15 +11600,15 @@ val from_channel : in_channel -&gt; json
         The <literal>in_channel</literal> constructor is from the
         original OCaml standard library, and its use is considered
         deprecated when using the Core standard library. This leaves us
-        with two ways of parsing the JSON: either from a string buffer,
-        or from a file on a filesystem. The next example shows both in
-        action, assuming the JSON record is stored in a file called
-        <emphasis>book.json</emphasis>:
+        with two ways of parsing the JSON: either from a string or from
+        a file on a filesystem. The next example shows both in action,
+        assuming the JSON record is stored in a file called
+        <literal>book.json</literal>:
       </para>
       <programlisting language="ocaml">
 open Core.Std
 
-let _ =
+let () =
   (* Read JSON file into an OCaml string *)
   let buf = In_channel.read_all &quot;book.json&quot; in
 
@@ -11537,13 +11626,11 @@ let _ =
         The <literal>from_file</literal> function accepts an input
         filename and takes care of opening and closing it for you. It's
         far more common to use <literal>from_string</literal> to
-        construct a JSON value from an OCaml <literal>string</literal>.
-        These strings can come from a network connection (we'll see more
-        of this in
+        construct JSON values though, since these strings come in via a
+        network connection (we'll see more of this in
         <xref linkend="concurrent-programming-with-async"/>)
-        or even a database. Finally, the example checks that the two
-        input mechanisms actually resulted in the same OCaml data
-        structure.
+        or a database. Finally, the example checks that the two input
+        mechanisms actually resulted in the same OCaml data structure.
       </para>
       <sidebar>
       <title>
@@ -11581,9 +11668,9 @@ let _ =
       <para>
         It's quite easy to mix up the use of <literal>=</literal> and
         <literal>==</literal>, so Core disables the
-        <literal>==</literal> operator and provides
-        <literal>phys_equal</literal> instead. You'll see a type error
-        if you use <literal>==</literal> anywhere:
+        <literal>==</literal> operator and provides the more explicit
+        <literal>phys_equal</literal> function instead. You'll see a
+        type error if you use <literal>==</literal> anywhere:
       </para>
       <programlisting language="ocaml">
 # 1 == 2;;
@@ -11594,7 +11681,8 @@ Error: This expression has type int but an expression was expected of type
 </programlisting>
       <para>
         If you feel like hanging your OCaml interpreter, you can verify
-        what happens with recursive values for yourself:
+        what happens with recursive values and structural equality for
+        yourself:
       </para>
       <programlisting language="ocaml">
 # type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
@@ -11613,16 +11701,15 @@ and t2 = { foo2 : int; bar2 : t1; }
       <sect3 id="selecting-values-from-json-structures">
         <title>Selecting values from JSON structures</title>
         <para>
-          Now that we've figured out how to parse the example JSON, lets
-          see how we can manipulate it from OCaml code with a more
-          complete example.
+          Now that we've figured out how to parse the example JSON into
+          an OCaml value, let's manipulate it from OCaml code and
+          extract specific fields.
         </para>
         <programlisting language="ocaml">
 open Core.Std
-open Async.Std
 open Printf
 
-let _ =
+let () =
   (* Read the JSON file *)
   let json = Yojson.Basic.from_file &quot;book.json&quot; in
 
@@ -11651,62 +11738,157 @@ let _ =
         <para>
           This introduces the <literal>Yojson.Basic.Util</literal>
           module, which contains <emphasis>combinator</emphasis>
-          functions for JSON manipulation. Combinators are a style of
-          function that can be chained together using the
-          <literal>|!</literal> pipe operator to select and convert
+          functions for JSON manipulation.
+        </para>
+        <sidebar>
+        <title>
+        Functional Combinators
+        </title>
+        <para>
+          Combinators are a design patternt that crops up quite often in
+          functional programming. John Hughes defines them as &quot;a
+          function which builds program fragments from program
+          fragments&quot;. In a functional language, this generally
+          means higher-order functions that combine other functions to
+          apply useful transformations over values.
+        </para>
+        <para>
+          You've already run across several of these in the
+          <literal>List</literal> module:
+        </para>
+        <programlisting language="ocaml">
+val map: 'a list -&gt; f:('a -&gt; 'b) -&gt; 'b list
+val fold: list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum 
+val iter: 'a list -&gt; f:('a -&gt; unit) -&gt; unit
+</programlisting>
+        <para>
+          <literal>map</literal> and <literal>fold</literal> are
+          extremely common combinators that transform an input list by
+          applying a function to each value of the list. The
+          <literal>map</literal> combinator is simplest, with the
+          resulting list being output directly. <literal>fold</literal>
+          applies each value in the input list to a function that
+          accumulates a single result, and returns that instead.
+        </para>
+        <para>
+          The final example above is a more specialised combinator that
+          is only useful in OCaml due to side-effects being allowed. The
+          input function is applied to every value, but no result is
+          supplied. Instead, the function must directly result in some
+          side-effect, such as printing to the console or updating a
+          reference elsewhere in the environment.
+        </para>
+        </sidebar>
+        <para>
+          <literal>Yojson</literal> provides several combinators in the
+          <literal>Yojson.Basic.Util</literal> module, such as:
+        </para>
+        <programlisting language="ocaml">
+val member : string -&gt; json -&gt; json
+val index : int -&gt; json -&gt; json
+val to_string : json -&gt; string
+val to_int : json -&gt; int
+val filter_string : json list -&gt; string list
+</programlisting>
+        <para>
+          We'll go through each of these uses one-by-one. Core provides
+          the <literal>|!</literal> pipebang which can chain combinators
+          together, and the example code uses this to select and convert
           values out of the JSON structure. Let's examine some of them
           in more detail:
         </para>
-        <itemizedlist>
-          <listitem>
-            <para>
-              For the <literal>title</literal> string, the
-              <literal>member</literal> combinator extracts the key from
-              the array, and casts it to an OCaml string. An exception
-              is raised if the JSON value is not a string.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              The <literal>tags</literal> field is similar to
-              <literal>title</literal>, but are passed through the
-              <literal>to_list</literal> combinator since they are a
-              JSON list. The <literal>filter_string</literal> combinator
-              folds all of the strings in the JSON list into an OCaml
-              list (any non-strings also in there are simply ignored).
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              The <literal>is_online</literal> and
-              <literal>is_translated</literal> fields are optional in
-              our JSON schema, and no error is raised if they are not
-              present in the JSON array. The resulting OCaml type is a
-              <literal>string option</literal> to reflect this. In our
-              example, only <literal>is_online</literal> is present and
-              <literal>is_translated</literal> will be
-              <literal>None</literal>.
-            </para>
-          </listitem>
-        </itemizedlist>
+        <programlisting language="ocaml">
+  let open Yojson.Basic.Util in
+  let title = json |! member &quot;title&quot; |! to_string in
+</programlisting>
         <para>
-          In the last part of the example, we simply print the parsed
-          fields since they are just normal OCaml values. This technique
-          of using chained parsing functions is very powerful in
-          combination with the OCaml type system. Many errors that don't
-          make sense at runtime (for example, mixing up lists and
-          objects) will be caught statically via a type error.
+          For the <literal>title</literal> field, the
+          <literal>member</literal> combinator extracts the key from the
+          <literal>json</literal> value, and converts it to an OCaml
+          string. An exception is raised if the JSON value is not a
+          string, so the caller must be careful to
+          <literal>try/with</literal> the result.
+        </para>
+        <programlisting language="ocaml">
+  let tags = json |! member &quot;tags&quot; |! to_list |! filter_string in
+  let pages = json |! member &quot;pages&quot; |! to_int in
+</programlisting>
+        <para>
+          The <literal>tags</literal> field is similar to
+          <literal>title</literal>, but the field is a list of strings
+          instead of a single one. Converting this to an OCaml
+          <literal>string list</literal> is a two stage process: first,
+          we must convert it to a list of JSON values, and then filter
+          out the <literal>String</literal> values. Remember that OCaml
+          lists must have a single type, so any other JSON values will
+          be skipped from the output of
+          <literal>filter_string</literal>.
+        </para>
+        <programlisting language="ocaml">
+  let is_online = json |! member &quot;is_online&quot; |! to_bool_option in
+  let is_translated = json |! member &quot;is_translated&quot; |! to_bool_option in
+</programlisting>
+        <para>
+          The <literal>is_online</literal> and
+          <literal>is_translated</literal> fields are optional in our
+          JSON schema, so no error should be raised if they are not
+          present. The OCaml type is a <literal>string option</literal>
+          to reflect this, and can be extracted via
+          <literal>to_bool_option</literal>. In our example JSON, only
+          <literal>is_online</literal> is present and
+          <literal>is_translated</literal> will be
+          <literal>None</literal>.
+        </para>
+        <programlisting language="ocaml">
+  let authors = json |! member &quot;authors&quot; |! to_list in
+  let names = List.map authors ~f:(fun json -&gt; member &quot;name&quot; json |! to_string) in
+</programlisting>
+        <para>
+          The final use of JSON combinators is to extract the
+          <literal>name</literal> fields from the
+          <literal>author</literal> list. We first construct the
+          <literal>author</literal> list, and then
+          <literal>map</literal> it into a
+          <literal>string list</literal>. Notice that the example
+          explicitly binds <literal>authors</literal> to a variable
+          name. It can also be written more succinctly using the
+          pipebang operator:
+        </para>
+        <programlisting language="ocaml">
+let names =
+  json |!
+  member &quot;authors&quot; |!
+  to_list |!
+  List.map ~f:(fun json -&gt; member &quot;name&quot; json |! to_string)
+</programlisting>
+        <para>
+          This style of programming which omits variable names and
+          chains functions together is known as &quot;point-free
+          programming&quot;. It's a succinct style, but shouldn't be
+          overused due to the increased difficulty of debugging
+          intermediate values. If an explicit name is assigned to each
+          stage of the transformations, debuggers in particular have an
+          easier time making the program flow easier to represent to the
+          programer.
+        </para>
+        <para>
+          This technique of using chained parsing functions is very
+          powerful in combination with the OCaml type system. Many
+          errors that don't make sense at runtime (for example, mixing
+          up lists and objects) will be caught statically via a type
+          error.
         </para>
       </sect3>
     </sect2>
     <sect2 id="constructing-json-values">
       <title>Constructing JSON values</title>
       <para>
-        To build and print JSON values, you can just construct values of
-        type <literal>json</literal> and call the
-        <literal>to_string</literal> function. There are also
-        pretty-printing functions that lay out the output in a more
-        human-readable style:
+        Building and printing JSON values is pretty straightforward
+        given the <literal>Yojson.Basic.json</literal> type. You can
+        just construct values of type <literal>json</literal> and call
+        the <literal>to_string</literal> function] on them. There are
+        also pretty-printing functions available that lay out the output
+        in a more human-readable style:
       </para>
       <programlisting language="ocaml">
 # let x = `Assoc [ (&quot;key&quot;, `String &quot;value&quot;) ] ;;
@@ -11721,16 +11903,26 @@ val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
 - : unit = ()
 </programlisting>
       <para>
-        In the example above, although the value that
-        <literal>x</literal> has is compatible with the type
-        <literal>json</literal>, it's not explicitly defined as such.
-        The type inference engine will figure out a type that is based
-        on how the value <literal>x</literal> is used, and in this case
-        only the <literal>Assoc</literal> and <literal>String</literal>
-        variants are present. One difficulty you will encounter is that
-        type errors involving polymorphic variants can be quite verbose
-        if you make a mistake in your code. For example, suppose you
-        build an <literal>Assoc</literal> and include a single value
+        In the example above, although the type of <literal>x</literal>
+        is compatible with the type <literal>json</literal>, it's not
+        explicitly defined as such. The type inference engine will
+        figure out a type that is based on how the value
+        <literal>x</literal> is used and in this case only the
+        <literal>Assoc</literal> and <literal>String</literal> variants
+        are present. This &quot;partial&quot; type signature is checked
+        against the bigger <literal>json</literal> type it is applied to
+        the <literal>pretty_to_string</literal> function, and determined
+        to be compatible.
+      </para>
+      <sidebar>
+      <title>
+      Polymorphic variants and easier type checking
+      </title>
+      <para>
+        One difficulty you will encounter is that type errors involving
+        polymorphic variants can be quite verbose if you make a mistake
+        in your code. For example, suppose you build an
+        <literal>Assoc</literal> and mistakenly include a single value
         instead of a list of keys:
       </para>
       <programlisting language="ocaml">
@@ -11764,16 +11956,12 @@ Error: This expression has type 'a * 'b
         <literal>Assoc</literal> variant has the incorrect type. This
         illustrates the strengths and drawbacks of using polymorphic
         variants: they make it possible to easily subtype across module
-        boundaries (the <literal>Basic</literal> and
-        <literal>Safe</literal> in Yojson's case), but the error
-        messages can be more confusing. However, a bit of careful manual
-        type annotation is all it takes to make tracking down such
-        issues much easier.
+        boundaries (<literal>Basic</literal> and <literal>Safe</literal>
+        in Yojson's case), but the error messages can be more confusing.
+        However, a bit of careful manual type annotation is all it takes
+        to make tracking down such issues much easier.
       </para>
-      <para>
-        <emphasis>avsm</emphasis>: segway into memory representation of
-        polyvariants here?
-      </para>
+      </sidebar>
       <sect3 id="using-non-standard-json-extensions">
         <title>Using non-standard JSON extensions</title>
         <para>
