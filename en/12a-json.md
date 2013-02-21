@@ -10,14 +10,14 @@ external tools to auto-generate OCaml code.
 
 JSON is a lightweight data-interchange format often used in web services and
 browsers.  It's described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
-and is designed to be easy to parse and generate.  You'll run into JSON very
-often when working with modern APIs, so we'll cover several different ways
-to manipulate it in this chapter.
+and is easier to parse and generate than alternatives such as XML.
+You'll run into JSON very often when working with modern web APIs, so we'll cover
+several different ways to manipulate it in this chapter.
 
-JSON consists of just two basic structures: an unordered collection of
+JSON consists of two basic structures: an unordered collection of
 key/value pairs, and an ordered list of values.  Values can be strings,
-booleans, floats, integers or null.  Let's see what an example JSON record for
-a book description looks like:
+booleans, floats, integers or null.  Let's see what a JSON record for
+an example book description looks like:
 
 ```json
 {
@@ -33,14 +33,15 @@ a book description looks like:
 }
 ```
 
-JSON values usually start with an object at the top level that contains a set
-of key/value pairs.  The keys must be strings, but values can be any JSON type.
+The outermost JSON value is usually a record (delimited by the curly braces)
+and contains an unordered set of key/value pairs.  The keys must be strings
+but values can be any JSON type.
 In the example above, `tags` is a string list, while the `authors` field
 contains a list of records.  Unlike OCaml lists, JSON lists can contain
-completely different JSON types within them.
+multiple different JSON types within a single list.
 
 This free-form nature of JSON types is both a blessing and a curse.  It's very
-easy to generate JSON values, but code parsing them also has to cope with
+easy to generate JSON values, but code that parses them also has to 
 handling subtle variations in how values are represented. For example, what if
 the `pages` value above is actually represented as a string value of `"450"`
 instead of an integer?
@@ -56,25 +57,26 @@ can be `Null` as well as contain an actual value.
 <title>Installing the Yojson library</title>
 
 There are several JSON libraries available for OCaml.  For this chapter, we've
-picked the [`Yojson`](http://mjambon.com/yojson.html) library. 
-Install it by using the OPAM package manager. 
+picked the [`Yojson`](http://mjambon.com/yojson.html) library that is available
+via OPAM.
 
 ```
 $ opam install yojson
 ```
 
 See [xref](#packaging-and-build-systems) for installation instructions if you haven't
-already got OPAM.
+already got OPAM. Once installed, you can open it in the `utop` toplevel by:
 
+```
+#require "yojson" ;;
+open Yojson ;;
+```
 </note>
  
 ### Parsing JSON with Yojson
 
-The JSON specification has very few data types, and Yojson implements these in
-the `Yojson.Basic` module.  The `json` type shown below is sufficient to
-express any valid JSON structure. Note that some of the types are recursive, so
-that fields can contain references to more JSON fields, and that it also
-specifically includes a `Null` variant for empty fields.
+The JSON specification has very few data types, and the `Yojson.Basic.json` type
+shown below is sufficient to express any valid JSON structure.
 
 ```ocaml
 type json = [
@@ -87,7 +89,13 @@ type json = [
   | `String of string ] 
 ```
 
-Let's parse the earlier JSON string example into this type now.  The first stop
+Note that some of the type definitions above are recursive.
+This means that some values such as `Assoc` can contain references to more
+JSON fields. The definition also specifically includes a `Null` variant for empty
+fields.  OCaml doesn't allow null values by default, so this must be encoded
+like any other value.
+
+Let's parse the earlier JSON example into this type now.  The first stop
 is the `Yojson.Basic` documentation, where we find these helpful functions:
 
 ```ocaml
@@ -108,8 +116,12 @@ val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 
 When first reading these interfaces, you can generally ignore the optional
 arguments (which have the question marks in the type signature), as they will
-be filled in with sensible values. The signature for these values with the
-optional elements removed makes their purpose quite clear:
+be filled in with sensible values.  In the above type fragment, the optional arguments
+permit finer control over the memory buffer allocation, and error messages from
+parsing.
+
+The type signature for these functions with the optional elements removed makes their
+purpose much clearer:
 
 ```ocaml
 val from_string : string -> json
@@ -118,15 +130,15 @@ val from_channel : in_channel -> json
 ```
 
 The `in_channel` constructor is from the original OCaml standard library, and
-its use is considered deprecated when using the Core standard library.  This
-leaves us with two ways of parsing the JSON: either from a string buffer, or
+its use is considered deprecated when using the Core standard library.
+This leaves us with two ways of parsing the JSON: either from a string or
 from a file on a filesystem.  The next example shows both in action, assuming
-the JSON record is stored in a file called *book.json*:
+the JSON record is stored in a file called `book.json`:
 
 ```ocaml
 open Core.Std
 
-let _ =
+let () =
   (* Read JSON file into an OCaml string *)
   let buf = In_channel.read_all "book.json" in
 
@@ -143,9 +155,9 @@ let _ =
 
 The `from_file` function accepts an input filename and takes care of opening
 and closing it for you. It's far more common to use `from_string` to construct
-a JSON value from an OCaml `string`. These strings can come from a network
-connection (we'll see more of this in
-[xref](#concurrent-programming-with-async)) or even a database. Finally, the
+JSON values though, since these strings come in via a network connection
+(we'll see more of this in [xref](#concurrent-programming-with-async))
+or a database. Finally, the
 example checks that the two input mechanisms actually resulted in the same
 OCaml data structure.
 
@@ -172,8 +184,8 @@ the physical equality operator, or write a custom comparison function that
 breaks the recursion.
 
 It's quite easy to mix up the use of `=` and `==`, so Core disables the `==`
-operator and provides `phys_equal` instead.  You'll see a type error if you use
-`==` anywhere:
+operator and provides the more explicit `phys_equal` function instead.
+You'll see a type error if you use `==` anywhere:
 
 ```ocaml
 # 1 == 2;;
@@ -184,7 +196,7 @@ Error: This expression has type int but an expression was expected of type
 ```
 
 If you feel like hanging your OCaml interpreter, you can verify what happens
-with recursive values for yourself:
+with recursive values and structural equality for yourself:
 
 ```ocaml
 # type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
@@ -204,15 +216,14 @@ and t2 = { foo2 : int; bar2 : t1; }
 
 #### Selecting values from JSON structures
 
-Now that we've figured out how to parse the example JSON, lets see how we can
-manipulate it from OCaml code with a more complete example.
+Now that we've figured out how to parse the example JSON into an OCaml value,
+let's manipulate it from OCaml code and extract specific fields.
 
 ```ocaml
 open Core.Std
-open Async.Std
 open Printf
 
-let _ =
+let () =
   (* Read the JSON file *)
   let json = Yojson.Basic.from_file "book.json" in
 
@@ -239,26 +250,117 @@ let _ =
   printf "Translated: %s\n" (string_of_bool_option is_translated)
 ```
 
-This introduces the `Yojson.Basic.Util` module, which contains *combinator*
-functions for JSON manipulation.  Combinators are a style of function that can
-be chained together using the `|!` pipe operator to select and convert values
-out of the JSON structure.  Let's examine some of them in more detail:
+This introduces the `Yojson.Basic.Util` module, which contains _combinator_
+functions for JSON manipulation.
 
-* For the `title` string, the `member` combinator extracts the key from the array, and casts it to an OCaml string. An exception is raised if the JSON value is not a string.
-* The `tags` field is similar to `title`, but are passed through the `to_list` combinator since they are a JSON list.  The `filter_string` combinator folds all of the strings in the JSON list into an OCaml list (any non-strings also in there are simply ignored).
-* The `is_online` and `is_translated` fields are optional in our JSON schema, and no error is raised if they are not present in the JSON array. The resulting OCaml type is a `string option` to reflect this. In our example, only `is_online` is present and `is_translated` will be `None`.
+<sidebar>
+<title>Functional Combinators</title>
 
-In the last part of the example, we simply print the parsed fields since they
-are just normal OCaml values. This technique of using chained parsing functions
-is very powerful in combination with the OCaml type system. Many errors that
-don't make sense at runtime (for example, mixing up lists and objects) will be
-caught statically via a type error.
+Combinators are a design patternt that crops up quite often in functional
+programming.  John Hughes defines them as "a function which builds program
+fragments from program fragments".  In a functional language, this generally
+means higher-order functions that combine other functions to apply useful
+transformations over values.
+
+You've already run across several of these in the `List` module:
+
+```ocaml
+val map: 'a list -> f:('a -> 'b) -> 'b list
+val fold: list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum 
+val iter: 'a list -> f:('a -> unit) -> unit
+```
+
+`map` and `fold` are extremely common combinators that transform
+an input list by applying a function to each value of the list.
+The `map` combinator is simplest, with the resulting list being
+output directly.  `fold` applies each value in the input list to
+a function that accumulates a single result, and returns that instead.
+
+The final example above is a more specialised combinator that is
+only useful in OCaml due to side-effects being allowed.  The input
+function is applied to every value, but no result is supplied.
+Instead, the function must directly result in some side-effect, such
+as printing to the console or updating a reference elsewhere in
+the environment.
+
+</sidebar>
+
+`Yojson` provides several combinators in the `Yojson.Basic.Util` module,
+such as:
+
+```ocaml
+val member : string -> json -> json
+val index : int -> json -> json
+val to_string : json -> string
+val to_int : json -> int
+val filter_string : json list -> string list
+```
+
+We'll go through each of these uses one-by-one. 
+Core provides the `|!` pipebang which can chain combinators together,
+and the example code uses this to select and convert values out of the JSON structure.
+Let's examine some of them in more detail:
+
+```ocaml
+  let open Yojson.Basic.Util in
+  let title = json |! member "title" |! to_string in
+```
+
+For the `title` field, the `member` combinator extracts the key from the `json` value, and converts it to an OCaml string.
+An exception is raised if the JSON value is not a string, so the caller must be careful to `try/with` the result.
+
+```ocaml
+  let tags = json |! member "tags" |! to_list |! filter_string in
+  let pages = json |! member "pages" |! to_int in
+```
+
+The `tags` field is similar to `title`, but the field is a list of strings instead of a single one.
+Converting this to an OCaml `string list` is a two stage process: first, we must convert it to a list of JSON values, and
+then filter out the `String` values.  Remember that OCaml lists must have a single type, so any other JSON values will be skipped from the output of `filter_string`.
+
+```ocaml
+  let is_online = json |! member "is_online" |! to_bool_option in
+  let is_translated = json |! member "is_translated" |! to_bool_option in
+```
+
+The `is_online` and `is_translated` fields are optional in our JSON schema, so no error should be raised if they are not present. The OCaml type is a `string option` to reflect this, and can be extracted via `to_bool_option`.  In our example JSON, only `is_online` is present and `is_translated` will be `None`.
+
+```ocaml
+  let authors = json |! member "authors" |! to_list in
+  let names = List.map authors ~f:(fun json -> member "name" json |! to_string) in
+```
+
+The final use of JSON combinators is to extract the `name` fields from the `author` list.
+We first construct the `author` list, and then `map` it into a `string list`.  Notice that
+the example explicitly binds `authors` to a variable name.  It can also be written more
+succinctly using the pipebang operator:
+
+```ocaml
+let names =
+  json |!
+  member "authors" |!
+  to_list |!
+  List.map ~f:(fun json -> member "name" json |! to_string)
+```
+
+This style of programming which omits variable names and chains functions
+together is known as "point-free programming".  It's a succinct style, but
+shouldn't be overused due to the increased difficulty of debugging intermediate
+values.  If an explicit name is assigned to each stage of the transformations,
+debuggers in particular have an easier time making the program flow easier to
+represent to the programer.
+
+This technique of using chained parsing functions is very powerful in
+combination with the OCaml type system. Many errors that don't make sense
+at runtime (for example, mixing up lists and objects) will be caught statically
+via a type error.
 
 ### Constructing JSON values 
 
-To build and print JSON values, you can just construct values of type `json`
-and call the `to_string` function.  There are also pretty-printing functions
-that lay out the output in a more human-readable style:
+Building and printing JSON values is pretty straightforward given the `Yojson.Basic.json`
+type.  You can just construct values of type `json` and call the `to_string` function]
+on them.  There are also pretty-printing functions available that lay out the output in
+a more human-readable style:
 
 ```ocaml
 # let x = `Assoc [ ("key", `String "value") ] ;;
@@ -273,13 +375,19 @@ val x : [> `Assoc of (string * [> `String of string ]) list ] =
 - : unit = ()
 ```
 
-In the example above, although the value that `x` has is compatible with the
+In the example above, although the type of `x` is compatible with the
 type `json`, it's not explicitly defined as such.  The type inference engine
-will figure out a type that is based on how the value `x` is used, and in this
-case only the `Assoc` and `String` variants are present.  One difficulty you
-will encounter is that type errors involving polymorphic variants can be quite
-verbose if you make a mistake in your code.  For example, suppose you build an
-`Assoc` and include a single value instead of a list of keys:
+will figure out a type that is based on how the value `x` is used and in this
+case only the `Assoc` and `String` variants are present.  This "partial" type
+signature is checked against the bigger `json` type it is applied to the `pretty_to_string`
+function, and determined to be compatible.
+
+<sidebar>
+<title>Polymorphic variants and easier type checking</title>
+
+One difficulty you will encounter is that type errors involving polymorphic variants can
+be quite verbose if you make a mistake in your code.  For example, suppose you build an
+`Assoc` and mistakenly include a single value instead of a list of keys:
 
 ```ocaml
 # let x = `Assoc ("key", `String "value");;
@@ -308,11 +416,11 @@ In this case, we've marked the `x` as being of type `Yojson.Basic.json`, and
 the compiler immediately spots that the argument to the `Assoc` variant has the
 incorrect type.  This illustrates the strengths and drawbacks of using
 polymorphic variants: they make it possible to easily subtype across module
-boundaries (the `Basic` and `Safe` in Yojson's case), but the error messages
+boundaries (`Basic` and `Safe` in Yojson's case), but the error messages
 can be more confusing.  However, a bit of careful manual type annotation is 
 all it takes to make tracking down such issues much easier.
 
-_avsm_: segway into memory representation of polyvariants here?
+</sidebar>
 
 #### Using non-standard JSON extensions
 
@@ -508,4 +616,3 @@ variety of other programming languages.
 We'll also return to the Github example here later in the book when discussing
 the Async networking library, and you can find the full ATD specification for
 Github in the [`ocaml-github`](http://github.com/avsm/ocaml-github) repository.
-
