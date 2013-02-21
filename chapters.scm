@@ -74,7 +74,7 @@
  (name "handling-json-data")
  (file "12a-json")
  (public true)
- (note "75% done, on Anil's stack")
+ (note "Largely complete")
  )
 ((part Practical)
  (name "xml-streams-and-trees")
