@@ -71,6 +71,7 @@ already got OPAM. Once installed, you can open it in the `utop` toplevel by:
 #require "yojson" ;;
 open Yojson ;;
 ```
+
 </note>
  
 ### Parsing JSON with Yojson
