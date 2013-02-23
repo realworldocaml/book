@@ -744,14 +744,20 @@ computed and used in its place.
       | Some x -> x
       | None -> Time.now ()
     in
-    printf "%s: %s\n" (Time.to_string time) message ;;
+    printf "%s: %s\n" (Time.to_sec_string time) message ;;
 val print_log_entry : Time.t option -> string -> unit
+# print_log_entry (Some Time.epoch) "A long long time ago";;
+1969-12-31 19:00:00: A long long time ago
+- : unit = ()
+# print_log_entry None "Up to the minute";;
+2013-02-23 16:49:25: Up to the minute
+- : unit = ()
 ```
 
 We use a `match` statement for handling the two possible states of an
 option.
 
-<note> <title> Nesting `let`s </title>
+<note> <title> Nesting `let`s with `let` and `in` </title>
 
 As a side note, this is our first use of `let` to define a new
 variable within the body of a function.  A `let` bounded with an `in`
@@ -871,7 +877,7 @@ One way of doing this is using a _variant_ type:
 
 The `|` character separates the different cases of the variant (the
 first `|` is optional), and each case has a tag, like `Circle`, `Rect`
-and `Scene`, to distinguish that case from the others.  Here's how we
+and `Segment`, to distinguish that case from the others.  Here's how we
 might write a function for testing whether a point is in the interior
 of some element of a list of `scene_element`s.
 
