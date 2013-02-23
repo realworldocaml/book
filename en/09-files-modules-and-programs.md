@@ -47,9 +47,9 @@ let () =
   (* Compute the line counts *)
   let counts = build_counts [] in
   (* Sort the line counts in descending order of frequency *)
-  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -> descending x y) counts  in
+  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -> compare y x) counts  in
   (* Print out the 10 highest frequency entries *)
-  List.iter (List.take 10 sorted_counts) ~f:(fun (line,count) ->
+  List.iter (List.take sorted_counts 10) ~f:(fun (line,count) ->
     printf "%3d: %s\n" count line)
 ```
 
@@ -151,7 +151,7 @@ only works with byte-code.  Also, the byte-code compiler compiles
 faster than the native code compiler.  Also, in order to run a
 bytecode executable you typically need to have OCaml installed on the
 system in question.  That's not strictly required, though, since you
-can a byte-code executable with an embedded runtime, using the
+can build a byte-code executable with an embedded runtime, using the
 `-custom` compiler flag.
 
 As a general matter, production executables should usually be built
@@ -378,7 +378,7 @@ let median t =
   let nth n = fst (List.nth_exn sorted_strings n) in
   if len mod 2 = 1
   then Median (nth (len/2))
-  else Before_and_after (nth (len/2), nth (len/2 + 1));;
+  else Before_and_after (nth (len/2 - 1), nth (len/2));;
 ```
 
 Now, to expose this usefully in the interface, we need to expose both
@@ -534,7 +534,7 @@ module Hostname : sig
 end = struct
   include String_id
   let mine = Unix.gethostname
-end  
+end
 ```
 
 ### Opening modules ###
