@@ -1114,10 +1114,10 @@ Note that the optional argument `?sep` has now disappeared, or
 _erased_.  So when does OCaml decide to erase an optional argument?
 
 The rule is: an optional argument is erased as soon as the first
-positional argument defined _after_ the optional argument is passed
-in.  That explains the behavior of `prepend_pound` above.  But if we
-had instead defined `concat` with the optional argument in the second
-position:
+positional (_i.e._, neither labeled nor optional) argument defined
+_after_ the optional argument is passed in.  That explains the
+behavior of `prepend_pound` above.  But if we had instead defined
+`concat` with the optional argument in the second position:
 
 ```ocaml
 # let concat x ?(sep="") y = x ^ sep ^ y ;;
