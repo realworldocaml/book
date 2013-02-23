@@ -258,6 +258,8 @@ recursive values, which we'll learn about later in the chapter.
 Note that when doing a `let`/`and` style declaration, the order of
 execution of the right-hand side of the binds is undefined by the
 language definition, so one should not write code that relies on it.
+If you want to make sure about the order of evaluation, you should use
+a sequence of `let`/`in` bindings.
 
 ## Functions ##
 
