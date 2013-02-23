@@ -596,9 +596,8 @@ val my_favorite_language : string list -> string = <fun>
 
 Note that we included a comment in the above code.  OCaml comments are
 bounded by `(*` and `*)`, and can be nested arbitrarily and cover
-multiple lines.  There's no equivalent of the C-style single line
-comment that is prefixed by `//` --- all comments must be bounded on
-both sides.
+multiple lines.  There's no equivalent of C-style single line
+comments that are prefixed by `//`.
 
 The first pattern, `first :: the_rest`, covers the case where
 `languages` has at least one element, since every list except for the
@@ -635,9 +634,11 @@ val sum : int list -> int
 - : int = 6
 ```
 
-Note that we had to use the `rec` keyword to allow `sum` to refer to
-itself.  And, as you might imagine, the base case and inductive case
-are different arms of the match.
+Following the common OCaml idiom, we use `hd` to refer to the head of
+the list and `tl` to refer to the tail.  Note that we had to use the
+`rec` keyword to allow `sum` to refer to itself.  As you might
+imagine, the base case and inductive case are different arms of the
+match.
 
 Logically, you can think of the evaluation of a simple recursive
 function like `sum` almost as if it were a mathematical equation whose
