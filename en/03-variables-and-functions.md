@@ -464,12 +464,14 @@ In order to define a recursive function, you need to mark the let
 binding as recursive with the `rec` keyword, as shown in this example:
 
 ```ocaml
-# let rec find_first_stutter = function
-     | [] | [_] ->
-       (* only zero or one elements, so no repeats *)
-       None
-     | x :: y :: tl ->
-       if x = y then Some x else find_first_stutter (y::tl)
+# let rec find_first_stutter list =
+    match list with
+    | [] | [_] ->
+      (* only zero or one elements, so no repeats *)
+      None
+    | x :: y :: tl ->
+      if x = y then Some x else find_first_stutter (y::tl)
+   ;;
 val find_first_stutter : 'a list -> 'a option = <fun>
 ```
 
@@ -1047,8 +1049,7 @@ arguments that shows up in the source code.
 
 Note that these heuristics might at different points in the source
 suggest different types.  Here's a version of `numeric_deriv` where
-the invocations of `f` were changes so they list the arguments in
-different orders.
+different invocations of `f` list the arguments in different orders.
 
 ```ocaml
 # let numeric_deriv ~delta ~x ~y ~f =
