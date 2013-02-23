@@ -130,9 +130,8 @@ fact, the behavior of the function is unchanged.  That's because the
 original definition of `pi` wasn't changed, it was just shadowed, so
 that any subsequent reference to `pi` would see the new definition of
 `pi` as zero.  But there is no later use of `pi`, so the binding
-doesn't make a difference.  Indeed, if you type the example I gave
-above into the toplevel, OCaml will warn you that the definition is
-unused.
+doesn't make a difference.  Indeed, if you type the example above into
+the toplevel, OCaml will warn you that the definition is unused.
 
 ```ocaml
 Characters 126-128:
@@ -144,6 +143,27 @@ Warning 26: unused variable pi.
 In OCaml, let bindings are immutable.  As we'll see in
 [xref](#imperative-programming), there are mutable values in OCaml, but
 no mutable variables.
+
+<note> <title> Why don't variables vary?  </title>
+
+One source confusion for people new to functional langauges is the
+fact that variables are typically immutable.  This seems pretty
+surprising even on linguistic terms.  Isn't the whole point of a
+variable that it can vary?
+
+The answer to this is that variables in a functional language are
+really more like variables in an equation.  If you think about the
+mathematical equation `x (y + z) = x y + x z`, there's no notion of
+mutating the variables `x`, `y` and `z`.  They vary in the sense that
+you can instantiate this equation with different numbers for those
+variables, and it still holds.
+
+The same is true in a functional language.  A function can be applied
+to different inputs, and thus its variables will take on different
+values, even though there's absolutely no mutation.
+
+</note>
+
 
 ### Pattern matching and `let` ###
 
@@ -567,7 +587,7 @@ First character    Usage
 There's one important special case: `-` and `-.`, which are the
 integer and floating point subtraction operators, can act as both
 prefix operators (for negation) and infix operators (for subtraction),
-So, you both `-x` and `x - y` are meaningful expressions.
+So, both `-x` and `x - y` are meaningful expressions.
 
 Here's an example of a very useful operator that's defined in Core,
 following these rules.  Here's the definition:
@@ -1003,7 +1023,7 @@ val numeric_deriv :
 ```
 
 In principle, it's not obvious how the order of the arguments to `f`
-should be chosen.  Since optional arguments can be passed in arbitrary
+should be chosen.  Since labeled arguments can be passed in arbitrary
 order, it seems like it could as well be `y:float -> x:float -> float`
 as it is `x:float -> y:float -> float`.
 
