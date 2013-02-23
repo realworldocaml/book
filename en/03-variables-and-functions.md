@@ -732,18 +732,18 @@ by a leading tilde, and a label (followed by a colon) are put in front
 of the variable to be labeled.
 
 ```ocaml
-# let f ~foo:a ~bar:b = a + b;;
-val f : foo:int -> bar:int -> int = <fun>
+# let ratio ~num ~denom = float num /. float denom;;
+val ratio : num:int -> denom:int -> float = <fun>
 ```
 
 We can then provide a labeled argument using a similar convention.  As
 you can see, the arguments can be provided in any order.
 
 ```ocaml
-# f ~foo:3 ~bar:10;;
-- : int = 13
-# f ~bar:10 ~foo:3;;
-- : int = 13
+# ratio ~num:3 ~denom:10;;
+- : float = 0.3
+# ratio ~denom:10 ~num:3;;
+- : float = 0.3
 ```
 
 OCaml also supports _label punning_, meaning that you get to drop the
@@ -753,10 +753,10 @@ function declaration and function invocation, as shown in these
 examples:
 
 ```ocaml
-# let foo = 3;;
-# let bar = 4;;
-# f ~foo ~bar;;
-- : int = 7
+# let num = 3;;
+# let denom = 4;;
+# ratio ~num ~denom;;
+- : float = 0.75
 ```
 
 Labeled arguments are useful in a few different cases:
