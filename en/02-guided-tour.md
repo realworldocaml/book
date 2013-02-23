@@ -909,7 +909,7 @@ We also made our first use of an _anonymous function_ in the call to
 `List.for_all`.  An anonymous function is a function that is defined
 but not named, in this case, using the `fun` keyword.  Anonymous
 functions are common in OCaml, particularly when using iteration
-functions like like `List.for_all`.
+functions like `List.for_all`.
 
 ## Imperative programming
 
