@@ -934,8 +934,7 @@ Arrays in OCaml are very similar to arrays in other languages like C:
 they are fixed width, indexing starts at 0, and accessing or modifying
 an array element is a constant-time operation.  Arrays are more
 compact in terms of memory utilization than most other data structures
-in OCaml, including lists.  OCaml uses three words per element of a
-list, but only one per element of an array.
+in OCaml, including lists.
 
 Here's an example.
 
@@ -1057,7 +1056,7 @@ val x : int ref = {contents = 0}
 # x := !x + 1 ;;   (* assignment, i.e., x.contents <- ... *)
 - : unit = ()
 # !x ;;
-- : int = 2
+- : int = 1
 ```
 
 The definition of all this is quite straightforward.  Here is the
@@ -1078,11 +1077,10 @@ parenthetical syntax is what marks them as such.
 
 Even though a `ref` is just another record type, it's notable because
 it is the standard way of simulating the traditional mutable variable
-you'll find in most imperative languages.  For example, if we wanted
-to write an imperative loop to sum over the elements of an array, we
-could do it as follows, using the function `List.iter` to call a
-simple function on every element of a list, and a ref to accumulate
-the results.
+you'll find in most imperative languages.  For example, we can sum
+over the elements of a list imperatively by calling `List.iter` to
+call a simple function on every element of a list, using a ref to
+accumulate the results.
 
 ```ocaml
 # let sum list =
@@ -1177,7 +1175,7 @@ so `printf` expects one additional argument of type `float`.
 We can use `ocamlbuild` to compile the program.  We'll need to create
 a file, in the same directory as `sum.ml`, called `_tags`.  We can put
 the following in `_tags` to indicate that we're building against Core,
-and that threads should be enabled, which is a required by Core.
+and that threads should be enabled, which is required by Core.
 
 ```
 true:package(core),thread
