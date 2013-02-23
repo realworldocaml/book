@@ -308,11 +308,11 @@ Error: This expression has type string but
     an expression was expected of type int
 ```
 
-In this example, `big_number` requires that `'a` be of type `int`,
-whereas `"short"` and `"loooooong"` require that `'a` be of type
-`string`, and they can't all be right at the same time.  This kind of
-genericity is called _parametric polymorphism_, and is very similar to
-generics in C# and Java.
+In this example, `big_number` requires that `'a` be instantiated as
+`int`, whereas `"short"` and `"loooooong"` require that `'a` be
+instantiated as `string`, and they can't both be right at the same
+time.  This kind of genericity is called _parametric polymorphism_,
+and is very similar to generics in C# and Java.
 
 <note><title>Type errors vs exceptions</title>
 
