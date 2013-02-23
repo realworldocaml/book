@@ -6,7 +6,7 @@ at JSON and XML, as they are very common third-party data formats.  This chapter
 also introduces you to some nice uses of polymorphic variants, and also using
 external tools to auto-generate OCaml code.
 
-## JSON Basics 
+## JSON Basics
 
 JSON is a lightweight data-interchange format often used in web services and
 browsers.  It's described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt),
@@ -41,7 +41,7 @@ contains a list of records.  Unlike OCaml lists, JSON lists can contain
 multiple different JSON types within a single list.
 
 This free-form nature of JSON types is both a blessing and a curse.  It's very
-easy to generate JSON values, but code that parses them also has to 
+easy to generate JSON values, but code that parses them also has to
 handling subtle variations in how values are represented. For example, what if
 the `pages` value above is actually represented as a string value of `"450"`
 instead of an integer?
@@ -73,7 +73,7 @@ open Yojson ;;
 ```
 
 </note>
- 
+
 ### Parsing JSON with Yojson
 
 The JSON specification has very few data types, and the `Yojson.Basic.json` type
@@ -87,7 +87,7 @@ type json = [
   | `Int of int
   | `List of json list
   | `Null
-  | `String of string ] 
+  | `String of string ]
 ```
 
 Note that some of the type definitions above are recursive.
@@ -107,7 +107,7 @@ val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> js
   [lnum] : number of the first line of input. Default is 1.
 
 val from_channel : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> in_channel -> json
-(* Read a JSON value from a channel. See [from_string] for the meaning of the 
+(* Read a JSON value from a channel. See [from_string] for the meaning of the
    optional arguments. *)
 
 val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
@@ -203,7 +203,7 @@ with recursive values and structural equality for yourself:
 # type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
 type t1 = { foo1 : int; bar1 : t2; }
 and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };; 
+# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
 <lots of text>
 # v1 == v1;;
 - : bool = true
@@ -230,13 +230,13 @@ let () =
 
   (* Locally open the JSON manipulation functions *)
   let open Yojson.Basic.Util in
-  let title = json |! member "title" |! to_string in
-  let tags = json |! member "tags" |! to_list |! filter_string in
-  let pages = json |! member "pages" |! to_int in
-  let is_online = json |! member "is_online" |! to_bool_option in
-  let is_translated = json |! member "is_translated" |! to_bool_option in
-  let authors = json |! member "authors" |! to_list in
-  let names = List.map authors ~f:(fun json -> member "name" json |! to_string) in
+  let title = json |> member "title" |> to_string in
+  let tags = json |> member "tags" |> to_list |> filter_string in
+  let pages = json |> member "pages" |> to_int in
+  let is_online = json |> member "is_online" |> to_bool_option in
+  let is_translated = json |> member "is_translated" |> to_bool_option in
+  let authors = json |> member "authors" |> to_list in
+  let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
 
   (* Print the results of the parsing *)
   printf "Title: %s (%d)\n" title pages;
@@ -267,7 +267,7 @@ You've already run across several of these in the `List` module:
 
 ```ocaml
 val map: 'a list -> f:('a -> 'b) -> 'b list
-val fold: list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum 
+val fold: list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
 val iter: 'a list -> f:('a -> unit) -> unit
 ```
 
@@ -297,22 +297,22 @@ val to_int : json -> int
 val filter_string : json list -> string list
 ```
 
-We'll go through each of these uses one-by-one. 
-Core provides the `|!` pipebang which can chain combinators together,
-and the example code uses this to select and convert values out of the JSON structure.
-Let's examine some of them in more detail:
+We'll go through each of these uses one-by-one.  Core provides the
+`|>` pipe-forward which can chain combinators together, and the
+example code uses this to select and convert values out of the JSON
+structure.  Let's examine some of them in more detail:
 
 ```ocaml
   let open Yojson.Basic.Util in
-  let title = json |! member "title" |! to_string in
+  let title = json |> member "title" |> to_string in
 ```
 
 For the `title` field, the `member` combinator extracts the key from the `json` value, and converts it to an OCaml string.
 An exception is raised if the JSON value is not a string, so the caller must be careful to `try/with` the result.
 
 ```ocaml
-  let tags = json |! member "tags" |! to_list |! filter_string in
-  let pages = json |! member "pages" |! to_int in
+  let tags = json |> member "tags" |> to_list |> filter_string in
+  let pages = json |> member "pages" |> to_int in
 ```
 
 The `tags` field is similar to `title`, but the field is a list of strings instead of a single one.
@@ -320,28 +320,29 @@ Converting this to an OCaml `string list` is a two stage process: first, we must
 then filter out the `String` values.  Remember that OCaml lists must have a single type, so any other JSON values will be skipped from the output of `filter_string`.
 
 ```ocaml
-  let is_online = json |! member "is_online" |! to_bool_option in
-  let is_translated = json |! member "is_translated" |! to_bool_option in
+  let is_online = json |> member "is_online" |> to_bool_option in
+  let is_translated = json |> member "is_translated" |> to_bool_option in
 ```
 
 The `is_online` and `is_translated` fields are optional in our JSON schema, so no error should be raised if they are not present. The OCaml type is a `string option` to reflect this, and can be extracted via `to_bool_option`.  In our example JSON, only `is_online` is present and `is_translated` will be `None`.
 
 ```ocaml
-  let authors = json |! member "authors" |! to_list in
-  let names = List.map authors ~f:(fun json -> member "name" json |! to_string) in
+  let authors = json |> member "authors" |> to_list in
+  let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
 ```
 
-The final use of JSON combinators is to extract the `name` fields from the `author` list.
-We first construct the `author` list, and then `map` it into a `string list`.  Notice that
-the example explicitly binds `authors` to a variable name.  It can also be written more
-succinctly using the pipebang operator:
+The final use of JSON combinators is to extract the `name` fields from
+the `author` list.  We first construct the `author` list, and then
+`map` it into a `string list`.  Notice that the example explicitly
+binds `authors` to a variable name.  It can also be written more
+succinctly using the pipe-forward operator:
 
 ```ocaml
 let names =
-  json |!
-  member "authors" |!
-  to_list |!
-  List.map ~f:(fun json -> member "name" json |! to_string)
+  json
+  |> member "authors"
+  |> to_list
+  |> List.map ~f:(fun json -> member "name" json |> to_string)
 ```
 
 This style of programming which omits variable names and chains functions
@@ -356,7 +357,7 @@ combination with the OCaml type system. Many errors that don't make sense
 at runtime (for example, mixing up lists and objects) will be caught statically
 via a type error.
 
-### Constructing JSON values 
+### Constructing JSON values
 
 Building and printing JSON values is pretty straightforward given the `Yojson.Basic.json`
 type.  You can just construct values of type `json` and call the `to_string` function]
@@ -418,7 +419,7 @@ the compiler immediately spots that the argument to the `Assoc` variant has the
 incorrect type.  This illustrates the strengths and drawbacks of using
 polymorphic variants: they make it possible to easily subtype across module
 boundaries (`Basic` and `Safe` in Yojson's case), but the error messages
-can be more confusing.  However, a bit of careful manual type annotation is 
+can be more confusing.  However, a bit of careful manual type annotation is
 all it takes to make tracking down such issues much easier.
 
 </sidebar>
@@ -432,7 +433,7 @@ human-readable local format.  The `Yojson.Safe.json` type is a superset of the
 `Basic` polymorphic variant, and looks like this:
 
 ```ocaml
-type json = [ 
+type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
   | `Float of float
@@ -444,7 +445,7 @@ type json = [
   | `String of string
   | `Stringlit of string
   | `Tuple of json list
-  | `Variant of string * json option ] 
+  | `Variant of string * json option ]
 ```
 
 You should immediately be able to spot a benefit of using polymorphic variants
@@ -458,7 +459,7 @@ The extensions includes with Yojson include:
 * The `lit` suffix denotes that the value is stored as a JSON string. For example, a `Floatlit` will be stored as `"1.234"` instead of `1.234`.
 * The `Tuple` type is stored as `("abc", 123)` instead of a list.
 * The `Variant` type encodes OCaml variants more explicitly, as `<"Foo">` or `<"Bar":123>` for a variant with parameters.
- 
+
 The only purpose of these extensions is to make the data representation more
 expressive without having to refer to the original OCaml types.  You can always
 cast a `Safe.json` to a `Basic.json` type by using the `to_basic` function as follows:
@@ -467,7 +468,7 @@ cast a `Safe.json` to a `Basic.json` type by using the `to_basic` function as fo
 val to_basic : json -> Yojson.Basic.json
 (** Tuples are converted to JSON arrays, Variants are converted to JSON strings
 or arrays of a string (constructor) and a json value (argument). Long integers
-are converted to JSON strings.  Examples: 
+are converted to JSON strings.  Examples:
 
 `Tuple [ `Int 1; `Float 2.3 ]   ->    `List [ `Int 1; `Float 2.3 ]
 `Variant ("A", None)            ->    `String "A"
@@ -546,13 +547,13 @@ to the ATD file.  It looks like this:
 
 ```ocaml
 type scope = [
-  | `User | `Public_repo | `Repo | `Repo_status 
+  | `User | `Public_repo | `Repo | `Repo_status
   | `Delete_repo | `Gist
 ]
 
-type app = { 
-  app_name (*atd name *): string; 
-  app_url (*atd url *): string 
+type app = {
+  app_name (*atd name *): string;
+  app_url (*atd url *): string
 }
 
 type authorization_request = {
@@ -589,7 +590,7 @@ val string_of_authorization_response :
   ?len:int -> authorization_response -> string
   (** Serialize a value of type {!authorization_response}
       into a JSON string.
-      @param len specifies the initial length 
+      @param len specifies the initial length
                  of the buffer used internally.
                  Default: 1024. *)
 

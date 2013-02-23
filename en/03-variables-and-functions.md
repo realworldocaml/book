@@ -573,8 +573,8 @@ Here's an example of a very useful operator that's defined in Core,
 following these rules.  Here's the definition:
 
 ```ocaml
-# let (|!) x f = f x ;;
-val ( |! ) : 'a -> ('a -> 'b) -> 'b = <fun>
+# let (|>) x f = f x ;;
+val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>
 ```
 
 It's not quite obvious at first what the purpose of this operator is:
@@ -588,9 +588,9 @@ using the provided comparison function.
 
 ```ocaml
 # Sys.getenv_exn "PATH"
-  |! String.split ~on:':'
-  |! List.dedup ~compare:String.compare
-  |! List.iter ~f:print_endline
+  |> String.split ~on:':'
+  |> List.dedup ~compare:String.compare
+  |> List.iter ~f:print_endline
   ;;
 /bin
 /opt/local/bin
@@ -619,14 +619,14 @@ function for printing out a list of strings.
 - : string list -> unit = <fun>
 ```
 
-It is this later form that we're using in the `|!` pipeline above.
+It is this later form that we're using in the `|>` pipeline above.
 
-Note that `|!` only works in the intended way because it is
+Note that `|>` only works in the intended way because it is
 left-associative.  Indeed, let's see what happens if we try using a
 right associative operator, like (^!).
 
 ```ocaml
-# let (^!) = (|!);;
+# let (^!) = (|>);;
 val ( ^! ) : 'a -> ('a -> 'b) -> 'b = <fun>
 # Sys.getenv_exn "PATH"
   ^! String.split ~on:':'
@@ -792,9 +792,9 @@ Labeled arguments are useful in a few different cases:
 
     ```ocaml
     # Sys.getenv_exn "PATH"
-      |! String.split ~on:':'
-      |! List.dedup ~compare:String.compare
-      |! List.iter ~f:print_endline
+      |> String.split ~on:':'
+      |> List.dedup ~compare:String.compare
+      |> List.iter ~f:print_endline
       ;;
     ```
 

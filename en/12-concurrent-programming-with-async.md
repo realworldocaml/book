@@ -41,9 +41,13 @@ help).  Let's see how to implement them first.
 
 ### URI handling
 
-You're hopefully familiar with HTTP URLs, which identify endpoints across the World Wide Web.  These are actually part of a more general family known
-as Uniform Resource Identifiers (URIs). The full URI specification is defined in [RFC3986](http://tools.ietf.org/html/rfc3986) (and is rather complicated!).
-Luckily, the `ocaml-uri` library provides a strongly-typed interface which takes care of much of the hassle.
+You're hopefully familiar with HTTP URLs, which identify endpoints
+across the World Wide Web.  These are actually part of a more general
+family known as Uniform Resource Identifiers (URIs). The full URI
+specification is defined in
+[RFC3986](http://tools.ietf.org/html/rfc3986) (and is rather
+complicated!).  Luckily, the `ocaml-uri` library provides a
+strongly-typed interface which takes care of much of the hassle.
 
 ```ocaml
 (* Generate a DuckDuckGo search URI from a query string *)
@@ -79,8 +83,8 @@ type json = [
   | `Tuple of json list
 ]
 ```ocaml
- 
-We're expecting the DuckDuckGo response to be a record, with an optional `Description` field being one of the keys in the record. 
+
+We're expecting the DuckDuckGo response to be a record, with an optional `Description` field being one of the keys in the record.
 The `get_definition_from_json` does a pattern match on this, and returns an optional string if a definition is found within the result.
 
 ```ocaml
@@ -96,9 +100,9 @@ let get_definition_from_json (json:string) =
 ```
 
 Notice that we use options here instead of throwing exceptions on an error.
-When the `Option` module is opened, it provides a `map` operator (`>>|`) which 
+When the `Option` module is opened, it provides a `map` operator (`>>|`) which
 calls the bound closure if the value exists.
-If no result is found, then the `Yojson.Safe.to_string` conversion function is simply ignored, and a `None` returned. 
+If no result is found, then the `Yojson.Safe.to_string` conversion function is simply ignored, and a `None` returned.
 
 ### Executing an HTTP client query
 
@@ -114,8 +118,8 @@ let do_ddg_query query =
       let buf = Buffer.create 128 in
       Pipe.iter_without_pushback body ~f:(Buffer.add_string buf)
       >>| fun () ->
-      get_definition_from_json (Buffer.contents buf) |!
-      Option.value ~default:"???"
+      get_definition_from_json (Buffer.contents buf)
+      |> Option.value ~default:"???"
   | Some (_, None) | None ->
       failwith "no body in response"
 ```
@@ -125,7 +129,7 @@ For this code, you'll need to OPAM install the `cohttp` library.  The `Cohttp_as
 The `Deferred.t` represents a *future* value whose result is not available yet. You can "wait" for the result by binding a callback using the `>>=` operator (which is imported when you open `Async.Std`). This is the same monad pattern available in other Core libraries such as `Option`, but instead of operating on optional values, we are now mapping over future values.
 We'll come back to monads later in this chapter. (_avsm_: TODO xref)
 
-The `ddg_query` function invokes the HTTP client call, and returns a tuple containing the response codes and headers, and a `string Pipe.Reader`.  Pipes in Async are often used to transmit large amounts of data between two processes or concurrent threads.  The `Cohttp` library creates a `Pipe.Writer` which it outputs the HTTP body into, and provides your application with the `Reader` end. 
+The `ddg_query` function invokes the HTTP client call, and returns a tuple containing the response codes and headers, and a `string Pipe.Reader`.  Pipes in Async are often used to transmit large amounts of data between two processes or concurrent threads.  The `Cohttp` library creates a `Pipe.Writer` which it outputs the HTTP body into, and provides your application with the `Reader` end.
 
 In this case, the HTTP body probably isn't very large, so we just iterate over the Pipe's contents until we have the full HTTP body in a `Buffer.t`.
 Once the full body has been retrieved into our buffer, the next callback passes it through the JSON parser and returns a human-readable string of the search description that DuckDuckGo gave us.
@@ -311,7 +315,7 @@ You can see this by executing the `flip` function at the toplevel a few times.
 
 ```ocaml
 # Thread_safe.block_on_async_exn flip ;;
-# - : string * Time.Span.t * Time.Span.t = ("Heads!", 2.86113s, 3.64635s) 
+# - : string * Time.Span.t * Time.Span.t = ("Heads!", 2.86113s, 3.64635s)
 # Thread_safe.block_on_async_exn flip ;;
 # - : string * Time.Span.t * Time.Span.t = ("Tails!", 4.44979s, 2.14977s)
 ```

@@ -41,7 +41,7 @@ like:
 <RelatedTopics>
  <RelatedTopic>
    <Text>Companies based in Pennsylvania</Text>
-   <FirstURL> 
+   <FirstURL>
      http://duckduckgo.com/c/Companies_based_in_Pennsylvania
    </FirstURL>
  </RelatedTopic>
@@ -82,8 +82,8 @@ XMLM:
 type signal = [
   | `Data of string
   | `Dtd of dtd
-  | `El_end 
-  | `El_start of tag 
+  | `El_end
+  | `El_start of tag
 ]
 ```
 
@@ -130,8 +130,8 @@ available.
 type source = [
   | `Channel of in_channel
   | `Fun of unit -> int
-  | `String of int * string 
-] 
+  | `String of int * string
+]
 ```
 
 The `Fun` channel returns one character at a time as an integer, and `String`
@@ -157,19 +157,19 @@ convert a signal stream into an OCaml structure by defining the following data
 type and helper functions:
 
 ```ocaml
-type tree = 
+type tree =
   | Element of Xmlm.tag * tree list
   | Data of string
 
-let in_tree i = 
+let in_tree i =
   let el tag children = Element (tag, children) in
   let data d = Data d in
   Xmlm.input_doc_tree ~el ~data i
 
-let out_tree o t = 
+let out_tree o t =
   let frag = function
-  | Element (tag, childs) -> `El (tag, childs) 
-  | Data d -> `Data d 
+  | Element (tag, childs) -> `El (tag, childs)
+  | Data d -> `Data d
   in
   Xmlm.output_doc_tree frag o t
 ```
@@ -188,7 +188,7 @@ val name : Xmlm.tag -> string
    and return the concatenated contents of all of them *)
 val filter_tag : string -> tree list -> tree list
 
-(* Given a list of [trees], concatenate all of the data contents               
+(* Given a list of [trees], concatenate all of the data contents
    into a string, and discard any sub-tags within it *)
 val concat_data : tree list -> string
 ```
@@ -207,12 +207,12 @@ let filter_tag n =
       ts @ acc
     |_ -> acc
   )
-     
+
 let concat_data =
   List.fold_left ~init:"" ~f:(fun acc ->
     function
     |Data s -> acc ^ s
-    |_ -> acc                           
+    |_ -> acc
   )
 ```
 
@@ -228,11 +228,11 @@ a matter of chaining the combinators together to peform the selection over the
 
 ```ocaml
 let topics trees =
-  filter_tag "DuckDuckGoResponse" trees |!
-  filter_tag "RelatedTopics" |!
-  filter_tag "RelatedTopic" |!
-  filter_tag "Text" |!
-  List.iter ~f:(fun x -> concat_data [x] |! print_endline)
+  filter_tag "DuckDuckGoResponse" trees
+  |> filter_tag "RelatedTopics"
+  |> filter_tag "RelatedTopic"
+  |> filter_tag "Text"
+  |> List.iter ~f:(fun x -> concat_data [x] |> print_endline)
 
 let _ =
   let i = Xmlm.make_input (`Channel (open_in "ddg.xml")) in
@@ -387,7 +387,7 @@ let rec xml_of_author author : Cow.Xml.t =
       (match [ `Data author.name ] with
        | [] -> []
        | _ ->
-         [ `El (((("", "name"), []) : Cow.Xml.tag), 
+         [ `El (((("", "name"), []) : Cow.Xml.tag),
          [ `Data author.name ]) ]) ]
 ```
 
@@ -473,7 +473,7 @@ pre-processing, but also to override the core language grammar with new
 constructs.  The most common way of doing this is by embedding the custom
 grammars inside `<:foo< ... >>` tags, where `foo` represents the particular
 grammar being used.  In the case of COW, this lets you generate XMLM-compatible
-OCaml values just by typing in XML tags.  
+OCaml values just by typing in XML tags.
 
 TODO antiquotations.
 

@@ -155,14 +155,14 @@ object `average` that returns the average of any two objects with a
   object
     method get = (p1#get + p2#get) / 2
   end;;
-val average : 
-  < get : int; .. > -> 
+val average :
+  < get : int; .. > ->
   < get : int; .. > ->
   < get : int > = <fun>
 ```
 
 There's some new syntax in the type that's been inferred for `average` here.
-The parameters have the object type `< get : int; .. >`. 
+The parameters have the object type `< get : int; .. >`.
 The `..` are ellipsis, standing for any other methods.  The
 type `< get : int; .. >` specifies an object that must have at least a
 `get` method, and possibly some others as well.
@@ -365,10 +365,10 @@ open Core.Std
 open Cryptokit
 
 let _ =
-  In_channel.(input_all stdin) |!
-  hash_string (Hash.md5 ()) |!
-  transform_string (Hexa.encode ()) |!
-  print_endline
+  In_channel.(input_all stdin)
+  |> hash_string (Hash.md5 ())
+  |> transform_string (Hexa.encode ())
+  |> print_endline
 ```
 
 After opening the right modules, we read in the entire standard input into an OCaml string.
@@ -389,10 +389,10 @@ let _ =
     |"sha1" -> Hash.sha1 ()
     |_ -> Hash.md5 ()
   in
-  In_channel.(input_all stdin) |!
-  hash_string hash_fn |!
-  transform_string (Hexa.encode ()) |!
-  print_endline
+  In_channel.(input_all stdin)
+  |> hash_string hash_fn
+  |> transform_string (Hexa.encode ())
+  |> print_endline
 ```
 
 Now let's try something more advanced.  The `openssl` library is installed on most systems, and can be used to encrypt plaintext using several encryption strategies.  At its simplest, it will take a secret phrase and derive an appropriate key and initialisation vector.
@@ -438,10 +438,10 @@ Notice how the encoder object is used as an accumulator, by using the `put_strin
 let evp_byte_to_key password tlen =
   let rec aux acc v =
     match String.length acc < tlen with
-    |true ->
+    | true ->
       let v = md5 (v ^ password) in
       aux (acc^v) v
-    |false -> acc
+    | false -> acc
   in
   let v = md5 password in
   String.uppercase (transform_string (Hexa.encode ()) (aux v v))
@@ -493,10 +493,10 @@ the class will be "too polymorphic," `x` could have some type `'b` and
   object
     val mutable value = x
     val mutable next_node = None
-  
+
     method get = value
     method set x = value <- x
-  
+
     method next = next_node
     method set_next node = next_node <- node
   end;;
@@ -770,11 +770,11 @@ module SList = struct
    class ['a] node x = object ... end
    class ['a] slist_iterator cur = object ... end
    class ['a] slist = object ... end
-   
+
    let make () = new slist
 end;;
 ```
-   
+
 We have multiple choices in defining the module type, depending on
 how much of the implementation we want to expose.  At one extreme, a
 maximally-abstract signature would completely hide the class

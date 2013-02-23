@@ -201,9 +201,9 @@ let intervals =
 
 let () =
   intervals
-  |! List.sexp_of_t Int_interval.sexp_of_t
-  |! Sexp.to_string_hum
-  |! print_endline
+  |> List.sexp_of_t Int_interval.sexp_of_t
+  |> Sexp.to_string_hum
+  |> print_endline
 ```
 
 But we're still missing something: we haven't created an `mli` for
@@ -306,7 +306,7 @@ type t = { a: string; b: int; c: float option } with sexp
 let run () =
   let t =
     Sexp.load_sexp "foo.scm"
-    |! t_of_sexp
+    |> t_of_sexp
   in
   printf "b is: %d\n%!" t.b
 

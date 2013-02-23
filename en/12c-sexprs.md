@@ -15,7 +15,7 @@ formats in [xref](#handling-json-data) and [xref](#xml-streams-and-trees).
 <note>
 <title>The `camlp4` preprocessor and `type_conv`</title>
 
-OCaml doesn't directly support converting static type definitions to and 
+OCaml doesn't directly support converting static type definitions to and
 from other data formats.  Instead, it supplies a powerful syntax extension
 mechanism known as `camlp4`.  This lets you extend the grammar of the language
 to mark types as requiring special action, and then mechanically generate
@@ -209,12 +209,12 @@ let intervals =
 
 let () =
   intervals
-  |! List.sexp_of_t Int_interval.sexp_of_t
-  |! Sexp.to_string_hum
-  |! print_endline
+  |> List.sexp_of_t Int_interval.sexp_of_t
+  |> Sexp.to_string_hum
+  |> print_endline
 ```
 
-But we're still missing something: we haven't created an `mli` signature 
+But we're still missing something: we haven't created an `mli` signature
 for `Int_interval` yet.  Note that we need to explicitly export the
 s-expression converters that were created within the ml.  If we don't:
 
@@ -321,7 +321,7 @@ type t = { a: string; b: int; c: float option } with sexp
 let run () =
   let t =
     Sexp.load_sexp "foo.scm"
-    |! t_of_sexp
+    |> t_of_sexp
   in
   printf "b is: %d\n%!" t.b
 
@@ -384,7 +384,7 @@ figuring out what has gone wrong.
 Sexplib supports a collection of directives for modifying the default
 behavior of the auto-generated sexp-converters.  These directives allow
 you to customize the way in which types are represented as
-s-expressions without having to write a custom parser. 
+s-expressions without having to write a custom parser.
 
 ### `sexp-opaque`
 

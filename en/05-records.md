@@ -470,7 +470,7 @@ created.
 
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming does have its place.  We'll discuss more about how (and
-when) to use OCaml's imperative features in 
+when) to use OCaml's imperative features in
 [xref](#imperative-programming).
 
 ## First-class fields
@@ -526,11 +526,11 @@ representative of each field, in the form of a value of type
   `Some f` if it is, where `f` is a function for mutating that field.
 
 We can use these first class fields to do things like write a generic
-function for displaying a record field. 
+function for displaying a record field.
 
 ```ocaml
 # let show_field field to_string record =
-     sprintf "%s: %s" (Field.name field) (Field.get field record |! to_string);;
+     sprintf "%s: %s" (Field.name field) (Field.get field record |> to_string);;
 val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string =
   <fun>
 ```
