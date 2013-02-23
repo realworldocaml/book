@@ -19,7 +19,7 @@ try out the examples.
 <title>Installing `utop`</title>
 
 The easiest way to get the examples running is to set up the OPAM
-package manager, which is explained in [xref](#installation). 
+package manager, which is explained in [xref](#installation).
 In a nutshell, you need to have a working C compilation environment
 and the PCRE library installed, and then:
 
@@ -141,6 +141,10 @@ val ratio : int -> int -> float = <fun>
 - : float = 0.571428571428571397
 ```
 
+As a side note, the above is our first use of OCaml modules.  The
+`Float` module contains a collection of useful functions for dealing
+with floats, including the function `Float.of_int`.
+
 The notation for the type-signature of a multi-argument functions may
 be a little surprising at first, but we'll explain where it comes from
 when we get to function currying in [xref](#variables-and-functions).
@@ -162,8 +166,8 @@ the integers that pass the test.
 
 ```ocaml
 # let sum_if_true test first second =
-    (if test x then x else 0)
-    + (if test y then y else 0)
+    (if test first then first else 0)
+    + (if test second then second else 0)
   ;;
 val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ```
@@ -215,7 +219,7 @@ As an example, let's walk through the process of inferring the type of
 - The fact that `+` returns an int implies that the return value of
   `sum_if_true` must be int.
 
-Together, that nails down the the types of all the variables, which
+Together, that nails down the types of all the variables, which
 determines the overall type of `sum_if_true`.
 
 Over time, you'll build a rough intuition for how the OCaml inference
@@ -564,7 +568,7 @@ Exception: Match_failure ("//toplevel//", 11, 10).
 
 You can avoid these warnings, and more importantly make sure that your
 code actually handles all of the possible cases, by using a `match`
-statement instead.  
+statement instead.
 
 A `match` statement is a kind of juiced-up version of the switch
 statement found in `C` and `Java`.  It essentially lets you list a
@@ -633,7 +637,7 @@ val sum : int list -> int
 
 Note that we had to use the `rec` keyword to allow `sum` to refer to
 itself.  And, as you might imagine, the base case and inductive case
-are different arms of the match.  
+are different arms of the match.
 
 Logically, you can think of the evaluation of a simple recursive
 function like `sum` almost as if it were a mathematical equation whose
@@ -1107,7 +1111,7 @@ val permute : 'a array -> unit = <fun>
 ```
 
 From a syntactic perspective, you should note the keywords that
-distinguish a for loop: `for`, `to`, `do` and `done`.  
+distinguish a for loop: `for`, `to`, `do` and `done`.
 
 Here's an example run of this code.
 
@@ -1151,7 +1155,7 @@ function `read_and_accumulate` is a recursive function that uses
 `In_channel.input_line` to read in lines one by one from the standard
 input, invoking itself at each iteration with its updated accumulated
 sum.  Note that `input_line` returns an optional value, with `None`
-indicating the end of the input.  
+indicating the end of the input.
 
 After `read_and_accumulate` returns, the total needs to be printed.
 This is done using the `printf` command, which provides support for
@@ -1197,7 +1201,7 @@ Total: 100.5
 
 More work is needed to make a really usable command-line programming,
 including a proper command-line parsing interface and better error
-handling.  
+handling.
 
 ## Where to go from here
 
