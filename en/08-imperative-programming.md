@@ -708,7 +708,7 @@ The main difference between our implementation of laziness and the
 built-in version is syntax.  Rather than writing `create_lazy (fun ()
 -> sqrt 16.)`, we can just write `lazy (sqrt 16.)`.
 
-### Memoization
+### Memoization and Dynamic Programming
 
 Another unobservable effect is _memoization_.  A memoized function
 remembers the result of previous invocations of the function so that
@@ -735,20 +735,22 @@ val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
 Note that we use `Hashtbl.Poly.create` to create a hash table using
-OCaml's built-in polymorphic hash function.  It's also possible to
-create a hash-table using a hash function specialized to a given
-type.
+OCaml's built-in polymorphic hash function.
 
 Memoization can be useful whenever you have a function that is
 expensive to recompute, and you don't mind caching old values
-indefinitely.  But memoization is also useful for efficiently
-implementing some recursive algorithms.  One good example is the
-algorithm for computing the _edit distance_ (also called the
-Levenshtein distance) between two strings.  The edit distance is the
-number of single-character changes (including letter switches,
-insertions and deletions) required to convert one string to the other.
-This kind of distance metric can be useful for a variety of
-approximate string matching problems, like spell checkers.
+indefinitely.  One important caution: every time you create a memoized
+function, there's something of a built-in memory leak.  As long as you
+hold on to the memoized function, you're holding every result it has
+returned thus far.
+
+Memoization is also useful for efficiently implementing some recursive
+algorithms.  One good example is the algorithm for computing the _edit
+distance_ (also called the Levenshtein distance) between two strings.
+The edit distance is the number of single-character changes (including
+letter switches, insertions and deletions) required to convert one
+string to the other.  This kind of distance metric can be useful for a
+variety of approximate string matching problems, like spell checkers.
 
 Consider the following code for computing the edit distance.
 Understanding the algorithm isn't important here, but you should pay
@@ -811,10 +813,10 @@ function.
 ```ocaml
 # let time f =
     let start = Time.now () in
-    let y = f () in
+    let x = f () in
     let stop = Time.now () in
     printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
-    y ;;
+    x ;;
 val time : (unit -> 'a) -> 'a = <fun>
 ```
 
@@ -829,36 +831,35 @@ Time: 19.3322s
 - : int = 2
 ```
 
-Just those few extra characters made it almost 4000 times slower!
+Just those few extra characters made it almost four thousand times
+slower!
 
 Memoization would be a huge help here, but to fix the problem, we need
-to memoize the calls that `edit_distance` makes to itself.  To see how
-to do this, let's step away from `edit_distance`, and instead consider
-a much simpler example: computing the nth element of the Fibonacci
-sequence.  The Fibonacci sequence by definition starts out with two
-`1`'s, with every subsequent element being the sum of the previous
-two.  The classic recursive definition of Fibonacci is as follows:
+to memoize the calls that `edit_distance` makes to itself.  This
+technique is sometimes referred to as _dynamic programming_.  To see
+how to do this, let's step away from `edit_distance`, and instead
+consider a much simpler example: computing the nth element of the
+Fibonacci sequence.  The Fibonacci sequence by definition starts out
+with two `1`'s, with every subsequent element being the sum of the
+previous two.  The classic recursive definition of Fibonacci is as
+follows:
 
 ```ocaml
 # let rec fib i =
     if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
 ```
+
 This is, however, exponentially slow, for the same reason that
 `edit_distance` was slow: we end up making many redundant calls to
 `fib`.  It shows up quite dramatically in the performance.
 
 ```ocaml
-# time (fun () -> fib 5);;
-Time: 0.0100136ms
-- : int = 8
-# time (fun () -> fib 10);;
-Time: 0.0441074ms
-- : int = 89
 # time (fun () -> fib 20);;
 Time: 5.17392ms
 - : int = 10946
 # time (fun () -> fib 40);;
 Time: 51.4205s
+- : int = 165580141
 ```
 
 Here, `fib 40` takes almost a minute to compute, as opposed to five
@@ -867,118 +868,124 @@ _milliseconds_ for `fib 20`.
 So, how can we use memoization to make this faster?  The tricky bit is
 that we need to insert the memoization before the recursive calls
 within `fib`.  We can't just define `fib` in the ordinary way and
-memoize it after the fact and expect any improvement.
-
-The first step is to write `fib` in a way that partially unwinds the
-recursion.  The following definition of `fib_recur` expects as its
-first argument to be passed a function that it can use for making its
-recursive calls.
+memoize it after the fact and expect the first call to `fib` to be
+improved (though of course repeated calls will be improved).
 
 ```ocaml
-# let fib_recur recur i =
+# let fib = memoize fib;;
+val fib : int -> int = <fun>
+# time (fun () -> fib 40);;
+Time: 52.6s
+- : int = 165580141
+# time (fun () -> fib 40);;
+Time: 0.00596046ms
+- : int = 165580141
+```
+
+In order to make `fib` fast, our first step will be to rewrite `fib`
+in a way that unwinds the recursion.  The following version expects as
+its first argument a function (called `fib`) that will be called in
+lieu of the usual recursive call.
+
+```ocaml
+# let fib_norec fib i =
     if i <= 1 then i
-    else recur (i - 1) + recur (i - 2) ;;
-val fib_recur : (int -> int) -> int -> int = <fun>
+    else fib (i - 1) + fib (i - 2) ;;
+val fib_norec : (int -> int) -> int -> int = <fun>
 ```
 
 We can now turn this back into an ordinary Fibonacci function by tying
 the recursive knot, as shown below.
 
 ```ocaml
-# let rec fib i = fib_recur fib i
+# let rec fib i = fib_norec fib i
 val fib : int -> int = <fun>
 # fib 5;;
 - : int = 8
 ```
 
-And we can even write a polymorphic function that we'll call `fix`
+We can even write a polymorphic function that we'll call `make_rec`
 that can tie the recursive not for any function of this form.
 
 ```ocaml
-# let fix f =
-    let rec f' x = f f' x in
-    f'
+# let make_rec f_norec =
+    let rec f x = f_norec f x in
+    f
   ;;
-val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-# let fib = fix fib_recur;;
+val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+# let fib = make_rec fib_norec;;
 val fib : int -> int = <fun>
 # fib 5;;
 - : int = 8
 ```
 
 This is a pretty strange piece of code, and it may take a few minutes
-of staring at this to figure out what's going on.  Like `fib_recur`,
-the function `f` passed into `fix` is a function that isn't recursive,
-but takes as an argument of a function that it will call.  What `fix`
-does is to essentially feed `f` to itself, thus making a true
-recursive function.
+of thought to figure out what's going on.  Like `fib_norec`, the
+function `f_norec` passed into `make_rec` is a function that isn't
+recursive, but takes as an argument a function that it will call.
+What `make_rec` does is to essentially feed `f_norec` to itself, thus
+making it a true recursive function.
 
-This is clever enough, but all we've done so far is find a new way to
+This is clever enough, but all we've really done is find a new way to
 implement the same old slow Fibonacci function.  To make it faster, we
-need a function like `fix` that inserts memoization when it ties the
-recursive knot.  Here is just such a function.
+need variant on `make_rec` that inserts memoization when it ties the
+recursive knot.  We'll call that function `memo_rec`.
 
 ```ocaml
-# let memo_fix f =
-     let rec f' = lazy (memoize (fun x -> f (Lazy.force f') x)) in
-     Lazy.force f'
+# let memo_rec f_norec x =
+     let fref = ref (fun _ -> assert false) in
+     let f = memoize (fun x -> f_norec !fref x) in
+     fref := f;
+     f x
   ;;
-val memo_fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 ```
 
-It's not obvious why we need to use laziness here.   It seems like you
-should be able to get away with just dropping the the `lazy` and the
-`Lazy.force` from the above code, as follows.
+Note that `memo_rec` has the same signature as `make_rec`.
+
+We're using the reference here as a way of tying the recursive knot
+without using a `let rec`, which for reasons we'll describe later
+wouldn't work here.
+
+Using `memo_rec`, we can now build an efficient version of `fib`.
 
 ```ocaml
-# let memo_fix f =
-     let rec f' = memoize (fun x -> f f' x) in
-     f'
-  ;;
-      Characters 35-60:
-       let rec f' = memoize (fun x -> f f' x) in
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: This kind of expression is not allowed as right-hand side of `let rec'
-```
-
-OCaml rejects the definition because OCaml, as a strict language,
-can't safely construct the closure `(fun x -> f f' x)` until `f'`
-itself is defined, and `f'` can't be defined until `memoize` runs, by
-which time the closure already needs to exist.  Generally, OCaml
-requires that the right hand side of a `let rec` be either a function,
-a `lazy` value or a variant or record constructor.
-
-In any case, using `memo_fix`, we can now build an efficient version
-of `fib`.
-
-```ocaml
-# let fib = memo_fix fib_recur;;
+# let fib = memo_rec fib_recur;;
 val fib : int -> int = <fun>
 # time (fun () -> fib 40);;
 Time: 0.236034ms
 ```
 
-We can even combine this into one compact form that makes this look as
-much as possible like an ordinary function declaration.  Here, we're
-essentially using `memo_fix` as a custom form of `let rec`.
+And as you can see, the exponential time complexity is now gone.
+
+The memory behavior here is important.  If you look back at the
+definition of `memo_rec`, you'll see that the call to memo_rec does
+not trigger a call to `memoize`.  Only when the final argument to
+`fib` is presented does `memoize` get called, and the result of that
+call falls out of scope when the `fib` call returns.  That means that,
+unlike ordinary memoization, calling `memo_rec` on a function does not
+create a memory leak --- the memoization table is collected after the
+computation completes.
+
+We can use `memo_rec` as part of a single declaration that makes this
+look like it's little more than a special form of `let rec`.
 
 ```ocaml
-# let fib = memo_fix (fun fib i ->
+# let fib = memo_rec (fun fib i ->
     if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
 val fib : int -> int = <fun>
 ```
 
-This very same approach will work for `edit_distance`.  The one change
-we'll need to make is that `edit_server` will now take a pair of
+This same approach will work for `edit_distance`.  The one change
+we'll need to make is that `edit_distance` will now take a pair of
 strings as a single argument, since `memoize` only works sensibly for
 single-argument functions.  We can always recover the original
 interface with a wrapper function.
 
 ```ocaml
-# let edit_distance = memo_fix (fun edit_distance (s,t) ->
+# let edit_distance = memo_rec (fun edit_distance (s,t) ->
     match String.length s, String.length t with
-    | (0,x) | (x,0) -> x (* if either string is empty, return the length of the
-                            other string. *)
+    | (0,x) | (x,0) -> x
     | (len_s,len_t) ->
       let s' = String.drop_suffix s 1 in
       let t' = String.drop_suffix t 1 in
@@ -1001,6 +1008,81 @@ than the one we started with.
 Time: 2.14601ms
 - : int = 2
 ```
+
 This is about ten thousand times faster than our original
 implementation.
+
+<note> <title> Limitations of `let rec` </title>
+
+You might wonder why we didn't tie the recursive knot in
+`memo_rec` using `let rec`, as we did for `make_rec` earlier.  Here's
+code that tries to do just that:
+
+```ocaml
+# let memo_rec f_norec =
+     let rec f = memoize (fun x -> f_norec f x) in
+     f
+  ;;
+      Characters 41-72:
+       let rec f = memoize (fun x -> f_norec f x) in
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of `let rec'
+```
+
+OCaml rejects the definition because OCaml, as a strict language, has
+limits on what it can put on the right hand side of a `let rec`.  In
+particular, imagine how the following code snippet would be compiled.
+
+```ocaml
+let rec x = x + 1
+```
+
+Note that `x` is an ordinary value, not a function.  As such, it's not
+clear how to execute this code.  In some sense, you could imagine it
+compiling down to an infinite loop, but there's no looping control
+structure to make that happen.
+
+To avoid such cases, the compiler only allow three possible constructs
+to show up on the right-hand sqide of a `let rec`: a function
+definition, a constructor, or the lazy keyword.  This excludes some
+reasonable things, like our definition of `memo_rec`, but it also
+blocks things that don't make sense, like our definition of `x`.
+
+It's worth noting that these restrictions don't show up in a lazy
+language like Haskell.  Indeed, we can make something like our
+definition of `x` work if we use OCaml's laziness:
+
+```ocaml
+# let rec x = lazy (Lazy.force x + 1);;
+val x : int lazy_t = <lazy>
+```
+
+Of course, actually trying to compute this will fail.  OCaml's `lazy`
+throws an exception when a lazy value tries to force itself as part of
+its own evaluation.
+
+```ocaml
+# Lazy.force x;;
+Exception: Lazy.Undefined.
+```
+
+But we can create useful recursive definitions possible with `lazy` as
+well.  In particular, we can use laziness to make our definition of
+`memo_rec` work without explicit mutation.
+
+```ocaml
+# let lazy_memo_rec f_norec x =
+     let rec f = lazy (memoize (fun x -> f_norec (Lazy.force f) x)) in
+     (Lazy.force f) x
+  ;;
+val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+# time (fun () -> lazy_memo_rec fib_norec 40);;
+Time: 0.298977ms
+- : int = 102334155
+```
+
+Laziness is more constrained than explicit mutation, and so in some
+cases can lead to code whose behavior is easier to think about.
+
+</note>
 
