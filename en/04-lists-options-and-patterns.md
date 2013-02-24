@@ -1,6 +1,11 @@
 Lists, Options and Patterns
 ================================================
 
+_(yminsky: I wonder whether the title should be "Lists, Tuples,
+Options and Patterns"...)_
+
+_(yminsky: Add some coverage of irrefutable patterns?)_
+
 ## Lists
 
 As with any programming language, we need a way to represent _data_, things like
@@ -252,6 +257,10 @@ val optional_default : default:'a -> 'a option -> 'a = <fun>
 - : int = 10
 ```
 
+_(yminsky: I wonder if we should largely skip the monad thing in this
+chapter, and instead put in a forward reference to the error handling
+chapter, which discusses these idioms in some detail.)_
+
 One annoying thing about the use of options is that functions do not
 compose directly.  For example, if we wanted to compute the third
 element of a list using the `List.hd` and `List.tl` functions, we
@@ -326,9 +335,10 @@ val third : 'a list -> 'a option = <fun>
 
 ## Pattern matching with `function`
 
-Pattern matching can be used anyplace where a regular binding is performed.  For
-a trivial example, we can use an underscore to ignore a value.  This is often
-useful when defining functions that ignore one or more of their arguments.
+Pattern matching can be used any place where a regular binding is
+performed.  For a trivial example, we can use an underscore to ignore
+a value.  This is often useful when defining functions that ignore one
+or more of their arguments.
 
 ```ocaml
 # let f _ = 5;;
@@ -354,9 +364,17 @@ val first_of_three : 'a * 'b * 'c -> 'a = <fun>
 - : string = "a"
 ```
 
+_(yminsky: I think you mean: "because a single pattern won't be
+exhaustive", or something to that effect.  There's some rough coverage
+of this issue in the Records chapter in the subsection on "Patterns
+and exhaustiveness".  The coverage here and there should probably be
+harmonized")_
+
 Lists are a little different when using normal patterns, because in general the
 patterns will not be exhaustive.  The compiler requires that patterns match all
 possible values of a type, regardless of the actual value being matched.
+
+_(yminsky: `h` -> `hd`, `t` -> `tl`)_
 
 ```ocaml
 # let h :: t = [1; 2];;
@@ -369,6 +387,9 @@ Here is an example of a value that is not matched:
 val h : int = 1
 val t : int list = [2]
 ```
+
+_(yminsky: I'm not sure `function` deserves material coverage here,
+since it was covered in the previous chapter)_
 
 When matching values with multiple different cases, like with lists or variants,
 you will usually want to use a `match` to perform a case analysis.  For
