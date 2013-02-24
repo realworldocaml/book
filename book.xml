@@ -538,6 +538,12 @@ val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
 - : float = 0.571428571428571397
 </programlisting>
     <para>
+      As a side note, the above is our first use of OCaml modules. The
+      <literal>Float</literal> module contains a collection of useful
+      functions for dealing with floats, including the function
+      <literal>Float.of_int</literal>.
+    </para>
+    <para>
       The notation for the type-signature of a multi-argument functions
       may be a little surprising at first, but we'll explain where it
       comes from when we get to function currying in
@@ -561,8 +567,8 @@ int -&gt; int -&gt; float
     </para>
     <programlisting language="ocaml">
 # let sum_if_true test first second =
-    (if test x then x else 0)
-    + (if test y then y else 0)
+    (if test first then first else 0)
+    + (if test second then second else 0)
   ;;
 val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
 </programlisting>
@@ -643,9 +649,8 @@ val even : int -&gt; bool = &lt;fun&gt;
         </listitem>
       </itemizedlist>
       <para>
-        Together, that nails down the the types of all the variables,
-        which determines the overall type of
-        <literal>sum_if_true</literal>.
+        Together, that nails down the types of all the variables, which
+        determines the overall type of <literal>sum_if_true</literal>.
       </para>
       <para>
         Over time, you'll build a rough intuition for how the OCaml
@@ -749,14 +754,14 @@ Error: This expression has type string but
 </programlisting>
       <para>
         In this example, <literal>big_number</literal> requires that
-        <literal>'a</literal> be of type <literal>int</literal>, whereas
-        <literal>&quot;short&quot;</literal> and
+        <literal>'a</literal> be instantiated as <literal>int</literal>,
+        whereas <literal>&quot;short&quot;</literal> and
         <literal>&quot;loooooong&quot;</literal> require that
-        <literal>'a</literal> be of type <literal>string</literal>, and
-        they can't all be right at the same time. This kind of
-        genericity is called <emphasis>parametric
-        polymorphism</emphasis>, and is very similar to generics in C#
-        and Java.
+        <literal>'a</literal> be instantiated as
+        <literal>string</literal>, and they can't both be right at the
+        same time. This kind of genericity is called
+        <emphasis>parametric polymorphism</emphasis>, and is very
+        similar to generics in C# and Java.
       </para>
       <note><title>
       Type errors vs exceptions
@@ -1079,9 +1084,8 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
           Note that we included a comment in the above code. OCaml
           comments are bounded by <literal>(*</literal> and
           <literal>*)</literal>, and can be nested arbitrarily and cover
-          multiple lines. There's no equivalent of the C-style single
-          line comment that is prefixed by <literal>//</literal> --- all
-          comments must be bounded on both sides.
+          multiple lines. There's no equivalent of C-style single line
+          comments that are prefixed by <literal>//</literal>.
         </para>
         <para>
           The first pattern, <literal>first :: the_rest</literal>,
@@ -1124,10 +1128,12 @@ val sum : int list -&gt; int
 - : int = 6
 </programlisting>
         <para>
-          Note that we had to use the <literal>rec</literal> keyword to
-          allow <literal>sum</literal> to refer to itself. And, as you
-          might imagine, the base case and inductive case are different
-          arms of the match.
+          Following the common OCaml idiom, we use <literal>hd</literal>
+          to refer to the head of the list and <literal>tl</literal> to
+          refer to the tail. Note that we had to use the
+          <literal>rec</literal> keyword to allow <literal>sum</literal>
+          to refer to itself. As you might imagine, the base case and
+          inductive case are different arms of the match.
         </para>
         <para>
           Logically, you can think of the evaluation of a simple
@@ -1249,15 +1255,22 @@ val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
       | Some x -&gt; x
       | None -&gt; Time.now ()
     in
-    printf &quot;%s: %s\n&quot; (Time.to_string time) message ;;
+    printf &quot;%s: %s\n&quot; (Time.to_sec_string time) message ;;
 val print_log_entry : Time.t option -&gt; string -&gt; unit
+# print_log_entry (Some Time.epoch) &quot;A long long time ago&quot;;;
+1969-12-31 19:00:00: A long long time ago
+- : unit = ()
+# print_log_entry None &quot;Up to the minute&quot;;;
+2013-02-23 16:49:25: Up to the minute
+- : unit = ()
 </programlisting>
       <para>
         We use a <literal>match</literal> statement for handling the two
         possible states of an option.
       </para>
       <note> <title> 
-      Nesting <literal>let</literal>s
+      Nesting <literal>let</literal>s with <literal>let</literal> and
+      <literal>in</literal>
       </title>
       <para>
         As a side note, this is our first use of <literal>let</literal>
@@ -1392,7 +1405,7 @@ val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
       The <literal>|</literal> character separates the different cases
       of the variant (the first <literal>|</literal> is optional), and
       each case has a tag, like <literal>Circle</literal>,
-      <literal>Rect</literal> and <literal>Scene</literal>, to
+      <literal>Rect</literal> and <literal>Segment</literal>, to
       distinguish that case from the others. Here's how we might write a
       function for testing whether a point is in the interior of some
       element of a list of <literal>scene_element</literal>s.
@@ -1430,7 +1443,7 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
       <literal>List.for_all</literal>. An anonymous function is a
       function that is defined but not named, in this case, using the
       <literal>fun</literal> keyword. Anonymous functions are common in
-      OCaml, particularly when using iteration functions like like
+      OCaml, particularly when using iteration functions like
       <literal>List.for_all</literal>.
     </para>
   </sect1>
@@ -1463,8 +1476,7 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
         and accessing or modifying an array element is a constant-time
         operation. Arrays are more compact in terms of memory
         utilization than most other data structures in OCaml, including
-        lists. OCaml uses three words per element of a list, but only
-        one per element of an array.
+        lists.
       </para>
       <para>
         Here's an example.
@@ -1606,7 +1618,7 @@ val x : int ref = {contents = 0}
 # x := !x + 1 ;;   (* assignment, i.e., x.contents &lt;- ... *)
 - : unit = ()
 # !x ;;
-- : int = 2
+- : int = 1
 </programlisting>
       <para>
         The definition of all this is quite straightforward. Here is the
@@ -1632,11 +1644,10 @@ let (:=) r x = r.contents &lt;- x
         Even though a <literal>ref</literal> is just another record
         type, it's notable because it is the standard way of simulating
         the traditional mutable variable you'll find in most imperative
-        languages. For example, if we wanted to write an imperative loop
-        to sum over the elements of an array, we could do it as follows,
-        using the function <literal>List.iter</literal> to call a simple
-        function on every element of a list, and a ref to accumulate the
-        results.
+        languages. For example, we can sum over the elements of a list
+        imperatively by calling <literal>List.iter</literal> to call a
+        simple function on every element of a list, using a ref to
+        accumulate the results.
       </para>
       <programlisting language="ocaml">
 # let sum list =
@@ -1749,7 +1760,7 @@ let () =
         <literal>sum.ml</literal>, called <literal>_tags</literal>. We
         can put the following in <literal>_tags</literal> to indicate
         that we're building against Core, and that threads should be
-        enabled, which is a required by Core.
+        enabled, which is required by Core.
       </para>
       <programlisting>
 true:package(core),thread
@@ -1943,8 +1954,8 @@ val dashed_languages : Core.Std.String.t = &quot;OCaml-Perl-C++-C&quot;
       that any subsequent reference to <literal>pi</literal> would see
       the new definition of <literal>pi</literal> as zero. But there is
       no later use of <literal>pi</literal>, so the binding doesn't make
-      a difference. Indeed, if you type the example I gave above into
-      the toplevel, OCaml will warn you that the definition is unused.
+      a difference. Indeed, if you type the example above into the
+      toplevel, OCaml will warn you that the definition is unused.
     </para>
     <programlisting language="ocaml">
 Characters 126-128:
@@ -1957,6 +1968,31 @@ Warning 26: unused variable pi.
       <xref linkend="imperative-programming"/>, there are
       mutable values in OCaml, but no mutable variables.
     </para>
+    <note> <title> 
+    Why don't variables vary?
+    </title>
+    <para>
+      One source confusion for people new to functional langauges is the
+      fact that variables are typically immutable. This seems pretty
+      surprising even on linguistic terms. Isn't the whole point of a
+      variable that it can vary?
+    </para>
+    <para>
+      The answer to this is that variables in a functional language are
+      really more like variables in an equation. If you think about the
+      mathematical equation <literal>x (y + z) = x y + x z</literal>,
+      there's no notion of mutating the variables <literal>x</literal>,
+      <literal>y</literal> and <literal>z</literal>. They vary in the
+      sense that you can instantiate this equation with different
+      numbers for those variables, and it still holds.
+    </para>
+    <para>
+      The same is true in a functional language. A function can be
+      applied to different inputs, and thus its variables will take on
+      different values, even though there's absolutely no mutation.
+    </para>
+    </note>
+
     <sect2 id="pattern-matching-and-let">
       <title>Pattern matching and <literal>let</literal></title>
       <para>
@@ -2062,7 +2098,9 @@ val y : int = 100
         <literal>let</literal>/<literal>and</literal> style declaration,
         the order of execution of the right-hand side of the binds is
         undefined by the language definition, so one should not write
-        code that relies on it.
+        code that relies on it. If you want to make sure about the order
+        of evaluation, you should use a sequence of
+        <literal>let</literal>/<literal>in</literal> bindings.
       </para>
     </sect2>
   </sect1>
@@ -2297,12 +2335,14 @@ val abs_diff : int * int -&gt; int = &lt;fun&gt;
         keyword, as shown in this example:
       </para>
       <programlisting language="ocaml">
-# let rec find_first_stutter = function
-     | [] | [_] -&gt;
-       (* only zero or one elements, so no repeats *)
-       None
-     | x :: y :: tl -&gt;
-       if x = y then Some x else find_first_stutter (y::tl)
+# let rec find_first_stutter list =
+    match list with
+    | [] | [_] -&gt;
+      (* only zero or one elements, so no repeats *)
+      None
+    | x :: y :: tl -&gt;
+      if x = y then Some x else find_first_stutter (y::tl)
+   ;;
 val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;
 </programlisting>
       <para>
@@ -2482,7 +2522,7 @@ val ( +! ) : int * int -&gt; int * int -&gt; int *int = &lt;fun&gt;
         There's one important special case: <literal>-</literal> and
         <literal>-.</literal>, which are the integer and floating point
         subtraction operators, can act as both prefix operators (for
-        negation) and infix operators (for subtraction), So, you both
+        negation) and infix operators (for subtraction), So, both
         <literal>-x</literal> and <literal>x - y</literal> are
         meaningful expressions.
       </para>
@@ -2491,8 +2531,8 @@ val ( +! ) : int * int -&gt; int * int -&gt; int *int = &lt;fun&gt;
         Core, following these rules. Here's the definition:
       </para>
       <programlisting language="ocaml">
-# let (|!) x f = f x ;;
-val ( |! ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
+# let (|&gt;) x f = f x ;;
+val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 </programlisting>
       <para>
         It's not quite obvious at first what the purpose of this
@@ -2507,9 +2547,9 @@ val ( |! ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
       </para>
       <programlisting language="ocaml">
 # Sys.getenv_exn &quot;PATH&quot;
-  |! String.split ~on:':'
-  |! List.dedup ~compare:String.compare
-  |! List.iter ~f:print_endline
+  |&gt; String.split ~on:':'
+  |&gt; List.dedup ~compare:String.compare
+  |&gt; List.iter ~f:print_endline
   ;;
 /bin
 /opt/local/bin
@@ -2540,15 +2580,15 @@ lines
 </programlisting>
       <para>
         It is this later form that we're using in the
-        <literal>|!</literal> pipeline above.
+        <literal>|&gt;</literal> pipeline above.
       </para>
       <para>
-        Note that <literal>|!</literal> only works in the intended way
-        because it is left-associative. Indeed, let's see what happens
-        if we try using a right associative operator, like (^!).
+        Note that <literal>|&gt;</literal> only works in the intended
+        way because it is left-associative. Indeed, let's see what
+        happens if we try using a right associative operator, like (^!).
       </para>
       <programlisting language="ocaml">
-# let (^!) = (|!);;
+# let (^!) = (|&gt;);;
 val ( ^! ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 # Sys.getenv_exn &quot;PATH&quot;
   ^! String.split ~on:':'
@@ -2644,8 +2684,8 @@ val some_or_zero : int option -&gt; int = &lt;fun&gt;
         be labeled.
       </para>
       <programlisting language="ocaml">
-# let f ~foo:a ~bar:b = a + b;;
-val f : foo:int -&gt; bar:int -&gt; int = &lt;fun&gt;
+# let ratio ~num ~denom = float num /. float denom;;
+val ratio : num:int -&gt; denom:int -&gt; float = &lt;fun&gt;
 </programlisting>
       <para>
         We can then provide a labeled argument using a similar
@@ -2653,10 +2693,10 @@ val f : foo:int -&gt; bar:int -&gt; int = &lt;fun&gt;
         order.
       </para>
       <programlisting language="ocaml">
-# f ~foo:3 ~bar:10;;
-- : int = 13
-# f ~bar:10 ~foo:3;;
-- : int = 13
+# ratio ~num:3 ~denom:10;;
+- : float = 0.3
+# ratio ~denom:10 ~num:3;;
+- : float = 0.3
 </programlisting>
       <para>
         OCaml also supports <emphasis>label punning</emphasis>, meaning
@@ -2666,10 +2706,10 @@ val f : foo:int -&gt; bar:int -&gt; int = &lt;fun&gt;
         and function invocation, as shown in these examples:
       </para>
       <programlisting language="ocaml">
-# let foo = 3;;
-# let bar = 4;;
-# f ~foo ~bar;;
-- : int = 7
+# let num = 3;;
+# let denom = 4;;
+# ratio ~num ~denom;;
+- : float = 0.75
 </programlisting>
       <para>
         Labeled arguments are useful in a few different cases:
@@ -2743,9 +2783,9 @@ val create_hashtable : init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Ha
           </para>
           <programlisting language="ocaml">
 # Sys.getenv_exn &quot;PATH&quot;
-  |! String.split ~on:':'
-  |! List.dedup ~compare:String.compare
-  |! List.iter ~f:print_endline
+  |&gt; String.split ~on:':'
+  |&gt; List.dedup ~compare:String.compare
+  |&gt; List.iter ~f:print_endline
   ;;
 </programlisting>
           <para>
@@ -2995,7 +3035,7 @@ val numeric_deriv :
 </programlisting>
         <para>
           In principle, it's not obvious how the order of the arguments
-          to <literal>f</literal> should be chosen. Since optional
+          to <literal>f</literal> should be chosen. Since labeled
           arguments can be passed in arbitrary order, it seems like it
           could as well be
           <literal>y:float -&gt; x:float -&gt; float</literal> as it is
@@ -3023,9 +3063,9 @@ val numeric_deriv :
         <para>
           Note that these heuristics might at different points in the
           source suggest different types. Here's a version of
-          <literal>numeric_deriv</literal> where the invocations of
-          <literal>f</literal> were changes so they list the arguments
-          in different orders.
+          <literal>numeric_deriv</literal> where different invocations
+          of <literal>f</literal> list the arguments in different
+          orders.
         </para>
         <programlisting language="ocaml">
 # let numeric_deriv ~delta ~x ~y ~f =
@@ -3095,11 +3135,12 @@ val prepend_pound : string -&gt; string = &lt;fun&gt;
         </para>
         <para>
           The rule is: an optional argument is erased as soon as the
-          first positional argument defined <emphasis>after</emphasis>
-          the optional argument is passed in. That explains the behavior
-          of <literal>prepend_pound</literal> above. But if we had
-          instead defined <literal>concat</literal> with the optional
-          argument in the second position:
+          first positional (<emphasis>i.e.</emphasis>, neither labeled
+          nor optional) argument defined <emphasis>after</emphasis> the
+          optional argument is passed in. That explains the behavior of
+          <literal>prepend_pound</literal> above. But if we had instead
+          defined <literal>concat</literal> with the optional argument
+          in the second position:
         </para>
         <programlisting language="ocaml">
 # let concat x ?(sep=&quot;&quot;) y = x ^ sep ^ y ;;
@@ -3156,6 +3197,50 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
   </sect1>
 </chapter><chapter id="lists-options-and-patterns">
   <title>Lists, Options and Patterns</title>
+  <para>
+    _(yminsky:
+  </para>
+  <para>
+    The overall structure of this section seems a little off to me. Here
+    are the headings, which I got from grepping out everything starting
+    with two hashes:
+  </para>
+  <programlisting>
+## Lists
+## Pattern matching
+## Options
+## Pattern matching with `function`
+### Using `when` and `as` in patterns
+## List operations
+### List length and random access
+#### Appending (concatenating) lists
+### Map
+### Folding
+### Predicates `exists` and `for_all`
+## Example: Implementing a set from a list
+## Example: pretty-printing a table
+#### Computing the widths
+#### Rendering the rows
+## List performance
+### Tail-recursion
+## Heterogenous values
+## Options and NULL values
+</programlisting>
+  <para>
+    The structure is hard for me to follow, and the section/chapter
+    headings seem a little disorganized
+  </para>
+  <para>
+    )_
+  </para>
+  <para>
+    <emphasis>(yminsky: I wonder whether the title should be
+    &quot;Lists, Tuples, Options and Patterns&quot;...)</emphasis>
+  </para>
+  <para>
+    <emphasis>(yminsky: Add some coverage of irrefutable
+    patterns?)</emphasis>
+  </para>
   <sect1 id="lists-1">
     <title>Lists</title>
     <para>
@@ -3169,6 +3254,11 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       You can construct a list of values by enclosing them in square
       brackets, separating the elements with semicolons. The list
       elements must all have the same type.
+    </para>
+    <para>
+      <emphasis>(yminsky: consider using the variable name
+      <literal>cities</literal> rather than
+      <literal>l1</literal>)</emphasis>
     </para>
     <programlisting language="ocaml">
 # let l1 = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;];;
@@ -3211,6 +3301,11 @@ val l1 : string list = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot
       <literal>[]</literal> representing the empty list.
     </para>
     <para>
+      <emphasis>(yminsky: Shouldn't the image go after the example
+      following? And I think it would need some explanator text
+      too.)</emphasis>
+    </para>
+    <para>
       TODO: IMAGE figures/04-list-01.svg
     </para>
     <programlisting language="ocaml">
@@ -3231,6 +3326,13 @@ val l2 : string list = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot
       matching</emphasis>.
     </para>
     <para>
+      <emphasis>(yminsky: I worry that the term &quot;destructor&quot;
+      isn't clarifying for the vast majority of readers. It sounds like
+      something you do to reclaim memory for the GC. I'd consider
+      dropping the term. If we really need a good term, maybe we should
+      use &quot;deconstruction&quot;.)</emphasis>
+    </para>
+    <para>
       For a list, there are two possible shapes: the empty list
       <literal>[]</literal> or a cons-cell <literal>h :: t</literal>. We
       can use a <literal>match</literal> expression to perform the
@@ -3238,6 +3340,12 @@ val l2 : string list = [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot
       <literal>h</literal> and <literal>t</literal> in the pattern are
       bound to the corresponding values in the list when the match is
       performed.
+    </para>
+    <para>
+      <emphasis>(yminsky: Consider using <literal>hd</literal> and
+      <literal>tl</literal> over <literal>h</literal> and
+      <literal>t</literal>, since that's what's used elsewhere in the
+      book.)</emphasis>
     </para>
     <para>
       For example, suppose we want to define a function to add 1 to each
@@ -3256,6 +3364,13 @@ val add1 : int list -&gt; int list = &lt;fun&gt;
 # add1 [5; 3; 7];;
 - : int list = [6; 4; 8]
 </programlisting>
+    <para>
+      _(yminsky: Maybe resent this at first with more parens, ot make it
+      clear that nesting is in fact going on? And then later, explain
+      that due to the associativity rules, the parens are unnecessary.
+      <emphasis>i.e.</emphasis>, <literal>_ :: (_ :: (x :: _))</literal>
+      might be clearer. )_
+    </para>
     <para>
       Patterns are not limited to just one constructor. They can be
       aribitrarily nested. For example, if we want to extract the third
@@ -3309,12 +3424,25 @@ val broken_third : 'a list -&gt; 'a option = &lt;fun&gt;
 - : int option = None
 </programlisting>
     <para>
+      <emphasis>(yminsky: I'd like to avoid using quotes as a way o
+      saying &quot;not literally&quot;. I think we can reword and avoid
+      the need for quotes, or in this case, I think just dropping them
+      would be fine.)</emphasis>
+    </para>
+    <para>
       Pattern ordering can be an issue, but a more important concern is
       that pure wildcard patterns match anything, making it easier to
       forget &quot;important&quot; cases. When a pattern matching is
       compiled, OCaml performs an exhaustiveness check, printing a
       warning if it is not exhaustive, along with an example of a
       missing pattern.
+    </para>
+    <para>
+      <emphasis>(yminsky: I wonder if somewhere it would make sense to
+      list in bulleted form, what the three static checks you get with
+      match statements: inexhaustive matches, impossible cases, useless
+      cases. Seems like a nice trio to describe in one unit. That said,
+      not sure how to fit it into the present flow.)</emphasis>
     </para>
     <programlisting language="ocaml">
 # let inexhaustive_third l =
@@ -3359,6 +3487,11 @@ val third : 'a list -&gt; 'a option = &lt;fun&gt;
       there is no value to return. For example, the empty list has no
       head or tail.
     </para>
+    <para>
+      <emphasis>(yminsky: I would use a shorter example here: maybe just
+      one of them (hd, nth, tl) with both a Some and None
+      outcome.)</emphasis>
+    </para>
     <programlisting language="ocaml">
 # List.hd [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;];;
 - : string option = Some &quot;Chicago&quot;
@@ -3373,6 +3506,11 @@ val third : 'a list -&gt; 'a option = &lt;fun&gt;
 # List.nth [&quot;Chicago&quot;; &quot;Paris&quot;; &quot;Tokyo&quot;] 5;;
 - : string option = None
 </programlisting>
+    <para>
+      <emphasis>(yminsky: Again, I would avoid the scare quotes around
+      &quot;optional&quot;. It's a somewhat different issue, but I would
+      avoid them around &quot;no value&quot; as well.)</emphasis>
+    </para>
     <para>
       A value of <literal>option</literal> type is &quot;optional&quot;
       -- it is either <literal>None</literal>, meaning &quot;no
@@ -3394,8 +3532,26 @@ type 'a option =
   | None
 </programlisting>
     <para>
+      <emphasis>(yminsky: Maybe show construction before destruction? We
+      call library functions that do a construction, but we don't do one
+      directly. Maybe implement
+      <literal>List.last</literal>?)</emphasis>
+    </para>
+    <para>
       As with lists, the way to take apart an <literal>option</literal>
       value is to use pattern matching, with patterns for the two cases.
+    </para>
+    <para>
+      <emphasis>(yminsky: Explain what
+      <literal>optional_default</literal> does? Also, maybe a different
+      name? It's called <literal>Option.value</literal> in Core, so
+      maybe <literal>option_value</literal>?)</emphasis>
+    </para>
+    <para>
+      <emphasis>(yminsky: You seem to use <literal>v</literal> for an
+      arbitrary value, but elsewhere in the book, we tend to use
+      <literal>x</literal> and <literal>y</literal>. Perhaps we should
+      settle on one standard.)</emphasis>
     </para>
     <programlisting language="ocaml">
 # let optional_default ~default opt =
@@ -3408,6 +3564,12 @@ val optional_default : default:'a -&gt; 'a option -&gt; 'a = &lt;fun&gt;
 # optional_default ~default:10 None;;
 - : int = 10
 </programlisting>
+    <para>
+      <emphasis>(yminsky: I wonder if we should largely skip the monad
+      thing in this chapter, and instead put in a forward reference to
+      the error handling chapter, which discusses these idioms in some
+      detail.)</emphasis>
+    </para>
     <para>
       One annoying thing about the use of options is that functions do
       not compose directly. For example, if we wanted to compute the
@@ -3494,7 +3656,7 @@ val third : 'a list -&gt; 'a option = &lt;fun&gt;
   <sect1 id="pattern-matching-with-function">
     <title>Pattern matching with <literal>function</literal></title>
     <para>
-      Pattern matching can be used anyplace where a regular binding is
+      Pattern matching can be used any place where a regular binding is
       performed. For a trivial example, we can use an underscore to
       ignore a value. This is often useful when defining functions that
       ignore one or more of their arguments.
@@ -3524,10 +3686,23 @@ val first_of_three : 'a * 'b * 'c -&gt; 'a = &lt;fun&gt;
 - : string = &quot;a&quot;
 </programlisting>
     <para>
+      <emphasis>(yminsky: I think you mean: &quot;because a single
+      pattern won't be exhaustive&quot;, or something to that effect.
+      There's some rough coverage of this issue in the Records chapter
+      in the subsection on &quot;Patterns and exhaustiveness&quot;. The
+      coverage here and there should probably be
+      harmonized&quot;)</emphasis>
+    </para>
+    <para>
       Lists are a little different when using normal patterns, because
       in general the patterns will not be exhaustive. The compiler
       requires that patterns match all possible values of a type,
       regardless of the actual value being matched.
+    </para>
+    <para>
+      <emphasis>(yminsky: <literal>h</literal> -&gt;
+      <literal>hd</literal>, <literal>t</literal> -&gt;
+      <literal>tl</literal>)</emphasis>
     </para>
     <programlisting language="ocaml">
 # let h :: t = [1; 2];;
@@ -3540,6 +3715,11 @@ Here is an example of a value that is not matched:
 val h : int = 1
 val t : int list = [2]
 </programlisting>
+    <para>
+      <emphasis>(yminsky: I'm not sure <literal>function</literal>
+      deserves material coverage here, since it was covered in the
+      previous chapter)</emphasis>
+    </para>
     <para>
       When matching values with multiple different cases, like with
       lists or variants, you will usually want to use a
@@ -3576,6 +3756,16 @@ val head2 : 'a list -&gt; 'a option = &lt;fun&gt;
       <title>Using <literal>when</literal> and <literal>as</literal> in
       patterns</title>
       <para>
+        <emphasis>(yminsky: I wonder if or-patterns deserve an explicit
+        mention. The fact that you can nest disjunctions anywhere nested
+        inside a pattern seems notable.)</emphasis>
+      </para>
+      <para>
+        <emphasis>(yminsky: Do you mean &quot;the example in the
+        introduction&quot;? Maybe better to reference the explicit
+        chapter or section using an xref.)</emphasis>
+      </para>
+      <para>
         Let's return to the example introduction, where we defined a
         function to remove adjacent duplicate elements in a list. There
         are several cases to consider. If the list is empty or has one
@@ -3583,14 +3773,25 @@ val head2 : 'a list -&gt; 'a option = &lt;fun&gt;
         first two elements of the list, keeping the first one if, and
         only if, it is different from the second.
       </para>
+      <para>
+        <emphasis>(yminsky: It's called <literal>destutter</literal> in
+        guided-tour. Seems worth keeping the same term)</emphasis>
+      </para>
+      <para>
+        <emphasis>(yminsky: Maybe worth rewriting the version of
+        destutter from that section in its entirety, so it's more
+        obvious what you're changing, and for that matter why it's
+        preferable. There are a number of points about performance that
+        seem worth saying.)</emphasis>
+      </para>
       <programlisting language="ocaml">
 # let rec uniq = function
    | ([] | [_]) as l -&gt; l
    | i1 :: ((i2 :: _) as t) -&gt;
-        if i1 = i2 then
-           uniq t
-        else
-           i1 :: uniq t;;
+     if i1 = i2 then
+       uniq t
+     else
+       i1 :: uniq t;;
 val uniq : 'a list -&gt; 'a list = &lt;fun&gt;
 # uniq [1; 3; 3; 3; 2];;
 - : int list = [1; 3; 2]
@@ -3611,6 +3812,11 @@ val uniq : 'a list -&gt; 'a list = &lt;fun&gt;
         <literal>t</literal> to the tail of the list. This would be
         harder (or at least more verbose) if we did not have
         <literal>as</literal> patterns.
+      </para>
+      <para>
+        <emphasis>(yminsky: If we show the original destutter from 2
+        here, we'll already have an inefficient version to discuss, so
+        we won't need this one!)</emphasis>
       </para>
       <programlisting language="ocaml">
 # let rec inefficient_uniq l =
@@ -3637,7 +3843,8 @@ val inefficient_uniq : 'a list -&gt; 'a list = &lt;fun&gt;
         <emphasis>expression</emphasis>, where the
         <emphasis>expression</emphasis> is a predicate. The predicate is
         allowed to use variables bound by the pattern, and the pattern
-        matches only of the expression evaluates to
+        matches only of <emphasis>(yminsky: &quot;only if&quot;, I
+        think)</emphasis> the expression evaluates to
         <literal>true</literal>. Another way to write the
         <literal>uniq</literal> function is to split the equality case
         using a <literal>when</literal> pattern.
@@ -3667,6 +3874,13 @@ val broken_uniq : 'a list -&gt; 'a list = &lt;fun&gt;
         as obvious as the original form without guards. You will
         generally find that <literal>when</literal> clauses are used
         only infrequently.
+      </para>
+      <para>
+        <emphasis>(yminsky: Maybe change the above to advice: &quot;You
+        should generally avoid <literal>when</literal> clauses except
+        when they really make things simpler, typically by reducing the
+        number of cases in your match. Othwerise, they're usually more
+        trouble than their worth&quot;.)</emphasis>
       </para>
       <programlisting language="ocaml">
 # let rec subtle_uniq = function
@@ -3719,6 +3933,12 @@ val subtle_uniq : 'a list -&gt; 'a list = &lt;fun&gt;
         Since lists support only sequential acccess, the implementations
         of these functions iterate through the elements of the list one
         at a time.
+      </para>
+      <para>
+        <emphasis>(yminsky: I wonder if one should either (a) introduce
+        tail recursion here, or (b) do the clearer-but-less-efficient
+        non-tail-rec version here, and explain how to make it
+        tail-recursive elsewhere.)</emphasis>
       </para>
       <programlisting language="ocaml">
 # let my_length l =
@@ -3779,6 +3999,10 @@ val my_append : 'a list -&gt; 'a list -&gt; 'a list = &lt;fun&gt;
         <literal>List.append (List.append l1 l2) l3</literal> produce
         equal results, but the first is more efficient in general.
       </para>
+      <para>
+        <emphasis>(yminsky: Might be worth saying something about what
+        the associativity of @ is.)</emphasis>
+      </para>
     </sect2>
     <sect2 id="map">
       <title>Map</title>
@@ -3810,9 +4034,25 @@ val my_map : f:('a -&gt; 'b) -&gt; 'a list -&gt; 'b list = &lt;fun&gt;
 # my_map ~f:(fun i -&gt; string_of_int (i * 10)) [1; 2; 3];;
 - : string list = [&quot;10&quot;; &quot;20&quot;; &quot;30&quot;]
 </programlisting>
+      <para>
+        <emphasis>(yminsky: If we're going to go over useful list
+        operations, I would put my vote in for, in order:
+        <literal>filter</literal> and <literal>filter_map</literal>,
+        <literal>zip</literal> and <literal>unzip</literal>,
+        <literal>partition_tf</literal>,
+        <literal>partition_map</literal>. <literal>filter_map</literal>
+        in particular is useful and not as well known as it deserves to
+        be.)</emphasis>
+      </para>
     </sect2>
     <sect2 id="folding">
       <title>Folding</title>
+      <para>
+        <emphasis>(yminsky: In Core one typically just calls it
+        <literal>List.fold</literal>. If you read the API,
+        <literal>fold_left</literal> is only for fairly special
+        cases.)</emphasis>
+      </para>
       <para>
         The <literal>List.fold_left</literal> function has a form
         similar to <literal>map</literal>, but it composes a function
@@ -3836,6 +4076,11 @@ val my_map : f:('a -&gt; 'b) -&gt; 'a list -&gt; 'b list = &lt;fun&gt;
         <literal>f</literal> to each element of the list from left to
         right, composing the results.
       </para>
+      <para>
+        <emphasis>(yminsky: &quot;composing the results&quot; might be
+        an awkward choice of words, since it sounds like it might be
+        about function composition, which it isn't.)</emphasis>
+      </para>
       <programlisting language="ocaml">
 # let rec my_fold_left ~init ~f = function
     | [] -&gt; init
@@ -3844,6 +4089,12 @@ val my_fold_left : init:'a -&gt; f:('a -&gt; 'b -&gt; 'a) -&gt; 'b list -&gt; 'a
 # my_fold_left ~init:[&quot;d&quot;] ~f:(fun t h -&gt; h :: t) [&quot;a&quot;; &quot;b&quot;; &quot;c&quot;];;
 - : string list = [&quot;c&quot;; &quot;b&quot;; &quot;a&quot;; &quot;d&quot;]
 </programlisting>
+      <para>
+        <emphasis>(yminsky: Maybe point out that folds are very general
+        can be complicated to think about, and that one should prefer
+        other, less powerful idioms like <literal>map</literal>,
+        <literal>filter_map</literal> etc, where they apply.)</emphasis>
+      </para>
     </sect2>
     <sect2 id="predicates-exists-and-for_all">
       <title>Predicates <literal>exists</literal> and
@@ -4267,7 +4518,7 @@ let rev l =
    | [] -&gt; result
    | h :: t -&gt; tail_recursive_rev (h :: result) t
   in tail_recursive_rev [] l;;
-   
+
 let rev_map l ~f =
   let rec rmap accu = function
    | [] -&gt; accu
@@ -4502,7 +4753,7 @@ let rec insert x = function
      Some { label = label; left = insert x left; right = right }
    else if x &gt; label then
      Some { label = label; left = left; right = insert x right }
-   else 
+   else
      tree
  | None -&gt; Some { label = x; left = None; right = None };;
 </programlisting>
@@ -4518,7 +4769,7 @@ let rec insert x = function
 type 'a binary_tree =
  | Leaf
  | Interior of 'a * 'a binary_tree * 'a binary_tree;;
- 
+
 let new_binary_tree () : 'a binary_tree = Leaf;;
 
 let rec insert x = function
@@ -5134,7 +5385,7 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 # let show_field field to_string record =
-     sprintf &quot;%s: %s&quot; (Field.name field) (Field.get field record |! to_string);;
+     sprintf &quot;%s: %s&quot; (Field.name field) (Field.get field record |&gt; to_string);;
 val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string =
   &lt;fun&gt;
 </programlisting>
@@ -7039,9 +7290,9 @@ let () =
   (* Compute the line counts *)
   let counts = build_counts [] in
   (* Sort the line counts in descending order of frequency *)
-  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -&gt; descending x y) counts  in
+  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -&gt; compare y x) counts  in
   (* Print out the 10 highest frequency entries *)
-  List.iter (List.take 10 sorted_counts) ~f:(fun (line,count) -&gt;
+  List.iter (List.take sorted_counts 10) ~f:(fun (line,count) -&gt;
     printf &quot;%3d: %s\n&quot; count line)
 </programlisting>
     <note><title>
@@ -7163,8 +7414,8 @@ $ strings `which ocamlopt` | ./freq.byte
       compiler compiles faster than the native code compiler. Also, in
       order to run a bytecode executable you typically need to have
       OCaml installed on the system in question. That's not strictly
-      required, though, since you can a byte-code executable with an
-      embedded runtime, using the <literal>-custom</literal> compiler
+      required, though, since you can build a byte-code executable with
+      an embedded runtime, using the <literal>-custom</literal> compiler
       flag.
     </para>
     <para>
@@ -7421,7 +7672,7 @@ let median t =
   let nth n = fst (List.nth_exn sorted_strings n) in
   if len mod 2 = 1
   then Median (nth (len/2))
-  else Before_and_after (nth (len/2), nth (len/2 + 1));;
+  else Before_and_after (nth (len/2 - 1), nth (len/2));;
 </programlisting>
       <para>
         Now, to expose this usefully in the interface, we need to expose
@@ -7594,7 +7845,7 @@ module Hostname : sig
 end = struct
   include String_id
   let mine = Unix.gethostname
-end  
+end
 </programlisting>
     </sect2>
     <sect2 id="opening-modules">
@@ -9574,8 +9825,8 @@ performing lazy computation
       <literal>create_lazy (fun () -&gt; sqrt 16.)</literal>, we can
       just write <literal>lazy (sqrt 16.)</literal>.
     </para>
-    <sect2 id="memoization">
-      <title>Memoization</title>
+    <sect2 id="memoization-and-dynamic-programming">
+      <title>Memoization and Dynamic Programming</title>
       <para>
         Another unobservable effect is <emphasis>memoization</emphasis>.
         A memoized function remembers the result of previous invocations
@@ -9604,21 +9855,26 @@ val memoize : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
       <para>
         Note that we use <literal>Hashtbl.Poly.create</literal> to
         create a hash table using OCaml's built-in polymorphic hash
-        function. It's also possible to create a hash-table using a hash
-        function specialized to a given type.
+        function.
       </para>
       <para>
         Memoization can be useful whenever you have a function that is
         expensive to recompute, and you don't mind caching old values
-        indefinitely. But memoization is also useful for efficiently
-        implementing some recursive algorithms. One good example is the
-        algorithm for computing the <emphasis>edit distance</emphasis>
-        (also called the Levenshtein distance) between two strings. The
-        edit distance is the number of single-character changes
-        (including letter switches, insertions and deletions) required
-        to convert one string to the other. This kind of distance metric
-        can be useful for a variety of approximate string matching
-        problems, like spell checkers.
+        indefinitely. One important caution: every time you create a
+        memoized function, there's something of a built-in memory leak.
+        As long as you hold on to the memoized function, you're holding
+        every result it has returned thus far.
+      </para>
+      <para>
+        Memoization is also useful for efficiently implementing some
+        recursive algorithms. One good example is the algorithm for
+        computing the <emphasis>edit distance</emphasis> (also called
+        the Levenshtein distance) between two strings. The edit distance
+        is the number of single-character changes (including letter
+        switches, insertions and deletions) required to convert one
+        string to the other. This kind of distance metric can be useful
+        for a variety of approximate string matching problems, like
+        spell checkers.
       </para>
       <para>
         Consider the following code for computing the edit distance.
@@ -9684,10 +9940,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       <programlisting language="ocaml">
 # let time f =
     let start = Time.now () in
-    let y = f () in
+    let x = f () in
     let stop = Time.now () in
     printf &quot;Time: %s\n&quot; (Time.Span.to_string (Time.diff stop start));
-    y ;;
+    x ;;
 val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;
 </programlisting>
       <para>
@@ -9702,39 +9958,39 @@ Time: 19.3322s
 - : int = 2
 </programlisting>
       <para>
-        Just those few extra characters made it almost 4000 times
-        slower!
+        Just those few extra characters made it almost four thousand
+        times slower!
       </para>
       <para>
         Memoization would be a huge help here, but to fix the problem,
         we need to memoize the calls that
-        <literal>edit_distance</literal> makes to itself. To see how to
-        do this, let's step away from <literal>edit_distance</literal>,
-        and instead consider a much simpler example: computing the nth
-        element of the Fibonacci sequence. The Fibonacci sequence by
-        definition starts out with two <literal>1</literal>'s, with
-        every subsequent element being the sum of the previous two. The
-        classic recursive definition of Fibonacci is as follows:
+        <literal>edit_distance</literal> makes to itself. This technique
+        is sometimes referred to as <emphasis>dynamic
+        programming</emphasis>. To see how to do this, let's step away
+        from <literal>edit_distance</literal>, and instead consider a
+        much simpler example: computing the nth element of the Fibonacci
+        sequence. The Fibonacci sequence by definition starts out with
+        two <literal>1</literal>'s, with every subsequent element being
+        the sum of the previous two. The classic recursive definition of
+        Fibonacci is as follows:
       </para>
+      <programlisting language="ocaml">
+# let rec fib i =
+    if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2);;
+</programlisting>
       <para>
-        <literal>ocaml # let rec fib i =     if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2);;</literal>
         This is, however, exponentially slow, for the same reason that
         <literal>edit_distance</literal> was slow: we end up making many
         redundant calls to <literal>fib</literal>. It shows up quite
         dramatically in the performance.
       </para>
       <programlisting language="ocaml">
-# time (fun () -&gt; fib 5);;
-Time: 0.0100136ms
-- : int = 8
-# time (fun () -&gt; fib 10);;
-Time: 0.0441074ms
-- : int = 89
 # time (fun () -&gt; fib 20);;
 Time: 5.17392ms
 - : int = 10946
 # time (fun () -&gt; fib 40);;
 Time: 51.4205s
+- : int = 165580141
 </programlisting>
       <para>
         Here, <literal>fib 40</literal> takes almost a minute to
@@ -9746,134 +10002,144 @@ Time: 51.4205s
         bit is that we need to insert the memoization before the
         recursive calls within <literal>fib</literal>. We can't just
         define <literal>fib</literal> in the ordinary way and memoize it
-        after the fact and expect any improvement.
-      </para>
-      <para>
-        The first step is to write <literal>fib</literal> in a way that
-        partially unwinds the recursion. The following definition of
-        <literal>fib_recur</literal> expects as its first argument to be
-        passed a function that it can use for making its recursive
-        calls.
+        after the fact and expect the first call to
+        <literal>fib</literal> to be improved (though of course repeated
+        calls will be improved).
       </para>
       <programlisting language="ocaml">
-# let fib_recur recur i =
+# let fib = memoize fib;;
+val fib : int -&gt; int = &lt;fun&gt;
+# time (fun () -&gt; fib 40);;
+Time: 52.6s
+- : int = 165580141
+# time (fun () -&gt; fib 40);;
+Time: 0.00596046ms
+- : int = 165580141
+</programlisting>
+      <para>
+        In order to make <literal>fib</literal> fast, our first step
+        will be to rewrite <literal>fib</literal> in a way that unwinds
+        the recursion. The following version expects as its first
+        argument a function (called <literal>fib</literal>) that will be
+        called in lieu of the usual recursive call.
+      </para>
+      <programlisting language="ocaml">
+# let fib_norec fib i =
     if i &lt;= 1 then i
-    else recur (i - 1) + recur (i - 2) ;;
-val fib_recur : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
+    else fib (i - 1) + fib (i - 2) ;;
+val fib_norec : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
         We can now turn this back into an ordinary Fibonacci function by
         tying the recursive knot, as shown below.
       </para>
       <programlisting language="ocaml">
-# let rec fib i = fib_recur fib i
+# let rec fib i = fib_norec fib i
 val fib : int -&gt; int = &lt;fun&gt;
 # fib 5;;
 - : int = 8
 </programlisting>
       <para>
-        And we can even write a polymorphic function that we'll call
-        <literal>fix</literal> that can tie the recursive not for any
-        function of this form.
+        We can even write a polymorphic function that we'll call
+        <literal>make_rec</literal> that can tie the recursive not for
+        any function of this form.
       </para>
       <programlisting language="ocaml">
-# let fix f =
-    let rec f' x = f f' x in
-    f'
+# let make_rec f_norec =
+    let rec f x = f_norec f x in
+    f
   ;;
-val fix : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
-# let fib = fix fib_recur;;
+val make_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
+# let fib = make_rec fib_norec;;
 val fib : int -&gt; int = &lt;fun&gt;
 # fib 5;;
 - : int = 8
 </programlisting>
       <para>
         This is a pretty strange piece of code, and it may take a few
-        minutes of staring at this to figure out what's going on. Like
-        <literal>fib_recur</literal>, the function <literal>f</literal>
-        passed into <literal>fix</literal> is a function that isn't
-        recursive, but takes as an argument of a function that it will
-        call. What <literal>fix</literal> does is to essentially feed
-        <literal>f</literal> to itself, thus making a true recursive
-        function.
+        minutes of thought to figure out what's going on. Like
+        <literal>fib_norec</literal>, the function
+        <literal>f_norec</literal> passed into
+        <literal>make_rec</literal> is a function that isn't recursive,
+        but takes as an argument a function that it will call. What
+        <literal>make_rec</literal> does is to essentially feed
+        <literal>f_norec</literal> to itself, thus making it a true
+        recursive function.
       </para>
       <para>
-        This is clever enough, but all we've done so far is find a new
+        This is clever enough, but all we've really done is find a new
         way to implement the same old slow Fibonacci function. To make
-        it faster, we need a function like <literal>fix</literal> that
-        inserts memoization when it ties the recursive knot. Here is
-        just such a function.
+        it faster, we need variant on <literal>make_rec</literal> that
+        inserts memoization when it ties the recursive knot. We'll call
+        that function <literal>memo_rec</literal>.
       </para>
       <programlisting language="ocaml">
-# let memo_fix f =
-     let rec f' = lazy (memoize (fun x -&gt; f (Lazy.force f') x)) in
-     Lazy.force f'
+# let memo_rec f_norec x =
+     let fref = ref (fun _ -&gt; assert false) in
+     let f = memoize (fun x -&gt; f_norec !fref x) in
+     fref := f;
+     f x
   ;;
-val memo_fix : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
+val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 </programlisting>
       <para>
-        It's not obvious why we need to use laziness here. It seems like
-        you should be able to get away with just dropping the the
-        <literal>lazy</literal> and the <literal>Lazy.force</literal>
-        from the above code, as follows.
-      </para>
-      <programlisting language="ocaml">
-# let memo_fix f =
-     let rec f' = memoize (fun x -&gt; f f' x) in
-     f'
-  ;;
-      Characters 35-60:
-       let rec f' = memoize (fun x -&gt; f f' x) in
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: This kind of expression is not allowed as right-hand side of `let rec'
-</programlisting>
-      <para>
-        OCaml rejects the definition because OCaml, as a strict
-        language, can't safely construct the closure
-        <literal>(fun x -&gt; f f' x)</literal> until
-        <literal>f'</literal> itself is defined, and
-        <literal>f'</literal> can't be defined until
-        <literal>memoize</literal> runs, by which time the closure
-        already needs to exist. Generally, OCaml requires that the right
-        hand side of a <literal>let rec</literal> be either a function,
-        a <literal>lazy</literal> value or a variant or record
-        constructor.
+        Note that <literal>memo_rec</literal> has the same signature as
+        <literal>make_rec</literal>.
       </para>
       <para>
-        In any case, using <literal>memo_fix</literal>, we can now build
-        an efficient version of <literal>fib</literal>.
+        We're using the reference here as a way of tying the recursive
+        knot without using a <literal>let rec</literal>, which for
+        reasons we'll describe later wouldn't work here.
+      </para>
+      <para>
+        Using <literal>memo_rec</literal>, we can now build an efficient
+        version of <literal>fib</literal>.
       </para>
       <programlisting language="ocaml">
-# let fib = memo_fix fib_recur;;
+# let fib = memo_rec fib_recur;;
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);;
 Time: 0.236034ms
 </programlisting>
       <para>
-        We can even combine this into one compact form that makes this
-        look as much as possible like an ordinary function declaration.
-        Here, we're essentially using <literal>memo_fix</literal> as a
-        custom form of <literal>let rec</literal>.
+        And as you can see, the exponential time complexity is now gone.
+      </para>
+      <para>
+        The memory behavior here is important. If you look back at the
+        definition of <literal>memo_rec</literal>, you'll see that the
+        call to memo_rec does not trigger a call to
+        <literal>memoize</literal>. Only when the final argument to
+        <literal>fib</literal> is presented does
+        <literal>memoize</literal> get called, and the result of that
+        call falls out of scope when the <literal>fib</literal> call
+        returns. That means that, unlike ordinary memoization, calling
+        <literal>memo_rec</literal> on a function does not create a
+        memory leak --- the memoization table is collected after the
+        computation completes.
+      </para>
+      <para>
+        We can use <literal>memo_rec</literal> as part of a single
+        declaration that makes this look like it's little more than a
+        special form of <literal>let rec</literal>.
       </para>
       <programlisting language="ocaml">
-# let fib = memo_fix (fun fib i -&gt;
+# let fib = memo_rec (fun fib i -&gt;
     if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2));;
 val fib : int -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
-        This very same approach will work for
+        This same approach will work for
         <literal>edit_distance</literal>. The one change we'll need to
-        make is that <literal>edit_server</literal> will now take a pair
-        of strings as a single argument, since
+        make is that <literal>edit_distance</literal> will now take a
+        pair of strings as a single argument, since
         <literal>memoize</literal> only works sensibly for
         single-argument functions. We can always recover the original
         interface with a wrapper function.
       </para>
       <programlisting language="ocaml">
-# let edit_distance = memo_fix (fun edit_distance (s,t) -&gt;
+# let edit_distance = memo_rec (fun edit_distance (s,t) -&gt;
     match String.length s, String.length t with
-    | (0,x) | (x,0) -&gt; x (* if either string is empty, return the length of the
-                            other string. *)
+    | (0,x) | (x,0) -&gt; x
     | (len_s,len_t) -&gt;
       let s' = String.drop_suffix s 1 in
       let t' = String.drop_suffix t 1 in
@@ -9891,11 +10157,101 @@ val edit_distance : string * string -&gt; int = &lt;fun&gt;
         And this new version of <literal>edit_distance</literal> is
         indeed much more efficient than the one we started with.
       </para>
+      <programlisting language="ocaml">
+# time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));;
+Time: 2.14601ms
+- : int = 2
+</programlisting>
       <para>
-        <literal>ocaml # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));; Time: 2.14601ms - : int = 2</literal>
         This is about ten thousand times faster than our original
         implementation.
       </para>
+      <note> <title> 
+      Limitations of <literal>let rec</literal>
+      </title>
+      <para>
+        You might wonder why we didn't tie the recursive knot in
+        <literal>memo_rec</literal> using <literal>let rec</literal>, as
+        we did for <literal>make_rec</literal> earlier. Here's code that
+        tries to do just that:
+      </para>
+      <programlisting language="ocaml">
+# let memo_rec f_norec =
+     let rec f = memoize (fun x -&gt; f_norec f x) in
+     f
+  ;;
+      Characters 41-72:
+       let rec f = memoize (fun x -&gt; f_norec f x) in
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of `let rec'
+</programlisting>
+      <para>
+        OCaml rejects the definition because OCaml, as a strict
+        language, has limits on what it can put on the right hand side
+        of a <literal>let rec</literal>. In particular, imagine how the
+        following code snippet would be compiled.
+      </para>
+      <programlisting language="ocaml">
+let rec x = x + 1
+</programlisting>
+      <para>
+        Note that <literal>x</literal> is an ordinary value, not a
+        function. As such, it's not clear how to execute this code. In
+        some sense, you could imagine it compiling down to an infinite
+        loop, but there's no looping control structure to make that
+        happen.
+      </para>
+      <para>
+        To avoid such cases, the compiler only allow three possible
+        constructs to show up on the right-hand sqide of a
+        <literal>let rec</literal>: a function definition, a
+        constructor, or the lazy keyword. This excludes some reasonable
+        things, like our definition of <literal>memo_rec</literal>, but
+        it also blocks things that don't make sense, like our definition
+        of <literal>x</literal>.
+      </para>
+      <para>
+        It's worth noting that these restrictions don't show up in a
+        lazy language like Haskell. Indeed, we can make something like
+        our definition of <literal>x</literal> work if we use OCaml's
+        laziness:
+      </para>
+      <programlisting language="ocaml">
+# let rec x = lazy (Lazy.force x + 1);;
+val x : int lazy_t = &lt;lazy&gt;
+</programlisting>
+      <para>
+        Of course, actually trying to compute this will fail. OCaml's
+        <literal>lazy</literal> throws an exception when a lazy value
+        tries to force itself as part of its own evaluation.
+      </para>
+      <programlisting language="ocaml">
+# Lazy.force x;;
+Exception: Lazy.Undefined.
+</programlisting>
+      <para>
+        But we can create useful recursive definitions possible with
+        <literal>lazy</literal> as well. In particular, we can use
+        laziness to make our definition of <literal>memo_rec</literal>
+        work without explicit mutation.
+      </para>
+      <programlisting language="ocaml">
+# let lazy_memo_rec f_norec x =
+     let rec f = lazy (memoize (fun x -&gt; f_norec (Lazy.force f) x)) in
+     (Lazy.force f) x
+  ;;
+val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
+# time (fun () -&gt; lazy_memo_rec fib_norec 40);;
+Time: 0.298977ms
+- : int = 102334155
+</programlisting>
+      <para>
+        Laziness is more constrained than explicit mutation, and so in
+        some cases can lead to code whose behavior is easier to think
+        about.
+      </para>
+      </note>
+
     </sect2>
   </sect1>
 </chapter><chapter id="object-oriented-programming">
@@ -10105,8 +10461,8 @@ val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
   object
     method get = (p1#get + p2#get) / 2
   end;;
-val average : 
-  &lt; get : int; .. &gt; -&gt; 
+val average :
+  &lt; get : int; .. &gt; -&gt;
   &lt; get : int; .. &gt; -&gt;
   &lt; get : int &gt; = &lt;fun&gt;
 </programlisting>
@@ -10350,10 +10706,10 @@ open Core.Std
 open Cryptokit
 
 let _ =
-  In_channel.(input_all stdin) |!
-  hash_string (Hash.md5 ()) |!
-  transform_string (Hexa.encode ()) |!
-  print_endline
+  In_channel.(input_all stdin)
+  |&gt; hash_string (Hash.md5 ())
+  |&gt; transform_string (Hexa.encode ())
+  |&gt; print_endline
 </programlisting>
     <para>
       After opening the right modules, we read in the entire standard
@@ -10383,10 +10739,10 @@ let _ =
     |&quot;sha1&quot; -&gt; Hash.sha1 ()
     |_ -&gt; Hash.md5 ()
   in
-  In_channel.(input_all stdin) |!
-  hash_string hash_fn |!
-  transform_string (Hexa.encode ()) |!
-  print_endline
+  In_channel.(input_all stdin)
+  |&gt; hash_string hash_fn
+  |&gt; transform_string (Hexa.encode ())
+  |&gt; print_endline
 </programlisting>
     <para>
       Now let's try something more advanced. The
@@ -10453,10 +10809,10 @@ let _ =
 let evp_byte_to_key password tlen =
   let rec aux acc v =
     match String.length acc &lt; tlen with
-    |true -&gt;
+    | true -&gt;
       let v = md5 (v ^ password) in
       aux (acc^v) v
-    |false -&gt; acc
+    | false -&gt; acc
   in
   let v = md5 password in
   String.uppercase (transform_string (Hexa.encode ()) (aux v v))
@@ -10524,10 +10880,10 @@ end;;
   object
     val mutable value = x
     val mutable next_node = None
-  
+
     method get = value
     method set x = value &lt;- x
-  
+
     method next = next_node
     method set_next node = next_node &lt;- node
   end;;
@@ -10829,7 +11185,7 @@ module SList = struct
    class ['a] node x = object ... end
    class ['a] slist_iterator cur = object ... end
    class ['a] slist = object ... end
-   
+
    let make () = new slist
 end;;
 </programlisting>
@@ -11150,9 +11506,9 @@ let intervals =
 
 let () =
   intervals
-  |! List.sexp_of_t Int_interval.sexp_of_t
-  |! Sexp.to_string_hum
-  |! print_endline
+  |&gt; List.sexp_of_t Int_interval.sexp_of_t
+  |&gt; Sexp.to_string_hum
+  |&gt; print_endline
 </programlisting>
     <para>
       But we're still missing something: we haven't created an
@@ -11272,7 +11628,7 @@ type t = { a: string; b: int; c: float option } with sexp
 let run () =
   let t =
     Sexp.load_sexp &quot;foo.scm&quot;
-    |! t_of_sexp
+    |&gt; t_of_sexp
   in
   printf &quot;b is: %d\n%!&quot; t.b
 
@@ -11552,7 +11908,7 @@ type json = [
   | `Int of int
   | `List of json list
   | `Null
-  | `String of string ] 
+  | `String of string ]
 </programlisting>
       <para>
         Note that some of the type definitions above are recursive. This
@@ -11575,7 +11931,7 @@ val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; str
   [lnum] : number of the first line of input. Default is 1.
 
 val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; in_channel -&gt; json
-(* Read a JSON value from a channel. See [from_string] for the meaning of the 
+(* Read a JSON value from a channel. See [from_string] for the meaning of the
    optional arguments. *)
 
 val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
@@ -11691,7 +12047,7 @@ Error: This expression has type int but an expression was expected of type
 # type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
 type t1 = { foo1 : int; bar1 : t2; }
 and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };; 
+# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
 &lt;lots of text&gt;
 # v1 == v1;;
 - : bool = true
@@ -11718,13 +12074,13 @@ let () =
 
   (* Locally open the JSON manipulation functions *)
   let open Yojson.Basic.Util in
-  let title = json |! member &quot;title&quot; |! to_string in
-  let tags = json |! member &quot;tags&quot; |! to_list |! filter_string in
-  let pages = json |! member &quot;pages&quot; |! to_int in
-  let is_online = json |! member &quot;is_online&quot; |! to_bool_option in
-  let is_translated = json |! member &quot;is_translated&quot; |! to_bool_option in
-  let authors = json |! member &quot;authors&quot; |! to_list in
-  let names = List.map authors ~f:(fun json -&gt; member &quot;name&quot; json |! to_string) in
+  let title = json |&gt; member &quot;title&quot; |&gt; to_string in
+  let tags = json |&gt; member &quot;tags&quot; |&gt; to_list |&gt; filter_string in
+  let pages = json |&gt; member &quot;pages&quot; |&gt; to_int in
+  let is_online = json |&gt; member &quot;is_online&quot; |&gt; to_bool_option in
+  let is_translated = json |&gt; member &quot;is_translated&quot; |&gt; to_bool_option in
+  let authors = json |&gt; member &quot;authors&quot; |&gt; to_list in
+  let names = List.map authors ~f:(fun json -&gt; member &quot;name&quot; json |&gt; to_string) in
 
   (* Print the results of the parsing *)
   printf &quot;Title: %s (%d)\n&quot; title pages;
@@ -11761,7 +12117,7 @@ let () =
         </para>
         <programlisting language="ocaml">
 val map: 'a list -&gt; f:('a -&gt; 'b) -&gt; 'b list
-val fold: list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum 
+val fold: list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum
 val iter: 'a list -&gt; f:('a -&gt; unit) -&gt; unit
 </programlisting>
         <para>
@@ -11795,14 +12151,14 @@ val filter_string : json list -&gt; string list
 </programlisting>
         <para>
           We'll go through each of these uses one-by-one. Core provides
-          the <literal>|!</literal> pipebang which can chain combinators
-          together, and the example code uses this to select and convert
-          values out of the JSON structure. Let's examine some of them
-          in more detail:
+          the <literal>|&gt;</literal> pipe-forward which can chain
+          combinators together, and the example code uses this to select
+          and convert values out of the JSON structure. Let's examine
+          some of them in more detail:
         </para>
         <programlisting language="ocaml">
   let open Yojson.Basic.Util in
-  let title = json |! member &quot;title&quot; |! to_string in
+  let title = json |&gt; member &quot;title&quot; |&gt; to_string in
 </programlisting>
         <para>
           For the <literal>title</literal> field, the
@@ -11813,8 +12169,8 @@ val filter_string : json list -&gt; string list
           <literal>try/with</literal> the result.
         </para>
         <programlisting language="ocaml">
-  let tags = json |! member &quot;tags&quot; |! to_list |! filter_string in
-  let pages = json |! member &quot;pages&quot; |! to_int in
+  let tags = json |&gt; member &quot;tags&quot; |&gt; to_list |&gt; filter_string in
+  let pages = json |&gt; member &quot;pages&quot; |&gt; to_int in
 </programlisting>
         <para>
           The <literal>tags</literal> field is similar to
@@ -11828,8 +12184,8 @@ val filter_string : json list -&gt; string list
           <literal>filter_string</literal>.
         </para>
         <programlisting language="ocaml">
-  let is_online = json |! member &quot;is_online&quot; |! to_bool_option in
-  let is_translated = json |! member &quot;is_translated&quot; |! to_bool_option in
+  let is_online = json |&gt; member &quot;is_online&quot; |&gt; to_bool_option in
+  let is_translated = json |&gt; member &quot;is_translated&quot; |&gt; to_bool_option in
 </programlisting>
         <para>
           The <literal>is_online</literal> and
@@ -11843,8 +12199,8 @@ val filter_string : json list -&gt; string list
           <literal>None</literal>.
         </para>
         <programlisting language="ocaml">
-  let authors = json |! member &quot;authors&quot; |! to_list in
-  let names = List.map authors ~f:(fun json -&gt; member &quot;name&quot; json |! to_string) in
+  let authors = json |&gt; member &quot;authors&quot; |&gt; to_list in
+  let names = List.map authors ~f:(fun json -&gt; member &quot;name&quot; json |&gt; to_string) in
 </programlisting>
         <para>
           The final use of JSON combinators is to extract the
@@ -11855,14 +12211,14 @@ val filter_string : json list -&gt; string list
           <literal>string list</literal>. Notice that the example
           explicitly binds <literal>authors</literal> to a variable
           name. It can also be written more succinctly using the
-          pipebang operator:
+          pipe-forward operator:
         </para>
         <programlisting language="ocaml">
 let names =
-  json |!
-  member &quot;authors&quot; |!
-  to_list |!
-  List.map ~f:(fun json -&gt; member &quot;name&quot; json |! to_string)
+  json
+  |&gt; member &quot;authors&quot;
+  |&gt; to_list
+  |&gt; List.map ~f:(fun json -&gt; member &quot;name&quot; json |&gt; to_string)
 </programlisting>
         <para>
           This style of programming which omits variable names and
@@ -11978,7 +12334,7 @@ Error: This expression has type 'a * 'b
           this:
         </para>
         <programlisting language="ocaml">
-type json = [ 
+type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
   | `Float of float
@@ -11990,7 +12346,7 @@ type json = [
   | `String of string
   | `Stringlit of string
   | `Tuple of json list
-  | `Variant of string * json option ] 
+  | `Variant of string * json option ]
 </programlisting>
         <para>
           You should immediately be able to spot a benefit of using
@@ -12044,7 +12400,7 @@ type json = [
 val to_basic : json -&gt; Yojson.Basic.json
 (** Tuples are converted to JSON arrays, Variants are converted to JSON strings
 or arrays of a string (constructor) and a json value (argument). Long integers
-are converted to JSON strings.  Examples: 
+are converted to JSON strings.  Examples:
 
 `Tuple [ `Int 1; `Float 2.3 ]   -&gt;    `List [ `Int 1; `Float 2.3 ]
 `Variant (&quot;A&quot;, None)            -&gt;    `String &quot;A&quot;
@@ -12136,13 +12492,13 @@ $ atdgen -j github.atd
       </para>
       <programlisting language="ocaml">
 type scope = [
-  | `User | `Public_repo | `Repo | `Repo_status 
+  | `User | `Public_repo | `Repo | `Repo_status
   | `Delete_repo | `Gist
 ]
 
-type app = { 
-  app_name (*atd name *): string; 
-  app_url (*atd url *): string 
+type app = {
+  app_name (*atd name *): string;
+  app_url (*atd url *): string
 }
 
 type authorization_request = {
@@ -12184,7 +12540,7 @@ val string_of_authorization_response :
   ?len:int -&gt; authorization_response -&gt; string
   (** Serialize a value of type {!authorization_response}
       into a JSON string.
-      @param len specifies the initial length 
+      @param len specifies the initial length
                  of the buffer used internally.
                  Default: 1024. *)
 
@@ -12293,7 +12649,7 @@ val authorization_response_of_string :
 &lt;RelatedTopics&gt;
  &lt;RelatedTopic&gt;
    &lt;Text&gt;Companies based in Pennsylvania&lt;/Text&gt;
-   &lt;FirstURL&gt; 
+   &lt;FirstURL&gt;
      http://duckduckgo.com/c/Companies_based_in_Pennsylvania
    &lt;/FirstURL&gt;
  &lt;/RelatedTopic&gt;
@@ -12344,8 +12700,8 @@ val authorization_response_of_string :
 type signal = [
   | `Data of string
   | `Dtd of dtd
-  | `El_end 
-  | `El_start of tag 
+  | `El_end
+  | `El_start of tag
 ]
 </programlisting>
     <para>
@@ -12400,8 +12756,8 @@ let _ =
 type source = [
   | `Channel of in_channel
   | `Fun of unit -&gt; int
-  | `String of int * string 
-] 
+  | `String of int * string
+]
 </programlisting>
     <para>
       The <literal>Fun</literal> channel returns one character at a time
@@ -12436,19 +12792,19 @@ type source = [
       and helper functions:
     </para>
     <programlisting language="ocaml">
-type tree = 
+type tree =
   | Element of Xmlm.tag * tree list
   | Data of string
 
-let in_tree i = 
+let in_tree i =
   let el tag children = Element (tag, children) in
   let data d = Data d in
   Xmlm.input_doc_tree ~el ~data i
 
-let out_tree o t = 
+let out_tree o t =
   let frag = function
-  | Element (tag, childs) -&gt; `El (tag, childs) 
-  | Data d -&gt; `Data d 
+  | Element (tag, childs) -&gt; `El (tag, childs)
+  | Data d -&gt; `Data d
   in
   Xmlm.output_doc_tree frag o t
 </programlisting>
@@ -12469,7 +12825,7 @@ val name : Xmlm.tag -&gt; string
    and return the concatenated contents of all of them *)
 val filter_tag : string -&gt; tree list -&gt; tree list
 
-(* Given a list of [trees], concatenate all of the data contents               
+(* Given a list of [trees], concatenate all of the data contents
    into a string, and discard any sub-tags within it *)
 val concat_data : tree list -&gt; string
 </programlisting>
@@ -12489,12 +12845,12 @@ let filter_tag n =
       ts @ acc
     |_ -&gt; acc
   )
-     
+
 let concat_data =
   List.fold_left ~init:&quot;&quot; ~f:(fun acc -&gt;
     function
     |Data s -&gt; acc ^ s
-    |_ -&gt; acc                           
+    |_ -&gt; acc
   )
 </programlisting>
     <para>
@@ -12516,11 +12872,11 @@ let concat_data =
     </para>
     <programlisting language="ocaml">
 let topics trees =
-  filter_tag &quot;DuckDuckGoResponse&quot; trees |!
-  filter_tag &quot;RelatedTopics&quot; |!
-  filter_tag &quot;RelatedTopic&quot; |!
-  filter_tag &quot;Text&quot; |!
-  List.iter ~f:(fun x -&gt; concat_data [x] |! print_endline)
+  filter_tag &quot;DuckDuckGoResponse&quot; trees
+  |&gt; filter_tag &quot;RelatedTopics&quot;
+  |&gt; filter_tag &quot;RelatedTopic&quot;
+  |&gt; filter_tag &quot;Text&quot;
+  |&gt; List.iter ~f:(fun x -&gt; concat_data [x] |&gt; print_endline)
 
 let _ =
   let i = Xmlm.make_input (`Channel (open_in &quot;ddg.xml&quot;)) in
@@ -12699,7 +13055,7 @@ let rec xml_of_author author : Cow.Xml.t =
       (match [ `Data author.name ] with
        | [] -&gt; []
        | _ -&gt;
-         [ `El ((((&quot;&quot;, &quot;name&quot;), []) : Cow.Xml.tag), 
+         [ `El ((((&quot;&quot;, &quot;name&quot;), []) : Cow.Xml.tag),
          [ `Data author.name ]) ]) ]
 </programlisting>
     <para>
@@ -13004,8 +13360,8 @@ let do_ddg_query query =
       let buf = Buffer.create 128 in
       Pipe.iter_without_pushback body ~f:(Buffer.add_string buf)
       &gt;&gt;| fun () -&gt;
-      get_definition_from_json (Buffer.contents buf) |!
-      Option.value ~default:&quot;???&quot;
+      get_definition_from_json (Buffer.contents buf)
+      |&gt; Option.value ~default:&quot;???&quot;
   | Some (_, None) | None -&gt;
       failwith &quot;no body in response&quot;
 </programlisting>
@@ -13294,7 +13650,7 @@ val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&
     </para>
     <programlisting language="ocaml">
 # Thread_safe.block_on_async_exn flip ;;
-# - : string * Time.Span.t * Time.Span.t = (&quot;Heads!&quot;, 2.86113s, 3.64635s) 
+# - : string * Time.Span.t * Time.Span.t = (&quot;Heads!&quot;, 2.86113s, 3.64635s)
 # Thread_safe.block_on_async_exn flip ;;
 # - : string * Time.Span.t * Time.Span.t = (&quot;Tails!&quot;, 4.44979s, 2.14977s)
 </programlisting>
