@@ -11,6 +11,8 @@ Lists are one of the most common ways to aggregate data in OCaml.  You can
 construct a list of values by enclosing them in square brackets, separating
 the elements with semicolons.  The list elements must all have the same type.
 
+_(yminsky: consider using the variable name `cities` rather than `l1`)_
+
 ```ocaml
 # let l1 = ["Chicago"; "Paris"; "Tokyo"];;
 val l1 : string list = ["Chicago"; "Paris"; "Tokyo"]
@@ -35,6 +37,9 @@ a list with 3 cons-cells, `"Chicago" :: "Paris" :: "Tokyo" :: []`.  Each cell
 has two parts: a value, and a pointer to the rest of the list.  The final
 pointer refers to the special value `[]` representing the empty list.
 
+_(yminsky: Shouldn't the image go after the example following?  And
+I think it would need some explanator text too.)_
+
 TODO: IMAGE figures/04-list-01.svg
 
 ```ocaml
@@ -52,10 +57,18 @@ Constructing a list is really only half the story -- it would be pretty useless
 to construct lists unless we can also pull them apart.  We need destructors, and
 for this we use _pattern matching_.
 
+_(yminsky: I worry that the term "destructor" isn't clarifying for the
+vast majority of readers.  It sounds like something you do to reclaim
+memory for the GC.  I'd consider dropping the term.  If we really need
+a good term, maybe we should use "deconstruction".)_
+
 For a list, there are two possible shapes: the empty list `[]` or a cons-cell `h
 :: t`.  We can use a `match` expression to perform the pattern matching.  In the
 case of a cons-cell, the variables `h` and `t` in the pattern are bound to the
 corresponding values in the list when the match is performed.
+
+_(yminsky: Consider using `hd` and `tl` over `h` and `t`, since that's
+what's used elsewhere in the book.)_
 
 For example, suppose we want to define a function to add 1 to each element of a
 list.  We have to consider two cases, where the list is empty, or where it is a
@@ -71,6 +84,11 @@ val add1 : int list -> int list = <fun>
 # add1 [5; 3; 7];;
 - : int list = [6; 4; 8]
 ```
+
+_(yminsky: Maybe resent this at first with more parens, ot make it
+clear that nesting is in fact going on?  And then later, explain that
+due to the associativity rules, the parens are unnecessary.   _i.e._,
+`_ :: (_ :: (x :: _))` might be clearer. )_
 
 Patterns are not limited to just one constructor.  They can be aribitrarily
 nested.  For example, if we want to extract the third element of a list, we can
@@ -117,11 +135,21 @@ val broken_third : 'a list -> 'a option = <fun>
 - : int option = None
 ```
 
+_(yminsky: I'd like to avoid using quotes as a way o saying "not literally".
+I think we can reword and avoid the need for quotes, or in this case,
+I think just dropping them would be fine.)_
+
 Pattern ordering can be an issue, but a more important concern is that pure
 wildcard patterns match anything, making it easier to forget "important" cases.
 When a pattern matching is compiled, OCaml performs an exhaustiveness check,
 printing a warning if it is not exhaustive, along with an example of a missing
 pattern.
+
+_(yminsky: I wonder if somewhere it would make sense to list in
+bulleted form, what the three static checks you get with match
+statements: inexhaustive matches, impossible cases, useless cases.
+Seems like a nice trio to describe in one unit.  That said, not sure
+how to fit it into the present flow.)_
 
 ```ocaml
 # let inexhaustive_third l =
@@ -161,6 +189,9 @@ Note that the `List` functions like `List.hd` (for "head" of the list),
 type.  That's because, in some cases, there is no value to return.  For example,
 the empty list has no head or tail.
 
+_(yminsky: I would use a shorter example here: maybe just one of them
+(hd, nth, tl) with both a Some and None outcome.)_
+
 ```ocaml
 # List.hd ["Chicago"; "Paris"; "Tokyo"];;
 - : string option = Some "Chicago"
@@ -176,6 +207,10 @@ the empty list has no head or tail.
 - : string option = None
 ```
 
+_(yminsky: Again, I would avoid the scare quotes around "optional".
+It's a somewhat different issue, but I would avoid them around "no
+value" as well.)_
+
 A value of `option` type is "optional" -- it is either `None`, meaning "no
 value"; or `Some v` for some value `v`.  For example, `List.hd ["Chicago";
 "Paris"; "Tokyo"]` is `Some "Chicago"` because the head of the list exists
@@ -190,8 +225,20 @@ type 'a option =
   | None
 ```
 
+_(yminsky: Maybe show construction before destruction?  We call
+library functions that do a construction, but we don't do one
+directly.  Maybe implement `List.last`?)_
+
 As with lists, the way to take apart an `option` value is to use pattern
 matching, with patterns for the two cases.
+
+_(yminsky: Explain what `optional_default` does?  Also, maybe a
+different name?  It's called `Option.value` in Core, so maybe
+`option_value`?)_
+
+_(yminsky: You seem to use `v` for an arbitrary value, but elsewhere
+in the book, we tend to use `x` and `y`.  Perhaps we should settle on
+one standard.)_
 
 ```ocaml
 # let optional_default ~default opt =
@@ -205,10 +252,10 @@ val optional_default : default:'a -> 'a option -> 'a = <fun>
 - : int = 10
 ```
 
-One annoying thing about the use of options is that functions do not compose
-directly.  For example, if we wanted to compute the third element of a list
-using the `List.hd` and `List.tl` functions, we might try to compose them like
-this.
+One annoying thing about the use of options is that functions do not
+compose directly.  For example, if we wanted to compute the third
+element of a list using the `List.hd` and `List.tl` functions, we
+might try to compose them like this.
 
 ```ocaml
 # let third l = List.hd (List.tl (List.tl l));;
@@ -219,9 +266,9 @@ Error: This expression has type 'a list option
        but an expression was expected of type 'b list
 ```
 
-Unfortunately, this doesn't work because the functions return options, not lists.  We
-can use pattern matching to perform the composition, but the code is pretty
-tedious.
+Unfortunately, this doesn't work because the functions return options,
+not lists.  We can use pattern matching to perform the composition,
+but the code is pretty tedious.
 
 ```ocaml
 # let tedious_third l1 =
@@ -241,7 +288,7 @@ val tedious_third : 'a list -> 'a option = <fun>
 
 One solution for abbreviating the code is to define a composition operator `v
 >>= f` that takes an option value `v`, performs the pattern match, and passes
-the value to function `f` if there is one. 
+the value to function `f` if there is one.
 
 ```ocaml
 # let (>>=) v f =
@@ -947,7 +994,7 @@ let rev l =
    | [] -> result
    | h :: t -> tail_recursive_rev (h :: result) t
   in tail_recursive_rev [] l;;
-   
+
 let rev_map l ~f =
   let rec rmap accu = function
    | [] -> accu
@@ -1144,7 +1191,7 @@ let rec insert x = function
      Some { label = label; left = insert x left; right = right }
    else if x > label then
      Some { label = label; left = left; right = insert x right }
-   else 
+   else
      tree
  | None -> Some { label = x; left = None; right = None };;
 ```
@@ -1159,7 +1206,7 @@ versions are isomorphic.
 type 'a binary_tree =
  | Leaf
  | Interior of 'a * 'a binary_tree * 'a binary_tree;;
- 
+
 let new_binary_tree () : 'a binary_tree = Leaf;;
 
 let rec insert x = function
