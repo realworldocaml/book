@@ -424,6 +424,9 @@ _(yminsky: I wonder if or-patterns deserve an explicit mention.  The
 fact that you can nest disjunctions anywhere nested inside a pattern
 seems notable.)_
 
+_(yminsky: Do you mean "the example in the introduction"?  Maybe
+better to reference the explicit chapter or section using an xref.)_
+
 Let's return to the example introduction, where we defined a function
 to remove adjacent duplicate elements in a list.  There are several
 cases to consider.  If the list is empty or has one element, we can
@@ -431,14 +434,22 @@ return it unchanged.  Otherwise, compare the first two elements of the
 list, keeping the first one if, and only if, it is different from the
 second.
 
+_(yminsky: It's called `destutter` in guided-tour.  Seems worth
+keeping the same term)_
+
+_(yminsky: Maybe worth rewriting the version of destutter from that
+section in its entirety, so it's more obvious what you're changing,
+and for that matter why it's preferable.  There are a number of points
+about performance that seem worth saying.)_
+
 ```ocaml
 # let rec uniq = function
    | ([] | [_]) as l -> l
    | i1 :: ((i2 :: _) as t) ->
-        if i1 = i2 then
-           uniq t
-        else
-           i1 :: uniq t;;
+     if i1 = i2 then
+       uniq t
+     else
+       i1 :: uniq t;;
 val uniq : 'a list -> 'a list = <fun>
 # uniq [1; 3; 3; 3; 2];;
 - : int list = [1; 3; 2]
@@ -452,6 +463,9 @@ or have one element, and the list is bound to the variable `l`.
 The second pattern is somewhat more interesting, `i1 :: ((i2 :: _) as t)` binds
 `t` to the tail of the list.  This would be harder (or at least more verbose) if
 we did not have `as` patterns.
+
+_(yminsky: If we show the original destutter from 2 here, we'll
+already have an inefficient version to discuss, so we won't need this one!)_
 
 ```ocaml
 # let rec inefficient_uniq l =
@@ -470,10 +484,11 @@ recursive call, possibly allocating a new cons-cell.  The compiler may or may
 not optimize the recursive call.  The form using `as` is more concise and
 possibly more efficient.
 
-OCaml also supports _guarded_ patterns using _pattern_ `when` _expression_,
-where the _expression_ is a predicate.  The predicate is allowed to use
-variables bound by the pattern, and the pattern matches only of the expression
-evaluates to `true`.  Another way to write the `uniq` function is to split the
+OCaml also supports _guarded_ patterns using _pattern_ `when`
+_expression_, where the _expression_ is a predicate.  The predicate is
+allowed to use variables bound by the pattern, and the pattern matches
+only of _(yminsky: "only if", I think)_ the expression evaluates to
+`true`.  Another way to write the `uniq` function is to split the
 equality case using a `when` pattern.
 
 ```ocaml
