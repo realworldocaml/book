@@ -593,6 +593,10 @@ random access into the list.
 Since lists support only sequential acccess, the implementations of these
 functions iterate through the elements of the list one at a time.
 
+_(yminsky: I wonder if one should either (a) introduce tail recursion
+here, or (b) do the clearer-but-less-efficient non-tail-rec version
+here, and explain how to make it tail-recursive elsewhere.)_
+
 ```ocaml
 # let my_length l =
     let rec length i = function
@@ -651,12 +655,15 @@ efficient to associate to the right.  The expressions `List.append l1
 (List.append l2 l3)` and `List.append (List.append l1 l2) l3` produce equal
 results, but the first is more efficient in general.
 
+_(yminsky: Might be worth saying something about what the
+associativity of @ is.)_
+
 ### Map
 
-The `List.map` function creates a new list by mapping a function over the
-elements of one list, forming a new list from the results.  Given a function
-`f`, and a list `l = [a1; a2; ...; aN]`, the function `List.map ~f l` returns
-the new list `[f a1; f a2; ...; f aN]`.
+The `List.map` function creates a new list by mapping a function over
+the elements of one list, forming a new list from the results.  Given
+a function `f`, and a list `l = [a1; a2; ...; aN]`, the function
+`List.map ~f l` returns the new list `[f a1; f a2; ...; f aN]`.
 
 ```ocaml
 # List.map;;
@@ -677,6 +684,12 @@ val my_map : f:('a -> 'b) -> 'a list -> 'b list = <fun>
 # my_map ~f:(fun i -> string_of_int (i * 10)) [1; 2; 3];;
 - : string list = ["10"; "20"; "30"]
 ```
+
+_(yminsky: If we're going to go over useful list operations, I would
+put my vote in for, in order: `filter` and `filter_map`, `zip` and
+`unzip`, `partition_tf`, `partition_map`.  `filter_map` in particular
+is useful and not as well known as it deserves to be.)_
+
 
 ### Folding
 
