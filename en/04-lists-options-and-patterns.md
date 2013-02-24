@@ -1,6 +1,37 @@
 Lists, Options and Patterns
 ================================================
 
+_(yminsky:
+
+The overall structure of this section seems a little off to me.  Here
+are the headings, which I got from grepping out everything starting
+with two hashes:
+
+    ## Lists
+    ## Pattern matching
+    ## Options
+    ## Pattern matching with `function`
+    ### Using `when` and `as` in patterns
+    ## List operations
+    ### List length and random access
+    #### Appending (concatenating) lists
+    ### Map
+    ### Folding
+    ### Predicates `exists` and `for_all`
+    ## Example: Implementing a set from a list
+    ## Example: pretty-printing a table
+    #### Computing the widths
+    #### Rendering the rows
+    ## List performance
+    ### Tail-recursion
+    ## Heterogenous values
+    ## Options and NULL values
+
+The structure is hard for me to follow, and the section/chapter
+headings seem a little disorganized
+
+)_
+
 _(yminsky: I wonder whether the title should be "Lists, Tuples,
 Options and Patterns"...)_
 
@@ -513,6 +544,12 @@ the compiler can't infer when the guards consider all values.  Of course, in
 this particular case, we can remove the second guard and rely on pattern
 ordering, but the result is not as obvious as the original form without guards.
 You will generally find that `when` clauses are used only infrequently.
+
+_(yminsky: Maybe change the above to advice: "You should generally
+avoid `when` clauses except when they really make things simpler,
+typically by reducing the number of cases in your match.  Othwerise,
+they're usually more trouble than their worth".)_
+
 
 ```ocaml
 # let rec subtle_uniq = function
