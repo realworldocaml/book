@@ -420,11 +420,16 @@ equivalent; they return the first element of the list if it exists.  The
 
 ### Using `when` and `as` in patterns
 
-Let's return to the example introduction, where we defined a function to remove
-adjacent duplicate elements in a list.  There are several cases to consider.  If
-the list is empty or has one element, we can return it unchanged.  Otherwise,
-compare the first two elements of the list, keeping the first one if, and only
-if, it is different from the second.
+_(yminsky: I wonder if or-patterns deserve an explicit mention.  The
+fact that you can nest disjunctions anywhere nested inside a pattern
+seems notable.)_
+
+Let's return to the example introduction, where we defined a function
+to remove adjacent duplicate elements in a list.  There are several
+cases to consider.  If the list is empty or has one element, we can
+return it unchanged.  Otherwise, compare the first two elements of the
+list, keeping the first one if, and only if, it is different from the
+second.
 
 ```ocaml
 # let rec uniq = function
