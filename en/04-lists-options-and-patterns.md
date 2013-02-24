@@ -693,6 +693,9 @@ is useful and not as well known as it deserves to be.)_
 
 ### Folding
 
+_(yminsky: In Core one typically just calls it `List.fold`.  If you
+read the API, `fold_left` is only for fairly special cases.)_
+
 The `List.fold_left` function has a form similar to `map`, but it composes a
 function over the elements of the list.  The expression `List.fold_left ~init ~f
 [a1; a2; a3]` applies `f` to each element of the list, composing the results as
@@ -711,6 +714,10 @@ function over the elements.
 The implementation is straightforward, applying the function `f` to each element
 of the list from left to right, composing the results.
 
+_(yminsky: "composing the results" might be an awkward choice of
+words, since it sounds like it might be about function composition,
+which it isn't.)_
+
 ```ocaml
 # let rec my_fold_left ~init ~f = function
     | [] -> init
@@ -719,6 +726,10 @@ val my_fold_left : init:'a -> f:('a -> 'b -> 'a) -> 'b list -> 'a = <fun>
 # my_fold_left ~init:["d"] ~f:(fun t h -> h :: t) ["a"; "b"; "c"];;
 - : string list = ["c"; "b"; "a"; "d"]
 ```
+
+_(yminsky: Maybe point out that folds are very general can be
+complicated to think about, and that one should prefer other, less
+powerful idioms like `map`, `filter_map` etc, where they apply.)_
 
 ### Predicates `exists` and `for_all`
 
