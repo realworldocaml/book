@@ -1155,6 +1155,15 @@ have problems with large lists.
 
 ## Heterogenous values
 
+_(yminsky: I'm not sure that "heterogenous values" is really the right
+name for this section.  Indeed, I'm not totally sure how to think
+about this as a general lesson about lists.  Indeed, it mostly seems
+like it's more about good use of the type system and parametric
+polymorphism than it is about lists per se.
+
+I think I would just think of this as an extension of the example, and
+not a particularized lesson about lists.)_
+
 Lists are fairly general, but there are several reasons why you might
 not want to use them.
 
@@ -1162,13 +1171,12 @@ not want to use them.
 * The list length is variable, not fixed.
 * The data in a list must have the same type.
 
-In the tabulaton example above, the
-`List` is not a good choice for each entry in the table.  Now, let's
-think about how you might actually use this interface in practice.
-Usually, when you have data to render in a table, the data entries are
-described more precisely by a record.  So, imagine that you start off
-with a record type for representing information about a given
-programming language:
+In the tabulaton example above, the `List` is not a good choice for
+each entry in the table.  Now, let's think about how you might
+actually use this interface in practice.  Usually, when you have data
+to render in a table, the data entries are described more precisely by
+a record.  So, imagine that you start off with a record type for
+representing information about a given programming language:
 
 ```ocaml
 type style =
@@ -1261,6 +1269,10 @@ specialized columns with different formatting and alignment rules,
 which is easier to do with this interface than with the original one
 based on passing in lists-of-lists.
 
+_(yminsky: Isn't this awkwardly placed?  It feels like this should go
+way earlier in the chapter.  Indeed, some of the material below shows
+up earlier as it is, including the explicit definition of the option type.)_
+
 ## Options and NULL values
 
 OCaml has no "NULL" or "nil" values.  Programmers coming from other
@@ -1313,6 +1325,14 @@ in the tree is labeled with a value and it has up to two children.  The nodes in
 the tree follow _infix_ order, meaning that the label of the left child is
 smaller than the label of its parent, and the label of the right child is larger
 than the label of the parent.
+
+_(yminsky: Do we really want a binary tree example here?  It feels a
+little overkill for so early in the book, and feels off-topic from the
+lists/options/pattern-matching direction of the chapter.)_
+
+_(yminsky: I think we should use label punning below, to make it a bit
+easier to read.  We already introduced label punning in the getting
+started section.)_
 
 ```ocaml
 type 'a node = { label : 'a; left : 'a binary_tree; right : 'a binary_tree }
