@@ -89,7 +89,7 @@ types with variable structure, like lists and variants, do not.
 
 Another important characteristic of record patterns is that they don't
 need to be complete; a pattern can mention only a subset of the fields
-in the record.  This can be convenient, but it's can also be error
+in the record.  This can be convenient, but it can also be error
 prone.  In particular, this means that when new fields are added to
 the record, code that should be updated to react to the presence of
 those new fields will not be flagged by the compiler.
