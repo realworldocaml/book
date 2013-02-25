@@ -39,7 +39,7 @@ running on.
 ```ocaml
 # open Core_extended.Std;;
 # let my_host =
-    let sh cmd = String.strip (Shell.sh_full cmd) in
+    let sh = Shell.sh_one_exn in
     { hostname   = sh "hostname";
       os_name    = sh "uname -s";
       os_release = sh "uname -r";
@@ -165,7 +165,7 @@ following code for generating a `host_info` record.
 
 ```ocaml
 # let my_host =
-    let sh cmd = String.strip (Shell.sh_full cmd) in
+    let sh cmd = Shell.sh_one_exn cmd in
     let hostname   = sh "hostname" in
     let os_name    = sh "uname -s" in
     let os_release = sh "uname -r" in
@@ -484,7 +484,7 @@ list of `Logon` messages.
 ```ocaml
 # let get_users logons =
      List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
-  val get_hostnames : Logon.t list -> string list = <fun>
+val get_users : Logon.t list -> string list = <fun>
 ```
 
 Here, we wrote a small function `(fun x -> x.Logon.user)` to access
@@ -557,9 +557,9 @@ Here's an example of `show_field` in action.
 - : string = "time: 2012-06-26 18:44:13.807826"
 ```
 
-(As a side note, the above is our first use of the `Fn` module which
-provides a collection of useful primitives for dealing with functions.
-`Fn.id` is the identity function.)
+As a side note, the above is our first use of the `Fn` module (short
+for "function") which provides a collection of useful primitives for
+dealing with functions.  `Fn.id` is the identity function.
 
 `fieldslib` also provides higher-level operators, like `Fields.fold`
 and `Fields.iter`, which let you iterate over all the fields of a
