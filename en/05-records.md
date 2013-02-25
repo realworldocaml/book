@@ -38,11 +38,13 @@ running on.
 
 ```ocaml
 # open Core_extended.Std;;
-# let my_host = { hostname   = Shell.sh_one "hostname";
-                  os_name    = Shell.sh_one "uname -s";
-                  os_release = Shell.sh_one "uname -r";
-                  cpu_arch   = Shell.sh_one "uname -p";
-                };;
+# let my_host =
+    let sh cmd = String.strip (Shell.sh_full cmd) in
+    { hostname   = sh "hostname";
+      os_name    = sh "uname -s";
+      os_release = sh "uname -r";
+      cpu_arch   = sh "uname -p";
+    };;
 val my_host : host_info =
   {hostname = "Yarons-MacBook-Air.local"; os_name = "Darwin";
    os_release = "11.4.0"; cpu_arch = "i386"}
@@ -163,10 +165,11 @@ following code for generating a `host_info` record.
 
 ```ocaml
 # let my_host =
-    let hostname   = Shell.sh_one "hostname" in
-    let os_name    = Shell.sh_one "uname -s" in
-    let os_release = Shell.sh_one "uname -r" in
-    let cpu_arch   = Shell.sh_one "uname -p" in
+    let sh cmd = String.strip (Shell.sh_full cmd) in
+    let hostname   = sh "hostname" in
+    let os_name    = sh "uname -s" in
+    let os_release = sh "uname -r" in
+    let cpu_arch   = sh "uname -p" in
     { hostname; os_name; os_release; cpu_arch };;
 val my_host : host_info =
   {hostname = "Yarons-MacBook-Air.local"; os_name = "Darwin";
