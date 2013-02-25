@@ -758,6 +758,8 @@ A better implementation is to compute the result directly, using the
 shirt-circuit property of the logical connectives `&&` and `||` to terminate the
 computation as soon as the result is known.
 
+_(yminsky: Again, use `hd` and `tl`)_
+
 ```ocaml
 # let rec my_exists ~f = function
    | [] -> false
@@ -768,6 +770,10 @@ val my_exists : f:('a -> bool) -> 'a list -> bool = <fun>
 In the `my_exists` function, once `f h` is true, the disjunction `f h ||
 my_exists ~f t` returns immediately without evaluating the expression `my_exists
 ~f t`.
+
+_(yminsky: I wonder if we should skip this example.  It's neither
+particularly practical, nor does it really illustrate anything all
+that new about lists.  It seems like a distraction.)_
 
 ## Example: Implementing a set from a list
 
@@ -851,7 +857,11 @@ example, we will go over the design of a simple library to do just that.
 _(yminsky: This is the first appearance of an mli file.  If we're
 going to introduce it here, we need to do a little more explanation.
 
-jyh: I agree, let's discuss.)_
+jyh: I agree, let's discuss.
+
+yminsky: My inclination is to think that we can just get away without
+using an mli here; just do this stuff directly in the toplevel.
+)_
 
 We'll start with the interface.  The code will go in a new
 module called `Text_table` whose `.mli` contains just the following
@@ -913,6 +923,7 @@ of string lengths.  Then, starting with the lengths of the headers, we
 use `List.fold` to join in the lengths of the elements of each row by
 `max`'ing them together element-wise.
 
+_(yminsky: Should we explain what map2_exn does a little better?)_
 
 Note that this code will throw an exception if any of the rows has a
 different number of entries than the header.  In particular,
@@ -1019,6 +1030,15 @@ let render header rows =
 
 ## List performance
 
+_(yminsky: I think it's important not to go too negative on the
+performance of lists.  Lists are after all quite efficient for lots of
+applications, as long as you're thoughtful in how you use them, and
+you don't use them in cases where the space overhead is material.  But
+transformations of large lists can actually be quite fast, in part
+because allocation in OCaml is so very fast.  Indeed, I think
+programmers from other languages often overestimate the cost of using
+lists, to the detriment of their code.)_
+
 Lists are ubiquitous in OCaml programs.  They are easy to use and
 reasonably efficient for small lists, but large lists can have
 significant performance problems.  The issue is that lists are formed
@@ -1033,14 +1053,18 @@ the following `length` function takes linear time to count the number
 of elements in the list.
 
 ```ocaml
-let rec length = function [] -> 0 | _ :: t -> (length t) + 1;;
+let rec length = function
+  | [] -> 0
+  | _ :: t -> length t + 1
+;;
 ```
 
-In fact, this implementation of the function `length` has a worse problem.  When
-the function runs, each recursive call is active at the same time as the caller.
-The runtime needs to allocate a stack frame for each active call, so this
-function also takes linear space.  For large lists, this is not only
-inefficient, it can also result in stack overflow.
+In fact, this implementation of the function `length` has a worse
+problem.  When the function runs, each recursive call is active at the
+same time as the caller.  The runtime needs to allocate a stack frame
+for each active call, so this function also takes linear space.  For
+large lists, this is not only inefficient, it can also result in stack
+overflow.
 
 ### Tail-recursion
 
@@ -1048,6 +1072,9 @@ We can't do anything about `length` taking linear time --
 singly-linked lists of this kind don't have an efficient `length`
 operation.  However, we can address the space problem using _tail
 recursion_.
+
+_(yminsky: Probably some explanation is required for the word "stack
+frame", which I think we can't assume people will just know.)_
 
 Tail recursion occurs whenever the result of the recursive call is
 returned immediately by the calling function.  In this case, the
