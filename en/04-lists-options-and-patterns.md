@@ -1039,6 +1039,12 @@ because allocation in OCaml is so very fast.  Indeed, I think
 programmers from other languages often overestimate the cost of using
 lists, to the detriment of their code.)_
 
+_(yminsky: Indeed, maybe this section should explicitly just be about
+tail recursion, rather than being about list performance writ large?
+It doesn't really talk about that in any detail, and it's kind of too
+early in the book to start counting the number of words in a cons
+cell...)_
+
 Lists are ubiquitous in OCaml programs.  They are easy to use and
 reasonably efficient for small lists, but large lists can have
 significant performance problems.  The issue is that lists are formed
