@@ -359,6 +359,14 @@ trick when pattern-matching:
 val message_to_string : Log_entry.t -> string = <fun>
 ```
 
+However, when using dot-notation for accessing record fields, you need
+to specify the module explicitly.
+
+```ocaml
+# let is_important t = t.Log_entry.important;;
+val is_important : Log_entry.t -> bool = <fun>
+```
+
 For functions defined within the module where a given record is
 defined, the module qualification goes away entirely.
 
