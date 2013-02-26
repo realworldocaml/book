@@ -36,6 +36,7 @@ let from_yminsky =
   ; "bolinfest"               (* mbolin@gmail.com *)
   ; "bnigito"                 (* bnigito@janestreet.com *)
   ; "roshanjames"             (* rjames@janestreet.com *)
+  ; "wang-d"                  (* yminsky@janestreet.com *)
   ]
 
 let from_email = 
