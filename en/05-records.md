@@ -574,9 +574,11 @@ function for displaying a record field.
      name ^ ": " ^ field_string
   ;;
 val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string = <fun>
-``` This takes three arguments: the `Field.t`, a function for
-converting the contents of the field in question to a string, and a
-record from which the field can be grabbed..
+```
+
+This takes three arguments: the `Field.t`, a function for converting
+the contents of the field in question to a string, and a record from
+which the field can be grabbed..
 
 Here's an example of `show_field` in action.
 
