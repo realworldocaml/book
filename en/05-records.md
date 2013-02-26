@@ -293,11 +293,16 @@ This eliminates the collisions and is simple enough to do.  But it
 leaves you with awkwardly named record fields, and adds needless
 repetition and verbosity to your code.
 
-Another approach is to mint a module for each type.  This is actually
-a broadly useful idiom (and one used quite extensively by Core),
-providing for each type a name-space within which to put related
-values.  When using this style, it is standard practice to name the
-type associated with the module `t`.  Using this style we would write:
+Another approach is to mint a module for each type.  We'll talk more
+about modules more in [xref](#files-modules-and-programs), but for
+now, you can think of a module as a way of collecting values and types
+together in a named package.
+
+Packing types into modules is actually a broadly useful idiom (and one
+used quite extensively by Core), providing for each type a name-space
+within which to put related values.  When using this style, it is
+standard practice to name the type associated with the module `t`.
+Using this style we would write:
 
 ```ocaml
 # module Log_entry = struct
@@ -539,7 +544,7 @@ representative of each field, in the form of a value of type
 `Field.t`.  The `Field` module provides the following functions:
 
 * `Field.name`, which returns the name of a field
-* `Field.get`, which returns the content of afield
+* `Field.get`, which returns the content of a field
 * `Field.fset`, which does a functional update of a field
 * `Field.setter`, which returns `None` if the field is not mutable or
   `Some f` if it is, where `f` is a function for mutating that field.
