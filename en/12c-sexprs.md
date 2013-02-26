@@ -1,39 +1,22 @@
 # Data Serialization with S-Expressions
 
-Data serialization, _i.e._ reading and writing program data to a sequence
-of bytes, is an important and common programming task.  Sometimes you
-need to match someone else's data format (such as XML), and other times
-you just want to quickly dump some values to disk and read them
-back later.  To this end, OCaml comes with several techniques for
-data serialization depending on what your problem is.
+Data serialization, _i.e._ converting data to and from a sequence of
+bytes that's suitable for writing to desk or sending across the
+network, is an important and common programming task.  Sometimes you
+need to match someone else's data format (such as XML), and other
+times you just want to quickly dump some values to disk and read them
+back later.  To this end, OCaml comes with several techniques for data
+serialization depending on what your problem is.
 
-We'll start by introducing some features in Core that make it really easy to
-manipulate s-expressions and safe binary serialisers directly from OCaml types.
-After this section, we'll move onto interoperating with other third-party
-formats in [xref](#handling-json-data) and [xref](#xml-streams-and-trees).
+We'll start by considering the question of how to serialize data in a
+human-readable and editable format when you're not constrained to
+using a particular third-party format.  Core's solution to this
+problem is to use s-expressions
 
-<note>
-<title>The `camlp4` preprocessor and `type_conv`</title>
-
-OCaml doesn't directly support converting static type definitions to and
-from other data formats.  Instead, it supplies a powerful syntax extension
-mechanism known as `camlp4`.  This lets you extend the grammar of the language
-to mark types as requiring special action, and then mechanically generate
-boilerplate code over those types (such as converting to and from other data
-formats).
-
-Many of the examples in the subsequent chapters depend on `camlp4`, but
-the examples all invoke it automatically for you via the `-pp` flag to the
-OCaml compiler.  If you're interested in building your own generators,
-investigate the `type_conv` library which provides the basic extension
-mechanism used by the rest of this chapter.
-
-</note>
-
-S-expressions are nested paranthetical strings whose atomic values are strings.
-They were first popularized by the Lisp programming language in the 1960s, and
-have remained a simple way to encode data structures since then.  An example
-s-expression might look like this:
+S-expressions are nested paranthetical strings whose atomic values are
+strings.  They were first popularized by the Lisp programming language
+in the 1960s, and have remained a simple way to encode data structures
+since then.  An example s-expression might look like this:
 
 ```scheme
 (this (is an) (s expression))
@@ -116,32 +99,81 @@ OCaml syntax, and replaced with the extra conversion functions you see
 above. You can ignore `t_of_sexp__`, which is a helper function that is
 needed in very rare cases.
 
-The syntax extensions in Core all have this same basic structure: they
-auto-generate code based on type definitions, implementing functionality
-that you could in theory have implemented by hand, but with far less
-programmer effort.
+The syntax extensions in Core almost all have this same basic
+structure: they auto-generate code based on type definitions,
+implementing functionality that you could in theory have implemented
+by hand, but with far less programmer effort.
 
-## Sexp basics
+<note>
+<title>The `camlp4` preprocessor and `type_conv`</title>
 
-Sexplib's format for s-expressions is pretty straightforward. An
-s-expression is written down as a nested parenthetical expression,
-with whitespace-separated strings as the atoms.  Quotes are used for
-atoms that contain parenthesis or spaces themselves, backslash is the
-escape character, and semicolons are used to introduce comments.
-Thus, if you create the following `foo.scm` file:
+OCaml doesn't directly support converting static type definitions to
+and from other data formats.  Instead, it supplies a powerful syntax
+extension mechanism known as `camlp4`.  This lets you extend the
+grammar of the language to mark types as requiring special action, and
+then mechanically generate boilerplate code over those types (such as
+converting to and from other data formats).
+
+Many of the examples in the subsequent chapters depend on `camlp4`,
+but the examples all invoke it automatically for you via the `-pp`
+flag to the OCaml compiler.  If you're interested in building your own
+generators, investigate the `type_conv` library which provides the
+basic extension mechanism used by the rest of this chapter.
+
+</note>
+
+
+## The Sexp format
+
+The textual representation of s-expressions is pretty
+straightforward. An s-expression is written down as a nested
+parenthetical expression, with whitespace-separated strings as the
+atoms.  Quotes are used for atoms that contain parenthesis or spaces
+themselves, backslash is the escape character, and semicolons are used
+to introduce single-line comments.  Thus, if you create the following
+`example.scm` file:
 
 ```scheme
-;; foo.scm
+;; example.scm
 
-((foo 3.3) ;; Shall I compare thee  to a summer's dream?
+((foo 3.3) ;; Shall I compare thee to a summer's day?
  (bar "this is () an \" atom"))
 ```
 
 we can load it up and print it back out again:
 
 ```ocaml
-# Sexp.load_sexp "foo.scm";;
-- : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
+# Sexp.load_sexp "example.scm";;
+- : Core.Std.Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
+```
+
+All in, the s-expression format actually supports three comment
+syntaxes:
+
+- `;`, which comments out everything to the end of a line
+- `#|` and `|#`, which are delimiters for commenting out a block
+- `#;`, which comments out the first complete s-expression that follows.
+
+The following example shows all of these in action.
+
+```scheme
+;; comment_heavy_example.scm
+((this is included)
+ ; (this is commented out
+ (this stays)
+ #; (all of this is commented
+     out (even though it crosses lines.))
+  (and #| block delimiters will comment out
+    an arbitrary multi-line block))) |#
+   now we're done
+   ))
+```
+
+If we load this into the toplevel, we can see what is excluded.
+
+```ocaml
+# Sexp.load_sexp "comment_heavy_example.scm";;
+- : Core.Std.Sexp.t = ((this is included) (this stays) (and now we're done))
 ```
 
 Note that the comments were dropped from the file upon reading.  This
