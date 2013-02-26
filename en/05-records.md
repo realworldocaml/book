@@ -549,7 +549,22 @@ representative of each field, in the form of a value of type
 * `Field.setter`, which returns `None` if the field is not mutable or
   `Some f` if it is, where `f` is a function for mutating that field.
 
-We can use these first class fields to do things like write a generic
+A `Field.t` has two type parameters: the first for the type of the
+record, and the second for the type of the field in question.  Thus,
+the type of `Logon.Fields.session_id` is `(Logon.t, string) Field.t`,
+whereas the type of `Logon.Fields.time` is `(Logon.t, Time.t)
+Field.t`.  Accordingly, the function `Field.get` has type
+
+```ocaml
+('r, 'a) Field.t -> 'r -> 'a
+```
+
+As you can see, the first parameter of the `Field.t` corresponds to
+the record you pass to `get`, and the second argument corresponds to
+the value contained in the field, which is also the return type of
+`get`.
+
+We can use first class fields to do things like write a generic
 function for displaying a record field.
 
 ```ocaml
@@ -557,11 +572,9 @@ function for displaying a record field.
      sprintf "%s: %s" (Field.name field) (Field.get field record |> to_string);;
 val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string =
   <fun>
-```
-
-This takes three arguments: the `Field.t`, a function for converting
-the contents of the field in question to a string, and the record
-type.
+``` This takes three arguments: the `Field.t`, a function for
+converting the contents of the field in question to a string, and a
+record from which the field can be grabbed..
 
 Here's an example of `show_field` in action.
 
@@ -607,12 +620,16 @@ credentials: Xy2d9W
 - : unit = ()
 ```
 
-The advantage of using field iterators is that when the definition of
-`Logon` changes, `iter` will change along with it, prompting you to
-handle whatever new cases arise.
+One nice side effect of this approach is that it helps you refactor
+your code when changing the fields of a record.  In particular, if you
+add a field to `Logon`, the type of `iter` will change with it,
+acquiring a new argument.  Any code using `iter` won't be able to
+compile until it's fixed to take this new argument into account, and
+these compilation failiures will point out places you need to adapt
+your code.
 
-Field iterators are useful for a variety of tasks, from building
-validation functions to scaffolding the definition of a web-form based
-on a record type, all with a guarantee that you've exhaustively
-considered all elements of the field.
+Field iterators are useful for a variety of record-related tasks, from
+building record validation functions to scaffolding the definition of
+a web-form from a record type, all with a guarantee that you've
+considered all fields of the record type in question.
 
