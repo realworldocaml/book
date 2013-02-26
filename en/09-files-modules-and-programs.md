@@ -492,10 +492,12 @@ module <name> : <signature> = <implementation>
 
 We could have written this slightly differently, by giving the
 signature its own toplevel `module type` declaration, making it
-possible to in a lightweight way create multiple distinct types with
-the same underlying implementation.
+possible to create multiple distinct types with the same underlying
+implementation in a lightweight way.
 
 ```ocaml
+open Core.Std
+
 module type ID = sig
   type t
   val of_string : string -> t
@@ -511,14 +513,23 @@ end
 module Username : ID = String_id
 module Hostname : ID = String_id
 
-(* Now the following buggy code won't compile *)
 type session_info = { user: Username.t;
                       host: Hostname.t;
                       when_started: Time.t;
                     }
 
 let sessions_have_same_user s1 s2 =
-  s1.user = s2.user
+  s1.user = s2.host
+```
+
+The above code is buggy, and indeed, the compiler will refuse to
+compile it, spitting out the following error.
+
+```
+File "buggy.ml", line 25, characters 12-19:
+Error: This expression has type Hostname.t
+       but an expression was expected of type Username.t
+Command exited with code 2.
 ```
 
 We can also combine this with the use of the include directive to add
