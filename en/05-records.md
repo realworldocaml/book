@@ -349,10 +349,18 @@ val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ```
 
+This is not restricted to constructing a record; we can use the same
+trick when pattern-matching:
+
+```ocaml
+# let message_to_string { Log_entry. important; message; _ } =
+    if important then String.uppercase message else message
+  ;;
+val message_to_string : Log_entry.t -> string = <fun>
+```
+
 For functions defined within the module where a given record is
-defined, the module qualification goes away entirely.  And indeed, for
-things like constructors, defining it within the module is often the
-best solution.
+defined, the module qualification goes away entirely.
 
 ## Functional updates
 
