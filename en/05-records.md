@@ -569,9 +569,11 @@ function for displaying a record field.
 
 ```ocaml
 # let show_field field to_string record =
-     sprintf "%s: %s" (Field.name field) (Field.get field record |> to_string);;
-val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string =
-  <fun>
+     let name = Field.name field in
+     let field_string = to_string (Field.get field record) in
+     name ^ ": " ^ field_string
+  ;;
+val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string = <fun>
 ``` This takes three arguments: the `Field.t`, a function for
 converting the contents of the field in question to a string, and a
 record from which the field can be grabbed..
