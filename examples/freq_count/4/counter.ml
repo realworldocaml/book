@@ -10,6 +10,6 @@ let touch t s =
     | None -> 0
     | Some x -> x
   in
-  Map.add t s (count + 1)
+  Map.add t ~key:s ~data:(count + 1)
 
 let to_list t = Map.to_alist t

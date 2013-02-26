@@ -334,9 +334,9 @@ datastructure in Core.
 
 open Core.Std
 
-type t = string Int.Map.t
+type t = int String.Map.t
 
-let empty = Map.empty
+let empty = String.Map.empty
 
 let touch t s =
   let count =
@@ -344,7 +344,7 @@ let touch t s =
     | None -> 0
     | Some x -> x
   in
-  Map.add t s (count + 1)
+  Map.add t ~key:s ~data:(count + 1)
 
 let to_list t = Map.to_alist t
 ```
@@ -389,7 +389,7 @@ by adding these lines to the `counter.mli`:
 type median = | Median of string
               | Before_and_after of string * string
 
-val get_median : t -> median
+val median : t -> median
 ```
 
 The decision of whether a given type should be abstract or concrete is

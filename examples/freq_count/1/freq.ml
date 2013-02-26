@@ -19,6 +19,8 @@ let rec build_counts counts =
 let () =
   (* Compute the line counts *)
   let counts = build_counts [] in
-  (* Print out the frequ in the sorted count list *)
-  List.iter (List.take sourted_counts 10) ~f:(fun (line,count) ->
+  (* Sort the line counts in descending order of frequency *)
+  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -> compare y x) counts  in
+  (* Print out the frequency in the sorted count list *)
+  List.iter (List.take sorted_counts 10) ~f:(fun (line,count) ->
     printf "%3d: %s\n" count line)

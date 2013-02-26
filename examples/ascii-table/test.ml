@@ -1,7 +1,7 @@
 open Core.Std
 
 let print_table header rows =
-  printf "%s\n\n%!" (Ascii_table.render_table header rows)
+  printf "%s\n\n%!" (Ascii_table.render header rows)
 
 let () =
   print_table
@@ -30,5 +30,5 @@ let people = [
 
 
 let () =
-  printf "%s\n%!" (Ascii_table.render_columns
+  printf "%s\n%!" (Ascii_table.column_render
                      [name_col;age;description;age] people)
