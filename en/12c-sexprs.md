@@ -1,28 +1,30 @@
 # Data Serialization with S-Expressions
 
 Data serialization, _i.e._ converting data to and from a sequence of
-bytes that's suitable for writing to desk or sending across the
+bytes that's suitable for writing to disk or sending across the
 network, is an important and common programming task.  Sometimes you
-need to match someone else's data format (such as XML), and other
-times you just want to quickly dump some values to disk and read them
-back later.  To this end, OCaml comes with several techniques for data
-serialization depending on what your problem is.
+need to match someone else's data format (such as XML), sometimes you
+need a highly efficient format, and sometimes you just want something
+that is easy for humans to read and edit.  To this end, OCaml comes
+with several techniques for data serialization depending on what your
+problem is.
 
 We'll start by considering the question of how to serialize data in a
-human-readable and editable format when you're not constrained to
-using a particular third-party format.  Core's solution to this
-problem is to use s-expressions
+human-readable and editable form when you're not constrained to using
+a particular third-party format.  Core's solution to this problem is
+to use s-expressions
 
-S-expressions are nested paranthetical strings whose atomic values are
-strings.  They were first popularized by the Lisp programming language
-in the 1960s, and have remained a simple way to encode data structures
-since then.  An example s-expression might look like this:
+S-expressions are nested paranthetical expressions whose atomic values
+are strings.  They were first popularized by the Lisp programming
+language in the 1960s, and have remained one of the simplest and most
+effective ways to encode structured data.  An example s-expression
+might look like this:
 
 ```scheme
 (this (is an) (s expression))
 ```
 
-The corresponding OCaml type for an s-expression is quite simple:
+The OCaml type of an s-expression is quite simple:
 
 ```ocaml
 module Sexp : sig
@@ -30,9 +32,11 @@ module Sexp : sig
 end
 ```
 
-An s-expression is in essence a nested parenthetical list whose atomic
-values are strings.  The `Sexp` module in Core comes with functionality
-for parsing and printing s-expressions.
+An s-expression can be thought of as a tree where each node contains a
+list of its children, and where the leaves of the tree are strings.
+
+The `Sexp` module in Core comes with functionality for parsing and
+printing s-expressions.
 
 ```ocaml
 # let sexp =
@@ -80,9 +84,12 @@ mechanical and error prone, not to mention a drag.
 
 Given how mechanical the code is, you could imagine writing a program
 that inspected the type definition and auto-generated the conversion
-code for you.  That is precisely where syntax extensions come in.
-Using `Sexplib` (part of Core) and adding `with sexp` as an annotation to our
-type definition, we get the functions we want for free.
+code for you.  As it turns out, we can do just that using `Sexplib`.
+The `Sexplib` package, which is included with Core, provides both a
+library for manipulating s-exressions and a syntax extension for
+generating such conversion functions.  With that synax extension
+enabled, any type that has `with sexp` as an annotation will trigger
+the generation of the functions we want for free.
 
 ```ocaml
 # type t = { foo: int; bar: float } with sexp;;
@@ -94,10 +101,10 @@ val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
 - : t = {foo = 3; bar = 35.}
 ```
 
-The `with sexp` is detected by a `Sexplib` grammar extension to the normal
-OCaml syntax, and replaced with the extra conversion functions you see
-above. You can ignore `t_of_sexp__`, which is a helper function that is
-needed in very rare cases.
+The `with sexp` is detected by a `Sexplib` syntax extension and
+replaced with the extra conversion functions you see above. You can
+ignore `t_of_sexp__`, which is a helper function that is needed in
+very rare cases.
 
 The syntax extensions in Core almost all have this same basic
 structure: they auto-generate code based on type definitions,
@@ -122,25 +129,25 @@ basic extension mechanism used by the rest of this chapter.
 
 </note>
 
-
 ## The Sexp format
 
 The textual representation of s-expressions is pretty
 straightforward. An s-expression is written down as a nested
 parenthetical expression, with whitespace-separated strings as the
 atoms.  Quotes are used for atoms that contain parenthesis or spaces
-themselves, backslash is the escape character, and semicolons are used
-to introduce single-line comments.  Thus, if you create the following
-`example.scm` file:
+themselves; backslash is the escape character; and semicolons are used
+to introduce single-line comments.  Thus, the following file,
+`example.scm`:
 
 ```scheme
 ;; example.scm
 
-((foo 3.3) ;; Shall I compare thee to a summer's day?
+((foo 3.3) ;; This is a comment
  (bar "this is () an \" atom"))
 ```
 
-we can load it up and print it back out again:
+can be loaded using sexplib.  As you can see, the commented data is
+not part of the resulting s-expression.
 
 ```ocaml
 # Sexp.load_sexp "example.scm";;
@@ -163,13 +170,14 @@ The following example shows all of these in action.
  (this stays)
  #; (all of this is commented
      out (even though it crosses lines.))
-  (and #| block delimiters will comment out
+  (and #| block delimiters #| which can be nested #|
+     will comment out
     an arbitrary multi-line block))) |#
    now we're done
    ))
 ```
 
-If we load this into the toplevel, we can see what is excluded.
+Again, loading the file as an s-expression drops the comments.
 
 ```ocaml
 # Sexp.load_sexp "comment_heavy_example.scm";;
@@ -185,7 +193,7 @@ open-paren in front of `bar`, we'll get a parse error:
 
 ```ocaml
 # Exn.handle_uncaught ~exit:false (fun () ->
-    ignore (Sexp.load_sexp "foo.scm"));;
+    ignore (Sexp.load_sexp "example.scm"));;
   Uncaught exception:
 
   (Sexplib.Sexp.Parse_error
@@ -212,7 +220,7 @@ intervals.
 
 open Core.Std
 
-(* Invariant: For any Range (x,y), y > x *)
+(* Invariant: For any Range (x,y), y >= x *)
 type t = | Range of int * int
          | Empty
 with sexp
@@ -246,9 +254,10 @@ let () =
   |> print_endline
 ```
 
-But we're still missing something: we haven't created an `mli` signature
-for `Int_interval` yet.  Note that we need to explicitly export the
-s-expression converters that were created within the ml.  If we don't:
+But we're still missing something: we haven't created an `mli`
+signature for `Int_interval` yet.  Note that we need to explicitly
+export the s-expression converters that were created within the ml.
+If we don't:
 
 ```ocaml
 (* file: int_interval.mli *)
@@ -277,8 +286,8 @@ val sexp_of_t : Sexp.t -> t
 val t_of_sexp : t -> Sexp.t
 ```
 
-But Sexplib has a shorthand for this as well, so that we can just
-use the same `with` shorthand in the `mli` signature:
+But Sexplib has a shorthand for this as well, so that we can just use
+the same `with` shorthand in the `mli`.
 
 ```ocaml
 type t with sexp
@@ -292,7 +301,7 @@ $ ./test_interval.native
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
 ```
 
-<sidebar> <title>Preserving invariants</title>
+### Preserving invariants
 
 One easy mistake to make when dealing with sexp converters is to
 ignore the fact that those converters can violate the invariants of
@@ -302,9 +311,9 @@ correctness of the `is_empty` check on the fact that for any value
 function preserves this invariant, but the `t_of_sexp` function does
 not.
 
-We can fix this problem by overriding the autogenerated function
-and writing a custom sexp-converter, but still using the sexp-converter
-that we already have:
+We can fix this problem by overriding the autogenerated function and
+writing a custom sexp-converter that is based on the auto-generated
+converter.
 
 ```ocaml
 type t = | Range of int * int
@@ -316,9 +325,9 @@ let create x y = if x > y then Empty else Range (x,y)
 let t_of_sexp sexp =
   let t = t_of_sexp sexp in
   begin match t with
-  | Range (x,y) when y < x ->
-    of_sexp_error "Upper and lower bound of Range swapped" sexp
-  | Empty | Range _ -> ()
+  | Empty -> ()
+  | Range (x,y) ->
+    if y < x then of_sexp_error "Upper and lower bound of Range swapped" sexp
   end;
   t
 ```
@@ -333,9 +342,7 @@ We call the function `of_sexp_error` to raise an exception because
 that improves the error reporting that Sexplib can provide when a
 conversion fails.
 
-</sidebar>
-
-## Getting good error messages
+### Getting good error messages
 
 There are two steps to deserializing a type from an s-expression:
 first, converting the bytes in a file to an s-expression, and the
@@ -352,7 +359,7 @@ type t = { a: string; b: int; c: float option } with sexp
 
 let run () =
   let t =
-    Sexp.load_sexp "foo.scm"
+    Sexp.load_sexp "example.scm"
     |> t_of_sexp
   in
   printf "b is: %d\n%!" t.b
@@ -364,7 +371,7 @@ let () =
 If you were to run this on a malformatted file, say, this one:
 
 ```
-;; foo.scm
+;; example.scm
 ((a not-an-integer)
  (b not-an-integer)
  (c ()))
@@ -390,7 +397,7 @@ follows:
 
 ```ocaml
 let run () =
-  let t = Sexp.load_sexp_conv_exn "foo.scm" t_of_sexp in
+  let t = Sexp.load_sexp_conv_exn "example.scm" t_of_sexp in
   printf "b is: %d\n%!" t.b
 ```
 
@@ -402,13 +409,13 @@ read_foo $ ./read_foo.native
 Uncaught exception:
 
   (Sexplib.Conv.Of_sexp_error
-   (Sexplib.Sexp.Annotated.Conv_exn foo.scm:3:4
+   (Sexplib.Sexp.Annotated.Conv_exn example.scm:3:4
     (Failure "int_of_sexp: (Failure int_of_string)"))
    not-an-integer)
 ```
 
-In the above error, "foo.scm:3:4" tells us that the error occurred on
-"foo.scm", line 3, character 4, which is a much better start for
+In the above error, "example.scm:3:4" tells us that the error occurred on
+"example.scm", line 3, character 4, which is a much better start for
 figuring out what has gone wrong.
 
 ## Sexp-conversion directives
@@ -418,7 +425,7 @@ behavior of the auto-generated sexp-converters.  These directives allow
 you to customize the way in which types are represented as
 s-expressions without having to write a custom parser.
 
-### `sexp-opaque`
+### `sexp_opaque`
 
 The most commonly used directive is `sexp_opaque`, whose purpose is to
 mark a given component of a type as being unconvertible.  Anything
