@@ -81,6 +81,12 @@ let head2 = function
   | [] -> None
   | h :: _ -> Some h;;
 
+let rec last l =
+  match l with
+  | [] -> None
+  | [x] -> Some x
+  | _ :: t -> last t;;
+
 (*
  * -*-
  * Local Variables:
