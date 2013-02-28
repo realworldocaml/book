@@ -2,19 +2,32 @@
 
 XML is a markup language designed to store tree-structured data in a format
 that is (somewhat) human- and machine-readable. Like JSON, it is a textual
-format  commonly used in web technologies, with a complete
-[specification](http://www.w3.org/TR/REC-xml/) available online. A complete
-description is beyond the scope of this book, but we'll explain how to
-manipulate it now.
+format commonly used in web technologies, with a complete
+[specification](http://www.w3.org/TR/REC-xml/) available online.
+
+We're going to explain the basics of XML manipulation here, and also introduce
+the notion of a _visitor pattern_ to manipulate fragments of XML trees.
 
 <note>
 <title>Obtaining and installing XMLM</title>
 
 The remainder of this section uses the freely available XMLM library.  It's
-easiest to obtain it via OPAM (see [xref](#packaging-and-build-systems) for
-installation instructions).  You need to run `opam install xmlm` once OPAM is
-installed.  The library documentation is also readable
-[online](http://erratique.ch/software/xmlm/doc/Xmlm).
+easiest to obtain it via OPAM.  See [xref](#packaging-and-build-systems) for
+installation instructions if you don't have OPAM.
+
+```ocaml
+$ opam install xmlm
+```
+
+Once installed, the `xmlm` library will be available in your toplevel.
+
+```ocaml
+$ utop
+# #require "xmlm";;
+# open Xmlm ;;
+```
+
+The library documentation is also available [online](http://erratique.ch/software/xmlm/doc/Xmlm).
 
 </note>
 
