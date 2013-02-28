@@ -464,14 +464,38 @@ see the contents of field `a` marked as opaque:
 - : Sexp.t = ((a <opaque>) (b foo))
 ```
 
+### `sexp_list`
+
+Sometimes, sexp-converters have more parentheses than one would
+ideally like.  Consider, for example, the following variant type:
+
+```ocaml
+# type compatible_versions = | Specific of string list
+                             | All
+  with sexp;;
+# sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
+- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
+```
+
+You might prefer to make the syntax a bit less parenthesis-laden by
+dropping the parentheses around the list.  `sexp_list` gives us this
+alternate syntax:
+
+```ocaml
+# type compatible_versions = | Specific of string sexp_list
+                             | All
+  with sexp;;
+# sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
+- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
+```
+
 ### `sexp_option`
 
-Another common directive is `sexp_opaque`, which is used to make an
-optional field in a record.  Ordinary optional values are represented
-either as `()` for `None`, or as `(x)` for `Some x`.  If you put an
-option in a record field, then the record field will always be
-required, and its value will be presented in the way an ordinary
-optional value would.  For example:
+Another common directive is `sexp_option`, which is used to to make a
+record field optional in the s-expressoin.  Normally, optional values
+are represented either as `()` for `None`, or as `(x)` for `Some x`,
+and a record field containing an option would be rendered accordingly.
+For example:
 
 ```ocaml
 # type t = { a: int option; b: string } with sexp;;
@@ -493,28 +517,91 @@ it with `sexp_option`:
 - : Sexp.t = ((b hello))
 ```
 
-### `sexp_list`
+### Specifying defaults
 
-One problem with the auto-generated sexp-converters is that they can
-have more parentheses than one would ideally like.  Consider, for
-example, the following variant type:
+The `sexp_option` declaration is really just an example of how one
+might want to deal with default values.  With `sexp_option`, your type
+on the OCaml side is an option, with `None` representing the case
+where no value is provided.  But you might want to allow other ways of
+filling in default values.
 
-```ocaml
-# type compatible_versions = | Specific of string list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
-- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
-```
-
-You might prefer to make the syntax a bit less parenthesis-laden by
-dropping the parentheses around the list.  `sexp_list` gives us this
-alternate syntax:
+Consider the following type which represents the configuration of a
+very simple web-server.
 
 ```ocaml
-# type compatible_versions = | Specific of string sexp_list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
-- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
+# type http_server_config = {
+     web_root: string;
+     port: int;
+     addr: string;
+  } with sexp;;
 ```
+
+One could imagine making some of these paramters optional; in
+particular, by default, we might want the web server to bind to port
+80, and to listen as localhost.  The sexp-syntax allows this to do
+this, as follows.
+
+```ocaml
+# type http_server_config = {
+     web_root: string;
+     port: int with default(80);
+     addr: string with default("localhost");
+  } with sexp;;
+type http_server_config = { web_root : string; port : int; addr : string; }
+val http_server_config_of_sexp__ : Sexplib.Sexp.t -> http_server_config =
+  <fun>
+val http_server_config_of_sexp : Sexplib.Sexp.t -> http_server_config = <fun>
+val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
+# http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))";;
+# let cfg = http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
+val cfg : http_server_config =
+  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
+```
+
+When we convert that back out to an s-expression, you'll notice that
+no data is dropped.
+
+```ocaml
+# sexp_of_http_server_config cfg;;
+- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
+```
+
+We could make the generated s-expression also drop exported values, by
+using the `sexp_drop_default` directive.
+
+```ocaml
+# type http_server_config = {
+     web_root: string;
+     port: int with default(80), sexp_drop_default;
+     addr: string with default("localhost"), sexp_drop_default;
+  } with sexp;;
+type http_server_config = { web_root : string; port : int; addr : string; }
+val http_server_config_of_sexp__ : Sexplib.Sexp.t -> http_server_config =
+  <fun>
+val http_server_config_of_sexp : Sexplib.Sexp.t -> http_server_config = <fun>
+val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
+# let cfg = http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
+val cfg : http_server_config =
+  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
+# sexp_of_http_server_config cfg;;
+- : Sexplib.Sexp.t = ((web_root /var/www/html))
+```
+
+As you can see, the fields that are at their default values are simply
+omitted from the s-expression.  On the other hand, if we convert a
+config with other values, then those values will be included in the
+s-expression.
+
+```ocaml
+# sexp_of_http_server_config { cfg with port = 8080 };;
+- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 8080))
+# sexp_of_http_server_config { cfg with port = 8080; addr = "192.168.0.1" };;
+- : Sexplib.Sexp.t =
+((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
+```
+
+This can be very useful in designing config file formats that are both
+reasonably terse and easy to generate and maintain.  It can also be
+useful for backwards compatibility: if you add a new field to your
+config record, but you make that field optiona, then you should still
+be able to parse older version of your config.
