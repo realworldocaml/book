@@ -75,17 +75,41 @@ let third l =
 let head1 l =
   match l with
   | [] -> None
-  | h :: _ -> Some h;;
+  | hd :: _ -> Some hd;;
 
 let head2 = function
   | [] -> None
-  | h :: _ -> Some h;;
+  | hd :: _ -> Some hd;;
 
 let rec last l =
   match l with
   | [] -> None
   | [x] -> Some x
-  | _ :: t -> last t;;
+  | _ :: tl -> last tl;;
+
+type number =
+  | Int of int
+  | Float of float;;
+
+let add_numbers x1 x2 =
+  match x1, x2 with
+  | Int i1, Int i2 -> Int (i1 + i2)
+  | Int i, Float x
+  | Float x, Int i -> Float (x +. Float.of_int i)
+ | Float x1, Float x2 -> Float (x1 +. x2);;
+
+type number =
+  | Int of int
+  | Float of float
+  | Rational of int * int;;
+
+let add_numbers x1 x2 =
+  match x1, x2 with
+  | Int i1, Int i2 -> Int (i1 + i2)
+  | Int i, Float x
+  | Float x, Int i -> Float (x +. Float.of_int i)
+ | Float x1, Float x2 -> Float (x1 +. x2);;
+
 
 (*
  * -*-

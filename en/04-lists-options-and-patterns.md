@@ -116,10 +116,13 @@ val add1 : int list -> int list = <fun>
 - : int list = [6; 4; 8]
 ```
 
-_(yminsky: Maybe resent this at first with more parens, ot make it
-clear that nesting is in fact going on?  And then later, explain that
-due to the associativity rules, the parens are unnecessary.   _i.e._,
-`_ :: (_ :: (x :: _))` might be clearer. )_
+A pattern match uses the `match` keyword to match an expression (in this case
+`l`) against a set of match cases `|` _pattern_ `->` _body_, selecting the first
+case where the _pattern_ matches the expression.  When a match case like `hd ::
+tl -> (hd + 1) :: (add1 tl)` is selected, the variables in the pattern are bound
+to the parts of the expression that match (in this case, `hd` is bound to the
+head of the cons cell, and `tl` to its tail), and the expression to the right of
+the arrow is evaluated.
 
 Patterns are not limited to just one constructor.  They can be aribitrarily
 nested.  For example, if we want to extract the third element of a list, we can
@@ -140,7 +143,9 @@ val third : 'a list -> 'a option = <fun>
 - : string option = None
 ```
 
-We have been explicit about grouping by using pranetheses here, but in fact the cons operator `::` is right associative, so the parentheses are unnecessary.  It is equivalent to use the pattern `_ :: _ :: x :: _`.
+We have been explicit about grouping by using parentheses here, but in fact the
+cons operator `::` is right associative, so the parentheses are unnecessary.  It
+is equivalent to use the pattern `_ :: _ :: x :: _`.
 
 ```ocaml
 # let third l =
@@ -148,10 +153,6 @@ We have been explicit about grouping by using pranetheses here, but in fact the 
     | _ :: _ :: x :: _ -> Some x
     | _ -> None;;
 val third : 'a list -> 'a option = <fun>
-# third ["A"; "B"; "C"; "D"];;
-- : string option = Some "C"
-# third ["A"; "B"];;
-- : string option = None
 ```
 
 The pattern `_ :: _ :: x :: _` is not exhaustive, because it doesn't match lists
@@ -180,19 +181,17 @@ val broken_third : 'a list -> 'a option = <fun>
 - : int option = None
 ```
 
-Pattern ordering can be an issue, but a more important concern is that pure
-wildcard patterns match anything, making it easier to forget important cases.
-When a pattern matching is compiled, OCaml performs an exhaustiveness check,
-printing a warning if it is not exhaustive, along with an example of a missing
-pattern.
+### Pattern checks
 
-_(yminsky: I wonder if somewhere it would make sense to list in
-bulleted form, what the three static checks you get with match
-statements: inexhaustive matches, impossible cases, useless cases.
-Seems like a nice trio to describe in one unit.  That said, not sure
-how to fit it into the present flow.
+There are actually three kinds of checks that the compiler performs whenever you
+write a pattern match, including exhaustiveness checking, impossible cases, and
+unused cases.
 
-That's a good point, I'll see what I can do.)_
+Of these, exhaustivness checking is something you will find yourself relying
+upon frequently, to ensure that all possible cases have been considered.  When a
+pattern matching is compiled, OCaml tests whether the match contains all
+possible cases, printing a warning if it is not exhaustive.  If not, the
+compiler prints an example of a missing pattern.
 
 ```ocaml
 # let inexhaustive_third l =
@@ -211,11 +210,12 @@ val inexhaustive_third : 'a list -> 'a option = <fun>
 Exception: (Match_failure //toplevel// 14 3).
 ```
 
-This exhaustiveness checking can be tremendously useful in ensuring that the
-appropriate cases are all considered.  Generally speaking, it is usually better
-to be as specific as possible when writing patterns.  This helps exhaustiveness
-checking point out missing cases if they exist, and also means that pattern
-ordering is not as important.
+This exhaustiveness checking is used to ensure that you have considered all
+cases.  Overly general patterns, like the wildcard `_` pattern, diminish the
+value of the checker.  Generally speaking, it is usually better to be as
+specific as possible when writing patterns.  This helps exhaustiveness checking
+point out missing cases if they exist, and also means that pattern ordering is
+not as important.
 
 ```ocaml
 # let third l =
@@ -224,6 +224,37 @@ ordering is not as important.
     | _ :: _ :: x :: _ -> Some x;;
 val third : 'a list -> 'a option = <fun>
 ```
+
+Exhaustivness checking becomes even more useful when you are defining your own
+variant types.  In the following example, we define a variant type `number` that
+is either an `int` or a `float`.  The `add_number` function adds two numbers,
+promoting an `int` to a `float` when necessary, so there are four cases to
+consider.  If we accidentally leave out a case, the compiler will point it out.
+
+```ocaml
+# type number =
+    | Int of int
+    | Float of float;;
+type number = Int of int | Float of float
+# let add_numbers x1 x2 =
+    match x1, x2 with
+    | Int i1, Int i2 -> Int (i1 + i2)
+    | Int i, Float x
+    | Float x, Int i -> Float (x +. Float.of_int i);;
+Characters 26-148:
+  ..match x1, x2 with
+    | Int i1, Int i2 -> Int (i1 + i2)
+    | Int i, Float x
+    | Float x, Int i -> Float (x +. Float.of_int i)..
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Float _, Float _)
+val add_numbers : number -> number -> number = <fun>
+```
+
+Later, if we add another variant, like `Rational of int * int` for fractions,
+the compiler will point out that the pattern match in `add_numbers` is no longer
+exhaustive.
 
 ## Options
 
