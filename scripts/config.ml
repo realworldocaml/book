@@ -4,6 +4,7 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
+let trusted = ["stedolan"; "lpw25"; "raphael-proust"] 
 let support = ["jamescotton"] 
 
 let from_anil =
@@ -61,14 +62,16 @@ let from_email =
 ]
 
 let internal_reviewers =
-  authors @ support
+  authors @ support @ trusted
 
 let external_reviewers =
-  internal_reviewers @ from_anil @ from_yminsky @ from_email
+  internal_reviewers @ from_anil @ from_yminsky @ from_email @ trusted
+
+let full_access = trusted @ authors
 
 let allowed_users = function
   | "alpha1" -> internal_reviewers
   | "alpha2" -> external_reviewers
   | "alpha3" -> external_reviewers
-  | "trunk"  -> authors
+  | "trunk"  -> full_access
   |_ -> authors
