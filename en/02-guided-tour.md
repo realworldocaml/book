@@ -893,7 +893,7 @@ of some element of a list of `scene_element`s.
   ;;
 val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
 # let is_inside_scene point scene =
-     List.for_all scene
+     List.exists scene
        ~f:(fun el -> is_inside_scene_element point el)
    ;;
 val is_inside_scene : point2d -> scene_element list -> bool = <fun>
@@ -906,10 +906,10 @@ types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
 
 We also made our first use of an _anonymous function_ in the call to
-`List.for_all`.  An anonymous function is a function that is defined
+`List.exists`.  An anonymous function is a function that is defined
 but not named, in this case, using the `fun` keyword.  Anonymous
 functions are common in OCaml, particularly when using iteration
-functions like `List.for_all`.
+functions like `List.exists`.
 
 ## Imperative programming
 
