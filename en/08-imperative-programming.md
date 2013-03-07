@@ -187,14 +187,15 @@ bindings:
     let () = t.buckets.(i) <- filtered_bucket in
     let () = t.length <- t.length - 1 in
 ```
+
 but `;` is more idiomatic.
 
 In general, when a sequence expression `expr1; expr2` is evaluated,
 `expr1` is evaluated first, and then `expr2`.  The expression `expr1`
-must have type `unit`, and the the value of `expr2` is returned as the
-value of the entire sequence.  For example, the sequence `print_string
-"hello world"; 1 + 2` first prints the string `"hello world"`, then
-returns the integer `3`.
+should have type `unit`, and the the value of `expr2` is returned as
+the value of the entire sequence.  For example, the sequence
+`print_string "hello world"; 1 + 2` first prints the string `"hello
+world"`, then returns the integer `3`.
 
 It's also worth noting that `;` is a _separator_, not a terminator as
 it is in C or Java.  The compiler is somewhat relaxed about parsing a
