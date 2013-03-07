@@ -8,8 +8,9 @@ deep in any one topic.
 We'll present this guided tour using the Core standard library and the
 `utop` OCaml toplevel, a shell that lets you type in expressions and
 evaluate them interactively.  `utop` is an easier-to-use version of
-the toplevel that you get by typing `ocaml` at the command line, and
-these instructions will assume you're using `utop` specifically.
+the standard toplevel (which you can start by typing `ocaml` at the
+command line).  These instructions will assume you're using `utop`
+specifically.
 
 Before getting started, do make sure you have a working OCaml
 installation and toplevel as you read through this chapter so you can
