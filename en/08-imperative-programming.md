@@ -209,12 +209,6 @@ Hello world
 - : int = 2
 ```
 
-Also note, the precedence of a `match` expression is very low, so to separate it
-from the following assignment `l := Some new_front`, we surround the match in a
-`begin ... end` bracketing (we could also use parentheses).  If we did not, the
-final assignment would become part of the `None -> ...` case, which is not what
-we want.
-
 Note also that we do all of the side-effecting operations at the very
 end of each function.  This is good practice because it minimizes the
 chance that such operations will be interrupted with an exception,
