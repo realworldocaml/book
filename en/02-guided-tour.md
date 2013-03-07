@@ -897,6 +897,12 @@ val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
        ~f:(fun el -> is_inside_scene_element point el)
    ;;
 val is_inside_scene : point2d -> scene_element list -> bool = <fun>
+# is_inside_scene {x=3.;y=7.}
+    [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
+- : bool = false
+# is_inside_scene {x=3.;y=7.}
+    [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
+- : bool = true
 ```
 
 You might at this point notice that the use of `match` here is
