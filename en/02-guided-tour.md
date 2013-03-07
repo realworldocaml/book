@@ -558,8 +558,10 @@ val my_favorite_language : 'a list -> 'a = <fun>
 
 The warning comes because the compiler can't be certain that the
 pattern match won't lead to a runtime error.  Indeed, the warning
-gives an example of a pattern that won't match, the empty list, `[]`.
-We can see this in action below.
+gives an example of a list, (`[]`, the empty list) that doesn't match
+the provided pattern.  Indeed, if we try to run
+`my_favorite_language`, we'll see that it works on non-empty list, and
+fails on empty ones.
 
 ```ocaml
 # my_favorite_language ["English";"Spanish";"French"];;
