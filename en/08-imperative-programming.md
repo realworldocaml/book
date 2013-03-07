@@ -1086,3 +1086,170 @@ cases can lead to code whose behavior is easier to think about.
 
 </note>
 
+## Input and Output
+
+Imperative programming is about more than modifying in-memory
+data-structures.  Any function that doesn't boil down to a
+deterministic transformation from its arguments to its return value is
+imperative in nature.  That includes not only things that mutate your
+program's data, but also operations that interact with the world
+outside of your program.  An important example of this kind of
+interaction is I/O, input and output, such as operations for reading
+or writing data to files, terminal input and output, and network
+sockets.
+
+There are multiple I/O libraries in OCaml.  In this section we'll
+discuss OCaml's simple buffered I/O that can be used through the
+`In_channel` and `Out_channel` modules in Core.  Other I/O primitives
+are also available through the `Unix` module in Core as well as
+`Async`, the asynchronous I/O library that is covered in
+[xref](#concurrent-programming-with-async).  Note that most of the
+functionality in Core's `In_channel`, `Out_channel` (and in Core's
+`Unix` module) derives from the standard library.  Although we use
+Core's interfaces here, most of what is described is equally
+applicable to the standard library.
+
+### Terminal I/O
+
+OCaml has a type `in_channel` for input channels and a separate type
+`out_channel` for output channels.  Such a channel can be backed by a
+file, a network socket, or a terminal, though the `In_channel` and
+`Out_channel` libraries only have direct support for files and
+terminals; other kinds of channels can be created through the `Unix`
+module.
+
+Terminal I/O is the simplest one to start with.  Each OCaml process
+has three standard channels, mapping on to the three standard file
+descriptors in Unix.
+
+* `In_channel.stdin`.  The "standard input" channel.  By default,
+  input comes from the terminal, which handles keyboard input.
+
+* `In_channel.stdout`.  The "standard output" channel.  By default,
+  output written to `stdout` appears on the user terminal.
+
+* `In_channel.stderr`.  The "standard error" channel.  This is similar
+  to `stdout`, but is intended for error messages.
+
+The values `stdin`, `stdout` and `stderr` are useful enough that they
+are also available in the global name-space directly, without having
+to go through the `In_channel` and `Out_channel` modules.
+
+Let's see this in action in a simple interactive application.  The
+following program, `time_converter`, prompts the user for a timezone,
+and then prints out the current time in that timezone.  Here, we use
+Core's `Zone` module for looking up a timezone, and the `Time` module
+for computing the current time and printing it out in the timezone in
+question.
+
+```ocaml
+(* file: time_converter.ml *)
+open Core.Std
+
+let () =
+  Out_channel.output_string stdout "Pick a timezone: ";
+  Out_channel.flush stdout;
+  match In_channel.input_line stdin with
+  | None -> failwith "No timezone provided"
+  | Some zone_string ->
+    let zone = Zone.find_exn zone_string in
+    let time_string = Time.to_localized_string (Time.now ()) zone in
+    Out_channel.output_string stdout
+      (String.concat
+         ["The time in ";Zone.to_string zone;" is "; time_string;"\n"]);
+    Out_channel.flush stdout
+```
+
+We can build this program (using the `build.sh` script described in
+[xref](#files-modules-and-programs)) and run it, you'll see that it
+prompts you for input, as follows:
+
+```
+$ ./time_converter.byte
+Pick a timezone:
+```
+
+You can then type in the name of a timezone and hit return, and it
+will print out the current time in the timezone in question.
+
+```
+Pick a timezone: Europe/London
+The time in Europe/London is 2013-03-06 02:15:13.602033
+```
+
+We called `Out_channel.flush` on `stdout` because `out_channel`s are
+buffered, which is to say that OCaml doesn't immediately do a write
+every time you call `output_string`.  Instead, writes are buffered
+until either enough has been written to trigger the flushing of the
+buffers, or until a flush is explicitly requested.  This greatly
+increases the efficiency of the writing process, by reducing the
+number of system calls that need to be done.
+
+Note that `In_channel.input_line` returns a `string option`, with
+`None` indicating that the input stream has ended (_i.e._, an
+end-of-file condition).  `Out_channel.output_string` is used to print
+the final output, and `Out_channel.flush` is called to flush that
+output to the screen.  This flush is not technically required, since
+the program ends after that instruction, at which point all remaining
+output will be flushed anyway, but the flush is nonetheless good
+practice.
+
+### Formatted output with `printf`
+
+Generating output with functions like `Out_channel.output_string` is
+simple and easy to understand, but can be a bit verbose.  OCaml also
+supports formatted output using the `printf` function, which is
+modeled after `printf` in the C standard library.  The `printf`
+function takes a _format string_ that describe what to print and how
+to format it, as well as arguments to be printed.  So, for example, we
+can write:
+
+
+```ocaml
+# printf "%i is an integer, %F is a float, \"%s\" is a string\n" 3 4.5 "five";;
+3 is an integer, 4.5 is a float, "five" is a string
+- : unit = ()
+```
+
+Importantly, and unlike C's `printf`, the `printf` in OCaml is
+type-safe.  In particular, if we provide an argument whose type
+doesn't match what's presented in the format string, we'll get a type
+error.
+
+```ocaml
+# printf "An integer: %i\n" 4.5;;
+Characters 26-29:
+  printf "An integer: %i\n" 4.5;;
+                            ^^^
+Error: This expression has type float but an expression was expected of type
+         int
+```
+
+In order to be able to do this checking at compile-time, OCaml needs
+for the format string to be available at compile-time as well.  As a
+result, format strings aren't ordinary strings, and can't be ordinary
+strings that are computed at runtime.
+
+Let's see how we can rewrite our time conversion program to be a
+little more concise using printf.
+
+```ocaml
+(* file: time_converter.ml *)
+open Core.Std
+
+let () =
+  printf "Pick a timezone: %!";
+  match In_channel.input_line stdin with
+  | None -> failwith "No timezone provided"
+  | Some zone_string ->
+    let zone = Zone.find_exn zone_string in
+    let time_string = Time.to_localized_string (Time.now ()) zone in
+    printf "The time in %s is %s.\n%!" (Zone.to_string zone) time_string
+```
+
+In the above example, we've used only two formatting directives: `%s`,
+for including a string, and `%!` which causes `printf` to generate a
+flush.
+
+`printf`'s formatting directives offer a significant amount of
+control, allowing you to specify
