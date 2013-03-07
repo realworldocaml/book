@@ -16,7 +16,7 @@ design.  These features include:
 * _Garbage collection_ for automatic memory management, now a feature
   of almost every modern high-level language.
 * _Higher-order functions_ that can be passed around as first-class
-  values, and seen in Javascript or Scala.
+  values, as seen in Javascript or Scala.
 * _Static type-checking_ to reduce run-time errors, such as Java class
   interfaces or Objective-C methods.
 * _Generics_ to enable abstractions to be constructed across different
@@ -64,10 +64,14 @@ But all is not lost!  There is an effective alternative to the OCaml
 standard library called Core.  Jane Street, a company that has been
 using OCaml for more than a decade, developed Core for its own
 internal use, but it was designed from the start with an eye towards
-being a general-purpose standard library.  Core is also distributed
-with syntax extensions which provide essential new functionality to
-OCaml; and there are additional libraries such as the `Async` network
-communications library that provide even more useful functionality.
+being a general-purpose standard library.  Core is also engineered
+with correctness, reliability and performance very much in mind.
+
+Core is also distributed with syntax extensions which provide
+essential new functionality to OCaml; and there are additional
+libraries such as the Async network communications library that
+provide even more useful functionality.  All of these libraries are
+distributed under a liberal Apache-style license.
 
 ### The OCaml Platform
 
