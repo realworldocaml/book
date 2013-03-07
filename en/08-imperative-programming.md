@@ -451,9 +451,9 @@ field is `None`, and at the end of the list, the `next` field is
 `None`.
 
 
-The type of the list itself, `'a t`, is an optional, mutable reference
-to an `element`.  This reference is `None` if the list is empty, and
-`Some` otherwise.
+The type of the list itself, `'a t`, is an mutable reference to an
+optional `element`.  This reference is `None` if the list is empty,
+and `Some` otherwise.
 
 Now we can define a few basic functions that operate on lists and
 elements.
