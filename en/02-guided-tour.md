@@ -537,10 +537,11 @@ Here's a simple example.
   ;;
 ```
 
-By pattern matching using `::`, we've broken off the first element of
-`languages` from the rest of the list.  If you know Lisp or Scheme,
-what we've done is the equivalent of using `car` to grab the first
-element of a list.
+By pattern matching using `::`, we've isolated and named the first
+element of the list (`my_favorite`) and the remainder of the list
+(`the_rest`).  If you know Lisp or Scheme, what we've done is the
+equivalent of using the functions `car` and `cdr` to isolate the first
+element of a list and the remainder of that list.
 
 If you try the above example in the toplevel, however, you'll see that
 it spits out an error:
