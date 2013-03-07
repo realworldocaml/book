@@ -1141,6 +1141,25 @@ val ar : int array =
 [|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
 ```
 
+OCaml also supports while loops, as shown in the following function
+for finding the first non-negative position in an array.  Note that
+`while` (like `for`) is also a keyword.
+
+```ocaml
+# let find_first_negative_entry ar =
+     let pos = ref 0 in
+     while !pos < Array.length ar && ar.(!pos) >= 0 do
+       pos := !pos + 1
+     done;
+     if !pos = Array.length ar then None else Some !pos
+  ;;
+            val find_first_negative_entry : int Core.Std.Array.t -> int option = <fun>
+# find_first_negative_entry [|1;2;0;3|];;
+- : int option = None
+# find_first_negative_entry [|1;-2;0;3|];;
+- : int option = Some 1
+```
+
 ## A complete program
 
 So far, we've played with the basic features of the language using the
