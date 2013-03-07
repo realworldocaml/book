@@ -2,11 +2,11 @@
 
 ## Why OCaml?
 
-The programming languages that you use affect your productivity.  They
-affect how reliable your software is, how efficient it is, how easy it
-is to read, to refactor, and to extend.  And the languages you know
-and use can deeply affect how you think about programming and software
-design.
+The programming languages that you use affect the software you create.
+They influence your software's reliability, security and efficiency,
+and how easy it is to read, refactor, and extend.  And the languages
+you know can also deeply affect how you think about programming and
+software design.
 
 But not all ideas about how to design a programming language are
 created equal.  Over the last 40 years, a few key language features
