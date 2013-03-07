@@ -945,7 +945,7 @@ wouldn't work here.
 Using `memo_rec`, we can now build an efficient version of `fib`.
 
 ```ocaml
-# let fib = memo_rec fib_recur;;
+# let fib = memo_rec fib_norec;;
 val fib : int -> int = <fun>
 # time (fun () -> fib 40);;
 Time: 0.236034ms

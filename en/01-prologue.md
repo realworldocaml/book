@@ -69,13 +69,13 @@ basis of the Platform, which is a set of tools and libraries that, along with
 the OCaml compiler, let you build realistic applications quickly and
 effectively.
 
-Another big improvement over the standard library is the `utop` interactive
-top level.  This is a modern interactive tool that supports command history,
-macro expansion, module completion, and other niceties that make it much
-more pleasant to work with the language.  We'll be using `utop` throughout
-the book instead of the normal OCaml toplevel.  It can, of course, be 
-installed using OPAM, and [xref](#installation) guides you through that
-that process.
+Another big improvement over the standard library is the `utop`
+interactive top level.  This is a modern interactive tool that
+supports command history, macro expansion, module completion, and
+other niceties that make it much more pleasant to work with the
+language.  We'll be using `utop` throughout the book instead of the
+normal OCaml toplevel.  It can, of course, be installed using OPAM,
+and [xref](#installation) guides you through that process.
 
 ## About this book
 
