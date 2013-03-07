@@ -63,7 +63,7 @@ The type `('a, 'b) t` is used to represent a dictionary with keys of
 type `'a` and data of type `'b`.  The `mli` also includes a collection
 of helper functions.  Notice that a number of the functions, in
 particular, ones like `add` that modify the dictionary, return unit.
-This is typical of functions that act by side-effect.
+This is typical of functions that act by side-effect.  
 
 The implementation is shown below.  We'll go through the code bit by
 bit, explaining different imperative constructs as they show up.
@@ -115,9 +115,9 @@ There's also code for `create`, which creates an empty dictionary,
 and `find`, which looks for a matching key in the table using
 `List.find_map` on the corresponding bucket.  (`List.find_map` takes a
 list, and a function for transforming the list elements to options,
-returning a list of the contents of the returned `Some`s.)  In `find`,
-you'll notice that we make use of the `array.(index)` syntax for
-looking up a value in an array.
+returning the first element for which the function returned `Some`.)
+In `find`, you'll notice that we make use of the `array.(index)`
+syntax for looking up a value in an array.
 
 ```ocaml
 let iter t ~f =
