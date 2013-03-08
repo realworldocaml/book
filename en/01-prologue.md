@@ -140,13 +140,13 @@ Real World OCaml is split into three parts and appendices:
   switching to other languages, many of which have drawn inspiration
   from ML.
 
-* Part II builds on the basics to construct more complete examples.
-  This is where you'll pick up some useful techniques for building
-  networked systems, as well as some functional design patterns that
-  glue together OCaml language elements in useful ways.  The theme
-  throughout this chapter is on networked systems, and we build a
-  running example that will perform Internet queries using the
-  DuckDuckGo search engine.
+* Part II builds on the basics by working through complete examples.
+  Here you'll pick up useful techniques for building networked
+  systems, as well as functional design patterns that help combine
+  different features of the language to good effect.  The focus
+  throughout this section is on networked systems, and among other
+  examples we'll build a running example that will perform Internet
+  queries using the DuckDuckGo search engine.
 
 * Part III is all about understanding the runtime system in
   OCaml. It's a remarkably simple system in comparison to other
