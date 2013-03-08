@@ -907,7 +907,8 @@ using the same syntax as labeled arguments, and, similarly to labeled
 arguments, optional arguments can be provided in any order.
 
 Here's an example of a string concatenation function with an optional
-separator.
+separator.  This function uses the `^` operator for simple pairwise
+string concatenation.
 
 ```ocaml
 # let concat ?sep x y =
