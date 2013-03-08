@@ -863,8 +863,8 @@ and `second`, listed in that order.  We could have defined
 arguments were listed.
 
 ```ocaml
-# let apply_to_tuple f (first,second) = f ~second ~first;;
-val apply_to_tuple : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
+# let apply_to_tuple_2 f (first,second) = f ~second ~first;;
+val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
 ```
 
 It turns out this order of listing matters.  In particular, if we
@@ -875,19 +875,18 @@ define a function that has a different order
 val divide : first:int -> second:int -> int = <fun>
 ```
 
-we'll find that it can't be passed in to `apply_to_tuple`.
+we'll find that it can't be passed in to `apply_to_tuple_2`.
 
 ```ocaml
-# apply_to_tuple divide (3,4);;
+# apply_to_tuple_2 divide (3,4);;
 Characters 15-21:
-  apply_to_tuple divide (3,4);;
-                 ^^^^^^
+  apply_to_tuple_2 divide (3,4);;
+                   ^^^^^^
 Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
 ```
 
-But, if we go back to the original definition of `apply_to_tuple`,
-things will work smoothly.
+But, it works smoothly with the original `apply_to_tuple`.
 
 ```ocaml
 # let apply_to_tuple f (first,second) = f ~first ~second;;
