@@ -184,7 +184,7 @@ that is _irrefutable_, _i.e._, where any value of the type in question
 is guaranteed to match the pattern.  Tuple and record patterns are
 irrefutable, but list patterns are not.  Consider the following code
 that implements a function for up-casing the first element of a
-comma-separate list.
+comma-separated list.
 
 ```ocaml
 # let upcase_first_entry line =
