@@ -568,25 +568,54 @@ val ( +! ) : int * int -> int * int -> int *int = <fun>
 - : int * int = (1,6)
 ```
 
-The syntactic role of an operator work is determined by its first
-character.  This table describes how, and lists the operators from
-highest to lowest precedence.
+The syntactic role of an operator is typically determined by first
+character or two, though there are a few exceptions.  This table
+breaks the different operators and other syntactic forms into groups
+from highest to lowest precedence.   that we write `!`... to
+indicate the class of operators beginning with `!`.
 
--------------------------------------------------------------
-First character    Usage
------------------  -------------------------------------------
-`!` `?` `~`        Prefix and unary
+------------------------------------------
+Prefix                     Usage
+-----------------------    -----------------
+`!`..., `?`..., `~`...     Unary prefix
 
-`**`               Infix, right associative
+`.`, `.(`, `.[`         
 
-`+` `-`            Infix, left associative
+function application,      Left associative
+constructor, `assert`,
+`lazy`        
 
-`@` `^`            Infix, right associative
+`-`, `-.`                  Unary prefix
 
-`=` `<` `>` `|`    Infix, left associative
-`&` `$`
+`**`...,                   Right associative
+`lsl`, `lsr`, `asr`               
 
--------------------------------------------------------------
+`*`..., `/`..., `%`...,    Left associative
+`mod`, `land`, `lor`,
+`lxor`
+
+`+`, `-`                   Left associative
+
+`::`                       Right associative
+
+`@`..., `^`...             Right associative
+
+`=`..., `<`..., `>`...,    Left associative
+`|`..., `&`..., `$`...
+
+`&`, `&&`                  Right associative
+
+`or`, `||`                 Right associative
+
+`,`                   
+
+`<-`, `:=`                 Right associative
+
+`if`                  
+
+`;`                        Right associative 
+
+--------------------------------------------
 
 There's one important special case: `-` and `-.`, which are the
 integer and floating point subtraction operators, can act as both
