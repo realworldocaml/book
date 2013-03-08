@@ -89,6 +89,9 @@ machine.
 
 ### Building from source
 
+_NOTE_: we really should be telling people to install 4.01, but
+it's not released yet.
+
 To install OCaml from source code, first make sure that you have a C
 compilation environment (usually either `gcc` or `llvm` installed)
 

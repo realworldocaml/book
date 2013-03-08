@@ -623,6 +623,23 @@ using the provided comparison function.
 - : unit = ()
 ```
 
+Note that we can do this without `|>`, but the result is a bit more
+verbose.
+
+```ocaml
+# let path = Sys.getenv_exn "PATH" in
+  let split_path = String.split ~on:':' path in
+  let deduped_path = List.dedup ~compare:String.compare split_path in
+  List.iter ~f:print_endline deduped_path
+  ;;
+/bin
+/opt/local/bin
+/usr/bin
+/usr/local/bin
+- : unit = ()
+```
+
+
 An important part of what's happening here is partial application.
 Normally, `List.iter` takes two arguments: a function to be called on
 each element of the list, and the list to iterate over.  We can call
