@@ -796,9 +796,9 @@ you can see, the arguments can be provided in any order.
 
 OCaml also supports _label punning_, meaning that you get to drop the
 text after the `:` if the name of the label and the name of the
-variable being used are the same.  Label punning works in both
-function declaration and function invocation, as shown in these
-examples:
+variable being used are the same.  We've seen above how label punning
+works when defining a function.  The following shows how it can be
+used when invoking a function.
 
 ```ocaml
 # let num = 3;;
