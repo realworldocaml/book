@@ -76,16 +76,17 @@ distributed under a liberal Apache-style license.
 
 ### The OCaml Platform
 
-Core is a very comprehensive standard library, but there's also a
-large community of programmers who have used OCaml since its first
-release in 1996.  In Real World OCaml, we'll also introduce some of
-these libraries for you to experiment with realistic examples.  The
-installation and management of these third-party libraries is made
-much easier via a package management tool known as OPAM.  We'll
-explain more about OPAM as the book unfolds, but it forms the basis of
-the Platform, which is a set of tools and libraries that, along with
-the OCaml compiler, let you build realistic applications quickly and
-effectively.
+Core is comprehensive and effective standard library, but there's a
+lot more out there than Core.  A large community of programmers have
+been using OCaml since its first release in 1996 and have generated a
+lot of useful libraries and tools.  In Real World OCaml, we'll
+introduce some of these libraries for you to experiment with realistic
+examples.  The installation and management of these third-party
+libraries is made much easier via a package management tool known as
+OPAM.  We'll explain more about OPAM as the book unfolds, but it forms
+the basis of the Platform, which is a set of tools and libraries that,
+along with the OCaml compiler, let you build realistic applications
+quickly and effectively.
 
 Another big improvement over the standard library is the `utop`
 interactive top level.  This is a modern interactive tool that
