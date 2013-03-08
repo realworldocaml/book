@@ -195,7 +195,7 @@ design, formal methods, compilers, and new models of distributed
 computation.  He obtained his PhD in Computer Science from Cornell
 University, where he studied programming languages.  He is the author
 of the MetaPRL system, a logical framework for design and analysis of
-large software systems; OMake, an advanced build system for large
+large software systems; and OMake, an advanced build system for large
 software projects.  He is the author of the textbook, _An Introduction
 to Objective Caml_ (unpublished).
 
