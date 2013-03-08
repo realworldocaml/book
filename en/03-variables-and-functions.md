@@ -365,8 +365,7 @@ in a monadic style, as we'll see in
 
 ### Multi-argument functions ###
 
-OCaml of course also supports multi-argument functions.  Here's an
-example that came up in [xref](#a-guided-tour).
+OCaml of course also supports multi-argument functions, for example:
 
 ```ocaml
 # let abs_diff x y = abs (x - y);;
