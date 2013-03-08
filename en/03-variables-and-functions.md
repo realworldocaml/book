@@ -1129,8 +1129,20 @@ val prepend_pound : string -> string = <fun>
 - : string = "# a BASH comment"
 ```
 
-Note that the optional argument `?sep` has now disappeared, or
-_erased_.  So when does OCaml decide to erase an optional argument?
+The optional argument `?sep` has now disappeared, or been _erased_.
+Indeed, if we try to pass in that optional argument now, it will be
+rejected.
+
+```ocaml
+# prepend_pound "a BASH comment" ~sep:":";;
+Characters 0-13:
+  prepend_pound "a BASH comment" ~sep:":";;
+  ^^^^^^^^^^^^^
+Error: This function has type string -> string
+       It is applied to too many arguments; maybe you forgot a `;'.
+```
+
+So when does OCaml decide to erase an optional argument?
 
 The rule is: an optional argument is erased as soon as the first
 positional (_i.e._, neither labeled nor optional) argument defined
