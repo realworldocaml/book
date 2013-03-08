@@ -570,8 +570,9 @@ val ( +! ) : int * int -> int * int -> int *int = <fun>
 The syntactic role of an operator is typically determined by first
 character or two, though there are a few exceptions.  This table
 breaks the different operators and other syntactic forms into groups
-from highest to lowest precedence.   that we write `!`... to
-indicate the class of operators beginning with `!`.
+from highest to lowest precedence, explaining how each behaves
+syntactically.  We write `!`... to indicate the class of operators
+beginning with `!`.
 
 ------------------------------------------
 Prefix                     Usage
