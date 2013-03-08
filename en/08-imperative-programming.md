@@ -1248,3 +1248,90 @@ flush.
 
 `printf`'s formatting directives offer a significant amount of
 control, allowing you to specify
+
+
+## Order of evaluation
+
+The order in which expressions are evaluated is an important part of
+the definition of a programming language, and it is particularly
+important in the context of imperative programming.  Most programming
+languages you're likely to have encountered are _strict_, and OCaml is
+too.  In a strict langauge, when you have a function that takes some
+set of arguments, the arguments are evaluated first, and then passed
+to the function.  In other words, imagine if I had a collection of
+angles and I wanted to figure out if any of them had a `sin` that was
+less than zero.  I could write the following computation to figure
+this out.
+
+```ocaml
+# let x = sin 120. in
+  let y = sin 75.  in
+  let z = sin 128. in
+  List.exists ~f:(fun x -> x < 0.) [x;y;z]
+  ;;
+- : bool = true
+```
+
+In some sense, we don't really need to compute the `sin 128`, because
+`sin 75.` is negative, so we should be able to stop there.  But in a
+strict language like OCaml, an expression is evaluated immediately
+when it's bound to a variable.  It doesn't have to be this way, even
+in OCaml.  If we use OCaml's `lazy` keyword, we can change this
+computation so that `sin 128.` doesn't need to be computed.
+
+```ocaml
+# let x = lazy (sin 120.) in
+  let y = lazy (sin 75.)  in
+  let z = lazy (sin 128.) in
+  List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+  ;;
+- : bool = true
+```
+
+We can verify that this is happening by a few well placed `printf`s.
+
+```ocaml
+# let x = lazy (printf "1\n"; sin 120.) in
+  let y = lazy (printf "2\n"; sin 75.)  in
+  let z = lazy (printf "3\n";sin 128.) in
+  List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+  ;;
+1
+2
+- : bool = true
+```
+
+OCaml is strict by default for a good reason: Lazy evaluation and
+imperative programming generally don't mix well, because laziness
+makes it harder to reason about when a given side effect is going to
+occur, which matters quite a bit to the meaning of an imperative
+operation.
+
+So, in a strict program, we know that expressions that are bound to
+variables are guaranteed evaluated in the order that they're bound,
+what about the evaluation order within a single expression?
+Officially, the answer is that evaluation order within an expression
+is undefined.  In practice, OCaml has only one compiler, and
+compiler's behavior is unlikely to change and forms a kind of defacto
+standard.  Unfortunately, the evaluation order it has is often the
+oppose of what one might expect.
+
+Consider the following example.
+
+```ocaml
+# List.exists ~f:(fun x -> x < 0.)
+    [ (printf "1\n"; sin 120.);
+      (printf "2\n"; sin 75.);
+      (printf "3\n"; sin 128.); ]
+  ;;
+3
+2
+1
+- : bool = true
+```
+
+Here, you can see that the sub-expression that came last was actually
+evaluated first!  This is generally the case for many different kinds
+of expressions, so if you want to make sure of the evaluation order of
+different sub-expressions, you should bind them separately to values
+as part of a series of `let/in` statements.
