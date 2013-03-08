@@ -897,7 +897,8 @@ val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 
 So, even though the order of labeled arguments usually doesn't matter,
 it will sometimes bite you in higher-ordered contexts, where you're
-doing things like passing functions as arguments to other functions.
+passing functions as arguments to other functions as we were in the
+above examples.
 
 ### Optional arguments ###
 
@@ -1176,7 +1177,7 @@ Warning 16: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
 ```
 
-And indeed, when we provide the two positions arguments, the `sep`
+And indeed, when we provide the two positional arguments, the `sep`
 argument is not erased, instead returning a function that expects the
 `sep` argument to be provided.
 
