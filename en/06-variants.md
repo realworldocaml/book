@@ -920,7 +920,9 @@ a price.  Here are some of the downsides.
   variants.  This means that heavy use of polymorphic variants can
   leave you scratching your head trying to figure out why a given
   piece of code did or didn't compile.  It can also lead to absurdly
-  long and hard to decode error messages.
+  long and hard to decode error messages.  Indeed, concision at the
+  value level is often balanced out by more verbosity at the type
+  level.
 - _Error-finding:_ Polymorphic variants are type-safe, but the typing
   discipline that they impose is, by dint of its flexibility, less
   likely to catch bugs in your program.
