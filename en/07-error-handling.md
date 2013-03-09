@@ -59,7 +59,7 @@ val compute_bounds :
 ```
 
 The match statement is used to handle the error cases, propagating a
-None in `hd` or `last` into the return value of `compute_bounds`.  
+None in `hd` or `last` into the return value of `compute_bounds`.
 
 On the other hand, in `find_mismatches` below, errors encountered
 during the computation do not propagate to the return value of the
@@ -362,8 +362,8 @@ program.
 <note>
 <title>Declaring exceptions with `with sexp`</title>
 
-OCaml can't always generate a useful textual representation of your
-exception, for example:
+OCaml can't always generate a useful textual representation of an
+exception.  For example:
 
 ```ocaml
 # exception Wrong_date of Date.t;;
@@ -372,9 +372,9 @@ exception Wrong_date of Date.t
 - : exn = Wrong_date(_)
 ```
 
-But if you declare the exception using `with sexp` (and the
-constituent types have sexp converters), you'll get something with
-more information.
+But if we declare the exception using `with sexp` (and the constituent
+types have sexp converters), we'll get something with more
+information.
 
 ```ocaml
 # exception Wrong_date of Date.t with sexp;;
@@ -392,6 +392,74 @@ precise exception is being reported.  In this case, since we've
 declared the exception at the toplevel, that module path is trivial.
 
 </note>
+
+### Helper functions for throwing exceptions
+
+A number of helper functions that are provided to simplify the task of
+throwing exceptions.  The simplest one is `failwith`, which could be
+defined as follows:
+
+```ocaml
+# let failwith msg = raise (Failure msg);;
+val failwith : string -> 'a = <fun>
+```
+
+There are several other useful functions for raising exceptions, which
+can be found in the API documentation for the `Common` and `Exn`
+modules in Core.
+
+Another important way of throwing an exception is the `assert`
+directive.  `assert` is used for situations where violation of
+condition in question is a bug.  Consider the following piece of code
+for zipping together two lists.
+
+```ocaml
+# let merge_lists xs ys ~f =
+    if List.length xs <> List.length ys then None
+    else
+      let rec loop xs ys =
+        match xs,ys with
+        | [],[] -> []
+        | x::xs, y::ys -> f x y :: loop xs ys
+        | _ -> assert false
+      in
+      Some (loop xs ys)
+   ;;
+ val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
+  <fun>
+# merge_lists [1;2;3] [-1;1;2] ~f:(+);;
+- : int list option = Some [0; 3; 5]
+# merge_lists [1;2;3] [-1;1] ~f:(+);;
+- : int list option = None
+```
+
+Here we use `assert false`, which means that the assert is guaranteed
+to trigger.  In general, one can put an arbirary condition in the
+assertion.
+
+In this case, the assert can never be triggered because we have a
+check that makes sure that the lists are of the same length before we
+call `loop`.  If we change the code so that we drop this test, then we
+can trigger the assert.
+
+```ocaml
+# let merge_lists xs ys ~f =
+      let rec loop xs ys =
+        match xs,ys with
+        | [],[] -> []
+        | x::xs, y::ys -> f x y :: loop xs ys
+        | _ -> assert false
+      in
+      loop xs ys
+   ;;
+val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
+# merge_lists [1;2;3] [-1] ~f:(+);;
+Exception: (Assert_failure //toplevel// 25 15).
+```
+
+This shows what's special about `assert`, which is that it captures
+the source location.
+
 
 ### Exception handlers
 
