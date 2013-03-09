@@ -1089,9 +1089,8 @@ deterministic transformation from its arguments to its return value is
 imperative in nature.  That includes not only things that mutate your
 program's data, but also operations that interact with the world
 outside of your program.  An important example of this kind of
-interaction is I/O, input and output, such as operations for reading
-or writing data to files, terminal input and output, and network
-sockets.
+interaction is I/O, _i.e._, operations for reading or writing data to
+things like files, terminal input and output, and network sockets.
 
 There are multiple I/O libraries in OCaml.  In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
@@ -1103,14 +1102,13 @@ in Core's `In_channel`, `Out_channel` (and in Core's `Unix` module)
 derives from the standard library, but we'll use Core's interfaces
 here.
 
-OCaml's buffered I/O library is organized around two types:
-`in_channel` channels that you read from and `out_channel` for
-channels you write to.  A channel can be backed by a file, a network
-socket, or a terminal, though the `In_channel` and `Out_channel`
-modules only have direct support for files and terminals; other kinds
-of channels can be created through the `Unix` module.
-
 ### Terminal I/O
+
+OCaml's buffered I/O library is organized around two types:
+`in_channel`, for channels you read from, and `out_channel`, for
+channels you write to.  `In_channel` and `Out_channel` modules only
+have direct support for channels corresponding to files and terminals;
+other kinds of channels can be created through the `Unix` module.
 
 We'll start our discussion of I/O by focusing on the terminal.
 Following the UNIX model, communication with the terminal is organized
@@ -1222,12 +1220,19 @@ Error: This expression has type float but an expression was expected of type
          int
 ```
 
-<note> <title> Format strings aren't strings </title>
+<note> <title> Understanding format strings </title>
 
-To be able to do this checking at compile-time, OCaml needs to have
-the format string available at compile time as well, as a string
-literal.  Really the format string is not an ordinary string at all,
-as you can see if you try to pass an ordinary string to `printf`.
+The format strings used by `printf` turn out to be quite different
+from ordinary strings.  This difference ties to the fact that OCaml
+format strings, unlike their equivalent in C, are type-safe.  In
+particular, the compiler checks that the types referred to by the
+format string match the types of the rest of the arguments passed to
+`printf`.
+
+To check this, OCaml needs to analyze the contents of the format
+string at compile time, which means the format string needs to be
+available as a string literal at compile time.  Indeed, if you try to
+pass an ordinary string to `printf`, the compiler will complain.
 
 ```ocaml
 # let fmt = "%i is an integer, %F is a float, \"%s\" is a string\n";;
@@ -1242,30 +1247,37 @@ Error: This expression has type string but an expression was expected of type
            format6
 ```
 
-If this looks different from everything else you've seen so far,
-that's because it is.  There are in fact some hacks in the type-system
-specifically to support `printf`.  In particular, if OCaml infers that
-something is a format string, then it parses it at compile time as a
-format string, and fills out the rest of the types accordingly.
+If OCaml infers that a given string literal is a format string, then
+it parses it at compile time as such, choosing its type in accordance
+with the formatting directives it finds.  Thus, if we add a
+type-annotation indicating that the string we're defining is actually
+a format string, it will be interepreted as such:
 
 ```ocaml
 # let fmt : ('a, 'b, 'c) format =
     "%i is an integer, %F is a float, \"%s\" is a string\n";;
   val fmt : (int -> float -> string -> 'c, 'b, 'c) format = <abstr>
+```
+
+And accordingly, we can pass it to `printf`.
+
+```ocaml
 # printf fmt 3 4.5 "five";;
 3 is an integer, 4.5 is a float, "five" is a string
 - : unit = ()
 ```
 
-Most of the time, you don't need to worry about this special handling
-of format strings --- you can just use `printf` and not worry about
-the details.  But it's useful to keep the broad outlines of the story
-in the back of your head.
+If this looks different from everything else you've seen so far,
+that's because it is.  This is really a special case in the
+type-system.  Most of the time, you don't need to worry about this
+special handling of format strings --- you can just use `printf` and
+not worry about the details.  But it's useful to keep the broad
+outlines of the story in the back of your head.
 
 </note>
 
-Let's see how we can rewrite our time conversion program to be a
-little more concise using printf.
+Now let's see how we can rewrite our time conversion program to be a
+little more concise using `printf`.
 
 ```ocaml
 (* file: time_converter.ml *)
@@ -1282,11 +1294,22 @@ let () =
 ```
 
 In the above example, we've used only two formatting directives: `%s`,
-for including a string, and `%!` which causes `printf` to generate a
-flush.
+for including a string, and `%!` which causes `printf` to flush the
+channel.  There's a lot more that you can do with `printf`, including
+controlling the width of a given entry, the ali
 
 `printf`'s formatting directives offer a significant amount of
-control, allowing you to specify
+control, allowing you to specify things like:
+
+- alignment and padding
+- escaping rules for strings
+- whether numbers should be formatted in decimal, hex or binary
+- precision of float conversions
+
+And much more.  You can read the documentation for the `Printf` module
+in the OCaml Manual to see the full details.
+
+
 
 
 ## Order of evaluation
