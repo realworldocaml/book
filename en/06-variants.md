@@ -412,10 +412,10 @@ The purpose of each tag is pretty straightforward.  `And`, `Or` and
 
 The `Base` tag is what allows you to tie the `blang` to your
 application, by letting you specify an element of some base predicate
-type, whose whose truth or falsehood is determined by your
-application.  If you were writing a filter language for an email
-processor, your base predicates might specify the tests you would run
-against an email, as in the following example.
+type, whose truth or falsehood is determined by your application.  If
+you were writing a filter language for an email processor, your base
+predicates might specify the tests you would run against an email, as
+in the following example.
 
 ```ocaml
 # type mail_field = To | From | CC | Date | Subject
