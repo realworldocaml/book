@@ -204,7 +204,7 @@ which is both an ordinary function and an infix operator `>>=`.
 Here's the definition of `bind` for options.
 
 ```ocaml
-let bind option f =
+# let bind option f =
     match option with
     | None -> None
     | Some x -> f x
@@ -373,8 +373,8 @@ exception Wrong_date of Date.t
 ```
 
 But if you declare the exception using `with sexp` (and the
-constituent types have sexp converters), we'll get something with more
-information.
+constituent types have sexp converters), you'll get something with
+more information.
 
 ```ocaml
 # exception Wrong_date of Date.t with sexp;;
@@ -420,9 +420,9 @@ exception will be fed to the pattern match statements following the
 exception caught, and the `try/with` clause evaluates to the
 expression on the right-hand side of the matching pattern.
 
-Otherwise, the original exception continues up the call stack, to be
-handled by the next outer exception handler.  If the exception is
-never caught, it terminates the program.
+Otherwise, the original exception continues up the stack of function
+calls, to be handled by the next outer exception handler.  If the
+exception is never caught, it terminates the program.
 
 ### Cleaning up in the presence of exceptions
 
