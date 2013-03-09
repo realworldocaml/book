@@ -332,8 +332,9 @@ val plusone : int -> int = <fun>
 - : int = 4
 ```
 
-Defining named functions is so common that there is some built in
-syntactic sugar for it.  Thus, we can write:
+Defining named functions is so common that there is a built in syntax
+for it.  Thus, the following definition of `plusone` is equivalent to
+the definition above.
 
 ```ocaml
 # let plusone x = x + 1;;
@@ -423,8 +424,9 @@ val dist_from_3 : int -> int = <fun>
 The practice of applying some of the arguments of a curried function
 to get a new function is called _partial application_.
 
-Note that the `fun` keyword supports its own syntactic sugar for
-currying, so we could also have written `abs_diff` as follows.
+Note that the `fun` keyword supports its own syntax for currying, so
+we the following definition of `abs_diff` is equivalent to the
+definition above.
 
 ```ocaml
 # let abs_diff = (fun x y -> abs (x - y));;
