@@ -123,10 +123,11 @@ error type.  Among other things, this makes it easier to write utility
 functions to automate common error handling patterns.
 
 But which type to choose?  Is it better to represent errors as
-strings?  Or S-expressions?  Or something else entirely?
+strings?  Some more structured representation like XML or
+s-expressions?  Or something else entirely?
 
 Core's answer to this question is the `Error.t` type, which tries to
-forge a good compromise between efficiency, convenience and control
+forge a good compromise between efficiency, convenience, and control
 over the presentation of errors.
 
 It might not be obvious at first why efficiency is an issue at all.
