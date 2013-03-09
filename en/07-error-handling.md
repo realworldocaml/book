@@ -198,10 +198,10 @@ errors in Core.
 
 As you write more error handling code in OCaml, you'll discover that
 certain patterns start to emerge.  A number of these common patterns
-been codified in the interfaces of modules like `Option` and `Result`.
-One particularly useful one is built around the function `bind`, which
-is both an ordinary function and an infix operator `>>=`.  Here's how
-you can define `bind`.
+have been codified by functions in modules like `Option` and `Result`.
+One particularly useful pattern is built around the function `bind`,
+which is both an ordinary function and an infix operator `>>=`.
+Here's the definition of `bind` for options.
 
 ```ocaml
 let bind option f =
@@ -271,8 +271,8 @@ terminate a computation and report an error, while providing a
 mechanism to catch and handle (and possibly recover from) exceptions
 that are triggered by sub-computations.
 
-You can trigger an exception triggered in OCaml by, for example,
-dividing an integer by zero:
+You can trigger an exception by, for example, dividing an integer by
+zero:
 
 ```ocaml
 # 3 / 0;;
@@ -287,10 +287,11 @@ a few levels deep in a computation.
 Exception: Division_by_zero.
 ```
 
-```ocaml
 If we put a `printf` in the middle of the computation, we can see that
 the `List.map` is interrupted part way through it's execution:
 
+
+```ocaml
 # List.map ~f:(fun x -> printf "%d\n%!" x; 100 / x) [1;3;0;4];;
 1
 3
