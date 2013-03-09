@@ -387,7 +387,7 @@ Another common application of variants is to represent tree-like
 recursive data-structures.  We'll show how this can be done by walking
 through the design of a simple Boolean expression language.  Such a
 language can be useful anywhere you need to specify filters, which are
-used in everything from packet analyzers to mail clients.  
+used in everything from packet analyzers to mail clients.
 
 An expression in this language will be defined by the variant `blang`
 (short for "boolean language") with one tag for each kind of
@@ -408,7 +408,7 @@ that a `blang` may contain other `blang`s.
 
 The purpose of each tag is pretty straightforward.  `And`, `Or` and
 `Not` are the basic operators for building up boolean expression, and
-`Const` lets you enter constants `true` and `false`.  
+`Const` lets you enter constants `true` and `false`.
 
 The `Base` tag is what allows you to tie the `blang` to your
 application, by letting you specify an element of some base predicate
@@ -515,8 +515,8 @@ it's easy to see that we've missed an important case: double-negation.
 ```
 
 This example is more than a toy.  There's a module very much in this
-spirit already exists as part of Core, and gets a lot of practical use
-in a variety of applications.  
+spirit already exists as part of Core called `Blang`, and it gets a
+lot of practical use in a variety of applications.
 
 More generally, using variants to build recursive data-structures is a
 common technique, and shows up everywhere from designing little
