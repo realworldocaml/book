@@ -292,9 +292,9 @@ message type.  The repetition in this case isn't that bad, but would
 become problematic in larger and more complicated examples.
 
 We can improve the code by refactoring our types to explicitly
-separate which parts are shared and which are common.  The first step
-is to cut down the definitions of the per-message records to just
-contain the unique components of each message.
+separate the parts that are shared from those that are common.  The
+first step is to cut down the definitions of the per-message records
+to just contain the unique components of each message.
 
 ```ocaml
 module Log_entry = struct
