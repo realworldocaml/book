@@ -63,7 +63,7 @@ The type `('a, 'b) t` is used to represent a dictionary with keys of
 type `'a` and data of type `'b`.  The `mli` also includes a collection
 of helper functions.  Notice that a number of the functions, in
 particular, ones like `add` that modify the dictionary, return unit.
-This is typical of functions that act by side-effect.  
+This is typical of functions that act by side-effect.
 
 The implementation is shown below.  We'll go through the code bit by
 bit, explaining different imperative constructs as they show up.
@@ -1306,11 +1306,134 @@ control, allowing you to specify things like:
 - whether numbers should be formatted in decimal, hex or binary
 - precision of float conversions
 
-And much more.  You can read the documentation for the `Printf` module
-in the OCaml Manual to see the full details.
+And much more.
+It's also worth noting that there are `printf`-style functions that
+target outputs other than `stdout`, including:
 
+- `eprintf` prints to `stderr`.
+- `fprintf` prints to an arbitrary `out_channel`.
+- `sprintf` returns a formatted string
 
+All of this, and a good deal more, is described in the API
+documentation for the `Printf` module in the OCaml Manual.
 
+### File I/O
+
+Another common use of `in_channel`s and `out_channel`s is for working
+with files.  Here's a couple of functions, one that creates a file
+full of numbers, and the other that reads in such a file and returns
+the sum of those numbers.
+
+```ocaml
+# let create_number_file filename numbers =
+    let outc = Out_channel.create filename in
+    List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
+    Out_channel.close outc
+  ;;
+ val create_number_file : string -> int Core.Std.List.t -> unit = <fun>
+# let sum_file filename =
+     let file = In_channel.create filename in
+     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+     let sum = List.fold ~init:0 ~f:(+) numbers in
+     In_channel.close file;
+     sum
+  ;;
+val sum_file : string -> int = <fun>
+# create_number_file "numbers.txt" [1;2;3;4;5];;
+- : unit = ()
+# sum_file "numbers.txt";;
+- : int = 15
+```
+
+For both of these functions we followed the same basic sequence: we
+first create the channel, then use the channel, and finally close the
+channel.  The closing of the channel is important, since without it,
+we won't release resources associated with the file back to the
+operating system.
+
+One problem with the code above is that if it throws an exception in
+the middle of its work, it won't actually close the file.  If we try to
+read a file that doesn't actually contain numbers, we'll see such an
+error:
+
+```ocaml
+# sum_file "/etc/hosts";;
+Exception: (Failure "Int.of_string: \"##\"").
+```
+
+And if we do this over and over in a loop, we'll eventually run out of
+file descriptors.
+
+```ocaml
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
+- : unit = ()
+# sum_file "numbers.txt";;
+Exception: (Sys_error "numbers.txt: Too many open files").
+```
+
+And now, you'll need to restart your toplevel if you want to open any
+more files!
+
+To avoid this, we need to make sure that our code cleans up after
+itself.  We can do this using the `protect` function described in
+[xref](#error-handling), as follows.
+
+```ocaml
+# let sum_file filename =
+     let file = In_channel.create filename in
+     protect ~f:(fun () ->
+         let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+         List.fold ~init:0 ~f:(+) numbers)
+       ~finally:(fun () -> In_channel.close file)
+  ;;
+val sum_file : string -> int = <fun>
+```
+
+And now, the file descriptor leak is gone:
+
+```ocaml
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
+- : unit = ()
+# sum_file "numbers.txt";;
+- : int = 15
+```
+
+This is really an example of a more general complexity of imperative
+programming.  When programming imperatively, you need to be quite
+careful to make sure that exceptions don't leave you in an awkward
+state.
+
+`In_channel` also supports some idioms that handle some of the details
+of this for you.  For example, the `with_file` function takes a
+filename and a function for processing that file, and takes care of
+the opening and closing of the file transparently.
+
+```ocaml
+# let sum_file filename =
+     In_channel.with_file filename ~f:(fun file ->
+       let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+       List.fold ~init:0 ~f:(+) numbers)
+  ;;
+val sum_file : string -> int = <fun>
+```
+
+Another misfeature of our implementation of `sum_file` is that we
+read the entire file into memory before processing it.  For a large
+file, it's more efficient to process a line at a time.  You can use
+the `In_channel.fold_lines` function to do just that.
+
+```ocaml
+# let sum_file filename =
+     In_channel.with_file filename ~f:(fun file ->
+       In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
+         sum + Int.of_string line))
+  ;;
+val sum_file : string -> int = <fun>
+```
+
+THis is just a taste of the functionality of `In_channel` and
+`Out_channel`.  To get a fuller understanding you should review the
+API documentation for those modules.
 
 ## Order of evaluation
 
