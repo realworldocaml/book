@@ -338,7 +338,7 @@ module Common = struct
 end
 ```
 
-A full message can then represented as a pair of a `Common.t` and a
+A full message can then be represented as a pair of a `Common.t` and a
 `details`.  Using this, we can rewrite our example above as follows:
 
 ```ocaml
@@ -486,7 +486,8 @@ presence of constants.
     | Or blangs ->
       let blangs = List.map ~f:simplify blangs in
       if List.exists blangs ~f:(function Const true -> true | _ -> false)
-      then Const true else Or blangs
+      then Const true
+      else Or blangs
     | Not blang ->
       match simplify blang with
       | Const bool -> Const (not bool)
