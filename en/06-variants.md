@@ -514,9 +514,9 @@ it's easy to see that we've missed an important case: double-negation.
       | (And _ | Or _ | Base _ ) -> Not blang
 ```
 
-This example is more than a toy.  There's a module very much in this
-spirit already exists as part of Core called `Blang`, and it gets a
-lot of practical use in a variety of applications.
+This example is more than a toy.  There's a module in Core very much
+in this spirit in Core called `Blang`, and it gets a lot of practical
+use in a variety of applications.
 
 More generally, using variants to build recursive data-structures is a
 common technique, and shows up everywhere from designing little
