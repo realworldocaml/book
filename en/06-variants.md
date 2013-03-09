@@ -289,7 +289,9 @@ snippet of code:
 
 This code effectively computes the session id for each underlying
 message type.  The repetition in this case isn't that bad, but would
-become problematic in larger and more complicated examples.
+become problematic in larger and more complicated examples.  Also, we
+had to include code for the `Logon` case, even though it can't
+actually come up.
 
 We can improve the code by refactoring our types to explicitly
 separate the parts that are shared from those that are common.  The
