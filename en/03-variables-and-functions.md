@@ -272,10 +272,10 @@ the foundations.
 
 ### Anonymous Functions ###
 
-We'll start by looking at the most basic form of OCaml function, the
-_anonymous_ function.  Anonymous functions are declared using the
-`fun` keyword.  Here's a simple anonymous function for incrementing an
-integer.
+We'll start by looking at the most basic (and most concise) style of
+function declaration in OCaml: the _anonymous_ function.  Anonymous
+functions are declared using the `fun` keyword, as shown here.
+
 
 ```ocaml
 # (fun x -> x + 1);;
@@ -284,7 +284,7 @@ integer.
 
 Anonymous functions aren't named, but they can be used for many
 different purposes nonetheless.  You can, for example, apply an
-anonymous function to an argument:
+anonymous function to an argument.
 
 ```ocaml
 # (fun x -> x + 1) 7;;
@@ -579,16 +579,16 @@ Prefix                     Usage
 -----------------------    -----------------
 `!`..., `?`..., `~`...     Unary prefix
 
-`.`, `.(`, `.[`         
+`.`, `.(`, `.[`
 
 function application,      Left associative
 constructor, `assert`,
-`lazy`        
+`lazy`
 
 `-`, `-.`                  Unary prefix
 
 `**`...,                   Right associative
-`lsl`, `lsr`, `asr`               
+`lsl`, `lsr`, `asr`
 
 `*`..., `/`..., `%`...,    Left associative
 `mod`, `land`, `lor`,
@@ -607,13 +607,13 @@ constructor, `assert`,
 
 `or`, `||`                 Right associative
 
-`,`                   
+`,`
 
 `<-`, `:=`                 Right associative
 
-`if`                  
+`if`
 
-`;`                        Right associative 
+`;`                        Right associative
 
 --------------------------------------------
 
