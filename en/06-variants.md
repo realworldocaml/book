@@ -66,7 +66,8 @@ the following groups.
 
 We'll also represent this more complicated color-space as a variant,
 but this time, the different tags will have arguments which describe
-the data available in each case.
+the data available in each case.  Note that variants can have multiple
+arguments, which are separated by `*`'s.
 
 ```ocaml
 # type weight = Regular | Bold
@@ -206,7 +207,7 @@ behavior of the code, but we have improved our robustness to change.
 ## Combining records and variants
 
 Records and variants are most effective when used in concert.
-Consider again the type `Log_entry.t` [xref](#records):
+Consider again the type `Log_entry.t` from [xref](#records):
 
 ```ocaml
 module Log_entry = struct
