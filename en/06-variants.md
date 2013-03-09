@@ -479,13 +479,21 @@ presence of constants.
 # let rec simplify = function
     | Base _ | Const _ as x -> x
     | And blangs ->
-      let blangs = List.map ~f:simplify blangs in
-      if List.exists blangs ~f:(function Const false -> true | _ -> false)
+      let blangs =
+        List.map ~f:simplify blangs
+        |> List.filter ~f:(fun x -> x <> Const true)
+      in
+      if List.is_empty blangs then Const true
+      else if List.exists blangs ~f:(fun x -> x = Const false)
       then Const false
       else And blangs
     | Or blangs ->
-      let blangs = List.map ~f:simplify blangs in
-      if List.exists blangs ~f:(function Const true -> true | _ -> false)
+      let blangs =
+        List.map ~f:simplify blangs
+        |> List.filter ~f:(fun x -> x <> Const false)
+      in
+      if List.is_empty blangs then Const false
+      else if List.exists blangs ~f:(fun x -> x = Const true)
       then Const true
       else Or blangs
     | Not blang ->
