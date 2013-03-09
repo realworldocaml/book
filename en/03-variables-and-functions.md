@@ -272,10 +272,10 @@ the foundations.
 
 ### Anonymous Functions ###
 
-We'll start by looking at the most basic (and most concise) style of
-function declaration in OCaml: the _anonymous_ function.  Anonymous
-functions are declared using the `fun` keyword, as shown here.
-
+We'll start by looking at the most basic style of function declaration
+in OCaml: the _anonymous_ function.  An anonymous function is a
+function value that is declared without being named.  They can be
+declared using the `fun` keyword, as shown here.
 
 ```ocaml
 # (fun x -> x + 1);;
@@ -291,7 +291,9 @@ anonymous function to an argument.
 - : int = 8
 ```
 
-Or pass it to another function.
+Or pass it to another function.  Passing functions to iteration
+functions like `List.map` is probably the most common use-case for
+anonymous functions.
 
 ```ocaml
 # List.map ~f:(fun x -> x + 1) [1;2;3];;
