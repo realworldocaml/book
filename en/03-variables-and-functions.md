@@ -461,7 +461,11 @@ in the OCaml world.
 
 A function is _recursive_ if it refers to itself in its definition.
 Recursion is important in any programming language, but is
-particularly important in functional languages.
+particularly important in functional languages, because it is the
+fundamental building block that is used for building looping
+constructs.  (As we'll see in [xref](#imperative-programming), OCaml
+also supports imperative looping constructs like `for` and `while`,
+but these are only useful when using OCaml's imperative features.)
 
 In order to define a recursive function, you need to mark the let
 binding as recursive with the `rec` keyword, as shown in this example:
