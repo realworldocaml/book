@@ -26,21 +26,23 @@ let from_anil =
   ; "nc6"                     (* Nick Clarke <nicholas.clarke@gmail.com> *)
   ; "stevej"                  (* Steve Jenson <stevej@fruitless.org> *)
   ; "ray1729"                 (* Ray Miller <ray@1729.org.uk> *)
-  ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
   ; "bmatican"                (* Bogdan Alexandru Matican <bogdanmatican@gmail.com> *)
+  ; "tmonca"                  (* Toby Moncaster <toby.moncaster@cl.cam.ac.uk> *)
+  ; "pw374"                   (* Philippe Wang <philippe.wang@gmail.com> *)
+  ; "samstaton"               (* Sam Staton <sam.staton@cl.cam.ac.uk> *)
+  ; "vbmithr"                 (* vb@luminar.eu.org *)
 ]
 
 let from_yminsky =
   [ "naftul"                  (* nminsky@gmail.com    *)
   ; "fbsATcsDOTcornellDOTedu" (* fbs@cs.cornell.edu   *)
-  ; "zdancewic"               (* stevez@cis.upenn.edu *)
   ; "bolinfest"               (* mbolin@gmail.com *)
   ; "bnigito"                 (* bnigito@janestreet.com *)
   ; "roshanjames"             (* rjames@janestreet.com *)
   ; "wang-d"                  (* dwang@janestreet.com *)
   ; "datkin"                  (* datkin@janestreet.com *)
   ; "milanst"                 (* mstanojevic@janestreet.com *)
-  ]
+  ; "Zdancewic"               (* Stephan Zdancewic <stevez@cis.upenn.edu> *)
 
 let from_email = 
   [ "JakubOboza "             (* jakub.oboza@gmail.com *)
@@ -60,6 +62,26 @@ let from_email =
   ; "camlspotter"             (* Jun Furuse <jun.furuse@gmail.com> *)
   ; "davidperrin"             (* David Perrin <david.perrin@virtualpv.co.uk> *)
   ; "chris-taylor"            (* Chris Taylor <Chris.Taylor@gsacapital.com> *)
+  ; "Kakadu"                  (* Kakadu <kakadu.hafanana@gmail.com> *)
+  ; "adrianb82"               (* Adrian Brasoveanu <abrsvn@gmail.com> *)
+  ; "bobzhang"                (* bob zhang <bobzhang1988@gmail.com> *)
+  ; "mshure"                  (* Mark Shure <mark.shure@gmail.com> *)
+  ; "HappyCrow"               (* Francois Berenger <berenger@riken.jp> *)
+  
+  (* Facebook people *)
+  ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
+  ; "joelpob"                 (* ma2bd@laposte.net *)
+  ; "mansu"                   (* suman.karumuri@gmail.com *)
+  ; "Aryx"                    (* yoann.padioleau@gmail.com *)
+  ; "paulcavallaro"           (* paulcavallaro@gmail.com *)
+
+  (* Simcorp people *)
+  ; "jfrydendall" 
+  ; "hvitved"
+  ; "kss-simcorp"
+  ; "anders-schack"
+  ; "Alxxa"
+
 ]
 
 let internal_reviewers =
