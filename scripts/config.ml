@@ -31,6 +31,7 @@ let from_anil =
   ; "pw374"                   (* Philippe Wang <philippe.wang@gmail.com> *)
   ; "samstaton"               (* Sam Staton <sam.staton@cl.cam.ac.uk> *)
   ; "vbmithr"                 (* vb@luminar.eu.org *)
+  ; "bellosa"                 (* Frank Bellosa <frank@bellosa.de> *)
 ]
 
 let from_yminsky =
