@@ -8,8 +8,9 @@ deep in any one topic.
 We'll present this guided tour using the Core standard library and the
 `utop` OCaml toplevel, a shell that lets you type in expressions and
 evaluate them interactively.  `utop` is an easier-to-use version of
-the toplevel that you get by typing `ocaml` at the command line, and
-these instructions will assume you're using `utop` specifically.
+the standard toplevel (which you can start by typing `ocaml` at the
+command line).  These instructions will assume you're using `utop`
+specifically.
 
 Before getting started, do make sure you have a working OCaml
 installation and toplevel as you read through this chapter so you can
@@ -536,10 +537,11 @@ Here's a simple example.
   ;;
 ```
 
-By pattern matching using `::`, we've broken off the first element of
-`languages` from the rest of the list.  If you know Lisp or Scheme,
-what we've done is the equivalent of using `car` to grab the first
-element of a list.
+By pattern matching using `::`, we've isolated and named the first
+element of the list (`my_favorite`) and the remainder of the list
+(`the_rest`).  If you know Lisp or Scheme, what we've done is the
+equivalent of using the functions `car` and `cdr` to isolate the first
+element of a list and the remainder of that list.
 
 If you try the above example in the toplevel, however, you'll see that
 it spits out an error:
@@ -556,8 +558,10 @@ val my_favorite_language : 'a list -> 'a = <fun>
 
 The warning comes because the compiler can't be certain that the
 pattern match won't lead to a runtime error.  Indeed, the warning
-gives an example of a pattern that won't match, the empty list, `[]`.
-We can see this in action below.
+gives an example of a list, (`[]`, the empty list) that doesn't match
+the provided pattern.  Indeed, if we try to run
+`my_favorite_language`, we'll see that it works on non-empty list, and
+fails on empty ones.
 
 ```ocaml
 # my_favorite_language ["English";"Spanish";"French"];;
@@ -893,10 +897,16 @@ of some element of a list of `scene_element`s.
   ;;
 val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
 # let is_inside_scene point scene =
-     List.for_all scene
+     List.exists scene
        ~f:(fun el -> is_inside_scene_element point el)
    ;;
 val is_inside_scene : point2d -> scene_element list -> bool = <fun>
+# is_inside_scene {x=3.;y=7.}
+    [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
+- : bool = false
+# is_inside_scene {x=3.;y=7.}
+    [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
+- : bool = true
 ```
 
 You might at this point notice that the use of `match` here is
@@ -906,10 +916,10 @@ types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
 
 We also made our first use of an _anonymous function_ in the call to
-`List.for_all`.  An anonymous function is a function that is defined
+`List.exists`.  An anonymous function is a function that is defined
 but not named, in this case, using the `fun` keyword.  Anonymous
 functions are common in OCaml, particularly when using iteration
-functions like `List.for_all`.
+functions like `List.exists`.
 
 ## Imperative programming
 
@@ -1129,6 +1139,25 @@ val ar : int array =
 # ar;;
 - : int array =
 [|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
+```
+
+OCaml also supports while loops, as shown in the following function
+for finding the first non-negative position in an array.  Note that
+`while` (like `for`) is also a keyword.
+
+```ocaml
+# let find_first_negative_entry ar =
+     let pos = ref 0 in
+     while !pos < Array.length ar && ar.(!pos) >= 0 do
+       pos := !pos + 1
+     done;
+     if !pos = Array.length ar then None else Some !pos
+  ;;
+            val find_first_negative_entry : int Core.Std.Array.t -> int option = <fun>
+# find_first_negative_entry [|1;2;0;3|];;
+- : int option = None
+# find_first_negative_entry [|1;-2;0;3|];;
+- : int option = Some 1
 ```
 
 ## A complete program

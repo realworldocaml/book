@@ -59,7 +59,7 @@ val compute_bounds :
 ```
 
 The match statement is used to handle the error cases, propagating a
-None in `hd` or `last` into the return value of `compute_bounds`.  
+None in `hd` or `last` into the return value of `compute_bounds`.
 
 On the other hand, in `find_mismatches` below, errors encountered
 during the computation do not propagate to the return value of the
@@ -123,10 +123,11 @@ error type.  Among other things, this makes it easier to write utility
 functions to automate common error handling patterns.
 
 But which type to choose?  Is it better to represent errors as
-strings?  Or S-expressions?  Or something else entirely?
+strings?  Some more structured representation like XML or
+s-expressions?  Or something else entirely?
 
 Core's answer to this question is the `Error.t` type, which tries to
-forge a good compromise between efficiency, convenience and control
+forge a good compromise between efficiency, convenience, and control
 over the presentation of errors.
 
 It might not be obvious at first why efficiency is an issue at all.
@@ -187,7 +188,7 @@ interpreted by sexplib as a sexp-converter for the tuple.
 
 `Error` also supports operations for transforming errors.  For
 example, it's often useful to augment an error with some extra
-information about the context of the error, or to combine multiplier
+information about the context of the error, or to combine multiple
 errors together.  `Error.tag` and `Error.of_list` fulfill these roles.
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
@@ -198,13 +199,13 @@ errors in Core.
 
 As you write more error handling code in OCaml, you'll discover that
 certain patterns start to emerge.  A number of these common patterns
-been codified in the interfaces of modules like `Option` and `Result`.
-One particularly useful one is built around the function `bind`, which
-is both an ordinary function and an infix operator `>>=`.  Here's how
-you can define `bind`.
+have been codified by functions in modules like `Option` and `Result`.
+One particularly useful pattern is built around the function `bind`,
+which is both an ordinary function and an infix operator `>>=`.
+Here's the definition of `bind` for options.
 
 ```ocaml
-let bind option f =
+# let bind option f =
     match option with
     | None -> None
     | Some x -> f x
@@ -271,8 +272,8 @@ terminate a computation and report an error, while providing a
 mechanism to catch and handle (and possibly recover from) exceptions
 that are triggered by sub-computations.
 
-You can trigger an exception triggered in OCaml by, for example,
-dividing an integer by zero:
+You can trigger an exception by, for example, dividing an integer by
+zero:
 
 ```ocaml
 # 3 / 0;;
@@ -287,10 +288,11 @@ a few levels deep in a computation.
 Exception: Division_by_zero.
 ```
 
-```ocaml
 If we put a `printf` in the middle of the computation, we can see that
 the `List.map` is interrupted part way through it's execution:
 
+
+```ocaml
 # List.map ~f:(fun x -> printf "%d\n%!" x; 100 / x) [1;3;0;4];;
 1
 3
@@ -361,8 +363,8 @@ program.
 <note>
 <title>Declaring exceptions with `with sexp`</title>
 
-OCaml can't always generate a useful textual representation of your
-exception, for example:
+OCaml can't always generate a useful textual representation of an
+exception.  For example:
 
 ```ocaml
 # exception Wrong_date of Date.t;;
@@ -371,8 +373,8 @@ exception Wrong_date of Date.t
 - : exn = Wrong_date(_)
 ```
 
-But if you declare the exception using `with sexp` (and the
-constituent types have sexp converters), we'll get something with more
+But if we declare the exception using `with sexp` (and the constituent
+types have sexp converters), we'll get something with more
 information.
 
 ```ocaml
@@ -391,6 +393,74 @@ precise exception is being reported.  In this case, since we've
 declared the exception at the toplevel, that module path is trivial.
 
 </note>
+
+### Helper functions for throwing exceptions
+
+A number of helper functions that are provided to simplify the task of
+throwing exceptions.  The simplest one is `failwith`, which could be
+defined as follows:
+
+```ocaml
+# let failwith msg = raise (Failure msg);;
+val failwith : string -> 'a = <fun>
+```
+
+There are several other useful functions for raising exceptions, which
+can be found in the API documentation for the `Common` and `Exn`
+modules in Core.
+
+Another important way of throwing an exception is the `assert`
+directive.  `assert` is used for situations where violation of
+condition in question is a bug.  Consider the following piece of code
+for zipping together two lists.
+
+```ocaml
+# let merge_lists xs ys ~f =
+    if List.length xs <> List.length ys then None
+    else
+      let rec loop xs ys =
+        match xs,ys with
+        | [],[] -> []
+        | x::xs, y::ys -> f x y :: loop xs ys
+        | _ -> assert false
+      in
+      Some (loop xs ys)
+   ;;
+ val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
+  <fun>
+# merge_lists [1;2;3] [-1;1;2] ~f:(+);;
+- : int list option = Some [0; 3; 5]
+# merge_lists [1;2;3] [-1;1] ~f:(+);;
+- : int list option = None
+```
+
+Here we use `assert false`, which means that the assert is guaranteed
+to trigger.  In general, one can put an arbirary condition in the
+assertion.
+
+In this case, the assert can never be triggered because we have a
+check that makes sure that the lists are of the same length before we
+call `loop`.  If we change the code so that we drop this test, then we
+can trigger the assert.
+
+```ocaml
+# let merge_lists xs ys ~f =
+      let rec loop xs ys =
+        match xs,ys with
+        | [],[] -> []
+        | x::xs, y::ys -> f x y :: loop xs ys
+        | _ -> assert false
+      in
+      loop xs ys
+   ;;
+val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
+# merge_lists [1;2;3] [-1] ~f:(+);;
+Exception: (Assert_failure //toplevel// 25 15).
+```
+
+This shows what's special about `assert`, which is that it captures
+the source location.
+
 
 ### Exception handlers
 
@@ -419,9 +489,9 @@ exception will be fed to the pattern match statements following the
 exception caught, and the `try/with` clause evaluates to the
 expression on the right-hand side of the matching pattern.
 
-Otherwise, the original exception continues up the call stack, to be
-handled by the next outer exception handler.  If the exception is
-never caught, it terminates the program.
+Otherwise, the original exception continues up the stack of function
+calls, to be handled by the next outer exception handler.  If the
+exception is never caught, it terminates the program.
 
 ### Cleaning up in the presence of exceptions
 

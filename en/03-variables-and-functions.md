@@ -184,7 +184,7 @@ that is _irrefutable_, _i.e._, where any value of the type in question
 is guaranteed to match the pattern.  Tuple and record patterns are
 irrefutable, but list patterns are not.  Consider the following code
 that implements a function for up-casing the first element of a
-comma-separate list.
+comma-separated list.
 
 ```ocaml
 # let upcase_first_entry line =
@@ -272,10 +272,10 @@ the foundations.
 
 ### Anonymous Functions ###
 
-We'll start by looking at the most basic form of OCaml function, the
-_anonymous_ function.  Anonymous functions are declared using the
-`fun` keyword.  Here's a simple anonymous function for incrementing an
-integer.
+We'll start by looking at the most basic style of function declaration
+in OCaml: the _anonymous_ function.  An anonymous function is a
+function value that is declared without being named.  They can be
+declared using the `fun` keyword, as shown here.
 
 ```ocaml
 # (fun x -> x + 1);;
@@ -284,14 +284,16 @@ integer.
 
 Anonymous functions aren't named, but they can be used for many
 different purposes nonetheless.  You can, for example, apply an
-anonymous function to an argument:
+anonymous function to an argument.
 
 ```ocaml
 # (fun x -> x + 1) 7;;
 - : int = 8
 ```
 
-Or pass it to another function.
+Or pass it to another function.  Passing functions to iteration
+functions like `List.map` is probably the most common use-case for
+anonymous functions.
 
 ```ocaml
 # List.map ~f:(fun x -> x + 1) [1;2;3];;
@@ -330,8 +332,9 @@ val plusone : int -> int = <fun>
 - : int = 4
 ```
 
-Defining named functions is so common that there is some built in
-syntactic sugar for it.  Thus, we can write:
+Defining named functions is so common that there is a built in syntax
+for it.  Thus, the following definition of `plusone` is equivalent to
+the definition above.
 
 ```ocaml
 # let plusone x = x + 1;;
@@ -365,8 +368,7 @@ in a monadic style, as we'll see in
 
 ### Multi-argument functions ###
 
-OCaml of course also supports multi-argument functions.  Here's an
-example that came up in [xref](#a-guided-tour).
+OCaml of course also supports multi-argument functions, for example:
 
 ```ocaml
 # let abs_diff x y = abs (x - y);;
@@ -422,8 +424,9 @@ val dist_from_3 : int -> int = <fun>
 The practice of applying some of the arguments of a curried function
 to get a new function is called _partial application_.
 
-Note that the `fun` keyword supports its own syntactic sugar for
-currying, so we could also have written `abs_diff` as follows.
+Note that the `fun` keyword supports its own syntax for currying, so
+we the following definition of `abs_diff` is equivalent to the
+definition above.
 
 ```ocaml
 # let abs_diff = (fun x y -> abs (x - y));;
@@ -458,7 +461,11 @@ in the OCaml world.
 
 A function is _recursive_ if it refers to itself in its definition.
 Recursion is important in any programming language, but is
-particularly important in functional languages.
+particularly important in functional languages, because it is the
+fundamental building block that is used for building looping
+constructs.  (As we'll see in [xref](#imperative-programming), OCaml
+also supports imperative looping constructs like `for` and `while`,
+but these are only useful when using OCaml's imperative features.)
 
 In order to define a recursive function, you need to mark the let
 binding as recursive with the `rec` keyword, as shown in this example:
@@ -568,25 +575,55 @@ val ( +! ) : int * int -> int * int -> int *int = <fun>
 - : int * int = (1,6)
 ```
 
-The syntactic role of an operator work is determined by its first
-character.  This table describes how, and lists the operators from
-highest to lowest precedence.
+The syntactic role of an operator is typically determined by first
+character or two, though there are a few exceptions.  This table
+breaks the different operators and other syntactic forms into groups
+from highest to lowest precedence, explaining how each behaves
+syntactically.  We write `!`... to indicate the class of operators
+beginning with `!`.
 
--------------------------------------------------------------
-First character    Usage
------------------  -------------------------------------------
-`!` `?` `~`        Prefix and unary
+------------------------------------------
+Prefix                     Usage
+-----------------------    -----------------
+`!`..., `?`..., `~`...     Unary prefix
 
-`**`               Infix, right associative
+`.`, `.(`, `.[`
 
-`+` `-`            Infix, left associative
+function application,      Left associative
+constructor, `assert`,
+`lazy`
 
-`@` `^`            Infix, right associative
+`-`, `-.`                  Unary prefix
 
-`=` `<` `>` `|`    Infix, left associative
-`&` `$`
+`**`...,                   Right associative
+`lsl`, `lsr`, `asr`
 
--------------------------------------------------------------
+`*`..., `/`..., `%`...,    Left associative
+`mod`, `land`, `lor`,
+`lxor`
+
+`+`, `-`                   Left associative
+
+`::`                       Right associative
+
+`@`..., `^`...             Right associative
+
+`=`..., `<`..., `>`...,    Left associative
+`|`..., `&`..., `$`...
+
+`&`, `&&`                  Right associative
+
+`or`, `||`                 Right associative
+
+`,`
+
+`<-`, `:=`                 Right associative
+
+`if`
+
+`;`                        Right associative
+
+--------------------------------------------
 
 There's one important special case: `-` and `-.`, which are the
 integer and floating point subtraction operators, can act as both
@@ -622,6 +659,23 @@ using the provided comparison function.
 /usr/local/bin
 - : unit = ()
 ```
+
+Note that we can do this without `|>`, but the result is a bit more
+verbose.
+
+```ocaml
+# let path = Sys.getenv_exn "PATH" in
+  let split_path = String.split ~on:':' path in
+  let deduped_path = List.dedup ~compare:String.compare split_path in
+  List.iter ~f:print_endline deduped_path
+  ;;
+/bin
+/opt/local/bin
+/usr/bin
+/usr/local/bin
+- : unit = ()
+```
+
 
 An important part of what's happening here is partial application.
 Normally, `List.iter` takes two arguments: a function to be called on
@@ -750,9 +804,9 @@ you can see, the arguments can be provided in any order.
 
 OCaml also supports _label punning_, meaning that you get to drop the
 text after the `:` if the name of the label and the name of the
-variable being used are the same.  Label punning works in both
-function declaration and function invocation, as shown in these
-examples:
+variable being used are the same.  We've seen above how label punning
+works when defining a function.  The following shows how it can be
+used when invoking a function.
 
 ```ocaml
 # let num = 3;;
@@ -846,8 +900,8 @@ and `second`, listed in that order.  We could have defined
 arguments were listed.
 
 ```ocaml
-# let apply_to_tuple f (first,second) = f ~second ~first;;
-val apply_to_tuple : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
+# let apply_to_tuple_2 f (first,second) = f ~second ~first;;
+val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
 ```
 
 It turns out this order of listing matters.  In particular, if we
@@ -858,19 +912,18 @@ define a function that has a different order
 val divide : first:int -> second:int -> int = <fun>
 ```
 
-we'll find that it can't be passed in to `apply_to_tuple`.
+we'll find that it can't be passed in to `apply_to_tuple_2`.
 
 ```ocaml
-# apply_to_tuple divide (3,4);;
+# apply_to_tuple_2 divide (3,4);;
 Characters 15-21:
-  apply_to_tuple divide (3,4);;
-                 ^^^^^^
+  apply_to_tuple_2 divide (3,4);;
+                   ^^^^^^
 Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
 ```
 
-But, if we go back to the original definition of `apply_to_tuple`,
-things will work smoothly.
+But, it works smoothly with the original `apply_to_tuple`.
 
 ```ocaml
 # let apply_to_tuple f (first,second) = f ~first ~second;;
@@ -881,7 +934,8 @@ val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 
 So, even though the order of labeled arguments usually doesn't matter,
 it will sometimes bite you in higher-ordered contexts, where you're
-doing things like passing functions as arguments to other functions.
+passing functions as arguments to other functions as we were in the
+above examples.
 
 ### Optional arguments ###
 
@@ -891,7 +945,8 @@ using the same syntax as labeled arguments, and, similarly to labeled
 arguments, optional arguments can be provided in any order.
 
 Here's an example of a string concatenation function with an optional
-separator.
+separator.  This function uses the `^` operator for simple pairwise
+string concatenation.
 
 ```ocaml
 # let concat ?sep x y =
@@ -935,7 +990,8 @@ of explicitness.
 This means that rarely used functions should not have optional
 arguments.  A good rule of thumb is not to use optional arguments for
 functions internal to a module, _i.e._, functions that are not
-included in the `mli`.
+included in the module's interface, or `mli` file.  We'll learn more
+about `mli`s in [xref](#files-modules-and-programs).
 
 #### Explicit passing of an optional argument ###
 
@@ -1111,8 +1167,20 @@ val prepend_pound : string -> string = <fun>
 - : string = "# a BASH comment"
 ```
 
-Note that the optional argument `?sep` has now disappeared, or
-_erased_.  So when does OCaml decide to erase an optional argument?
+The optional argument `?sep` has now disappeared, or been _erased_.
+Indeed, if we try to pass in that optional argument now, it will be
+rejected.
+
+```ocaml
+# prepend_pound "a BASH comment" ~sep:":";;
+Characters 0-13:
+  prepend_pound "a BASH comment" ~sep:":";;
+  ^^^^^^^^^^^^^
+Error: This function has type string -> string
+       It is applied to too many arguments; maybe you forgot a `;'.
+```
+
+So when does OCaml decide to erase an optional argument?
 
 The rule is: an optional argument is erased as soon as the first
 positional (_i.e._, neither labeled nor optional) argument defined
@@ -1159,7 +1227,7 @@ Warning 16: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
 ```
 
-And indeed, when we provide the two positions arguments, the `sep`
+And indeed, when we provide the two positional arguments, the `sep`
 argument is not erased, instead returning a function that expects the
 `sep` argument to be provided.
 

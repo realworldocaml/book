@@ -12,6 +12,6 @@ let intervals =
 
 let () =
   intervals
-  |! List.sexp_of_t Int_interval.sexp_of_t
-  |! Sexp.to_string_hum
-  |! print_endline
+  |> List.sexp_of_t Int_interval.sexp_of_t
+  |> Sexp.to_string_hum
+  |> print_endline

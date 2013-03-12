@@ -115,9 +115,9 @@ There's also code for `create`, which creates an empty dictionary,
 and `find`, which looks for a matching key in the table using
 `List.find_map` on the corresponding bucket.  (`List.find_map` takes a
 list, and a function for transforming the list elements to options,
-returning a list of the contents of the returned `Some`s.)  In `find`,
-you'll notice that we make use of the `array.(index)` syntax for
-looking up a value in an array.
+returning the first element for which the function returned `Some`.)
+In `find`, you'll notice that we make use of the `array.(index)`
+syntax for looking up a value in an array.
 
 ```ocaml
 let iter t ~f =
@@ -187,14 +187,15 @@ bindings:
     let () = t.buckets.(i) <- filtered_bucket in
     let () = t.length <- t.length - 1 in
 ```
+
 but `;` is more idiomatic.
 
 In general, when a sequence expression `expr1; expr2` is evaluated,
 `expr1` is evaluated first, and then `expr2`.  The expression `expr1`
-must have type `unit`, and the the value of `expr2` is returned as the
-value of the entire sequence.  For example, the sequence `print_string
-"hello world"; 1 + 2` first prints the string `"hello world"`, then
-returns the integer `3`.
+should have type `unit`, and the the value of `expr2` is returned as
+the value of the entire sequence.  For example, the sequence
+`print_string "hello world"; 1 + 2` first prints the string `"hello
+world"`, then returns the integer `3`.
 
 It's also worth noting that `;` is a _separator_, not a terminator as
 it is in C or Java.  The compiler is somewhat relaxed about parsing a
@@ -207,12 +208,6 @@ terminator
 Hello world
 - : int = 2
 ```
-
-Also note, the precedence of a `match` expression is very low, so to separate it
-from the following assignment `l := Some new_front`, we surround the match in a
-`begin ... end` bracketing (we could also use parentheses).  If we did not, the
-final assignment would become part of the `None -> ...` case, which is not what
-we want.
 
 Note also that we do all of the side-effecting operations at the very
 end of each function.  This is good practice because it minimizes the
@@ -456,9 +451,9 @@ field is `None`, and at the end of the list, the `next` field is
 `None`.
 
 
-The type of the list itself, `'a t`, is an optional, mutable reference
-to an `element`.  This reference is `None` if the list is empty, and
-`Some` otherwise.
+The type of the list itself, `'a t`, is an mutable reference to an
+optional `element`.  This reference is `None` if the list is empty,
+and `Some` otherwise.
 
 Now we can define a few basic functions that operate on lists and
 elements.
@@ -950,7 +945,7 @@ wouldn't work here.
 Using `memo_rec`, we can now build an efficient version of `fib`.
 
 ```ocaml
-# let fib = memo_rec fib_recur;;
+# let fib = memo_rec fib_norec;;
 val fib : int -> int = <fun>
 # time (fun () -> fib 40);;
 Time: 0.236034ms
@@ -1086,3 +1081,442 @@ cases can lead to code whose behavior is easier to think about.
 
 </note>
 
+## Input and Output
+
+Imperative programming is about more than modifying in-memory
+data-structures.  Any function that doesn't boil down to a
+deterministic transformation from its arguments to its return value is
+imperative in nature.  That includes not only things that mutate your
+program's data, but also operations that interact with the world
+outside of your program.  An important example of this kind of
+interaction is I/O, _i.e._, operations for reading or writing data to
+things like files, terminal input and output, and network sockets.
+
+There are multiple I/O libraries in OCaml.  In this section we'll
+discuss OCaml's buffered I/O library that can be used through the
+`In_channel` and `Out_channel` modules in Core.  Other I/O primitives
+are also available through the `Unix` module in Core as well as
+`Async`, the asynchronous I/O library that is covered in
+[xref](#concurrent-programming-with-async).  Most of the functionality
+in Core's `In_channel`, `Out_channel` (and in Core's `Unix` module)
+derives from the standard library, but we'll use Core's interfaces
+here.
+
+### Terminal I/O
+
+OCaml's buffered I/O library is organized around two types:
+`in_channel`, for channels you read from, and `out_channel`, for
+channels you write to.  `In_channel` and `Out_channel` modules only
+have direct support for channels corresponding to files and terminals;
+other kinds of channels can be created through the `Unix` module.
+
+We'll start our discussion of I/O by focusing on the terminal.
+Following the UNIX model, communication with the terminal is organized
+around three channels, which correspond to the three standard file
+descriptors in Unix:
+
+* `In_channel.stdin`.  The "standard input" channel.  By default,
+  input comes from the terminal, which handles keyboard input.
+
+* `In_channel.stdout`.  The "standard output" channel.  By default,
+  output written to `stdout` appears on the user terminal.
+
+* `In_channel.stderr`.  The "standard error" channel.  This is similar
+  to `stdout`, but is intended for error messages.
+
+The values `stdin`, `stdout` and `stderr` are useful enough that they
+are also available in the global name-space directly, without having
+to go through the `In_channel` and `Out_channel` modules.
+
+Let's see this in action in a simple interactive application.  The
+following program, `time_converter`, prompts the user for a timezone,
+and then prints out the current time in that timezone.  Here, we use
+Core's `Zone` module for looking up a timezone, and the `Time` module
+for computing the current time and printing it out in the timezone in
+question.
+
+```ocaml
+(* file: time_converter.ml *)
+open Core.Std
+
+let () =
+  Out_channel.output_string stdout "Pick a timezone: ";
+  Out_channel.flush stdout;
+  match In_channel.input_line stdin with
+  | None -> failwith "No timezone provided"
+  | Some zone_string ->
+    let zone = Zone.find_exn zone_string in
+    let time_string = Time.to_localized_string (Time.now ()) zone in
+    Out_channel.output_string stdout
+      (String.concat
+         ["The time in ";Zone.to_string zone;" is "; time_string;"\n"]);
+    Out_channel.flush stdout
+```
+
+We can build this program (using the `build.sh` script and the `_tags`
+file described in [xref](#files-modules-and-programs)) and run it,
+you'll see that it prompts you for input, as follows:
+
+```
+$ ./time_converter.byte
+Pick a timezone:
+```
+
+You can then type in the name of a timezone and hit return, and it
+will print out the current time in the timezone in question.
+
+```
+Pick a timezone: Europe/London
+The time in Europe/London is 2013-03-06 02:15:13.602033
+```
+
+We called `Out_channel.flush` on `stdout` because `out_channel`s are
+buffered, which is to say that OCaml doesn't immediately do a write
+every time you call `output_string`.  Instead, writes are buffered
+until either enough has been written to trigger the flushing of the
+buffers, or until a flush is explicitly requested.  This greatly
+increases the efficiency of the writing process, by reducing the
+number of system calls.
+
+Note that `In_channel.input_line` returns a `string option`, with
+`None` indicating that the input stream has ended (_i.e._, an
+end-of-file condition).  `Out_channel.output_string` is used to print
+the final output, and `Out_channel.flush` is called to flush that
+output to the screen.  The final flush is not technically required,
+since the program ends after that instruction, at which point all
+remaining output will be flushed anyway, but the flush is nonetheless
+good practice.
+
+### Formatted output with `printf`
+
+Generating output with functions like `Out_channel.output_string` is
+simple and easy to understand, but can be a bit verbose.  OCaml also
+supports formatted output using the `printf` function, which is
+modeled after `printf` in the C standard library.  `printf` takes a
+_format string_ that describe what to print and how to format it, as
+well as arguments to be printed, as determined by the formatting
+directives embedded in the format string.  So, for example, we can
+write:
+
+
+```ocaml
+# printf "%i is an integer, %F is a float, \"%s\" is a string\n"
+    3 4.5 "five";;
+3 is an integer, 4.5 is a float, "five" is a string
+- : unit = ()
+```
+
+Importantly, and unlike C's `printf`, the `printf` in OCaml is
+type-safe.  In particular, if we provide an argument whose type
+doesn't match what's presented in the format string, we'll get a type
+error.
+
+```ocaml
+# printf "An integer: %i\n" 4.5;;
+Characters 26-29:
+  printf "An integer: %i\n" 4.5;;
+                            ^^^
+Error: This expression has type float but an expression was expected of type
+         int
+```
+
+<note> <title> Understanding format strings </title>
+
+The format strings used by `printf` turn out to be quite different
+from ordinary strings.  This difference ties to the fact that OCaml
+format strings, unlike their equivalent in C, are type-safe.  In
+particular, the compiler checks that the types referred to by the
+format string match the types of the rest of the arguments passed to
+`printf`.
+
+To check this, OCaml needs to analyze the contents of the format
+string at compile time, which means the format string needs to be
+available as a string literal at compile time.  Indeed, if you try to
+pass an ordinary string to `printf`, the compiler will complain.
+
+```ocaml
+# let fmt = "%i is an integer, %F is a float, \"%s\" is a string\n";;
+val fmt : string = "%i is an integer, %F is a float, \"%s\" is a string\n"
+# printf fmt 3 4.5 "five";;
+Characters 7-10:
+  printf fmt 3 4.5 "five";;
+         ^^^
+Error: This expression has type string but an expression was expected of type
+         ('a -> 'b -> 'c -> 'd, out_channel, unit) format =
+           ('a -> 'b -> 'c -> 'd, out_channel, unit, unit, unit, unit)
+           format6
+```
+
+If OCaml infers that a given string literal is a format string, then
+it parses it at compile time as such, choosing its type in accordance
+with the formatting directives it finds.  Thus, if we add a
+type-annotation indicating that the string we're defining is actually
+a format string, it will be interepreted as such:
+
+```ocaml
+# let fmt : ('a, 'b, 'c) format =
+    "%i is an integer, %F is a float, \"%s\" is a string\n";;
+  val fmt : (int -> float -> string -> 'c, 'b, 'c) format = <abstr>
+```
+
+And accordingly, we can pass it to `printf`.
+
+```ocaml
+# printf fmt 3 4.5 "five";;
+3 is an integer, 4.5 is a float, "five" is a string
+- : unit = ()
+```
+
+If this looks different from everything else you've seen so far,
+that's because it is.  This is really a special case in the
+type-system.  Most of the time, you don't need to worry about this
+special handling of format strings --- you can just use `printf` and
+not worry about the details.  But it's useful to keep the broad
+outlines of the story in the back of your head.
+
+</note>
+
+Now let's see how we can rewrite our time conversion program to be a
+little more concise using `printf`.
+
+```ocaml
+(* file: time_converter.ml *)
+open Core.Std
+
+let () =
+  printf "Pick a timezone: %!";
+  match In_channel.input_line stdin with
+  | None -> failwith "No timezone provided"
+  | Some zone_string ->
+    let zone = Zone.find_exn zone_string in
+    let time_string = Time.to_localized_string (Time.now ()) zone in
+    printf "The time in %s is %s.\n%!" (Zone.to_string zone) time_string
+```
+
+In the above example, we've used only two formatting directives: `%s`,
+for including a string, and `%!` which causes `printf` to flush the
+channel.  There's a lot more that you can do with `printf`, including
+controlling the width of a given entry, the ali
+
+`printf`'s formatting directives offer a significant amount of
+control, allowing you to specify things like:
+
+- alignment and padding
+- escaping rules for strings
+- whether numbers should be formatted in decimal, hex or binary
+- precision of float conversions
+
+And much more.
+It's also worth noting that there are `printf`-style functions that
+target outputs other than `stdout`, including:
+
+- `eprintf` prints to `stderr`.
+- `fprintf` prints to an arbitrary `out_channel`.
+- `sprintf` returns a formatted string
+
+All of this, and a good deal more, is described in the API
+documentation for the `Printf` module in the OCaml Manual.
+
+### File I/O
+
+Another common use of `in_channel`s and `out_channel`s is for working
+with files.  Here's a couple of functions, one that creates a file
+full of numbers, and the other that reads in such a file and returns
+the sum of those numbers.
+
+```ocaml
+# let create_number_file filename numbers =
+    let outc = Out_channel.create filename in
+    List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
+    Out_channel.close outc
+  ;;
+ val create_number_file : string -> int Core.Std.List.t -> unit = <fun>
+# let sum_file filename =
+     let file = In_channel.create filename in
+     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+     let sum = List.fold ~init:0 ~f:(+) numbers in
+     In_channel.close file;
+     sum
+  ;;
+val sum_file : string -> int = <fun>
+# create_number_file "numbers.txt" [1;2;3;4;5];;
+- : unit = ()
+# sum_file "numbers.txt";;
+- : int = 15
+```
+
+For both of these functions we followed the same basic sequence: we
+first create the channel, then use the channel, and finally close the
+channel.  The closing of the channel is important, since without it,
+we won't release resources associated with the file back to the
+operating system.
+
+One problem with the code above is that if it throws an exception in
+the middle of its work, it won't actually close the file.  If we try to
+read a file that doesn't actually contain numbers, we'll see such an
+error:
+
+```ocaml
+# sum_file "/etc/hosts";;
+Exception: (Failure "Int.of_string: \"##\"").
+```
+
+And if we do this over and over in a loop, we'll eventually run out of
+file descriptors.
+
+```ocaml
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
+- : unit = ()
+# sum_file "numbers.txt";;
+Exception: (Sys_error "numbers.txt: Too many open files").
+```
+
+And now, you'll need to restart your toplevel if you want to open any
+more files!
+
+To avoid this, we need to make sure that our code cleans up after
+itself.  We can do this using the `protect` function described in
+[xref](#error-handling), as follows.
+
+```ocaml
+# let sum_file filename =
+     let file = In_channel.create filename in
+     protect ~f:(fun () ->
+         let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+         List.fold ~init:0 ~f:(+) numbers)
+       ~finally:(fun () -> In_channel.close file)
+  ;;
+val sum_file : string -> int = <fun>
+```
+
+And now, the file descriptor leak is gone:
+
+```ocaml
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
+- : unit = ()
+# sum_file "numbers.txt";;
+- : int = 15
+```
+
+This is really an example of a more general complexity of imperative
+programming.  When programming imperatively, you need to be quite
+careful to make sure that exceptions don't leave you in an awkward
+state.
+
+`In_channel` also supports some idioms that handle some of the details
+of this for you.  For example, the `with_file` function takes a
+filename and a function for processing that file, and takes care of
+the opening and closing of the file transparently.
+
+```ocaml
+# let sum_file filename =
+     In_channel.with_file filename ~f:(fun file ->
+       let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+       List.fold ~init:0 ~f:(+) numbers)
+  ;;
+val sum_file : string -> int = <fun>
+```
+
+Another misfeature of our implementation of `sum_file` is that we
+read the entire file into memory before processing it.  For a large
+file, it's more efficient to process a line at a time.  You can use
+the `In_channel.fold_lines` function to do just that.
+
+```ocaml
+# let sum_file filename =
+     In_channel.with_file filename ~f:(fun file ->
+       In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
+         sum + Int.of_string line))
+  ;;
+val sum_file : string -> int = <fun>
+```
+
+THis is just a taste of the functionality of `In_channel` and
+`Out_channel`.  To get a fuller understanding you should review the
+API documentation for those modules.
+
+## Order of evaluation
+
+The order in which expressions are evaluated is an important part of
+the definition of a programming language, and it is particularly
+important in the context of imperative programming.  Most programming
+languages you're likely to have encountered are _strict_, and OCaml is
+too.  In a strict langauge, when you have a function that takes some
+set of arguments, the arguments are evaluated first, and then passed
+to the function.  In other words, imagine if I had a collection of
+angles and I wanted to figure out if any of them had a `sin` that was
+less than zero.  I could write the following computation to figure
+this out.
+
+```ocaml
+# let x = sin 120. in
+  let y = sin 75.  in
+  let z = sin 128. in
+  List.exists ~f:(fun x -> x < 0.) [x;y;z]
+  ;;
+- : bool = true
+```
+
+In some sense, we don't really need to compute the `sin 128`, because
+`sin 75.` is negative, so we should be able to stop there.  But in a
+strict language like OCaml, an expression is evaluated immediately
+when it's bound to a variable.  It doesn't have to be this way, even
+in OCaml.  If we use OCaml's `lazy` keyword, we can change this
+computation so that `sin 128.` doesn't need to be computed.
+
+```ocaml
+# let x = lazy (sin 120.) in
+  let y = lazy (sin 75.)  in
+  let z = lazy (sin 128.) in
+  List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+  ;;
+- : bool = true
+```
+
+We can verify that this is happening by a few well placed `printf`s.
+
+```ocaml
+# let x = lazy (printf "1\n"; sin 120.) in
+  let y = lazy (printf "2\n"; sin 75.)  in
+  let z = lazy (printf "3\n";sin 128.) in
+  List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+  ;;
+1
+2
+- : bool = true
+```
+
+OCaml is strict by default for a good reason: Lazy evaluation and
+imperative programming generally don't mix well, because laziness
+makes it harder to reason about when a given side effect is going to
+occur, which matters quite a bit to the meaning of an imperative
+operation.
+
+So, in a strict program, we know that expressions that are bound to
+variables are guaranteed evaluated in the order that they're bound,
+what about the evaluation order within a single expression?
+Officially, the answer is that evaluation order within an expression
+is undefined.  In practice, OCaml has only one compiler, and
+compiler's behavior is unlikely to change and forms a kind of defacto
+standard.  Unfortunately, the evaluation order it has is often the
+oppose of what one might expect.
+
+Consider the following example.
+
+```ocaml
+# List.exists ~f:(fun x -> x < 0.)
+    [ (printf "1\n"; sin 120.);
+      (printf "2\n"; sin 75.);
+      (printf "3\n"; sin 128.); ]
+  ;;
+3
+2
+1
+- : bool = true
+```
+
+Here, you can see that the sub-expression that came last was actually
+evaluated first!  This is generally the case for many different kinds
+of expressions, so if you want to make sure of the evaluation order of
+different sub-expressions, you should bind them separately to values
+as part of a series of `let/in` statements.
