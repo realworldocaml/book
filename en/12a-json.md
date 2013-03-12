@@ -59,8 +59,8 @@ can be `Null` as well as contain an actual value.
 <title>Installing the Yojson library</title>
 
 There are several JSON libraries available for OCaml.  For this chapter, we've
-picked the [`Yojson`](http://mjambon.com/yojson.html) library that is available
-via OPAM.
+picked the [`Yojson`](http://mjambon.com/yojson.html) library by Martin Jambon. 
+It's easiest to install via OPAM.
 
 ```
 $ opam install yojson
@@ -91,15 +91,14 @@ type json = [
   | `Null
   | `String of string ]
 ```
+Some interesting properties should leap out at you after reading this definition:
 
-Note that some of the type definitions above are recursive.
-This means that some values such as `Assoc` can contain references to more
-JSON fields. The definition also specifically includes a `Null` variant for empty
-fields.  OCaml doesn't allow null values by default, so this must be encoded
-like any other value.
+* Some of the type definitions are _recursive_ (that is, one of the algebraic data types includes a reference to the name of the type being defined). Fields such as `Assoc` can contain references to more JSON fields.
+* The definition specifically includes a `Null` variant for empty fields.  OCaml doesn't allow null values by default, so this must be encoded like any other value.
+* The differences between certain OCaml and JSON data structures is more obvious. For example, a JSON `List` can contain more JSON fields, whereas an OCaml `list` must contain values that are all the same type.
+* The type definition uses polymorphic variants and not normal variants. This will become significant later when we extend it with custom extensions to the JSON format.
 
-Let's parse the earlier JSON example into this type now.  The first stop
-is the `Yojson.Basic` documentation, where we find these helpful functions:
+Let's parse the earlier JSON example into this type now.  The first stop is the `Yojson.Basic` documentation, where we find these helpful functions:
 
 ```ocaml
 val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
