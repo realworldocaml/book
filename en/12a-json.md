@@ -1,10 +1,12 @@
 # Handling JSON data
 
 Now that you've seen how to convert OCaml values into s-expressions, it's
-time to look at other useful serialization mechanisms. We'll start off by looking
-at JSON and XML, as they are very common third-party data formats.  This chapter
-also introduces you to some nice uses of polymorphic variants, and also using
-external tools to auto-generate OCaml code.
+time to look at other useful serialization formats. We'll cover JSON
+next, as it is a very common third-party data format on the Internet, and
+much easier to parse than alternatives. This chapter introduces you to a couple of new techniques that glue together the basic ideas from Part I of the book:
+
+* Using polymorphic variants to write more portable protocols (but still retain the ability to extend them if needed)
+* Using external tools to generate boilerplate OCaml modules and signatures from external specification files.
 
 ## JSON Basics
 
