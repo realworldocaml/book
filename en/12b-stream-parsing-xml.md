@@ -91,7 +91,7 @@ library.  It tells us that:
 > destination. Functions are provided to easily transform sequences of
 > `signal`s to/from arborescent data structures.
 
-The `signal` type is at the heart of all XMLM functions, so let's look at its type definition first:
+The `signal` type is at the heart of all XMLM functions:
 
 ```ocaml
 type signal = [
@@ -103,7 +103,7 @@ type signal = [
 ```
 
 XMLM parses input XML documents into an ordered sequence of these `signal` values.
-The first `signal` that's received when parsing an XML document is always a `Dtd`.
+The first `signal` that's received is always a `Dtd`.
 The Document Type Description (DTD) optionally defines which tags are
 allowed within the XML document.  Some XML parsers can validate a document
 against a DTD, but XMLM is a _non-validating_ parser that reads the DTD if
@@ -170,9 +170,9 @@ El_end
 El_end
 ```
 
-Only the opening `El_start` defines the tag name, and the `El_end` signal simply
+Only the opening `El_start` defines the tag name, and the `El_end` signal 
 closes the more recently opened tag.  The tag names are a little complicated due
-to the XML facility for namespaces; simply ignore the empty component of the tag
+to the XML facility for namespaces; just ignore the empty component of the tag
 if you don't care about these.
 Now, let's define the `xml_id` function that uses the input and output values we 
 defined above and parses this document.
@@ -257,12 +257,12 @@ Let's look at the implementation of these functions in more detail.
 let name ((_,n),_) = n
 ```
 
-The `name` function is a good example of pattern-matching to extract a particular
-field from a tuple-based data structure.  An `Xmlm.tag` consists of
+The `name` function is a good example of how pattern-matching can make data
+structure manipulation very succinct.  An `Xmlm.tag` consists of
 a tuple of the tag name and its attributes.  The tag name is itself a tuple of the
 namespace and the local name (which is what we actually want).  The pattern matching
-in the `name` argument specifically binds the local name to `n`, and ignores the rest of
-the argument input.  The function body then simply returns `n` to the caller.
+in the `name` function  binds the local name portion of these tuples to `n`, and ignores
+the rest of the argument input.  The function body  just returns `n` to the caller.
 
 ```ocaml
 let concat_data tl =
