@@ -39,7 +39,7 @@ how to use the live API later in [xref](#concurrent-programming-with-async),
 but for now here's what a shortened XML search response from DuckDuckGo looks
 like:
 
-```ocaml
+```xml
 <DuckDuckGoResponse version="1.0">
 <Heading>DuckDuckGo</Heading>
 <AbstractText>DuckDuckGo is an Internet search engine.</AbstractText>
@@ -102,29 +102,26 @@ type signal = [
 ]
 ```
 
-XMLM parses input XML documents into an ordered sequence of these `signal`s.
+XMLM parses input XML documents into an ordered sequence of these `signal` values.
 The first `signal` that's received when parsing an XML document is always a `Dtd`.
 The Document Type Description (DTD) optionally defines which tags are
 allowed within the XML document.  Some XML parsers can validate a document
 against a DTD, but XMLM is a _non-validating_ parser that reads the DTD if
-present, but disregards its contents.
+present but disregards its contents.
 
 The `El_start` and `El_end` signals indicate the opening and closing of tags,
 and `Data` passes the data contained between tags.
 
-Let's take a shot at handling signals by writing the identity function that
-parses some XML and outputs it unmodified. There is no buffering required
-since this uses the XMLM streaming API directly:
 
 ```
 let i = Xmlm.make_input (`Channel (open_in "ddg.xml")) ;;
 let o = Xmlm.make_output (`Channel stdout) ;;
 ```
 
-Let's start at the bottom, where we open up input and output channels to pass
-to `Xmlm` parser.  The `make_input` and `make_output` functions use a
-polymorphic variant to define the mechanism that the library should use to read
-and write the XML.  `Channel` is used above, but there are several others
+We'll begin by defining the input source and output target for the XML data.
+The `make_input` and `make_output` functions use a
+polymorphic variant to define how the library should use to read and write
+the XML.  `Channel` is used above, but there are several others
 defined in the library:
 
 ```ocaml
@@ -152,8 +149,33 @@ to use either `String` or `Fun`.  This is because the `in_channel` interface
 is deprecated in Core, and shouldn't be used in new code. _(avsm: this is a
 somewhat unsatisfying explanation: what about adding a better Core interface?)_.
 
+Regardless of which input method you choose, XMLM will convert it into a sequence
+of signals.  For example, take this simplified XML fragment from our earlier
+search engine example.
+
+```xml
+<DuckDuckGoResponse version="1.0">
+<Heading>DuckDuckGo</Heading>
+</DuckDuckGoResponse>
+```
+
+This will be converted into the following sequence of signals:
+
+```
+Dtd _
+El_start (("","DuckDuckGoResponse"), [("","version"), "1.0"]
+El_start (("","Heading"), [])
+Data "DuckDuckGo"
+El_end
+El_end
+```
+
+Only the opening `El_start` defines the tag name, and the `El_end` signal simply
+closes the more recently opened tag.  The tag names are a little complicated due
+to the XML facility for namespaces; simply ignore the empty component of the tag
+if you don't care about these.
 Now, let's define the `xml_id` function that uses the input and output values we 
-defined above.
+defined above and parses this document.
 
 ```ocaml
 let xml_id i o =
@@ -171,24 +193,24 @@ let xml_id i o =
 ```
 
 The `xml_id` function begins by defining a recursive helper `pull` function.
-The  `pull` function  iterates over `signal`s and consumes them all.
-It first uses `Xmlm.peek` to inspect the current input signal
-and immediately output it.  The rest of the function is not strictly necessary,
-but tracks that all of the tags that have been started via the `El_start`
-signal are also closed by a corresponding `El_end` signal.  
+The  `pull` function  iterates over the `signal` values until there are none left.
+It first uses `Xmlm.peek` to inspect the current input signal and immediately outputs
+it.  The rest of the function is not strictly necessary, but tracks that all of
+the tags that have been started via the `El_start` signal are also closed by a
+corresponding `El_end` signal.
 
 The `pull` function isn't invoked immediately.  The first thing we need to
 do is consume the `Dtd` signal, which is present in every well-formed XML
 input.  Then we invoke `pull` with a depth of `0`, and it consumes the whole
 document.  The final action is to call `Xmlm.eoi`
-to verifiy that the "end of input" has been reached, since `pull` should
+to verify that the end of input has been reached, since the earlier `pull` should
 have consumed all of the XML signals.
 
 ### Tree parsing XML
 
 Signals enforce a very iterative style of parsing XML, as your program has to
 deal with signals arriving serially.  It's often more convenient to deal with
-complete XML documents directly in-memory as an OCaml data structure.  You can
+complete XML documents directly in-memory as an OCaml tree data structure.  We can
 convert a signal stream into an OCaml structure by defining the following data
 type and helper functions:
 
@@ -211,8 +233,8 @@ let out_tree o t =
 ```
 
 The type `tree` can be pattern-matched and traversed like a normal OCaml data
-structure.  Let's see how this works by extracting out all the "Related Topics"
-in the example document.  First, we'll need a few helper combinator functions
+structure.  Let's see how this works by extracting all the "RelatedTopics"
+in the example XML document.  First, we'll need a few helper combinator functions
 to filter through tags and trees, with the following signature:
 
 ```ocaml
@@ -220,22 +242,43 @@ to filter through tags and trees, with the following signature:
    Discards the namespace information. *)
 val name : Xmlm.tag -> string
 
-(* Filter out the contents of a tag [n] from a tagset,
-   and return the concatenated contents of all of them *)
-val filter_tag : string -> tree list -> tree list
-
 (* Given a list of [trees], concatenate all of the data contents
    into a string, and discard any sub-tags within it *)
 val concat_data : tree list -> string
+
+(* Filter out the contents of a tag [n] from a tagset,
+   and return the concatenated contents of all of them *)
+val filter_tag : string -> tree list -> tree list
 ```
 
-The implementation of these signatures fold over the `tree` structure to filter
-the tags which match the desired tag name.  A similar version that matches on
-tag attributes is left as an exercise for you to try.
+Let's look at the implementation of these functions in more detail.
 
 ```ocaml
 let name ((_,n),_) = n
+```
 
+The `name` function is a good example of pattern-matching to extract a particular
+field from a tuple-based data structure.  An `Xmlm.tag` consists of
+a tuple of the tag name and its attributes.  The tag name is itself a tuple of the
+namespace and the local name (which is what we actually want).  The pattern matching
+in the `name` argument specifically binds the local name to `n`, and ignores the rest of
+the argument input.  The function body then simply returns `n` to the caller.
+
+```ocaml
+let concat_data tl =
+  List.fold_left ~init:"" ~f:(fun acc ->
+    function
+    |Data s -> acc ^ s
+    |_ -> acc
+  ) tl
+```
+
+The `concat_data` function accepts a `tree list` parameter and looks for
+`Data` tags that it concatenates into a single string. All other
+tags are ignored and discarded (a more sophisticated implementation would recurse into
+sub-tags and concatenate any data within them too).
+
+```ocaml
 let filter_tag n =
   List.fold_left ~init:[] ~f:(fun acc ->
     function
@@ -243,24 +286,18 @@ let filter_tag n =
       ts @ acc
     |_ -> acc
   )
-
-let concat_data =
-  List.fold_left ~init:"" ~f:(fun acc ->
-    function
-    |Data s -> acc ^ s
-    |_ -> acc
-  )
 ```
 
-(_avsm_: have we explained `fold_left` before this section or does it need a full intro?)
-
-Notice the use of a *guard pattern* in the `filter_tag` pattern match. This
-looks for an `Element` tag that matches the name parameter, and concatenates
-the results with the accumulator list.
+The `filter_tag` function also folds over a `tree list`, but uses
+a more specialised pattern match.  It looks for an `Element` value, but uses the
+`when` clause to also check that the name of the tag matches
+the `n` function argument.  If it does match then that
+pattern is selected, and otherwise matching continues to the next option (in this
+case, a  catch-all that simply returns the accumulator and continues the fold).
+This use of `when` in pattern matching is known as a _guard pattern_.
 
 Once we have these helper functions, the selection of all the `<Text>` tags is
-a matter of chaining the combinators together to peform the selection over the
-`tree` data structure.
+a matter of chaining the filter functions we just defined together.
 
 ```ocaml
 let topics trees =
@@ -276,10 +313,11 @@ let _ =
   topics [it]
 ```
 
-The `filter_tag` combinator accepts a `tree list` parameter and outputs a `tree
-list`. This lets us easily chain together the results of one filter to another,
-and hence select hierarchical XML tags very easily.  When we get to the
-`<Text>` tag, we iterate over all the results and print each one individually.
+The `filter_tag` function accepts a `tree list` and also outputs a `tree
+list` that contains the sub-tags that match. This lets us chain together the
+results of one filter to another, and hence select hierarchical XML tags very easily.
+When we get to the `<Text>` tag, we iterate over all the results, concatenate
+the data contents, and print each one individually.
 
 ### Constructing XML documents using syntax extensions
 
