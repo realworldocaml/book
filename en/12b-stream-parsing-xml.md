@@ -80,7 +80,7 @@ Luckily there exists a low-level _streaming_ interface that parses an XML docume
 This can be cumbersome to use for quick tasks, so we'll build a simpler tree API on top of it.
 We'll start with the streaming API first though.
 
-### Stream parsing XML
+## Stream parsing XML
 
 The XMLM documentation is a good place to read about the overall layout of the
 library.  It tells us that:
@@ -206,7 +206,7 @@ document.  The final action is to call `Xmlm.eoi`
 to verify that the end of input has been reached, since the earlier `pull` should
 have consumed all of the XML signals.
 
-### Tree parsing XML
+## Tree parsing XML
 
 Signals enforce a very iterative style of parsing XML, as your program has to
 deal with signals arriving serially.  It's often more convenient to deal with
@@ -319,23 +319,45 @@ results of one filter to another, and hence select hierarchical XML tags very ea
 When we get to the `<Text>` tag, we iterate over all the results, concatenate
 the data contents, and print each one individually.
 
-### Constructing XML documents using syntax extensions
+## Building XML using syntax extensions
 
-In the earlier JSON chapter, we explained how to construct records by creating
-the records directly.  You can do exactly the same thing for XML, but there is
-also a more automated method available by using OCaml's facility for syntax
-extensions.
+In the earlier JSON chapter, we explained how to construct values by creating
+the data structures directly.  While this works for small documents, it can
+get really confusing with bigger structures.  For example, look at:
 
-The OCaml distribution provides the `camlp4` tool for this purpose, which you
-can view as a type-safe preprocessor.  Camlp4 operates by loading in a set of
-syntax extension modules that transform the Abstract Syntax Tree (AST) of
-OCaml, usually by adding nodes that generate code.  We'll talk about how to
-build your own syntax extensions later in the book, but for now we'll describe
-how to *use* several syntax extensions that make it easier to manipulate
-external data formats such as XML.
+```ocaml
+let mk_tag n a c = Element((("",n),a),c)
+let mk_data d = Data d
 
-We'll use the Atom 1.0 syndication format as our example here. Atom feeds allow
-web-based programs (such as browsers) to poll a website for updates.  The
+let response =
+  mk_tag "DuckDuckGoResponse" [("","version"),"1.0"] 
+    (mk_tag "Heading" [] [mk_data "DuckDuckGo"])
+```
+
+This defines a couple of helper functions to construct `Element` and `Data` values,
+and then builds a `response` value.  Wouldn't it be nice if there were a way to
+write the XML we want directly?  Happily, OCaml's syntax extension
+mechanism comes to the rescue via the _quotation_ mechanism. It lets us write
+this equivalent code:
+
+```ocaml
+let response =
+  <:xml
+    <DuckDuckGoResponse version="1.0">
+      <Heading>DuckDuckGo</Heading>
+    </DuckDuckGoResponse>
+  >>
+```
+
+We use the Sexplib syntax extension earlier to generate boilerplate code from
+type definitions.
+The quotation shown above is a little different: it lets the syntax of
+an entire block of code to be completely different from OCaml's usual one.
+Camlp4 loads a syntax extension module that transforms the Abstract Syntax Tree (AST) of
+the code fragment (in this case, `xml`), and converts it into the desired data structure.
+
+We'll use the Atom 1.0 syndication format as our example. Atom feeds allow
+web-based programs such as browsers to poll a website for updates.  The
 website owner publishes a feed of content in a standardized XML format via
 HTTP.  This feed is then parsed by clients and compared against previously
 downloaded versions to determine which contents are available.
@@ -355,8 +377,8 @@ Here's an example of an Atom feed:
  <entry>
   <title>Atom-Powered Robots Run Amok</title>
   <link href="http://example.org/2003/12/13/atom03" />
-  <link rel="alternate" type="text/html" href="http://example.org/2003/12/13/atom03.html"/>
-  <link rel="edit" href="http://example.org/2003/12/13/atom03/edit"/>
+  <link rel="alternate" type="text/html" href="http://example.org/atom03.html"/>
+  <link rel="edit" href="http://example.org/atom03/edit"/>
   <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
   <updated>2003-12-13T18:30:02Z</updated>
   <summary>Some text.</summary>
@@ -369,19 +391,18 @@ Here's an example of an Atom feed:
 ```
 
 We want to build this by minimising the amount of repetitive XML generation
-code.  The "Caml on the Web" (COW) library provides a syntax extension that is
-useful here.
+code.  The "Caml on the Web" (COW) library provides the syntax extension we need.
 
 <note>
 <title>Installing Caml on the Web (COW)</title>
 
-The COW library and syntax extension can be installed via OPAM by `opam install
+The COW library and syntax extension can be installed via OPAM via `opam install
 cow`.  There are two OCamlfind packages installed: the library is called `cow`
 and the syntax extension is activated with the `cow.syntax` package.
 
 One caveat to bear in mind is that COW isn't fully compatible with Core yet,
 and so you must use the syntax extension before opening the Core modules.
-(_avsm_: we can fix this easily, but note is here as a warning to reviewers).
+(_avsm_: we can fix this easily, but the note is here as a warning to reviewers).
 
 </note>
 
@@ -553,7 +574,7 @@ TODO antiquotations.
 
 TODO finish the atom example.
 
-### Working with XHTML
+### Working with XHTMLx
 
 TODO use Cow.Html to generate a more complete Atom feed.
 
