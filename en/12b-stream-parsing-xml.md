@@ -11,7 +11,7 @@ the notion of a _visitor pattern_ to manipulate fragments of XML trees.
 <note>
 <title>Obtaining and installing XMLM</title>
 
-The remainder of this section uses the freely available XMLM library.  It's
+The remainder of this chapter uses the freely available XMLM library.  It's
 easiest to obtain it via OPAM.  See [xref](#packaging-and-build-systems) for
 installation instructions if you don't have OPAM.
 
@@ -68,14 +68,17 @@ like:
 </DuckDuckGoResponse>
 ```
 
-The XML document is structured as a series of `<tags>` that are closed by an
-end `</tag>`.  The opening tags have an optional set of key/value attributes
-and usually contain text data or further tags within them.  If the XML document
-is large, we don't want to read the whole thing into memory before processing
-it.  Luckily we don't have to, as there are two parsing strategies for XML: a
-low-level *streaming* API that parses a document incrementally, and a simpler
-but more inefficient tree API.  We'll start with the streaming API first, as
-the tree API is built on top of it.
+The XML document is structured as a set of opening `<tag>` tokens that are closed by a
+corresponding end `</tag>` token.  Opening tags can have an optional set of key/value
+attributes, for example `<tag name="foo" id="bar">`.
+A tag usually contains data that can contain further tags, thus forming a tree
+structure.
+
+These XML documents can be very large, and we don't want to have to read it all into
+memory before starting to process it.
+Luckily there exists a low-level _streaming_ interface that parses an XML document incrementally.
+This can be cumbersome to use for quick tasks, so we'll build a simpler tree API on top of it.
+We'll start with the streaming API first though.
 
 ### Stream parsing XML
 
@@ -88,8 +91,7 @@ library.  It tells us that:
 > destination. Functions are provided to easily transform sequences of
 > `signal`s to/from arborescent data structures.
 
-The type of a `signal` reveals the basic structure of the streaming API in
-XMLM:
+The `signal` type is at the heart of all XMLM functions, so let's look at its type definition first:
 
 ```ocaml
 type signal = [
@@ -100,44 +102,30 @@ type signal = [
 ]
 ```
 
-XMLM outputs an ordered sequence of these signals to your code as it parses the
-document.  The first `signal` when inputting an XML document is always a `Dtd`.
-The DTD (or *document type description*) optionally defines which tags are
+XMLM parses input XML documents into an ordered sequence of these `signal`s.
+The first `signal` that's received when parsing an XML document is always a `Dtd`.
+The Document Type Description (DTD) optionally defines which tags are
 allowed within the XML document.  Some XML parsers can validate a document
-against a DTD, but XMLM is a *non-validating* parser that reads the DTD if
-present, but disregards its contents.  The `El_start` and `El_end` signals
-indicate the opening and closing of tags, and `Data` passes the free-form
-information contained between tags.
+against a DTD, but XMLM is a _non-validating_ parser that reads the DTD if
+present, but disregards its contents.
 
-Let's take a shot at handling signals by writing the XML identity function that
-parses some XML and outputs it again.  There is no explicit buffering required
-since this uses the XMLM streaming API.
+The `El_start` and `El_end` signals indicate the opening and closing of tags,
+and `Data` passes the data contained between tags.
 
-```ocaml
-let xml_id i o =
-  let rec pull i o depth =
-    Xmlm.output o (Xmlm.peek i);
-    match Xmlm.input i with
-    | `El_start _ -> pull i o (depth + 1)
-    | `El_end -> if depth > 1 then pull i o (depth - 1)
-    | `Data _ -> pull i o depth
-    | `Dtd _ -> assert false
-  in
-  Xmlm.output o (Xmlm.input i); (* `Dtd *)
-  pull i o 0;
-  if not (Xmlm.eoi i) then invalid_arg "document not well-formed"
+Let's take a shot at handling signals by writing the identity function that
+parses some XML and outputs it unmodified. There is no buffering required
+since this uses the XMLM streaming API directly:
 
-let _ =
-  let i = Xmlm.make_input (`Channel (open_in "ddg.xml")) in
-  let o = Xmlm.make_output (`Channel stdout) in
-  xml_id i o
+```
+let i = Xmlm.make_input (`Channel (open_in "ddg.xml")) ;;
+let o = Xmlm.make_output (`Channel stdout) ;;
 ```
 
 Let's start at the bottom, where we open up input and output channels to pass
-to `Xmlm` parser.  The `input` and `output` constructor functions use a
+to `Xmlm` parser.  The `make_input` and `make_output` functions use a
 polymorphic variant to define the mechanism that the library should use to read
-the document.  `Channel` is the simplest, but there are several others
-available.
+and write the XML.  `Channel` is used above, but there are several others
+defined in the library:
 
 ```ocaml
 type source = [
@@ -147,19 +135,54 @@ type source = [
 ]
 ```
 
-The `Fun` channel returns one character at a time as an integer, and `String`
-starts parsing an OCaml string from the given integer offset.  Both of these
-are will normally be used in preference to `Channel`, which uses an interface
-that is deprecated in Core.
+Each of these sources uses a different strategy for obtaining input data:
 
-The `xml_id` function begins by reading one signal, which will always be a
-`Dtd`.  The recursive `pull` function is then invoked to iterate over the
-remaining signals.  This uses `Xmlm.peek` to inspect the current input signal
+* `Channel` uses the OCaml standard library channel system. When more data is
+required, a blocking read is performed on that channel.
+* `String` accepts the whole document as an OCaml `string`, starting from an
+integer offset and continuing until the whole document has been parsed.
+* `Fun` is  more general than the others, and supplies a function which
+can be called repeatedly to obtain the next character.  The function can do this by
+any means it chooses: for example from the network (hopefully with buffering
+so it's not reading a single character at a time), or from a list of strings
+from elsewhere in the application.
+
+Although we use `Channel` in this small example, real applications will tend
+to use either `String` or `Fun`.  This is because the `in_channel` interface
+is deprecated in Core, and shouldn't be used in new code. _(avsm: this is a
+somewhat unsatisfying explanation: what about adding a better Core interface?)_.
+
+Now, let's define the `xml_id` function that uses the input and output values we 
+defined above.
+
+```ocaml
+let xml_id i o =
+  let rec pull depth =
+    Xmlm.output o (Xmlm.peek i);
+    match Xmlm.input i with
+    | `El_start _ -> pull i o (depth + 1)
+    | `El_end -> if depth > 1 then pull i o (depth - 1)
+    | `Data _ -> pull i o depth
+    | `Dtd _ -> assert false
+  in
+  Xmlm.output o (Xmlm.input i); (* `Dtd *)
+  pull 0;
+  if not (Xmlm.eoi i) then invalid_arg "document not well-formed"
+```
+
+The `xml_id` function begins by defining a recursive helper `pull` function.
+The  `pull` function  iterates over `signal`s and consumes them all.
+It first uses `Xmlm.peek` to inspect the current input signal
 and immediately output it.  The rest of the function is not strictly necessary,
-but it tracks that all of the tags that have been started via the `El_start`
-signal are also closed by a corresponding `El_end` signal.  Once the `pull`
-function has finished due to the opening tag being closed, the `Xmlm.eoi`
-function verifies that the "end of input" has been reached.
+but tracks that all of the tags that have been started via the `El_start`
+signal are also closed by a corresponding `El_end` signal.  
+
+The `pull` function isn't invoked immediately.  The first thing we need to
+do is consume the `Dtd` signal, which is present in every well-formed XML
+input.  Then we invoke `pull` with a depth of `0`, and it consumes the whole
+document.  The final action is to call `Xmlm.eoi`
+to verifiy that the "end of input" has been reached, since `pull` should
+have consumed all of the XML signals.
 
 ### Tree parsing XML
 
