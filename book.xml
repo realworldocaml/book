@@ -13846,7 +13846,7 @@ $ utop
     </blockquote>
     <para>
       The <literal>signal</literal> type is at the heart of all XMLM
-      functions, so let's look at its type definition first:
+      functions:
     </para>
     <programlisting language="ocaml">
 type signal = [
@@ -13859,12 +13859,12 @@ type signal = [
     <para>
       XMLM parses input XML documents into an ordered sequence of these
       <literal>signal</literal> values. The first
-      <literal>signal</literal> that's received when parsing an XML
-      document is always a <literal>Dtd</literal>. The Document Type
-      Description (DTD) optionally defines which tags are allowed within
-      the XML document. Some XML parsers can validate a document against
-      a DTD, but XMLM is a <emphasis>non-validating</emphasis> parser
-      that reads the DTD if present but disregards its contents.
+      <literal>signal</literal> that's received is always a
+      <literal>Dtd</literal>. The Document Type Description (DTD)
+      optionally defines which tags are allowed within the XML document.
+      Some XML parsers can validate a document against a DTD, but XMLM
+      is a <emphasis>non-validating</emphasis> parser that reads the DTD
+      if present but disregards its contents.
     </para>
     <para>
       The <literal>El_start</literal> and <literal>El_end</literal>
@@ -13953,10 +13953,10 @@ El_end
 </programlisting>
     <para>
       Only the opening <literal>El_start</literal> defines the tag name,
-      and the <literal>El_end</literal> signal simply closes the more
-      recently opened tag. The tag names are a little complicated due to
-      the XML facility for namespaces; simply ignore the empty component
-      of the tag if you don't care about these. Now, let's define the
+      and the <literal>El_end</literal> signal closes the more recently
+      opened tag. The tag names are a little complicated due to the XML
+      facility for namespaces; just ignore the empty component of the
+      tag if you don't care about these. Now, let's define the
       <literal>xml_id</literal> function that uses the input and output
       values we defined above and parses this document.
     </para>
@@ -14053,16 +14053,15 @@ val filter_tag : string -&gt; tree list -&gt; tree list
 let name ((_,n),_) = n
 </programlisting>
     <para>
-      The <literal>name</literal> function is a good example of
-      pattern-matching to extract a particular field from a tuple-based
-      data structure. An <literal>Xmlm.tag</literal> consists of a tuple
-      of the tag name and its attributes. The tag name is itself a tuple
-      of the namespace and the local name (which is what we actually
-      want). The pattern matching in the <literal>name</literal>
-      argument specifically binds the local name to
-      <literal>n</literal>, and ignores the rest of the argument input.
-      The function body then simply returns <literal>n</literal> to the
-      caller.
+      The <literal>name</literal> function is a good example of how
+      pattern-matching can make data structure manipulation very
+      succinct. An <literal>Xmlm.tag</literal> consists of a tuple of
+      the tag name and its attributes. The tag name is itself a tuple of
+      the namespace and the local name (which is what we actually want).
+      The pattern matching in the <literal>name</literal> function binds
+      the local name portion of these tuples to <literal>n</literal>,
+      and ignores the rest of the argument input. The function body just
+      returns <literal>n</literal> to the caller.
     </para>
     <programlisting language="ocaml">
 let concat_data tl =
@@ -14130,30 +14129,54 @@ let _ =
       individually.
     </para>
   </sect1>
-  <sect1 id="constructing-xml-documents-using-syntax-extensions">
-    <title>Constructing XML documents using syntax extensions</title>
+  <sect1 id="building-xml-using-syntax-extensions">
+    <title>Building XML using syntax extensions</title>
     <para>
-      In the earlier JSON chapter, we explained how to construct records
-      by creating the records directly. You can do exactly the same
-      thing for XML, but there is also a more automated method available
-      by using OCaml's facility for syntax extensions.
+      In the earlier JSON chapter, we explained how to construct values
+      by creating the data structures directly. While this works for
+      small documents, it can get really confusing with bigger
+      structures. For example, look at:
+    </para>
+    <programlisting language="ocaml">
+let mk_tag n a c = Element(((&quot;&quot;,n),a),c)
+let mk_data d = Data d
+
+let response =
+  mk_tag &quot;DuckDuckGoResponse&quot; [(&quot;&quot;,&quot;version&quot;),&quot;1.0&quot;] 
+    (mk_tag &quot;Heading&quot; [] [mk_data &quot;DuckDuckGo&quot;])
+</programlisting>
+    <para>
+      This defines a couple of helper functions to construct
+      <literal>Element</literal> and <literal>Data</literal> values, and
+      then builds a <literal>response</literal> value. Wouldn't it be
+      nice if there were a way to write the XML we want directly?
+      Happily, OCaml's syntax extension mechanism comes to the rescue
+      via the <emphasis>quotation</emphasis> mechanism. It lets us write
+      this equivalent code:
+    </para>
+    <programlisting language="ocaml">
+let response =
+  &lt;:xml
+    &lt;DuckDuckGoResponse version=&quot;1.0&quot;&gt;
+      &lt;Heading&gt;DuckDuckGo&lt;/Heading&gt;
+    &lt;/DuckDuckGoResponse&gt;
+  &gt;&gt;
+</programlisting>
+    <para>
+      We use the Sexplib syntax extension earlier to generate
+      boilerplate code from type definitions. The quotation shown above
+      is a little different: it lets the syntax of an entire block of
+      code to be completely different from OCaml's usual one. Camlp4
+      loads a syntax extension module that transforms the Abstract
+      Syntax Tree (AST) of the code fragment (in this case,
+      <literal>xml</literal>), and converts it into the desired data
+      structure.
     </para>
     <para>
-      The OCaml distribution provides the <literal>camlp4</literal> tool
-      for this purpose, which you can view as a type-safe preprocessor.
-      Camlp4 operates by loading in a set of syntax extension modules
-      that transform the Abstract Syntax Tree (AST) of OCaml, usually by
-      adding nodes that generate code. We'll talk about how to build
-      your own syntax extensions later in the book, but for now we'll
-      describe how to <emphasis>use</emphasis> several syntax extensions
-      that make it easier to manipulate external data formats such as
-      XML.
-    </para>
-    <para>
-      We'll use the Atom 1.0 syndication format as our example here.
-      Atom feeds allow web-based programs (such as browsers) to poll a
-      website for updates. The website owner publishes a feed of content
-      in a standardized XML format via HTTP. This feed is then parsed by
+      We'll use the Atom 1.0 syndication format as our example. Atom
+      feeds allow web-based programs such as browsers to poll a website
+      for updates. The website owner publishes a feed of content in a
+      standardized XML format via HTTP. This feed is then parsed by
       clients and compared against previously downloaded versions to
       determine which contents are available.
     </para>
@@ -14173,8 +14196,8 @@ let _ =
  &lt;entry&gt;
   &lt;title&gt;Atom-Powered Robots Run Amok&lt;/title&gt;
   &lt;link href=&quot;http://example.org/2003/12/13/atom03&quot; /&gt;
-  &lt;link rel=&quot;alternate&quot; type=&quot;text/html&quot; href=&quot;http://example.org/2003/12/13/atom03.html&quot;/&gt;
-  &lt;link rel=&quot;edit&quot; href=&quot;http://example.org/2003/12/13/atom03/edit&quot;/&gt;
+  &lt;link rel=&quot;alternate&quot; type=&quot;text/html&quot; href=&quot;http://example.org/atom03.html&quot;/&gt;
+  &lt;link rel=&quot;edit&quot; href=&quot;http://example.org/atom03/edit&quot;/&gt;
   &lt;id&gt;urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a&lt;/id&gt;
   &lt;updated&gt;2003-12-13T18:30:02Z&lt;/updated&gt;
   &lt;summary&gt;Some text.&lt;/summary&gt;
@@ -14188,14 +14211,14 @@ let _ =
     <para>
       We want to build this by minimising the amount of repetitive XML
       generation code. The &quot;Caml on the Web&quot; (COW) library
-      provides a syntax extension that is useful here.
+      provides the syntax extension we need.
     </para>
     <note>
     <title>
     Installing Caml on the Web (COW)
     </title>
     <para>
-      The COW library and syntax extension can be installed via OPAM by
+      The COW library and syntax extension can be installed via OPAM via
       <literal>opam install cow</literal>. There are two OCamlfind
       packages installed: the library is called <literal>cow</literal>
       and the syntax extension is activated with the
@@ -14205,7 +14228,7 @@ let _ =
       One caveat to bear in mind is that COW isn't fully compatible with
       Core yet, and so you must use the syntax extension before opening
       the Core modules. (<emphasis>avsm</emphasis>: we can fix this
-      easily, but note is here as a warning to reviewers).
+      easily, but the note is here as a warning to reviewers).
     </para>
     </note>
     <para>
@@ -14398,12 +14421,12 @@ type meta = {
     <para>
       TODO finish the atom example.
     </para>
-  </sect1>
-  <sect1 id="working-with-xhtml">
-    <title>Working with XHTML</title>
-    <para>
-      TODO use Cow.Html to generate a more complete Atom feed.
-    </para>
+    <sect2 id="working-with-xhtmlx">
+      <title>Working with XHTMLx</title>
+      <para>
+        TODO use Cow.Html to generate a more complete Atom feed.
+      </para>
+    </sect2>
   </sect1>
 </chapter><chapter id="concurrent-programming-with-async">
   <title>Concurrent Programming with Async</title>
