@@ -12,4 +12,3 @@ let () =
   in
   List.iter (List.take sorted_counts 10)
     ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
-

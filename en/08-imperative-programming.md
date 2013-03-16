@@ -1439,14 +1439,16 @@ API documentation for those modules.
 
 The order in which expressions are evaluated is an important part of
 the definition of a programming language, and it is particularly
-important in the context of imperative programming.  Most programming
-languages you're likely to have encountered are _strict_, and OCaml is
-too.  In a strict langauge, when you have a function that takes some
-set of arguments, the arguments are evaluated first, and then passed
-to the function.  In other words, imagine if I had a collection of
-angles and I wanted to figure out if any of them had a `sin` that was
-less than zero.  I could write the following computation to figure
-this out.
+important when programming imperatively.  Most programming languages
+you're likely to have encountered are _strict_, and OCaml is too.  In
+a strict langauge, when you bind an identifier to the result of some
+expression, the expression is evaluated before the variable is
+defined.  Similarly, if you call a function on a set of arguments,
+those arguments are evaluated before they are pased to the function.
+
+Consider the following simple example.  Here, we have a collection of
+angles and we want to determine if any of them have a negative `sin.
+The following snippet of code would answer that question.
 
 ```ocaml
 # let x = sin 120. in
@@ -1458,11 +1460,12 @@ this out.
 ```
 
 In some sense, we don't really need to compute the `sin 128`, because
-`sin 75.` is negative, so we should be able to stop there.  But in a
-strict language like OCaml, an expression is evaluated immediately
-when it's bound to a variable.  It doesn't have to be this way, even
-in OCaml.  If we use OCaml's `lazy` keyword, we can change this
-computation so that `sin 128.` doesn't need to be computed.
+`sin 75.` is negative, so we could know the answer before even
+computing `sin 128`.
+
+It doesn't have to be this way.  Using the `lazy` keyword, we can
+write the original computation so that `sin 128.` won't ever be
+computed.
 
 ```ocaml
 # let x = lazy (sin 120.) in
@@ -1473,12 +1476,12 @@ computation so that `sin 128.` doesn't need to be computed.
 - : bool = true
 ```
 
-We can verify that this is happening by a few well placed `printf`s.
+We can confirm that fact by a few well placed `printf`s.
 
 ```ocaml
 # let x = lazy (printf "1\n"; sin 120.) in
   let y = lazy (printf "2\n"; sin 75.)  in
-  let z = lazy (printf "3\n";sin 128.) in
+  let z = lazy (printf "3\n"; sin 128.) in
   List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
   ;;
 1
@@ -1489,17 +1492,17 @@ We can verify that this is happening by a few well placed `printf`s.
 OCaml is strict by default for a good reason: Lazy evaluation and
 imperative programming generally don't mix well, because laziness
 makes it harder to reason about when a given side effect is going to
-occur, which matters quite a bit to the meaning of an imperative
-operation.
+occur.  Understanding the order of side-effects is essential to
+reasoning about the behavior of an imperative program.
 
-So, in a strict program, we know that expressions that are bound to
-variables are guaranteed evaluated in the order that they're bound,
-what about the evaluation order within a single expression?
-Officially, the answer is that evaluation order within an expression
-is undefined.  In practice, OCaml has only one compiler, and
-compiler's behavior is unlikely to change and forms a kind of defacto
-standard.  Unfortunately, the evaluation order it has is often the
-oppose of what one might expect.
+In a strict language, we know that expressions that are bound by a
+sequence of let-bindings will be evaluated in the order that they're
+defined.  But what about the evaluation order within a single
+expression?  Officially, the answer is that evaluation order within an
+expression is undefined.  In practice, OCaml has only one compiler,
+and that behavior is a kind of defacto standard.  Unfortunately, the
+evaluation order in this case is often the oppose of what one might
+expect.
 
 Consider the following example.
 
@@ -1517,6 +1520,84 @@ Consider the following example.
 
 Here, you can see that the sub-expression that came last was actually
 evaluated first!  This is generally the case for many different kinds
-of expressions, so if you want to make sure of the evaluation order of
-different sub-expressions, you should bind them separately to values
-as part of a series of `let/in` statements.
+of expressions.  If you want to make sure of the evaluation order of
+different sub-expressions, you should express them as a series of
+`let` bindings.
+
+## Ungeneralizeable type variables
+
+Consider the following simple function.
+
+```ocaml
+# let remember =
+    let cache = ref None in
+    (fun x ->
+       match !cache with
+       | Some y -> y
+       | None -> cache := Some x; x)
+  ;;
+```
+
+`Remember` simply caches the first value that's passed to it,
+returning that value on every call.  It's not a terribly useful
+function, but it raises an interesting question: what type should it
+have?
+
+The first time `remember` is called it returns whatever value was
+passed to it, which would lead one to think that it returns a value of
+the same type as it is passed.  As such, you would expect it to have
+type `t -> t`, for some type `t`.  There's nothing that ties the
+choice of `t` to any particular type, so you might expect OCaml to
+generalize, replacing `t` with a type variable, as happens with the
+identity function.
+
+```ocaml
+# let identity x = x;;
+val identity : 'a -> 'a = <fun>
+```
+
+But `remember` is different from `identity` in that the return type
+(and indeed, the return value) is always the same.  We can't tell what
+type `t` is, but we know it can be only one concrete type.  In other
+words, we need a type variable for `t`, but that type variable can't
+be generalized.  OCaml marks type variables as ungeneralizeable by
+marking them with an underscore, as shown below in the type for
+`remember`.
+
+```ocaml
+val remember : '_a -> '_a = <fun>
+```
+
+OCaml will convert a non-generalizable type-variable to a concrete
+type as soon as it gets a clue as to what concrete type it is to be
+used as.
+
+```ocaml
+# let remember_three () = remember 3;;
+val remember_three : unit -> int = <fun>
+# remember;;
+- : int -> int = <fun>
+# remember "avocado";;
+Characters 9-18:
+  remember "avocado";;
+           ^^^^^^^^^
+Error: This expression has type string but an expression was expected of type
+         int
+```
+
+Note that we caused the type of `remember` to be settled even though
+we never actually called the function.  It's enough to define a
+function that could be used to call `remember` with a concrete type to
+get the compiler to choose a type.
+
+This is in contrast to something like the identity function, where it
+can be used on multiple types without incident.
+
+```ocaml
+# identity 3;;
+- : int = 3
+# identity;;
+- : 'a -> 'a = <fun>
+# identity "five";;
+- : string = "five"
+```

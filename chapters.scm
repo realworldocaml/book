@@ -59,14 +59,14 @@
  (file "08a-objects")
  (note "Largely complete")
  )
+
+;; PART 2: PRACTICAL EXAMPLES
+
 ((part Practical)
  (name "data-serialization-with-s-expressions")
  (file "12c-sexprs")
  (note "Largely complete")
  )
-
-;; PART 2: PRACTICAL EXAMPLES
-
 ((part Practical)
  (name "handling-json-data")
  (file "12a-json")
