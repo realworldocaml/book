@@ -66,7 +66,8 @@ the following groups.
 
 We'll also represent this more complicated color-space as a variant,
 but this time, the different tags will have arguments which describe
-the data available in each case.
+the data available in each case.  Note that variants can have multiple
+arguments, which are separated by `*`'s.
 
 ```ocaml
 # type weight = Regular | Bold
@@ -206,7 +207,7 @@ behavior of the code, but we have improved our robustness to change.
 ## Combining records and variants
 
 Records and variants are most effective when used in concert.
-Consider again the type `Log_entry.t` [xref](#records):
+Consider again the type `Log_entry.t` from [xref](#records):
 
 ```ocaml
 module Log_entry = struct
@@ -289,12 +290,14 @@ snippet of code:
 
 This code effectively computes the session id for each underlying
 message type.  The repetition in this case isn't that bad, but would
-become problematic in larger and more complicated examples.
+become problematic in larger and more complicated examples.  Also, we
+had to include code for the `Logon` case, even though it can't
+actually come up.
 
 We can improve the code by refactoring our types to explicitly
-separate which parts are shared and which are common.  The first step
-is to cut down the definitions of the per-message records to just
-contain the unique components of each message.
+separate the parts that are shared from those that are common.  The
+first step is to cut down the definitions of the per-message records
+to just contain the unique components of each message.
 
 ```ocaml
 module Log_entry = struct
@@ -335,7 +338,7 @@ module Common = struct
 end
 ```
 
-A full message can then represented as a pair of a `Common.t` and a
+A full message can then be represented as a pair of a `Common.t` and a
 `details`.  Using this, we can rewrite our example above as follows:
 
 ```ocaml
@@ -387,7 +390,7 @@ Another common application of variants is to represent tree-like
 recursive data-structures.  We'll show how this can be done by walking
 through the design of a simple Boolean expression language.  Such a
 language can be useful anywhere you need to specify filters, which are
-used in everything from packet analyzers to mail clients.  
+used in everything from packet analyzers to mail clients.
 
 An expression in this language will be defined by the variant `blang`
 (short for "boolean language") with one tag for each kind of
@@ -408,14 +411,14 @@ that a `blang` may contain other `blang`s.
 
 The purpose of each tag is pretty straightforward.  `And`, `Or` and
 `Not` are the basic operators for building up boolean expression, and
-`Const` lets you enter constants `true` and `false`.  
+`Const` lets you enter constants `true` and `false`.
 
 The `Base` tag is what allows you to tie the `blang` to your
 application, by letting you specify an element of some base predicate
-type, whose whose truth or falsehood is determined by your
-application.  If you were writing a filter language for an email
-processor, your base predicates might specify the tests you would run
-against an email, as in the following example.
+type, whose truth or falsehood is determined by your application.  If
+you were writing a filter language for an email processor, your base
+predicates might specify the tests you would run against an email, as
+in the following example.
 
 ```ocaml
 # type mail_field = To | From | CC | Date | Subject
@@ -476,14 +479,23 @@ presence of constants.
 # let rec simplify = function
     | Base _ | Const _ as x -> x
     | And blangs ->
-      let blangs = List.map ~f:simplify blangs in
-      if List.exists blangs ~f:(function Const false -> true | _ -> false)
+      let blangs =
+        List.map ~f:simplify blangs
+        |> List.filter ~f:(fun x -> x <> Const true)
+      in
+      if List.is_empty blangs then Const true
+      else if List.exists blangs ~f:(fun x -> x = Const false)
       then Const false
       else And blangs
     | Or blangs ->
-      let blangs = List.map ~f:simplify blangs in
-      if List.exists blangs ~f:(function Const true -> true | _ -> false)
-      then Const true else Or blangs
+      let blangs =
+        List.map ~f:simplify blangs
+        |> List.filter ~f:(fun x -> x <> Const false)
+      in
+      if List.is_empty blangs then Const false
+      else if List.exists blangs ~f:(fun x -> x = Const true)
+      then Const true
+      else Or blangs
     | Not blang ->
       match simplify blang with
       | Const bool -> Const (not bool)
@@ -514,9 +526,9 @@ it's easy to see that we've missed an important case: double-negation.
       | (And _ | Or _ | Base _ ) -> Not blang
 ```
 
-This example is more than a toy.  There's a module very much in this
-spirit already exists as part of Core, and gets a lot of practical use
-in a variety of applications.  
+This example is more than a toy.  There's a module in Core very much
+in this spirit in Core called `Blang`, and it gets a lot of practical
+use in a variety of applications.
 
 More generally, using variants to build recursive data-structures is a
 common technique, and shows up everywhere from designing little
@@ -908,7 +920,9 @@ a price.  Here are some of the downsides.
   variants.  This means that heavy use of polymorphic variants can
   leave you scratching your head trying to figure out why a given
   piece of code did or didn't compile.  It can also lead to absurdly
-  long and hard to decode error messages.
+  long and hard to decode error messages.  Indeed, concision at the
+  value level is often balanced out by more verbosity at the type
+  level.
 - _Error-finding:_ Polymorphic variants are type-safe, but the typing
   discipline that they impose is, by dint of its flexibility, less
   likely to catch bugs in your program.

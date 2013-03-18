@@ -27,31 +27,38 @@ with association lists, _i.e._, lists of key/value pairs.
 
 open Core.Std
 
-(* build_counts recursively builds up a mapping from lines to
-   number of occurrences of that line. *)
-let rec build_counts counts =
-  match In_channel.input_line stdin with
-  | None -> counts (* EOF, so return the counts accumulated so far *)
-  | Some line ->
-    (* get the number of times this line has been seen before,
-       inferring 0 if the line doesn't show up in [counts] *)
+let build_counts () =
+  In_channel.fold_lines stdin ~init:[] ~f:(fun counts line ->
     let count =
       match List.Assoc.find counts line with
       | None -> 0
       | Some x -> x
     in
-    (* increment the count for line by 1, and recurse *)
-    build_counts (List.Assoc.add counts line (count + 1))
+    List.Assoc.add counts line (count + 1)
+  )
 
 let () =
-  (* Compute the line counts *)
-  let counts = build_counts [] in
-  (* Sort the line counts in descending order of frequency *)
-  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -> compare y x) counts  in
-  (* Print out the 10 highest frequency entries *)
-  List.iter (List.take sorted_counts 10) ~f:(fun (line,count) ->
-    printf "%3d: %s\n" count line)
+  build_counts ()
+  |> List.sort ~cmp:(fun (_,x) (_,y) -> compare y x)
+  |> (fun l -> List.take l 10)
+  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
 ```
+
+The function `build_counts` reads in lines from `stdin`, constructing
+from those lines an associating list with the frequencies of each
+line.  It does this by invoking `In_channel.fold_lines` (similar to
+the function `List.fold` described in
+[xref](#lists-options-and-patterns)), which reads through the lines
+one by one, calling the provided fold function for each line to update
+the accumulator.  That accumulator is initialized to the empty list.
+
+With `build_counts` defined, we then call the function to build the
+associating list, sort that list be frequency in descending order,
+grab the first 10 elements off the list, and the iterate over those
+ten elements and print them to the screen.  These operations are tied
+together using the operator, as described in
+[xref](#variables-and-functions).
+
 
 <note><title>Where is the main function?</title>
 
@@ -210,21 +217,16 @@ compiled.
 
 ```ocaml
 (* freq.ml: using Counter *)
-
 open Core.Std
 
-let rec build_counts counts =
-  match In_channel.input_line stdin with
-  | None -> counts
-  | Some line -> build_counts (Counter.touch counts line)
+let build_counts () =
+  In_channel.fold_lines stdin ~init:[] ~f:Counter.touch
 
 let () =
-  let counts = build_counts [] in
-  let sorted_counts = List.sort counts
-    ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
-  in
-  List.iter (List.take sorted_counts 10)
-    ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+  build_counts ()
+  |> List.sort counts ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
+  |> (fun l -> List.take l 10)
+  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
 ```
 
 
@@ -232,10 +234,11 @@ let () =
 
 While we've pushed some of the logic to the `Counter` module, the code
 in `freq.ml` can still depend on the details of the implementation of
-`Counter`.  Indeed, if you look at the invocation of `build_counts`:
+`Counter`.  Indeed, if you look at the definition of build_counts:
 
 ```ocaml
-  let counts = build_counts [] in
+let build_counts () =
+  In_channel.fold_lines stdin ~init:[] ~f:Counter.touch
 ```
 
 you'll see that it depends on the fact that the empty set of frequency
@@ -243,7 +246,6 @@ counts is represented as an empty list.  We'd like to prevent this
 kind of dependency, so that we can change the implementation of
 `Counter` without needing to change client code like that in
 `freq.ml`.
-
 
 The first step towards hiding the implementation details of `Counter`
 is to create an interface file, `counter.mli`, which controls how
@@ -492,10 +494,12 @@ module <name> : <signature> = <implementation>
 
 We could have written this slightly differently, by giving the
 signature its own toplevel `module type` declaration, making it
-possible to in a lightweight way create multiple distinct types with
-the same underlying implementation.
+possible to create multiple distinct types with the same underlying
+implementation in a lightweight way.
 
 ```ocaml
+open Core.Std
+
 module type ID = sig
   type t
   val of_string : string -> t
@@ -511,14 +515,23 @@ end
 module Username : ID = String_id
 module Hostname : ID = String_id
 
-(* Now the following buggy code won't compile *)
 type session_info = { user: Username.t;
                       host: Hostname.t;
                       when_started: Time.t;
                     }
 
 let sessions_have_same_user s1 s2 =
-  s1.user = s2.user
+  s1.user = s2.host
+```
+
+The above code is buggy, and indeed, the compiler will refuse to
+compile it, spitting out the following error.
+
+```
+File "buggy.ml", line 25, characters 12-19:
+Error: This expression has type Hostname.t
+       but an expression was expected of type Username.t
+Command exited with code 2.
 ```
 
 We can also combine this with the use of the include directive to add
