@@ -1524,7 +1524,7 @@ of expressions.  If you want to make sure of the evaluation order of
 different sub-expressions, you should express them as a series of
 `let` bindings.
 
-## Ungeneralizeable type variables
+## Side-effects and weak polymorphism
 
 Consider the following simple function.
 
@@ -1538,39 +1538,42 @@ Consider the following simple function.
   ;;
 ```
 
-`Remember` simply caches the first value that's passed to it,
+`remember` simply caches the first value that's passed to it,
 returning that value on every call.  It's not a terribly useful
 function, but it raises an interesting question: what type should it
 have?
 
-The first time `remember` is called it returns whatever value was
-passed to it, which would lead one to think that it returns a value of
-the same type as it is passed.  As such, you would expect it to have
-type `t -> t`, for some type `t`.  There's nothing that ties the
-choice of `t` to any particular type, so you might expect OCaml to
-generalize, replacing `t` with a type variable, as happens with the
-identity function.
+It seems clear that `remember` should return a value of the same type
+as it is passed.  In other words, you would expect it to have type `t
+-> t`, for some type `t`.  There's nothing that ties the choice of `t`
+to any particular type, so you might expect OCaml to generalize,
+replacing `t` with a polymorphic type variable, as happens with the
+definition of the identity function, below.
 
 ```ocaml
 # let identity x = x;;
 val identity : 'a -> 'a = <fun>
 ```
 
-But `remember` is different from `identity` in that the return type
-(and indeed, the return value) is always the same.  We can't tell what
-type `t` is, but we know it can be only one concrete type.  In other
-words, we need a type variable for `t`, but that type variable can't
-be generalized.  OCaml marks type variables as ungeneralizeable by
-marking them with an underscore, as shown below in the type for
-`remember`.
+But in reality, OCaml infers a different type for `remember`:
 
 ```ocaml
 val remember : '_a -> '_a = <fun>
 ```
 
-OCaml will convert a non-generalizable type-variable to a concrete
-type as soon as it gets a clue as to what concrete type it is to be
-used as.
+The type variable `'_a` is a _weakly polymorphic_ type variable, which
+means that the type in question is merely unknown, as opposed to
+actually polymorphic.  In other words, it's not yet determined what is
+the type of values passed to `remember`, but `remember` can only
+handle a single type.
+
+The reason for this is straightforward.  Unlike `identity`, `remember`
+always returns the same value it was passed on its first invocation,
+which means it can return only one type of value.
+
+OCaml will convert a weakly polymorphic variable to a concrete type as
+soon as it gets a clue as to what concrete type it is to be used as,
+as you can see below.
 
 ```ocaml
 # let remember_three () = remember 3;;
@@ -1585,13 +1588,13 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-Note that we caused the type of `remember` to be settled even though
-we never actually called the function.  It's enough to define a
-function that could be used to call `remember` with a concrete type to
-get the compiler to choose a type.
+Note that the type of `remember` was settled even though we never
+actually called the function.  It's enough to define a function that
+could be used to call `remember` with a concrete type to get the
+compiler to choose a type.
 
-This is in contrast to something like the identity function, where it
-can be used on multiple types without incident.
+This is in contrast to the identity function, where it can be used on
+multiple types without incident.
 
 ```ocaml
 # identity 3;;
@@ -1601,3 +1604,4 @@ can be used on multiple types without incident.
 # identity "five";;
 - : string = "five"
 ```
+
