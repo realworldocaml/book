@@ -168,7 +168,8 @@ let command =
 let () = Command.run command
 ```
 
-There are several other transformations you can do on anonymous arguments. We've shown you `maybe`, and you can also obtain lists of arguments or supply default values.
+There are several other transformations you can do on anonymous arguments. We've shown you `maybe`, and you can also obtain lists of arguments or supply default values.  Try altering the example above to take a list of files and output checksums for all of them,
+just as the `md5` command does.
 
 Anonymous argument   OCaml type
 ------------------   ----------
@@ -176,4 +177,101 @@ sequence             `list` of arguments
 maybe                `option` argument
 maybe_with_default   argument with a default value if argument is missing
 
-### Flags
+## Using Flags
+
+You aren't just limited to anonymous arguments on the command-line, of course.  Flags (such as `-v`) can be specified in the same manner as anonymous arguments.  These can appear in any order on the command-line, or multiple times, depending on how they're declared.
+Let's add two arguments to our `md5` command that mimic the Linux version: a `-s` flag to specify the string to be hashed directly, and a `-t` self-benchmark test.
+
+```ocaml
+Command.Spec.(
+  empty
+  +> flag "-s" (optional string) ~doc:"string Checksum the given string"
+  +> flag "-t" no_arg ~doc:" run a built-in time trial"
+  +> anon (maybe ("filename" %: string))
+)
+```
+The `flag` command is quite similar to `anon`.  The first argument is the
+flag name, and aliases can be specified via an optional argument.  The `doc`
+string should be formatted so that the first word is the short name that
+should appear in the usage text, with the remainder being the full help text.
+Notice that the `-t` flag has no argument, and so we prepend the doc text
+with a blank space.
+The help text for the above fragment looks like this:
+
+```
+$ mlmd5 -s 
+Generate an MD5 hash of the input data
+
+  mlmd5 [filename]
+
+=== flags ===
+
+  [-s string]    Checksum the given string
+  [-t run]       a built-in time trial
+  [-build-info]  print info about this build and exit
+  [-version]     print the version of this build and exit
+  [-help]        print this help text and exit
+                 (alias: -?)
+
+missing argument for flag -s
+
+$ mlmd5 -s "ocaml rocks"
+5a118fe92ac3b6c7854c595ecf6419cb
+```
+
+The `-s` flag requires a `string` argument in our specification,
+and the parser outputs an error message if it isn't supplied.
+Here's a list of some of the functions that you can wrap flags in
+to control how they are parsed:
+
+Flag function            OCaml type
+-------------            ----------
+`required` _arg_         _arg_ and error if not present
+`optional` _arg_         _arg_ `option`
+`optional_with_default`  _arg_ with a default if not present
+`listed` _arg_           _arg_ `list` may appear multiple times
+`no_arg`                 `bool` that is true if flag is present.
+
+The flags affect the type of the callback function in exactly the
+same way as anonymous arguments do.  The full example of our `md5`
+function with flags is below.
+
+```ocaml
+open Core.Std
+
+let get_file_data file checksum =
+  match file, checksum with
+  | None, Some buf -> buf
+  | _, Some buf -> eprintf "Warning: ignoring file\n"; buf
+  | (None|Some "-"), None -> In_channel.(input_all stdin)
+  | Some file, None -> In_channel.read_all file
+
+let do_hash file checksum =
+  let open Cryptokit in
+  get_file_data file checksum
+  |> hash_string (Hash.md5 ())
+  |> transform_string (Hexa.encode ())
+  |> print_endline
+
+let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    Command.Spec.(
+      empty
+      +> flag "-s" (optional string) ~doc:"string Checksum the given string"
+      +> flag "-t" no_arg ~doc:"run a built-in time trial"
+      +> anon (maybe ("filename" %: string))
+    )
+  (fun checksum trial file () ->
+    match trial with
+    | true -> printf "Running time trial\n"
+    | false -> do_hash file checksum)
+
+let () = Command.run command
+```
+
+Notice how the `get_file_data` function now pattern matches
+across the `checksum` flag and the `file` anonymous argument.
+It selects the flag in preference to the file argument, but
+emits a warning if there's ambiguity.
+
