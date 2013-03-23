@@ -116,69 +116,121 @@ to understand this better.
 variables (the `'a`) which represent the type of the thread, and are inferred
 based on how they are used in your code. The `'a` type of the argument passed
 to the `bind` callback _must_ be the same as the `'a Deferred.t` of the input
-thread, preventing runtime mismatches between thread callbacks.  Both `bind` and
-`return` form a design pattern in functional programming known as *monads*, and
+thread, preventing runtime mismatches between thread callbacks.
+
+Both `bind` and `return` form a design pattern in functional programming known as *monads*, and
 you will run across this signature in many applications beyond just threads.
-
-_(avsm: do we talk about Monads earlier in the Core chapter? I presume we do,
-since the Option monad is very useful)
-
-Binding callbacks is to deferred values is the most common way to compose
-blocking operations, and inline operators are provided to make it easier to use.
-In the fragment below, we see `>>=` and `>>|` used in similar ways to convert
-an integer into a string:
+_TODO avsm: figure out where to talk about all the monads in Core in more detail_.
+The `>>=` inline operator is provided as a more succinct alias to `bind`, as shown below.
 
 ```ocaml
 # let x = return 5 ;;
 val x : int Deferred.t = <abstr>
 # x >>= fun y -> return (string_of_int y) ;;
 val - : string Deferred.t = <abstr>
+```
+
+The `>>=` operator is exactly the same as `bind` and unpacks the integer future
+into the `y` variable. The subsequent closure is called with the resulting integer and
+builds a new string future.
+
+It can be a little verbose to keep calling `bind` and `return` to wrap simple
+functions such as `string_of_int`. The `>>|` operator maps a non-Async function 
+directly across a `Deferred.t` value.  In the example below, the deferred `x` is
+mapped to `string_of_int` directly, and the result is a `string Deferred.t`.
+
+```ocaml
 # x >>| string_of_int ;;
 val - : string Deferred.t = <abstr>
 ```
 
-The `>>=` operator is exactly the same as `bind` and unpacks the integer future
-into the `y` variable. The subsequent closure receives the unpacked integer and
-builds a new string future.  It can be a little verbose to keep calling `bind`
-and `return`, and so the `>>|` operator maps a non-Async function across a
-future value.  In the second example, the future value of `x` is mapped to
-`string_of_int` directly, and the result is a `string` future.
+Multiple threads can be chained together with successive calls to `bind` to sequentially compose
+blocking operations.
 
-Async threads can be evaluated from the toplevel by wrapping them in
-`Thread_safe.block_on_async_exn`, which spawns a system thread that waits until
-a result is available.  The `utop` toplevel automatically detects `Deferred.t`
-types that are entered interactively and wraps them in this function for you
-automatically.
+```ocaml
+# return 5
+  >>= fun v -> return (string_of_int v)
+  >>= fun v -> return (v = "5")
+- : bool Deferred.t = <abstr>
+```
+
+The example above constructs an `int` thread, converts it to a `string` thread, and then to
+a `bool` thread via a string comparison.  Of course, there's no interesting threading
+going on in this example beyond building a constant value, but let's look at how to run
+it next.
+
+## Executing async applications
+
+All async threads run within a _scheduler_ that is responsible for associating
+blocked threads with system resources (such as file descriptors) and waking them
+up when external I/O or timer events fire. 
+
+### Running threads within the toplevel
+
+If you're experimenting with async programming, the `utop` toplevel is a convenient
+place to write code interactively. Async threads can be evaluated into a concrete
+value by wrapping them in `Thread_safe.block_on_async_exn`, which spawns a system thread that waits until
+a result is available.
+
+```ocaml
+# Thread_safe.block_on_async_exn ;;
+- : (unit -> 'a Deferred.t) -> 'a = <fun>
+```
+ 
+A neat feature in `utop` is that it detects functions with a
+`Deferred.t` in the return type, and automatically translates it into
+a call to `block_on_async_exn` for you.
 
 ```ocaml
 # let fn () = return 5 >>| string_of_int ;;
 val fn : unit -> string Deferred.t = <abstr>
+
 # Thread_safe.block_on_async_exn fn ;;
 - : string = "5"
+
 # fn () ;;
 - : string = "5"
 ```
 
-In the second evaluation of `fn`, the toplevel detected the return type of
-a future and evaluated the result into a concrete string.
+We've defined an `fn` thread in the first phrase, and then run it manually
+using `block_on_async_exn`.  The final phrase executes `fn` directly, and
+you can see the `utop` translation kicking in and returning the concrete
+value.
 
-<note>
-<title>Terminating Async applications</title>
+### Running threads within an application
 
-When you run the search example, you'll notice that the application doesn't terminate even when all of the searches are complete. The Async scheduler doesn't terminate by default, and so most applications will listen for a signal to exit or simply use `CTRL-C` to interrupt it from a console.
+An application can also use the same `block_on_async_exn` as the toplevel, but there are two alternatives.
+Once a few threads have been started, the `Scheduler.go` function runs them for you.
 
-Another alternative is to run an Async function in a separate system
-thread. You can do this by wrapping the function in the `Async.Thread_safe.block_on_async_exn`.  The `utop` toplevel does this automatically for you if you attempt to evaluate an Async function interactively.
+```ocaml
+# Scheduler.go ;;
+- : ?raise_unhandled_exn:bool -> unit -> never_returns = <fun> 
+```
 
-</note>
+Notice that this function never returns, even if all of the spawned threads are completed.
+The Async scheduler doesn't terminate by default, and so most applications will listen for a signal to exit or simply use `CTRL-C` to interrupt it from a console.
 
+Another common way to execute async threads is via the `Command` module we introduced in [xref](#command-line-parsing).
+When you open `Async.Std`, the `Command` module now has an `async_basic` available.
+
+```ocaml
+# Command.async_basic ;;
+- : summary:string -> 
+    ?readme:(unit -> string) -> 
+    ('a, unit -> unit Deferred.t) Command.Spec.t -> 
+    'a -> Command.t = <fun>
+```
+
+This is used in exactly the same way as the usual `Command` module, except that the callbacks must return a `Deferred.t`.  This lets you run blocking threads directly from a command-line interface.
 
 ## Timing and Thread Composition
 
-Our examples so far have been with static threads, and now we'll look at how to
-coordinate multiple threads and timeouts.  Let's write a program that spawns
-two threads, each of which sleep for some random time and return either
-"Heads" or "Tails", and the quickest thread returns its value.
+Our examples so far have been with static threads, which isn't
+very much use for real programs.  We'll now add timing to the mix
+by showing you how to  coordinate multiple threads and timeouts.
+Let's write a program that spawns two threads, each of which sleep
+for some random time and return either "Heads" or "Tails". 
+The first thread that wakes up returns its value.
 
 ```ocaml
 # let flip () =
@@ -199,7 +251,7 @@ two threads, each of which sleep for some random time and return either
 val flip : unit -> (string * Time.Span.t * Time.Span.t) Deferred.t = <fun>
 ```
 
-This introduces a couple of new time-related Async functions. The `Time` module
+This example introduces a couple of new time-related Async functions. The `Time` module
 contains functions to express both absolute and relative temporal
 relationships.  In our coin flipping example, we create a relative time span of
 3 seconds, and then permute it randomly twice by 75%.  We then create two
