@@ -25,6 +25,7 @@ library functions.
 # return 5 ;;
 - : int Deferred.t = <abstr>
 ```
+
 <note>
 <title>When to open `Async.Std`</title>
 
