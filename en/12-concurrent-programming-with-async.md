@@ -5,14 +5,13 @@ you'll soon need to handle concurrent operations. Consider the case of a web
 server sending a large file to many clients, or a GUI waiting for a mouse
 clicks. These applications often need to block while waiting for input for a particular task, and process something else during that time. Meanwhile, when new data does appear, the blocked task needs to be resumed as quickly as possible.
 
-Efficiency really matters here, as busy servers can often handle tens of thousands of simultaneous connections.  An equally important concern is readable source code, where the control flow of the program is obvious at a glance.
+Busy servers can often handle tens of thousands of simultaneous connections, so runtime efficiency really matters.  An equally important concern is readable source code, so that the control flow of the program is obvious at a glance.
 
-You've probably used preemptive system threads before in some programming languages such as Java or C#.  In this model, each task is usually given an operating system thread of its own.
-Other languages such as Javascript are single-threaded, and applications must register function callbacks to be triggered upon external events (such as a timeout or browser click).
+A common approach to concurrency is to use _preemptive_ system threads, most commonly in Java or C#.  In this threading model, each task is given an operating system thread of its own, and the kernel schedules them with arbitrary interleavings.
+Other language runtimes such as Javascript are single-threaded, and applications register function callbacks to be triggered upon external events such as a timeout or browser click.
 
-Both of these mechanisms have tradeoffs. Preemptive threads require their own memory stacks and can be memory hungry. The operating system can also arbitrarily interleave the execution of threads, and so they require careful locking around shared data structures.
-
-Event-driven systems usually only execute a single task at a time and require less locking.  However, the program structure can often descend into a maze of event callbacks for even a simple operation that blocks a few times.  Code readability matters, and so we'd like to avoid such spaghetti control flow.
+Both of these mechanisms have tradeoffs. Preemptive threads require more resources per thread and can be memory hungry. The operating system can also arbitrarily interleave the execution of preemptive threads, putting a load on the programmer to lock shared data structures.
+Single-threaded event-driven systems execute a single task at a time and require less locking.  However, the program structure can often descend into a maze of event callbacks for even a simple operation that blocks a few times.  Code readability matters, and so we'd like to avoid such spaghetti control flow.
 
 The `Async` OCaml library offers a hybrid model that lets you write
 event-driven code that can block *without* the complexity of preemptive threading.
