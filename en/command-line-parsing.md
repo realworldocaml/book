@@ -51,8 +51,8 @@ let command =
 let () = Command.run command
 ```
 
-The `do_hash` function accepts a filename parameter and prints the human-readalbe MD5
-string to the console sandard output.  We want to control the inputs to this function
+The `do_hash` function accepts a filename parameter and prints the human-readable MD5
+string to the console standard output.  We want to control the inputs to this function
 via the command-line, and this is what the subsequent `command` value declares.
 If you compile this program and run it, the help screen looks like this:
 
@@ -85,25 +85,25 @@ $ ./basic.byte basic.byte
 
 So how does all this work?  There are three parts to defining a command-line interface:
 
-* `Command.basic` takes a function which is passed parameters parsed from the command-line according to a `spec` parameter.  It takes a
-`summary` parameter for a one-line description of the command behavior, and  `readme`  for longer help text.
-* `Command.spec` defines the steps required to convert a command-line into an OCaml structure.
+* `Command.Spec.t` defines the steps required to convert a command-line into an OCaml structure.
+* `Command.basic` takes a callback that is passed parameters parsed from the command-line according to the `spec` parameter.  It takes a
+`summary` string for a one-line description of the command behavior, and an optional `readme` for longer help text.
 * `Command.run` actually executes a command and its specification, and runs the callback function with the resulting parameters.
 
 Most of the interesting logic lies in how the specifications are defined.  
 The `Command.Spec` module defines several combinators that can be chained together to define flags and anonymous arguments, what types they should map to, and whether to take special actions (such as interactive input) if certain fields are encountered.
 
 ```ocaml
-  Command.Spec.(
-    empty
-    +> anon ("filename" %: string)
-  )
+Command.Spec.(
+  empty
+  +> anon ("filename" %: string)
+)
 ```
 
-Here, we begin the specification with an `empty` value, and then chain more parameters via the `+>` combinator.
-Our simple `example define a single _anonymous_ parameter via the `anon` function (that is, a standalone token from the command-line).
-Anonymous functions can be assigned a name that is used in help text and an OCaml type that they are mapped to.
-The parameters specified are all passed to a callback function which actually invokes the program logic.
+We begin the specification above with an `empty` value, and then chain more parameters via the `+>` combinator.
+Our example defines a single _anonymous_ parameter via the `anon` function (that is, a standalone token from the command-line).
+Anonymous functions can be assigned a name that is used in help text, and an OCaml type that they are mapped to.
+The parameters specified here are all eventually passed to a callback function which actually invokes the program logic.
 
 ```ocaml
 (fun file () -> do_hash file)
