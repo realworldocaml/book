@@ -36,6 +36,7 @@
 
 
 
+
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -5061,31 +5062,42 @@ let rec insert x = function
 
 open Core.Std
 
-(* build_counts recursively builds up a mapping from lines to
-   number of occurrences of that line. *)
-let rec build_counts counts =
-  match In_channel.input_line stdin with
-  | None -&gt; counts (* EOF, so return the counts accumulated so far *)
-  | Some line -&gt;
-    (* get the number of times this line has been seen before,
-       inferring 0 if the line doesn't show up in [counts] *)
+let build_counts () =
+  In_channel.fold_lines stdin ~init:[] ~f:(fun counts line -&gt;
     let count =
       match List.Assoc.find counts line with
       | None -&gt; 0
       | Some x -&gt; x
     in
-    (* increment the count for line by 1, and recurse *)
-    build_counts (List.Assoc.add counts line (count + 1))
+    List.Assoc.add counts line (count + 1)
+  )
 
 let () =
-  (* Compute the line counts *)
-  let counts = build_counts [] in
-  (* Sort the line counts in descending order of frequency *)
-  let sorted_counts = List.sort ~cmp:(fun (_,x) (_,y) -&gt; compare y x) counts  in
-  (* Print out the 10 highest frequency entries *)
-  List.iter (List.take sorted_counts 10) ~f:(fun (line,count) -&gt;
-    printf &quot;%3d: %s\n&quot; count line)
+  build_counts ()
+  |&gt; List.sort ~cmp:(fun (_,x) (_,y) -&gt; compare y x)
+  |&gt; (fun l -&gt; List.take l 10)
+  |&gt; List.iter ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
 </programlisting>
+    <para>
+      The function <literal>build_counts</literal> reads in lines from
+      <literal>stdin</literal>, constructing from those lines an
+      associating list with the frequencies of each line. It does this
+      by invoking <literal>In_channel.fold_lines</literal> (similar to
+      the function <literal>List.fold</literal> described in
+      <xref linkend="lists-options-and-patterns"/>), which
+      reads through the lines one by one, calling the provided fold
+      function for each line to update the accumulator. That accumulator
+      is initialized to the empty list.
+    </para>
+    <para>
+      With <literal>build_counts</literal> defined, we then call the
+      function to build the associating list, sort that list be
+      frequency in descending order, grab the first 10 elements off the
+      list, and the iterate over those ten elements and print them to
+      the screen. These operations are tied together using the operator,
+      as described in
+      <xref linkend="variables-and-functions"/>.
+    </para>
     <note><title>
     Where is the main function?
     </title>
@@ -5276,21 +5288,16 @@ let touch t s =
     </para>
     <programlisting language="ocaml">
 (* freq.ml: using Counter *)
-
 open Core.Std
 
-let rec build_counts counts =
-  match In_channel.input_line stdin with
-  | None -&gt; counts
-  | Some line -&gt; build_counts (Counter.touch counts line)
+let build_counts () =
+  In_channel.fold_lines stdin ~init:[] ~f:Counter.touch
 
 let () =
-  let counts = build_counts [] in
-  let sorted_counts = List.sort counts
-    ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
-  in
-  List.iter (List.take sorted_counts 10)
-    ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
+  build_counts ()
+  |&gt; List.sort counts ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; (fun l -&gt; List.take l 10)
+  |&gt; List.iter ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
 </programlisting>
     <sect2 id="signatures-and-abstract-types">
       <title>Signatures and Abstract Types</title>
@@ -5299,10 +5306,11 @@ let () =
         <literal>Counter</literal> module, the code in
         <literal>freq.ml</literal> can still depend on the details of
         the implementation of <literal>Counter</literal>. Indeed, if you
-        look at the invocation of <literal>build_counts</literal>:
+        look at the definition of build_counts:
       </para>
       <programlisting language="ocaml">
-  let counts = build_counts [] in
+let build_counts () =
+  In_channel.fold_lines stdin ~init:[] ~f:Counter.touch
 </programlisting>
       <para>
         you'll see that it depends on the fact that the empty set of
@@ -11103,15 +11111,19 @@ val sum_file : string -&gt; int = &lt;fun&gt;
     <para>
       The order in which expressions are evaluated is an important part
       of the definition of a programming language, and it is
-      particularly important in the context of imperative programming.
-      Most programming languages you're likely to have encountered are
+      particularly important when programming imperatively. Most
+      programming languages you're likely to have encountered are
       <emphasis>strict</emphasis>, and OCaml is too. In a strict
-      langauge, when you have a function that takes some set of
-      arguments, the arguments are evaluated first, and then passed to
-      the function. In other words, imagine if I had a collection of
-      angles and I wanted to figure out if any of them had a
-      <literal>sin</literal> that was less than zero. I could write the
-      following computation to figure this out.
+      langauge, when you bind an identifier to the result of some
+      expression, the expression is evaluated before the variable is
+      defined. Similarly, if you call a function on a set of arguments,
+      those arguments are evaluated before they are pased to the
+      function.
+    </para>
+    <para>
+      Consider the following simple example. Here, we have a collection
+      of angles and we want to determine if any of them have a negative
+      `sin. The following snippet of code would answer that question.
     </para>
     <programlisting language="ocaml">
 # let x = sin 120. in
@@ -11124,12 +11136,13 @@ val sum_file : string -&gt; int = &lt;fun&gt;
     <para>
       In some sense, we don't really need to compute the
       <literal>sin 128</literal>, because <literal>sin 75.</literal> is
-      negative, so we should be able to stop there. But in a strict
-      language like OCaml, an expression is evaluated immediately when
-      it's bound to a variable. It doesn't have to be this way, even in
-      OCaml. If we use OCaml's <literal>lazy</literal> keyword, we can
-      change this computation so that <literal>sin 128.</literal>
-      doesn't need to be computed.
+      negative, so we could know the answer before even computing
+      <literal>sin 128</literal>.
+    </para>
+    <para>
+      It doesn't have to be this way. Using the <literal>lazy</literal>
+      keyword, we can write the original computation so that
+      <literal>sin 128.</literal> won't ever be computed.
     </para>
     <programlisting language="ocaml">
 # let x = lazy (sin 120.) in
@@ -11140,13 +11153,13 @@ val sum_file : string -&gt; int = &lt;fun&gt;
 - : bool = true
 </programlisting>
     <para>
-      We can verify that this is happening by a few well placed
+      We can confirm that fact by a few well placed
       <literal>printf</literal>s.
     </para>
     <programlisting language="ocaml">
 # let x = lazy (printf &quot;1\n&quot;; sin 120.) in
   let y = lazy (printf &quot;2\n&quot;; sin 75.)  in
-  let z = lazy (printf &quot;3\n&quot;;sin 128.) in
+  let z = lazy (printf &quot;3\n&quot;; sin 128.) in
   List.exists ~f:(fun x -&gt; Lazy.force x &lt; 0.) [x;y;z]
   ;;
 1
@@ -11157,18 +11170,18 @@ val sum_file : string -&gt; int = &lt;fun&gt;
       OCaml is strict by default for a good reason: Lazy evaluation and
       imperative programming generally don't mix well, because laziness
       makes it harder to reason about when a given side effect is going
-      to occur, which matters quite a bit to the meaning of an
-      imperative operation.
+      to occur. Understanding the order of side-effects is essential to
+      reasoning about the behavior of an imperative program.
     </para>
     <para>
-      So, in a strict program, we know that expressions that are bound
-      to variables are guaranteed evaluated in the order that they're
-      bound, what about the evaluation order within a single expression?
-      Officially, the answer is that evaluation order within an
-      expression is undefined. In practice, OCaml has only one compiler,
-      and compiler's behavior is unlikely to change and forms a kind of
-      defacto standard. Unfortunately, the evaluation order it has is
-      often the oppose of what one might expect.
+      In a strict language, we know that expressions that are bound by a
+      sequence of let-bindings will be evaluated in the order that
+      they're defined. But what about the evaluation order within a
+      single expression? Officially, the answer is that evaluation order
+      within an expression is undefined. In practice, OCaml has only one
+      compiler, and that behavior is a kind of defacto standard.
+      Unfortunately, the evaluation order in this case is often the
+      oppose of what one might expect.
     </para>
     <para>
       Consider the following example.
@@ -11187,11 +11200,95 @@ val sum_file : string -&gt; int = &lt;fun&gt;
     <para>
       Here, you can see that the sub-expression that came last was
       actually evaluated first! This is generally the case for many
-      different kinds of expressions, so if you want to make sure of the
-      evaluation order of different sub-expressions, you should bind
-      them separately to values as part of a series of
-      <literal>let/in</literal> statements.
+      different kinds of expressions. If you want to make sure of the
+      evaluation order of different sub-expressions, you should express
+      them as a series of <literal>let</literal> bindings.
     </para>
+  </sect1>
+  <sect1 id="ungeneralizeable-type-variables">
+    <title>Ungeneralizeable type variables</title>
+    <para>
+      Consider the following simple function.
+    </para>
+    <programlisting language="ocaml">
+# let remember =
+    let cache = ref None in
+    (fun x -&gt;
+       match !cache with
+       | Some y -&gt; y
+       | None -&gt; cache := Some x; x)
+  ;;
+</programlisting>
+    <para>
+      <literal>Remember</literal> simply caches the first value that's
+      passed to it, returning that value on every call. It's not a
+      terribly useful function, but it raises an interesting question:
+      what type should it have?
+    </para>
+    <para>
+      The first time <literal>remember</literal> is called it returns
+      whatever value was passed to it, which would lead one to think
+      that it returns a value of the same type as it is passed. As such,
+      you would expect it to have type <literal>t -&gt; t</literal>, for
+      some type <literal>t</literal>. There's nothing that ties the
+      choice of <literal>t</literal> to any particular type, so you
+      might expect OCaml to generalize, replacing <literal>t</literal>
+      with a type variable, as happens with the identity function.
+    </para>
+    <programlisting language="ocaml">
+# let identity x = x;;
+val identity : 'a -&gt; 'a = &lt;fun&gt;
+</programlisting>
+    <para>
+      But <literal>remember</literal> is different from
+      <literal>identity</literal> in that the return type (and indeed,
+      the return value) is always the same. We can't tell what type
+      <literal>t</literal> is, but we know it can be only one concrete
+      type. In other words, we need a type variable for
+      <literal>t</literal>, but that type variable can't be generalized.
+      OCaml marks type variables as ungeneralizeable by marking them
+      with an underscore, as shown below in the type for
+      <literal>remember</literal>.
+    </para>
+    <programlisting language="ocaml">
+val remember : '_a -&gt; '_a = &lt;fun&gt;
+</programlisting>
+    <para>
+      OCaml will convert a non-generalizable type-variable to a concrete
+      type as soon as it gets a clue as to what concrete type it is to
+      be used as.
+    </para>
+    <programlisting language="ocaml">
+# let remember_three () = remember 3;;
+val remember_three : unit -&gt; int = &lt;fun&gt;
+# remember;;
+- : int -&gt; int = &lt;fun&gt;
+# remember &quot;avocado&quot;;;
+Characters 9-18:
+  remember &quot;avocado&quot;;;
+           ^^^^^^^^^
+Error: This expression has type string but an expression was expected of type
+         int
+</programlisting>
+    <para>
+      Note that we caused the type of <literal>remember</literal> to be
+      settled even though we never actually called the function. It's
+      enough to define a function that could be used to call
+      <literal>remember</literal> with a concrete type to get the
+      compiler to choose a type.
+    </para>
+    <para>
+      This is in contrast to something like the identity function, where
+      it can be used on multiple types without incident.
+    </para>
+    <programlisting language="ocaml">
+# identity 3;;
+- : int = 3
+# identity;;
+- : 'a -&gt; 'a = &lt;fun&gt;
+# identity &quot;five&quot;;;
+- : string = &quot;five&quot;
+</programlisting>
   </sect1>
 </chapter><chapter id="object-oriented-programming">
   <title>Object Oriented Programming</title>
@@ -13725,6 +13822,1029 @@ val authorization_response_of_string :
         the full ATD specification for Github in the
         <ulink url="http://github.com/avsm/ocaml-github"><literal>ocaml-github</literal></ulink>
         repository.
+      </para>
+    </sect2>
+  </sect1>
+</chapter><chapter id="command-line-parsing">
+  <title>Command Line Parsing</title>
+  <para>
+    Many of the OCaml programs you will write will end up as binaries
+    that will be run directly from a command prompt. Any non-trivial
+    program invoked as a command needs a few features:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        program options and file inputs need to be parsed from the
+        command line arguments.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        sensible error messages have to be generated in response to
+        incorrect inputs.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        show help and manual pages for all the available options.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        support interactive auto-completion of commands to assist the
+        user.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Supporting all of this functionality manually is tedious and
+    error-prone. Core provides the <literal>Command</literal> library
+    that lets you declare your command-line options in one data
+    structure, and the library takes care of parsing, help generation
+    and auto-completion. Command is simple to use for smaller
+    applications, and has a sophisticated sub-command mode that groups
+    related commands together (you may be familiar with this style from
+    <literal>git</literal> or <literal>hg</literal>).
+  </para>
+  <para>
+    This chapter demonstrates how to use <literal>Command</literal> to
+    extend the cryptographic utility from
+    <xref linkend="object-oriented-programming"/> and build a
+    simple equivalent to the <literal>md5</literal> and
+    <literal>shasum</literal> utilities. It also continues the
+    demonstration of how elegant <emphasis>functional
+    combinators</emphasis> can be to declare complex data structures in
+    a type-safe way.
+  </para>
+  <sect1 id="basic-command-line-parsing">
+    <title>Basic command line parsing</title>
+    <para>
+      We'll begin by cloning the <literal>md5</literal> binary that is
+      present on most Linux distributions and MacOS X. It reads in the
+      contents of a file, applies the MD5 one-way hash function to the
+      data, and outputs an ASCII hex representation of the result.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
+let do_hash file =
+  let open Cryptokit in
+  In_channel.read_all file
+  |&gt; hash_string (Hash.md5 ())
+  |&gt; transform_string (Hexa.encode ())
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:&quot;Generate an MD5 hash of the input data&quot;
+    ~readme:(fun () -&gt; &quot;More detailed information&quot;)
+    Command.Spec.(
+      empty
+      +&gt; anon (&quot;filename&quot; %: string)
+    )
+  (fun file () -&gt; do_hash file)
+
+let () = Command.run command
+</programlisting>
+    <para>
+      The <literal>do_hash</literal> function accepts a filename
+      parameter and prints the human-readalbe MD5 string to the console
+      sandard output. We want to control the inputs to this function via
+      the command-line, and this is what the subsequent
+      <literal>command</literal> value declares. If you compile this
+      program and run it, the help screen looks like this:
+    </para>
+    <programlisting>
+$ ./basic.byte 
+Generate an MD5 hash of the input data
+
+  basic.byte filename
+
+More detailed information
+
+=== flags ===
+
+  [-build-info]  print info about this build and exit
+  [-version]     print the version of this build and exit
+  [-help]        print this help text and exit
+                 (alias: -?)
+
+missing anonymous argument: filename
+</programlisting>
+    <para>
+      If we invoke the binary without any arguments, it emits a help
+      screen that informs you that a required argument
+      <literal>filename</literal> is missing. Supplying the argument to
+      the command results in <literal>do_hash</literal> being called,
+      and the MD5 output being displayed to the standard output.
+    </para>
+    <programlisting>
+$ ./basic.byte basic.byte
+59562f5e4f790d16f1b2a095cd5de844
+</programlisting>
+    <para>
+      So how does all this work? There are three parts to defining a
+      command-line interface:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>Command.basic</literal> takes a function which is
+          passed parameters parsed from the command-line according to a
+          <literal>spec</literal> parameter. It takes a
+          <literal>summary</literal> parameter for a one-line
+          description of the command behavior, and
+          <literal>readme</literal> for longer help text.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>Command.spec</literal> defines the steps required to
+          convert a command-line into an OCaml structure.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>Command.run</literal> actually executes a command and
+          its specification, and runs the callback function with the
+          resulting parameters.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Most of the interesting logic lies in how the specifications are
+      defined.<literallayout/>The
+      <literal>Command.Spec</literal> module defines several combinators
+      that can be chained together to define flags and anonymous
+      arguments, what types they should map to, and whether to take
+      special actions (such as interactive input) if certain fields are
+      encountered.
+    </para>
+    <programlisting language="ocaml">
+  Command.Spec.(
+    empty
+    +&gt; anon (&quot;filename&quot; %: string)
+  )
+</programlisting>
+    <para>
+      Here, we begin the specification with an <literal>empty</literal>
+      value, and then chain more parameters via the
+      <literal>+&gt;</literal> combinator. Our simple
+      <literal>example define a single _anonymous_ parameter via the</literal>anon`
+      function (that is, a standalone token from the command-line).
+      Anonymous functions can be assigned a name that is used in help
+      text and an OCaml type that they are mapped to. The parameters
+      specified are all passed to a callback function which actually
+      invokes the program logic.
+    </para>
+    <programlisting language="ocaml">
+(fun file () -&gt; do_hash file)
+</programlisting>
+    <para>
+      In our example, the function takes a <literal>file</literal>
+      parameter that is a <literal>string</literal>, and maps it to the
+      <literal>do_hash</literal> function. You aren't just limited to
+      strings though, as <literal>Command.Spec</literal> defines several
+      other conversion functions that validate and parse input into
+      various types:
+    </para>
+    <informaltable>
+      <tgroup cols="3">
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <thead>
+          <row>
+            <entry>
+              Argument type
+            </entry>
+            <entry>
+              OCaml type
+            </entry>
+            <entry>
+              Example
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              <literal>string</literal>
+            </entry>
+            <entry>
+              <literal>string</literal>
+            </entry>
+            <entry>
+              <literal>foo</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>int</literal>
+            </entry>
+            <entry>
+              <literal>int</literal>
+            </entry>
+            <entry>
+              <literal>123</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>float</literal>
+            </entry>
+            <entry>
+              <literal>float</literal>
+            </entry>
+            <entry>
+              <literal>123.01</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>bool</literal>
+            </entry>
+            <entry>
+              <literal>bool</literal>
+            </entry>
+            <entry>
+              <literal>true</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>date</literal>
+            </entry>
+            <entry>
+              <literal>Date.t</literal>
+            </entry>
+            <entry>
+              <literal>2013-12-25</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>time_span</literal>
+            </entry>
+            <entry>
+              <literal>Span.t</literal>
+            </entry>
+            <entry>
+              <literal>5s</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>file</literal>
+            </entry>
+            <entry>
+              <literal>string</literal>
+            </entry>
+            <entry>
+              <literal>&lt;valid filename&gt;</literal>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      Anonymous arguments don't have to be declared individually. A more
+      realistic <literal>md5</literal> function might also read from the
+      standard input if a filename isn't specified. We can change our
+      specification with a single line to reflect this by writing:
+    </para>
+    <programlisting language="ocaml">
+Command.Spec.(
+  empty
+  +&gt; anon (maybe (&quot;filename&quot; %: string))
+)
+</programlisting>
+    <para>
+      The anonymous parameter has been prefixed with a
+      <literal>maybe</literal> that indicates the value is now optional.
+      If you compile the example, you'll get a type error though:
+    </para>
+    <programlisting>
+File &quot;basic_broken.ml&quot;, line 18, characters 26-30:
+Error: This expression has type string option
+       but an expression was expected of type string
+Command exited with code 2.
+</programlisting>
+    <para>
+      This is because the type of the callback function has changed. It
+      now wants a <literal>string option</literal> instead of a
+      <literal>string</literal> since the value is optional. We can
+      quickly adapt our example to use the new information and read from
+      standard input if no file is specified.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
+let get_file_data = function
+  | None
+  | Some &quot;-&quot; -&gt; In_channel.(input_all stdin)
+  | Some file -&gt; In_channel.read_all file
+ 
+let do_hash file =
+  let open Cryptokit in
+  get_file_data file 
+  |&gt; hash_string (Hash.md5 ())
+  |&gt; transform_string (Hexa.encode ())
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:&quot;Generate an MD5 hash of the input data&quot;
+    Command.Spec.(
+      empty
+      +&gt; anon (maybe (&quot;filename&quot; %: string))
+    )
+  (fun file () -&gt; do_hash file)
+
+let () = Command.run command
+</programlisting>
+    <para>
+      There are several other transformations you can do on anonymous
+      arguments. We've shown you <literal>maybe</literal>, and you can
+      also obtain lists of arguments or supply default values. Try
+      altering the example above to take a list of files and output
+      checksums for all of them, just as the <literal>md5</literal>
+      command does.
+    </para>
+    <informaltable>
+      <tgroup cols="2">
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <thead>
+          <row>
+            <entry>
+              Anonymous argument
+            </entry>
+            <entry>
+              OCaml type
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              sequence
+            </entry>
+            <entry>
+              <literal>list</literal> of arguments
+            </entry>
+          </row>
+          <row>
+            <entry>
+              maybe
+            </entry>
+            <entry>
+              <literal>option</literal> argument
+            </entry>
+          </row>
+          <row>
+            <entry>
+              maybe_with_default
+            </entry>
+            <entry>
+              argument with a default value if argument is missing
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect1>
+  <sect1 id="using-flags-to-label-the-command-line">
+    <title>Using flags to label the command line</title>
+    <para>
+      You aren't just limited to anonymous arguments on the
+      command-line, of course. Flags (such as <literal>-v</literal>) can
+      be specified in the same manner as anonymous arguments. These can
+      appear in any order on the command-line, or multiple times,
+      depending on how they're declared. Let's add two arguments to our
+      <literal>md5</literal> command that mimic the Linux version: a
+      <literal>-s</literal> flag to specify the string to be hashed
+      directly, and a <literal>-t</literal> self-benchmark test.
+    </para>
+    <programlisting language="ocaml">
+Command.Spec.(
+  empty
+  +&gt; flag &quot;-s&quot; (optional string) ~doc:&quot;string Checksum the given string&quot;
+  +&gt; flag &quot;-t&quot; no_arg ~doc:&quot; run a built-in time trial&quot;
+  +&gt; anon (maybe (&quot;filename&quot; %: string))
+)
+</programlisting>
+    <para>
+      The <literal>flag</literal> command is quite similar to
+      <literal>anon</literal>. The first argument is the flag name, and
+      aliases can be specified via an optional argument. The
+      <literal>doc</literal> string should be formatted so that the
+      first word is the short name that should appear in the usage text,
+      with the remainder being the full help text. Notice that the
+      <literal>-t</literal> flag has no argument, and so we prepend the
+      doc text with a blank space. The help text for the above fragment
+      looks like this:
+    </para>
+    <programlisting>
+$ mlmd5 -s 
+Generate an MD5 hash of the input data
+
+  mlmd5 [filename]
+
+=== flags ===
+
+  [-s string]    Checksum the given string
+  [-t run]       a built-in time trial
+  [-build-info]  print info about this build and exit
+  [-version]     print the version of this build and exit
+  [-help]        print this help text and exit
+                 (alias: -?)
+
+missing argument for flag -s
+
+$ mlmd5 -s &quot;ocaml rocks&quot;
+5a118fe92ac3b6c7854c595ecf6419cb
+</programlisting>
+    <para>
+      The <literal>-s</literal> flag requires a
+      <literal>string</literal> argument in our specification, and the
+      parser outputs an error message if it isn't supplied. Here's a
+      list of some of the functions that you can wrap flags in to
+      control how they are parsed:
+    </para>
+    <informaltable>
+      <tgroup cols="2">
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <thead>
+          <row>
+            <entry>
+              Flag function
+            </entry>
+            <entry>
+              OCaml type
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              <literal>required</literal> <emphasis>arg</emphasis>
+            </entry>
+            <entry>
+              <emphasis>arg</emphasis> and error if not present
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>optional</literal> <emphasis>arg</emphasis>
+            </entry>
+            <entry>
+              <emphasis>arg</emphasis> <literal>option</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>optional_with_default</literal>
+            </entry>
+            <entry>
+              <emphasis>arg</emphasis> with a default if not present
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>listed</literal> <emphasis>arg</emphasis>
+            </entry>
+            <entry>
+              <emphasis>arg</emphasis> <literal>list</literal> may
+              appear multiple times
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>no_arg</literal>
+            </entry>
+            <entry>
+              <literal>bool</literal> that is true if flag is present.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      The flags affect the type of the callback function in exactly the
+      same way as anonymous arguments do. The full example of our
+      <literal>md5</literal> function with flags is below.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
+let get_file_data file checksum =
+  match file, checksum with
+  | None, Some buf -&gt; buf
+  | _, Some buf -&gt; eprintf &quot;Warning: ignoring file\n&quot;; buf
+  | (None|Some &quot;-&quot;), None -&gt; In_channel.(input_all stdin)
+  | Some file, None -&gt; In_channel.read_all file
+
+let do_hash file checksum =
+  let open Cryptokit in
+  get_file_data file checksum
+  |&gt; hash_string (Hash.md5 ())
+  |&gt; transform_string (Hexa.encode ())
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:&quot;Generate an MD5 hash of the input data&quot;
+    Command.Spec.(
+      empty
+      +&gt; flag &quot;-s&quot; (optional string) ~doc:&quot;string Checksum the given string&quot;
+      +&gt; flag &quot;-t&quot; no_arg ~doc:&quot;run a built-in time trial&quot;
+      +&gt; anon (maybe (&quot;filename&quot; %: string))
+    )
+  (fun checksum trial file () -&gt;
+    match trial with
+    | true -&gt; printf &quot;Running time trial\n&quot;
+    | false -&gt; do_hash file checksum)
+
+let () = Command.run command
+</programlisting>
+    <para>
+      Notice how the <literal>get_file_data</literal> function now
+      pattern matches across the <literal>checksum</literal> flag and
+      the <literal>file</literal> anonymous argument. It selects the
+      flag in preference to the file argument, but emits a warning if
+      there's ambiguity.
+    </para>
+  </sect1>
+  <sect1 id="grouping-sub-commands-together">
+    <title>Grouping sub-commands together</title>
+    <para>
+      You can get pretty far by combining flags and anonymous arguments
+      to assemble complex command-line interfaces. After a while though,
+      too many options can make the program very confusing for newcomers
+      to your application. One way to solve this is by grouping common
+      operations together and adding some hierarchy to the command-line
+      interface.
+    </para>
+    <para>
+      You'll have run across this style already when using the OPAM
+      package manager (or, in the non-OCaml world, the Git or Mercurial
+      commands). OPAM exposes commands in this form:
+    </para>
+    <programlisting>
+opam config env
+opam remote list -kind git
+opam install --help
+opam install xmlm
+</programlisting>
+    <para>
+      The <literal>config</literal>, <literal>remote</literal> and
+      <literal>install</literal> keywords form a logical grouping of
+      commands, and factor out flags and arguments that are specific to
+      that particular operation. It's really simple to extend your
+      application to do this in Command: just swap
+      <literal>Command.basic</literal> for
+      <literal>Command.group</literal>:
+    </para>
+    <programlisting language="ocaml">
+val group :
+  summary:string -&gt;
+  ?readme:(unit -&gt; string) -&gt;
+  (string * t) list -&gt; t
+</programlisting>
+    <para>
+      The <literal>group</literal> signature accepts a list of basic
+      <literal>Command.t</literal> values and their corresponding names.
+      When executed, it looks for the appropriate sub-command from the
+      name list, and dispatches it to the right command handler.
+    </para>
+    <para>
+      Let's build the beginning of a calendar that do a few operations
+      over dates from the command line. We first define a command that
+      adds days to an input date and prints the resulting date.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
+let add =
+  Command.basic
+    ~summary:&quot;Add [days] to the [base] date and print day&quot;
+    Command.Spec.(
+      empty
+      +&gt; anon (&quot;base&quot; %: date)
+      +&gt; anon (&quot;days&quot; %: int)
+    )
+  (fun base span () -&gt;
+    Date.add_days base span
+    |&gt; Date.to_string
+    |&gt; print_endline
+  )
+
+let () = Command.run add
+</programlisting>
+    <para>
+      Once we've tested this and made sure it works, we can define
+      another command that takes the difference of two dates. Both of
+      the commands are now grouped as sub-commands using
+      <literal>Command.group</literal>.
+    </para>
+    <programlisting>
+open Core.Std
+
+let add =
+  Command.basic ~summary:&quot;Add [days] to the [base] date&quot;
+    Command.Spec.(
+      empty
+      +&gt; anon (&quot;base&quot; %: date)
+      +&gt; anon (&quot;days&quot; %: int)
+    )
+  (fun base span () -&gt;
+    Date.add_days base span
+    |&gt; Date.to_string
+    |&gt; print_endline
+  )
+
+let diff =
+  Command.basic ~summary:&quot;Show days between [date1] and [date2]&quot;
+    Command.Spec.(
+      empty
+      +&gt; anon (&quot;date1&quot; %: date)
+      +&gt; anon (&quot;date2&quot; %: date)
+    )
+  (fun date1 date2 () -&gt;
+    Date.diff date1 date2
+    |&gt; printf &quot;%d days\n&quot;
+  )
+
+let command =
+  Command.group ~summary:&quot;Manipulate dates&quot;
+    [ &quot;add&quot;, add; &quot;diff&quot;, diff ]
+  
+let () = Command.run command
+</programlisting>
+    <para>
+      And that's all you need to add sub-command support! The help page
+      for our calendar now reflects the two commands we just added:
+    </para>
+    <programlisting>
+$ cal
+Manipulate dates
+
+  cal SUBCOMMAND
+
+=== subcommands ===
+
+  add      Add [days] to the [base] date
+  diff     Show days between [date1] and [date2]
+  version  print version information
+  help     explain a given subcommand (perhaps recursively)
+
+missing subcommand for command cal
+</programlisting>
+    <para>
+      We can invoke the two commands we just defined to verify that they
+      work and see the date parsing in action.
+    </para>
+    <programlisting>
+$ cal add 2012-12-25 40
+2013-02-03
+$ cal diff 2012-12-25 2012-11-01
+54 days
+</programlisting>
+  </sect1>
+  <sect1 id="command-auto-completion-with-bash">
+    <title>Command auto-completion with bash</title>
+    <para>
+      TODO, see https://github.com/janestreet/core/issues/11
+    </para>
+  </sect1>
+  <sect1 id="advanced-control-over-parsing">
+    <title>Advanced control over parsing</title>
+    <para>
+      The use of the spec combinators has been somewhat magic so far: we
+      just build them up with the '+&gt;' combinator and things seem to
+      work. As your programs get larger and more complex, you'll want to
+      factor out common functionality between specifications. Some other
+      times, you'll need to interrupt the parsing to perform special
+      processing, such as requesting an interactive passphrase from the
+      user before proceeding. We'll show you some new combinators that
+      let you do this now.
+    </para>
+    <sidebar>
+    <title>
+    The types behind <literal>Command.Spec</literal>
+    </title>
+    <para>
+      The Command module's safety relies on the specification's output
+      values precisely matching the callback function which invokes the
+      main program. Any mismatch here will inevitably result in a
+      dynamic failure, and so Command uses some interesting type
+      abstraction to guarantee they remain in sync. You don't have to
+      understand this section to use the more advanced combinators, but
+      it'll help you debug type errors as you use
+      <literal>Command</literal> more.
+    </para>
+    <para>
+      The type of <literal>Command.t</literal> looks deceptively simple:
+    </para>
+    <programlisting language="ocaml">
+type ('main_in, 'main_out) t 
+</programlisting>
+    <para>
+      You can think of <literal>('a, 'b) t</literal> as a function of
+      type <literal>'a -&gt; 'b</literal>, but embellished with
+      information about:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          how to parse the command line
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          what the command does and how to call it
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          how to auto-complete a partial command line
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The type of a specification transforms a
+      <literal>'main_in</literal> to a <literal>'main_out</literal>
+      value. For instance, a value of <literal>Spec.t</literal> might
+      have type:
+    </para>
+    <para>
+      <literal>ocaml (arg1 -&gt; ... -&gt; argN -&gt; 'r, 'r) Spec.t</literal>
+    </para>
+    <para>
+      Such a value transforms a main function of type
+      <literal>arg1 -&gt; ... -&gt; argN -&gt; 'r</literal> by supplying
+      all the argument values, leaving a main function that returns a
+      value of type <literal>'r</literal>. Let's look at some examples
+      of specs, and their types:
+    </para>
+    <programlisting language="ocaml">
+# Command.Spec.empty ;;
+- : ('m, 'm) Spec.t = &lt;abstr&gt;
+# Command.Spec.(empty +&gt; anon (&quot;foo&quot; %: int)) ;;
+- : (int -&gt; '_a, '_a) Command.Spec.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      The empty specification is simple as it doesn't add any parameters
+      to the callback type. The second example adds an
+      <literal>int</literal> anonymous parameter that is reflected in
+      the inferred type. Notice that the return value of this fragment
+      has been inferred to be <literal>'_a</literal> instead of the
+      usual <literal>'a</literal>. The underscore denotes a
+      <emphasis>weakly polymorphic type</emphasis> which cannot be
+      generalized further. You should never see this in normal use, but
+      you may encounter this if you define specifications in the
+      top-level of a module. You can work around this so-called
+      <emphasis>value restriction</emphasis> by moving the definitions
+      under a <literal>let</literal> binding.
+    </para>
+    <para>
+      One forms a command by combining a spec of type
+      <literal>('main, unit) Spec.t</literal> with a main function of
+      type <literal>'main</literal>. All the combinators we've shown so
+      far incrementally build up the type of <literal>'main</literal>
+      according to the command-line parameters it expects, so the
+      resulting type of <literal>'main</literal> is something like:
+    </para>
+    <programlisting language="ocaml">
+arg1 -&gt; ... -&gt; argN -&gt; unit
+</programlisting>
+    <para>
+      The type of <literal>Command.basic</literal> should make more
+      sense now:
+    </para>
+    <programlisting language="ocaml">
+val basic :
+  summary:string -&gt;
+  ?readme:(unit -&gt; string) -&gt;
+  ('main, unit -&gt; unit) Spec.t -&gt; 'main -&gt; t
+</programlisting>
+    <para>
+      The final line is the important one. It shows that the callback
+      function for a spec should consume identical arguments to the
+      supplied <literal>main</literal> function, except that there is an
+      additional <literal>unit</literal> argument. This final
+      <literal>unit</literal> is there in case there are no command-line
+      arguments, as at least one parameter is required for the callback.
+      That's why you have to supply an additional <literal>()</literal>
+      to the callback function in the previous examples.
+    </para>
+    </sidebar>
+    <sect2 id="composing-specification-fragments-together">
+      <title>Composing specification fragments together</title>
+      <para>
+        If you want to factor out common command-line operations, the
+        <literal>++</literal> operator will append two specifications
+        together. Let's add some dummy verbosity and debug flags to our
+        calendar application to illustrate this.
+      </para>
+      <programlisting language="ocaml">
+open Core.Std                                                                                                                 
+                                                                                                                              
+let add ~common = 
+  Command.basic ~summary:&quot;Add [days] to the [base] date&quot;                                                                      
+    Command.Spec.( 
+      empty 
+      +&gt; anon (&quot;base&quot; %: date)
+      +&gt; anon (&quot;days&quot; %: int)
+      ++ common                                                                                                               
+    )
+  (fun base span debug verbose () -&gt;                                                                                          
+    Date.add_days base span
+    |&gt; Date.to_string
+    |&gt; print_endline
+  )
+                                                                                                                              
+let diff ~common =                                                                                                            
+  Command.basic ~summary:&quot;Show days between [date1] and [date2]&quot;                                                              
+    Command.Spec.(
+      empty
+      +&gt; anon (&quot;date1&quot; %: date)                                                                                               
+      +&gt; anon (&quot;date2&quot; %: date)
+      ++ common
+    ) 
+  (fun date1 date2 debug verbose () -&gt;                                                                                        
+    Date.diff date1 date2
+    |&gt; printf &quot;%d days\n&quot;                                                                                                     
+  ) 
+</programlisting>
+      <para>
+        The definitions of the specifications are very similar to the
+        earlier example, except that they append a
+        <literal>common</literal> parameter after each specification. We
+        can supply these flags when defining the groups:
+      </para>
+      <programlisting>
+let () =                                                                                                                 
+  let common =
+    Command.Spec.(
+      empty
+      +&gt; flag &quot;-d&quot; (optional_with_default false bool) ~doc:&quot; Debug mode&quot;
+      +&gt; flag &quot;-v&quot; (optional_with_default false bool) ~doc:&quot; Verbose output&quot;
+    )
+  in
+  List.map
+    [ &quot;add&quot;, add; &quot;diff&quot;, diff ]
+    ~f:(fun (name, cmd) -&gt; (name, cmd ~common))
+  |&gt; Command.group ~summary:&quot;Manipulate dates&quot;
+  |&gt; Command.run
+</programlisting>
+      <para>
+        Both of these flags will now be applied and passed to all the
+        callback functions. This makes code refactoring a breeze by
+        using the compiler to spot places where you use commands. Just
+        add a parameter to the common definition, run the compiler, and
+        fix type errors until everything works again.
+      </para>
+      <para>
+        For example, if we remove the <literal>verbose</literal> flag
+        above and compile, we'll get this impressively long type error:
+      </para>
+      <programlisting language="ocaml">
+File &quot;cal_compose_error.ml&quot;, line 39, characters 38-45:
+Error: This expression has type
+         (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit -&gt; unit)
+         Command.Spec.t =
+           (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit -&gt; unit)
+           Command.Spec.t
+       but an expression was expected of type
+         (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit) Command.Spec.t
+           = (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit) Command.Spec.t
+       Type unit -&gt; unit is not compatible with type unit 
+</programlisting>
+      <para>
+        While this does look scary, the key line to scan is the last
+        one, where it's telling you that you have supplied too many
+        arguments in the callback function
+        (<literal>unit -&gt; unit</literal> vs <literal>unit</literal>).
+        If you started with a working program and made this single
+        change, you typically don't even need to read the type error, as
+        the filename and location information is sufficient to make the
+        obvious fix.
+      </para>
+    </sect2>
+    <sect2 id="prompting-for-interactive-input">
+      <title>Prompting for interactive input</title>
+      <para>
+        The <literal>step</literal> combinator lets you control the
+        normal course of parsing by supplying a function that maps
+        callback arguments to a new set of values. For instance, let's
+        suppose we want our first calendar application to prompt for the
+        number of days to add if a value wasn't supplied on the
+        command-line.
+      </para>
+      <programlisting language="ocaml">
+open Core.Std
+
+let add =
+  Command.basic
+    ~summary:&quot;Add [days] to the [base] date and print day&quot;
+    Command.Spec.(
+      step (fun m base days -&gt;
+        match days with
+        | Some days -&gt; m base days
+        | None -&gt;
+            print_endline &quot;enter days: &quot;;
+            m base (read_int ())
+      )
+      +&gt; anon (&quot;base&quot; %: date)
+      +&gt; anon (maybe (&quot;days&quot; %: int))
+    )
+  (fun base span () -&gt;
+    Date.add_days base span
+    |&gt; Date.to_string
+    |&gt; print_endline
+  )
+
+let () = Command.run add
+</programlisting>
+      <para>
+        There are two main changes from the simple example that accepts
+        a date and an integer. Firstly, the <literal>days</literal>
+        argument is now an optional integer instead of a required
+        argument. The <literal>step</literal> combinator takes the date
+        and days parameters, and interactively reads an integer if no
+        day value was supplied. It then returns an
+        <literal>int</literal> instead of the
+        <literal>int option</literal> that was passed in.
+      </para>
+      <programlisting>
+$ cal_add_interactive 2013-12-01
+enter days: 
+35
+2014-01-05
+</programlisting>
+      <para>
+        Notice that the &quot;program logic&quot; in the final callback
+        doesn't see any of this, and is exactly the same as in our
+        original version. The <literal>step</literal> combinator has
+        transformed an <literal>int option</literal> argument into an
+        <literal>int</literal>. This is reflected in the type of the
+        specification:
+      </para>
+      <programlisting language="ocaml">
+# open Core.Std ;;
+# open Command.Spec ;;
+# step (fun m (base:Date.t) days -&gt;
+  match days with
+  | Some days -&gt; m base days
+  | None -&gt;
+     print_endline &quot;enter days: &quot;;
+     m base (read_int ()));;
+- : (Date.t -&gt; int -&gt; '_a, Date.t -&gt; int option -&gt; '_a) Spec.t = &lt;abstr&gt; 
+</programlisting>
+      <para>
+        The first half of the <literal>Spec.t</literal> shows that the
+        callback type is <literal>Date.t -&gt; int</literal>, whereas
+        the resulting value that is expected from the next specification
+        in the chain is a <literal>Date.t -&gt; int option</literal>.
+      </para>
+    </sect2>
+    <sect2 id="adding-labelled-arguments-to-callbacks">
+      <title>Adding labelled arguments to callbacks</title>
+      <para>
+        The <literal>step</literal> chaining combinator lets you control
+        the types of your callbacks very easily. This can either help
+        you fit in with existing interfaces, or make things more
+        explicit by adding labelled arguments.
+      </para>
+      <programlisting language="ocaml">
+open Core.Std
+
+let add =
+  Command.basic
+    ~summary:&quot;Add [days] to the [base] date and print day&quot;
+    Command.Spec.(
+      step (fun m base days -&gt; m ~base ~days)
+      +&gt; anon (&quot;base&quot; %: date)
+      +&gt; anon (&quot;days&quot; %: int)
+    )
+  (fun ~base ~days () -&gt;
+    Date.add_days base days
+    |&gt; Date.to_string
+    |&gt; print_endline
+  )
+
+let () = Command.run add
+</programlisting>
+      <para>
+        This example goes back to our non-interactive calendar addition
+        program, but adds a <literal>step</literal> combinator to turn
+        the normal arguments into labelled ones. This is reflected in
+        the callback function below, and can help prevent errors with
+        command-line arguments with similar types but different names.
       </para>
     </sect2>
   </sect1>
