@@ -429,7 +429,7 @@ The type of a specification transforms a `'main_in` to a `'main_out` value.  For
 
 ```ocaml
 (arg1 -> ... -> argN -> 'r, 'r) Spec.t
- ```
+```
 
 Such a value transforms a main function of type `arg1 -> ... -> argN -> 'r` by supplying all the argument values, leaving a main function that returns a value of type `'r`.  Let's look at some examples of specs, and their types:
 
