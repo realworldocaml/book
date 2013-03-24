@@ -228,7 +228,7 @@ This is used in exactly the same way as the usual `Command` module, except that 
 
 Our examples so far have been with static threads, which isn't
 very much use for real programs.  We'll now add timing to the mix
-by showing you how to  coordinate multiple threads and timeouts.
+and show you how to coordinate threads and timeouts.
 Let's write a program that spawns two threads, each of which sleep
 for some random time and return either "Heads" or "Tails". 
 The first thread that wakes up returns its value.
@@ -252,28 +252,42 @@ The first thread that wakes up returns its value.
 val flip : unit -> (string * Time.Span.t * Time.Span.t) Deferred.t = <fun>
 ```
 
-This example introduces a couple of new time-related Async functions. The `Time` module
-contains functions to express both absolute and relative temporal
-relationships.  In our coin flipping example, we create a relative time span of
-3 seconds, and then permute it randomly twice by 75%.  We then create two
-threads, `coin_heads` and `coin_tails` which return after their respective
-intervals.  Finally, `Deferred.any` waits for the first thread which completes
-and returns its value, ignoring the remaining undetermined threads.
+This example introduces a couple of new time-related Async functions.
+The `Time` module contains functions to express both absolute and relative temporal
+relationships.  In our coin flipping example, we use:
+* `Time.Span.of_sec` to create a relative time span of 3 seconds
+* `Time.Span.randomize` to permute this span randomly by 75%
+* `Clock.after` to build a `unit Deferred.t` that will return after the specified timespan
+* `Deferred.any` to select between a list of threads and return the value of the first one to return a value.
+
+It's important to note that there is no need for an explicit "thread create" function in Async.
+Instead, we build up functions that manipulate `Deferred.t` values, and bind them to names when
+convenient.  In the example above, we've created `coin_heads` and `coin_tails` which
+have the following type:
+
+```
+val coin_heads : (string * Time.Span.t * Time.Span.t) Deferred.t
+val coin_tails : (string * Time.Span.t * Time.Span.t) Deferred.t
+```
 
 Both of the threads encode the time intervals in their return value so that you
 can can easily verify the calculations (you could also simply print the time
 spans to the console as they are calculated and simplify the return types).
-You can see this by executing the `flip` function at the toplevel a few times.
+Let's verify this by running the `flip` function at the toplevel a few times.
+Remember to run this in `utop`, since it will spin up the Async scheduler automatically
+for you and block until a result is available.
 
 ```ocaml
-# Thread_safe.block_on_async_exn flip ;;
+# flip () ;;
 # - : string * Time.Span.t * Time.Span.t = ("Heads!", 2.86113s, 3.64635s)
-# Thread_safe.block_on_async_exn flip ;;
+
+# flip () ;;
 # - : string * Time.Span.t * Time.Span.t = ("Tails!", 4.44979s, 2.14977s)
 ```
 
+We used `any` in our example to choose the first ready thread. 
 The `Deferred` module has a number of other ways to select between multiple
-threads, such as:
+threads:
 
 Function    # Threads  Behaviour
 --------    ---------  ---------
