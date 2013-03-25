@@ -4,7 +4,7 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
-let trusted = ["stedolan"; "lpw25"; "raphael-proust"] 
+let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"] 
 let support = ["jamescotton"] 
 
 let from_anil =
@@ -33,6 +33,7 @@ let from_anil =
   ; "vbmithr"                 (* vb@luminar.eu.org *)
   ; "bellosa"                 (* Frank Bellosa <frank@bellosa.de> *)
   ; "simonjbeaumont"          (* Simon Beaumont <simon.beaumont@citrix.com> *)
+  ; "green-gecko"             (* Alex Ho <a_green_gecko@yahoo.com> *)
   ; 
 ]
 
@@ -72,6 +73,7 @@ let from_email =
   ; "bobzhang"                (* bob zhang <bobzhang1988@gmail.com> *)
   ; "mshure"                  (* Mark Shure <mark.shure@gmail.com> *)
   ; "HappyCrow"               (* Francois Berenger <berenger@riken.jp> *)
+  ; "alexanderkyte"           (* alex kyte <alexanderkyte@gmail.com> *)
   
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
@@ -87,6 +89,8 @@ let from_email =
   ; "anders-schack"
   ; "Alxxa"
 
+  (* MrNumber *)
+  ; "bpr"                     (* Brian Rogoff <brogoff@gmail.com> *)
 ]
 
 let internal_reviewers =
