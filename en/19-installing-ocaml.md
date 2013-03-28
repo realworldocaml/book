@@ -55,7 +55,7 @@ $ port install ocaml
 $ port install ocaml-pcre
 ```
 
-### Linux
+### Debian Linux
 
 On Debian Linux, you should install OCaml via binary packages.  You'll
 need at least OCaml version 3.12.1 to bootstrap OPAM, which means
@@ -78,7 +78,14 @@ the library.
 
 TODO: Fedora / RHEL
 
-TODO: Arch Linux
+### Arch Linux
+
+Arch Linux provides OCaml 4.0.1 (or later) in the standard repositories, so the
+easiest method of installation is using `pacman`:
+
+```
+$ pacman -Sy ocaml
+```
 
 ### Windows
 
@@ -210,7 +217,21 @@ $ sudo make install
 
 ### Arch Linux
 
-TODO
+OPAM is available in the Arch User Repository (AUR) in two packages.
+You'll need both `ocaml` and the `base-devel` packages installed first:
+
+* `opam` contains the most recent stable release, and is the recommended package.
+* `opam-git` builds the package from the latest upstream source, and should only be used if you are looking for a specific bleeding-edge feature.
+
+Run these commands to install the stable OPAM package:
+
+```
+$ sudo pacman -Sy base-devel 
+$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz 
+$ tar -xvf opam.tar.gz && cd opam
+$ makepkg 
+$ sudo pacman -U opam-_version_.pkg.tar.gz
+```
 
 ## Setting up OPAM
 

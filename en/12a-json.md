@@ -1,10 +1,13 @@
 # Handling JSON data
 
 Now that you've seen how to convert OCaml values into s-expressions, it's
-time to look at other useful serialization mechanisms. We'll start off by looking
-at JSON and XML, as they are very common third-party data formats.  This chapter
-also introduces you to some nice uses of polymorphic variants, and also using
-external tools to auto-generate OCaml code.
+time to look at other useful serialization formats. We'll cover JSON
+next, as it is a very common third-party data format on the Internet, and
+much easier to parse than alternatives. This chapter introduces you to a couple of new techniques that glue together the basic ideas from Part I of the book:
+
+* Using polymorphic variants to write more portable protocols (but still retain the ability to extend them if needed)
+* The use of _combinators_ to compose common operations over data structures in a type-safe way.
+* Using external tools to generate boilerplate OCaml modules and signatures from external specification files.
 
 ## JSON Basics
 
@@ -57,8 +60,8 @@ can be `Null` as well as contain an actual value.
 <title>Installing the Yojson library</title>
 
 There are several JSON libraries available for OCaml.  For this chapter, we've
-picked the [`Yojson`](http://mjambon.com/yojson.html) library that is available
-via OPAM.
+picked the [`Yojson`](http://mjambon.com/yojson.html) library by Martin Jambon. 
+It's easiest to install via OPAM.
 
 ```
 $ opam install yojson
@@ -89,15 +92,14 @@ type json = [
   | `Null
   | `String of string ]
 ```
+Some interesting properties should leap out at you after reading this definition:
 
-Note that some of the type definitions above are recursive.
-This means that some values such as `Assoc` can contain references to more
-JSON fields. The definition also specifically includes a `Null` variant for empty
-fields.  OCaml doesn't allow null values by default, so this must be encoded
-like any other value.
+* Some of the type definitions are _recursive_ (that is, one of the algebraic data types includes a reference to the name of the type being defined). Fields such as `Assoc` can contain references to more JSON fields, and thus precisely describe the underlying JSON data structure.
+* The definition specifically includes a `Null` variant for empty fields.  OCaml doesn't allow null values by default, so this must be encoded like any other value.
+* The differences between certain OCaml and JSON data structures is more obvious. For example, a JSON `List` can contain more JSON fields, whereas an OCaml `list` must contain values that are all the same type.
+* The type definition uses polymorphic variants and not normal variants. This will become significant later when we extend it with custom extensions to the JSON format.
 
-Let's parse the earlier JSON example into this type now.  The first stop
-is the `Yojson.Basic` documentation, where we find these helpful functions:
+Let's parse the earlier JSON example into this type now.  The first stop is the `Yojson.Basic` documentation, where we find these helpful functions:
 
 ```ocaml
 val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
@@ -117,9 +119,9 @@ val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 
 When first reading these interfaces, you can generally ignore the optional
 arguments (which have the question marks in the type signature), as they will
-be filled in with sensible values.  In the above type fragment, the optional arguments
-permit finer control over the memory buffer allocation, and error messages from
-parsing.
+be filled in with sensible values. In the above signature, the optional arguments
+offer finer control over the memory buffer allocation and error messages from
+parsing incorrect JSON.
 
 The type signature for these functions with the optional elements removed makes their
 purpose much clearer:
@@ -257,7 +259,7 @@ functions for JSON manipulation.
 <sidebar>
 <title>Functional Combinators</title>
 
-Combinators are a design patternt that crops up quite often in functional
+Combinators are a design pattern that crops up quite often in functional
 programming.  John Hughes defines them as "a function which builds program
 fragments from program fragments".  In a functional language, this generally
 means higher-order functions that combine other functions to apply useful
@@ -426,7 +428,7 @@ all it takes to make tracking down such issues much easier.
 
 #### Using non-standard JSON extensions
 
-The standard JSON types are *really* basic, and OCaml types are far more
+The standard JSON types are _really_ basic, and OCaml types are far more
 expressive. Yojson supports an extended JSON format for those times when you're
 not interoperating with external systems and just want a convenient
 human-readable local format.  The `Yojson.Safe.json` type is a superset of the

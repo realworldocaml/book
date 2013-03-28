@@ -31,6 +31,9 @@ let from_anil =
   ; "pw374"                   (* Philippe Wang <philippe.wang@gmail.com> *)
   ; "samstaton"               (* Sam Staton <sam.staton@cl.cam.ac.uk> *)
   ; "vbmithr"                 (* vb@luminar.eu.org *)
+  ; "bellosa"                 (* Frank Bellosa <frank@bellosa.de> *)
+  ; "simonjbeaumont"          (* Simon Beaumont <simon.beaumont@citrix.com> *)
+  ; 
 ]
 
 let from_yminsky =
@@ -65,7 +68,7 @@ let from_email =
   ; "davidperrin"             (* David Perrin <david.perrin@virtualpv.co.uk> *)
   ; "chris-taylor"            (* Chris Taylor <Chris.Taylor@gsacapital.com> *)
   ; "Kakadu"                  (* Kakadu <kakadu.hafanana@gmail.com> *)
-  ; "adrianb82"               (* Adrian Brasoveanu <abrsvn@gmail.com> *)
+  ; "abrsvn"                  (* Adrian Brasoveanu <abrsvn@gmail.com> *)
   ; "bobzhang"                (* bob zhang <bobzhang1988@gmail.com> *)
   ; "mshure"                  (* Mark Shure <mark.shure@gmail.com> *)
   ; "HappyCrow"               (* Francois Berenger <berenger@riken.jp> *)
