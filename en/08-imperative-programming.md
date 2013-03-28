@@ -1545,7 +1545,7 @@ have?
 
 On its first call, `remember` returns the same value its passed, which
 means its input type and return type should match.  Accordingly,
-`remember` should have the type `t -> t`, for some type `t`.  There's
+`remember` should have the type `t -> t` for some type `t`.  There's
 nothing about `remmeber` that ties the choice of `t` to any particular
 type, so you might expect OCaml to generalize, replacing `t` with a
 polymorphic type variable.  It's this kind of generalization that
@@ -1564,19 +1564,19 @@ val identity : 'a -> 'a = <fun>
 As you can see, the polymorphic type of `identity` lets it operate on
 types of different values.
 
-This is not what happens with `remember`, though, for which the
-following type is inferred.
+This is not what happens with `remember`, though.  Here's the type
+that OCaml infers for remember, which looks almost, but not quite,
+like the type of the identity function.
 
 ```ocaml
 val remember : '_a -> '_a = <fun>
 ```
 
-The type variable `'_a` is _weakly polymorphic_, which is to say that
-it can be used with any one type, unlike a regular polymorphic type
-variable can be used with multiple different types.  That's because,
-unlike `identity`, `remember` always returns the value it was passed
-on its first invocation, which means it always returns a value of the
-same type.
+The underscore in the type variable `'_a` tells us that the variable
+is only _weakly polymorphic_, which is to say that it can be used with
+any _single_ type.  That makes sense, because, unlike `identity`,
+`remember` always returns the value it was passed on its first
+invocation, which means it can only be used with one type.
 
 OCaml will convert a weakly polymorphic variable to a concrete type as
 soon as it gets a clue as to what concrete type it is to be used as,
@@ -1600,109 +1600,224 @@ Note that the type of `remember` was settled by the definition of
 
 ### The Value Restriction
 
-So, when does the compiler infer weakly polymorphic types?  Fully
-polymorphic types are not safe in the context of mutation, such as you
-find with arrays or refs, so OCaml needs a simple rule to figure out
-when it can be confident that no refs are involved.  The rule is
-called the value restriction.  The core of the value restriction is
-the observation that some kinds of simple values by their nature can't
-contain refs, including:
+So, when does the compiler infer weakly polymorphic types?  As we've
+seen, we need weakly polymorphic types when a value of unknown type is
+stored in a persistent mutable cell.  Because the type-system isn't
+precise enough to determine all cases where this might happen, OCaml
+uses a rough rule to flag cases where it's sure there are no
+persistent refs, and to only infer polymorphic types in those cases.
+This rule is called _the value restriction_.
+
+The core of the value restriction is the observation that some kinds
+of simple values by their nature can't contain refs, including:
 
 - Constants (_i.e._, things like integer and floating point literatls)
 - Constructors that contain only other simple values
-- Simple functions, i.e., expressions that begin with `fun` or
-  `function`.
+- Function declarations, _i.e._, expressions that begin with `fun` or
+  `function`, or, the equivalent let binding, `let f x = ...`.
+- `let` bindings of the form `let var = <expr1> in <expr2>`, where
+  both `<expr1>` and `<expr2>` are simple values.
 
-Thus, if you write down an expression th
-
-```ocaml
-# (3,[None;None]);;
-- : int * 'a option list = (3, [None; None])
-```
-
-
-
-It turns
-out that there's no good rule that can tell you precisely when it's
-safe to use fully polymorphic as opposed to weakly polymorphic types.
-There is however a safe approximation that OCaml uses, called the
-_generalized value restriction_.  The approximation is safe in the
-sense that it infers weakly polymorphic types in some cases where it
-would be safe to infer fully polymorphic ones, but it never infers a
-fully polymorphic type when it is unsafe to do so.
-
-The full details of the generalized value restriction are highly
-technical, but there are a few basic guidelines that will give you a
-sufficient working understanding.
-
-*Mutability* Types contained within mutable data-structures like refs
-or arrays can only be weakly polymorophic.  It's worth noting that OCaml
-
-*Ordinary function definitions*, can be fully polymorphic, even if
-they return mutable objects.  Thus, an `option ref` is weakly
-polymorphic:
+Thus, the following expression is a simple value, and as a result, the
+types of values contained within it are allowed to be polymorphic.
 
 ```ocaml
-# ref None;;
-- : '_a option ref = {contents = None}
+# (fun x -> [x;x]);;
+- : 'a -> 'a list = <fun>
 ```
 
-But a function that returns an `option ref` is fully polymorphic.
+But, if we write down an expression that isn't a simple value by the
+above definition, we'll get different results.  For example, consider
+what happens if we try to memoize the function defined above.
 
 ```ocaml
-# let create_ref () = ref None;;
-val create_ref : unit -> 'a option ref = <fun>
+# memoize (fun x -> [x;x]);;
+- : '_a -> '_a list = <fun>
 ```
 
-This is safe because every invocation of the function returns a brand
-new `option ref`, so the types of the option refs are not tied
-together.  On the other hand,
-
-
-Which is not to say that all functions are fully polymorphic.  In
-particular, *functions returned from functions* can in generaly only
-be weakly polymorphic.  So, for example:
+The memoized version of the function does in fact need to be
+restricted to a single type, because it uses mutable state behind the
+scenes to cache previous invocations of the funciton it has passed.
+But OCaml would make the same determination even if the function in
+question did no such thing.  Consider this example:
 
 ```ocaml
-# identity;;
-- : 'a -> 'a = <fun>
-# let memo_ident = memoize identity;;
-val memo_ident : '_a -> '_a = <fun>
+# identity (fun x -> [x;x]);;
+- : '_a -> '_a list = <fun>
 ```
 
-This example of course makes good semantic sense: the memoized
-identity function by its nature can only return one type of value.
-But the value restriction is an approximation, and so there are some
-cases where fully polymorphic types would make sense, but where
-they're nonetheless not inferred.  For example:
+It would be safe to infer a weakly polymorphic variable here, but
+because OCaml's type system doesn't distinguish between pure and
+impure functions, it can't separate those two cases.
+
+The value restriction doesn't require that there is no mutable state,
+only that there is no _persistent_ mutable state that could share
+values between uses of the same function.  Thus, a function that
+produces a fresh reference every time it's called can have a fully
+polymorphic type:
 
 ```ocaml
-# let new_identity = identity identity;;
-val new_identity : '_a -> '_a = <fun>
+# let f () = ref None;;
+val f : unit -> 'a option ref = <fun>
 ```
 
-It's worth noting that one can generally force polymorphic types by
-wrapping the definition of the value in question in a function call.
+But a function that has a mutable cache that persists across calls,
+like memoize, can only be weakly polymorphic.
+
+### Partial application and the value restriction
+
+Most of the time, when the value restriction kicks in, it's for a good
+reason, _i.e._, it's because the value in question can actually only
+safely be used with a single type.  But sometimes, the value
+restriction kicks in when you don't want it.  The most common such
+case is partially applied functions.  A partially applied function,
+like any function application, is not a simple value, and as such,
+functions created by partial application are sometimes less general
+than you might expect.
+
+Consider the `List.init` function, which is used for creating lists
+where each element is created by calling a function on the index of
+that element.
 
 ```ocaml
-# let new_identity x = identity identity x;;
-val new_identity : 'a -> 'a = <fun>
-# new_identity 3;;
-- : int = 3
-# new_identity "four";;
-- : string = "four"
+# List.init;;
+- : int -> f:(int -> 'a) -> 'a list = <fun>
+# List.init 10 ~f:Int.to_string;;
+- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
 ```
 
-This works for the memoized identity too, it's worth noting.
+Imagine we wanted to create a specialized version of `List.init` that
+always created lists of length 10.  We could do that using partial
+application, as follows.
 
 ```ocaml
-# let sort_of_memoized_identity x = memoize identity x;;
-val sort_of_memoized_identity : 'a -> 'a = <fun>
-# sort_of_memoized_identity 3;;
-- : int = 3
-# sort_of_memoized_identity "four";;
-- : string = "four"
+# let list_init_10 = List.init 10;;
+val list_init_10 : f:(int -> '_a) -> '_a list = <fun>
 ```
 
-In changing the types so that OCaml was willing to infer a polymorphic
-type we also changed the semantics of
+As you can see, we now infer a weakly polymorphic type for the
+resulting function, and for good reason.  There's nothing that tells
+us that `List.init` isn't creating a persistent `ref` somewhere inside
+of it that would be shared across multiple calls to `list_init_10`.
+We can eliminate this possibility, and at the same time get the
+compiler to infer a polymorphic type, by using explicit variables
+rather than partial application.
+
+```ocaml
+# let list_init_10 ~f = List.init 10 ~f;;
+val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
+```
+
+This transformation is referred to as _eta expansion_, and is often
+useful to resolve problems that arise from the value restriction.
+
+### Relaxing the value restriction
+
+OCaml is actually a little better at inferring polymorphic types than
+is implied above.  The value restriction as we described it above is
+basically a syntactic check: there are a few operations that you can
+do that count as simple values, and anything that's a simple value can
+be generalized.
+
+But OCaml actually has a relaxed version of the value restriction that
+can make some use of tyep information to allow polymorphic types for
+things that are not simple values.
+
+For example, we saw above that a function application, even a simple
+application of the identity function, is not a simple value and thus
+can turn a polymorphic value into a weakly polymorphic one.
+
+```ocaml
+# identity (fun x -> [x;x]);;
+- : '_a -> '_a list = <fun>
+```
+
+But that's not always the case.  When the type of the returned value
+is immutable, then OCaml can typically infer a fully polymorphic type.
+
+```ocaml
+# identity [];;
+- : 'a list = []
+```
+
+On the other hand, if the returned type is potentially mutable, then
+the result will be weakly polymorphic.
+
+```ocaml
+# [||];;
+- : 'a array = [||]
+# identity [||];;
+- : '_a array = [||]
+```
+
+A more important example of this comes up when defining abstract data
+types.  Consider the following simple data-structure for an immutable
+list type that supports constant-time concatenation.
+
+```ocaml
+# module Concat_list : sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
+    val to_list : 'a t -> 'a list       (* linear time   *)
+  end = struct
+
+    type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+    let empty = Empty
+    let singleton x = Singleton x
+    let concat x y = Concat (x,y)
+
+    let rec to_list_with_tail t tail =
+      match t with
+      | Empty -> tail
+      | Singleton x -> x :: tail
+      | Concat (x,y) -> to_list_with_tail x (to_list_with_tail y tail)
+
+    let to_list t =
+      to_list_with_tail t []
+
+  end;;
+ module Concat_list :
+  sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat : 'a t -> 'a t -> 'a t
+    val to_list : 'a t -> 'a list
+  end
+```
+
+The details of the implementation don't matter so much, but it's
+important to note that a `Concat_list.t` is unquestionably an
+immutable value.  However, when it comes to the value restriction,
+OCaml treats it as if it were mutable.
+
+```ocaml
+# Concat_list.empty;;
+- : 'a Concat_list.t = <abstr>
+# identity Concat_list.empty;;
+- : '_a Concat_list.t = <abstr>
+```
+
+The issue here is that the signature, by virtue of being abstract, has
+obscured the fact that `Concat_list.t` is in fact an immutable
+data-type.  We can resolve this in one of two ways: either by making
+the type concrete (_i.e._, exposing the implementation in the `mli`),
+which is often not desireable; or by marking the type variable in
+question as _covariant_.  We'll learn more about variance and
+covariance in [xref](object-oriented-programming), but for now, you
+can think of it as an annotation which can be put in the interface of
+a pure datastructure.
+
+Thus, if we replace `type 'a t` in the interface with `type +'a t`,
+that will make it explicit in the interface that the data-structure
+doesn't contain any persistent references to values of type `'a`, at
+which point, OCaml can infer polymorphic types for expressions of this
+type that are not simple values.
+
+```ocaml
+# identity Concat_list.empty;;
+- : 'a Concat_list.t = <abstr>
+```
