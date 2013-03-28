@@ -1526,7 +1526,7 @@ different sub-expressions, you should express them as a series of
 
 ## Side-effects and weak polymorphism
 
-Consider the following simple function.
+Consider the following simple imperative function.
 
 ```ocaml
 # let remember =
@@ -1543,33 +1543,40 @@ returning that value on every call.  It's not a terribly useful
 function, but it raises an interesting question: what type should it
 have?
 
-It seems clear that `remember` should return a value of the same type
-as it is passed.  In other words, you would expect it to have type `t
--> t`, for some type `t`.  There's nothing that ties the choice of `t`
-to any particular type, so you might expect OCaml to generalize,
-replacing `t` with a polymorphic type variable, as happens with the
-definition of the identity function, below.
+On its first call, `remember` returns the same value its passed, which
+means its input type and return type should match.  Accordingly,
+`remember` should have the type `t -> t`, for some type `t`.  There's
+nothing about `remmeber` that ties the choice of `t` to any particular
+type, so you might expect OCaml to generalize, replacing `t` with a
+polymorphic type variable.  It's this kind of generalization that
+gives us polymorphic types in the first place.  The identity function,
+as an example, gets a polymorphic type in this way.
 
 ```ocaml
 # let identity x = x;;
 val identity : 'a -> 'a = <fun>
+# identity 3;;
+- : int = 3
+# identity "five";;
+- : string = "five"
 ```
 
-But in reality, OCaml infers a different type for `remember`:
+As you can see, the polymorphic type of `identity` lets it operate on
+types of different values.
+
+This is not what happens with `remember`, though, for which the
+following type is inferred.
 
 ```ocaml
 val remember : '_a -> '_a = <fun>
 ```
 
-The type variable `'_a` is a _weakly polymorphic_ type variable, which
-means that the type in question is merely unknown, as opposed to
-actually polymorphic.  In other words, it's not yet determined what is
-the type of values passed to `remember`, but `remember` can only
-handle a single type.
-
-The reason for this is straightforward.  Unlike `identity`, `remember`
-always returns the same value it was passed on its first invocation,
-which means it can return only one type of value.
+The type variable `'_a` is _weakly polymorphic_, which is to say that
+it can be used with any one type, unlike a regular polymorphic type
+variable can be used with multiple different types.  That's because,
+unlike `identity`, `remember` always returns the value it was passed
+on its first invocation, which means it always returns a value of the
+same type.
 
 OCaml will convert a weakly polymorphic variable to a concrete type as
 soon as it gets a clue as to what concrete type it is to be used as,
@@ -1588,20 +1595,114 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-Note that the type of `remember` was settled even though we never
-actually called the function.  It's enough to define a function that
-could be used to call `remember` with a concrete type to get the
-compiler to choose a type.
+Note that the type of `remember` was settled by the definition of
+`remember_three`, even though `remember_three` was never called!
 
-This is in contrast to the identity function, where it can be used on
-multiple types without incident.
+### The Value Restriction
+
+So, when does the compiler infer weakly polymorphic types?  Fully
+polymorphic types are not safe in the context of mutation, such as you
+find with arrays or refs, so OCaml needs a simple rule to figure out
+when it can be confident that no refs are involved.  The rule is
+called the value restriction.  The core of the value restriction is
+the observation that some kinds of simple values by their nature can't
+contain refs, including:
+
+- Constants (_i.e._, things like integer and floating point literatls)
+- Constructors that contain only other simple values
+- Simple functions, i.e., expressions that begin with `fun` or
+  `function`.
+
+Thus, if you write down an expression th
 
 ```ocaml
-# identity 3;;
-- : int = 3
-# identity;;
-- : 'a -> 'a = <fun>
-# identity "five";;
-- : string = "five"
+# (3,[None;None]);;
+- : int * 'a option list = (3, [None; None])
 ```
 
+
+
+It turns
+out that there's no good rule that can tell you precisely when it's
+safe to use fully polymorphic as opposed to weakly polymorphic types.
+There is however a safe approximation that OCaml uses, called the
+_generalized value restriction_.  The approximation is safe in the
+sense that it infers weakly polymorphic types in some cases where it
+would be safe to infer fully polymorphic ones, but it never infers a
+fully polymorphic type when it is unsafe to do so.
+
+The full details of the generalized value restriction are highly
+technical, but there are a few basic guidelines that will give you a
+sufficient working understanding.
+
+*Mutability* Types contained within mutable data-structures like refs
+or arrays can only be weakly polymorophic.  It's worth noting that OCaml
+
+*Ordinary function definitions*, can be fully polymorphic, even if
+they return mutable objects.  Thus, an `option ref` is weakly
+polymorphic:
+
+```ocaml
+# ref None;;
+- : '_a option ref = {contents = None}
+```
+
+But a function that returns an `option ref` is fully polymorphic.
+
+```ocaml
+# let create_ref () = ref None;;
+val create_ref : unit -> 'a option ref = <fun>
+```
+
+This is safe because every invocation of the function returns a brand
+new `option ref`, so the types of the option refs are not tied
+together.  On the other hand,
+
+
+Which is not to say that all functions are fully polymorphic.  In
+particular, *functions returned from functions* can in generaly only
+be weakly polymorphic.  So, for example:
+
+```ocaml
+# identity;;
+- : 'a -> 'a = <fun>
+# let memo_ident = memoize identity;;
+val memo_ident : '_a -> '_a = <fun>
+```
+
+This example of course makes good semantic sense: the memoized
+identity function by its nature can only return one type of value.
+But the value restriction is an approximation, and so there are some
+cases where fully polymorphic types would make sense, but where
+they're nonetheless not inferred.  For example:
+
+```ocaml
+# let new_identity = identity identity;;
+val new_identity : '_a -> '_a = <fun>
+```
+
+It's worth noting that one can generally force polymorphic types by
+wrapping the definition of the value in question in a function call.
+
+```ocaml
+# let new_identity x = identity identity x;;
+val new_identity : 'a -> 'a = <fun>
+# new_identity 3;;
+- : int = 3
+# new_identity "four";;
+- : string = "four"
+```
+
+This works for the memoized identity too, it's worth noting.
+
+```ocaml
+# let sort_of_memoized_identity x = memoize identity x;;
+val sort_of_memoized_identity : 'a -> 'a = <fun>
+# sort_of_memoized_identity 3;;
+- : int = 3
+# sort_of_memoized_identity "four";;
+- : string = "four"
+```
+
+In changing the types so that OCaml was willing to infer a polymorphic
+type we also changed the semantics of
