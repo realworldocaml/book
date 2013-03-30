@@ -48,6 +48,7 @@ let from_yminsky =
   ; "milanst"                 (* mstanojevic@janestreet.com *)
   ; "Zdancewic"               (* Stephan Zdancewic <stevez@cis.upenn.edu> *)
   ; "sfenick"                 (* Sharon Fenick <sfenick@gmail.com> *)
+  ; "yairminsky"              (* Yair Minsky <yair.minsky@yale.edu> *)
 ]
 
 let from_email = 
