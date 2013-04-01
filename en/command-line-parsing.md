@@ -518,12 +518,13 @@ let () =
   |> Command.run
 ```
 
-Both of these flags will now be applied and passed to all the callback functions.
-This makes code refactoring a breeze by using the compiler to spot places where you
-use commands.  Just add a parameter to the common definition, run the compiler,
-and fix type errors until everything works again.
+Both of these flags will now be applied and passed to all the callback
+functions.  This makes code refactoring a breeze by using the compiler to spot
+places where you use commands.  Just add a parameter to the common definition,
+run the compiler, and fix type errors until everything works again.
 
-For example, if we remove the `verbose` flag above and compile, we'll get this impressively long type error:
+For example, if we remove the `verbose` flag above and compile, we'll get this
+impressively long type error:
 
 ```ocaml
 File "cal_compose_error.ml", line 39, characters 38-45:
@@ -538,11 +539,18 @@ Error: This expression has type
        Type unit -> unit is not compatible with type unit 
 ```
 
-While this does look scary, the key line to scan is the last one, where it's telling you that you have supplied too many arguments in the callback function (`unit -> unit` vs `unit`).  If you started with a working program and made this single change, you typically don't even need to read the type error, as the filename and location information is sufficient to make the obvious fix.
+While this does look scary, the key line to scan is the last one, where it's
+telling you that you have supplied too many arguments in the callback function
+(`unit -> unit` vs `unit`).  If you started with a working program and made
+this single change, you typically don't even need to read the type error, as
+the filename and location information is sufficient to make the obvious fix.
 
 ### Prompting for interactive input
 
-The `step` combinator lets you control the normal course of parsing by supplying a function that maps callback arguments to a new set of values.  For instance, let's suppose we want our first calendar application to prompt for the number of days to add if a value wasn't supplied on the command-line.
+The `step` combinator lets you control the normal course of parsing by
+supplying a function that maps callback arguments to a new set of values.  For
+instance, let's suppose we want our first calendar application to prompt for
+the number of days to add if a value wasn't supplied on the command-line.
 
 ```ocaml
 open Core.Std
@@ -570,7 +578,11 @@ let add =
 let () = Command.run add
 ```
 
-There are two main changes from the simple example that accepts a date and an integer.  Firstly, the `days` argument is now an optional integer instead of a required argument.  The `step` combinator takes the date and days parameters, and interactively reads an integer if no day value was supplied.  It then returns an `int` instead of the `int option` that was passed in.
+There are two main changes from the simple example that accepts a date and an
+integer.  Firstly, the `days` argument is now an optional integer instead of a
+required argument.  The `step` combinator takes the date and days parameters,
+and interactively reads an integer if no day value was supplied.  It then
+returns an `int` instead of the `int option` that was passed in.
 
 ```
 $ cal_add_interactive 2013-12-01
@@ -579,7 +591,10 @@ enter days:
 2014-01-05
 ```
 
-Notice that the "program logic" in the final callback doesn't see any of this, and is exactly the same as in our original version.  The `step` combinator has transformed an `int option` argument into an `int`.  This is reflected in the type of the specification:
+Notice that the "program logic" in the final callback doesn't see any of this,
+and is exactly the same as in our original version.  The `step` combinator has
+transformed an `int option` argument into an `int`.  This is reflected in the
+type of the specification:
 
 ```ocaml
 # open Core.Std ;;
@@ -593,11 +608,15 @@ Notice that the "program logic" in the final callback doesn't see any of this, a
 - : (Date.t -> int -> '_a, Date.t -> int option -> '_a) Spec.t = <abstr> 
 ```
 
-The first half of the `Spec.t` shows that the callback type is `Date.t -> int`, whereas the resulting value that is expected from the next specification in the chain is a `Date.t -> int option`.
+The first half of the `Spec.t` shows that the callback type is `Date.t -> int`,
+whereas the resulting value that is expected from the next specification in the
+chain is a `Date.t -> int option`.
 
 ### Adding labelled arguments to callbacks
 
-The `step` chaining combinator lets you control the types of your callbacks very easily.  This can either help you fit in with existing interfaces, or make things more explicit by adding labelled arguments. 
+The `step` chaining combinator lets you control the types of your callbacks
+very easily.  This can either help you fit in with existing interfaces, or make
+things more explicit by adding labelled arguments. 
 
 ```ocaml
 open Core.Std
@@ -619,5 +638,8 @@ let add =
 let () = Command.run add
 ```
 
-This example goes back to our non-interactive calendar addition program, but adds a `step` combinator to turn the normal arguments into labelled ones.  This is reflected in the callback function below, and can help prevent errors with command-line arguments with similar types but different names.
+This example goes back to our non-interactive calendar addition program, but
+adds a `step` combinator to turn the normal arguments into labelled ones.  This
+is reflected in the callback function below, and can help prevent errors with
+command-line arguments with similar types but different names.
 
