@@ -31,9 +31,9 @@ let f ~mode () =
      don't_wait_for (after (Time.Span.of_sec 0.2) >>= fail ~mode);
      after (Time.Span.of_sec 0.1) >>= fail ~mode
   |"ok_fail" ->
-     printf "[%s] 2 threads: background fails\n" mode;
-     don't_wait_for (after (Time.Span.of_sec 0.2) >>= fail ~mode);
-     after (Time.Span.of_sec 0.1) >>= succeed ~mode
+     printf "[%s] 2 threads: background fails first\n" mode;
+     don't_wait_for (after (Time.Span.of_sec 0.1) >>= fail ~mode);
+     after (Time.Span.of_sec 0.2) >>= succeed ~mode
   |"fail_ok" ->
      printf "[%s] 2 threads: main fails\n" mode;
      don't_wait_for (after (Time.Span.of_sec 0.2) >>= succeed ~mode);
