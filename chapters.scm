@@ -78,6 +78,11 @@
  (note "In progress, Anil")
  )
 ((part Practical)
+ (name "Text processing and Unicode")
+ (file "text-processing-and-unicode")
+ (note "Not started")t
+)
+((part Practical)
  (name "xml-streams-and-trees")
  (file "12b-stream-parsing-xml")
  (note "75% done, on Anil's stack")
