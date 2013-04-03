@@ -11205,10 +11205,10 @@ val sum_file : string -&gt; int = &lt;fun&gt;
       them as a series of <literal>let</literal> bindings.
     </para>
   </sect1>
-  <sect1 id="ungeneralizeable-type-variables">
-    <title>Ungeneralizeable type variables</title>
+  <sect1 id="side-effects-and-weak-polymorphism">
+    <title>Side-effects and weak polymorphism</title>
     <para>
-      Consider the following simple function.
+      Consider the following simple imperative function.
     </para>
     <programlisting language="ocaml">
 # let remember =
@@ -11220,43 +11220,57 @@ val sum_file : string -&gt; int = &lt;fun&gt;
   ;;
 </programlisting>
     <para>
-      <literal>Remember</literal> simply caches the first value that's
+      <literal>remember</literal> simply caches the first value that's
       passed to it, returning that value on every call. It's not a
       terribly useful function, but it raises an interesting question:
       what type should it have?
     </para>
     <para>
-      The first time <literal>remember</literal> is called it returns
-      whatever value was passed to it, which would lead one to think
-      that it returns a value of the same type as it is passed. As such,
-      you would expect it to have type <literal>t -&gt; t</literal>, for
-      some type <literal>t</literal>. There's nothing that ties the
-      choice of <literal>t</literal> to any particular type, so you
-      might expect OCaml to generalize, replacing <literal>t</literal>
-      with a type variable, as happens with the identity function.
+      On its first call, <literal>remember</literal> returns the same
+      value its passed, which means its input type and return type
+      should match. Accordingly, <literal>remember</literal> should have
+      the type <literal>t -&gt; t</literal>, for some type
+      <literal>t</literal>. There's nothing about
+      <literal>remmeber</literal> that ties the choice of
+      <literal>t</literal> to any particular type, so you might expect
+      OCaml to generalize, replacing <literal>t</literal> with a
+      polymorphic type variable. It's this kind of generalization that
+      gives us polymorphic types in the first place. The identity
+      function, as an example, gets a polymorphic type in this way.
     </para>
     <programlisting language="ocaml">
 # let identity x = x;;
 val identity : 'a -&gt; 'a = &lt;fun&gt;
+# identity 3;;
+- : int = 3
+# identity &quot;five&quot;;;
+- : string = &quot;five&quot;
 </programlisting>
     <para>
-      But <literal>remember</literal> is different from
-      <literal>identity</literal> in that the return type (and indeed,
-      the return value) is always the same. We can't tell what type
-      <literal>t</literal> is, but we know it can be only one concrete
-      type. In other words, we need a type variable for
-      <literal>t</literal>, but that type variable can't be generalized.
-      OCaml marks type variables as ungeneralizeable by marking them
-      with an underscore, as shown below in the type for
-      <literal>remember</literal>.
+      As you can see, the polymorphic type of
+      <literal>identity</literal> lets it operate on types of different
+      values.
+    </para>
+    <para>
+      This is not what happens with <literal>remember</literal>, though,
+      for which the following type is inferred.
     </para>
     <programlisting language="ocaml">
 val remember : '_a -&gt; '_a = &lt;fun&gt;
 </programlisting>
     <para>
-      OCaml will convert a non-generalizable type-variable to a concrete
+      The type variable <literal>'_a</literal> is <emphasis>weakly
+      polymorphic</emphasis>, which is to say that it can be used with
+      any one type, unlike a regular polymorphic type variable can be
+      used with multiple different types. That's because, unlike
+      <literal>identity</literal>, <literal>remember</literal> always
+      returns the value it was passed on its first invocation, which
+      means it always returns a value of the same type.
+    </para>
+    <para>
+      OCaml will convert a weakly polymorphic variable to a concrete
       type as soon as it gets a clue as to what concrete type it is to
-      be used as.
+      be used as, as you can see below.
     </para>
     <programlisting language="ocaml">
 # let remember_three () = remember 3;;
@@ -11271,24 +11285,141 @@ Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
     <para>
-      Note that we caused the type of <literal>remember</literal> to be
-      settled even though we never actually called the function. It's
-      enough to define a function that could be used to call
-      <literal>remember</literal> with a concrete type to get the
-      compiler to choose a type.
+      Note that the type of <literal>remember</literal> was settled by
+      the definition of <literal>remember_three</literal>, even though
+      <literal>remember_three</literal> was never called!
     </para>
-    <para>
-      This is in contrast to something like the identity function, where
-      it can be used on multiple types without incident.
-    </para>
-    <programlisting language="ocaml">
-# identity 3;;
-- : int = 3
+    <sect2 id="the-value-restriction">
+      <title>The Value Restriction</title>
+      <para>
+        So, when does the compiler infer weakly polymorphic types? Fully
+        polymorphic types are not safe in the context of mutation, such
+        as you find with arrays or refs, so OCaml needs a simple rule to
+        figure out when it can be confident that no refs are involved.
+        The rule is called the value restriction. The core of the value
+        restriction is the observation that some kinds of simple values
+        by their nature can't contain refs, including:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Constants (<emphasis>i.e.</emphasis>, things like integer
+            and floating point literatls)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Constructors that contain only other simple values
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Simple functions, i.e., expressions that begin with
+            <literal>fun</literal> or <literal>function</literal>.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Thus, if you write down an expression th
+      </para>
+      <programlisting language="ocaml">
+# (3,[None;None]);;
+- : int * 'a option list = (3, [None; None])
+</programlisting>
+      <para>
+        It turns out that there's no good rule that can tell you
+        precisely when it's safe to use fully polymorphic as opposed to
+        weakly polymorphic types. There is however a safe approximation
+        that OCaml uses, called the <emphasis>generalized value
+        restriction</emphasis>. The approximation is safe in the sense
+        that it infers weakly polymorphic types in some cases where it
+        would be safe to infer fully polymorphic ones, but it never
+        infers a fully polymorphic type when it is unsafe to do so.
+      </para>
+      <para>
+        The full details of the generalized value restriction are highly
+        technical, but there are a few basic guidelines that will give
+        you a sufficient working understanding.
+      </para>
+      <para>
+        <emphasis>Mutability</emphasis> Types contained within mutable
+        data-structures like refs or arrays can only be weakly
+        polymorophic. It's worth noting that OCaml
+      </para>
+      <para>
+        <emphasis>Ordinary function definitions</emphasis>, can be fully
+        polymorphic, even if they return mutable objects. Thus, an
+        <literal>option ref</literal> is weakly polymorphic:
+      </para>
+      <programlisting language="ocaml">
+# ref None;;
+- : '_a option ref = {contents = None}
+</programlisting>
+      <para>
+        But a function that returns an <literal>option ref</literal> is
+        fully polymorphic.
+      </para>
+      <programlisting language="ocaml">
+# let create_ref () = ref None;;
+val create_ref : unit -&gt; 'a option ref = &lt;fun&gt;
+</programlisting>
+      <para>
+        This is safe because every invocation of the function returns a
+        brand new <literal>option ref</literal>, so the types of the
+        option refs are not tied together. On the other hand,
+      </para>
+      <para>
+        Which is not to say that all functions are fully polymorphic. In
+        particular, <emphasis>functions returned from
+        functions</emphasis> can in generaly only be weakly polymorphic.
+        So, for example:
+      </para>
+      <programlisting language="ocaml">
 # identity;;
 - : 'a -&gt; 'a = &lt;fun&gt;
-# identity &quot;five&quot;;;
-- : string = &quot;five&quot;
+# let memo_ident = memoize identity;;
+val memo_ident : '_a -&gt; '_a = &lt;fun&gt;
 </programlisting>
+      <para>
+        This example of course makes good semantic sense: the memoized
+        identity function by its nature can only return one type of
+        value. But the value restriction is an approximation, and so
+        there are some cases where fully polymorphic types would make
+        sense, but where they're nonetheless not inferred. For example:
+      </para>
+      <programlisting language="ocaml">
+# let new_identity = identity identity;;
+val new_identity : '_a -&gt; '_a = &lt;fun&gt;
+</programlisting>
+      <para>
+        It's worth noting that one can generally force polymorphic types
+        by wrapping the definition of the value in question in a
+        function call.
+      </para>
+      <programlisting language="ocaml">
+# let new_identity x = identity identity x;;
+val new_identity : 'a -&gt; 'a = &lt;fun&gt;
+# new_identity 3;;
+- : int = 3
+# new_identity &quot;four&quot;;;
+- : string = &quot;four&quot;
+</programlisting>
+      <para>
+        This works for the memoized identity too, it's worth noting.
+      </para>
+      <programlisting language="ocaml">
+# let sort_of_memoized_identity x = memoize identity x;;
+val sort_of_memoized_identity : 'a -&gt; 'a = &lt;fun&gt;
+# sort_of_memoized_identity 3;;
+- : int = 3
+# sort_of_memoized_identity &quot;four&quot;;;
+- : string = &quot;four&quot;
+</programlisting>
+      <para>
+        In changing the types so that OCaml was willing to infer a
+        polymorphic type we also changed the semantics of
+      </para>
+    </sect2>
   </sect1>
 </chapter><chapter id="object-oriented-programming">
   <title>Object Oriented Programming</title>
@@ -13909,9 +14040,9 @@ let () = Command.run command
 </programlisting>
     <para>
       The <literal>do_hash</literal> function accepts a filename
-      parameter and prints the human-readalbe MD5 string to the console
-      sandard output. We want to control the inputs to this function via
-      the command-line, and this is what the subsequent
+      parameter and prints the human-readable MD5 string to the console
+      standard output. We want to control the inputs to this function
+      via the command-line, and this is what the subsequent
       <literal>command</literal> value declares. If you compile this
       program and run it, the help screen looks like this:
     </para>
@@ -13950,18 +14081,18 @@ $ ./basic.byte basic.byte
     <itemizedlist>
       <listitem>
         <para>
-          <literal>Command.basic</literal> takes a function which is
-          passed parameters parsed from the command-line according to a
-          <literal>spec</literal> parameter. It takes a
-          <literal>summary</literal> parameter for a one-line
-          description of the command behavior, and
-          <literal>readme</literal> for longer help text.
+          <literal>Command.Spec.t</literal> defines the steps required
+          to convert a command-line into an OCaml structure.
         </para>
       </listitem>
       <listitem>
         <para>
-          <literal>Command.spec</literal> defines the steps required to
-          convert a command-line into an OCaml structure.
+          <literal>Command.basic</literal> takes a callback that is
+          passed parameters parsed from the command-line according to
+          the <literal>spec</literal> parameter. It takes a
+          <literal>summary</literal> string for a one-line description
+          of the command behavior, and an optional
+          <literal>readme</literal> for longer help text.
         </para>
       </listitem>
       <listitem>
@@ -13974,29 +14105,28 @@ $ ./basic.byte basic.byte
     </itemizedlist>
     <para>
       Most of the interesting logic lies in how the specifications are
-      defined.<literallayout/>The
-      <literal>Command.Spec</literal> module defines several combinators
-      that can be chained together to define flags and anonymous
-      arguments, what types they should map to, and whether to take
-      special actions (such as interactive input) if certain fields are
-      encountered.
+      defined. The <literal>Command.Spec</literal> module defines
+      several combinators that can be chained together to define flags
+      and anonymous arguments, what types they should map to, and
+      whether to take special actions (such as interactive input) if
+      certain fields are encountered.
     </para>
     <programlisting language="ocaml">
-  Command.Spec.(
-    empty
-    +&gt; anon (&quot;filename&quot; %: string)
-  )
+Command.Spec.(
+  empty
+  +&gt; anon (&quot;filename&quot; %: string)
+)
 </programlisting>
     <para>
-      Here, we begin the specification with an <literal>empty</literal>
+      We begin the specification above with an <literal>empty</literal>
       value, and then chain more parameters via the
-      <literal>+&gt;</literal> combinator. Our simple
-      <literal>example define a single _anonymous_ parameter via the</literal>anon`
-      function (that is, a standalone token from the command-line).
-      Anonymous functions can be assigned a name that is used in help
-      text and an OCaml type that they are mapped to. The parameters
-      specified are all passed to a callback function which actually
-      invokes the program logic.
+      <literal>+&gt;</literal> combinator. Our example defines a single
+      <emphasis>anonymous</emphasis> parameter via the
+      <literal>anon</literal> function (that is, a standalone token from
+      the command-line). Anonymous functions can be assigned a name that
+      is used in help text, and an OCaml type that they are mapped to.
+      The parameters specified here are all eventually passed to a
+      callback function which actually invokes the program logic.
     </para>
     <programlisting language="ocaml">
 (fun file () -&gt; do_hash file)
@@ -14514,12 +14644,6 @@ $ cal diff 2012-12-25 2012-11-01
 54 days
 </programlisting>
   </sect1>
-  <sect1 id="command-auto-completion-with-bash">
-    <title>Command auto-completion with bash</title>
-    <para>
-      TODO, see https://github.com/janestreet/core/issues/11
-    </para>
-  </sect1>
   <sect1 id="advanced-control-over-parsing">
     <title>Advanced control over parsing</title>
     <para>
@@ -14580,9 +14704,9 @@ type ('main_in, 'main_out) t
       value. For instance, a value of <literal>Spec.t</literal> might
       have type:
     </para>
-    <para>
-      <literal>ocaml (arg1 -&gt; ... -&gt; argN -&gt; 'r, 'r) Spec.t</literal>
-    </para>
+    <programlisting language="ocaml">
+(arg1 -&gt; ... -&gt; argN -&gt; 'r, 'r) Spec.t
+</programlisting>
     <para>
       Such a value transforms a main function of type
       <literal>arg1 -&gt; ... -&gt; argN -&gt; 'r</literal> by supplying
@@ -14846,6 +14970,209 @@ let () = Command.run add
         the callback function below, and can help prevent errors with
         command-line arguments with similar types but different names.
       </para>
+    </sect2>
+  </sect1>
+  <sect1 id="command-line-auto-completion-with-bash">
+    <title>Command-line auto-completion with
+    <literal>bash</literal></title>
+    <para>
+      Modern UNIX shells usually have a tab-completion feature to
+      interactively help you figure out how to build a command-line.
+      These work by pressing the <literal>&lt;tab&gt;</literal> key in
+      the middle of typing a command, and seeing the options that pop
+      up. You've probably used this most often to find the files in the
+      current directory, but it can actually be extended for other parts
+      of the command too.
+    </para>
+    <para>
+      The precise mechanism for autocompletion varies depending on what
+      shell you are using, but we'll assume you are using the most
+      common one: <literal>bash</literal>. This is the default
+      interactie shell on most Linux distributions and MacOS X, but you
+      may need to switch to it on *BSD or Windows (when using Cygwin).
+      The rest of this section assumes that you're using
+      <literal>bash</literal>.
+    </para>
+    <para>
+      Bash autocompletion isn't always installed by default, so check
+      your OS package manager to see if you have it available.
+    </para>
+    <informaltable>
+      <tgroup cols="3">
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <thead>
+          <row>
+            <entry>
+              Operating System
+            </entry>
+            <entry>
+              Package Manager
+            </entry>
+            <entry>
+              Package
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              Debian Linux
+            </entry>
+            <entry>
+              <literal>apt</literal>
+            </entry>
+            <entry>
+              <literal>TODO</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              CentOS
+            </entry>
+            <entry>
+              <literal>yum</literal>
+            </entry>
+            <entry>
+              <literal>TODO</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              MacOS X
+            </entry>
+            <entry>
+              Homebrew
+            </entry>
+            <entry>
+              <literal>bash-completion</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              MacOS X
+            </entry>
+            <entry>
+              MacPorts
+            </entry>
+            <entry>
+              <literal>TODO</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              FreeBSD
+            </entry>
+            <entry>
+              Ports System
+            </entry>
+            <entry>
+              <literal>/usr/ports TODO</literal>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              OpenBSD
+            </entry>
+            <entry>
+              <literal>pkg_add</literal>
+            </entry>
+            <entry>
+              <literal>TODO</literal>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      Once you have bash completion installed and configured, check that
+      it works by typing the <literal>ssh</literal> command, and
+      pressing <literal>tab</literal>. This should show you the list of
+      known hosts from your <literal>~/.ssh/known_hosts</literal> file.
+      If it lists those, then you can continue on, but if it lists the
+      files in your current directory instead, then check your OS
+      documentation to configure completion correctly.
+    </para>
+    <para>
+      One last bit of information you'll need to find is the location of
+      the <literal>bash_completion.d</literal> directory. This is where
+      all the shell fragments that contain the completion logic are
+      held. On Linux, this is often in
+      <literal>/etc/bash_completion.d</literal>, and in Homebrew on
+      MacOS X it would be
+      <literal>/usr/local/etc/bash_completion.d</literal> by default.
+    </para>
+    <sect2 id="generating-completion-fragments-from-command">
+      <title>Generating completion fragments from Command</title>
+      <para>
+        The Command library has a declarative description of all the
+        possible valid options, and it can use this information to
+        generate a shell script which provides completion support for
+        that command. To generate the fragment, just run the command
+        with the <literal>COMMAND_OUTPUT_INSTALLATION_BASH</literal>
+        environment variable set to any value.
+      </para>
+      <para>
+        For example, let's try it on our calendar example from earlier,
+        assuming that the binary is called <literal>cal</literal> in the
+        current directory:
+      </para>
+      <programlisting>
+$ COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal
+
+function _jsautocom_41790 {
+  export COMP_CWORD
+  COMP_WORDS[0]=./cal
+  COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))
+}
+complete -F _jsautocom_41790 ./cal
+</programlisting>
+    </sect2>
+    <sect2 id="installing-the-completion-fragment">
+      <title>Installing the completion fragment</title>
+      <para>
+        You don't need to worry about what this script actually does
+        (unless you have an unhealthy fascination with shell scripting,
+        that is). Instead, redirect the output to a file in your
+        <literal>bash_completion.d</literal> directory, named after the
+        command you're installing.
+      </para>
+      <programlisting>
+$ sudo env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal \
+    &gt; /etc/bash_completion.d/cal
+$ bash -l
+$ ./cal &lt;tab&gt;
+add      diff     help     version
+</programlisting>
+      <para>
+        The first line above redirects the earlier output into your
+        <literal>bash_completion.d</literal> directory. The
+        <literal>bash -l</literal> loads the new configuration as a
+        fresh login shell, and then the final line shows the four valid
+        commands by pressing the tab key.
+      </para>
+      <para>
+        Command competion support works for flags and grouped commands,
+        and is very useful when building larger command-line interfaces.
+      </para>
+      <note>
+      <title>
+      Installing a geneeric completion handler
+      </title>
+      <para>
+        Sadly, <literal>bash</literal> doesn't support installing a
+        generic handler for all Command-based applications. This means
+        that you have to install the completion script for every
+        application, but you should be able to automate this in the
+        build and packaging system for your application.
+      </para>
+      <para>
+        It will help to check out how other applications that install
+        tab-completion scripts and following their lead, as the details
+        are very OS-specific.
+      </para>
+      </note>
     </sect2>
   </sect1>
 </chapter><chapter id="xml-streams-and-trees">
@@ -15560,40 +15887,489 @@ type meta = {
     appear, the blocked task needs to be resumed as quickly as possible.
   </para>
   <para>
-    Efficiency really matters here, as busy servers can often handle
-    tens of thousands of simultaneous connections. An equally important
-    concern is readable source code, where the control flow of the
-    program is obvious at a glance.
+    Busy servers can often handle tens of thousands of simultaneous
+    connections, so runtime efficiency really matters. An equally
+    important concern is readable source code, so that the control flow
+    of the program is obvious at a glance.
   </para>
   <para>
-    You've probably used preemptive system threads before in some
-    programming languages such as Java or C#. In this model, each task
-    is usually given an operating system thread of its own. Other
-    languages such as Javascript are single-threaded, and applications
-    must register function callbacks to be triggered upon external
-    events (such as a timeout or browser click).
+    A common approach to concurrency is to use
+    <emphasis>preemptive</emphasis> system threads, most commonly in
+    Java or C#. In this threading model, each task is given an operating
+    system thread of its own, and the kernel schedules them with
+    arbitrary interleavings. Other language runtimes such as Javascript
+    are single-threaded, and applications register function callbacks to
+    be triggered upon external events such as a timeout or browser
+    click.
   </para>
   <para>
     Both of these mechanisms have tradeoffs. Preemptive threads require
-    their own memory stacks and can be memory hungry. The operating
-    system can also arbitrarily interleave the execution of threads, and
-    so they require careful locking around shared data structures.
-  </para>
-  <para>
-    Event-driven systems usually only execute a single task at a time
-    and require less locking. However, the program structure can often
-    descend into a maze of event callbacks for even a simple operation
-    that blocks a few times. Code readability matters, and so we'd like
-    to avoid such spaghetti control flow.
+    more resources per thread and can be memory hungry. The operating
+    system can also arbitrarily interleave the execution of preemptive
+    threads, putting a load on the programmer to lock shared data
+    structures. Single-threaded event-driven systems execute a single
+    task at a time and require less locking. However, the program
+    structure can often descend into a maze of event callbacks for even
+    a simple operation that blocks a few times. Code readability
+    matters, and so we'd like to avoid such spaghetti control flow.
   </para>
   <para>
     The <literal>Async</literal> OCaml library offers a hybrid model
     that lets you write event-driven code that can block
     <emphasis>without</emphasis> the complexity of preemptive threading.
-    Let's dive straight into an example to see what this looks like, and
-    then explain some of the new concepts. We're going to search for
-    definitions of English terms using the DuckDuckGo search engine.
+    Lets begin by constructing a simple thread. Async follows the Core
+    convention and provides an <literal>Async.Std</literal> that
+    provides threaded variants of many standard library functions.
   </para>
+  <programlisting language="ocaml">
+# require &quot;async.unix&quot; ;;
+# open Async.Std ;;
+# return 5 ;;
+- : int Deferred.t = &lt;abstr&gt;
+</programlisting>
+  <note>
+  <title>
+  When to open <literal>Async.Std</literal>
+  </title>
+  <para>
+    The <literal>Core.Std</literal> module is normally opened up in
+    every file you write. You need to be a little more careful when
+    opening <literal>Async.Std</literal> as it replaces standard
+    blocking functions with asynchronous equivalents. This comes across
+    most obviously with the standard input and output descriptors.
+  </para>
+  <programlisting language="ocaml">
+# open Core.Std;;
+# print_endline &quot;hello world&quot;;;
+hello world
+- : unit = ()
+# open Async.Std;;
+# print_endline &quot;hello world&quot;;;
+- : unit = ()
+TODO what is the manual flush call here?
+</programlisting>
+  <para>
+    With just <literal>Core.Std</literal> open, the
+    <literal>print_endline</literal> function immediately displayed its
+    output to the console. When <literal>Async.Std</literal> was opened,
+    the call to <literal>print_endline</literal> is buffered and needs
+    to be manually flushed before the output is displayed.
+  </para>
+  </note>
+  <sect1 id="creating-your-first-async-threads">
+    <title>Creating your first async threads</title>
+    <para>
+      Async threads are co-operative and never preempt each other, and
+      the library internally converts blocking code into a single event
+      loop. The threads are normal OCaml heap-allocated values (without
+      any runtime magic!) and can be allocated very fast. Concurrency is
+      mostly limited only by your available main memory, or operating
+      system limits on other resources such as file descriptors.
+    </para>
+    <para>
+      The basic type of an Async thread is a
+      <literal>'a Deferred.t</literal>, which can be constructed by the
+      <literal>return</literal> function. The type parameter (in this
+      case <literal>int</literal>) represents the ultimate type of the
+      thread once it has completed in the future. This return value
+      cannot be used directly while it is wrapped in a
+      <literal>Deferred.t</literal> as it may not be available yet.
+      Instead, we can <literal>bind</literal> a functional closure to
+      the thread that is called once the value is eventually ready.
+    </para>
+    <programlisting language="ocaml">
+# open Async.Std ;;
+# let x = return 5 ;;
+val x : int Deferred.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      The <literal>return</literal> function constructs a constant
+      <literal>int Deferred.t</literal> whose value will be available
+      immediately.
+    </para>
+    <programlisting language="ocaml">
+# let y = Deferred.bind x (fun v -&gt; return (string_of_int v)) ;;
+val y : string Deferred.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      We've now bound a function to <literal>x</literal> that will be
+      called over its resulting value. The closure simply converts the
+      <literal>int</literal> to a <literal>string</literal> and returns
+      it as a <literal>string Deferred.t</literal>. Notice that while
+      both <literal>x</literal> and <literal>y</literal> share a common
+      <literal>Deferred.t</literal> type, their type variables differ
+      and so they cannot be interchangably used except in polymorphic
+      functions. This is useful when refactoring large codebases as you
+      can tell if any function will block simply by the presence of an
+      <literal>Deferred.t</literal> in the signature.
+    </para>
+    <para>
+      Another important note is that the result of the bound function
+      must also be a <literal>Deferred</literal> value. If we try to
+      return a <literal>string</literal> immediately, then we get the
+      following type error.
+    </para>
+    <para>
+      `<literal>ocaml # let y = Deferred.bind x (fun v -&gt; string_of_int v);; Error: This expression has type string but an expression was expected of type          'a Deferred.t = 'a Ivar.Deferred.t</literal>
+    </para>
+    <para>
+      This requirement makes <literal>bind</literal> operations
+      composable. You can take the <literal>y</literal> value and
+      <literal>bind</literal> it again to another thread, and expect
+      them all to run in the correct sequence. Let's examine the
+      function signatures of <literal>bind</literal> and
+      <literal>return</literal> more closely to understand this better.
+    </para>
+    <programlisting language="ocaml">
+# return ;;
+- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
+# Deferred.bind ;;
+- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
+</programlisting>
+    <para>
+      <literal>return</literal>, <literal>bind</literal> and the
+      <literal>Deferred.t</literal> type all contain polymorphic type
+      variables (the <literal>'a</literal>) which represent the type of
+      the thread, and are inferred based on how they are used in your
+      code. The <literal>'a</literal> type of the argument passed to the
+      <literal>bind</literal> callback <emphasis>must</emphasis> be the
+      same as the <literal>'a Deferred.t</literal> of the input thread,
+      preventing runtime mismatches between thread callbacks.
+    </para>
+    <para>
+      Both <literal>bind</literal> and <literal>return</literal> form a
+      design pattern in functional programming known as
+      <emphasis>monads</emphasis>, and you will run across this
+      signature in many applications beyond just threads. <emphasis>TODO
+      avsm: figure out where to talk about all the monads in Core in
+      more detail</emphasis>. The <literal>&gt;&gt;=</literal> inline
+      operator is provided as a more succinct alias to
+      <literal>bind</literal>, as shown below.
+    </para>
+    <programlisting language="ocaml">
+# let x = return 5 ;;
+val x : int Deferred.t = &lt;abstr&gt;
+# x &gt;&gt;= fun y -&gt; return (string_of_int y) ;;
+val - : string Deferred.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      The <literal>&gt;&gt;=</literal> operator is exactly the same as
+      <literal>bind</literal> and unpacks the integer future into the
+      <literal>y</literal> variable. The subsequent closure is called
+      with the resulting integer and builds a new string future.
+    </para>
+    <para>
+      It can be a little verbose to keep calling <literal>bind</literal>
+      and <literal>return</literal> to wrap simple functions such as
+      <literal>string_of_int</literal>. The <literal>&gt;&gt;|</literal>
+      operator maps a non-Async function directly across a
+      <literal>Deferred.t</literal> value. In the example below, the
+      deferred <literal>x</literal> is mapped to
+      <literal>string_of_int</literal> directly, and the result is a
+      <literal>string Deferred.t</literal>.
+    </para>
+    <programlisting language="ocaml">
+# x &gt;&gt;| string_of_int ;;
+val - : string Deferred.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      Multiple threads can be chained together with successive calls to
+      <literal>bind</literal> to sequentially compose blocking
+      operations.
+    </para>
+    <programlisting language="ocaml">
+# return 5
+  &gt;&gt;= fun v -&gt; return (string_of_int v)
+  &gt;&gt;= fun v -&gt; return (v = &quot;5&quot;)
+- : bool Deferred.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      The example above constructs an <literal>int</literal> thread,
+      converts it to a <literal>string</literal> thread, and then to a
+      <literal>bool</literal> thread via a string comparison. Of course,
+      there's no interesting threading going on in this example beyond
+      building a constant value, but let's look at how to run it next.
+    </para>
+  </sect1>
+  <sect1 id="executing-async-applications">
+    <title>Executing async applications</title>
+    <para>
+      All async threads run within a <emphasis>scheduler</emphasis> that
+      is responsible for associating blocked threads with system
+      resources (such as file descriptors) and waking them up when
+      external I/O or timer events fire.
+    </para>
+    <sect2 id="running-threads-within-the-toplevel">
+      <title>Running threads within the toplevel</title>
+      <para>
+        If you're experimenting with async programming, the
+        <literal>utop</literal> toplevel is a convenient place to write
+        code interactively. Async threads can be evaluated into a
+        concrete value by wrapping them in
+        <literal>Thread_safe.block_on_async_exn</literal>, which spawns
+        a system thread that waits until a result is available.
+      </para>
+      <programlisting language="ocaml">
+# Thread_safe.block_on_async_exn ;;
+- : (unit -&gt; 'a Deferred.t) -&gt; 'a = &lt;fun&gt;
+</programlisting>
+      <para>
+        A neat feature in <literal>utop</literal> is that it detects
+        functions with a <literal>Deferred.t</literal> in the return
+        type, and automatically translates it into a call to
+        <literal>block_on_async_exn</literal> for you.
+      </para>
+      <programlisting language="ocaml">
+# let fn () = return 5 &gt;&gt;| string_of_int ;;
+val fn : unit -&gt; string Deferred.t = &lt;abstr&gt;
+
+# Thread_safe.block_on_async_exn fn ;;
+- : string = &quot;5&quot;
+
+# fn () ;;
+- : string = &quot;5&quot;
+</programlisting>
+      <para>
+        We've defined an <literal>fn</literal> thread in the first
+        phrase, and then run it manually using
+        <literal>block_on_async_exn</literal>. The final phrase executes
+        <literal>fn</literal> directly, and you can see the
+        <literal>utop</literal> translation kicking in and returning the
+        concrete value.
+      </para>
+    </sect2>
+    <sect2 id="running-threads-within-an-application">
+      <title>Running threads within an application</title>
+      <para>
+        An application can also use the same
+        <literal>block_on_async_exn</literal> as the toplevel, but there
+        are two alternatives. Once a few threads have been started, the
+        <literal>Scheduler.go</literal> function runs them for you.
+      </para>
+      <programlisting language="ocaml">
+# Scheduler.go ;;
+- : ?raise_unhandled_exn:bool -&gt; unit -&gt; never_returns = &lt;fun&gt; 
+</programlisting>
+      <para>
+        Notice that this function never returns, even if all of the
+        spawned threads are completed. The Async scheduler doesn't
+        terminate by default, and so most applications will listen for a
+        signal to exit or simply use <literal>CTRL-C</literal> to
+        interrupt it from a console.
+      </para>
+      <para>
+        Another common way to execute async threads is via the
+        <literal>Command</literal> module we introduced in
+        <xref linkend="command-line-parsing"/>. When you open
+        <literal>Async.Std</literal>, the <literal>Command</literal>
+        module now has an <literal>async_basic</literal> available.
+      </para>
+      <programlisting language="ocaml">
+# Command.async_basic ;;
+- : summary:string -&gt; 
+    ?readme:(unit -&gt; string) -&gt; 
+    ('a, unit -&gt; unit Deferred.t) Command.Spec.t -&gt; 
+    'a -&gt; Command.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        This is used in exactly the same way as the usual
+        <literal>Command</literal> module, except that the callbacks
+        must return a <literal>Deferred.t</literal>. This lets you run
+        blocking threads directly from a command-line interface.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="timing-and-thread-composition">
+    <title>Timing and Thread Composition</title>
+    <para>
+      Our examples so far have been with static threads, which isn't
+      very much use for real programs. We'll now add timing to the mix
+      and show you how to coordinate threads and timeouts. Let's write a
+      program that spawns two threads, each of which sleep for some
+      random time and return either &quot;Heads&quot; or
+      &quot;Tails&quot;. The first thread that wakes up returns its
+      value.
+    </para>
+    <programlisting language="ocaml">
+# let flip () =
+  let span = Time.Span.of_sec 3.0 in
+  let span_heads = Time.Span.randomize span ~percent:0.75 in
+  let span_tails = Time.Span.randomize span ~percent:0.75 in
+  let coin_heads =
+    Clock.after span_heads
+    &gt;&gt;| fun () -&gt;
+    &quot;Heads!&quot;, span_heads, span_tails
+  in
+  let coin_tails =
+    Clock.after span_tails
+    &gt;&gt;| fun () -&gt;
+    &quot;Tails!&quot;, span_heads, span_tails
+  in
+  Deferred.any [coin_heads; coin_tails] ;;
+val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&gt;
+</programlisting>
+    <para>
+      This example introduces a couple of new time-related Async
+      functions. The <literal>Time</literal> module contains functions
+      to express both absolute and relative temporal relationships. In
+      our coin flipping example, we use: *
+      <literal>Time.Span.of_sec</literal> to create a relative time span
+      of 3 seconds * <literal>Time.Span.randomize</literal> to permute
+      this span randomly by 75% * <literal>Clock.after</literal> to
+      build a <literal>unit Deferred.t</literal> that will return after
+      the specified timespan * <literal>Deferred.any</literal> to select
+      between a list of threads and return the value of the first one to
+      return a value.
+    </para>
+    <para>
+      It's important to note that there is no need for an explicit
+      &quot;thread create&quot; function in Async. Instead, we build up
+      functions that manipulate <literal>Deferred.t</literal> values,
+      and bind them to names when convenient. In the example above,
+      we've created <literal>coin_heads</literal> and
+      <literal>coin_tails</literal> which have the following type:
+    </para>
+    <programlisting>
+val coin_heads : (string * Time.Span.t * Time.Span.t) Deferred.t
+val coin_tails : (string * Time.Span.t * Time.Span.t) Deferred.t
+</programlisting>
+    <para>
+      Both of the threads encode the time intervals in their return
+      value so that you can can easily verify the calculations (you
+      could also simply print the time spans to the console as they are
+      calculated and simplify the return types). Let's verify this by
+      running the <literal>flip</literal> function at the toplevel a few
+      times. Remember to run this in <literal>utop</literal>, since it
+      will spin up the Async scheduler automatically for you and block
+      until a result is available.
+    </para>
+    <programlisting language="ocaml">
+# flip () ;;
+# - : string * Time.Span.t * Time.Span.t = (&quot;Heads!&quot;, 2.86113s, 3.64635s)
+
+# flip () ;;
+# - : string * Time.Span.t * Time.Span.t = (&quot;Tails!&quot;, 4.44979s, 2.14977s)
+</programlisting>
+    <para>
+      We used <literal>any</literal> in our example to choose the first
+      ready thread. The <literal>Deferred</literal> module has a number
+      of other ways to select between multiple threads:
+    </para>
+    <informaltable>
+      <tgroup cols="3">
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <thead>
+          <row>
+            <entry>
+              Function
+            </entry>
+            <entry>
+              # Threads
+            </entry>
+            <entry>
+              Behaviour
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              both
+            </entry>
+            <entry>
+              2
+            </entry>
+            <entry>
+              Combines both threads into a tuple and returns both
+              values.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              any
+            </entry>
+            <entry>
+              list
+            </entry>
+            <entry>
+              Returns the first thread that becomes determined.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              all
+            </entry>
+            <entry>
+              list
+            </entry>
+            <entry>
+              Waits for all threads to complete and returns their
+              values.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              all_unit
+            </entry>
+            <entry>
+              list
+            </entry>
+            <entry>
+              Waits for all <literal>unit</literal> threads to complete
+              and returns <literal>unit</literal>.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              peek
+            </entry>
+            <entry>
+              1
+            </entry>
+            <entry>
+              Inspects a single thread to see if it is determined yet.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      Try modifying the <literal>Deferred.any</literal> in the above
+      example to use some of the other thread joining functions above,
+      such as <literal>Deferred.both</literal>.
+    </para>
+    <sect2 id="cancellation">
+      <title>Cancellation</title>
+      <para>
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="a-simple-tcp-echo-server">
+    <title>A simple TCP Echo Server</title>
+    <para>
+    </para>
+  </sect1>
+  <sect1 id="onto-an-http-server">
+    <title>Onto an HTTP Server</title>
+    <para>
+    </para>
+  </sect1>
+  <sect1 id="binding-to-the-github-api">
+    <title>Binding to the Github API</title>
+    <para>
+      Show how we can use a monadic style to bind to the Github API and
+      make simple JSON requests/responses.
+    </para>
+    <note><title>
+    A Note on Portability
+    </title>
+    <para>
+      Explain libev and why its needed here.
+    </para>
+    </note>
+  </sect1>
   <sect1 id="example-searching-definitions-with-duckduckgo">
     <title>Example: searching definitions with DuckDuckGo</title>
     <para>
@@ -15823,337 +16599,7 @@ let run_many_searches =
         <literal>Serial</literal>, the map will wait for each search to
         fully complete before issuing the next one.
       </para>
-      <note>
-      <title>
-      Terminating Async applications
-      </title>
-      <para>
-        When you run the search example, you'll notice that the
-        application doesn't terminate even when all of the searches are
-        complete. The Async scheduler doesn't terminate by default, and
-        so most applications will listen for a signal to exit or simply
-        use <literal>CTRL-C</literal> to interrupt it from a console.
-      </para>
-      <para>
-        Another alternative is to run an Async function in a separate
-        system thread. You can do this by wrapping the function in the
-        <literal>Async.Thread_safe.block_on_async_exn</literal>. The
-        <literal>utop</literal> toplevel does this automatically for you
-        if you attempt to evaluate an Async function interactively.
-      </para>
-      </note>
     </sect2>
-  </sect1>
-  <sect1 id="manipulating-async-threads">
-    <title>Manipulating Async threads</title>
-    <para>
-      Now that we've seen the search example above, let's examine how
-      Async works in more detail.
-    </para>
-    <para>
-      Async threads are co-operative and never preempt each other, and
-      the library internally converts blocking code into a single event
-      loop. The threads are normal OCaml heap-allocated values (without
-      any runtime magic!) and are therefore very fast to allocate.
-      Concurrency is mostly limited only by your available main memory,
-      or operating system limits on non-memory resources such as file
-      descriptors.
-    </para>
-    <para>
-      Lets begin by constructing a simple thread. Async follows the Core
-      convention and provides an <literal>Async.Std</literal> that
-      provides threaded variants of many standard library functions. The
-      examples throughout this chapter assume that
-      <literal>Async.Std</literal> is open in your environment.
-    </para>
-    <programlisting language="ocaml">
-# require &quot;async.unix&quot; ;;
-# open Async.Std ;;
-# return 5 ;;
-- : int Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      The basic type of an Async thread is a
-      <literal>Deferred.t</literal>, which can be constructed by the
-      <literal>return</literal> function. The type parameter (in this
-      case <literal>int</literal>) represents the ultimate type of the
-      thread once it has completed in the future. This return value
-      cannot be used directly while it is wrapped in a
-      <literal>Deferred.t</literal> as it may not be available yet.
-      Instead, we <literal>bind</literal> a function closure that is
-      called once the value is eventually ready.
-    </para>
-    <programlisting language="ocaml">
-# let x = return 5 ;;
-val x : int Deferred.t = &lt;abstr&gt;
-# let y = Deferred.bind x (fun a -&gt; return (string_of_int a)) ;;
-val y : string Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      Here, we've bound a function to <literal>x</literal> that will
-      convert the <literal>int</literal> to a <literal>string</literal>.
-      Notice that while both <literal>x</literal> and
-      <literal>y</literal> share a common <literal>Deferred.t</literal>
-      type, their type variables differ and so they cannot be
-      interchangably used except in polymorphic functions. This is
-      useful when refactoring large codebases, as you can tell if any
-      function will block simply by the presence of an
-      <literal>Deferred.t</literal> in the signature.
-    </para>
-    <para>
-      Let's examine the function signatures of <literal>bind</literal>
-      and <literal>return</literal> more closely.
-    </para>
-    <programlisting language="ocaml">
-# return ;;
-- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
-# Deferred.bind ;;
-- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
-</programlisting>
-    <para>
-      <literal>return</literal>, <literal>bind</literal> and the
-      <literal>Deferred.t</literal> type all contain polymorphic type
-      variables (the <literal>'a</literal>) which represent the type of
-      the thread, and are inferred based on how they are used in your
-      code. The <literal>'a</literal> type of the argument passed to the
-      <literal>bind</literal> callback <emphasis>must</emphasis> be the
-      same as the <literal>'a Deferred.t</literal> of the input thread,
-      preventing runtime mismatches between thread callbacks. Both
-      <literal>bind</literal> and <literal>return</literal> form a
-      design pattern in functional programming known as
-      <emphasis>monads</emphasis>, and you will run across this
-      signature in many applications beyond just threads.
-    </para>
-    <para>
-      _(avsm: do we talk about Monads earlier in the Core chapter? I
-      presume we do, since the Option monad is very useful)
-    </para>
-    <para>
-      Binding callbacks is to deferred values is the most common way to
-      compose blocking operations, and inline operators are provided to
-      make it easier to use. In the fragment below, we see
-      <literal>&gt;&gt;=</literal> and <literal>&gt;&gt;|</literal> used
-      in similar ways to convert an integer into a string:
-    </para>
-    <programlisting language="ocaml">
-# let x = return 5 ;;
-val x : int Deferred.t = &lt;abstr&gt;
-# x &gt;&gt;= fun y -&gt; return (string_of_int y) ;;
-val - : string Deferred.t = &lt;abstr&gt;
-# x &gt;&gt;| string_of_int ;;
-val - : string Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      The <literal>&gt;&gt;=</literal> operator is exactly the same as
-      <literal>bind</literal> and unpacks the integer future into the
-      <literal>y</literal> variable. The subsequent closure receives the
-      unpacked integer and builds a new string future. It can be a
-      little verbose to keep calling <literal>bind</literal> and
-      <literal>return</literal>, and so the <literal>&gt;&gt;|</literal>
-      operator maps a non-Async function across a future value. In the
-      second example, the future value of <literal>x</literal> is mapped
-      to <literal>string_of_int</literal> directly, and the result is a
-      <literal>string</literal> future.
-    </para>
-    <para>
-      Async threads can be evaluated from the toplevel by wrapping them
-      in <literal>Thread_safe.block_on_async_exn</literal>, which spawns
-      a system thread that waits until a result is available. The
-      <literal>utop</literal> toplevel automatically detects
-      <literal>Deferred.t</literal> types that are entered interactively
-      and wraps them in this function for you automatically.
-    </para>
-    <programlisting language="ocaml">
-# let fn () = return 5 &gt;&gt;| string_of_int ;;
-val fn : unit -&gt; string Deferred.t = &lt;abstr&gt;
-# Thread_safe.block_on_async_exn fn ;;
-- : string = &quot;5&quot;
-# fn () ;;
-- : string = &quot;5&quot;
-</programlisting>
-    <para>
-      In the second evaluation of <literal>fn</literal>, the toplevel
-      detected the return type of a future and evaluated the result into
-      a concrete string.
-    </para>
-    <para>
-      (<emphasis>avsm</emphasis>: this utop feature not actually
-      implemented yet for Async, but works for Lwt)
-    </para>
-  </sect1>
-  <sect1 id="timing-and-thread-composition">
-    <title>Timing and Thread Composition</title>
-    <para>
-      Our examples so far have been with static threads, and now we'll
-      look at how to coordinate multiple threads and timeouts. Let's
-      write a program that spawns two threads, each of which sleep for
-      some random time and return either &quot;Heads&quot; or
-      &quot;Tails&quot;, and the quickest thread returns its value.
-    </para>
-    <programlisting language="ocaml">
-# let flip () =
-  let span = Time.Span.of_sec 3.0 in
-  let span_heads = Time.Span.randomize span ~percent:0.75 in
-  let span_tails = Time.Span.randomize span ~percent:0.75 in
-  let coin_heads =
-    Clock.after span_heads
-    &gt;&gt;| fun () -&gt;
-    &quot;Heads!&quot;, span_heads, span_tails
-  in
-  let coin_tails =
-    Clock.after span_tails
-    &gt;&gt;| fun () -&gt;
-    &quot;Tails!&quot;, span_heads, span_tails
-  in
-  Deferred.any [coin_heads; coin_tails] ;;
-val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&gt;
-</programlisting>
-    <para>
-      This introduces a couple of new time-related Async functions. The
-      <literal>Time</literal> module contains functions to express both
-      absolute and relative temporal relationships. In our coin flipping
-      example, we create a relative time span of 3 seconds, and then
-      permute it randomly twice by 75%. We then create two threads,
-      <literal>coin_heads</literal> and <literal>coin_tails</literal>
-      which return after their respective intervals. Finally,
-      <literal>Deferred.any</literal> waits for the first thread which
-      completes and returns its value, ignoring the remaining
-      undetermined threads.
-    </para>
-    <para>
-      Both of the threads encode the time intervals in their return
-      value so that you can can easily verify the calculations (you
-      could also simply print the time spans to the console as they are
-      calculated and simplify the return types). You can see this by
-      executing the <literal>flip</literal> function at the toplevel a
-      few times.
-    </para>
-    <programlisting language="ocaml">
-# Thread_safe.block_on_async_exn flip ;;
-# - : string * Time.Span.t * Time.Span.t = (&quot;Heads!&quot;, 2.86113s, 3.64635s)
-# Thread_safe.block_on_async_exn flip ;;
-# - : string * Time.Span.t * Time.Span.t = (&quot;Tails!&quot;, 4.44979s, 2.14977s)
-</programlisting>
-    <para>
-      The <literal>Deferred</literal> module has a number of other ways
-      to select between multiple threads, such as:
-    </para>
-    <informaltable>
-      <tgroup cols="3">
-        <colspec align="left"/>
-        <colspec align="left"/>
-        <colspec align="left"/>
-        <thead>
-          <row>
-            <entry>
-              Function
-            </entry>
-            <entry>
-              # Threads
-            </entry>
-            <entry>
-              Behaviour
-            </entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>
-              both
-            </entry>
-            <entry>
-              2
-            </entry>
-            <entry>
-              Combines both threads into a tuple and returns both
-              values.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              any
-            </entry>
-            <entry>
-              list
-            </entry>
-            <entry>
-              Returns the first thread that becomes determined.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              all
-            </entry>
-            <entry>
-              list
-            </entry>
-            <entry>
-              Waits for all threads to complete and returns their
-              values.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              all_unit
-            </entry>
-            <entry>
-              list
-            </entry>
-            <entry>
-              Waits for all <literal>unit</literal> threads to complete
-              and returns <literal>unit</literal>.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              peek
-            </entry>
-            <entry>
-              1
-            </entry>
-            <entry>
-              Inspects a single thread to see if it is determined yet.
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-    <para>
-      Try modifying the <literal>Deferred.any</literal> in the above
-      example to use some of the other thread joining functions above,
-      such as <literal>Deferred.both</literal>.
-    </para>
-    <sect2 id="cancellation">
-      <title>Cancellation</title>
-      <para>
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="a-simple-tcp-echo-server">
-    <title>A simple TCP Echo Server</title>
-    <para>
-    </para>
-  </sect1>
-  <sect1 id="onto-an-http-server">
-    <title>Onto an HTTP Server</title>
-    <para>
-    </para>
-  </sect1>
-  <sect1 id="binding-to-the-github-api">
-    <title>Binding to the Github API</title>
-    <para>
-      Show how we can use a monadic style to bind to the Github API and
-      make simple JSON requests/responses.
-    </para>
-    <note><title>
-    A Note on Portability
-    </title>
-    <para>
-      Explain libev and why its needed here.
-    </para>
-    </note>
-
-
   </sect1>
 </chapter><chapter id="fast-binary-serialization-with-bin_prot">
   <title>Fast Binary Serialization with bin_prot</title>
@@ -16195,15 +16641,15 @@ val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&
   <para>
     The <literal>bin_prot</literal> syntax extension isn't activated by
     default in the toplevel, but is easily available if you add this to
-    your <literal>~/.ocamlinit</literal> file:
+    your <literal>~/.ocamlinit</literal> file. You can also just type
+    this in directly into <literal>utop</literal> (with
+    <literal>;;</literal> to finish the line) instead.
   </para>
   <programlisting>
 #require &quot;bin_prot.syntax&quot;
 </programlisting>
   <para>
-    You can also just type this in directly into <literal>utop</literal>
-    (with <literal>;;</literal> to finish the line) instead. The
-    extension is activated by putting <literal>with bin_io</literal>
+    The extension is activated by putting <literal>with bin_io</literal>
     after the type declaration. This looks a bit unsightly in the
     toplevel because of all the definitions that are generated. We'll
     elide those definitions in the book, but you can see them for
@@ -20412,6 +20858,7 @@ immutable: 2.6186s (19073 minor collections)
 </chapter><chapter id="parsing-with-ocamllex-and-ocamlyacc">
   <title>Parsing with OCamllex and OCamlyacc</title>
   <para>
+    TODO: talk about ulex too
   </para>
 </chapter></part><appendix id="installation">
   <title>Installation</title>
