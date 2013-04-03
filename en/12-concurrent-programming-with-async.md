@@ -5,19 +5,316 @@ you'll soon need to handle concurrent operations. Consider the case of a web
 server sending a large file to many clients, or a GUI waiting for a mouse
 clicks. These applications often need to block while waiting for input for a particular task, and process something else during that time. Meanwhile, when new data does appear, the blocked task needs to be resumed as quickly as possible.
 
-Efficiency really matters here, as busy servers can often handle tens of thousands of simultaneous connections.  An equally important concern is readable source code, where the control flow of the program is obvious at a glance.
+Busy servers can often handle tens of thousands of simultaneous connections, so runtime efficiency really matters.  An equally important concern is readable source code, so that the control flow of the program is obvious at a glance.
 
-You've probably used preemptive system threads before in some programming languages such as Java or C#.  In this model, each task is usually given an operating system thread of its own.
-Other languages such as Javascript are single-threaded, and applications must register function callbacks to be triggered upon external events (such as a timeout or browser click).
+A common approach to concurrency is to use _preemptive_ system threads, most commonly in Java or C#.  In this threading model, each task is given an operating system thread of its own, and the kernel schedules them with arbitrary interleavings.
+Other language runtimes such as Javascript are single-threaded, and applications register function callbacks to be triggered upon external events such as a timeout or browser click.
 
-Both of these mechanisms have tradeoffs. Preemptive threads require their own memory stacks and can be memory hungry. The operating system can also arbitrarily interleave the execution of threads, and so they require careful locking around shared data structures.
-
-Event-driven systems usually only execute a single task at a time and require less locking.  However, the program structure can often descend into a maze of event callbacks for even a simple operation that blocks a few times.  Code readability matters, and so we'd like to avoid such spaghetti control flow.
+Both of these mechanisms have tradeoffs. Preemptive threads require more resources per thread and can be memory hungry. The operating system can also arbitrarily interleave the execution of preemptive threads, putting a load on the programmer to lock shared data structures.
+Single-threaded event-driven systems execute a single task at a time and require less locking.  However, the program structure can often descend into a maze of event callbacks for even a simple operation that blocks a few times.  Code readability matters, and so we'd like to avoid such spaghetti control flow.
 
 The `Async` OCaml library offers a hybrid model that lets you write
 event-driven code that can block *without* the complexity of preemptive threading.
-Let's dive straight into an example to see what this looks like, and
-then explain some of the new concepts.  We're going to search for definitions of English terms using the DuckDuckGo search engine.
+Lets begin by constructing a simple thread. Async follows the Core convention
+and provides an `Async.Std` that provides threaded variants of many standard
+library functions.
+
+```ocaml
+# require "async.unix" ;;
+# open Async.Std ;;
+# return 5 ;;
+- : int Deferred.t = <abstr>
+```
+
+<note>
+<title>When to open `Async.Std`</title>
+
+The `Core.Std` module is normally opened up in every file you write. You
+need to be a little more careful when opening `Async.Std` as it replaces
+standard blocking functions with asynchronous equivalents.
+This comes across most obviously with the standard input and output descriptors.
+
+```ocaml
+# open Core.Std;;
+# print_endline "hello world";;
+hello world
+- : unit = ()
+# open Async.Std;;
+# print_endline "hello world";;
+- : unit = ()
+TODO what is the manual flush call here?
+```
+
+With just `Core.Std` open, the `print_endline` function immediately displayed
+its output to the console.  When `Async.Std` was opened, the call to `print_endline`
+is buffered and needs to be manually flushed before the output is displayed.
+
+</note>
+
+## Creating your first async threads
+
+Async threads are co-operative and never preempt each other, and
+the library internally converts blocking code into a single event loop.  The
+threads are normal OCaml heap-allocated values (without any runtime magic!) and
+can be allocated very fast. Concurrency is mostly limited only by your
+available main memory, or operating system limits on other resources such
+as file descriptors.
+
+The basic type of an Async thread is a `'a Deferred.t`, which can be constructed
+by the `return` function.  The type parameter (in this case `int`) represents
+the ultimate type of the thread once it has completed in the future.  This
+return value cannot be used directly while it is wrapped in a `Deferred.t` as
+it may not be available yet.  Instead, we can `bind` a functional closure to
+the thread that is called once the value is eventually ready.
+
+```ocaml
+# open Async.Std ;;
+# let x = return 5 ;;
+val x : int Deferred.t = <abstr>
+```
+
+The `return` function constructs a constant `int Deferred.t` whose value will
+be available immediately.
+
+```ocaml
+# let y = Deferred.bind x (fun v -> return (string_of_int v)) ;;
+val y : string Deferred.t = <abstr>
+```
+
+We've now bound a function to `x` that will be called over its resulting
+value.  The closure simply converts the `int` to a `string` and returns it
+as a `string Deferred.t`. 
+Notice that while both `x` and `y` share a common `Deferred.t` type, their type
+variables differ and so they cannot be interchangably used except in
+polymorphic functions.  This is useful when refactoring large codebases as you
+can tell if any function will block simply by the presence of an `Deferred.t`
+in the signature.
+
+Another important note is that the result of the bound function must also be
+a `Deferred` value.  If we try to return a `string` immediately, then we get the
+following type error.
+
+````ocaml
+# let y = Deferred.bind x (fun v -> string_of_int v);;
+Error: This expression has type string but an expression was expected of type
+         'a Deferred.t = 'a Ivar.Deferred.t
+```
+
+This requirement makes `bind` operations composable. You can take the
+`y` value and `bind` it again to another thread, and expect them all to
+run in the correct sequence.
+Let's examine the function signatures of `bind` and `return` more closely
+to understand this better.
+
+```ocaml
+# return ;;
+- : 'a -> 'a Deferred.t = <fun>
+# Deferred.bind ;;
+- : 'a Deferred.t -> ('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
+```
+
+`return`, `bind` and the `Deferred.t` type all contain polymorphic type
+variables (the `'a`) which represent the type of the thread, and are inferred
+based on how they are used in your code. The `'a` type of the argument passed
+to the `bind` callback _must_ be the same as the `'a Deferred.t` of the input
+thread, preventing runtime mismatches between thread callbacks.
+
+Both `bind` and `return` form a design pattern in functional programming known as *monads*, and
+you will run across this signature in many applications beyond just threads.
+_TODO avsm: figure out where to talk about all the monads in Core in more detail_.
+The `>>=` inline operator is provided as a more succinct alias to `bind`, as shown below.
+
+```ocaml
+# let x = return 5 ;;
+val x : int Deferred.t = <abstr>
+# x >>= fun y -> return (string_of_int y) ;;
+val - : string Deferred.t = <abstr>
+```
+
+The `>>=` operator is exactly the same as `bind` and unpacks the integer future
+into the `y` variable. The subsequent closure is called with the resulting integer and
+builds a new string future.
+
+It can be a little verbose to keep calling `bind` and `return` to wrap simple
+functions such as `string_of_int`. The `>>|` operator maps a non-Async function 
+directly across a `Deferred.t` value.  In the example below, the deferred `x` is
+mapped to `string_of_int` directly, and the result is a `string Deferred.t`.
+
+```ocaml
+# x >>| string_of_int ;;
+val - : string Deferred.t = <abstr>
+```
+
+Multiple threads can be chained together with successive calls to `bind` to sequentially compose
+blocking operations.
+
+```ocaml
+# return 5
+  >>= fun v -> return (string_of_int v)
+  >>= fun v -> return (v = "5")
+- : bool Deferred.t = <abstr>
+```
+
+The example above constructs an `int` thread, converts it to a `string` thread, and then to
+a `bool` thread via a string comparison.  Of course, there's no interesting threading
+going on in this example beyond building a constant value, but let's look at how to run
+it next.
+
+## Executing async applications
+
+All async threads run within a _scheduler_ that is responsible for associating
+blocked threads with system resources (such as file descriptors) and waking them
+up when external I/O or timer events fire. 
+
+### Running threads within the toplevel
+
+If you're experimenting with async programming, the `utop` toplevel is a convenient
+place to write code interactively. Async threads can be evaluated into a concrete
+value by wrapping them in `Thread_safe.block_on_async_exn`, which spawns a system thread that waits until
+a result is available.
+
+```ocaml
+# Thread_safe.block_on_async_exn ;;
+- : (unit -> 'a Deferred.t) -> 'a = <fun>
+```
+ 
+A neat feature in `utop` is that it detects functions with a
+`Deferred.t` in the return type, and automatically translates it into
+a call to `block_on_async_exn` for you.
+
+```ocaml
+# let fn () = return 5 >>| string_of_int ;;
+val fn : unit -> string Deferred.t = <abstr>
+
+# Thread_safe.block_on_async_exn fn ;;
+- : string = "5"
+
+# fn () ;;
+- : string = "5"
+```
+
+We've defined an `fn` thread in the first phrase, and then run it manually
+using `block_on_async_exn`.  The final phrase executes `fn` directly, and
+you can see the `utop` translation kicking in and returning the concrete
+value.
+
+### Running threads within an application
+
+An application can also use the same `block_on_async_exn` as the toplevel, but there are two alternatives.
+Once a few threads have been started, the `Scheduler.go` function runs them for you.
+
+```ocaml
+# Scheduler.go ;;
+- : ?raise_unhandled_exn:bool -> unit -> never_returns = <fun> 
+```
+
+Notice that this function never returns, even if all of the spawned threads are completed.
+The Async scheduler doesn't terminate by default, and so most applications will listen for a signal to exit or simply use `CTRL-C` to interrupt it from a console.
+
+Another common way to execute async threads is via the `Command` module we introduced in [xref](#command-line-parsing).
+When you open `Async.Std`, the `Command` module now has an `async_basic` available.
+
+```ocaml
+# Command.async_basic ;;
+- : summary:string -> 
+    ?readme:(unit -> string) -> 
+    ('a, unit -> unit Deferred.t) Command.Spec.t -> 
+    'a -> Command.t = <fun>
+```
+
+This is used in exactly the same way as the usual `Command` module, except that the callbacks must return a `Deferred.t`.  This lets you run blocking threads directly from a command-line interface.
+
+## Timing and Thread Composition
+
+Our examples so far have been with static threads, which isn't
+very much use for real programs.  We'll now add timing to the mix
+and show you how to coordinate threads and timeouts.
+Let's write a program that spawns two threads, each of which sleep
+for some random time and return either "Heads" or "Tails". 
+The first thread that wakes up returns its value.
+
+```ocaml
+# let flip () =
+  let span = Time.Span.of_sec 3.0 in
+  let span_heads = Time.Span.randomize span ~percent:0.75 in
+  let span_tails = Time.Span.randomize span ~percent:0.75 in
+  let coin_heads =
+    Clock.after span_heads
+    >>| fun () ->
+    "Heads!", span_heads, span_tails
+  in
+  let coin_tails =
+    Clock.after span_tails
+    >>| fun () ->
+    "Tails!", span_heads, span_tails
+  in
+  Deferred.any [coin_heads; coin_tails] ;;
+val flip : unit -> (string * Time.Span.t * Time.Span.t) Deferred.t = <fun>
+```
+
+This example introduces a couple of new time-related Async functions.
+The `Time` module contains functions to express both absolute and relative temporal
+relationships.  In our coin flipping example, we use:
+* `Time.Span.of_sec` to create a relative time span of 3 seconds
+* `Time.Span.randomize` to permute this span randomly by 75%
+* `Clock.after` to build a `unit Deferred.t` that will return after the specified timespan
+* `Deferred.any` to select between a list of threads and return the value of the first one to return a value.
+
+It's important to note that there is no need for an explicit "thread create" function in Async.
+Instead, we build up functions that manipulate `Deferred.t` values, and bind them to names when
+convenient.  In the example above, we've created `coin_heads` and `coin_tails` which
+have the following type:
+
+```
+val coin_heads : (string * Time.Span.t * Time.Span.t) Deferred.t
+val coin_tails : (string * Time.Span.t * Time.Span.t) Deferred.t
+```
+
+Both of the threads encode the time intervals in their return value so that you
+can can easily verify the calculations (you could also simply print the time
+spans to the console as they are calculated and simplify the return types).
+Let's verify this by running the `flip` function at the toplevel a few times.
+Remember to run this in `utop`, since it will spin up the Async scheduler automatically
+for you and block until a result is available.
+
+```ocaml
+# flip () ;;
+# - : string * Time.Span.t * Time.Span.t = ("Heads!", 2.86113s, 3.64635s)
+
+# flip () ;;
+# - : string * Time.Span.t * Time.Span.t = ("Tails!", 4.44979s, 2.14977s)
+```
+
+We used `any` in our example to choose the first ready thread. 
+The `Deferred` module has a number of other ways to select between multiple
+threads:
+
+Function    # Threads  Behaviour
+--------    ---------  ---------
+both        2          Combines both threads into a tuple and returns both values.
+any         list       Returns the first thread that becomes determined.
+all         list       Waits for all threads to complete and returns their values.
+all_unit    list       Waits for all `unit` threads to complete and returns `unit`.
+peek        1          Inspects a single thread to see if it is determined yet.
+
+Try modifying the `Deferred.any` in the above example to use some of the other
+thread joining functions above, such as `Deferred.both`.
+
+### Cancellation
+
+## A simple TCP Echo Server
+
+## Onto an HTTP Server
+
+## Binding to the Github API
+
+Show how we can use a monadic style to bind to the Github API and make simple JSON requests/responses.
+
+<note><title>A Note on Portability</title>
+
+Explain libev and why its needed here.
+
+</note>
 
 ## Example: searching definitions with DuckDuckGo
 
@@ -159,195 +456,5 @@ let run_many_searches =
 
 The `Deferred.List` module lets you specify exactly how to map over a collection of futures.  The searches will be executed simultaneously, and the map thread will complete once all of the sub-threads are complete. If you replace the `Parallel` parameter with `Serial`, the map will wait for each search to fully complete before issuing the next one.
 
-<note>
-<title>Terminating Async applications</title>
-
-When you run the search example, you'll notice that the application doesn't terminate even when all of the searches are complete. The Async scheduler doesn't terminate by default, and so most applications will listen for a signal to exit or simply use `CTRL-C` to interrupt it from a console.
-
-Another alternative is to run an Async function in a separate system
-thread. You can do this by wrapping the function in the `Async.Thread_safe.block_on_async_exn`.  The `utop` toplevel does this automatically for you if you attempt to evaluate an Async function interactively.
-
-</note>
-
-## Manipulating Async threads
-
-Now that we've seen the search example above, let's examine how Async works in more detail.
-
-Async threads are co-operative and never preempt each other, and
-the library internally converts blocking code into a single event loop.  The
-threads are normal OCaml heap-allocated values (without any runtime magic!) and
-are therefore very fast to allocate. Concurrency is mostly limited only by your
-available main memory, or operating system limits on non-memory resources such
-as file descriptors.
-
-Lets begin by constructing a simple thread. Async follows the Core convention
-and provides an `Async.Std` that provides threaded variants of many standard
-library functions.  The examples throughout this chapter assume that `Async.Std`
-is open in your environment.
-
-```ocaml
-# require "async.unix" ;;
-# open Async.Std ;;
-# return 5 ;;
-- : int Deferred.t = <abstr>
-```
-
-The basic type of an Async thread is a `Deferred.t`, which can be constructed
-by the `return` function.  The type parameter (in this case `int`) represents
-the ultimate type of the thread once it has completed in the future.  This
-return value cannot be used directly while it is wrapped in a `Deferred.t` as
-it may not be available yet.  Instead, we `bind` a function closure that is
-called once the value is eventually ready.
-
-```ocaml
-# let x = return 5 ;;
-val x : int Deferred.t = <abstr>
-# let y = Deferred.bind x (fun a -> return (string_of_int a)) ;;
-val y : string Deferred.t = <abstr>
-```
-
-Here, we've bound a function to `x` that will convert the `int` to a `string`.
-Notice that while both `x` and `y` share a common `Deferred.t` type, their type
-variables differ and so they cannot be interchangably used except in
-polymorphic functions.  This is useful when refactoring large codebases, as you
-can tell if any function will block simply by the presence of an `Deferred.t`
-in the signature.
-
-Let's examine the function signatures of `bind` and `return` more closely.
-
-```ocaml
-# return ;;
-- : 'a -> 'a Deferred.t = <fun>
-# Deferred.bind ;;
-- : 'a Deferred.t -> ('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
-```
-
-`return`, `bind` and the `Deferred.t` type all contain polymorphic type
-variables (the `'a`) which represent the type of the thread, and are inferred
-based on how they are used in your code. The `'a` type of the argument passed
-to the `bind` callback *must* be the same as the `'a Deferred.t` of the input
-thread, preventing runtime mismatches between thread callbacks.  Both `bind` and
-`return` form a design pattern in functional programming known as *monads*, and
-you will run across this signature in many applications beyond just threads.
-
-_(avsm: do we talk about Monads earlier in the Core chapter? I presume we do,
-since the Option monad is very useful)
-
-Binding callbacks is to deferred values is the most common way to compose
-blocking operations, and inline operators are provided to make it easier to use.
-In the fragment below, we see `>>=` and `>>|` used in similar ways to convert
-an integer into a string:
-
-```ocaml
-# let x = return 5 ;;
-val x : int Deferred.t = <abstr>
-# x >>= fun y -> return (string_of_int y) ;;
-val - : string Deferred.t = <abstr>
-# x >>| string_of_int ;;
-val - : string Deferred.t = <abstr>
-```
-
-The `>>=` operator is exactly the same as `bind` and unpacks the integer future
-into the `y` variable. The subsequent closure receives the unpacked integer and
-builds a new string future.  It can be a little verbose to keep calling `bind`
-and `return`, and so the `>>|` operator maps a non-Async function across a
-future value.  In the second example, the future value of `x` is mapped to
-`string_of_int` directly, and the result is a `string` future.
-
-Async threads can be evaluated from the toplevel by wrapping them in
-`Thread_safe.block_on_async_exn`, which spawns a system thread that waits until
-a result is available.  The `utop` toplevel automatically detects `Deferred.t`
-types that are entered interactively and wraps them in this function for you
-automatically.
-
-```ocaml
-# let fn () = return 5 >>| string_of_int ;;
-val fn : unit -> string Deferred.t = <abstr>
-# Thread_safe.block_on_async_exn fn ;;
-- : string = "5"
-# fn () ;;
-- : string = "5"
-```
-
-In the second evaluation of `fn`, the toplevel detected the return type of
-a future and evaluated the result into a concrete string.
-
-(_avsm_: this utop feature not actually implemented yet for Async, but works for Lwt)
-
-## Timing and Thread Composition
-
-Our examples so far have been with static threads, and now we'll look at how to
-coordinate multiple threads and timeouts.  Let's write a program that spawns
-two threads, each of which sleep for some random time and return either
-"Heads" or "Tails", and the quickest thread returns its value.
-
-```ocaml
-# let flip () =
-  let span = Time.Span.of_sec 3.0 in
-  let span_heads = Time.Span.randomize span ~percent:0.75 in
-  let span_tails = Time.Span.randomize span ~percent:0.75 in
-  let coin_heads =
-    Clock.after span_heads
-    >>| fun () ->
-    "Heads!", span_heads, span_tails
-  in
-  let coin_tails =
-    Clock.after span_tails
-    >>| fun () ->
-    "Tails!", span_heads, span_tails
-  in
-  Deferred.any [coin_heads; coin_tails] ;;
-val flip : unit -> (string * Time.Span.t * Time.Span.t) Deferred.t = <fun>
-```
-
-This introduces a couple of new time-related Async functions. The `Time` module
-contains functions to express both absolute and relative temporal
-relationships.  In our coin flipping example, we create a relative time span of
-3 seconds, and then permute it randomly twice by 75%.  We then create two
-threads, `coin_heads` and `coin_tails` which return after their respective
-intervals.  Finally, `Deferred.any` waits for the first thread which completes
-and returns its value, ignoring the remaining undetermined threads.
-
-Both of the threads encode the time intervals in their return value so that you
-can can easily verify the calculations (you could also simply print the time
-spans to the console as they are calculated and simplify the return types).
-You can see this by executing the `flip` function at the toplevel a few times.
-
-```ocaml
-# Thread_safe.block_on_async_exn flip ;;
-# - : string * Time.Span.t * Time.Span.t = ("Heads!", 2.86113s, 3.64635s)
-# Thread_safe.block_on_async_exn flip ;;
-# - : string * Time.Span.t * Time.Span.t = ("Tails!", 4.44979s, 2.14977s)
-```
-
-The `Deferred` module has a number of other ways to select between multiple
-threads, such as:
-
-Function    # Threads  Behaviour
---------    ---------  ---------
-both        2          Combines both threads into a tuple and returns both values.
-any         list       Returns the first thread that becomes determined.
-all         list       Waits for all threads to complete and returns their values.
-all_unit    list       Waits for all `unit` threads to complete and returns `unit`.
-peek        1          Inspects a single thread to see if it is determined yet.
-
-Try modifying the `Deferred.any` in the above example to use some of the other
-thread joining functions above, such as `Deferred.both`.
-
-### Cancellation
-
-## A simple TCP Echo Server
-
-## Onto an HTTP Server
-
-## Binding to the Github API
-
-Show how we can use a monadic style to bind to the Github API and make simple JSON requests/responses.
-
-<note><title>A Note on Portability</title>
-
-Explain libev and why its needed here.
-
-</note>
 
 

@@ -4,30 +4,26 @@ S-expressions are a good serialization format when you need something
 machine-parseable as well as human readable and editable.  But Sexplib's
 s-expressions are not particularly performant for a couple of reasons:
 
-* s-expression serialization goes through an intermediate type, `Sexp.t`, which must be allocated and is then typically
-thrown away, putting non-trivial pressure on the garbage collector.
-* parsing and printing to strings in an ASCII format can be expensive
-for types like `int`s, `float`s and `Time.t`s where some real computation needs
-to be done to produce or parse the ASCII representation.
+* s-expression serialization goes through an intermediate type, `Sexp.t`, which must be allocated and is then typically thrown away, putting non-trivial pressure on the garbage collector.
+* parsing and printing to strings in an ASCII format can be expensive for types like `int`s, `float`s and `Time.t`s where some real computation needs to be done to produce or parse the ASCII representation.
 
-`Bin_prot` is a library that addresses these issues by providing
-fast serialization in a compact binary format.  We'll also introduce the
-Core `Bigstring` library for handling large binary strings efficiently during this chapter.
+`Bin_prot` is a library that addresses these issues by providing fast serialization in a compact binary format.  We'll also introduce the Core `Bigstring` library for handling large binary strings efficiently during this chapter.
 
 <note>
 <title>Using `bin_prot` in the toplevel</title>
 
 The `bin_prot` syntax extension isn't activated by default in the toplevel, but is easily available
-if you add this to your `~/.ocamlinit` file:
+if you add this to your `~/.ocamlinit` file.
+You can also just type this in directly into `utop` (with `;;` to finish the line) instead.
 
 ```
 #require "bin_prot.syntax"
 ```
 
-You can also just type this in directly into `utop` (with `;;` to finish the line) instead.
 The extension is activated by putting `with bin_io` after the type declaration.
-This looks a bit unsightly in the toplevel because of all the definitions that are
-generated.  We'll elide those definitions in the book, but you can see them for yourself in the toplevel.
+This looks a bit unsightly in the toplevel because of all the definitions that
+are generated.  We'll elide those definitions in the book, but you can see them
+for yourself in the toplevel.
 
 </note>
 

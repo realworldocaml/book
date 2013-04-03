@@ -24,9 +24,10 @@ type-safe way.
 
 ## Basic command line parsing
 
-We'll begin by cloning the `md5` binary that is present on most Linux distributions
-and MacOS X.  It reads in the contents of a file, applies the MD5 one-way hash function
-to the data, and outputs an ASCII hex representation of the result.
+We'll begin by cloning the `md5` binary that is present on most Linux
+distributions and MacOS X.  It reads in the contents of a file, applies the MD5
+one-way hash function to the data, and outputs an ASCII hex representation of
+the result.
 
 ```ocaml
 open Core.Std
@@ -51,10 +52,11 @@ let command =
 let () = Command.run command
 ```
 
-The `do_hash` function accepts a filename parameter and prints the human-readalbe MD5
-string to the console sandard output.  We want to control the inputs to this function
-via the command-line, and this is what the subsequent `command` value declares.
-If you compile this program and run it, the help screen looks like this:
+The `do_hash` function accepts a filename parameter and prints the
+human-readable MD5 string to the console standard output.  We want to control
+the inputs to this function via the command-line, and this is what the
+subsequent `command` value declares.  If you compile this program and run it,
+the help screen looks like this:
 
 ```
 $ ./basic.byte 
@@ -85,31 +87,40 @@ $ ./basic.byte basic.byte
 
 So how does all this work?  There are three parts to defining a command-line interface:
 
-* `Command.basic` takes a function which is passed parameters parsed from the command-line according to a `spec` parameter.  It takes a
-`summary` parameter for a one-line description of the command behavior, and  `readme`  for longer help text.
-* `Command.spec` defines the steps required to convert a command-line into an OCaml structure.
+* `Command.Spec.t` defines the steps required to convert a command-line into an OCaml structure.
+* `Command.basic` takes a callback that is passed parameters parsed from the command-line according to the `spec` parameter.  It takes a
+`summary` string for a one-line description of the command behavior, and an optional `readme` for longer help text.
 * `Command.run` actually executes a command and its specification, and runs the callback function with the resulting parameters.
 
-Most of the interesting logic lies in how the specifications are defined.  
-The `Command.Spec` module defines several combinators that can be chained together to define flags and anonymous arguments, what types they should map to, and whether to take special actions (such as interactive input) if certain fields are encountered.
+Most of the interesting logic lies in how the specifications are defined.  The
+`Command.Spec` module defines several combinators that can be chained together
+to define flags and anonymous arguments, what types they should map to, and
+whether to take special actions (such as interactive input) if certain fields
+are encountered.
 
 ```ocaml
-  Command.Spec.(
-    empty
-    +> anon ("filename" %: string)
-  )
+Command.Spec.(
+  empty
+  +> anon ("filename" %: string)
+)
 ```
 
-Here, we begin the specification with an `empty` value, and then chain more parameters via the `+>` combinator.
-Our simple `example define a single _anonymous_ parameter via the `anon` function (that is, a standalone token from the command-line).
-Anonymous functions can be assigned a name that is used in help text and an OCaml type that they are mapped to.
-The parameters specified are all passed to a callback function which actually invokes the program logic.
+We begin the specification above with an `empty` value, and then chain more
+parameters via the `+>` combinator.  Our example defines a single _anonymous_
+parameter via the `anon` function
+(that is, a standalone token from the command-line).  Anonymous functions can
+be assigned a name that is used in help text, and an OCaml type that they are
+mapped to.  The parameters specified here are all eventually passed to a
+callback function which actually invokes the program logic.
 
 ```ocaml
 (fun file () -> do_hash file)
 ```
 
-In our example, the function takes a `file` parameter that is a `string`, and maps it to the `do_hash` function.  You aren't just limited to strings though, as `Command.Spec` defines several other conversion functions that validate and parse input into various types:
+In our example, the function takes a `file` parameter that is a `string`, and
+maps it to the `do_hash` function.  You aren't just limited to strings though,
+as `Command.Spec` defines several other conversion functions that validate and
+parse input into various types:
 
 Argument type    OCaml type    Example
 -------------    -----------   -------
@@ -121,7 +132,10 @@ Argument type    OCaml type    Example
 `time_span`      `Span.t`      `5s`
 `file`           `string`      `<valid filename>`
 
-Anonymous arguments don't have to be declared individually.  A more realistic `md5` function might also read from the standard input if a filename isn't specified.  We can change our specification with a single line to reflect this by writing:
+Anonymous arguments don't have to be declared individually.  A more realistic
+`md5` function might also read from the standard input if a filename isn't
+specified.  We can change our specification with a single line to reflect this
+by writing:
 
 ```ocaml
 Command.Spec.(
@@ -130,7 +144,9 @@ Command.Spec.(
 )
 ```
 
-The anonymous parameter has been prefixed with a `maybe` that indicates the value is now optional.  If you compile the example, you'll get a type error though:
+The anonymous parameter has been prefixed with a `maybe` that indicates the
+value is now optional.  If you compile the example, you'll get a type error
+though:
 
 ```
 File "basic_broken.ml", line 18, characters 26-30:
@@ -139,7 +155,10 @@ Error: This expression has type string option
 Command exited with code 2.
 ```
 
-This is because the type of the callback function has changed.  It now wants a `string option` instead of a `string` since the value is optional.  We can quickly adapt our example to use the new information and read from standard input if no file is specified.
+This is because the type of the callback function has changed.  It now wants a
+`string option` instead of a `string` since the value is optional.  We can
+quickly adapt our example to use the new information and read from standard
+input if no file is specified.
 
 ```ocaml
 open Core.Std
@@ -168,8 +187,10 @@ let command =
 let () = Command.run command
 ```
 
-There are several other transformations you can do on anonymous arguments. We've shown you `maybe`, and you can also obtain lists of arguments or supply default values.  Try altering the example above to take a list of files and output checksums for all of them,
-just as the `md5` command does.
+There are several other transformations you can do on anonymous arguments.
+We've shown you `maybe`, and you can also obtain lists of arguments or supply
+default values.  Try altering the example above to take a list of files and
+output checksums for all of them, just as the `md5` command does.
 
 Anonymous argument   OCaml type
 ------------------   ----------
@@ -179,8 +200,12 @@ maybe_with_default   argument with a default value if argument is missing
 
 ## Using flags to label the command line
 
-You aren't just limited to anonymous arguments on the command-line, of course.  Flags (such as `-v`) can be specified in the same manner as anonymous arguments.  These can appear in any order on the command-line, or multiple times, depending on how they're declared.
-Let's add two arguments to our `md5` command that mimic the Linux version: a `-s` flag to specify the string to be hashed directly, and a `-t` self-benchmark test.
+You aren't just limited to anonymous arguments on the command-line, of course.
+Flags (such as `-v`) can be specified in the same manner as anonymous
+arguments.  These can appear in any order on the command-line, or multiple
+times, depending on how they're declared.  Let's add two arguments to our `md5`
+command that mimic the Linux version: a `-s` flag to specify the string to be
+hashed directly, and a `-t` self-benchmark test.
 
 ```ocaml
 Command.Spec.(
@@ -191,13 +216,12 @@ Command.Spec.(
 )
 ```
 
-The `flag` command is quite similar to `anon`.  The first argument is the
-flag name, and aliases can be specified via an optional argument.  The `doc`
-string should be formatted so that the first word is the short name that
-should appear in the usage text, with the remainder being the full help text.
-Notice that the `-t` flag has no argument, and so we prepend the doc text
-with a blank space.
-The help text for the above fragment looks like this:
+The `flag` command is quite similar to `anon`.  The first argument is the flag
+name, and aliases can be specified via an optional argument.  The `doc` string
+should be formatted so that the first word is the short name that should appear
+in the usage text, with the remainder being the full help text.  Notice that
+the `-t` flag has no argument, and so we prepend the doc text with a blank
+space.  The help text for the above fragment looks like this:
 
 ```
 $ mlmd5 -s 
@@ -307,13 +331,13 @@ val group :
   (string * t) list -> t
 ```
 
-The `group` signature accepts a list of basic `Command.t` values and their corresponding
-names. When executed, it looks for the appropriate sub-command from the name list, and
-dispatches it to the right command handler.
+The `group` signature accepts a list of basic `Command.t` values and their
+corresponding names. When executed, it looks for the appropriate sub-command
+from the name list, and dispatches it to the right command handler.
 
-Let's build the beginning of a calendar that do a few operations over dates from the
-command line.  We first define a command that adds days to an input date and prints the
-resulting date.
+Let's build the beginning of a calendar that do a few operations over dates
+from the command line.  We first define a command that adds days to an input
+date and prints the resulting date.
 
 ```ocaml
 open Core.Std
@@ -335,8 +359,9 @@ let add =
 let () = Command.run add
 ```
 
-Once we've tested this and made sure it works, we can define another command that takes the
-difference of two dates.  Both of the commands are now grouped as sub-commands using `Command.group`.
+Once we've tested this and made sure it works, we can define another command
+that takes the difference of two dates.  Both of the commands are now grouped
+as sub-commands using `Command.group`.
 
 ```
 open Core.Std
@@ -373,7 +398,8 @@ let command =
 let () = Command.run command
 ```
 
-And that's all you need to add sub-command support!  The help page for our calendar now reflects the two commands we just added:
+And that's all you need to add sub-command support!  The help page for our
+calendar now reflects the two commands we just added:
 
 ```
 $ cal
@@ -391,7 +417,8 @@ Manipulate dates
 missing subcommand for command cal
 ```
 
-We can invoke the two commands we just defined to verify that they work and see the date parsing in action.
+We can invoke the two commands we just defined to verify that they work and see
+the date parsing in action.
 
 ```
 $ cal add 2012-12-25 40
@@ -400,18 +427,25 @@ $ cal diff 2012-12-25 2012-11-01
 54 days
 ```
 
-## Command auto-completion with bash
-
-TODO, see https://github.com/janestreet/core/issues/11
-
 ## Advanced control over parsing
 
-The use of the spec combinators has been somewhat magic so far: we just build them up with the '+>' combinator and things seem to work.  As your programs get larger and more complex, you'll want to factor out common functionality between specifications.  Some other times, you'll need to interrupt the parsing to perform special processing, such as requesting an interactive passphrase from the user before proceeding.  We'll show you some new combinators that let you do this now.
+The use of the spec combinators has been somewhat magic so far: we just build
+them up with the '+>' combinator and things seem to work.  As your programs get
+larger and more complex, you'll want to factor out common functionality between
+specifications.  Some other times, you'll need to interrupt the parsing to
+perform special processing, such as requesting an interactive passphrase from
+the user before proceeding.  We'll show you some new combinators that let you
+do this now.
 
 <sidebar>
 <title>The types behind `Command.Spec`</title>
 
-The Command module's safety relies on the specification's output values precisely matching the callback function which invokes the main program. Any mismatch here will inevitably result in a dynamic failure, and so Command uses some interesting type abstraction to guarantee they remain in sync.  You don't have to understand this section to use the more advanced combinators, but it'll help you debug type errors as you use `Command` more.
+The Command module's safety relies on the specification's output values
+precisely matching the callback function which invokes the main program. Any
+mismatch here will inevitably result in a dynamic failure, and so Command uses
+some interesting type abstraction to guarantee they remain in sync.  You don't
+have to understand this section to use the more advanced combinators, but it'll
+help you debug type errors as you use `Command` more.
 
 The type of `Command.t` looks deceptively simple:
 
@@ -419,19 +453,23 @@ The type of `Command.t` looks deceptively simple:
 type ('main_in, 'main_out) t 
 ```
 
-You can think of `('a, 'b) t` as a function of type `'a -> 'b`, but embellished with information about:
+You can think of `('a, 'b) t` as a function of type `'a -> 'b`, but embellished
+with information about:
 
 * how to parse the command line
 * what the command does and how to call it
 * how to auto-complete a partial command line
 
-The type of a specification transforms a `'main_in` to a `'main_out` value.  For instance, a value of `Spec.t` might have type:
+The type of a specification transforms a `'main_in` to a `'main_out` value.
+For instance, a value of `Spec.t` might have type:
 
 ```ocaml
 (arg1 -> ... -> argN -> 'r, 'r) Spec.t
 ```
 
-Such a value transforms a main function of type `arg1 -> ... -> argN -> 'r` by supplying all the argument values, leaving a main function that returns a value of type `'r`.  Let's look at some examples of specs, and their types:
+Such a value transforms a main function of type `arg1 -> ... -> argN -> 'r` by
+supplying all the argument values, leaving a main function that returns a value
+of type `'r`.  Let's look at some examples of specs, and their types:
 
 ```ocaml
 # Command.Spec.empty ;;
@@ -440,10 +478,19 @@ Such a value transforms a main function of type `arg1 -> ... -> argN -> 'r` by s
 - : (int -> '_a, '_a) Command.Spec.t = <abstr>
 ```
 
-The empty specification is simple as it doesn't add any parameters to the callback type.
-The second example adds an `int` anonymous parameter that is reflected in the inferred type.  Notice that the return value of this fragment has been inferred to be `'_a` instead of the usual `'a`.  The underscore denotes a _weakly polymorphic type_ which cannot be generalized further.  You should never see this in normal use, but you may encounter this if you define specifications in the top-level of a module.  You can work around this so-called _value restriction_ by moving the definitions under a `let` binding.
+The empty specification is simple as it doesn't add any parameters to the
+callback type.  The second example adds an `int` anonymous parameter that is
+reflected in the inferred type.  Notice that the return value of this fragment
+has been inferred to be `'_a` instead of the usual `'a`.  The underscore
+denotes a _weakly polymorphic type_ which cannot be generalized further.  You
+should never see this in normal use, but you may encounter this if you define
+specifications in the top-level of a module.  You can work around this
+so-called _value restriction_ by moving the definitions under a `let` binding.
 
-One forms a command by combining a spec of type `('main, unit) Spec.t` with a main function of type `'main`.  All the combinators we've shown so far incrementally build up the type of `'main` according to the command-line parameters it expects, so the resulting type of `'main` is something like:
+One forms a command by combining a spec of type `('main, unit) Spec.t` with a
+main function of type `'main`.  All the combinators we've shown so far
+incrementally build up the type of `'main` according to the command-line
+parameters it expects, so the resulting type of `'main` is something like:
 
 ```ocaml
 arg1 -> ... -> argN -> unit
@@ -458,14 +505,20 @@ val basic :
   ('main, unit -> unit) Spec.t -> 'main -> t
 ```
 
-The final line is the important one. It shows that the callback function for a spec should consume identical arguments to the supplied `main` function, except that there is an additional `unit` argument.  This final `unit` is there in case there are no command-line arguments, as at least one parameter is required for the callback.  That's why you have to supply an additional `()` to the callback function in the previous examples.
+The final line is the important one. It shows that the callback function for a
+spec should consume identical arguments to the supplied `main` function, except
+that there is an additional `unit` argument.  This final `unit` is there in
+case there are no command-line arguments, as at least one parameter is required
+for the callback.  That's why you have to supply an additional `()` to the
+callback function in the previous examples.
 
 </sidebar>
 
 ### Composing specification fragments together
 
-If you want to factor out common command-line operations, the `++` operator will append two specifications together.
-Let's add some dummy verbosity and debug flags to our calendar application to illustrate this.
+If you want to factor out common command-line operations, the `++` operator
+will append two specifications together.  Let's add some dummy verbosity and
+debug flags to our calendar application to illustrate this.
 
 ```ocaml
 open Core.Std                                                                                                                 
@@ -518,12 +571,13 @@ let () =
   |> Command.run
 ```
 
-Both of these flags will now be applied and passed to all the callback functions.
-This makes code refactoring a breeze by using the compiler to spot places where you
-use commands.  Just add a parameter to the common definition, run the compiler,
-and fix type errors until everything works again.
+Both of these flags will now be applied and passed to all the callback
+functions.  This makes code refactoring a breeze by using the compiler to spot
+places where you use commands.  Just add a parameter to the common definition,
+run the compiler, and fix type errors until everything works again.
 
-For example, if we remove the `verbose` flag above and compile, we'll get this impressively long type error:
+For example, if we remove the `verbose` flag above and compile, we'll get this
+impressively long type error:
 
 ```ocaml
 File "cal_compose_error.ml", line 39, characters 38-45:
@@ -538,11 +592,18 @@ Error: This expression has type
        Type unit -> unit is not compatible with type unit 
 ```
 
-While this does look scary, the key line to scan is the last one, where it's telling you that you have supplied too many arguments in the callback function (`unit -> unit` vs `unit`).  If you started with a working program and made this single change, you typically don't even need to read the type error, as the filename and location information is sufficient to make the obvious fix.
+While this does look scary, the key line to scan is the last one, where it's
+telling you that you have supplied too many arguments in the callback function
+(`unit -> unit` vs `unit`).  If you started with a working program and made
+this single change, you typically don't even need to read the type error, as
+the filename and location information is sufficient to make the obvious fix.
 
 ### Prompting for interactive input
 
-The `step` combinator lets you control the normal course of parsing by supplying a function that maps callback arguments to a new set of values.  For instance, let's suppose we want our first calendar application to prompt for the number of days to add if a value wasn't supplied on the command-line.
+The `step` combinator lets you control the normal course of parsing by
+supplying a function that maps callback arguments to a new set of values.  For
+instance, let's suppose we want our first calendar application to prompt for
+the number of days to add if a value wasn't supplied on the command-line.
 
 ```ocaml
 open Core.Std
@@ -570,7 +631,11 @@ let add =
 let () = Command.run add
 ```
 
-There are two main changes from the simple example that accepts a date and an integer.  Firstly, the `days` argument is now an optional integer instead of a required argument.  The `step` combinator takes the date and days parameters, and interactively reads an integer if no day value was supplied.  It then returns an `int` instead of the `int option` that was passed in.
+There are two main changes from the simple example that accepts a date and an
+integer.  Firstly, the `days` argument is now an optional integer instead of a
+required argument.  The `step` combinator takes the date and days parameters,
+and interactively reads an integer if no day value was supplied.  It then
+returns an `int` instead of the `int option` that was passed in.
 
 ```
 $ cal_add_interactive 2013-12-01
@@ -579,7 +644,10 @@ enter days:
 2014-01-05
 ```
 
-Notice that the "program logic" in the final callback doesn't see any of this, and is exactly the same as in our original version.  The `step` combinator has transformed an `int option` argument into an `int`.  This is reflected in the type of the specification:
+Notice that the "program logic" in the final callback doesn't see any of this,
+and is exactly the same as in our original version.  The `step` combinator has
+transformed an `int option` argument into an `int`.  This is reflected in the
+type of the specification:
 
 ```ocaml
 # open Core.Std ;;
@@ -593,11 +661,15 @@ Notice that the "program logic" in the final callback doesn't see any of this, a
 - : (Date.t -> int -> '_a, Date.t -> int option -> '_a) Spec.t = <abstr> 
 ```
 
-The first half of the `Spec.t` shows that the callback type is `Date.t -> int`, whereas the resulting value that is expected from the next specification in the chain is a `Date.t -> int option`.
+The first half of the `Spec.t` shows that the callback type is `Date.t -> int`,
+whereas the resulting value that is expected from the next specification in the
+chain is a `Date.t -> int option`.
 
 ### Adding labelled arguments to callbacks
 
-The `step` chaining combinator lets you control the types of your callbacks very easily.  This can either help you fit in with existing interfaces, or make things more explicit by adding labelled arguments. 
+The `step` chaining combinator lets you control the types of your callbacks
+very easily.  This can either help you fit in with existing interfaces, or make
+things more explicit by adding labelled arguments. 
 
 ```ocaml
 open Core.Std
@@ -619,5 +691,106 @@ let add =
 let () = Command.run add
 ```
 
-This example goes back to our non-interactive calendar addition program, but adds a `step` combinator to turn the normal arguments into labelled ones.  This is reflected in the callback function below, and can help prevent errors with command-line arguments with similar types but different names.
+This example goes back to our non-interactive calendar addition program, but
+adds a `step` combinator to turn the normal arguments into labelled ones.  This
+is reflected in the callback function below, and can help prevent errors with
+command-line arguments with similar types but different names.
 
+## Command-line auto-completion with `bash`
+
+Modern UNIX shells usually have a tab-completion feature to interactively help
+you figure out how to build a command-line.  These work by pressing the `<tab>`
+key in the middle of typing a command, and seeing the options that pop up.
+You've probably used this most often to find the files in the current
+directory, but it can actually be extended for other parts of the command too.
+
+The precise mechanism for autocompletion varies depending on what shell you are
+using, but we'll assume you are using the most common one: `bash`.  This is the
+default interactie shell on most Linux distributions and MacOS X, but you may
+need to switch to it on *BSD or Windows (when using Cygwin).  The rest of this
+section assumes that you're using `bash`.
+
+<note>
+<title>The `bash` autocompletion feature</title>
+Bash autocompletion isn't always installed by default, so check your OS package
+manager to see if you have it available.
+
+Operating System  Package Manager  Package
+----------------  ---------------  -------
+Debian Linux      `apt`            `TODO`
+CentOS            `yum`            `TODO`
+MacOS X           Homebrew         `bash-completion`
+MacOS X           MacPorts         `TODO`
+FreeBSD           Ports System     `/usr/ports TODO`
+OpenBSD           `pkg_add`        `TODO`
+
+Once you have bash completion installed and configured, check that it works by
+typing the `ssh` command, and pressing `tab`.  This should show you the list of
+known hosts from your `~/.ssh/known_hosts` file.  If it lists those, then you
+can continue on, but if it lists the files in your current directory instead,
+then check your OS documentation to configure completion correctly.
+
+One last bit of information you'll need to find is the location of the
+`bash_completion.d` directory. This is where all the shell fragments that
+contain the completion logic are held.  On Linux, this is often in
+`/etc/bash_completion.d`, and in Homebrew on MacOS X it would be
+`/usr/local/etc/bash_completion.d` by default.
+
+</note>
+
+### Generating completion fragments from Command
+
+The Command library has a declarative description of all the possible valid
+options, and it can use this information to generate a shell script which
+provides completion support for that command.  To generate the fragment,
+just run the command with the `COMMAND_OUTPUT_INSTALLATION_BASH` environment
+variable set to any value.
+
+For example, let's try it on our calendar example from earlier, assuming that
+the binary is called `cal` in the current directory:
+
+```
+$ COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal
+
+function _jsautocom_41790 {
+  export COMP_CWORD
+  COMP_WORDS[0]=./cal
+  COMPREPLY=($("${COMP_WORDS[@]}"))
+}
+complete -F _jsautocom_41790 ./cal
+```
+
+### Installing the completion fragment
+
+You don't need to worry about what this script actually does (unless you have
+an unhealthy fascination with shell scripting, that is).  Instead, redirect the
+output to a file in your `bash_completion.d` directory, named after the command
+you're installing.
+
+```
+$ sudo env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal \
+    > /etc/bash_completion.d/cal
+$ bash -l
+$ ./cal <tab>
+add      diff     help     version
+```
+
+The first line above redirects the earlier output into your `bash_completion.d`
+directory.  The `bash -l` loads the new configuration as a fresh login shell,
+and then the final line shows the four valid commands by pressing the tab key.
+
+Command competion support works for flags and grouped commands, and is very
+useful when building larger command-line interfaces.
+
+<note>
+<title>Installing a geneeric completion handler</title>
+
+Sadly, `bash` doesn't support installing a generic handler for all
+Command-based applications.  This means that you have to install the completion
+script for every application, but you should be able to automate this in the
+build and packaging system for your application.
+
+It will help to check out how other applications that install tab-completion
+scripts and following their lead, as the details are very OS-specific.
+
+</note>
