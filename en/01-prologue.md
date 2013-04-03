@@ -42,7 +42,7 @@ arrive there, like higher-order functions in C# or parametric
 polymorphism in Java, it's typically in a limited and awkward form.
 The only languages that support these ideas well are statically-typed
 functional programming languages like OCaml, F#, Haskell, Scala and
-Standard-ML.
+Standard ML.
 
 Among this worthy set of languages, OCaml stands apart because it
 manages to provide a great deal of power while remaining highly
