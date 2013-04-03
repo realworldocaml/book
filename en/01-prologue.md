@@ -24,8 +24,8 @@ design.  These features include:
 * _Immutable data structures_ that cannot be destructively updated,
   famously enforced in Haskell but also a common feature of many
   distributed big data frameworks.
-* _Algebraic datatypes_ and pattern matching to describe values more
-  precisely, available in Miranda, F# and Standard ML.
+* _Algebraic datatypes_ and _pattern matching_ to define and 
+  manipulate complex data structures, available in Miranda, F# and Standard ML.
 * _Automatic type inference_ to avoid having to laboriously define the
   type of every single variable in a program and have it inferred
   based on how a value is used.
