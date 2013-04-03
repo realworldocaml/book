@@ -28,8 +28,8 @@ design.  These features include:
   manipulate complex data structures, available in Miranda, F# and Standard ML.
 * _Automatic type inference_ to avoid having to laboriously define the
   type of every single variable in a program, and instead have them inferred
-  based on how a value is used.  Available in Standard ML, F# and
-  C++11's `auto` keyword.
+  based on how a value is used.  Available in Standard ML, F# and even modern
+  C++11 via its `auto` keyword.
 
 Some of you will know and love these features, and others will be
 completely new to them.  Most of you will have seen _some_ of them in
