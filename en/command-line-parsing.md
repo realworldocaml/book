@@ -710,8 +710,6 @@ default interactie shell on most Linux distributions and MacOS X, but you may
 need to switch to it on *BSD or Windows (when using Cygwin).  The rest of this
 section assumes that you're using `bash`.
 
-<note>
-<title>The `bash` autocompletion feature</title>
 Bash autocompletion isn't always installed by default, so check your OS package
 manager to see if you have it available.
 
@@ -735,8 +733,6 @@ One last bit of information you'll need to find is the location of the
 contain the completion logic are held.  On Linux, this is often in
 `/etc/bash_completion.d`, and in Homebrew on MacOS X it would be
 `/usr/local/etc/bash_completion.d` by default.
-
-</note>
 
 ### Generating completion fragments from Command
 
