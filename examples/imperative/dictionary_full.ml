@@ -267,12 +267,3 @@ let () =
     Printf.printf "Size %s is $%.02f\n" size price;
     it#next
   done;;
-
-(*
- * -*-
- * Local Variables:
- * Fill-column: 100
- * End:
- * -*-
- * vim:ts=3:et:tw=100
- *)

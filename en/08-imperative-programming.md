@@ -5,21 +5,22 @@ code in general, is _pure_.  Pure code works without mutating the
 program's internal state, performing I/O, reading the clock, or in any
 other way interacting with changeable parts of the world.  Thus, a
 pure function behaves like a mathematical function, always returning
-the same results when given the same inputs.  _Imperative_ code, on
-the other hand, operates by side-effects that modify a program's
-internal state or interacts with the outside world, and so can have a
-different effect, and return different results, every time they're
-called.
+the same results when given the same inputs, and never affecting the
+world except insofar as it returns the value of its computation.
+_Imperative_ code, on the other hand, operates by side-effects that
+modify a program's internal state or interact with the outside world,
+and so can have a new effect, and return different results, every time
+they're called.
 
 Pure code is the default in OCaml, and for good reason --- it's
 generally easier to reason about, less error prone and more
-composeable.  But imperative code is of fundamental importance to any
+composable.  But imperative code is of fundamental importance to any
 practical programming language because real-world tasks require that
-you interact with the outside world, whether by receiving a network
-packet or by writing data to a file.  Imperative programming can also
-be important for performance.  While pure code is quite efficient in
-OCaml, there are many algorithms that can only be implemented
-efficiently using imperative techniques.
+you interact with the outside world, which is by its nature
+imperative.  Imperative programming can also be important for
+performance.  While pure code is quite efficient in OCaml, there are
+many algorithms that can only be implemented efficiently using
+imperative techniques.
 
 OCaml offers a happy compromise here, making it easy and natural to
 program in a pure style, but also providing great support for
@@ -27,23 +28,21 @@ imperative programming where you need it.  This chapter will walk you
 through OCaml's imperative features, and help you use them to their
 fullest.
 
-## A simple dictionary
+## Example: Imperative dictionaries
 
-We'll walk through the implementation of a simple imperative
-dictionary, _i.e._, a mutable mapping from keys to values.  Both Core
-and OCaml's standard library provide multiple data structures for
-implementing such dictionaries, and for most real world tasks, you
-should use one of those.  But we'll walk through this nonetheless as a
-way of seeing OCaml's imperative constructs in action.
+We'll start with the implementation of a simple imperative dictionary,
+_i.e._, a mutable mapping from keys to values.  This is really for
+illustration purposes; both Core and the standard library provide
+imperative dictionaries, and for most real world tasks, you should use
+one of those implementations.
 
-We'll implement our dictionary as a hash table, based on an _open
-hashing_ scheme, which is to say it will be structured as an array of
-buckets, with each bucket containing a list of key/value pairs that
-have been hashed into that bucket.  For simplicity's sake, we'll use a
-fixed-length bucket array, though growing the bucket array as more
-elements are added would be necessary for a practical implementation.
+Our dictionary, like those in Core and the standard library, will be
+implemented as a hash table.  In particular, we'll use a _open
+hashing_ scheme, which is to say the hash table will be an array of
+buckets, each bucket containing a list of key/value pairs that have
+been hashed into that bucket.
 
-First, we'll write down the `mli` for our dictionary.
+Here's the interface we'll match, provided as an `mli`.
 
 ```ocaml
 (* file: dictionary.mli *)
@@ -59,14 +58,19 @@ val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 val remove : ('a, 'b) t -> 'a -> unit
 ```
 
-The type `('a, 'b) t` is used to represent a dictionary with keys of
-type `'a` and data of type `'b`.  The `mli` also includes a collection
-of helper functions.  Notice that a number of the functions, in
-particular, ones like `add` that modify the dictionary, return unit.
-This is typical of functions that act by side-effect.
+The type `('a, 'b) t` is used for a dictionary with keys of type `'a`
+and data of type `'b`.  The `mli` also includes a collection of helper
+functions whose purpose and behavior should be largely inferrable from
+their names and type signatures.  Notice that a number of the
+functions, in particular, ones like `add` that modify the dictionary,
+return unit.  This is typical of functions that act by side-effect.
 
-The implementation is shown below.  We'll go through the code bit by
-bit, explaining different imperative constructs as they show up.
+We'll now walk through the implementation (contained in the
+corresponding `ml` file) piece by piece, explaining different
+imperative constructs as they come up.
+
+Our first step is to define the type of a dictionary as a record with
+two fields.
 
 ```ocaml
 (* file: dictionary.ml *)
@@ -77,15 +81,18 @@ type ('a, 'b) t = { mutable length: int;
                   }
 ```
 
-Our first step is to define the type of a dictionary as a record with
-two fields.  The first field, `length` is declared as mutable.  In
-OCaml, records are immutable by default, but individual fields are
-mutable when marked as such.  The second field, `buckets`, is
-immutable, but contains an array, which is itself a mutable data
-structure, as we'll see.
+The first field, `length` is declared as mutable.  In OCaml, records
+are immutable by default, but individual fields are mutable when
+marked as such.  The second field, `buckets`, is immutable, but
+contains an array, which is itself a mutable data structure, as we'll
+see.
+
+Now we'll start putting together the basic functions for manipulating
+a dictionary.
 
 ```ocaml
 let num_buckets = 17
+
 let hash_bucket key = (Hashtbl.hash key) mod num_buckets
 
 let create () =
@@ -100,24 +107,34 @@ let find t key =
     ~f:(fun (key',data) -> if key' = key then Some data else None)
 ```
 
-Now we define the function for choosing a hash-bucket based on the
-key.  We do this using `Hashtbl.hash` to compute hash values.
-`Hashtbl.hash` is a special function provided by the OCaml runtime
-that can compute a hash for almost any OCaml value.  It's type is `'a
--> int`, so it can be applied to a value of any type.  (While it can
-be applied to any type, it won't succeed for all values.
-`Hashtbl.hash` will throw an exception if it encounters a value it
-can't handle, like a function or a value from a C libraries that lives
-outside the OCaml heap.)
+Note that `num_buckets` is a constant.  That's because, for
+simplicity's sake, we're using a fixed-length bucket array.  For a
+practical implementation, the length of the array would have to be
+able to grow as the number of elements in the dictionary increases.
 
-There's also code for `create`, which creates an empty dictionary,
-`length`, which grabs the length from the corresponding record field,
-and `find`, which looks for a matching key in the table using
-`List.find_map` on the corresponding bucket.  (`List.find_map` takes a
-list, and a function for transforming the list elements to options,
-returning the first element for which the function returned `Some`.)
-In `find`, you'll notice that we make use of the `array.(index)`
-syntax for looking up a value in an array.
+The function `hash_bucket` is used throughout the rest of the module
+to choose the position in the array that a given key should be stored
+at.  It is implemented on top of `Hashtbl.hash`, which is a hash
+function provided by the OCaml runtime that can be applied to values
+of any type.  Thus, its own type is polymorphic: `'a -> int`.
+
+While `Hashtbl.hash` can be used with any type, it won't necessarily
+succeed for all values.  `Hashtbl.hash` will throw an exception if it
+encounters a value it can't handle, like a function or a value from a
+C libraries that lives outside the OCaml heap.
+
+The other functions defined above are fairly straightforward:
+
+- `create` creates an empty dictionary.
+- `length` grabs the length from the corresponding record field, thus
+  returning the number of entries stored in the dictionary.
+- `find` looks for a matching key in the table and returns the
+  corresponding value if found as an option.
+
+A new piece of syntax has also popped up in `find`: we write
+`array.(index)` to grab a value from an array.
+
+Now we'll look at the implementation of `iter`:
 
 ```ocaml
 let iter t ~f =
@@ -128,17 +145,19 @@ let iter t ~f =
 
 `iter` is designed to walk over all the entries in the dictionary.  In
 particular, `iter d ~f` will call `f` for each key/value pair in
-dictionary `d`.  Note that `f` is expected to return `unit`, since it
-is expected to work by side effect rather than by returning a value.
+dictionary `d`.  Note that `f` must return `unit`, since it is
+expected to work by side effect rather than by returning a value, and
+the overall `iter` function returns `unit ` as well.
 
-The code for `iter` uses two forms of iteration: a `for` loop to
-iterate over the array of buckets; and within that loop, and a call to
-`List.iter` to walk over the list of values in a given bucket.  `for`
-loops are not of fundamental importance to the language: instead of
-using `for`, we could have implemented the outer loop using the
-`Array.iter`, which in turn could be implemented as a recursive
-function.  But `for` is syntactically convenient, and is often more
-familiar and idiomatic when coding imperatively.
+The code for `iter` uses two forms of iteration: a `for` loop to walk
+over the array of buckets; and within that loop, and a call to
+`List.iter` to walk over the list of values in a given bucket.  We
+could have done the outer loop with a recursive function instead of a
+`for` loop, but `for` loops are syntactically convenient, and are more
+familiar and idiomatic in the context of imperative code.
+
+The following code is for adding and removing mappings from the
+dictionary.
 
 ```ocaml
 let bucket_has_key t i key =
@@ -168,46 +187,50 @@ let remove t key =
   )
 ```
 
-The above code is for adding and removing mappings from the
-dictionary.  This section is made more complicated by the fact that we
-need to detect whether we are overwriting or removing an existing
-binding, so we can decide whether `t.length` needs to be changed.  The
-helper function `bucket_has_key` is used for this purpose.
+This above code is made more complicated by the fact that we need to
+detect whether we are overwriting or removing an existing binding, so
+we can decide whether `t.length` needs to be changed.  The helper
+function `bucket_has_key` is used for this purpose.
 
-We use the `<-` operator for updating elements of an array (`array.(i)
-<- expr`) and for updating a record field (`record.field <-
-expression`).
+Another new piece of syntax shows up in both `add` and `remove`: the
+use of the `<-` operator to update elements of an array (`array.(i) <-
+expr`) and for updating a record field (`record.field <- expression`).
 
 We also use a single semicolon, `;`, as a sequencing operator, to
-allow us to do two side-effecting operations in a row: first, update
-the bucket, then update the count.  We could have done this using let
-bindings:
+allow us to do a sequence of side-effecting operations in a row:
+first, update the bucket, then update the count.  We could have done
+this using let bindings:
 
 ```ocaml
     let () = t.buckets.(i) <- filtered_bucket in
-    let () = t.length <- t.length - 1 in
+    t.length <- t.length - 1
 ```
 
-but `;` is more idiomatic.
-
-In general, when a sequence expression `expr1; expr2` is evaluated,
-`expr1` is evaluated first, and then `expr2`.  The expression `expr1`
-should have type `unit`, and the the value of `expr2` is returned as
-the value of the entire sequence.  For example, the sequence
-`print_string "hello world"; 1 + 2` first prints the string `"hello
-world"`, then returns the integer `3`.
-
-It's also worth noting that `;` is a _separator_, not a terminator as
-it is in C or Java.  The compiler is somewhat relaxed about parsing a
-terminating semicolon, so it may work for you, but you should not rely
-on it.  Here is an example where we're using `;` as if it were a
-terminator
+but `;` is more concise and idiomatic.  More generally,
 
 ```ocaml
-# let i = print_string "Hello world\n"; 2; in i;;
-Hello world
-- : int = 2
+<expr1>;
+<expr2>;
+...
+<exprN>
 ```
+
+is eqivalent to
+
+```ocaml
+let () = <expr1> in
+let () = <expr2> in
+...
+<exprN>
+```
+
+When a sequence expression `expr1; expr2` is evaluated, `expr1` is
+evaluated first, and then `expr2`.  The expression `expr1` should have
+type `unit` (though this is a warning rather than a hard restriction),
+and the value of `expr2` is returned as the value of the entire
+sequence.  For example, the sequence `print_string "hello world"; 1 +
+2` first prints the string `"hello world"`, then returns the integer
+`3`.
 
 Note also that we do all of the side-effecting operations at the very
 end of each function.  This is good practice because it minimizes the
@@ -216,42 +239,66 @@ leaving the data structure in an inconsistent state.
 
 ## Primitive mutable data
 
-We've already encountered two different forms of mutable data: records
-with mutable fields, and arrays.  These are two of the building blocks
-of imperative programming in OCaml.  We discuss those, and a few
-others, below.
+Now that we've looked at a complete example, let's take a more
+systematic look at imperative programming in OCaml.  We encountered
+two different forms of mutable data above: records with mutable fields
+and arrays.  We'll now discuss these in more detail, along with the
+other primitive forms of mutable data that are available in OCaml.
 
 ### Array-like data
 
-OCaml supports a number of array-like data structures; _i.e._,
-integer-indexed containers.  The `array` type is one example, and the
-`Array` module comes with a variety of mutable operations on arrays,
-including `Array.set`, which modifies an individual element, and
-`Array.blit`, which efficiently copies a range of values in an array.
+OCaml supports a number of array-like data structures; _i.e._, mutable
+integer-indexed containers that provide constant-time access to their
+elements.  We'll discuss several of them below.
 
-Arrays also come with a special syntax for getting an element from an
-array: `array.(index)`; and for setting an element: `array.(index) <-
-expr`.  Literal arrays can be declared using `[|` and `|]` as
-delimiters.  Thus, `[| 1; 2; 3 |]` is an integer array.
+#### Ordinary arrays
 
-Strings are essentially byte-arrays, with some extra useful functions
-in the `String` module for dealing with textual data in this form.
-The main reason to use a `String.t` rather than a `Char.t array` (a
-`Char.t` is an 8-bit character) is that the former is considerably
-more space efficient; an array uses one word --- 8 bytes on a 64-bit
-machine --- to store a single entry, whereas strings use one byte per
-character.
+The `array` type is used for general purpose polymorphic arrays.  The
+`Array` module has a variety of utility functions for interacting with
+arrays, including a number of mutating operations.  These include
+`Array.set`, for setting an individual element, and `Array.blit`, for
+efficiently copying values from one range of indices to another.
+
+Arrays also come with special syntax for retrieving an element from an
+array:
+
+```ocaml
+array.(index)
+```
+
+and for setting an element in an array:
+
+```ocaml
+array.(index) <- expr
+```
+
+Array literals are written using `[|` and `|]` as delimiters.  Thus,
+`[| 1; 2; 3 |]` is a literal integer array.
+
+#### Strings
+
+Strings are essentially byte-arrays which are often used for textual
+data.  The main advantage of using a `string` in place of a `Char.t
+array` (a `Char.t` is an 8-bit character) is that the former is
+considerably more space efficient; an array uses one word --- 8 bytes
+on a 64-bit machine --- to store a single entry, whereas strings use
+one byte per character.
 
 Strings also come with their own syntax for getting and setting
 values: `string.[index]` and `string.[index] <- expr` respectively,
-and string literals are bounded by quotes.
+and string literals are bounded by quotes.  There's also a module
+`String` where you'll find useful functions for working with strings.
+We'll talk more about the `String` module in
+[xref](#text-processing-and-unicode).
 
-A bigarray is a handle to a block of memory stored outside of the
+#### Bigarrays
+
+A `Bigarray.t` is a handle to a block of memory stored outside of the
 OCaml heap.  These are mostly useful for interacting with C or Fortran
 libraries, and are discussed in
 [xref](#managing-external-memory-with-bigarrays).  Bigarrays too have
 their own getting and setting syntax: `bigarray.{index}` and
-`bigarray.{index} <- expr`.
+`bigarray.{index} <- expr`.  There is no literal syntax for bigarrays.
 
 ### Mutable record and object fields and ref cells
 
@@ -261,7 +308,7 @@ using the `<-` operator, _i.e._, `record.field <- expr`.
 
 As we'll see in [xref](#object-oriented-programming), fields of an
 object can similarly be declared as mutable, and can then be modified
-in much the same way as with records.
+in much the same way as record fields.
 
 #### Ref Cells
 
@@ -270,13 +317,19 @@ data, but what the variable points to can't be changed.  Sometimes,
 though, you want to do exactly what you would do with a mutable
 variable in another language: define a single, mutable value. In OCaml
 this is typically achieved using a `ref`, which is essentially a
-container with a single, mutable value.
+container with a single mutable polymorphic field.
+
+The definition for the ref type is as follows:
+
+```ocaml
+type 'a ref = { mutable contents : 'a }
+```
 
 The standard library defines the following operators for working with
 refs.
 
-* `ref expr` constructs a reference cell containing the value defined by the
-  expression `expr`.
+* `ref expr` constructs a reference cell containing the value defined
+  by the expression `expr`.
 * `!refcell` returns the contents of the reference cell.
 * `refcell := expr` replaces the contents of the reference cell.
 
@@ -293,12 +346,10 @@ val x : int ref = {contents = 1}
 - : int = 2
 ```
 
-There's nothing magic about a `ref`: it's really just a record.  The
-`ref` type and its associated operations are defined as follows.
+All of these are operations are just ordinary OCaml functions, and
+could be defined as follows.
 
 ```ocaml
-type 'a ref = { mutable contents : 'a }
-
 let ref x = { contents = x }
 let (!) r = r.contents
 let (:=) r x = r.contents <- x
@@ -307,15 +358,12 @@ let (:=) r x = r.contents <- x
 ### Foreign functions
 
 Another source of imperative operations in OCaml is resources that
-come from interfacing with some external library through OCaml's
-foreign function interface (FFI).  The FFI opens OCaml up to any
-imperative construct that is exported by a system call, a C library,
-or any other external resource that you connect to.  Many of these
-come built in, like access to the `write` system call, or to the
-`clock`; while others come from user libraries, like LAPACK bindings.
-
-More generally, when you wrap a library for use in OCaml, you'll often
-find yourself introducing new imperative operations to the language.
+come from interfacing with external libraries through OCaml's foreign
+function interface (FFI).  The FFI opens OCaml up to imperative
+constructs that are exported by system calls or other external
+libraries.  Many of these come built in, like access to the `write`
+system call, or to the `clock`; while others come from user libraries,
+like LAPACK bindings.
 
 ## `for` and `while` loops
 
@@ -353,9 +401,10 @@ i = 0
 - : unit = ()
 ```
 
-A `while`-loop on the other hand, takes a condition and a body, and
-repeatedly runs the body until the condition is false.  Here's a
-simple example of a function for reversing an array in-place.
+OCaml also supports `while` loops, which include a condition and a
+body.  The loop first evaluates the condition, and then, if it
+evaluates to true, evaluates the body and starts the loop again.
+Here's a simple example of a function for reversing an array in-place.
 
 ```ocaml
 # let rev_inplace ar =
@@ -381,20 +430,18 @@ val nums : int array = [|1; 2; 3; 4; 5|]
 - : int array = [|5; 4; 3; 2; 1|]
 ```
 
-In the above, we used `incr` and `decr`, which are functions for
-incrementing and decrementing an `int ref` by one, respectively.
+In the above, we used `incr` and `decr`, which are build-in functions
+for incrementing and decrementing an `int ref` by one, respectively.
 
-## Doubly-linked lists
+## Example: Doubly-linked lists
 
 Another common imperative data structure is the doubly-linked list.
 Doubly-linked lists can be traversed in both directions and elements
 can be added and removed from the list in constant time.  Core defines
-a doubly-linked list (the module is called `Doubly_linked`) which is a
-good choice for real work, but we'll define our own as an
-illustration.
+a doubly-linked list (the module is called `Doubly_linked`), but we'll
+define our own linked list library as an illustration.
 
 Here's the `mli` of the module we'll build.
-
 
 ```ocaml
 (* file: dlist.mli *)
@@ -1038,7 +1085,7 @@ compiling down to an infinite loop, but there's no looping control
 structure to make that happen.
 
 To avoid such cases, the compiler only allow three possible constructs
-to show up on the right-hand sqide of a `let rec`: a function
+to show up on the right-hand side of a `let rec`: a function
 definition, a constructor, or the lazy keyword.  This excludes some
 reasonable things, like our definition of `memo_rec`, but it also
 blocks things that don't make sense, like our definition of `x`.
@@ -1251,7 +1298,7 @@ If OCaml infers that a given string literal is a format string, then
 it parses it at compile time as such, choosing its type in accordance
 with the formatting directives it finds.  Thus, if we add a
 type-annotation indicating that the string we're defining is actually
-a format string, it will be interepreted as such:
+a format string, it will be interpreted as such:
 
 ```ocaml
 # let fmt : ('a, 'b, 'c) format =
@@ -1295,8 +1342,7 @@ let () =
 
 In the above example, we've used only two formatting directives: `%s`,
 for including a string, and `%!` which causes `printf` to flush the
-channel.  There's a lot more that you can do with `printf`, including
-controlling the width of a given entry, the ali
+channel.
 
 `printf`'s formatting directives offer a significant amount of
 control, allowing you to specify things like:
@@ -1306,13 +1352,12 @@ control, allowing you to specify things like:
 - whether numbers should be formatted in decimal, hex or binary
 - precision of float conversions
 
-And much more.
-It's also worth noting that there are `printf`-style functions that
-target outputs other than `stdout`, including:
+There are also `printf`-style functions that target outputs other than
+`stdout`, including:
 
-- `eprintf` prints to `stderr`.
-- `fprintf` prints to an arbitrary `out_channel`.
-- `sprintf` returns a formatted string
+- `eprintf`, which prints to `stderr`.
+- `fprintf`, which prints to an arbitrary `out_channel`
+- `sprintf`, which returns a formatted string
 
 All of this, and a good deal more, is described in the API
 documentation for the `Printf` module in the OCaml Manual.
@@ -1431,7 +1476,7 @@ the `In_channel.fold_lines` function to do just that.
 val sum_file : string -> int = <fun>
 ```
 
-THis is just a taste of the functionality of `In_channel` and
+This is just a taste of the functionality of `In_channel` and
 `Out_channel`.  To get a fuller understanding you should review the
 API documentation for those modules.
 
@@ -1441,10 +1486,10 @@ The order in which expressions are evaluated is an important part of
 the definition of a programming language, and it is particularly
 important when programming imperatively.  Most programming languages
 you're likely to have encountered are _strict_, and OCaml is too.  In
-a strict langauge, when you bind an identifier to the result of some
+a strict language, when you bind an identifier to the result of some
 expression, the expression is evaluated before the variable is
 defined.  Similarly, if you call a function on a set of arguments,
-those arguments are evaluated before they are pased to the function.
+those arguments are evaluated before they are passed to the function.
 
 Consider the following simple example.  Here, we have a collection of
 angles and we want to determine if any of them have a negative `sin.
@@ -1500,7 +1545,7 @@ sequence of let-bindings will be evaluated in the order that they're
 defined.  But what about the evaluation order within a single
 expression?  Officially, the answer is that evaluation order within an
 expression is undefined.  In practice, OCaml has only one compiler,
-and that behavior is a kind of defacto standard.  Unfortunately, the
+and that behavior is a kind of _de facto_ standard.  Unfortunately, the
 evaluation order in this case is often the oppose of what one might
 expect.
 
@@ -1545,8 +1590,8 @@ have?
 
 On its first call, `remember` returns the same value its passed, which
 means its input type and return type should match.  Accordingly,
-`remember` should have the type `t -> t`, for some type `t`.  There's
-nothing about `remmeber` that ties the choice of `t` to any particular
+`remember` should have the type `t -> t` for some type `t`.  There's
+nothing about `remember` that ties the choice of `t` to any particular
 type, so you might expect OCaml to generalize, replacing `t` with a
 polymorphic type variable.  It's this kind of generalization that
 gives us polymorphic types in the first place.  The identity function,
@@ -1562,21 +1607,21 @@ val identity : 'a -> 'a = <fun>
 ```
 
 As you can see, the polymorphic type of `identity` lets it operate on
-types of different values.
+values with different types.
 
-This is not what happens with `remember`, though, for which the
-following type is inferred.
+This is not what happens with `remember`, though.  Here's the type
+that OCaml infers for remember, which looks almost, but not quite,
+like the type of the identity function.
 
 ```ocaml
 val remember : '_a -> '_a = <fun>
 ```
 
-The type variable `'_a` is _weakly polymorphic_, which is to say that
-it can be used with any one type, unlike a regular polymorphic type
-variable can be used with multiple different types.  That's because,
-unlike `identity`, `remember` always returns the value it was passed
-on its first invocation, which means it always returns a value of the
-same type.
+The underscore in the type variable `'_a` tells us that the variable
+is only _weakly polymorphic_, which is to say that it can be used with
+any _single_ type.  That makes sense, because, unlike `identity`,
+`remember` always returns the value it was passed on its first
+invocation, which means it can only be used with one type.
 
 OCaml will convert a weakly polymorphic variable to a concrete type as
 soon as it gets a clue as to what concrete type it is to be used as,
@@ -1600,109 +1645,224 @@ Note that the type of `remember` was settled by the definition of
 
 ### The Value Restriction
 
-So, when does the compiler infer weakly polymorphic types?  Fully
-polymorphic types are not safe in the context of mutation, such as you
-find with arrays or refs, so OCaml needs a simple rule to figure out
-when it can be confident that no refs are involved.  The rule is
-called the value restriction.  The core of the value restriction is
-the observation that some kinds of simple values by their nature can't
-contain refs, including:
+So, when does the compiler infer weakly polymorphic types?  As we've
+seen, we need weakly polymorphic types when a value of unknown type is
+stored in a persistent mutable cell.  Because the type-system isn't
+precise enough to determine all cases where this might happen, OCaml
+uses a rough rule to flag cases where it's sure there are no
+persistent refs, and to only infer polymorphic types in those cases.
+This rule is called _the value restriction_.
 
-- Constants (_i.e._, things like integer and floating point literatls)
+The core of the value restriction is the observation that some kinds
+of simple values by their nature can't contain refs, including:
+
+- Constants (_i.e._, things like integer and floating point literals)
 - Constructors that contain only other simple values
-- Simple functions, i.e., expressions that begin with `fun` or
-  `function`.
+- Function declarations, _i.e._, expressions that begin with `fun` or
+  `function`, or, the equivalent let binding, `let f x = ...`.
+- `let` bindings of the form `let var = <expr1> in <expr2>`, where
+  both `<expr1>` and `<expr2>` are simple values.
 
-Thus, if you write down an expression th
-
-```ocaml
-# (3,[None;None]);;
-- : int * 'a option list = (3, [None; None])
-```
-
-
-
-It turns
-out that there's no good rule that can tell you precisely when it's
-safe to use fully polymorphic as opposed to weakly polymorphic types.
-There is however a safe approximation that OCaml uses, called the
-_generalized value restriction_.  The approximation is safe in the
-sense that it infers weakly polymorphic types in some cases where it
-would be safe to infer fully polymorphic ones, but it never infers a
-fully polymorphic type when it is unsafe to do so.
-
-The full details of the generalized value restriction are highly
-technical, but there are a few basic guidelines that will give you a
-sufficient working understanding.
-
-*Mutability* Types contained within mutable data-structures like refs
-or arrays can only be weakly polymorophic.  It's worth noting that OCaml
-
-*Ordinary function definitions*, can be fully polymorphic, even if
-they return mutable objects.  Thus, an `option ref` is weakly
-polymorphic:
+Thus, the following expression is a simple value, and as a result, the
+types of values contained within it are allowed to be polymorphic.
 
 ```ocaml
-# ref None;;
-- : '_a option ref = {contents = None}
+# (fun x -> [x;x]);;
+- : 'a -> 'a list = <fun>
 ```
 
-But a function that returns an `option ref` is fully polymorphic.
+But, if we write down an expression that isn't a simple value by the
+above definition, we'll get different results.  For example, consider
+what happens if we try to memoize the function defined above.
 
 ```ocaml
-# let create_ref () = ref None;;
-val create_ref : unit -> 'a option ref = <fun>
+# memoize (fun x -> [x;x]);;
+- : '_a -> '_a list = <fun>
 ```
 
-This is safe because every invocation of the function returns a brand
-new `option ref`, so the types of the option refs are not tied
-together.  On the other hand,
-
-
-Which is not to say that all functions are fully polymorphic.  In
-particular, *functions returned from functions* can in generaly only
-be weakly polymorphic.  So, for example:
+The memoized version of the function does in fact need to be
+restricted to a single type, because it uses mutable state behind the
+scenes to cache previous invocations of the function it has passed.
+But OCaml would make the same determination even if the function in
+question did no such thing.  Consider this example:
 
 ```ocaml
-# identity;;
-- : 'a -> 'a = <fun>
-# let memo_ident = memoize identity;;
-val memo_ident : '_a -> '_a = <fun>
+# identity (fun x -> [x;x]);;
+- : '_a -> '_a list = <fun>
 ```
 
-This example of course makes good semantic sense: the memoized
-identity function by its nature can only return one type of value.
-But the value restriction is an approximation, and so there are some
-cases where fully polymorphic types would make sense, but where
-they're nonetheless not inferred.  For example:
+It would be safe to infer a weakly polymorphic variable here, but
+because OCaml's type system doesn't distinguish between pure and
+impure functions, it can't separate those two cases.
+
+The value restriction doesn't require that there is no mutable state,
+only that there is no _persistent_ mutable state that could share
+values between uses of the same function.  Thus, a function that
+produces a fresh reference every time it's called can have a fully
+polymorphic type:
 
 ```ocaml
-# let new_identity = identity identity;;
-val new_identity : '_a -> '_a = <fun>
+# let f () = ref None;;
+val f : unit -> 'a option ref = <fun>
 ```
 
-It's worth noting that one can generally force polymorphic types by
-wrapping the definition of the value in question in a function call.
+But a function that has a mutable cache that persists across calls,
+like memoize, can only be weakly polymorphic.
+
+### Partial application and the value restriction
+
+Most of the time, when the value restriction kicks in, it's for a good
+reason, _i.e._, it's because the value in question can actually only
+safely be used with a single type.  But sometimes, the value
+restriction kicks in when you don't want it.  The most common such
+case is partially applied functions.  A partially applied function,
+like any function application, is not a simple value, and as such,
+functions created by partial application are sometimes less general
+than you might expect.
+
+Consider the `List.init` function, which is used for creating lists
+where each element is created by calling a function on the index of
+that element.
 
 ```ocaml
-# let new_identity x = identity identity x;;
-val new_identity : 'a -> 'a = <fun>
-# new_identity 3;;
-- : int = 3
-# new_identity "four";;
-- : string = "four"
+# List.init;;
+- : int -> f:(int -> 'a) -> 'a list = <fun>
+# List.init 10 ~f:Int.to_string;;
+- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
 ```
 
-This works for the memoized identity too, it's worth noting.
+Imagine we wanted to create a specialized version of `List.init` that
+always created lists of length 10.  We could do that using partial
+application, as follows.
 
 ```ocaml
-# let sort_of_memoized_identity x = memoize identity x;;
-val sort_of_memoized_identity : 'a -> 'a = <fun>
-# sort_of_memoized_identity 3;;
-- : int = 3
-# sort_of_memoized_identity "four";;
-- : string = "four"
+# let list_init_10 = List.init 10;;
+val list_init_10 : f:(int -> '_a) -> '_a list = <fun>
 ```
 
-In changing the types so that OCaml was willing to infer a polymorphic
-type we also changed the semantics of
+As you can see, we now infer a weakly polymorphic type for the
+resulting function, and for good reason.  There's nothing that tells
+us that `List.init` isn't creating a persistent `ref` somewhere inside
+of it that would be shared across multiple calls to `list_init_10`.
+We can eliminate this possibility, and at the same time get the
+compiler to infer a polymorphic type, by using explicit variables
+rather than partial application.
+
+```ocaml
+# let list_init_10 ~f = List.init 10 ~f;;
+val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
+```
+
+This transformation is referred to as _eta expansion_, and is often
+useful to resolve problems that arise from the value restriction.
+
+### Relaxing the value restriction
+
+OCaml is actually a little better at inferring polymorphic types than
+is implied above.  The value restriction as we described it above is
+basically a syntactic check: there are a few operations that you can
+do that count as simple values, and anything that's a simple value can
+be generalized.
+
+But OCaml actually has a relaxed version of the value restriction that
+can make some use of type information to allow polymorphic types for
+things that are not simple values.
+
+For example, we saw above that a function application, even a simple
+application of the identity function, is not a simple value and thus
+can turn a polymorphic value into a weakly polymorphic one.
+
+```ocaml
+# identity (fun x -> [x;x]);;
+- : '_a -> '_a list = <fun>
+```
+
+But that's not always the case.  When the type of the returned value
+is immutable, then OCaml can typically infer a fully polymorphic type.
+
+```ocaml
+# identity [];;
+- : 'a list = []
+```
+
+On the other hand, if the returned type is potentially mutable, then
+the result will be weakly polymorphic.
+
+```ocaml
+# [||];;
+- : 'a array = [||]
+# identity [||];;
+- : '_a array = [||]
+```
+
+A more important example of this comes up when defining abstract data
+types.  Consider the following simple data-structure for an immutable
+list type that supports constant-time concatenation.
+
+```ocaml
+# module Concat_list : sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
+    val to_list : 'a t -> 'a list       (* linear time   *)
+  end = struct
+
+    type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+    let empty = Empty
+    let singleton x = Singleton x
+    let concat x y = Concat (x,y)
+
+    let rec to_list_with_tail t tail =
+      match t with
+      | Empty -> tail
+      | Singleton x -> x :: tail
+      | Concat (x,y) -> to_list_with_tail x (to_list_with_tail y tail)
+
+    let to_list t =
+      to_list_with_tail t []
+
+  end;;
+ module Concat_list :
+  sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat : 'a t -> 'a t -> 'a t
+    val to_list : 'a t -> 'a list
+  end
+```
+
+The details of the implementation don't matter so much, but it's
+important to note that a `Concat_list.t` is unquestionably an
+immutable value.  However, when it comes to the value restriction,
+OCaml treats it as if it were mutable.
+
+```ocaml
+# Concat_list.empty;;
+- : 'a Concat_list.t = <abstr>
+# identity Concat_list.empty;;
+- : '_a Concat_list.t = <abstr>
+```
+
+The issue here is that the signature, by virtue of being abstract, has
+obscured the fact that `Concat_list.t` is in fact an immutable
+data-type.  We can resolve this in one of two ways: either by making
+the type concrete (_i.e._, exposing the implementation in the `mli`),
+which is often not desirable; or by marking the type variable in
+question as _covariant_.  We'll learn more about variance and
+covariance in [xref](#object-oriented-programming), but for now, you
+can think of it as an annotation which can be put in the interface of
+a pure data structure.
+
+Thus, if we replace `type 'a t` in the interface with `type +'a t`,
+that will make it explicit in the interface that the data-structure
+doesn't contain any persistent references to values of type `'a`, at
+which point, OCaml can infer polymorphic types for expressions of this
+type that are not simple values.
+
+```ocaml
+# identity Concat_list.empty;;
+- : 'a Concat_list.t = <abstr>
+```
