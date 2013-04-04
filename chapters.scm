@@ -75,7 +75,7 @@
 ((part Practical)
  (name "command-line-parsing")
  (file "command-line-parsing")
- (note "In progress, Anil")
+ (note "Largely complete")
  )
 ((part Practical)
  (name "Text processing and Unicode")
@@ -97,6 +97,7 @@
  (name "fast-binary-serialization-with-bin_prot")
  (file "12d-binio")
  (note "50% done (Anil)")
+ (public false)
  )
 
 ;; PART 3: ADVANCED TOPICS
