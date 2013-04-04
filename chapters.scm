@@ -94,32 +94,21 @@
  (note "50% done (Anil)")
  (public false)
  )
-
-;; PART 3: ADVANCED TOPICS
-
 ((part Advanced)
  (name "first-class-modules")
  (file "10a-fcm")
  (note "75%, blocked on release of ocaml-plugin lib")
  (public false)
  )
+
+;; PART 3: ADVANCED TOPICS
+
 ((part Advanced)
  (name "foreign-function-interface")
  (file "14-interfacing-with-C")
  (note "50%, on Anil's stack")
  (public false)
  )
-((part Advanced)
- (name "object-subtyping-and-inheritance")
- (file "13-advanced-objects")
- (note "Largely complete")
- )
-((part Advanced)
- (name "advanced-topics")
- (file "13b-advanced-topics")
- (note "Contains various advanced material from other chapters, 0% complete")
- (public false)
-)
 ((part Advanced)
  (name "managing-external-memory-with-bigarrays")
  (file "15-bigarrays")
@@ -150,6 +139,17 @@
  (note "Not started, on Jason's stack?")
  (public false)
  )
+((part Advanced)
+ (name "object-subtyping-and-inheritance")
+ (file "13-advanced-objects")
+ (note "Largely complete")
+ )
+((part Advanced)
+ (name "advanced-topics")
+ (file "13b-advanced-topics")
+ (note "Contains various advanced material from other chapters, 0% complete")
+ (public false)
+)
 
 ;; Part 4: APPENDIX
 
