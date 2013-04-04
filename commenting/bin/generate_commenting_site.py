@@ -263,6 +263,7 @@ def render_locale_chapter_page(html_name, chapter_tag, soup, navigation_list, ar
             aside.append(header)
             rows = element.find_all("tr")
             if len(rows) != 2:
+                print rows
                 panic("Expect two rows in special section from {}".format(html_name))
             for child in find_required(html_name, rows[1], "td").find_all(True, recursive=False):
                 aside.append(child)
