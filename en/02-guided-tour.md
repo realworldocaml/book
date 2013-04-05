@@ -468,9 +468,9 @@ of the lengths of each language as follows.
 - : int list = [5; 4; 1]
 ```
 
-`List.map` takes two arguments: a list, and a function for
-transforming the elements of that list.  Note that `List.map` creates
-a new list and does not modify the original.
+`List.map` takes two arguments: a list and a function for transforming
+the elements of that list.  Note that `List.map` creates a new list
+and does not modify the original.
 
 In this example, the function `String.length` is passed under the
 _labeled argument_ `~f`.  Labels allow you to specify function
@@ -783,8 +783,11 @@ within which the new variable can be used.  Thus, we could write:
 - : int = 14
 ```
 
-And even have multiple let statements in a row, each one adding a new
-variable binding to what came before.
+Note that the scope of the let binding is terminated by the
+double-semicolon.
+
+We can also have multiple let statements in a row, each one adding a
+new variable binding to what came before.
 
 ```ocaml
 # let x = 7 in
@@ -956,8 +959,7 @@ Arrays in OCaml are very similar to arrays in other languages like C:
 indexing starts at 0, and accessing or modifying an array element is a
 constant-time operation.  Arrays are more compact in terms of memory
 utilization than most other data structures in OCaml, including lists.
-
-Here's an example.
+Here's an example:
 
 ```ocaml
 # let numbers = [| 1;2;3;4 |];;
@@ -1094,7 +1096,7 @@ let (:=) r x = r.contents <- x
 ```
 
 Here, `!` and `:=` are infix operators that we're defining, where the
-parenthetical syntax is what marks them as such.
+parenthetical syntax marks them as such.
 
 Even though a `ref` is just another record type, it's notable because
 it is the standard way of simulating the traditional mutable variable
@@ -1176,7 +1178,7 @@ for finding the first non-negative position in an array.  Note that
 So far, we've played with the basic features of the language using the
 toplevel.  Now we'll create a simple, complete stand-along program
 that does something useful: sum up a list of numbers read in from the
-UNIX standard input.
+standard input.
 
 Here's the code, which you can save in a file called `sum.ml`.
 
