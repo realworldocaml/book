@@ -136,7 +136,7 @@ and [xref](#installation) guides you through that process.
 
 Real World OCaml is aimed at programmers who have some experience with
 conventional programming languages, but not specifically with
-_statically typed functional programming_.  The world of dynamic
+_statically-typed functional programming_.  The world of dynamic
 scripting languages such as Javascript, Ruby and Python have all
 adopted healthy elements of functional programming, but not all of it.
 Real World OCaml takes you through the full lifecycle of how to
