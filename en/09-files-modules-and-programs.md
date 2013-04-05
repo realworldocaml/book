@@ -211,8 +211,8 @@ let touch t s =
 ```
 
 We can now rewrite `freq.ml` to use `Counter`.  Note that the
-resulting code can still be built with `build.sh`, since `ocamlbuild`
-will discover dependencies and realize that `counter.ml` needs to be
+resulting code can still be built with `ocamlbuild`, which will
+discover dependencies and realize that `counter.ml` needs to be
 compiled.
 
 ```ocaml
