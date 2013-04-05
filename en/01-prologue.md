@@ -51,6 +51,41 @@ understand.  It is this that makes OCaml a great choice for
 programmers who want to step up to a better programming language, and
 at the same time want to get practical work done.
 
+#### A brief history from the 1960s
+
+OCaml was written in 1996 by Xavier Leroy, Jérôme Vouillon, Damien Doligez and
+Didier Rémy at INRIA in France.  It was inspired by a long line of research
+into ML starting in the 1960s, and continues to have deep links to the academic
+community.
+
+ML was originally the _meta language_ of the LCF proof assistant released by
+Robin Milner in 1972 (at Stanford, and later at Cambridge).  ML was turned into
+a compiler in order to make it easier to use LCF on different machines, and
+gradually turned into a fully fledged system of its own by the 1980s. 
+
+In 1990, Xavier Leroy and Damien Doligez built a new implementation called Caml
+Light that was based on a bytecode interpreter with a fast sequential garbage
+collector.  Over the next few years useful libraries appeared, such as Michel
+Mauny's parsing system, and performance further improved with a fast native
+code compiler that made OCaml's performance competitive with mainstream
+languages such as C++.  A module system inspired by Standard ML also provided
+powerful facilities for abstraction and larger scale programs.
+
+The modern OCaml emerged in 1996, when a powerful and elegant object system was 
+implemented by Didier Rémy and Jérôme Vouillon.  This object system was notable
+for supporting many common OO idioms in a statically type-safe way, whereas
+the same idioms required runtime checks in languages such as C++ or Java.
+In 2000, Jacques Garrique extended OCaml with several new features such as 
+polymorphic methods and variants and labelled and optional arguments.
+
+The last decade has seen OCaml attract a significant user base, and language
+improvements have been steadily added to support the growing codebases that use
+the language both commercially and for academic use.  First-class modules,
+GADTs and dynamic linking have improved the flexibility of the language, and
+there is fast native code support for x86_64, ARM, PowerPC and Sparc64, making
+OCaml a good choice for systems where resource usage, predictability and
+performance matters.  
+
 ### The Core Standard Library
 
 A language on its own isn't enough.  You also need a rich set of
