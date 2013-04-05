@@ -497,7 +497,7 @@ operator `::` for adding elements to the front of a list.
 - : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
 ```
 
-Here, we're creating a new extended list, not changing the list we
+Here, we're creating a new and extended list, not changing the list we
 started with, as you can see below.
 
 ```ocaml
@@ -519,8 +519,9 @@ The bracket notation for lists is really just syntactic sugar for
 ```
 
 The `::` operator can only be used for adding one element to the front
-of the list.  There's also a list concatenation operator, `@`, which
-can concatenate two lists.
+of the list, with the list terminating at `[]`, the empty list.
+There's also a list concatenation operator, `@`, which can concatenate
+two lists.
 
 ```ocaml
 # [1;2;3] @ [4;5;6];;
@@ -550,7 +551,7 @@ equivalent of using the functions `car` and `cdr` to isolate the first
 element of a list and the remainder of that list.
 
 If you try the above example in the toplevel, however, you'll see that
-it spits out an error:
+it spits out a warning:
 
 ```ocaml
     Characters 25-69:
@@ -588,7 +589,7 @@ code following the first matched pattern.  And, as we've already seen,
 we can name new variables in our patterns that correspond to
 sub-structures of the value being matched.
 
-Here's a new version of `my_favorite_language` that uses `match`, and
+Here's a new version of `my_favorite_language` that uses `match` and
 doesn't trigger a compiler warning.
 
 ```ocaml
@@ -700,7 +701,7 @@ case to the match:
 # let rec destutter list =
     match list with
     | [] -> []
-    | [hd] -> [hd]
+    | hd :: [] -> hd :: []
     | hd1 :: hd2 :: tl ->
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
@@ -926,6 +927,11 @@ We also made our first use of an _anonymous function_ in the call to
 but not named, in this case, using the `fun` keyword.  Anonymous
 functions are common in OCaml, particularly when using iteration
 functions like `List.exists`.
+
+The purpose of `List.exists` is to check if there are any elements of
+the given list in question on which the provided function evaluates to
+`true`.  In this case, we're using `List.exists` to check if there is
+a scene element within which our point resides.
 
 ## Imperative programming
 
