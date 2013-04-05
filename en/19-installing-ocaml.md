@@ -1,6 +1,6 @@
 # Installation
 
-The easiest way to use OCaml is via the binary packages available in
+The easiest way to use OCaml is via the binary packages available for
 many operating systems.  For day-to-day code development however, it's
 much easier to use a source-code manager that lets you modify
 individual libraries and automatically recompile all the dependencies.
