@@ -20,9 +20,9 @@ try out the examples.
 <title>Installing `utop`</title>
 
 The easiest way to get the examples running is to set up the OPAM
-package manager, which is explained in [xref](#installation).
-In a nutshell, you need to have a working C compilation environment
-and the PCRE library installed, and then:
+package manager, which is explained in [xref](#installation).  In a
+nutshell, you need to have a working C compilation environment and the
+PCRE library installed, and then:
 
 ```
 $ opam init
@@ -31,7 +31,8 @@ $ opam install utop core_extended
 $ eval `opam config -env`
 ```
 
-Then create a file called `~/.ocamlinit` in your home directory:
+Note that the above commands will take some time to run.  When they're
+done, create a file called `~/.ocamlinit` in your home directory:
 
 ```ocaml
 #use "topfind"
@@ -50,11 +51,11 @@ you can split your typing over multiple lines.  You can exit `utop` by pressing
 
 ## OCaml as a calculator
 
-Let's spin up the toplevel.  Throughout the book we're going to use
-Core, a more full-featured and capable replacement for OCaml's
-standard library.  Accordingly, we'll start by opening the `Core.Std`
-module to get access to Core's libraries.  If you don't open
-`Core.Std` many of the examples below will fail.
+Let's spin up `utop`.  Throughout the book we're going to use Core, a
+more full-featured and capable replacement for OCaml's standard
+library.  Accordingly, we'll start by opening the `Core.Std` module to
+get access to Core's libraries.  If you don't open `Core.Std` many of
+the examples below will fail.
 
 ```ocaml
 $ utop
@@ -1114,7 +1115,7 @@ while and for loops for interacting with them.  Here, for example, is
 some code that uses a for loop for permuting an array.  We use the
 `Random` module as our source of randomness.  `Random` starts out with
 a deterministic seed, but you can call `Random.self_init` to choose a
-new at random.
+new seed at random.
 
 ```ocaml
 # let permute ar =
@@ -1238,9 +1239,9 @@ max $ ./sum.native
 Total: 100.5
 ```
 
-More work is needed to make a really usable command-line programming,
+More work is needed to make a really usable command-line program,
 including a proper command-line parsing interface and better error
-handling.
+handling, all of which is covered in [xref](#command-line-parsing).
 
 ## Where to go from here
 
