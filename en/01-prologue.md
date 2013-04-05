@@ -135,21 +135,20 @@ and [xref](#installation) guides you through that process.
 ## About this book
 
 Real World OCaml is aimed at programmers who have some experience with
-conventional programming languages, but not specifically with
-_statically-typed functional programming_.  The world of dynamic
-scripting languages such as Javascript, Ruby and Python have all
-adopted healthy elements of functional programming, but not all of it.
-Real World OCaml takes you through the full lifecycle of how to
-construct software with static typing, including the powerful module
-system that makes code re-use so much more robust.
+conventional programming languages, but not specifically with _statically-typed
+functional programming_.  The world of dynamic scripting languages such as
+Javascript, Ruby and Python have all adopted healthy elements of functional
+programming, but not all of it.  Real World OCaml takes you through the full
+lifecycle of how to construct software with static typing, including the
+powerful module system that makes code re-use so much more robust.
 
 At the same time, OCaml is not Haskell.  It takes a much more pragmatic
-approach by being strictly evaluated by default, and permitting arbitrary
+approach by being strictly evaluated by default and permitting arbitrary
 side-effects.  In fact, you can write OCaml code that looks very similar to
-imperative C but is still type-safe. One of the major strengths of OCaml for
-systems programming is that, with some experience, you can predict the runtime
-behaviour of a block of code very easily, with very little compiler magic
-involved.
+imperative C but remains completely type-safe.  One of the major strengths of
+OCaml for systems programming is that, with some experience, you can predict
+the runtime behaviour of a block of code very easily, with very little compiler
+magic involved.
 
 If you've learnt some OCaml before, this book may surprise you with
 some differences from your past experience.  The Core standard library
