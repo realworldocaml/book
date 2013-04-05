@@ -92,11 +92,11 @@ at you.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int` the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
-  operators (`+.` instead of `+`), and OCaml doesn't do any automated
-  casting between the types.  This can be a bit of a nuisance, but it
-  has its benefits, since it prevents some kinds of bugs that arise in
-  other languages due to unexpected differences between the behavior
-  of `int` and `float`.
+  operators (`+.` instead of `+`), and OCaml doesn't automatically
+  cast between types.  This can be a bit of a nuisance, but it has its
+  benefits, since it prevents some kinds of bugs that arise in other
+  languages due to unexpected differences between the behavior of
+  `int` and `float`.
 
 We can also create a variable to name the value of a given expression,
 using the `let` keyword (also known as a _let binding_).
@@ -113,7 +113,7 @@ variable (`x` or `y`), in addition to its type (`int`) and value (`7` or `14`).
 
 ## Functions and Type Inference
 
-The `let` syntax can also be used for creating functions:
+The `let` syntax can also be used for creating functions.
 
 ```ocaml
 # let square x = x * x ;;
@@ -123,6 +123,10 @@ val square : int -> int = <fun>
 # square (square 2);;
 - : int = 16
 ```
+
+Functions in OCaml are values like any other, which is why we bind one
+to a variable using the same `let` keyword used for binding a variable
+to a simple value such as an integer.
 
 When using `let` to define a function, the first identifier after the
 `let` is the function name, and each subsequent identifier is a
@@ -154,17 +158,11 @@ for dealing with floats.
 
 The notation for the type-signature of a multi-argument functions may
 be a little surprising at first, but we'll explain where it comes from
-when we get to function currying in [xref](#variables-and-functions).
+when we get to function currying in [xref](#multi-argument-functions).
 For the moment, think of the arrows as separating different arguments
 of the function, with the type after the final arrow being the return
-value of the function.  Thus,
-
-```ocaml
-int -> int -> float
-```
-
-describes a function that takes two `int` arguments and returns a
-`float`.
+value of the function.  Thus, `int -> int -> float` describes a
+function that takes two `int` arguments and returns a `float`.
 
 We can even write functions that take other functions as arguments.
 Here's an example of a function that takes three arguments: a test
@@ -180,9 +178,9 @@ val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ```
 
 If we look at the inferred type signature in detail, we see that the
-first argument is a function that takes an int and returns a boolean,
-and that the remaining two arguments are integers.  Here's an example
-of this function in action.
+first argument is a function that takes an integer and returns a
+boolean, and that the remaining two arguments are integers.  Here's an
+example of this function in action.
 
 ```ocaml
 # let even x =
@@ -195,9 +193,9 @@ val even : int -> bool = <fun>
 ```
 
 Note that in the definition of `even` we used `=` in two different
-ways: once as an equality test, when comparing `x mod 2` to `0`; and
-once as the part of the let binding that separates the thing being
-defined from its definition.  These two uses of `=` are basically
+ways: once as the part of the let binding that separates the thing
+being defined from its definition; and once as an equality test, when
+comparing `x mod 2` to `0`.  These two uses of `=` are basically
 unrelated.
 
 ### Type inference
@@ -238,7 +236,7 @@ catch unintended type changes.  Here's an annotated version of
 `sum_if_true`:
 
 ```ocaml
-# let sum_if_true (test : int -> bool) (x:int) (y:int) : int =
+# let sum_if_true (test : int -> bool) (x : int) (y : int) : int =
      (if test x then x else 0)
      + (if test y then y else 0)
   ;;
@@ -254,7 +252,7 @@ is failing to compile.
 ### Inferring generic types
 
 Sometimes, there isn't enough information to fully determine the
-concrete type of a given value.  Consider this function.
+concrete type of a given value.  Consider this function:
 
 ```ocaml
 # let first_if_true test x y =
@@ -280,9 +278,11 @@ In particular, the type of the `test` argument is `('a -> bool)`,
 which means that test is a one-argument function whose return value is
 `bool`, and whose argument could be of any type `'a`.  But, whatever
 type `'a` is, it has to be the same as the type of the other two
-arguments, `x` and `y`.
+arguments, `x` and `y`, and of the return value of `first_if_true`.
+This kind of genericity is called _parametric polymorphism_, and is
+very similar to generics in C# and Java.
 
-This genericity means that we can write:
+The generic type of `first_if_true` allows us to write:
 
 ```ocaml
 # let long_string s = String.length s > 6;;
@@ -291,7 +291,7 @@ val long_string : string -> bool = <fun>
 - : string = "loooooong"
 ```
 
-And we can also write:
+as well as:
 
 ```ocaml
 # let big_number x = x > 3;;
@@ -318,8 +318,7 @@ Error: This expression has type string but
 In this example, `big_number` requires that `'a` be instantiated as
 `int`, whereas `"short"` and `"loooooong"` require that `'a` be
 instantiated as `string`, and they can't both be right at the same
-time.  This kind of genericity is called _parametric polymorphism_,
-and is very similar to generics in C# and Java.
+time.
 
 <note><title>Type errors vs exceptions</title>
 
@@ -416,7 +415,8 @@ fuss.
 ```ocaml
 # let distance (x1,y1) (x2,y2) =
     sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
-;;
+  ;;
+val distance : float * float -> float * float -> float = <fun>
 ```
 
 The `**` operator used above is for raising a floating-point number to
