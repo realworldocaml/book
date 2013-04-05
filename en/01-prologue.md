@@ -208,7 +208,7 @@ do follow the installation instructions in [xref](#installation)
 carefully.
 
 At this stage, the Windows operating system is also unsupported, and
-only MacOS X, Linux, FreeBSD and OpenBSD can be expected to work
+only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work
 reliably.  We realize this is a concern; there are no fundamental
 barriers to Windows support, but we're focussed on getting the main
 content finished before getting stuck into the porting effort.

@@ -31,7 +31,7 @@ operating systems.  This is the simplest and preferred installation
 route, but we'll also describe how to do a manual installation as a
 last resort.
 
-### MacOS X
+### Mac OS X
 
 The [Homebrew](http://github.com/mxcl/homebrew) package manager has an
 OCaml installer, which is usually updated pretty quickly to the latest
@@ -46,7 +46,7 @@ The Perl-compatible Regular Expression library (PCRE) is used by the
 Core suite.  It's not strictly needed to use OCaml, but is a commonly
 used library that we're installing now to save time later.
 
-Another popular package manager on MacOS X is
+Another popular package manager on Mac OS X is
 [MacPorts](http://macports.org), which also has an OCaml port:
 
 ```
@@ -150,7 +150,7 @@ _Reviewers_: this has since been fixed in OCaml-4.01.0.
 
 </important>
 
-### MacOS X
+### Mac OS X
 
 Source installation of OPAM will take a minute or so on a modern
 machine.  There is a Homebrew package for the latest OPAM:
@@ -236,7 +236,7 @@ $ sudo pacman -U opam-_version_.pkg.tar.gz
 
 The entire OPAM package database is held in the `.opam` directory in
 your home directory, including compiler installations. On Linux and
-MacOS X, this will be the `~/.opam` directory.  You shouldn't switch
+Mac OS X, this will be the `~/.opam` directory.  You shouldn't switch
 to an admin user to install packages as nothing will be installed
 outside of this directory.  If you run into problems, just delete the
 whole `~/.opam` directory and follow the installations instructions
@@ -297,7 +297,7 @@ This evaluates the results of running `opam config env` in your
 current shell, and sets the variables so that subsequent commands will
 use them.  This only works with your current shell, and it can be
 automated for all future shells by adding the line to your login
-scripts.  On MacOS X or Debian, this is usually the `~/.bash_profile`
+scripts.  On Mac OS X or Debian, this is usually the `~/.bash_profile`
 file if you're using the default shell.  If you've switched to another
 shell, it might be `~/.zshrc` instead.  OPAM isn't unusual in this
 approach; the SSH `ssh-agent` also works similarly, so if you're
