@@ -80,7 +80,7 @@
 ((part Practical)
  (name "Text processing and Unicode")
  (file "text-processing-and-unicode")
- (note "Not started")t
+ (note "Not started")
 )
 ((part Practical)
  (name "xml-streams-and-trees")
