@@ -104,11 +104,22 @@ being a general-purpose standard library, and has very broad
 applicability.  Core is also engineered with correctness, reliability
 and performance very much in mind.
 
-Core is also distributed with syntax extensions which provide
-essential new functionality to OCaml; and there are additional
-libraries such as the Async network communications library that
-provide even more useful functionality.  All of these libraries are
-distributed under a liberal Apache-style license.
+Core is also distributed with syntax extensions which provide useful new
+functionality to OCaml, and there are additional libraries such as the Async
+network communications library that extend the reach of Core into building
+complex distributed systems.  All of these libraries are distributed under a
+liberal Apache-style license.
+
+If you've learnt some OCaml before, this book may surprise you with some
+differences from your past experience.  The Core standard library redefines
+most of the standard modules to be much more consistent, and so you'll need to
+adapt older code.  We believe the Core model is worth learning; it's been
+successfully used on large, million-line codebases, and removes a big barrier
+to more widespread OCaml adoption.  There will always exist code that uses only
+the compiler standard library of course, but there are other online resources
+available to learn that.  Real World OCaml focuses on the techniques the
+authors have used in their personal experience to construct scalable, robust
+computer systems.
 
 ### The OCaml Platform
 
@@ -148,21 +159,10 @@ side-effects.  In fact, you can write OCaml code that looks very similar to
 imperative C but remains completely type-safe.  One of the major strengths of
 OCaml for systems programming is that, with some experience, you can predict
 the runtime behaviour of a block of code very easily, with very little compiler
-magic involved.
+magic involved.  We'll explain some of these tricks to you as we go through the
+book and gradually introduce more complex concepts.
 
-If you've learnt some OCaml before, this book may surprise you with
-some differences from your past experience.  The Core standard library
-redefines most of the standard modules to be much more consistent, and
-so you'll need to adapt older code.  We believe the Core model is
-worth learning; it's been successfully used on large million line
-codebases, and removes a big barrier to more widespread OCaml
-adoption.  There will always exist code that uses only the compiler
-standard library of course, but there are other online resources
-available to learn that.  Real World OCaml focuses on the techniques
-the authors have used in their personal experience to construct
-scalable, robust computer systems.
-
-## What to expect
+### What to expect
 
 Real World OCaml is split into three parts and appendices:
 
