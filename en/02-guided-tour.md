@@ -117,6 +117,8 @@ The `let` syntax can also be used for creating functions:
 ```ocaml
 # let square x = x * x ;;
 val square : int -> int = <fun>
+# square 2;;
+- : int = 4
 # square (square 2);;
 - : int = 16
 ```
@@ -142,9 +144,12 @@ val ratio : int -> int -> float = <fun>
 - : float = 0.571428571428571397
 ```
 
-As a side note, the above is our first use of OCaml modules.  The
-`Float` module contains a collection of useful functions for dealing
-with floats, including the function `Float.of_int`.
+As a side note, the above is our first use of OCaml modules.  Here,
+`FLoat.of_int` refers to the `of_int` function contained in the
+`FLoat` module, and not, as you might expect from an object-oriented
+language, accessing a method of an object.  The `Float` module in
+particular contains `of_int` as well as many other useful functions
+for dealing with floats.
 
 The notation for the type-signature of a multi-argument functions may
 be a little surprising at first, but we'll explain where it comes from
@@ -466,8 +471,8 @@ of the lengths of each language as follows.
 transforming the elements of that list.  Note that `List.map` creates
 a new list and does not modify the original.
 
-In this example, the function `String.length` is passed using under
-the _labeled argument_ `~f`.  Labels allow you to specify function
+In this example, the function `String.length` is passed under the
+_labeled argument_ `~f`.  Labels allow you to specify function
 arguments by name rather than by position.  As you can see below, we
 can change the order of labeled arguments without changing the
 function's behavior.
@@ -695,7 +700,7 @@ case to the match:
     match list with
     | [] -> []
     | [hd] -> [hd]
-    | hd1 :: (hd2 :: tl) ->
+    | hd1 :: hd2 :: tl ->
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
   ;;
@@ -735,8 +740,8 @@ are constructors, like `::` and `[]` for lists, which let you build
 optional values.  You can think of an option as a specialized list
 that can only have zero or one element.
 
-To get a value out of an option, we use pattern matching, as we did
-with tuples and lists.  Consider the following simple function for
+To examine the contents of an option, we use pattern matching, as we
+did with tuples and lists.  Consider the following simple function for
 printing a log entry given an optional time and a message.  If no time
 is provided (_i.e._, if the time is `None`), the current time is
 computed and used in its place.
