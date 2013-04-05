@@ -143,13 +143,13 @@ Real World OCaml takes you through the full lifecycle of how to
 construct software with static typing, including the powerful module
 system that makes code re-use so much more robust.
 
-At the same time, OCaml is not Haskell.  It takes a much more
-pragmatic approach by being strictly evaluated by default, and
-permitting arbitrary side-effects.  In fact, you can write OCaml code
-that looks very similar to C, but is still type-safe. One of the major
-strengths of OCaml for systems programming is that, with some
-experience, you can predict the runtime behaviour of a block of code
-very easily, with very little compiler magic involved.
+At the same time, OCaml is not Haskell.  It takes a much more pragmatic
+approach by being strictly evaluated by default, and permitting arbitrary
+side-effects.  In fact, you can write OCaml code that looks very similar to
+imperative C but is still type-safe. One of the major strengths of OCaml for
+systems programming is that, with some experience, you can predict the runtime
+behaviour of a block of code very easily, with very little compiler magic
+involved.
 
 If you've learnt some OCaml before, this book may surprise you with
 some differences from your past experience.  The Core standard library
