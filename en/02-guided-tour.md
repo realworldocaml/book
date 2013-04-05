@@ -953,10 +953,9 @@ while loops.
 
 Perhaps the simplest mutable data structure in OCaml is the array.
 Arrays in OCaml are very similar to arrays in other languages like C:
-they are fixed width, indexing starts at 0, and accessing or modifying
-an array element is a constant-time operation.  Arrays are more
-compact in terms of memory utilization than most other data structures
-in OCaml, including lists.
+indexing starts at 0, and accessing or modifying an array element is a
+constant-time operation.  Arrays are more compact in terms of memory
+utilization than most other data structures in OCaml, including lists.
 
 Here's an example.
 
