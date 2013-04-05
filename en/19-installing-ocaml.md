@@ -5,13 +5,12 @@ many operating systems.  For day-to-day code development however, it's
 much easier to use a source-code manager that lets you modify
 individual libraries and automatically recompile all the dependencies.
 
-An important difference between OCaml and scripting languages such as
-Python or Ruby is that the static type safety that means that you
-can't just mix-and-match compiled libraries.  Interfaces are checked
-when libraries are compiled, so when an interface is changed, all the
-dependent libraries must also be recompiled.  Source-based package
-managers automate this process for you and make development life much
-easier.
+An important difference between OCaml and scripting languages such as Python or
+Ruby is the static type safety that means that you can't just mix-and-match
+compiled libraries.  Interfaces are checked when libraries are compiled, so
+when an interface is changed, all the dependent libraries must also be
+recompiled.  Source-based package managers automate this process for you and
+make development life much easier.
 
 To work through Real World OCaml, you'll need three major components
 installed:
