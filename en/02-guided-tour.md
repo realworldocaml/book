@@ -26,25 +26,17 @@ and the PCRE library installed, and then:
 
 ```
 $ opam init
-$ opam switch 4.00.1+short-types
+$ opam switch 4.01.0dev+trunk
 $ opam install utop core_extended
 $ eval `opam config -env`
 ```
 
-Then create a file called `~/.ocamlinit` in your home directory:
-
-```ocaml
-#use "topfind"
-#camlp4o
-#thread
-#require "core.top"
-```
-
-Then type in `utop`, and you'll be in an interactive toplevel environment.
-OCaml phrases are only evaluated when you enter a double semicolon (`;;`), so
-you can split your typing over multiple lines.  You can exit `utop` by pressing
-`control-D` and return. For complete instructions, please refer to
-[xref](#installation).
+This will take a few minutes to compile, and install the latest version of
+OCaml with the Core standard library.  Once the command completes, type in
+`utop`, and you'll be in an interactive toplevel environment.  OCaml phrases
+are only evaluated when you enter a double semicolon (`;;`), so you can split
+your typing over multiple lines.  You can exit `utop` by pressing `control-D`
+and return. For complete instructions, please refer to [xref](#installation).
 
 </note>
 

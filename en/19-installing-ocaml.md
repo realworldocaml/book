@@ -96,16 +96,13 @@ machine.
 
 ### Building from source
 
-_NOTE_: we really should be telling people to install 4.01, but
-it's not released yet.
-
 To install OCaml from source code, first make sure that you have a C
-compilation environment (usually either `gcc` or `llvm` installed)
+compilation environment (usually either `gcc` or `llvm` installed).
 
 ```
-$ curl -OL http://caml.inria.fr/pub/distrib/ocaml-4.00/ocaml-4.00.1.tar.gz
-$ tar -zxvf ocaml-4.00.1.tar.gz
-$ cd ocaml-4.00.1
+$ curl -OL https://github.com/ocaml/ocaml/archive/trunk.tar.gz
+$ tar -zxvf trunk.tar.gz
+$ cd ocaml-trunk
 $ ./configure
 $ make world world.opt
 $ sudo make install
@@ -124,6 +121,18 @@ need to add `$HOME/my-ocaml/bin` to your `PATH`, normally by editing
 the `~/.bash_profile` file.  You shouldn't really to do this unless
 you have special reasons, so try to install binary packages before
 trying a source installation.
+
+<note>
+<title>Note to reviewers</title>
+
+We instruct you install the unreleased trunk version of OCaml
+in these instructions, as we take advantage of some recent additions
+to the language that simplify explanations in the book.  The 4.01
+release will happen before the book is released, but you may run
+into "bleeding edge" bugs with the trunk release.  Leave a comment
+here if you do and we'll address them.
+
+</note>
 
 ## Getting OPAM
 
@@ -260,11 +269,11 @@ replacement standard library that all of the examples in this book
 use.  Before doing this, let's make sure you have exactly the right
 compiler version you need.  We've made some minor modifications to the
 way the OCaml compiler displays type signatures, and the next command
-will install a patched `4.00.1` compiler with this functionality
+will install a patched `4.01.0` compiler with this functionality
 enabled.
 
 ```
-$ opam switch 4.00.1+short-types
+$ opam switch 4.01.0dev+trunk
 ```
 
 This step will take about 5-10 minutes on a modern machine, and will
@@ -276,7 +285,7 @@ without sacrificing your current installation.  You only need to
 install this compiler once, and future updates will be much faster as
 they only recompile libraries within the compiler installation.
 
-The new compiler will be installed into `~/.opam/4.00.1+short-types`
+The new compiler will be installed into `~/.opam/4.01.0dev+trunk`
 and any libraries you install for it will be tracked separately from
 your system installation.  You can have any number of compilers
 installed simultaneously, but only one can be active at any time.
@@ -340,7 +349,7 @@ so that you can run it within your editing environment.
 
 Remember from earlier that OPAM never installs files directly into
 your system directories, and this applies to `utop` too.  You'll find
-the binary in `~/.opam/4.00.1+short-types/bin`.  However, just typing
+the binary in `~/.opam/4.01.0dev+trunk/bin`.  However, just typing
 in `utop` from your shell should just work, due to the `opam config
 env` step which configures your shell.  Don't forget to automate this
 as described earlier, as it makes life much easier when developing
