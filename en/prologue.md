@@ -108,7 +108,8 @@ Core is also distributed with syntax extensions which provide useful new
 functionality to OCaml, and there are additional libraries such as the Async
 network communications library that extend the reach of Core into building
 complex distributed systems.  All of these libraries are distributed under a
-liberal Apache-style license.
+liberal Apache 2 license to permit free use in hobby, academic and commercial
+settings.
 
 If you've learnt some OCaml before, this book may surprise you with some
 differences from your past experience.  The Core standard library redefines
