@@ -436,6 +436,21 @@ Core opened and ready to use.
 
 TODO: Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 
+To use `utop` directly in Emacs, add the following line to your `~/.emacs` file:
+
+```scm
+(autoload 'utop "utop" "Toplevel for OCaml" t)
+```
+
+You also need to make the `utop.el` file available to your Emacs installation.
+The OPAM version of `utop` installs it into the `~/.opam` hierarchy, for
+example in `~/.opam/system/share/emacs/site-lisp/utop.el`. You may need to
+replace `system` with your current compiler switch, such as `4.01.0dev+trunk`.
+
+Once this successfully loads in Emacs, you can run utop by executing the
+command `utop` in Emacs.  There are more details instructions at the 
+[utop homepage](https://github.com/diml/utop#integration-with-emacs).
+
 #### Vim
 
 TODO: Vim users can use the built-in style, and
