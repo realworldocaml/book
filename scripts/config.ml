@@ -82,7 +82,7 @@ let from_email =
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
   ; "joelpob"                 (* ma2bd@laposte.net *)
   ; "mansu"                   (* suman.karumuri@gmail.com *)
-  ; "Aryx"                    (* yoann.padioleau@gmail.com *)
+  ; "aryx"                    (* yoann.padioleau@gmail.com *)
   ; "paulcavallaro"           (* paulcavallaro@gmail.com *)
 
   (* Simcorp people *)
