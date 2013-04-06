@@ -108,5 +108,6 @@ let allowed_users = function
   | "alpha1" -> internal_reviewers
   | "alpha2" -> external_reviewers
   | "alpha3" -> external_reviewers
+  | "alpha4" -> full_access
   | "trunk"  -> full_access
   |_ -> authors
