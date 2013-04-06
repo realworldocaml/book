@@ -29,15 +29,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -3452,12 +3443,7 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       </sect3>
     </sect2>
   </sect1>
-</chapter><chapter id="lists-options-and-patterns">
-  <title>Lists, options and patterns</title>
-  <para>
-    <emphasis>(This chapter yet to be completed)</emphasis>
-  </para>
-</chapter><chapter id="files-modules-and-programs">
+</chapter><chapter id="lists-options-and-patterns"><title>Lists, Options and Patterns</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter><chapter id="files-modules-and-programs">
   <title>Files, Modules and Programs</title>
   <para>
     We've so far experienced OCaml largely through the toplevel. As you
@@ -3575,10 +3561,10 @@ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
       One great tool for this task is <literal>ocamlbuild</literal>,
       which is shipped with the OCaml compiler. We'll talk more about
       <literal>ocamlbuild</literal> in
-      <xref linkend="packaging-and-build-systems"/>, but for
-      now, we'll just walk through the steps required for this simple
-      application. First, create a <literal>_tags</literal> file,
-      containing the following lines.
+      <xref linkend="packaging"/>, but for now, we'll just
+      walk through the steps required for this simple application.
+      First, create a <literal>_tags</literal> file, containing the
+      following lines.
     </para>
     <programlisting>
 true:package(core),thread,annot,debugging
@@ -11863,10 +11849,9 @@ val cfg : http_server_config =
 $ opam install yojson
 </programlisting>
     <para>
-      See <xref linkend="packaging-and-build-systems"/> for
-      installation instructions if you haven't already got OPAM. Once
-      installed, you can open it in the <literal>utop</literal> toplevel
-      by:
+      See <xref linkend="installation"/> for installation
+      instructions if you haven't already got OPAM. Once installed, you
+      can open it in the <literal>utop</literal> toplevel by:
     </para>
     <programlisting>
 #require &quot;yojson&quot; ;;
@@ -11880,8 +11865,17 @@ open Yojson ;;
         <literal>Yojson.Basic.json</literal> type shown below is
         sufficient to express any valid JSON structure.
       </para>
+      <programlisting language="ocaml">
+type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of json list
+  | `Null
+  | `String of string ]
+</programlisting>
       <para>
-        <literal>ocaml type json = [   | `Assoc of (string * json) list   | `Bool of bool   | `Float of float   | `Int of int   | `List of json list   | `Null   | `String of string ]</literal>
         Some interesting properties should leap out at you after reading
         this definition:
       </para>
@@ -11929,9 +11923,11 @@ open Yojson ;;
       <programlisting language="ocaml">
 val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
 (* Read a JSON value from a string.
-  [buf] : use this buffer at will during parsing instead of creating a new one.
-  [fname] : data file name to be used in error messages. It does not have to be a real file.
-  [lnum] : number of the first line of input. Default is 1.
+   [buf]   : use this buffer at will during parsing instead of
+             creating a new one. 
+   [fname] : data file name to be used in error messages. It does not 
+             have to be a real file. 
+   [lnum]  : number of the first line of input. Default is 1.
 
 val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; in_channel -&gt; json
 (* Read a JSON value from a channel. See [from_string] for the meaning of the
@@ -12119,9 +12115,9 @@ let () =
           <literal>List</literal> module:
         </para>
         <programlisting language="ocaml">
-val map: 'a list -&gt; f:('a -&gt; 'b) -&gt; 'b list
-val fold: list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum
-val iter: 'a list -&gt; f:('a -&gt; unit) -&gt; unit
+val map  : 'a list -&gt; f:('a -&gt; 'b)   -&gt; 'b list
+val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit
+val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum
 </programlisting>
         <para>
           <literal>map</literal> and <literal>fold</literal> are
@@ -12401,14 +12397,15 @@ type json = [
         </para>
         <programlisting language="ocaml">
 val to_basic : json -&gt; Yojson.Basic.json
-(** Tuples are converted to JSON arrays, Variants are converted to JSON strings
-or arrays of a string (constructor) and a json value (argument). Long integers
-are converted to JSON strings.  Examples:
+(** Tuples are converted to JSON arrays, Variants are converted to
+    JSON strings or arrays of a string (constructor) and a json value
+    (argument). Long integers are converted to JSON strings.
+    Examples:
 
-`Tuple [ `Int 1; `Float 2.3 ]   -&gt;    `List [ `Int 1; `Float 2.3 ]
-`Variant (&quot;A&quot;, None)            -&gt;    `String &quot;A&quot;
-`Variant (&quot;B&quot;, Some x)          -&gt;    `List [ `String &quot;B&quot;, x ]
-`Intlit &quot;12345678901234567890&quot;  -&gt;    `String &quot;12345678901234567890&quot;
+    `Tuple [ `Int 1; `Float 2.3 ]   -&gt;    `List [ `Int 1; `Float 2.3 ]
+    `Variant (&quot;A&quot;, None)            -&gt;    `String &quot;A&quot;
+    `Variant (&quot;B&quot;, Some x)          -&gt;    `List [ `String &quot;B&quot;, x ]
+    `Intlit &quot;12345678901234567890&quot;  -&gt;    `String &quot;12345678901234567890&quot;
  *)
 </programlisting>
       </sect3>
@@ -12622,13 +12619,12 @@ val authorization_response_of_string :
     </listitem>
     <listitem>
       <para>
-        show help and manual pages for all the available options.
+        help needs to be shown for all the available options.
       </para>
     </listitem>
     <listitem>
       <para>
-        support interactive auto-completion of commands to assist the
-        user.
+        interactive auto-completion of commands to assist the user.
       </para>
     </listitem>
   </itemizedlist>
@@ -12645,12 +12641,11 @@ val authorization_response_of_string :
   <para>
     This chapter demonstrates how to use <literal>Command</literal> to
     extend the cryptographic utility from
-    <xref linkend="object-oriented-programming"/> and build a
+    <xref linkend="object-oriented-programming"/> and builds a
     simple equivalent to the <literal>md5</literal> and
-    <literal>shasum</literal> utilities. It also continues the
-    demonstration of how elegant <emphasis>functional
-    combinators</emphasis> can be to declare complex data structures in
-    a type-safe way.
+    <literal>shasum</literal> utilities. It also demonstrates how
+    <emphasis>functional combinators</emphasis> can be used to declare
+    complex data structures in a type-safe and elegant way.
   </para>
   <sect1 id="basic-command-line-parsing">
     <title>Basic command line parsing</title>
@@ -12691,7 +12686,7 @@ let () = Command.run command
       program and run it, the help screen looks like this:
     </para>
     <programlisting>
-$ ./basic.byte 
+$ ./basic.byte
 Generate an MD5 hash of the input data
 
   basic.byte filename
@@ -12876,7 +12871,7 @@ Command.Spec.(
               <literal>string</literal>
             </entry>
             <entry>
-              <literal>&lt;valid filename&gt;</literal>
+              <literal>/etc/passwd</literal>
             </entry>
           </row>
         </tbody>
@@ -12919,10 +12914,10 @@ let get_file_data = function
   | None
   | Some &quot;-&quot; -&gt; In_channel.(input_all stdin)
   | Some file -&gt; In_channel.read_all file
- 
+
 let do_hash file =
   let open Cryptokit in
-  get_file_data file 
+  get_file_data file
   |&gt; hash_string (Hash.md5 ())
   |&gt; transform_string (Hexa.encode ())
   |&gt; print_endline
@@ -13021,7 +13016,7 @@ Command.Spec.(
       looks like this:
     </para>
     <programlisting>
-$ mlmd5 -s 
+$ mlmd5 -s
 Generate an MD5 hash of the input data
 
   mlmd5 [filename]
@@ -13091,7 +13086,7 @@ $ mlmd5 -s &quot;ocaml rocks&quot;
               <literal>listed</literal> <emphasis>arg</emphasis>
             </entry>
             <entry>
-              <emphasis>arg</emphasis> <literal>list</literal> may
+              <emphasis>arg</emphasis> <literal>list</literal>, flag may
               appear multiple times
             </entry>
           </row>
@@ -13195,9 +13190,10 @@ val group :
       name list, and dispatches it to the right command handler.
     </para>
     <para>
-      Let's build the beginning of a calendar that do a few operations
-      over dates from the command line. We first define a command that
-      adds days to an input date and prints the resulting date.
+      Let's build the beginning of a calendar toool that does a few
+      operations over dates from the command line. We first define a
+      command that adds days to an input date and prints the resulting
+      date.
     </para>
     <programlisting language="ocaml">
 open Core.Std
@@ -13224,7 +13220,7 @@ let () = Command.run add
       the commands are now grouped as sub-commands using
       <literal>Command.group</literal>.
     </para>
-    <programlisting>
+    <programlisting language="ocaml">
 open Core.Std
 
 let add =
@@ -13255,7 +13251,7 @@ let diff =
 let command =
   Command.group ~summary:&quot;Manipulate dates&quot;
     [ &quot;add&quot;, add; &quot;diff&quot;, diff ]
-  
+
 let () = Command.run command
 </programlisting>
     <para>
@@ -13318,7 +13314,7 @@ $ cal diff 2012-12-25 2012-11-01
       The type of <literal>Command.t</literal> looks deceptively simple:
     </para>
     <programlisting language="ocaml">
-type ('main_in, 'main_out) t 
+type ('main_in, 'main_out) t
 </programlisting>
     <para>
       You can think of <literal>('a, 'b) t</literal> as a function of
@@ -13419,34 +13415,34 @@ val basic :
         calendar application to illustrate this.
       </para>
       <programlisting language="ocaml">
-open Core.Std                                                                                                                 
-                                                                                                                              
-let add ~common = 
-  Command.basic ~summary:&quot;Add [days] to the [base] date&quot;                                                                      
-    Command.Spec.( 
-      empty 
+open Core.Std
+
+let add ~common =
+  Command.basic ~summary:&quot;Add [days] to the [base] date&quot;
+    Command.Spec.(
+      empty
       +&gt; anon (&quot;base&quot; %: date)
       +&gt; anon (&quot;days&quot; %: int)
-      ++ common                                                                                                               
+      ++ common
     )
-  (fun base span debug verbose () -&gt;                                                                                          
+  (fun base span debug verbose () -&gt;
     Date.add_days base span
     |&gt; Date.to_string
     |&gt; print_endline
   )
-                                                                                                                              
-let diff ~common =                                                                                                            
-  Command.basic ~summary:&quot;Show days between [date1] and [date2]&quot;                                                              
+
+let diff ~common =
+  Command.basic ~summary:&quot;Show days between [date2] and [date1]&quot;
     Command.Spec.(
       empty
-      +&gt; anon (&quot;date1&quot; %: date)                                                                                               
+      +&gt; anon (&quot;date1&quot; %: date)
       +&gt; anon (&quot;date2&quot; %: date)
       ++ common
-    ) 
-  (fun date1 date2 debug verbose () -&gt;                                                                                        
+    )
+  (fun date1 date2 debug verbose () -&gt;
     Date.diff date1 date2
-    |&gt; printf &quot;%d days\n&quot;                                                                                                     
-  ) 
+    |&gt; printf &quot;%d days\n&quot;
+  )
 </programlisting>
       <para>
         The definitions of the specifications are very similar to the
@@ -13455,7 +13451,7 @@ let diff ~common =
         can supply these flags when defining the groups:
       </para>
       <programlisting>
-let () =                                                                                                                 
+let () =
   let common =
     Command.Spec.(
       empty
@@ -13463,9 +13459,8 @@ let () =
       +&gt; flag &quot;-v&quot; (optional_with_default false bool) ~doc:&quot; Verbose output&quot;
     )
   in
-  List.map
+  List.map ~f:(fun (name, cmd) -&gt; (name, cmd ~common))
     [ &quot;add&quot;, add; &quot;diff&quot;, diff ]
-    ~f:(fun (name, cmd) -&gt; (name, cmd ~common))
   |&gt; Command.group ~summary:&quot;Manipulate dates&quot;
   |&gt; Command.run
 </programlisting>
@@ -13490,7 +13485,7 @@ Error: This expression has type
        but an expression was expected of type
          (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit) Command.Spec.t
            = (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit) Command.Spec.t
-       Type unit -&gt; unit is not compatible with type unit 
+       Type unit -&gt; unit is not compatible with type unit
 </programlisting>
       <para>
         While this does look scary, the key line to scan is the last
@@ -13550,7 +13545,7 @@ let () = Command.run add
       </para>
       <programlisting>
 $ cal_add_interactive 2013-12-01
-enter days: 
+enter days:
 35
 2014-01-05
 </programlisting>
@@ -13571,7 +13566,7 @@ enter days:
   | None -&gt;
      print_endline &quot;enter days: &quot;;
      m base (read_int ()));;
-- : (Date.t -&gt; int -&gt; '_a, Date.t -&gt; int option -&gt; '_a) Spec.t = &lt;abstr&gt; 
+- : (Date.t -&gt; int -&gt; '_a, Date.t -&gt; int option -&gt; '_a) Spec.t = &lt;abstr&gt;
 </programlisting>
       <para>
         The first half of the <literal>Spec.t</literal> shows that the
@@ -13632,9 +13627,9 @@ let () = Command.run add
       The precise mechanism for autocompletion varies depending on what
       shell you are using, but we'll assume you are using the most
       common one: <literal>bash</literal>. This is the default
-      interactie shell on most Linux distributions and Mac OS X, but you
-      may need to switch to it on *BSD or Windows (when using Cygwin).
-      The rest of this section assumes that you're using
+      interactive shell on most Linux distributions and Mac OS X, but
+      you may need to switch to it on *BSD or Windows (when using
+      Cygwin). The rest of this section assumes that you're using
       <literal>bash</literal>.
     </para>
     <para>
@@ -13797,12 +13792,12 @@ add      diff     help     version
         commands by pressing the tab key.
       </para>
       <para>
-        Command competion support works for flags and grouped commands,
+        Command completion support works for flags and grouped commands,
         and is very useful when building larger command-line interfaces.
       </para>
       <note>
       <title>
-      Installing a geneeric completion handler
+      Installing a generic completion handler
       </title>
       <para>
         Sadly, <literal>bash</literal> doesn't support installing a
@@ -13819,12 +13814,7 @@ add      diff     help     version
       </note>
     </sect2>
   </sect1>
-</chapter><chapter id="text-processing-and-unicode">
-  <title>Text Processing and Unicode</title>
-  <para>
-    TODO
-  </para>
-</chapter><chapter id="xml-streams-and-trees">
+</chapter><chapter id="text-processing-and-unicode"><title>Text Processing and Unicode</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter><chapter id="xml-streams-and-trees">
   <title>XML Streams and Trees</title>
   <para>
     XML is a markup language designed to store tree-structured data in a
@@ -13846,8 +13836,8 @@ add      diff     help     version
   <para>
     The remainder of this chapter uses the freely available XMLM
     library. It's easiest to obtain it via OPAM. See
-    <xref linkend="packaging-and-build-systems"/> for
-    installation instructions if you don't have OPAM.
+    <xref linkend="installation"/> for installation
+    instructions if you don't have OPAM.
   </para>
   <programlisting language="ocaml">
 $ opam install xmlm
@@ -14524,1881 +14514,7 @@ type meta = {
       </para>
     </sect2>
   </sect1>
-</chapter><chapter id="concurrent-programming-with-async">
-  <title>Concurrent Programming with Async</title>
-  <para>
-    When you start building OCaml code that interfaces with external
-    systems, you'll soon need to handle concurrent operations. Consider
-    the case of a web server sending a large file to many clients, or a
-    GUI waiting for a mouse clicks. These applications often need to
-    block while waiting for input for a particular task, and process
-    something else during that time. Meanwhile, when new data does
-    appear, the blocked task needs to be resumed as quickly as possible.
-  </para>
-  <para>
-    Busy servers can often handle tens of thousands of simultaneous
-    connections, so runtime efficiency really matters. An equally
-    important concern is readable source code, so that the control flow
-    of the program is obvious at a glance.
-  </para>
-  <para>
-    A common approach to concurrency is to use
-    <emphasis>preemptive</emphasis> system threads, most commonly in
-    Java or C#. In this threading model, each task is given an operating
-    system thread of its own, and the kernel schedules them with
-    arbitrary interleavings. Other language runtimes such as Javascript
-    are single-threaded, and applications register function callbacks to
-    be triggered upon external events such as a timeout or browser
-    click.
-  </para>
-  <para>
-    Both of these mechanisms have tradeoffs. Preemptive threads require
-    more resources per thread and can be memory hungry. The operating
-    system can also arbitrarily interleave the execution of preemptive
-    threads, putting a load on the programmer to lock shared data
-    structures. Single-threaded event-driven systems execute a single
-    task at a time and require less locking. However, the program
-    structure can often descend into a maze of event callbacks for even
-    a simple operation that blocks a few times. Code readability
-    matters, and so we'd like to avoid such spaghetti control flow.
-  </para>
-  <para>
-    The <literal>Async</literal> OCaml library offers a hybrid model
-    that lets you write event-driven code that can block
-    <emphasis>without</emphasis> the complexity of preemptive threading.
-    Lets begin by constructing a simple thread. Async follows the Core
-    convention and provides an <literal>Async.Std</literal> that
-    provides threaded variants of many standard library functions.
-  </para>
-  <programlisting language="ocaml">
-# require &quot;async.unix&quot; ;;
-# open Async.Std ;;
-# return 5 ;;
-- : int Deferred.t = &lt;abstr&gt;
-</programlisting>
-  <note>
-  <title>
-  When to open <literal>Async.Std</literal>
-  </title>
-  <para>
-    The <literal>Core.Std</literal> module is normally opened up in
-    every file you write. You need to be a little more careful when
-    opening <literal>Async.Std</literal> as it replaces standard
-    blocking functions with asynchronous equivalents. This comes across
-    most obviously with the standard input and output descriptors.
-  </para>
-  <programlisting language="ocaml">
-# open Core.Std;;
-# print_endline &quot;hello world&quot;;;
-hello world
-- : unit = ()
-# open Async.Std;;
-# print_endline &quot;hello world&quot;;;
-- : unit = ()
-TODO what is the manual flush call here?
-</programlisting>
-  <para>
-    With just <literal>Core.Std</literal> open, the
-    <literal>print_endline</literal> function immediately displayed its
-    output to the console. When <literal>Async.Std</literal> was opened,
-    the call to <literal>print_endline</literal> is buffered and needs
-    to be manually flushed before the output is displayed.
-  </para>
-  </note>
-  <sect1 id="creating-your-first-async-threads">
-    <title>Creating your first async threads</title>
-    <para>
-      Async threads are co-operative and never preempt each other, and
-      the library internally converts blocking code into a single event
-      loop. The threads are normal OCaml heap-allocated values (without
-      any runtime magic!) and can be allocated very fast. Concurrency is
-      mostly limited only by your available main memory, or operating
-      system limits on other resources such as file descriptors.
-    </para>
-    <para>
-      The basic type of an Async thread is a
-      <literal>'a Deferred.t</literal>, which can be constructed by the
-      <literal>return</literal> function. The type parameter (in this
-      case <literal>int</literal>) represents the ultimate type of the
-      thread once it has completed in the future. This return value
-      cannot be used directly while it is wrapped in a
-      <literal>Deferred.t</literal> as it may not be available yet.
-      Instead, we can <literal>bind</literal> a functional closure to
-      the thread that is called once the value is eventually ready.
-    </para>
-    <programlisting language="ocaml">
-# open Async.Std ;;
-# let x = return 5 ;;
-val x : int Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      The <literal>return</literal> function constructs a constant
-      <literal>int Deferred.t</literal> whose value will be available
-      immediately.
-    </para>
-    <programlisting language="ocaml">
-# let y = Deferred.bind x (fun v -&gt; return (string_of_int v)) ;;
-val y : string Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      We've now bound a function to <literal>x</literal> that will be
-      called over its resulting value. The closure simply converts the
-      <literal>int</literal> to a <literal>string</literal> and returns
-      it as a <literal>string Deferred.t</literal>. Notice that while
-      both <literal>x</literal> and <literal>y</literal> share a common
-      <literal>Deferred.t</literal> type, their type variables differ
-      and so they cannot be interchangably used except in polymorphic
-      functions. This is useful when refactoring large codebases as you
-      can tell if any function will block simply by the presence of an
-      <literal>Deferred.t</literal> in the signature.
-    </para>
-    <para>
-      Another important note is that the result of the bound function
-      must also be a <literal>Deferred</literal> value. If we try to
-      return a <literal>string</literal> immediately, then we get the
-      following type error.
-    </para>
-    <para>
-      `<literal>ocaml # let y = Deferred.bind x (fun v -&gt; string_of_int v);; Error: This expression has type string but an expression was expected of type          'a Deferred.t = 'a Ivar.Deferred.t</literal>
-    </para>
-    <para>
-      This requirement makes <literal>bind</literal> operations
-      composable. You can take the <literal>y</literal> value and
-      <literal>bind</literal> it again to another thread, and expect
-      them all to run in the correct sequence. Let's examine the
-      function signatures of <literal>bind</literal> and
-      <literal>return</literal> more closely to understand this better.
-    </para>
-    <programlisting language="ocaml">
-# return ;;
-- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
-# Deferred.bind ;;
-- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
-</programlisting>
-    <para>
-      <literal>return</literal>, <literal>bind</literal> and the
-      <literal>Deferred.t</literal> type all contain polymorphic type
-      variables (the <literal>'a</literal>) which represent the type of
-      the thread, and are inferred based on how they are used in your
-      code. The <literal>'a</literal> type of the argument passed to the
-      <literal>bind</literal> callback <emphasis>must</emphasis> be the
-      same as the <literal>'a Deferred.t</literal> of the input thread,
-      preventing runtime mismatches between thread callbacks.
-    </para>
-    <para>
-      Both <literal>bind</literal> and <literal>return</literal> form a
-      design pattern in functional programming known as
-      <emphasis>monads</emphasis>, and you will run across this
-      signature in many applications beyond just threads. <emphasis>TODO
-      avsm: figure out where to talk about all the monads in Core in
-      more detail</emphasis>. The <literal>&gt;&gt;=</literal> inline
-      operator is provided as a more succinct alias to
-      <literal>bind</literal>, as shown below.
-    </para>
-    <programlisting language="ocaml">
-# let x = return 5 ;;
-val x : int Deferred.t = &lt;abstr&gt;
-# x &gt;&gt;= fun y -&gt; return (string_of_int y) ;;
-val - : string Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      The <literal>&gt;&gt;=</literal> operator is exactly the same as
-      <literal>bind</literal> and unpacks the integer future into the
-      <literal>y</literal> variable. The subsequent closure is called
-      with the resulting integer and builds a new string future.
-    </para>
-    <para>
-      It can be a little verbose to keep calling <literal>bind</literal>
-      and <literal>return</literal> to wrap simple functions such as
-      <literal>string_of_int</literal>. The <literal>&gt;&gt;|</literal>
-      operator maps a non-Async function directly across a
-      <literal>Deferred.t</literal> value. In the example below, the
-      deferred <literal>x</literal> is mapped to
-      <literal>string_of_int</literal> directly, and the result is a
-      <literal>string Deferred.t</literal>.
-    </para>
-    <programlisting language="ocaml">
-# x &gt;&gt;| string_of_int ;;
-val - : string Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      Multiple threads can be chained together with successive calls to
-      <literal>bind</literal> to sequentially compose blocking
-      operations.
-    </para>
-    <programlisting language="ocaml">
-# return 5
-  &gt;&gt;= fun v -&gt; return (string_of_int v)
-  &gt;&gt;= fun v -&gt; return (v = &quot;5&quot;)
-- : bool Deferred.t = &lt;abstr&gt;
-</programlisting>
-    <para>
-      The example above constructs an <literal>int</literal> thread,
-      converts it to a <literal>string</literal> thread, and then to a
-      <literal>bool</literal> thread via a string comparison. Of course,
-      there's no interesting threading going on in this example beyond
-      building a constant value, but let's look at how to run it next.
-    </para>
-  </sect1>
-  <sect1 id="executing-async-applications">
-    <title>Executing async applications</title>
-    <para>
-      All async threads run within a <emphasis>scheduler</emphasis> that
-      is responsible for associating blocked threads with system
-      resources (such as file descriptors) and waking them up when
-      external I/O or timer events fire.
-    </para>
-    <sect2 id="running-threads-within-the-toplevel">
-      <title>Running threads within the toplevel</title>
-      <para>
-        If you're experimenting with async programming, the
-        <literal>utop</literal> toplevel is a convenient place to write
-        code interactively. Async threads can be evaluated into a
-        concrete value by wrapping them in
-        <literal>Thread_safe.block_on_async_exn</literal>, which spawns
-        a system thread that waits until a result is available.
-      </para>
-      <programlisting language="ocaml">
-# Thread_safe.block_on_async_exn ;;
-- : (unit -&gt; 'a Deferred.t) -&gt; 'a = &lt;fun&gt;
-</programlisting>
-      <para>
-        A neat feature in <literal>utop</literal> is that it detects
-        functions with a <literal>Deferred.t</literal> in the return
-        type, and automatically translates it into a call to
-        <literal>block_on_async_exn</literal> for you.
-      </para>
-      <programlisting language="ocaml">
-# let fn () = return 5 &gt;&gt;| string_of_int ;;
-val fn : unit -&gt; string Deferred.t = &lt;abstr&gt;
-
-# Thread_safe.block_on_async_exn fn ;;
-- : string = &quot;5&quot;
-
-# fn () ;;
-- : string = &quot;5&quot;
-</programlisting>
-      <para>
-        We've defined an <literal>fn</literal> thread in the first
-        phrase, and then run it manually using
-        <literal>block_on_async_exn</literal>. The final phrase executes
-        <literal>fn</literal> directly, and you can see the
-        <literal>utop</literal> translation kicking in and returning the
-        concrete value.
-      </para>
-    </sect2>
-    <sect2 id="running-threads-within-an-application">
-      <title>Running threads within an application</title>
-      <para>
-        An application can also use the same
-        <literal>block_on_async_exn</literal> as the toplevel, but there
-        are two alternatives. Once a few threads have been started, the
-        <literal>Scheduler.go</literal> function runs them for you.
-      </para>
-      <programlisting language="ocaml">
-# Scheduler.go ;;
-- : ?raise_unhandled_exn:bool -&gt; unit -&gt; never_returns = &lt;fun&gt; 
-</programlisting>
-      <para>
-        Notice that this function never returns, even if all of the
-        spawned threads are completed. The Async scheduler doesn't
-        terminate by default, and so most applications will listen for a
-        signal to exit or simply use <literal>CTRL-C</literal> to
-        interrupt it from a console.
-      </para>
-      <para>
-        Another common way to execute async threads is via the
-        <literal>Command</literal> module we introduced in
-        <xref linkend="command-line-parsing"/>. When you open
-        <literal>Async.Std</literal>, the <literal>Command</literal>
-        module now has an <literal>async_basic</literal> available.
-      </para>
-      <programlisting language="ocaml">
-# Command.async_basic ;;
-- : summary:string -&gt; 
-    ?readme:(unit -&gt; string) -&gt; 
-    ('a, unit -&gt; unit Deferred.t) Command.Spec.t -&gt; 
-    'a -&gt; Command.t = &lt;fun&gt;
-</programlisting>
-      <para>
-        This is used in exactly the same way as the usual
-        <literal>Command</literal> module, except that the callbacks
-        must return a <literal>Deferred.t</literal>. This lets you run
-        blocking threads directly from a command-line interface.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="timing-and-thread-composition">
-    <title>Timing and Thread Composition</title>
-    <para>
-      Our examples so far have been with static threads, which isn't
-      very much use for real programs. We'll now add timing to the mix
-      and show you how to coordinate threads and timeouts. Let's write a
-      program that spawns two threads, each of which sleep for some
-      random time and return either &quot;Heads&quot; or
-      &quot;Tails&quot;. The first thread that wakes up returns its
-      value.
-    </para>
-    <programlisting language="ocaml">
-# let flip () =
-  let span = Time.Span.of_sec 3.0 in
-  let span_heads = Time.Span.randomize span ~percent:0.75 in
-  let span_tails = Time.Span.randomize span ~percent:0.75 in
-  let coin_heads =
-    Clock.after span_heads
-    &gt;&gt;| fun () -&gt;
-    &quot;Heads!&quot;, span_heads, span_tails
-  in
-  let coin_tails =
-    Clock.after span_tails
-    &gt;&gt;| fun () -&gt;
-    &quot;Tails!&quot;, span_heads, span_tails
-  in
-  Deferred.any [coin_heads; coin_tails] ;;
-val flip : unit -&gt; (string * Time.Span.t * Time.Span.t) Deferred.t = &lt;fun&gt;
-</programlisting>
-    <para>
-      This example introduces a couple of new time-related Async
-      functions. The <literal>Time</literal> module contains functions
-      to express both absolute and relative temporal relationships. In
-      our coin flipping example, we use: *
-      <literal>Time.Span.of_sec</literal> to create a relative time span
-      of 3 seconds * <literal>Time.Span.randomize</literal> to permute
-      this span randomly by 75% * <literal>Clock.after</literal> to
-      build a <literal>unit Deferred.t</literal> that will return after
-      the specified timespan * <literal>Deferred.any</literal> to select
-      between a list of threads and return the value of the first one to
-      return a value.
-    </para>
-    <para>
-      It's important to note that there is no need for an explicit
-      &quot;thread create&quot; function in Async. Instead, we build up
-      functions that manipulate <literal>Deferred.t</literal> values,
-      and bind them to names when convenient. In the example above,
-      we've created <literal>coin_heads</literal> and
-      <literal>coin_tails</literal> which have the following type:
-    </para>
-    <programlisting>
-val coin_heads : (string * Time.Span.t * Time.Span.t) Deferred.t
-val coin_tails : (string * Time.Span.t * Time.Span.t) Deferred.t
-</programlisting>
-    <para>
-      Both of the threads encode the time intervals in their return
-      value so that you can can easily verify the calculations (you
-      could also simply print the time spans to the console as they are
-      calculated and simplify the return types). Let's verify this by
-      running the <literal>flip</literal> function at the toplevel a few
-      times. Remember to run this in <literal>utop</literal>, since it
-      will spin up the Async scheduler automatically for you and block
-      until a result is available.
-    </para>
-    <programlisting language="ocaml">
-# flip () ;;
-# - : string * Time.Span.t * Time.Span.t = (&quot;Heads!&quot;, 2.86113s, 3.64635s)
-
-# flip () ;;
-# - : string * Time.Span.t * Time.Span.t = (&quot;Tails!&quot;, 4.44979s, 2.14977s)
-</programlisting>
-    <para>
-      We used <literal>any</literal> in our example to choose the first
-      ready thread. The <literal>Deferred</literal> module has a number
-      of other ways to select between multiple threads:
-    </para>
-    <informaltable>
-      <tgroup cols="3">
-        <colspec align="left"/>
-        <colspec align="left"/>
-        <colspec align="left"/>
-        <thead>
-          <row>
-            <entry>
-              Function
-            </entry>
-            <entry>
-              # Threads
-            </entry>
-            <entry>
-              Behaviour
-            </entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>
-              both
-            </entry>
-            <entry>
-              2
-            </entry>
-            <entry>
-              Combines both threads into a tuple and returns both
-              values.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              any
-            </entry>
-            <entry>
-              list
-            </entry>
-            <entry>
-              Returns the first thread that becomes determined.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              all
-            </entry>
-            <entry>
-              list
-            </entry>
-            <entry>
-              Waits for all threads to complete and returns their
-              values.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              all_unit
-            </entry>
-            <entry>
-              list
-            </entry>
-            <entry>
-              Waits for all <literal>unit</literal> threads to complete
-              and returns <literal>unit</literal>.
-            </entry>
-          </row>
-          <row>
-            <entry>
-              peek
-            </entry>
-            <entry>
-              1
-            </entry>
-            <entry>
-              Inspects a single thread to see if it is determined yet.
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-    <para>
-      Try modifying the <literal>Deferred.any</literal> in the above
-      example to use some of the other thread joining functions above,
-      such as <literal>Deferred.both</literal>.
-    </para>
-    <sect2 id="cancellation">
-      <title>Cancellation</title>
-      <para>
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="a-simple-tcp-echo-server">
-    <title>A simple TCP Echo Server</title>
-    <para>
-    </para>
-  </sect1>
-  <sect1 id="onto-an-http-server">
-    <title>Onto an HTTP Server</title>
-    <para>
-    </para>
-  </sect1>
-  <sect1 id="binding-to-the-github-api">
-    <title>Binding to the Github API</title>
-    <para>
-      Show how we can use a monadic style to bind to the Github API and
-      make simple JSON requests/responses.
-    </para>
-    <note><title>
-    A Note on Portability
-    </title>
-    <para>
-      Explain libev and why its needed here.
-    </para>
-    </note>
-  </sect1>
-  <sect1 id="example-searching-definitions-with-duckduckgo">
-    <title>Example: searching definitions with DuckDuckGo</title>
-    <para>
-      DuckDuckGo is a search engine with a freely available search
-      interface. A DuckDuckGo search is executed by making an HTTP
-      request to <literal>api.duckduckgo.com</literal>. The result comes
-      back in either JSON or XML format, depending on what was requested
-      in the original query string. Let's write some functions that
-      construct the right URI and can parse the resulting JSON.
-    </para>
-    <para>
-      Before we can make the HTTP calls, we need a couple of helper
-      functions with the following signature.
-    </para>
-    <programlisting language="ocaml">
-(* Generate a DuckDuckGo API search URI for [query] *)
-val make_ddg_uri : query:string -&gt; Uri.t
-
-(* Extract the Definition field from the DuckDuckGo search
-   response, or return [None] if it doesn't exist *)
-val get_definition_from_json: string -&gt; string option
-</programlisting>
-    <para>
-      This code uses a couple of new libraries we haven't seen before.
-      You will need to OPAM install <literal>uri</literal> and
-      <literal>yojson</literal> (refer to
-      <xref linkend="installation"/> if you need help). Let's
-      see how to implement them first.
-    </para>
-    <sect2 id="uri-handling">
-      <title>URI handling</title>
-      <para>
-        You're hopefully familiar with HTTP URLs, which identify
-        endpoints across the World Wide Web. These are actually part of
-        a more general family known as Uniform Resource Identifiers
-        (URIs). The full URI specification is defined in
-        <ulink url="http://tools.ietf.org/html/rfc3986">RFC3986</ulink>
-        (and is rather complicated!). Luckily, the
-        <literal>ocaml-uri</literal> library provides a strongly-typed
-        interface which takes care of much of the hassle.
-      </para>
-      <programlisting language="ocaml">
-(* Generate a DuckDuckGo search URI from a query string *)
-let make_ddg_uri =
-  let base_uri = &quot;http://api.duckduckgo.com/?format=json&quot; in
-  let uri = Uri.of_string base_uri in
-  fun ~query -&gt;
-    Uri.add_query_param uri (&quot;q&quot;, [query])
-</programlisting>
-      <para>
-        A <literal>Uri.t</literal> is constructed from the
-        <literal>Uri.of_string</literal> function, and a query parameter
-        <literal>q</literal> is added with the desired search query. The
-        library takes care of encoding the URI correctly when outputting
-        it in the network protocol.
-      </para>
-      <para>
-        Note that the URI manipulation functions are all
-        <emphasis>pure</emphasis> functions which return a new URI
-        value, and never modify the input. This makes it easier to pass
-        around URI values through your application stack without fear of
-        modification.
-      </para>
-    </sect2>
-    <sect2 id="parsing-json-strings">
-      <title>Parsing JSON strings</title>
-      <para>
-        The HTTP response from DuckDuckGo is in JSON, a common (and
-        thankfully simple) format that is specified in
-        <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>.
-        There are quite a few JSON parsers available for OCaml, and
-        we've picked
-        <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
-        for this example.
-      </para>
-      <para>
-        There are a few non-standard extensions to JSON, so Yojson
-        exposes them as the <literal>Basic</literal> and
-        <literal>Safe</literal> sub-modules. It doesn't really matter
-        which one we pick for this simple example, so we'll go with
-        <literal>Safe</literal>.
-      </para>
-      <para>
-        The input <literal>string</literal> is parsed using
-        <literal>Yojson.Safe.from_string</literal> into an OCaml data
-        type. The JSON values are represented using polymorphic
-        variants, and can thus be pattern matched more easily once they
-        have been parsed by Yojson.
-      </para>
-      <programlisting language="ocaml">
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Int of int
-  | `List of json list
-  | `Null
-  | `String of string
-  | `Tuple of json list
-]
-</programlisting>
-      <para>
-        We're expecting the DuckDuckGo response to be a record, with an
-        optional <literal>Description</literal> field being one of the
-        keys in the record. The
-        <literal>get_definition_from_json</literal> does a pattern match
-        on this, and returns an optional string if a definition is found
-        within the result.
-      </para>
-      <programlisting language="ocaml">
-(* Extract the Definition field from the DuckDuckGo search
-   response, or return [None] if it doesn't exist *)
-let get_definition_from_json (json:string) =
-  match Yojson.Safe.from_string json with
-  |`Assoc kv_list -&gt;
-      let open Option in
-      List.Assoc.find kv_list &quot;Definition&quot; &gt;&gt;|
-      Yojson.Safe.to_string
-  |_ -&gt; None
-</programlisting>
-      <para>
-        Notice that we use options here instead of throwing exceptions
-        on an error. When the <literal>Option</literal> module is
-        opened, it provides a <literal>map</literal> operator
-        (<literal>&gt;&gt;|</literal>) which calls the bound closure if
-        the value exists. If no result is found, then the
-        <literal>Yojson.Safe.to_string</literal> conversion function is
-        simply ignored, and a <literal>None</literal> returned.
-      </para>
-    </sect2>
-    <sect2 id="executing-an-http-client-query">
-      <title>Executing an HTTP client query</title>
-      <para>
-        Now that we've written those utility functions, let's look at
-        the Async code that performs the actual search:
-      </para>
-      <programlisting language="ocaml">
-(* Execute the DuckDuckGo search *)
-(* TODO: This client API is being simplified in Cohttp *)
-let do_ddg_query query =
-  Cohttp_async.Client.call `GET (make_ddg_uri ~query)
-  &gt;&gt;= function
-  | Some (res, Some body) -&gt;
-      let buf = Buffer.create 128 in
-      Pipe.iter_without_pushback body ~f:(Buffer.add_string buf)
-      &gt;&gt;| fun () -&gt;
-      get_definition_from_json (Buffer.contents buf)
-      |&gt; Option.value ~default:&quot;???&quot;
-  | Some (_, None) | None -&gt;
-      failwith &quot;no body in response&quot;
-</programlisting>
-      <para>
-        For this code, you'll need to OPAM install the
-        <literal>cohttp</literal> library. The
-        <literal>Cohttp_async.Client</literal> module executes the HTTP
-        call, and returns a status and response body wrapped. This whole
-        result is wrapped in a type you haven't seen before:
-        <literal>Async.Deferred.t</literal>.
-      </para>
-      <para>
-        The <literal>Deferred.t</literal> represents a
-        <emphasis>future</emphasis> value whose result is not available
-        yet. You can &quot;wait&quot; for the result by binding a
-        callback using the <literal>&gt;&gt;=</literal> operator (which
-        is imported when you open <literal>Async.Std</literal>). This is
-        the same monad pattern available in other Core libraries such as
-        <literal>Option</literal>, but instead of operating on optional
-        values, we are now mapping over future values. We'll come back
-        to monads later in this chapter. (<emphasis>avsm</emphasis>:
-        TODO xref)
-      </para>
-      <para>
-        The <literal>ddg_query</literal> function invokes the HTTP
-        client call, and returns a tuple containing the response codes
-        and headers, and a <literal>string Pipe.Reader</literal>. Pipes
-        in Async are often used to transmit large amounts of data
-        between two processes or concurrent threads. The
-        <literal>Cohttp</literal> library creates a
-        <literal>Pipe.Writer</literal> which it outputs the HTTP body
-        into, and provides your application with the
-        <literal>Reader</literal> end.
-      </para>
-      <para>
-        In this case, the HTTP body probably isn't very large, so we
-        just iterate over the Pipe's contents until we have the full
-        HTTP body in a <literal>Buffer.t</literal>. Once the full body
-        has been retrieved into our buffer, the next callback passes it
-        through the JSON parser and returns a human-readable string of
-        the search description that DuckDuckGo gave us.
-      </para>
-      <programlisting language="ocaml">
-(* Run a single search *)
-let run_one_search =
-  do_ddg_query &quot;Camel&quot; &gt;&gt;| prerr_endline
-
-(* Start the Async scheduler *)
-let _ = Scheduler.go ()
-</programlisting>
-      <para>
-        Let's actually use the search function to run a real query now.
-        The fragment above spawns a single search, and then fires up the
-        Async scheduler. The scheduler is where all the work happens,
-        and must be started in every application that uses Async.
-        Without it, logging won't be output, nor will blocked functions
-        ever wake up. When the scheduler is active, it is waiting for
-        incoming I/O events and waking up function callbacks that were
-        sleeping on that particular file descriptor or timeout.
-      </para>
-      <para>
-        A single connection isn't that interesting from a concurrency
-        perspective. Luckily, Async makes it very easy to run multiple
-        parallel searches:
-      </para>
-      <programlisting language="ocaml">
-(* Run many searches in parallel *)
-let run_many_searches =
-  let searches = [&quot;Duck&quot;; &quot;Sheep&quot;; &quot;Cow&quot;; &quot;Llama&quot;; &quot;Camel&quot;] in
-  Deferred.List.map ~how:`Parallel searches ~f:do_ddg_query &gt;&gt;|
-  List.iter ~f:print_endline
-</programlisting>
-      <para>
-        The <literal>Deferred.List</literal> module lets you specify
-        exactly how to map over a collection of futures. The searches
-        will be executed simultaneously, and the map thread will
-        complete once all of the sub-threads are complete. If you
-        replace the <literal>Parallel</literal> parameter with
-        <literal>Serial</literal>, the map will wait for each search to
-        fully complete before issuing the next one.
-      </para>
-    </sect2>
-  </sect1>
-</chapter><chapter id="fast-binary-serialization-with-bin_prot">
-  <title>Fast Binary Serialization with bin_prot</title>
-  <para>
-    S-expressions are a good serialization format when you need
-    something machine-parseable as well as human readable and editable.
-    But Sexplib's s-expressions are not particularly performant for a
-    couple of reasons:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        s-expression serialization goes through an intermediate type,
-        <literal>Sexp.t</literal>, which must be allocated and is then
-        typically thrown away, putting non-trivial pressure on the
-        garbage collector.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        parsing and printing to strings in an ASCII format can be
-        expensive for types like <literal>int</literal>s,
-        <literal>float</literal>s and <literal>Time.t</literal>s where
-        some real computation needs to be done to produce or parse the
-        ASCII representation.
-      </para>
-    </listitem>
-  </itemizedlist>
-  <para>
-    <literal>Bin_prot</literal> is a library that addresses these issues
-    by providing fast serialization in a compact binary format. We'll
-    also introduce the Core <literal>Bigstring</literal> library for
-    handling large binary strings efficiently during this chapter.
-  </para>
-  <note>
-  <title>
-  Using <literal>bin_prot</literal> in the toplevel
-  </title>
-  <para>
-    The <literal>bin_prot</literal> syntax extension isn't activated by
-    default in the toplevel, but is easily available if you add this to
-    your <literal>~/.ocamlinit</literal> file. You can also just type
-    this in directly into <literal>utop</literal> (with
-    <literal>;;</literal> to finish the line) instead.
-  </para>
-  <programlisting>
-#require &quot;bin_prot.syntax&quot;
-</programlisting>
-  <para>
-    The extension is activated by putting <literal>with bin_io</literal>
-    after the type declaration. This looks a bit unsightly in the
-    toplevel because of all the definitions that are generated. We'll
-    elide those definitions in the book, but you can see them for
-    yourself in the toplevel.
-  </para>
-  </note>
-  <sect1 id="defining-a-message-broker">
-    <title>Defining a message broker</title>
-    <para>
-      Here's a small complete example of a program that can read and
-      write values using <literal>bin_io</literal>. Here, the
-      serialization is of types that might be used as part of a
-      message-queue, where each message has a topic, some content, and a
-      source, which is in turn a hostname and a port.
-    </para>
-    <programlisting language="ocaml">
-open Core.Std
-
-module Message = struct
-  module Source = struct
-    type t = { hostname: string;
-               port: int;
-             }
-    with bin_io
-  end
-
-  type t = { topic: string;
-             content: string;
-             source: Source.t;
-           }
-  with bin_io
-end
-</programlisting>
-    <para>
-      You can can combine multiple syntax generators in the same type
-      declaration by comma-separating them, so you could generate both
-      formats via <literal>with bin_io,sexp</literal> above.
-    </para>
-    <para>
-      Next we need to define how to marshal and unmarshal these
-      messages. The interface is a little more complex than for
-      s-expressions since we don't just want to serialise from the
-      normal OCaml <literal>string</literal>, but also to the
-      <literal>bigstring</literal> type. We'll explain what this is in
-      more detail shortly, but for now think of it as a more efficient
-      alternative for large binary data.
-    </para>
-    <programlisting language="ocaml">
-let binable =
-  (module Message : Binable.S with type t = Message.t)
-
-let save_message outc msg =
-  let s = Binable.to_bigstring binable msg in
-  let len = Bigstring.length s in
-  Out_channel.output_binary_int outc len;
-  Bigstring.really_output outc s
-</programlisting>
-    <para>
-      The <literal>binable</literal> value above captures all the
-      auto-generated <literal>bin_io</literal> functions into a
-      first-class module of type <literal>Binable.S</literal>. This
-      module has the low-level reader and writer functions which we
-      don't want to have to manually construct.
-    </para>
-    <para>
-      The <literal>save_message</literal> is then responsible for
-      writing the binary content out to a <literal>bigstring</literal>.
-      It first invokes the <literal>Binable.to_bigstring</literal> on a
-      <literal>Message.t</literal> value to retrieve a marshalled
-      string. It then determines the length of this string, and writes
-      out the length and the string to the output channel.
-    </para>
-    <para>
-      The <literal>Binable</literal> interface in Core is pretty simple:
-      <literal>type 'a m = (module Binable.S with type t = 'a)  val of_bigstring : 'a m -&gt; bigstring -&gt; 'a val to_bigstring : ?prefix_with_length:bool -&gt; 'a m -&gt; 'a -&gt; bigstring val of_string : 'a m -&gt; string -&gt; 'a val to_string : 'a m -&gt; 'a -&gt; string</literal>
-    </para>
-    <para>
-      Since the <literal>Binable.S</literal> module values are generated
-      for you automatically, the only functions you'll need to regularly
-      use are the conversion functions above.
-    </para>
-    <para>
-      Reading back the binary value we've just defined is quite similar.
-      We read in the length field, read that much data into a
-      <literal>bigstring</literal>, and convert it to our type using
-      <literal>Binable.of_bigstring</literal>.
-    </para>
-    <programlisting language="ocaml">
-let load_message inc =
-  match In_channel.input_binary_int inc with
-  | None -&gt; failwith &quot;length missing from header&quot;
-  | Some len -&gt;
-    let buf = Bigstring.create len in
-    Bigstring.really_input ~pos:0 ~len inc buf;
-    Binable.of_bigstring binable buf
-</programlisting>
-    <para>
-      The code to generate and read and write these messages now just
-      uses the static <literal>Message.t</literal> type, with no need to
-      worry about the marshalling mechanism.
-    </para>
-    <programlisting language="ocaml">
-(* Generate some example messages *)
-let example content =
-  let source =
-    { Message.Source.
-      hostname = &quot;ocaml.org&quot;; port = 2322 }
-  in
-  { Message.
-    topic = &quot;rwo-example&quot;; content; source; }
-
-(* write out three messages... *)
-let write_messages () =
-  let outc = Out_channel.create &quot;tmp.bin&quot; in
-  List.iter ~f:(save_message outc) [
-    example &quot;a wonderful&quot;;
-    example &quot;trio&quot;;
-    example &quot;of messages&quot;;
-  ];
-  Out_channel.close outc
-
-(* ... and read them back in *)
-let read_messages () =
-  let inc = In_channel.create &quot;tmp.bin&quot; in
-  for i = 1 to 3 do
-    let msg = load_message inc in
-    printf &quot;msg %d: %s\n&quot; i msg.Message.content
-  done
-
-let () =
-  write_messages (); read_messages ()
-</programlisting>
-  </sect1>
-  <sect1 id="bigstring">
-    <title>Bigstring</title>
-    <para>
-      We earlier mentioned that <literal>bigstring</literal> is a more
-      efficient version of <literal>string</literal>. Understanding the
-      difference requires some understanding of how OCaml allocates
-      values. TODO.
-    </para>
-  </sect1>
-  <sect1 id="fieldslib">
-    <title>Fieldslib</title>
-    <para>
-      TODO: out of place
-    </para>
-    <para>
-      One common idiom when using records is to provide field accessor
-      functions for a particular record.
-    </para>
-    <programlisting language="ocaml">
-type t = { topic: string;
-           content: string;
-           source: Source.t;
-         }
-
-let topic   t = t.topic
-let content t = t.content
-let source  t = t.source
-</programlisting>
-    <para>
-      Similarly, sometimes you simultaneously want an accessor to a
-      field of a record and a textual representation of the name of that
-      field. This might come up if you were validating a field and
-      needed the string representation to generate an error message, or
-      if you wanted to scaffold a form in a GUI automatically based on
-      the fields of a record. Fieldslib provides a module
-      <literal>Field</literal> for this purpose. Here's some code for
-      creating <literal>Field.t</literal>'s for all the fields of our
-      type <literal>t</literal>.
-    </para>
-    <programlisting language="ocaml">
-# module Fields = struct
-    let topic =
-      { Field.
-        name   = &quot;topic&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.topic);
-        fset   = (fun t topic -&gt; { t with topic });
-      }
-    let content =
-      { Field.
-        name   = &quot;content&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.content);
-        fset   = (fun t content -&gt; { t with content });
-      }
-    let source =
-      { Field.
-        name   = &quot;source&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.source);
-        fset   = (fun t source -&gt; { t with source });
-      }
-  end ;;
-module Fields :
-  sig
-    val topic : (t, string list) Core.Std.Field.t
-    val content : (t, string) Core.Std.Field.t
-    val source : (t, Source.t) Core.Std.Field.t
-  end
-</programlisting>
-    <para>
-      There are several syntax extensions distributed with Core,
-      including:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <emphasis role="strong">Sexplib</emphasis>: provides
-          serialization for s-expressions.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Bin_prot</emphasis>: provides
-          serialization to an efficient binary format.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Fieldslib</emphasis>: generates
-          first-class values that represent fields of a record, as well
-          as accessor functions and setters for mutable record fields.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Variantslib</emphasis>: like Fieldslib
-          for variants, producing first-class variants and other helper
-          functions for interacting with variant types.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Pa_compare</emphasis>: generates
-          efficient, type-specialized comparison functions.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Pa_typehash</emphasis>: generates a
-          hash value for a type definition, <emphasis>i.e.</emphasis>,
-          an integer that is highly unlikely to be the same for two
-          distinct types.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      We'll discuss each of these syntax extensions in detail, starting
-      with Sexplib.
-    </para>
-  </sect1>
-</chapter></part><part label="III"><title>Advanced Topics</title><chapter id="first-class-modules">
-  <title>First class modules</title>
-  <para>
-    _(jyh: I'm going to start some new text on FCM. We might want
-    another chapter, but let's see how it goes. I've kept Ron's original
-    text below.)
-  </para>
-  <para>
-    OCaml provides several mechanisms for organizing your programs,
-    including modules and functors, files and compilation units, and
-    classes and objects. Files and compilation units
-    (<literal>.ml</literal> and <literal>.mli</literal> files) are
-    really just a simplified module system. Classes and objects are a
-    different form of organization altogether (as we'll see in
-    <xref linkend="object-oriented-programming"/>. Yet, in
-    each of these cases, there is a clear separation between types and
-    values -- values cannot contain types, and types cannot contain
-    values. And since modules can contain types, modules can't be
-    values.
-  </para>
-  <para>
-    <emphasis>(yminsky: Instead of saying that ml and mli files are a
-    simplified module system, maybe say that they &quot;provide a simple
-    way of creating modules and interfaces&quot;, or some such? It's not
-    like there's a simplified module system floating around)</emphasis>
-  </para>
-  <para>
-    <emphasis>(yminsky: consider dropping &quot;Yet&quot; in the
-    above.)</emphasis>
-  </para>
-  <para>
-    Next, we'll relax this restriction with <emphasis>first-class
-    modules</emphasis>. &quot;First-class&quot; means that modules can
-    be passed around as ordinary values that can be created from and
-    converted back to regular modules. This is a relatively recent
-    addition to the OCaml language, and while it might seem trivial to
-    say, it has profound consequences on the language. First-class
-    modules are strictly more expressive than any other organization
-    mechanism, including classes and objects. Once you use first-class
-    modules, you'll never want to go back.
-  </para>
-  <para>
-    <emphasis>(yminsky: I wouldn't say they're strictly more expressive.
-    For example, they don't give you a way of expressing sub typing
-    relationships effectively, which objects do.)</emphasis>
-  </para>
-  <para>
-    This is not say that first-class modules should be used
-    indiscriminately. When you pass modules as values, the reason is to
-    support dynamic behavior, and this can have a negative impact on
-    understandability. As we proceed, we'll compare first-class modules
-    to other techniques, and suggest alternatives when it seems
-    appropriate.
-  </para>
-  <para>
-    _(jyh: Original text You can think of OCaml as being broken up into
-    two sub-language: a core language that is concerned with values and
-    types, and a module language that is concerned with modules and
-    module signatures. These sub-languages are stratified, in that
-    modules can contain types and values, but ordinary values can't
-    contain modules or module types. That means you can't do things like
-    define a variable whose definition is a module, or a function that
-    takes a module as an argument.
-  </para>
-  <para>
-    OCaml provides a way around this stratification in the form of
-    <emphasis>first-class modules</emphasis>. First-class modules are
-    ordinary values that can be created from and converted back to
-    regular modules. As we'll see, letting modules into the core
-    language makes it possible to use more flexible and dynamic
-    module-oriented designs.)_
-  </para>
-  <sect1 id="another-trivial-example">
-    <title>Another trivial example</title>
-    <para>
-      Much as we did with functors, we'll start out with an utterly
-      trivial example, to allow us to show the basic mechanics of first
-      class modules with a minimum of fuss.
-    </para>
-    <para>
-      A first-class module is created by packaging up a module with a
-      signature that it satisfies. The following defines a simple
-      signature and a module that matches it.
-    </para>
-    <programlisting language="ocaml">
-# module type X_int = sig val x : int end;;
-module type X_int = sig val x : int end
-# module Three : X_int = struct let x = 3 end;;
-module Three : X_int
-# Three.x;;
-- : int = 3
-</programlisting>
-    <para>
-      We can then create a first-class module using the
-      <literal>module</literal> keyword.
-    </para>
-    <programlisting language="ocaml">
-# let three = (module Three : X_int);;
-val three : (module X_int) = &lt;module&gt;
-</programlisting>
-    <para>
-      Note that the type of the first-class module,
-      <literal>(module X_int)</literal>, is based on the name of the
-      signature that we used in constructing it.
-    </para>
-    <para>
-      To get at the contents of <literal>three</literal>, we need to
-      unpack it into a module again, which we can do using the
-      <literal>val</literal> keyword.
-    </para>
-    <programlisting language="ocaml">
-# module New_three = (val three : X_int) ;;
-module New_three : X_int
-# New_three.x;;
-- : int = 3
-</programlisting>
-    <para>
-      Using these conversions as building blocks, we can create tools
-      for working with first-class modules in a natural way. The
-      following shows the definition of two function,
-      <literal>to_int</literal>, which converts a
-      <literal>(module X_int)</literal> into an <literal>int</literal>.
-      And <literal>plus</literal>, which adds two
-      <literal>(module X_int)</literal>s.
-    </para>
-    <programlisting language="ocaml">
-# let to_int m =
-    let module M = (val m : X_int) in
-    M.x
-  ;;
-val to_int : (module X_int) -&gt; int = &lt;fun&gt;
-# let plus m1 m2 =
-    (module struct
-       let x = to_int m1 + to_int m2
-     end : X_int)
-  ;;
-val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;
-</programlisting>
-    <para>
-      With these functions in hand, we can start operating on our
-      <literal>(module X_int)</literal>'s in a more natural style,
-      taking full advantage of the concision and simplicity of the core
-      language.
-    </para>
-    <programlisting language="ocaml">
-# let six = plus three three;;
-val six : (module X_int) = &lt;module&gt;
-# to_int (List.fold ~init:six ~f:plus [three;three]);;
-- : int = 12
-</programlisting>
-    <para>
-      Of course, all we've really done with this example is come up with
-      a more cumbersome way of working with integers. Let's see what
-      happens when with work with more complex abstract types.
-    </para>
-  </sect1>
-  <sect1 id="standard-vs.-first-class-modules">
-    <title>Standard vs. first-class modules</title>
-    <para>
-      <emphasis>(yminsky: I'm not in solve with the example. It feels in
-      some sense too artificial, and that aside, when you get to the end
-      of the example, you haven't really gotten any juice of first-class
-      modules)</emphasis>
-    </para>
-    <para>
-      <emphasis>(yminsky: using &quot;standard&quot; in quotes seems a
-      little awkward. Maybe just drop the quotes, and talk about
-      standard or ordinary modules directly?)</emphasis>
-    </para>
-    <para>
-      Let's compare the style of &quot;standard&quot; modules to
-      first-class modules, using a simple library of abstract geometric
-      shapes. In a &quot;standard&quot; module definition, we would
-      define the shapes using abstract data types, where there is a type
-      <literal>t</literal> that defines the actual representation, and
-      the module would include functions that operate on the values of
-      type <literal>t</literal>. In the following code, the module type
-      <literal>Shape</literal> defines the type of generic shape, and
-      the modules <literal>Rectangle</literal> and
-      <literal>Line</literal> implement some concrete shapes.
-    </para>
-    <programlisting language="ocaml">
-module type Shape = sig
-  type t
-  val area : t -&gt; int
-  val position : t -&gt; int * int
-end
-
-module Rectangle = struct
-   type t = { width : int; height : int; x : int; y : int }
-   let make ~x ~y ~width ~height =
-      { width = width; height = height; x = x; y = y }
-   let area { width = width; height = height } = width * height
-   let position { x = x; y = y } = (x, y)
-end
-
-module Line = struct
-   type t = { dx : int; dy : int; x : int; y : int }
-   let make ~x ~y ~dx ~dy = { dx = dx; dy = dy; x = x; y = y }
-   let area _ = 0
-   let position { x = x; y = y } = (x, y)
-end
-</programlisting>
-    <para>
-      Next, if we want to define a generic shape that is either a
-      rectangle or a line, we would probably use a variant type. The
-      following module <literal>Shapes</literal> is entirely
-      boilerplate. We define the variant type, then functions to perform
-      a dynamic dispatch based on the type of object.
-    </para>
-    <programlisting language="ocaml">
-module Shapes = struct
-   type t = [ `Rect of Rectangle.t | `Line of Line.t ]
-   let make_rectangle = Rectangle.make
-   let make_line = Line.make
-   let area = function
-      `Rect r -&gt; Rectangle.area r
-    | `Line l -&gt; Line.area l
-   let position = function
-      `Rect r -&gt; Rectangle.position r
-    | `Line l -&gt; Line.position l
-end;;
-</programlisting>
-    <para>
-      In fact, confronted with this boilerplate, we would probably
-      choose not use modules at all, but simply define a single module
-      with a variant type and the code for all of the shapes. This isn't
-      to say that separate code for separate shapes is bad, it just
-      means that the language doesn't support it well (at least with
-      standard modules).
-    </para>
-    <para>
-      With first-class modules, the situation changes, but we have to
-      dispense with the representation type altogether. For immutable
-      shapes, the implementation is now trivial.
-    </para>
-    <programlisting language="ocaml">
-# module type Shape = sig
-    val area : int
-    val position : int * int
-  end;;
-module type Shape = sig val area : int val position : int * int end
-# let make_rectangle ~x ~y ~width ~height =
-   let module Rectangle = struct
-      let area = width * height
-      let position = (x, y)
-   end in
-   (module Rectangle : Shape);;
-val make_rectangle :
-  x:int -&gt; y:int -&gt; width:int -&gt; height:int -&gt; (module Shape) = &lt;fun&gt;
-# let make_line ~x ~y ~dx ~dy =
-   let module Line = struct
-      let area = 0
-      let position = (x, y)
-   end in
-   (module Line : Shape);;
-val make_line : x:int -&gt; y:int -&gt; dx:'a -&gt; dy:'b -&gt; (module Shape) = &lt;fun&gt;
-</programlisting>
-    <para>
-      For mutable shapes, it isn't much different, but we have to
-      include the state as values in the module implementations. For
-      this, we'll define a representation type <literal>t</literal> in
-      the module implementation, and for rectangles, a value
-      <literal>rect</literal> of that type. The code for lines is
-      similar.
-    </para>
-    <programlisting language="ocaml">
-# module type Shape = sig
-     val area : unit -&gt; int
-     val position : unit -&gt; int * int
-     val moveby : dx:int -&gt; dy:int -&gt; unit
-     val enlargeby : size:int -&gt; unit
-  end;;
-module type Shape = ...
-# let make_rectangle ~x ~y ~width ~height =
-    let module Rectangle = struct
-      type t = { mutable x : int; mutable y : int;
-                 mutable width : int; mutable height : int }
-      let rect = { x = x; y = y; width = width; height = height }
-      let area () = rect.width * rect.height
-      let position () = (rect.x, rect.y)
-      let moveby ~dx ~dy =
-         rect.x &lt;- rect.x + dx;
-         rect.y &lt;- rect.y + dy
-      let enlargeby ~size =
-         rect.width &lt;- rect.width * size;
-         rect.height &lt;- rect.height * size
-    end in
-    (module Rectangle : Shape);;
-val make_rectangle :
-  x:int -&gt; y:int -&gt; width:int -&gt; height:int -&gt; (module Shape) = &lt;fun&gt;
-</programlisting>
-  </sect1>
-  <sect1 id="a-more-complete-example----containers">
-    <title>A more complete example -- containers</title>
-    <para>
-      So far, we haven't done anything that really needs modules. The
-      type <literal>Shape</literal> could just as well be specified as a
-      record type
-      <literal>type shape = { area : int; position : int * int; ... }</literal>.
-    </para>
-    <para>
-      To explore the topic more fully, let's implement a system of
-      dynamic containers. OCaml already provides a set of standard
-      containers like <literal>List</literal>, <literal>Set</literal>,
-      <literal>Hashtbl</literal>, etc., but these types have to be
-      selected statically. If a function expects a value of type
-      <literal>Set.Make(ElementType).t</literal>, then you have to pass
-      it a set of exactly that type. What we would like is a kind of
-      container where the container implementation is chosen by the
-      caller. We define an abstract <emphasis>interface</emphasis>, as a
-      module type, then define one or more concrete module
-      implementations.
-    </para>
-    <para>
-      Let's start by defining an abstract container interface. It
-      contains some elements of type <literal>elt</literal>, and
-      functions to examine and iterate through the contents. For
-      convenience, we also define a normal type
-      <literal>'a container</literal> to represent containers with
-      elements of type <literal>'a</literal>.
-    </para>
-    <programlisting language="ocaml">
-module type Container = sig
-   type elt
-   val empty : unit -&gt; bool
-   val iter : (elt -&gt; unit) -&gt; unit
-   val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
-end;;
-
-type 'a container = (module Container with type elt = 'a)
-</programlisting>
-    <sect2 id="imperative-containers">
-      <title>Imperative containers</title>
-      <para>
-        For imperative containers, will also want functions to mutate
-        the contents by adding or removing elements. For example, a
-        stack can be implemented as a module <literal>Stack</literal>
-        that includes all the functions in the generic
-        <literal>Container</literal> module, as well as functions to
-        push and pop elements.
-      </para>
-      <programlisting language="ocaml">
-module type Stack = sig
-   include Container
-   val push : elt -&gt; unit
-   val pop : unit -&gt; elt
-end;;
-
-type 'a stack = (module Stack with type elt = 'a)
-</programlisting>
-      <para>
-        Now that the types are defined, the next step is to define a
-        concrete container implementation. For this simple example,
-        we'll use a list to represent a stack. The function
-        <literal>make_list_stack</literal> constructs module
-        implementation using a <literal>let module</literal>
-        construction, then returns the result.
-      </para>
-      <programlisting language="ocaml">
-# let make_list_stack (type element) () : element stack =
-    let module ListStack = struct
-      type elt = element
-      let contents = ref []
-      let empty () = !contents = []
-      let iter f = List.iter f !contents
-      let fold f x = List.fold_left f x !contents
-      let push x = contents := x :: !contents
-      let pop () =
-         match !contents with
-            x :: rest -&gt; contents := rest; x
-          | [] -&gt; raise (Invalid_argument &quot;stack is empty&quot;)
-    end in
-    (module ListStack : Stack with type elt = element);;
-val make_list_stack : unit -&gt; 'a stack = &lt;fun&gt;
-</programlisting>
-      <para>
-        Note the use of the explicit type parameter
-        <literal>element</literal>. This is required because the use of
-        a type variable in the module definition (like
-        <literal>type elt = 'a</literal>) would be rejected by the
-        compiler. The construction and use of the stack is
-        straightforward.
-      </para>
-      <programlisting language="ocaml">
-# let demo (s : int stack) =
-    let module S = (val s) in
-    S.push 5;
-    S.push 17;
-    S.iter (fun i -&gt; Printf.printf &quot;Element: %d\n&quot; i);;
-val demo : int stack -&gt; unit = &lt;fun&gt;
-# demo (make_list_stack ());;
-Element: 17
-Element: 5
-- : unit = ()
-</programlisting>
-      <para>
-        The <literal>demo</literal> function is entirely oblivious to
-        the implementation of the stack. Instead of passing a module
-        implementation based on lists, we could pass a different
-        implementation based on arrays.
-      </para>
-      <para>
-        We could go on to define other containers, sets, dictionaries,
-        queues, etc. but the implementations would be similar to what we
-        have seen. Instead, let's look at functional data structures,
-        which require a little more work to express.
-      </para>
-    </sect2>
-    <sect2 id="pure-functional-containers">
-      <title>Pure functional containers</title>
-      <para>
-        Imperative data structures have simpler types that functional
-        ones because the return type of imperative functions is just
-        <literal>unit</literal>. When we look at pure functional data
-        structures, we immediately run into a problem with type
-        recursion.
-      </para>
-      <programlisting language="ocaml">
-# module type Container = sig
-    type elt
-    val empty : bool
-    val iter : (elt -&gt; unit) -&gt; unit
-    val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
-    val add : elt -&gt; (module Container)
-  end;;
-Characters 160-178:
-     val add : elt -&gt; (module Container)
-                      ^^^^^^^^^^^^^^^^^^
-Error: Unbound module type Container
-</programlisting>
-      <para>
-        The problem here is that module type definitions are not
-        recursive -- we can't use the type being defined in its own
-        definition.
-      </para>
-      <para>
-        Recursive modules provide a solution, but it requires a
-        &quot;trick&quot;, where we define a module that is equal to
-        itself. This module contains only type definitions, and the only
-        purpose of the outer recursive module is to allow the recursion
-        in the definition. While we're at it, let's include a
-        <literal>map</literal> function with the usual semantics.
-      </para>
-      <programlisting language="ocaml">
-module rec Container : sig
-   module type T = sig
-      type elt
-      val empty : bool
-      val iter : (elt -&gt; unit) -&gt; unit
-      val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
-      val map : (elt -&gt; 'a) -&gt; 'a Container.t
-      val add : elt -&gt; elt Container.t
-   end
-   type 'a t = (module Container.T with type elt = 'a)
-end = Container;;
-</programlisting>
-      <para>
-        There are several ways to write this model, but this definition
-        is convenient because it defines both a module type
-        <literal>Container.T</literal> and a value type
-        <literal>'a Container.t</literal>. The outer recursive module
-        <literal>Container</literal> allows the module type
-        <literal>T</literal> to refer to the value type
-        <literal>t</literal> and <emphasis>vice versa</emphasis>. Note
-        that the module <literal>Container</literal> is defined as
-        itself (as <literal>Container</literal>).
-      </para>
-      <para>
-        With this first technicality out of the way, the next one is how
-        to construct values of type <literal>Container.t</literal>. In
-        the imperative version of the stack, we used a function
-        <literal>make_list_stack</literal>. We want to do the same here,
-        but the function definition must be both recursive and
-        polymorphic.
-      </para>
-      <programlisting language="ocaml">
-# let make_stack () =
-    let rec make : 'a. 'a list -&gt; 'a Container.t = fun
-      (type element) (contents : element list) -&gt;
-      let module NewList = struct
-         type elt = element
-         let empty = contents = []
-         let iter f = List.iter f contents
-         let fold f x = List.fold_left f x contents
-         let map f = make (List.map f contents)
-         let add x = make (x :: contents)
-      end in
-      (module NewList : Container.T with type elt = element)
-   in
-   make [];;
-val make_stack : unit -&gt; 'a Container.t = &lt;fun&gt;
-</programlisting>
-      <para>
-        The recursion here is particularly important. The functions
-        <literal>map</literal> and <literal>add</literal> return new
-        collections, so they call the function <literal>make</literal>
-        recursively. The explicit polymorphic type
-        <literal>make : 'a. 'a list -&gt; 'a Container.t</literal> means
-        that the function <literal>make</literal> is properly
-        polymorphic, so that the <literal>map</literal> function is
-        polymorphic.
-      </para>
-      <para>
-        Now that the construction is done, the usage is similar to the
-        imperative case, except that now the data structure is
-        functional.
-      </para>
-      <programlisting language="ocaml">
-# let demo (s : int Container.t) =
-    let module S = (val s) in
-    let module S = (val (S.add 5)) in
-    let module S = (val (S.add 17)) in
-    S.iter (fun i -&gt; Printf.printf &quot;Int Element: %d\n&quot; i);
-    let s = S.map (fun i -&gt; float_of_int i +. 0.1) in
-    let module S = (val s) in
-    S.iter (fun x -&gt; Printf.printf &quot;Float Element: %f\n&quot; x);
-    s;;
-val demo : int Container.t -&gt; float Container.t = &lt;fun&gt;
-# demo (make_stack ());;
-Int Element: 17
-Int Element: 5
-Float Element: 17.100000
-Float Element: 5.100000
-- : unit = ()
-</programlisting>
-      <para>
-        The syntactic load here is pretty high, requiring a
-        <literal>let module</literal> expression to name every
-        intermediate value. First-class modules are fairly new to the
-        language, and this is likely to change, but in the meantime the
-        syntactic load can be pretty daunting.
-      </para>
-      <para>
-        Let's look a some other more typical examples, where dynamic
-        module selection is more localized.
-      </para>
-      <para>
-        _(jyh: This is a rough draft, I'm not sure about the ordering
-        and the topics, yet. Switching back to Ron's text now.)
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="dynamically-choosing-a-module">
-    <title>Dynamically choosing a module</title>
-    <para>
-      Perhaps the simplest thing you can do with first-class modules
-      that you can't do without them is to pick the implementation of a
-      module at runtime.
-    </para>
-    <para>
-      Consider an application that does I/O multiplexing using a system
-      call like <literal>select</literal> to determine which file
-      descriptors are ready to use. There are in fact multiple APIs you
-      might want to use, including <literal>select</literal> itself,
-      <literal>epoll</literal>, and <literal>libev</literal>, where
-      different multiplexers make somewhat different performance and
-      portability trade-offs. You could support all of these in one
-      application by defining a single module, let's call it
-      <literal>Mutliplexer</literal>, whose implementation is chosen at
-      run-time based on an environment variable.
-    </para>
-    <para>
-      To do this, you'd first need an interface <literal>S</literal>
-      that all of the different multiplexer implementations would need
-      to match, and then an implementation of each multiplexer.
-    </para>
-    <programlisting language="ocaml">
-(* file: multiplexer.ml *)
-
-(* An interface the OS-specific functionality *)
-module type S = sig ... end
-
-(* The implementations of each individual multiplexer *)
-module Select : S = struct ... end
-module Epoll  : S = struct ... end
-module Libev  : S = struct ... end
-</programlisting>
-    <para>
-      We can choose the first-class module that we want based on looking
-      up an environment variable.
-    </para>
-    <programlisting language="ocaml">
-let multiplexer =
-  match Sys.getenv &quot;MULTIPLEXER&quot; with
-  | None
-  | Some &quot;select&quot; -&gt; (module Select : S)
-  | Some &quot;epoll&quot;  -&gt; (module Epoll : S)
-  | Some &quot;libev&quot;  -&gt; (module Libev : S)
-  | Some other -&gt; failwithf &quot;Unknown multiplexer: %s&quot; other ()
-</programlisting>
-    <para>
-      Finally, we can convert the resulting first-class module back to
-      an ordinary module, and then include that so it becomes part of
-      the body of our module.
-    </para>
-    <programlisting language="ocaml">
-(* The final, dynamically chosen, implementation *)
-include (val multiplexer : S)
-</programlisting>
-  </sect1>
-  <sect1 id="example-a-service-bundle">
-    <title>Example: A service bundle</title>
-    <para>
-      This section describes the design of a library for bundling
-      together multiple services, where a service is a piece of code
-      that exports a query interface. A service bundle combines together
-      multiple individual services under a single query interface that
-      works by dispatching incoming queries to the appropriate
-      underlying service.
-    </para>
-    <para>
-      The following is a first attempt at an interface for our
-      <literal>Service</literal> module, which contains both a module
-      type <literal>S</literal>, which is the interface that a service
-      should meet, as well as a <literal>Bundle</literal> module which
-      is for combining multiple services.
-    </para>
-    <programlisting language="ocaml">
-(* file: service.mli *)
-
-open Core.Std
-
-(** The module type for a service. *)
-module type S = sig
-  type t
-  val name           : string
-  val create         : unit -&gt; t
-  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
-end
-
-(** Bundles multiple services together *)
-module Bundle : sig
-  type t
-  val create : (module S) list -&gt; t
-  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
-  val service_names  : t -&gt; string list
-end
-</programlisting>
-    <para>
-      Here, a service has a state, represented by the type
-      <literal>t</literal>, a name by which the service can be
-      referenced, a function <literal>create</literal> for instantiating
-      a service, and a function by which a service can actually handle a
-      request. Here, requests and responses are delivered as
-      s-expressions. At the <literal>Bundle</literal> level, the
-      s-expression of a request is expected to be formatted as follows:
-    </para>
-    <programlisting>
-(&lt;service-name&gt; &lt;body&gt;)
-</programlisting>
-    <para>
-      where <literal>&lt;service_name&gt;</literal> is the service that
-      should handle the request, and <literal>&lt;body&gt;</literal> is
-      the body of the request.
-    </para>
-    <para>
-      Now let's look at how to implement <literal>Service</literal>. The
-      core datastructure of <literal>Bundle</literal> is a hashtable of
-      request handlers, one per service. Each request handler is a
-      function of type
-      <literal>(Sexp.t -&gt; Sexp.t Or_error.t)</literal>. These request
-      handlers really stand in for the underlying service, with the
-      particular state of the service in question being hidden inside of
-      the request handler.
-    </para>
-    <para>
-      The first part of <literal>service.ml</literal> is just the
-      preliminaries: the definition of the module type
-      <literal>S</literal>, and the definition of the type
-      <literal>Bundle.t</literal>.
-    </para>
-    <programlisting language="ocaml">
-(* file: service.ml *)
-
-open Core.Std
-
-module type S = sig
-  type t
-  val name           : string
-  val create         : unit -&gt; t
-  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
-end
-
-module Bundle = struct
-  type t = { handlers: (Sexp.t -&gt; Sexp.t Or_error.t) String.Table.t; }
-</programlisting>
-    <para>
-      The next thing we need is a function for creating a
-      <literal>Bundle.t</literal>. This <literal>create</literal>
-      function builds a table to hold the request handlers, and then
-      iterates through the services, unpacking each module, constructing
-      the request handler, and then putting that request handler in the
-      table.
-    </para>
-    <programlisting language="ocaml">
-  (** Creates a handler given a list of services *)
-  let create services =
-    let handlers = String.Table.create () in
-    List.iter services ~f:(fun service_m -&gt;
-      let module Service = (val service_m : S) in
-      let service = Service.create () in
-      if Hashtbl.mem handlers Service.name then
-        failwith (&quot;Attempt to register duplicate handler for &quot;^Service.name);
-      Hashtbl.replace handlers ~key:Service.name
-        ~data:(fun sexp -&gt; Service.handle_request service sexp)
-    );
-    {handlers}
-</programlisting>
-    <para>
-      Note that the <literal>Service.t</literal> that is created is
-      referenced by the corresponding request handler, so that it is
-      effectively hidden behind the function in the
-      <literal>handlers</literal> table.
-    </para>
-    <para>
-      Now we can write the function for the bundle to handle requests.
-      The handler will examine the s-expression to determine the body of
-      the query and the name of the service to dispatch to. It then
-      looks up the handler calls it to generate the response.
-    </para>
-    <programlisting language="ocaml">
-  let handle_request t sexp =
-    match sexp with
-    | Sexp.List [Sexp.Atom name;query] -&gt;
-      begin match Hashtbl.find t.handlers name with
-      | None -&gt; Or_error.error_string (&quot;Unknown service: &quot;^name)
-      | Some handler -&gt;
-        try handler query
-        with exn -&gt; Error (Error.of_exn exn)
-      end
-    | _ -&gt; Or_error.error_string &quot;Malformed query&quot;
-</programlisting>
-    <para>
-      Last of all, we define a function for looking up the names of the
-      available services.
-    </para>
-    <programlisting language="ocaml">
-  let service_names t = Hashtbl.keys t.handlers
-
-end
-</programlisting>
-    <para>
-      To see this system in action, we need to define some services,
-      create the corresponding bundle, and then hook that bundle up to
-      some kind of client. For simplicity, we'll build a simple
-      command-line interface. There are two functions below:
-      <literal>handle_one</literal>, which handles a single interaction;
-      and <literal>handle_loop</literal>, which creates the bundle and
-      then runs <literal>handle_one</literal> in a loop.
-    </para>
-    <programlisting language="ocaml">
-(* file: service_client.ml *)
-
-open Core.Std
-
-(** Handles a single request coming from stdin *)
-let handle_one bundle =
-  printf &quot;&gt;&gt;&gt; %!&quot;; (* prompt *)
-  match In_channel.input_line stdin with
-  | None -&gt; `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
-  | Some line -&gt;
-    let line = String.strip line in (* drop leading and trailing whitespace *)
-    if line = &quot;&quot; then `Continue
-    else match Or_error.try_with (fun () -&gt; Sexp.of_string line) with
-    | Error err -&gt;
-      eprintf &quot;Couldn't parse query: %s\n%!&quot; (Error.to_string_hum err);
-      `Continue
-    | Ok query_sexp -&gt;
-      let resp = Service.Bundle.handle_request bundle query_sexp in
-      Sexp.output_hum stdout (&lt;:sexp_of&lt;Sexp.t Or_error.t&gt;&gt; resp);
-      Out_channel.newline stdout;
-      `Continue
-
-let handle_loop services =
-  let bundle = Service.Bundle.create services in
-  let rec loop () =
-    match handle_one bundle with
-    | `Stop -&gt; ()
-    | `Continue -&gt; loop ()
-  in
-  loop ()
-</programlisting>
-    <para>
-      Now we'll create a couple of toy services. One service is a
-      counter that can be updated by query; and the other service lists
-      a directory. The last line then kicks off the shell with the
-      services we've defined.
-    </para>
-    <programlisting language="ocaml">
-module Counter : Service.S = struct
-  type t = int ref
-
-  let name = &quot;update-counter&quot;
-  let create () = ref 0
-
-  let handle_request t sexp =
-    match Or_error.try_with (fun () -&gt; int_of_sexp sexp) with
-    | Error _ as err -&gt; err
-    | Ok x -&gt;
-      t := !t + x;
-      Ok (sexp_of_int !t)
-end
-
-module List_dir : Service.S = struct
-  type t = unit
-
-  let name = &quot;ls&quot;
-  let create () = ()
-
-  let handle_request () sexp =
-    match Or_error.try_with (fun () -&gt; string_of_sexp sexp) with
-    | Error _ as err -&gt; err
-    | Ok dir -&gt; Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
-end
-
-let () =
-  handle_loop [(module List_dir : Service.S); (module Counter : Service.S)]
-</programlisting>
-    <para>
-      And now we can go ahead and start up the client.
-    </para>
-    <programlisting>
-$ ./service_client.byte
-&gt;&gt;&gt; (update-counter 1)
-(Ok 1)
-&gt;&gt;&gt; (update-counter 10)
-(Ok 11)
-&gt;&gt;&gt; (ls .)
-(Ok
- (_build _tags service.ml service.mli service.mli~ service.ml~
-  service_client.byte service_client.ml service_client.ml~))
-&gt;&gt;&gt;
-</programlisting>
-    <para>
-      Now, let's consider what happens to the design when we want to
-      make the interface of a service a bit more realistic. In
-      particular, right now services are created without any
-      configuration. Let's add a config type to each service, and change
-      the interface of <literal>Bundle</literal> so that services can be
-      registered along with their configs. At the same time, we'll
-      change the <literal>Bundle</literal> API to allow services to be
-      changed dynamically, rather than just added at creation time.
-    </para>
-  </sect1>
-</chapter><chapter id="foreign-function-interface">
+</chapter><chapter id="concurrent-programming-with-async"><title>Concurrent Programming with Async</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter><chapter id="fast-binary-serialization-with-bin_prot"><title>Fast Binary Serialization</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter><chapter id="first-class-modules"><title>Plugins with First-class Modules</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter></part><part label="III"><title>Advanced Topics</title><chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
   <para>
     Much of the static type information contained within an OCaml
@@ -17363,85 +15479,7 @@ Hello OCaml World!
 
     </sect2>
   </sect1>
-</chapter><chapter id="managing-external-memory-with-bigarrays">
-  <title>Managing external memory with Bigarrays</title>
-  <sect1 id="bigarrays-for-external-memory-blocks">
-    <title>Bigarrays for external memory blocks</title>
-    <para>
-      An OCaml bigarray is a useful custom block provided as standard to
-      manipulate memory blocks outside the OCaml heap. It has
-      <literal>Custom_tag</literal> in the header, and the first word
-      points to the <literal>custom_operations</literal> struct for
-      bigarrays. Following this is a <literal>caml_ba_array</literal>
-      struct.
-    </para>
-    <programlisting>
-struct caml_ba_array {
-  void * data;                  /* Pointer to raw data */
-  intnat num_dims;              /* Number of dimensions */
-  intnat flags;                 /* Kind of element array + memory layout + allocation status */
-  struct caml_ba_proxy * proxy; /* The proxy for sub-arrays, or NULL */
-  intnat dim[]  /*[num_dims]*/; /* Size in each dimension */
-};
-</programlisting>
-    <para>
-      The <literal>data</literal> is usually a pointer to a
-      <literal>malloc</literal>'ed chunk of memory, which the custom
-      finalizer operation <literal>free</literal>'s when the block is
-      free. The <literal>flags</literal> field encodes three values,
-      located in the bits as specified by three masks:
-    </para>
-    <programlisting>
-CAML_BA_KIND_MASK = 0xFF     /* Mask for kind in flags field */
-CAML_BA_LAYOUT_MASK = 0x100  /* Mask for layout in flags field */
-CAML_BA_MANAGED_MASK = 0x600 /* Mask for &quot;managed&quot; bits in flags field */
-</programlisting>
-    <para>
-      The <literal>CAML_BA_KIND_MASK</literal> bits hold a value of the
-      <literal>caml_ba_kind</literal> enum that identifies the kind of
-      value in the bigarray <literal>data</literal>.
-    </para>
-    <programlisting>
-enum caml_ba_kind {
-  CAML_BA_FLOAT32,             /* Single-precision floats */
-  CAML_BA_FLOAT64,             /* Double-precision floats */
-  CAML_BA_SINT8,               /* Signed 8-bit integers */
-  CAML_BA_UINT8,               /* Unsigned 8-bit integers */
-  CAML_BA_SINT16,              /* Signed 16-bit integers */
-  CAML_BA_UINT16,              /* Unsigned 16-bit integers */
-  CAML_BA_INT32,               /* Signed 32-bit integers */
-  CAML_BA_INT64,               /* Signed 64-bit integers */
-  CAML_BA_CAML_INT,            /* OCaml-style integers (signed 31 or 63 bits) */
-  CAML_BA_NATIVE_INT,          /* Platform-native long integers (32 or 64 bits) */
-  CAML_BA_COMPLEX32,           /* Single-precision complex */
-  CAML_BA_COMPLEX64,           /* Double-precision complex */
-}
-</programlisting>
-    <para>
-      The <literal>CAML_BA_LAYOUT_MASK</literal> bit says whether
-      multi-dimensional arrays are layed out C or Fortran style.
-    </para>
-    <programlisting>
-enum caml_ba_layout {
-  CAML_BA_C_LAYOUT = 0,           /* Row major, indices start at 0 */
-  CAML_BA_FORTRAN_LAYOUT = 0x100, /* Column major, indices start at 1 */
-};
-</programlisting>
-    <para>
-      The <literal>CAML_BA_MANAGED_MASK</literal> bits hold a value of
-      the <literal>caml_ba_managed</literal> enum that identifies
-      whether OCaml is responsible for freeing the
-      <literal>data</literal> or some other code is.
-    </para>
-    <programlisting>
-enum caml_ba_managed {
-  CAML_BA_EXTERNAL = 0,        /* Data is not allocated by OCaml */
-  CAML_BA_MANAGED = 0x200,     /* Data is allocated by OCaml */
-  CAML_BA_MAPPED_FILE = 0x400, /* Data is a memory mapped file */
-};
-</programlisting>
-  </sect1>
-</chapter><chapter id="inside-the-runtime">
+</chapter><chapter id="managing-external-memory-with-bigarrays"><title>Managing External Memory with Bigarray</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter><chapter id="inside-the-runtime">
   <title>Inside the Runtime</title>
   <para>
     (<emphasis>avsm</emphasis>: this chapter is still being chopped and
@@ -18190,44 +16228,7 @@ immutable: 2.6186s (19073 minor collections)
       </para>
     </sect2>
   </sect1>
-</chapter><chapter id="performance-tuning-and-profiling">
-  <title>Performance Tuning and Profiling</title>
-  <para>
-    Read http://janestreet.github.com/ocaml-perf-notes.html
-  </para>
-  <sect1 id="byte-code-profiling">
-    <title>Byte code Profiling</title>
-    <para>
-      ocamlcp and call trace information
-    </para>
-  </sect1>
-  <sect1 id="native-code-profiling">
-    <title>Native Code Profiling</title>
-    <sect2 id="gdb">
-      <title>gdb</title>
-      <para>
-        requires shinwell's patch in ocaml trunk via opam
-      </para>
-    </sect2>
-    <sect2 id="perf">
-      <title>perf</title>
-      <para>
-        requires fabrice's frame pointer patch
-      </para>
-    </sect2>
-    <sect2 id="dtrace">
-      <title>dtrace</title>
-      <para>
-        requires my dtrace/instruments patch for libasmrun
-      </para>
-    </sect2>
-  </sect1>
-</chapter><chapter id="parsing-with-ocamllex-and-ocamlyacc">
-  <title>Parsing with OCamllex and OCamlyacc</title>
-  <para>
-    TODO: talk about ulex too
-  </para>
-</chapter><chapter id="object-subtyping-and-inheritance">
+</chapter><chapter id="performance-tuning-and-profiling"><title>Performance Tuning and Profiling</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter><chapter id="parsing-with-ocamllex-and-ocamlyacc"><title>Parsing with ocamllex and ocamlyacc</title><para>This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version.</para></chapter><chapter id="object-subtyping-and-inheritance">
   <title>Object Subtyping and Inheritance</title>
   <sect1 id="subtyping">
     <title>Subtyping</title>
@@ -19233,80 +17234,6 @@ end;;
 </programlisting>
     </sect2>
   </sect1>
-</chapter><chapter id="advanced-topics">
-  <title>Advanced Topics</title>
-  <para>
-    <emphasis>(jyh: This is a placeholder chapter for extra
-    material.)</emphasis>
-  </para>
-  <sect1 id="hybrid-recursion">
-    <title>Hybrid recursion</title>
-    <para>
-      In general, the choice of whether to use regular recursion vs.
-      tail recursion is not immediately obvious. Regular recursion is
-      often better for small lists (and other data structures), but it
-      is better to use tail recursion for very large lists -- especially
-      because stack sizes limit the number of recursive calls.
-    </para>
-    <para>
-      Core takes a hybrid approach that can be illustrated with the
-      implementation of the function <literal>Core_list.map</literal>.
-    </para>
-    <programlisting language="ocaml">
-let map_slow l ~f = rev (rev_map l ~f);;
-
-let rec count_map ~f l ctr =
-  match l with
-  | [] -&gt; []
-  | [x1] -&gt; let f1 = f x1 in [f1]
-  | [x1; x2] -&gt; let f1 = f x1 in let f2 = f x2 in [f1; f2]
-  | [x1; x2; x3] -&gt;
-    let f1 = f x1 in
-    let f2 = f x2 in
-    let f3 = f x3 in
-    [f1; f2; f3]
-  | [x1; x2; x3; x4] -&gt;
-    let f1 = f x1 in
-    let f2 = f x2 in
-    let f3 = f x3 in
-    let f4 = f x4 in
-    [f1; f2; f3; f4]
-  | x1 :: x2 :: x3 :: x4 :: x5 :: tl -&gt;
-    let f1 = f x1 in 
-    let f2 = f x2 in
-    let f3 = f x3 in
-    let f4 = f x4 in
-    let f5 = f x5 in
-    f1 :: f2 :: f3 :: f4 :: f5 ::
-      (if ctr &gt; 1000 then map_slow ~f tl else count_map ~f tl (ctr + 1));;
-
-let map l ~f = count_map ~f l 0;;
-</programlisting>
-    <para>
-      For performance, there are separate patterns for small lists with
-      up to 4 elements, then a recursive case for lists with five or
-      more elements. The <literal>ctr</literal> value limits the
-      recursion -- regular recursion is used for up to 1000 recursive
-      calls (which includes lists with up to 4000 elements), then the
-      tail-recursive function <literal>map_slow</literal> is used for
-      any remainder.
-    </para>
-    <para>
-      As an aside, you might wonder why this implementation uses
-      explicit let-definitions for the result values
-      <literal>f1</literal>, <literal>f2</literal>, etc. The reason is
-      to force the order of evaluation, so that the the function
-      <literal>f</literal> is always applied to the list values
-      left-to-right (starting with the first element in the list). In an
-      expression like <literal>[f x1; f x2; f x3]</literal> the order of
-      evaluation is not specified by the language, any of the
-      subexpressions might be evaluated first (though we would often
-      expect evaluation order to be either left-to-right or
-      right-to-left). For functions that perform I/O, or have other
-      side-effects, left-to-right evaluation order is important (and
-      required).
-    </para>
-  </sect1>
 </chapter></part><appendix id="installation">
   <title>Installation</title>
   <para>
@@ -19416,13 +17343,25 @@ $ sudo apt-get install git libpcre3-dev curl build-essential m4
         highlight these in the book when we introduce the library.
       </para>
       <para>
-        TODO: Fedora / RHEL
+        Fedora and Red Hat
+      </para>
+      <para>
+        OCaml has been included in the basic distribution since Fedora
+        8. To install the latest compiler, just run:
+      </para>
+      <programlisting>
+# yum install ocaml
+# yum install pcre-devel
+</programlisting>
+      <para>
+        The PCRE package is used by Core and is just included here for
+        convenience later.
       </para>
     </sect2>
     <sect2 id="arch-linux">
       <title>Arch Linux</title>
       <para>
-        Arch Linux provides OCaml 4.0.1 (or later) in the standard
+        Arch Linux provides OCaml 4.00.1 (or later) in the standard
         repositories, so the easiest method of installation is using
         <literal>pacman</literal>:
       </para>
@@ -19537,7 +17476,9 @@ $ sudo port install opam
       <title>Debian Linux</title>
       <para>
         There are experimental binary packages available for Debian
-        Wheezy/amd64. Just add the following line to your
+        Wheezy/amd64. You should be able to use these on 64-bit Ubuntu
+        and other derivative distributions such as Linux Mint also. Just
+        add the following line to your
         <literal>/etc/apt/sources.list</literal>:
       </para>
       <programlisting>
@@ -19579,10 +17520,12 @@ $ ./configure &amp;&amp; make
 $ sudo make install
 </programlisting>
     </sect2>
-    <sect2 id="fedorarhel">
-      <title>Fedora/RHEL</title>
+    <sect2 id="fedora-and-red-hat">
+      <title>Fedora and Red Hat</title>
       <para>
-        TODO
+        There is currently no RPM available for Fedora or Red Hat, so
+        please install OPAM via the source code instructions for the
+        moment.
       </para>
     </sect2>
     <sect2 id="arch-linux-1">
@@ -19619,8 +17562,8 @@ $ sudo pacman -U opam-_version_.pkg.tar.gz
 </programlisting>
     </sect2>
   </sect1>
-  <sect1 id="setting-up-opam">
-    <title>Setting up OPAM</title>
+  <sect1 id="configuring-the-opam-package-manager">
+    <title>Configuring the OPAM package manager</title>
     <para>
       The entire OPAM package database is held in the
       <literal>.opam</literal> directory in your home directory,
@@ -19633,19 +17576,92 @@ $ sudo pacman -U opam-_version_.pkg.tar.gz
       stage again.
     </para>
     <para>
-      Begin by initialising the OPAM package database.
+      Let's begin by initialising the OPAM package database. This will
+      require an active Internet connection, and ask you a few
+      interactive questions at the end. It's safe to answer yes to these
+      unless you want to manually control the configuration steps
+      yourself as an advanced user.
     </para>
     <programlisting>
 $ opam init
-$ opam list
+&lt;...&gt;
+=-=-=-= Configuring OPAM =-=-=-=
+Do you want to update your configuration to use OPAM ? [Y/n] y
+[1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
+[2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
+[3/4] Do you want to install the auto-complete scripts ? [Y/n] y
+[4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
+User configuration:
+  ~/.ocamlinit is already up-to-date.
+  ~/.profile is already up-to-date.
+Gloabal configuration:
+  Updating &lt;root&gt;/opam-init/init.sh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating &lt;root&gt;/opam-init/init.zsh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating &lt;root&gt;/opam-init/init.csh
+    auto-completion : [true]
+    opam-switch-eval: [true]
 </programlisting>
     <para>
       You only need to run this command once, and it will create the
       <literal>~/.opam</literal> directory and sync with the latest
       package list from the online OPAM database.
-      <literal>opam list</literal> will list these, but don't install
-      any just yet.
     </para>
+    <para>
+      When the <literal>init</literal> command finishes, you'll see some
+      instructions about environment variables. OPAM never installs
+      files into your system directories (which would require
+      administrator privileges). Instead, it puts them into your home
+      directory by default, and can output a set of shell commands which
+      configures your shell with the right <literal>PATH</literal>
+      variables so that packages will just work. This requires just one
+      command:
+    </para>
+    <programlisting>
+$ eval `opam config -env`
+</programlisting>
+    <para>
+      This evaluates the results of running
+      <literal>opam config env</literal> in your current shell, and sets
+      the variables so that subsequent commands will use them. This only
+      works with your current shell, and it can be automated for all
+      future shells by adding the line to your login scripts. On Mac OS
+      X or Debian, this is usually the
+      <literal>~/.bash_profile</literal> file if you're using the
+      default shell. If you've switched to another shell, it might be
+      <literal>~/.zshrc</literal> instead. OPAM isn't unusual in this
+      approach; the SSH <literal>ssh-agent</literal> also works
+      similarly, so if you're having any problems just hunt around in
+      your configuration scripts to see how that's being invoked.
+    </para>
+    <para>
+      If you answered <literal>yes</literal> to the auto-complete
+      scripts question during <literal>opam init</literal>, this should
+      have all been set up for you. You can verify this worked by
+      listing the available packages:
+    </para>
+    <programlisting>
+$ opam list
+</programlisting>
+    <note>
+    <title>
+    Note to reviewers
+    </title>
+    <para>
+      OPAM 1.0's always places the login commands into your
+      <literal>~/.profile</literal> directory, which isn't executed if
+      your shell is <literal>bash</literal>. This has been fixed in
+      subsequent versions, but for now you'll need to manually copy the
+      contents of <literal>~/.profile</literal> over to
+      <literal>~/.bash_profile</literal> via:
+    </para>
+    <programlisting>
+$ cat ~/.profile &gt;&gt; ~/.bash_profile
+</programlisting>
+    </note>
     <para>
       The most important package we need to install is Core, which is
       the replacement standard library that all of the examples in this
@@ -19678,32 +17694,6 @@ $ opam switch 4.01.0dev+trunk
       simultaneously, but only one can be active at any time. Browse
       through the available compilers by running
       <literal>opam switch list</literal>.
-    </para>
-    <para>
-      When the compilation finishes, you'll see some instructions about
-      environment variables. OPAM never installs files into your system
-      directories (which would require administrator privileges).
-      Instead, it puts them into your home directory by default, and can
-      output a set of shell commands which configures your shell with
-      the right <literal>PATH</literal> variables so that packages will
-      just work. This requires just one command:
-    </para>
-    <programlisting>
-$ eval `opam config -env`
-</programlisting>
-    <para>
-      This evaluates the results of running
-      <literal>opam config env</literal> in your current shell, and sets
-      the variables so that subsequent commands will use them. This only
-      works with your current shell, and it can be automated for all
-      future shells by adding the line to your login scripts. On Mac OS
-      X or Debian, this is usually the
-      <literal>~/.bash_profile</literal> file if you're using the
-      default shell. If you've switched to another shell, it might be
-      <literal>~/.zshrc</literal> instead. OPAM isn't unusual in this
-      approach; the SSH <literal>ssh-agent</literal> also works
-      similarly, so if you're having any problems just hunt around in
-      your configuration scripts to see how that's being invoked.
     </para>
     <para>
       Finally, we're ready to install the Core libraries. Run this:
@@ -19753,7 +17743,7 @@ $ opam install core core_extended async
 $ opam install utop
 </programlisting>
       <para>
-        The <literal>utop</literal> package us an interactive
+        The <literal>utop</literal> package is an interactive
         command-line interface to OCaml that has tab-completion,
         persistent history and integration with Emacs so that you can
         run it within your editing environment.
@@ -19773,61 +17763,75 @@ $ opam install utop
     <sect2 id="command-line">
       <title>Command Line</title>
       <para>
-        TODO: explain OCamlfind here.
-      </para>
-      <para>
         The <literal>utop</literal> tool provides a convenient
         interactive toplevel, with full command history, command macros
-        and module name completion. The <literal>~/.ocamlinit</literal>
-        file in your home directory initialises <literal>utop</literal>
-        with common libraries and syntax extensions, so you don't need
-        to type them in every time. A good default you should create for
-        the examples in this book is:
+        and module name completion. When you first run
+        <literal>utop</literal>, you'll find yourself at an interactive
+        prompt with a bar at the bottom of the screen. The bottom bar
+        dynamically updates as you write text, and contains the possible
+        names of modules or variables that are valid at that point in
+        the phrase you are entering. You can press the
+        <literal>&lt;tab&gt;</literal> key to complete the phrase with
+        the first choice.
+      </para>
+      <para>
+        The <literal>~/.ocamlinit</literal> file in your home directory
+        initialises <literal>utop</literal> with common libraries and
+        syntax extensions so you don't need to type them in every time.
+        Now that you have Core installed, you should update it to load
+        it every time you start <literal>utop</literal>, by adding this
+        to it:
       </para>
       <programlisting language="ocaml">
 #use &quot;topfind&quot;
 #camlp4o
-#thread
-#require &quot;core.top&quot;;;
-#require &quot;async&quot;;;
+#require &quot;core.top&quot;
+#require &quot;core_extended&quot;
+#require &quot;async&quot;
+open Core.Std
 </programlisting>
       <para>
         When you run <literal>utop</literal> with this initialization
         file, it should start up with Core opened and ready to use.
       </para>
-      <para>
-        <emphasis>TODO</emphasis>: the <literal>.ocamlinit</literal>
-        handling in OPAM is being finalised and is tracked in
-        <ulink url="https://github.com/OCamlPro/opam/issues/185">issue
-        185</ulink>.
-      </para>
     </sect2>
     <sect2 id="editors">
       <title>Editors</title>
-      <para>
-        TODO: Emacs users have tuareg and
-        <ulink url="http://www.typerex.org/">Typerex</ulink>.
-      </para>
-      <para>
-        TODO: Vim users can use the built-in style, and
-        <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
-        may also be useful.
-      </para>
-      <para>
-        TODO: Eclipse plugins: which one is maintained?
-      </para>
+      <sect3 id="emacs">
+        <title>Emacs</title>
+        <para>
+          TODO: Emacs users have tuareg and
+          <ulink url="http://www.typerex.org/">Typerex</ulink>.
+        </para>
+      </sect3>
+      <sect3 id="vim">
+        <title>Vim</title>
+        <para>
+          TODO: Vim users can use the built-in style, and
+          <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
+          may also be useful.
+        </para>
+      </sect3>
+      <sect3 id="eclipse">
+        <title>Eclipse</title>
+        <para>
+          Eclipse is a popular IDE usually used for Java development.
+          The OCaml Development Tools (ODT) project provides equivalent
+          IDE features for editing and compiling OCaml code, such as
+          automatic compilation and name completion.
+        </para>
+        <para>
+          ODT is distributed as a set of plugins for the Eclipse IDE
+          environment from the
+          <ulink url="http://ocamldt.free.fr">homepage</ulink>. You just
+          have to copy these plugins into your Eclipse distribution in
+          order to access the new OCaml facilities.
+        </para>
+      </sect3>
     </sect2>
   </sect1>
-  <sect1 id="developing-with-opam">
-    <title>Developing with OPAM</title>
-    <para>
-      TODO: Package listings are obtained by adding
-      <emphasis>remotes</emphasis> that provide package descriptions,
-      installation instructions and URLs.
-    </para>
-  </sect1>
-</appendix><appendix id="packaging-and-build-systems">
-  <title>Packaging and Build Systems</title>
+</appendix><appendix id="packaging">
+  <title>Packaging</title>
   <para>
     The OCaml toolchain is structured much like a C compiler, with
     several tools that generate intermediate files and finally link
