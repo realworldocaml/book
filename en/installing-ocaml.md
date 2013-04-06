@@ -438,7 +438,7 @@ TODO: Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 
 To use `utop` directly in Emacs, add the following line to your `~/.emacs` file:
 
-```scm
+```scheme
 (autoload 'utop "utop" "Toplevel for OCaml" t)
 ```
 
