@@ -25,7 +25,7 @@ type-safe way.
 ## Basic command line parsing
 
 We'll begin by cloning the `md5` binary that is present on most Linux
-distributions and MacOS X.  It reads in the contents of a file, applies the MD5
+distributions and Mac OS X.  It reads in the contents of a file, applies the MD5
 one-way hash function to the data, and outputs an ASCII hex representation of
 the result.
 
@@ -706,12 +706,10 @@ directory, but it can actually be extended for other parts of the command too.
 
 The precise mechanism for autocompletion varies depending on what shell you are
 using, but we'll assume you are using the most common one: `bash`.  This is the
-default interactie shell on most Linux distributions and MacOS X, but you may
+default interactie shell on most Linux distributions and Mac OS X, but you may
 need to switch to it on *BSD or Windows (when using Cygwin).  The rest of this
 section assumes that you're using `bash`.
 
-<note>
-<title>The `bash` autocompletion feature</title>
 Bash autocompletion isn't always installed by default, so check your OS package
 manager to see if you have it available.
 
@@ -719,8 +717,8 @@ Operating System  Package Manager  Package
 ----------------  ---------------  -------
 Debian Linux      `apt`            `TODO`
 CentOS            `yum`            `TODO`
-MacOS X           Homebrew         `bash-completion`
-MacOS X           MacPorts         `TODO`
+Mac OS X           Homebrew         `bash-completion`
+Mac OS X           MacPorts         `TODO`
 FreeBSD           Ports System     `/usr/ports TODO`
 OpenBSD           `pkg_add`        `TODO`
 
@@ -733,10 +731,8 @@ then check your OS documentation to configure completion correctly.
 One last bit of information you'll need to find is the location of the
 `bash_completion.d` directory. This is where all the shell fragments that
 contain the completion logic are held.  On Linux, this is often in
-`/etc/bash_completion.d`, and in Homebrew on MacOS X it would be
+`/etc/bash_completion.d`, and in Homebrew on Mac OS X it would be
 `/usr/local/etc/bash_completion.d` by default.
-
-</note>
 
 ### Generating completion fragments from Command
 

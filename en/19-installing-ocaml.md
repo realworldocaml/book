@@ -1,17 +1,16 @@
 # Installation
 
-The easiest way to use OCaml is via the binary packages available in
+The easiest way to use OCaml is via the binary packages available for
 many operating systems.  For day-to-day code development however, it's
 much easier to use a source-code manager that lets you modify
 individual libraries and automatically recompile all the dependencies.
 
-An important difference between OCaml and scripting languages such as
-Python or Ruby is that the static type safety that means that you
-can't just mix-and-match compiled libraries.  Interfaces are checked
-when libraries are compiled, so when an interface is changed, all the
-dependent libraries must also be recompiled.  Source-based package
-managers automate this process for you and make development life much
-easier.
+An important difference between OCaml and scripting languages such as Python or
+Ruby is the static type safety that means that you can't just mix-and-match
+compiled libraries.  Interfaces are checked when libraries are compiled, so
+when an interface is changed, all the dependent libraries must also be
+recompiled.  Source-based package managers automate this process for you and
+make development life much easier.
 
 To work through Real World OCaml, you'll need three major components
 installed:
@@ -32,11 +31,12 @@ operating systems.  This is the simplest and preferred installation
 route, but we'll also describe how to do a manual installation as a
 last resort.
 
-### MacOS X
+### Mac OS X
 
 The [Homebrew](http://github.com/mxcl/homebrew) package manager has an
 OCaml installer, which is usually updated pretty quickly to the latest
-stable release.
+stable release.  Before installing OCaml, make sure that you have the latest
+XCode installed from the App Store so that a C compiler is available.
 
 ```
 $ brew install ocaml
@@ -47,12 +47,14 @@ The Perl-compatible Regular Expression library (PCRE) is used by the
 Core suite.  It's not strictly needed to use OCaml, but is a commonly
 used library that we're installing now to save time later.
 
-Another popular package manager on MacOS X is
-[MacPorts](http://macports.org), which also has an OCaml port:
+Another popular package manager on Mac OS X is
+[MacPorts](http://macports.org), which also has an OCaml port.  As
+with Homebrew, make sure you have XCode installed and have followed
+the rest of the MacPorts installation instructions, and then type in:
 
 ```
-$ port install ocaml
-$ port install ocaml-pcre
+$ sudo port install ocaml
+$ sudo port install ocaml-pcre
 ```
 
 ### Debian Linux
@@ -61,7 +63,7 @@ On Debian Linux, you should install OCaml via binary packages.  You'll
 need at least OCaml version 3.12.1 to bootstrap OPAM, which means
 using Debian Wheezy or greater.  Don't worry about getting the
 absolute latest version of the compiler, as you just need one new
-enough to compile the OPAM package manager, after which you use OPAM
+enough to compile the OPAM package manager, after which you'll use OPAM
 to manage your compiler installation.
 
 ```
@@ -96,16 +98,13 @@ machine.
 
 ### Building from source
 
-_NOTE_: we really should be telling people to install 4.01, but
-it's not released yet.
-
 To install OCaml from source code, first make sure that you have a C
-compilation environment (usually either `gcc` or `llvm` installed)
+compilation environment (usually either `gcc` or `llvm` installed).
 
 ```
-$ curl -OL http://caml.inria.fr/pub/distrib/ocaml-4.00/ocaml-4.00.1.tar.gz
-$ tar -zxvf ocaml-4.00.1.tar.gz
-$ cd ocaml-4.00.1
+$ curl -OL https://github.com/ocaml/ocaml/archive/trunk.tar.gz
+$ tar -zxvf trunk.tar.gz
+$ cd ocaml-trunk
 $ ./configure
 $ make world world.opt
 $ sudo make install
@@ -125,6 +124,18 @@ the `~/.bash_profile` file.  You shouldn't really to do this unless
 you have special reasons, so try to install binary packages before
 trying a source installation.
 
+<note>
+<title>Note to reviewers</title>
+
+We instruct you install the unreleased trunk version of OCaml
+in these instructions, as we take advantage of some recent additions
+to the language that simplify explanations in the book.  The 4.01
+release will happen before the book is released, but you may run
+into "bleeding edge" bugs with the trunk release.  Leave a comment
+here if you do and we'll address them.
+
+</note>
+
 ## Getting OPAM
 
 OPAM manages multiple simultaneous OCaml compiler and library
@@ -137,21 +148,11 @@ Before installing OPAM, make sure that you have the OCaml compiler
 installed as described above.  Once installed, the entire OPAM
 database is held in your home directory (normally `$HOME/.opam`).  If
 something goes wrong, just delete this `.opam` directory and start
-over from a clean slate.  If youre using a version of OPAM you've
-installed previously, please ensure you have at least version
-0.9.3 or greater.
+over from a clean slate.  If youre using a beta version of OPAM,
+please upgrade it to at least version 1.0.0 or greater before
+proceeding.
 
-<important>
-<title>OCamlfind and OPAM</title>
-
-OPAM maintains multiple compiler and library installations, but this
-can clash with a global installation of the `ocamlfind` tool.
-Uninstall any existing copies of `ocamlfind` before installing OPAM.
-_Reviewers_: this has since been fixed in OCaml-4.01.0.
-
-</important>
-
-### MacOS X
+### Mac OS X
 
 Source installation of OPAM will take a minute or so on a modern
 machine.  There is a Homebrew package for the latest OPAM:
@@ -164,8 +165,18 @@ $ brew install opam
 And on MacPorts, install it like this:
 
 ```
-$ port install opam
+$ sudo port install opam
 ```
+
+<note>
+<title>Check the MacPorts version of OPAM</title>
+
+As of this snapshot, the MacPorts version of OPAM is still 0.9.4,
+which is too old.  If it hasn't been updated when you try it, then
+please do a source installation of OPAM 1.0.0 or higher. We've contacted
+the MacPorts team to request an update.
+
+</note>
 
 ### Debian Linux
 
@@ -237,7 +248,7 @@ $ sudo pacman -U opam-_version_.pkg.tar.gz
 
 The entire OPAM package database is held in the `.opam` directory in
 your home directory, including compiler installations. On Linux and
-MacOS X, this will be the `~/.opam` directory.  You shouldn't switch
+Mac OS X, this will be the `~/.opam` directory.  You shouldn't switch
 to an admin user to install packages as nothing will be installed
 outside of this directory.  If you run into problems, just delete the
 whole `~/.opam` directory and follow the installations instructions
@@ -260,11 +271,11 @@ replacement standard library that all of the examples in this book
 use.  Before doing this, let's make sure you have exactly the right
 compiler version you need.  We've made some minor modifications to the
 way the OCaml compiler displays type signatures, and the next command
-will install a patched `4.00.1` compiler with this functionality
+will install a patched `4.01.0` compiler with this functionality
 enabled.
 
 ```
-$ opam switch 4.00.1+short-types
+$ opam switch 4.01.0dev+trunk
 ```
 
 This step will take about 5-10 minutes on a modern machine, and will
@@ -276,7 +287,7 @@ without sacrificing your current installation.  You only need to
 install this compiler once, and future updates will be much faster as
 they only recompile libraries within the compiler installation.
 
-The new compiler will be installed into `~/.opam/4.00.1+short-types`
+The new compiler will be installed into `~/.opam/4.01.0dev+trunk`
 and any libraries you install for it will be tracked separately from
 your system installation.  You can have any number of compilers
 installed simultaneously, but only one can be active at any time.
@@ -298,7 +309,7 @@ This evaluates the results of running `opam config env` in your
 current shell, and sets the variables so that subsequent commands will
 use them.  This only works with your current shell, and it can be
 automated for all future shells by adding the line to your login
-scripts.  On MacOS X or Debian, this is usually the `~/.bash_profile`
+scripts.  On Mac OS X or Debian, this is usually the `~/.bash_profile`
 file if you're using the default shell.  If you've switched to another
 shell, it might be `~/.zshrc` instead.  OPAM isn't unusual in this
 approach; the SSH `ssh-agent` also works similarly, so if you're
@@ -340,7 +351,7 @@ so that you can run it within your editing environment.
 
 Remember from earlier that OPAM never installs files directly into
 your system directories, and this applies to `utop` too.  You'll find
-the binary in `~/.opam/4.00.1+short-types/bin`.  However, just typing
+the binary in `~/.opam/4.01.0dev+trunk/bin`.  However, just typing
 in `utop` from your shell should just work, due to the `opam config
 env` step which configures your shell.  Don't forget to automate this
 as described earlier, as it makes life much easier when developing
