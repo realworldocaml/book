@@ -697,12 +697,15 @@ Error: The implementation counter.ml
 ```
 
 This error message is a bit intimidating at first, and it takes a bit
-of thought to see where the first type, which is the type of `touch`
-in the implementation, doesn't match the second one, which is the type
-of `touch` in the interface.  You need to recognize that `t` is in
-fact a `Core.Std.Map.t`, and the problem is that in the first type,
-the first argument is a map while the second is the key to that map,
-but the order is swapped in the second type.
+of thought to see why the first type for touch (which comes from the
+implementation) doesn't match the second one (which comes from the
+interface).  The key thing to remember is that `t` is a
+`Core.Std.Map.t`, at which point you can see that the error is a
+mismatch in the order of arguments to `touch`.
+
+There's no denying that learning to decode such error messages is
+difficult at first, and takes some getting used to.  But in time,
+decoding these errors becomes second nature.
 
 #### Missing definitions
 
