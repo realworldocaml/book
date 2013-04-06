@@ -415,32 +415,38 @@ OCaml code!
 
 ### Command Line
 
-TODO: explain OCamlfind here.
-
 The `utop` tool provides a convenient interactive toplevel, with full
-command history, command macros and module name completion.  The
-`~/.ocamlinit` file in your home directory initialises `utop` with
-common libraries and syntax extensions, so you don't need to type them
-in every time.  A good default you should create for the examples in
-this book is:
+command history, command macros and module name completion.  When you
+first run `utop`, you'll find yourself at an interactive prompt with
+a bar at the bottom of the screen.  The bottom bar dynamically updates as you
+write text, and contains the possible names of modules or variables
+that are valid at that point in the phrase you are entering.  You can
+press the `<tab>` key to complete the phrase with the first choice. 
+
+The `~/.ocamlinit` file in your home directory initialises `utop` with
+common libraries and syntax extensions so you don't need to type them
+in every time.  Now that you have Core installed, you should update it
+to load it every time you start `utop`, by adding this to it:
 
 ```ocaml
 #use "topfind"
 #camlp4o
-#thread
-#require "core.top";;
-#require "async";;
+#require "core.top"
+#require "core_extended"
+#require "async"
+open Core.Std
 ```
 
 When you run `utop` with this initialization file, it should start up with
 Core opened and ready to use.
 
-_TODO_: the `.ocamlinit` handling in OPAM is being finalised and is
-tracked in [issue 185](https://github.com/OCamlPro/opam/issues/185).
-
 ### Editors
 
+#### Emacs
+
 TODO: Emacs users have tuareg and [Typerex](http://www.typerex.org/).
+
+#### Vim
 
 TODO: Vim users can use the built-in style, and
 [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
