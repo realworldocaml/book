@@ -331,6 +331,20 @@ You can verify this worked by listing the available packages:
 $ opam list
 ```
 
+<note>
+<title>Note to reviewers</title>
+
+OPAM 1.0's always places the login commands into your `~/.profile`
+directory, which isn't executed if your shell is `bash`.  This has
+been fixed in subsequent versions, but for now you'll need to manually
+copy the contents of `~/.profile` over to `~/.bash_profile` via:
+
+```
+$ cat ~/.profile >> ~/.bash_profile
+```
+
+</note>
+
 The most important package we need to install is Core, which is the
 replacement standard library that all of the examples in this book
 use.  Before doing this, let's make sure you have exactly the right
