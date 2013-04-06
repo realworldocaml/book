@@ -78,11 +78,21 @@ some OCaml libraries require more system libraries (for example,
 `libssl-dev`), but we'll highlight these in the book when we introduce
 the library.
 
-TODO: Fedora / RHEL
+Fedora and Red Hat
+
+OCaml has been included in the basic distribution since Fedora 8.  To install the
+latest compiler, just run:
+
+```
+# yum install ocaml
+# yum install pcre-devel
+```
+
+The PCRE package is used by Core and is just included here for convenience later.
 
 ### Arch Linux
 
-Arch Linux provides OCaml 4.0.1 (or later) in the standard repositories, so the
+Arch Linux provides OCaml 4.00.1 (or later) in the standard repositories, so the
 easiest method of installation is using `pacman`:
 
 ```
@@ -181,8 +191,9 @@ the MacPorts team to request an update.
 ### Debian Linux
 
 There are experimental binary packages available for Debian
-Wheezy/amd64. Just add the following line to your
-`/etc/apt/sources.list`:
+Wheezy/amd64.  You should be able to use these on 64-bit Ubuntu and other
+derivative distributions such as Linux Mint also.  Just add the following line
+to your `/etc/apt/sources.list`:
 
 ```
 deb http://www.recoil.org/~avsm/ wheezy main
@@ -222,9 +233,10 @@ $ ./configure && make
 $ sudo make install
 ```
 
-### Fedora/RHEL
+### Fedora and Red Hat
 
- TODO
+There is currently no RPM available for Fedora or Red Hat, so please
+install OPAM via the source code instructions for the moment.
 
 ### Arch Linux
 
