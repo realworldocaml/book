@@ -24,7 +24,7 @@ installed:
 Let's get started with how to install OCaml on various operating
 systems, and we'll get OPAM and `utop` running after that.
 
-## Getting OCaml 
+## Getting OCaml
 
 The OCaml compiler is available as a binary distribution on many
 operating systems.  This is the simplest and preferred installation
@@ -68,7 +68,7 @@ to manage your compiler installation.
 
 ```
 $ sudo apt-get install ocaml ocaml-native-compilers camlp4-extra
-$ sudo apt-get install git libpcre3-dev curl build-essential m4 
+$ sudo apt-get install git libpcre3-dev curl build-essential m4
 ```
 
 Notice that we've installed a few more packages than just the OCaml
@@ -237,10 +237,10 @@ You'll need both `ocaml` and the `base-devel` packages installed first:
 Run these commands to install the stable OPAM package:
 
 ```
-$ sudo pacman -Sy base-devel 
-$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz 
+$ sudo pacman -Sy base-devel
+$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
 $ tar -xvf opam.tar.gz && cd opam
-$ makepkg 
+$ makepkg
 $ sudo pacman -U opam-_version_.pkg.tar.gz
 ```
 
@@ -302,7 +302,7 @@ variables so that packages will just work.  This requires just one
 command:
 
 ```
-$ eval `opam config env`
+$ eval `opam config -env`
 ```
 
 This evaluates the results of running `opam config env` in your

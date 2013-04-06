@@ -5,3 +5,6 @@
 ** Fix inconsistency of sexp_option and sexp_list
 ** Make fieldslib respect private record types
  (i.e., no map, no set_XXX)
+* Things we need to cover
+** polymorphic compare and hash
+

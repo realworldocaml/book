@@ -20,9 +20,9 @@ try out the examples.
 <title>Installing `utop`</title>
 
 The easiest way to get the examples running is to set up the OPAM
-package manager, which is explained in [xref](#installation).
-In a nutshell, you need to have a working C compilation environment
-and the PCRE library installed, and then:
+package manager, which is explained in [xref](#installation).  In a
+nutshell, you need to have a working C compilation environment and the
+PCRE library installed, and then:
 
 ```
 $ opam init
@@ -31,22 +31,31 @@ $ opam install utop core_extended
 $ eval `opam config -env`
 ```
 
-This will take a few minutes to compile, and install the latest version of
-OCaml with the Core standard library.  Once the command completes, type in
-`utop`, and you'll be in an interactive toplevel environment.  OCaml phrases
-are only evaluated when you enter a double semicolon (`;;`), so you can split
-your typing over multiple lines.  You can exit `utop` by pressing `control-D`
-and return. For complete instructions, please refer to [xref](#installation).
+Note that the above commands will take some time to run.  When they're
+done, create a file called `~/.ocamlinit` in your home directory:
+
+```ocaml
+#use "topfind"
+#camlp4o
+#thread
+#require "core.top"
+```
+
+Then type in `utop`, and you'll be in an interactive toplevel environment.
+OCaml phrases are only evaluated when you enter a double semicolon (`;;`), so
+you can split your typing over multiple lines.  You can exit `utop` by pressing
+`control-D` and return. For complete instructions, please refer to
+[xref](#installation).
 
 </note>
 
 ## OCaml as a calculator
 
-Let's spin up the toplevel.  Throughout the book we're going to use
-Core, a more full-featured and capable replacement for OCaml's
-standard library.  Accordingly, we'll start by opening the `Core.Std`
-module to get access to Core's libraries.  If you don't open
-`Core.Std` many of the examples below will fail.
+Let's spin up `utop`.  Throughout the book we're going to use Core, a
+more full-featured and capable replacement for OCaml's standard
+library.  Accordingly, we'll start by opening the `Core.Std` module to
+get access to Core's libraries.  If you don't open `Core.Std` many of
+the examples below will fail.
 
 ```ocaml
 $ utop
@@ -83,11 +92,11 @@ at you.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int` the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
-  operators (`+.` instead of `+`), and OCaml doesn't do any automated
-  casting between the types.  This can be a bit of a nuisance, but it
-  has its benefits, since it prevents some kinds of bugs that arise in
-  other languages due to unexpected differences between the behavior
-  of `int` and `float`.
+  operators (`+.` instead of `+`), and OCaml doesn't automatically
+  cast between types.  This can be a bit of a nuisance, but it has its
+  benefits, since it prevents some kinds of bugs that arise in other
+  languages due to unexpected differences between the behavior of
+  `int` and `float`.
 
 We can also create a variable to name the value of a given expression,
 using the `let` keyword (also known as a _let binding_).
@@ -104,14 +113,20 @@ variable (`x` or `y`), in addition to its type (`int`) and value (`7` or `14`).
 
 ## Functions and Type Inference
 
-The `let` syntax can also be used for creating functions:
+The `let` syntax can also be used for creating functions.
 
 ```ocaml
 # let square x = x * x ;;
 val square : int -> int = <fun>
+# square 2;;
+- : int = 4
 # square (square 2);;
 - : int = 16
 ```
+
+Functions in OCaml are values like any other, which is why we bind one
+to a variable using the same `let` keyword used for binding a variable
+to a simple value such as an integer.
 
 When using `let` to define a function, the first identifier after the
 `let` is the function name, and each subsequent identifier is a
@@ -134,23 +149,20 @@ val ratio : int -> int -> float = <fun>
 - : float = 0.571428571428571397
 ```
 
-As a side note, the above is our first use of OCaml modules.  The
-`Float` module contains a collection of useful functions for dealing
-with floats, including the function `Float.of_int`.
+As a side note, the above is our first use of OCaml modules.  Here,
+`FLoat.of_int` refers to the `of_int` function contained in the
+`FLoat` module, and not, as you might expect from an object-oriented
+language, accessing a method of an object.  The `Float` module in
+particular contains `of_int` as well as many other useful functions
+for dealing with floats.
 
 The notation for the type-signature of a multi-argument functions may
 be a little surprising at first, but we'll explain where it comes from
-when we get to function currying in [xref](#variables-and-functions).
+when we get to function currying in [xref](#multi-argument-functions).
 For the moment, think of the arrows as separating different arguments
 of the function, with the type after the final arrow being the return
-value of the function.  Thus,
-
-```ocaml
-int -> int -> float
-```
-
-describes a function that takes two `int` arguments and returns a
-`float`.
+value of the function.  Thus, `int -> int -> float` describes a
+function that takes two `int` arguments and returns a `float`.
 
 We can even write functions that take other functions as arguments.
 Here's an example of a function that takes three arguments: a test
@@ -166,9 +178,9 @@ val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ```
 
 If we look at the inferred type signature in detail, we see that the
-first argument is a function that takes an int and returns a boolean,
-and that the remaining two arguments are integers.  Here's an example
-of this function in action.
+first argument is a function that takes an integer and returns a
+boolean, and that the remaining two arguments are integers.  Here's an
+example of this function in action.
 
 ```ocaml
 # let even x =
@@ -181,9 +193,9 @@ val even : int -> bool = <fun>
 ```
 
 Note that in the definition of `even` we used `=` in two different
-ways: once as an equality test, when comparing `x mod 2` to `0`; and
-once as the part of the let binding that separates the thing being
-defined from its definition.  These two uses of `=` are basically
+ways: once as the part of the let binding that separates the thing
+being defined from its definition; and once as an equality test, when
+comparing `x mod 2` to `0`.  These two uses of `=` are basically
 unrelated.
 
 ### Type inference
@@ -224,7 +236,7 @@ catch unintended type changes.  Here's an annotated version of
 `sum_if_true`:
 
 ```ocaml
-# let sum_if_true (test : int -> bool) (x:int) (y:int) : int =
+# let sum_if_true (test : int -> bool) (x : int) (y : int) : int =
      (if test x then x else 0)
      + (if test y then y else 0)
   ;;
@@ -240,7 +252,7 @@ is failing to compile.
 ### Inferring generic types
 
 Sometimes, there isn't enough information to fully determine the
-concrete type of a given value.  Consider this function.
+concrete type of a given value.  Consider this function:
 
 ```ocaml
 # let first_if_true test x y =
@@ -266,9 +278,11 @@ In particular, the type of the `test` argument is `('a -> bool)`,
 which means that test is a one-argument function whose return value is
 `bool`, and whose argument could be of any type `'a`.  But, whatever
 type `'a` is, it has to be the same as the type of the other two
-arguments, `x` and `y`.
+arguments, `x` and `y`, and of the return value of `first_if_true`.
+This kind of genericity is called _parametric polymorphism_, and is
+very similar to generics in C# and Java.
 
-This genericity means that we can write:
+The generic type of `first_if_true` allows us to write:
 
 ```ocaml
 # let long_string s = String.length s > 6;;
@@ -277,7 +291,7 @@ val long_string : string -> bool = <fun>
 - : string = "loooooong"
 ```
 
-And we can also write:
+as well as:
 
 ```ocaml
 # let big_number x = x > 3;;
@@ -304,8 +318,7 @@ Error: This expression has type string but
 In this example, `big_number` requires that `'a` be instantiated as
 `int`, whereas `"short"` and `"loooooong"` require that `'a` be
 instantiated as `string`, and they can't both be right at the same
-time.  This kind of genericity is called _parametric polymorphism_,
-and is very similar to generics in C# and Java.
+time.
 
 <note><title>Type errors vs exceptions</title>
 
@@ -402,7 +415,8 @@ fuss.
 ```ocaml
 # let distance (x1,y1) (x2,y2) =
     sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
-;;
+  ;;
+val distance : float * float -> float * float -> float = <fun>
 ```
 
 The `**` operator used above is for raising a floating-point number to
@@ -454,12 +468,12 @@ of the lengths of each language as follows.
 - : int list = [5; 4; 1]
 ```
 
-`List.map` takes two arguments: a list, and a function for
-transforming the elements of that list.  Note that `List.map` creates
-a new list and does not modify the original.
+`List.map` takes two arguments: a list and a function for transforming
+the elements of that list.  Note that `List.map` creates a new list
+and does not modify the original.
 
-In this example, the function `String.length` is passed using under
-the _labeled argument_ `~f`.  Labels allow you to specify function
+In this example, the function `String.length` is passed under the
+_labeled argument_ `~f`.  Labels allow you to specify function
 arguments by name rather than by position.  As you can see below, we
 can change the order of labeled arguments without changing the
 function's behavior.
@@ -483,7 +497,7 @@ operator `::` for adding elements to the front of a list.
 - : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
 ```
 
-Here, we're creating a new extended list, not changing the list we
+Here, we're creating a new and extended list, not changing the list we
 started with, as you can see below.
 
 ```ocaml
@@ -505,8 +519,9 @@ The bracket notation for lists is really just syntactic sugar for
 ```
 
 The `::` operator can only be used for adding one element to the front
-of the list.  There's also a list concatenation operator, `@`, which
-can concatenate two lists.
+of the list, with the list terminating at `[]`, the empty list.
+There's also a list concatenation operator, `@`, which can concatenate
+two lists.
 
 ```ocaml
 # [1;2;3] @ [4;5;6];;
@@ -536,7 +551,7 @@ equivalent of using the functions `car` and `cdr` to isolate the first
 element of a list and the remainder of that list.
 
 If you try the above example in the toplevel, however, you'll see that
-it spits out an error:
+it spits out a warning:
 
 ```ocaml
     Characters 25-69:
@@ -574,7 +589,7 @@ code following the first matched pattern.  And, as we've already seen,
 we can name new variables in our patterns that correspond to
 sub-structures of the value being matched.
 
-Here's a new version of `my_favorite_language` that uses `match`, and
+Here's a new version of `my_favorite_language` that uses `match` and
 doesn't trigger a compiler warning.
 
 ```ocaml
@@ -686,8 +701,8 @@ case to the match:
 # let rec destutter list =
     match list with
     | [] -> []
-    | [hd] -> [hd]
-    | hd1 :: (hd2 :: tl) ->
+    | hd :: [] -> hd :: []
+    | hd1 :: hd2 :: tl ->
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
   ;;
@@ -727,8 +742,8 @@ are constructors, like `::` and `[]` for lists, which let you build
 optional values.  You can think of an option as a specialized list
 that can only have zero or one element.
 
-To get a value out of an option, we use pattern matching, as we did
-with tuples and lists.  Consider the following simple function for
+To examine the contents of an option, we use pattern matching, as we
+did with tuples and lists.  Consider the following simple function for
 printing a log entry given an optional time and a message.  If no time
 is provided (_i.e._, if the time is `None`), the current time is
 computed and used in its place.
@@ -768,8 +783,11 @@ within which the new variable can be used.  Thus, we could write:
 - : int = 14
 ```
 
-And even have multiple let statements in a row, each one adding a new
-variable binding to what came before.
+Note that the scope of the let binding is terminated by the
+double-semicolon.
+
+We can also have multiple let statements in a row, each one adding a
+new variable binding to what came before.
 
 ```ocaml
 # let x = 7 in
@@ -913,6 +931,11 @@ but not named, in this case, using the `fun` keyword.  Anonymous
 functions are common in OCaml, particularly when using iteration
 functions like `List.exists`.
 
+The purpose of `List.exists` is to check if there are any elements of
+the given list in question on which the provided function evaluates to
+`true`.  In this case, we're using `List.exists` to check if there is
+a scene element within which our point resides.
+
 ## Imperative programming
 
 So far, we've only written so-called _pure_ or _functional_ code,
@@ -933,12 +956,10 @@ while loops.
 
 Perhaps the simplest mutable data structure in OCaml is the array.
 Arrays in OCaml are very similar to arrays in other languages like C:
-they are fixed width, indexing starts at 0, and accessing or modifying
-an array element is a constant-time operation.  Arrays are more
-compact in terms of memory utilization than most other data structures
-in OCaml, including lists.
-
-Here's an example.
+indexing starts at 0, and accessing or modifying an array element is a
+constant-time operation.  Arrays are more compact in terms of memory
+utilization than most other data structures in OCaml, including lists.
+Here's an example:
 
 ```ocaml
 # let numbers = [| 1;2;3;4 |];;
@@ -1075,7 +1096,7 @@ let (:=) r x = r.contents <- x
 ```
 
 Here, `!` and `:=` are infix operators that we're defining, where the
-parenthetical syntax is what marks them as such.
+parenthetical syntax marks them as such.
 
 Even though a `ref` is just another record type, it's notable because
 it is the standard way of simulating the traditional mutable variable
@@ -1101,7 +1122,7 @@ while and for loops for interacting with them.  Here, for example, is
 some code that uses a for loop for permuting an array.  We use the
 `Random` module as our source of randomness.  `Random` starts out with
 a deterministic seed, but you can call `Random.self_init` to choose a
-new at random.
+new seed at random.
 
 ```ocaml
 # let permute ar =
@@ -1157,7 +1178,7 @@ for finding the first non-negative position in an array.  Note that
 So far, we've played with the basic features of the language using the
 toplevel.  Now we'll create a simple, complete stand-along program
 that does something useful: sum up a list of numbers read in from the
-UNIX standard input.
+standard input.
 
 Here's the code, which you can save in a file called `sum.ml`.
 
@@ -1225,9 +1246,9 @@ max $ ./sum.native
 Total: 100.5
 ```
 
-More work is needed to make a really usable command-line programming,
+More work is needed to make a really usable command-line program,
 including a proper command-line parsing interface and better error
-handling.
+handling, all of which is covered in [xref](#command-line-parsing).
 
 ## Where to go from here
 

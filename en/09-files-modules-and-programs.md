@@ -211,8 +211,8 @@ let touch t s =
 ```
 
 We can now rewrite `freq.ml` to use `Counter`.  Note that the
-resulting code can still be built with `build.sh`, since `ocamlbuild`
-will discover dependencies and realize that `counter.ml` needs to be
+resulting code can still be built with `ocamlbuild`, which will
+discover dependencies and realize that `counter.ml` needs to be
 compiled.
 
 ```ocaml
@@ -397,7 +397,7 @@ val median : t -> median
 The decision of whether a given type should be abstract or concrete is
 an important one.  Abstract types give you more control over how
 values are created and accessed, and makes it easier to enforce
-invariants beyond the what's enforced by the type itself; concrete
+invariants beyond the what is enforced by the type itself; concrete
 types let you expose more detail and structure to client code in a
 lightweight way.  The right choice depends very much on the context.
 
@@ -576,7 +576,27 @@ Here's some general advice on how to deal with opens.
     specifically designed to be opened, like `Core.Std` or
     `Option.Monad_infix`.
 
-  * One alternative to local opens that makes your code terser without
+  * If you do need to do an open, it's better to do a _local open_.
+    There are two syntaxes for local opens.  For example, you can write:
+
+    ```ocaml
+    let average x y =
+      let open Int64 in
+      x + y / of_int 2
+    ```
+
+    In the above, `of_int` and the infix operators are the ones from
+    `Int64` module.
+
+    There's another even more lightweight syntax for local opens, which
+    is particularly useful for small expressions:
+
+    ```ocaml
+    let average x y =
+      Int64.(x + y / of_int 2)
+    ```
+
+  * An alternative to local opens that makes your code terser without
     giving up on explicitness is to locally rebind the name of a
     module.  So, instead of writing:
 
@@ -603,26 +623,6 @@ Here's some general advice on how to deal with opens.
     easy to read and remember what `C` stands for.  Rebinding modules
     to very short names at the toplevel of your module is usually a
     mistake.
-
-  * If you do need to do an open, it's better to do a _local open_.
-    There are two syntaxes for local opens.  For example, you can write:
-
-    ```ocaml
-    let average x y =
-      let open Int64 in
-      x + y / of_int 2
-    ```
-
-    In the above, `of_int` and the infix operators are the ones from
-    `Int64` module.
-
-    There's another even more lightweight syntax for local opens, which
-    is particularly useful for small expressions:
-
-    ```ocaml
-    let average x y =
-      Int64.(x + y / of_int 2)
-    ```
 
 
 ### Common errors with modules
@@ -657,10 +657,10 @@ Error: The implementation counter.ml
 ```
 
 This error message is a bit intimidating at first, and it takes a bit
-of thought to see where the first type, which is the type of [touch]
+of thought to see where the first type, which is the type of `touch`
 in the implementation, doesn't match the second one, which is the type
-of [touch] in the interface.  You need to recognize that [t] is in
-fact a [Core.Std.Map.t], and the problem is that in the first type,
+of `touch` in the interface.  You need to recognize that `t` is in
+fact a `Core.Std.Map.t`, and the problem is that in the first type,
 the first argument is a map while the second is the key to that map,
 but the order is swapped in the second type.
 
@@ -722,8 +722,10 @@ function.
 In most cases, OCaml doesn't allow circular dependencies, _i.e._, a
 collection of definitions that all refer to each other.  If you want
 to create such definitions, you typically have to mark them specially.
-For example, when defining a set of mutually recursive values, you
-need to define them using `let rec` rather than ordinary `let`.
+For example, when defining a set of mutually recursive values (like
+the definition of `is_even` and `is_odd` in
+[xref](#recursive-functions)), you need to define them using `let rec`
+rather than ordinary `let`.
 
 The same is true at the module level.  By default, circular
 dependencies between modules is not allowed, and indeed, circular
