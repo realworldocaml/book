@@ -63,7 +63,7 @@ On Debian Linux, you should install OCaml via binary packages.  You'll
 need at least OCaml version 3.12.1 to bootstrap OPAM, which means
 using Debian Wheezy or greater.  Don't worry about getting the
 absolute latest version of the compiler, as you just need one new
-enough to compile the OPAM package manager, after which you use OPAM
+enough to compile the OPAM package manager, after which you'll use OPAM
 to manage your compiler installation.
 
 ```
