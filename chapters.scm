@@ -104,7 +104,7 @@
  (title "Fast Binary Serialization")
  (public false)
  )
-((part Advanced)
+((part Practical)
  (name "first-class-modules")
  (file "fcm")
  (note "75%, blocked on release of ocaml-plugin lib")
