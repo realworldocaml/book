@@ -2,7 +2,7 @@
 
 ((part Preface)
  (name "prologue")
- (file "01-prologue")
+ (file "prologue")
  (note "Largely complete")
  )
 
@@ -10,12 +10,12 @@
 
 ((part Basic)
  (name "a-guided-tour")
- (file "02-guided-tour")
+ (file "guided-tour")
  (note "Largely complete")
  )
 ((part Basic)
  (name "variables-and-functions")
- (file "03-variables-and-functions")
+ (file "variables-and-functions")
  (note "Largely complete")
  )
 ((part Basic)
