@@ -48,8 +48,12 @@ module Auth = struct
       return login
 
   let check ~milestone ~login =
-    let allowed_users = Config.allowed_users milestone in
+    let _,allowed_users = Config.allowed_users milestone in
     List.mem login allowed_users
+
+  let who_has_access ~milestone = 
+    let who,_ = Config.allowed_users milestone in
+    who
 
   let denied =
     let tmpl = Core.Std.In_channel.read_all "forbidden.html.in" in
@@ -81,19 +85,20 @@ module Comment = struct
     List.fold_left (fun acc m ->
       let open Github_t in
       printf " %d: %s (%s)\n%!" m.milestone_number m.milestone_title m.milestone_description;
-      (m.milestone_number,(m.milestone_title, m.milestone_description))::acc
+      let access = Auth.who_has_access ~milestone:m.milestone_title in
+      (m.milestone_number,(m.milestone_title, m.milestone_description, access))::acc
     ) [] ms
 
   let all_milestones =
-    List.rev (List.fold_left (fun a (_,(n,_)) -> n :: a) [] milestones )
+    List.rev (List.fold_left (fun a (_,(n,_,_)) -> n :: a) [] milestones )
 
   (* Generate the index.html *)
   let index =
     let tmpl = Core.Std.In_channel.read_all "index.html.in" in
     let ms = String.concat "\n" (
-      List.map (fun (id,(name,descr)) ->
+      List.map (fun (id,(name,descr,access)) ->
         let pdf = if Sys.file_exists (docroot ^ "/" ^ name ^ "/rwo-snapshot.pdf") then sprintf "<a href=\"%s/rwo-snapshot.pdf\"><img src=\"media/img/pdf_icon_small.gif\" /></a>" name else "" in
-        sprintf "<li><b><a href=\"%s/en/html/\">%s</a></b>: %s <br/><a href=\"%s/en/html/\"><img src=\"media/img/html_icon_small.gif\" /> %s</li>" name name descr name pdf;
+        sprintf "<li><b><a href=\"%s/en/html/\">%s</a></b>: %s <br/><a href=\"%s/en/html/\"><img src=\"media/img/html_icon_small.gif\" /></a> %s (<i>access for: %s</i>)</li>" name name descr name pdf access;
       ) milestones)
     in
     Re_str.(global_replace (regexp_string "@MILESTONES@") ms tmpl )
@@ -116,7 +121,7 @@ module Comment = struct
   let get ~milestone_number ~id =
     match assoc_opt milestones milestone_number with
     |None -> eprintf "Unknown milestone %d\n%!" milestone_number; None
-    |Some (milestone,_) -> begin
+    |Some (milestone,_,_) -> begin
       match init ~milestone with
       |None -> eprintf "No milestone dump data for %s\n%!" milestone; None
       |Some ids -> begin

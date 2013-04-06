@@ -97,17 +97,17 @@ let from_email =
 ]
 
 let internal_reviewers =
-  authors @ support @ trusted
+  "Authors",
+  (authors @ support @ trusted)
 
 let external_reviewers =
-  internal_reviewers @ from_anil @ from_yminsky @ from_email @ trusted
-
-let full_access = trusted @ authors
+  "External Reviewers",
+  (authors @ support @ from_anil @ from_yminsky @ from_email)
 
 let allowed_users = function
   | "alpha1" -> internal_reviewers
   | "alpha2" -> external_reviewers
   | "alpha3" -> external_reviewers
-  | "alpha4" -> full_access
-  | "trunk"  -> full_access
-  |_ -> authors
+  | "alpha4" -> internal_reviewers
+  | "trunk"  -> internal_reviewers
+  |_ -> internal_reviewers
