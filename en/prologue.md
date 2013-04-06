@@ -96,13 +96,13 @@ implemented, it is really intended for use within the compiler itself,
 and covers only a small subset of the functionality you expect for
 more general-purpose use.
 
-But all is not lost!  There is an effective alternative to the OCaml
-standard library called Core.  Jane Street, a company that has been
-using OCaml for more than a decade, developed Core for its own
-internal use, but it was designed from the start with an eye towards
-being a general-purpose standard library, and has very broad
-applicability.  Core is also engineered with correctness, reliability
-and performance very much in mind.
+In the world of open-source software, nothing stops alternative libraries
+from being written by the community, and this exactly what the Core standard
+library is.  Jane Street, a company that has been using OCaml for more than a
+decade, developed Core for its own internal use, but it was designed from the
+start with an eye towards being a general-purpose standard library, and has
+very broad applicability.  Core is also engineered with correctness,
+reliability and performance very much in mind.
 
 Core is also distributed with syntax extensions which provide useful new
 functionality to OCaml, and there are additional libraries such as the Async
