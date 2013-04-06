@@ -148,19 +148,9 @@ Before installing OPAM, make sure that you have the OCaml compiler
 installed as described above.  Once installed, the entire OPAM
 database is held in your home directory (normally `$HOME/.opam`).  If
 something goes wrong, just delete this `.opam` directory and start
-over from a clean slate.  If youre using a version of OPAM you've
-installed previously, please ensure you have at least version
-0.9.3 or greater.
-
-<important>
-<title>OCamlfind and OPAM</title>
-
-OPAM maintains multiple compiler and library installations, but this
-can clash with a global installation of the `ocamlfind` tool.
-Uninstall any existing copies of `ocamlfind` before installing OPAM.
-_Reviewers_: this has since been fixed in OCaml-4.01.0.
-
-</important>
+over from a clean slate.  If youre using a beta version of OPAM,
+please upgrade it to at least version 1.0.0 or greater before
+proceeding.
 
 ### Mac OS X
 
@@ -175,8 +165,18 @@ $ brew install opam
 And on MacPorts, install it like this:
 
 ```
-$ port install opam
+$ sudo port install opam
 ```
+
+<note>
+<title>Check the MacPorts version of OPAM</title>
+
+As of this snapshot, the MacPorts version of OPAM is still 0.9.4,
+which is too old.  If it hasn't been updated when you try it, then
+please do a source installation of OPAM 1.0.0 or higher. We've contacted
+the MacPorts team to request an update.
+
+</title>
 
 ### Debian Linux
 
