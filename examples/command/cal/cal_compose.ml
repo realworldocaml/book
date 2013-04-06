@@ -27,7 +27,7 @@ let diff ~common =
     |> printf "%d days\n"
   )
 
-let () =                                                                                                                 
+let () =
   let common =
     Command.Spec.(
       empty
@@ -35,8 +35,7 @@ let () =
       +> flag "-v" (optional_with_default false bool) ~doc:" Verbose output"
     )
   in
-  List.map
+  List.map ~f:(fun (name, cmd) -> (name, cmd ~common))
     [ "add", add; "diff", diff ]
-    ~f:(fun (name, cmd) -> (name, cmd ~common))
   |> Command.group ~summary:"Manipulate dates"
   |> Command.run
