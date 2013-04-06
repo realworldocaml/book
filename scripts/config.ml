@@ -34,7 +34,7 @@ let from_anil =
   ; "bellosa"                 (* Frank Bellosa <frank@bellosa.de> *)
   ; "simonjbeaumont"          (* Simon Beaumont <simon.beaumont@citrix.com> *)
   ; "green-gecko"             (* Alex Ho <a_green_gecko@yahoo.com> *)
-  ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> TODO *)
+  ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> *)
 ]
 
 let from_yminsky =
@@ -98,7 +98,7 @@ let from_email =
 
 let internal_reviewers =
   "Authors",
-  (authors @ support @ trusted)
+  (authors @ trusted)
 
 let external_reviewers =
   "External Reviewers",
@@ -106,8 +106,8 @@ let external_reviewers =
 
 let allowed_users = function
   | "alpha1" -> internal_reviewers
-  | "alpha2" -> external_reviewers
-  | "alpha3" -> external_reviewers
-  | "alpha4" -> internal_reviewers
+  | "alpha2" -> internal_reviewers
+  | "alpha3" -> internal_reviewers
+  | "alpha4" -> external_reviewers
   | "trunk"  -> internal_reviewers
   |_ -> internal_reviewers
