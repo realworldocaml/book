@@ -494,12 +494,18 @@ go to `Ext_list` instead.
 Up until now, we've only considered modules that correspond to files,
 like `counter.ml`.  But modules (and module signatures) can be nested
 inside other modules.  As a simple example, consider a program that
-needs to deal with some class of identifier like a username.  Rather
-than just keeping usernames as strings, you might want to mint an
-abstract type, so that the type-system will help you to not confuse
-usernames with other string data that is floating around your program.
+needs to deal with multiple identifier like usernames and hostnames.
+If you just represent these as strings, then it becomes easy to
+confuse one with the other.
 
-Here's how you might create such a type, within a module:
+A better approach is to mint new abstract types for each identifier,
+where those types are under the covers just implemented as strings.
+That way, the type system will prevent you from confusing a username
+with a hostname, and if you do need to convert, you can do so using
+explicit conversions to and from the string type.
+
+Here's how you might create such an abstract type, within a
+sub-module:
 
 ```ocaml
 open Core.Std
@@ -514,6 +520,11 @@ end = struct
   let to_string x = x
 end
 ```
+
+Note that the `to_string` and `of_string` functions above are
+implemented simply as the identity function, which means they have no
+runtime effect.  They are there purely as part of the discipline that
+they enforce on the code through the type system.
 
 The basic structure of a module declaration like this is:
 
@@ -553,8 +564,8 @@ let sessions_have_same_user s1 s2 =
   s1.user = s2.host
 ```
 
-The above code is buggy, and indeed, the compiler will refuse to
-compile it, spitting out the following error.
+The above code has a fairly obvious bug, and indeed, the compiler will
+refuse to compile it, spitting out the following error.
 
 ```
 File "buggy.ml", line 25, characters 12-19:
