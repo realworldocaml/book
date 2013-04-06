@@ -683,7 +683,9 @@ val touch : string -> t -> t
 ```
 
 and then try to compile `Counter` (by writing `ocamlbuild
--use-ocamlfind counter.cmo`), we'll get the following error:
+-use-ocamlfind counter.cmo`.  The `cmo` file is a compiled object
+file, containing the bytecode-compiled version of a module), we'll get
+the following error:
 
 ```
 File "counter.ml", line 1, characters 0-1:
