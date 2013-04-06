@@ -194,7 +194,7 @@ Real World OCaml is split into three parts and appendices:
   such as GNU `gdb` and `gprof`.  Contributing your code back to the
   community is also important (if only to get bug fixes from other
   people!), and this part also explains how to do this via OPAM and
-  Github.
+  GitHub.
 
 <note>
 <title>Note to reviewers</title>
