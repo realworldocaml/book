@@ -430,10 +430,10 @@ invariants beyond the what is enforced by the type itself; concrete
 types let you expose more detail and structure to client code in a
 lightweight way.  The right choice depends very much on the context.
 
-### The `include` directive ###
+### The `include` statement ###
 
 OCaml provides a number of tools for manipulating modules.  One
-particularly useful one is the `include` directive, which is used to
+particularly useful one is the `include` statement, which is used to
 include the contents of one module into another.
 
 One natural application of `include` is to create one module which is
@@ -574,7 +574,7 @@ Error: This expression has type Hostname.t
 Command exited with code 2.
 ```
 
-We can also combine this with the use of the include directive to add
+We can also combine this with the use of the include statement to add
 some extra functionality to such a module.  Thus, we could have
 rewritten the definition of `Hostname` above as follows to add a
 function `Hostname.mine` that returns the hostname of the present
@@ -593,7 +593,7 @@ end
 ### Opening modules ###
 
 One useful primitive in OCaml's module language is the `open`
-directive.  We've seen that already in the `open Core.Std` that has
+statement.  We've seen that already in the `open Core.Std` that has
 been at the top of our source files.
 
 The basic purpose of `open` is to extend the namespaces that OCaml
