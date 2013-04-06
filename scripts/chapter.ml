@@ -13,5 +13,6 @@ type chapter = {
   name: string;
   file: string;
   public: bool with default(true);
+  title: string sexp_option;
   note: string;
 } with sexp
