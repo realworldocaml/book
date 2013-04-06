@@ -357,7 +357,7 @@ spartan experience and so we use a more modern alternative.
 $ opam install utop
 ```
 
-The `utop` package us an interactive command-line interface to OCaml
+The `utop` package is an interactive command-line interface to OCaml
 that has tab-completion, persistent history and integration with Emacs
 so that you can run it within your editing environment.
 
