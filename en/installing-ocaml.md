@@ -78,11 +78,21 @@ some OCaml libraries require more system libraries (for example,
 `libssl-dev`), but we'll highlight these in the book when we introduce
 the library.
 
-TODO: Fedora / RHEL
+Fedora and Red Hat
+
+OCaml has been included in the basic distribution since Fedora 8.  To install the
+latest compiler, just run:
+
+```
+# yum install ocaml
+# yum install pcre-devel
+```
+
+The PCRE package is used by Core and is just included here for convenience later.
 
 ### Arch Linux
 
-Arch Linux provides OCaml 4.0.1 (or later) in the standard repositories, so the
+Arch Linux provides OCaml 4.00.1 (or later) in the standard repositories, so the
 easiest method of installation is using `pacman`:
 
 ```
@@ -181,8 +191,9 @@ the MacPorts team to request an update.
 ### Debian Linux
 
 There are experimental binary packages available for Debian
-Wheezy/amd64. Just add the following line to your
-`/etc/apt/sources.list`:
+Wheezy/amd64.  You should be able to use these on 64-bit Ubuntu and other
+derivative distributions such as Linux Mint also.  Just add the following line
+to your `/etc/apt/sources.list`:
 
 ```
 deb http://www.recoil.org/~avsm/ wheezy main
@@ -222,9 +233,10 @@ $ ./configure && make
 $ sudo make install
 ```
 
-### Fedora/RHEL
+### Fedora and Red Hat
 
- TODO
+There is currently no RPM available for Fedora or Red Hat, so please
+install OPAM via the source code instructions for the moment.
 
 ### Arch Linux
 
@@ -244,7 +256,7 @@ $ makepkg
 $ sudo pacman -U opam-_version_.pkg.tar.gz
 ```
 
-## Setting up OPAM
+## Configuring the OPAM package manager
 
 The entire OPAM package database is held in the `.opam` directory in
 your home directory, including compiler installations. On Linux and
@@ -254,17 +266,84 @@ outside of this directory.  If you run into problems, just delete the
 whole `~/.opam` directory and follow the installations instructions
 from the `opam init` stage again.
 
-Begin by initialising the OPAM package database.
+Let's begin by initialising the OPAM package database.  This will
+require an active Internet connection, and ask you a few interactive
+questions at the end.  It's safe to answer yes to these unless you
+want to manually control the configuration steps yourself as an
+advanced user.
 
 ```
 $ opam init
-$ opam list
+<...>
+=-=-=-= Configuring OPAM =-=-=-=
+Do you want to update your configuration to use OPAM ? [Y/n] y
+[1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
+[2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
+[3/4] Do you want to install the auto-complete scripts ? [Y/n] y
+[4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
+User configuration:
+  ~/.ocamlinit is already up-to-date.
+  ~/.profile is already up-to-date.
+Gloabal configuration:
+  Updating <root>/opam-init/init.sh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating <root>/opam-init/init.zsh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating <root>/opam-init/init.csh
+    auto-completion : [true]
+    opam-switch-eval: [true]
 ```
 
 You only need to run this command once, and it will create the
 `~/.opam` directory and sync with the latest package list from the
-online OPAM database.  `opam list` will list these, but don't install
-any just yet.
+online OPAM database.
+
+When the `init` command finishes, you'll see some instructions about
+environment variables.  OPAM never installs files into your system
+directories (which would require administrator privileges).  Instead,
+it puts them into your home directory by default, and can output a set
+of shell commands which configures your shell with the right `PATH`
+variables so that packages will just work.  This requires just one
+command:
+
+```
+$ eval `opam config -env`
+```
+
+This evaluates the results of running `opam config env` in your
+current shell, and sets the variables so that subsequent commands will
+use them.  This only works with your current shell, and it can be
+automated for all future shells by adding the line to your login
+scripts.  On Mac OS X or Debian, this is usually the `~/.bash_profile`
+file if you're using the default shell.  If you've switched to another
+shell, it might be `~/.zshrc` instead.  OPAM isn't unusual in this
+approach; the SSH `ssh-agent` also works similarly, so if you're
+having any problems just hunt around in your configuration scripts to
+see how that's being invoked.
+
+If you answered `yes` to the auto-complete scripts question during
+`opam init`, this should have all been set up for you. 
+You can verify this worked by listing the available packages:
+
+```
+$ opam list
+```
+
+<note>
+<title>Note to reviewers</title>
+
+OPAM 1.0's always places the login commands into your `~/.profile`
+directory, which isn't executed if your shell is `bash`.  This has
+been fixed in subsequent versions, but for now you'll need to manually
+copy the contents of `~/.profile` over to `~/.bash_profile` via:
+
+```
+$ cat ~/.profile >> ~/.bash_profile
+```
+
+</note>
 
 The most important package we need to install is Core, which is the
 replacement standard library that all of the examples in this book
@@ -292,29 +371,6 @@ and any libraries you install for it will be tracked separately from
 your system installation.  You can have any number of compilers
 installed simultaneously, but only one can be active at any time.
 Browse through the available compilers by running `opam switch list`.
-
-When the compilation finishes, you'll see some instructions about
-environment variables.  OPAM never installs files into your system
-directories (which would require administrator privileges).  Instead,
-it puts them into your home directory by default, and can output a set
-of shell commands which configures your shell with the right `PATH`
-variables so that packages will just work.  This requires just one
-command:
-
-```
-$ eval `opam config -env`
-```
-
-This evaluates the results of running `opam config env` in your
-current shell, and sets the variables so that subsequent commands will
-use them.  This only works with your current shell, and it can be
-automated for all future shells by adding the line to your login
-scripts.  On Mac OS X or Debian, this is usually the `~/.bash_profile`
-file if you're using the default shell.  If you've switched to another
-shell, it might be `~/.zshrc` instead.  OPAM isn't unusual in this
-approach; the SSH `ssh-agent` also works similarly, so if you're
-having any problems just hunt around in your configuration scripts to
-see how that's being invoked.
 
 Finally, we're ready to install the Core libraries.  Run this:
 
@@ -345,7 +401,7 @@ spartan experience and so we use a more modern alternative.
 $ opam install utop
 ```
 
-The `utop` package us an interactive command-line interface to OCaml
+The `utop` package is an interactive command-line interface to OCaml
 that has tab-completion, persistent history and integration with Emacs
 so that you can run it within your editing environment.
 
@@ -359,39 +415,49 @@ OCaml code!
 
 ### Command Line
 
-TODO: explain OCamlfind here.
-
 The `utop` tool provides a convenient interactive toplevel, with full
-command history, command macros and module name completion.  The
-`~/.ocamlinit` file in your home directory initialises `utop` with
-common libraries and syntax extensions, so you don't need to type them
-in every time.  A good default you should create for the examples in
-this book is:
+command history, command macros and module name completion.  When you
+first run `utop`, you'll find yourself at an interactive prompt with
+a bar at the bottom of the screen.  The bottom bar dynamically updates as you
+write text, and contains the possible names of modules or variables
+that are valid at that point in the phrase you are entering.  You can
+press the `<tab>` key to complete the phrase with the first choice. 
+
+The `~/.ocamlinit` file in your home directory initialises `utop` with
+common libraries and syntax extensions so you don't need to type them
+in every time.  Now that you have Core installed, you should update it
+to load it every time you start `utop`, by adding this to it:
 
 ```ocaml
 #use "topfind"
 #camlp4o
-#thread
-#require "core.top";;
-#require "async";;
+#require "core.top"
+#require "core_extended"
+#require "async"
+open Core.Std
 ```
 
 When you run `utop` with this initialization file, it should start up with
 Core opened and ready to use.
 
-_TODO_: the `.ocamlinit` handling in OPAM is being finalised and is
-tracked in [issue 185](https://github.com/OCamlPro/opam/issues/185).
-
 ### Editors
 
+#### Emacs
+
 TODO: Emacs users have tuareg and [Typerex](http://www.typerex.org/).
+
+#### Vim
 
 TODO: Vim users can use the built-in style, and
 [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
 
-TODO: Eclipse plugins: which one is maintained?
+#### Eclipse
 
-## Developing with OPAM
+Eclipse is a popular IDE usually used for Java development. The OCaml
+Development Tools (ODT) project provides equivalent IDE features for
+editing and compiling OCaml code, such as automatic compilation and
+name completion.
 
-TODO: Package listings are obtained by adding *remotes* that provide package
-descriptions, installation instructions and URLs.
+ODT is distributed as a set of plugins for the Eclipse IDE environment from the
+[homepage](http://ocamldt.free.fr). You just have to copy these plugins into
+your Eclipse distribution in order to access the new OCaml facilities.

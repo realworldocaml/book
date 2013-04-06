@@ -74,9 +74,8 @@ library by Martin Jambon.  It's easiest to install via OPAM.
 $ opam install yojson
 ```
 
-See [xref](#packaging-and-build-systems) for installation instructions
-if you haven't already got OPAM. Once installed, you can open it in
-the `utop` toplevel by:
+See [xref](#installation) for installation instructions if you haven't already
+got OPAM. Once installed, you can open it in the `utop` toplevel by:
 
 ```
 #require "yojson" ;;

@@ -12,7 +12,7 @@ the notion of a _visitor pattern_ to manipulate fragments of XML trees.
 <title>Obtaining and installing XMLM</title>
 
 The remainder of this chapter uses the freely available XMLM library.  It's
-easiest to obtain it via OPAM.  See [xref](#packaging-and-build-systems) for
+easiest to obtain it via OPAM.  See [xref](#installation) for
 installation instructions if you don't have OPAM.
 
 ```ocaml
