@@ -128,9 +128,11 @@ functions:
 ```ocaml
 val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 (* Read a JSON value from a string.
-  [buf] : use this buffer at will during parsing instead of creating a new one.
-  [fname] : data file name to be used in error messages. It does not have to be a real file.
-  [lnum] : number of the first line of input. Default is 1.
+   [buf]   : use this buffer at will during parsing instead of
+             creating a new one. 
+   [fname] : data file name to be used in error messages. It does not 
+             have to be a real file. 
+   [lnum]  : number of the first line of input. Default is 1.
 
 val from_channel : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> in_channel -> json
 (* Read a JSON value from a channel. See [from_string] for the meaning of the
@@ -296,23 +298,22 @@ other functions to apply useful transformations over values.
 You've already run across several of these in the `List` module:
 
 ```ocaml
-val map: 'a list -> f:('a -> 'b) -> 'b list
-val fold: list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
-val iter: 'a list -> f:('a -> unit) -> unit
+val map  : 'a list -> f:('a -> 'b)   -> 'b list
+val iter : 'a list -> f:('a -> unit) -> unit
+val fold : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
 ```
 
-`map` and `fold` are extremely common combinators that transform
-an input list by applying a function to each value of the list.
-The `map` combinator is simplest, with the resulting list being
-output directly.  `fold` applies each value in the input list to
-a function that accumulates a single result, and returns that instead.
+`map` and `fold` are extremely common combinators that transform an
+input list by applying a function to each value of the list.  The
+`map` combinator is simplest, with the resulting list being output
+directly.  `fold` applies each value in the input list to a function
+that accumulates a single result, and returns that instead.
 
-The final example above is a more specialised combinator that is
-only useful in OCaml due to side-effects being allowed.  The input
-function is applied to every value, but no result is supplied.
-Instead, the function must directly result in some side-effect, such
-as printing to the console or updating a reference elsewhere in
-the environment.
+The final example above is a more specialised combinator that is only
+useful in OCaml due to side-effects being allowed.  The input function
+is applied to every value, but no result is supplied.  Instead, the
+function must directly result in some side-effect, such as printing to
+the console or updating a reference elsewhere in the environment.
 
 </sidebar>
 
