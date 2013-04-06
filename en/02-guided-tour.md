@@ -26,7 +26,7 @@ PCRE library installed, and then:
 
 ```
 $ opam init
-$ opam switch 4.00.1+short-types
+$ opam switch 4.01.0dev+trunk
 $ opam install utop core_extended
 $ eval `opam config -env`
 ```

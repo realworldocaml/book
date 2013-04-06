@@ -81,7 +81,7 @@ like Java or C++, the OCaml object system may come as a surprise.
 Foremost is the complete separation of subtyping and inheritance in
 OCaml.  In a language like Java, a class name is also used as the type
 of objects created by instantiating it, and the subtyping rule
-corresponds to inheritance.  For example. if we implement a class
+corresponds to inheritance.  For example, if we implement a class
 `Stack` in Java by inheriting from a class `Deque`, we would be
 allowed to pass a stack anywhere a deque is expected (this is a silly
 example of course, practitioners will point out that we shouldn't do
