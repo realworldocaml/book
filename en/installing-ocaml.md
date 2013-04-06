@@ -445,9 +445,13 @@ TODO: Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 TODO: Vim users can use the built-in style, and
 [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
 
-TODO: Eclipse plugins: which one is maintained?
+#### Eclipse
 
-## Developing with OPAM
+Eclipse is a popular IDE usually used for Java development. The OCaml
+Development Tools (ODT) project provides equivalent IDE features for
+editing and compiling OCaml code, such as automatic compilation and
+name completion.
 
-TODO: Package listings are obtained by adding *remotes* that provide package
-descriptions, installation instructions and URLs.
+ODT is distributed as a set of plugins for the Eclipse IDE environment from the
+[homepage](http://ocamldt.free.fr). You just have to copy these plugins into
+your Eclipse distribution in order to access the new OCaml facilities.
