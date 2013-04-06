@@ -1,33 +1,36 @@
 # Command Line Parsing
 
-Many of the OCaml programs you will write will end up as binaries that will be
-run directly from a command prompt.  Any non-trivial program invoked as a
-command needs a few features:
+Many of the OCaml programs you will write will end up as binaries that
+will be run directly from a command prompt.  Any non-trivial program
+invoked as a command needs a few features:
 
-* program options and file inputs need to be parsed from the command line arguments.
-* sensible error messages have to be generated in response to incorrect inputs.
-* show help and manual pages for all the available options.
-* support interactive auto-completion of commands to assist the user.
+* program options and file inputs need to be parsed from the command
+  line arguments.
+* sensible error messages have to be generated in response to
+  incorrect inputs.
+* help needs to be shown for all the available options.
+* interactive auto-completion of commands to assist the user.
 
-Supporting all of this functionality manually is tedious and error-prone. Core
-provides the `Command` library that lets you declare your command-line options
-in one data structure, and the library takes care of parsing, help generation
-and auto-completion.  Command is simple to use for smaller applications, and
-has a sophisticated sub-command mode that groups related commands together (you
-may be familiar with this style from `git` or `hg`).
+Supporting all of this functionality manually is tedious and
+error-prone. Core provides the `Command` library that lets you declare
+your command-line options in one data structure, and the library takes
+care of parsing, help generation and auto-completion.  Command is
+simple to use for smaller applications, and has a sophisticated
+sub-command mode that groups related commands together (you may be
+familiar with this style from `git` or `hg`).
 
-This chapter demonstrates how to use `Command` to extend the cryptographic
-utility from [xref](#object-oriented-programming) and build a simple equivalent
-to the `md5` and `shasum` utilities. It also continues the demonstration of how
-elegant _functional combinators_ can be to declare complex data structures in a
-type-safe way.
+This chapter demonstrates how to use `Command` to extend the
+cryptographic utility from [xref](#object-oriented-programming) and
+builds a simple equivalent to the `md5` and `shasum` utilities. It
+also demonstrates how _functional combinators_ can be used to declare
+complex data structures in a type-safe and elegant way.
 
 ## Basic command line parsing
 
 We'll begin by cloning the `md5` binary that is present on most Linux
-distributions and MacOS X.  It reads in the contents of a file, applies the MD5
-one-way hash function to the data, and outputs an ASCII hex representation of
-the result.
+distributions and MacOS X.  It reads in the contents of a file,
+applies the MD5 one-way hash function to the data, and outputs an
+ASCII hex representation of the result.
 
 ```ocaml
 open Core.Std
@@ -59,7 +62,7 @@ subsequent `command` value declares.  If you compile this program and run it,
 the help screen looks like this:
 
 ```
-$ ./basic.byte 
+$ ./basic.byte
 Generate an MD5 hash of the input data
 
   basic.byte filename
@@ -76,27 +79,33 @@ More detailed information
 missing anonymous argument: filename
 ```
 
-If we invoke the binary without any arguments, it emits a help screen that informs you
-that a required argument `filename` is missing.  Supplying the argument to the command
-results in `do_hash` being called, and the MD5 output being displayed to the standard output.
+If we invoke the binary without any arguments, it emits a help screen
+that informs you that a required argument `filename` is missing.
+Supplying the argument to the command results in `do_hash` being
+called, and the MD5 output being displayed to the standard output.
 
 ```
 $ ./basic.byte basic.byte
 59562f5e4f790d16f1b2a095cd5de844
 ```
 
-So how does all this work?  There are three parts to defining a command-line interface:
+So how does all this work?  There are three parts to defining a
+command-line interface:
 
-* `Command.Spec.t` defines the steps required to convert a command-line into an OCaml structure.
-* `Command.basic` takes a callback that is passed parameters parsed from the command-line according to the `spec` parameter.  It takes a
-`summary` string for a one-line description of the command behavior, and an optional `readme` for longer help text.
-* `Command.run` actually executes a command and its specification, and runs the callback function with the resulting parameters.
+* `Command.Spec.t` defines the steps required to convert a
+  command-line into an OCaml structure.
+* `Command.basic` takes a callback that is passed parameters parsed
+  from the command-line according to the `spec` parameter.  It takes a
+  `summary` string for a one-line description of the command behavior,
+  and an optional `readme` for longer help text.
+* `Command.run` actually executes a command and its specification, and
+  runs the callback function with the resulting parameters.
 
-Most of the interesting logic lies in how the specifications are defined.  The
-`Command.Spec` module defines several combinators that can be chained together
-to define flags and anonymous arguments, what types they should map to, and
-whether to take special actions (such as interactive input) if certain fields
-are encountered.
+Most of the interesting logic lies in how the specifications are
+defined.  The `Command.Spec` module defines several combinators that
+can be chained together to define flags and anonymous arguments, what
+types they should map to, and whether to take special actions (such as
+interactive input) if certain fields are encountered.
 
 ```ocaml
 Command.Spec.(
@@ -105,22 +114,22 @@ Command.Spec.(
 )
 ```
 
-We begin the specification above with an `empty` value, and then chain more
-parameters via the `+>` combinator.  Our example defines a single _anonymous_
-parameter via the `anon` function
-(that is, a standalone token from the command-line).  Anonymous functions can
-be assigned a name that is used in help text, and an OCaml type that they are
-mapped to.  The parameters specified here are all eventually passed to a
+We begin the specification above with an `empty` value, and then chain
+more parameters via the `+>` combinator.  Our example defines a single
+_anonymous_ parameter via the `anon` function (that is, a standalone
+token from the command-line).  Anonymous functions can be assigned a
+name that is used in help text, and an OCaml type that they are mapped
+to.  The parameters specified here are all eventually passed to a
 callback function which actually invokes the program logic.
 
 ```ocaml
 (fun file () -> do_hash file)
 ```
 
-In our example, the function takes a `file` parameter that is a `string`, and
-maps it to the `do_hash` function.  You aren't just limited to strings though,
-as `Command.Spec` defines several other conversion functions that validate and
-parse input into various types:
+In our example, the function takes a `file` parameter that is a
+`string`, and maps it to the `do_hash` function.  You aren't just
+limited to strings though, as `Command.Spec` defines several other
+conversion functions that validate and parse input into various types:
 
 Argument type    OCaml type    Example
 -------------    -----------   -------
@@ -130,12 +139,12 @@ Argument type    OCaml type    Example
 `bool`           `bool`        `true`
 `date`           `Date.t`      `2013-12-25`
 `time_span`      `Span.t`      `5s`
-`file`           `string`      `<valid filename>`
+`file`           `string`      `/etc/passwd`
 
-Anonymous arguments don't have to be declared individually.  A more realistic
-`md5` function might also read from the standard input if a filename isn't
-specified.  We can change our specification with a single line to reflect this
-by writing:
+Anonymous arguments don't have to be declared individually.  A more
+realistic `md5` function might also read from the standard input if a
+filename isn't specified.  We can change our specification with a
+single line to reflect this by writing:
 
 ```ocaml
 Command.Spec.(
@@ -144,9 +153,9 @@ Command.Spec.(
 )
 ```
 
-The anonymous parameter has been prefixed with a `maybe` that indicates the
-value is now optional.  If you compile the example, you'll get a type error
-though:
+The anonymous parameter has been prefixed with a `maybe` that
+indicates the value is now optional.  If you compile the example,
+you'll get a type error though:
 
 ```
 File "basic_broken.ml", line 18, characters 26-30:
@@ -155,10 +164,10 @@ Error: This expression has type string option
 Command exited with code 2.
 ```
 
-This is because the type of the callback function has changed.  It now wants a
-`string option` instead of a `string` since the value is optional.  We can
-quickly adapt our example to use the new information and read from standard
-input if no file is specified.
+This is because the type of the callback function has changed.  It now
+wants a `string option` instead of a `string` since the value is
+optional.  We can quickly adapt our example to use the new information
+and read from standard input if no file is specified.
 
 ```ocaml
 open Core.Std
@@ -167,10 +176,10 @@ let get_file_data = function
   | None
   | Some "-" -> In_channel.(input_all stdin)
   | Some file -> In_channel.read_all file
- 
+
 let do_hash file =
   let open Cryptokit in
-  get_file_data file 
+  get_file_data file
   |> hash_string (Hash.md5 ())
   |> transform_string (Hexa.encode ())
   |> print_endline
@@ -187,10 +196,11 @@ let command =
 let () = Command.run command
 ```
 
-There are several other transformations you can do on anonymous arguments.
-We've shown you `maybe`, and you can also obtain lists of arguments or supply
-default values.  Try altering the example above to take a list of files and
-output checksums for all of them, just as the `md5` command does.
+There are several other transformations you can do on anonymous
+arguments.  We've shown you `maybe`, and you can also obtain lists of
+arguments or supply default values.  Try altering the example above to
+take a list of files and output checksums for all of them, just as the
+`md5` command does.
 
 Anonymous argument   OCaml type
 ------------------   ----------
@@ -200,12 +210,13 @@ maybe_with_default   argument with a default value if argument is missing
 
 ## Using flags to label the command line
 
-You aren't just limited to anonymous arguments on the command-line, of course.
-Flags (such as `-v`) can be specified in the same manner as anonymous
-arguments.  These can appear in any order on the command-line, or multiple
-times, depending on how they're declared.  Let's add two arguments to our `md5`
-command that mimic the Linux version: a `-s` flag to specify the string to be
-hashed directly, and a `-t` self-benchmark test.
+You aren't just limited to anonymous arguments on the command-line, of
+course.  Flags (such as `-v`) can be specified in the same manner as
+anonymous arguments.  These can appear in any order on the
+command-line, or multiple times, depending on how they're declared.
+Let's add two arguments to our `md5` command that mimic the Linux
+version: a `-s` flag to specify the string to be hashed directly, and
+a `-t` self-benchmark test.
 
 ```ocaml
 Command.Spec.(
@@ -216,15 +227,16 @@ Command.Spec.(
 )
 ```
 
-The `flag` command is quite similar to `anon`.  The first argument is the flag
-name, and aliases can be specified via an optional argument.  The `doc` string
-should be formatted so that the first word is the short name that should appear
-in the usage text, with the remainder being the full help text.  Notice that
-the `-t` flag has no argument, and so we prepend the doc text with a blank
-space.  The help text for the above fragment looks like this:
+The `flag` command is quite similar to `anon`.  The first argument is
+the flag name, and aliases can be specified via an optional argument.
+The `doc` string should be formatted so that the first word is the
+short name that should appear in the usage text, with the remainder
+being the full help text.  Notice that the `-t` flag has no argument,
+and so we prepend the doc text with a blank space.  The help text for
+the above fragment looks like this:
 
 ```
-$ mlmd5 -s 
+$ mlmd5 -s
 Generate an MD5 hash of the input data
 
   mlmd5 [filename]
@@ -254,12 +266,12 @@ Flag function            OCaml type
 `required` _arg_         _arg_ and error if not present
 `optional` _arg_         _arg_ `option`
 `optional_with_default`  _arg_ with a default if not present
-`listed` _arg_           _arg_ `list` may appear multiple times
+`listed` _arg_           _arg_ `list`, flag may appear multiple times
 `no_arg`                 `bool` that is true if flag is present.
 
-The flags affect the type of the callback function in exactly the
-same way as anonymous arguments do.  The full example of our `md5`
-function with flags is below.
+The flags affect the type of the callback function in exactly the same
+way as anonymous arguments do.  The full example of our `md5` function
+with flags is below.
 
 ```ocaml
 open Core.Std
@@ -295,21 +307,21 @@ let command =
 let () = Command.run command
 ```
 
-Notice how the `get_file_data` function now pattern matches
-across the `checksum` flag and the `file` anonymous argument.
-It selects the flag in preference to the file argument, but
-emits a warning if there's ambiguity.
+Notice how the `get_file_data` function now pattern matches across the
+`checksum` flag and the `file` anonymous argument.  It selects the
+flag in preference to the file argument, but emits a warning if
+there's ambiguity.
 
 ## Grouping sub-commands together
 
-You can get pretty far by combining flags and anonymous arguments to assemble
-complex command-line interfaces.  After a while though, too many options can
-make the program very confusing for newcomers to your application.  One
-way to solve this is by grouping common operations together and adding
-some hierarchy to the command-line interface.
+You can get pretty far by combining flags and anonymous arguments to
+assemble complex command-line interfaces.  After a while though, too
+many options can make the program very confusing for newcomers to your
+application.  One way to solve this is by grouping common operations
+together and adding some hierarchy to the command-line interface.
 
-You'll have run across this style already when using the OPAM package manager
-(or, in the non-OCaml world, the Git or Mercurial commands).
+You'll have run across this style already when using the OPAM package
+manager (or, in the non-OCaml world, the Git or Mercurial commands).
 OPAM exposes commands in this form:
 
 ```
@@ -319,10 +331,11 @@ opam install --help
 opam install xmlm
 ```
 
-The `config`, `remote` and `install` keywords form a logical grouping of commands,
-and factor out flags and arguments that are specific to that particular operation.
-It's really simple to extend your application to do this in Command: just swap
-`Command.basic` for `Command.group`:
+The `config`, `remote` and `install` keywords form a logical grouping
+of commands, and factor out flags and arguments that are specific to
+that particular operation.  It's really simple to extend your
+application to do this in Command: just swap `Command.basic` for
+`Command.group`:
 
 ```ocaml
 val group :
@@ -331,13 +344,14 @@ val group :
   (string * t) list -> t
 ```
 
-The `group` signature accepts a list of basic `Command.t` values and their
-corresponding names. When executed, it looks for the appropriate sub-command
-from the name list, and dispatches it to the right command handler.
+The `group` signature accepts a list of basic `Command.t` values and
+their corresponding names. When executed, it looks for the appropriate
+sub-command from the name list, and dispatches it to the right command
+handler.
 
-Let's build the beginning of a calendar that do a few operations over dates
-from the command line.  We first define a command that adds days to an input
-date and prints the resulting date.
+Let's build the beginning of a calendar toool that does a few
+operations over dates from the command line.  We first define a
+command that adds days to an input date and prints the resulting date.
 
 ```ocaml
 open Core.Std
@@ -359,11 +373,11 @@ let add =
 let () = Command.run add
 ```
 
-Once we've tested this and made sure it works, we can define another command
-that takes the difference of two dates.  Both of the commands are now grouped
-as sub-commands using `Command.group`.
+Once we've tested this and made sure it works, we can define another
+command that takes the difference of two dates.  Both of the commands
+are now grouped as sub-commands using `Command.group`.
 
-```
+```ocaml
 open Core.Std
 
 let add =
@@ -394,7 +408,7 @@ let diff =
 let command =
   Command.group ~summary:"Manipulate dates"
     [ "add", add; "diff", diff ]
-  
+
 let () = Command.run command
 ```
 
@@ -450,7 +464,7 @@ help you debug type errors as you use `Command` more.
 The type of `Command.t` looks deceptively simple:
 
 ```ocaml
-type ('main_in, 'main_out) t 
+type ('main_in, 'main_out) t
 ```
 
 You can think of `('a, 'b) t` as a function of type `'a -> 'b`, but embellished
@@ -521,42 +535,42 @@ will append two specifications together.  Let's add some dummy verbosity and
 debug flags to our calendar application to illustrate this.
 
 ```ocaml
-open Core.Std                                                                                                                 
-                                                                                                                              
-let add ~common = 
-  Command.basic ~summary:"Add [days] to the [base] date"                                                                      
-    Command.Spec.( 
-      empty 
+open Core.Std
+
+let add ~common =
+  Command.basic ~summary:"Add [days] to the [base] date"
+    Command.Spec.(
+      empty
       +> anon ("base" %: date)
       +> anon ("days" %: int)
-      ++ common                                                                                                               
+      ++ common
     )
-  (fun base span debug verbose () ->                                                                                          
+  (fun base span debug verbose () ->
     Date.add_days base span
     |> Date.to_string
     |> print_endline
   )
-                                                                                                                              
-let diff ~common =                                                                                                            
-  Command.basic ~summary:"Show days between [date1] and [date2]"                                                              
+
+let diff ~common =
+  Command.basic ~summary:"Show days between [date2] and [date1]"
     Command.Spec.(
       empty
-      +> anon ("date1" %: date)                                                                                               
+      +> anon ("date1" %: date)
       +> anon ("date2" %: date)
       ++ common
-    ) 
-  (fun date1 date2 debug verbose () ->                                                                                        
+    )
+  (fun date1 date2 debug verbose () ->
     Date.diff date1 date2
-    |> printf "%d days\n"                                                                                                     
-  ) 
+    |> printf "%d days\n"
+  )
 ```
 
 The definitions of the specifications are very similar to the earlier
-example, except that they append a `common` parameter after each specification.
-We can supply these flags when defining the groups:
+example, except that they append a `common` parameter after each
+specification.  We can supply these flags when defining the groups:
 
 ```
-let () =                                                                                                                 
+let () =
   let common =
     Command.Spec.(
       empty
@@ -564,20 +578,20 @@ let () =
       +> flag "-v" (optional_with_default false bool) ~doc:" Verbose output"
     )
   in
-  List.map
+  List.map ~f:(fun (name, cmd) -> (name, cmd ~common))
     [ "add", add; "diff", diff ]
-    ~f:(fun (name, cmd) -> (name, cmd ~common))
   |> Command.group ~summary:"Manipulate dates"
   |> Command.run
 ```
 
 Both of these flags will now be applied and passed to all the callback
-functions.  This makes code refactoring a breeze by using the compiler to spot
-places where you use commands.  Just add a parameter to the common definition,
-run the compiler, and fix type errors until everything works again.
+functions.  This makes code refactoring a breeze by using the compiler
+to spot places where you use commands.  Just add a parameter to the
+common definition, run the compiler, and fix type errors until
+everything works again.
 
-For example, if we remove the `verbose` flag above and compile, we'll get this
-impressively long type error:
+For example, if we remove the `verbose` flag above and compile, we'll
+get this impressively long type error:
 
 ```ocaml
 File "cal_compose_error.ml", line 39, characters 38-45:
@@ -589,21 +603,23 @@ Error: This expression has type
        but an expression was expected of type
          (bool -> unit -> unit -> unit, unit -> unit) Command.Spec.t
            = (bool -> unit -> unit -> unit, unit -> unit) Command.Spec.t
-       Type unit -> unit is not compatible with type unit 
+       Type unit -> unit is not compatible with type unit
 ```
 
-While this does look scary, the key line to scan is the last one, where it's
-telling you that you have supplied too many arguments in the callback function
-(`unit -> unit` vs `unit`).  If you started with a working program and made
-this single change, you typically don't even need to read the type error, as
-the filename and location information is sufficient to make the obvious fix.
+While this does look scary, the key line to scan is the last one,
+where it's telling you that you have supplied too many arguments in
+the callback function (`unit -> unit` vs `unit`).  If you started with
+a working program and made this single change, you typically don't
+even need to read the type error, as the filename and location
+information is sufficient to make the obvious fix.
 
 ### Prompting for interactive input
 
 The `step` combinator lets you control the normal course of parsing by
-supplying a function that maps callback arguments to a new set of values.  For
-instance, let's suppose we want our first calendar application to prompt for
-the number of days to add if a value wasn't supplied on the command-line.
+supplying a function that maps callback arguments to a new set of
+values.  For instance, let's suppose we want our first calendar
+application to prompt for the number of days to add if a value wasn't
+supplied on the command-line.
 
 ```ocaml
 open Core.Std
@@ -639,7 +655,7 @@ returns an `int` instead of the `int option` that was passed in.
 
 ```
 $ cal_add_interactive 2013-12-01
-enter days: 
+enter days:
 35
 2014-01-05
 ```
@@ -658,7 +674,7 @@ type of the specification:
   | None ->
      print_endline "enter days: ";
      m base (read_int ()));;
-- : (Date.t -> int -> '_a, Date.t -> int option -> '_a) Spec.t = <abstr> 
+- : (Date.t -> int -> '_a, Date.t -> int option -> '_a) Spec.t = <abstr>
 ```
 
 The first half of the `Spec.t` shows that the callback type is `Date.t -> int`,
@@ -669,7 +685,7 @@ chain is a `Date.t -> int option`.
 
 The `step` chaining combinator lets you control the types of your callbacks
 very easily.  This can either help you fit in with existing interfaces, or make
-things more explicit by adding labelled arguments. 
+things more explicit by adding labelled arguments.
 
 ```ocaml
 open Core.Std
@@ -691,29 +707,32 @@ let add =
 let () = Command.run add
 ```
 
-This example goes back to our non-interactive calendar addition program, but
-adds a `step` combinator to turn the normal arguments into labelled ones.  This
-is reflected in the callback function below, and can help prevent errors with
-command-line arguments with similar types but different names.
+This example goes back to our non-interactive calendar addition
+program, but adds a `step` combinator to turn the normal arguments
+into labelled ones.  This is reflected in the callback function below,
+and can help prevent errors with command-line arguments with similar
+types but different names.
 
 ## Command-line auto-completion with `bash`
 
-Modern UNIX shells usually have a tab-completion feature to interactively help
-you figure out how to build a command-line.  These work by pressing the `<tab>`
-key in the middle of typing a command, and seeing the options that pop up.
-You've probably used this most often to find the files in the current
-directory, but it can actually be extended for other parts of the command too.
+Modern UNIX shells usually have a tab-completion feature to
+interactively help you figure out how to build a command-line.  These
+work by pressing the `<tab>` key in the middle of typing a command,
+and seeing the options that pop up.  You've probably used this most
+often to find the files in the current directory, but it can actually
+be extended for other parts of the command too.
 
-The precise mechanism for autocompletion varies depending on what shell you are
-using, but we'll assume you are using the most common one: `bash`.  This is the
-default interactie shell on most Linux distributions and MacOS X, but you may
-need to switch to it on *BSD or Windows (when using Cygwin).  The rest of this
-section assumes that you're using `bash`.
+The precise mechanism for autocompletion varies depending on what
+shell you are using, but we'll assume you are using the most common
+one: `bash`.  This is the default interactive shell on most Linux
+distributions and MacOS X, but you may need to switch to it on *BSD or
+Windows (when using Cygwin).  The rest of this section assumes that
+you're using `bash`.
 
 <note>
 <title>The `bash` autocompletion feature</title>
-Bash autocompletion isn't always installed by default, so check your OS package
-manager to see if you have it available.
+Bash autocompletion isn't always installed by default, so check your
+OS package manager to see if you have it available.
 
 Operating System  Package Manager  Package
 ----------------  ---------------  -------
@@ -762,10 +781,10 @@ complete -F _jsautocom_41790 ./cal
 
 ### Installing the completion fragment
 
-You don't need to worry about what this script actually does (unless you have
-an unhealthy fascination with shell scripting, that is).  Instead, redirect the
-output to a file in your `bash_completion.d` directory, named after the command
-you're installing.
+You don't need to worry about what this script actually does (unless
+you have an unhealthy fascination with shell scripting, that is).
+Instead, redirect the output to a file in your `bash_completion.d`
+directory, named after the command you're installing.
 
 ```
 $ sudo env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal \
@@ -775,22 +794,24 @@ $ ./cal <tab>
 add      diff     help     version
 ```
 
-The first line above redirects the earlier output into your `bash_completion.d`
-directory.  The `bash -l` loads the new configuration as a fresh login shell,
-and then the final line shows the four valid commands by pressing the tab key.
+The first line above redirects the earlier output into your
+`bash_completion.d` directory.  The `bash -l` loads the new
+configuration as a fresh login shell, and then the final line shows
+the four valid commands by pressing the tab key.
 
-Command competion support works for flags and grouped commands, and is very
-useful when building larger command-line interfaces.
+Command completion support works for flags and grouped commands, and
+is very useful when building larger command-line interfaces.
 
 <note>
-<title>Installing a geneeric completion handler</title>
+<title>Installing a generic completion handler</title>
 
 Sadly, `bash` doesn't support installing a generic handler for all
-Command-based applications.  This means that you have to install the completion
-script for every application, but you should be able to automate this in the
-build and packaging system for your application.
+Command-based applications.  This means that you have to install the
+completion script for every application, but you should be able to
+automate this in the build and packaging system for your application.
 
-It will help to check out how other applications that install tab-completion
-scripts and following their lead, as the details are very OS-specific.
+It will help to check out how other applications that install
+tab-completion scripts and following their lead, as the details are
+very OS-specific.
 
 </note>
