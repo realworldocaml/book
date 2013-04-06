@@ -20,7 +20,7 @@ design.  These features include:
 * _Static type-checking_ to reduce run-time errors, such as Java class
   interfaces or Objective-C methods.
 * _Generics_ to enable abstractions to be constructed across different
-  datatypes, available in Java and .NET.
+  datatypes, available in Java and C#.
 * _Immutable data structures_ that cannot be destructively updated,
   famously enforced in Haskell but also a common feature of many
   distributed big data frameworks.
