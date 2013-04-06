@@ -176,7 +176,7 @@ which is too old.  If it hasn't been updated when you try it, then
 please do a source installation of OPAM 1.0.0 or higher. We've contacted
 the MacPorts team to request an update.
 
-</title>
+</note>
 
 ### Debian Linux
 
