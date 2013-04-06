@@ -1200,9 +1200,9 @@ let () =
     Out_channel.flush stdout
 ```
 
-We can build this program (using the `build.sh` script and the `_tags`
-file described in [xref](#files-modules-and-programs)) and run it,
-you'll see that it prompts you for input, as follows:
+We can build this program (using `ocamlbuild` with the `_tags` file
+described in [xref](#single-file-programs)) and run it, you'll see
+that it prompts you for input, as follows:
 
 ```
 $ ./time_converter.byte
