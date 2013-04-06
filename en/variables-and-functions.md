@@ -3,28 +3,28 @@
 Variables and functions are fundamental ideas that show up in
 virtually all programming languages.  But OCaml has a different take
 on these basic concepts, and so we'll spend some time digging into the
-details of OCaml's variables and functions differ from what you may
-have seen elsewhere.
+details so you can see how OCaml's variables and functions differ from
+what you may have encountered in other languages.
 
 ## Variables
 
 At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
-using the `let` keyword.  When typed in at the prompt of the
-interpreter, a let binding has the following syntax.
+using the `let` keyword.  We can type a so-called _top-level_ `let`
+binding into `utop` with the following syntax to bind a new variable.
 
 ```ocaml
 let <identifier> = <expr>
 ```
 
 As we'll see when we get to the module system in
-[xref](#files-modules-and-programs), this same syntax is used for
-toplevel definitions in a module.
+[xref](#files-modules-and-programs), this same syntax is used for let
+bindings at the top-level of a module.
 
 Every variable binding has a _scope_, which is the portion of the code
-that can refer to that binding.  The scope of a toplevel let binding
-is everything that follows it in the toplevel session (or in the
-remainder of the module).
+that can refer to that binding.  The scope of a top-level let binding
+is everything that follows it in the session, when using `utop`, or,
+when using modules, for the remainder of the module.
 
 Here's a simple example.
 
@@ -81,7 +81,7 @@ val languages : string = "OCaml,Perl,C++,C"
      let languages = String.split languages ~on:',' in
      String.concat ~sep:"-" languages
   ;;
-val dashed_languages : Core.Std.String.t = "OCaml-Perl-C++-C"
+val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
 
 This time, in the inner scope we called the list of strings
@@ -500,9 +500,9 @@ example.
 val is_even : int -> bool = <fun>
 val is_odd : int -> bool = <fun>
 # List.map ~f:is_even [0;1;2;3;4;5];;
-- : bool Core.Std.List.t = [true; false; true; false; true; false]
+- : bool list = [true; false; true; false; true; false]
 # List.map ~f:is_odd [0;1;2;3;4;5];;
-- : bool Core.Std.List.t = [false; true; false; true; false; true]
+- : bool list = [false; true; false; true; false; true]
 ```
 
 OCaml distinguishes between non-recursive definitions (using `let`)
