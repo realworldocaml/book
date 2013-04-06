@@ -35,7 +35,8 @@ last resort.
 
 The [Homebrew](http://github.com/mxcl/homebrew) package manager has an
 OCaml installer, which is usually updated pretty quickly to the latest
-stable release.
+stable release.  Before installing OCaml, make sure that you have the latest
+XCode installed from the App Store so that a C compiler is available.
 
 ```
 $ brew install ocaml
