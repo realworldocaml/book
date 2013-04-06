@@ -48,11 +48,13 @@ Core suite.  It's not strictly needed to use OCaml, but is a commonly
 used library that we're installing now to save time later.
 
 Another popular package manager on Mac OS X is
-[MacPorts](http://macports.org), which also has an OCaml port:
+[MacPorts](http://macports.org), which also has an OCaml port.  As
+with Homebrew, make sure you have XCode installed and have followed
+the rest of the MacPorts installation instructions, and then type in:
 
 ```
-$ port install ocaml
-$ port install ocaml-pcre
+$ sudo port install ocaml
+$ sudo port install ocaml-pcre
 ```
 
 ### Debian Linux
