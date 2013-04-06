@@ -66,7 +66,7 @@ gradually turned into a fully fledged system of its own by the 1980s.
 In 1990, Xavier Leroy and Damien Doligez built a new implementation called Caml
 Light that was based on a bytecode interpreter with a fast sequential garbage
 collector.  Over the next few years useful libraries appeared, such as Michel
-Mauny's parsing system, and performance further improved with a fast native
+Mauny's parsing system. Efficiency further improved with a fast native
 code compiler that made OCaml's performance competitive with mainstream
 languages such as C++.  A module system inspired by Standard ML also provided
 powerful facilities for abstraction and larger scale programs.
@@ -81,10 +81,10 @@ polymorphic methods and variants and labelled and optional arguments.
 The last decade has seen OCaml attract a significant user base, and language
 improvements have been steadily added to support the growing codebases that use
 the language both commercially and for academic use.  First-class modules,
-GADTs and dynamic linking have improved the flexibility of the language, and
-there is fast native code support for x86_64, ARM, PowerPC and Sparc64, making
-OCaml a good choice for systems where resource usage, predictability and
-performance matters.  
+Generalized Algebraic Data Types (GADTs) and dynamic linking have improved the
+flexibility of the language, and there is fast native code support for x86_64,
+ARM, PowerPC and Sparc64, making OCaml a good choice for systems where resource
+usage, predictability and performance matters.  
 
 ### The Core Standard Library
 
@@ -96,19 +96,20 @@ implemented, it is really intended for use within the compiler itself,
 and covers only a small subset of the functionality you expect for
 more general-purpose use.
 
-But all is not lost!  There is an effective alternative to the OCaml
-standard library called Core.  Jane Street, a company that has been
-using OCaml for more than a decade, developed Core for its own
-internal use, but it was designed from the start with an eye towards
-being a general-purpose standard library, and has very broad
-applicability.  Core is also engineered with correctness, reliability
-and performance very much in mind.
+In the world of open-source software, nothing stops alternative libraries
+from being written by the community, and this exactly what the Core standard
+library is.  Jane Street, a company that has been using OCaml for more than a
+decade, developed Core for its own internal use, but it was designed from the
+start with an eye towards being a general-purpose standard library, and has
+very broad applicability.  Core is also engineered with correctness,
+reliability and performance very much in mind.
 
 Core is also distributed with syntax extensions which provide useful new
 functionality to OCaml, and there are additional libraries such as the Async
 network communications library that extend the reach of Core into building
 complex distributed systems.  All of these libraries are distributed under a
-liberal Apache-style license.
+liberal Apache 2 license to permit free use in hobby, academic and commercial
+settings.
 
 If you've learnt some OCaml before, this book may surprise you with some
 differences from your past experience.  The Core standard library redefines
