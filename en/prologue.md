@@ -66,7 +66,7 @@ gradually turned into a fully fledged system of its own by the 1980s.
 In 1990, Xavier Leroy and Damien Doligez built a new implementation called Caml
 Light that was based on a bytecode interpreter with a fast sequential garbage
 collector.  Over the next few years useful libraries appeared, such as Michel
-Mauny's parsing system, and performance further improved with a fast native
+Mauny's parsing system. Efficiency further improved with a fast native
 code compiler that made OCaml's performance competitive with mainstream
 languages such as C++.  A module system inspired by Standard ML also provided
 powerful facilities for abstraction and larger scale programs.
