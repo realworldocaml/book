@@ -22,7 +22,6 @@
  (name "lists-options-and-patterns")
  (file "lists-options-and-patterns")
  (note "yminsky working on this")
- (public true)
  )
 ((part Basic)
  (name "files-modules-and-programs")
