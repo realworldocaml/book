@@ -178,16 +178,6 @@ And on MacPorts, install it like this:
 $ sudo port install opam
 ```
 
-<note>
-<title>Check the MacPorts version of OPAM</title>
-
-As of this snapshot, the MacPorts version of OPAM is still 0.9.4,
-which is too old.  If it hasn't been updated when you try it, then
-please do a source installation of OPAM 1.0.0 or higher. We've contacted
-the MacPorts team to request an update.
-
-</note>
-
 ### Debian Linux
 
 There are experimental binary packages available for Debian
