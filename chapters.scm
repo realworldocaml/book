@@ -157,7 +157,7 @@
  (note "50% done, on Anil's stack")
  )
 ((part Appendix)
- (name "packaging-and-build-systems")
+ (name "packaging")
  (file "packaging-and-build-systems")
  (note "25% done, on Anil's stack")
  (public true)

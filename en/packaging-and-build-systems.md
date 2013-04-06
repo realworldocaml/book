@@ -1,4 +1,4 @@
-# Packaging and Build Systems
+# Packaging
 
 The OCaml toolchain is structured much like a C compiler, with several tools
 that generate intermediate files and finally link against a runtime.  The
