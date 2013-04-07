@@ -4,3 +4,8 @@
  - dealing with type errors
  - Using type annotations to narrow down problems
 
+** Helpful hints on debugging
+ Should just be sprinkled throughout the text in examples
+*** Using (type a) to nail down the polymorphic type of something.
+*** Generally using type annotations
+*** Debugger?
