@@ -173,7 +173,7 @@ code, which uses `List.unzip`, a function for converting a list of
 pairs into a pair of lists.
 
 ```ocaml
-# let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")]
+# let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 val ints : int list = [1; 2; 3]
 val strings : string list = ["one"; "two"; "three"]
 ```
