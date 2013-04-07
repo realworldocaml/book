@@ -111,7 +111,7 @@ val y : int = 14
 After a new variable is created, the toplevel tells us the name of the
 variable (`x` or `y`), in addition to its type (`int`) and value (`7` or `14`).
 
-## Functions and Type Inference
+## Functions and type Inference
 
 The `let` syntax can also be used for creating functions.
 
