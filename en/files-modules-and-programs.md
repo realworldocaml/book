@@ -47,10 +47,10 @@ let () =
 The function `build_counts` reads in lines from `stdin`, constructing
 from those lines an associating list with the frequencies of each
 line.  It does this by invoking `In_channel.fold_lines` (similar to
-the function `List.fold` described in
-[xref](#lists-options-and-patterns)), which reads through the lines
-one by one, calling the provided fold function for each line to update
-the accumulator.  That accumulator is initialized to the empty list.
+the function `List.fold` described in [xref](#lists-and-patterns)),
+which reads through the lines one by one, calling the provided fold
+function for each line to update the accumulator.  That accumulator is
+initialized to the empty list.
 
 With `build_counts` defined, we then call the function to build the
 associating list, sort that list be frequency in descending order,
