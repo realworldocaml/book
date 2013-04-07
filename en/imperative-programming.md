@@ -750,7 +750,7 @@ The main difference between our implementation of laziness and the
 built-in version is syntax.  Rather than writing `create_lazy (fun ()
 -> sqrt 16.)`, we can just write `lazy (sqrt 16.)`.
 
-### Memoization and Dynamic Programming
+### Memoization and dynamic programming
 
 Another unobservable effect is _memoization_.  A memoized function
 remembers the result of previous invocations of the function so that
