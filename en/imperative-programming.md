@@ -37,7 +37,7 @@ imperative dictionaries, and for most real world tasks, you should use
 one of those implementations.
 
 Our dictionary, like those in Core and the standard library, will be
-implemented as a hash table.  In particular, we'll use a _open
+implemented as a hash table.  In particular, we'll use an _open
 hashing_ scheme, which is to say the hash table will be an array of
 buckets, each bucket containing a list of key/value pairs that have
 been hashed into that bucket.
