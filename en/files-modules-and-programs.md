@@ -352,9 +352,14 @@ Error: This expression has type 'a list
 
 This is because `freq.ml` depends on the fact that frequency counts
 are represented as association lists, a fact that we've just hidden.
-We just need to fix the code to use `Counter.empty` instead of `[]`
-and `Counter.to_list` to get the association list out at the end for
-processing and printing.
+We just need to fix `build_counts` to use `Counter.empty` instead of
+`[]` and `Counter.to_list` to get the association list out at the end
+for processing and printing, as below.
+
+```ocaml
+let build_counts () =
+  In_channel.fold_lines stdin ~init:Counter.empty ~f:Counter.touch
+```
 
 Now we can turn to optimizing the implementation of `Counter`.  Here's
 an alternate and far more efficient implementation, based on the `Map`
