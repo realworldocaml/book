@@ -42,7 +42,9 @@ hashing_ scheme, which is to say the hash table will be an array of
 buckets, each bucket containing a list of key/value pairs that have
 been hashed into that bucket.
 
-Here's the interface we'll match, provided as an `mli`.
+Here's the interface we'll match, provided as an `mli`.  Here, the
+type `('a, 'b) t` is used for a dictionary with keys of type `'a` and
+data of type `'b`.
 
 ```ocaml
 (* file: dictionary.mli *)
@@ -58,12 +60,11 @@ val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 val remove : ('a, 'b) t -> 'a -> unit
 ```
 
-The type `('a, 'b) t` is used for a dictionary with keys of type `'a`
-and data of type `'b`.  The `mli` also includes a collection of helper
-functions whose purpose and behavior should be largely inferrable from
-their names and type signatures.  Notice that a number of the
-functions, in particular, ones like `add` that modify the dictionary,
-return unit.  This is typical of functions that act by side-effect.
+The `mli` also includes a collection of helper functions whose purpose
+and behavior should be largely inferrable from their names and type
+signatures.  Notice that a number of the functions, in particular,
+ones like `add` that modify the dictionary, return unit.  This is
+typical of functions that act by side-effect.
 
 We'll now walk through the implementation (contained in the
 corresponding `ml` file) piece by piece, explaining different
