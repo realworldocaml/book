@@ -239,7 +239,8 @@ A `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a `Log_entry`.
 If we want to write code that processes messages generically, rather
 than code specialized to a fixed message type, we need something like
 `client_message` to act as one overarching type for the different
-possible messages.
+possible messages.  We can then match on the `client_message` to
+determine the type of the particular message being dealt with.
 
 You can increase the precision of your types by using variants to
 represent differences between types, and records to represent shared
