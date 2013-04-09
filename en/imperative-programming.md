@@ -760,9 +760,10 @@ performing lazy computation
 - : float = 4.
 ```
 
-The main difference between our implementation of laziness and the
-built-in version is syntax.  Rather than writing `create_lazy (fun ()
--> sqrt 16.)`, we can just write `lazy (sqrt 16.)`.
+The main user-visisble difference between our implementation of
+laziness and the built-in version is syntax.  Rather than writing
+`create_lazy (fun () -> sqrt 16.)`, we can with the built-in `lazy`
+just write `lazy (sqrt 16.)`.
 
 ### Memoization and dynamic programming
 
