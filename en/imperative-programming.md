@@ -708,13 +708,15 @@ to represent a lazy value.
 type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
 ```
 
-A `lazy_state` represents the possible states of a lazy value.  A
-lazy value is `Delayed` before it has been run, where `Delayed` holds
-a function for computing the value in question.  A lazy value is in
-the `Value` state when it has been forced and the computation ended
+A `lazy_state` represents the possible states of a lazy value.  A lazy
+value is `Delayed` before it has been run, where `Delayed` holds a
+function for computing the value in question.  A lazy value is in the
+`Value` state when it has been forced and the computation ended
 normally.  The `Exn` case is for when the lazy value has been forced,
-but the computation ended with an exception.  A lazy value is just a
-reference to a `lazy_state`.
+but the computation ended with an exception.  A lazy value is simply a
+`ref` containing a `lazy_state`, where the `ref` makes it possible to
+change from being in the `Delayed` state to being in the `Value` or
+`Exn` states.
 
 We can create a lazy value based on a thunk, _i.e._, a function that
 takes a unit argument.  Wrapping an expression in a thunk is another
