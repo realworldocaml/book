@@ -8,9 +8,9 @@ pure function behaves like a mathematical function, always returning
 the same results when given the same inputs, and never affecting the
 world except insofar as it returns the value of its computation.
 _Imperative_ code, on the other hand, operates by side-effects that
-modify a program's internal state or interact with the outside world,
-and so can have a new effect, and return different results, every time
-they're called.
+modify a program's internal state or interact with the outside world.
+An imperative function has a new effect, and potentially returns
+different results, every time it's called.
 
 Pure code is the default in OCaml, and for good reason --- it's
 generally easier to reason about, less error prone and more
