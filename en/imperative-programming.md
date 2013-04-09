@@ -190,8 +190,7 @@ let add t ~key ~data =
 
 let remove t key =
   let i = hash_bucket key in
-  if not (bucket_has_key t i key) then ()
-  else (
+  if bucket_has_key t i key then (
     let filtered_bucket =
       List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
     in
