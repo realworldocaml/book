@@ -133,9 +133,21 @@ The other functions defined above are fairly straightforward:
   corresponding value if found as an option.
 
 A new piece of syntax has also popped up in `find`: we write
-`array.(index)` to grab a value from an array.
+`array.(index)` to grab a value from an array.  Also, `find` uses
+`List.find_map`, which you can see the type of by typing it into the
+toplevel:
 
-Now we'll look at the implementation of `iter`:
+```ocaml
+# List.find_map;;
+- : 'a list -> f:('a -> 'b option) -> 'b option = <fun>
+```
+
+`List.find_map` iterates over the elements of the list, calling `f` on
+each one until a `Some` is returned by `f`, at which point the value
+returned by `f` is returned by `find_map`.  If `f` returns `None` on
+all values, then `None` is returned by `find_map`.
+
+Now let's look at the implementation of `iter`:
 
 ```ocaml
 let iter t ~f =
