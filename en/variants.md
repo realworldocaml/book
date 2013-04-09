@@ -10,7 +10,8 @@ case-analysis on that information.
 Let's consider a concrete example of how variants can be useful.
 Almost all terminals support a set of 8 basic colors, and we can
 represent those colors using a variant.  Each color is declared as a
-simple tag, with pipes used to separate the different cases.
+simple tag, with pipes used to separate the different cases.  Note
+that variant tags must be capitalized.
 
 ```ocaml
 # type basic_color =
@@ -22,9 +23,9 @@ simple tag, with pipes used to separate the different cases.
 ```
 
 The following function uses pattern matching to convert a
-`basic_color` to a corresponding integer.  Note that the
-exhaustiveness checking on pattern matches means that the compiler
-will warn us if we miss a color.
+`basic_color` to a corresponding integer.  The exhaustiveness checking
+on pattern matches means that the compiler will warn us if we miss a
+color.
 
 ```ocaml
 # let basic_color_to_int = function
