@@ -80,12 +80,3 @@ let head1 l =
 let head2 = function
   | [] -> None
   | h :: _ -> Some h;;
-
-(*
- * -*-
- * Local Variables:
- * Fill-column: 100
- * End:
- * -*-
- * vim:ts=3:et:tw=100
- *)

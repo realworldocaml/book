@@ -1,33 +1,20 @@
 open Core.Std
-module Bench = Core_extended.Std.Bench
-module Test = Bench.Test
 
-let num_match x =
+(* Some examples comparing the performance of pattern matching vs direct
+   implementations. *)
+
+let plus_one x =
   match x with
   | 0 -> 1
   | 1 -> 2
   | 2 -> 3
-  | 3 -> 4
-  | 4 -> 5
-  | 5 -> 6
-  | 6 -> 7
-  | 7 -> 8
-  | 8 -> 9
-  | 9 -> 10
-  | _ -> 11
+  | _ -> x + 1
 
-let num_if x =
+let plus_one_slow x =
   if      x = 0 then 1
   else if x = 1 then 2
   else if x = 2 then 3
-  else if x = 3 then 4
-  else if x = 4 then 5
-  else if x = 5 then 6
-  else if x = 6 then 7
-  else if x = 7 then 8
-  else if x = 8 then 9
-  else if x = 9 then 10
-  else 11
+  else x + 1
 
 let pos_match l =
   match l with
@@ -42,22 +29,72 @@ let pos_match l =
   | [] -> 0
 
 let pos_if l =
-  if      List.length l > 7 then List.nth_exn l 7
-  else if List.length l > 6 then List.nth_exn l 6
-  else if List.length l > 5 then List.nth_exn l 5
-  else if List.length l > 4 then List.nth_exn l 4
-  else if List.length l > 3 then List.nth_exn l 3
-  else if List.length l > 2 then List.nth_exn l 2
-  else if List.length l > 1 then List.nth_exn l 1
-  else if List.length l > 6 then List.nth_exn l 0
-  else 0
+  match List.nth l 7 with
+  | Some x -> x
+  | None ->
+    match List.nth l 6 with
+    | Some x -> x
+    | None ->
+      match List.nth l 5 with
+      | Some x -> x
+      | None ->
+        match List.nth l 4 with
+        | Some x -> x
+        | None ->
+          match List.nth l 3 with
+          | Some x -> x
+          | None ->
+            match List.nth l 2 with
+            | Some x -> x
+            | None ->
+              match List.nth l 1 with
+              | Some x -> x
+              | None ->
+                match List.nth l 0 with
+                | Some x -> x
+                | None ->
+                  0
+;;
+
+let rec sum l =
+  match l with
+  | [] -> 0
+  | hd :: tl -> hd + sum tl
+
+let rec sum_slow l =
+  if List.is_empty l then 0
+  else List.hd_exn l + sum_slow (List.tl_exn l)
+;;
 
 let () =
-  Exn.handle_uncaught ~exit:true (fun () ->
-    Bench.bench
-      [ Test.create ~name:"num match" (fun () -> ignore (num_match 9))
-      ; Test.create ~name:"num if"    (fun () -> ignore (num_if 9))
-      ; Test.create ~name:"pos match" (fun () -> assert (1 = pos_match [0;0;0;0;0;0;1]))
-      ; Test.create ~name:"pos if"    (fun () -> assert (1 = pos_if [0;0;0;0;0;0;1]))
-      ]
-  )
+  let example = [1;2;3;4;5;6;7;8;9;10;11;12] in
+  let s = sum example in
+  Command.basic
+    ~summary:"Run some benchamrks"
+    Command.Spec.(
+      empty
+      +> anon ("benchmark" %: string)
+    )
+    (fun benchmark () ->
+      Bench.config.Bench.verbose <- false;
+      Bench.config.Bench.gc_between_tests <- true;
+      match benchmark with
+      | "plusone" ->
+        Bench.bench
+          [ "if"    , (fun () -> ignore (plus_one_slow 9))
+          ; "match" , (fun () -> ignore (plus_one 9))
+          ]
+      | "pos" ->
+        Bench.bench
+          [ "if"    , (fun () -> assert (1 = pos_if    [0;0;0;0;0;0;1]))
+          ; "match" , (fun () -> assert (1 = pos_match [0;0;0;0;0;0;1]))
+          ]
+      | "list" ->
+        Bench.bench
+          [ "if"    , (fun () -> assert (s = sum_slow example))
+          ; "match" , (fun () -> assert (s = sum example))
+          ]
+      | _ ->
+        failwithf "Unknown benchmark %s" benchmark ()
+    )
+  |> Command.run
