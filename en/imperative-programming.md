@@ -497,7 +497,7 @@ open Core.Std
 type 'a element =
   { value : 'a;
     mutable next : 'a element option;
-    mutable previous : 'a element option
+    mutable prev : 'a element option
   }
 
 type 'a t = 'a element option ref
