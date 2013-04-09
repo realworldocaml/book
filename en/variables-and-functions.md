@@ -146,7 +146,7 @@ no mutable variables.
 
 <note> <title> Why don't variables vary?  </title>
 
-One source confusion for people new to functional langauges is the
+One source of confusion for people new to functional langauges is the
 fact that variables are typically immutable.  This seems pretty
 surprising even on linguistic terms.  Isn't the whole point of a
 variable that it can vary?
@@ -680,7 +680,7 @@ verbose.
 An important part of what's happening here is partial application.
 Normally, `List.iter` takes two arguments: a function to be called on
 each element of the list, and the list to iterate over.  We can call
-`List.iter` with all it's arguments:
+`List.iter` with all its arguments:
 
 ```ocaml
 # List.iter ~f:print_endline ["Two"; "lines"];;
