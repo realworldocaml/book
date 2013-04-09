@@ -969,9 +969,9 @@ What `make_rec` does is to essentially feed `f_norec` to itself, thus
 making it a true recursive function.
 
 This is clever enough, but all we've really done is find a new way to
-implement the same old slow Fibonacci function.  To make it faster, we
-need variant on `make_rec` that inserts memoization when it ties the
-recursive knot.  We'll call that function `memo_rec`.
+implement the same old slow Fibonacci function.  To make it
+faster, we need variant on `make_rec` that inserts memoization when it
+ties the recursive knot.  We'll call that function `memo_rec`.
 
 ```ocaml
 # let memo_rec f_norec x =
@@ -1018,11 +1018,18 @@ look like it's little more than a special form of `let rec`.
 val fib : int -> int = <fun>
 ```
 
-This same approach will work for `edit_distance`.  The one change
-we'll need to make is that `edit_distance` will now take a pair of
-strings as a single argument, since `memoize` only works sensibly for
-single-argument functions.  We can always recover the original
-interface with a wrapper function.
+Memoization is overkill for implementing Fibonacci, and indeed, the
+`fib` defined above is not especially efficient, allocating space
+linear in the number passed in to `fib`.  It's easy enough to write a
+Fibonacci function that takes a constant amount of space.
+
+But memoization is a good approach for optimizing `edit_distance`, and
+we can apply the same approach we used on `fib` here.  We will need to
+change `edit_distance` to take a pair of strings as a single argument,
+since `memo_rec` only works on single-argument functions.  (We can
+always recover the original interface with a wrapper function.)  With
+just that change and the addition of the `memo_rec` call, we can get a
+memoized version of `edit_distance`:
 
 ```ocaml
 # let edit_distance = memo_rec (fun edit_distance (s,t) ->
@@ -1042,17 +1049,15 @@ interface with a wrapper function.
 val edit_distance : string * string -> int = <fun>
 ```
 
-And this new version of `edit_distance` is indeed much more efficient
-than the one we started with.
+This new version of `edit_distance` is much more efficient than the
+one we started with; the following call is about ten thousand times
+faster than it was without memoization.
 
 ```ocaml
 # time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 Time: 2.14601ms
 - : int = 2
 ```
-
-This is about ten thousand times faster than our original
-implementation.
 
 <note> <title> Limitations of `let rec` </title>
 
