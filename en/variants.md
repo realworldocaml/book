@@ -210,14 +210,15 @@ Records and variants are most effective when used in concert.
 Consider again the type `Log_entry.t` from [xref](#records):
 
 ```ocaml
-module Log_entry = struct
-  type t =
-    { session_id: string;
-      time: Time.t;
-      important: bool;
-      message: string;
-    }
-end
+# module Log_entry = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        important: bool;
+        message: string;
+      }
+  end
+  ;;
 ```
 
 This record type combines multiple pieces of data into one value.  In
@@ -228,9 +229,10 @@ other hand, are disjunctions, letting you represent multiple
 possibilities, as in the following example.
 
 ```ocaml
-type client_message = | Logon of Logon.t
-                      | Heartbeat of Heartbeat.t
-                      | Log_entry of Log_entry.t
+# type client_message = | Logon of Logon.t
+                        | Heartbeat of Heartbeat.t
+                        | Log_entry of Log_entry.t
+  ;;
 ```
 
 A `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a `Log_entry`.
@@ -253,27 +255,30 @@ messages, where the accumulator is a pair of:
 Here's the concrete code.
 
 ```ocaml
-let messages_for_user user messages =
-  let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
-      ~f:(fun ((messages,user_sessions) as acc) message ->
-        match message with
-        | Logon m ->
-          if m.Logon.user = user then
-            (message::messages, Set.add user_sessions m.Logon.session_id)
-          else acc
-        | Heartbeat _ | Log_entry _ ->
-          let session_id = match message with
-            | Logon     m -> m.Logon.session_id
-            | Heartbeat m -> m.Heartbeat.session_id
-            | Log_entry m -> m.Log_entry.session_id
-          in
-          if Set.mem user_sessions session_id then
-            (message::messages,user_sessions)
-          else acc
-      )
-  in
-  List.rev user_messages
+# let messages_for_user user messages =
+    let (user_messages,_) =
+      List.fold messages ~init:([],String.Set.empty)
+        ~f:(fun ((messages,user_sessions) as acc) message ->
+          match message with
+          | Logon m ->
+            if m.Logon.user = user then
+              (message::messages, Set.add user_sessions m.Logon.session_id)
+            else acc
+          | Heartbeat _ | Log_entry _ ->
+            let session_id = match message with
+              | Logon     m -> m.Logon.session_id
+              | Heartbeat m -> m.Heartbeat.session_id
+              | Log_entry m -> m.Log_entry.session_id
+            in
+            if Set.mem user_sessions session_id then
+              (message::messages,user_sessions)
+            else acc
+        )
+    in
+    List.rev user_messages
+  ;;
+val messages_for_user : string -> client_message list -> client_message list =
+  <fun>
 ```
 
 There's one awkward bit about the code above, which is the calculation
@@ -300,65 +305,71 @@ first step is to cut down the definitions of the per-message records
 to just contain the unique components of each message.
 
 ```ocaml
-module Log_entry = struct
-  type t = { important: bool;
-             message: string;
-           }
-end
+# module Log_entry = struct
+    type t = { important: bool;
+               message: string;
+             }
+  end
 
-module Heartbeat = struct
-  type t = { status_message: string; }
-end
+  module Heartbeat = struct
+    type t = { status_message: string; }
+  end
 
-module Logon = struct
-  type t = { user: string;
-             credentials: string;
-           }
-end
+  module Logon = struct
+    type t = { user: string;
+               credentials: string;
+             }
+  end
+  ;;
 ```
 
 We can then define a variant type that covers the different possible
 unique components.
 
 ```ocaml
-type details =
-| Logon of Logon.t
-| Heartbeat of Heartbeat.t
-| Log_entry of Log_entry.t
+# type details =
+  | Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+ ;;
 ```
 
 Separately, we need a record that contains the fields that are common
 across all messages.
 
 ```ocaml
-module Common = struct
-  type t = { session_id: string;
-             time: Time.t;
-           }
-end
+# module Common = struct
+    type t = { session_id: string;
+               time: Time.t;
+             }
+  end
+  ;;
 ```
 
 A full message can then be represented as a pair of a `Common.t` and a
 `details`.  Using this, we can rewrite our example above as follows:
 
 ```ocaml
-let messages_for_user user messages =
-  let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
-      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
-        let session_id = common.Common.session_id in
-        match details with
-        | Logon m ->
-          if m.Logon.user = user then
-            (message::messages, Set.add user_sessions session_id)
-          else acc
-        | Heartbeat _ | Log_entry _ ->
-          if Set.mem user_sessions session_id then
-            (message::messages,user_sessions)
-          else acc
-      )
-  in
-  List.rev user_messages
+# let messages_for_user user messages =
+    let (user_messages,_) =
+      List.fold messages ~init:([],String.Set.empty)
+        ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
+          let session_id = common.Common.session_id in
+          match details with
+          | Logon m ->
+            if m.Logon.user = user then
+              (message::messages, Set.add user_sessions session_id)
+            else acc
+          | Heartbeat _ | Log_entry _ ->
+            if Set.mem user_sessions session_id then
+              (message::messages,user_sessions)
+            else acc
+        )
+    in
+    List.rev user_messages
+  ;;
+val messages_for_user :
+  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 ```
 
 Note that the more complex match statement for computing the session
@@ -374,11 +385,12 @@ had functions for handling individual message types, we could write a
 dispatch function as follows.
 
 ```ocaml
-let handle_message server_state (common,details) =
-  match details with
-  | Log_entry m -> handle_log_entry server_state (common,m)
-  | Logon     m -> handle_logon     server_state (common,m)
-  | Heartbeat m -> handle_heartbeat server_state (common,m)
+# let handle_message server_state (common,details) =
+    match details with
+    | Log_entry m -> handle_log_entry server_state (common,m)
+    | Logon     m -> handle_logon     server_state (common,m)
+    | Heartbeat m -> handle_heartbeat server_state (common,m)
+  ;;
 ```
 
 And it's explicit at the type level that `handle_log_entry` sees only
@@ -615,18 +627,17 @@ Perhaps surprisingly, we can also create polymorphic variant types
 that have different upper and lower bounds.
 
 ```ocaml
-let is_positive = function
+# let is_positive = function
      | `Int   x -> Ok (x > 0)
      | `Float x -> Ok (x > 0.)
      | `Not_a_number -> Error "not a number";;
 val is_positive :
   [< `Float of float | `Int of int | `Not_a_number ] ->
-  (bool, string) Result.t = <fun>
+  (bool, string) Core.Result.t = <fun>
 # List.filter [three; four] ~f:(fun x ->
      match is_positive x with Error _ -> false | Ok b -> b);;
-  - : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ]
-    List.t
-= [`Int 3; `Float 4.]
+- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
+[`Int 3; `Float 4.]
 ```
 
 Here, the inferred type states that the tags can be no more than ``
@@ -829,6 +840,8 @@ Also, notice that we defined all of these types as exact variants.
 We can implement this library as follows.
 
 ```ocaml
+(* file: terminal_color.ml *)
+
 open Core.Std
 
 type basic_color =
