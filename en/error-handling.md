@@ -289,7 +289,7 @@ Exception: Division_by_zero.
 ```
 
 If we put a `printf` in the middle of the computation, we can see that
-the `List.map` is interrupted part way through it's execution:
+`List.map` is interrupted part way through it's execution:
 
 
 ```ocaml
