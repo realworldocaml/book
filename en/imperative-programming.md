@@ -791,8 +791,11 @@ function.  Here we'll use Core's `Hashtbl` module, rather than our toy
 val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
-Note that we use `Hashtbl.Poly.create` to create a hash table using
-OCaml's built-in polymorphic hash function.
+The code above is a bit tricky.  `memoize` takes as its argument a
+function `f`, and then allocates a hashtable (called `table`) and
+returns a new function as the memoized version of `f`.  When called,
+this new function looks in `table` first, and if it fails to find a
+value, calls `f` and stashes the result in `table`.
 
 Memoization can be useful whenever you have a function that is
 expensive to recompute, and you don't mind caching old values
