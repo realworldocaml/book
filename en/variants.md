@@ -811,7 +811,9 @@ mixing catch-all cases and polymorphic variants.
 </note>
 
 Let's consider how we might turn our code into a proper library with
-an `mli`.  Here's what the interface to this file might look like.
+an implementation in an `ml` file and an implementation in a separate
+`mli`, as we saw in [xref](#files-modules-and-programs).  Let's start
+with the `mli`.
 
 ```ocaml
 (* file: terminal_color.mli *)
