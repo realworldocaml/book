@@ -35,6 +35,7 @@ let from_anil =
   ; "simonjbeaumont"          (* Simon Beaumont <simon.beaumont@citrix.com> *)
   ; "green-gecko"             (* Alex Ho <a_green_gecko@yahoo.com> *)
   ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> *)
+  ; "ChrisDodd"               (* Chris Dodd <dodd@csl.sri.com> TODO *)
 ]
 
 let from_yminsky =
