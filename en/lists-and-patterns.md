@@ -271,18 +271,15 @@ definitions.
 
 ## Using the `List` module effectively
 
-In this chapter and before, we've written a fair amount of direct
-list-munging code using pattern matching and recursive functions.  In
-real-world programming, you need to do this comparatively rarely.
-Most of the time, you're better off using functions from the `List`
-module which is full of reusable functions that abstract out common
-patterns for computing with lists.
+We've so far written a fair amount of list-munging code using pattern
+matching and recursive functions.  But in real life, you're usually
+better off using the `List` module, which is full of reusable
+functions that abstract out common patterns for computing with lists.
 
-To see this, let's work through a concrete example.  In particular,
-we'll write code to render a table of data.  In particular, we'll
-write a function `render_table` that, given a list of column headers
-and a list of rows, prints them out in a well formatted text table.
-So, if you were to write:
+Let's work through a concrete example to see this in action.  In the
+following, we'll write a function `render_table` that, given a list of
+column headers and a list of rows, prints them out in a well formatted
+text table.  So, if you were to write:
 
 ```ocaml
 # printf "%s\n"
@@ -306,14 +303,13 @@ it would generate the following output.
 | OCaml    | Xavier Leroy   | 1996          |
 ```
 
-Let's now dive into the implementation.  The first thing we need to do
-is to compute the maximum widths of each column of data.  We can do
-this by converting the header and each row into a list of integer
-lengths, and the taking the element-wise max of those lengths.
-Writing the code for all of this directly can be a bit of a chore, but
-we can it quite concisely if we make use of some built in functions
-from the list module.  We'll use three in particular, `List.map`,
-`List.map2_exn`, and `List.fold`.
+Before we write `render_table`, we need a function to compute the
+maximum width of each column of data.  We can do this by converting
+the header and each row into a list of integer lengths, and then
+taking the element-wise max of those lists of lengths.  Writing the
+code for all of this directly would be a bit of a chore, but we can do
+it quite concisely by making use of three functions from the `List`
+module: `map`, `map2_exn`, and `fold`.
 
 `List.map` is the simplest to explain.  It takes a list and a function
 for transforming elements of that list, and returns a new list with
@@ -340,12 +336,13 @@ lists are of mismatched length.
 Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 <> 4 ").
 ```
 
-The final, and most complicated function is `List.fold`.  With
-`List.fold`, you provide an initial value, and a function for updating
-that initial value with the information from a list element.
-`List.fold` then walks over the list elements from left to right,
-carrying forward the updated initial value as an accumulator.  It's
-worth looking at the type for `List.fold` and puzzling through it:
+`List.fold` is the most complicated of the three.  `List.fold` takes
+three arguments, a list to process, an initial accumulator value, and
+a function for updating the accumulator with the information from a
+list element.  `List.fold` walks over the list elements from left to
+right, updating the accumulator as it goes, and returning the final
+value of the accumulator.  This structure is reflected in the type of
+`List.fold`.
 
 ```ocaml
 # List.fold;;
@@ -359,18 +356,18 @@ We can use `List.fold` for something as simple as summing up a list:
 - : int = 10
 ```
 
-But we can also use it for more complicated calculations where the
-accumulator does not necessarily have the same type as the elements of
-the list.  Here, for example, is how you can use `fold` to reverse a
-list.
+This example is particularly simple because the accumulator and the
+list elements are of the same type.  But `fold` is not limited to such
+cases.  We can for example use `fold` to reverse a list, in which case
+the accumulator is itself a list.
 
 ```ocaml
 # List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4];;
 - : int list = [4; 3; 2; 1]
 ```
 
-Let's bring this all together to write a function to compute the
-maximum widths for the table.
+Let's bring our three functions together to compute the maximum column
+widths.
 
 ```ocaml
 # let max_widths header rows =
@@ -383,14 +380,14 @@ maximum widths for the table.
 val max_widths : string list -> string list list -> int list = <fun>
 ```
 
-Here, we define the function `to_lengths` which converts a list of
-strings to a list of integer lengths.  Then `fold`, using the lengths
-of the header row as the initial accumulator, uses `map2_exn` to take
-the max of the accumulator with the lengths of the strings in each row
-of the table.
+Using `List.map` we define the function `to_lengths` which converts a
+list of strings to a list of integer lengths.  `List.fold` is then
+used to iterate over the rows, using `map2_exn` to take the max of the
+accumulator with the lengths of the strings in each row of the table,
+with the accumulator initialized to the lengths of the header row.
 
-The next thing we'll need to do is to compute the separator row, based
-on the widths.  Here's a simple function for doing that, which uses
+Now let's consider how to generate the line that separates the header
+from the rest of the text table.  We can do this in part by using
 `List.map` to convert a width to an appropriately sized string of
 dashes.  For generating the strings themselves we use `String.concat`,
 which concatenates a list of strings with an optional separator
@@ -438,28 +435,26 @@ assembling of large strings, it can be a serious performance issue.
 </note>
 
 Now we need code for rendering a row with data in it.  We'll first
-write a function `pad` for padding out a string to a specified length:
+write a function `pad` for padding out a string to a specified length
+plus one blank space on either side.
 
 ```ocaml
 # let pad s length =
-    if String.length s >= length then s
-    else s ^ String.make (length - String.length s) ' '
+    " " ^ s ^ String.make (length - String.length s + 1) ' '
   ;;
 val pad : string -> int -> string = <fun>
 # pad "hello" 10;;
-- : string = "hello     "
+- : string = " hello      "
 ```
 
-And then we'll write a function for rendering a whole row by merging
-together the padded out strings.  Again, we'll use `List.map2_exn` for
-combining the list of data in the row with the list of widths.
+We can render a row of data by merging together the padded strings.
+Again, we'll use `List.map2_exn` for combining the list of data in the
+row with the list of widths.
 
 ```ocaml
 # let render_row row widths =
-    let pieces = List.map2_exn row widths
-      ~f:(fun s width -> " " ^ pad s width ^ " ")
-    in
-    "|" ^ String.concat ~sep:"|" pieces ^ "|"
+    let padded = List.map2_exn row widths ~f:pad in
+    "|" ^ String.concat ~sep:"|" padded ^ "|"
   ;;
 val render_row : string list -> int list -> string = <fun>
 # render_row ["Hello";"World"] [10;15];;
@@ -481,6 +476,125 @@ the table.
 val render_table : string list -> string list list -> string = <fun>
 ```
 
+### More useful list functions
+
+The example we worked through above only touched on three of the
+function in `List`.  We won't cover the entire interface, but there
+are a few more functions that are useful enough to mention here.
+
+Very often when processing lists, one wants to restrict attention to
+just a subset of values.  The `List.filter` function does just that.
+
+```ocaml
+# List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
+- : int list = [2; 4]
+```
+
+Sometimes, you want to both transform and filter as part of the same
+computation.  `List.filter_map` allows you to do just that.  The
+following expression uses `List.filter_map` to produce the list of
+file extensions in the current directory, piping the results through
+`List.dedup` to remove duplicates.  Note that this example also uses
+some functions from other modules, including `Sys.ls_dir` to get a
+directory listing, and `String.rsplit2` to split a string on the
+rightmost appearance ofa  given character.
+
+```ocaml
+# List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
+    match String.rsplit2 ~on:'.' fname with
+    | None  | Some ("",_) -> None
+    | Some (_,ext) ->
+      Some ext)
+  |> List.dedup
+  ;;
+- : string list = ["byte"; "ml"; "mli"; "native"; "txt"]
+```
+
+In the match statement above, you may notice that we for the first
+time used an underscore in a pattern match.  You use an underscore
+when you want to indicate that the pattern doesn't depend on some
+sub-component of the data structure, but that you don't want to name
+it is an explicit variable.
+
+Another feature of OCaml's pattern language that we encounter here is
+_or-patterns_, which allow you to have multiple sub-patterns within a
+larger pattern.  In this case, `None | Some ("",_)` is an or-pattern.
+As we'll see later, or-patterns can be nested anywhere within larger
+patterns.
+
+Another function that is similar to `filter` is `partition_tf`, which
+takes a list and partitions it into a pair of lists based on a boolean
+condition.  `tf` is a mnemonic to remind the reader that `true`
+elements go to the first bucket and `false` ones go to the second.
+Thus, one could write:
+
+```ocaml
+# let is_ocaml_source s =
+    match String.rsplit2 s ~on:'.' with
+    | Some (_,("ml"|"mli")) -> true
+    | _ -> false
+  ;;
+val is_ocaml_source : string -> bool = <fun>
+# let (ml_files,other_files) =
+    List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
+val ml_files : string list = ["example.ml"]
+val other_files : string list = ["_build"; "_tags"]
+```
+
+Note the use of a nested or-pattern in `is_ocaml_source`.
+
+Another very common operation on lists is concatenation.  The list
+module actually comes with a few different ways of doing this.  First,
+there's`List.append`, for concatenating a pair of lists.
+
+```ocaml
+# List.append [1;2;3] [4;5;6];;
+- : int list = [1; 2; 3; 4; 5; 6]
+# [1;2;3] @ [4;5;6];;
+- : int list = [1; 2; 3; 4; 5; 6]
+```
+
+`@` is just a synonym for `List.append`.  In addition, there is
+`List.concat`, for concatenating a list of lists.
+
+```ocaml
+# List.concat [[1;2];[3;4;5];[6];[]];;
+- : int list = [1; 2; 3; 4; 5; 6]
+```
+Here's an example of using `List.concat` along with `List.map` to
+compute a recursive listing of a directory tree.
+
+```ocaml
+# let rec ls_rec s =
+    if Sys.is_file_exn ~follow_symlinks:true s
+    then [s]
+    else
+      Sys.ls_dir s
+      |> List.map ~f:(fun sub -> ls_rec (s ^ "/" ^ sub))
+      |> List.concat
+  ;;
+# all_files ".";;
+- : string list =
+["./_build/_digests"; "./_build/_log"; "./_build/example.ml";
+ "./_build/example.ml.depends"; "./_build/ocamlc.where"; "./_tags";
+ "./example.ml"]
+```
+
+The above combination of `List.map` and `List.concat` is common
+enough that there is a function `List.concat_map` that combines these
+into one, more efficient operation.
+
+```ocaml
+# let rec ls_rec s =
+    if Sys.is_file_exn ~follow_symlinks:true s
+    then [s]
+    else
+      Sys.ls_dir s
+      |> List.concat_map ~f:(fun sub -> ls_rec (s ^/ sub))
+  ;;
+val ls_rec : string -> string list = <fun>
+```
+
 ## Tail recursion
 
 ## Writing efficient list-handling code
@@ -490,3 +604,5 @@ _(Cover as-patterns here)_
 ## TODO
 
 - Underscores in pattern matches
+- with and as in patterns
+
