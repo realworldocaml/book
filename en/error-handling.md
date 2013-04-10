@@ -289,7 +289,7 @@ Exception: Division_by_zero.
 ```
 
 If we put a `printf` in the middle of the computation, we can see that
-the `List.map` is interrupted part way through it's execution:
+`List.map` is interrupted part way through it's execution:
 
 
 ```ocaml
@@ -479,7 +479,7 @@ try <expr> with
 ...
 ```
 
-A `try/with` clause first evaluates it's body, `<expr>`.  If no
+A `try/with` clause first evaluates its body, `<expr>`.  If no
 exception is thrown, then the result of evaluating the body is what
 the entire `try/with` clause evaluates to.
 

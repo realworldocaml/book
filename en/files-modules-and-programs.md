@@ -45,7 +45,7 @@ let () =
 ```
 
 The function `build_counts` reads in lines from `stdin`, constructing
-from those lines an associating list with the frequencies of each
+from those lines an association list with the frequencies of each
 line.  It does this by invoking `In_channel.fold_lines` (similar to
 the function `List.fold` described in [xref](#lists-and-patterns)),
 which reads through the lines one by one, calling the provided fold
@@ -53,10 +53,10 @@ function for each line to update the accumulator.  That accumulator is
 initialized to the empty list.
 
 With `build_counts` defined, we then call the function to build the
-associating list, sort that list be frequency in descending order,
-grab the first 10 elements off the list, and the iterate over those
+association list, sort that list be frequency in descending order,
+grab the first 10 elements off the list, and then iterate over those
 ten elements and print them to the screen.  These operations are tied
-together using the operator, as described in
+together using the `|>` operator, as described in
 [xref](#variables-and-functions).
 
 
@@ -352,9 +352,14 @@ Error: This expression has type 'a list
 
 This is because `freq.ml` depends on the fact that frequency counts
 are represented as association lists, a fact that we've just hidden.
-We just need to fix the code to use `Counter.empty` instead of `[]`
-and `Counter.to_list` to get the association list out at the end for
-processing and printing.
+We just need to fix `build_counts` to use `Counter.empty` instead of
+`[]` and `Counter.to_list` to get the association list out at the end
+for processing and printing, as below.
+
+```ocaml
+let build_counts () =
+  In_channel.fold_lines stdin ~init:Counter.empty ~f:Counter.touch
+```
 
 Now we can turn to optimizing the implementation of `Counter`.  Here's
 an alternate and far more efficient implementation, based on the `Map`
@@ -425,9 +430,9 @@ val median : t -> median
 
 The decision of whether a given type should be abstract or concrete is
 an important one.  Abstract types give you more control over how
-values are created and accessed, and makes it easier to enforce
-invariants beyond the what is enforced by the type itself; concrete
-types let you expose more detail and structure to client code in a
+values are created and accessed, and make it easier to enforce
+invariants beyond what is enforced by the type itself; concrete types
+let you expose more detail and structure to client code in a
 lightweight way.  The right choice depends very much on the context.
 
 ### The `include` statement ###
@@ -773,8 +778,8 @@ the definition of `is_even` and `is_odd` in
 rather than ordinary `let`.
 
 The same is true at the module level.  By default, circular
-dependencies between modules is not allowed, and indeed, circular
-dependencies among files is never allowed.
+dependencies between modules are not allowed, and indeed, circular
+dependencies among files are never allowed.
 
 The simplest case of this is that a module can not directly refer to
 itself (although definitions within a module can refer to each other

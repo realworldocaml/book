@@ -10,7 +10,8 @@ case-analysis on that information.
 Let's consider a concrete example of how variants can be useful.
 Almost all terminals support a set of 8 basic colors, and we can
 represent those colors using a variant.  Each color is declared as a
-simple tag, with pipes used to separate the different cases.
+simple tag, with pipes used to separate the different cases.  Note
+that variant tags must be capitalized.
 
 ```ocaml
 # type basic_color =
@@ -22,9 +23,9 @@ simple tag, with pipes used to separate the different cases.
 ```
 
 The following function uses pattern matching to convert a
-`basic_color` to a corresponding integer.  Note that the
-exhaustiveness checking on pattern matches means that the compiler
-will warn us if we miss a color.
+`basic_color` to a corresponding integer.  The exhaustiveness checking
+on pattern matches means that the compiler will warn us if we miss a
+color.
 
 ```ocaml
 # let basic_color_to_int = function
@@ -210,14 +211,15 @@ Records and variants are most effective when used in concert.
 Consider again the type `Log_entry.t` from [xref](#records):
 
 ```ocaml
-module Log_entry = struct
-  type t =
-    { session_id: string;
-      time: Time.t;
-      important: bool;
-      message: string;
-    }
-end
+# module Log_entry = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        important: bool;
+        message: string;
+      }
+  end
+  ;;
 ```
 
 This record type combines multiple pieces of data into one value.  In
@@ -228,16 +230,18 @@ other hand, are disjunctions, letting you represent multiple
 possibilities, as in the following example.
 
 ```ocaml
-type client_message = | Logon of Logon.t
-                      | Heartbeat of Heartbeat.t
-                      | Log_entry of Log_entry.t
+# type client_message = | Logon of Logon.t
+                        | Heartbeat of Heartbeat.t
+                        | Log_entry of Log_entry.t
+  ;;
 ```
 
 A `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a `Log_entry`.
 If we want to write code that processes messages generically, rather
 than code specialized to a fixed message type, we need something like
 `client_message` to act as one overarching type for the different
-possible messages.
+possible messages.  We can then match on the `client_message` to
+determine the type of the particular message being dealt with.
 
 You can increase the precision of your types by using variants to
 represent differences between types, and records to represent shared
@@ -253,27 +257,30 @@ messages, where the accumulator is a pair of:
 Here's the concrete code.
 
 ```ocaml
-let messages_for_user user messages =
-  let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
-      ~f:(fun ((messages,user_sessions) as acc) message ->
-        match message with
-        | Logon m ->
-          if m.Logon.user = user then
-            (message::messages, Set.add user_sessions m.Logon.session_id)
-          else acc
-        | Heartbeat _ | Log_entry _ ->
-          let session_id = match message with
-            | Logon     m -> m.Logon.session_id
-            | Heartbeat m -> m.Heartbeat.session_id
-            | Log_entry m -> m.Log_entry.session_id
-          in
-          if Set.mem user_sessions session_id then
-            (message::messages,user_sessions)
-          else acc
-      )
-  in
-  List.rev user_messages
+# let messages_for_user user messages =
+    let (user_messages,_) =
+      List.fold messages ~init:([],String.Set.empty)
+        ~f:(fun ((messages,user_sessions) as acc) message ->
+          match message with
+          | Logon m ->
+            if m.Logon.user = user then
+              (message::messages, Set.add user_sessions m.Logon.session_id)
+            else acc
+          | Heartbeat _ | Log_entry _ ->
+            let session_id = match message with
+              | Logon     m -> m.Logon.session_id
+              | Heartbeat m -> m.Heartbeat.session_id
+              | Log_entry m -> m.Log_entry.session_id
+            in
+            if Set.mem user_sessions session_id then
+              (message::messages,user_sessions)
+            else acc
+        )
+    in
+    List.rev user_messages
+  ;;
+val messages_for_user : string -> client_message list -> client_message list =
+  <fun>
 ```
 
 There's one awkward bit about the code above, which is the calculation
@@ -300,65 +307,71 @@ first step is to cut down the definitions of the per-message records
 to just contain the unique components of each message.
 
 ```ocaml
-module Log_entry = struct
-  type t = { important: bool;
-             message: string;
-           }
-end
+# module Log_entry = struct
+    type t = { important: bool;
+               message: string;
+             }
+  end
 
-module Heartbeat = struct
-  type t = { status_message: string; }
-end
+  module Heartbeat = struct
+    type t = { status_message: string; }
+  end
 
-module Logon = struct
-  type t = { user: string;
-             credentials: string;
-           }
-end
+  module Logon = struct
+    type t = { user: string;
+               credentials: string;
+             }
+  end
+  ;;
 ```
 
 We can then define a variant type that covers the different possible
 unique components.
 
 ```ocaml
-type details =
-| Logon of Logon.t
-| Heartbeat of Heartbeat.t
-| Log_entry of Log_entry.t
+# type details =
+  | Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+ ;;
 ```
 
 Separately, we need a record that contains the fields that are common
 across all messages.
 
 ```ocaml
-module Common = struct
-  type t = { session_id: string;
-             time: Time.t;
-           }
-end
+# module Common = struct
+    type t = { session_id: string;
+               time: Time.t;
+             }
+  end
+  ;;
 ```
 
 A full message can then be represented as a pair of a `Common.t` and a
 `details`.  Using this, we can rewrite our example above as follows:
 
 ```ocaml
-let messages_for_user user messages =
-  let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
-      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
-        let session_id = common.Common.session_id in
-        match details with
-        | Logon m ->
-          if m.Logon.user = user then
-            (message::messages, Set.add user_sessions session_id)
-          else acc
-        | Heartbeat _ | Log_entry _ ->
-          if Set.mem user_sessions session_id then
-            (message::messages,user_sessions)
-          else acc
-      )
-  in
-  List.rev user_messages
+# let messages_for_user user messages =
+    let (user_messages,_) =
+      List.fold messages ~init:([],String.Set.empty)
+        ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
+          let session_id = common.Common.session_id in
+          match details with
+          | Logon m ->
+            if m.Logon.user = user then
+              (message::messages, Set.add user_sessions session_id)
+            else acc
+          | Heartbeat _ | Log_entry _ ->
+            if Set.mem user_sessions session_id then
+              (message::messages,user_sessions)
+            else acc
+        )
+    in
+    List.rev user_messages
+  ;;
+val messages_for_user :
+  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 ```
 
 Note that the more complex match statement for computing the session
@@ -374,11 +387,12 @@ had functions for handling individual message types, we could write a
 dispatch function as follows.
 
 ```ocaml
-let handle_message server_state (common,details) =
-  match details with
-  | Log_entry m -> handle_log_entry server_state (common,m)
-  | Logon     m -> handle_logon     server_state (common,m)
-  | Heartbeat m -> handle_heartbeat server_state (common,m)
+# let handle_message server_state (common,details) =
+    match details with
+    | Log_entry m -> handle_log_entry server_state (common,m)
+    | Logon     m -> handle_logon     server_state (common,m)
+    | Heartbeat m -> handle_heartbeat server_state (common,m)
+  ;;
 ```
 
 And it's explicit at the type level that `handle_log_entry` sees only
@@ -526,9 +540,9 @@ it's easy to see that we've missed an important case: double-negation.
       | (And _ | Or _ | Base _ ) -> Not blang
 ```
 
-This example is more than a toy.  There's a module in Core very much
-in this spirit in Core called `Blang`, and it gets a lot of practical
-use in a variety of applications.
+This example is more than a toy.  There's a module very much in this
+spirit in Core called `Blang`, and it gets a lot of practical use in a
+variety of applications.
 
 More generally, using variants to build recursive data-structures is a
 common technique, and shows up everywhere from designing little
@@ -615,18 +629,17 @@ Perhaps surprisingly, we can also create polymorphic variant types
 that have different upper and lower bounds.
 
 ```ocaml
-let is_positive = function
+# let is_positive = function
      | `Int   x -> Ok (x > 0)
      | `Float x -> Ok (x > 0.)
      | `Not_a_number -> Error "not a number";;
 val is_positive :
   [< `Float of float | `Int of int | `Not_a_number ] ->
-  (bool, string) Result.t = <fun>
+  (bool, string) Core.Result.t = <fun>
 # List.filter [three; four] ~f:(fun x ->
      match is_positive x with Error _ -> false | Ok b -> b);;
-  - : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ]
-    List.t
-= [`Int 3; `Float 4.]
+- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
+[`Int 3; `Float 4.]
 ```
 
 Here, the inferred type states that the tags can be no more than ``
@@ -800,7 +813,9 @@ mixing catch-all cases and polymorphic variants.
 </note>
 
 Let's consider how we might turn our code into a proper library with
-an `mli`.  Here's what the interface to this file might look like.
+an implementation in an `ml` file and an implementation in a separate
+`mli`, as we saw in [xref](#files-modules-and-programs).  Let's start
+with the `mli`.
 
 ```ocaml
 (* file: terminal_color.mli *)
@@ -829,6 +844,8 @@ Also, notice that we defined all of these types as exact variants.
 We can implement this library as follows.
 
 ```ocaml
+(* file: terminal_color.ml *)
+
 open Core.Std
 
 type basic_color =

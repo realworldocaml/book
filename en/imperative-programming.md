@@ -8,9 +8,9 @@ pure function behaves like a mathematical function, always returning
 the same results when given the same inputs, and never affecting the
 world except insofar as it returns the value of its computation.
 _Imperative_ code, on the other hand, operates by side-effects that
-modify a program's internal state or interact with the outside world,
-and so can have a new effect, and return different results, every time
-they're called.
+modify a program's internal state or interact with the outside world.
+An imperative function has a new effect, and potentially returns
+different results, every time it's called.
 
 Pure code is the default in OCaml, and for good reason --- it's
 generally easier to reason about, less error prone and more
@@ -37,12 +37,14 @@ imperative dictionaries, and for most real world tasks, you should use
 one of those implementations.
 
 Our dictionary, like those in Core and the standard library, will be
-implemented as a hash table.  In particular, we'll use a _open
+implemented as a hash table.  In particular, we'll use an _open
 hashing_ scheme, which is to say the hash table will be an array of
 buckets, each bucket containing a list of key/value pairs that have
 been hashed into that bucket.
 
-Here's the interface we'll match, provided as an `mli`.
+Here's the interface we'll match, provided as an `mli`.  Here, the
+type `('a, 'b) t` is used for a dictionary with keys of type `'a` and
+data of type `'b`.
 
 ```ocaml
 (* file: dictionary.mli *)
@@ -58,12 +60,11 @@ val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 val remove : ('a, 'b) t -> 'a -> unit
 ```
 
-The type `('a, 'b) t` is used for a dictionary with keys of type `'a`
-and data of type `'b`.  The `mli` also includes a collection of helper
-functions whose purpose and behavior should be largely inferrable from
-their names and type signatures.  Notice that a number of the
-functions, in particular, ones like `add` that modify the dictionary,
-return unit.  This is typical of functions that act by side-effect.
+The `mli` also includes a collection of helper functions whose purpose
+and behavior should be largely inferrable from their names and type
+signatures.  Notice that a number of the functions, in particular,
+ones like `add` that modify the dictionary, return unit.  This is
+typical of functions that act by side-effect.
 
 We'll now walk through the implementation (contained in the
 corresponding `ml` file) piece by piece, explaining different
@@ -132,9 +133,21 @@ The other functions defined above are fairly straightforward:
   corresponding value if found as an option.
 
 A new piece of syntax has also popped up in `find`: we write
-`array.(index)` to grab a value from an array.
+`array.(index)` to grab a value from an array.  Also, `find` uses
+`List.find_map`, which you can see the type of by typing it into the
+toplevel:
 
-Now we'll look at the implementation of `iter`:
+```ocaml
+# List.find_map;;
+- : 'a list -> f:('a -> 'b option) -> 'b option = <fun>
+```
+
+`List.find_map` iterates over the elements of the list, calling `f` on
+each one until a `Some` is returned by `f`, at which point the value
+returned by `f` is returned by `find_map`.  If `f` returns `None` on
+all values, then `None` is returned by `find_map`.
+
+Now let's look at the implementation of `iter`:
 
 ```ocaml
 let iter t ~f =
@@ -177,8 +190,7 @@ let add t ~key ~data =
 
 let remove t key =
   let i = hash_bucket key in
-  if not (bucket_has_key t i key) then ()
-  else (
+  if bucket_has_key t i key then (
     let filtered_bucket =
       List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
     in
@@ -485,7 +497,7 @@ open Core.Std
 type 'a element =
   { value : 'a;
     mutable next : 'a element option;
-    mutable previous : 'a element option
+    mutable prev : 'a element option
   }
 
 type 'a t = 'a element option ref
@@ -696,13 +708,15 @@ to represent a lazy value.
 type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
 ```
 
-A `lazy_state` represents the possible states of a lazy value.  A
-lazy value is `Delayed` before it has been run, where `Delayed` holds
-a function for computing the value in question.  A lazy value is in
-the `Value` state when it has been forced and the computation ended
+A `lazy_state` represents the possible states of a lazy value.  A lazy
+value is `Delayed` before it has been run, where `Delayed` holds a
+function for computing the value in question.  A lazy value is in the
+`Value` state when it has been forced and the computation ended
 normally.  The `Exn` case is for when the lazy value has been forced,
-but the computation ended with an exception.  A lazy value is just a
-reference to a `lazy_state`.
+but the computation ended with an exception.  A lazy value is simply a
+`ref` containing a `lazy_state`, where the `ref` makes it possible to
+change from being in the `Delayed` state to being in the `Value` or
+`Exn` states.
 
 We can create a lazy value based on a thunk, _i.e._, a function that
 takes a unit argument.  Wrapping an expression in a thunk is another
@@ -746,9 +760,10 @@ performing lazy computation
 - : float = 4.
 ```
 
-The main difference between our implementation of laziness and the
-built-in version is syntax.  Rather than writing `create_lazy (fun ()
--> sqrt 16.)`, we can just write `lazy (sqrt 16.)`.
+The main user-visisble difference between our implementation of
+laziness and the built-in version is syntax.  Rather than writing
+`create_lazy (fun () -> sqrt 16.)`, we can with the built-in `lazy`
+just write `lazy (sqrt 16.)`.
 
 ### Memoization and dynamic programming
 
@@ -776,8 +791,11 @@ function.  Here we'll use Core's `Hashtbl` module, rather than our toy
 val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
-Note that we use `Hashtbl.Poly.create` to create a hash table using
-OCaml's built-in polymorphic hash function.
+The code above is a bit tricky.  `memoize` takes as its argument a
+function `f`, and then allocates a hashtable (called `table`) and
+returns a new function as the memoized version of `f`.  When called,
+this new function looks in `table` first, and if it fails to find a
+value, calls `f` and stashes the result in `table`.
 
 Memoization can be useful whenever you have a function that is
 expensive to recompute, and you don't mind caching old values
@@ -969,9 +987,9 @@ What `make_rec` does is to essentially feed `f_norec` to itself, thus
 making it a true recursive function.
 
 This is clever enough, but all we've really done is find a new way to
-implement the same old slow Fibonacci function.  To make it faster, we
-need variant on `make_rec` that inserts memoization when it ties the
-recursive knot.  We'll call that function `memo_rec`.
+implement the same old slow Fibonacci function.  To make it
+faster, we need variant on `make_rec` that inserts memoization when it
+ties the recursive knot.  We'll call that function `memo_rec`.
 
 ```ocaml
 # let memo_rec f_norec x =
@@ -1018,11 +1036,18 @@ look like it's little more than a special form of `let rec`.
 val fib : int -> int = <fun>
 ```
 
-This same approach will work for `edit_distance`.  The one change
-we'll need to make is that `edit_distance` will now take a pair of
-strings as a single argument, since `memoize` only works sensibly for
-single-argument functions.  We can always recover the original
-interface with a wrapper function.
+Memoization is overkill for implementing Fibonacci, and indeed, the
+`fib` defined above is not especially efficient, allocating space
+linear in the number passed in to `fib`.  It's easy enough to write a
+Fibonacci function that takes a constant amount of space.
+
+But memoization is a good approach for optimizing `edit_distance`, and
+we can apply the same approach we used on `fib` here.  We will need to
+change `edit_distance` to take a pair of strings as a single argument,
+since `memo_rec` only works on single-argument functions.  (We can
+always recover the original interface with a wrapper function.)  With
+just that change and the addition of the `memo_rec` call, we can get a
+memoized version of `edit_distance`:
 
 ```ocaml
 # let edit_distance = memo_rec (fun edit_distance (s,t) ->
@@ -1042,17 +1067,15 @@ interface with a wrapper function.
 val edit_distance : string * string -> int = <fun>
 ```
 
-And this new version of `edit_distance` is indeed much more efficient
-than the one we started with.
+This new version of `edit_distance` is much more efficient than the
+one we started with; the following call is about ten thousand times
+faster than it was without memoization.
 
 ```ocaml
 # time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 Time: 2.14601ms
 - : int = 2
 ```
-
-This is about ten thousand times faster than our original
-implementation.
 
 <note> <title> Limitations of `let rec` </title>
 
