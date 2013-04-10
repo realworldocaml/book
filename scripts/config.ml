@@ -35,7 +35,7 @@ let from_anil =
   ; "simonjbeaumont"          (* Simon Beaumont <simon.beaumont@citrix.com> *)
   ; "green-gecko"             (* Alex Ho <a_green_gecko@yahoo.com> *)
   ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> *)
-  ; "ChrisDodd"               (* Chris Dodd <dodd@csl.sri.com> TODO *)
+  ; "ChrisDodd"               (* Chris Dodd <dodd@csl.sri.com> *)
 ]
 
 let from_yminsky =
@@ -52,7 +52,7 @@ let from_yminsky =
   ; "yairminsky"              (* Yair Minsky <yair.minsky@yale.edu> *)
   ; "nicholasbs"              (* Nicholas Bergson-Shilcock <me@nicholasbs.net> *)
   ; "happy4crazy"             (* Alan O'Donnell  <alan@hackerschool.com> *)
-  ; "rnml"                    (* Nathan Linger <nlinger@janestreet.com> TODO *)
+  ; "rnml"                    (* Nathan Linger <nlinger@janestreet.com> *)
 ]
 
 let from_email = 
@@ -79,6 +79,7 @@ let from_email =
   ; "mshure"                  (* Mark Shure <mark.shure@gmail.com> *)
   ; "HappyCrow"               (* Francois Berenger <berenger@riken.jp> *)
   ; "alexanderkyte"           (* alex kyte <alexanderkyte@gmail.com> *)
+  ; "genos"                   (* Graham Enos <graham.enos@gmail.com> *)
   
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
