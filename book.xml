@@ -71,14 +71,15 @@
       <listitem>
         <para>
           <emphasis>Static type-checking</emphasis> to reduce run-time
-          errors, such as Java class interfaces or Objective-C methods.
+          errors, such as Java or Scala interfaces or variable type
+          declarations in C#, Ada and Pascal.
         </para>
       </listitem>
       <listitem>
         <para>
           <emphasis>Generics</emphasis> to enable abstractions to be
           constructed across different datatypes, available in Java and
-          .NET.
+          C#.
         </para>
       </listitem>
       <listitem>
@@ -150,10 +151,10 @@
         implementation called Caml Light that was based on a bytecode
         interpreter with a fast sequential garbage collector. Over the
         next few years useful libraries appeared, such as Michel Mauny's
-        parsing system, and performance further improved with a fast
-        native code compiler that made OCaml's performance competitive
-        with mainstream languages such as C++. A module system inspired
-        by Standard ML also provided powerful facilities for abstraction
+        parsing system. Efficiency further improved with a fast native
+        code compiler that made OCaml's performance competitive with
+        mainstream languages such as C++. A module system inspired by
+        Standard ML also provided powerful facilities for abstraction
         and larger scale programs.
       </para>
       <para>
@@ -170,11 +171,12 @@
         The last decade has seen OCaml attract a significant user base,
         and language improvements have been steadily added to support
         the growing codebases that use the language both commercially
-        and for academic use. First-class modules, GADTs and dynamic
-        linking have improved the flexibility of the language, and there
-        is fast native code support for x86_64, ARM, PowerPC and
-        Sparc64, making OCaml a good choice for systems where resource
-        usage, predictability and performance matters.
+        and for academic use. First-class modules, Generalized Algebraic
+        Data Types (GADTs) and dynamic linking have improved the
+        flexibility of the language, and there is fast native code
+        support for x86_64, ARM, PowerPC and Sparc64, making OCaml a
+        good choice for systems where resource usage, predictability and
+        performance matters.
       </para>
     </sect2>
     <sect2 id="the-core-standard-library">
@@ -189,8 +191,9 @@
         functionality you expect for more general-purpose use.
       </para>
       <para>
-        But all is not lost! There is an effective alternative to the
-        OCaml standard library called Core. Jane Street, a company that
+        In the world of open-source software, nothing stops alternative
+        libraries from being written by the community, and this exactly
+        what the Core standard library is. Jane Street, a company that
         has been using OCaml for more than a decade, developed Core for
         its own internal use, but it was designed from the start with an
         eye towards being a general-purpose standard library, and has
@@ -203,7 +206,8 @@
         libraries such as the Async network communications library that
         extend the reach of Core into building complex distributed
         systems. All of these libraries are distributed under a liberal
-        Apache-style license.
+        Apache 2 license to permit free use in hobby, academic and
+        commercial settings.
       </para>
       <para>
         If you've learnt some OCaml before, this book may surprise you
@@ -238,7 +242,7 @@
       </para>
       <para>
         Another big improvement over the standard library is the
-        <literal>utop</literal> interactive top level. This is a modern
+        <literal>utop</literal> command-line interface. This is a modern
         interactive tool that supports command history, macro expansion,
         module completion, and other niceties that make it much more
         pleasant to work with the language. We'll be using
@@ -319,7 +323,7 @@
             <literal>gdb</literal> and <literal>gprof</literal>.
             Contributing your code back to the community is also
             important (if only to get bug fixes from other people!), and
-            this part also explains how to do this via OPAM and Github.
+            this part also explains how to do this via OPAM and GitHub.
           </para>
         </listitem>
       </itemizedlist>
@@ -570,7 +574,7 @@ val y : int = 14
     </para>
   </sect1>
   <sect1 id="functions-and-type-inference">
-    <title>Functions and Type Inference</title>
+    <title>Functions and type Inference</title>
     <para>
       The <literal>let</literal> syntax can also be used for creating
       functions.
@@ -1930,17 +1934,18 @@ Total: 100.5
     Variables and functions are fundamental ideas that show up in
     virtually all programming languages. But OCaml has a different take
     on these basic concepts, and so we'll spend some time digging into
-    the details of OCaml's variables and functions differ from what you
-    may have seen elsewhere.
+    the details so you can see how OCaml's variables and functions
+    differ from what you may have encountered in other languages.
   </para>
   <sect1 id="variables">
     <title>Variables</title>
     <para>
       At its simplest, a variable is an identifier whose meaning is
       bound to a particular value. In OCaml these bindings are often
-      introduced using the <literal>let</literal> keyword. When typed in
-      at the prompt of the interpreter, a let binding has the following
-      syntax.
+      introduced using the <literal>let</literal> keyword. We can type a
+      so-called <emphasis>top-level</emphasis> <literal>let</literal>
+      binding into <literal>utop</literal> with the following syntax to
+      bind a new variable.
     </para>
     <programlisting language="ocaml">
 let &lt;identifier&gt; = &lt;expr&gt;
@@ -1948,13 +1953,14 @@ let &lt;identifier&gt; = &lt;expr&gt;
     <para>
       As we'll see when we get to the module system in
       <xref linkend="files-modules-and-programs"/>, this same
-      syntax is used for toplevel definitions in a module.
+      syntax is used for let bindings at the top-level of a module.
     </para>
     <para>
       Every variable binding has a <emphasis>scope</emphasis>, which is
       the portion of the code that can refer to that binding. The scope
-      of a toplevel let binding is everything that follows it in the
-      toplevel session (or in the remainder of the module).
+      of a top-level let binding is everything that follows it in the
+      session, when using <literal>utop</literal>, or, when using
+      modules, for the remainder of the module.
     </para>
     <para>
       Here's a simple example.
@@ -2019,7 +2025,7 @@ val languages : string = &quot;OCaml,Perl,C++,C&quot;
      let languages = String.split languages ~on:',' in
      String.concat ~sep:&quot;-&quot; languages
   ;;
-val dashed_languages : Core.Std.String.t = &quot;OCaml-Perl-C++-C&quot;
+val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
 </programlisting>
     <para>
       This time, in the inner scope we called the list of strings
@@ -2090,8 +2096,8 @@ Warning 26: unused variable pi.
     Why don't variables vary?
     </title>
     <para>
-      One source confusion for people new to functional langauges is the
-      fact that variables are typically immutable. This seems pretty
+      One source of confusion for people new to functional langauges is
+      the fact that variables are typically immutable. This seems pretty
       surprising even on linguistic terms. Isn't the whole point of a
       variable that it can vary?
     </para>
@@ -2120,7 +2126,7 @@ Warning 26: unused variable pi.
         function for converting a list of pairs into a pair of lists.
       </para>
       <programlisting language="ocaml">
-# let (ints,strings) = List.unzip [(1,&quot;one&quot;); (2,&quot;two&quot;); (3,&quot;three&quot;)]
+# let (ints,strings) = List.unzip [(1,&quot;one&quot;); (2,&quot;two&quot;); (3,&quot;three&quot;)];;
 val ints : int list = [1; 2; 3]
 val strings : string list = [&quot;one&quot;; &quot;two&quot;; &quot;three&quot;]
 </programlisting>
@@ -2495,9 +2501,9 @@ val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;
 val is_even : int -&gt; bool = &lt;fun&gt;
 val is_odd : int -&gt; bool = &lt;fun&gt;
 # List.map ~f:is_even [0;1;2;3;4;5];;
-- : bool Core.Std.List.t = [true; false; true; false; true; false]
+- : bool list = [true; false; true; false; true; false]
 # List.map ~f:is_odd [0;1;2;3;4;5];;
-- : bool Core.Std.List.t = [false; true; false; true; false; true]
+- : bool list = [false; true; false; true; false; true]
 </programlisting>
       <para>
         OCaml distinguishes between non-recursive definitions (using
@@ -2801,7 +2807,7 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
         application. Normally, <literal>List.iter</literal> takes two
         arguments: a function to be called on each element of the list,
         and the list to iterate over. We can call
-        <literal>List.iter</literal> with all it's arguments:
+        <literal>List.iter</literal> with all its arguments:
       </para>
       <programlisting language="ocaml">
 # List.iter ~f:print_endline [&quot;Two&quot;; &quot;lines&quot;];;
@@ -3451,11 +3457,571 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       </sect3>
     </sect2>
   </sect1>
-</chapter><chapter id="lists-options-and-patterns">
-  <title>Lists, options and patterns</title>
+</chapter><chapter id="lists-and-patterns">
+  <title>Lists and Patterns</title>
   <para>
-    <emphasis>(This chapter yet to be completed)</emphasis>
+    This chapter will focus on two common elements of programming in
+    OCaml: lists and pattern matching. Both of these were discussed in
+    <xref linkend="a-guided-tour"/>, but we'll go into more
+    depth here, presenting the two topics together, and using one to
+    help illustrate the other.
   </para>
+  <sect1 id="list-basics">
+    <title>List Basics</title>
+    <para>
+      We'll start with lists. An OCaml list is an immutable, finite
+      sequence of elements of the same type. As we've seen, OCaml lists
+      can be generated using a bracket-and-semicolon notation:
+    </para>
+    <programlisting language="ocaml">
+# [1;2;3];;
+- : int list = [1; 2; 3]
+</programlisting>
+    <para>
+      And they can also be generated using the equivalent
+      <literal>::</literal> notation.
+    </para>
+    <programlisting language="ocaml">
+# 1 :: (2 :: (3 :: [])) ;;
+- : int list = [1; 2; 3]
+# 1 :: 2 :: 3 :: [] ;;
+- : int list = [1; 2; 3]
+</programlisting>
+    <para>
+      Note that <literal>[]</literal>, the empty list, is used as a
+      terminator for the list.
+    </para>
+    <para>
+      The <literal>::</literal> operator is considered the more
+      fundamental of the two, and it conveys something important about
+      the nature of lists, which is that they are implemented as
+      singly-linked lists. The following is a rough graphical
+      representation of how the list
+      <literal>1 :: 2 :: 3 :: []</literal> is laid out as a
+      data-structure.
+    </para>
+    <programlisting>
++---+---+   +---+---+   +---+---+
+| 1 | *----&gt;| 2 | *----&gt;| 3 | *----&gt;||
++---+---+   +---+---+   +---+---+
+</programlisting>
+    <para>
+      In the above, the final arrow (from the box containing
+      <literal>3</literal>) points to the empty list.
+    </para>
+    <para>
+      Every time you see the <literal>::</literal> operator used to
+      extend a list, you should think of that as allocating a new list
+      element that contains two things: a reference to the data in that
+      list element, and a reference to the remainder of the list.
+    </para>
+  </sect1>
+  <sect1 id="using-patterns-to-extract-data-from-a-list">
+    <title>Using patterns to extract data from a list</title>
+    <para>
+      We can read data out of a list using a match statement. Here's a
+      simple example of a recursive function that computes the sum of
+      all elements of a list.
+    </para>
+    <programlisting language="ocaml">
+# let rec sum l =
+    match l with
+    | [] -&gt; 0
+    | hd :: tl -&gt; hd + sum tl
+  ;;
+val sum : int list -&gt; int = &lt;fun&gt;
+# sum [1;2;3];;
+- : int = 6
+# sum [];;
+- : int = 0
+</programlisting>
+    <para>
+      This code follows the convention of using <literal>hd</literal> to
+      represent the first element (or head) of the list, and
+      <literal>tl</literal> to represent the remainder (or tail).
+    </para>
+    <para>
+      The match statement in <literal>sum</literal> is really doing two
+      things: first, it's acting as a case-analysis tool, breaking down
+      the possibilities into a pattern-indexed list of cases. Second, it
+      lets you name sub-structures within the data-structure being
+      matched. In this case, the variables <literal>hd</literal> and
+      <literal>tl</literal> are bound by the pattern that defines the
+      first case of the match statment, and are then used in the
+      expressions to the right of the arrow.
+    </para>
+    <para>
+      The fact that match statements can be used to bind new variables
+      can be a little surprising. To see how, imagine we wanted to write
+      a function that filtered out from a list all elements equal to a
+      particular value. You might be tempted to write that code as
+      follows.
+    </para>
+    <programlisting language="ocaml">
+# let rec drop_value l to_drop =
+    match l with
+    | [] -&gt; []
+    | to_drop :: tl -&gt; drop_value tl to_drop
+    | hd :: tl -&gt; hd :: drop_value tl to_drop
+  ;;
+</programlisting>
+    <para>
+      But when we type this in, the compiler will immediately warn us
+      that something is wrong. Moreover, the function clearly does the
+      wrong thing, filtering out all elements of the list rather than
+      just those equal to the provided value.
+    </para>
+    <programlisting>
+Characters 114-122:
+      | hd :: tl -&gt; hd :: drop_value tl to_drop
+        ^^^^^^^^
+Warning 11: this match case is unused.
+val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
+# drop_value [1;2;3] 2;;
+- : int list = []
+</programlisting>
+    <para>
+      So, what's going on?
+    </para>
+    <para>
+      The key observation is that the appearance of
+      <literal>to_drop</literal> in the second case doesn't imply a
+      check that the first element is equal to the value
+      <literal>to_drop</literal> passed in as an argument to
+      <literal>drop_value</literal>. Instead, it just causes a new
+      variable <literal>to_drop</literal> to be bound to whatever
+      happens to be in the first element of the list, shadowing the
+      earlier definition of <literal>to_drop</literal>. The third case
+      is unused because it is essentially the same pattern as was used
+      in the second case.
+    </para>
+    <para>
+      A better way to write this code is not to use pattern matching for
+      determining whether the first element is equal to
+      <literal>to_drop</literal>, but to instead just use an ordinary
+      boolean condition and an if-statement.
+    </para>
+    <programlisting language="ocaml">
+# let rec drop_value l to_drop =
+    match l with
+    | [] -&gt; []
+    | hd :: tl -&gt;
+      let new_tl = drop_value tl to_drop in
+      if hd = to_drop then new_tl else hd :: new_tl
+  ;;
+val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
+# drop_value [1;2;3] 1;;
+- : int list = [1; 3]
+</programlisting>
+    <para>
+      Note that if we wanted to drop a particular literal value (rather
+      than a value that was passed in), we could do this using something
+      like our original implementation of <literal>drop_value</literal>.
+    </para>
+    <programlisting language="ocaml">
+# let rec drop_zero l =
+    match l with
+    | [] -&gt; []
+    | 0  :: tl -&gt; drop_zero tl
+    | hd :: tl -&gt; hd :: drop_zero tl
+  ;;
+val drop_zero : int list -&gt; int list = &lt;fun&gt;
+# drop_zero [1;2;0;3];;
+- : int list = [1; 2; 3]
+</programlisting>
+  </sect1>
+  <sect1 id="limitations-and-blessings-of-pattern-matching">
+    <title>Limitations (and blessings) of pattern matching</title>
+    <para>
+      The above example highlights an important fact about patterns,
+      which is that they can't be used to express arbitrary conditions.
+      Patterns can characterize the layout of a data-structure, and can
+      even include literals as in the <literal>drop_zero</literal>
+      example, but that's where they stop. A pattern can check if a list
+      has two elements, but it can't check if the first two elements are
+      equal to each other.
+    </para>
+    <para>
+      You can think of patterns as a specialized sub-language that can
+      express a limited (though still quite rich) set of conditions. The
+      fact that the pattern language is limited turns out to be a very
+      good thing, making it possible to build better support for
+      patterns in the compiler. In particular, both the efficiency of
+      match statements and the ability of the compiler to detect errors
+      in matches depend on the constrained nature of patterns.
+    </para>
+    <sect2 id="performance">
+      <title>Performance</title>
+      <para>
+        Naively, you might think that it would be necessary to check
+        each case in a <literal>match</literal> in sequence to figure
+        out which one fires. If the cases of a match were guarded by
+        arbitrary OCaml code, that would be the case. But OCaml is often
+        able to generate code that jumps directly to the matched case
+        based on an efficiently chosen set of run-time checks. This
+        means that match statements that would be slow when implemented
+        as a sequence of checks can run quickly as a match.
+      </para>
+      <para>
+        As an example, consider the following rather silly functions for
+        incrementing an integer by one. The first is implemented with a
+        match statement, and the second, with a sequence of if
+        statements.
+      </para>
+      <programlisting language="ocaml">
+let plus_one x =
+  match x with
+  | 0 -&gt; 1
+  | 1 -&gt; 2
+  | 2 -&gt; 3
+  | _ -&gt; x + 1
+
+let plus_one_slow x =
+  if      x = 0 then 1
+  else if x = 1 then 2
+  else if x = 2 then 3
+  else x + 1
+</programlisting>
+      <para>
+        If you benchmark these, you'll see that
+        <literal>plus_one_slow</literal> is about 35% slower than
+        <literal>plus_one</literal>. And the advantage gets larger as
+        the number of cases increases. As another example, we can
+        rewrite the <literal>sum</literal> function we described earlier
+        in the chapter using an <literal>if</literal> statement rather
+        than a match. Here, we're using the functions
+        <literal>is_empty</literal>, <literal>hd_exn</literal> and
+        <literal>tl_exn</literal> from the <literal>List</literal>
+        module to deconstruct the list, rather than using pattern
+        matching.
+      </para>
+      <programlisting>
+let rec sum_slow l =
+  if List.is_empty l then 0
+  else List.hd_exn l + sum_slow (List.tl_exn l)
+;;
+</programlisting>
+      <para>
+        In this case, the match-based implementation is 70% faster than
+        the one using if. The difference comes because we need to
+        effectively do the same check multiple times, since each
+        function we call has to re-examine the first element of the list
+        to determine whether or not it's the empty cell, whereas with
+        the match statement this happens exactly once per list element.
+      </para>
+      <para>
+        Overall, pattern matching is very efficient; typically more
+        efficient than the alternatives one might code by hand. One
+        notable exception is matches over strings, which are in fact
+        tested sequentially. But most of the time, using pattern
+        matching is a performance win.
+      </para>
+    </sect2>
+    <sect2 id="detecting-errors">
+      <title>Detecting errors</title>
+      <para>
+        The error-detecting capabilities of match statements are if
+        anything more important than their performance. We've already
+        seen one example of OCaml's ability to find problems in a
+        pattern match: in our broken implementation of
+        <literal>drop_value</literal>, OCaml warned us that the final
+        case was redundant. There are no algorithms for determining if a
+        predicate written in a general-purpose language is redundant,
+        but it can be solved reliably in the context of patterns.
+      </para>
+      <para>
+        OCaml also checks match statements for exhaustiveness. Consider
+        what happens if we modify <literal>drop_zero</literal> by
+        deleting the handler for one of the cases.
+      </para>
+      <programlisting language="ocaml">
+# let rec drop_zero l =
+    match l with
+    | [] -&gt; []
+    | 0  :: tl -&gt; drop_zero tl
+  ;;
+</programlisting>
+      <para>
+        The compiler will produce a warning that we've missed a case,
+        along with an example of an unmatched pattern.
+      </para>
+      <programlisting>
+Characters 26-84:
+  ....match l with
+      | [] -&gt; []
+      | 0  :: tl -&gt; drop_zero tl
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+1::_
+val drop_zero : int list -&gt; 'a list = &lt;fun&gt;
+</programlisting>
+      <para>
+        For simple examples like this, exhaustiveness checks are useful
+        enough. But as we'll see in
+        <xref linkend="variants"/>, as you get to more
+        complicated examples, especially those involving user-defined
+        types, the fact that pattern matches are checked for
+        exhaustiveness become invaluable, both as a way of catching
+        outright errors and as a refactoring tool, with such compiler
+        errors guiding you to the locations where you need to adapt your
+        code to deal with changing type definitions.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="using-the-list-module-effectively">
+    <title>Using the <literal>List</literal> module effectively</title>
+    <para>
+      In this chapter and before, we've written a fair amount of direct
+      list-munging code using pattern matching and recursive functions.
+      In real-world programming, you need to do this comparatively
+      rarely. Most of the time, you're better off using functions from
+      the <literal>List</literal> module which is full of reusable
+      functions that abstract out common patterns for computing with
+      lists.
+    </para>
+    <para>
+      To see this, let's work through a concrete example. In particular,
+      we'll write code to render a table of data. In particular, we'll
+      write a function <literal>render_table</literal> that, given a
+      list of column headers and a list of rows, prints them out in a
+      well formatted text table. So, if you were to write:
+    </para>
+    <programlisting language="ocaml">
+# printf &quot;%s\n&quot;
+   (render_table
+     [&quot;language&quot;;&quot;architect&quot;;&quot;first release&quot;]
+     [ [&quot;Lisp&quot; ;&quot;John McCarthy&quot; ;&quot;1958&quot;] ;
+       [&quot;C&quot;    ;&quot;Dennis Ritchie&quot;;&quot;1969&quot;] ;
+       [&quot;ML&quot;   ;&quot;Robin Milner&quot;  ;&quot;1973&quot;] ;
+       [&quot;OCaml&quot;;&quot;Xavier Leroy&quot;  ;&quot;1996&quot;] ;
+     ]);;
+</programlisting>
+    <para>
+      it would generate the following output.
+    </para>
+    <programlisting>
+| language | architect      | first release |
+|----------+----------------+---------------|
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
+</programlisting>
+    <para>
+      Let's now dive into the implementation. The first thing we need to
+      do is to compute the maximum widths of each column of data. We can
+      do this by converting the header and each row into a list of
+      integer lengths, and the taking the element-wise max of those
+      lengths. Writing the code for all of this directly can be a bit of
+      a chore, but we can it quite concisely if we make use of some
+      built in functions from the list module. We'll use three in
+      particular, <literal>List.map</literal>,
+      <literal>List.map2_exn</literal>, and
+      <literal>List.fold</literal>.
+    </para>
+    <para>
+      <literal>List.map</literal> is the simplest to explain. It takes a
+      list and a function for transforming elements of that list, and
+      returns a new list with the transformed elements. Thus, we can
+      write:
+    </para>
+    <programlisting language="ocaml">
+# List.map ~f:String.length [&quot;Hello&quot;; &quot;World!&quot;];;
+- : int list = [5; 6]
+</programlisting>
+    <para>
+      <literal>List.map2_exn</literal> is similar to
+      <literal>List.map</literal>, except that it takes two lists and a
+      function for combining them. Thus, we might write:
+    </para>
+    <programlisting language="ocaml">
+# List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
+- : int list = [3; 2; 3]
+</programlisting>
+    <para>
+      The <literal>_exn</literal> is there because the function throws
+      an exception if the lists are of mismatched length.
+    </para>
+    <programlisting language="ocaml">
+# List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
+Exception: (Invalid_argument &quot;length mismatch in rev_map2_exn: 3 &lt;&gt; 4 &quot;).
+</programlisting>
+    <para>
+      The final, and most complicated function is
+      <literal>List.fold</literal>. With <literal>List.fold</literal>,
+      you provide an initial value, and a function for updating that
+      initial value with the information from a list element.
+      <literal>List.fold</literal> then walks over the list elements
+      from left to right, carrying forward the updated initial value as
+      an accumulator. It's worth looking at the type for
+      <literal>List.fold</literal> and puzzling through it:
+    </para>
+    <programlisting language="ocaml">
+# List.fold;;
+- : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum = &lt;fun&gt;
+</programlisting>
+    <para>
+      We can use <literal>List.fold</literal> for something as simple as
+      summing up a list:
+    </para>
+    <programlisting language="ocaml">
+# List.fold ~init:0 ~f:(+) [1;2;3;4];;
+- : int = 10
+</programlisting>
+    <para>
+      But we can also use it for more complicated calculations where the
+      accumulator does not necessarily have the same type as the
+      elements of the list. Here, for example, is how you can use
+      <literal>fold</literal> to reverse a list.
+    </para>
+    <programlisting language="ocaml">
+# List.fold ~init:[] ~f:(fun list x -&gt; x :: list) [1;2;3;4];;
+- : int list = [4; 3; 2; 1]
+</programlisting>
+    <para>
+      Let's bring this all together to write a function to compute the
+      maximum widths for the table.
+    </para>
+    <programlisting language="ocaml">
+# let max_widths header rows =
+    let to_lengths l = List.map ~f:String.length l in
+    List.fold rows
+      ~init:(to_lengths header)
+      ~f:(fun acc row -&gt;
+        List.map2_exn ~f:Int.max acc (to_lengths row))
+  ;;
+val max_widths : string list -&gt; string list list -&gt; int list = &lt;fun&gt;
+</programlisting>
+    <para>
+      Here, we define the function <literal>to_lengths</literal> which
+      converts a list of strings to a list of integer lengths. Then
+      <literal>fold</literal>, using the lengths of the header row as
+      the initial accumulator, uses <literal>map2_exn</literal> to take
+      the max of the accumulator with the lengths of the strings in each
+      row of the table.
+    </para>
+    <para>
+      The next thing we'll need to do is to compute the separator row,
+      based on the widths. Here's a simple function for doing that,
+      which uses <literal>List.map</literal> to convert a width to an
+      appropriately sized string of dashes. For generating the strings
+      themselves we use <literal>String.concat</literal>, which
+      concatenates a list of strings with an optional separator string,
+      and <literal>^</literal> concatenating a pair of strings.
+    </para>
+    <programlisting language="ocaml">
+# let render_separator widths =
+    let pieces = List.map widths
+      ~f:(fun w -&gt; String.make (w + 2) '-')
+    in
+    &quot;|&quot; ^ String.concat ~sep:&quot;+&quot; pieces ^ &quot;|&quot;
+  ;;
+val render_separator : int list -&gt; string = &lt;fun&gt;
+# render_separator [3;6;2];;
+- : string = &quot;|-----+--------+----|&quot;
+</programlisting>
+    <para>
+      Note that we make the line of dashes two larger than the provided
+      width to provide some whitespace around each entry in the table.
+    </para>
+    <note>
+    <title>
+    Performance of <literal>String.concat</literal> and
+    <literal>^</literal>
+    </title>
+    <para>
+      In the above, we're using two different ways of concatenating
+      strings, <literal>String.concat</literal>, which operates on lists
+      of strings, and <literal>^</literal>, which is a pairwise
+      operator. You should avoid <literal>^</literal> for joining long
+      numbers of strings, since, it allocates a new string every time it
+      runs. Thus, the following code:
+    </para>
+    <programlisting language="ocaml">
+let s = &quot;.&quot; ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;  ^ &quot;.&quot;
+</programlisting>
+    <para>
+      will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
+      code:
+    </para>
+    <programlisting language="ocaml">
+let s = String.concat [&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;;&quot;.&quot;]
+</programlisting>
+    <para>
+      allocates one string of size 7, as well as a list of length 7. At
+      these small sizes, the differences don't amount to much, but for
+      assembling of large strings, it can be a serious performance
+      issue.
+    </para>
+    </note>
+    <para>
+      Now we need code for rendering a row with data in it. We'll first
+      write a function <literal>pad</literal> for padding out a string
+      to a specified length:
+    </para>
+    <programlisting language="ocaml">
+# let pad s length =
+    if String.length s &gt;= length then s
+    else s ^ String.make (length - String.length s) ' '
+  ;;
+val pad : string -&gt; int -&gt; string = &lt;fun&gt;
+# pad &quot;hello&quot; 10;;
+- : string = &quot;hello     &quot;
+</programlisting>
+    <para>
+      And then we'll write a function for rendering a whole row by
+      merging together the padded out strings. Again, we'll use
+      <literal>List.map2_exn</literal> for combining the list of data in
+      the row with the list of widths.
+    </para>
+    <programlisting language="ocaml">
+# let render_row row widths =
+    let pieces = List.map2_exn row widths
+      ~f:(fun s width -&gt; &quot; &quot; ^ pad s width ^ &quot; &quot;)
+    in
+    &quot;|&quot; ^ String.concat ~sep:&quot;|&quot; pieces ^ &quot;|&quot;
+  ;;
+val render_row : string list -&gt; int list -&gt; string = &lt;fun&gt;
+# render_row [&quot;Hello&quot;;&quot;World&quot;] [10;15];;
+- : string = &quot;| Hello      | World           |&quot;
+</programlisting>
+    <para>
+      Now we can bring this all together in a single function that
+      renders the table.
+    </para>
+    <programlisting language="ocaml">
+# let render_table header rows =
+    let widths = max_widths header rows in
+    String.concat ~sep:&quot;\n&quot;
+      (render_row header widths
+       :: render_separator widths
+       :: List.map rows ~f:(fun row -&gt; render_row row widths)
+      )
+  ;;
+val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
+</programlisting>
+  </sect1>
+  <sect1 id="tail-recursion">
+    <title>Tail recursion</title>
+    <para>
+    </para>
+  </sect1>
+  <sect1 id="writing-efficient-list-handling-code">
+    <title>Writing efficient list-handling code</title>
+    <para>
+      <emphasis>(Cover as-patterns here)</emphasis>
+    </para>
+  </sect1>
+  <sect1 id="todo">
+    <title>TODO</title>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Underscores in pattern matches
+        </para>
+      </listitem>
+    </itemizedlist>
+  </sect1>
 </chapter><chapter id="files-modules-and-programs">
   <title>Files, Modules and Programs</title>
   <para>
@@ -3508,21 +4074,21 @@ let () =
     <para>
       The function <literal>build_counts</literal> reads in lines from
       <literal>stdin</literal>, constructing from those lines an
-      associating list with the frequencies of each line. It does this
+      association list with the frequencies of each line. It does this
       by invoking <literal>In_channel.fold_lines</literal> (similar to
       the function <literal>List.fold</literal> described in
-      <xref linkend="lists-options-and-patterns"/>), which
-      reads through the lines one by one, calling the provided fold
-      function for each line to update the accumulator. That accumulator
-      is initialized to the empty list.
+      <xref linkend="lists-and-patterns"/>), which reads
+      through the lines one by one, calling the provided fold function
+      for each line to update the accumulator. That accumulator is
+      initialized to the empty list.
     </para>
     <para>
       With <literal>build_counts</literal> defined, we then call the
-      function to build the associating list, sort that list be
+      function to build the association list, sort that list be
       frequency in descending order, grab the first 10 elements off the
-      list, and the iterate over those ten elements and print them to
-      the screen. These operations are tied together using the operator,
-      as described in
+      list, and then iterate over those ten elements and print them to
+      the screen. These operations are tied together using the
+      <literal>|&gt;</literal> operator, as described in
       <xref linkend="variables-and-functions"/>.
     </para>
     <note><title>
@@ -3864,12 +4430,17 @@ Error: This expression has type 'a list
       <para>
         This is because <literal>freq.ml</literal> depends on the fact
         that frequency counts are represented as association lists, a
-        fact that we've just hidden. We just need to fix the code to use
+        fact that we've just hidden. We just need to fix
+        <literal>build_counts</literal> to use
         <literal>Counter.empty</literal> instead of
         <literal>[]</literal> and <literal>Counter.to_list</literal> to
         get the association list out at the end for processing and
-        printing.
+        printing, as below.
       </para>
+      <programlisting language="ocaml">
+let build_counts () =
+  In_channel.fold_lines stdin ~init:Counter.empty ~f:Counter.touch
+</programlisting>
       <para>
         Now we can turn to optimizing the implementation of
         <literal>Counter</literal>. Here's an alternate and far more
@@ -3948,11 +4519,11 @@ val median : t -&gt; median
       <para>
         The decision of whether a given type should be abstract or
         concrete is an important one. Abstract types give you more
-        control over how values are created and accessed, and makes it
-        easier to enforce invariants beyond the what is enforced by the
-        type itself; concrete types let you expose more detail and
-        structure to client code in a lightweight way. The right choice
-        depends very much on the context.
+        control over how values are created and accessed, and make it
+        easier to enforce invariants beyond what is enforced by the type
+        itself; concrete types let you expose more detail and structure
+        to client code in a lightweight way. The right choice depends
+        very much on the context.
       </para>
     </sect2>
     <sect2 id="the-include-statement">
@@ -4362,8 +4933,8 @@ Error: The implementation counter.ml
         </para>
         <para>
           The same is true at the module level. By default, circular
-          dependencies between modules is not allowed, and indeed,
-          circular dependencies among files is never allowed.
+          dependencies between modules are not allowed, and indeed,
+          circular dependencies among files are never allowed.
         </para>
         <para>
           The simplest case of this is that a module can not directly
@@ -5143,7 +5714,8 @@ credentials: Xy2d9W
     Let's consider a concrete example of how variants can be useful.
     Almost all terminals support a set of 8 basic colors, and we can
     represent those colors using a variant. Each color is declared as a
-    simple tag, with pipes used to separate the different cases.
+    simple tag, with pipes used to separate the different cases. Note
+    that variant tags must be capitalized.
   </para>
   <programlisting language="ocaml">
 # type basic_color =
@@ -5155,9 +5727,9 @@ credentials: Xy2d9W
 </programlisting>
   <para>
     The following function uses pattern matching to convert a
-    <literal>basic_color</literal> to a corresponding integer. Note that
-    the exhaustiveness checking on pattern matches means that the
-    compiler will warn us if we miss a color.
+    <literal>basic_color</literal> to a corresponding integer. The
+    exhaustiveness checking on pattern matches means that the compiler
+    will warn us if we miss a color.
   </para>
   <programlisting language="ocaml">
 # let basic_color_to_int = function
@@ -5366,14 +5938,15 @@ val oldschool_color_to_int : color -&gt; int = &lt;fun&gt;
       <xref linkend="records"/>:
     </para>
     <programlisting language="ocaml">
-module Log_entry = struct
-  type t =
-    { session_id: string;
-      time: Time.t;
-      important: bool;
-      message: string;
-    }
-end
+# module Log_entry = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        important: bool;
+        message: string;
+      }
+  end
+  ;;
 </programlisting>
     <para>
       This record type combines multiple pieces of data into one value.
@@ -5387,9 +5960,10 @@ end
       possibilities, as in the following example.
     </para>
     <programlisting language="ocaml">
-type client_message = | Logon of Logon.t
-                      | Heartbeat of Heartbeat.t
-                      | Log_entry of Log_entry.t
+# type client_message = | Logon of Logon.t
+                        | Heartbeat of Heartbeat.t
+                        | Log_entry of Log_entry.t
+  ;;
 </programlisting>
     <para>
       A <literal>client_message</literal> is a <literal>Logon</literal>
@@ -5398,7 +5972,9 @@ type client_message = | Logon of Logon.t
       to write code that processes messages generically, rather than
       code specialized to a fixed message type, we need something like
       <literal>client_message</literal> to act as one overarching type
-      for the different possible messages.
+      for the different possible messages. We can then match on the
+      <literal>client_message</literal> to determine the type of the
+      particular message being dealt with.
     </para>
     <para>
       You can increase the precision of your types by using variants to
@@ -5426,27 +6002,30 @@ type client_message = | Logon of Logon.t
       Here's the concrete code.
     </para>
     <programlisting language="ocaml">
-let messages_for_user user messages =
-  let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
-      ~f:(fun ((messages,user_sessions) as acc) message -&gt;
-        match message with
-        | Logon m -&gt;
-          if m.Logon.user = user then
-            (message::messages, Set.add user_sessions m.Logon.session_id)
-          else acc
-        | Heartbeat _ | Log_entry _ -&gt;
-          let session_id = match message with
-            | Logon     m -&gt; m.Logon.session_id
-            | Heartbeat m -&gt; m.Heartbeat.session_id
-            | Log_entry m -&gt; m.Log_entry.session_id
-          in
-          if Set.mem user_sessions session_id then
-            (message::messages,user_sessions)
-          else acc
-      )
-  in
-  List.rev user_messages
+# let messages_for_user user messages =
+    let (user_messages,_) =
+      List.fold messages ~init:([],String.Set.empty)
+        ~f:(fun ((messages,user_sessions) as acc) message -&gt;
+          match message with
+          | Logon m -&gt;
+            if m.Logon.user = user then
+              (message::messages, Set.add user_sessions m.Logon.session_id)
+            else acc
+          | Heartbeat _ | Log_entry _ -&gt;
+            let session_id = match message with
+              | Logon     m -&gt; m.Logon.session_id
+              | Heartbeat m -&gt; m.Heartbeat.session_id
+              | Log_entry m -&gt; m.Log_entry.session_id
+            in
+            if Set.mem user_sessions session_id then
+              (message::messages,user_sessions)
+            else acc
+        )
+    in
+    List.rev user_messages
+  ;;
+val messages_for_user : string -&gt; client_message list -&gt; client_message list =
+  &lt;fun&gt;
 </programlisting>
     <para>
       There's one awkward bit about the code above, which is the
@@ -5474,42 +6053,45 @@ let messages_for_user user messages =
       records to just contain the unique components of each message.
     </para>
     <programlisting language="ocaml">
-module Log_entry = struct
-  type t = { important: bool;
-             message: string;
-           }
-end
+# module Log_entry = struct
+    type t = { important: bool;
+               message: string;
+             }
+  end
 
-module Heartbeat = struct
-  type t = { status_message: string; }
-end
+  module Heartbeat = struct
+    type t = { status_message: string; }
+  end
 
-module Logon = struct
-  type t = { user: string;
-             credentials: string;
-           }
-end
+  module Logon = struct
+    type t = { user: string;
+               credentials: string;
+             }
+  end
+  ;;
 </programlisting>
     <para>
       We can then define a variant type that covers the different
       possible unique components.
     </para>
     <programlisting language="ocaml">
-type details =
-| Logon of Logon.t
-| Heartbeat of Heartbeat.t
-| Log_entry of Log_entry.t
+# type details =
+  | Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+ ;;
 </programlisting>
     <para>
       Separately, we need a record that contains the fields that are
       common across all messages.
     </para>
     <programlisting language="ocaml">
-module Common = struct
-  type t = { session_id: string;
-             time: Time.t;
-           }
-end
+# module Common = struct
+    type t = { session_id: string;
+               time: Time.t;
+             }
+  end
+  ;;
 </programlisting>
     <para>
       A full message can then be represented as a pair of a
@@ -5517,23 +6099,26 @@ end
       Using this, we can rewrite our example above as follows:
     </para>
     <programlisting language="ocaml">
-let messages_for_user user messages =
-  let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
-      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) -&gt;
-        let session_id = common.Common.session_id in
-        match details with
-        | Logon m -&gt;
-          if m.Logon.user = user then
-            (message::messages, Set.add user_sessions session_id)
-          else acc
-        | Heartbeat _ | Log_entry _ -&gt;
-          if Set.mem user_sessions session_id then
-            (message::messages,user_sessions)
-          else acc
-      )
-  in
-  List.rev user_messages
+# let messages_for_user user messages =
+    let (user_messages,_) =
+      List.fold messages ~init:([],String.Set.empty)
+        ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) -&gt;
+          let session_id = common.Common.session_id in
+          match details with
+          | Logon m -&gt;
+            if m.Logon.user = user then
+              (message::messages, Set.add user_sessions session_id)
+            else acc
+          | Heartbeat _ | Log_entry _ -&gt;
+            if Set.mem user_sessions session_id then
+              (message::messages,user_sessions)
+            else acc
+        )
+    in
+    List.rev user_messages
+  ;;
+val messages_for_user :
+  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;
 </programlisting>
     <para>
       Note that the more complex match statement for computing the
@@ -5551,11 +6136,12 @@ let messages_for_user user messages =
       types, we could write a dispatch function as follows.
     </para>
     <programlisting language="ocaml">
-let handle_message server_state (common,details) =
-  match details with
-  | Log_entry m -&gt; handle_log_entry server_state (common,m)
-  | Logon     m -&gt; handle_logon     server_state (common,m)
-  | Heartbeat m -&gt; handle_heartbeat server_state (common,m)
+# let handle_message server_state (common,details) =
+    match details with
+    | Log_entry m -&gt; handle_log_entry server_state (common,m)
+    | Logon     m -&gt; handle_logon     server_state (common,m)
+    | Heartbeat m -&gt; handle_heartbeat server_state (common,m)
+  ;;
 </programlisting>
     <para>
       And it's explicit at the type level that
@@ -5721,9 +6307,9 @@ val simplify : 'a blang -&gt; 'a blang = &lt;fun&gt;
       | (And _ | Or _ | Base _ ) -&gt; Not blang
 </programlisting>
     <para>
-      This example is more than a toy. There's a module in Core very
-      much in this spirit in Core called <literal>Blang</literal>, and
-      it gets a lot of practical use in a variety of applications.
+      This example is more than a toy. There's a module very much in
+      this spirit in Core called <literal>Blang</literal>, and it gets a
+      lot of practical use in a variety of applications.
     </para>
     <para>
       More generally, using variants to build recursive data-structures
@@ -5825,18 +6411,17 @@ val exact : [ `Float of float | `Int of int ] list
       that have different upper and lower bounds.
     </para>
     <programlisting language="ocaml">
-let is_positive = function
+# let is_positive = function
      | `Int   x -&gt; Ok (x &gt; 0)
      | `Float x -&gt; Ok (x &gt; 0.)
      | `Not_a_number -&gt; Error &quot;not a number&quot;;;
 val is_positive :
   [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt;
-  (bool, string) Result.t = &lt;fun&gt;
+  (bool, string) Core.Result.t = &lt;fun&gt;
 # List.filter [three; four] ~f:(fun x -&gt;
      match is_positive x with Error _ -&gt; false | Ok b -&gt; b);;
-  - : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ]
-    List.t
-= [`Int 3; `Float 4.]
+- : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ] list =
+[`Int 3; `Float 4.]
 </programlisting>
     <para>
       Here, the inferred type states that the tags can be no more than
@@ -6025,8 +6610,10 @@ val is_positive_permissive :
       </note>
       <para>
         Let's consider how we might turn our code into a proper library
-        with an <literal>mli</literal>. Here's what the interface to
-        this file might look like.
+        with an implementation in an <literal>ml</literal> file and an
+        implementation in a separate <literal>mli</literal>, as we saw
+        in <xref linkend="files-modules-and-programs"/>. Let's
+        start with the <literal>mli</literal>.
       </para>
       <programlisting language="ocaml">
 (* file: terminal_color.mli *)
@@ -6056,6 +6643,8 @@ val extended_color_to_int : extended_color -&gt; int
         implement this library as follows.
       </para>
       <programlisting language="ocaml">
+(* file: terminal_color.ml *)
+
 open Core.Std
 
 type basic_color =
@@ -6557,7 +7146,7 @@ Exception: Division_by_zero.
 </programlisting>
     <para>
       If we put a <literal>printf</literal> in the middle of the
-      computation, we can see that the <literal>List.map</literal> is
+      computation, we can see that <literal>List.map</literal> is
       interrupted part way through it's execution:
     </para>
     <programlisting language="ocaml">
@@ -6763,7 +7352,7 @@ try &lt;expr&gt; with
 ...
 </programlisting>
       <para>
-        A <literal>try/with</literal> clause first evaluates it's body,
+        A <literal>try/with</literal> clause first evaluates its body,
         <literal>&lt;expr&gt;</literal>. If no exception is thrown, then
         the result of evaluating the body is what the entire
         <literal>try/with</literal> clause evaluates to.
@@ -7875,8 +8464,8 @@ include Foldable.Extend(T)
     returns the value of its computation.
     <emphasis>Imperative</emphasis> code, on the other hand, operates by
     side-effects that modify a program's internal state or interact with
-    the outside world, and so can have a new effect, and return
-    different results, every time they're called.
+    the outside world. An imperative function has a new effect, and
+    potentially returns different results, every time it's called.
   </para>
   <para>
     Pure code is the default in OCaml, and for good reason --- it's
@@ -7907,14 +8496,17 @@ include Foldable.Extend(T)
     </para>
     <para>
       Our dictionary, like those in Core and the standard library, will
-      be implemented as a hash table. In particular, we'll use a
+      be implemented as a hash table. In particular, we'll use an
       <emphasis>open hashing</emphasis> scheme, which is to say the hash
       table will be an array of buckets, each bucket containing a list
       of key/value pairs that have been hashed into that bucket.
     </para>
     <para>
       Here's the interface we'll match, provided as an
-      <literal>mli</literal>.
+      <literal>mli</literal>. Here, the type
+      <literal>('a, 'b) t</literal> is used for a dictionary with keys
+      of type <literal>'a</literal> and data of type
+      <literal>'b</literal>.
     </para>
     <programlisting language="ocaml">
 (* file: dictionary.mli *)
@@ -7930,14 +8522,12 @@ val iter   : ('a, 'b) t -&gt; f:(key:'a -&gt; data:'b -&gt; unit) -&gt; unit
 val remove : ('a, 'b) t -&gt; 'a -&gt; unit
 </programlisting>
     <para>
-      The type <literal>('a, 'b) t</literal> is used for a dictionary
-      with keys of type <literal>'a</literal> and data of type
-      <literal>'b</literal>. The <literal>mli</literal> also includes a
-      collection of helper functions whose purpose and behavior should
-      be largely inferrable from their names and type signatures. Notice
-      that a number of the functions, in particular, ones like
-      <literal>add</literal> that modify the dictionary, return unit.
-      This is typical of functions that act by side-effect.
+      The <literal>mli</literal> also includes a collection of helper
+      functions whose purpose and behavior should be largely inferrable
+      from their names and type signatures. Notice that a number of the
+      functions, in particular, ones like <literal>add</literal> that
+      modify the dictionary, return unit. This is typical of functions
+      that act by side-effect.
     </para>
     <para>
       We'll now walk through the implementation (contained in the
@@ -8032,10 +8622,26 @@ let find t key =
     <para>
       A new piece of syntax has also popped up in
       <literal>find</literal>: we write <literal>array.(index)</literal>
-      to grab a value from an array.
+      to grab a value from an array. Also, <literal>find</literal> uses
+      <literal>List.find_map</literal>, which you can see the type of by
+      typing it into the toplevel:
+    </para>
+    <programlisting language="ocaml">
+# List.find_map;;
+- : 'a list -&gt; f:('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
+</programlisting>
+    <para>
+      <literal>List.find_map</literal> iterates over the elements of the
+      list, calling <literal>f</literal> on each one until a
+      <literal>Some</literal> is returned by <literal>f</literal>, at
+      which point the value returned by <literal>f</literal> is returned
+      by <literal>find_map</literal>. If <literal>f</literal> returns
+      <literal>None</literal> on all values, then
+      <literal>None</literal> is returned by
+      <literal>find_map</literal>.
     </para>
     <para>
-      Now we'll look at the implementation of <literal>iter</literal>:
+      Now let's look at the implementation of <literal>iter</literal>:
     </para>
     <programlisting language="ocaml">
 let iter t ~f =
@@ -8085,8 +8691,7 @@ let add t ~key ~data =
 
 let remove t key =
   let i = hash_bucket key in
-  if not (bucket_has_key t i key) then ()
-  else (
+  if bucket_has_key t i key then (
     let filtered_bucket =
       List.filter t.buckets.(i) ~f:(fun (key',_) -&gt; key' &lt;&gt; key)
     in
@@ -8478,7 +9083,7 @@ open Core.Std
 type 'a element =
   { value : 'a;
     mutable next : 'a element option;
-    mutable previous : 'a element option
+    mutable prev : 'a element option
   }
 
 type 'a t = 'a element option ref
@@ -8731,8 +9336,11 @@ type 'a lazy_state = Delayed of (unit -&gt; 'a) | Value of 'a | Exn of exn
       <literal>Value</literal> state when it has been forced and the
       computation ended normally. The <literal>Exn</literal> case is for
       when the lazy value has been forced, but the computation ended
-      with an exception. A lazy value is just a reference to a
-      <literal>lazy_state</literal>.
+      with an exception. A lazy value is simply a <literal>ref</literal>
+      containing a <literal>lazy_state</literal>, where the
+      <literal>ref</literal> makes it possible to change from being in
+      the <literal>Delayed</literal> state to being in the
+      <literal>Value</literal> or <literal>Exn</literal> states.
     </para>
     <para>
       We can create a lazy value based on a thunk,
@@ -8779,13 +9387,14 @@ performing lazy computation
 - : float = 4.
 </programlisting>
     <para>
-      The main difference between our implementation of laziness and the
-      built-in version is syntax. Rather than writing
+      The main user-visisble difference between our implementation of
+      laziness and the built-in version is syntax. Rather than writing
       <literal>create_lazy (fun () -&gt; sqrt 16.)</literal>, we can
-      just write <literal>lazy (sqrt 16.)</literal>.
+      with the built-in <literal>lazy</literal> just write
+      <literal>lazy (sqrt 16.)</literal>.
     </para>
     <sect2 id="memoization-and-dynamic-programming">
-      <title>Memoization and Dynamic Programming</title>
+      <title>Memoization and dynamic programming</title>
       <para>
         Another unobservable effect is <emphasis>memoization</emphasis>.
         A memoized function remembers the result of previous invocations
@@ -8812,9 +9421,14 @@ performing lazy computation
 val memoize : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 </programlisting>
       <para>
-        Note that we use <literal>Hashtbl.Poly.create</literal> to
-        create a hash table using OCaml's built-in polymorphic hash
-        function.
+        The code above is a bit tricky. <literal>memoize</literal> takes
+        as its argument a function <literal>f</literal>, and then
+        allocates a hashtable (called <literal>table</literal>) and
+        returns a new function as the memoized version of
+        <literal>f</literal>. When called, this new function looks in
+        <literal>table</literal> first, and if it fails to find a value,
+        calls <literal>f</literal> and stashes the result in
+        <literal>table</literal>.
       </para>
       <para>
         Memoization can be useful whenever you have a function that is
@@ -9087,13 +9701,23 @@ Time: 0.236034ms
 val fib : int -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
-        This same approach will work for
-        <literal>edit_distance</literal>. The one change we'll need to
-        make is that <literal>edit_distance</literal> will now take a
-        pair of strings as a single argument, since
-        <literal>memoize</literal> only works sensibly for
-        single-argument functions. We can always recover the original
-        interface with a wrapper function.
+        Memoization is overkill for implementing Fibonacci, and indeed,
+        the <literal>fib</literal> defined above is not especially
+        efficient, allocating space linear in the number passed in to
+        <literal>fib</literal>. It's easy enough to write a Fibonacci
+        function that takes a constant amount of space.
+      </para>
+      <para>
+        But memoization is a good approach for optimizing
+        <literal>edit_distance</literal>, and we can apply the same
+        approach we used on <literal>fib</literal> here. We will need to
+        change <literal>edit_distance</literal> to take a pair of
+        strings as a single argument, since <literal>memo_rec</literal>
+        only works on single-argument functions. (We can always recover
+        the original interface with a wrapper function.) With just that
+        change and the addition of the <literal>memo_rec</literal> call,
+        we can get a memoized version of
+        <literal>edit_distance</literal>:
       </para>
       <programlisting language="ocaml">
 # let edit_distance = memo_rec (fun edit_distance (s,t) -&gt;
@@ -9113,18 +9737,16 @@ val fib : int -&gt; int = &lt;fun&gt;
 val edit_distance : string * string -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
-        And this new version of <literal>edit_distance</literal> is
-        indeed much more efficient than the one we started with.
+        This new version of <literal>edit_distance</literal> is much
+        more efficient than the one we started with; the following call
+        is about ten thousand times faster than it was without
+        memoization.
       </para>
       <programlisting language="ocaml">
 # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));;
 Time: 2.14601ms
 - : int = 2
 </programlisting>
-      <para>
-        This is about ten thousand times faster than our original
-        implementation.
-      </para>
       <note> <title> 
       Limitations of <literal>let rec</literal>
       </title>
@@ -12496,12 +13118,12 @@ val to_basic : json -&gt; Yojson.Basic.json
       </para>
       <para>
         Let's go straight into looking at an example of how this works,
-        by using a small portion of the Github API. Github is a popular
+        by using a small portion of the GitHub API. GitHub is a popular
         code hosting and sharing website that provides a JSON-based web
         <ulink url="http://developer.github.com">API</ulink>. The ATD
-        code fragment below describes the Github authorization API. It
+        code fragment below describes the GitHub authorization API. It
         is based on a pseudo-standard web protocol known as OAuth, and
-        is used to authorized users to access Github services.
+        is used to authorized users to access GitHub services.
       </para>
       <programlisting language="ocaml">
 type scope = [
@@ -12536,7 +13158,7 @@ type authorization_response = {
       <para>
         ATD is (deliberately) similar to OCaml type definitions. Each
         field can include extra annotations to customise the parsing
-        code for a particular backend. For example, the Github
+        code for a particular backend. For example, the GitHub
         <literal>scope</literal> field above is defined as a variant
         type, but with the actual JSON values being defined explicitly
         (as lower-case versions).
@@ -12656,9 +13278,9 @@ val authorization_response_of_string :
         huge variety of other programming languages.
       </para>
       <para>
-        We'll also return to the Github example here later in the book
+        We'll also return to the GitHub example here later in the book
         when discussing the Async networking library, and you can find
-        the full ATD specification for Github in the
+        the full ATD specification for GitHub in the
         <ulink url="http://github.com/avsm/ocaml-github"><literal>ocaml-github</literal></ulink>
         repository.
       </para>
@@ -15068,9 +15690,9 @@ val coin_tails : (string * Time.Span.t * Time.Span.t) Deferred.t
     </para>
   </sect1>
   <sect1 id="binding-to-the-github-api">
-    <title>Binding to the Github API</title>
+    <title>Binding to the GitHub API</title>
     <para>
-      Show how we can use a monadic style to bind to the Github API and
+      Show how we can use a monadic style to bind to the GitHub API and
       make simple JSON requests/responses.
     </para>
     <note><title>
@@ -16528,7 +17150,7 @@ $ ./service_client.byte
       program.
     </para>
     <para>
-      When there is'nt enough memory available to satisfy an allocation
+      When there isn't enough memory available to satisfy an allocation
       request from the allocated heap blocks, the runtime system invokes
       the <emphasis>garbage collector</emphasis> (or GC). An OCaml
       program does not explicitly free a heap block when it is done with
