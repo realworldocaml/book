@@ -50,7 +50,7 @@ regions it obtains from the operating system using *malloc(3)*. The OCaml runtim
 uses these memory regions to hold *heap blocks*, which it then fills up in
 response to allocation requests by the OCaml program.
 
-When there is'nt enough memory available to satisfy an allocation request from
+When there isn't enough memory available to satisfy an allocation request from
 the allocated heap blocks, the runtime system invokes the *garbage collector*
 (or GC). An OCaml program does not explicitly free a heap block when it is done
 with it, and the GC must determine which heap blocks are "alive" and which heap
