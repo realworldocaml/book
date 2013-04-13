@@ -597,12 +597,101 @@ val ls_rec : string -> string list = <fun>
 
 ## Tail recursion
 
-## Writing efficient list-handling code
+The only way to compute the length of an OCaml list is to walk the
+list from beginning to end.  As a result, computing the length of a
+list takes time linear in the size of the list.  Here's a simple
+function for doing so.
 
-_(Cover as-patterns here)_
+```ocaml
+# let rec length = function
+    | [] -> 0
+    | _ :: tl -> 1 + length tl
+  ;;
+# length [1;2;3];;
+- : int = 3
+```
+
+This looks simple enough, but you'll discover that this implementation
+runs into problems on very large lists.  Here are some examples, using
+`List.init` to create lists to experiment on.
+
+```ocaml
+# let make_list n = List.init n ~f:(fun x -> x);;
+val make_list : int -> int list = <fun>
+# make_list 10;
+- : int list = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9]
+# length (make_list 10_000_000);;
+Stack overflow during evaluation (looping recursion?).
+```
+
+To understand this failure, you need to learn a bit more about how
+function calls work.  Typically, a function call needs some space to
+keep track of information associated with the call, such as the
+arguments passed to the function, or the location of the code that
+needs to start executing when the function call is complete.  To allow
+for nested function calls, this information is typically organized in
+a stack, where a new _stack frame_ is allocated for each nested
+function call, and then deallocated when the function call is
+complete.
+
+And that's the problem with our call to `length`.  Because `length`
+dispatches one nested recursive call per element in the list, our call
+to `length` tried to allocate ten million stack frames; which turned
+out to be more stack space than was available.
+
+Happily, there's a way around this problem.  Consider the following
+alternate implementation of length:
+
+```ocaml
+# let length l =
+    let rec length_plus_n l n =
+       match l with
+       | [] -> n
+       | _ :: tl -> length_plus_n tl (n + 1)
+    in
+    length_plus_n l 0
+  ;;
+val length : 'a list -> int = <fun>
+utop[41]> length [1;2;3;4];;
+- : int = 4
+```
+
+This is correct, if a bit harder to understand.  This implementation
+depends on a helper function, `length_plus_n`, that computes the
+length of a given list plus a given `n`.  The full function is
+implemented by calling `length_plus_n` with `n` equal to zero.  In
+practice, `n` acts as a kind of accumulator, element by element
+building up the final result of the computation.
+
+The advantage of this implementation is that the recursive call is a
+_tail call_.  We'll explain more precisely what it means to be a tail
+call shortly, but the reason it's important is that tail calls don't
+require the allocation of a new stack frame, due to what is called the
+_tail-call optimization_.  A recursive function is said to be _tail
+recursive_ if all of its recursive calls are tail calls.  Our new
+version of `length` is indeed tail recursive, and as a result, it can
+compute the length of a long list without blowing the stack.
+
+```ocaml
+# length (make_list 10_000_000);;
+- : int = 10000000
+```
+
+So when is a call a tail call?  It's useful to think about what
+happens when one function (the _caller_) invokes another (the
+_callee_).  The invocation is a tail call when the caller doesn't do
+anything with the value returned by the callee except to return it
+itself.
+
+The tail-call optimization works because, when a caller makes a tail
+call to the callee, the caller's stack frame need never be used again,
+and so you don't need to keep it around.  Thus, instead of allocating
+a new stack frame for the callee, the compiler is free to resuse the
+caller's stack frame, which is exactly what it does.
 
 ## TODO
 
 - Underscores in pattern matches
-- with and as in patterns
+- with patterns
+- as patterns
 
