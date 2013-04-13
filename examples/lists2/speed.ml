@@ -66,6 +66,54 @@ let rec sum_slow l =
   else List.hd_exn l + sum_slow (List.tl_exn l)
 ;;
 
+let sqrt_ar   =
+  [|6.; 203.; 56.; 12.; 98.;6.; 203.; 56.; 12.; 98.;6.; 203.; 56.; 12.; 98.;|]
+let sqrt_list = Array.to_list sqrt_ar
+let sqrt_ar () =
+  ignore (Array.map ~f:sqrt sqrt_ar)
+let sqrt_list () =
+  ignore (List.map ~f:sqrt sqrt_list)
+
+let l = [ "a";"b"; "c"; "d"; "e"; "f"]
+let a = Array.of_list l
+let rev_l () = ignore (List.rev l)
+let rev_a () =
+  let l = Array.length a in
+  Array.init l ~f:(fun i ->
+    a.(l - i - 1))
+  |> ignore
+
+let l = List.range 0 100000
+let a = Array.of_list l
+let sum_l () =
+  List.fold ~init:0 ~f:(+) l
+let sum_a () =
+  Array.fold ~init:0 ~f:(+) a
+
+let sum_direct_l () =
+  let rec loop l acc =
+    match l with
+    | [] -> acc
+    | hd :: tl -> loop tl (acc + hd)
+  in
+  loop l 0
+
+let sum_direct_ref_a () =
+  let sum = ref 0 in
+  for i = 0 to Array.length a - 1 do
+    sum := !sum + a.(i)
+  done;
+  !sum
+
+let sum_direct_a () =
+  let len = Array.length a in
+  let rec loop acc i =
+    if i >= len then acc
+    else loop (acc + a.(i)) (i + 1)
+  in
+  loop 0 0
+
+
 let () =
   let example = [1;2;3;4;5;6;7;8;9;10;11;12] in
   let s = sum example in
@@ -93,6 +141,24 @@ let () =
         Bench.bench
           [ "if"    , (fun () -> assert (s = sum_slow example))
           ; "match" , (fun () -> assert (s = sum example))
+          ]
+      | "sqrt" ->
+        Bench.bench
+          [ "array" , sqrt_ar
+          ; "list"  , sqrt_list
+          ]
+      | "rev" ->
+        Bench.bench
+          [ "array" , rev_a
+          ; "list"  , rev_l
+          ]
+      | "sum" ->
+        Bench.bench
+          [ "array"            , sum_a
+          ; "list"             , sum_l
+          ; "list direct"      ,   sum_direct_l
+          ; "array direct"     , sum_direct_a
+          ; "array direct ref" , sum_direct_ref_a
           ]
       | _ ->
         failwithf "Unknown benchmark %s" benchmark ()
