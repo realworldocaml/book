@@ -1,5 +1,22 @@
 # Records
 
+<note><title>A note to reviewers</title>
+
+**IMPORTANT**: This section is going to describe how records and
+variants will behave in OCaml 4.01.  If you want to follow along fully
+with the examples here, you'll need to make sure you install a
+bleeding-edge release, which you can do as follows:
+
+```
+opam switch 4.01.0dev+trunk
+```
+
+Once you make the switch, you'll need to install the packages you
+need.  Note that once your packages are installed, you can quickly
+switch back and forth between compilers with no extra work.
+
+</note>
+
 One of OCaml's best features is its concise and expressive system for
 declaring new datatypes.  Two key elements of that system are
 _records_ and _variants_, both of which we discussed briefly in
