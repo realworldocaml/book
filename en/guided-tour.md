@@ -72,6 +72,8 @@ calculations.
 - : int = 2
 # 3.5 +. 6.;;
 - : float = 9.5
+# 30_000_000 / 300_000;;
+- : int = 100
 # sqrt 9.;;
 - : float = 3.
 ```
@@ -89,6 +91,10 @@ at you.
 - Function arguments are separated by spaces, instead of by
   parenthesis and commas, which is more like the UNIX shell than C or
   Java.
+- OCaml allows you to place underscores in the middle of your integer
+  literals, as a way of improving readability.  Note that underscores
+  can be placed anywhere in within the number, not just every three
+  digits.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int` the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
