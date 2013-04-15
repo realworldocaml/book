@@ -231,8 +231,8 @@ re-examine the first element of the list to determine whether or not
 it's the empty cell.  With a match statement, this work happens
 exactly once per list element.
 
-Overall, pattern matching is typically more efficient than the
-alternatives one might code by hand.  One notable exception is matches
+Generally, pattern matching is typically more efficient than the
+alternatives you might code by hand.  One notable exception is matches
 over strings, which are in fact tested sequentially.  But most of the
 time, using pattern matching is a clear performance win.
 
@@ -272,11 +272,10 @@ Here is an example of a value that is not matched:
 For simple examples like this, exhaustiveness checks are useful
 enough.  But as we'll see in [xref](#variants), as you get to more
 complicated examples, especially those involving user-defined types,
-the fact that pattern matches are checked for exhaustiveness become
-invaluable, both as a way of catching outright errors and as a
-refactoring tool, with such compiler errors guiding you to the
-locations where you need to adapt your code to deal with changing type
-definitions.
+exhaustiveness checks become a lot more valuable.  In addition to
+catching outright errors, they act as a sort of refactoring tool,
+guiding you to the locations where you need to adapt your code to deal
+with changing types.
 
 ## Using the `List` module effectively
 
@@ -285,10 +284,10 @@ matching and recursive functions.  But in real life, you're usually
 better off using the `List` module, which is full of reusable
 functions that abstract out common patterns for computing with lists.
 
-Let's work through a concrete example to see this in action.  In the
-following, we'll write a function `render_table` that, given a list of
-column headers and a list of rows, prints them out in a well formatted
-text table.  So, if you were to write:
+Let's work through a concrete example to see this in action.  We'll
+write a function `render_table` that, given a list of column headers
+and a list of rows, prints them out in a well formatted text table.
+So, if you were to write:
 
 ```ocaml
 # printf "%s\n"
@@ -312,13 +311,13 @@ it would generate the following output.
 | OCaml    | Xavier Leroy   | 1996          |
 ```
 
-Before we write `render_table`, we need a function to compute the
-maximum width of each column of data.  We can do this by converting
-the header and each row into a list of integer lengths, and then
-taking the element-wise max of those lists of lengths.  Writing the
-code for all of this directly would be a bit of a chore, but we can do
-it quite concisely by making use of three functions from the `List`
-module: `map`, `map2_exn`, and `fold`.
+The first step is to write a function to compute the maximum width of
+each column of data.  We can do this by converting the header and each
+row into a list of integer lengths, and then taking the element-wise
+max of those lists of lengths.  Writing the code for all of this
+directly would be a bit of a chore, but we can do it quite concisely
+by making use of three functions from the `List` module: `map`,
+`map2_exn`, and `fold`.
 
 `List.map` is the simplest to explain.  It takes a list and a function
 for transforming elements of that list, and returns a new list with
@@ -345,13 +344,13 @@ lists are of mismatched length.
 Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 <> 4 ").
 ```
 
-`List.fold` is the most complicated of the three.  `List.fold` takes
-three arguments, a list to process, an initial accumulator value, and
-a function for updating the accumulator with the information from a
-list element.  `List.fold` walks over the list elements from left to
-right, updating the accumulator as it goes, and returning the final
-value of the accumulator.  This structure is reflected in the type of
-`List.fold`.
+`List.fold` is the most complicated of the three, takin three
+arguments: a list to process, an initial accumulator value, and a
+function for updating the accumulator with the information from a list
+element.  `List.fold` walks over the list from left to right, updating
+the accumulator at each step and returning the final value of the
+accumulator when it's done.  You can see some of this by looking at
+the type-signature for `fold`.
 
 ```ocaml
 # List.fold;;
@@ -380,27 +379,29 @@ widths.
 
 ```ocaml
 # let max_widths header rows =
-    let to_lengths l = List.map ~f:String.length l in
+    let lengths l = List.map ~f:String.length l in
     List.fold rows
-      ~init:(to_lengths header)
+      ~init:(lengths header)
       ~f:(fun acc row ->
-        List.map2_exn ~f:Int.max acc (to_lengths row))
+        List.map2_exn ~f:Int.max acc (lengths row))
   ;;
 val max_widths : string list -> string list list -> int list = <fun>
 ```
 
-Using `List.map` we define the function `to_lengths` which converts a
+Using `List.map` we define the function `lengths` which converts a
 list of strings to a list of integer lengths.  `List.fold` is then
 used to iterate over the rows, using `map2_exn` to take the max of the
 accumulator with the lengths of the strings in each row of the table,
 with the accumulator initialized to the lengths of the header row.
 
-Now let's consider how to generate the line that separates the header
-from the rest of the text table.  We can do this in part by using
-`List.map` to convert a width to an appropriately sized string of
-dashes.  For generating the strings themselves we use `String.concat`,
-which concatenates a list of strings with an optional separator
-string, and `^` concatenating a pair of strings.
+Now that we know how to compute column widths, we can write the code
+to generate the line that separates the header from the rest of the
+text table.  We'll do this in part by mapping `String.make` over the
+lengths of the columns to generate a string of dashes of the
+appropriate length.  We'll then join these sequences of dashes
+together using `String.concat`, which concatenates a list of strings
+with an optional separator string, and `^`, which is a pairwise string
+concatenation function, to add the delimiters on the outside.
 
 ```ocaml
 # let render_separator widths =
@@ -703,8 +704,77 @@ situations where the depth of the sequence of nested calls is on the
 order of the size of your data, tail recursion is usually the right
 approach.
 
-## TODO
+## More concise and faster patterns
 
-- with patterns
-- as patterns
+Now that we know more about how lists and patterns work, let's
+consider how we can improve on an example from
+(xref)(#recursive-list-functions): the function `destutter`, which
+removes sequential duplicates from a list.  Here's the implementation
+that was described earlier.
 
+```ocaml
+# let rec destutter list =
+    match list with
+    | [] -> []
+    | hd :: [] -> hd :: []
+    | hd :: hd' :: tl ->
+      if hd = hd' then destutter (hd' :: tl)
+      else hd :: destutter (hd' :: tl)
+  ;;
+```
+
+We'll consider some ways of making this code more concise and more
+efficient.
+
+First, let's consider efficiency.  One problem with the `destutter`
+code above is that it in some cases recreates on the right-hand side
+of the arrow a value that already existed on the left hand side.
+Thus, the pattern `hd :: [] -> hd :: []` actually allocates a new list
+element, which really, it should be able to just return the list being
+matched.  We can reduce allocation here by using an `as` pattern,
+which allows us to declare a name for the thing matched by a pattern
+or sub-pattern.  While we're at it, we'll use the `function` keyword
+to eliminate the need for an explicit match.
+
+```ocaml
+# let rec destutter = function
+    | [] as l -> l
+    | _ :: [] as l -> l
+    | hd :: (hd' :: _ as tl) ->
+      if hd = hd' then destutter tl
+      else hd :: destutter tl
+  ;;
+```
+
+We can further collapse this by combining the first two cases into
+one, using an or-pattern.  At the same time, we'll use the more
+concise `[_]` pattern to match a list with a single element, rather
+than `_ :: []`.
+
+```ocaml
+# let rec destutter = function
+    | [] | [_] as l -> l
+    | hd :: (hd' :: _ as tl) when hd1 = ->
+      if hd1 = hd2 then destutter tl
+      else hd1 :: destutter tl
+  ;;
+```
+
+We can make the code slightly terser now by using a `when` clause.  A
+`when` clause allows one to add an extra precondition on a pattern in
+the form of an arbitrary OCaml expression.  In this case, we can use
+it to include the check on whether the first two elements are equal.
+
+
+```ocaml
+# let rec destutter = function
+    | [] | [_] as l -> l
+    | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
+    | hd :: tl -> hd :: destutter tl
+  ;;
+```
+
+Note that `when` clauses have some downsides.  As we noted earlier,
+some of the static checks associated with pattern matches rely on the
+fact that patterns are restricted in what they can express.  Once we
+add the ability to express arbitrary patterns...
