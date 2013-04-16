@@ -775,6 +775,90 @@ it to include the check on whether the first two elements are equal.
 ```
 
 Note that `when` clauses have some downsides.  As we noted earlier,
-some of the static checks associated with pattern matches rely on the
-fact that patterns are restricted in what they can express.  Once we
-add the ability to express arbitrary patterns...
+the static checks associated with pattern matches rely on the fact
+that patterns are restricted in what they can express.  Once we add
+the ability to add an arbitrary condition to a pattern, something will
+be lost.  In particular, the ability for the compiler to determine
+if a match is exhaustive, or if some case is redundant, is
+compromised.
+
+Consider the following function which takes a list of optional values,
+and returns the number of those values that are `Some`.  Because this
+implementation uses `when` clauses, the compiler can't tell that the
+code is exhaustive.
+
+```ocaml
+# let rec count_some list =
+    match list with
+    | [] -> 0
+    | x :: tl when Option.is_none x -> count_some tl
+    | x :: tl when Option.is_some x -> 1 + count_some tl
+  ;;
+val count_some : 'a option list -> int = <fun>
+Characters 30-169:
+val count_some : 'a option list -> int = <fun>
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::_
+(However, some guarded clause may match this value.)
+```
+
+Despite the warning, the function does work fine.
+
+```ocaml
+# count_some [Some 3; None; Some 4];;
+- : int = 2
+```
+
+If we add another redundant case without a `when` clause, the compiler
+will stop complaining about exhaustiveness, and won't produce a
+warning about the redundancy.
+
+```ocaml
+# let rec count_some list =
+    match list with
+    | [] -> 0
+    | x :: tl when Option.is_none x -> count_some tl
+    | x :: tl when Option.is_some x -> 1 + count_some tl
+    | x :: tl -> -1 (* unreachable *)
+  ;;
+val count_some : 'a option list -> int = <fun>
+```
+
+Probably a better approach is to simply drop the second `when`
+clause.
+
+```ocaml
+# let rec count_some list =
+    match list with
+    | [] -> 0
+    | x :: tl when Option.is_none x -> count_some tl
+    | _ :: tl -> 1 + count_some tl
+  ;;
+```
+
+This is a little less clear, however, than the direct pattern-matching
+solution, where the meaning of each pattern is clearer on its own.
+
+
+```ocaml
+# let rec count_some list =
+    match list with
+    | [] -> 0
+    | None   :: tl -> count_some tl
+    | Some _ :: tl -> 1 + count_some tl
+  ;;
+```
+
+The takeaway from all of this is that, while `when` clauses can be
+useful, one should prefer patterns wherever they are sufficient.
+
+As a side note, the above implementation of `count_some` is longer
+than necessary, and to boot is not tail recursive.  For real work, you
+should probably just use the`List.count` function from `Core` as
+follows:
+
+```ocaml
+# let count_some l = List.count ~f:Option.is_some l;;
+val count_some : 'a option list -> int = <fun>
+```
