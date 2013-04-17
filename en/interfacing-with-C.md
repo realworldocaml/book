@@ -53,7 +53,7 @@ response to allocation requests by the OCaml program.
 When there isn't enough memory available to satisfy an allocation request from
 the allocated heap blocks, the runtime system invokes the *garbage collector*
 (or GC). An OCaml program does not explicitly free a heap block when it is done
-with it, and the GC must determine which heap blocks are "alive" and which heap
+with it, and the GC must determine which heap blocks are *alive* and which heap
 blocks are *dead*, i.e. no longer in use. Dead blocks are collected and their
 memory made available for re-use by the application.
 
@@ -63,90 +63,134 @@ of *roots*, which are values that the application always has access to (such as
 the stack).  The GC maintains a directed graph in which heap blocks are nodes,
 and there is an edge from heap block `b1` to heap block `b2` if some field of
 `b1` points to `b2`.  All blocks reachable from the roots by following edges in
-the graph must be retained, and unreachable blocks can be reused.
+the graph must be retained, and unreachable blocks can be reused.  This strategy
+is commonly known as "mark and sweep" collection.
 
-With the typical OCaml programming style, many small blocks are frequently
-allocated, used for a short period of time, and then never used again.  OCaml
-takes advantage of this fact to improve the performance of allocation and
-collection by using a *generational* garbage collector. This means that it has
-different memory regions to hold blocks based on how long the blocks have been
-alive.  OCaml's heap is split in two; there is a small, fixed-size *minor heap*
-used for initially allocating most blocks, and a large, variable-sized *major
-heap* for holding blocks that have been alive longer or are larger than 4KB.  A
-typical functional programming style means that young blocks tend to die young,
-and old blocks tend to stay around for longer than young ones (this is referred
-to as the *generational hypothesis*). To reflect this, OCaml uses different
-memory layouts and garbage collection algorithms for the major and minor heaps.
+The typical OCaml programming style typically involves allocating many small
+blocks of memory that are used for a short period of time and then never
+accessed again.  OCaml takes advantage of this fact to improve the performance
+of allocation and collection by using a *generational* garbage collector. This
+means that it has different memory regions to hold blocks based on how long the
+blocks have been alive.  OCaml's heap is split in two; there is a small,
+fixed-size *minor heap* where most most blocks are initially allocated, and a large,
+variable-sized *major heap* for blocks that have been alive longer or
+are larger than 4KB.  A typical functional programming style means that young
+blocks tend to die young, and old blocks tend to stay around for longer than
+young ones (this is referred to as the *generational hypothesis*).
+
+OCaml uses different memory layouts and garbage collection algorithms for
+the major and minor heaps to account for this generational difference.  We're going
+to describe the memory layout in this chapter, and move onto the garbage
+collections algorithms in [xref](inside-the-runtime).
 
 ### The fast minor heap
 
-The minor heap is one contiguous chunk of memory containing a sequence of heap
-blocks that have been allocated.  If there is space, allocating a new block is
-a fast constant-time operation in which the pointer to the end of the heap is
-incremented by the desired size.  To garbage collect the minor heap, OCaml uses
-*copying collection* to copy all live blocks in the minor heap to the major
-heap.  This only takes work proportional to the number of live blocks in the
-minor heap, which is typically small according to the generational hypothesis.
+The minor heap is one contiguous chunk of virtual memory containing a sequence
+of heap blocks that have been allocated.  If there is space, allocating a new
+block is a fast constant-time operation in which the pointer to the end of the
+heap is incremented by the desired size.  To garbage collect the minor heap,
+OCaml uses *copying collection* to copy all live blocks in the minor heap to
+the major heap.  This only takes work proportional to the number of live blocks
+in the minor heap, which is typically small according to the generational
+hypothesis.
 
 One complexity of generational collection is that in order to know which blocks
-in the minor heap are live, the collector must know which minor-heap blocks are
-directly pointed to by major-heap blocks.  To do this, OCaml maintains a set of
-such inter-generational pointers, and, through cooperation with the compiler,
-uses a write barrier to update this set whenever a major-heap block is modified
-to point at a minor-heap block.
+in the minor heap are live, the collector must track which minor-heap blocks
+are directly pointed to by major-heap blocks.  Without this information, the
+minor collection would require scanning the much larger major heap. OCaml
+maintains a set of such *inter-generational pointers*, and, through cooperation
+with the compiler, introduces a write barrier to update this set whenever a
+major-heap block is modified to point at a minor-heap block. We'll talk more
+about the implications of the write barrier in [xref](tuning-and-profiling).
 
 ### The long-lived major heap
 
-The major heap consists of a number of chunks of memory, each containing live
-blocks interspersed with regions of free memory.  The runtime system maintains
-a free list data structure that indexes all the free memory, and this list is
-used to satisfy allocation requests. OCaml uses mark and sweep garbage
-collection for the major heap.  The *mark* phase to traverses the block graph
-and marks all live blocks by setting a bit in the color tag of the block header.
-(_avsm_: we only explain the color tag in the next section, so rephrase or xref).
+The major heap consists of any number of non-contiguous chunks of virtual
+memory, each containing live blocks interspersed with regions of free memory.
+The runtime system maintains a free list data structure that indexes all the
+free memory, and this list is used to satisfy allocation requests for OCaml
+blocks.  The major heap is cleaned via a mark and sweep garbage collection
+algorithm.
 
-The *sweep* phase sequentially scans all heap memory and identifies dead blocks
-that weren't marked earlier.  The *compact* phase relocates live blocks to
-eliminate the gaps of free memory between them and ensure memory does not
-fragment.
+* The *mark* phase to traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
+* The *sweep* phase sequentially scans the heap chunks and identifies dead blocks that weren't marked earlier.
+* The *compact* phase moves live blocks to eliminate the gaps of free memory into a freshly allocated heap, and ensures that memory does not fragment in long-lived programs.
 
-A garbage collection must *stop the world* (that is, halt the application) in
-order to ensure that blocks can be safely moved. The mark and sweep phases run
+A major heap garbage collection must *stop the world* (that is, halt the
+application) in order to ensure that blocks can be safely moved around without
+this move being observed by the live application. The mark and sweep phases run
 incrementally over slices of memory, and are broken up into a number of steps
-that are interspersed with the running OCaml program.  Only a compaction
-touches all the memory in one go, and is a relatively rare operation.
+that are interspersed with the running OCaml program.  Only the compaction
+phase touches all the memory in one go, and is a relatively rare operation.
 
-The `Gc` module lets you control all these parameters from your application,
-and we will discuss garbage collection tuning in (_avsm_: crossref).
+The `Gc` module lets you control all these parameters from your application.
+Although the defaults are usually sensible, understanding them and tuning them
+is an important concern we will discuss later in [xref](tuning-and-profiling).
 
-## The representation of values
+## The representation of OCaml values
 
-Every OCaml *value* is a single word that is either an integer or a pointer.
-If the lowest bit of the word is non-zero, the value is an unboxed integer.
-Several OCaml types map onto this integer representation, including `bool`,
-`int`, the empty list, `unit`, and variants without constructors.  Integers are
-the only unboxed runtime values in OCaml, and are the cheapest values to
-allocate.
+So far, we've described the overall memory layout, but not what the contents of
+each block contains.  Every OCaml variable points to a `value`
+at runtime, which is a single memory word that is either an integer or a
+pointer.  The OCaml runtime needs to understand the difference between the two so
+that it can follow pointers, but not integers (which directly hold the value
+and don't point to anything meaningful).
 
-If the lowest bit of the `value` is zero, then the value is a pointer.  A
-pointer value is stored unmodified, since pointers are guaranteed to be
-word-aligned and the bottom bits are always zero. If the pointer is inside an
-area managed by the OCaml runtime, it is assumed to point to an OCaml *block*.
-If it points outside the OCaml runtime area, it is is treated as an opaque C
-pointer to some other system resource.
+If the lowest bit of the block word is non-zero, the value is an unboxed
+integer.  Several OCaml types map onto this integer representation, including
+`bool`, `int`, the empty list, `unit`, and variants without constructors.
+Integers are the only unboxed runtime values in OCaml, which means that they
+can be stored directly without having to allocate a wrapper structure that will
+take up more memory. They can also be passed directly to other function calls
+in registers, and so are generally the cheapest and fastest values to use in
+OCaml.
+
+If the lowest bit of the `value` is zero, then the value is a memory pointer.
+A pointer value is stored unmodified, since pointers are guaranteed to be
+word-aligned and so the bottom bits are always zero. If the pointer is inside a
+memory chunk that is marked as being managed by the OCaml runtime, it is
+assumed to point to an OCaml block (see below).  If it points outside the OCaml
+runtime area, it is is treated as an opaque C pointer to some other system
+resource.
+
+<note>
+<title>Some history about OCaml's word-aligned pointers</title>
+
+The alert reader may be wondering how OCaml can guarantee that all of its
+pointers are word-aligned.  In the old days when RISC chips such as Sparc,
+MIPS and Alpha were commonplace, unaligned memory accesses were forbidden by
+the instruction architecture and would result in a CPU exception that normally
+terminates the program.  Thus, all pointers were historically rounded off to
+the architecture word-size (usually 32- or 64-bits).
+
+Modern CISC processors such as the Intel x86 do support unaligned memory accesses,
+but the chip still runs faster if accesses are word-aligned.  OCaml therefore
+simply mandates that all pointers be word-aligned, which guarantees that the
+bottom few bits of any valid pointer will be zero.  Setting the bottom bit to
+a non-zero value is a simple way to mark an integer, at the cost of losing
+that single bit of precision.
+
+An even more alert reader will be wondering about the performance implications
+are for integer arithmetic using this tagged representation.  Since the bottom
+bit is set, any operation on the integer has to shift the bottom bit right to
+recover the "native" value.  The native code OCaml compiler generates very
+efficient x86 assembly code in this case, and takes advantage of modern
+processor instructions to either hide the extra work, or get it for free from
+the instruction set.  Addition and substraction are a single instruction, and
+multiplication is only a few more.
+
+</note>
 
 ### Blocks and values
 
 An OCaml *block* is the basic unit of allocation on the heap.  A block consists
-of a one-word header (either 32- or 64-bits) followed by variable-length data,
-which is either opaque bytes or *fields*.  The collector never inspects opaque
-bytes, but fields are valid OCaml values. The runtime always inspects fields,
-and follows them as part of the garbage collection process described earlier.
-Every block header has a multipurpose tag byte that defines whether to
-interprete the subsequent data as opaque or OCaml fields.
-
-(_avsm_: pointers to blocks actually point 4/8 bytes into it, for some efficiency
-reason that I cannot recall right now).
+of a one-word header (either 32- or 64-bits) followed by variable-length data
+that is either opaque bytes or an array of *fields*.  The header has a
+multi-purpose tag byte that defines whether to interprete the subsequent data
+as opaque or OCaml fields.  The garbage collector never inspects opaque bytes,
+but the array of fields are all treated as more valid OCaml values. The garbage
+collector always inspects fields, and follows them as part of the collection
+process described earlier.
 
 ```
 +------------------------+-------+----------+----------+----------+----
@@ -158,9 +202,9 @@ reason that I cannot recall right now).
 The size field records the length of the block in memory words. Note that it is
 limited to 22-bits on 32-bit platforms, which is the reason why OCaml strings
 are limited to 16MB on that architecture. If you need bigger strings, either
-switch to a 64-bit host, or use the `Bigarray` module (_avsm_: xref).  The
+switch to a 64-bit host, or use the `Bigarray` module described in [xref](managing-external-memory-with-bigarrays).  The
 2-bit color field is used by the garbage collector to keep track of its
-status, and is not exposed directly to OCaml programs.
+state during mark-and-sweep, and is not exposed directly to OCaml programs.
 
 Tag Color   Block Status
 ---------   ------------
@@ -174,11 +218,6 @@ represents opaque bytes or fields.  If a block's tag is greater than or equal
 to `No_scan_tag` (251), then the block's data are all opaque bytes, and are not
 scanned by the collector. The most common such block is the `string` type,
 which we describe more below.
-
-(_avsm_: too much info here) If the header is zero, then the object has been
-forwarded as part of minor collection, and the first field points to the new
-location.  Also, if the block is on the `oldify_todo_list`, part of the minor
-gc, then the second field points to the next entry on the oldify_todo_list.
 
 The exact representation of values inside a block depends on their OCaml type.
 They are summarised in the table below, and then we'll examine some of them in
@@ -206,21 +245,11 @@ to the tag bit described earlier. Other atomic types such as the `unit` and
 empty list `[]` value are stored as constant integers.  Boolean values have a
 value of `0` and `1` for `true` and `false` respectively.
 
-<note>
-<title>Why are OCaml integers missing a bit?</title>
-
-Since the lowest bit of an OCaml value is reserved, native OCaml integers have
-a maximum allowable length of 31- or 63-bits, depending on the host
-architecture. The rationale for reserving the lowest bit is for efficiency.
-Pointers always point to word-aligned addresses, and so their lower bits are
-normally zero. By setting the lower bit to a non-zero value for integers, the
-garbage collector can simply iterate over every header tag to distinguish
-integers from pointers.  This reduces the garbage collection overhead on the
-overall program.
-
-</note>
-
-(_avsm_: explain that integer manipulation is almost as fast due to isa quirks)
+Remember that since integers are never allocated on the heap, all of these
+basic types such as empty lists and `unit` are therefore very efficient to use.
+They will often be passed in registers and never even appear on the stack,
+if you don't have too many parameters to your functions or are running on
+a modern architecture with lots of spare registers (such as `x86_64`).
 
 ### Tuples, records and arrays
 
@@ -230,7 +259,7 @@ overall program.
 +---------+----------+----------+- - - - -
 ```
 
-Tuples, records and arrays are all represented identically at runtime, with a
+Tuples, records and arrays are all represented identically at runtime as a
 block with tag `0`.  Tuples and records have constant sizes determined at
 compile-time, whereas arrays can be of variable length.  While arrays are
 restricted to containing a single type of element in the OCaml type system,
@@ -482,9 +511,10 @@ struct custom_operations {
 
 The custom operations specify how the runtime should perform polymorphic
 comparison, hashing and binary marshalling.  They also optionally contain a
-finalizer, which the runtime will call just before the block is garbage
-collected.  This finalizer has nothing to do with ordinary OCaml finalizers, as
-created by `Gc.finalise`. (_avsm_: xref to GC module explanation)
+*finalizer* that the runtime calls just before the block is garbage collected.
+This finalizer has nothing to do with ordinary OCaml finalizers (as created by
+`Gc.finalise` and explained in [xref](tuning-the-runtime)).  Instead, they are
+used to call C cleanup functions such as `free`.
 
 When a custom block is allocated, you can also specify the proportion of
 "extra-heap resources" consumed by the block, which will affect the garbage
