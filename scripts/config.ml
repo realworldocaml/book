@@ -53,6 +53,7 @@ let from_yminsky =
   ; "nicholasbs"              (* Nicholas Bergson-Shilcock <me@nicholasbs.net> *)
   ; "happy4crazy"             (* Alan O'Donnell  <alan@hackerschool.com> *)
   ; "rnml"                    (* Nathan Linger <nlinger@janestreet.com> *)
+  ; "msaffer"                 (* Matthew Saffer <msaffer@janestreet.com> TODO *)
 ]
 
 let from_email = 
