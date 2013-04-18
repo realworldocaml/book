@@ -522,8 +522,8 @@ in all three places, but the extra text may not help clarity.  A
 convenient middle ground is to annotate the fields and/or class
 parameters, and add constraints to methods only if necessary.
 
-Next, we can define the list itself.  We'll keep a field `head` the
-refers to the first element in the list, and `last` refers to the
+Next, we can define the list itself.  We'll keep a field `head` that
+refers to the first element in the list, and `last` that refers to the
 final element in the list.  The method `insert` adds an element to the
 end of the list.
 
@@ -585,7 +585,7 @@ class Iterator {
 
 OCaml support both styles.  In fact, OCaml is more flexible than these
 approaches because an object type can be implemented by any object
-with the appropriate methods, it does not have to be specified by the
+with the appropriate methods; it does not have to be specified by the
 object's class _a priori_.  We'll leave abstract classes for later.
 Let's demonstrate the technique using object types.
 
