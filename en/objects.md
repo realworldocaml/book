@@ -835,7 +835,7 @@ end = SList
 
 In this signature, we've chosen to make nearly everything visible.
 The class type for `slist` specifies the types of the fields `first`
-and `last`, as well ad the types of each of the methods.  We've also
+and `last`, as well as the types of each of the methods.  We've also
 included a class type for `slist_iterator`, which is of somewhat more
 questionable value, since the type doesn't appear in the type for
 `slist` at all.
