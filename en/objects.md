@@ -593,7 +593,7 @@ First, we'll define an object type `iterator` that specifies the
 methods in an iterator.
 
 ```ocaml
-type 'a iterator = < get : 'a; has_value : bool; next : unit >;;`
+type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
 ```
 
 Next, we'll define an actual iterator for the class `slist`.  We can
