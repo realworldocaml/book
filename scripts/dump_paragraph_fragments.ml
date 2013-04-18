@@ -42,7 +42,8 @@ let _ =
       let (dtd,it) = in_tree i in
       filter dtd file it
     with Xmlm.Error (_p,e) -> begin
-      Printf.eprintf "FATAL: %s\n" (Xmlm.error_message e);
+      Printf.eprintf "FATAL: %s %s\n" file (Xmlm.error_message e);
+      print_endline buf;
       exit 1
     end
   );

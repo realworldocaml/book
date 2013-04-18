@@ -34,7 +34,8 @@ let from_anil =
   ; "bellosa"                 (* Frank Bellosa <frank@bellosa.de> *)
   ; "simonjbeaumont"          (* Simon Beaumont <simon.beaumont@citrix.com> *)
   ; "green-gecko"             (* Alex Ho <a_green_gecko@yahoo.com> *)
-  ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> TODO *)
+  ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> *)
+  ; "ChrisDodd"               (* Chris Dodd <dodd@csl.sri.com> *)
 ]
 
 let from_yminsky =
@@ -79,12 +80,13 @@ let from_email =
   ; "mshure"                  (* Mark Shure <mark.shure@gmail.com> *)
   ; "HappyCrow"               (* Francois Berenger <berenger@riken.jp> *)
   ; "alexanderkyte"           (* alex kyte <alexanderkyte@gmail.com> *)
+  ; "genos"                   (* Graham Enos <graham.enos@gmail.com> *)
   
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
   ; "joelpob"                 (* ma2bd@laposte.net *)
   ; "mansu"                   (* suman.karumuri@gmail.com *)
-  ; "Aryx"                    (* yoann.padioleau@gmail.com *)
+  ; "aryx"                    (* yoann.padioleau@gmail.com *)
   ; "paulcavallaro"           (* paulcavallaro@gmail.com *)
 
   (* Simcorp people *)
@@ -99,16 +101,17 @@ let from_email =
 ]
 
 let internal_reviewers =
-  authors @ support @ trusted
+  "Authors",
+  (authors @ trusted)
 
 let external_reviewers =
-  internal_reviewers @ from_anil @ from_yminsky @ from_email @ trusted
-
-let full_access = trusted @ authors
+  "External Reviewers",
+  (authors @ support @ from_anil @ from_yminsky @ from_email)
 
 let allowed_users = function
   | "alpha1" -> internal_reviewers
-  | "alpha2" -> external_reviewers
-  | "alpha3" -> external_reviewers
-  | "trunk"  -> full_access
-  |_ -> authors
+  | "alpha2" -> internal_reviewers
+  | "alpha3" -> internal_reviewers
+  | "alpha4" -> external_reviewers
+  | "trunk"  -> internal_reviewers
+  |_ -> internal_reviewers
