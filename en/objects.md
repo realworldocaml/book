@@ -656,7 +656,7 @@ method iter f =
   while it#has_value do
     f it#get
     it#next
-  end
+  done
 ```
 
 What about functional operations similar to `List.map` or `List.fold`?
