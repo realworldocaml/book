@@ -358,8 +358,8 @@ val x : int ref = {contents = 1}
 - : int = 2
 ```
 
-All of these are operations are just ordinary OCaml functions, and
-could be defined as follows.
+The above are just ordinary OCaml functions which could be defined as
+follows.
 
 ```ocaml
 let ref x = { contents = x }
@@ -519,11 +519,11 @@ elements.
 
 ```ocaml
 let create () = ref None
-let is_empty l = !l = None
+let is_empty t = !t = None
 
 let value elt = elt.value
 
-let first l = !l
+let first t = !t
 let next elt = elt.next
 let prev elt = elt.prev
 ```
@@ -562,20 +562,20 @@ with `insert_first`, which inserts an element at the front of the
 list.
 
 ```ocaml
-let insert_first l value =
-  let new_elt = { prev = None; next = !l; value } in
-  begin match !l with
+let insert_first t value =
+  let new_elt = { prev = None; next = !t; value } in
+  begin match !t with
   | Some old_first -> old_first.prev <- Some new_elt
   | None -> ()
   end;
-  l := Some new_elt;
+  t := Some new_elt;
   new_elt
 ```
 
 `insert_first` first defines a new element `new_elt`, and then links
 it into the list, finally setting the the list itself to point to
 `new_elt`.  Note that the precedence of a `match` expression is very
-low, so to separate it from the following assignment `l := Some
+low, so to separate it from the following assignment `t := Some
 new_front`, we surround the match in a `begin ... end` bracketing (we
 could also use parentheses).  If we did not, the final assignment
 would become part of the `None -> ...` case, which is not what we
@@ -599,11 +599,11 @@ let insert_after elt value =
 Finally, we need a `remove` function.
 
 ```ocaml
-let remove l elt =
+let remove t elt =
   let { prev; next; _ } = elt in
   begin match prev with
   | Some prev -> prev.next <- next
-  | None -> l := next
+  | None -> t := next
   end;
   begin match next with
   | Some next -> next.prev <- prev;
@@ -650,33 +650,33 @@ use `next` to walk from element to element, and `value` to extract the
 element from a given node.
 
 ```ocaml
-let iter l ~f =
+let iter t ~f =
   let rec loop = function
     | None -> ()
     | Some el -> f (value el); loop (next el)
   in
-  loop !l
+  loop !t
 
-let find_el l ~f =
+let find_el t ~f =
   let rec loop = function
     | None -> None
     | Some elt ->
       if f (value elt) then Some elt
       else loop (next elt)
   in
-  loop !l
+  loop !t
 ```
 
-## Laziness and other unobservable effects
+## Laziness and other benign effects
 
 There are many instances where you basically want to program in a pure
 style, but you want to make limited use of side-effects to improve the
 performance of your code, without really changing anything else.  Such
-side effects are sometimes called _unobservable effects_, and they are
-a useful way of leveraging OCaml's imperative features while still
+side effects are sometimes called _benign effects_, and they are a
+useful way of leveraging OCaml's imperative features while still
 maintaining most of the benefits of pure programming.
 
-One of the simplest unobservable effect is _laziness_.  A lazy value
+One of the simplest benign effect is _laziness_.  A lazy value
 is one that is not computed until it is actually needed.  In OCaml,
 lazy values are created using the `lazy` keyword, which can be used to
 prefix any expression, returning a value of type `'a Lazy.t`.  The
@@ -767,10 +767,10 @@ just write `lazy (sqrt 16.)`.
 
 ### Memoization and dynamic programming
 
-Another unobservable effect is _memoization_.  A memoized function
-remembers the result of previous invocations of the function so that
-they can be returned without further computation when the same
-arguments are presented again.
+Another benign effect is _memoization_.  A memoized function remembers
+the result of previous invocations of the function so that they can be
+returned without further computation when the same arguments are
+presented again.
 
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
@@ -1107,11 +1107,12 @@ clear how to execute this code.  In some sense, you could imagine it
 compiling down to an infinite loop, but there's no looping control
 structure to make that happen.
 
-To avoid such cases, the compiler only allow three possible constructs
-to show up on the right-hand side of a `let rec`: a function
-definition, a constructor, or the lazy keyword.  This excludes some
-reasonable things, like our definition of `memo_rec`, but it also
-blocks things that don't make sense, like our definition of `x`.
+To avoid such cases, the compiler only allows three possible
+constructs to show up on the right-hand side of a `let rec`: a
+function definition, a constructor, or the lazy keyword.  This
+excludes some reasonable things, like our definition of `memo_rec`,
+but it also blocks things that don't make sense, like our definition
+of `x`.
 
 It's worth noting that these restrictions don't show up in a lazy
 language like Haskell.  Indeed, we can make something like our
@@ -1131,9 +1132,9 @@ its own evaluation.
 Exception: Lazy.Undefined.
 ```
 
-But we can create useful recursive definitions possible with `lazy` as
-well.  In particular, we can use laziness to make our definition of
-`memo_rec` work without explicit mutation.
+But we can also create useful recursive definitions with `lazy`.  In
+particular, we can use laziness to make our definition of `memo_rec`
+work without explicit mutation.
 
 ```ocaml
 # let lazy_memo_rec f_norec x =
@@ -1188,10 +1189,10 @@ descriptors in Unix:
 * `In_channel.stdin`.  The "standard input" channel.  By default,
   input comes from the terminal, which handles keyboard input.
 
-* `In_channel.stdout`.  The "standard output" channel.  By default,
+* `Out_channel.stdout`.  The "standard output" channel.  By default,
   output written to `stdout` appears on the user terminal.
 
-* `In_channel.stderr`.  The "standard error" channel.  This is similar
+* `Out_channel.stderr`.  The "standard error" channel.  This is similar
   to `stdout`, but is intended for error messages.
 
 The values `stdin`, `stdout` and `stderr` are useful enough that they
