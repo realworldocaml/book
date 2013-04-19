@@ -385,9 +385,7 @@ let touch t s =
   Map.add t ~key:s ~data:(count + 1)
 ```
 
-## More on modules and signatures
-
-### Concrete types in signatures
+## Concrete types in signatures
 
 In our frequency-count example, the module `Counter` had an abstract
 type `Counter.t` for representing a collection of frequency counts.
@@ -435,66 +433,7 @@ invariants beyond what is enforced by the type itself; concrete types
 let you expose more detail and structure to client code in a
 lightweight way.  The right choice depends very much on the context.
 
-### The `include` statement ###
-
-OCaml provides a number of tools for manipulating modules.  One
-particularly useful one is the `include` statement, which is used to
-include the contents of one module into another.
-
-One natural application of `include` is to create one module which is
-an extension of another one.  For example, imagine you wanted to build
-an extended version of the `List` module, where you've added some
-functionality not present in the module as distributed in Core.  We
-can do this easily using `include`:
-
-```ocaml
-(* ext_list.ml: an extended list module *)
-
-open Core.Std
-
-(* The new function we're going to add *)
-let rec intersperse list el =
-  match list with
-  | [] | [ _ ]   -> list
-  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
-
-(* The remainder of the list module *)
-include List
-```
-
-Now, what about the interface of this new module?  It turns out that
-include works on the signature language as well, so we can pull
-essentially the same trick to write an `mli` for this new module.  The
-only trick is that we need to get our hands on the signature for the
-list module, which can be done using `module type of`.
-
-```ocaml
-(* ext_list.mli: an extended list module *)
-
-open Core.Std
-
-(* Include the interface of the list module from Core *)
-include (module type of List)
-
-(* Signature of function we're adding *)
-val intersperse : 'a list -> 'a -> 'a list
-```
-
-And we can now use `Ext_list` as a replacement for `List`.  If we want
-to use `Ext_list` in preference to `List` in our project, we can
-create a file of common definitions:
-
-```ocaml
-(* common.ml *)
-
-module List = Ext_list
-```
-
-And if we then put `open Common` after `open Core.Std` at the top of
-each file in our project, then references to `List` will automatically
-go to `Ext_list` instead.
-
-### Modules within a file ###
+## Nested modules
 
 Up until now, we've only considered modules that correspond to files,
 like `counter.ml`.  But modules (and module signatures) can be nested
@@ -595,24 +534,43 @@ end = struct
 end
 ```
 
-### Opening modules ###
+## Opening modules
 
 One useful primitive in OCaml's module language is the `open`
 statement.  We've seen that already in the `open Core.Std` that has
 been at the top of our source files.
 
-The basic purpose of `open` is to extend the namespaces that OCaml
-searches when trying to resolve an identifier.  Roughly, if you open a
-module `M`, then every subsequent time you look for an identifier
-`foo`, the module system will look in `M` for a value named `foo`.
-This is true for all kinds of identifiers, including types, type
-constructors, values and modules.
+We've used OCaml's `open` statement many times already in the `open
 
-`open` is essential when dealing with something like a standard
-library, but it's generally good style to keep opening of modules to a
-minimum.  Opening a module is basically a tradeoff between terseness
-and explicitness - the more modules you open, the harder it is to
-look at an identifier and figure out where it's defined.
+So far, we've been referring to values and types within a module by
+using the module name as an explicit qualifier.  _e.g._, we write
+`List.map` to refer to the `map` function in the `List` module
+Sometimes, though, you want to be able to refer to the contents of a
+module without that kind of explicit qualification.  This is what the
+`open` statement is for.
+
+We've already seen the `open` statement in use in the `open Core.Std`
+statements at the top of each source file.  Opening a module adds its
+contents to the environment that the compiler looks in for finding
+identifiers.  Here's a trivial example that gives you a sense of how
+this works.
+
+```ocaml
+# module M = struct let foo = 3 end;;
+module M : sig val foo : int end
+# foo;;
+Error: Unbound value foo
+# open M;;
+# foo;;
+- : int = 3
+```
+
+`open` is essential when you want to modify your environment for a
+standard library like Core, but it's generally good style to keep
+opening of modules to a minimum.  Opening a module is basically a
+tradeoff between terseness and explicitness - the more modules you
+open, the harder it is to look at an identifier and figure out where
+it's defined.
 
 Here's some general advice on how to deal with opens.
 
@@ -622,7 +580,8 @@ Here's some general advice on how to deal with opens.
     `Option.Monad_infix`.
 
   * If you do need to do an open, it's better to do a _local open_.
-    There are two syntaxes for local opens.  For example, you can write:
+    There are two syntaxes for local opens.  For example, you can
+    write:
 
     ```ocaml
     let average x y =
@@ -669,14 +628,126 @@ Here's some general advice on how to deal with opens.
     to very short names at the toplevel of your module is usually a
     mistake.
 
+## Including modules
 
-### Common errors with modules
+While opening a module affects the environment used to search for
+identifiers, _including_ a module is a way of actually adding new
+identifiers to a module proper.  Consider the following simple module
+for representing a range of intervals.
+
+```ocaml
+# module Interval = struct
+    type t = | Interval of int * int
+             | Empty
+
+    let create low high =
+      if high < low then Empty else Interval (low,high)
+  end;;
+module Interval :
+  sig type t = Interval of int * int | Empty val create : int -> int -> t end
+```
+
+We can use the `include` directive to create a new, extended version
+of the `Interval` module.
+
+```ocaml
+# module Extended_interval = struct
+    include Interval
+
+    let contains t x =
+      match t with
+      | Empty -> false
+      | Interval (low,high) -> x >= low && x <= high
+  end;;
+module Extended_interval :
+  sig
+    type t = Interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val contains : t -> int -> bool
+  end
+# Extended_interval.contains (Extended_interval.create 3 10) 4;;
+- : bool = true
+```
+
+The difference between `include` and `open` is that we've done more
+than change how identifiers are searched for: we've changed what's in
+the module.  If we'd used `open`, we'd have gotten a quite different
+result.
+
+```ocaml
+# module Extended_interval = struct
+    open Interval
+
+    let contains t x =
+      match t with
+      | Empty -> false
+      | Interval (low,high) -> x >= low && x <= high
+  end;;
+module Extended_interval :
+  sig val contains : Extended_interval.t -> int -> bool end
+# Extended_interval.contains (Extended_interval.create 3 10) 4;;
+Error: Unbound value Extended_interval.create
+```
+
+To consider a more realistic example, imagine you wanted to build an
+extended version of the `List` module, where you've added some
+functionality not present in the module as distributed in Core.
+`include` allows us to do just that.
+
+```ocaml
+(* ext_list.ml: an extended list module *)
+
+open Core.Std
+
+(* The new function we're going to add *)
+let rec intersperse list el =
+  match list with
+  | [] | [ _ ]   -> list
+  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
+
+(* The remainder of the list module *)
+include List
+```
+
+Now, what about the interface of this new module?  It turns out that
+include works on the signature language as well, so we can pull
+essentially the same trick to write an `mli` for this new module.  The
+only trick is that we need to get our hands on the signature for the
+list module, which can be done using `module type of`.
+
+```ocaml
+(* ext_list.mli: an extended list module *)
+
+open Core.Std
+
+(* Include the interface of the list module from Core *)
+include (module type of List)
+
+(* Signature of function we're adding *)
+val intersperse : 'a list -> 'a -> 'a list
+```
+
+And we can now use `Ext_list` as a replacement for `List`.  If we want
+to use `Ext_list` in preference to `List` in our project, we can
+create a file of common definitions:
+
+```ocaml
+(* common.ml *)
+
+module List = Ext_list
+```
+
+And if we then put `open Common` after `open Core.Std` at the top of
+each file in our project, then references to `List` will automatically
+go to `Ext_list` instead.
+
+## Common errors with modules
 
 When OCaml compiles a program with an `ml` and an `mli`, it will
 complain if it detects a mismatch between the two.  Here are some of
 the common errors you'll run into.
 
-#### Type mismatches
+### Type mismatches
 
 The simplest kind of error is where the type specified in the
 signature does not match up with the type in the implementation of the
@@ -714,7 +785,7 @@ There's no denying that learning to decode such error messages is
 difficult at first, and takes some getting used to.  But in time,
 decoding these errors becomes second nature.
 
-#### Missing definitions
+### Missing definitions
 
 We might decide that we want a new function in `Counter` for pulling
 out the frequency count of a given string.  We can update the `mli` by
@@ -736,7 +807,7 @@ Error: The implementation counter.ml
 
 A missing type definition will lead to a similar error.
 
-#### Type definition mismatches
+### Type definition mismatches
 
 Type definitions that show up in an `mli` need to match up with
 corresponding definitions in the `ml`.  Consider again the example of
@@ -767,7 +838,7 @@ including the order in which record fields are declared and the order
 of arguments (including labeled and optional arguments) to a
 function.
 
-#### Cyclic dependencies
+### Cyclic dependencies
 
 In most cases, OCaml doesn't allow circular dependencies, _i.e._, a
 collection of definitions that all refer to each other.  If you want
