@@ -210,6 +210,10 @@ let touch t s =
   List.Assoc.add t s (count + 1)
 ```
 
+The file `counter.ml` will be compiled into a module named `Counter`.
+The name of the module is derived automatically from the filename.
+Note that the module name is capitalized even if the file is not.
+
 We can now rewrite `freq.ml` to use `Counter`.  Note that the
 resulting code can still be built with `ocamlbuild`, which will
 discover dependencies and realize that `counter.ml` needs to be
