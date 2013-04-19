@@ -14,9 +14,9 @@ module signatures.
 
 ## Single File Programs ##
 
-We'll start with an example: a utility that reads lines from `stdin`,
-computing a frequency count of the lines that have been read in.  At
-the end, the 10 lines with the highest frequency counts are written
+We'll start with an example: a utility that reads lines from `stdin`
+and computes a frequency count of the lines that have been read in.
+At the end, the 10 lines with the highest frequency counts are written
 out.  Here's a simple implementation, which we'll save as the file
 `freq.ml`.  Note that we're using several functions from the
 `List.Assoc` module, which provides utility functions for interacting
