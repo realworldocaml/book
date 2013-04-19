@@ -124,8 +124,8 @@ If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
 `freq.byte`, we would have gotten native-code instead.
 
 We can now run the our program from the command-line.  The following
-line extracts strings from the `ocamlopt` executable, and then reports
-the most frequently occurring ones.
+line extracts strings from the `ocamlopt` executable, reporting the
+most frequently occurring ones.
 
 ```
 $ strings `which ocamlopt` | ./freq.byte
