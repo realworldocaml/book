@@ -895,7 +895,8 @@ rather than ordinary `let`.
 
 The same is true at the module level.  By default, circular
 dependencies between modules are not allowed, and indeed, circular
-dependencies among files are never allowed.
+dependencies among files are never allowed.  Recursive modules are
+possible, but are a rare case and we won't discuss them further here.
 
 The simplest case of this is that a module can not directly refer to
 itself (although definitions within a module can refer to each other
