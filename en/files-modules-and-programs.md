@@ -228,7 +228,7 @@ let build_counts () =
 
 let () =
   build_counts ()
-  |> List.sort counts ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort counts ~cmp:(fun (_,x) (_,y) -> compare y x)
   |> (fun l -> List.take l 10)
   |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
 ```
@@ -237,7 +237,7 @@ let () =
 
 While we've pushed some of the logic to the `Counter` module, the code
 in `freq.ml` can still depend on the details of the implementation of
-`Counter`.  Indeed, if you look at the definition of build_counts:
+`Counter`.  Indeed, if you look at the definition of `build_counts`:
 
 ```ocaml
 let build_counts () =
@@ -392,6 +392,13 @@ let touch t s =
   in
   Map.add t ~key:s ~data:(count + 1)
 ```
+
+Note that in the above we use `String.Map` in some places and simply
+`Map` in others.  This has to do with the fact that for some
+operations, like creating a `Map.t`, you need access to
+type-specialized information, and for others, like looking something
+up in `Map.t`, you don't.  This is covered in more detail in
+[xref](#maps-and-hashtables).
 
 ## Concrete types in signatures
 
