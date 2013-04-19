@@ -53,7 +53,7 @@ function for each line to update the accumulator.  That accumulator is
 initialized to the empty list.
 
 With `build_counts` defined, we then call the function to build the
-association list, sort that list be frequency in descending order,
+association list, sort that list by frequency in descending order,
 grab the first 10 elements off the list, and then iterate over those
 ten elements and print them to the screen.  These operations are tied
 together using the `|>` operator, as described in
@@ -99,10 +99,10 @@ is required for Core.
 While this works well enough for a one-file project, more complicated
 builds will require a tool to orchestrate the build.  One great tool
 for this task is `ocamlbuild`, which is shipped with the OCaml
-compiler.  We'll talk more about `ocamlbuild` in
-[xref](#packaging), but for now, we'll just walk
-through the steps required for this simple application.  First, create
-a `_tags` file, containing the following lines.
+compiler.  We'll talk more about `ocamlbuild` in [xref](#packaging),
+but for now, we'll just walk through the steps required for this
+simple application.  First, create a `_tags` file containing the
+following lines:
 
 ```
 true:package(core),thread,annot,debugging
@@ -111,9 +111,8 @@ true:package(core),thread,annot,debugging
 The purpose of the `_tags` file is to specify which compilation
 options are required for which files.  In this case, we're telling
 `ocamlbuild` to link in the `core` package and to turn on threading,
-output of annotation files, and debugging support for all files (the
-condition `true` causes the options to be applied to every file in the
-project.)
+output of annotation files, and debugging support for all files (since
+the condition `true` evaluates to `true` on all files).
 
 We can then invoke `ocamlbuild` to build the executable in question.
 
