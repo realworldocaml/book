@@ -229,8 +229,7 @@ let () =
   |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
 ```
 
-
-### Signatures and Abstract Types ###
+## Signatures and Abstract Types
 
 While we've pushed some of the logic to the `Counter` module, the code
 in `freq.ml` can still depend on the details of the implementation of
@@ -248,20 +247,22 @@ kind of dependency, so that we can change the implementation of
 `freq.ml`.
 
 The first step towards hiding the implementation details of `Counter`
-is to create an interface file, `counter.mli`, which controls how
-`counter` is accessed.  Let's start by writing down a simple
-descriptive interface, _i.e._, an interface that describes what's
-currently available in `Counter` without hiding anything.  We'll use
-`val` declarations in the `mli`, which have the following syntax
+is to write down the _signature_ of the module.  Note that the terms
+_interface_, _signature_ and _module type_ are all used almost
+interchangeably in the OCaml world.
+
+In this case, we'll put the signature in `counter.mli`, which is the
+interface file (that's where the `i` in `mli` comes from) for
+`counter.ml`.  We'll start by writing down an interface that describes
+what's currently available in `Counter` without hiding anything.
+We'll use `val` declarations to specify values to expose.  The syntax
+of a `val` declaration is as follows:
 
 ```
 val <identifier> : <type>
 ```
 
-and are used to expose the existence of a given value in the module.
-Here's an interface that describes the current contents of `Counter`.
-We can save this as `counter.mli` and compile, and the program will
-build as before.
+And here's the contents of the `mli` file.
 
 ```ocaml
 (* counter.mli: descriptive interface *)
@@ -269,6 +270,9 @@ open Core.Std
 
 val touch : (string * int) list -> string -> (string * int) list
 ```
+
+Note that `ocamlbuild` will detect the presence of the `mli` file
+automatically and include it in the build.
 
 <note><title>Auto-generating `mli` files</title>
 
@@ -320,7 +324,7 @@ Note that we needed to add `empty` and `to_list` to `Counter`, since
 otherwise, there would be no way to create a `Counter.t` or get data
 out of one.
 
-Here's a rewrite of `counter.ml` to match this signature.
+Here's a rewrite of `counter.ml` to match this interface.
 
 ```ocaml
 (* counter.ml: implementation matching abstract interface *)
