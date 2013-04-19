@@ -12,8 +12,8 @@ opam switch 4.01.0dev+trunk
 ```
 
 Once you make the switch, you'll need to install the packages you
-need.  Note that once your packages are installed, you can quickly
-switch back and forth between compilers with no extra work.
+need.  Note that switching back and forth between different compilers
+and their packages is a fast operation after the initial build.
 
 </note>
 
@@ -45,13 +45,14 @@ information about a given computer.
       os_name    : string;
       os_release : string;
       cpu_arch   : string;
+      timestamp  : Time.t;
     };;
 ```
 
 We can construct a `host_info` just as easily.  The following code
 uses the `Shell` module from `Core_extended` to dispatch commands to
 the shell to extract the information we need about the computer we're
-running on.
+running on, and the `Time.now` call from Core's `Time` module.
 
 ```ocaml
 # open Core_extended.Std;;
@@ -61,18 +62,18 @@ running on.
       os_name    = sh "uname -s";
       os_release = sh "uname -r";
       cpu_arch   = sh "uname -p";
+      timestamp  = Time.now ();
     };;
 val my_host : host_info =
-  {hostname = "Yarons-MacBook-Air.local"; os_name = "Darwin";
-   os_release = "11.4.0"; cpu_arch = "i386"}
+  {hostname = "yevaud.local"; os_name = "Darwin"; os_release = "12.3.0";
+   cpu_arch = "i386"; timestamp = 2013-04-13 06:39:17.806527}
 ```
 
 You might wonder how the compiler inferred that `my_host` is of type
 `host_info`.  The hook that the compiler uses in this case to figure
-out the type is the record field names.  It turns out that, within a
-given scope, each record field name is associated with a unique record
-type.  Later in the chapter, we'll talk about what to do when you want
-to have the same record fields in multiple records.
+out the type is the record field name.  Later in the chapter, we'll
+talk about what happens when there is more than one record type in
+scope with the same field name.
 
 Once we have a record value in hand, we can extract elements from the
 record field using dot-notation.
@@ -89,20 +90,23 @@ pattern match, as in the definition of `host_info_to_string` below.
 
 ```ocaml
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c } =
-       sprintf "%s (%s %s / %s)" h os r c;;
+                            os_release = r; cpu_arch = c;
+                            timestamp = ts;
+                          } =
+       sprintf "%s (%s %s / %s, on %s)" h os r c (Time.to_sec_string ts);;
     val host_info_to_string : host_info -> string = <fun>
 # host_info_to_string my_host;;
-- : string = "Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)"
+- : string = "yevaud.local (Darwin 12.3.0 / i386, on 2013-04-13 06:39:17)"
 ```
 
 Note that the pattern that we used had only a single case, rather than
-using several cases separated by `|`s.  We only needed a single
-pattern because record patterns are _irrefutable_, meaning that,
-because the layout of a record is always the same, a record pattern
-match will never fail at runtime.  In general, types with a fixed
-structure, like records and tuples, have irrefutable patterns, whereas
-types with variable structure, like lists and variants, do not.
+using several cases separated by `|`s.  We needed only one pattern
+because record patterns are _irrefutable_, meaning that a record
+pattern match will never fail at runtime.  This makes sense, because
+the set of fields available in a record is always the same.  In
+general, patterns for types with a fixed structure, like records and
+tuples, are irrefutable, unlike types with variable structure like
+lists and variants.
 
 Another important characteristic of record patterns is that they don't
 need to be complete; a pattern can mention only a subset of the fields
@@ -121,14 +125,15 @@ As an example, imagine that we wanted to add a new field to our
       os_release : string;
       cpu_arch   : string;
       os_version : string;
-    };;
+      timestamp  : Time.t;
+    } ;;
 ```
 
 The code for `host_info_to_string` would continue to compile without
 change.  In this particular case, it's pretty clear that you might
-want to update `host_info_to_string` in order to take into account the
-new field, and it would be nice if the type system would give you a
-warning about the change.
+want to update `host_info_to_string` in order to include `os_version`,
+and it would be nice if the type system would give you a warning about
+the change.
 
 Happily, OCaml does offer an optional warning for missing fields in a
 record pattern.  With that warning turned on (which you can do in the
@@ -136,17 +141,17 @@ toplevel by typing `#warnings "+9" `), the compiler will warn about
 the missing field.
 
 ```ocaml
-# warnings "+9";;
+# #warnings "+9";;
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c } =
-       sprintf "%s (%s %s / %s)" h os r c;;
-    Characters 24-112:
-  ........................{ hostname = h; os_name = os;
-                              os_release = r; cpu_arch = c }..
+                            os_release = r; cpu_arch = c;
+                            timestamp = ts;
+                          } =
+    sprintf "%s (%s %s / %s, on %s)" h os r c (Time.to_sec_string ts);;
+Characters 24-183:
+val host_info_to_string : host_info -> string = <fun>
 Warning 9: the following labels are not bound in this record pattern:
 os_version
 Either bind these labels explicitly or add '; _' to the pattern.
-val host_info_to_string : host_info -> string = <fun>
 ```
 
 We can disable the warning for a given pattern by explicitly
@@ -155,14 +160,15 @@ adding an underscore to the pattern, as shown below.
 
 ```ocaml
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c; _ } =
-       sprintf "%s (%s %s / %s)" h os r c;;
-    val host_info_to_string : host_info -> string = <fun>
+                            os_release = r; cpu_arch = c;
+                            timestamp = ts; _
+                          } =
+    sprintf "%s (%s %s / %s, on %s)" h os r c (Time.to_sec_string ts);;
+val host_info_to_string : host_info -> string = <fun>
 ```
 
-Generally, the right default is to turn the warning for incomplete
-record matches on, and to explicitly disable it with an `_` where
-necessary.
+It's a good idea to enable the warning for incomplete record matches,
+and to explicitly disable it with an `_` where necessary.
 
 ## Field punning
 
@@ -187,10 +193,15 @@ following code for generating a `host_info` record.
     let os_name    = sh "uname -s" in
     let os_release = sh "uname -r" in
     let cpu_arch   = sh "uname -p" in
-    { hostname; os_name; os_release; cpu_arch };;
+    let os_version = sh "Uname -v" in
+    let timestamp  = Time.now () in
+    { hostname; os_name; os_release; cpu_arch; os_version; timestamp };;
 val my_host : host_info =
-  {hostname = "Yarons-MacBook-Air.local"; os_name = "Darwin";
-   os_release = "11.4.0"; cpu_arch = "i386"}
+  {hostname = "yevaud.local"; os_name = "Darwin"; os_release = "12.3.0";
+   cpu_arch = "i386";
+   os_version =
+    "Darwin Kernel Version 12.3.0: Sun Jan  6 22:37:10 PST 2013; root:xnu-2050.22.13~1/RELEASE_X86_64";
+   timestamp = 2013-04-13 06:49:57.771755}
 ```
 
 In the above code, we defined variables corresponding to the record
@@ -202,27 +213,41 @@ writing a function for constructing a record from labeled arguments,
 as shown below.
 
 ```ocaml
-# let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
-    let hostname = String.lowercase hostname in
-    { hostname; os_name; os_release; cpu_arch };;
+# let create_host_info ~hostname ~os_name ~os_release ~cpu_arch ~os_version =
+    { os_name; os_release; cpu_arch; os_version;
+      hostname = String.lowercase hostname;
+      timestamp = Time.now () };;
+val create_host_info :
+  hostname:string ->
+  os_name:string ->
+  os_release:string ->
+  cpu_arch:string -> os_version:string -> timestamp:Time.t -> host_info =
+  <fun>
 ```
 
 This is considerably more concise than what you would get without
 punning at all.
 
 ```ocaml
-let create_host_info ~hostname:hostname ~os_name:os_name
-   ~os_release:os_release ~cpu_arch:cpu_arch =
-    let hostname = String.lowercase hostname in
-    { hostname = hostname ; os_name = os_name;
-      os_release = os_release; cpu_arch = cpu_arch };;
+# let create_host_info
+    ~hostname:hostname ~os_name:os_name ~os_release:os_release
+    ~cpu_arch:cpu_arch ~os_version:os_version =
+    { os_name = os_name; os_release = os_release;
+     cpu_arch = cpu_arch; os_version = os_version;
+      hostname = String.lowercase hostname;
+      timestamp = Time.now () };;
+val create_host_info :
+  hostname:string ->
+  os_name:string ->
+  os_release:string ->
+  cpu_arch:string -> os_version:string -> timestamp:Time.t -> host_info =
+  <fun>
 ```
 
 Together, labeled arguments, field names, and field and label punning,
 encourage a style where you propagate the same names throughout your
 code-base.  This is generally good practice, since it encourages
-consistent naming, which makes it easier for new people to navigate
-your source.
+consistent naming, which makes it easier to navigate the source.
 
 ## Reusing field names
 
@@ -260,60 +285,52 @@ messages include a session id and the time the message was generated.
 ;;
 ```
 
-The fact that we reused field names will cause trouble when we try to
-construct a message.
+Reusing field names can lead to some ambiguity.  For example, if we
+want to write a function to grab the session_id from a record, what
+type will it have?
 
 ```ocaml
-# let create_log_entry ~session_id ~important message =
-     { time = Time.now (); session_id; important; message }
-  ;;
-    Characters 75-129:
-       { time = Time.now (); session_id; important; message }
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The record field label important belongs to the type log_entry
-       but is mixed here with labels of type logon
+# let get_session_id t = t.session_id;;
+val get_session_id : logon -> string = <fun>
 ```
 
-The problem is that the declaration of `logon` (and `heartbeat`)
-shadowed some of the fields of `log_entry`.  As a result, the fields
-`time` and `session_id` are assumed to be fields of `logon`, and
-`important` and `message`, which were not shadowed, are assumed to be
-fields of `log_entry`.  The compiler therefore complains that we're
-trying to construct a record with fields from two different record
-types.
-
-There are two common solutions to this problem.  The first is to add a
-prefix to each field name to make it unique, as shown below.
+In the simple case, OCaml just picks the most recent definition of
+that record field.  We can force OCaml to assume we're dealing with a
+different type (say, a `heartbeat`) using a type annotation.
 
 ```ocaml
-# type log_entry =
-    { log_entry_session_id: string;
-      log_entry_time: Time.t;
-      log_entry_important: bool;
-      log_entry_message: string;
-    }
-  type heartbeat =
-    { heartbeat_session_id: string;
-      heartbeat_time: Time.t;
-      heartbeat_status_message: string;
-    }
-  type logon =
-    { logon_session_id: string;
-      logon_time: Time.t;
-      logon_user: string;
-      logon_credentials: string;
-    }
-;;
+# let get_heatbeat_session_id (t:heartbeat) = t.session_id;;
+val get_heatbeat_session_id : heartbeat -> string = <funambulate>
 ```
 
-This eliminates the collisions and is simple enough to do.  But it
-leaves you with awkwardly named record fields, and adds needless
-repetition and verbosity to your code.
+While it's possible to resolve ambiguous field names using type
+annotations, having such ambiguity floating around can be a bit
+confusing.  Consider the following functions for grabbing the session
+id and status from a heartbeat.
 
-Another approach is to mint a module for each type.  We'll talk more
-about modules more in [xref](#files-modules-and-programs), but for
-now, you can think of a module as a way of collecting values and types
-together in a named package.
+```ocaml
+# let status_and_session t = (t.status_message, t.session_id);;
+val status_and_session : heartbeat -> string * string = <fun>
+# let session_and_status t = (t.session_id, t.status_message);;
+Error: The record type logon has no field status_message
+# let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
+val session_and_status : heartbeat -> string * string = <fun>
+```
+
+Why did the first definition succeed without a type annotation and the
+second one fail?  The difference is that in the first case, the
+type-checker considered the `status_message` field first and thus
+concluded that the record was a `heartbeat`.  When the order was
+switched, the `session_id` field was considered first, and so that
+drove the type to be considered to be a `logon`, at which point
+`t.status_message` no longer made sense.
+
+A better solution is to avoid the ambiguity altogether, either by
+using non-overlapping field names or, more generally, by minting a
+module for each type.  We'll talk more about modules more in
+[xref](#files-modules-and-programs), but for now, you can think of a
+module as a way of collecting values and types together in a named
+package.
 
 Packing types into modules is actually a broadly useful idiom (and one
 used quite extensively by Core), providing for each type a name-space
@@ -381,11 +398,32 @@ trick when pattern-matching:
 val message_to_string : Log_entry.t -> string = <fun>
 ```
 
-However, when using dot-notation for accessing record fields, you need
-to specify the module explicitly.
+Another approach is to use a type annotation to nail down the return
+type as being `Log_entry.t`.  Note that this normally kicks out a
+warning, which we first explicitly disable.
+
+```ocaml
+# #warnings "-40";;
+# let create_log_entry ~session_id ~important message : Log_entry.t =
+     { time = Time.now (); session_id; important; message }
+  ;;
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+```
+
+When using dot-notation for accessing record fields, we can qualify
+the field by the module directly:
 
 ```ocaml
 # let is_important t = t.Log_entry.important;;
+val is_important : Log_entry.t -> bool = <fun>
+```
+
+Or we can apply a type annotation to make the qualifications
+unnecessary.
+
+```ocaml
+# let is_important (t : Log_entry.t) = t.important;;
 val is_important : Log_entry.t -> bool = <fun>
 ```
 
@@ -410,12 +448,12 @@ the client information when a new heartbeat arrives.
      credentials: string;
      last_heartbeat_time: Time.t;
    };;
-# let register_heartbeat t hb =
+# let register_heartbeat t (hb:Heartbeat.t) =
       { addr = t.addr;
         port = t.port;
         user = t.user;
         credentials = t.credentials;
-        last_heartbeat_time = hb.Heartbeat.time;
+        last_heartbeat_time = hb.time;
       };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
@@ -438,8 +476,8 @@ on an existing one, with a set of field changes layered on top.
 Given this, we can rewrite `register_heartbeat` more concisely.
 
 ```ocaml
-# let register_heartbeat t hb =
-    { t with last_heartbeat_time = hb.Heartbeat.time };;
+# let register_heartbeat t (hb : Heartbeat.t) =
+    { t with last_heartbeat_time = hb.time };;
 ```
 
 Functional updates make your code independent of the identity of the
@@ -469,9 +507,9 @@ field.  The correct thing to do would be to update the code as
 follows.
 
 ```ocaml
-# let register_heartbeat t hb =
-    { t with last_heartbeat_time   = hb.Heartbeat.time;
-             last_heartbeat_status = hb.Heartbeat.status_message;
+# let register_heartbeat t (hb : Heartbeat.t) =
+    { t with last_heartbeat_time   = hb.time;
+             last_heartbeat_status = hb.status_message;
     };;
 ```
 
@@ -498,9 +536,9 @@ side-effecting version of `register_heartbeat` would be written as
 follows.
 
 ```ocaml
-# let register_heartbeat t hb =
-    t.last_heartbeat_time   <- hb.Heartbeat.time;
-    t.last_heartbeat_status <- hb.Heartbeat.status_message
+# let register_heartbeat t (hb : Heartbeat.t) =
+    t.last_heartbeat_time   <- hb.time;
+    t.last_heartbeat_status <- hb.status_message
   ;;
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 ```
@@ -570,16 +608,34 @@ A `Field.t` has two type parameters: the first for the type of the
 record, and the second for the type of the field in question.  Thus,
 the type of `Logon.Fields.session_id` is `(Logon.t, string) Field.t`,
 whereas the type of `Logon.Fields.time` is `(Logon.t, Time.t)
-Field.t`.  Accordingly, the function `Field.get` has type
+Field.t`.  Thus,  if you call `Field.get` on `Logon.Fields.user`,
+you'll get a function for extracting the `user` field from a `Logon.t`.
 
 ```ocaml
-('r, 'a) Field.t -> 'r -> 'a
+# Field.get Logon.Fields.user;;
+- : Logon.t -> string = <fun>
 ```
 
-As you can see, the first parameter of the `Field.t` corresponds to
-the record you pass to `get`, and the second argument corresponds to
-the value contained in the field, which is also the return type of
-`get`.
+Thus, first parameter of the `Field.t` corresponds to the record you
+pass to `get`, and the second argument corresponds to the value
+contained in the field, which is also the return type of `get`.
+
+The type of `Field.get` is a little more complicated than you might
+naively expect from the above, as you can see below.
+
+```ocaml
+# Field.get;;
+- : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>
+```
+
+The extra type parameter `'b` is there to keep track of permissions on
+the `Field.t`.  As we'll see later when we cover
+
+The type is `Field.t_with_perm` rather than a simple `Field.t` because
+fields have a notion of access control associated with them because
+there are some special cases where we may expose a field but not
+expose the ability to read a field but not the ability to do a
+functional update.
 
 We can use first class fields to do things like write a generic
 function for displaying a record field.
