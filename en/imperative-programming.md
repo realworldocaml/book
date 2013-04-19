@@ -132,7 +132,7 @@ The other functions defined above are fairly straightforward:
 - `find` looks for a matching key in the table and returns the
   corresponding value if found as an option.
 
-A new piece of syntax has also popped up in `find`: we write
+Another bit of syntax has popped up in `find`: we write
 `array.(index)` to grab a value from an array.  Also, `find` uses
 `List.find_map`, which you can see the type of by typing it into the
 toplevel:
@@ -157,8 +157,8 @@ let iter t ~f =
 ```
 
 `iter` is designed to walk over all the entries in the dictionary.  In
-particular, `iter d ~f` will call `f` for each key/value pair in
-dictionary `d`.  Note that `f` must return `unit`, since it is
+particular, `iter t ~f` will call `f` for each key/value pair in
+dictionary `t`.  Note that `f` must return `unit`, since it is
 expected to work by side effect rather than by returning a value, and
 the overall `iter` function returns `unit ` as well.
 
@@ -204,8 +204,8 @@ detect whether we are overwriting or removing an existing binding, so
 we can decide whether `t.length` needs to be changed.  The helper
 function `bucket_has_key` is used for this purpose.
 
-Another new piece of syntax shows up in both `add` and `remove`: the
-use of the `<-` operator to update elements of an array (`array.(i) <-
+Another piece of syntax shows up in both `add` and `remove`: the use
+of the `<-` operator to update elements of an array (`array.(i) <-
 expr`) and for updating a record field (`record.field <- expression`).
 
 We also use a single semicolon, `;`, as a sequencing operator, to
@@ -509,7 +509,6 @@ previous and next elements.  At the beginning of the list, the `prev`
 field is `None`, and at the end of the list, the `next` field is
 `None`.
 
-
 The type of the list itself, `'a t`, is an mutable reference to an
 optional `element`.  This reference is `None` if the list is empty,
 and `Some` otherwise.
@@ -573,17 +572,17 @@ let insert_first t value =
 ```
 
 `insert_first` first defines a new element `new_elt`, and then links
-it into the list, finally setting the the list itself to point to
+it into the list, finally setting the list itself to point to
 `new_elt`.  Note that the precedence of a `match` expression is very
-low, so to separate it from the following assignment `t := Some
-new_front`, we surround the match in a `begin ... end` bracketing (we
-could also use parentheses).  If we did not, the final assignment
-would become part of the `None -> ...` case, which is not what we
-want.
+low, so to separate it from the following assignment (`t := Some
+new_elt`) we surround the match with `begin ... end`. We could have
+used parenthesis for the same purpose.  Without some kind of
+bracketing, the final assignment would incorrectly become part of the
+`None -> ...` case.
 
-In order to add elements later in the list, we can use `insert_after`,
-which takes an `element` as an argument, after which it inserts a new
-element.
+We can use `insert_after` to insert elements later in the list.
+`insert_after` takes as arguments both an `element` after which to
+insert the new node, and a value to insert.
 
 ```ocaml
 let insert_after elt value =
@@ -795,7 +794,9 @@ The code above is a bit tricky.  `memoize` takes as its argument a
 function `f`, and then allocates a hashtable (called `table`) and
 returns a new function as the memoized version of `f`.  When called,
 this new function looks in `table` first, and if it fails to find a
-value, calls `f` and stashes the result in `table`.
+value, calls `f` and stashes the result in `table`.  Note that `table`
+doesn't go out of scope as long as the function returned by `memoize`
+is in scope.
 
 Memoization can be useful whenever you have a function that is
 expensive to recompute, and you don't mind caching old values
@@ -1608,9 +1609,12 @@ Consider the following simple imperative function.
 ```
 
 `remember` simply caches the first value that's passed to it,
-returning that value on every call.  It's not a terribly useful
-function, but it raises an interesting question: what type should it
-have?
+returning that value on every call.  Note that we've carefully written
+`remember` so that `cache` is created and initialized once, and is
+shared across invocations of `remember`.
+
+`remember` is not a terribly useful function, but it raises an
+interesting question: what type should it have?
 
 On its first call, `remember` returns the same value its passed, which
 means its input type and return type should match.  Accordingly,
