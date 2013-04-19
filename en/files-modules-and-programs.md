@@ -606,7 +606,7 @@ Error: Unbound value foo
 `open` is essential when you want to modify your environment for a
 standard library like Core, but it's generally good style to keep
 opening of modules to a minimum.  Opening a module is basically a
-tradeoff between terseness and explicitness - the more modules you
+tradeoff between terseness and explicitness --- the more modules you
 open, the harder it is to look at an identifier and figure out where
 it's defined.
 
@@ -650,7 +650,7 @@ Here's some general advice on how to deal with opens.
          printf "Before and after median:\n   %s\n   %s\n" before after
     ```
 
-    ...you could write
+    you could write:
 
     ```ocaml
     let print_median m =
@@ -857,15 +857,15 @@ A missing type definition will lead to a similar error.
 Type definitions that show up in an `mli` need to match up with
 corresponding definitions in the `ml`.  Consider again the example of
 the type `median`.  The order of the declaration of variants matters
-to the OCaml compiler so, if the definition of `median` in the
-implementation lists those options in a different order:
+to the OCaml compiler, so the definition of `median` in the
+implementation listing those options in a different order:
 
 ```ocaml
 type median = | Before_and_after of line * line
               | Median of line
 ```
 
-that will lead to a compilation error:
+will lead to a compilation error:
 
 ```
 File "counter.ml", line 1, characters 0-1:
