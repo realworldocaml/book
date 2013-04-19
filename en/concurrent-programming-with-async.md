@@ -306,9 +306,9 @@ thread joining functions above, such as `Deferred.both`.
 
 ## Onto an HTTP Server
 
-## Binding to the Github API
+## Binding to the GitHub API
 
-Show how we can use a monadic style to bind to the Github API and make simple JSON requests/responses.
+Show how we can use a monadic style to bind to the GitHub API and make simple JSON requests/responses.
 
 <note><title>A Note on Portability</title>
 

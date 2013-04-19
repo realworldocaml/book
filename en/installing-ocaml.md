@@ -178,16 +178,6 @@ And on MacPorts, install it like this:
 $ sudo port install opam
 ```
 
-<note>
-<title>Check the MacPorts version of OPAM</title>
-
-As of this snapshot, the MacPorts version of OPAM is still 0.9.4,
-which is too old.  If it hasn't been updated when you try it, then
-please do a source installation of OPAM 1.0.0 or higher. We've contacted
-the MacPorts team to request an update.
-
-</note>
-
 ### Debian Linux
 
 There are experimental binary packages available for Debian
@@ -445,6 +435,21 @@ Core opened and ready to use.
 #### Emacs
 
 TODO: Emacs users have tuareg and [Typerex](http://www.typerex.org/).
+
+To use `utop` directly in Emacs, add the following line to your `~/.emacs` file:
+
+```scheme
+(autoload 'utop "utop" "Toplevel for OCaml" t)
+```
+
+You also need to make the `utop.el` file available to your Emacs installation.
+The OPAM version of `utop` installs it into the `~/.opam` hierarchy, for
+example in `~/.opam/system/share/emacs/site-lisp/utop.el`. You may need to
+replace `system` with your current compiler switch, such as `4.01.0dev+trunk`.
+
+Once this successfully loads in Emacs, you can run utop by executing the
+command `utop` in Emacs.  There are more details instructions at the 
+[utop homepage](https://github.com/diml/utop#integration-with-emacs).
 
 #### Vim
 

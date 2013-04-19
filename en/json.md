@@ -543,12 +543,12 @@ write any OCaml parsing code at all, as it will all be auto-generated
 for you.
 
 Let's go straight into looking at an example of how this works, by
-using a small portion of the Github API.  Github is a popular code
+using a small portion of the GitHub API.  GitHub is a popular code
 hosting and sharing website that provides a JSON-based web
 [API](http://developer.github.com).  The ATD code fragment below
-describes the Github authorization API.  It is based on a
+describes the GitHub authorization API.  It is based on a
 pseudo-standard web protocol known as OAuth, and is used to authorized
-users to access Github services.
+users to access GitHub services.
 
 ```ocaml
 type scope = [
@@ -583,7 +583,7 @@ type authorization_response = {
 
 ATD is (deliberately) similar to OCaml type definitions.  Each field
 can include extra annotations to customise the parsing code for a
-particular backend. For example, the Github `scope` field above is
+particular backend. For example, the GitHub `scope` field above is
 defined as a variant type, but with the actual JSON values being
 defined explicitly (as lower-case versions).
 
@@ -676,7 +676,7 @@ generation process: [Piqi](http://piqi.org) uses the Google protobuf
 format, and [Thrift](http://thrift.apache.org) supports a huge variety
 of other programming languages.
 
-We'll also return to the Github example here later in the book when
+We'll also return to the GitHub example here later in the book when
 discussing the Async networking library, and you can find the full ATD
-specification for Github in the
+specification for GitHub in the
 [`ocaml-github`](http://github.com/avsm/ocaml-github) repository.
