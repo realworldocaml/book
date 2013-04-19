@@ -17,10 +17,31 @@ module signatures.
 We'll start with an example: a utility that reads lines from `stdin`
 and computes a frequency count of the lines that have been read in.
 At the end, the 10 lines with the highest frequency counts are written
-out.  Here's a simple implementation, which we'll save as the file
-`freq.ml`.  Note that we're using several functions from the
-`List.Assoc` module, which provides utility functions for interacting
-with association lists, _i.e._, lists of key/value pairs.
+out.  We'll start with a simple implementation, which we'll save as
+the file `freq.ml`.
+
+This implementation will use two functions from the `List.Assoc`
+module, which provides utility functions for interacting with
+association lists, _i.e._, lists of key/value pairs.  In particular,
+we use the function `List.Assoc.find`, which looks up a key in an
+association list, and `List.add`, which adds a new binding to an
+association list, as shown below.
+
+```ocaml
+# let assoc = [("one", 1); ("two",2); ("three",3)];;
+val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
+# List.Assoc.find assoc "two";;
+- : int option = Some 2
+# List.Assoc.add assoc "four" 4;; (* add a new key *)
+[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
+# List.Assoc.add assoc "two" 4;; (* overwrite an existing key *)
+- : (string, int) List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
+```
+
+Note that `List.Assoc.add` doesn't modify the original list, but
+instead allocates a new list with the requisite key/value added.
+
+Now we can write down `freq.ml`.
 
 ```ocaml
 (* freq.ml: basic implementation *)
@@ -409,8 +430,8 @@ including the type definition in the interface.
 
 For example, imagine we wanted to add a function to `Counter` for
 returning the line with the median frequency count.  If the number of
-lines is even, then there is no precise median, so the function would
-return the two lines before and after the median instead.  We'll use a
+lines is even, then there is no precise median and the function would
+return the lines before and after the median instead.  We'll use a
 custom type to represent the fact that there are two possible return
 values.  Here's a possible implementation.
 
@@ -431,8 +452,10 @@ let median t =
 ```
 
 Now, to expose this usefully in the interface, we need to expose both
-the function and the type `median` with its definition.  We'd do that
-by adding these lines to the `counter.mli`:
+the function and the type `median` with its definition.  Note that
+values (of which functions are an example) and types have distinct
+namespaces, so there's no name clash here.  The following two lines
+added to `freq.mli` does the trick.
 
 ```ocaml
 type median = | Median of string
@@ -741,6 +764,13 @@ include (module type of List)
 (* Signature of function we're adding *)
 val intersperse : 'a list -> 'a -> 'a list
 ```
+
+Note that the order of declarations in the `mli` does not need to
+match the order of declarations in the `ml`.  Also, the order of
+declarations in the `ml` is quite important in that it determines what
+values are shadowed.  If we wanted to replace a function in `List`
+with a new function of the same name, the declaration of that function
+in the `ml` would have to come after the `include List` declaration.
 
 And we can now use `Ext_list` as a replacement for `List`.  If we want
 to use `Ext_list` in preference to `List` in our project, we can
