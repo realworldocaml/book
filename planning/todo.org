@@ -14,4 +14,6 @@
 ** Clever type tricks
  - private types and private type abbreviations
  - GADTs
- -
+** Threads
+ - We should do some coverage of pre-emptive threads and how they
+   work in OCaml, no?  Maybe as part of the Async chapter?
