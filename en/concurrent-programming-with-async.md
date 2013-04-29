@@ -1,48 +1,156 @@
 # Concurrent Programming with Async
 
-When you start building OCaml code that interfaces with external
-systems, you'll soon need to handle concurrent operations. Consider
-the case of a web server sending a large file to many clients, or a
-GUI waiting for a mouse clicks. These applications often need to block
-while waiting for input for a particular task, and process something
-else during that time. Meanwhile, when new data does appear, the
-blocked task needs to be resumed as quickly as possible.
+The logic of building programs that interact with the outside world is
+often dominated by waiting: waiting for the click of a mouse, or for
+data to be fetched from disk, or for space to be available on an
+outgoing network buffer.  Even mildly sophisticated sophisticated
+interactive applications are typically _concurrent_, needing to wait
+for multiple different events at the same time, responding immediately
+to whatever event happens first.
 
-Busy servers can often handle tens of thousands of simultaneous
-connections, so runtime efficiency really matters.  An equally
-important concern is readable source code, so that the control flow of
-the program is obvious at a glance.
+A common approach to concurrency is to use preemptive system threads,
+which is the most common solution in languages like Java or C#.  In
+this model, each task that may require simultaneous waiting is given
+an operating system thread of its own, so it can block without
+stopping the entire program.  Other language runtimes such as
+Javascript are single-threaded, and applications register function
+callbacks to be triggered upon external events such as a timeout or
+browser click.
 
-A common approach to concurrency is to use _preemptive_ system
-threads, most commonly in Java or C#.  In this threading model, each
-task is given an operating system thread of its own, and the kernel
-schedules them with arbitrary interleavings.  Other language runtimes
-such as Javascript are single-threaded, and applications register
-function callbacks to be triggered upon external events such as a
-timeout or browser click.
+Each of these mechanisms has its own trade-offs. Preemptive threads
+require significant memory and other resources per thread.  Also, the
+operating system can arbitrarily interleave the execution of
+preemptive threads, requiring the programmer to carefully protect
+shared resources with locks and condition variables, which can be
+exceedingly error-prone.
 
-Both of these mechanisms have tradeoffs. Preemptive threads require
-more resources per thread and can be memory hungry. The operating
-system can also arbitrarily interleave the execution of preemptive
-threads, putting a load on the programmer to lock shared data
-structures.  Single-threaded event-driven systems execute a single
-task at a time and require less locking.  However, the program
-structure can often descend into a maze of event callbacks for even a
-simple operation that blocks a few times.  Code readability matters,
-and so we'd like to avoid such spaghetti control flow.
+Single-threaded event-driven systems, on the other hand, execute a
+single task at a time and do not require the same kind of complex
+synchronization that preemptive threads do.  However, the inverted
+control structure of an event-driven program often means that your own
+control flow has to be threaded awkwardly through the system's event
+loop, leading to a maze of event callbacks.
 
-The `Async` OCaml library offers a hybrid model that lets you write
-event-driven code that can block *without* the complexity of
-preemptive threading.  Lets begin by constructing a simple
-thread. Async follows the Core convention and provides an `Async.Std`
-that provides threaded variants of many standard library functions.
+This chapter covers the Async library, which offers a hybrid model
+that aims to provide the best of both worlds, avoiding the performance
+compromises and synchronization woes of preemptive threads without the
+confusing inversion of control that usually comes with event-driven
+systems.
+
+## Deferred values
+
+Consider a typical function for doing I/O in Core.
 
 ```ocaml
-# require "async.unix" ;;
-# open Async.Std ;;
-# return 5 ;;
-- : int Deferred.t = <abstr>
+# In_channel.read_all;;
+- : string -> string = <fun>
 ```
+
+Since the function returns a concrete string, it has to block until
+the read completes.  The blocking nature of the call means that no
+progress can be made on anything else until the read is completed, as
+you can see below.
+
+```ocaml
+# Out_channel.write_all "test.txt" ~data:"This is only a test.";;
+- : unit = ()
+# In_channel.read_all "test.txt";;
+- : string = "This is only a test."
+```
+
+In Async, well-behaved functions never block.  Instead, they return a
+value of type `Deferred.t` that acts as a placeholder that will
+eventually be filled in with the result.  As an example, consider the
+signature of the Async equivalent of `In_channel.read_all`.
+
+```ocaml
+# open Async.Std;;
+# Reader.file_contents;;
+- : string -> string Deferred.t = <fun>
+```
+
+Note that we opened `Async.Std`, which adds a number of new
+identifiers and modules into our namespace that make using Async more
+convenient.  Opening `Async.Std` is standard practice for writing
+programs using Async, much like opening `Core.Std` is for using Core.
+
+A deferred is essentially a handle to a value that may be computed in
+the future.  As such, if we call `Reader.file_contents`, the resulting
+deferred will initially be empty, as you can see by calling
+`Deferred.peek` on the resulting deferred.
+
+```ocaml
+# let contents = Reader.file_contents "test.txt";;
+val contents : string Deferred.t = <abstr>
+# Deferred.peek contents;;
+- : string option = None
+```
+
+The value in `contents` isn't yet determined in part because there's
+nothing running that could do the necessary I/O.  When using Async,
+processing of I/O and other events is handled by the Async scheduler.
+When writing a stand-along program, you need to start the scheduler
+explicitly, but utop knows about Async, and can start the scheduler
+automatically.  More than that, utop knows about deferred values, and
+when you type in an expression of type `Deferred.t`, it will make sure
+the scheduler is running and block until the deferred is determined.
+Thus, we can write:
+
+```ocaml
+# contents;;
+- : string = "This is only a test.\n"
+# Deferred.peek contents;;
+- : string option = Some "This is only a test.\n"
+```
+
+In order to do real work with deferreds, we need a way of sequencing
+deferred computations, which we do using `Deferred.bind`.  First,
+let's consider the type-signature of bind.
+
+```ocaml
+# Deferred.bind ;;
+- : 'a Deferred.t -> ('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
+```
+
+Thus, `Deferred.bind d f` takes a deferred value `d` and a function f
+that is to be run with value of `d` once it's determined.  The call to
+`Deferred.bind` returns a new deferred that becomes determined when
+the deferred returned by `f` is determined.
+
+Here's a simple use of bind for a function that replaces a file with
+an uppercase version of its contents.
+
+```ocaml
+# let uppercase_file filename =
+    let text = Reader.file_contents filename in
+    Deferred.bind text (fun text ->
+      Writer.save filename ~contents:(String.uppercase text))
+  ;;
+val uppercase_file : string -> unit Deferred.t = <fun>
+# uppercase_file "test.txt";;
+- : unit = ()
+# Reader.file_contents "test.txt";;
+- : string = "THIS IS ONLY A TEST."
+```
+
+Writing out `Deferred.bind` explicitly can be rather verbose, and so
+`Async.Std` includes an infix operator for it: `>>=`.  Using this
+operator, we can rewrite `uppercase_file` as follows.
+
+```ocaml
+# let uppercase_file filename =
+    Reader.file_contents filename >>= fun text ->
+    Writer.save filename ~contents:(String.uppercase text)
+  ;;
+val uppercase_file : string -> unit Deferred.t = <fun>
+```
+
+In the above we've dropped the parenthesis around the function on the
+right-hand side of the bind, and we've didn't add a level of
+indentation for the contents of that function.  This is standard
+practice for using the bind operator.
+
+## Other Stuff
 
 <note>
 <title>When to open `Async.Std`</title>
@@ -55,13 +163,12 @@ and output descriptors.
 
 ```ocaml
 # open Core.Std;;
-# print_endline "hello world";;
+# printf "%s %s!\n" "Hello" "World";;
 hello world
 - : unit = ()
 # open Async.Std;;
 # print_endline "hello world";;
 - : unit = ()
-TODO what is the manual flush call here?
 ```
 
 With just `Core.Std` open, the `print_endline` function immediately
@@ -70,46 +177,6 @@ call to `print_endline` is buffered and needs to be manually flushed
 before the output is displayed.
 
 </note>
-
-## Creating your first async threads
-
-Async threads are co-operative and never preempt each other, and the
-library internally converts blocking code into a single event loop.
-The threads are normal OCaml heap-allocated values (without any
-runtime magic!) and can be allocated very fast. Concurrency is mostly
-limited only by your available main memory, or operating system limits
-on other resources such as file descriptors.
-
-The basic type of an Async thread is a `'a Deferred.t`, which can be
-constructed by the `return` function.  The type parameter (in this
-case `int`) represents the ultimate type of the thread once it has
-completed in the future.  This return value cannot be used directly
-while it is wrapped in a `Deferred.t` as it may not be available yet.
-Instead, we can `bind` a functional closure to the thread that is
-called once the value is eventually ready.
-
-```ocaml
-# open Async.Std ;;
-# let x = return 5 ;;
-val x : int Deferred.t = <abstr>
-```
-
-The `return` function constructs a constant `int Deferred.t` whose
-value will be available immediately.
-
-```ocaml
-# let y = Deferred.bind x (fun v -> return (string_of_int v)) ;;
-val y : string Deferred.t = <abstr>
-```
-
-We've now bound a function to `x` that will be called over its
-resulting value.  The closure simply converts the `int` to a `string`
-and returns it as a `string Deferred.t`.  Notice that while both `x`
-and `y` share a common `Deferred.t` type, their type variables differ
-and so they cannot be interchangably used except in polymorphic
-functions.  This is useful when refactoring large codebases as you can
-tell if any function will block simply by the presence of an
-`Deferred.t` in the signature.
 
 Another important note is that the result of the bound function must
 also be a `Deferred` value.  If we try to return a `string`
