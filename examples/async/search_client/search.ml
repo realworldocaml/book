@@ -12,8 +12,7 @@ let get_definition_from_json json =
   match Yojson.Safe.from_string json with
   | `Assoc kv_list ->
     begin match List.Assoc.find kv_list "Definition" with
-    | None | Some (`Null | `String "") -> None
-    | Some (`String s) -> Some s
+    | None | Some (`String "") -> None
     | Some s -> Some (Yojson.Safe.to_string s)
     end
   | _ -> None
@@ -43,7 +42,7 @@ let () =
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
       empty
-      +> flag "-parallel" no_arg ~doc:" Whether to run queries in parallel"
+      +> flag "-parallel" no_arg ~doc:" Run queries in parallel"
       +> anon (sequence ("search term" %: string))
     )
     (fun parallel search_strings () ->
