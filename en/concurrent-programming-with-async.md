@@ -37,7 +37,7 @@ compromises and synchronization woes of preemptive threads without the
 confusing inversion of control that usually comes with event-driven
 systems.
 
-## Deferred values
+## Async Basics
 
 Consider a typical function for doing I/O in Core.
 
@@ -150,149 +150,83 @@ right-hand side of the bind, and we've didn't add a level of
 indentation for the contents of that function.  This is standard
 practice for using the bind operator.
 
-## Other Stuff
-
-<note>
-<title>When to open `Async.Std`</title>
-
-The `Core.Std` module is normally opened up in every file you
-write. You need to be a little more careful when opening `Async.Std`
-as it replaces standard blocking functions with asynchronous
-equivalents.  This comes across most obviously with the standard input
-and output descriptors.
+Now let's look at another potential use of bind.  In this case, we'll
+write a function that counts the number of lines in a file.
 
 ```ocaml
-# open Core.Std;;
-# printf "%s %s!\n" "Hello" "World";;
-hello world
-- : unit = ()
-# open Async.Std;;
-# print_endline "hello world";;
-- : unit = ()
+# let count_lines filename =
+    Reader.file_contents filename >>= fun text ->
+    List.length (String.split text ~on:'\n');;
+  ;;
 ```
 
-With just `Core.Std` open, the `print_endline` function immediately
-displayed its output to the console.  When `Async.Std` was opened, the
-call to `print_endline` is buffered and needs to be manually flushed
-before the output is displayed.
+This looks reasonable enough, but when we try to compile it, we get
+the following error.
 
-</note>
-
-Another important note is that the result of the bound function must
-also be a `Deferred` value.  If we try to return a `string`
-immediately, then we get the following type error.
-
-````ocaml
-# let y = Deferred.bind x (fun v -> string_of_int v);;
-Error: This expression has type string but an expression was expected of type
-         'a Deferred.t = 'a Ivar.Deferred.t
+```
+Error: This expression has type int but an expression was expected of type
+         'a Deferred.t
 ```
 
-This requirement makes `bind` operations composable. You can take the
-`y` value and `bind` it again to another thread, and expect them all
-to run in the correct sequence.  Let's examine the function signatures
-of `bind` and `return` more closely to understand this better.
+The issue here is that bind expects a function that returns a
+deferred, but we've provided it a function that simply returns the
+result.  To make these signatures match, we need a function for taking
+an ordinary value and wrapping it in a deferred.  This function is a
+standard part of Async, and is called `return`:
 
-```ocaml
-# return ;;
+```
+# return;;
 - : 'a -> 'a Deferred.t = <fun>
-# Deferred.bind ;;
-- : 'a Deferred.t -> ('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
+# let three = return 3;;
+val three : int Deferred.t = <abstr>
+# three;;
+- : int = 3
 ```
 
-`return`, `bind` and the `Deferred.t` type all contain polymorphic
-type variables (the `'a`) which represent the type of the thread, and
-are inferred based on how they are used in your code. The `'a` type of
-the argument passed to the `bind` callback _must_ be the same as the
-`'a Deferred.t` of the input thread, preventing runtime mismatches
-between thread callbacks.
-
-Both `bind` and `return` form a design pattern in functional
-programming known as *monads*, and you will run across this signature
-in many applications beyond just threads.  _TODO avsm: figure out
-where to talk about all the monads in Core in more detail_.  The `>>=`
-inline operator is provided as a more succinct alias to `bind`, as
-shown below.
+Using `return`, we can make `count_lines` compile.
 
 ```ocaml
-# let x = return 5 ;;
-val x : int Deferred.t = <abstr>
-# x >>= fun y -> return (string_of_int y) ;;
-val - : string Deferred.t = <abstr>
+# let count_lines filename =
+    Reader.file_contents filename >>= fun text ->
+    return (List.length (String.split text ~on:'\n'));;
+  ;;
+val count_lines : string -> int Deferred.t = <fun>
 ```
 
-The `>>=` operator is exactly the same as `bind` and unpacks the
-integer future into the `y` variable. The subsequent closure is called
-with the resulting integer and builds a new string future.
+Together, `bind` and `return` form a design pattern in functional
+programming known as a _monad_.  You'll run across this signature in
+many applications beyond just threads.  Indeed, we already ran across
+monads in [xref](#bind-and-other-error-handling-idioms).
 
-It can be a little verbose to keep calling `bind` and `return` to wrap
-simple functions such as `string_of_int`. The `>>|` operator maps a
-non-Async function directly across a `Deferred.t` value.  In the
-example below, the deferred `x` is mapped to `string_of_int` directly,
-and the result is a `string Deferred.t`.
+Calling `bind` and `return` together is a fairly common pattern, and
+as such there is a standard shortcut for it called `Deferred.map`,
+which has the following signature:
 
 ```ocaml
-# x >>| string_of_int ;;
-val - : string Deferred.t = <abstr>
+# Deferred.map;;
+- : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>
 ```
 
-Multiple threads can be chained together with successive calls to
-`bind` to sequentially compose blocking operations.
+and comes with its own infix equivalent, `>>|`.  Using it, we can
+rewrite `count_lines` again a bit more succinctly:
 
 ```ocaml
-# return 5
-  >>= fun v -> return (string_of_int v)
-  >>= fun v -> return (v = "5")
-- : bool Deferred.t = <abstr>
+# let count_lines filename =
+    Reader.file_contents filename >>| fun text ->
+    List.length (String.split text ~on:'\n');;
+  ;;
+val count_lines : string -> int Deferred.t = <fun>
 ```
 
-The example above constructs an `int` thread, converts it to a
-`string` thread, and then to a `bool` thread via a string comparison.
-Of course, there's no interesting threading going on in this example
-beyond building a constant value, but let's look at how to run it
-next.
+## Building a message broker
 
-## Executing async applications
+Let's now walk through the task of building a simple, complete async
+application.
 
-All async threads run within a _scheduler_ that is responsible for
-associating blocked threads with system resources (such as file
-descriptors) and waking them up when external I/O or timer events
-fire.
 
-### Running threads within the toplevel
 
-If you're experimenting with async programming, the `utop` toplevel is
-a convenient place to write code interactively. Async threads can be
-evaluated into a concrete value by wrapping them in
-`Thread_safe.block_on_async_exn`, which spawns a system thread that
-waits until a result is available.
+## Building an Async application
 
-```ocaml
-# Thread_safe.block_on_async_exn ;;
-- : (unit -> 'a Deferred.t) -> 'a = <fun>
-```
-
-A neat feature in `utop` is that it detects functions with a
-`Deferred.t` in the return type, and automatically translates it into
-a call to `block_on_async_exn` for you.
-
-```ocaml
-# let fn () = return 5 >>| string_of_int ;;
-val fn : unit -> string Deferred.t = <abstr>
-
-# Thread_safe.block_on_async_exn fn ;;
-- : string = "5"
-
-# fn () ;;
-- : string = "5"
-```
-
-We've defined an `fn` thread in the first phrase, and then run it
-manually using `block_on_async_exn`.  The final phrase executes `fn`
-directly, and you can see the `utop` translation kicking in and
-returning the concrete value.
-
-### Running threads within an application
 
 An application can also use the same `block_on_async_exn` as the
 toplevel, but there are two alternatives.  Once a few threads have
@@ -615,4 +549,32 @@ map will wait for each search to fully complete before issuing the
 next one.
 
 
+
+## Other Stuff
+
+<note>
+<title>When to open `Async.Std`</title>
+
+The `Core.Std` module is normally opened up in every file you
+write. You need to be a little more careful when opening `Async.Std`
+as it replaces standard blocking functions with asynchronous
+equivalents.  This comes across most obviously with the standard input
+and output descriptors.
+
+```ocaml
+# open Core.Std;;
+# printf "%s %s!\n" "Hello" "World";;
+hello world
+- : unit = ()
+# open Async.Std;;
+# print_endline "hello world";;
+- : unit = ()
+```
+
+With just `Core.Std` open, the `print_endline` function immediately
+displayed its output to the console.  When `Async.Std` was opened, the
+call to `print_endline` is buffered and needs to be manually flushed
+before the output is displayed.
+
+</note>
 
