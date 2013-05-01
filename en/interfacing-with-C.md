@@ -495,7 +495,7 @@ The first word of the data within the custom block is a C pointer to a `struct`
 of custom operations. The custom block cannot have pointers to OCaml blocks and
 is opaque to the garbage collector.
 
-```
+```c
 struct custom_operations {
   char *identifier;
   void (*finalize)(value v);
@@ -523,13 +523,14 @@ collector's decision as to how much work to do in the next major slice.
 
 ## Interfacing with C
 
-Now that you understand the runtime structure of the garbage collector,
-interfacing with C libraries is actually pretty simple.  OCaml defines an
-`external` keyword that maps OCaml functions to a C symbol.  That C function
-will be passed the arguments with the C `value` type which corresponds
-to the memory layout for OCaml values described earlier.
+Now that you understand the runtime structure of the garbage collector, you can
+interface it with C.  OCaml defines an `external` keyword that maps OCaml
+functions to a C symbol.  When the function is invoked from OCaml, the C
+function will be called with the OCaml function arguments using their native
+`value` representation. This corresponds to the memory layout for OCaml values
+described earlier.
 
-### Getting started with a "Hello World" C binding
+### A "Hello World" C binding
 
 Let's define a simple "Hello World" C binding to see how this works.
 First create a `hello.ml` that contains the external declaration:
@@ -539,7 +540,8 @@ external hello_world: unit -> unit = "caml_hello_world"
 let _ = hello_world ()
 ```
 
-If you try to compile this module now, you should receive a linker error:
+If you try to compile this module to an executable now, you should receive a
+linker error:
 
 ```
 $ ocamlopt -o hello hello.ml
@@ -554,39 +556,18 @@ Error: Error during linking
 ```
 
 This is the system linker telling you that there is a missing
-`caml_hello_world` symbol that must be provided before a binary can be linked.
-Now create a file called `hello_stubs.c` which contains the C function.
+`caml_hello_world` symbol.  We need to provide a C file that will implement
+this function and make it available to the linker before it creates a
+standalone executable.  The OCaml compiler uses file extensions to determine
+how to compile each file.  When it sees a `.c` extension, it passes it to the
+system C compiler and appends an include directory containing the OCaml runtime
+header files.  You can find these runtime header files by running `ocamlc
+-where` and looking under the `caml/` subdirectory.
 
-```c
-#include <stdio.h>
-#include <caml/mlvalues.h>
-
-CAMLprim value
-caml_hello_world(value v_unit)
-{
-  printf("Hello OCaml World!\n");
-  return Val_unit;
-}
-```
-
-Now attempt to recompile the `hello` binary with the C file also included
-in the compiler invocation, and it should succeed:
-
-```
-$ ocamlopt -o hello hello.ml hello_stubs.c
-$ ./hello
-Hello OCaml World!
-```
-
-The compiler uses the file extensions to determine how to compile each file.
-In the case of the `.c` extension, it passes it to the system C compiler and
-appends an include directory containing the OCaml runtime header files that
-define conversion functions to-and-from OCaml values.
-
-The `mlvalues.h` header is the basic header that all C bindings need. Locate it
-in your system by using `ocamlc -where` to find your system OCaml installation.
-It defines a few important typedefs early on that should be familiar after
-the earlier explanations:
+`mlvalues.h` is the basic header file that all OCaml-C bindings need.  It is
+also shared by the garbage collector, and defines a few important typedefs early on
+that should be familiar after the earlier explanation about the memory
+representation of OCaml values:
 
 ```c
 typedef intnat value;
@@ -597,11 +578,41 @@ typedef intnat value;
 #define Val_unit Val_int(0)
 ```
 
-The `value` typedef is a word that can either be an integer if `Is_long` is
-true, or a heap block if `Is_block` is true.  Our C function definition of
-`caml_hello_world` accepts a single parameter, and returns a `value`.  In our
-simple example, all the types of parameters and returns are `unit`, and so we
-use the `Val_unit` macro to construct the return value.
+The `value` typedef is a memory word that can either be an integer if `Is_long` is
+true, or a heap block if `Is_block` is true.  All of the arguments passed to the
+C bindings will be of type `value`, since this is sufficient to represent
+any valid OCaml value in memory.  Let's look at the external declaration for
+`hello_world` again:
+
+```ocaml
+external hello_world: unit -> unit = "caml_hello_world"
+```
+
+This external function has a single argument of type `unit`, which is
+represented as an integer of value 0 in memory.  Our C function definition of
+`caml_hello_world` must therefore accept a single `value` parameter and return
+a `value`.  Let's create the `hello_stubs.c` file now that implements this:
+
+```c
+#include <stdio.h>
+#include <caml/mlvalues.h>
+
+CAMLprim value
+caml_hello_world(value v_unit)
+{
+  printf("Hello OCaml World from C!\n");
+  return Val_unit;
+}
+```
+
+You can now recompile the `hello` binary with this additional C file included
+in the compiler command-line, and it should succeed:
+
+```
+$ ocamlopt -o hello hello.ml hello_stubs.c
+$ ./hello
+Hello OCaml World from C!
+```
 
 You must be *very* careful that the value you return from the C function
 corresponds exactly to the memory representation of the types you declared
@@ -632,5 +643,91 @@ Initial allocation policy: 0
 Hello OCaml World!
 ```
 
+If you get an error that `libasmrund.a` is not found, then this is probably
+because you're using OCaml 4.00 and not 4.01.  It's only installed by default
+in the very latest version, which you should be using via the `4.01.0dev+trunk`
+OPAM switch.
+
 </tip>
+
+### Converting to and from OCaml values in C
+
+The earlier hello world example is extremely basic and only uses `unit` types.
+Let's extend the signature to take a couple of `int` arguments instead of a
+single `unit`, so that we can send more useful data between OCaml and C:
+
+```ocaml
+external add_numbers: int -> int -> int = "caml_add_numbers"
+let () = Printf.printf "From OCaml: %d\n" (add_numbers 10 15)
+```
+
+Our `add_numbers` binding now takes two arguments, and returns an integer instead of a simple `unit`.
+The complete stub now looks like this:
+
+```c
+#include <stdio.h>
+#include <caml/mlvalues.h>
+
+CAMLprim value
+caml_add_numbers(value v_arg1, value v_arg2)
+{
+  int v1 = Int_val(v_arg1);
+  int v2 = Int_val(v_arg2);
+  printf("From C:     %d + %d\n", v1, v2);
+  return Val_int(v1+v2);
+}
+```
+
+The first thing the binding does is to pass the `value` arguments through the
+`Int_val` macro.  This converts a `value` to an integer by removing the
+tag bit.  The integers are then added together and the result returned.  The
+result `value` is reconstructed by the `Val_int` macro, which takes a C integer
+and tags it into becoming an OCaml `value`.  When you compile and run this
+version of the code, you should see this output:
+
+```
+$ ./hello 
+From C:     10 + 15
+From OCaml: 25
+```
+
+You should keep an eye out for warnings from your compiler which often indicate
+that you've forgotten to correctly convert a value.  For example, try a broken
+version of the previous binding:
+
+```c
+#include <stdio.h>
+#include <caml/mlvalues.h>
+
+CAMLprim value
+caml_add_numbers(value v_arg1, value v_arg2)
+{
+  printf("From C:     %d + %d\n", v_arg1, v_arg2);
+  return Val_int(v_arg1 + v_arg2);
+}
+```
+
+The compiler will immediately complain of some invalid format strings when you compile this:
+
+```
+$ ocamlopt -o hello -ccopt -Wall hello_stubs.c hello.ml
+hello_stubs.c: In function ‘caml_add_numbers’:
+hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘value’
+hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘value’
+hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘value’
+hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘value’
+$ ./hello 
+From C:     21 + 31
+From OCaml: 26
+```
+
+Don't depend on the good graces of your C compiler to spot such errors though.
+Although the format string error in the `printf` was warned about, it's also
+invalid to add two `value`s together without converting them into native C
+types.  The C compiler doesn't warn about this, and the result is silently
+incorrect.  Instead, it's good practise to immediately convert arguments to
+local stack variables as early as possible, so you don't get the types mixed
+up deep into the C function.
+
+
 
