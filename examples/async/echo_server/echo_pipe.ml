@@ -7,10 +7,8 @@ let run () =
     Tcp.Server.create
       ~on_handler_error:`Raise
       (Tcp.on_port 8765)
-      (fun _addr reader writer ->
-        Pipe.iter' (Reader.pipe reader) ~f:(fun q ->
-          Queue.iter q ~f:(fun s -> Writer.write writer s);
-          Writer.flushed writer)
+      (fun _addr r w ->
+        Pipe.transfer_id (Reader.pipe r) (Writer.pipe w)
       )
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);

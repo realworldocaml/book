@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-../../build.sh echo.native echo2.native echo3.native
+../../build.sh echo.native echo_pipe.native echo3.native
