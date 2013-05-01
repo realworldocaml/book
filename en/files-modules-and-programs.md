@@ -14,13 +14,34 @@ module signatures.
 
 ## Single File Programs ##
 
-We'll start with an example: a utility that reads lines from `stdin`,
-computing a frequency count of the lines that have been read in.  At
-the end, the 10 lines with the highest frequency counts are written
-out.  Here's a simple implementation, which we'll save as the file
-`freq.ml`.  Note that we're using several functions from the
-`List.Assoc` module, which provides utility functions for interacting
-with association lists, _i.e._, lists of key/value pairs.
+We'll start with an example: a utility that reads lines from `stdin`
+and computes a frequency count of the lines that have been read in.
+At the end, the 10 lines with the highest frequency counts are written
+out.  We'll start with a simple implementation, which we'll save as
+the file `freq.ml`.
+
+This implementation will use two functions from the `List.Assoc`
+module, which provides utility functions for interacting with
+association lists, _i.e._, lists of key/value pairs.  In particular,
+we use the function `List.Assoc.find`, which looks up a key in an
+association list, and `List.add`, which adds a new binding to an
+association list, as shown below.
+
+```ocaml
+# let assoc = [("one", 1); ("two",2); ("three",3)];;
+val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
+# List.Assoc.find assoc "two";;
+- : int option = Some 2
+# List.Assoc.add assoc "four" 4;; (* add a new key *)
+[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
+# List.Assoc.add assoc "two" 4;; (* overwrite an existing key *)
+- : (string, int) List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
+```
+
+Note that `List.Assoc.add` doesn't modify the original list, but
+instead allocates a new list with the requisite key/value added.
+
+Now we can write down `freq.ml`.
 
 ```ocaml
 (* freq.ml: basic implementation *)
@@ -53,7 +74,7 @@ function for each line to update the accumulator.  That accumulator is
 initialized to the empty list.
 
 With `build_counts` defined, we then call the function to build the
-association list, sort that list be frequency in descending order,
+association list, sort that list by frequency in descending order,
 grab the first 10 elements off the list, and then iterate over those
 ten elements and print them to the screen.  These operations are tied
 together using the `|>` operator, as described in
@@ -62,8 +83,8 @@ together using the `|>` operator, as described in
 
 <note><title>Where is the main function?</title>
 
-Unlike C, programs in OCaml do not have a unique `main` function. When
-an OCaml program is evaluated, all the statements in the
+Unlike C, programs in OCaml do not have a unique `main` function.
+When an OCaml program is evaluated, all the statements in the
 implementation files are evaluated in order.  These implementation
 files can contain arbitrary expressions, not just function
 definitions. In this example, the declaration starting with `let () =`
@@ -99,10 +120,10 @@ is required for Core.
 While this works well enough for a one-file project, more complicated
 builds will require a tool to orchestrate the build.  One great tool
 for this task is `ocamlbuild`, which is shipped with the OCaml
-compiler.  We'll talk more about `ocamlbuild` in
-[xref](#packaging), but for now, we'll just walk
-through the steps required for this simple application.  First, create
-a `_tags` file, containing the following lines.
+compiler.  We'll talk more about `ocamlbuild` in [xref](#packaging),
+but for now, we'll just walk through the steps required for this
+simple application.  First, create a `_tags` file containing the
+following lines:
 
 ```
 true:package(core),thread,annot,debugging
@@ -111,11 +132,10 @@ true:package(core),thread,annot,debugging
 The purpose of the `_tags` file is to specify which compilation
 options are required for which files.  In this case, we're telling
 `ocamlbuild` to link in the `core` package and to turn on threading,
-output of annotation files, and debugging support for all files (the
-condition `true` causes the options to be applied to every file in the
-project.)
+generation of annotation files, and debugging support for all files
+(since the condition `true` evaluates to `true` on all files).
 
-We can then invoke `ocamlbuild` to build the executable in question.
+We can then invoke `ocamlbuild` to build the executable.
 
 ```
 $ ocamlbuild -use-ocamlfind freq.byte
@@ -125,8 +145,8 @@ If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
 `freq.byte`, we would have gotten native-code instead.
 
 We can now run the our program from the command-line.  The following
-line extracts strings from the `ocamlopt` executable, and then reports
-the most frequently occurring ones.
+line extracts strings from the `ocamlopt` executable, reporting the
+most frequently occurring ones.
 
 ```
 $ strings `which ocamlopt` | ./freq.byte
@@ -142,29 +162,30 @@ $ strings `which ocamlopt` | ./freq.byte
   4: ", '
 ```
 
-<note><title>Byte-code vs native-code</title>
+<note><title>Bytecode vs native code</title>
 
-OCaml ships with two compilers---the `ocamlc` byte-code compiler, and
-the `ocamlopt` native-code compiler.  Programs compiled with `ocamlc`
-are interpreted by a virtual machine, while programs compiled with
+OCaml ships with two compilers: the `ocamlc` bytecode compiler and the
+`ocamlopt` native-code compiler.  Programs compiled with `ocamlc` are
+interpreted by a virtual machine, while programs compiled with
 `ocamlopt` are compiled to native machine code to be run on a specific
 operating system and processor architecture.
 
 Aside from performance, executables generated by the two compilers
 have nearly identical behavior.  There are a few things to be aware
-of.  First, the byte-code compiler can be used on more architectures,
-and has some better tool support; in particular, the OCaml debugger
-only works with byte-code.  Also, the byte-code compiler compiles
-faster than the native code compiler.  Also, in order to run a
-bytecode executable you typically need to have OCaml installed on the
-system in question.  That's not strictly required, though, since you
-can build a byte-code executable with an embedded runtime, using the
-`-custom` compiler flag.
+of.  First, the bytecode compiler can be used on more architectures,
+and has some tools that are not available for native code.  For
+example, the OCaml debugger only works with bytecode (although the
+`gdb`, the Gnu Debugger, works with OCaml native-code applications).
+The bytecode compiler is also quicker than the native-code compiler.
+In addition, in order to run a bytecode executable you typically need
+to have OCaml installed on the system in question.  That's not
+strictly required, though, since you can build a bytecode executable
+with an embedded runtime, using the `-custom` compiler flag.
 
 As a general matter, production executables should usually be built
 using the native-code compiler, but it sometimes makes sense to use
 bytecode for development builds.  And, of course, bytecode makes sense
-when targeting a platform not supported by the native code compiler.
+when targeting a platform not supported by the native-code compiler.
 
 </note>
 
@@ -191,7 +212,7 @@ functionality into a separate module with an explicit interface.  We
 can consider alternative (and more efficient) implementations once we
 have a clear interface to program against.
 
-We'll start by creating a file, `counter.ml`, that contains the logic
+We'll start by creating a file, `counter.ml` that contains the logic
 for maintaining the association list used to describe the counts.  The
 key function, called `touch`, updates the association list with the
 information that a given line should be added to the frequency counts.
@@ -210,6 +231,10 @@ let touch t s =
   List.Assoc.add t s (count + 1)
 ```
 
+The file `counter.ml` will be compiled into a module named `Counter`.
+The name of the module is derived automatically from the filename.
+Note that the module name is capitalized even if the file is not.
+
 We can now rewrite `freq.ml` to use `Counter`.  Note that the
 resulting code can still be built with `ocamlbuild`, which will
 discover dependencies and realize that `counter.ml` needs to be
@@ -224,17 +249,16 @@ let build_counts () =
 
 let () =
   build_counts ()
-  |> List.sort counts ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~cmp:(fun (_,x) (_,y) -> compare y x)
   |> (fun l -> List.take l 10)
   |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
 ```
 
-
-### Signatures and Abstract Types ###
+## Signatures and Abstract Types
 
 While we've pushed some of the logic to the `Counter` module, the code
 in `freq.ml` can still depend on the details of the implementation of
-`Counter`.  Indeed, if you look at the definition of build_counts:
+`Counter`.  Indeed, if you look at the definition of `build_counts`:
 
 ```ocaml
 let build_counts () =
@@ -248,20 +272,22 @@ kind of dependency, so that we can change the implementation of
 `freq.ml`.
 
 The first step towards hiding the implementation details of `Counter`
-is to create an interface file, `counter.mli`, which controls how
-`counter` is accessed.  Let's start by writing down a simple
-descriptive interface, _i.e._, an interface that describes what's
-currently available in `Counter` without hiding anything.  We'll use
-`val` declarations in the `mli`, which have the following syntax
+is to write down the _signature_ of the module.  Note that the terms
+_interface_, _signature_ and _module type_ are all used almost
+interchangeably in the OCaml world.
+
+In this case, we'll put the signature in `counter.mli`, which is the
+interface file (that's where the `i` in `mli` comes from) for
+`counter.ml`.  We'll start by writing down an interface that describes
+what's currently available in `Counter` without hiding anything.
+We'll use `val` declarations to specify values to expose.  The syntax
+of a `val` declaration is as follows:
 
 ```
 val <identifier> : <type>
 ```
 
-and are used to expose the existence of a given value in the module.
-Here's an interface that describes the current contents of `Counter`.
-We can save this as `counter.mli` and compile, and the program will
-build as before.
+And here's the contents of the `mli` file.
 
 ```ocaml
 (* counter.mli: descriptive interface *)
@@ -269,6 +295,9 @@ open Core.Std
 
 val touch : (string * int) list -> string -> (string * int) list
 ```
+
+Note that `ocamlbuild` will detect the presence of the `mli` file
+automatically and include it in the build.
 
 <note><title>Auto-generating `mli` files</title>
 
@@ -320,7 +349,7 @@ Note that we needed to add `empty` and `to_list` to `Counter`, since
 otherwise, there would be no way to create a `Counter.t` or get data
 out of one.
 
-Here's a rewrite of `counter.ml` to match this signature.
+Here's a rewrite of `counter.ml` to match this interface.
 
 ```ocaml
 (* counter.ml: implementation matching abstract interface *)
@@ -385,9 +414,14 @@ let touch t s =
   Map.add t ~key:s ~data:(count + 1)
 ```
 
-## More on modules and signatures
+Note that in the above we use `String.Map` in some places and simply
+`Map` in others.  This has to do with the fact that for some
+operations, like creating a `Map.t`, you need access to
+type-specialized information, and for others, like looking something
+up in `Map.t`, you don't.  This is covered in more detail in
+[xref](#maps-and-hashtables).
 
-### Concrete types in signatures
+## Concrete types in signatures
 
 In our frequency-count example, the module `Counter` had an abstract
 type `Counter.t` for representing a collection of frequency counts.
@@ -396,8 +430,8 @@ including the type definition in the interface.
 
 For example, imagine we wanted to add a function to `Counter` for
 returning the line with the median frequency count.  If the number of
-lines is even, then there is no precise median, so the function would
-return the two lines before and after the median instead.  We'll use a
+lines is even, then there is no precise median and the function would
+return the lines before and after the median instead.  We'll use a
 custom type to represent the fact that there are two possible return
 values.  Here's a possible implementation.
 
@@ -418,8 +452,10 @@ let median t =
 ```
 
 Now, to expose this usefully in the interface, we need to expose both
-the function and the type `median` with its definition.  We'd do that
-by adding these lines to the `counter.mli`:
+the function and the type `median` with its definition.  Note that
+values (of which functions are an example) and types have distinct
+namespaces, so there's no name clash here.  The following two lines
+added to `freq.mli` does the trick.
 
 ```ocaml
 type median = | Median of string
@@ -435,66 +471,7 @@ invariants beyond what is enforced by the type itself; concrete types
 let you expose more detail and structure to client code in a
 lightweight way.  The right choice depends very much on the context.
 
-### The `include` statement ###
-
-OCaml provides a number of tools for manipulating modules.  One
-particularly useful one is the `include` statement, which is used to
-include the contents of one module into another.
-
-One natural application of `include` is to create one module which is
-an extension of another one.  For example, imagine you wanted to build
-an extended version of the `List` module, where you've added some
-functionality not present in the module as distributed in Core.  We
-can do this easily using `include`:
-
-```ocaml
-(* ext_list.ml: an extended list module *)
-
-open Core.Std
-
-(* The new function we're going to add *)
-let rec intersperse list el =
-  match list with
-  | [] | [ _ ]   -> list
-  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
-
-(* The remainder of the list module *)
-include List
-```
-
-Now, what about the interface of this new module?  It turns out that
-include works on the signature language as well, so we can pull
-essentially the same trick to write an `mli` for this new module.  The
-only trick is that we need to get our hands on the signature for the
-list module, which can be done using `module type of`.
-
-```ocaml
-(* ext_list.mli: an extended list module *)
-
-open Core.Std
-
-(* Include the interface of the list module from Core *)
-include (module type of List)
-
-(* Signature of function we're adding *)
-val intersperse : 'a list -> 'a -> 'a list
-```
-
-And we can now use `Ext_list` as a replacement for `List`.  If we want
-to use `Ext_list` in preference to `List` in our project, we can
-create a file of common definitions:
-
-```ocaml
-(* common.ml *)
-
-module List = Ext_list
-```
-
-And if we then put `open Common` after `open Core.Std` at the top of
-each file in our project, then references to `List` will automatically
-go to `Ext_list` instead.
-
-### Modules within a file ###
+## Nested modules
 
 Up until now, we've only considered modules that correspond to files,
 like `counter.ml`.  But modules (and module signatures) can be nested
@@ -595,24 +572,43 @@ end = struct
 end
 ```
 
-### Opening modules ###
+## Opening modules
 
 One useful primitive in OCaml's module language is the `open`
 statement.  We've seen that already in the `open Core.Std` that has
 been at the top of our source files.
 
-The basic purpose of `open` is to extend the namespaces that OCaml
-searches when trying to resolve an identifier.  Roughly, if you open a
-module `M`, then every subsequent time you look for an identifier
-`foo`, the module system will look in `M` for a value named `foo`.
-This is true for all kinds of identifiers, including types, type
-constructors, values and modules.
+We've used OCaml's `open` statement many times already in the `open
 
-`open` is essential when dealing with something like a standard
-library, but it's generally good style to keep opening of modules to a
-minimum.  Opening a module is basically a tradeoff between terseness
-and explicitness - the more modules you open, the harder it is to
-look at an identifier and figure out where it's defined.
+So far, we've been referring to values and types within a module by
+using the module name as an explicit qualifier.  _e.g._, we write
+`List.map` to refer to the `map` function in the `List` module
+Sometimes, though, you want to be able to refer to the contents of a
+module without that kind of explicit qualification.  This is what the
+`open` statement is for.
+
+We've already seen the `open` statement in use in the `open Core.Std`
+statements at the top of each source file.  Opening a module adds its
+contents to the environment that the compiler looks in for finding
+identifiers.  Here's a trivial example that gives you a sense of how
+this works.
+
+```ocaml
+# module M = struct let foo = 3 end;;
+module M : sig val foo : int end
+# foo;;
+Error: Unbound value foo
+# open M;;
+# foo;;
+- : int = 3
+```
+
+`open` is essential when you want to modify your environment for a
+standard library like Core, but it's generally good style to keep
+opening of modules to a minimum.  Opening a module is basically a
+tradeoff between terseness and explicitness --- the more modules you
+open, the harder it is to look at an identifier and figure out where
+it's defined.
 
 Here's some general advice on how to deal with opens.
 
@@ -622,7 +618,8 @@ Here's some general advice on how to deal with opens.
     `Option.Monad_infix`.
 
   * If you do need to do an open, it's better to do a _local open_.
-    There are two syntaxes for local opens.  For example, you can write:
+    There are two syntaxes for local opens.  For example, you can
+    write:
 
     ```ocaml
     let average x y =
@@ -653,7 +650,7 @@ Here's some general advice on how to deal with opens.
          printf "Before and after median:\n   %s\n   %s\n" before after
     ```
 
-    ...you could write
+    you could write:
 
     ```ocaml
     let print_median m =
@@ -669,14 +666,133 @@ Here's some general advice on how to deal with opens.
     to very short names at the toplevel of your module is usually a
     mistake.
 
+## Including modules
 
-### Common errors with modules
+While opening a module affects the environment used to search for
+identifiers, _including_ a module is a way of actually adding new
+identifiers to a module proper.  Consider the following simple module
+for representing a range of intervals.
+
+```ocaml
+# module Interval = struct
+    type t = | Interval of int * int
+             | Empty
+
+    let create low high =
+      if high < low then Empty else Interval (low,high)
+  end;;
+module Interval :
+  sig type t = Interval of int * int | Empty val create : int -> int -> t end
+```
+
+We can use the `include` directive to create a new, extended version
+of the `Interval` module.
+
+```ocaml
+# module Extended_interval = struct
+    include Interval
+
+    let contains t x =
+      match t with
+      | Empty -> false
+      | Interval (low,high) -> x >= low && x <= high
+  end;;
+module Extended_interval :
+  sig
+    type t = Interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val contains : t -> int -> bool
+  end
+# Extended_interval.contains (Extended_interval.create 3 10) 4;;
+- : bool = true
+```
+
+The difference between `include` and `open` is that we've done more
+than change how identifiers are searched for: we've changed what's in
+the module.  If we'd used `open`, we'd have gotten a quite different
+result.
+
+```ocaml
+# module Extended_interval = struct
+    open Interval
+
+    let contains t x =
+      match t with
+      | Empty -> false
+      | Interval (low,high) -> x >= low && x <= high
+  end;;
+module Extended_interval :
+  sig val contains : Extended_interval.t -> int -> bool end
+# Extended_interval.contains (Extended_interval.create 3 10) 4;;
+Error: Unbound value Extended_interval.create
+```
+
+To consider a more realistic example, imagine you wanted to build an
+extended version of the `List` module, where you've added some
+functionality not present in the module as distributed in Core.
+`include` allows us to do just that.
+
+```ocaml
+(* ext_list.ml: an extended list module *)
+
+open Core.Std
+
+(* The new function we're going to add *)
+let rec intersperse list el =
+  match list with
+  | [] | [ _ ]   -> list
+  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
+
+(* The remainder of the list module *)
+include List
+```
+
+Now, what about the interface of this new module?  It turns out that
+include works on the signature language as well, so we can pull
+essentially the same trick to write an `mli` for this new module.  The
+only trick is that we need to get our hands on the signature for the
+list module, which can be done using `module type of`.
+
+```ocaml
+(* ext_list.mli: an extended list module *)
+
+open Core.Std
+
+(* Include the interface of the list module from Core *)
+include (module type of List)
+
+(* Signature of function we're adding *)
+val intersperse : 'a list -> 'a -> 'a list
+```
+
+Note that the order of declarations in the `mli` does not need to
+match the order of declarations in the `ml`.  Also, the order of
+declarations in the `ml` is quite important in that it determines what
+values are shadowed.  If we wanted to replace a function in `List`
+with a new function of the same name, the declaration of that function
+in the `ml` would have to come after the `include List` declaration.
+
+And we can now use `Ext_list` as a replacement for `List`.  If we want
+to use `Ext_list` in preference to `List` in our project, we can
+create a file of common definitions:
+
+```ocaml
+(* common.ml *)
+
+module List = Ext_list
+```
+
+And if we then put `open Common` after `open Core.Std` at the top of
+each file in our project, then references to `List` will automatically
+go to `Ext_list` instead.
+
+## Common errors with modules
 
 When OCaml compiles a program with an `ml` and an `mli`, it will
 complain if it detects a mismatch between the two.  Here are some of
 the common errors you'll run into.
 
-#### Type mismatches
+### Type mismatches
 
 The simplest kind of error is where the type specified in the
 signature does not match up with the type in the implementation of the
@@ -714,7 +830,7 @@ There's no denying that learning to decode such error messages is
 difficult at first, and takes some getting used to.  But in time,
 decoding these errors becomes second nature.
 
-#### Missing definitions
+### Missing definitions
 
 We might decide that we want a new function in `Counter` for pulling
 out the frequency count of a given string.  We can update the `mli` by
@@ -736,20 +852,20 @@ Error: The implementation counter.ml
 
 A missing type definition will lead to a similar error.
 
-#### Type definition mismatches
+### Type definition mismatches
 
 Type definitions that show up in an `mli` need to match up with
 corresponding definitions in the `ml`.  Consider again the example of
 the type `median`.  The order of the declaration of variants matters
-to the OCaml compiler so, if the definition of `median` in the
-implementation lists those options in a different order:
+to the OCaml compiler, so the definition of `median` in the
+implementation listing those options in a different order:
 
 ```ocaml
 type median = | Before_and_after of line * line
               | Median of line
 ```
 
-that will lead to a compilation error:
+will lead to a compilation error:
 
 ```
 File "counter.ml", line 1, characters 0-1:
@@ -767,7 +883,7 @@ including the order in which record fields are declared and the order
 of arguments (including labeled and optional arguments) to a
 function.
 
-#### Cyclic dependencies
+### Cyclic dependencies
 
 In most cases, OCaml doesn't allow circular dependencies, _i.e._, a
 collection of definitions that all refer to each other.  If you want
@@ -779,7 +895,8 @@ rather than ordinary `let`.
 
 The same is true at the module level.  By default, circular
 dependencies between modules are not allowed, and indeed, circular
-dependencies among files are never allowed.
+dependencies among files are never allowed.  Recursive modules are
+possible, but are a rare case and we won't discuss them further here.
 
 The simplest case of this is that a module can not directly refer to
 itself (although definitions within a module can refer to each other
