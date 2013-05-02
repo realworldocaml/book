@@ -1,0 +1,9 @@
+.omakedb
+lexer.ml
+parser.mli
+parser.ml
+partial_parser.mli
+partial_parser.ml
+test
+*.run
+*.opt
