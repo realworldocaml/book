@@ -225,39 +225,37 @@ small complete stand-alone Async program. In particular, we'll write
 an echo server, _i.e._, a program that accepts connections from
 clients and spits back every line of text sent to it.
 
-The first step is to create a function that can copy data line-by-line
-from an input to an output.  Here, we'll use Async's `Reader` and
-`Writer` modules which provide a convenient abstraction for working
-with input and output channels.
+The first step is to create a function that can copy data from an
+input to an output.  Here, we'll use Async's `Reader` and `Writer`
+modules which provide a convenient abstraction for working with input
+and output channels.
 
 ```ocaml
 (* filename: echo.ml *)
 open Core.Std
 open Async.Std
 
-(** Reads line-by-line from the provided reader, writing each line to the
-    writer as it goes*)
-let rec copy_lines reader writer =
-  Reader.read_line reader
+(* Copy data from the reader to the writer, using the provided buffer
+   as scratch space *)
+let rec copy_blocks buffer r w =
+  Reader.read r buffer
   >>= function
   | `Eof -> return ()
-  | `Ok line ->
-    Writer.write writer line;
-    Writer.write writer "\n";
-    Writer.flushed writer
+  | `Ok bytes_read ->
+    Writer.write w buffer ~len:bytes_read;
+    Writer.flushed w
     >>= fun () ->
-    copy_lines reader writer
+    copy_blocks buffer r w
 ```
 
 Bind is used in the above code to sequence the operations: first, we
-call `Reader.read_line` to get a line of input, then, when that's
-complete and if a new line was returned, we write that line and an
-end-of-line character to the writer.  Finally, we wait until the
-writer's buffers are flushed, using the deferred returned by
-`Writer.flushed`, at which point we recur.  If we hit an end-of-file
-condition, the loop is ended.  The deferred returned by a call to
-`copy_lines` becomes determined only once the end-of-file condition is
-hit.
+call `Reader.read` to get a block of input, then, when that's complete
+and if a new block was returned, we write that block to the writer.
+Finally, we wait until the writer's buffers are flushed, waiting on
+the deferred returned by `Writer.flushed`, at which point we recur.
+If we hit an end-of-file condition, the loop is ended.  The deferred
+returned by a call to `copy_blocks` becomes determined only once the
+end-of-file condition is hit.
 
 One important aspect of how this is written is that it uses
 _pushback_, which is to say that if the writer can't make progress
@@ -266,9 +264,9 @@ pushback in your servers, then a stopped client can cause your program
 to leak memory, since you'll need to allocate space for the data
 that's been read in but not yet written out.
 
-`copy_lines` provides the logic for handling a client connection, but
+`copy_blocks` provides the logic for handling a client connection, but
 we still need to set up a server to receive such connections and
-dispatch to `copy_lines`.  For this, we'll use Async's `Tcp` module,
+dispatch to `copy_blocks`.  For this, we'll use Async's `Tcp` module,
 which has a collection of utilities for creating simple TCP clients
 and servers.
 
@@ -276,13 +274,14 @@ and servers.
 (** Starts a TCP server, which listens on the specified port, invoking
     copy_lines every time a client connects. *)
 let run () =
-  let server =
+  let buffer = String.create (16 * 1024) in
+  let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
       (Tcp.on_port 8765)
-      (fun _addr reader writer -> copy_lines reader writer)
+      (fun _addr r w -> copy_blocks buffer r w)
   in
-  ignore (server : (_,_) Tcp.Server.t Deferred.t)
+  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 ```
 
 The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which
@@ -400,32 +399,73 @@ the source that the call to `loop_forever` never returns.
 
 </note>
 
-## An improved echo server
+## Improving the echo server
 
-The echo server we designed works well enough, but the performance of
-the echo server can be improved considerably.  The key problem is the
-line-oriented nature of the `copy_lines` function.  If the file in
-question has very small lines, we're going to do a lot of system
-calls.  If the file has very large lines, then we're going to allocate
-a lot of space to hold the complete lines in memory.
+Let's try to go a little bit farther with our echo server.  Let's walk
+through a few small improvements:
 
-We can improve this by pulling data in the same chunks that they're
-handed over by the OS, rather than line by line.  One natural way of
-doing this is to use Async's `Pipe` module.
+- Add a proper command-line interface with `Command`
+- Add a flag to specify the port to listen on, and a flag to make the
+  server echo back the capitalized version of whatever was sent to it.
+- Simplify the code using Async's `Pipe` interface.
 
-A `Pipe.t` is essentially a producer/consumer queue for connecting
-different parts of your program to each other.
+Here's the improved code below.
 
 ```ocaml
-# let counting_pipe () =
-    let (r,w) = Pipe.create () in
-    let rec loop n =
-      Pipe.write w n
-      >>= fun () -> loop (n + 1)
-    in
-    don't_wait_for (loop 0);
-    r
-  ;;
-val counting_pipe : unit -> int Async.Std.Pipe.Reader.t = <fun>
+let run ~uppercase ~port =
+  let host_and_port =
+    Tcp.Server.create
+      ~on_handler_error:`Raise
+      (Tcp.on_port port)
+      (fun _addr r w ->
+        Pipe.transfer (Reader.pipe r) (Writer.pipe w)
+           ~f:(if uppercase then String.uppercase else Fn.id))
+  in
+  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
+  Deferred.never ()
+```
+
+The most notable change in this function is the use of Async's `Pipe`
+API.  A `Pipe` is a communication channel that's used for connecting
+different parts of your program.  You can think of it as a
+consumer/producer queue that uses deferreds for communicating when the
+pipe is ready to be read from or written to.
+
+Pipes are created in connected read/write pairs, as you can see below.
+
+```ocaml
+# let (r,w) = Pipe.create ();;
+val r : '_a Pipe.Reader.t = <abstr>
+val w : '_a Pipe.Writer.t = <abstr>
+```
+
+`r` and `w` are really just read and write handles to the same
+underlying object.  Note that `r` and `w` have weakly polymorphic
+types.  That's because a pipe is mutable and so can contain elements
+of only one type, which will be settled by the compiler once we try to
+use the pipe for anything.
+
+If we just try and write to the writer, we'll see that we block
+indefinitely in utop.  You can break out of the wait by hitting
+`Control-C`.
+
+```ocaml
+# Pipe.write w "Hello World!";;
+Interrupted.
+```
+
+The deferred returned by write completes on its own once the value
+written into the pipe has been read out:
+
+```ocaml
+# let (r,w) = Pipe.create ();;
+val r : '_a Pipe.Reader.t = <abstr>
+val w : '_a Pipe.Writer.t = <abstr>
+# let write_complete = Pipe.write w "Hello World!";;
+val write_complete : unit Deferred.t = <abstr>
+# Pipe.read r;;
+- : [ `Eof | `Ok of string ] = `Ok "Hello World!"
+# write_complete;;
+- : unit = ()
 ```
 
