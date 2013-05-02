@@ -1,29 +1,29 @@
 open Core.Std
 open Async.Std
 
-(** Reads line-by-line from the provided reader, writing each line to the
-    writer as it goes*)
-let rec copy_lines reader writer =
-  Reader.read_line reader
+(* Copy data from the reader to the writer, using the provided buffer
+   as scratch space *)
+let rec copy_blocks buffer r w =
+  Reader.read r buffer
   >>= function
   | `Eof -> return ()
-  | `Ok line ->
-    Writer.write writer line;
-    Writer.write writer "\n";
-    Writer.flushed writer
+  | `Ok bytes_read ->
+    Writer.write w buffer ~len:bytes_read;
+    Writer.flushed w
     >>= fun () ->
-    copy_lines reader writer
+    copy_blocks buffer r w
 
 (** Starts a TCP server, which listens on the specified port, invoking
     copy_lines every time a client connects. *)
 let run () =
-  let server =
+  let buffer = String.create (16 * 1024) in
+  let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
       (Tcp.on_port 8765)
-      (fun _addr reader writer -> copy_lines reader writer)
+      (fun _addr r w -> copy_blocks buffer r w)
   in
-  ignore (server : (_,_) Tcp.Server.t Deferred.t)
+  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 
 (* Call [run], and then start the scheduler *)
 let () =
