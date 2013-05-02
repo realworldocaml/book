@@ -32,6 +32,7 @@ let get_definition word =
     Pipe.to_list body >>| fun strings ->
     (word, get_definition_from_json (String.concat strings))
 
+(* Wrap a chunk of text to the specified width. *)
 let wrap text max_width =
   let rec build completed_lines current_line current_line_length words =
     match words with
@@ -48,6 +49,7 @@ let wrap text max_width =
   in
   build [] [] 0 (String.split ~on:' ' text)
 
+(* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
     word
@@ -60,7 +62,8 @@ let print_result (word,definition) =
 let run_one_search word =
   get_definition word >>| print_result
 
-(* Run many searches in parallel, printing out the results as you go *)
+(* Run many searches in parallel, printing out the results after they're all
+   done. *)
 let run_many_searches ~parallel words =
   Deferred.List.map words ~f:get_definition
     ~how:(if parallel then `Parallel else `Sequential)
