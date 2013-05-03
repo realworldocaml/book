@@ -157,10 +157,10 @@ resource.
 <title>Some history about OCaml's word-aligned pointers</title>
 
 The alert reader may be wondering how OCaml can guarantee that all of its
-pointers are word-aligned.  In the old days when RISC chips such as Sparc,
-MIPS and Alpha were commonplace, unaligned memory accesses were forbidden by
-the instruction architecture and would result in a CPU exception that normally
-terminates the program.  Thus, all pointers were historically rounded off to
+pointers are word-aligned.  In the old days when RISC chips such as Sparc, MIPS
+and Alpha were commonplace, unaligned memory accesses were forbidden by the
+instruction set architecture and would result in a CPU exception that
+terminated the program.  Thus, all pointers were historically rounded off to
 the architecture word-size (usually 32- or 64-bits).
 
 Modern CISC processors such as the Intel x86 do support unaligned memory accesses,
@@ -650,7 +650,7 @@ OPAM switch.
 
 </tip>
 
-### Converting to and from OCaml values in C
+### Converting from OCaml values in C
 
 The earlier hello world example is extremely basic and only uses `unit` types.
 Let's extend the signature to take a couple of `int` arguments instead of a
@@ -661,8 +661,8 @@ external add_numbers: int -> int -> int = "caml_add_numbers"
 let () = Printf.printf "From OCaml: %d\n" (add_numbers 10 15)
 ```
 
-Our `add_numbers` binding now takes two arguments, and returns an integer instead of a simple `unit`.
-The complete stub now looks like this:
+Our `add_numbers` binding now takes two arguments, and returns an integer
+instead of a simple `unit`.  The complete stub now looks like this:
 
 ```c
 #include <stdio.h>
@@ -679,11 +679,12 @@ caml_add_numbers(value v_arg1, value v_arg2)
 ```
 
 The first thing the binding does is to pass the `value` arguments through the
-`Int_val` macro.  This converts a `value` to an integer by removing the
-tag bit.  The integers are then added together and the result returned.  The
-result `value` is reconstructed by the `Val_int` macro, which takes a C integer
-and tags it into becoming an OCaml `value`.  When you compile and run this
-version of the code, you should see this output:
+`Int_val` macro and save them into local stack variables.  This macro converts
+a `value` to an integer by removing the tag bit.  The integers are then added
+together and the result returned.  The result `value` is reconstructed by the
+`Val_int` macro, which takes a C integer and tags it into becoming an OCaml
+`value`.  When you compile and run this version of the code, you should see
+this output:
 
 ```
 $ ./hello 
@@ -692,7 +693,7 @@ From OCaml: 25
 ```
 
 You should keep an eye out for warnings from your compiler which often indicate
-that you've forgotten to correctly convert a value.  For example, try a broken
+that you've forgotten to correctly convert a `value`.  For example, try a broken
 version of the previous binding:
 
 ```c
@@ -707,7 +708,7 @@ caml_add_numbers(value v_arg1, value v_arg2)
 }
 ```
 
-The compiler will immediately complain of some invalid format strings when you compile this:
+The compiler will now complain of invalid format strings when you compile this:
 
 ```
 $ ocamlopt -o hello -ccopt -Wall hello_stubs.c hello.ml
@@ -721,13 +722,77 @@ From C:     21 + 31
 From OCaml: 26
 ```
 
-Don't depend on the good graces of your C compiler to spot such errors though.
-Although the format string error in the `printf` was warned about, it's also
-invalid to add two `value`s together without converting them into native C
-types.  The C compiler doesn't warn about this, and the result is silently
-incorrect.  Instead, it's good practise to immediately convert arguments to
-local stack variables as early as possible, so you don't get the types mixed
+Notice that both the input and output integers are incorrect in the output,
+since they still have their tag bits set when being added in the C code.  Don't
+depend on the good graces of your C compiler to always spot such errors though.
+It's also invalid to add two `value`s together without converting them into
+native C type, but the C compiler can't warn about this and the result is
+silently incorrect.  It's good practise to immediately convert arguments to
+local C stack variables as early as possible, so you don't get the types mixed
 up deep into the C function.
 
+OCaml provides nacros to convert to and from all the basic OCaml runtime values
+and C types, of the form `to_from`.  For example `Val_long` means "Value from
+long", and `Long_val` means "Long from value".  The table below summarises the
+macros to extract various C types from OCaml `values` for 64-bit architectures.
+Note that OCaml doesn't support a single-precision float, so these are always
+double-precision.
 
+Macro                   OCaml Type         C type
+-----                   ----------         ------
 
+`Long_val`              `int`             `long`
+`Int_val`               `int`             `int`
+`Unsigned_long_val`     `int`             `unsigned long`
+`Unsigned_int_val`      `int`             `unsigned int`
+`Bool_val`              `bool`            `int`
+`Double_val`            `float`           `double`
+`String_val`            `string`          `string`
+`Nativeint_val`         `Nativeint.t`     `long`
+`Int32_val`             `Int32.t`         `long`
+`Int64_val`             `Int64.t`         `unsigned long`
+
+### Constructing OCaml values from C
+
+Building OCaml values to return from C is a little more involved, since we
+must ensure that any OCaml allocations aren't immediately cleaned up by the
+garbage collector before they have been registered as live values.  Luckily,
+OCaml provides some more macros to ease this.  Let's extend our earlier
+example to return a tuple of integers instead of just the result.
+
+```ocaml
+external add_numbers: int -> int -> int * int * int32 = "caml_add_numbers"
+let () = 
+  let (l,r,v) = add_numbers 10 15 in
+  Printf.printf "From OCaml: %d+%d=%ld\n" l r v
+```
+
+The `add_numbers` external now returns a more complex data type that requires
+allocating an OCaml value from within the C binding.
+
+```c
+#include <stdio.h>
+#include <caml/memory.h>
+#include <caml/alloc.h>
+
+CAMLprim value
+caml_add_numbers(value v_arg1, value v_arg2)
+{
+  CAMLparam2(v_arg1, v_arg2);
+  CAMLlocal1(v_res);
+  int v1 = Int_val(v_arg1);
+  int v2 = Int_val(v_arg2);
+  printf("From C:     %d+%d=%d\n", v1, v2, (v1+v2));
+  v_res = caml_alloc_tuple(3);
+  Field(v_res, 0) = Val_int(v1);
+  Field(v_res, 1) = Val_int(v2);
+  Field(v_res, 2) = caml_copy_int32(v1 + v2);
+  CAMLreturn(v_res);
+}
+```
+
+<note>
+<title>Faster bindings for zero-allocation functions</title>
+
+TODO Talk about "alloc" and "float" qualifiers to `external`
+</note>
