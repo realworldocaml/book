@@ -1,15 +1,23 @@
 open Core.Std
 open Async.Std
 
+let rec copy_blocks buffer r w =
+  Reader.read r buffer
+  >>= function
+  | `Eof -> return ()
+  | `Ok bytes_read ->
+    Writer.write w buffer ~len:bytes_read;
+    Writer.flushed w
+    >>= fun () ->
+    copy_blocks buffer r w
 
 let run () =
+  let buffer = String.create (16 * 1024) in
   let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
       (Tcp.on_port 8765)
-      (fun _addr r w ->
-        Pipe.transfer_id (Reader.pipe r) (Writer.pipe w)
-      )
+      (fun _addr r w -> copy_blocks buffer r w)
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
   Deferred.never ()

@@ -1,0 +1,22 @@
+MENHIR = menhir
+
+OCamlGeneratedFiles(lexer.ml)
+
+FILES[] =
+    lexer
+    parser
+    json
+
+LIB = json
+
+lexer.cmo: parser.mli
+lexer.cmx lexer.o: parser.mli
+
+%.ml %.mli: %.mly
+	$(MENHIR) $<
+
+.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+
+OCAML_LIBS = $(LIB)
+
+.DEFAULT: $(OCamlProgram test, test)

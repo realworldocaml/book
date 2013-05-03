@@ -40,12 +40,10 @@ let print_result (word,definition) =
     | None -> "No definition found"
     | Some def -> String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70)  def))
 
-(* Run many searches in parallel, printing out the results after they're all
-   done. *)
+(* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
-  Deferred.List.map words ~f:get_definition ~how:`Parallel
-  >>| fun results ->
-  List.iter results ~f:print_result
+  Deferred.List.iter words ~how:`Parallel ~f:(fun word ->
+    get_definition word >>| print_result)
 
 let () =
   Command.async_basic

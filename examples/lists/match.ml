@@ -75,7 +75,7 @@ let third l =
 let head1 l =
   match l with
   | [] -> None
-  | h :: _ -> Some h;;
+  | hd :: _ -> Some hd;;
 
 let head2 = function
   | [] -> None
