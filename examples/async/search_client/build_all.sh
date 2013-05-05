@@ -4,3 +4,4 @@
    search.native \
    timeout_search.native \
    search_out_of_order.native \
+   search_with_error_handling.native \
