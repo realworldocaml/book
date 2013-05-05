@@ -968,3 +968,140 @@ using higher-level abstractions built on top of monitors like
 `try_with`.
 
 
+### Example: Handling exceptions in our definition search
+
+Let's consider error handling for the definition search code that we
+wrote earlier in the chapter.  In particular, lets catch errors so
+that we'll report any queries that fail, but the failure of one query
+won't interfere with a different one.
+
+The search code as it is fails rarely, so let's make make a change
+that can cause it to fail more predictably, by making the server we
+connecto to configurable.  Then, we'll handle the errors that occur
+when you specify the wrong host.
+
+We make the choice of server configurable by changing `query_uri` to
+take an argument specifying the server to connect to:
+
+```ocaml
+(* Generate a DuckDuckGo search URI from a query string *)
+let query_uri ~server query =
+  let base_uri =
+    Uri.of_string (String.concat ["http://";server;"/?format=json"])
+  in
+  Uri.add_query_param base_uri ("q", [query])
+```
+
+and then making the appropriate changes to pass through the [~server]
+argument through the other function calls as necessary.  Then we just
+need to add a flag so we can specify the server at the command line:
+
+```ocaml
+let () =
+  Command.async_basic
+    ~summary:"Retrieve definitions from duckduckgo search engine"
+    Command.Spec.(
+      empty
+      +> anon (sequence ("word" %: string))
+      +> flag "-server" (optional_with_default "api.duckduckgo.com" string)
+           ~doc:" Specify server to connect to"
+    )
+    (fun words server () -> search_and_print ~server words)
+  |> Command.run
+```
+
+Now, if we rebuild the application and run it as is, we'll see the
+following error:
+
+```
+$ ./search_with_configurable_server.native -server localhost \
+     "Concurrent Programming" OCaml
+("unhandled exception"
+ ((lib/monitor.ml.Error_
+   ((exn (Unix.Unix_error "Connection refused" connect 127.0.0.1:80))
+    (backtrace
+     ("Raised by primitive operation at file \"lib/unix_syscalls.ml\", line 793, characters 12-69"
+      "Called from file \"lib/deferred.ml\", line 24, characters 62-65"
+      "Called from file \"lib/scheduler.ml\", line 120, characters 6-17"
+      "Called from file \"lib/jobs.ml\", line 73, characters 8-13" ""))
+    (monitor
+     (((name Tcp.close_sock_on_error) (here ()) (id 3) (has_seen_error true)
+       (someone_is_listening true) (kill_index 0))
+      ((name main) (here ()) (id 1) (has_seen_error true)
+       (someone_is_listening false) (kill_index 0))))))
+  (Pid 1352)))
+```
+
+As you can see, we got a "Connection refused" failure, which was
+passed up to the toplevel monitor, which ended the program.  We can
+handle the failures of individual connections separately by using the
+`try_with` function within each call to `get_definition`, as follows.
+
+```ocaml
+(* Execute the DuckDuckGo search *)
+let get_definition ~server word =
+  try_with (fun () ->
+    Cohttp_async.Client.call `GET (query_uri ~server word)
+    >>= function
+    | None | Some (_, None) -> return (word, None)
+    | Some (_, Some body) ->
+      Pipe.to_list body >>| fun strings ->
+      (word, get_definition_from_json (String.concat strings)))
+  >>| function
+  | Ok (word,result) -> (word, Ok result)
+  | Error exn        -> (word, Error exn)
+```
+
+Here, we use `try_with` to capture the exception, which we then use
+map (the `>>|` operator) to convert the error into the form we want: a
+pair whose first element is the word being searched for, and the
+second element is the (possibly erroneous) result.
+
+Now we just need to change the code for `print_result` so that it can
+handle the new type.
+
+```ocaml
+(* Print out a word/definition pair *)
+let print_result (word,definition) =
+  printf "%s\n%s\n\n%s\n\n"
+    word
+    (String.init (String.length word) ~f:(fun _ -> '-'))
+    (match definition with
+     | Error _ -> "DuckDuckGo query failed unexpectedly"
+     | Ok None -> "No definition found"
+     | Ok (Some def) ->
+       String.concat ~sep:"\n"
+         (Wrapper.wrap (Wrapper.make 70) def))
+```
+
+Now, if we run that same query, we'll get individualized handling of
+the connection failures:
+
+```
+$ ./search_with_error_handling.native -server localhost \
+     "Concurrent Programming" OCaml
+> Concurrent Programming
+----------------------
+
+DuckDuckGo query failed unexpectedly
+
+OCaml
+-----
+
+DuckDuckGo query failed unexpectedly
+
+```
+
+Note that in the above code we're relying on the call to
+`Cohttp_async.Client.call` to clean up after itself.  In particular,
+it needs to make sure to close whatever file descriptors have been
+opened.  There are other useful error-handling utlities in Async that
+are helpful here, notably the `Monitor.protect` call, which is
+analogous to the `protect` call described in
+[xref](#cleaning-up-in-the-presence-of-exceptions).  The Async API
+docs, for `Monitor` in particular, are a good source for learning what
+exception-handling calls exist.
+
+## Timeouts, Cancellation and Choices
+
+
