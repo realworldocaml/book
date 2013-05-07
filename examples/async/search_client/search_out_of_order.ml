@@ -42,8 +42,8 @@ let print_result (word,definition) =
 
 (* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
-  Deferred.List.iter words ~how:`Parallel ~f:(fun word ->
-    get_definition word >>| print_result)
+  Deferred.all_unit (List.map words ~f:(fun word ->
+    get_definition word >>| print_result))
 
 let () =
   Command.async_basic

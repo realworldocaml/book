@@ -47,7 +47,7 @@ let print_result (word,definition) =
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
 let search_and_print ~server words =
-  Deferred.List.map words ~f:(get_definition ~server) ~how:`Parallel
+  Deferred.all (List.map words ~f:(get_definition ~server))
   >>| fun results ->
   List.iter results ~f:print_result
 
