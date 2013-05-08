@@ -253,16 +253,16 @@ consistent naming, which makes it easier to navigate the source.
 
 Defining records with the same field names can be problematic.  Let's
 consider a simple example: building types to represent the protocol
-used for a logging server.  The following types represent messages a
-server might receive from a client.
+used for a logging server.
 
-Below, the `log_entry` message is used to deliver a log entry to the
-server for processing.  The `logon` message is sent when a client
-initiates a connection, and includes the identity of the user
-connecting and credentials used for authentication.  Finally, the
-`heartbeat` message is periodically sent by the client to demonstrate
-to the server that the client is alive and connected.  All of these
-messages include a session id and the time the message was generated.
+We'll describe three message types: `log_entry`, `heartbeat` and
+`logon`.  The `log_entry` message is used to deliver a log entry to
+the server; the `logon` message is sent to initiate a connection, and
+includes the identity of the user connecting and credentials used for
+authentication; and the `heartbeat` message is periodically sent by
+the client to demonstrate to the server that the client is alive and
+connected.  All of these messages include a session id and the time
+the message was generated.
 
 ```ocaml
 # type log_entry =
@@ -294,8 +294,8 @@ type will it have?
 val get_session_id : logon -> string = <fun>
 ```
 
-In the simple case, OCaml just picks the most recent definition of
-that record field.  We can force OCaml to assume we're dealing with a
+In this case, OCaml just picks the most recent definition of that
+record field.  We can force OCaml to assume we're dealing with a
 different type (say, a `heartbeat`) using a type annotation.
 
 ```ocaml
@@ -304,9 +304,9 @@ val get_heatbeat_session_id : heartbeat -> string = <funambulate>
 ```
 
 While it's possible to resolve ambiguous field names using type
-annotations, having such ambiguity floating around can be a bit
-confusing.  Consider the following functions for grabbing the session
-id and status from a heartbeat.
+annotations, the ambiguity can be a bit confusing.  Consider the
+following functions for grabbing the session id and status from a
+heartbeat.
 
 ```ocaml
 # let status_and_session t = (t.status_message, t.session_id);;
@@ -325,15 +325,15 @@ switched, the `session_id` field was considered first, and so that
 drove the type to be considered to be a `logon`, at which point
 `t.status_message` no longer made sense.
 
-A better solution is to avoid the ambiguity altogether, either by
-using non-overlapping field names or, more generally, by minting a
-module for each type.  We'll talk more about modules more in
+We can avoid this ambiguity altogether, either by using
+non-overlapping field names or, more generally, by minting a module
+for each type.  We'll talk more about modules more in
 [xref](#files-modules-and-programs), but for now, you can think of a
 module as a way of collecting values and types together in a named
 package.
 
-Packing types into modules is actually a broadly useful idiom (and one
-used quite extensively by Core), providing for each type a name-space
+Packing types into modules is a broadly useful idiom (and one used
+quite extensively by Core), providing for each type a name-space
 within which to put related values.  When using this style, it is
 standard practice to name the type associated with the module `t`.
 Using this style we would write:
@@ -398,32 +398,11 @@ trick when pattern-matching:
 val message_to_string : Log_entry.t -> string = <fun>
 ```
 
-Another approach is to use a type annotation to nail down the return
-type as being `Log_entry.t`.  Note that this normally kicks out a
-warning, which we first explicitly disable.
-
-```ocaml
-# #warnings "-40";;
-# let create_log_entry ~session_id ~important message : Log_entry.t =
-     { time = Time.now (); session_id; important; message }
-  ;;
-val create_log_entry :
-  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
-```
-
 When using dot-notation for accessing record fields, we can qualify
 the field by the module directly:
 
 ```ocaml
 # let is_important t = t.Log_entry.important;;
-val is_important : Log_entry.t -> bool = <fun>
-```
-
-Or we can apply a type annotation to make the qualifications
-unnecessary.
-
-```ocaml
-# let is_important (t : Log_entry.t) = t.important;;
 val is_important : Log_entry.t -> bool = <fun>
 ```
 
@@ -448,12 +427,12 @@ the client information when a new heartbeat arrives.
      credentials: string;
      last_heartbeat_time: Time.t;
    };;
-# let register_heartbeat t (hb:Heartbeat.t) =
+# let register_heartbeat t hb =
       { addr = t.addr;
         port = t.port;
         user = t.user;
         credentials = t.credentials;
-        last_heartbeat_time = hb.time;
+        last_heartbeat_time = hb.Heartbeat.time;
       };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
@@ -476,8 +455,8 @@ on an existing one, with a set of field changes layered on top.
 Given this, we can rewrite `register_heartbeat` more concisely.
 
 ```ocaml
-# let register_heartbeat t (hb : Heartbeat.t) =
-    { t with last_heartbeat_time = hb.time };;
+# let register_heartbeat t hb =
+    { t with last_heartbeat_time = hb.Heartbeat.time };;
 ```
 
 Functional updates make your code independent of the identity of the
@@ -507,10 +486,11 @@ field.  The correct thing to do would be to update the code as
 follows.
 
 ```ocaml
-# let register_heartbeat t (hb : Heartbeat.t) =
-    { t with last_heartbeat_time   = hb.time;
-             last_heartbeat_status = hb.status_message;
+# let register_heartbeat t hb =
+    { t with last_heartbeat_time   = hb.Heartbeat.time;
+             last_heartbeat_status = hb.Heartbeat.status_message;
     };;
+val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
 ## Mutable fields
@@ -536,9 +516,9 @@ side-effecting version of `register_heartbeat` would be written as
 follows.
 
 ```ocaml
-# let register_heartbeat t (hb : Heartbeat.t) =
-    t.last_heartbeat_time   <- hb.time;
-    t.last_heartbeat_status <- hb.status_message
+# let register_heartbeat t hb =
+    t.last_heartbeat_time   <- hb.Heartbeat.time;
+    t.last_heartbeat_status <- hb.Heartbeat.status_message
   ;;
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 ```
@@ -642,9 +622,9 @@ function for displaying a record field.
 
 ```ocaml
 # let show_field field to_string record =
-     let name = Field.name field in
-     let field_string = to_string (Field.get field record) in
-     name ^ ": " ^ field_string
+    let name = Field.name field in
+    let field_string = to_string (Field.get field record) in
+    name ^ ": " ^ field_string
   ;;
 val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string = <fun>
 ```
