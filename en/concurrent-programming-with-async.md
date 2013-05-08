@@ -711,52 +711,50 @@ Async's wrapping of `printf` that goes through the Async scheduler
 rather than immediately printing to standard out.  The shadowing of
 the original definition of `printf` is done when you open `Async.Std`.
 
-Next we need to dispatch the searches in parallel.  Async has a module
-called `Deferred.List` for doing deferred operations on lists.  The
-`map` function from that module has the following signature:
-
-```ocaml
-# Deferred.List.map;;
-- : ?how:Async_core.Deferred_intf.how ->
-    'a list -> f:('a -> 'b Deferred.t) -> 'b list Deferred.t
-= <fun>
-```
-
-This `map` takes a list and a deferred-producing function for
-transforming elements of that list, finally returning a deferred list
-of results.  If `how` is ``` `Sequential```, then the lists will be
-processed in order, one element being processed only after the
-previous one's deferred has become determined.  If `how` is ```
-`Parallel```, then the elements are processed in parallel.  In both
-cases, the output becoming determined only after the processing of all
-list elements is complete.
-
-Here's how we use it to dispatch our searches.
+Next we need to dispatch the searches in parallel, wait for the
+results, and print out what we find.  
 
 ```ocaml
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
 let search_and_print words =
-  Deferred.List.map words ~f:get_definition ~how:`Parallel
+  Deferred.all (List.map words ~f:get_definition)
   >>| fun results ->
   List.iter results ~f:print_result
 ```
 
-Note that the definitions will always be printed out in the same order
-that they're passed in, no matter what orders the queries return in.
-If we wanted, we could rewrite this to print out the results as
-they're received and thus potentially out of order:
+We used `List.map` to call `get_definition` on each word, and
+`Deferred.all` to wait for all the results.  Here's the type of
+`Deferred.all`:
+
+```ocaml
+# Deferred.all;;
+- : 'a Deferred.t list -> 'a list Deferred.t = <fun>
+```
+
+Note that the list returned by `Deferred.all` reflects the order of
+the deferreds passed to it.  As such, the definitions will be printed
+out in the same order that the search wrods are passed in, no matter
+what orders the queries return in.  We could rewrite this code to
+print out the results as they're received and thus potentially out of
+order:
 
 ```ocaml
 (* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
-  Deferred.List.iter words ~how:`Parallel ~f:(fun word ->
-    get_definition word >>| print_result)
+  Deferred.all_unit (List.map words ~f:(fun word ->
+    get_definition word >>| print_result))
 ```
 
 The difference is that we both dispatch the query and print out the
 result in the closure passed to `map`, rather than waiting for all of
-the results to get back and then printing them out together.
+the results to get back and then printing them out together.  We use
+`Deferred.all_unit` to wait for the results, which has this signature:
+
+```ocaml
+# Deferred.all_unit;;
+- : unit Deferred.t list -> unit Deferred.t = <fun>
+```
 
 Finally, we need to create a command line interface, again using
 `Command.async_basic`.
@@ -1104,4 +1102,62 @@ exception-handling calls exist.
 
 ## Timeouts, Cancellation and Choices
 
+One common kind of operation in a concurrent programming is the need
+to combine results from multiple distinct concurrent processes going
+on in the same program.  We already saw this in our web-search
+example, using `Deferred.all` and `Deferred.all_unit` to wait for all
+of a list of deferreds to become determined.  Another useful primitive
+is `Deferred.both`, which lets you wait until two deferreds of
+different types have returned, returning both values as a tuple:
+
+```ocaml
+# let both = Deferred.both
+   (after (sec 0.5)  >>| fun () -> "A")
+   (after (sec 0.25) >>| fun () -> 32.33)
+ ;; 
+val both : (string * float) Deferred.t = <abstr>
+# both;;
+- : string * float = ("A", 32.33)
+```
+
+Sometimes, however, we want to wait only for the first of multiple
+events to occur.  This happens particularly often when dealing with
+timeouts.  In that case, we can use the call `Deferred.any`, which,
+given a list of deferreds, returns a single deferred that will become
+determined once any of the values on the list is determined.
+
+```ocaml
+# Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
+               ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
+- : string = "half a second"
+```
+
+We can see how this would work in action by extending our definition
+search tool to timeout on any queries that take too long to satisfy.
+We'll do this by writing a wrapper for `get_definition` that takes a
+timeout (in the form of a `Time.Span.t`) as an argument, and returns
+either the definition, or the timeout, whichever finished first.
+
+```ocaml
+let get_definition_with_timeout ~server ~timeout word =
+  Deferred.any
+    [ (after timeout >>| fun () -> (word,Error "Timed out"))
+    ; (get_definition ~server word
+       >>| fun (word,result) ->
+       let result' = match result with
+         | Ok _ as x -> x
+         | Error _ -> Error "Unexpected failure"
+       in
+       (word,result')
+      )
+    ]
+```
+
+We use `>>|` above to transform the deferred values we're waiting for
+so that `Deferred.any` can choose between values of the same type.
+
+One problem with the above code is that the HTTP query kicked off by
+`get_definition` is not actually shut down when the timeout fires.  As
+such, `get_definition_with_timeout` essentially leaks an open
+connection.
 
