@@ -2,8 +2,10 @@ open Core.Std
 open Async.Std
 
 (* Generate a DuckDuckGo search URI from a query string *)
-let query_uri query =
-  let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
+let query_uri ~server query =
+  let base_uri =
+    Uri.of_string (String.concat ["http://";server;"/?format=json"])
+  in
   Uri.add_query_param base_uri ("q", [query])
 
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
@@ -23,8 +25,8 @@ let get_definition_from_json json =
   | _ -> None
 
 (* Execute the DuckDuckGo search *)
-let get_definition word =
-  Cohttp_async.Client.call `GET (query_uri word)
+let get_definition ~server word =
+  Cohttp_async.Client.call `GET (query_uri ~server word)
   >>= function
   | None | Some (_, None) -> return (word, None)
   | Some (_, Some body) ->
@@ -44,8 +46,8 @@ let print_result (word,definition) =
 
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
-let search_and_print words =
-  Deferred.List.map words ~f:get_definition ~how:`Parallel
+let search_and_print ~server words =
+  Deferred.List.map words ~f:(get_definition ~server) ~how:`Parallel
   >>| fun results ->
   List.iter results ~f:print_result
 
@@ -55,6 +57,8 @@ let () =
     Command.Spec.(
       empty
       +> anon (sequence ("word" %: string))
+      +> flag "-server" (optional_with_default "api.duckduckgo.com" string)
+           ~doc:" Specify server to connect to"
     )
-    (fun words () -> search_and_print words)
+    (fun words server () -> search_and_print ~server words)
   |> Command.run

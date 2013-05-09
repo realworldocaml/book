@@ -2,9 +2,9 @@ open Core.Std
 open Async.Std
 
 (* Generate a DuckDuckGo search URI from a query string *)
-let query_uri query =
+let query_uri =
   let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
-  Uri.add_query_param base_uri ("q", [query])
+  fun query -> Uri.add_query_param base_uri ("q", [query])
 
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
 let get_definition_from_json json =
@@ -38,16 +38,12 @@ let print_result (word,definition) =
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
     | None -> "No definition found"
-    | Some def ->
-      String.concat ~sep:"\n"
-        (Wrapper.wrap (Wrapper.make 70) def))
+    | Some def -> String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70)  def))
 
-(* Run many searches in parallel, printing out the results after they're all
-   done. *)
+(* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
-  Deferred.List.map words ~f:get_definition ~how:`Parallel
-  >>| fun results ->
-  List.iter results ~f:print_result
+  Deferred.List.iter words ~how:`Parallel ~f:(fun word ->
+    get_definition word >>| print_result)
 
 let () =
   Command.async_basic
