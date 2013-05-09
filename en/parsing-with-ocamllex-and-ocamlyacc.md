@@ -10,7 +10,7 @@ Let's be more precise about these terms.  By _parsing_, we mean reading a
 textual input into a form that is easier for a program to manipulate.  For
 example, suppose we want to read a file containing a value in JSON format.  JSON
 has a variety of values, including numbers, strings, arrays, and objects, and
-each of these has a precise textual representation.  For example, the following
+each of these has a textual representation.  For example, the following
 text represents an object containing a string labeled `title`, and an array
 containing two objects, each with a name and array of zip codes.
 
@@ -153,6 +153,7 @@ perform parsing from the `parser.mly` description.  The `parser.ml` contains an
 automaton implementation, and is generally difficult to read.  However, the
 `parser.mli` contains declarations that we need to build a lexer.
 
+```
 $ cat parser.mli
 exception Error
 
@@ -211,7 +212,11 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   ;
 ```
 
-We can read it like this, "A JSON `value` is either an object bracketed with curly braces, or an array bracketed with square braces. or a string, integer, float, etc.  In each of the productions, the right hand side specfies the expected sequence.  For example, the object is specified with the curly-bracket production.
+We can read it like this: a JSON `value` is either an object bracketed by curly
+braces, or an array bracketed by square braces. or a string, integer, float,
+etc.  In each of the productions, the right hand side specfies the expected
+sequence.  For example, the object is specified with the curly-bracket
+production.
 
 ```
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
@@ -224,10 +229,13 @@ value is `Object obj`, where `obj` is the sequence of object fields.  Note that
 we've left out bindings for `LEFT_BRACE` and `RIGHT_BRACE`, because their tokens
 don't have values.
 
-Next, let's define the object fields.  In the following rules, the `opt_object_fields` are either empty, or a non-empty sequence of fields in reverse order.  Note that if you wish to have comments in the rule definitions, you will have to use C comment delimiters.  By convention, the C comment `/* empty */` is used to point out that a production has an empty right hand side.
+Next, let's define the object fields.  In the following rules, the
+`opt_object_fields` are either empty, or a non-empty sequence of fields in
+reverse order.  Note that if you wish to have comments in the rule definitions,
+you have to use C comment delimiters.  By convention, the C comment `/*
+empty */` is used to point out that a production has an empty right hand side.
 
 ```
-
 opt_object_fields: /* empty */
     { [] }
   | obj = rev_object_fields
@@ -245,7 +253,7 @@ The rule `rev_object_fields` is defined recursively.  It has either one
 key/value field, or it is a sequence of fields, followed by a `COMMA` and one
 more field definition.
 
-e `rev_` prefixed is intended to point out that the fields are returned in
+The `rev_` prefixed is intended to point out that the fields are returned in
 reverse order.  Why would we do that?  One reason is that the `menhir` parser
 generator is left-recursive, which means that the constructed pushdown automoton
 uses less stack space with left-recursive definitions.  The following
