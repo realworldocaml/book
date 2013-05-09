@@ -79,6 +79,7 @@ let head1 l =
 
 let head2 = function
   | [] -> None
+<<<<<<< HEAD
   | hd :: _ -> Some hd;;
 
 let rec last l =
@@ -119,3 +120,6 @@ let add_numbers x1 x2 =
  * -*-
  * vim:ts=3:et:tw=100
  *)
+=======
+  | h :: _ -> Some h;;
+>>>>>>> upstream/master

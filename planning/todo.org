@@ -1,7 +1,11 @@
-* Fixes to Core
-** Improve Core's documentation.
-*** Have a front-page for the documentation
-** Improve bin-prot's usability in the non-async world?
-** Fix inconsistency of sexp_option and sexp_list
-** Make fieldslib respect private record types
- (i.e., no map, no set_XXX)
+* Things we need to cover
+** polymorphic compare and hash
+** Playing nicely with the type system
+ - dealing with type errors
+ - Using type annotations to narrow down problems
+
+** Helpful hints on debugging
+ Should just be sprinkled throughout the text in examples
+*** Using (type a) to nail down the polymorphic type of something.
+*** Generally using type annotations
+*** Debugger?
