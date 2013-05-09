@@ -79,47 +79,4 @@ let head1 l =
 
 let head2 = function
   | [] -> None
-<<<<<<< HEAD
-  | hd :: _ -> Some hd;;
-
-let rec last l =
-  match l with
-  | [] -> None
-  | [x] -> Some x
-  | _ :: tl -> last tl;;
-
-type number =
-  | Int of int
-  | Float of float;;
-
-let add_numbers x1 x2 =
-  match x1, x2 with
-  | Int i1, Int i2 -> Int (i1 + i2)
-  | Int i, Float x
-  | Float x, Int i -> Float (x +. Float.of_int i)
- | Float x1, Float x2 -> Float (x1 +. x2);;
-
-type number =
-  | Int of int
-  | Float of float
-  | Rational of int * int;;
-
-let add_numbers x1 x2 =
-  match x1, x2 with
-  | Int i1, Int i2 -> Int (i1 + i2)
-  | Int i, Float x
-  | Float x, Int i -> Float (x +. Float.of_int i)
- | Float x1, Float x2 -> Float (x1 +. x2);;
-
-
-(*
- * -*-
- * Local Variables:
- * Fill-column: 100
- * End:
- * -*-
- * vim:ts=3:et:tw=100
- *)
-=======
   | h :: _ -> Some h;;
->>>>>>> upstream/master
