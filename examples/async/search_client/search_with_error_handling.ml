@@ -2,8 +2,10 @@ open Core.Std
 open Async.Std
 
 (* Generate a DuckDuckGo search URI from a query string *)
-let query_uri query =
-  let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
+let query_uri ~server query =
+  let base_uri =
+    Uri.of_string (String.concat ["http://";server;"/?format=json"])
+  in
   Uri.add_query_param base_uri ("q", [query])
 
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
@@ -23,13 +25,18 @@ let get_definition_from_json json =
   | _ -> None
 
 (* Execute the DuckDuckGo search *)
-let get_definition word =
-  Cohttp_async.Client.call `GET (query_uri word)
-  >>= function
-  | None | Some (_, None) -> return (word, None)
-  | Some (_, Some body) ->
-    Pipe.to_list body >>| fun strings ->
-    (word, get_definition_from_json (String.concat strings))
+let get_definition ~server word =
+  try_with (fun () ->
+    Cohttp_async.Client.call `GET (query_uri ~server word)
+    >>= function
+    | None | Some (_, None) -> return (word, None)
+    | Some (_, Some body) ->
+      Pipe.to_list body >>| fun strings ->
+      (word, get_definition_from_json (String.concat strings)))
+  >>| function
+  | Ok (word,result) -> (word, Ok result)
+  | Error exn        -> (word, Error exn)
+
 
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
@@ -37,15 +44,16 @@ let print_result (word,definition) =
     word
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
-    | None -> "No definition found"
-    | Some def ->
-      String.concat ~sep:"\n"
-        (Wrapper.wrap (Wrapper.make 70) def))
+     | Error _ -> "DuckDuckGo query failed unexpectedly"
+     | Ok None -> "No definition found"
+     | Ok (Some def) ->
+       String.concat ~sep:"\n"
+         (Wrapper.wrap (Wrapper.make 70) def))
 
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
-let search_and_print words =
-  Deferred.all (List.map words ~f:get_definition)
+let search_and_print ~server words =
+  Deferred.all (List.map ~f:(get_definition ~server) words)
   >>| fun results ->
   List.iter results ~f:print_result
 
@@ -55,6 +63,8 @@ let () =
     Command.Spec.(
       empty
       +> anon (sequence ("word" %: string))
+      +> flag "-server" (optional_with_default "api.duckduckgo.com" string)
+           ~doc:" Specify server to connect to"
     )
-    (fun words () -> search_and_print words)
+    (fun words server () -> search_and_print ~server words)
   |> Command.run
