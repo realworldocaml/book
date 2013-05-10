@@ -1161,3 +1161,11 @@ One problem with the above code is that the HTTP query kicked off by
 such, `get_definition_with_timeout` essentially leaks an open
 connection.
 
+## Example: Building a message broker
+
+Now that we've learned the basics of working with Async, let's walk
+through a small but non-trivial application.  The particular
+application we'll pick is a message broker.
+
+The message broker provides a simple publish/subscribe API.  Clients
+can publish a value under a given topic, or subscribe to a stream
