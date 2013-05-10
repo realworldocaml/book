@@ -4,8 +4,8 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
-let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"] 
-let support = ["jamescotton"] 
+let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"]
+let support = ["jamescotton"]
 
 let from_anil =
   [ "mcclurmc"                (* Mike McClurg <mike.mcclurg@citrix.com> *)
@@ -54,9 +54,10 @@ let from_yminsky =
   ; "happy4crazy"             (* Alan O'Donnell  <alan@hackerschool.com> *)
   ; "rnml"                    (* Nathan Linger <nlinger@janestreet.com> *)
   ; "msaffer"                 (* Matthew Saffer <msaffer@janestreet.com> TODO *)
+  ; "orbitz"                  (* Malcolm Matalka <mmatalka@gmail.com> *)
 ]
 
-let from_email = 
+let from_email =
   [ "JakubOboza "             (* jakub.oboza@gmail.com *)
   ; "gour"                    (* gour@atmarama.net *)
   ; "getauvi"                 (* getauvi@gmail.com *)
@@ -81,7 +82,7 @@ let from_email =
   ; "HappyCrow"               (* Francois Berenger <berenger@riken.jp> *)
   ; "alexanderkyte"           (* alex kyte <alexanderkyte@gmail.com> *)
   ; "genos"                   (* Graham Enos <graham.enos@gmail.com> *)
-  
+
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
   ; "joelpob"                 (* ma2bd@laposte.net *)
@@ -90,7 +91,7 @@ let from_email =
   ; "paulcavallaro"           (* paulcavallaro@gmail.com *)
 
   (* Simcorp people *)
-  ; "jfrydendall" 
+  ; "jfrydendall"
   ; "hvitved"
   ; "kss-simcorp"
   ; "anders-schack"
