@@ -26,7 +26,7 @@ let get_definition_from_json json =
 
 (* Execute the DuckDuckGo search *)
 let get_definition ~hostname word =
-  Cohttp_async.Client.call `GET (query_uri ~hostname word)
+  Cohttp_async.Client.get (query_uri ~hostname word)
   >>= function
   | None | Some (_, None) -> return (word, None)
   | Some (_, Some body) ->
