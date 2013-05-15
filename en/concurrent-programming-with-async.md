@@ -763,17 +763,22 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996."
 
 ## Exception handling
 
-When programming with external resources, errors are everywhere: your
-connection might be refused, you can run out of file descriptors, your
-connection might get dropped by the server on the other side, and so
-on.  Some of these errors show up explicitly in the return type of a
-function, and sometimes they show up as exceptions.
+When programming with external resources, errors are everywhere:
+everything from a flaky server to a network outage to exhausting of
+local resources can lead to a run-time error.  When programming in
+OCaml, some of these errors will show up explicitly in a function's
+return type, and of them will show up as exceptions.  We covered
+exception handling in OCaml in [xref](#exceptions), but as we'll see,
+exception handling in a concurrent program presents some new
+challenges.
 
-Let's get a better sense of how exceptions work in Async by creating a
-computation that (sometimes) fails with an exception.  The function
-`maybe_raise` below blocks for .5 seconds, and then either throws an
-exception or returns unit, alternating between success and failure on
-each call.
+Let's get a better sense of how exceptions work in Async by creating
+an asynchronous computation that (sometimes) fails with an exception.
+The function `maybe_raise` below blocks for half a second, and then
+either throws an exception or returns unit, alternating between the
+two behaviors on subsequent calls.  The waiting will be done using the
+function `after` which takes a time span and returns a deferred which
+becomes determined after that time span elapses.
 
 ```ocaml
 # let maybe_raise =
@@ -799,17 +804,13 @@ Exception:
      (someone_is_listening false) (kill_index 0)))))).
 ```
 
-In the above we use the function `after` which takes a time span and
-returns a deferred which becomes determined after that time span
-elapses.
-
 In utop, the exception thrown by `maybe_raise ()` terminates the
 evaluation of just that expression, but in a stand-alone program, an
 uncaught exception would bring down the entire process.
 
-How would we go about capturing and handling such an exception?  As
-you can see below, OCaml's built-in `try/with` statement doesn't
-really do the job.
+So, how could we capture and handle such an exception?  You might try
+to do this using OCaml's built-in `try/with` statement, but as you can
+see below, that doesn't quite do the trick.
 
 ```ocaml
 # let handle_error () =
