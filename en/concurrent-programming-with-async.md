@@ -70,8 +70,8 @@ signature of the Async equivalent of `In_channel.read_all`.
 ```
 
 Note that we opened `Async.Std`, which adds a number of new
-identifiers and modules into our namespace that make using Async more
-convenient.  Opening `Async.Std` is standard practice for writing
+identifiers and modules into our environment that make using Async
+more convenient.  Opening `Async.Std` is standard practice for writing
 programs using Async, much like opening `Core.Std` is for using Core.
 
 A deferred is essentially a handle to a value that may be computed in
@@ -115,7 +115,9 @@ let's consider the type-signature of bind.
 Thus, `Deferred.bind d f` takes a deferred value `d` and a function f
 that is to be run with value of `d` once it's determined.  The call to
 `Deferred.bind` returns a new deferred that becomes determined when
-the deferred returned by `f` is determined.
+the deferred returned by `f` is determined.  It also implicitly
+registers with the scheduler an _Async job_ that is responsible for
+running `f` once `d` is determined.
 
 Here's a simple use of bind for a function that replaces a file with
 an uppercase version of its contents.
@@ -328,7 +330,7 @@ It repeats whatever I write.
 It repeats whatever I write.
 ```
 
-<note><title>Functions that never return</title>
+<note> <title>Functions that never return</title>
 
 You might wonder what's going on with the call to `never_returns`
 above.  `never_returns` is an idiom that comes from `Core` that is
@@ -557,8 +559,8 @@ across the World Wide Web.  These are actually part of a more general
 family known as Uniform Resource Identifiers (URIs). The full URI
 specification is defined in
 [RFC3986](http://tools.ietf.org/html/rfc3986), and is rather
-complicated.  Luckily, the `ocaml-uri` library provides a
-strongly-typed interface which takes care of much of the hassle.
+complicated.  Luckily, the `uri` library provides a strongly-typed
+interface which takes care of much of the hassle.
 
 We'll need a function for generating the URI's that we're going to use
 to query the DuckDuckGo servers.
@@ -579,47 +581,20 @@ query parameter `q` is added with the desired search query.  The
 library takes care of encoding the URI correctly when outputting it in
 the network protocol.
 
-Note that the URI manipulation functions are all pure functions which
-return a new URI value, and never modify the input.  This makes it
-easier to pass around URI values through your application stack
-without fear of modification.
-
 ### Parsing JSON strings
 
 The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
-[RFC4627](http://www.ietf.org/rfc/rfc4627.txt).  There are quite a few
-JSON parsers available for OCaml, and we've picked
-[`Yojson`](http://mjambon.com/yojson.html) for this example.
+[RFC4627](http://www.ietf.org/rfc/rfc4627.txt).  We'll parse the JSON
+data using the Yojson library, which we already introduced in
+[xref](parsing-json-with-yojson).
 
-There are a few non-standard extensions to JSON, so Yojson exposes
-them as the `Basic` and `Safe` sub-modules.  It doesn't really matter
-which one we pick for this simple example, so we'll go with `Safe`.
-
-The input `string` is parsed using `Yojson.Safe.from_string` into an
-OCaml data type. The JSON values are represented using polymorphic
-variants, and can thus be pattern matched more easily once they have
-been parsed by Yojson.
-
-```ocaml
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Int of int
-  | `List of json list
-  | `Null
-  | `String of string
-  | `Tuple of json list
-]
-```ocaml
-
-We're expecting the DuckDuckGo response to be a record, with an
-optional `Description` field being one of the keys in the record.  The
-`get_definition_from_json` does a pattern match on this, and returns
-an optional string if a definition is found within the result.  The
-description field sometimes contains an empty string, which we
-explicitly recognize as a null response in our code.
+We expect the response from DuckDuckGo to come across as a JSON
+record, which is represented by the ` ``Assoc` tag in Yojson's JSON
+variant.  We expect the definition itself to come across under either
+the key "Abstract" or "Definition", and so the code below looks under
+both keys, returning the first one for which a non-empty value is
+defined.
 
 ```ocaml
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
@@ -638,58 +613,47 @@ let get_definition_from_json json =
     end
   | _ -> None
 ```
-
-Note that we check two different fields, `Abstract` and `Definition`,
-since DuckDuckGo sometimes puts the definition in one location and
-sometimes in the other.
-
 ### Executing an HTTP client query
 
-Now that we've written those utility functions, let's look at the code
-for dispatching the search queries over HTTP.
+Now let's look at the code for dispatching the search queries over
+HTTP, using the Cohttp library.
 
 ```ocaml
 (* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.call `GET (query_uri word)
-  >>= function
-  | None | Some (_, None) -> return (word, None)
-  | Some (_, Some body) ->
-    Pipe.to_list body >>| fun strings ->
-    (word, get_definition_from_json (String.concat strings))
+  Cohttp_async.Client.get (query_uri word)
+  >>= fun (_, body) ->
+  Pipe.to_list body
+  >>| fun strings ->
+  (word, get_definition_from_json (String.concat strings))
 ```
 
-The `Cohttp.Client` module executes the HTTP call, and returns a
-deferred status and response.  To better understand what's going on,
-it's useful to look at the type for `Cohttp_async.Client.call`, which
-we can do in utop.
+To better understand what's going on, it's useful to look at the type
+for `Cohttp_async.Client.get`, which we can do in utop.
 
 ```ocaml
 # #require "cohttp.async";;
-# Cohttp_async.Client.call;;
-- : ?headers:Cohttp.Header.t ->
-    ?body:string Pipe.Reader.t ->
-    Cohttp.Code.meth ->
-    Uri.t ->
-    (Cohttp_async.Response.t * string Pipe.Reader.t option) option Deferred.t
+# Cohttp_async.Client.get;;
+- : ?interrupt:unit Deferred.t ->
+    ?headers:Cohttp.Header.t ->
+    Uri.t -> (Cohttp.Response.r * Cohttp_async.body) Deferred.t
 = <fun>
 ```
 
-`call` has two required arguments; the method (` ``GET`, in this
-case), and the URI.  An optional deferred value is returned,
-containing a `Cohttp_async.Response.t` (which we ignore) and an
-optional pipe reader which will receive the stream of strings which
-the Cohttp client writes the incoming data to.
+The `get` call takes as a required argument a URI, and returns a
+deferred value is returned, containing a `Cohttp.Response.t` (which we
+ignore) and a pipe reader to which the body of the request will be
+written to as it is received.
 
-In this case, the HTTP body probably isn't very large, so we just call
-`Pipe.to_list` to collect all the output of the pipe and returns those
-elements as a deferred list.  We then join that list into a string
-using `String.concat` and pass it through our JSON parser to extract
-the definitions.
+In this case, the HTTP body probably isn't very large, so we call
+`Pipe.to_list` to collect the strings from the pipe as a single
+deferred list of strings.  We then join those strings using
+`String.concat` and pass the result through our parsing function.
 
 Running a single search isn't that interesting from a concurrency
 perspective, so let's write code for dispatching multiple searches in
-parallel.  First, we need code for printing out a result.
+parallel.  First, we need code for formatting and printing out the
+search result.
 
 ```ocaml
 (* Print out a word/definition pair *)
@@ -704,15 +668,18 @@ let print_result (word,definition) =
         (Wrapper.wrap (Wrapper.make 70) def))
 ```
 
-We use the `Wrapper` module that comes from the `textwrap` package to
-do the line-wrapping.  `print_result` doesn't look like it uses Async,
-but it does: the version of `printf` that's called here is actually
-Async's wrapping of `printf` that goes through the Async scheduler
-rather than immediately printing to standard out.  The shadowing of
-the original definition of `printf` is done when you open `Async.Std`.
+We use the `Wrapper` module from the `textwrap` package to do the
+line-wrapping.  It may not be obvious that this routine is using
+Async, but it does: the version of `printf` that's called here is
+actually Async's specialized `printf` that goes through the Async
+scheduler rather than printing directly.  The original definition of
+`printf` is shadowed by this ne one when you open `Async.Std`.  An
+important side effect of this is that if you write an Async program
+and forget to start the scheduler, calls like `printf` won't actually
+generate any output!
 
-Next we need to dispatch the searches in parallel, wait for the
-results, and print out what we find.  
+The next function dispatches the searches in parallel, waits for the
+results, and then prints.
 
 ```ocaml
 (* Run many searches in parallel, printing out the results after they're all
@@ -736,8 +703,8 @@ Note that the list returned by `Deferred.all` reflects the order of
 the deferreds passed to it.  As such, the definitions will be printed
 out in the same order that the search wrods are passed in, no matter
 what orders the queries return in.  We could rewrite this code to
-print out the results as they're received and thus potentially out of
-order:
+print out the results as they're received (and thus potentially out of
+order) as follows.
 
 ```ocaml
 (* Run many searches in parallel, printing out the results as you go *)
@@ -749,14 +716,17 @@ let search_and_print words =
 The difference is that we both dispatch the query and print out the
 result in the closure passed to `map`, rather than waiting for all of
 the results to get back and then printing them out together.  We use
-`Deferred.all_unit` to wait for the results, which has this signature:
+`Deferred.all_unit`, which takes a list of `unit` deferreds and
+returns a single `unit` deferred that becomes determined when every
+deferred on the input list is determined.  We can see the type of this
+function in utop.
 
 ```ocaml
 # Deferred.all_unit;;
 - : unit Deferred.t list -> unit Deferred.t = <fun>
 ```
 
-Finally, we need to create a command line interface, again using
+Finally, we create a command line interface using
 `Command.async_basic`.
 
 ```ocaml
@@ -771,7 +741,7 @@ let () =
   |> Command.run
 ```
 
-And once we build this, we'll have a simple but usable definition
+And that's all we need to create a simple but usable definition
 searcher.
 
 ```
@@ -797,19 +767,13 @@ When programming with external resources, errors are everywhere: your
 connection might be refused, you can run out of file descriptors, your
 connection might get dropped by the server on the other side, and so
 on.  Some of these errors show up explicitly in the return type of a
-function, but errors are pervasive enough in concurrent programming
-that representing them explicitly everywhere is of limited usefulness.
-Instead, much of the time, such errors come through as exceptions.  In
-this section we'll describe Async's mechanisms for handling
-exceptions.
+function, and sometimes they show up as exceptions.
 
 Let's get a better sense of how exceptions work in Async by creating a
-computation that sometimes fails with an exception.  The following
-example blocks for a while, (using the `after` function, which takes a
-time-span and returns a deferred that will become determined after
-that time span is elapsed), and then either throws an exception or
-returns unit.  More precisely, it alternates between failing and
-succeeding, as you can see below.
+computation that (sometimes) fails with an exception.  The function
+`maybe_raise` below blocks for .5 seconds, and then either throws an
+exception or returns unit, alternating between success and failure on
+each call.
 
 ```ocaml
 # let maybe_raise =
@@ -835,12 +799,17 @@ Exception:
      (someone_is_listening false) (kill_index 0)))))).
 ```
 
-In utop, an exception just terminates the expression you're
-evaluating, but in a stand-alone program, an uncaught exception would
-bring down the entire process.
+In the above we use the function `after` which takes a time span and
+returns a deferred which becomes determined after that time span
+elapses.
 
-Note that OCaml's built-in `try/with` statement isn't enough to catch
-errors from such process, as you can see below.
+In utop, the exception thrown by `maybe_raise ()` terminates the
+evaluation of just that expression, but in a stand-alone program, an
+uncaught exception would bring down the entire process.
+
+How would we go about capturing and handling such an exception?  As
+you can see below, OCaml's built-in `try/with` statement doesn't
+really do the job.
 
 ```ocaml
 # let handle_error () =
@@ -863,11 +832,11 @@ Exception:
      (someone_is_listening false) (kill_index 0)))))).
 ```
 
-This didn't work because the `try/with` only captures exceptions that
-are thrown in the code directly executed within it; but `maybe_raise`
-schedules a job to run in the future, and it's that job that throws an
-exception.  Such exceptions can be caught using the `try_with`
-function provided by Async, as shown below.
+This didn't work because `try/with` only captures exceptions that are
+thrown in the code directly executed within it; but `maybe_raise`
+schedules an Async job to run in the future, and it's that job that
+throws an exception.  To deal with this issue, Async provides its own
+`try_with` function, which we use below.
 
 ```ocaml
 # let handle_error () =
@@ -888,24 +857,26 @@ a deferred that becomes determined either as `Ok` of whatever `f`
 returned, or `Error exn` if `f` threw an exception before its return
 value became determined.
 
-In order to better understand how this actually works, you need to
-understand Async's system of monitors, which are at the heart of its
-exception handling strategy.
-
 ### Monitors
 
-A monitor is a context that determines what to do when there is an
-unhandled exception.  Every Async computation runs within the context
-of some monitor, which, when the computation is running, is referred
-to as the current monitor.  When a new async job is scheduled, say,
-using `bind` or `map`, it inherits the current monitor of the job that
-spawned it.
+`try_with` is quite convenient and is good and broadly applicable tool
+for handling exceptions in Async, but it's not the whole story.  All
+of Async's exception-handling mechanisms are built on top of Async's
+system of _monitors_, which is broadly inspired by Erlang's monitors.
+Monitors are a low-level mechanism that is rarely used directly, but
+it's nonetheless worth understanding how it works.
+
+In Async, a monitor is a context that determines what to do when there
+is an unhandled exception.  Every Async job runs within the context of
+some monitor, which, when the job is running, is referred to as the
+current monitor.  When a new Async job is scheduled, say, using `bind`
+or `map`, it inherits the current monitor of the job that spawned it.
 
 Monitors are arranged in a tree -- when a new monitor is created (say,
 using `Monitor.create`) it is a child of the current monitor.  You can
-then run jobs within this new monitor using the `within` call (which
-expects a function that returns unit) or `within'` (which expects a
-function that returns a deferred).  Here's an example.
+explicitly run jobs within a monitor using `within`, which takes a
+thunk that returns a non-deferred value, or `within'`, which takes a
+thunk that returns a deferred.  Here's an example.
 
 ```ocaml
 # let blow_up () =
@@ -928,17 +899,20 @@ Exception:
      (someone_is_listening false) (kill_index 0)))))).
 ```
 
-As you can see, in addition to the ordinary stack-trace, the exception
-displays the trace of monitors through which the exception traveled,
-starting at the one we created, called "blow up monitor".  In this
-case, the other monitors come from utop's special handling of deferred
-computations.
+In addition to the ordinary stack-trace, the exception displays the
+trace of monitors through which the exception traveled, starting at
+the one we created, called "blow up monitor".  The other monitors you
+see come from utop's special handling of deferreds.
 
-But monitors can do more than just augment the error-trace of an
-exception.  You can also explicitly handle the errors in a monitor.
-In particular, the `Monitor.errors` call returns the stream of errors
-handled by that monitor.  Here, for example, is a function that
-captures and ignores errors in the processes it spawns.
+Monitors can do more than just augment the error-trace of an
+exception.  You can also use a monitor to explicitly handle errors
+delivered to that monitor.  The `Monitor.errors` call is a
+particularly important one.  It detaches the monitor from its parent,
+handing back the stream of errors that would otherwise have been
+delivered to the parent monitor.  This allows one to do custom
+handling of errors, which may include re-raising errors to the parent.
+Here is a very simple example of function that captures and ignores
+errors in the processes it spawns.
 
 ```ocaml
 # let swallow_error () =
@@ -953,20 +927,76 @@ val swallow_error : unit -> 'a Deferred.t = <fun>
 an error happened
 ```
 
-If you run this, you'll see that the error message gets printed out,
-but `swallow_error`, but utop blocks out because the deferred returned
-by `swallow_error` never gets determined, which makes sense, because
-the calculation never actually completes, so there's no value to
-return.  You can break out of this by hitting `Control-C`.
+The message "an error happened" is printed out, but the deferred
+returned by `swallow_error` is never determined.  This makes sense,
+since the calculation never actually completes, so there's no value to
+return.  You can break out of this in utop by hitting `Control-C`.
 
-All of this should highlight the fact that monitors are a fairly
-low-level error-handling tool.  They're powerful, and give you full
-control of how errors are handled, but you're typically better off
-using higher-level abstractions built on top of monitors like
-`try_with`.
+Here's an example of a monitor which passes some exceptions through to
+the parent, and handles others.  Exceptions are sent to the parent
+using `Monitor.send_exn`, with `Monitor.current` being called to find
+the current monitor, which is the parent of the newly created monitor.
 
+```ocaml
+# exception Ignore_me;;
+exception Ignore_me
+# let swallow_some_errors exn_to_raise =
+    let monitor = Monitor.create  () in
+    let parent  = Monitor.current () in
+    Stream.iter (Monitor.errors monitor) ~f:(fun error ->
+      match Monitor.extract_exn error with
+      | Ignore_me -> printf "ignoring exn\n"
+      | _ -> Monitor.send_exn parent error);
+    within' ~monitor (fun () ->
+       after (Time.Span.of_sec 0.5)
+       >>= fun () -> raise exn_to_raise)
+  ;;
+val swallow_some_errors : exn -> 'a Deferred.t = <fun>
+```
 
-### Example: Handling exceptions in our definition search
+Note that we use `Monitor.extract_exn` to grab the underlying
+exception that was thrown for matching purposes.  Async wraps its
+exception with extra information, including the monitor trace.
+
+If we pass in an exception other than `Ignore_me`, like, say, the
+built-in exception `Not_found`, then the exception will be passed to
+the parent monitor and delivered as usual.
+
+```ocaml
+# swallow_some_errors Not_found;;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Not_found) (backtrace (""))
+  (monitor
+   (((name (id 3)) (here ()) (id 3) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name block_on_async) (here ()) (id 2) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
+```
+
+If instead we use `Ignore_me`, the exception will be ignored, and we
+again see that the deferred never returns, but the exception was
+caught and ignored.
+
+```ocaml
+# swallow_some_errors Ignore_me;;
+ignoring exn
+```
+
+The above examples are artificial and incomplete.  In practice, most
+of the time you should avoid direct use of monitors and instead use
+some of the primitives like `Monitor.try_with` and `Monitor.protect`
+that are built on top of monitors, as is the built-in error handling
+for functions like `Tcp.Server.create`.  In the latter case, an
+exception when reading or writing to the open network connection or
+one thrown by the client-handling code will cause the connection to be
+closed.  In other cases, one might want to automatically retry a
+failed computation.  It is for building this kind of custom error
+handling that monitors can be helpful.
+
+### Example: Handling exceptions with DuckDuckGo
 
 Let's consider error handling for the definition search code that we
 wrote earlier in the chapter.  In particular, lets catch errors so
@@ -1161,11 +1191,3 @@ One problem with the above code is that the HTTP query kicked off by
 such, `get_definition_with_timeout` essentially leaks an open
 connection.
 
-## Example: Building a message broker
-
-Now that we've learned the basics of working with Async, let's walk
-through a small but non-trivial application.  The particular
-application we'll pick is a message broker.
-
-The message broker provides a simple publish/subscribe API.  Clients
-can publish a value under a given topic, or subscribe to a stream
