@@ -140,7 +140,7 @@ values can be compared as well.
 ```ocaml
 # Map.equal String.equal m1 m2;;
 - : bool = true
-</note>
+```
 
 Now, let's try to do a polymorphic comparison, using the `=` operator.
 Note that comparing the maps directly will fail at runtime because of
