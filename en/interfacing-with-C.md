@@ -757,8 +757,8 @@ Macro                   OCaml Type         C type
 Building OCaml values to return from C is a little more involved, since we
 must ensure that any OCaml allocations aren't immediately cleaned up by the
 garbage collector before they have been registered as live values.  Luckily,
-OCaml provides some more macros to ease this.  Let's extend our earlier
-example to return a tuple of integers instead of just the result.
+OCaml provides some more macros to make this easier to enforce. 
+Let's extend our earlier example to return a tuple of integers instead of just the result.
 
 ```ocaml
 external add_numbers: int -> int -> int * int * int32 = "caml_add_numbers"
@@ -768,7 +768,10 @@ let () =
 ```
 
 The `add_numbers` external now returns a more complex data type that requires
-allocating an OCaml value from within the C binding.
+allocating an OCaml tuple from within the C binding, storing the results within
+the tuple, and returning that tuple.  The contents of the tuple are also a mix
+of immediate values (the two first `int` fields in the tuple) and the last boxed `int32`
+that also needs to be allocated on the OCaml heap.
 
 ```c
 #include <stdio.h>
@@ -784,12 +787,58 @@ caml_add_numbers(value v_arg1, value v_arg2)
   int v2 = Int_val(v_arg2);
   printf("From C:     %d+%d=%d\n", v1, v2, (v1+v2));
   v_res = caml_alloc_tuple(3);
-  Field(v_res, 0) = Val_int(v1);
-  Field(v_res, 1) = Val_int(v2);
-  Field(v_res, 2) = caml_copy_int32(v1 + v2);
+  Store_field(v_res, 0, Val_int(v1));
+  Store_field(v_res, 1, Val_int(v2));
+  Store_field(v_res, 2, caml_copy_int32(v1 + v2));
   CAMLreturn(v_res);
 }
 ```
+
+The stub now uses several new macros that are all defined in `caml/memory.h`.  The `CAMLparam` macro registers its parameters as _local roots_ with the garbage collector.  This ensures that if the garbage collector is triggered during the C binding, it will not relocate or free the value we just allocated.
+We also need to allocate a tuple to store the result.  This is declared with the `CAMLlocal` macro, and returned via `CAMLreturn`.  For  many simple bindings, you can just follow the simple rule of replacing the C `return` with `CAMLreturn` and starting every function with `CAMLparam` and `CAMLlocal`, and not have to worry about the garbage collector.
+
+<note>
+<title>FFI rule: Use `CAMLparam` and `CAMLreturn` for OCaml values</title>
+A function that has parameters or local variables of type value must begin with a call to one of the `CAMLparam` macros and return with `CAMLreturn`, `CAMLreturn0`, or `CAMLreturnT`. Local variables of type `value` must be declared with one of the `CAMLlocal` macros. Arrays of values are declared with `CAMLlocalN`. These macros must be used at the beginning of the function, not in a nested block.
+</note>
+
+The tuple is then allocated via `caml_alloc_tuple`, with the number of fields representing the size of the tuple.  This must _immediately_ be followed by the `Store_field` macros to set the newly allocated tuple to sensible values.  In our example, we assign the first two fields to the local integers.  The `int32` requires another allocation, and  `caml_copy_int32` is used which copies a C `int32` into the correspondig OCaml `value`.  Once the tuple has been set, the function returns via `CAMLreturn`, which frees up the local roots that we registered at the beginning of the function.
+
+<note>
+<title>FFI rule: Use `Store_field` to assign to tuples, records and arrays</title>
+Assignments to the fields of structured blocks must be done with the `Store_field` macro (for normal blocks) or `Store_double_field` macro (for arrays and records of floating-point numbers). Other assignments must not use `Store_field` nor `Store_double_field`.
+</note>
+
+The `caml/alloc.h` header file lists all of the functions that allocate OCaml values.
+
+Function name                       Argument                          OCaml return type
+-------------                       --------                          -----------------
+`caml_alloc_tuple (<len>)`          Number of fields                  Tuple or record
+`caml_alloc_string (<len>)`         Size in bytes                     `string`
+`caml_copy_string (char *)          Pointer to a C string             `string`
+`caml_copy_string_array (char **)`  Pointer to array of C strings     `string array`
+`caml_copy_double (double)`         C `double` value                  `double`
+`caml_copy_int32 (int32)`           32-bit C integer                  `int32`
+`caml_copy_int64 (int64);           64-bit C integer                  `int64`
+`caml_copy_nativeint (intnat);      native C integer size (`long`)    `Nativeint.t`
+
+Tuples and records both have the same memory representation, with the same tag value (`0`).  This means that you can change how you map these fields into OCaml, without having to modify the C bindings. For example, our earlier integer addition example can also look like this:
+
+```ocaml
+type t = {
+  v1: int;
+  v2: int;
+  res: int32;
+}
+ 
+external add_numbers: int -> int -> t = "caml_add_numbers"
+
+let () = 
+  let v = add_numbers 10 15 in
+  Printf.printf "From OCaml: %d+%d=%ld\n" v.v1 v.v2 v.res
+```
+
+Records are never rearranged in memory, so the fields will appear in the same order they are declared. 
 
 <note>
 <title>Faster bindings for zero-allocation functions</title>
