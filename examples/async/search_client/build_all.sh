@@ -8,4 +8,5 @@
    search_with_configurable_server.native \
    search_with_timeout.native \
    search_with_timeout_choice.native \
+   search_with_timeout_no_leak.native \
     

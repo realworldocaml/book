@@ -21,11 +21,10 @@ let get_definition_from_json json =
 let get_definition ~timeout word =
   let get =
     Cohttp.Client.call `GET (query_uri word)
-    >>= function
-    | None | Some (_, None) -> return (Or_error.error_string "Empty reply")
-    | Some (_, Some body) ->
-      Pipe.to_list body >>| fun strings ->
-      get_definition_from_json (String.concat strings)
+    >>= fun (_, body) ->
+    Pipe.to_list body
+    >>| fun strings ->
+    get_definition_from_json (String.concat strings)
   in
   match timeout with
   | None -> get

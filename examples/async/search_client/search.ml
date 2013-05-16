@@ -24,12 +24,11 @@ let get_definition_from_json json =
 
 (* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.call `GET (query_uri word)
-  >>= function
-  | None | Some (_, None) -> return (word, None)
-  | Some (_, Some body) ->
-    Pipe.to_list body >>| fun strings ->
-    (word, get_definition_from_json (String.concat strings))
+  Cohttp_async.Client.get (query_uri word)
+  >>= fun (_, body) ->
+  Pipe.to_list body
+  >>| fun strings ->
+  (word, get_definition_from_json (String.concat strings))
 
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
@@ -51,7 +50,7 @@ let search_and_print words =
 
 let () =
   Command.async_basic
-    ~summary:"Retrieve definitions from duckduckgo search engine"
+    ~summary:"Retrieve definitions from DuckDuckGo search engine"
     Command.Spec.(
       empty
       +> anon (sequence ("word" %: string))
