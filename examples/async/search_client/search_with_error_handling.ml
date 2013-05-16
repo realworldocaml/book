@@ -28,14 +28,13 @@ let get_definition_from_json json =
 let get_definition ~server word =
   try_with (fun () ->
     Cohttp_async.Client.get (query_uri ~server word)
-    >>= fun (_, body) ->
+    >>= fun  (_, body) ->
     Pipe.to_list body
     >>| fun strings ->
     (word, get_definition_from_json (String.concat strings)))
   >>| function
   | Ok (word,result) -> (word, Ok result)
   | Error exn        -> (word, Error exn)
-
 
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
@@ -51,8 +50,11 @@ let print_result (word,definition) =
 
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
-let search_and_print ~server words =
-  Deferred.all (List.map ~f:(get_definition ~server) words)
+let search_and_print ~servers words =
+  let servers = Array.of_list servers in
+  Deferred.all (List.mapi words ~f:(fun i word ->
+    let server = servers.(i mod Array.length servers) in
+    get_definition ~server word))
   >>| fun results ->
   List.iter results ~f:print_result
 
@@ -60,10 +62,12 @@ let () =
   Command.async_basic
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
+      let string_list = Arg_type.create (String.split ~on:',') in
       empty
       +> anon (sequence ("word" %: string))
-      +> flag "-server" (optional_with_default "api.duckduckgo.com" string)
+      +> flag "-servers"
+           (optional_with_default ["api.duckduckgo.com"] string_list)
            ~doc:" Specify server to connect to"
     )
-    (fun words server () -> search_and_print ~server words)
+    (fun words servers () -> search_and_print ~servers words)
   |> Command.run
