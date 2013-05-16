@@ -38,6 +38,7 @@
 
 
 
+
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -5528,8 +5529,8 @@ opam switch 4.01.0dev+trunk
 </programlisting>
   <para>
     Once you make the switch, you'll need to install the packages you
-    need. Note that once your packages are installed, you can quickly
-    switch back and forth between compilers with no extra work.
+    need. Note that switching back and forth between different compilers
+    and their packages is a fast operation after the initial build.
   </para>
   </note>
   <para>
@@ -5564,6 +5565,7 @@ type &lt;record-name&gt; =
       os_name    : string;
       os_release : string;
       cpu_arch   : string;
+      timestamp  : Time.t;
     };;
 </programlisting>
   <para>
@@ -5571,7 +5573,8 @@ type &lt;record-name&gt; =
     following code uses the <literal>Shell</literal> module from
     <literal>Core_extended</literal> to dispatch commands to the shell
     to extract the information we need about the computer we're running
-    on.
+    on, and the <literal>Time.now</literal> call from Core's
+    <literal>Time</literal> module.
   </para>
   <programlisting language="ocaml">
 # open Core_extended.Std;;
@@ -5581,19 +5584,19 @@ type &lt;record-name&gt; =
       os_name    = sh &quot;uname -s&quot;;
       os_release = sh &quot;uname -r&quot;;
       cpu_arch   = sh &quot;uname -p&quot;;
+      timestamp  = Time.now ();
     };;
 val my_host : host_info =
-  {hostname = &quot;Yarons-MacBook-Air.local&quot;; os_name = &quot;Darwin&quot;;
-   os_release = &quot;11.4.0&quot;; cpu_arch = &quot;i386&quot;}
+  {hostname = &quot;yevaud.local&quot;; os_name = &quot;Darwin&quot;; os_release = &quot;12.3.0&quot;;
+   cpu_arch = &quot;i386&quot;; timestamp = 2013-04-13 06:39:17.806527}
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
     <literal>my_host</literal> is of type <literal>host_info</literal>.
     The hook that the compiler uses in this case to figure out the type
-    is the record field names. It turns out that, within a given scope,
-    each record field name is associated with a unique record type.
-    Later in the chapter, we'll talk about what to do when you want to
-    have the same record fields in multiple records.
+    is the record field name. Later in the chapter, we'll talk about
+    what happens when there is more than one record type in scope with
+    the same field name.
   </para>
   <para>
     Once we have a record value in hand, we can extract elements from
@@ -5612,21 +5615,24 @@ val my_host : host_info =
     </para>
     <programlisting language="ocaml">
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c } =
-       sprintf &quot;%s (%s %s / %s)&quot; h os r c;;
+                            os_release = r; cpu_arch = c;
+                            timestamp = ts;
+                          } =
+       sprintf &quot;%s (%s %s / %s, on %s)&quot; h os r c (Time.to_sec_string ts);;
     val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 # host_info_to_string my_host;;
-- : string = &quot;Yarons-MacBook-Air.local (Darwin 11.4.0 / i386)&quot;
+- : string = &quot;yevaud.local (Darwin 12.3.0 / i386, on 2013-04-13 06:39:17)&quot;
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
       than using several cases separated by <literal>|</literal>s. We
-      only needed a single pattern because record patterns are
-      <emphasis>irrefutable</emphasis>, meaning that, because the layout
-      of a record is always the same, a record pattern match will never
-      fail at runtime. In general, types with a fixed structure, like
-      records and tuples, have irrefutable patterns, whereas types with
-      variable structure, like lists and variants, do not.
+      needed only one pattern because record patterns are
+      <emphasis>irrefutable</emphasis>, meaning that a record pattern
+      match will never fail at runtime. This makes sense, because the
+      set of fields available in a record is always the same. In
+      general, patterns for types with a fixed structure, like records
+      and tuples, are irrefutable, unlike types with variable structure
+      like lists and variants.
     </para>
     <para>
       Another important characteristic of record patterns is that they
@@ -5648,15 +5654,16 @@ val my_host : host_info =
       os_release : string;
       cpu_arch   : string;
       os_version : string;
-    };;
+      timestamp  : Time.t;
+    } ;;
 </programlisting>
     <para>
       The code for <literal>host_info_to_string</literal> would continue
       to compile without change. In this particular case, it's pretty
       clear that you might want to update
-      <literal>host_info_to_string</literal> in order to take into
-      account the new field, and it would be nice if the type system
-      would give you a warning about the change.
+      <literal>host_info_to_string</literal> in order to include
+      <literal>os_version</literal>, and it would be nice if the type
+      system would give you a warning about the change.
     </para>
     <para>
       Happily, OCaml does offer an optional warning for missing fields
@@ -5666,17 +5673,17 @@ val my_host : host_info =
       warn about the missing field.
     </para>
     <programlisting language="ocaml">
-# warnings &quot;+9&quot;;;
+# #warnings &quot;+9&quot;;;
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c } =
-       sprintf &quot;%s (%s %s / %s)&quot; h os r c;;
-    Characters 24-112:
-  ........................{ hostname = h; os_name = os;
-                              os_release = r; cpu_arch = c }..
+                            os_release = r; cpu_arch = c;
+                            timestamp = ts;
+                          } =
+    sprintf &quot;%s (%s %s / %s, on %s)&quot; h os r c (Time.to_sec_string ts);;
+Characters 24-183:
+val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 Warning 9: the following labels are not bound in this record pattern:
 os_version
 Either bind these labels explicitly or add '; _' to the pattern.
-val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
       We can disable the warning for a given pattern by explicitly
@@ -5685,14 +5692,16 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c; _ } =
-       sprintf &quot;%s (%s %s / %s)&quot; h os r c;;
-    val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
+                            os_release = r; cpu_arch = c;
+                            timestamp = ts; _
+                          } =
+    sprintf &quot;%s (%s %s / %s, on %s)&quot; h os r c (Time.to_sec_string ts);;
+val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
-      Generally, the right default is to turn the warning for incomplete
-      record matches on, and to explicitly disable it with an
-      <literal>_</literal> where necessary.
+      It's a good idea to enable the warning for incomplete record
+      matches, and to explicitly disable it with an <literal>_</literal>
+      where necessary.
     </para>
   </sect1>
   <sect1 id="field-punning">
@@ -5721,10 +5730,15 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
     let os_name    = sh &quot;uname -s&quot; in
     let os_release = sh &quot;uname -r&quot; in
     let cpu_arch   = sh &quot;uname -p&quot; in
-    { hostname; os_name; os_release; cpu_arch };;
+    let os_version = sh &quot;Uname -v&quot; in
+    let timestamp  = Time.now () in
+    { hostname; os_name; os_release; cpu_arch; os_version; timestamp };;
 val my_host : host_info =
-  {hostname = &quot;Yarons-MacBook-Air.local&quot;; os_name = &quot;Darwin&quot;;
-   os_release = &quot;11.4.0&quot;; cpu_arch = &quot;i386&quot;}
+  {hostname = &quot;yevaud.local&quot;; os_name = &quot;Darwin&quot;; os_release = &quot;12.3.0&quot;;
+   cpu_arch = &quot;i386&quot;;
+   os_version =
+    &quot;Darwin Kernel Version 12.3.0: Sun Jan  6 22:37:10 PST 2013; root:xnu-2050.22.13~1/RELEASE_X86_64&quot;;
+   timestamp = 2013-04-13 06:49:57.771755}
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -5737,27 +5751,42 @@ val my_host : host_info =
       arguments, as shown below.
     </para>
     <programlisting language="ocaml">
-# let create_host_info ~hostname ~os_name ~os_release ~cpu_arch =
-    let hostname = String.lowercase hostname in
-    { hostname; os_name; os_release; cpu_arch };;
+# let create_host_info ~hostname ~os_name ~os_release ~cpu_arch ~os_version =
+    { os_name; os_release; cpu_arch; os_version;
+      hostname = String.lowercase hostname;
+      timestamp = Time.now () };;
+val create_host_info :
+  hostname:string -&gt;
+  os_name:string -&gt;
+  os_release:string -&gt;
+  cpu_arch:string -&gt; os_version:string -&gt; timestamp:Time.t -&gt; host_info =
+  &lt;fun&gt;
 </programlisting>
     <para>
       This is considerably more concise than what you would get without
       punning at all.
     </para>
     <programlisting language="ocaml">
-let create_host_info ~hostname:hostname ~os_name:os_name
-   ~os_release:os_release ~cpu_arch:cpu_arch =
-    let hostname = String.lowercase hostname in
-    { hostname = hostname ; os_name = os_name;
-      os_release = os_release; cpu_arch = cpu_arch };;
+# let create_host_info
+    ~hostname:hostname ~os_name:os_name ~os_release:os_release
+    ~cpu_arch:cpu_arch ~os_version:os_version =
+    { os_name = os_name; os_release = os_release;
+     cpu_arch = cpu_arch; os_version = os_version;
+      hostname = String.lowercase hostname;
+      timestamp = Time.now () };;
+val create_host_info :
+  hostname:string -&gt;
+  os_name:string -&gt;
+  os_release:string -&gt;
+  cpu_arch:string -&gt; os_version:string -&gt; timestamp:Time.t -&gt; host_info =
+  &lt;fun&gt;
 </programlisting>
     <para>
       Together, labeled arguments, field names, and field and label
       punning, encourage a style where you propagate the same names
       throughout your code-base. This is generally good practice, since
-      it encourages consistent naming, which makes it easier for new
-      people to navigate your source.
+      it encourages consistent naming, which makes it easier to navigate
+      the source.
     </para>
   </sect1>
   <sect1 id="reusing-field-names">
@@ -5765,15 +5794,15 @@ let create_host_info ~hostname:hostname ~os_name:os_name
     <para>
       Defining records with the same field names can be problematic.
       Let's consider a simple example: building types to represent the
-      protocol used for a logging server. The following types represent
-      messages a server might receive from a client.
+      protocol used for a logging server.
     </para>
     <para>
-      Below, the <literal>log_entry</literal> message is used to deliver
-      a log entry to the server for processing. The
-      <literal>logon</literal> message is sent when a client initiates a
-      connection, and includes the identity of the user connecting and
-      credentials used for authentication. Finally, the
+      We'll describe three message types: <literal>log_entry</literal>,
+      <literal>heartbeat</literal> and <literal>logon</literal>. The
+      <literal>log_entry</literal> message is used to deliver a log
+      entry to the server; the <literal>logon</literal> message is sent
+      to initiate a connection, and includes the identity of the user
+      connecting and credentials used for authentication; and the
       <literal>heartbeat</literal> message is periodically sent by the
       client to demonstrate to the server that the client is alive and
       connected. All of these messages include a session id and the time
@@ -5800,73 +5829,63 @@ let create_host_info ~hostname:hostname ~os_name:os_name
 ;;
 </programlisting>
     <para>
-      The fact that we reused field names will cause trouble when we try
-      to construct a message.
+      Reusing field names can lead to some ambiguity. For example, if we
+      want to write a function to grab the session_id from a record,
+      what type will it have?
     </para>
     <programlisting language="ocaml">
-# let create_log_entry ~session_id ~important message =
-     { time = Time.now (); session_id; important; message }
-  ;;
-    Characters 75-129:
-       { time = Time.now (); session_id; important; message }
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The record field label important belongs to the type log_entry
-       but is mixed here with labels of type logon
+# let get_session_id t = t.session_id;;
+val get_session_id : logon -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
-      The problem is that the declaration of <literal>logon</literal>
-      (and <literal>heartbeat</literal>) shadowed some of the fields of
-      <literal>log_entry</literal>. As a result, the fields
-      <literal>time</literal> and <literal>session_id</literal> are
-      assumed to be fields of <literal>logon</literal>, and
-      <literal>important</literal> and <literal>message</literal>, which
-      were not shadowed, are assumed to be fields of
-      <literal>log_entry</literal>. The compiler therefore complains
-      that we're trying to construct a record with fields from two
-      different record types.
-    </para>
-    <para>
-      There are two common solutions to this problem. The first is to
-      add a prefix to each field name to make it unique, as shown below.
+      In this case, OCaml just picks the most recent definition of that
+      record field. We can force OCaml to assume we're dealing with a
+      different type (say, a <literal>heartbeat</literal>) using a type
+      annotation.
     </para>
     <programlisting language="ocaml">
-# type log_entry =
-    { log_entry_session_id: string;
-      log_entry_time: Time.t;
-      log_entry_important: bool;
-      log_entry_message: string;
-    }
-  type heartbeat =
-    { heartbeat_session_id: string;
-      heartbeat_time: Time.t;
-      heartbeat_status_message: string;
-    }
-  type logon =
-    { logon_session_id: string;
-      logon_time: Time.t;
-      logon_user: string;
-      logon_credentials: string;
-    }
-;;
+# let get_heatbeat_session_id (t:heartbeat) = t.session_id;;
+val get_heatbeat_session_id : heartbeat -&gt; string = &lt;funambulate&gt;
 </programlisting>
     <para>
-      This eliminates the collisions and is simple enough to do. But it
-      leaves you with awkwardly named record fields, and adds needless
-      repetition and verbosity to your code.
+      While it's possible to resolve ambiguous field names using type
+      annotations, the ambiguity can be a bit confusing. Consider the
+      following functions for grabbing the session id and status from a
+      heartbeat.
+    </para>
+    <programlisting language="ocaml">
+# let status_and_session t = (t.status_message, t.session_id);;
+val status_and_session : heartbeat -&gt; string * string = &lt;fun&gt;
+# let session_and_status t = (t.session_id, t.status_message);;
+Error: The record type logon has no field status_message
+# let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
+val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
+</programlisting>
+    <para>
+      Why did the first definition succeed without a type annotation and
+      the second one fail? The difference is that in the first case, the
+      type-checker considered the <literal>status_message</literal>
+      field first and thus concluded that the record was a
+      <literal>heartbeat</literal>. When the order was switched, the
+      <literal>session_id</literal> field was considered first, and so
+      that drove the type to be considered to be a
+      <literal>logon</literal>, at which point
+      <literal>t.status_message</literal> no longer made sense.
     </para>
     <para>
-      Another approach is to mint a module for each type. We'll talk
-      more about modules more in
+      We can avoid this ambiguity altogether, either by using
+      non-overlapping field names or, more generally, by minting a
+      module for each type. We'll talk more about modules more in
       <xref linkend="files-modules-and-programs"/>, but for
       now, you can think of a module as a way of collecting values and
       types together in a named package.
     </para>
     <para>
-      Packing types into modules is actually a broadly useful idiom (and
-      one used quite extensively by Core), providing for each type a
-      name-space within which to put related values. When using this
-      style, it is standard practice to name the type associated with
-      the module <literal>t</literal>. Using this style we would write:
+      Packing types into modules is a broadly useful idiom (and one used
+      quite extensively by Core), providing for each type a name-space
+      within which to put related values. When using this style, it is
+      standard practice to name the type associated with the module
+      <literal>t</literal>. Using this style we would write:
     </para>
     <programlisting language="ocaml">
 # module Log_entry = struct
@@ -5929,8 +5948,8 @@ val create_log_entry :
 val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
-      However, when using dot-notation for accessing record fields, you
-      need to specify the module explicitly.
+      When using dot-notation for accessing record fields, we can
+      qualify the field by the module directly:
     </para>
     <programlisting language="ocaml">
 # let is_important t = t.Log_entry.important;;
@@ -6028,6 +6047,7 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
     { t with last_heartbeat_time   = hb.Heartbeat.time;
              last_heartbeat_status = hb.Heartbeat.status_message;
     };;
+val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </programlisting>
   </sect1>
   <sect1 id="mutable-fields">
@@ -6160,18 +6180,42 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
       <literal>Logon.Fields.session_id</literal> is
       <literal>(Logon.t, string) Field.t</literal>, whereas the type of
       <literal>Logon.Fields.time</literal> is
-      <literal>(Logon.t, Time.t) Field.t</literal>. Accordingly, the
-      function <literal>Field.get</literal> has type
+      <literal>(Logon.t, Time.t) Field.t</literal>. Thus, if you call
+      <literal>Field.get</literal> on
+      <literal>Logon.Fields.user</literal>, you'll get a function for
+      extracting the <literal>user</literal> field from a
+      <literal>Logon.t</literal>.
     </para>
     <programlisting language="ocaml">
-('r, 'a) Field.t -&gt; 'r -&gt; 'a
+# Field.get Logon.Fields.user;;
+- : Logon.t -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
-      As you can see, the first parameter of the
-      <literal>Field.t</literal> corresponds to the record you pass to
-      <literal>get</literal>, and the second argument corresponds to the
-      value contained in the field, which is also the return type of
-      <literal>get</literal>.
+      Thus, first parameter of the <literal>Field.t</literal>
+      corresponds to the record you pass to <literal>get</literal>, and
+      the second argument corresponds to the value contained in the
+      field, which is also the return type of <literal>get</literal>.
+    </para>
+    <para>
+      The type of <literal>Field.get</literal> is a little more
+      complicated than you might naively expect from the above, as you
+      can see below.
+    </para>
+    <programlisting language="ocaml">
+# Field.get;;
+- : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;
+</programlisting>
+    <para>
+      The extra type parameter <literal>'b</literal> is there to keep
+      track of permissions on the <literal>Field.t</literal>. As we'll
+      see later when we cover
+    </para>
+    <para>
+      The type is <literal>Field.t_with_perm</literal> rather than a
+      simple <literal>Field.t</literal> because fields have a notion of
+      access control associated with them because there are some special
+      cases where we may expose a field but not expose the ability to
+      read a field but not the ability to do a functional update.
     </para>
     <para>
       We can use first class fields to do things like write a generic
@@ -6179,9 +6223,9 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 # let show_field field to_string record =
-     let name = Field.name field in
-     let field_string = to_string (Field.get field record) in
-     name ^ &quot;: &quot; ^ field_string
+    let name = Field.name field in
+    let field_string = to_string (Field.get field record) in
+    name ^ &quot;: &quot; ^ field_string
   ;;
 val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string = &lt;fun&gt;
 </programlisting>
@@ -8145,867 +8189,6 @@ val find : (string * 'a) list -&gt; string -&gt; ('a, exn) Result.t = &lt;fun&gt
 Exception: Key_not_found(&quot;c&quot;).
 </programlisting>
     </sect2>
-  </sect1>
-</chapter><chapter id="functors">
-  <title>Functors</title>
-  <para>
-    Up until now, we've seen OCaml's module system play an important but
-    limited role. In particular, we've seen them as a mechanism for
-    organizing code into units with specified interfaces. But modules
-    can do much more than that, acting as a powerful toolset for
-    building generic code and structuring large-scale systems. Much of
-    that power comes from functors.
-  </para>
-  <para>
-    Functors are, roughly speaking, functions from modules to modules,
-    and they can be used to solve a variety of code-structuring
-    problems, including:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        <emphasis>Dependency injection</emphasis>, or making the
-        implementations of some components of a system swappable. This
-        is particularly useful when you want to mock up parts of your
-        system for testing and simulation purposes.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis>Auto-extension of modules</emphasis>. Sometimes, there
-        is some functionality that you want to build in a standard way
-        for different types, in each case based on a some piece of
-        type-specific logic. For example, you might want to add a slew
-        of comparison operators derived from a base comparison function.
-        To do this by hand would require a lot of repetitive code for
-        each type, but functors let you write this logic just once and
-        apply it to many different types.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        <emphasis>Instantiating modules with state</emphasis>. Modules
-        can contain mutable state, and that means that you'll
-        occasionally want to have multiple instantiations of a
-        particular module, each with its own separate and independent
-        mutable state. Functors let you automate the construction of
-        such modules.
-      </para>
-    </listitem>
-  </itemizedlist>
-  <sect1 id="a-trivial-example">
-    <title>A trivial example</title>
-    <para>
-      We'll start by considering the simplest possible example: a
-      functor for incrementing an integer.
-    </para>
-    <para>
-      More precisely, we'll create a functor that takes a module
-      containing a single integer variable <literal>x</literal>, and
-      returns a new module with <literal>x</literal> incremented by one.
-    </para>
-    <programlisting language="ocaml">
-# module type X_int = sig val x : int end;;
-module type X_int = sig val x : int end
-# module Increment (M:X_int) : X_int = struct
-    let x = M.x + 1
-  end;;
-module Increment : functor (M : X_int) -&gt; X_int
-</programlisting>
-    <para>
-      One thing that immediately jumps out about functors is that
-      they're considerably more heavyweight syntactically than ordinary
-      functions. For one thing, functors require explicit (module) type
-      annotations, which ordinary functions do not. Here, we've
-      specified the module type <literal>X_int</literal> for both the
-      input and output of the functor. Technically, only the type on the
-      input is mandatory, although in practice, one often specifies
-      both.
-    </para>
-    <para>
-      The following shows what happens when we omit the module type for
-      the output of the functor.
-    </para>
-    <programlisting language="ocaml">
-# module Increment (M:X_int) = struct
-    let x = M.x + 1
-  end;;
-module Increment : functor (M : X_int) -&gt; sig val x : int end
-</programlisting>
-    <para>
-      We can see that the inferred module type of the output is now
-      written out explicitly, rather than being a reference to the named
-      signature <literal>X_int</literal>.
-    </para>
-    <para>
-      We can now use <literal>Increment</literal> to define new modules.
-    </para>
-    <programlisting language="ocaml">
-# module Three = struct let x = 3 end;;
-  module Three : sig val x : int end
-# module Four = Increment(Three);;
-module Four : sig val x : int end
-# Four.x - Three.x;;
-- : int = 1
-</programlisting>
-    <para>
-      In this case, we applied <literal>Increment</literal> to a module
-      whose signature is exactly equal to <literal>X_int</literal>. But
-      we can apply <literal>Increment</literal> to any module that
-      satisfies the interface <literal>X_int</literal>, in the same way
-      that a the contents of an <literal>ml</literal> file can satisfy
-      the <literal>mli</literal>. That means that the module type can
-      omit some information available in the module, either by dropping
-      fields or by leaving some fields abstract. Here's an example:
-    </para>
-    <programlisting language="ocaml">
-# module Three_and_more = struct
-    let x = 3
-    let y = &quot;three&quot;
-  end;;
-module Three_and_more : sig val x : int val x_string : string end
-# module Four = Increment(Three_and_more);;
-module Four : sig val x : int end
-</programlisting>
-  </sect1>
-  <sect1 id="a-bigger-example-computing-with-intervals">
-    <title>A bigger example: computing with intervals</title>
-    <para>
-      Let's now consider a more realistic example of how to use
-      functors: a library for computing with intervals. This library
-      will be functorized over the type of the endpoints of the
-      intervals and the ordering of those endpoints.
-    </para>
-    <para>
-      First we'll define a module type that captures the information
-      we'll need about the endpoint type. This interface, which we'll
-      call <literal>Comparable</literal>, contains just two things: a
-      comparison function, and the type of the values to be compared.
-    </para>
-    <programlisting language="ocaml">
-# module type Comparable = sig
-    type t
-    val compare : t -&gt; t -&gt; int
-  end ;;
-module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
-</programlisting>
-    <para>
-      The comparison function follows the standard OCaml idiom for such
-      functions, returning <literal>0</literal> if the two elements are
-      equal, a positive number if the first element is larger than the
-      second, and a negative number if the first element is smaller than
-      the second. Thus, we could rewrite the standard comparison
-      functions on top of <literal>compare</literal> as shown below.
-    </para>
-    <programlisting language="ocaml">
-compare x y &lt; 0     (* x &lt; y *)
-compare x y = 0     (* x = y *)
-compare x y &gt; 0     (* x &gt; y *)
-</programlisting>
-    <para>
-      The functor for creating the interval module is shown below. We
-      represent an interval with a variant type, which is either
-      <literal>Empty</literal> or <literal>Interval (x,y)</literal>,
-      where <literal>x</literal> and <literal>y</literal> are the bounds
-      of the interval.
-    </para>
-    <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable) = struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    let create low high =
-      if Endpoint.compare low high &gt; 0 then Empty
-      else Interval (low,high)
-
-    let is_empty = function
-      | Empty -&gt; true
-      | Interval _ -&gt; false
-
-    let contains t x =
-      match t with
-      | Empty -&gt; false
-      | Interval (l,h) -&gt;
-        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0
-
-    let intersect t1 t2 =
-      let min x y = if Endpoint.compare x y &lt;= 0 then x else y in
-      let max x y = if Endpoint.compare x y &gt;= 0 then x else y in
-      match t1,t2 with
-      | Empty, _ | _, Empty -&gt; Empty
-      | Interval (l1,h1), Interval (l2,h2) -&gt;
-        create (max l1 l2) (min h1 h2)
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) -&gt;
-    sig
-      type t = Interval of Endpoint.t * Endpoint.t | Empty
-      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; Endpoint.t -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-    end
-</programlisting>
-    <para>
-      We can instantiate the functor by applying it to a module with the
-      right signature. In the following, we provide the functor input as
-      an anonymous module.
-    </para>
-    <programlisting language="ocaml">
-# module Int_interval =
-    Make_interval(struct
-      type t = int
-      let compare = Int.compare
-    end);;
-module Int_interval :
-  sig
-    type t = Interval of int * int | Empty
-    val create : int -&gt; int -&gt; t
-    val is_empty : t -&gt; bool
-    val contains : t -&gt; int -&gt; bool
-    val intersect : t -&gt; t -&gt; t
-  end
-</programlisting>
-    <para>
-      When we choose our interfaces that are aligned with the standards
-      of our libraries, we don't need to construct a custom module to
-      feed to the functor. In this case, for example, we can directly
-      use the <literal>Int</literal> or <literal>String</literal>
-      modules provided by Core.
-    </para>
-    <programlisting language="ocaml">
-# module Int_interval = Make_interval(Int) ;;
-# module String_interval = Make_interval(String) ;;
-</programlisting>
-    <para>
-      This works because many modules in Core, including
-      <literal>Int</literal> and <literal>String</literal>, satisfy an
-      extended version of the <literal>Comparable</literal> signature
-      described above. Standardized signatures are generally good
-      practice, both because they makes functors easier to use, and
-      because they make the codebase generally easier to navigate.
-    </para>
-    <para>
-      Now we can use the newly defined <literal>Int_interval</literal>
-      module like any ordinary module.
-    </para>
-    <programlisting language="ocaml">
-# let i1 = Int_interval.create 3 8;;
-val i1 : Int_interval.t = Int_interval.Interval (3, 8)
-# let i2 = Int_interval.create 4 10;;
-val i2 : Int_interval.t = Int_interval.Interval (4, 10)
-# Int_interval.intersect i1 i2;;
-- : Int_interval.t = Int_interval.Interval (4, 8)
-</programlisting>
-    <para>
-      This design gives us the freedom to use any comparison function we
-      want for comparing the endpoints. We could, for example, create a
-      type of int interval with the order of the comparison reversed, as
-      follows:
-    </para>
-    <programlisting language="ocaml">
-# module Rev_int_interval =
-    Make_interval(struct
-      type t = int
-      let compare x y = Int.compare y x
-    end);;
-</programlisting>
-    <para>
-      The behavior of <literal>Rev_int_interval</literal> is of course
-      different from <literal>Int_interval</literal>, as we can see
-      below.
-    </para>
-    <programlisting language="ocaml">
-# let interval = Int_interval.create 4 3;;
-val interval : Int_interval.t = Int_interval.Empty
-# let rev_interval = Rev_int_interval.create 4 3;;
-val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
-</programlisting>
-    <para>
-      Importantly, <literal>Rev_int_interval.t</literal> is a different
-      type than <literal>Int_interval.t</literal>, even though its
-      physical representation is the same. Indeed, the type system will
-      prevent us from confusing them.
-    </para>
-    <programlisting language="ocaml">
-# Int_interval.contains rev_interval 3;;
-Characters 22-34:
-  Int_interval.contains rev_interval 3;;
-                        ^^^^^^^^^^^^
-Error: This expression has type Rev_int_interval.t
-       but an expression was expected of type
-         Int_interval.t = Make_interval(Int).t
-</programlisting>
-    <para>
-      This is important, because confusing the two kinds of intervals
-      would be a semantic error, and it's an easy one to make. The
-      ability of functors to mint new types is a useful trick that comes
-      up a lot.
-    </para>
-    <sect2 id="making-the-functor-abstract">
-      <title>Making the functor abstract</title>
-      <para>
-        There's a problem with <literal>Make_interval</literal>. The
-        code we wrote depends on the invariant that the upper bound of
-        an interval is greater than its lower bound, but that invariant
-        can be violated. The invariant is enforced by the create
-        function, but because <literal>Interval.t</literal> is not
-        abstract, we can bypass the <literal>create</literal> function.
-      </para>
-      <programlisting language="ocaml">
-# Int_interval.create 4 3;; (* going through create *)
-- : Int_interval.t = Int_interval.Empty
-# Int_interval.Interval (4,3);; (* bypassing create *)
-- : Int_interval.t = Int_interval.Interval (4, 3)
-</programlisting>
-      <para>
-        To make <literal>Int_interval.t</literal> abstract, we need to
-        apply an interface to the output of the
-        <literal>Make_interval</literal>. Here's an explicit interface
-        that we can use for that purpose.
-      </para>
-      <programlisting language="ocaml">
-# module type Interval_intf = sig
-   type t
-   type endpoint
-   val create : endpoint -&gt; endpoint -&gt; t
-   val is_empty : t -&gt; bool
-   val contains : t -&gt; endpoint -&gt; bool
-   val intersect : t -&gt; t -&gt; t
-  end;;
-</programlisting>
-      <para>
-        This interface includes the type <literal>endpoint</literal> to
-        represent the type of the endpoints of the interval. Given this
-        interface, we can redo our definition of
-        <literal>Make_interval</literal>. Notice that we added the type
-        <literal>endpoint</literal> to the implementation of the module
-        to make the implementation match
-        <literal>Interval_intf</literal>.
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable) : Interval_intf = struct
-
-    type endpoint = Endpoint.t
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ....
-
-  end ;;
-module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf
-</programlisting>
-    </sect2>
-    <sect2 id="sharing-constraints">
-      <title>Sharing constraints</title>
-      <para>
-        The resulting module is abstract, but unfortunately, it's too
-        abstract. In particular, we haven't exposed the type
-        <literal>endpoint</literal>, which means that we can't even
-        construct an interval anymore.
-      </para>
-      <programlisting language="ocaml">
-# module Int_interval = Make_interval(Int);;
-module Int_interval : Interval_intf
-# Int_interval.create 3 4;;
-Characters 20-21:
-  Int_interval.create 3 4;;
-                      ^
-Error: This expression has type int but an expression was expected of type
-         Int_interval.endpoint
-</programlisting>
-      <para>
-        To fix this, we need to expose the fact that
-        <literal>endpoint</literal> is equal to <literal>Int.t</literal>
-        (or more generally, <literal>Endpoint.t</literal>, where
-        <literal>Endpoint</literal> is the argument to the functor). One
-        way of doing this is through a <emphasis>sharing
-        constraint</emphasis>, which allows you to tell the compiler to
-        expose the fact that a given type is equal to some other type.
-        The syntax for a sharing constraint on a module type is as
-        follows.
-      </para>
-      <programlisting language="ocaml">
-S with type s = t
-</programlisting>
-      <para>
-        where <literal>S</literal> is a module type,
-        <literal>s</literal> is a type inside of <literal>S</literal>,
-        and <literal>t</literal> is a type defined outside of
-        <literal>S</literal>. The result of this expression is a new
-        signature that's been modified so that it exposes the fact that
-        <literal>s</literal> is equal to <literal>t</literal>. We can
-        use a sharing constraint to create a specialized version of
-        <literal>Interval_intf</literal> for integer intervals.
-      </para>
-      <programlisting language="ocaml">
-# module type Int_interval_intf = Interval_intf with type endpoint = int;;
-module type Int_interval_intf =
-  sig
-    type t
-    type endpoint = int
-    val create : endpoint -&gt; endpoint -&gt; t
-    val is_empty : t -&gt; bool
-    val contains : t -&gt; endpoint -&gt; bool
-    val intersect : t -&gt; t -&gt; t
-  end
-</programlisting>
-      <para>
-        And we can also use it in the context of a functor, where the
-        right-hand side of the sharing constraint is an element of the
-        functor argument. Thus, we expose an equality between a type in
-        the output of the functor (in this case, the type
-        <literal>endpoint</literal>) and a type in its input
-        (<literal>Endpoint.t</literal>).
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable)
-      : Interval_intf with type endpoint = Endpoint.t = struct
-
-    type endpoint = Endpoint.t
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ...
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) -&gt;
-    sig
-      type t
-      type endpoint = Endpoint.t
-      val create : endpoint -&gt; endpoint -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; endpoint -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-    end
-</programlisting>
-      <para>
-        So now, the interface is as it was, except that
-        <literal>endpoint</literal> is now known to be equal to
-        <literal>Endpoint.t</literal>. As a result of that type
-        equality, we can now do things like construct intervals again.
-      </para>
-      <programlisting language="ocaml">
-# let i = Int_interval.create 3 4;;
-val i : Int_interval.t = &lt;abstr&gt;
-# Int_interval.contains i 5;;
-- : bool = false
-</programlisting>
-    </sect2>
-    <sect2 id="destructive-substitution">
-      <title>Destructive substitution</title>
-      <para>
-        Sharing constraints basically do the job, but they have some
-        downsides. In particular, we've now been stuck with the useless
-        type declaration of <literal>endpoint</literal> that clutters up
-        both the interface and the implementation. A better solution
-        would be to modify the <literal>Interval_intf</literal>
-        signature by replacing <literal>endpoint</literal> with
-        <literal>Endpoint.t</literal> everywhere it shows up, and
-        deleting the definition of <literal>endpoint</literal> from the
-        signature. We can do just this using what's called
-        <emphasis>destructive substitution</emphasis>. Here's the basic
-        syntax.
-      </para>
-      <programlisting language="ocaml">
-S with type s := t
-</programlisting>
-      <para>
-        The following shows how we could use this with
-        <literal>Make_interval</literal>.
-      </para>
-      <para>
-        Here's an example of what we get if we use destructive
-        substitution to specialize the <literal>Interval_intf</literal>
-        interface to integer intervals.
-      </para>
-      <programlisting language="ocaml">
-# module type Int_interval_intf = Interval_intf with type endpoint := int;;
-module type Int_interval_intf =
-  sig
-    type t
-    val create : int -&gt; int -&gt; t
-    val is_empty : t -&gt; bool
-    val contains : t -&gt; int -&gt; bool
-    val intersect : t -&gt; t -&gt; t
-  end
-</programlisting>
-      <para>
-        There's now no mention of n <literal>endpoint</literal>, all
-        occurrences of that type having been replaced by
-        <literal>int</literal>. As with sharing constraints, we can also
-        use this in the context of a functor.
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable)
-    : Interval_intf with type endpoint := Endpoint.t =
-  struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ....
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) -&gt;
-    sig
-      type t
-      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; Endpoint.t -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-    end
-</programlisting>
-      <para>
-        The interface is precisely what we want, and we didn't need to
-        define the <literal>endpoint</literal> type alias in the body of
-        the module. If we instantiate this module, we'll see that it
-        works properly: we can construct new intervals, but
-        <literal>t</literal> is abstract, and so we can't directly
-        access the constructors and violate the invariants of the data
-        structure.
-      </para>
-      <programlisting language="ocaml">
-# module Int_interval = Make_interval(Int);;
-# Int_interval.create 3 4;;
-- : Int_interval.t = &lt;abstr&gt;
-# Int_interval.Interval (4,3);;
-Characters 0-27:
-  Int_interval.Interval (4,3);;
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Unbound constructor Int_interval.Interval
-</programlisting>
-    </sect2>
-    <sect2 id="using-multiple-interfaces">
-      <title>Using multiple interfaces</title>
-      <para>
-        Another feature that we might want for our interval module is
-        the ability to serialize the type, in particular, by converting
-        to s-expressions. If we simply invoke the
-        <literal>sexplib</literal> macros by adding
-        <literal>with sexp</literal> to the definition of
-        <literal>t</literal>, though, we'll get an error:
-      </para>
-      <programlisting language="ocaml">
-# module Make_interval(Endpoint : Comparable)
-    : Interval_intf with type endpoint := Endpoint.t = struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-    with sexp
-
-    ....
-
-  end ;;
-Characters 120-123:
-        type t = | Interval of Endpoint.t * Endpoint.t
-                               ^^^^^^^^^^
-Error: Unbound value Endpoint.t_of_sexp
-</programlisting>
-      <para>
-        The problem is that <literal>with sexp</literal> adds code for
-        defining the s-expression converters, and that code assumes that
-        <literal>Endpoint</literal> has the appropriate sexp-conversion
-        functions for <literal>Endpoint.t</literal>. But all we know
-        about <literal>Endpoint</literal> is that it satisfies the
-        <literal>Comparable</literal> interface, which doesn't say
-        anything about s-expressions.
-      </para>
-      <para>
-        Happily, Core comes with a built in interface for just this
-        purpose called <literal>Sexpable</literal>, which is defined as
-        follows:
-      </para>
-      <programlisting language="ocaml">
-module type Sexpable = sig
-  type t = int
-  val sexp_of_t : t -&gt; Sexp.t
-  val t_of_sexp : Sexp.t -&gt; t
-end
-</programlisting>
-      <para>
-        We can modify <literal>Make_interval</literal> to use the
-        <literal>Sexpable</literal> interface, for both its input and
-        its output. Note the use of destructive substitution to combine
-        multiple signatures together. This is important because it stops
-        the <literal>type t</literal>'s from the different signatures
-        from interfering with each other.
-      </para>
-      <para>
-        Also note that we have been careful to override the
-        sexp-converter here to ensure that the data structures
-        invariants are still maintained when reading in from an
-        s-expression.
-      </para>
-      <programlisting language="ocaml">
-# module type Interval_intf_with_sexp = sig
-   type t
-   include Interval_intf with type t := t
-   include Sexpable      with type t := t
-  end;;
-# module Make_interval(Endpoint : sig
-    type t
-    include Comparable with type t := t
-    include Sexpable   with type t := t
-  end) : Interval_intf_with_sexp with type endpoint := Endpoint.t =
-  struct
-
-      type t = | Interval of Endpoint.t * Endpoint.t
-               | Empty
-      with sexp
-
-      let create low high =
-         ...
-
-      (* put a wrapper round the auto-generated sexp_of_t to enforce
-         the invariants of the data structure *)
-      let t_of_sexp sexp =
-        match t_of_sexp sexp with
-        | Empty -&gt; Empty
-        | Interval (x,y) -&gt; create x y
-
-      ....
-
-     end ;;
-module Make_interval :
-  functor
-    (Endpoint : sig
-           type t
-           val compare : t -&gt; t -&gt; int
-           val sexp_of_t : t -&gt; Sexplib.Sexp.t
-           val t_of_sexp : Sexplib.Sexp.t -&gt; t
-         end) -&gt;
-    sig
-      type t
-      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
-      val is_empty : t -&gt; bool
-      val contains : t -&gt; Endpoint.t -&gt; bool
-      val intersect : t -&gt; t -&gt; t
-      val sexp_of_t : t -&gt; Sexplib.Sexp.t
-      val t_of_sexp : Sexplib.Sexp.t -&gt; t
-    end
-</programlisting>
-      <para>
-        And now, we can use that sexp-converter in the ordinary way:
-      </para>
-      <programlisting language="ocaml">
-# module Int = Make_interval(Int) ;;
-# Int_interval.sexp_of_t (Int_interval.create 3 4);;
-- : Sexplib.Sexp.t = (Interval 3 4)
-# Int_interval.sexp_of_t (Int_interval.create 4 3);;
-- : Sexplib.Sexp.t = Empty
-</programlisting>
-    </sect2>
-  </sect1>
-  <sect1 id="extending-modules">
-    <title>Extending modules</title>
-    <para>
-      Another common use of functors is to generate type-specific
-      functionality for a given module in a standardized way. Let's see
-      how this works in the context of a functional queue, which is just
-      a functional version of a FIFO (first-in, first-out) queue. Being
-      functional, operations on the queue return new queues, rather than
-      modifying the queues that were passed in.
-    </para>
-    <para>
-      Here's a reasonable mli
-    </para>
-    <programlisting language="ocaml">
-(* file: fqueue.mli *)
-
-type 'a t
-
-val empty : 'a t
-
-val enqueue : 'a t -&gt; 'a -&gt; 'a t
-
-(** [dequeue q] returns None if the [q] is empty *)
-val dequeue : 'a t -&gt; ('a * 'a t) option
-
-val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
-</programlisting>
-    <para>
-      Now let's implement <literal>Fqueue</literal>. A standard trick is
-      for the <literal>Fqueue</literal> to maintain an input and an
-      output list, so that one can efficiently
-      <literal>enqueue</literal> on the first list, and can efficiently
-      dequeue from the out list. If you attempt to dequeue when the
-      output list is empty, the input list is reversed and becomes the
-      new output list. Here's an implementation that uses that trick.
-    </para>
-    <programlisting language="ocaml">
-(* file: fqueue.ml *)
-open Core.Std
-
-type 'a t = 'a list * 'a list
-
-let empty = ([],[])
-
-let enqueue (l1,l2) x = (x :: l1,l2)
-
-let dequeue (in_list,out_list) =
-  match out_list with
-  | hd :: tl -&gt; Some (hd, (in_list,tl))
-  | [] -&gt;
-    match List.rev in_list with
-    | [] -&gt; None
-    | hd::tl -&gt; Some (hd, ([], tl))
-
-let fold (in_list,out_list) ~init ~f =
-  List.fold ~init:(List.fold ~init ~f out_list) ~f
-    (List.rev in_list)
-</programlisting>
-    <para>
-      One problem with our <literal>Fqueue</literal> is that the
-      interface is quite skeletal. There are lots of useful helper
-      functions that one might want that aren't there. For example, for
-      lists we have <literal>List.iter</literal> which runs a function
-      on each node; and a <literal>List.find</literal> that finds the
-      first element on the list that matches a given predicate. Such
-      helper functions come up for pretty much every container type, and
-      implementing them over and over is a bit of a dull and repetitive
-      affair.
-    </para>
-    <para>
-      As it happens, many of these helper functions can be derived
-      mechanically from just the fold function we already implemented.
-      Rather than write all of these helper functions by hand for every
-      new container type, we can instead use a functor that will let us
-      add this functionality to any container that has a
-      <literal>fold</literal> function.
-    </para>
-    <para>
-      We'll create a new module, <literal>Foldable</literal> that
-      automates the process of adding helper functions to a
-      fold-supporting container. As you can see,
-      <literal>Foldable</literal> contains a module signature
-      <literal>S</literal> which defines the signature that is required
-      to support folding; and a functor <literal>Extend</literal> that
-      allows one to extend any module that matches
-      <literal>Foldable.S</literal>.
-    </para>
-    <programlisting language="ocaml">
-(* file: foldable.ml *)
-
-open Core.Std
-
-module type S = sig
-  type 'a t
-  val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
-end
-
-module type Extension = sig
-  type 'a t
-  val iter    : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
-  val length  : 'a t -&gt; int
-  val count   : 'a t -&gt; f:('a -&gt; bool) -&gt; int
-  val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-  val exists  : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-end
-
-(* For extending a Foldable module *)
-module Extend(Arg : S)
-  : Extension with type 'a t := 'a Arg.t =
-struct
-  open Arg
-
-  let iter t ~f =
-    fold t ~init:() ~f:(fun () a -&gt; f a)
-
-  let length t =
-    fold t ~init:0  ~f:(fun acc _ -&gt; acc + 1)
-
-  let count t ~f =
-    fold t ~init:0  ~f:(fun count x -&gt; count + if f x then 1 else 0)
-
-  exception Short_circuit
-
-  let for_all c ~f =
-    try iter c ~f:(fun x -&gt; if not (f x) then raise Short_circuit); true
-    with Short_circuit -&gt; false
-
-  let exists c ~f =
-    try iter c ~f:(fun x -&gt; if f x then raise Short_circuit); false
-    with Short_circuit -&gt; true
-end
-</programlisting>
-    <para>
-      Now we can apply this to <literal>Fqueue</literal>. We can rewrite
-      the interface of <literal>Fqueue</literal> as follows.
-    </para>
-    <programlisting language="ocaml">
-(* file: fqueue.mli *)
-open Core.Std
-
-type 'a t
-val empty : 'a t
-val enqueue : 'a t -&gt; 'a -&gt; 'a t
-val dequeue : 'a t -&gt; ('a * 'a t) option
-val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
-
-include Foldable.Extension with type 'a t := 'a t
-</programlisting>
-    <para>
-      In order to apply the functor, we'll put the definition of
-      <literal>Fqueue</literal> in a sub-module called
-      <literal>T</literal>, and then call
-      <literal>Foldable.Extend</literal> on <literal>T</literal>.
-    </para>
-    <programlisting language="ocaml">
-open Core.Std
-
-module T = struct
-  type 'a t = 'a list * 'a list
-
-  let empty = [],[]
-
-  let enqueue (l1,l2) x =
-    (x :: l1,l2)
-
-  let rec dequeue (in_list,out_list) =
-    match out_list with
-    | hd :: tl -&gt; Some (hd, (in_list,tl))
-    | [] -&gt; dequeue ([], List.rev in_list)
-
-  let fold (in_list,out_list) ~init ~f =
-    List.fold ~init:(List.fold ~init ~f out_list) ~f
-      (List.rev in_list)
-end
-include T
-include Foldable.Extend(T)
-</programlisting>
-    <para>
-      This pattern comes up quite a bit in Core, and is used to for a
-      variety of purposes.
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          Adding comparison-based data structures like maps and sets,
-          based on the <literal>Comparable</literal> interface.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Adding hash-based data structures like hash sets and hash
-          heaps.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Support for so-called monadic libraries, like the ones
-          discussed in <xref linkend="error-handling"/> and
-          <xref linkend="concurrent-programming-with-async"/>.
-          Here, the functor is used to provide a collection of standard
-          helper functions based on the core <literal>bind</literal> and
-          <literal>return</literal> operators.
-        </para>
-      </listitem>
-    </itemizedlist>
   </sect1>
 </chapter><chapter id="imperative-programming-1">
   <title>Imperative Programming</title>
@@ -11303,6 +10486,867 @@ val list_init_10 : f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;
 </programlisting>
     </sect2>
   </sect1>
+</chapter><chapter id="functors">
+  <title>Functors</title>
+  <para>
+    Up until now, we've seen OCaml's module system play an important but
+    limited role. In particular, we've seen them as a mechanism for
+    organizing code into units with specified interfaces. But modules
+    can do much more than that, acting as a powerful toolset for
+    building generic code and structuring large-scale systems. Much of
+    that power comes from functors.
+  </para>
+  <para>
+    Functors are, roughly speaking, functions from modules to modules,
+    and they can be used to solve a variety of code-structuring
+    problems, including:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <emphasis>Dependency injection</emphasis>, or making the
+        implementations of some components of a system swappable. This
+        is particularly useful when you want to mock up parts of your
+        system for testing and simulation purposes.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Auto-extension of modules</emphasis>. Sometimes, there
+        is some functionality that you want to build in a standard way
+        for different types, in each case based on a some piece of
+        type-specific logic. For example, you might want to add a slew
+        of comparison operators derived from a base comparison function.
+        To do this by hand would require a lot of repetitive code for
+        each type, but functors let you write this logic just once and
+        apply it to many different types.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis>Instantiating modules with state</emphasis>. Modules
+        can contain mutable state, and that means that you'll
+        occasionally want to have multiple instantiations of a
+        particular module, each with its own separate and independent
+        mutable state. Functors let you automate the construction of
+        such modules.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <sect1 id="a-trivial-example">
+    <title>A trivial example</title>
+    <para>
+      We'll start by considering the simplest possible example: a
+      functor for incrementing an integer.
+    </para>
+    <para>
+      More precisely, we'll create a functor that takes a module
+      containing a single integer variable <literal>x</literal>, and
+      returns a new module with <literal>x</literal> incremented by one.
+    </para>
+    <programlisting language="ocaml">
+# module type X_int = sig val x : int end;;
+module type X_int = sig val x : int end
+# module Increment (M:X_int) : X_int = struct
+    let x = M.x + 1
+  end;;
+module Increment : functor (M : X_int) -&gt; X_int
+</programlisting>
+    <para>
+      One thing that immediately jumps out about functors is that
+      they're considerably more heavyweight syntactically than ordinary
+      functions. For one thing, functors require explicit (module) type
+      annotations, which ordinary functions do not. Here, we've
+      specified the module type <literal>X_int</literal> for both the
+      input and output of the functor. Technically, only the type on the
+      input is mandatory, although in practice, one often specifies
+      both.
+    </para>
+    <para>
+      The following shows what happens when we omit the module type for
+      the output of the functor.
+    </para>
+    <programlisting language="ocaml">
+# module Increment (M:X_int) = struct
+    let x = M.x + 1
+  end;;
+module Increment : functor (M : X_int) -&gt; sig val x : int end
+</programlisting>
+    <para>
+      We can see that the inferred module type of the output is now
+      written out explicitly, rather than being a reference to the named
+      signature <literal>X_int</literal>.
+    </para>
+    <para>
+      We can now use <literal>Increment</literal> to define new modules.
+    </para>
+    <programlisting language="ocaml">
+# module Three = struct let x = 3 end;;
+  module Three : sig val x : int end
+# module Four = Increment(Three);;
+module Four : sig val x : int end
+# Four.x - Three.x;;
+- : int = 1
+</programlisting>
+    <para>
+      In this case, we applied <literal>Increment</literal> to a module
+      whose signature is exactly equal to <literal>X_int</literal>. But
+      we can apply <literal>Increment</literal> to any module that
+      satisfies the interface <literal>X_int</literal>, in the same way
+      that a the contents of an <literal>ml</literal> file can satisfy
+      the <literal>mli</literal>. That means that the module type can
+      omit some information available in the module, either by dropping
+      fields or by leaving some fields abstract. Here's an example:
+    </para>
+    <programlisting language="ocaml">
+# module Three_and_more = struct
+    let x = 3
+    let y = &quot;three&quot;
+  end;;
+module Three_and_more : sig val x : int val x_string : string end
+# module Four = Increment(Three_and_more);;
+module Four : sig val x : int end
+</programlisting>
+  </sect1>
+  <sect1 id="a-bigger-example-computing-with-intervals">
+    <title>A bigger example: computing with intervals</title>
+    <para>
+      Let's now consider a more realistic example of how to use
+      functors: a library for computing with intervals. This library
+      will be functorized over the type of the endpoints of the
+      intervals and the ordering of those endpoints.
+    </para>
+    <para>
+      First we'll define a module type that captures the information
+      we'll need about the endpoint type. This interface, which we'll
+      call <literal>Comparable</literal>, contains just two things: a
+      comparison function, and the type of the values to be compared.
+    </para>
+    <programlisting language="ocaml">
+# module type Comparable = sig
+    type t
+    val compare : t -&gt; t -&gt; int
+  end ;;
+module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
+</programlisting>
+    <para>
+      The comparison function follows the standard OCaml idiom for such
+      functions, returning <literal>0</literal> if the two elements are
+      equal, a positive number if the first element is larger than the
+      second, and a negative number if the first element is smaller than
+      the second. Thus, we could rewrite the standard comparison
+      functions on top of <literal>compare</literal> as shown below.
+    </para>
+    <programlisting language="ocaml">
+compare x y &lt; 0     (* x &lt; y *)
+compare x y = 0     (* x = y *)
+compare x y &gt; 0     (* x &gt; y *)
+</programlisting>
+    <para>
+      The functor for creating the interval module is shown below. We
+      represent an interval with a variant type, which is either
+      <literal>Empty</literal> or <literal>Interval (x,y)</literal>,
+      where <literal>x</literal> and <literal>y</literal> are the bounds
+      of the interval.
+    </para>
+    <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable) = struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    let create low high =
+      if Endpoint.compare low high &gt; 0 then Empty
+      else Interval (low,high)
+
+    let is_empty = function
+      | Empty -&gt; true
+      | Interval _ -&gt; false
+
+    let contains t x =
+      match t with
+      | Empty -&gt; false
+      | Interval (l,h) -&gt;
+        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0
+
+    let intersect t1 t2 =
+      let min x y = if Endpoint.compare x y &lt;= 0 then x else y in
+      let max x y = if Endpoint.compare x y &gt;= 0 then x else y in
+      match t1,t2 with
+      | Empty, _ | _, Empty -&gt; Empty
+      | Interval (l1,h1), Interval (l2,h2) -&gt;
+        create (max l1 l2) (min h1 h2)
+
+  end ;;
+module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t = Interval of Endpoint.t * Endpoint.t | Empty
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</programlisting>
+    <para>
+      We can instantiate the functor by applying it to a module with the
+      right signature. In the following, we provide the functor input as
+      an anonymous module.
+    </para>
+    <programlisting language="ocaml">
+# module Int_interval =
+    Make_interval(struct
+      type t = int
+      let compare = Int.compare
+    end);;
+module Int_interval :
+  sig
+    type t = Interval of int * int | Empty
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+    <para>
+      When we choose our interfaces that are aligned with the standards
+      of our libraries, we don't need to construct a custom module to
+      feed to the functor. In this case, for example, we can directly
+      use the <literal>Int</literal> or <literal>String</literal>
+      modules provided by Core.
+    </para>
+    <programlisting language="ocaml">
+# module Int_interval = Make_interval(Int) ;;
+# module String_interval = Make_interval(String) ;;
+</programlisting>
+    <para>
+      This works because many modules in Core, including
+      <literal>Int</literal> and <literal>String</literal>, satisfy an
+      extended version of the <literal>Comparable</literal> signature
+      described above. Standardized signatures are generally good
+      practice, both because they makes functors easier to use, and
+      because they make the codebase generally easier to navigate.
+    </para>
+    <para>
+      Now we can use the newly defined <literal>Int_interval</literal>
+      module like any ordinary module.
+    </para>
+    <programlisting language="ocaml">
+# let i1 = Int_interval.create 3 8;;
+val i1 : Int_interval.t = Int_interval.Interval (3, 8)
+# let i2 = Int_interval.create 4 10;;
+val i2 : Int_interval.t = Int_interval.Interval (4, 10)
+# Int_interval.intersect i1 i2;;
+- : Int_interval.t = Int_interval.Interval (4, 8)
+</programlisting>
+    <para>
+      This design gives us the freedom to use any comparison function we
+      want for comparing the endpoints. We could, for example, create a
+      type of int interval with the order of the comparison reversed, as
+      follows:
+    </para>
+    <programlisting language="ocaml">
+# module Rev_int_interval =
+    Make_interval(struct
+      type t = int
+      let compare x y = Int.compare y x
+    end);;
+</programlisting>
+    <para>
+      The behavior of <literal>Rev_int_interval</literal> is of course
+      different from <literal>Int_interval</literal>, as we can see
+      below.
+    </para>
+    <programlisting language="ocaml">
+# let interval = Int_interval.create 4 3;;
+val interval : Int_interval.t = Int_interval.Empty
+# let rev_interval = Rev_int_interval.create 4 3;;
+val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
+</programlisting>
+    <para>
+      Importantly, <literal>Rev_int_interval.t</literal> is a different
+      type than <literal>Int_interval.t</literal>, even though its
+      physical representation is the same. Indeed, the type system will
+      prevent us from confusing them.
+    </para>
+    <programlisting language="ocaml">
+# Int_interval.contains rev_interval 3;;
+Characters 22-34:
+  Int_interval.contains rev_interval 3;;
+                        ^^^^^^^^^^^^
+Error: This expression has type Rev_int_interval.t
+       but an expression was expected of type
+         Int_interval.t = Make_interval(Int).t
+</programlisting>
+    <para>
+      This is important, because confusing the two kinds of intervals
+      would be a semantic error, and it's an easy one to make. The
+      ability of functors to mint new types is a useful trick that comes
+      up a lot.
+    </para>
+    <sect2 id="making-the-functor-abstract">
+      <title>Making the functor abstract</title>
+      <para>
+        There's a problem with <literal>Make_interval</literal>. The
+        code we wrote depends on the invariant that the upper bound of
+        an interval is greater than its lower bound, but that invariant
+        can be violated. The invariant is enforced by the create
+        function, but because <literal>Interval.t</literal> is not
+        abstract, we can bypass the <literal>create</literal> function.
+      </para>
+      <programlisting language="ocaml">
+# Int_interval.create 4 3;; (* going through create *)
+- : Int_interval.t = Int_interval.Empty
+# Int_interval.Interval (4,3);; (* bypassing create *)
+- : Int_interval.t = Int_interval.Interval (4, 3)
+</programlisting>
+      <para>
+        To make <literal>Int_interval.t</literal> abstract, we need to
+        apply an interface to the output of the
+        <literal>Make_interval</literal>. Here's an explicit interface
+        that we can use for that purpose.
+      </para>
+      <programlisting language="ocaml">
+# module type Interval_intf = sig
+   type t
+   type endpoint
+   val create : endpoint -&gt; endpoint -&gt; t
+   val is_empty : t -&gt; bool
+   val contains : t -&gt; endpoint -&gt; bool
+   val intersect : t -&gt; t -&gt; t
+  end;;
+</programlisting>
+      <para>
+        This interface includes the type <literal>endpoint</literal> to
+        represent the type of the endpoints of the interval. Given this
+        interface, we can redo our definition of
+        <literal>Make_interval</literal>. Notice that we added the type
+        <literal>endpoint</literal> to the implementation of the module
+        to make the implementation match
+        <literal>Interval_intf</literal>.
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable) : Interval_intf = struct
+
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ....
+
+  end ;;
+module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf
+</programlisting>
+    </sect2>
+    <sect2 id="sharing-constraints">
+      <title>Sharing constraints</title>
+      <para>
+        The resulting module is abstract, but unfortunately, it's too
+        abstract. In particular, we haven't exposed the type
+        <literal>endpoint</literal>, which means that we can't even
+        construct an interval anymore.
+      </para>
+      <programlisting language="ocaml">
+# module Int_interval = Make_interval(Int);;
+module Int_interval : Interval_intf
+# Int_interval.create 3 4;;
+Characters 20-21:
+  Int_interval.create 3 4;;
+                      ^
+Error: This expression has type int but an expression was expected of type
+         Int_interval.endpoint
+</programlisting>
+      <para>
+        To fix this, we need to expose the fact that
+        <literal>endpoint</literal> is equal to <literal>Int.t</literal>
+        (or more generally, <literal>Endpoint.t</literal>, where
+        <literal>Endpoint</literal> is the argument to the functor). One
+        way of doing this is through a <emphasis>sharing
+        constraint</emphasis>, which allows you to tell the compiler to
+        expose the fact that a given type is equal to some other type.
+        The syntax for a sharing constraint on a module type is as
+        follows.
+      </para>
+      <programlisting language="ocaml">
+S with type s = t
+</programlisting>
+      <para>
+        where <literal>S</literal> is a module type,
+        <literal>s</literal> is a type inside of <literal>S</literal>,
+        and <literal>t</literal> is a type defined outside of
+        <literal>S</literal>. The result of this expression is a new
+        signature that's been modified so that it exposes the fact that
+        <literal>s</literal> is equal to <literal>t</literal>. We can
+        use a sharing constraint to create a specialized version of
+        <literal>Interval_intf</literal> for integer intervals.
+      </para>
+      <programlisting language="ocaml">
+# module type Int_interval_intf = Interval_intf with type endpoint = int;;
+module type Int_interval_intf =
+  sig
+    type t
+    type endpoint = int
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+      <para>
+        And we can also use it in the context of a functor, where the
+        right-hand side of the sharing constraint is an element of the
+        functor argument. Thus, we expose an equality between a type in
+        the output of the functor (in this case, the type
+        <literal>endpoint</literal>) and a type in its input
+        (<literal>Endpoint.t</literal>).
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable)
+      : Interval_intf with type endpoint = Endpoint.t = struct
+
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ...
+
+  end ;;
+module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      type endpoint = Endpoint.t
+      val create : endpoint -&gt; endpoint -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; endpoint -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</programlisting>
+      <para>
+        So now, the interface is as it was, except that
+        <literal>endpoint</literal> is now known to be equal to
+        <literal>Endpoint.t</literal>. As a result of that type
+        equality, we can now do things like construct intervals again.
+      </para>
+      <programlisting language="ocaml">
+# let i = Int_interval.create 3 4;;
+val i : Int_interval.t = &lt;abstr&gt;
+# Int_interval.contains i 5;;
+- : bool = false
+</programlisting>
+    </sect2>
+    <sect2 id="destructive-substitution">
+      <title>Destructive substitution</title>
+      <para>
+        Sharing constraints basically do the job, but they have some
+        downsides. In particular, we've now been stuck with the useless
+        type declaration of <literal>endpoint</literal> that clutters up
+        both the interface and the implementation. A better solution
+        would be to modify the <literal>Interval_intf</literal>
+        signature by replacing <literal>endpoint</literal> with
+        <literal>Endpoint.t</literal> everywhere it shows up, and
+        deleting the definition of <literal>endpoint</literal> from the
+        signature. We can do just this using what's called
+        <emphasis>destructive substitution</emphasis>. Here's the basic
+        syntax.
+      </para>
+      <programlisting language="ocaml">
+S with type s := t
+</programlisting>
+      <para>
+        The following shows how we could use this with
+        <literal>Make_interval</literal>.
+      </para>
+      <para>
+        Here's an example of what we get if we use destructive
+        substitution to specialize the <literal>Interval_intf</literal>
+        interface to integer intervals.
+      </para>
+      <programlisting language="ocaml">
+# module type Int_interval_intf = Interval_intf with type endpoint := int;;
+module type Int_interval_intf =
+  sig
+    type t
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</programlisting>
+      <para>
+        There's now no mention of n <literal>endpoint</literal>, all
+        occurrences of that type having been replaced by
+        <literal>int</literal>. As with sharing constraints, we can also
+        use this in the context of a functor.
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t =
+  struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ....
+
+  end ;;
+module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</programlisting>
+      <para>
+        The interface is precisely what we want, and we didn't need to
+        define the <literal>endpoint</literal> type alias in the body of
+        the module. If we instantiate this module, we'll see that it
+        works properly: we can construct new intervals, but
+        <literal>t</literal> is abstract, and so we can't directly
+        access the constructors and violate the invariants of the data
+        structure.
+      </para>
+      <programlisting language="ocaml">
+# module Int_interval = Make_interval(Int);;
+# Int_interval.create 3 4;;
+- : Int_interval.t = &lt;abstr&gt;
+# Int_interval.Interval (4,3);;
+Characters 0-27:
+  Int_interval.Interval (4,3);;
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: Unbound constructor Int_interval.Interval
+</programlisting>
+    </sect2>
+    <sect2 id="using-multiple-interfaces">
+      <title>Using multiple interfaces</title>
+      <para>
+        Another feature that we might want for our interval module is
+        the ability to serialize the type, in particular, by converting
+        to s-expressions. If we simply invoke the
+        <literal>sexplib</literal> macros by adding
+        <literal>with sexp</literal> to the definition of
+        <literal>t</literal>, though, we'll get an error:
+      </para>
+      <programlisting language="ocaml">
+# module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t = struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+    with sexp
+
+    ....
+
+  end ;;
+Characters 120-123:
+        type t = | Interval of Endpoint.t * Endpoint.t
+                               ^^^^^^^^^^
+Error: Unbound value Endpoint.t_of_sexp
+</programlisting>
+      <para>
+        The problem is that <literal>with sexp</literal> adds code for
+        defining the s-expression converters, and that code assumes that
+        <literal>Endpoint</literal> has the appropriate sexp-conversion
+        functions for <literal>Endpoint.t</literal>. But all we know
+        about <literal>Endpoint</literal> is that it satisfies the
+        <literal>Comparable</literal> interface, which doesn't say
+        anything about s-expressions.
+      </para>
+      <para>
+        Happily, Core comes with a built in interface for just this
+        purpose called <literal>Sexpable</literal>, which is defined as
+        follows:
+      </para>
+      <programlisting language="ocaml">
+module type Sexpable = sig
+  type t = int
+  val sexp_of_t : t -&gt; Sexp.t
+  val t_of_sexp : Sexp.t -&gt; t
+end
+</programlisting>
+      <para>
+        We can modify <literal>Make_interval</literal> to use the
+        <literal>Sexpable</literal> interface, for both its input and
+        its output. Note the use of destructive substitution to combine
+        multiple signatures together. This is important because it stops
+        the <literal>type t</literal>'s from the different signatures
+        from interfering with each other.
+      </para>
+      <para>
+        Also note that we have been careful to override the
+        sexp-converter here to ensure that the data structures
+        invariants are still maintained when reading in from an
+        s-expression.
+      </para>
+      <programlisting language="ocaml">
+# module type Interval_intf_with_sexp = sig
+   type t
+   include Interval_intf with type t := t
+   include Sexpable      with type t := t
+  end;;
+# module Make_interval(Endpoint : sig
+    type t
+    include Comparable with type t := t
+    include Sexpable   with type t := t
+  end) : Interval_intf_with_sexp with type endpoint := Endpoint.t =
+  struct
+
+      type t = | Interval of Endpoint.t * Endpoint.t
+               | Empty
+      with sexp
+
+      let create low high =
+         ...
+
+      (* put a wrapper round the auto-generated sexp_of_t to enforce
+         the invariants of the data structure *)
+      let t_of_sexp sexp =
+        match t_of_sexp sexp with
+        | Empty -&gt; Empty
+        | Interval (x,y) -&gt; create x y
+
+      ....
+
+     end ;;
+module Make_interval :
+  functor
+    (Endpoint : sig
+           type t
+           val compare : t -&gt; t -&gt; int
+           val sexp_of_t : t -&gt; Sexplib.Sexp.t
+           val t_of_sexp : Sexplib.Sexp.t -&gt; t
+         end) -&gt;
+    sig
+      type t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+      val sexp_of_t : t -&gt; Sexplib.Sexp.t
+      val t_of_sexp : Sexplib.Sexp.t -&gt; t
+    end
+</programlisting>
+      <para>
+        And now, we can use that sexp-converter in the ordinary way:
+      </para>
+      <programlisting language="ocaml">
+# module Int = Make_interval(Int) ;;
+# Int_interval.sexp_of_t (Int_interval.create 3 4);;
+- : Sexplib.Sexp.t = (Interval 3 4)
+# Int_interval.sexp_of_t (Int_interval.create 4 3);;
+- : Sexplib.Sexp.t = Empty
+</programlisting>
+    </sect2>
+  </sect1>
+  <sect1 id="extending-modules">
+    <title>Extending modules</title>
+    <para>
+      Another common use of functors is to generate type-specific
+      functionality for a given module in a standardized way. Let's see
+      how this works in the context of a functional queue, which is just
+      a functional version of a FIFO (first-in, first-out) queue. Being
+      functional, operations on the queue return new queues, rather than
+      modifying the queues that were passed in.
+    </para>
+    <para>
+      Here's a reasonable mli
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.mli *)
+
+type 'a t
+
+val empty : 'a t
+
+val enqueue : 'a t -&gt; 'a -&gt; 'a t
+
+(** [dequeue q] returns None if the [q] is empty *)
+val dequeue : 'a t -&gt; ('a * 'a t) option
+
+val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+</programlisting>
+    <para>
+      Now let's implement <literal>Fqueue</literal>. A standard trick is
+      for the <literal>Fqueue</literal> to maintain an input and an
+      output list, so that one can efficiently
+      <literal>enqueue</literal> on the first list, and can efficiently
+      dequeue from the out list. If you attempt to dequeue when the
+      output list is empty, the input list is reversed and becomes the
+      new output list. Here's an implementation that uses that trick.
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.ml *)
+open Core.Std
+
+type 'a t = 'a list * 'a list
+
+let empty = ([],[])
+
+let enqueue (l1,l2) x = (x :: l1,l2)
+
+let dequeue (in_list,out_list) =
+  match out_list with
+  | hd :: tl -&gt; Some (hd, (in_list,tl))
+  | [] -&gt;
+    match List.rev in_list with
+    | [] -&gt; None
+    | hd::tl -&gt; Some (hd, ([], tl))
+
+let fold (in_list,out_list) ~init ~f =
+  List.fold ~init:(List.fold ~init ~f out_list) ~f
+    (List.rev in_list)
+</programlisting>
+    <para>
+      One problem with our <literal>Fqueue</literal> is that the
+      interface is quite skeletal. There are lots of useful helper
+      functions that one might want that aren't there. For example, for
+      lists we have <literal>List.iter</literal> which runs a function
+      on each node; and a <literal>List.find</literal> that finds the
+      first element on the list that matches a given predicate. Such
+      helper functions come up for pretty much every container type, and
+      implementing them over and over is a bit of a dull and repetitive
+      affair.
+    </para>
+    <para>
+      As it happens, many of these helper functions can be derived
+      mechanically from just the fold function we already implemented.
+      Rather than write all of these helper functions by hand for every
+      new container type, we can instead use a functor that will let us
+      add this functionality to any container that has a
+      <literal>fold</literal> function.
+    </para>
+    <para>
+      We'll create a new module, <literal>Foldable</literal> that
+      automates the process of adding helper functions to a
+      fold-supporting container. As you can see,
+      <literal>Foldable</literal> contains a module signature
+      <literal>S</literal> which defines the signature that is required
+      to support folding; and a functor <literal>Extend</literal> that
+      allows one to extend any module that matches
+      <literal>Foldable.S</literal>.
+    </para>
+    <programlisting language="ocaml">
+(* file: foldable.ml *)
+
+open Core.Std
+
+module type S = sig
+  type 'a t
+  val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+end
+
+module type Extension = sig
+  type 'a t
+  val iter    : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
+  val length  : 'a t -&gt; int
+  val count   : 'a t -&gt; f:('a -&gt; bool) -&gt; int
+  val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+  val exists  : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+end
+
+(* For extending a Foldable module *)
+module Extend(Arg : S)
+  : Extension with type 'a t := 'a Arg.t =
+struct
+  open Arg
+
+  let iter t ~f =
+    fold t ~init:() ~f:(fun () a -&gt; f a)
+
+  let length t =
+    fold t ~init:0  ~f:(fun acc _ -&gt; acc + 1)
+
+  let count t ~f =
+    fold t ~init:0  ~f:(fun count x -&gt; count + if f x then 1 else 0)
+
+  exception Short_circuit
+
+  let for_all c ~f =
+    try iter c ~f:(fun x -&gt; if not (f x) then raise Short_circuit); true
+    with Short_circuit -&gt; false
+
+  let exists c ~f =
+    try iter c ~f:(fun x -&gt; if f x then raise Short_circuit); false
+    with Short_circuit -&gt; true
+end
+</programlisting>
+    <para>
+      Now we can apply this to <literal>Fqueue</literal>. We can rewrite
+      the interface of <literal>Fqueue</literal> as follows.
+    </para>
+    <programlisting language="ocaml">
+(* file: fqueue.mli *)
+open Core.Std
+
+type 'a t
+val empty : 'a t
+val enqueue : 'a t -&gt; 'a -&gt; 'a t
+val dequeue : 'a t -&gt; ('a * 'a t) option
+val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+
+include Foldable.Extension with type 'a t := 'a t
+</programlisting>
+    <para>
+      In order to apply the functor, we'll put the definition of
+      <literal>Fqueue</literal> in a sub-module called
+      <literal>T</literal>, and then call
+      <literal>Foldable.Extend</literal> on <literal>T</literal>.
+    </para>
+    <programlisting language="ocaml">
+open Core.Std
+
+module T = struct
+  type 'a t = 'a list * 'a list
+
+  let empty = [],[]
+
+  let enqueue (l1,l2) x =
+    (x :: l1,l2)
+
+  let rec dequeue (in_list,out_list) =
+    match out_list with
+    | hd :: tl -&gt; Some (hd, (in_list,tl))
+    | [] -&gt; dequeue ([], List.rev in_list)
+
+  let fold (in_list,out_list) ~init ~f =
+    List.fold ~init:(List.fold ~init ~f out_list) ~f
+      (List.rev in_list)
+end
+include T
+include Foldable.Extend(T)
+</programlisting>
+    <para>
+      This pattern comes up quite a bit in Core, and is used to for a
+      variety of purposes.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Adding comparison-based data structures like maps and sets,
+          based on the <literal>Comparable</literal> interface.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Adding hash-based data structures like hash sets and hash
+          heaps.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Support for so-called monadic libraries, like the ones
+          discussed in <xref linkend="error-handling"/> and
+          <xref linkend="concurrent-programming-with-async"/>.
+          Here, the functor is used to provide a collection of standard
+          helper functions based on the core <literal>bind</literal> and
+          <literal>return</literal> operators.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </sect1>
 </chapter><chapter id="object-oriented-programming">
   <title>Object Oriented Programming</title>
   <para>
@@ -12320,7 +12364,7 @@ end = SList
       exactly equivalent to <literal>'a t</literal>.
     </para>
   </sect1>
-</chapter></part><part label="II"><title>Practical Examples</title><chapter id="data-serialization-with-s-expressions">
+</chapter></part><part label="II"><title>Tools and Techniques</title><chapter id="data-serialization-with-s-expressions">
   <title>Data Serialization with S-Expressions</title>
   <para>
     Data serialization, <emphasis>i.e.</emphasis> converting data to and
@@ -15069,7 +15113,194 @@ add      diff     help     version
 </chapter><chapter id="maps-and-hashtables">
   <title>Maps and Hashtables</title>
   <para>
+    Organizing data as key/value pairs representing bindings of keys to
+    values is a useful and common programming pattern. Maybe the
+    simplest way of representing a collection of bindings is as a list
+    of pairs, <emphasis>i.e.</emphasis>, an <emphasis>association
+    list</emphasis>. Thus, you could write:
   </para>
+  <programlisting language="ocaml">
+# let digit_alist =
+    [ 0, &quot;zero&quot;; 1, &quot;one&quot;; 2, &quot;two&quot;; 3, &quot;three&quot;; 4, &quot;four&quot;
+    ; 5, &quot;five&quot; ; 6, &quot;six&quot;; 7, &quot;seven&quot;; 8, &quot;eight&quot;; 9, &quot;nine&quot; ]
+  ;;
+</programlisting>
+  <para>
+    And we can use functions from the <literal>List.Assoc</literal>
+    module to manipulate such an association list.
+  </para>
+  <programlisting language="ocaml">
+# List.Assoc.find digit_alist 6;;
+- : string option = Some &quot;six&quot;
+# List.Assoc.find digit_alist 22;;
+- : string option = None
+# List.Assoc.add digit_alist 0 &quot;zilch&quot;;;
+- : (int, string) List.Assoc.t =
+[(0, &quot;zilch&quot;); (1, &quot;one&quot;); (2, &quot;two&quot;); (3, &quot;three&quot;); (4, &quot;four&quot;);
+ (5, &quot;five&quot;); (6, &quot;six&quot;); (7, &quot;seven&quot;); (8, &quot;eight&quot;); (9, &quot;nine&quot;)]
+</programlisting>
+  <para>
+    Association lists are simple and easy to use, and have the advantage
+    of being an immutable data-structure. But the performance of
+    association lists is poor for most applications, since almost every
+    non-trivial operation on an association list requires a linear-time
+    scan of the list.
+  </para>
+  <para>
+    In this chapter, we'll talk about two more efficient alternatives to
+    association lists: <emphasis>maps</emphasis> and
+    <emphasis>hash-tables</emphasis>. A map is an immutable tree-based
+    data structure where most operations on a map are take time
+    logarithmic in the size of the map; a hash-table is a mutable data
+    structure where most operations take constant time. These are both
+    very useful and very common tools. In the following, we'll describe
+    them both in some detail, and provide some advice as to when to use
+    one or the other.
+  </para>
+  <sect1 id="constructing-maps">
+    <title>Constructing maps</title>
+    <para>
+      Maps store their data in an ordered binary tree. As such you need
+      to know how to compare elements of the key type in order to
+      construct the map. Accordingly, functions for creating a map
+      require that you pass in a value of type
+      <literal>Comparator.t</literal>, which is available as part of any
+      module that satisfies Core's <literal>Comparable</literal>
+      interface. Thus, we can create a map as follows.
+    </para>
+    <programlisting language="ocaml">
+# let digit_map = Map.of_alist_exn Int.comparator digit_alist;;
+val digit_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
+# Map.find digit_map 3;;
+- : string option = Some &quot;three&quot;
+# let digit_map' = Map.add digit_map 0 &quot;zip&quot;;;
+val digit_map' : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
+# (Map.find digit_map' 0, Map.find digit_map 0);;
+- : string option * string option = (Some &quot;zip&quot;, Some &quot;zero&quot;)
+</programlisting>
+    <para>
+      We use the function <literal>Map.of_alist_exn</literal> to
+      construct our map. This function throws an exception if it
+      encounters entries with duplicate keys. Note that we only need to
+      include the comparator on functions that create new maps from
+      scratch. That's because the comparator is stashed inside the map,
+      so it's available within the data-structure when you need to do a
+      lookup or add a binding to a map.
+    </para>
+    <para>
+      We don't actually need to grab the comparator explicitly: the
+      <literal>Comparable</literal> interface provides a
+      type-specialized version of the <literal>Map</literal> module, so
+      we can write:
+    </para>
+    <programlisting language="ocaml">
+# let digit_map = Int.Map.of_alist_exn digit_alist;;
+val digit_map : string Int.Map.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      If we don't want to go to the trouble of using the specialized
+      comparison for a given type, we can use OCaml's build in
+      polymorphic compare as well, as shown below.
+    </para>
+    <programlisting language="ocaml">
+# Map.of_alist_exn Comparator.Poly.comparator digit_alist;;
+- : (int, string, Comparator.Poly.comparator) Map.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      Or, more simply, and equivalently:
+    </para>
+    <programlisting language="ocaml">
+# Map.Poly.of_alist_exn digit_alist;;
+- : (int, string) Map.Poly.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      All of these different construction methods end up returning maps
+      of the same polymorphic type, so that accessor functions like
+      <literal>Map.find</literal> or <literal>Map.add</literal> work no
+      matter what.
+    </para>
+    <warning> <title> 
+    The perils of polymorphic compare
+    </title>
+    <para>
+      Polymorphic compare is highly convenient, but has serious
+      downsides as well, and should be used with care. One issue is that
+      polymorphic compare is typically slower than type-specialized
+      comparison functions. But more important than that is the fact
+      that polymorphic compare sometimes gives semantically surprising
+      results.
+    </para>
+    <para>
+      To understand what's wrong with polymorphic comparison, you need
+      to know how it works. Polymorphic compare operates directly on the
+      runtime-representation of OCaml objects, going field by field and
+      comparing items as they arise, not paying attention to the type of
+      the objects in question.
+    </para>
+    <para>
+      This is convenient because it works on most OCaml types, excluding
+      only things like closures and objects from outside of the OCaml
+      heap of the kind that arise from an external library binding.
+    </para>
+    <para>
+      But sometimes, a structural comparison is just not what you want.
+      Indeed, there are types for which you want two items to be
+      considered equal even if they're structurally different. Maps are
+      actually a great example of this. Consider the following.
+    </para>
+    <programlisting language="ocaml">
+# let (m1,m2) = (Int.Map.of_alist_exn [1,&quot;one&quot;; 2,&quot;two&quot;],
+                 Int.Map.of_alist_exn [2,&quot;two&quot;; 1,&quot;one&quot;]);;
+val m1 : string Int.Map.t = &lt;abstr&gt;
+val m2 : string Int.Map.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      Logically, these two maps should be equal, since they have the
+      same set of key/value bindings. But because the bindings were
+      added in different orders, the structure of the trees turns out to
+      be different, and so a structural comparison function will
+      conclude that they're different.
+    </para>
+    <para>
+      First, let's use the built in comparison function for maps. Note
+      that we need to pass in an equality test for strings so that the
+      values can be compared as well.
+    </para>
+    <programlisting language="ocaml">
+# Map.equal String.equal m1 m2;;
+- : bool = true
+</programlisting>
+    <para>
+      Now, let's try to do a polymorphic comparison, using the
+      <literal>=</literal> operator. Note that comparing the maps
+      directly will fail at runtime because of the comparators stored
+      within the map contain function values.
+    </para>
+    <programlisting language="ocaml">
+# m1 = m2;;
+Exception: (Invalid_argument &quot;equal: functional value&quot;).
+</programlisting>
+    <para>
+      We can however use the function <literal>Map.to_tree</literal> to
+      expose the underlying tree without the attached comparator.
+    </para>
+    <programlisting language="ocaml">
+# Map.to_tree m1 = Map.to_tree m2;;
+- : bool = false
+</programlisting>
+    <para>
+      These problems show up on any data structure where the natural
+      equality function is not structural.
+    </para>
+    </warning>
+  </sect1>
+  <sect1 id="working-with-maps">
+    <title>Working with maps</title>
+    <para>
+      Maps come with a bunch of really useful primitives for interacting
+      with them.
+    </para>
+  </sect1>
 </chapter><chapter id="text-processing-and-unicode">
   <title>Text Processing and Unicode</title>
   <para>
@@ -15855,10 +16086,11 @@ type meta = {
 </programlisting>
     <para>
       Note that we opened <literal>Async.Std</literal>, which adds a
-      number of new identifiers and modules into our namespace that make
-      using Async more convenient. Opening <literal>Async.Std</literal>
-      is standard practice for writing programs using Async, much like
-      opening <literal>Core.Std</literal> is for using Core.
+      number of new identifiers and modules into our environment that
+      make using Async more convenient. Opening
+      <literal>Async.Std</literal> is standard practice for writing
+      programs using Async, much like opening
+      <literal>Core.Std</literal> is for using Core.
     </para>
     <para>
       A deferred is essentially a handle to a value that may be computed
@@ -15907,7 +16139,10 @@ val contents : string Deferred.t = &lt;abstr&gt;
       of <literal>d</literal> once it's determined. The call to
       <literal>Deferred.bind</literal> returns a new deferred that
       becomes determined when the deferred returned by
-      <literal>f</literal> is determined.
+      <literal>f</literal> is determined. It also implicitly registers
+      with the scheduler an <emphasis>Async job</emphasis> that is
+      responsible for running <literal>f</literal> once
+      <literal>d</literal> is determined.
     </para>
     <para>
       Here's a simple use of bind for a function that replaces a file
@@ -16148,7 +16383,7 @@ This is an echo server
 It repeats whatever I write.
 It repeats whatever I write.
 </programlisting>
-    <note><title>
+    <note> <title>
     Functions that never return
     </title>
     <para>
@@ -16393,43 +16628,42 @@ val write_complete : unit Deferred.t = &lt;abstr&gt;
     <title>Example: searching definitions with DuckDuckGo</title>
     <para>
       DuckDuckGo is a search engine with a freely available search
-      interface. A DuckDuckGo search is executed by making an HTTP
-      request to <literal>api.duckduckgo.com</literal>. The result comes
-      back in either JSON or XML format, depending on what was requested
-      in the original query string. Let's write some functions that
-      construct the right URI and can parse the resulting JSON.
+      interface. In this section, we'll use Async to write a small
+      command-line utility for querying DuckDuckGo to extract
+      definitions for a collection of terms.
     </para>
     <para>
       Our code is going to rely on a number of other libraries, all of
-      which can be installed using OPAM, described below. (Refer to
-      <xref linkend="installation"/> if you need help)
+      which can be installed using OPAM. Refer to
+      <xref linkend="installation"/> if you need help on the
+      installation. Here's the list of libraries we'll need.
     </para>
     <itemizedlist>
       <listitem>
         <para>
-          <literal>textwrap</literal>, a library for wrapping long lines
-          in text. We'll use this for printing out our results.
+          <literal>textwrap</literal>, a library for wrapping long
+          lines. We'll use this for printing out our results.
         </para>
       </listitem>
       <listitem>
         <para>
-          <literal>uri</literal> is a library for handling URI's, or
+          <literal>uri</literal>, a library for handling URI's, or
           &quot;Uniform Resource Identifiers&quot;, of which HTTP URL's
           are an example.
         </para>
       </listitem>
       <listitem>
         <para>
-          <literal>yojson</literal> is a JSON parsing library that was
+          <literal>yojson</literal>, a JSON parsing library that was
           described in
           <xref linkend="parsing-json-with-yojson"/>
         </para>
       </listitem>
       <listitem>
         <para>
-          <literal>cohttp</literal> is a library for creating HTTP
-          clients and servers. We need the Async support, which comes
-          with the <literal>cohttp.async</literal> package.
+          <literal>cohttp</literal>, a library for creating HTTP clients
+          and servers. We need Async support, which comes with the
+          <literal>cohttp.async</literal> package.
         </para>
       </listitem>
     </itemizedlist>
@@ -16444,9 +16678,9 @@ val write_complete : unit Deferred.t = &lt;abstr&gt;
         a more general family known as Uniform Resource Identifiers
         (URIs). The full URI specification is defined in
         <ulink url="http://tools.ietf.org/html/rfc3986">RFC3986</ulink>,
-        and is rather complicated. Luckily, the
-        <literal>ocaml-uri</literal> library provides a strongly-typed
-        interface which takes care of much of the hassle.
+        and is rather complicated. Luckily, the <literal>uri</literal>
+        library provides a strongly-typed interface which takes care of
+        much of the hassle.
       </para>
       <para>
         We'll need a function for generating the URI's that we're going
@@ -16458,9 +16692,9 @@ open Core.Std
 open Async.Std
 
 (* Generate a DuckDuckGo search URI from a query string *)
-let query_uri =
+let query_uri query =
   let base_uri = Uri.of_string &quot;http://api.duckduckgo.com/?format=json&quot; in
-  fun query -&gt; Uri.add_query_param base_uri (&quot;q&quot;, [query])
+  Uri.add_query_param base_uri (&quot;q&quot;, [query])
 </programlisting>
       <para>
         A <literal>Uri.t</literal> is constructed from the
@@ -16469,12 +16703,6 @@ let query_uri =
         library takes care of encoding the URI correctly when outputting
         it in the network protocol.
       </para>
-      <para>
-        Note that the URI manipulation functions are all pure functions
-        which return a new URI value, and never modify the input. This
-        makes it easier to pass around URI values through your
-        application stack without fear of modification.
-      </para>
     </sect2>
     <sect2 id="parsing-json-strings">
       <title>Parsing JSON strings</title>
@@ -16482,127 +16710,68 @@ let query_uri =
         The HTTP response from DuckDuckGo is in JSON, a common (and
         thankfully simple) format that is specified in
         <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>.
-        There are quite a few JSON parsers available for OCaml, and
-        we've picked
-        <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
-        for this example.
+        We'll parse the JSON data using the Yojson library, which we
+        already introduced in
+        <ulink url="parsing-json-with-yojson">xref</ulink>.
       </para>
       <para>
-        There are a few non-standard extensions to JSON, so Yojson
-        exposes them as the <literal>Basic</literal> and
-        <literal>Safe</literal> sub-modules. It doesn't really matter
-        which one we pick for this simple example, so we'll go with
-        <literal>Safe</literal>.
+        We expect the response from DuckDuckGo to come across as a JSON
+        record, which is represented by the <literal>``Assoc</literal>
+        tag in Yojson's JSON variant. We expect the definition itself to
+        come across under either the key &quot;Abstract&quot; or
+        &quot;Definition&quot;, and so the code below looks under both
+        keys, returning the first one for which a non-empty value is
+        defined.
       </para>
       <para>
-        The input <literal>string</literal> is parsed using
-        <literal>Yojson.Safe.from_string</literal> into an OCaml data
-        type. The JSON values are represented using polymorphic
-        variants, and can thus be pattern matched more easily once they
-        have been parsed by Yojson.
+        <literal>ocaml (* Extract the &quot;Definition&quot; or &quot;Abstract&quot; field from the DuckDuckGo results *) let get_definition_from_json json =   match Yojson.Safe.from_string json with   | `Assoc kv_list -&gt;     let find key =       begin match List.Assoc.find kv_list key with       | None | Some (`String &quot;&quot;) -&gt; None       | Some s -&gt; Some (Yojson.Safe.to_string s)       end     in     begin match find &quot;Abstract&quot; with     | Some _ as x -&gt; x     | None -&gt; find &quot;Definition&quot;     end   | _ -&gt; None</literal>
+        ### Executing an HTTP client query
       </para>
-      <programlisting language="ocaml">
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Int of int
-  | `List of json list
-  | `Null
-  | `String of string
-  | `Tuple of json list
-]
-</programlisting>
       <para>
-        We're expecting the DuckDuckGo response to be a record, with an
-        optional <literal>Description</literal> field being one of the
-        keys in the record. The
-        <literal>get_definition_from_json</literal> does a pattern match
-        on this, and returns an optional string if a definition is found
-        within the result. The description field sometimes contains an
-        empty string, which we explicitly recognize as a null response
-        in our code.
-      </para>
-      <programlisting language="ocaml">
-(* Extract the &quot;Definition&quot; or &quot;Abstract&quot; field from the DuckDuckGo results *)
-let get_definition_from_json json =
-  match Yojson.Safe.from_string json with
-  | `Assoc kv_list -&gt;
-    let find key =
-      begin match List.Assoc.find kv_list key with
-      | None | Some (`String &quot;&quot;) -&gt; None
-      | Some s -&gt; Some (Yojson.Safe.to_string s)
-      end
-    in
-    begin match find &quot;Abstract&quot; with
-    | Some _ as x -&gt; x
-    | None -&gt; find &quot;Definition&quot;
-    end
-  | _ -&gt; None
-</programlisting>
-      <para>
-        Note that we check two different fields,
-        <literal>Abstract</literal> and <literal>Definition</literal>,
-        since DuckDuckGo sometimes puts the definition in one location
-        and sometimes in the other. Also, throughout this code we use
-        options to represent the failure to find a definition.
-      </para>
-    </sect2>
-    <sect2 id="executing-an-http-client-query">
-      <title>Executing an HTTP client query</title>
-      <para>
-        Now that we've written those utility functions, let's look at
-        the Async code that performs the actual search:
+        Now let's look at the code for dispatching the search queries
+        over HTTP, using the Cohttp library.
       </para>
       <programlisting language="ocaml">
 (* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.call `GET (query_uri word)
-  &gt;&gt;= function
-  | None | Some (_, None) -&gt; return (word, None)
-  | Some (_, Some body) -&gt;
-    Pipe.to_list body &gt;&gt;| fun strings -&gt;
-    (word, get_definition_from_json (String.concat strings))
+  Cohttp_async.Client.get (query_uri word)
+  &gt;&gt;= fun (_, body) -&gt;
+  Pipe.to_list body
+  &gt;&gt;| fun strings -&gt;
+  (word, get_definition_from_json (String.concat strings))
 </programlisting>
       <para>
-        The <literal>Cohttp.Client</literal> module executes the HTTP
-        call, and returns a deferred status and response. To better
-        understand what's going on here, it's useful to look at the type
-        for <literal>Cohttp_async.CLient.call</literal>, which we can do
-        in utop.
+        To better understand what's going on, it's useful to look at the
+        type for <literal>Cohttp_async.Client.get</literal>, which we
+        can do in utop.
       </para>
       <programlisting language="ocaml">
 # #require &quot;cohttp.async&quot;;;
-# Cohttp_async.Client.call;;
-- : ?headers:Cohttp.Header.t -&gt;
-    ?body:string Pipe.Reader.t -&gt;
-    Cohttp.Code.meth -&gt;
-    Uri.t -&gt;
-    (Cohttp_async.Response.t * string Pipe.Reader.t option) option Deferred.t
+# Cohttp_async.Client.get;;
+- : ?interrupt:unit Deferred.t -&gt;
+    ?headers:Cohttp.Header.t -&gt;
+    Uri.t -&gt; (Cohttp.Response.r * Cohttp_async.body) Deferred.t
 = &lt;fun&gt;
 </programlisting>
       <para>
-        Ignoring the optional arguments, <literal>call</literal> takes
-        two arguments; the method (<literal>``GET</literal>, in this
-        case), and the URI. An optional deferred value is returned,
-        containing a <literal>Cohttp_async.Response.t</literal> (which
-        we ignore) and an optional pipe reader which will receive the
-        stream of strings which the Cohttp client writes the incoming
-        data to.
+        The <literal>get</literal> call takes as a required argument a
+        URI, and returns a deferred value is returned, containing a
+        <literal>Cohttp.Response.t</literal> (which we ignore) and a
+        pipe reader to which the body of the request will be written to
+        as it is received.
       </para>
       <para>
         In this case, the HTTP body probably isn't very large, so we
-        just call <literal>Pipe.to_list</literal> to collect all the
-        output of the pipe and returns those elements as a deferred
-        list. We then join that list into a string using
-        <literal>String.concat</literal> and pass it through our JSON
-        parser to extract the definitions.
+        call <literal>Pipe.to_list</literal> to collect the strings from
+        the pipe as a single deferred list of strings. We then join
+        those strings using <literal>String.concat</literal> and pass
+        the result through our parsing function.
       </para>
       <para>
         Running a single search isn't that interesting from a
         concurrency perspective, so let's write code for dispatching
-        multiple searches in parallel. First, we need code for printing
-        out a result.
+        multiple searches in parallel. First, we need code for
+        formatting and printing out the search result.
       </para>
       <programlisting language="ocaml">
 (* Print out a word/definition pair *)
@@ -16612,69 +16781,78 @@ let print_result (word,definition) =
     (String.init (String.length word) ~f:(fun _ -&gt; '-'))
     (match definition with
     | None -&gt; &quot;No definition found&quot;
-    | Some def -&gt; String.concat ~sep:&quot;\n&quot; (Wrapper.wrap (Wrapper.make 70)  def))
+    | Some def -&gt;
+      String.concat ~sep:&quot;\n&quot;
+        (Wrapper.wrap (Wrapper.make 70) def))
 </programlisting>
       <para>
-        Note that we use the <literal>Wrapper</literal> module that
-        comes from the <literal>textwrap</literal> package to wrap the
-        output so it will display well when printed out. Note that
-        <literal>print_result</literal> doesn't look like it uses Async,
-        but it does: the version of <literal>printf</literal> that's
-        called here is actually Async's wrapping of
-        <literal>printf</literal> that goes through the Async scheduler
-        rather than immediately printing to standard out. The shadowing
-        of the original definition of <literal>printf</literal> is done
-        when you open <literal>Async.Std</literal>.
+        We use the <literal>Wrapper</literal> module from the
+        <literal>textwrap</literal> package to do the line-wrapping. It
+        may not be obvious that this routine is using Async, but it
+        does: the version of <literal>printf</literal> that's called
+        here is actually Async's specialized <literal>printf</literal>
+        that goes through the Async scheduler rather than printing
+        directly. The original definition of <literal>printf</literal>
+        is shadowed by this ne one when you open
+        <literal>Async.Std</literal>. An important side effect of this
+        is that if you write an Async program and forget to start the
+        scheduler, calls like <literal>printf</literal> won't actually
+        generate any output!
       </para>
       <para>
-        Now, we need to actually dispatch the searches in parallel.
-        Async has a module called <literal>Deferred.List</literal> for
-        doing concurrent operations on lists. The <literal>map</literal>
-        function from that module has the following signature:
-      </para>
-      <programlisting language="ocaml">
-# Deferred.List.map;;
-- : ?how:Async_core.Deferred_intf.how -&gt;
-    'a list -&gt; f:('a -&gt; 'b Deferred.t) -&gt; 'b list Deferred.t
-= &lt;fun&gt;
-</programlisting>
-      <para>
-        This <literal>map</literal> takes a list and a
-        deferred-producing function for transforming elements of that
-        list, finally returning a deferred list of results. If
-        <literal>how</literal> is <literal>``Sequential</literal>, then
-        the lists will be processed in order, one element being
-        processed only after the previous one's deferred has become
-        determined. If <literal>how</literal> is
-        <literal>``Parallel</literal>, then the elements are processed
-        in parallel. In both cases, the output becoming determined only
-        after the processing of all list elements is complete.
-      </para>
-      <para>
-        Here's how we use it to dispatch our searches.
+        The next function dispatches the searches in parallel, waits for
+        the results, and then prints.
       </para>
       <programlisting language="ocaml">
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
 let search_and_print words =
-  Deferred.List.map words ~f:get_definition ~how:`Parallel
+  Deferred.all (List.map words ~f:get_definition)
   &gt;&gt;| fun results -&gt;
   List.iter results ~f:print_result
 </programlisting>
       <para>
-        Note that the definitions will always be printed out in the same
-        order that they're passed in, even though they may be processed
-        out of order. If we wanted, we could rewrite this to print out
-        the results as they're received, which would look like this:
+        We used <literal>List.map</literal> to call
+        <literal>get_definition</literal> on each word, and
+        <literal>Deferred.all</literal> to wait for all the results.
+        Here's the type of <literal>Deferred.all</literal>:
+      </para>
+      <programlisting language="ocaml">
+# Deferred.all;;
+- : 'a Deferred.t list -&gt; 'a list Deferred.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        Note that the list returned by <literal>Deferred.all</literal>
+        reflects the order of the deferreds passed to it. As such, the
+        definitions will be printed out in the same order that the
+        search wrods are passed in, no matter what orders the queries
+        return in. We could rewrite this code to print out the results
+        as they're received (and thus potentially out of order) as
+        follows.
       </para>
       <programlisting language="ocaml">
 (* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
-  Deferred.List.iter words ~how:`Parallel ~f:(fun word -&gt;
-    get_definition word &gt;&gt;| print_result)
+  Deferred.all_unit (List.map words ~f:(fun word -&gt;
+    get_definition word &gt;&gt;| print_result))
 </programlisting>
       <para>
-        Finally, we need to create a command line interface, again using
+        The difference is that we both dispatch the query and print out
+        the result in the closure passed to <literal>map</literal>,
+        rather than waiting for all of the results to get back and then
+        printing them out together. We use
+        <literal>Deferred.all_unit</literal>, which takes a list of
+        <literal>unit</literal> deferreds and returns a single
+        <literal>unit</literal> deferred that becomes determined when
+        every deferred on the input list is determined. We can see the
+        type of this function in utop.
+      </para>
+      <programlisting language="ocaml">
+# Deferred.all_unit;;
+- : unit Deferred.t list -&gt; unit Deferred.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        Finally, we create a command line interface using
         <literal>Command.async_basic</literal>.
       </para>
       <programlisting language="ocaml">
@@ -16689,8 +16867,8 @@ let () =
   |&gt; Command.run
 </programlisting>
       <para>
-        And once we build this, we'll have a simple but usable
-        definition searcher.
+        And that's all we need to create a simple but usable definition
+        searcher.
       </para>
       <programlisting>
 $ ./search.native &quot;Concurrent Programming&quot; &quot;OCaml&quot;
@@ -16709,6 +16887,481 @@ of the Caml programming language, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
 </programlisting>
     </sect2>
+  </sect1>
+  <sect1 id="exception-handling">
+    <title>Exception handling</title>
+    <para>
+      When programming with external resources, errors are everywhere:
+      everything from a flaky server to a network outage to exhausting
+      of local resources can lead to a run-time error. When programming
+      in OCaml, some of these errors will show up explicitly in a
+      function's return type, and of them will show up as exceptions. We
+      covered exception handling in OCaml in
+      <xref linkend="exceptions"/>, but as we'll see,
+      exception handling in a concurrent program presents some new
+      challenges.
+    </para>
+    <para>
+      Let's get a better sense of how exceptions work in Async by
+      creating an asynchronous computation that (sometimes) fails with
+      an exception. The function <literal>maybe_raise</literal> below
+      blocks for half a second, and then either throws an exception or
+      returns unit, alternating between the two behaviors on subsequent
+      calls. The waiting will be done using the function
+      <literal>after</literal> which takes a time span and returns a
+      deferred which becomes determined after that time span elapses.
+    </para>
+    <programlisting language="ocaml">
+# let maybe_raise =
+    let should_fail = ref false in
+    fun () -&gt;
+      let will_fail = !should_fail in
+      should_fail := not will_fail;
+      after (Time.Span.of_sec 0.5)
+      &gt;&gt;= fun () -&gt;
+      if will_fail then raise Exit else return ()
+ ;;
+val maybe_raise : Core.Span.t -&gt; unit Deferred.t = &lt;fun&gt;
+# maybe_raise ();;
+- : unit = ()
+# maybe_raise ();;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Exit) (backtrace (&quot;&quot;))
+  (monitor
+   (((name block_on_async) (here ()) (id 5) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
+</programlisting>
+    <para>
+      In utop, the exception thrown by <literal>maybe_raise ()</literal>
+      terminates the evaluation of just that expression, but in a
+      stand-alone program, an uncaught exception would bring down the
+      entire process.
+    </para>
+    <para>
+      So, how could we capture and handle such an exception? You might
+      try to do this using OCaml's built-in <literal>try/with</literal>
+      statement, but as you can see below, that doesn't quite do the
+      trick.
+    </para>
+    <programlisting language="ocaml">
+# let handle_error () =
+    try
+      maybe_raise ()
+      &gt;&gt;| fun () -&gt; &quot;success&quot;
+    with _ -&gt; return &quot;failure&quot;
+  ;;
+val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
+# handle_error ();;
+- : string = &quot;success&quot;
+# handle_error ();;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Exit) (backtrace (&quot;&quot;))
+  (monitor
+   (((name block_on_async) (here ()) (id 58) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
+</programlisting>
+    <para>
+      This didn't work because <literal>try/with</literal> only captures
+      exceptions that are thrown in the code directly executed within
+      it, while <literal>maybe_raise</literal> schedules an Async job to
+      run in the future, and it's that job that throws an exception.
+    </para>
+    <para>
+      We can capture this kind of asynchronous error use the
+      <literal>try_with</literal> function provided by Async:
+    </para>
+    <programlisting language="ocaml">
+# let handle_error () =
+    try_with (fun () -&gt; maybe_raise ())
+    &gt;&gt;| function
+    | Ok ()   -&gt; &quot;success&quot;
+    | Error _ -&gt; &quot;failure&quot;
+  ;;
+# handle_error ();;
+- : string = &quot;success&quot;
+# handle_error ();;
+  - : string = &quot;failure&quot;
+</programlisting>
+    <para>
+      <literal>try_with f</literal> takes as its argument a
+      deferred-returning thunk <literal>f</literal> (a thunk is a
+      function whose argument is unit), and returns a deferred that
+      becomes determined either as <literal>Ok</literal> of whatever
+      <literal>f</literal> returned, or <literal>Error exn</literal> if
+      <literal>f</literal> threw an exception before its return value
+      became determined.
+    </para>
+    <sect2 id="monitors">
+      <title>Monitors</title>
+      <para>
+        <literal>try_with</literal> is a a great way of handling
+        exceptions in Async, but it's not the whole story. All of
+        Async's exception-handling mechanisms,
+        <literal>try_with</literal> included, are built on top of
+        Async's system of <emphasis>monitors</emphasis>, which are
+        inspired by the error-handling mechanism in Erlang of the same
+        name. Monitors are fairly low-level and are only occasionally
+        used directly, but it's nontheless worth understanding how they
+        work.
+      </para>
+      <para>
+        In Async, a monitor is a context that determines what to do when
+        there is an unhandled exception. Every Async job runs within the
+        context of some monitor, which, when the job is running, is
+        referred to as the current monitor. When a new Async job is
+        scheduled, say, using <literal>bind</literal> or
+        <literal>map</literal>, it inherits the current monitor of the
+        job that spawned it.
+      </para>
+      <para>
+        Monitors are arranged in a tree -- when a new monitor is created
+        (say, using <literal>Monitor.create</literal>) it is a child of
+        the current monitor. You can explicitly run jobs within a
+        monitor using <literal>within</literal>, which takes a thunk
+        that returns a non-deferred value, or
+        <literal>within'</literal>, which takes a thunk that returns a
+        deferred. Here's an example.
+      </para>
+      <programlisting language="ocaml">
+# let blow_up () =
+    let monitor = Monitor.create ~name:&quot;blow up monitor&quot; () in
+    within' ~monitor maybe_raise
+  ;;
+# blow_up ();;
+- : unit = ()
+# blow_up ();;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Exit) (backtrace (&quot;&quot;))
+  (monitor
+   (((name &quot;blow up monitor&quot;) (here ()) (id 73) (has_seen_error true)
+     (someone_is_listening false) (kill_index 0))
+    ((name block_on_async) (here ()) (id 72) (has_seen_error false)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
+</programlisting>
+      <para>
+        In addition to the ordinary stack-trace, the exception displays
+        the trace of monitors through which the exception traveled,
+        starting at the one we created, called &quot;blow up
+        monitor&quot;. The other monitors you see come from utop's
+        special handling of deferreds.
+      </para>
+      <para>
+        Monitors can do more than just augment the error-trace of an
+        exception. You can also use a monitor to explicitly handle
+        errors delivered to that monitor. The
+        <literal>Monitor.errors</literal> call is a particularly
+        important one. It detaches the monitor from its parent, handing
+        back the stream of errors that would otherwise have been
+        delivered to the parent monitor. This allows one to do custom
+        handling of errors, which may include re-raising errors to the
+        parent. Here is a very simple example of function that captures
+        and ignores errors in the processes it spawns.
+      </para>
+      <programlisting language="ocaml">
+# let swallow_error () =
+    let monitor = Monitor.create () in
+    Stream.iter (Monitor.errors monitor) ~f:(fun _exn -&gt;
+      printf &quot;an error happened\n&quot;);
+    within' ~monitor (fun () -&gt;
+      after (Time.Span.of_sec 0.5) &gt;&gt;= fun () -&gt; failwith &quot;Kaboom!&quot;)
+  ;;
+val swallow_error : unit -&gt; 'a Deferred.t = &lt;fun&gt;
+# swallow_error ();;
+an error happened
+</programlisting>
+      <para>
+        The message &quot;an error happened&quot; is printed out, but
+        the deferred returned by <literal>swallow_error</literal> is
+        never determined. This makes sense, since the calculation never
+        actually completes, so there's no value to return. You can break
+        out of this in utop by hitting <literal>Control-C</literal>.
+      </para>
+      <para>
+        Here's an example of a monitor which passes some exceptions
+        through to the parent, and handles others. Exceptions are sent
+        to the parent using <literal>Monitor.send_exn</literal>, with
+        <literal>Monitor.current</literal> being called to find the
+        current monitor, which is the parent of the newly created
+        monitor.
+      </para>
+      <programlisting language="ocaml">
+# exception Ignore_me;;
+exception Ignore_me
+# let swallow_some_errors exn_to_raise =
+    let child_monitor  = Monitor.create  () in
+    let parent_monitor = Monitor.current () in
+    Stream.iter (Monitor.errors child_monitor) ~f:(fun error -&gt;
+      match Monitor.extract_exn error with
+      | Ignore_me -&gt; printf &quot;ignoring exn\n&quot;
+      | _ -&gt; Monitor.send_exn parent_monitor error);
+    within' ~monitor:child_monitor (fun () -&gt;
+       after (Time.Span.of_sec 0.5)
+       &gt;&gt;= fun () -&gt; raise exn_to_raise)
+  ;;
+val swallow_some_errors : exn -&gt; 'a Deferred.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        Note that we use <literal>Monitor.extract_exn</literal> to grab
+        the underlying exception that was thrown. Async wraps exceptions
+        it catches with extra information, including the monitor trace,
+        so you need to grab the underlying exception to match on it.
+      </para>
+      <para>
+        If we pass in an exception other than
+        <literal>Ignore_me</literal>, like, say, the built-in exception
+        <literal>Not_found</literal>, then the exception will be passed
+        to the parent monitor and delivered as usual.
+      </para>
+      <programlisting language="ocaml">
+# swallow_some_errors Not_found;;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Not_found) (backtrace (&quot;&quot;))
+  (monitor
+   (((name (id 3)) (here ()) (id 3) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name block_on_async) (here ()) (id 2) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
+</programlisting>
+      <para>
+        If instead we use <literal>Ignore_me</literal>, the exception
+        will be ignored, and we again see that the deferred never
+        returns, but the exception was caught and ignored.
+      </para>
+      <programlisting language="ocaml">
+# swallow_some_errors Ignore_me;;
+ignoring exn
+</programlisting>
+      <para>
+        In practice, you should rarely use monitors directly, instead
+        using functions like <literal>try_with</literal> and
+        <literal>Monitor.protect</literal> that are built on top of
+        monitors. One example of a library that uses monitors directly
+        is <literal>Tcp.Server.create</literal>, which tracks both
+        exceptions thrown by the logic that handles the network
+        connection and by the callback for responding to an individual
+        request, in either case responding to an exception by closing
+        the connection. It is for building this kind of custom error
+        handling that monitors can be helpful.n
+      </para>
+    </sect2>
+    <sect2 id="example-handling-exceptions-with-duckduckgo">
+      <title>Example: Handling exceptions with DuckDuckGo</title>
+      <para>
+        Let's now go back and improve the exception handling of our
+        DuckDuckGo client. In particular, we'll change it so that any
+        individual queries that fail are reported as such, without
+        preventing other queries from succeeding.
+      </para>
+      <para>
+        The search code as it is fails rarely, so let's make make a
+        change that can cause it to fail more predictably, by making it
+        possible to distribute the requests over multiple servers. Then,
+        we'll handle the errors that occur when one of those servers is
+        mis-specified.
+      </para>
+      <para>
+        First we'll need to change <literal>query_uri</literal> to take
+        an argument specifying the server to connect to, as follows.
+      </para>
+      <programlisting language="ocaml">
+(* Generate a DuckDuckGo search URI from a query string *)
+let query_uri ~server query =
+  let base_uri =
+    Uri.of_string (String.concat [&quot;http://&quot;;server;&quot;/?format=json&quot;])
+  in
+  Uri.add_query_param base_uri (&quot;q&quot;, [query])
+</programlisting>
+      <para>
+        and then making the appropriate changes to get the list of
+        servers on the command-line, and to distribute the search
+        queries round-robin over the list of servers. Now, let's see
+        what happens if we rebuild the application and run it giving it
+        a list of servers, some of which won't respond to the query.
+      </para>
+      <programlisting>
+$ ./search_with_configurable_server.native \
+     -servers localhost,api.duckduckgo.com \
+     &quot;Concurrent Programming&quot; OCaml
+(&quot;unhandled exception&quot;
+ ((lib/monitor.ml.Error_
+   ((exn (Unix.Unix_error &quot;Connection refused&quot; connect 127.0.0.1:80))
+    (backtrace
+     (&quot;Raised by primitive operation at file \&quot;lib/unix_syscalls.ml\&quot;, line 793, characters 12-69&quot;
+      &quot;Called from file \&quot;lib/deferred.ml\&quot;, line 24, characters 62-65&quot;
+      &quot;Called from file \&quot;lib/scheduler.ml\&quot;, line 120, characters 6-17&quot;
+      &quot;Called from file \&quot;lib/jobs.ml\&quot;, line 73, characters 8-13&quot; &quot;&quot;))
+    (monitor
+     (((name Tcp.close_sock_on_error) (here ()) (id 3) (has_seen_error true)
+       (someone_is_listening true) (kill_index 0))
+      ((name main) (here ()) (id 1) (has_seen_error true)
+       (someone_is_listening false) (kill_index 0))))))
+  (Pid 1352)))
+</programlisting>
+      <para>
+        As you can see, we got a &quot;Connection refused&quot; failure
+        which ends the entire program, even though one of the two
+        queries would have gone through successfully. We can handle the
+        failures of individual connections separately by using the
+        <literal>try_with</literal> function within each call to
+        <literal>get_definition</literal>, as follows.
+      </para>
+      <programlisting language="ocaml">
+(* Execute the DuckDuckGo search *)
+let get_definition ~server word =
+  try_with (fun () -&gt;
+    Cohttp_async.Client.get (query_uri ~server word)
+    &gt;&gt;= fun  (_, body) -&gt;
+    Pipe.to_list body
+    &gt;&gt;| fun strings -&gt;
+    (word, get_definition_from_json (String.concat strings)))
+  &gt;&gt;| function
+  | Ok (word,result) -&gt; (word, Ok result)
+  | Error exn        -&gt; (word, Error exn)
+</programlisting>
+      <para>
+        Here, we use <literal>try_with</literal> to capture the
+        exception, which we then use map (the
+        <literal>&gt;&gt;|</literal> operator) to convert the error into
+        the form we want: a pair whose first element is the word being
+        searched for, and the second element is the (possibly erroneous)
+        result.
+      </para>
+      <para>
+        Now we just need to change the code for
+        <literal>print_result</literal> so that it can handle the new
+        type.
+      </para>
+      <programlisting language="ocaml">
+(* Print out a word/definition pair *)
+let print_result (word,definition) =
+  printf &quot;%s\n%s\n\n%s\n\n&quot;
+    word
+    (String.init (String.length word) ~f:(fun _ -&gt; '-'))
+    (match definition with
+     | Error _ -&gt; &quot;DuckDuckGo query failed unexpectedly&quot;
+     | Ok None -&gt; &quot;No definition found&quot;
+     | Ok (Some def) -&gt;
+       String.concat ~sep:&quot;\n&quot;
+         (Wrapper.wrap (Wrapper.make 70) def))
+</programlisting>
+      <para>
+        Now, if we run that same query, we'll get individualized
+        handling of the connection failures:
+      </para>
+      <programlisting>
+$ ./search_with_error_handling.native \
+     -servers localhost,api.duckduckgo.com \
+     &quot;Concurrent Programming&quot; OCaml
+Concurrent Programming
+----------------------
+
+DuckDuckGo query failed unexpectedly
+
+OCaml
+-----
+
+&quot;OCaml, originally known as Objective Caml, is the main implementation
+of the Caml programming language, created by Xavier Leroy, Jérôme
+Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
+</programlisting>
+      <para>
+        Now, only the query that went to the faulty server failed.
+      </para>
+      <para>
+        Note that in this code, we're relying on the fact that
+        <literal>Cohttp_async.Client.get</literal> will clean up after
+        itself after an exception, in particular by closing its file
+        descriptors. If you need to implement such functionality
+        directly, you may want to use the
+        <literal>Monitor.protect</literal> call, which is analogous to
+        the <literal>protect</literal> call described in
+        <xref linkend="cleaning-up-in-the-presence-of-exceptions"/>.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="timeouts-cancellation-and-choices">
+    <title>Timeouts, Cancellation and Choices</title>
+    <para>
+      One common kind of operation in a concurrent programming is the
+      need to combine results from multiple distinct concurrent
+      processes going on in the same program. We already saw this in our
+      web-search example, using <literal>Deferred.all</literal> and
+      <literal>Deferred.all_unit</literal> to wait for all of a list of
+      deferreds to become determined. Another useful primitive is
+      <literal>Deferred.both</literal>, which lets you wait until two
+      deferreds of different types have returned, returning both values
+      as a tuple:
+    </para>
+    <programlisting language="ocaml">
+# let both = Deferred.both
+   (after (sec 0.5)  &gt;&gt;| fun () -&gt; &quot;A&quot;)
+   (after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33)
+ ;; 
+val both : (string * float) Deferred.t = &lt;abstr&gt;
+# both;;
+- : string * float = (&quot;A&quot;, 32.33)
+</programlisting>
+    <para>
+      Sometimes, however, we want to wait only for the first of multiple
+      events to occur. This happens particularly often when dealing with
+      timeouts. In that case, we can use the call
+      <literal>Deferred.any</literal>, which, given a list of deferreds,
+      returns a single deferred that will become determined once any of
+      the values on the list is determined.
+    </para>
+    <programlisting language="ocaml">
+# Deferred.any [ (after (sec 0.5) &gt;&gt;| fun () -&gt; &quot;half a second&quot;)
+               ; (after (sec 10.) &gt;&gt;| fun () -&gt; &quot;ten seconds&quot;) ] ;;
+- : string = &quot;half a second&quot;
+</programlisting>
+    <para>
+      We can see how this would work in action by extending our
+      definition search tool to timeout on any queries that take too
+      long to satisfy. We'll do this by writing a wrapper for
+      <literal>get_definition</literal> that takes a timeout (in the
+      form of a <literal>Time.Span.t</literal>) as an argument, and
+      returns either the definition, or the timeout, whichever finished
+      first.
+    </para>
+    <programlisting language="ocaml">
+let get_definition_with_timeout ~server ~timeout word =
+  Deferred.any
+    [ (after timeout &gt;&gt;| fun () -&gt; (word,Error &quot;Timed out&quot;))
+    ; (get_definition ~server word
+       &gt;&gt;| fun (word,result) -&gt;
+       let result' = match result with
+         | Ok _ as x -&gt; x
+         | Error _ -&gt; Error &quot;Unexpected failure&quot;
+       in
+       (word,result')
+      )
+    ]
+</programlisting>
+    <para>
+      We use <literal>&gt;&gt;|</literal> above to transform the
+      deferred values we're waiting for so that
+      <literal>Deferred.any</literal> can choose between values of the
+      same type.
+    </para>
+    <para>
+      One problem with the above code is that the HTTP query kicked off
+      by <literal>get_definition</literal> is not actually shut down
+      when the timeout fires. As such,
+      <literal>get_definition_with_timeout</literal> essentially leaks
+      an open connection.
+    </para>
   </sect1>
 </chapter><chapter id="fast-binary-serialization-with-bin_prot">
   <title>Fast Binary Serialization with bin_prot</title>
@@ -16737,12 +17390,10 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
       </para>
     </listitem>
   </itemizedlist>
-  <para>
-    <literal>Bin_prot</literal> is a library that addresses these issues
-    by providing fast serialization in a compact binary format. We'll
-    also introduce the Core <literal>Bigstring</literal> library for
-    handling large binary strings efficiently during this chapter.
-  </para>
+  <literal>Bin_prot</literal> is a library that addresses these issues
+  by providing fast serialization in a compact binary format. We'll also
+  introduce the Core <literal>Bigstring</literal> library for handling
+  large binary strings efficiently during this chapter. ut
   <note>
   <title>
   Using <literal>bin_prot</literal> in the toplevel
@@ -18895,10 +19546,10 @@ Hello OCaml World!
     <sect2 id="converting-from-ocaml-values-in-c">
       <title>Converting from OCaml values in C</title>
       <para>
-        The earlier hello world example is extremely basic and only uses
+        The earlier hello world example is rather basic and only uses
         <literal>unit</literal> types. Let's extend the signature to
         take a couple of <literal>int</literal> arguments instead of a
-        single <literal>unit</literal>, so that we can send more useful
+        single <literal>unit</literal> so that we can send more useful
         data between OCaml and C:
       </para>
       <programlisting language="ocaml">
@@ -18906,9 +19557,9 @@ external add_numbers: int -&gt; int -&gt; int = &quot;caml_add_numbers&quot;
 let () = Printf.printf &quot;From OCaml: %d\n&quot; (add_numbers 10 15)
 </programlisting>
       <para>
-        Our <literal>add_numbers</literal> binding now takes two
-        arguments, and returns an integer instead of a simple
-        <literal>unit</literal>. The complete stub now looks like this:
+        The <literal>add_numbers</literal> external function now takes
+        two arguments, and returns an integer instead of a simple
+        <literal>unit</literal>. The updated C stub looks like this:
       </para>
       <programlisting language="c">
 #include &lt;stdio.h&gt;
@@ -18924,13 +19575,13 @@ caml_add_numbers(value v_arg1, value v_arg2)
 }
 </programlisting>
       <para>
-        The first thing the binding does is to pass the
-        <literal>value</literal> arguments through the
-        <literal>Int_val</literal> macro and save them into local stack
-        variables. This macro converts a <literal>value</literal> to an
-        integer by removing the tag bit. The integers are then added
-        together and the result returned. The result
-        <literal>value</literal> is reconstructed by the
+        OCaml passes the integers to <literal>caml_add_numbers</literal>
+        as <literal>value</literal> types, so the binding uses the
+        <literal>Int_val</literal> macro to convert them into local
+        stack variables. The <literal>Int_val</literal> macro converts a
+        <literal>value</literal> to an integer by removing the tag bit.
+        The C integers are then added together and the result
+        <literal>value</literal> is constructed by applying the
         <literal>Val_int</literal> macro, which takes a C integer and
         tags it into becoming an OCaml <literal>value</literal>. When
         you compile and run this version of the code, you should see
@@ -18986,7 +19637,7 @@ From OCaml: 26
         the C function.
       </para>
       <para>
-        OCaml provides nacros to convert to and from all the basic OCaml
+        OCaml provides macros to convert to and from all the basic OCaml
         runtime values and C types, of the form
         <literal>to_from</literal>. For example
         <literal>Val_long</literal> means &quot;Value from long&quot;,
@@ -19044,8 +19695,9 @@ From OCaml: 26
         involved, since we must ensure that any OCaml allocations aren't
         immediately cleaned up by the garbage collector before they have
         been registered as live values. Luckily, OCaml provides some
-        more macros to ease this. Let's extend our earlier example to
-        return a tuple of integers instead of just the result.
+        more macros to make this easier to enforce. Let's extend our
+        earlier example to return a tuple of integers instead of just
+        the result.
       </para>
       <programlisting language="ocaml">
 external add_numbers: int -&gt; int -&gt; int * int * int32 = &quot;caml_add_numbers&quot;
@@ -19055,8 +19707,12 @@ let () =
 </programlisting>
       <para>
         The <literal>add_numbers</literal> external now returns a more
-        complex data type that requires allocating an OCaml value from
-        within the C binding.
+        complex data type that requires allocating an OCaml tuple from
+        within the C binding, storing the results within the tuple, and
+        returning that tuple. The contents of the tuple are also a mix
+        of immediate values (the two first <literal>int</literal> fields
+        in the tuple) and the last boxed <literal>int32</literal> that
+        also needs to be allocated on the OCaml heap.
       </para>
       <programlisting language="c">
 #include &lt;stdio.h&gt;
@@ -19072,12 +19728,209 @@ caml_add_numbers(value v_arg1, value v_arg2)
   int v2 = Int_val(v_arg2);
   printf(&quot;From C:     %d+%d=%d\n&quot;, v1, v2, (v1+v2));
   v_res = caml_alloc_tuple(3);
-  Field(v_res, 0) = Val_int(v1);
-  Field(v_res, 1) = Val_int(v2);
-  Field(v_res, 2) = caml_copy_int32(v1 + v2);
+  Store_field(v_res, 0, Val_int(v1));
+  Store_field(v_res, 1, Val_int(v2));
+  Store_field(v_res, 2, caml_copy_int32(v1 + v2));
   CAMLreturn(v_res);
 }
 </programlisting>
+      <para>
+        The stub now uses several new macros that are all defined in
+        <literal>caml/memory.h</literal>. The
+        <literal>CAMLparam</literal> macro registers its parameters as
+        <emphasis>local roots</emphasis> with the garbage collector.
+        This ensures that if the garbage collector is triggered during
+        the C binding, it will not relocate or free the value we just
+        allocated. We also need to allocate a tuple to store the result.
+        This is declared with the <literal>CAMLlocal</literal> macro,
+        and returned via <literal>CAMLreturn</literal>. For many simple
+        bindings, you can just follow the simple rule of replacing the C
+        <literal>return</literal> with <literal>CAMLreturn</literal> and
+        starting every function with <literal>CAMLparam</literal> and
+        <literal>CAMLlocal</literal>, and not have to worry about the
+        garbage collector.
+      </para>
+      <note>
+      <title>
+      FFI rule: Use <literal>CAMLparam</literal> and
+      <literal>CAMLreturn</literal> for OCaml values
+      </title>
+      A function that has parameters or local variables of type value
+      must begin with a call to one of the <literal>CAMLparam</literal>
+      macros and return with <literal>CAMLreturn</literal>,
+      <literal>CAMLreturn0</literal>, or <literal>CAMLreturnT</literal>.
+      Local variables of type <literal>value</literal> must be declared
+      with one of the <literal>CAMLlocal</literal> macros. Arrays of
+      values are declared with <literal>CAMLlocalN</literal>. These
+      macros must be used at the beginning of the function, not in a
+      nested block.
+      </note>
+      <para>
+        The tuple is then allocated via
+        <literal>caml_alloc_tuple</literal>, with the number of fields
+        representing the size of the tuple. This must
+        <emphasis>immediately</emphasis> be followed by the
+        <literal>Store_field</literal> macros to set the newly allocated
+        tuple to sensible values. In our example, we assign the first
+        two fields to the local integers. The <literal>int32</literal>
+        requires another allocation, and
+        <literal>caml_copy_int32</literal> is used which copies a C
+        <literal>int32</literal> into the correspondig OCaml
+        <literal>value</literal>. Once the tuple has been set, the
+        function returns via <literal>CAMLreturn</literal>, which frees
+        up the local roots that we registered at the beginning of the
+        function.
+      </para>
+      <note>
+      <title>
+      FFI rule: Use <literal>Store_field</literal> to assign to tuples,
+      records and arrays
+      </title>
+      Assignments to the fields of structured blocks must be done with
+      the <literal>Store_field</literal> macro (for normal blocks) or
+      <literal>Store_double_field</literal> macro (for arrays and
+      records of floating-point numbers). Other assignments must not use
+      <literal>Store_field</literal> nor
+      <literal>Store_double_field</literal>.
+      </note>
+      <para>
+        The <literal>caml/alloc.h</literal> header file lists all of the
+        functions that allocate OCaml values.
+      </para>
+      <informaltable>
+        <tgroup cols="3">
+          <colspec align="left"/>
+          <colspec align="left"/>
+          <colspec align="left"/>
+          <thead>
+            <row>
+              <entry>
+                Function name
+              </entry>
+              <entry>
+                Argument
+              </entry>
+              <entry>
+                OCaml return type
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                <literal>caml_alloc_tuple (&lt;len&gt;)</literal>
+              </entry>
+              <entry>
+                Number of fields
+              </entry>
+              <entry>
+                Tuple or record
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>caml_alloc_string (&lt;len&gt;)</literal>
+              </entry>
+              <entry>
+                Size in bytes
+              </entry>
+              <entry>
+                <literal>string</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                `caml_copy_string (char *)
+              </entry>
+              <entry>
+                Pointer to a C string
+              </entry>
+              <entry>
+                <literal>string</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>caml_copy_string_array (char **)</literal>
+              </entry>
+              <entry>
+                Pointer to array of C strings
+              </entry>
+              <entry>
+                <literal>string array</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>caml_copy_double (double)</literal>
+              </entry>
+              <entry>
+                C <literal>double</literal> value
+              </entry>
+              <entry>
+                <literal>double</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>caml_copy_int32 (int32)</literal>
+              </entry>
+              <entry>
+                32-bit C integer
+              </entry>
+              <entry>
+                <literal>int32</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                `caml_copy_int64 (int64);
+              </entry>
+              <entry>
+                64-bit C integer
+              </entry>
+              <entry>
+                <literal>int64</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                `caml_copy_nativeint (intnat);
+              </entry>
+              <entry>
+                native C integer size (<literal>long</literal>)
+              </entry>
+              <entry>
+                <literal>Nativeint.t</literal>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <para>
+        Tuples and records both have the same memory representation,
+        with the same tag value (<literal>0</literal>). This means that
+        you can change how you map these fields into OCaml, without
+        having to modify the C bindings. For example, our earlier
+        integer addition example can also look like this:
+      </para>
+      <programlisting language="ocaml">
+type t = {
+  v1: int;
+  v2: int;
+  res: int32;
+}
+ 
+external add_numbers: int -&gt; int -&gt; t = &quot;caml_add_numbers&quot;
+
+let () = 
+  let v = add_numbers 10 15 in
+  Printf.printf &quot;From OCaml: %d+%d=%ld\n&quot; v.v1 v.v2 v.res
+</programlisting>
+      <para>
+        Records are never rearranged in memory, so the fields will
+        appear in the same order they are declared.
+      </para>
       <note>
       <title>
       Faster bindings for zero-allocation functions
