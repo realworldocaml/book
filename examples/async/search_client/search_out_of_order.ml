@@ -24,12 +24,11 @@ let get_definition_from_json json =
 
 (* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.call `GET (query_uri word)
-  >>= function
-  | None | Some (_, None) -> return (word, None)
-  | Some (_, Some body) ->
-    Pipe.to_list body >>| fun strings ->
-    (word, get_definition_from_json (String.concat strings))
+  Cohttp_async.Client.get (query_uri word)
+  >>= fun (_,body) ->
+  Pipe.to_list body
+  >>| fun strings ->
+  (word, get_definition_from_json (String.concat strings))
 
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
@@ -42,8 +41,8 @@ let print_result (word,definition) =
 
 (* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
-  Deferred.List.iter words ~how:`Parallel ~f:(fun word ->
-    get_definition word >>| print_result)
+  Deferred.all_unit (List.map words ~f:(fun word ->
+    get_definition word >>| print_result))
 
 let () =
   Command.async_basic

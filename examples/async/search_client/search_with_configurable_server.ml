@@ -2,8 +2,10 @@ open Core.Std
 open Async.Std
 
 (* Generate a DuckDuckGo search URI from a query string *)
-let query_uri query =
-  let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
+let query_uri ~server query =
+  let base_uri =
+    Uri.of_string (String.concat ["http://";server;"/?format=json"])
+  in
   Uri.add_query_param base_uri ("q", [query])
 
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
@@ -23,9 +25,9 @@ let get_definition_from_json json =
   | _ -> None
 
 (* Execute the DuckDuckGo search *)
-let get_definition word =
-  Cohttp_async.Client.get (query_uri word)
-  >>= fun (_, body) ->
+let get_definition ~server word =
+  Cohttp_async.Client.get (query_uri ~server word)
+  >>= fun  (_, body) ->
   Pipe.to_list body
   >>| fun strings ->
   (word, get_definition_from_json (String.concat strings))
@@ -43,17 +45,24 @@ let print_result (word,definition) =
 
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
-let search_and_print words =
-  Deferred.all (List.map words ~f:get_definition)
+let search_and_print ~servers words =
+  let servers = Array.of_list servers in
+  Deferred.all (List.mapi words ~f:(fun i word ->
+    let server = servers.(i mod Array.length servers) in
+    get_definition ~server word))
   >>| fun results ->
   List.iter results ~f:print_result
 
 let () =
   Command.async_basic
-    ~summary:"Retrieve definitions from DuckDuckGo search engine"
+    ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
+      let string_list = Arg_type.create (String.split ~on:',') in
       empty
       +> anon (sequence ("word" %: string))
+      +> flag "-servers"
+           (optional_with_default ["api.duckduckgo.com"] string_list)
+           ~doc:" Specify server to connect to"
     )
-    (fun words () -> search_and_print words)
+    (fun words servers () -> search_and_print ~servers words)
   |> Command.run

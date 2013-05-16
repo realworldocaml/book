@@ -6,10 +6,10 @@ open Core.Std
 open Chapter
 
 let part_to_string = function
-  |Basic -> "I", "Basic Concepts"
-  |Practical -> "II", "Practical Examples"
-  |Advanced -> "III", "Advanced Topics"
-  |Appendix |Preface -> assert false
+  | Basic     -> "I"   , "Basic Concepts"
+  | Practical -> "II"  , "Tools and Techniques"
+  | Advanced  -> "III" , "Advanced Topics"
+  | Appendix | Preface -> assert false
 
 let all_parts = [ Basic; Practical; Advanced ]
 
@@ -64,13 +64,13 @@ module Transform = struct
       let title = mk_tag "title" [Data label_name] in
       let chapters =
         List.filter_map parts ~f:(fun c ->
-          if c.part = part then begin 
+          if c.part = part then begin
             match c.public, public with
             |false, true ->
               let title = mk_tag "title" [Data (Option.value ~default:"???" c.title)] in
               let para = mk_tag "para" [Data "This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version."] in
               Some (mk_tag ~attrs:["id",c.name] "chapter" [ title; para ])
-            |_ -> Some (mk_chapter c.name) 
+            |_ -> Some (mk_chapter c.name)
           end
           else None
         )
@@ -101,7 +101,7 @@ let apply_transform parts_file book public =
       exit 1)
 
 open Cmdliner
-let _ = 
+let _ =
   let parts = Arg.(required & pos 0 (some non_dir_file) None & info [] ~docv:"CHAPTERS"
                      ~doc:"Sexp list of chapters and the parts that they map onto. See $(b,type chapter) in $(i,add_parts.ml) for the format of this file.") in
   let book = Arg.(required & pos 1 (some non_dir_file) None & info [] ~docv:"DOCBOOK"
