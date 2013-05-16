@@ -652,17 +652,17 @@ OPAM switch.
 
 ### Converting from OCaml values in C
 
-The earlier hello world example is extremely basic and only uses `unit` types.
+The earlier hello world example is rather basic and only uses `unit` types.
 Let's extend the signature to take a couple of `int` arguments instead of a
-single `unit`, so that we can send more useful data between OCaml and C:
+single `unit` so that we can send more useful data between OCaml and C:
 
 ```ocaml
 external add_numbers: int -> int -> int = "caml_add_numbers"
 let () = Printf.printf "From OCaml: %d\n" (add_numbers 10 15)
 ```
 
-Our `add_numbers` binding now takes two arguments, and returns an integer
-instead of a simple `unit`.  The complete stub now looks like this:
+The `add_numbers` external function now takes two arguments, and returns an
+integer instead of a simple `unit`.  The updated C stub looks like this:
 
 ```c
 #include <stdio.h>
@@ -678,10 +678,10 @@ caml_add_numbers(value v_arg1, value v_arg2)
 }
 ```
 
-The first thing the binding does is to pass the `value` arguments through the
-`Int_val` macro and save them into local stack variables.  This macro converts
-a `value` to an integer by removing the tag bit.  The integers are then added
-together and the result returned.  The result `value` is reconstructed by the
+OCaml passes the integers to `caml_add_numbers` as `value` types, so the binding 
+uses the `Int_val` macro to convert them into local stack variables. The `Int_val` macro
+converts a `value` to an integer by removing the tag bit.  The C integers are then added
+together and the result `value` is constructed by applying the
 `Val_int` macro, which takes a C integer and tags it into becoming an OCaml
 `value`.  When you compile and run this version of the code, you should see
 this output:
@@ -731,7 +731,7 @@ silently incorrect.  It's good practise to immediately convert arguments to
 local C stack variables as early as possible, so you don't get the types mixed
 up deep into the C function.
 
-OCaml provides nacros to convert to and from all the basic OCaml runtime values
+OCaml provides macros to convert to and from all the basic OCaml runtime values
 and C types, of the form `to_from`.  For example `Val_long` means "Value from
 long", and `Long_val` means "Long from value".  The table below summarises the
 macros to extract various C types from OCaml `values` for 64-bit architectures.
