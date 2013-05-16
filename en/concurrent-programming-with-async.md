@@ -834,10 +834,12 @@ Exception:
 ```
 
 This didn't work because `try/with` only captures exceptions that are
-thrown in the code directly executed within it; but `maybe_raise`
+thrown in the code directly executed within it, while `maybe_raise`
 schedules an Async job to run in the future, and it's that job that
-throws an exception.  To deal with this issue, Async provides its own
-`try_with` function, which we use below.
+throws an exception.  
+
+We can capture this kind of asynchronous error use the `try_with`
+function provided by Async:
 
 ```ocaml
 # let handle_error () =
@@ -849,23 +851,23 @@ throws an exception.  To deal with this issue, Async provides its own
 # handle_error ();;
 - : string = "success"
 # handle_error ();;
-- : string = "failure"
+  - : string = "failure"
 ```
 
-Essentially, ``try_with f` takes as its argument a deferred-returning
-thunk `f` (a thunk is a function whose argument is unit), and returns
-a deferred that becomes determined either as `Ok` of whatever `f`
-returned, or `Error exn` if `f` threw an exception before its return
-value became determined.
+`try_with f` takes as its argument a deferred-returning thunk `f` (a
+thunk is a function whose argument is unit), and returns a deferred
+that becomes determined either as `Ok` of whatever `f` returned, or
+`Error exn` if `f` threw an exception before its return value became
+determined.
 
 ### Monitors
 
-`try_with` is quite convenient and is good and broadly applicable tool
-for handling exceptions in Async, but it's not the whole story.  All
-of Async's exception-handling mechanisms are built on top of Async's
-system of _monitors_, which is broadly inspired by Erlang's monitors.
-Monitors are a low-level mechanism that is rarely used directly, but
-it's nonetheless worth understanding how it works.
+`try_with` is a a great way of handling exceptions in Async, but it's
+not the whole story.  All of Async's exception-handling mechanisms,
+`try_with` included, are built on top of Async's system of _monitors_,
+which are inspired by the error-handling mechanism in Erlang of the
+same name.  Monitors are fairly low-level and are only occasionally
+used directly, but it's nontheless worth understanding how they work.
 
 In Async, a monitor is a context that determines what to do when there
 is an unhandled exception.  Every Async job runs within the context of
@@ -882,19 +884,18 @@ thunk that returns a deferred.  Here's an example.
 ```ocaml
 # let blow_up () =
     let monitor = Monitor.create ~name:"blow up monitor" () in
-    within' ~monitor (fun () ->
-      after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
+    within' ~monitor maybe_raise
   ;;
+# blow_up ();;
+- : unit = ()
 # blow_up ();;
 Exception:
 (lib/monitor.ml.Error_
- ((exn (Failure Kaboom!))
-  (backtrace
-   ("Raised at file \"pervasives.ml\", line 20, characters 22-33" ""))
+ ((exn Exit) (backtrace (""))
   (monitor
-   (((name "blow up monitor") (here ()) (id 3) (has_seen_error true)
+   (((name "blow up monitor") (here ()) (id 73) (has_seen_error true)
      (someone_is_listening false) (kill_index 0))
-    ((name block_on_async) (here ()) (id 2) (has_seen_error false)
+    ((name block_on_async) (here ()) (id 72) (has_seen_error false)
      (someone_is_listening true) (kill_index 0))
     ((name main) (here ()) (id 1) (has_seen_error false)
      (someone_is_listening false) (kill_index 0)))))).
@@ -942,13 +943,13 @@ the current monitor, which is the parent of the newly created monitor.
 # exception Ignore_me;;
 exception Ignore_me
 # let swallow_some_errors exn_to_raise =
-    let monitor = Monitor.create  () in
-    let parent  = Monitor.current () in
-    Stream.iter (Monitor.errors monitor) ~f:(fun error ->
+    let child_monitor  = Monitor.create  () in
+    let parent_monitor = Monitor.current () in
+    Stream.iter (Monitor.errors child_monitor) ~f:(fun error ->
       match Monitor.extract_exn error with
       | Ignore_me -> printf "ignoring exn\n"
-      | _ -> Monitor.send_exn parent error);
-    within' ~monitor (fun () ->
+      | _ -> Monitor.send_exn parent_monitor error);
+    within' ~monitor:child_monitor (fun () ->
        after (Time.Span.of_sec 0.5)
        >>= fun () -> raise exn_to_raise)
   ;;
@@ -956,8 +957,9 @@ val swallow_some_errors : exn -> 'a Deferred.t = <fun>
 ```
 
 Note that we use `Monitor.extract_exn` to grab the underlying
-exception that was thrown for matching purposes.  Async wraps its
-exception with extra information, including the monitor trace.
+exception that was thrown.  Async wraps exceptions it catches with
+extra information, including the monitor trace, so you need to grab
+the underlying exception to match on it.
 
 If we pass in an exception other than `Ignore_me`, like, say, the
 built-in exception `Not_found`, then the exception will be passed to
@@ -986,31 +988,29 @@ caught and ignored.
 ignoring exn
 ```
 
-The above examples are artificial and incomplete.  In practice, most
-of the time you should avoid direct use of monitors and instead use
-some of the primitives like `Monitor.try_with` and `Monitor.protect`
-that are built on top of monitors, as is the built-in error handling
-for functions like `Tcp.Server.create`.  In the latter case, an
-exception when reading or writing to the open network connection or
-one thrown by the client-handling code will cause the connection to be
-closed.  In other cases, one might want to automatically retry a
-failed computation.  It is for building this kind of custom error
-handling that monitors can be helpful.
+In practice, you should rarely use monitors directly, instead using
+functions like `try_with` and `Monitor.protect` that are built on top
+of monitors.  One example of a library that uses monitors directly is
+`Tcp.Server.create`, which tracks both exceptions thrown by the logic
+that handles the network connection and by the callback for responding
+to an individual request, in either case responding to an exception by
+closing the connection.  It is for building this kind of custom error
+handling that monitors can be helpful.n
 
 ### Example: Handling exceptions with DuckDuckGo
 
-Let's consider error handling for the definition search code that we
-wrote earlier in the chapter.  In particular, lets catch errors so
-that we'll report any queries that fail, but the failure of one query
-won't interfere with a different one.
+Let's now go back and improve the exception handling of our DuckDuckGo
+client.  In particular, we'll change it so that any individual queries
+that fail are reported as such, without preventing other queries from
+succeeding.
 
 The search code as it is fails rarely, so let's make make a change
-that can cause it to fail more predictably, by making the server we
-connecto to configurable.  Then, we'll handle the errors that occur
-when you specify the wrong host.
+that can cause it to fail more predictably, by making it possible to
+distribute the requests over multiple servers.  Then, we'll handle the
+errors that occur when one of those servers is mis-specified.
 
-We make the choice of server configurable by changing `query_uri` to
-take an argument specifying the server to connect to:
+First we'll need to change `query_uri` to take an argument specifying
+the server to connect to, as follows.
 
 ```ocaml
 (* Generate a DuckDuckGo search URI from a query string *)
@@ -1021,29 +1021,15 @@ let query_uri ~server query =
   Uri.add_query_param base_uri ("q", [query])
 ```
 
-and then making the appropriate changes to pass through the [~server]
-argument through the other function calls as necessary.  Then we just
-need to add a flag so we can specify the server at the command line:
-
-```ocaml
-let () =
-  Command.async_basic
-    ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Spec.(
-      empty
-      +> anon (sequence ("word" %: string))
-      +> flag "-server" (optional_with_default "api.duckduckgo.com" string)
-           ~doc:" Specify server to connect to"
-    )
-    (fun words server () -> search_and_print ~server words)
-  |> Command.run
-```
-
-Now, if we rebuild the application and run it as is, we'll see the
-following error:
+and then making the appropriate changes to get the list of servers on
+the command-line, and to distribute the search queries round-robin
+over the list of servers.  Now, let's see what happens if we rebuild
+the application and run it giving it a list of servers, some of which
+won't respond to the query.
 
 ```
-$ ./search_with_configurable_server.native -server localhost \
+$ ./search_with_configurable_server.native \
+     -servers localhost,api.duckduckgo.com \
      "Concurrent Programming" OCaml
 ("unhandled exception"
  ((lib/monitor.ml.Error_
@@ -1061,21 +1047,21 @@ $ ./search_with_configurable_server.native -server localhost \
   (Pid 1352)))
 ```
 
-As you can see, we got a "Connection refused" failure, which was
-passed up to the toplevel monitor, which ended the program.  We can
-handle the failures of individual connections separately by using the
-`try_with` function within each call to `get_definition`, as follows.
+As you can see, we got a "Connection refused" failure which ends the
+entire program, even though one of the two queries would have gone
+through successfully. We can handle the failures of individual
+connections separately by using the `try_with` function within each
+call to `get_definition`, as follows.
 
 ```ocaml
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
-    Cohttp_async.Client.call `GET (query_uri ~server word)
-    >>= function
-    | None | Some (_, None) -> return (word, None)
-    | Some (_, Some body) ->
-      Pipe.to_list body >>| fun strings ->
-      (word, get_definition_from_json (String.concat strings)))
+    Cohttp_async.Client.get (query_uri ~server word)
+    >>= fun  (_, body) ->
+    Pipe.to_list body
+    >>| fun strings ->
+    (word, get_definition_from_json (String.concat strings)))
   >>| function
   | Ok (word,result) -> (word, Ok result)
   | Error exn        -> (word, Error exn)
@@ -1107,9 +1093,10 @@ Now, if we run that same query, we'll get individualized handling of
 the connection failures:
 
 ```
-$ ./search_with_error_handling.native -server localhost \
+$ ./search_with_error_handling.native \
+     -servers localhost,api.duckduckgo.com \
      "Concurrent Programming" OCaml
-> Concurrent Programming
+Concurrent Programming
 ----------------------
 
 DuckDuckGo query failed unexpectedly
@@ -1117,19 +1104,19 @@ DuckDuckGo query failed unexpectedly
 OCaml
 -----
 
-DuckDuckGo query failed unexpectedly
-
+"OCaml, originally known as Objective Caml, is the main implementation
+of the Caml programming language, created by Xavier Leroy, Jérôme
+Vouillon, Damien Doligez, Didier Rémy and others in 1996."
 ```
 
-Note that in the above code we're relying on the call to
-`Cohttp_async.Client.call` to clean up after itself.  In particular,
-it needs to make sure to close whatever file descriptors have been
-opened.  There are other useful error-handling utlities in Async that
-are helpful here, notably the `Monitor.protect` call, which is
-analogous to the `protect` call described in
-[xref](#cleaning-up-in-the-presence-of-exceptions).  The Async API
-docs, for `Monitor` in particular, are a good source for learning what
-exception-handling calls exist.
+Now, only the query that went to the faulty server failed.
+
+Note that in this code, we're relying on the fact that
+`Cohttp_async.Client.get` will clean up after itself after an
+exception, in particular by closing its file descriptors.  If you need
+to implement such functionality directly, you may want to use the
+`Monitor.protect` call, which is analogous to the `protect` call
+described in [xref](#cleaning-up-in-the-presence-of-exceptions).
 
 ## Timeouts, Cancellation and Choices
 
