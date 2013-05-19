@@ -20516,11 +20516,11 @@ caml_add_numbers(value v_arg1, value v_arg2)
       </para>
       <programlisting>
 $ ocamlopt -o hello -ccopt -Wall hello_stubs.c hello.ml
-hello_stubs.c: In function ‘caml_add_numbers’:
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘value’
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘value’
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘value’
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘value’
+hello_stubs.c: In function caml_add_numbers:
+hello_stubs.c:7: warning: format %d expects type int, but argument 2 has type value
+hello_stubs.c:7: warning: format %d expects type int, but argument 3 has type value
+hello_stubs.c:7: warning: format %d expects type int, but argument 2 has type value
+hello_stubs.c:7: warning: format %d expects type int, but argument 3 has type value
 $ ./hello 
 From C:     21 + 31
 From OCaml: 26
@@ -20567,27 +20567,119 @@ From OCaml: 26
             </row>
           </thead>
           <tbody>
+            <row>
+              <entry>
+                <literal>Long_val</literal>
+              </entry>
+              <entry>
+                <literal>int</literal> `
+              </entry>
+              <entry>
+                long`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Int_val</literal>
+              </entry>
+              <entry>
+                <literal>int</literal> `
+              </entry>
+              <entry>
+                int`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Unsigned_long_val</literal>
+              </entry>
+              <entry>
+                <literal>int</literal> `
+              </entry>
+              <entry>
+                unsigned long`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Unsigned_int_val</literal>
+              </entry>
+              <entry>
+                <literal>int</literal> `
+              </entry>
+              <entry>
+                unsigned int`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Bool_val</literal>
+              </entry>
+              <entry>
+                <literal>bool</literal> `
+              </entry>
+              <entry>
+                int`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Double_val</literal>
+              </entry>
+              <entry>
+                <literal>float</literal> `
+              </entry>
+              <entry>
+                double`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>String_val</literal>
+              </entry>
+              <entry>
+                <literal>string</literal> `
+              </entry>
+              <entry>
+                string`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Nativeint_val</literal>
+              </entry>
+              <entry>
+                <literal>Nativeint.t</literal> `
+              </entry>
+              <entry>
+                long`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Int32_val</literal>
+              </entry>
+              <entry>
+                <literal>Int32.t</literal> `
+              </entry>
+              <entry>
+                long`
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>Int64_val</literal>
+              </entry>
+              <entry>
+                <literal>Int64.t</literal> `
+              </entry>
+              <entry>
+                unsigned long`
+              </entry>
+            </row>
           </tbody>
         </tgroup>
       </informaltable>
-      <para>
-        <literal>Long_val</literal> <literal>int</literal>
-        <literal>long</literal> <literal>Int_val</literal>
-        <literal>int</literal> <literal>int</literal>
-        <literal>Unsigned_long_val</literal> <literal>int</literal>
-        <literal>unsigned long</literal>
-        <literal>Unsigned_int_val</literal> <literal>int</literal>
-        <literal>unsigned int</literal> <literal>Bool_val</literal>
-        <literal>bool</literal> <literal>int</literal>
-        <literal>Double_val</literal> <literal>float</literal>
-        <literal>double</literal> <literal>String_val</literal>
-        <literal>string</literal> <literal>string</literal>
-        <literal>Nativeint_val</literal> <literal>Nativeint.t</literal>
-        <literal>long</literal> <literal>Int32_val</literal>
-        <literal>Int32.t</literal> <literal>long</literal>
-        <literal>Int64_val</literal> <literal>Int64.t</literal>
-        <literal>unsigned long</literal>
-      </para>
     </sect2>
     <sect2 id="constructing-ocaml-values-from-c">
       <title>Constructing OCaml values from C</title>
