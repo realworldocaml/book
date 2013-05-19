@@ -16172,6 +16172,686 @@ type meta = {
       </para>
     </sect2>
   </sect1>
+</chapter><chapter id="data-serialization-with-s-expressions">
+  <title>Data Serialization with S-Expressions</title>
+  <para>
+    Data serialization, <emphasis>i.e.</emphasis> converting data to and
+    from a sequence of bytes that's suitable for writing to disk or
+    sending across the network, is an important and common programming
+    task. Sometimes you need to match someone else's data format (such
+    as XML), sometimes you need a highly efficient format, and sometimes
+    you just want something that is easy for humans to read and edit. To
+    this end, OCaml comes with several techniques for data serialization
+    depending on what your problem is.
+  </para>
+  <para>
+    We'll start by considering the question of how to serialize data in
+    a human-readable and editable form when you're not constrained to
+    using a particular third-party format. Core's solution to this
+    problem is to use s-expressions
+  </para>
+  <para>
+    S-expressions are nested paranthetical expressions whose atomic
+    values are strings. They were first popularized by the Lisp
+    programming language in the 1960s, and have remained one of the
+    simplest and most effective ways to encode structured data. An
+    example s-expression might look like this:
+  </para>
+  <programlisting language="scheme">
+(this (is an) (s expression))
+</programlisting>
+  <para>
+    The OCaml type of an s-expression is quite simple:
+  </para>
+  <programlisting language="ocaml">
+module Sexp : sig
+  type t = Atom of string | List of t list
+end
+</programlisting>
+  <para>
+    An s-expression can be thought of as a tree where each node contains
+    a list of its children, and where the leaves of the tree are
+    strings.
+  </para>
+  <para>
+    The <literal>Sexp</literal> module in Core comes with functionality
+    for parsing and printing s-expressions.
+  </para>
+  <programlisting language="ocaml">
+# let sexp =
+    let a x = Sexp.Atom x and l x = Sexp.List x in
+    l [a &quot;this&quot;;l [a &quot;is&quot;; a &quot;an&quot;]; l [a &quot;s&quot;; a &quot;expression&quot;]];;
+val sexp : Sexp.t = (this (is an) (s expression))
+</programlisting>
+  <para>
+    In addition, most of the base types in Core support conversion to
+    and from s-expressions. For example, we can write:
+  </para>
+  <programlisting language="ocaml">
+# Int.sexp_of_t 3;;
+- : Sexp.t = 3
+# List.sexp_of_t;;
+- : ('a -&gt; Sexp.t) -&gt; 'a List.t -&gt; Sexp.t = &lt;fun&gt;
+# List.sexp_of_t Int.sexp_of_t [1;2;3];;
+- : Sexp.t = (1 2 3)
+</programlisting>
+  <para>
+    Notice that <literal>List.sexp_of_t</literal> is polymorphic, and
+    takes as its first argument another conversion function to handle
+    the elements of the list to be converted. Core uses this scheme more
+    generally for defining sexp-converters for polymorphic types.
+  </para>
+  <para>
+    But what if you want a function to convert some brand new type to an
+    s-expression? You can of course write it yourself manually:
+  </para>
+  <programlisting language="ocaml">
+# type t = { foo: int; bar: float };;
+# let sexp_of_t t =
+    let a x = Sexp.Atom x and l x = Sexp.List x in
+    l [ l [a &quot;foo&quot;; Int.sexp_of_t t.foo  ];
+        l [a &quot;bar&quot;; Float.sexp_of_t t.bar]; ]
+  ;;
+val sexp_of_t : t -&gt; Core.Std.Sexp.t = &lt;fun&gt;
+# sexp_of_t { foo = 3; bar = -5.5 };;
+- : Core.Std.Sexp.t = ((foo 3) (bar -5.5))
+</programlisting>
+  <para>
+    This is somewhat tiresome to write, and it gets more so when you
+    consider the parser, <emphasis>i.e.</emphasis>,
+    <literal>t_of_sexp</literal>, which is considerably more complex.
+    Writing this kind of parsing and printing code by hand is mechanical
+    and error prone, not to mention a drag.
+  </para>
+  <para>
+    Given how mechanical the code is, you could imagine writing a
+    program that inspected the type definition and auto-generated the
+    conversion code for you. As it turns out, we can do just that using
+    <literal>Sexplib</literal>. The <literal>Sexplib</literal> package,
+    which is included with Core, provides both a library for
+    manipulating s-exressions and a syntax extension for generating such
+    conversion functions. With that synax extension enabled, any type
+    that has <literal>with sexp</literal> as an annotation will trigger
+    the generation of the functions we want for free.
+  </para>
+  <programlisting language="ocaml">
+# type t = { foo: int; bar: float } with sexp;;
+type t = { foo : int; bar : float; }
+val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
+# t_of_sexp (Sexp.of_string &quot;((bar 35) (foo 3))&quot;);;
+- : t = {foo = 3; bar = 35.}
+</programlisting>
+  <para>
+    The <literal>with sexp</literal> is detected by a
+    <literal>Sexplib</literal> syntax extension and replaced with the
+    extra conversion functions you see above. You can ignore
+    <literal>t_of_sexp__</literal>, which is a helper function that is
+    needed in very rare cases.
+  </para>
+  <para>
+    The syntax extensions in Core almost all have this same basic
+    structure: they auto-generate code based on type definitions,
+    implementing functionality that you could in theory have implemented
+    by hand, but with far less programmer effort.
+  </para>
+  <note>
+  <title>
+  The <literal>camlp4</literal> preprocessor and
+  <literal>type_conv</literal>
+  </title>
+  <para>
+    OCaml doesn't directly support converting static type definitions to
+    and from other data formats. Instead, it supplies a powerful syntax
+    extension mechanism known as <literal>camlp4</literal>. This lets
+    you extend the grammar of the language to mark types as requiring
+    special action, and then mechanically generate boilerplate code over
+    those types (such as converting to and from other data formats).
+  </para>
+  <para>
+    Many of the examples in the subsequent chapters depend on
+    <literal>camlp4</literal>, but the examples all invoke it
+    automatically for you via the <literal>-pp</literal> flag to the
+    OCaml compiler. If you're interested in building your own
+    generators, investigate the <literal>type_conv</literal> library
+    which provides the basic extension mechanism used by the rest of
+    this chapter.
+  </para>
+  </note>
+  <sect1 id="the-sexp-format">
+    <title>The Sexp format</title>
+    <para>
+      The textual representation of s-expressions is pretty
+      straightforward. An s-expression is written down as a nested
+      parenthetical expression, with whitespace-separated strings as the
+      atoms. Quotes are used for atoms that contain parenthesis or
+      spaces themselves; backslash is the escape character; and
+      semicolons are used to introduce single-line comments. Thus, the
+      following file, <literal>example.scm</literal>:
+    </para>
+    <programlisting language="scheme">
+;; example.scm
+
+((foo 3.3) ;; This is a comment
+ (bar &quot;this is () an \&quot; atom&quot;))
+</programlisting>
+    <para>
+      can be loaded using sexplib. As you can see, the commented data is
+      not part of the resulting s-expression.
+    </para>
+    <programlisting language="ocaml">
+# Sexp.load_sexp &quot;example.scm&quot;;;
+- : Core.Std.Sexp.t = ((foo 3.3) (bar &quot;this is () an \&quot; atom&quot;))
+</programlisting>
+    <para>
+      All in, the s-expression format actually supports three comment
+      syntaxes:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>;</literal>, which comments out everything to the end
+          of a line
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>#|</literal> and <literal>|#</literal>, which are
+          delimiters for commenting out a block
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>#;</literal>, which comments out the first complete
+          s-expression that follows.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The following example shows all of these in action.
+    </para>
+    <programlisting language="scheme">
+;; comment_heavy_example.scm
+((this is included)
+ ; (this is commented out
+ (this stays)
+ #; (all of this is commented
+     out (even though it crosses lines.))
+  (and #| block delimiters #| which can be nested #|
+     will comment out
+    an arbitrary multi-line block))) |#
+   now we're done
+   ))
+</programlisting>
+    <para>
+      Again, loading the file as an s-expression drops the comments.
+    </para>
+    <programlisting language="ocaml">
+# Sexp.load_sexp &quot;comment_heavy_example.scm&quot;;;
+- : Core.Std.Sexp.t = ((this is included) (this stays) (and now we're done))
+</programlisting>
+    <para>
+      Note that the comments were dropped from the file upon reading.
+      This is expected, since there's no place in the
+      <literal>Sexp.t</literal> type to store comments.
+    </para>
+    <para>
+      If we introduce an error into our s-expression, by, say, deleting
+      the open-paren in front of <literal>bar</literal>, we'll get a
+      parse error:
+    </para>
+    <programlisting language="ocaml">
+# Exn.handle_uncaught ~exit:false (fun () -&gt;
+    ignore (Sexp.load_sexp &quot;example.scm&quot;));;
+  Uncaught exception:
+
+  (Sexplib.Sexp.Parse_error
+   ((location parse) (err_msg &quot;unexpected character: ')'&quot;) (text_line 4)
+    (text_char 29) (global_offset 94) (buf_pos 94)))
+</programlisting>
+    <para>
+      In the above, we use <literal>Exn.handle_uncaught</literal> to
+      make sure that the exception gets printed out in full detail. You
+      should generally wrap every Core program in this handler to get
+      good error messages for any unexpected exceptions.
+    </para>
+  </sect1>
+  <sect1 id="sexp-converters">
+    <title>Sexp converters</title>
+    <para>
+      The most important functionality provided by Sexplib is the
+      auto-generation of converters for new types. We've seen a bit of
+      how this works already, but let's walk through a complete example.
+      Here's the source for the beginning of a library for representing
+      integer intervals.
+    </para>
+    <programlisting language="ocaml">
+(* file: int_interval.ml *)
+(* Module for representing closed integer intervals *)
+
+open Core.Std
+
+(* Invariant: For any Range (x,y), y &gt;= x *)
+type t = | Range of int * int
+         | Empty
+with sexp
+
+let is_empty = function Empty -&gt; true | Range _ -&gt; false
+let create x y = if x &gt; y then Empty else Range (x,y)
+let contains i x = match i with
+   | Empty -&gt; false
+   | Range (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
+</programlisting>
+    <para>
+      We can now use this module as follows:
+    </para>
+    <programlisting language="ocaml">
+(* file: test_interval.ml *)
+
+open Core.Std
+
+let intervals =
+  let module I = Int_interval in
+  [ I.create 3 4;
+    I.create 5 4; (* should be empty *)
+    I.create 2 3;
+    I.create 1 6;
+  ]
+
+let () =
+  intervals
+  |&gt; List.sexp_of_t Int_interval.sexp_of_t
+  |&gt; Sexp.to_string_hum
+  |&gt; print_endline
+</programlisting>
+    <para>
+      But we're still missing something: we haven't created an
+      <literal>mli</literal> signature for
+      <literal>Int_interval</literal> yet. Note that we need to
+      explicitly export the s-expression converters that were created
+      within the ml. If we don't:
+    </para>
+    <programlisting language="ocaml">
+(* file: int_interval.mli *)
+(* Module for representing closed integer intervals *)
+
+type t
+
+val is_empty : t -&gt; bool
+val create : int -&gt; int -&gt; t
+val contains : t -&gt; int -&gt; bool
+</programlisting>
+    <para>
+      then we'll get the following error:
+    </para>
+    <programlisting>
+File &quot;test_interval.ml&quot;, line 15, characters 20-42:
+Error: Unbound value Int_interval.sexp_of_t
+Command exited with code 2.
+</programlisting>
+    <para>
+      We could export the types by hand in the signature:
+    </para>
+    <programlisting language="ocaml">
+type t
+val sexp_of_t : Sexp.t -&gt; t
+val t_of_sexp : t -&gt; Sexp.t
+</programlisting>
+    <para>
+      But Sexplib has a shorthand for this as well, so that we can just
+      use the same <literal>with</literal> shorthand in the
+      <literal>mli</literal>.
+    </para>
+    <programlisting language="ocaml">
+type t with sexp
+</programlisting>
+    <para>
+      at which point <literal>test_interval.ml</literal> will compile
+      again, and if we run it, we'll get the following output:
+    </para>
+    <programlisting>
+$ ./test_interval.native
+((Range 3 4) Empty (Range 2 3) (Range 1 6))
+</programlisting>
+    <sect2 id="preserving-invariants">
+      <title>Preserving invariants</title>
+      <para>
+        One easy mistake to make when dealing with sexp converters is to
+        ignore the fact that those converters can violate the invariants
+        of your code. For example, the <literal>Int_interval</literal>
+        module depends for the correctness of the
+        <literal>is_empty</literal> check on the fact that for any value
+        <literal>Range (x,y)</literal>, <literal>y</literal> is greater
+        than or equal to <literal>x</literal>. The
+        <literal>create</literal> function preserves this invariant, but
+        the <literal>t_of_sexp</literal> function does not.
+      </para>
+      <para>
+        We can fix this problem by overriding the autogenerated function
+        and writing a custom sexp-converter that is based on the
+        auto-generated converter.
+      </para>
+      <programlisting language="ocaml">
+type t = | Range of int * int
+         | Empty
+with sexp
+
+let create x y = if x &gt; y then Empty else Range (x,y)
+
+let t_of_sexp sexp =
+  let t = t_of_sexp sexp in
+  begin match t with
+  | Empty -&gt; ()
+  | Range (x,y) -&gt;
+    if y &lt; x then of_sexp_error &quot;Upper and lower bound of Range swapped&quot; sexp
+  end;
+  t
+</programlisting>
+      <para>
+        This trick of overriding an existing function definition with a
+        new one is perfectly acceptable in OCaml. Function definitions
+        are only recursive if the <literal>rec</literal> keyword is
+        specified, and so in this case the inner
+        <literal>t_of_sexp</literal> call will go to the earlier
+        auto-generated definition that resulted from the
+        <literal>type t with sexp</literal> definition.
+      </para>
+      <para>
+        We call the function <literal>of_sexp_error</literal> to raise
+        an exception because that improves the error reporting that
+        Sexplib can provide when a conversion fails.
+      </para>
+    </sect2>
+    <sect2 id="getting-good-error-messages">
+      <title>Getting good error messages</title>
+      <para>
+        There are two steps to deserializing a type from an
+        s-expression: first, converting the bytes in a file to an
+        s-expression, and the second, converting that s-expression into
+        the type in question. One problem with this is that it can be
+        hard to localize errors to the right place using this scheme.
+        Consider the following example:
+      </para>
+      <programlisting language="ocaml">
+(* file: read_foo.ml *)
+
+open Core.Std
+
+type t = { a: string; b: int; c: float option } with sexp
+
+let run () =
+  let t =
+    Sexp.load_sexp &quot;example.scm&quot;
+    |&gt; t_of_sexp
+  in
+  printf &quot;b is: %d\n%!&quot; t.b
+
+let () =
+  Exn.handle_uncaught ~exit:true run
+</programlisting>
+      <para>
+        If you were to run this on a malformatted file, say, this one:
+      </para>
+      <programlisting>
+;; example.scm
+((a not-an-integer)
+ (b not-an-integer)
+ (c ()))
+</programlisting>
+      <para>
+        you'll get the following error:
+      </para>
+      <programlisting>
+read_foo $ ./read_foo.native
+Uncaught exception:
+
+  (Sexplib.Conv.Of_sexp_error
+   (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) not-an-integer)
+</programlisting>
+      <para>
+        If all you have is the error message and the string, it's not
+        terribly informative. In particular, you know that the parsing
+        error-ed out on the atom &quot;not-an-integer&quot;, but you
+        don't know which one! In a large file, this kind of bad error
+        message can be pure misery.
+      </para>
+      <para>
+        But there's hope! If we make small change to the
+        <literal>run</literal> function as follows:
+      </para>
+      <programlisting language="ocaml">
+let run () =
+  let t = Sexp.load_sexp_conv_exn &quot;example.scm&quot; t_of_sexp in
+  printf &quot;b is: %d\n%!&quot; t.b
+</programlisting>
+      <para>
+        and run it again, we'll get the following much more helpful
+        error message:
+      </para>
+      <programlisting language="ocaml">
+read_foo $ ./read_foo.native
+Uncaught exception:
+
+  (Sexplib.Conv.Of_sexp_error
+   (Sexplib.Sexp.Annotated.Conv_exn example.scm:3:4
+    (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;))
+   not-an-integer)
+</programlisting>
+      <para>
+        In the above error, &quot;example.scm:3:4&quot; tells us that
+        the error occurred on &quot;example.scm&quot;, line 3, character
+        4, which is a much better start for figuring out what has gone
+        wrong.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="sexp-conversion-directives">
+    <title>Sexp-conversion directives</title>
+    <para>
+      Sexplib supports a collection of directives for modifying the
+      default behavior of the auto-generated sexp-converters. These
+      directives allow you to customize the way in which types are
+      represented as s-expressions without having to write a custom
+      parser.
+    </para>
+    <sect2 id="sexp_opaque">
+      <title><literal>sexp_opaque</literal></title>
+      <para>
+        The most commonly used directive is
+        <literal>sexp_opaque</literal>, whose purpose is to mark a given
+        component of a type as being unconvertible. Anything marked with
+        <literal>sexp_opaque</literal> will be presented as the atom
+        <literal>&lt;opaque&gt;</literal> by the to-sexp converter, and
+        will trigger an exception from the from-sexp converter. Note
+        that the type of a component marked as opaque doesn't need to
+        have a sexp-converter defined. Here, if we define a type without
+        a sexp-converter, and then try to use it another type with a
+        sexp-converter, we'll error out:
+      </para>
+      <programlisting language="ocaml">
+# type no_converter = int * int;;
+type no_converter = int * int
+# type t = { a: no_converter; b: string } with sexp;;
+Characters 14-26:
+  type t = { a: no_converter; b: string } with sexp;;
+                ^^^^^^^^^^^^
+Error: Unbound value no_converter_of_sexp
+</programlisting>
+      <para>
+        But with <literal>sexp_opaque</literal>, we won't:
+      </para>
+      <programlisting language="ocaml">
+# type t = { a: no_converter sexp_opaque; b: string } with sexp;;
+type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
+val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
+val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        And if we now convert a value of this type to an s-expression,
+        we'll see the contents of field <literal>a</literal> marked as
+        opaque:
+      </para>
+      <programlisting language="ocaml">
+# sexp_of_t { a = (3,4); b = &quot;foo&quot; };;
+- : Sexp.t = ((a &lt;opaque&gt;) (b foo))
+</programlisting>
+    </sect2>
+    <sect2 id="sexp_list">
+      <title><literal>sexp_list</literal></title>
+      <para>
+        Sometimes, sexp-converters have more parentheses than one would
+        ideally like. Consider, for example, the following variant type:
+      </para>
+      <programlisting language="ocaml">
+# type compatible_versions = | Specific of string list
+                             | All
+  with sexp;;
+# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
+- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
+</programlisting>
+      <para>
+        You might prefer to make the syntax a bit less parenthesis-laden
+        by dropping the parentheses around the list.
+        <literal>sexp_list</literal> gives us this alternate syntax:
+      </para>
+      <programlisting language="ocaml">
+# type compatible_versions = | Specific of string sexp_list
+                             | All
+  with sexp;;
+# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
+- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
+</programlisting>
+    </sect2>
+    <sect2 id="sexp_option">
+      <title><literal>sexp_option</literal></title>
+      <para>
+        Another common directive is <literal>sexp_option</literal>,
+        which is used to to make a record field optional in the
+        s-expressoin. Normally, optional values are represented either
+        as <literal>()</literal> for <literal>None</literal>, or as
+        <literal>(x)</literal> for <literal>Some x</literal>, and a
+        record field containing an option would be rendered accordingly.
+        For example:
+      </para>
+      <programlisting language="ocaml">
+# type t = { a: int option; b: string } with sexp;;
+# sexp_of_t { a = None; b = &quot;hello&quot; };;
+- : Sexp.t = ((a ()) (b hello))
+# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
+- : Sexp.t = ((a (3)) (b hello))
+</programlisting>
+      <para>
+        But what if we want a field to be optional,
+        <emphasis>i.e.</emphasis>, we want to allow it to be omitted
+        from the record entirely? In that case, we can mark it with
+        <literal>sexp_option</literal>:
+      </para>
+      <programlisting language="ocaml">
+# type t = { a: int sexp_option; b: string } with sexp;;
+# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
+- : Sexp.t = ((a 3) (b hello))
+# sexp_of_t { a = None; b = &quot;hello&quot; };;
+- : Sexp.t = ((b hello))
+</programlisting>
+    </sect2>
+    <sect2 id="specifying-defaults">
+      <title>Specifying defaults</title>
+      <para>
+        The <literal>sexp_option</literal> declaration is really just an
+        example of how one might want to deal with default values. With
+        <literal>sexp_option</literal>, your type on the OCaml side is
+        an option, with <literal>None</literal> representing the case
+        where no value is provided. But you might want to allow other
+        ways of filling in default values.
+      </para>
+      <para>
+        Consider the following type which represents the configuration
+        of a very simple web-server.
+      </para>
+      <programlisting language="ocaml">
+# type http_server_config = {
+     web_root: string;
+     port: int;
+     addr: string;
+  } with sexp;;
+</programlisting>
+      <para>
+        One could imagine making some of these paramters optional; in
+        particular, by default, we might want the web server to bind to
+        port 80, and to listen as localhost. The sexp-syntax allows this
+        to do this, as follows.
+      </para>
+      <programlisting language="ocaml">
+# type http_server_config = {
+     web_root: string;
+     port: int with default(80);
+     addr: string with default(&quot;localhost&quot;);
+  } with sexp;;
+type http_server_config = { web_root : string; port : int; addr : string; }
+val http_server_config_of_sexp__ : Sexplib.Sexp.t -&gt; http_server_config =
+  &lt;fun&gt;
+val http_server_config_of_sexp : Sexplib.Sexp.t -&gt; http_server_config = &lt;fun&gt;
+val sexp_of_http_server_config : http_server_config -&gt; Sexplib.Sexp.t = &lt;fun&gt;
+# http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;;;
+# let cfg = http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;);;
+val cfg : http_server_config =
+  {web_root = &quot;/var/www/html&quot;; port = 80; addr = &quot;localhost&quot;}
+</programlisting>
+      <para>
+        When we convert that back out to an s-expression, you'll notice
+        that no data is dropped.
+      </para>
+      <programlisting language="ocaml">
+# sexp_of_http_server_config cfg;;
+- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
+</programlisting>
+      <para>
+        We could make the generated s-expression also drop exported
+        values, by using the <literal>sexp_drop_default</literal>
+        directive.
+      </para>
+      <programlisting language="ocaml">
+# type http_server_config = {
+     web_root: string;
+     port: int with default(80), sexp_drop_default;
+     addr: string with default(&quot;localhost&quot;), sexp_drop_default;
+  } with sexp;;
+type http_server_config = { web_root : string; port : int; addr : string; }
+val http_server_config_of_sexp__ : Sexplib.Sexp.t -&gt; http_server_config =
+  &lt;fun&gt;
+val http_server_config_of_sexp : Sexplib.Sexp.t -&gt; http_server_config = &lt;fun&gt;
+val sexp_of_http_server_config : http_server_config -&gt; Sexplib.Sexp.t = &lt;fun&gt;
+# let cfg = http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;);;
+val cfg : http_server_config =
+  {web_root = &quot;/var/www/html&quot;; port = 80; addr = &quot;localhost&quot;}
+# sexp_of_http_server_config cfg;;
+- : Sexplib.Sexp.t = ((web_root /var/www/html))
+</programlisting>
+      <para>
+        As you can see, the fields that are at their default values are
+        simply omitted from the s-expression. On the other hand, if we
+        convert a config with other values, then those values will be
+        included in the s-expression.
+      </para>
+      <programlisting language="ocaml">
+# sexp_of_http_server_config { cfg with port = 8080 };;
+- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 8080))
+# sexp_of_http_server_config { cfg with port = 8080; addr = &quot;192.168.0.1&quot; };;
+- : Sexplib.Sexp.t =
+((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
+</programlisting>
+      <para>
+        This can be very useful in designing config file formats that
+        are both reasonably terse and easy to generate and maintain. It
+        can also be useful for backwards compatibility: if you add a new
+        field to your config record, but you make that field optiona,
+        then you should still be able to parse older version of your
+        config.
+      </para>
+    </sect2>
+  </sect1>
 </chapter><chapter id="concurrent-programming-with-async">
   <title>Concurrent Programming with Async</title>
   <para>
@@ -17774,686 +18454,6 @@ ocaml
 programming language, created by Xavier Leroy, Jérôme Vouillon,
 Damien Doligez, Didier Rémy and others in 1996.&quot;
 </programlisting>
-  </sect1>
-</chapter><chapter id="data-serialization-with-s-expressions">
-  <title>Data Serialization with S-Expressions</title>
-  <para>
-    Data serialization, <emphasis>i.e.</emphasis> converting data to and
-    from a sequence of bytes that's suitable for writing to disk or
-    sending across the network, is an important and common programming
-    task. Sometimes you need to match someone else's data format (such
-    as XML), sometimes you need a highly efficient format, and sometimes
-    you just want something that is easy for humans to read and edit. To
-    this end, OCaml comes with several techniques for data serialization
-    depending on what your problem is.
-  </para>
-  <para>
-    We'll start by considering the question of how to serialize data in
-    a human-readable and editable form when you're not constrained to
-    using a particular third-party format. Core's solution to this
-    problem is to use s-expressions
-  </para>
-  <para>
-    S-expressions are nested paranthetical expressions whose atomic
-    values are strings. They were first popularized by the Lisp
-    programming language in the 1960s, and have remained one of the
-    simplest and most effective ways to encode structured data. An
-    example s-expression might look like this:
-  </para>
-  <programlisting language="scheme">
-(this (is an) (s expression))
-</programlisting>
-  <para>
-    The OCaml type of an s-expression is quite simple:
-  </para>
-  <programlisting language="ocaml">
-module Sexp : sig
-  type t = Atom of string | List of t list
-end
-</programlisting>
-  <para>
-    An s-expression can be thought of as a tree where each node contains
-    a list of its children, and where the leaves of the tree are
-    strings.
-  </para>
-  <para>
-    The <literal>Sexp</literal> module in Core comes with functionality
-    for parsing and printing s-expressions.
-  </para>
-  <programlisting language="ocaml">
-# let sexp =
-    let a x = Sexp.Atom x and l x = Sexp.List x in
-    l [a &quot;this&quot;;l [a &quot;is&quot;; a &quot;an&quot;]; l [a &quot;s&quot;; a &quot;expression&quot;]];;
-val sexp : Sexp.t = (this (is an) (s expression))
-</programlisting>
-  <para>
-    In addition, most of the base types in Core support conversion to
-    and from s-expressions. For example, we can write:
-  </para>
-  <programlisting language="ocaml">
-# Int.sexp_of_t 3;;
-- : Sexp.t = 3
-# List.sexp_of_t;;
-- : ('a -&gt; Sexp.t) -&gt; 'a List.t -&gt; Sexp.t = &lt;fun&gt;
-# List.sexp_of_t Int.sexp_of_t [1;2;3];;
-- : Sexp.t = (1 2 3)
-</programlisting>
-  <para>
-    Notice that <literal>List.sexp_of_t</literal> is polymorphic, and
-    takes as its first argument another conversion function to handle
-    the elements of the list to be converted. Core uses this scheme more
-    generally for defining sexp-converters for polymorphic types.
-  </para>
-  <para>
-    But what if you want a function to convert some brand new type to an
-    s-expression? You can of course write it yourself manually:
-  </para>
-  <programlisting language="ocaml">
-# type t = { foo: int; bar: float };;
-# let sexp_of_t t =
-    let a x = Sexp.Atom x and l x = Sexp.List x in
-    l [ l [a &quot;foo&quot;; Int.sexp_of_t t.foo  ];
-        l [a &quot;bar&quot;; Float.sexp_of_t t.bar]; ]
-  ;;
-val sexp_of_t : t -&gt; Core.Std.Sexp.t = &lt;fun&gt;
-# sexp_of_t { foo = 3; bar = -5.5 };;
-- : Core.Std.Sexp.t = ((foo 3) (bar -5.5))
-</programlisting>
-  <para>
-    This is somewhat tiresome to write, and it gets more so when you
-    consider the parser, <emphasis>i.e.</emphasis>,
-    <literal>t_of_sexp</literal>, which is considerably more complex.
-    Writing this kind of parsing and printing code by hand is mechanical
-    and error prone, not to mention a drag.
-  </para>
-  <para>
-    Given how mechanical the code is, you could imagine writing a
-    program that inspected the type definition and auto-generated the
-    conversion code for you. As it turns out, we can do just that using
-    <literal>Sexplib</literal>. The <literal>Sexplib</literal> package,
-    which is included with Core, provides both a library for
-    manipulating s-exressions and a syntax extension for generating such
-    conversion functions. With that synax extension enabled, any type
-    that has <literal>with sexp</literal> as an annotation will trigger
-    the generation of the functions we want for free.
-  </para>
-  <programlisting language="ocaml">
-# type t = { foo: int; bar: float } with sexp;;
-type t = { foo : int; bar : float; }
-val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
-# t_of_sexp (Sexp.of_string &quot;((bar 35) (foo 3))&quot;);;
-- : t = {foo = 3; bar = 35.}
-</programlisting>
-  <para>
-    The <literal>with sexp</literal> is detected by a
-    <literal>Sexplib</literal> syntax extension and replaced with the
-    extra conversion functions you see above. You can ignore
-    <literal>t_of_sexp__</literal>, which is a helper function that is
-    needed in very rare cases.
-  </para>
-  <para>
-    The syntax extensions in Core almost all have this same basic
-    structure: they auto-generate code based on type definitions,
-    implementing functionality that you could in theory have implemented
-    by hand, but with far less programmer effort.
-  </para>
-  <note>
-  <title>
-  The <literal>camlp4</literal> preprocessor and
-  <literal>type_conv</literal>
-  </title>
-  <para>
-    OCaml doesn't directly support converting static type definitions to
-    and from other data formats. Instead, it supplies a powerful syntax
-    extension mechanism known as <literal>camlp4</literal>. This lets
-    you extend the grammar of the language to mark types as requiring
-    special action, and then mechanically generate boilerplate code over
-    those types (such as converting to and from other data formats).
-  </para>
-  <para>
-    Many of the examples in the subsequent chapters depend on
-    <literal>camlp4</literal>, but the examples all invoke it
-    automatically for you via the <literal>-pp</literal> flag to the
-    OCaml compiler. If you're interested in building your own
-    generators, investigate the <literal>type_conv</literal> library
-    which provides the basic extension mechanism used by the rest of
-    this chapter.
-  </para>
-  </note>
-  <sect1 id="the-sexp-format">
-    <title>The Sexp format</title>
-    <para>
-      The textual representation of s-expressions is pretty
-      straightforward. An s-expression is written down as a nested
-      parenthetical expression, with whitespace-separated strings as the
-      atoms. Quotes are used for atoms that contain parenthesis or
-      spaces themselves; backslash is the escape character; and
-      semicolons are used to introduce single-line comments. Thus, the
-      following file, <literal>example.scm</literal>:
-    </para>
-    <programlisting language="scheme">
-;; example.scm
-
-((foo 3.3) ;; This is a comment
- (bar &quot;this is () an \&quot; atom&quot;))
-</programlisting>
-    <para>
-      can be loaded using sexplib. As you can see, the commented data is
-      not part of the resulting s-expression.
-    </para>
-    <programlisting language="ocaml">
-# Sexp.load_sexp &quot;example.scm&quot;;;
-- : Core.Std.Sexp.t = ((foo 3.3) (bar &quot;this is () an \&quot; atom&quot;))
-</programlisting>
-    <para>
-      All in, the s-expression format actually supports three comment
-      syntaxes:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>;</literal>, which comments out everything to the end
-          of a line
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>#|</literal> and <literal>|#</literal>, which are
-          delimiters for commenting out a block
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>#;</literal>, which comments out the first complete
-          s-expression that follows.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      The following example shows all of these in action.
-    </para>
-    <programlisting language="scheme">
-;; comment_heavy_example.scm
-((this is included)
- ; (this is commented out
- (this stays)
- #; (all of this is commented
-     out (even though it crosses lines.))
-  (and #| block delimiters #| which can be nested #|
-     will comment out
-    an arbitrary multi-line block))) |#
-   now we're done
-   ))
-</programlisting>
-    <para>
-      Again, loading the file as an s-expression drops the comments.
-    </para>
-    <programlisting language="ocaml">
-# Sexp.load_sexp &quot;comment_heavy_example.scm&quot;;;
-- : Core.Std.Sexp.t = ((this is included) (this stays) (and now we're done))
-</programlisting>
-    <para>
-      Note that the comments were dropped from the file upon reading.
-      This is expected, since there's no place in the
-      <literal>Sexp.t</literal> type to store comments.
-    </para>
-    <para>
-      If we introduce an error into our s-expression, by, say, deleting
-      the open-paren in front of <literal>bar</literal>, we'll get a
-      parse error:
-    </para>
-    <programlisting language="ocaml">
-# Exn.handle_uncaught ~exit:false (fun () -&gt;
-    ignore (Sexp.load_sexp &quot;example.scm&quot;));;
-  Uncaught exception:
-
-  (Sexplib.Sexp.Parse_error
-   ((location parse) (err_msg &quot;unexpected character: ')'&quot;) (text_line 4)
-    (text_char 29) (global_offset 94) (buf_pos 94)))
-</programlisting>
-    <para>
-      In the above, we use <literal>Exn.handle_uncaught</literal> to
-      make sure that the exception gets printed out in full detail. You
-      should generally wrap every Core program in this handler to get
-      good error messages for any unexpected exceptions.
-    </para>
-  </sect1>
-  <sect1 id="sexp-converters">
-    <title>Sexp converters</title>
-    <para>
-      The most important functionality provided by Sexplib is the
-      auto-generation of converters for new types. We've seen a bit of
-      how this works already, but let's walk through a complete example.
-      Here's the source for the beginning of a library for representing
-      integer intervals.
-    </para>
-    <programlisting language="ocaml">
-(* file: int_interval.ml *)
-(* Module for representing closed integer intervals *)
-
-open Core.Std
-
-(* Invariant: For any Range (x,y), y &gt;= x *)
-type t = | Range of int * int
-         | Empty
-with sexp
-
-let is_empty = function Empty -&gt; true | Range _ -&gt; false
-let create x y = if x &gt; y then Empty else Range (x,y)
-let contains i x = match i with
-   | Empty -&gt; false
-   | Range (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
-</programlisting>
-    <para>
-      We can now use this module as follows:
-    </para>
-    <programlisting language="ocaml">
-(* file: test_interval.ml *)
-
-open Core.Std
-
-let intervals =
-  let module I = Int_interval in
-  [ I.create 3 4;
-    I.create 5 4; (* should be empty *)
-    I.create 2 3;
-    I.create 1 6;
-  ]
-
-let () =
-  intervals
-  |&gt; List.sexp_of_t Int_interval.sexp_of_t
-  |&gt; Sexp.to_string_hum
-  |&gt; print_endline
-</programlisting>
-    <para>
-      But we're still missing something: we haven't created an
-      <literal>mli</literal> signature for
-      <literal>Int_interval</literal> yet. Note that we need to
-      explicitly export the s-expression converters that were created
-      within the ml. If we don't:
-    </para>
-    <programlisting language="ocaml">
-(* file: int_interval.mli *)
-(* Module for representing closed integer intervals *)
-
-type t
-
-val is_empty : t -&gt; bool
-val create : int -&gt; int -&gt; t
-val contains : t -&gt; int -&gt; bool
-</programlisting>
-    <para>
-      then we'll get the following error:
-    </para>
-    <programlisting>
-File &quot;test_interval.ml&quot;, line 15, characters 20-42:
-Error: Unbound value Int_interval.sexp_of_t
-Command exited with code 2.
-</programlisting>
-    <para>
-      We could export the types by hand in the signature:
-    </para>
-    <programlisting language="ocaml">
-type t
-val sexp_of_t : Sexp.t -&gt; t
-val t_of_sexp : t -&gt; Sexp.t
-</programlisting>
-    <para>
-      But Sexplib has a shorthand for this as well, so that we can just
-      use the same <literal>with</literal> shorthand in the
-      <literal>mli</literal>.
-    </para>
-    <programlisting language="ocaml">
-type t with sexp
-</programlisting>
-    <para>
-      at which point <literal>test_interval.ml</literal> will compile
-      again, and if we run it, we'll get the following output:
-    </para>
-    <programlisting>
-$ ./test_interval.native
-((Range 3 4) Empty (Range 2 3) (Range 1 6))
-</programlisting>
-    <sect2 id="preserving-invariants">
-      <title>Preserving invariants</title>
-      <para>
-        One easy mistake to make when dealing with sexp converters is to
-        ignore the fact that those converters can violate the invariants
-        of your code. For example, the <literal>Int_interval</literal>
-        module depends for the correctness of the
-        <literal>is_empty</literal> check on the fact that for any value
-        <literal>Range (x,y)</literal>, <literal>y</literal> is greater
-        than or equal to <literal>x</literal>. The
-        <literal>create</literal> function preserves this invariant, but
-        the <literal>t_of_sexp</literal> function does not.
-      </para>
-      <para>
-        We can fix this problem by overriding the autogenerated function
-        and writing a custom sexp-converter that is based on the
-        auto-generated converter.
-      </para>
-      <programlisting language="ocaml">
-type t = | Range of int * int
-         | Empty
-with sexp
-
-let create x y = if x &gt; y then Empty else Range (x,y)
-
-let t_of_sexp sexp =
-  let t = t_of_sexp sexp in
-  begin match t with
-  | Empty -&gt; ()
-  | Range (x,y) -&gt;
-    if y &lt; x then of_sexp_error &quot;Upper and lower bound of Range swapped&quot; sexp
-  end;
-  t
-</programlisting>
-      <para>
-        This trick of overriding an existing function definition with a
-        new one is perfectly acceptable in OCaml. Function definitions
-        are only recursive if the <literal>rec</literal> keyword is
-        specified, and so in this case the inner
-        <literal>t_of_sexp</literal> call will go to the earlier
-        auto-generated definition that resulted from the
-        <literal>type t with sexp</literal> definition.
-      </para>
-      <para>
-        We call the function <literal>of_sexp_error</literal> to raise
-        an exception because that improves the error reporting that
-        Sexplib can provide when a conversion fails.
-      </para>
-    </sect2>
-    <sect2 id="getting-good-error-messages">
-      <title>Getting good error messages</title>
-      <para>
-        There are two steps to deserializing a type from an
-        s-expression: first, converting the bytes in a file to an
-        s-expression, and the second, converting that s-expression into
-        the type in question. One problem with this is that it can be
-        hard to localize errors to the right place using this scheme.
-        Consider the following example:
-      </para>
-      <programlisting language="ocaml">
-(* file: read_foo.ml *)
-
-open Core.Std
-
-type t = { a: string; b: int; c: float option } with sexp
-
-let run () =
-  let t =
-    Sexp.load_sexp &quot;example.scm&quot;
-    |&gt; t_of_sexp
-  in
-  printf &quot;b is: %d\n%!&quot; t.b
-
-let () =
-  Exn.handle_uncaught ~exit:true run
-</programlisting>
-      <para>
-        If you were to run this on a malformatted file, say, this one:
-      </para>
-      <programlisting>
-;; example.scm
-((a not-an-integer)
- (b not-an-integer)
- (c ()))
-</programlisting>
-      <para>
-        you'll get the following error:
-      </para>
-      <programlisting>
-read_foo $ ./read_foo.native
-Uncaught exception:
-
-  (Sexplib.Conv.Of_sexp_error
-   (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) not-an-integer)
-</programlisting>
-      <para>
-        If all you have is the error message and the string, it's not
-        terribly informative. In particular, you know that the parsing
-        error-ed out on the atom &quot;not-an-integer&quot;, but you
-        don't know which one! In a large file, this kind of bad error
-        message can be pure misery.
-      </para>
-      <para>
-        But there's hope! If we make small change to the
-        <literal>run</literal> function as follows:
-      </para>
-      <programlisting language="ocaml">
-let run () =
-  let t = Sexp.load_sexp_conv_exn &quot;example.scm&quot; t_of_sexp in
-  printf &quot;b is: %d\n%!&quot; t.b
-</programlisting>
-      <para>
-        and run it again, we'll get the following much more helpful
-        error message:
-      </para>
-      <programlisting language="ocaml">
-read_foo $ ./read_foo.native
-Uncaught exception:
-
-  (Sexplib.Conv.Of_sexp_error
-   (Sexplib.Sexp.Annotated.Conv_exn example.scm:3:4
-    (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;))
-   not-an-integer)
-</programlisting>
-      <para>
-        In the above error, &quot;example.scm:3:4&quot; tells us that
-        the error occurred on &quot;example.scm&quot;, line 3, character
-        4, which is a much better start for figuring out what has gone
-        wrong.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="sexp-conversion-directives">
-    <title>Sexp-conversion directives</title>
-    <para>
-      Sexplib supports a collection of directives for modifying the
-      default behavior of the auto-generated sexp-converters. These
-      directives allow you to customize the way in which types are
-      represented as s-expressions without having to write a custom
-      parser.
-    </para>
-    <sect2 id="sexp_opaque">
-      <title><literal>sexp_opaque</literal></title>
-      <para>
-        The most commonly used directive is
-        <literal>sexp_opaque</literal>, whose purpose is to mark a given
-        component of a type as being unconvertible. Anything marked with
-        <literal>sexp_opaque</literal> will be presented as the atom
-        <literal>&lt;opaque&gt;</literal> by the to-sexp converter, and
-        will trigger an exception from the from-sexp converter. Note
-        that the type of a component marked as opaque doesn't need to
-        have a sexp-converter defined. Here, if we define a type without
-        a sexp-converter, and then try to use it another type with a
-        sexp-converter, we'll error out:
-      </para>
-      <programlisting language="ocaml">
-# type no_converter = int * int;;
-type no_converter = int * int
-# type t = { a: no_converter; b: string } with sexp;;
-Characters 14-26:
-  type t = { a: no_converter; b: string } with sexp;;
-                ^^^^^^^^^^^^
-Error: Unbound value no_converter_of_sexp
-</programlisting>
-      <para>
-        But with <literal>sexp_opaque</literal>, we won't:
-      </para>
-      <programlisting language="ocaml">
-# type t = { a: no_converter sexp_opaque; b: string } with sexp;;
-type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
-val t_of_sexp__ : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val t_of_sexp : Sexplib.Sexp.t -&gt; t = &lt;fun&gt;
-val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
-</programlisting>
-      <para>
-        And if we now convert a value of this type to an s-expression,
-        we'll see the contents of field <literal>a</literal> marked as
-        opaque:
-      </para>
-      <programlisting language="ocaml">
-# sexp_of_t { a = (3,4); b = &quot;foo&quot; };;
-- : Sexp.t = ((a &lt;opaque&gt;) (b foo))
-</programlisting>
-    </sect2>
-    <sect2 id="sexp_list">
-      <title><literal>sexp_list</literal></title>
-      <para>
-        Sometimes, sexp-converters have more parentheses than one would
-        ideally like. Consider, for example, the following variant type:
-      </para>
-      <programlisting language="ocaml">
-# type compatible_versions = | Specific of string list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
-- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
-</programlisting>
-      <para>
-        You might prefer to make the syntax a bit less parenthesis-laden
-        by dropping the parentheses around the list.
-        <literal>sexp_list</literal> gives us this alternate syntax:
-      </para>
-      <programlisting language="ocaml">
-# type compatible_versions = | Specific of string sexp_list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific [&quot;3.12.0&quot;; &quot;3.12.1&quot;; &quot;3.13.0&quot;]);;
-- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
-</programlisting>
-    </sect2>
-    <sect2 id="sexp_option">
-      <title><literal>sexp_option</literal></title>
-      <para>
-        Another common directive is <literal>sexp_option</literal>,
-        which is used to to make a record field optional in the
-        s-expressoin. Normally, optional values are represented either
-        as <literal>()</literal> for <literal>None</literal>, or as
-        <literal>(x)</literal> for <literal>Some x</literal>, and a
-        record field containing an option would be rendered accordingly.
-        For example:
-      </para>
-      <programlisting language="ocaml">
-# type t = { a: int option; b: string } with sexp;;
-# sexp_of_t { a = None; b = &quot;hello&quot; };;
-- : Sexp.t = ((a ()) (b hello))
-# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
-- : Sexp.t = ((a (3)) (b hello))
-</programlisting>
-      <para>
-        But what if we want a field to be optional,
-        <emphasis>i.e.</emphasis>, we want to allow it to be omitted
-        from the record entirely? In that case, we can mark it with
-        <literal>sexp_option</literal>:
-      </para>
-      <programlisting language="ocaml">
-# type t = { a: int sexp_option; b: string } with sexp;;
-# sexp_of_t { a = Some 3; b = &quot;hello&quot; };;
-- : Sexp.t = ((a 3) (b hello))
-# sexp_of_t { a = None; b = &quot;hello&quot; };;
-- : Sexp.t = ((b hello))
-</programlisting>
-    </sect2>
-    <sect2 id="specifying-defaults">
-      <title>Specifying defaults</title>
-      <para>
-        The <literal>sexp_option</literal> declaration is really just an
-        example of how one might want to deal with default values. With
-        <literal>sexp_option</literal>, your type on the OCaml side is
-        an option, with <literal>None</literal> representing the case
-        where no value is provided. But you might want to allow other
-        ways of filling in default values.
-      </para>
-      <para>
-        Consider the following type which represents the configuration
-        of a very simple web-server.
-      </para>
-      <programlisting language="ocaml">
-# type http_server_config = {
-     web_root: string;
-     port: int;
-     addr: string;
-  } with sexp;;
-</programlisting>
-      <para>
-        One could imagine making some of these paramters optional; in
-        particular, by default, we might want the web server to bind to
-        port 80, and to listen as localhost. The sexp-syntax allows this
-        to do this, as follows.
-      </para>
-      <programlisting language="ocaml">
-# type http_server_config = {
-     web_root: string;
-     port: int with default(80);
-     addr: string with default(&quot;localhost&quot;);
-  } with sexp;;
-type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp__ : Sexplib.Sexp.t -&gt; http_server_config =
-  &lt;fun&gt;
-val http_server_config_of_sexp : Sexplib.Sexp.t -&gt; http_server_config = &lt;fun&gt;
-val sexp_of_http_server_config : http_server_config -&gt; Sexplib.Sexp.t = &lt;fun&gt;
-# http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;;;
-# let cfg = http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;);;
-val cfg : http_server_config =
-  {web_root = &quot;/var/www/html&quot;; port = 80; addr = &quot;localhost&quot;}
-</programlisting>
-      <para>
-        When we convert that back out to an s-expression, you'll notice
-        that no data is dropped.
-      </para>
-      <programlisting language="ocaml">
-# sexp_of_http_server_config cfg;;
-- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
-</programlisting>
-      <para>
-        We could make the generated s-expression also drop exported
-        values, by using the <literal>sexp_drop_default</literal>
-        directive.
-      </para>
-      <programlisting language="ocaml">
-# type http_server_config = {
-     web_root: string;
-     port: int with default(80), sexp_drop_default;
-     addr: string with default(&quot;localhost&quot;), sexp_drop_default;
-  } with sexp;;
-type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp__ : Sexplib.Sexp.t -&gt; http_server_config =
-  &lt;fun&gt;
-val http_server_config_of_sexp : Sexplib.Sexp.t -&gt; http_server_config = &lt;fun&gt;
-val sexp_of_http_server_config : http_server_config -&gt; Sexplib.Sexp.t = &lt;fun&gt;
-# let cfg = http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;);;
-val cfg : http_server_config =
-  {web_root = &quot;/var/www/html&quot;; port = 80; addr = &quot;localhost&quot;}
-# sexp_of_http_server_config cfg;;
-- : Sexplib.Sexp.t = ((web_root /var/www/html))
-</programlisting>
-      <para>
-        As you can see, the fields that are at their default values are
-        simply omitted from the s-expression. On the other hand, if we
-        convert a config with other values, then those values will be
-        included in the s-expression.
-      </para>
-      <programlisting language="ocaml">
-# sexp_of_http_server_config { cfg with port = 8080 };;
-- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 8080))
-# sexp_of_http_server_config { cfg with port = 8080; addr = &quot;192.168.0.1&quot; };;
-- : Sexplib.Sexp.t =
-((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
-</programlisting>
-      <para>
-        This can be very useful in designing config file formats that
-        are both reasonably terse and easy to generate and maintain. It
-        can also be useful for backwards compatibility: if you add a new
-        field to your config record, but you make that field optiona,
-        then you should still be able to parse older version of your
-        config.
-      </para>
-    </sect2>
   </sect1>
 </chapter><chapter id="fast-binary-serialization">
   <title>Fast Binary Serialization</title>
