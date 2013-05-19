@@ -123,8 +123,8 @@ error type.  Among other things, this makes it easier to write utility
 functions to automate common error handling patterns.
 
 But which type to choose?  Is it better to represent errors as
-strings?  Some more structured representation like XML or
-s-expressions?  Or something else entirely?
+strings?  Some more structured representation like XML?  Or something
+else entirely?
 
 Core's answer to this question is the `Error.t` type, which tries to
 forge a good compromise between efficiency, convenience, and control
@@ -159,8 +159,21 @@ that takes a single argument of type `unit`.
 In this case, we can benefit from the laziness of `Error`, since the
 thunk won't be called until the `Error.t` is converted to a string.
 
-We can also create an `Error.t` based on an s-expression converter.
-This is probably the most common idiom in Core.
+The most common way to create an `Error.t` is based on an
+_s-expression_.  The basic idea is pretty simple.  An s-expression is
+a balanced parenthetical expression where the leaves of the
+expressions are strings.  Thus, the following is a simple
+s-expression:
+
+```
+(This (is an) (s expression))
+```
+
+S-expressions are supported by the Sexplib library that is distributed
+with Core, and is the most common serialization format used in Core.
+Indeed, most types in Core come with built-in s-expression converters.
+Here's an example of creating an error using the sexp converter for
+times, `Time.sexp_of_t`.
 
 ```ocaml
 # Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
@@ -168,23 +181,28 @@ This is probably the most common idiom in Core.
 "Something failed a long time ago: (1969-12-31 19:00:00.000000)"
 ```
 
-Here, the value `Time.epoch` is included in the error, but that value
-isn't converted into an s-expression until the error is printed out.
-Using the Sexplib syntax-extension, which is discussed in more detail
-in chapter [xref](data-serialization-with-json-xml-and-s-expressions),
-we can create an s-expression converter for a new type, thus allowing
-us to conveniently register multiple pieces of data in an `Error.t` as
-a tuple.
+Note that the time isn't actually serialized into an s-expression
+until the error is printed out.  We're not restricted to doing this
+kind of error reporting with built-in types.  This will be discussed
+in more detail in [xref](data-serialization-with-s-expressions), but
+Sexplib comes with a language extension that can auto-generate
+sexp-converters for newly generated types, as shown below.
+
+```ocaml
+# let custom_to_sexp = <:sexp_of<float * string list * int>>;;
+val custom_to_sexp : float * string list * int -> Sexp.t = <fun>
+# custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
+- : Sexp.t = (3.5 (a b c) 6034)
+```
+
+We can use this same idiom for generating an error.
 
 ```ocaml
 # Error.create "Something went terribly wrong"
     (3.5, ["a";"b";"c"], 6034)
     <:sexp_of<float * string list * int>> ;;
-- : Core.Std.Error.t = "Something went terribly wrong: (3.5(a b c)6034)"
+- : Error.t = Something went terribly wrong: (3.5(a b c)6034)
 ```
-
-The above declaration of `<:sexp_of<float * string list * int>>` is
-interpreted by sexplib as a sexp-converter for the tuple.
 
 `Error` also supports operations for transforming errors.  For
 example, it's often useful to augment an error with some extra
