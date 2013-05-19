@@ -1161,7 +1161,7 @@ let get_definition ~server word =
     (word, get_definition_from_json (String.concat strings)))
   >>| function
   | Ok (word,result) -> (word, Ok result)
-  | Error exn        -> (word, Error exn)
+  | Error _          -> (word, Error "Unexpected failure")
 ```
 
 Here, we use `try_with` to capture the exception, which we then use
@@ -1179,7 +1179,7 @@ let print_result (word,definition) =
     word
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
-     | Error _ -> "DuckDuckGo query failed unexpectedly"
+     | Error s -> "DuckDuckGo query failed: " ^ s
      | Ok None -> "No definition found"
      | Ok (Some def) ->
        String.concat ~sep:"\n"
@@ -1223,15 +1223,16 @@ program.  We already saw this in our DuckDuckGo example, where we used
 `Deferred.all` and `Deferred.all_unit` to wait for a list of deferreds
 to become determined.  Another useful primitive is `Deferred.both`,
 which lets you wait until two deferreds of different types have
-returned, returning both values as a tuple:
+returned, returning both values as a tuple.  Here, we use the function
+`sec`, which is shorthand for creating a time-span equal to a given
+number of seconds.
 
 ```ocaml
-# let both = Deferred.both
+# let string_and_float = Deferred.both
    (after (sec 0.5)  >>| fun () -> "A")
-   (after (sec 0.25) >>| fun () -> 32.33)
- ;; 
-val both : (string * float) Deferred.t = <abstr>
-# both;;
+   (after (sec 0.25) >>| fun () -> 32.33);;
+val string_and_float : (string * float) Deferred.t = <abstr>
+# string_and_float;;
 - : string * float = ("A", 32.33)
 ```
 
@@ -1270,18 +1271,17 @@ let get_definition_with_timeout ~server ~timeout word =
 We use `>>|` above to transform the deferred values we're waiting for
 so that `Deferred.any` can choose between values of the same type.
 
-One problem with the above code is that the HTTP query kicked off by
+A problem with this code is that the HTTP query kicked off by
 `get_definition` is not actually shut down when the timeout fires.  As
 such, `get_definition_with_timeout` essentially leaks an open
-connection.  Cohttp does provide a way of shutting down a client,
-though, by passing in a deferred that, when it is determined, will
-cause the client connection to be terminated and the corresponding
-connections closed.
+connection.  Happily, Cohttp does provide a way of shutting down a
+client.  You can pass a deferred under the label `interrupt` to
+`Cohttp_async.Client.get`.  Once `interrupt` is determined, the client
+connection will terminated and the corresponding connections closed.
 
 The following code shows how you can change `get_definition` and
-`get_definition_with_timeout` to actually cancel the process that's
-running.  First, we add an argument `~interrupt` to `get_definition`,
-which in turn just passed that to `Cohttp_async.Client.get`.
+`get_definition_with_timeout` to cancel the `get` call if the timeout
+expires.  
 
 ```ocaml
 (* Execute the DuckDuckGo search *)
@@ -1303,8 +1303,7 @@ timeout expires.
 
 ```ocaml
 let get_definition_with_timeout ~server ~timeout word =
-  let timeout_d = after timeout in
-  get_definition ~server ~interrupt:timeout_d word
+  get_definition ~server ~interrupt:(after timeout) word
   >>| fun (word,result) ->
   let result' = match result with
     | Ok _ as x -> x
@@ -1313,11 +1312,27 @@ let get_definition_with_timeout ~server ~timeout word =
   (word,result')
 ```
 
-This will work, and will cause the connection to fail if we time-out;
-but our code no longer explicitly knows whether or not the timeout has
-kicked in, and it shows when we use it, in that the error message in
-the case of a timeout will now be `Unexpected failure` rather than
-`Timed out`, which it was in our previous implementation.
+This will work, and will cause the connection to shut-down cleanly
+when we time out; but our code no longer explicitly knows whether or
+not the timeout has kicked in.  In particular, the error message on a
+timeout will now be `Unexpected failure` rather than `Timed out`,
+which it was in our previous implementation.  This is a minor issue in
+this case, but if we wanted to have special behavior in the case of a
+timeout, it would be a more serious issue.
+
+We can get more precise handling of timeouts using Async's `choose`
+operator, which lets you pick between a collection of different
+deferreds.  Each deferred is combined, using the function `choice`,
+with a function that is called if and only if that is the chosen
+deferred.  If multiple deferreds become determined at around the same
+time, there's no guarantee that the one that became determined first
+will be chosen; but once any deferred becomes determined, then the
+`choose` will become determined, and only one of the paired functions
+will be called.
+
+We can use `choose` to ensure that the `interrupt` deferred becomes
+determined if and only if the timeout-deferred is chosen.  Here's the
+code.
 
 ```ocaml
 let get_definition_with_timeout ~server ~timeout word =
@@ -1335,4 +1350,22 @@ let get_definition_with_timeout ~server ~timeout word =
            (word,result')
         )
     ]
+```
+
+Now, if we run this with a suitably small timeout, we'll see that some
+queries succeed and some fail, and the errors are reported accordingly.
+
+```
+$ ./search_with_timeout_no_leak.native "concurrent programming" ocaml -timeout 0.1s
+concurrent programming
+----------------------
+
+DuckDuckGo query failed: Timed out
+
+ocaml
+-----
+
+"OCaml or Objective Caml, is the main implementation of the Caml
+programming language, created by Xavier Leroy, Jérôme Vouillon,
+Damien Doligez, Didier Rémy and others in 1996."
 ```
