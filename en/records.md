@@ -55,6 +55,7 @@ the shell to extract the information we need about the computer we're
 running on, and the `Time.now` call from Core's `Time` module.
 
 ```ocaml
+# #require "core_extended";;
 # open Core_extended.Std;;
 # let my_host =
     let sh = Shell.sh_one_exn in
@@ -457,6 +458,7 @@ Given this, we can rewrite `register_heartbeat` more concisely.
 ```ocaml
 # let register_heartbeat t hb =
     { t with last_heartbeat_time = hb.Heartbeat.time };;
+val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
 Functional updates make your code independent of the identity of the
@@ -523,9 +525,9 @@ follows.
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 ```
 
-Note that `<-` is not needed for initialization, because all fields of
-a record, including mutable ones, must be specified when the record is
-created.
+Note that mutable assignment, and thus the `<-` operator, is not
+needed for initialization, because all fields of a record, including
+mutable ones, are specified when the record is created.
 
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming does have its place.  We'll discuss more about how (and
