@@ -247,12 +247,12 @@ val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
 ```
 
 The above code is a little bit hard to swallow, however, on a
-syntactic level.  We can make it a bit easier to read, and drop some
-of the parenthesis, by using the infix operator form of bind.  Note
-that we locally open the `Option.Monad_infix` module to get access to
-the operators.  (The module is called `Monad_infix` because the bind
-operator is part of a sub-interface called `Monad`, which we'll talk
-about more in [xref](#concurrent-programming-with-async).
+syntactic level.  We can make it easier to read, and drop some of the
+parenthesis, by using the infix operator form of bind, which we get
+access to by locally opening `Option.Monad_infix`.  The module is
+called `Monad_infix` because the bind operator is part of a
+sub-interface called `Monad`, which we'll talk about more in
+[xref](#concurrent-programming-with-async).
 
 ```ocaml
 # let compute_bounds ~cmp list =
@@ -415,6 +415,10 @@ of the module where the exception in question is defined.  In this
 case, since we've declared the exception at the toplevel, that module
 path is trivial.
 
+This is all part of the support for s-expressions provided by the
+Sexplib library and syntax-extension, which is described in more
+detail in [xref](data-serialization-with-s-expressions).
+
 </note>
 
 ### Helper functions for throwing exceptions
@@ -458,7 +462,7 @@ of code for zipping together two lists.
 ```
 
 Here we use `assert false`, which means that the assert is guaranteed
-to trigger.  In general, one can put an arbirary condition in the
+to trigger.  In general, one can put an arbitrary condition in the
 assertion.
 
 In this case, the assert can never be triggered because we have a
