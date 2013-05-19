@@ -263,7 +263,16 @@ about more in [xref](#concurrent-programming-with-async).
     List.hd sorted   >>= fun first ->
     List.last sorted >>= fun last  ->
     Some (first,last)
+  ;;
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 ```
+
+This use of `bind` isn't really materially better than the one we
+started with, and indeed, for small examples like this, direct
+matching of options is generally better than using `bind`.  But for
+large complex examples with many stages of error-handling, the bind
+idiom becomes clearer and easier to manage.
 
 There are other useful idioms encoded in the functions in `Option`.
 Another example is `Option.both`, which takes two optional values and
