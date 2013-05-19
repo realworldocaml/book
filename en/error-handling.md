@@ -273,7 +273,7 @@ large complex examples with many stages of error-handling, the bind
 idiom becomes clearer and easier to manage.
 
 There are other useful idioms encoded in the functions in `Option`.
-Another example is `Option.both`, which takes two optional values and
+One example is `Option.both`, which takes two optional values and
 produces a new optional pair that is `None` if either of its arguments
 are `None`.  Using `Option.both`, we can make `compute_bounds` even
 shorter.
@@ -282,6 +282,9 @@ shorter.
 # let compute_bounds ~cmp list =
     let sorted = List.sort ~cmp list in
     Option.both (List.hd sorted) (List.last sorted)
+  ;;
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 ```
 
 These error-handling functions are valuable because they let you
@@ -306,7 +309,7 @@ Exception: Division_by_zero.
 ```
 
 And an exception can terminate a computation even if it happens nested
-a few levels deep in a computation.
+somewhere deep within it.
 
 ```ocaml
 # List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
@@ -314,7 +317,8 @@ Exception: Division_by_zero.
 ```
 
 If we put a `printf` in the middle of the computation, we can see that
-`List.map` is interrupted part way through it's execution:
+`List.map` is interrupted part way through it's execution, never
+getting to the end of the list.
 
 
 ```ocaml
