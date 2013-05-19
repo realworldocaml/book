@@ -39,7 +39,6 @@
 
 
 
-
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -17657,8 +17656,183 @@ programming language, created by Xavier Leroy, Jérôme Vouillon,
 Damien Doligez, Didier Rémy and others in 1996.&quot;
 </programlisting>
   </sect1>
-</chapter><chapter id="fast-binary-serialization-with-bin_prot">
-  <title>Fast Binary Serialization with bin_prot</title>
+</chapter><chapter id="fast-binary-serialization">
+  <title>Fast Binary Serialization</title>
+  <para>
+    Now that we've learned the basics of working with Async, let's walk
+    through a small but non-trivial application: a message broker which
+    provides clients with a simple pub/sub API that lets them publish
+    and subscribe to streams of values associated with a given topic.
+  </para>
+  <para>
+    All of this will require a serialization format for the messages
+    themselves. S-expressions, which we encountered in
+    <xref linkend="data-serialization-with-s-expressions"/>,
+    are a good serialization format when you need something
+    machine-parseable as well as human readable and editable. But
+    Sexplib's s-expressions are not particularly performant for a couple
+    of reasons:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        s-expression serialization goes through an intermediate type,
+        <literal>Sexp.t</literal>, which must be allocated and is then
+        typically thrown away, putting non-trivial pressure on the
+        garbage collector.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        parsing and printing to strings in an ASCII format can be
+        expensive for types like <literal>int</literal>s,
+        <literal>float</literal>s and <literal>Time.t</literal>s where
+        some real computation needs to be done to produce or parse the
+        ASCII representation.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Bin-prot is a library and syntax extension that addresses these
+    issues by providing efficient serialization in a compact binary
+    format. You can enable Bin-prot in your top-level by typing the
+    following:
+  </para>
+  <programlisting language="ocaml">
+# #require &quot;bin_prot.syntax&quot;;;
+</programlisting>
+  <para>
+    The syntax extension is triggered on a given type by writing
+    <literal>with bin_io</literal> to the end of the type definition.
+    Thus, we can write:
+  </para>
+  <programlisting language="ocaml">
+# module M = struct
+    type t = { number: int;
+               text: string;
+               variant : [`Whatever of float | `Nothing ];
+             }
+    with bin_io
+  end;;
+module M :
+  sig
+    type t = {
+      number : int;
+      text : string;
+      variant : [ `Nothing | `Whatever of float ];
+    }
+    val bin_size_t : t -&gt; int
+    val bin_write_t_ :
+      Bin_prot.Unsafe_common.sptr -&gt;
+      Bin_prot.Unsafe_common.eptr -&gt; t -&gt; Bin_prot.Unsafe_common.sptr
+    val bin_write_t : Bin_prot.Common.buf -&gt; pos:int -&gt; t -&gt; int
+    val bin_writer_t : t Bin_prot.Type_class.writer0
+    val bin_read_t__ : 'a -&gt; 'b -&gt; 'c -&gt; 'd
+    val bin_read_t_ :
+      Bin_prot.Unsafe_common.sptr_ptr -&gt; Bin_prot.Unsafe_common.eptr -&gt; t
+    val bin_read_t : Bin_prot.Common.buf -&gt; pos_ref:int ref -&gt; t
+    val bin_reader_t : t Bin_prot.Type_class.reader0
+    val bin_t : t Bin_prot.Type_class.t0
+  end
+</programlisting>
+  <para>
+    The details of the generated values are not particularly important,
+    but they give you the functionality needed to serialize and
+    deserialize binary messages efficiently.
+  </para>
+  <para>
+    Clients can either publish values under a topic, or subscribe to the
+    stream of values associated with a given topic. The server will
+    maintain a cache of the last value published under any given topic,
+    so that a subscriber immediately receives the most recently
+    published value under said topic. To make it easier to see what's
+    going on, we'll also implement a query for dumping the current state
+    of the server.
+  </para>
+  <para>
+    We'll use Async's <literal>Rpc</literal> module for implementing
+    that client/server protocol. The following module specifies the
+    specific message types we'll use, as well as the RPCs that will be
+    used for communicating with the server.
+  </para>
+  <para>
+    First, we'll start with the basic types.
+  </para>
+  <programlisting language="ocaml">
+(* file: protocol.ml *)
+open Core.Std
+open Async.Std
+
+module Username : Identifiable = String
+module Topic    : Identifiable = String
+
+module Message = struct
+  type t = { text: string;
+             topic: Topic.t;
+             from: Username.t;
+             time: Time.t;
+           }
+  with sexp, bin_io
+end
+</programlisting>
+  <para>
+    <literal>Username.t</literal> and <literal>Topic.t</literal> are
+    just abstract types that are implemented as strings. The
+    <literal>Message.t</literal> type contains the basic information
+    associated with a message, including the text of the message, who
+    it's from, the topic, and the time it was sent.
+  </para>
+  <para>
+    Note that the declaration of <literal>Message.t</literal> is
+    followed by the annotation <literal>with sexp, bin_io</literal>.
+    We've seen <literal>with sexp</literal> before in
+    <xref linkend="data-serialization-with-s-expressions"/>,
+    but <literal>bin_io</literal> is new. S-expressions are a convenient
+    serialization format, but like any human-readable serialization
+    format,
+  </para>
+  <para>
+    Now we can move on to declaring the <literal>Rpc</literal> protocol
+    we'll use. The <literal>Rpc</literal> module actually supports two
+    different kinds of RPC protocols: an ordinary RPC, represented by an
+    <literal>Rpc.Rpc.t</literal>, is a simple back-and-forth style of
+    communication: the client sends a message, and the server sends a
+    response. In the following, we use <literal>Rpc.Rpc.create</literal>
+    to declare the <literal>Rpc</literal> interface.
+  </para>
+  <programlisting language="ocaml">
+let publish_rpc = Rpc.Rpc.create
+  ~name:&quot;publish&quot;
+  ~version:0
+  ~bin_query:Message.bin_t
+  ~bin_response:Unit.bin_t
+</programlisting>
+  <para>
+    Note that we declare a name for the RPC and a version number. The
+    name and the version number are used together to identify which RPC
+    is being sent, with the version number allowing the minting of
+    multiple revisions of the RPC, potentially with different types and
+    behavior.
+  </para>
+  <para>
+    The argument <literal>bin_query</literal> and
+    <literal>bin_response</literal> are used
+  </para>
+  <para>
+    ```ocaml let subscribe_rpc = Rpc.Pipe_rpc.create
+    ~name:&quot;subscribe&quot; ~version:0 ~bin_query:Topic.bin_t
+    ~bin_response:Message.bin_t ~bin_error:String.bin_t
+  </para>
+  <para>
+    module Dump = struct type single = { topic : Topic.t; message :
+    Message.t; num_subscribers: int; } with sexp,bin_io type t = single
+    list with sexp,bin_io end
+  </para>
+  <para>
+    let dump_rpc = Rpc.Rpc.create ~name:&quot;dump&quot; ~version:0
+    ~bin_query:Unit.bin_t ~bin_response:Dump.bin_t ``` # Fast Binary
+    Serialization with bin_prot
+  </para>
   <para>
     S-expressions are a good serialization format when you need
     something machine-parseable as well as human readable and editable.
