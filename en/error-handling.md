@@ -82,10 +82,10 @@ val find_mismatches :
 
 The use of options to encode errors underlines the fact that it's not
 clear whether a particular outcome, like not finding something on a
-list, is really an error, or just another valid outcome of your
-function.  This turns out to be very context-dependent, and
-error-aware return types give you a uniform way of handling the result
-that works well for both situations.
+list, is an error or is just another valid outcome.  This depends on
+the larger context of your program, and thus is not something that a
+general purpose library can know in advance.  One of the advantages of
+error-aware return types is that they work well in both situations.
 
 ### Encoding errors with `Result`
 
@@ -123,8 +123,8 @@ error type.  Among other things, this makes it easier to write utility
 functions to automate common error handling patterns.
 
 But which type to choose?  Is it better to represent errors as
-strings?  Some more structured representation like XML or
-s-expressions?  Or something else entirely?
+strings?  Some more structured representation like XML?  Or something
+else entirely?
 
 Core's answer to this question is the `Error.t` type, which tries to
 forge a good compromise between efficiency, convenience, and control
@@ -137,18 +137,17 @@ particularly if it includes expensive-to-convert numerical data.
 
 `Error` gets around this issue through laziness.  In particular, an
 `Error.t` allows you to put off generation of the error string until
-you need it, which means a lot of the time you never have to construct
-it at all. You can of course construct an error directly from a
-string:
+and unless you need it, which means a lot of the time you never have
+to construct it at all.  You can of course construct an error directly
+from a string:
 
 ```ocaml
 # Error.of_string "something went wrong";;
 - : Core.Std.Error.t = "something went wrong"
 ```
 
-A more interesting construction message from a performance point of
-view is to construct an `Error.t` from a _thunk_, _i.e._, a function
-that takes a single argument of type `unit`.
+But you can also construct an `Error.t` from a _thunk_, _i.e._, a
+function that takes a single argument of type `unit`.
 
 ```ocaml
 # Error.of_thunk (fun () ->
@@ -157,10 +156,22 @@ that takes a single argument of type `unit`.
 ```
 
 In this case, we can benefit from the laziness of `Error`, since the
-thunk won't be called until the `Error.t` is converted to a string.
+thunk won't be called unless the `Error.t` is converted to a string.
 
-We can also create an `Error.t` based on an s-expression converter.
-This is probably the most common idiom in Core.
+The most common way to create `Error.t`s is using _s-expressions_.  An
+s-expression is a balanced parenthetical expression where the leaves
+of the expressions are strings.  Thus, the following is a simple
+s-expression:
+
+```
+(This (is an) (s expression))
+```
+
+S-expressions are supported by the Sexplib library that is distributed
+with Core, and is the most common serialization format used in Core.
+Indeed, most types in Core come with built-in s-expression converters.
+Here's an example of creating an error using the sexp converter for
+times, `Time.sexp_of_t`.
 
 ```ocaml
 # Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
@@ -168,28 +179,34 @@ This is probably the most common idiom in Core.
 "Something failed a long time ago: (1969-12-31 19:00:00.000000)"
 ```
 
-Here, the value `Time.epoch` is included in the error, but that value
-isn't converted into an s-expression until the error is printed out.
-Using the Sexplib syntax-extension, which is discussed in more detail
-in chapter [xref](data-serialization-with-json-xml-and-s-expressions),
-we can create an s-expression converter for a new type, thus allowing
-us to conveniently register multiple pieces of data in an `Error.t` as
-a tuple.
+Note that the time isn't actually serialized into an s-expression
+until the error is printed out.  We're not restricted to doing this
+kind of error reporting with built-in types.  This will be discussed
+in more detail in [xref](data-serialization-with-s-expressions), but
+Sexplib comes with a language extension that can auto-generate
+sexp-converters for newly generated types, as shown below.
+
+```ocaml
+# let custom_to_sexp = <:sexp_of<float * string list * int>>;;
+val custom_to_sexp : float * string list * int -> Sexp.t = <fun>
+# custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
+- : Sexp.t = (3.5 (a b c) 6034)
+```
+
+We can use this same idiom for generating an error.
 
 ```ocaml
 # Error.create "Something went terribly wrong"
     (3.5, ["a";"b";"c"], 6034)
     <:sexp_of<float * string list * int>> ;;
-- : Core.Std.Error.t = "Something went terribly wrong: (3.5(a b c)6034)"
+- : Error.t = Something went terribly wrong: (3.5(a b c)6034)
 ```
-
-The above declaration of `<:sexp_of<float * string list * int>>` is
-interpreted by sexplib as a sexp-converter for the tuple.
 
 `Error` also supports operations for transforming errors.  For
 example, it's often useful to augment an error with some extra
-information about the context of the error, or to combine multiple
-errors together.  `Error.tag` and `Error.of_list` fulfill these roles.
+information about the context of the error or to combine multiple
+errors together.  `Error.tag` and `Error.of_list` fulfill these roles,
+as you can see below.
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
 Result.t`, and it is, after `option`, the most common way of returning
@@ -231,12 +248,12 @@ val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
 ```
 
 The above code is a little bit hard to swallow, however, on a
-syntactic level.  We can make it a bit easier to read, and drop some
-of the parenthesis, by using the infix operator form of bind.  Note
-that we locally open the `Option.Monad_infix` module to get access to
-the operators.  (The module is called `Monad_infix` because the bind
-operator is part of a sub-interface called `Monad`, which we'll talk
-about more in [xref](#concurrent-programming-with-async).
+syntactic level.  We can make it easier to read, and drop some of the
+parenthesis, by using the infix operator form of bind, which we get
+access to by locally opening `Option.Monad_infix`.  The module is
+called `Monad_infix` because the bind operator is part of a
+sub-interface called `Monad`, which we'll talk about more in
+[xref](#concurrent-programming-with-async).
 
 ```ocaml
 # let compute_bounds ~cmp list =
@@ -245,10 +262,19 @@ about more in [xref](#concurrent-programming-with-async).
     List.hd sorted   >>= fun first ->
     List.last sorted >>= fun last  ->
     Some (first,last)
+  ;;
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 ```
 
+This use of `bind` isn't really materially better than the one we
+started with, and indeed, for small examples like this, direct
+matching of options is generally better than using `bind`.  But for
+large complex examples with many stages of error-handling, the bind
+idiom becomes clearer and easier to manage.
+
 There are other useful idioms encoded in the functions in `Option`.
-Another example is `Option.both`, which takes two optional values and
+One example is `Option.both`, which takes two optional values and
 produces a new optional pair that is `None` if either of its arguments
 are `None`.  Using `Option.both`, we can make `compute_bounds` even
 shorter.
@@ -257,6 +283,9 @@ shorter.
 # let compute_bounds ~cmp list =
     let sorted = List.sort ~cmp list in
     Option.both (List.hd sorted) (List.last sorted)
+  ;;
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 ```
 
 These error-handling functions are valuable because they let you
@@ -281,7 +310,7 @@ Exception: Division_by_zero.
 ```
 
 And an exception can terminate a computation even if it happens nested
-a few levels deep in a computation.
+somewhere deep within it.
 
 ```ocaml
 # List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
@@ -289,7 +318,8 @@ Exception: Division_by_zero.
 ```
 
 If we put a `printf` in the middle of the computation, we can see that
-`List.map` is interrupted part way through it's execution:
+`List.map` is interrupted part way through it's execution, never
+getting to the end of the list.
 
 
 ```ocaml
@@ -386,19 +416,21 @@ exception Wrong_date of Core.Std.Date.t
 
 The period in front of `Wrong_date` is there because the
 representation generated by `with sexp` includes the full module path
-of the module where the exception in question is defined.  We'll talk
-more about modules in [xref](#files-modules-and-programs), but for
-now, it's enough to know that this is useful in tracking down which
-precise exception is being reported.  In this case, since we've
-declared the exception at the toplevel, that module path is trivial.
+of the module where the exception in question is defined.  In this
+case, since we've declared the exception at the toplevel, that module
+path is trivial.
+
+This is all part of the support for s-expressions provided by the
+Sexplib library and syntax-extension, which is described in more
+detail in [xref](data-serialization-with-s-expressions).
 
 </note>
 
 ### Helper functions for throwing exceptions
 
-A number of helper functions that are provided to simplify the task of
-throwing exceptions.  The simplest one is `failwith`, which could be
-defined as follows:
+OCaml and Core provide a number of helper functions to simplify the
+task of throwing exceptions.  The simplest one is `failwith`, which
+could be defined as follows:
 
 ```ocaml
 # let failwith msg = raise (Failure msg);;
@@ -410,9 +442,9 @@ can be found in the API documentation for the `Common` and `Exn`
 modules in Core.
 
 Another important way of throwing an exception is the `assert`
-directive.  `assert` is used for situations where violation of
-condition in question is a bug.  Consider the following piece of code
-for zipping together two lists.
+directive.  `assert` is used for situations where a violation of the
+condition in question indicates a bug.  Consider the following piece
+of code for zipping together two lists.
 
 ```ocaml
 # let merge_lists xs ys ~f =
@@ -435,7 +467,7 @@ for zipping together two lists.
 ```
 
 Here we use `assert false`, which means that the assert is guaranteed
-to trigger.  In general, one can put an arbirary condition in the
+to trigger.  In general, one can put an arbitrary condition in the
 assertion.
 
 In this case, the assert can never be triggered because we have a
@@ -455,12 +487,12 @@ can trigger the assert.
    ;;
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
 # merge_lists [1;2;3] [-1] ~f:(+);;
-Exception: (Assert_failure //toplevel// 25 15).
+Exception: (Assert_failure //toplevel// 6 15).
 ```
 
 This shows what's special about `assert`, which is that it captures
-the source location.
-
+the line number and character offset of the source location from which
+the assertion was made.
 
 ### Exception handlers
 
@@ -513,9 +545,9 @@ if the config file in question is malformed.  Unfortunately, that
 means that the `In_channel.t` that was opened will never be closed,
 leading to a file-descriptor leak.
 
-We can fix this using Core's `protect` function.  The basic purpose of
+We can fix this using Core's `protect` function.  The purpose of
 `protect` is to ensure that the `finally` thunk will be called when
-`f` exits, whether it exited normally or with an exception.  This is
+`f` exits, whether it exits normally or with an exception.  This is
 similar to the `try/finally` construct available in many programming
 languages, but it is implemented in a library, rather than being a
 built-in primitive.  Here's how it could be used to fix `load_config`.
@@ -523,29 +555,43 @@ built-in primitive.  Here's how it could be used to fix `load_config`.
 ```ocaml
 let load_config filename =
   let inc = In_channel.create filename in
-  protect ~f:(fun () -> Config.t_of_sexp (Sexp.input_sexp inc)
+  protect ~f:(fun () -> Config.t_of_sexp (Sexp.input_sexp inc))
     ~finally:(fun () -> In_channel.close inc)
 ```
+
+This is a common enough problem that `In_channel` has a function
+called `with_file` that automates this pattern.
+
+```ocaml
+let load_config filename =
+  In_channel.with_file filename ~f:(fun inc ->
+    Config.t_of_sexp (Sexp.input_sexp inc))
+```
+
+`In_channel.with_file` is actually built on top of `protect` so that
+it can clean up after itself in the presence of exceptions.
+
 
 ### Catching specific exceptions
 
 OCaml's exception-handling system allows you to tune your
 error-recovery logic to the particular error that was thrown.  For
-example, `List.find_exn` always throws `Not_found`.  You can take
-advantage of this in your code, for example, let's define a function
-called `lookup_weight`, with the following signature:
+example, `List.find_exn` throws `Not_found` when the element in
+question can'tbe found.  You can take advantage of this in your code,
+for example, let's define a function called `lookup_weight`, with the
+following signature.
 
 ```ocaml
-(** [lookup_weight ~compute_weight alist key] Looks up a
-    floating-point weight by applying [compute_weight] to the data
-    associated with [key] by [alist].  If [key] is not found, then
-    return 0.
-*)
 val lookup_weight :
   compute_weight:('data -> float) -> ('key * 'data) list -> 'key -> float
 ```
 
-We can implement such a function using exceptions as follows:
+`lookup_weight ~compute_weight alist key` should return a
+floating-point weight by applying `compute_weight` to the data
+associated with `key` by `alist`.  If `key` is not found, then it
+shoudl return 0.
+
+We can implement `lookup_weight` as follows.
 
 ```ocaml
 # let lookup_weight ~compute_weight alist key =
@@ -559,10 +605,11 @@ val lookup_weight :
   <fun>
 ```
 
-This implementation is more problematic than it looks.  In particular,
-what happens if `compute_weight` itself throws an exception?  Ideally,
-`lookup_weight` should propagate that exception on, but if the
-exception happens to be `Not_found`, then that's not what will happen:
+Let's think about the behavior of this code in the presence of
+exceptions.  In particular, what happens if `compute_weight` throws an
+exception?  Ideally, `lookup_weight` should propagate that exception
+on, but if the exception happens to be `Not_found`, then that's not
+what will happen:
 
 ```ocaml
 # lookup_weight ~compute_weight:(fun _ -> raise Not_found)
@@ -571,16 +618,17 @@ exception happens to be `Not_found`, then that's not what will happen:
 ```
 
 This kind of problem is hard to detect in advance, because the type
-system doesn't tell us what kinds of exceptions a given function might
-throw.  Because of this kind of confusion, it's usually better to
-avoid catching specific exceptions.  In this case, we can improve the
-code by catching the exception in a narrower scope.
+system doesn't tell you what exceptions a given function might throw.
+For this reason, it's generally better to avoid relying on the
+identity of the exception to determine the nature of a failure.  A
+better approach is to narrow the scope of the exception handler, so
+that when it fires it's very clear what part of the code failed.
 
 ```ocaml
 # let lookup_weight ~compute_weight alist key =
     match
       try Some (List.Assoc.find_exn alist key)
-      with Not_found -> None
+      with _ -> None
     with
     | None -> 0.
     | Some data -> compute_weight data ;;
@@ -638,12 +686,14 @@ where the error came from.  But in a complex program, simply knowing
 which exception was thrown is usually not enough information to figure
 out what went wrong.
 
-We can get more information from OCaml if we turn on stack traces.
-This can be done by setting the `OCAMLRUNPARAM` environment variable,
-as shown:
+We can get more information from OCaml if we turn on stack backtraces.
+A backtrace is essentially a summary of the stack of calls that were
+executed to get to the point where the exception was thrown.
+Backtraces can be enabled by setting the `OCAMLRUNPARAM` environment
+variable as shown.
 
 ```bash
-exn $ export OCAMLRUNPARAM=b
+exn $ export OCAMLRUNPARAM=b=1
 exn $ ./exn
 3
 Fatal error: exception Exn.Empty_list
@@ -651,9 +701,10 @@ Raised at file "exn.ml", line 7, characters 16-26
 Called from file "exn.ml", line 12, characters 17-28
 ```
 
-Backtraces can also be obtained at runtime.  In particular,
-`Exn.backtrace` will return the backtrace of the most recently thrown
-exception.
+You can also capture a backtrace within your program by calling
+`Exn.backtrace`, which returns the backtrace of the most recently
+thrown exception.  This is useful for reporting detailed information
+on errors that did not cause your program to fail.
 
 ### From exceptions to error-aware types and back again ###
 
