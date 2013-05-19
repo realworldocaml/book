@@ -84,6 +84,26 @@ record field using dot-notation.
 - : string = "i386"
 ```
 
+When declaring an OCaml type, you always have the option of
+parameterizing it by a polymorphic type.  Records are no different in
+this regard.  So, for example, here's a type one might to timestamp
+arbitrary items.
+
+```ocaml
+# type 'a timestamped = { item: 'a; time: Time.t };;
+type 'a timestamped = { item : 'a; time : Time.t; }
+```
+
+We can then write polymorphic functions that operate over this
+parameterized type.
+
+```ocaml
+# let first_timestamped list =
+    List.reduce list ~f:(fun a b -> if a.time < b.time then a else b)
+  ;;
+val first_timestamped : 'a timestamped list -> 'a timestamped option = <fun>
+```
+
 ## Patterns and exhaustiveness
 
 Another way of getting information out of a record is by using a
