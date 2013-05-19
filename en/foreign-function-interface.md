@@ -33,8 +33,8 @@ It will then be available via the `ctypes` ocamlfind package.
 Ncurses is a library to build terminal-independent text interfaces in a
 reasonably efficient way.  The  manual page (usually via `man ncurses`)
 explains the basics of the C interface.  The `initscr` function allocates some
-state and returns as a `WINDOW` pointer.  This C pointer is then passed to
-various terminal drawing functions.
+state and returns it as a point to the C `WINDOW` typedef.  This C pointer is
+then passed to various terminal drawing functions.
 
 The `ctypes` library provides a combinator interface that lets you declare
 these C functions as OCaml values.  The library takes care of converting the
