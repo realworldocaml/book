@@ -39,6 +39,7 @@
 
 
 
+
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -5577,6 +5578,7 @@ type &lt;record-name&gt; =
     <literal>Time</literal> module.
   </para>
   <programlisting language="ocaml">
+# #require &quot;core_extended&quot;;;
 # open Core_extended.Std;;
 # let my_host =
     let sh = Shell.sh_one_exn in
@@ -5928,11 +5930,14 @@ val create_log_entry :
       qualify the fields, because this function is outside of the
       <literal>Log_entry</literal> module where the record was defined.
       OCaml only requires the module qualification for one record field,
-      however, so we can write this more concisely.
+      however, so we can write this more concisely. Note that we are
+      allowed to insert whitespace between the module-path and the field
+      name.
     </para>
     <programlisting language="ocaml">
 # let create_log_entry ~session_id ~important message =
-     { Log_entry. time = Time.now (); session_id; important; message }
+     { Log_entry.
+       time = Time.now (); session_id; important; message }
   ;;
 val create_log_entry :
   session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
@@ -5942,7 +5947,7 @@ val create_log_entry :
       same trick when pattern-matching:
     </para>
     <programlisting language="ocaml">
-# let message_to_string { Log_entry. important; message; _ } =
+# let message_to_string { Log_entry.important; message; _ } =
     if important then String.uppercase message else message
   ;;
 val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
@@ -6014,6 +6019,7 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
     <programlisting language="ocaml">
 # let register_heartbeat t hb =
     { t with last_heartbeat_time = hb.Heartbeat.time };;
+val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </programlisting>
     <para>
       Functional updates make your code independent of the identity of
@@ -6081,9 +6087,10 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;f
 val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
 </programlisting>
     <para>
-      Note that <literal>&lt;-</literal> is not needed for
+      Note that mutable assignment, and thus the
+      <literal>&lt;-</literal> operator, is not needed for
       initialization, because all fields of a record, including mutable
-      ones, must be specified when the record is created.
+      ones, are specified when the record is created.
     </para>
     <para>
       OCaml's policy of immutable-by-default is a good one, but
@@ -7492,10 +7499,11 @@ val find_mismatches :
     <para>
       The use of options to encode errors underlines the fact that it's
       not clear whether a particular outcome, like not finding something
-      on a list, is really an error, or just another valid outcome of
-      your function. This turns out to be very context-dependent, and
-      error-aware return types give you a uniform way of handling the
-      result that works well for both situations.
+      on a list, is an error or is just another valid outcome. This
+      depends on the larger context of your program, and thus is not
+      something that a general purpose library can know in advance. One
+      of the advantages of error-aware return types is that they work
+      well in both situations.
     </para>
     <sect2 id="encoding-errors-with-result">
       <title>Encoding errors with <literal>Result</literal></title>
@@ -7543,8 +7551,8 @@ end
       </para>
       <para>
         But which type to choose? Is it better to represent errors as
-        strings? Some more structured representation like XML or
-        s-expressions? Or something else entirely?
+        strings? Some more structured representation like XML? Or
+        something else entirely?
       </para>
       <para>
         Core's answer to this question is the <literal>Error.t</literal>
@@ -7561,18 +7569,17 @@ end
       <para>
         <literal>Error</literal> gets around this issue through
         laziness. In particular, an <literal>Error.t</literal> allows
-        you to put off generation of the error string until you need it,
-        which means a lot of the time you never have to construct it at
-        all. You can of course construct an error directly from a
-        string:
+        you to put off generation of the error string until and unless
+        you need it, which means a lot of the time you never have to
+        construct it at all. You can of course construct an error
+        directly from a string:
       </para>
       <programlisting language="ocaml">
 # Error.of_string &quot;something went wrong&quot;;;
 - : Core.Std.Error.t = &quot;something went wrong&quot;
 </programlisting>
       <para>
-        A more interesting construction message from a performance point
-        of view is to construct an <literal>Error.t</literal> from a
+        But you can also construct an <literal>Error.t</literal> from a
         <emphasis>thunk</emphasis>, <emphasis>i.e.</emphasis>, a
         function that takes a single argument of type
         <literal>unit</literal>.
@@ -7584,13 +7591,26 @@ end
 </programlisting>
       <para>
         In this case, we can benefit from the laziness of
-        <literal>Error</literal>, since the thunk won't be called until
+        <literal>Error</literal>, since the thunk won't be called unless
         the <literal>Error.t</literal> is converted to a string.
       </para>
       <para>
-        We can also create an <literal>Error.t</literal> based on an
-        s-expression converter. This is probably the most common idiom
-        in Core.
+        The most common way to create <literal>Error.t</literal>s is
+        using <emphasis>s-expressions</emphasis>. An s-expression is a
+        balanced parenthetical expression where the leaves of the
+        expressions are strings. Thus, the following is a simple
+        s-expression:
+      </para>
+      <programlisting>
+(This (is an) (s expression))
+</programlisting>
+      <para>
+        S-expressions are supported by the Sexplib library that is
+        distributed with Core, and is the most common serialization
+        format used in Core. Indeed, most types in Core come with
+        built-in s-expression converters. Here's an example of creating
+        an error using the sexp converter for times,
+        <literal>Time.sexp_of_t</literal>.
       </para>
       <programlisting language="ocaml">
 # Error.create &quot;Something failed a long time ago&quot; Time.epoch Time.sexp_of_t;;
@@ -7598,33 +7618,38 @@ end
 &quot;Something failed a long time ago: (1969-12-31 19:00:00.000000)&quot;
 </programlisting>
       <para>
-        Here, the value <literal>Time.epoch</literal> is included in the
-        error, but that value isn't converted into an s-expression until
-        the error is printed out. Using the Sexplib syntax-extension,
-        which is discussed in more detail in chapter
-        <ulink url="data-serialization-with-json-xml-and-s-expressions">xref</ulink>,
-        we can create an s-expression converter for a new type, thus
-        allowing us to conveniently register multiple pieces of data in
-        an <literal>Error.t</literal> as a tuple.
+        Note that the time isn't actually serialized into an
+        s-expression until the error is printed out. We're not
+        restricted to doing this kind of error reporting with built-in
+        types. This will be discussed in more detail in
+        <ulink url="data-serialization-with-s-expressions">xref</ulink>,
+        but Sexplib comes with a language extension that can
+        auto-generate sexp-converters for newly generated types, as
+        shown below.
+      </para>
+      <programlisting language="ocaml">
+# let custom_to_sexp = &lt;:sexp_of&lt;float * string list * int&gt;&gt;;;
+val custom_to_sexp : float * string list * int -&gt; Sexp.t = &lt;fun&gt;
+# custom_to_sexp (3.5, [&quot;a&quot;;&quot;b&quot;;&quot;c&quot;], 6034);;
+- : Sexp.t = (3.5 (a b c) 6034)
+</programlisting>
+      <para>
+        We can use this same idiom for generating an error.
       </para>
       <programlisting language="ocaml">
 # Error.create &quot;Something went terribly wrong&quot;
     (3.5, [&quot;a&quot;;&quot;b&quot;;&quot;c&quot;], 6034)
     &lt;:sexp_of&lt;float * string list * int&gt;&gt; ;;
-- : Core.Std.Error.t = &quot;Something went terribly wrong: (3.5(a b c)6034)&quot;
+- : Error.t = Something went terribly wrong: (3.5(a b c)6034)
 </programlisting>
-      <para>
-        The above declaration of
-        <literal>&lt;:sexp_of&lt;float * string list * int&gt;&gt;</literal>
-        is interpreted by sexplib as a sexp-converter for the tuple.
-      </para>
       <para>
         <literal>Error</literal> also supports operations for
         transforming errors. For example, it's often useful to augment
         an error with some extra information about the context of the
-        error, or to combine multiple errors together.
+        error or to combine multiple errors together.
         <literal>Error.tag</literal> and
-        <literal>Error.of_list</literal> fulfill these roles.
+        <literal>Error.of_list</literal> fulfill these roles, as you can
+        see below.
       </para>
       <para>
         The type <literal>'a Or_error.t</literal> is just a shorthand
@@ -7677,11 +7702,10 @@ val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) o
 </programlisting>
       <para>
         The above code is a little bit hard to swallow, however, on a
-        syntactic level. We can make it a bit easier to read, and drop
-        some of the parenthesis, by using the infix operator form of
-        bind. Note that we locally open the
-        <literal>Option.Monad_infix</literal> module to get access to
-        the operators. (The module is called
+        syntactic level. We can make it easier to read, and drop some of
+        the parenthesis, by using the infix operator form of bind, which
+        we get access to by locally opening
+        <literal>Option.Monad_infix</literal>. The module is called
         <literal>Monad_infix</literal> because the bind operator is part
         of a sub-interface called <literal>Monad</literal>, which we'll
         talk about more in
@@ -7694,10 +7718,21 @@ val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) o
     List.hd sorted   &gt;&gt;= fun first -&gt;
     List.last sorted &gt;&gt;= fun last  -&gt;
     Some (first,last)
+  ;;
+val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
+  &lt;fun&gt;
 </programlisting>
       <para>
+        This use of <literal>bind</literal> isn't really materially
+        better than the one we started with, and indeed, for small
+        examples like this, direct matching of options is generally
+        better than using <literal>bind</literal>. But for large complex
+        examples with many stages of error-handling, the bind idiom
+        becomes clearer and easier to manage.
+      </para>
+      <para>
         There are other useful idioms encoded in the functions in
-        <literal>Option</literal>. Another example is
+        <literal>Option</literal>. One example is
         <literal>Option.both</literal>, which takes two optional values
         and produces a new optional pair that is <literal>None</literal>
         if either of its arguments are <literal>None</literal>. Using
@@ -7708,6 +7743,9 @@ val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) o
 # let compute_bounds ~cmp list =
     let sorted = List.sort ~cmp list in
     Option.both (List.hd sorted) (List.last sorted)
+  ;;
+val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
+  &lt;fun&gt;
 </programlisting>
       <para>
         These error-handling functions are valuable because they let you
@@ -7738,7 +7776,7 @@ Exception: Division_by_zero.
 </programlisting>
     <para>
       And an exception can terminate a computation even if it happens
-      nested a few levels deep in a computation.
+      nested somewhere deep within it.
     </para>
     <programlisting language="ocaml">
 # List.map ~f:(fun x -&gt; 100 / x) [1;3;0;4];;
@@ -7747,7 +7785,8 @@ Exception: Division_by_zero.
     <para>
       If we put a <literal>printf</literal> in the middle of the
       computation, we can see that <literal>List.map</literal> is
-      interrupted part way through it's execution:
+      interrupted part way through it's execution, never getting to the
+      end of the list.
     </para>
     <programlisting language="ocaml">
 # List.map ~f:(fun x -&gt; printf &quot;%d\n%!&quot; x; 100 / x) [1;3;0;4];;
@@ -7850,20 +7889,22 @@ exception Wrong_date of Core.Std.Date.t
       The period in front of <literal>Wrong_date</literal> is there
       because the representation generated by
       <literal>with sexp</literal> includes the full module path of the
-      module where the exception in question is defined. We'll talk more
-      about modules in
-      <xref linkend="files-modules-and-programs"/>, but for
-      now, it's enough to know that this is useful in tracking down
-      which precise exception is being reported. In this case, since
-      we've declared the exception at the toplevel, that module path is
-      trivial.
+      module where the exception in question is defined. In this case,
+      since we've declared the exception at the toplevel, that module
+      path is trivial.
+    </para>
+    <para>
+      This is all part of the support for s-expressions provided by the
+      Sexplib library and syntax-extension, which is described in more
+      detail in
+      <ulink url="data-serialization-with-s-expressions">xref</ulink>.
     </para>
     </note>
     <sect2 id="helper-functions-for-throwing-exceptions">
       <title>Helper functions for throwing exceptions</title>
       <para>
-        A number of helper functions that are provided to simplify the
-        task of throwing exceptions. The simplest one is
+        OCaml and Core provide a number of helper functions to simplify
+        the task of throwing exceptions. The simplest one is
         <literal>failwith</literal>, which could be defined as follows:
       </para>
       <programlisting language="ocaml">
@@ -7879,9 +7920,9 @@ val failwith : string -&gt; 'a = &lt;fun&gt;
       <para>
         Another important way of throwing an exception is the
         <literal>assert</literal> directive. <literal>assert</literal>
-        is used for situations where violation of condition in question
-        is a bug. Consider the following piece of code for zipping
-        together two lists.
+        is used for situations where a violation of the condition in
+        question indicates a bug. Consider the following piece of code
+        for zipping together two lists.
       </para>
       <programlisting language="ocaml">
 # let merge_lists xs ys ~f =
@@ -7905,7 +7946,7 @@ val failwith : string -&gt; 'a = &lt;fun&gt;
       <para>
         Here we use <literal>assert false</literal>, which means that
         the assert is guaranteed to trigger. In general, one can put an
-        arbirary condition in the assertion.
+        arbitrary condition in the assertion.
       </para>
       <para>
         In this case, the assert can never be triggered because we have
@@ -7925,11 +7966,12 @@ val failwith : string -&gt; 'a = &lt;fun&gt;
    ;;
 val merge_lists : 'a list -&gt; 'b list -&gt; f:('a -&gt; 'b -&gt; 'c) -&gt; 'c list = &lt;fun&gt;
 # merge_lists [1;2;3] [-1] ~f:(+);;
-Exception: (Assert_failure //toplevel// 25 15).
+Exception: (Assert_failure //toplevel// 6 15).
 </programlisting>
       <para>
         This shows what's special about <literal>assert</literal>, which
-        is that it captures the source location.
+        is that it captures the line number and character offset of the
+        source location from which the assertion was made.
       </para>
     </sect2>
     <sect2 id="exception-handlers">
@@ -7996,43 +8038,61 @@ let load_config filename =
       </para>
       <para>
         We can fix this using Core's <literal>protect</literal>
-        function. The basic purpose of <literal>protect</literal> is to
-        ensure that the <literal>finally</literal> thunk will be called
-        when <literal>f</literal> exits, whether it exited normally or
-        with an exception. This is similar to the
-        <literal>try/finally</literal> construct available in many
-        programming languages, but it is implemented in a library,
-        rather than being a built-in primitive. Here's how it could be
-        used to fix <literal>load_config</literal>.
+        function. The purpose of <literal>protect</literal> is to ensure
+        that the <literal>finally</literal> thunk will be called when
+        <literal>f</literal> exits, whether it exits normally or with an
+        exception. This is similar to the <literal>try/finally</literal>
+        construct available in many programming languages, but it is
+        implemented in a library, rather than being a built-in
+        primitive. Here's how it could be used to fix
+        <literal>load_config</literal>.
       </para>
       <programlisting language="ocaml">
 let load_config filename =
   let inc = In_channel.create filename in
-  protect ~f:(fun () -&gt; Config.t_of_sexp (Sexp.input_sexp inc)
+  protect ~f:(fun () -&gt; Config.t_of_sexp (Sexp.input_sexp inc))
     ~finally:(fun () -&gt; In_channel.close inc)
 </programlisting>
+      <para>
+        This is a common enough problem that
+        <literal>In_channel</literal> has a function called
+        <literal>with_file</literal> that automates this pattern.
+      </para>
+      <programlisting language="ocaml">
+let load_config filename =
+  In_channel.with_file filename ~f:(fun inc -&gt;
+    Config.t_of_sexp (Sexp.input_sexp inc))
+</programlisting>
+      <para>
+        <literal>In_channel.with_file</literal> is actually built on top
+        of <literal>protect</literal> so that it can clean up after
+        itself in the presence of exceptions.
+      </para>
     </sect2>
     <sect2 id="catching-specific-exceptions">
       <title>Catching specific exceptions</title>
       <para>
         OCaml's exception-handling system allows you to tune your
         error-recovery logic to the particular error that was thrown.
-        For example, <literal>List.find_exn</literal> always throws
-        <literal>Not_found</literal>. You can take advantage of this in
-        your code, for example, let's define a function called
-        <literal>lookup_weight</literal>, with the following signature:
+        For example, <literal>List.find_exn</literal> throws
+        <literal>Not_found</literal> when the element in question
+        can'tbe found. You can take advantage of this in your code, for
+        example, let's define a function called
+        <literal>lookup_weight</literal>, with the following signature.
       </para>
       <programlisting language="ocaml">
-(** [lookup_weight ~compute_weight alist key] Looks up a
-    floating-point weight by applying [compute_weight] to the data
-    associated with [key] by [alist].  If [key] is not found, then
-    return 0.
-*)
 val lookup_weight :
   compute_weight:('data -&gt; float) -&gt; ('key * 'data) list -&gt; 'key -&gt; float
 </programlisting>
       <para>
-        We can implement such a function using exceptions as follows:
+        <literal>lookup_weight ~compute_weight alist key</literal>
+        should return a floating-point weight by applying
+        <literal>compute_weight</literal> to the data associated with
+        <literal>key</literal> by <literal>alist</literal>. If
+        <literal>key</literal> is not found, then it shoudl return 0.
+      </para>
+      <para>
+        We can implement <literal>lookup_weight</literal> as follows.
       </para>
       <programlisting language="ocaml">
 # let lookup_weight ~compute_weight alist key =
@@ -8046,9 +8106,9 @@ val lookup_weight :
   &lt;fun&gt;
 </programlisting>
       <para>
-        This implementation is more problematic than it looks. In
-        particular, what happens if <literal>compute_weight</literal>
-        itself throws an exception? Ideally,
+        Let's think about the behavior of this code in the presence of
+        exceptions. In particular, what happens if
+        <literal>compute_weight</literal> throws an exception? Ideally,
         <literal>lookup_weight</literal> should propagate that exception
         on, but if the exception happens to be
         <literal>Not_found</literal>, then that's not what will happen:
@@ -8060,17 +8120,18 @@ val lookup_weight :
 </programlisting>
       <para>
         This kind of problem is hard to detect in advance, because the
-        type system doesn't tell us what kinds of exceptions a given
-        function might throw. Because of this kind of confusion, it's
-        usually better to avoid catching specific exceptions. In this
-        case, we can improve the code by catching the exception in a
-        narrower scope.
+        type system doesn't tell you what exceptions a given function
+        might throw. For this reason, it's generally better to avoid
+        relying on the identity of the exception to determine the nature
+        of a failure. A better approach is to narrow the scope of the
+        exception handler, so that when it fires it's very clear what
+        part of the code failed.
       </para>
       <programlisting language="ocaml">
 # let lookup_weight ~compute_weight alist key =
     match
       try Some (List.Assoc.find_exn alist key)
-      with Not_found -&gt; None
+      with _ -&gt; None
     with
     | None -&gt; 0.
     | Some data -&gt; compute_weight data ;;
@@ -8131,11 +8192,13 @@ Fatal error: exception Exn.Empty_list
       </para>
       <para>
         We can get more information from OCaml if we turn on stack
-        traces. This can be done by setting the
-        <literal>OCAMLRUNPARAM</literal> environment variable, as shown:
+        backtraces. A backtrace is essentially a summary of the stack of
+        calls that were executed to get to the point where the exception
+        was thrown. Backtraces can be enabled by setting the
+        <literal>OCAMLRUNPARAM</literal> environment variable as shown.
       </para>
       <programlisting language="bash">
-exn $ export OCAMLRUNPARAM=b
+exn $ export OCAMLRUNPARAM=b=1
 exn $ ./exn
 3
 Fatal error: exception Exn.Empty_list
@@ -8143,9 +8206,11 @@ Raised at file &quot;exn.ml&quot;, line 7, characters 16-26
 Called from file &quot;exn.ml&quot;, line 12, characters 17-28
 </programlisting>
       <para>
-        Backtraces can also be obtained at runtime. In particular,
-        <literal>Exn.backtrace</literal> will return the backtrace of
-        the most recently thrown exception.
+        You can also capture a backtrace within your program by calling
+        <literal>Exn.backtrace</literal>, which returns the backtrace of
+        the most recently thrown exception. This is useful for reporting
+        detailed information on errors that did not cause your program
+        to fail.
       </para>
     </sect2>
     <sect2 id="from-exceptions-to-error-aware-types-and-back-again">
@@ -16052,7 +16117,7 @@ type meta = {
     comes with event-driven systems.
   </para>
   <sect1 id="async-basics">
-    <title>Async Basics</title>
+    <title>Async basics</title>
     <para>
       Consider a typical function for doing I/O in Core.
     </para>
@@ -16255,9 +16320,125 @@ val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
   ;;
 val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
 </programlisting>
+    <sect2 id="ivars-and-upon">
+      <title>Ivars and upon</title>
+      <para>
+        Deferreds are usually built using combinations of
+        <literal>bind</literal>, <literal>map</literal> and
+        <literal>return</literal>, but sometimes you want to construct a
+        deferred that you can determine explicitly with user-code. This
+        is done using an <emphasis>ivar</emphasis>, which is a handle
+        that lets you control precisely when a deferred becomes
+        determined.
+      </para>
+      <para>
+        There are three fundamental operations for working with an ivar;
+        you can create one, using <literal>Ivar.create</literal>, you
+        can read off the deferred that corresponds to the ivar in
+        question, using <literal>Ivar.read</literal>, and you can fill
+        an ivar, thus causing that deferred to become determined, using
+        <literal>Ivar.fill</literal>. These operations are illustrated
+        below.
+      </para>
+      <programlisting language="ocaml">
+# let ivar = Ivar.create ();;
+val ivar : '_a Ivar.t = &lt;abstr&gt;
+# let def = Ivar.read ivar;;
+val def : '_a Ivar.Deferred.t = &lt;abstr&gt;
+# Deferred.peek def;;
+- : '_a option = None
+# Ivar.fill ivar &quot;Hello&quot;;;
+- : unit = ()
+# Deferred.peek def;;
+- : string option = Some &quot;Hello&quot;
+</programlisting>
+      <para>
+        Ivars are something of a low-level feature; operators like map,
+        bind and return are typically easier to use and think about. But
+        ivars can be useful when you want to build complicated
+        synchronization patterns that can't be constructed naturally
+        otherwise.
+      </para>
+      <para>
+        As an example, imagine we wanted a way of scheduling a sequence
+        of actions that would run after a fixed delay. In addition, we'd
+        like to guarantee that these delayed actions are executed in the
+        same order they were scheduled in. One could imagine building a
+        module for handling this with the following interface.
+      </para>
+      <programlisting language="ocaml">
+# module type Delayer_intf = sig
+    type t
+    val create : Time.Span.t -&gt; t
+    val schedule : t -&gt; (unit -&gt; 'a Deferred.t) -&gt; 'a Deferred.t
+  end;;
+</programlisting>
+      <para>
+        An action is handed to <literal>schedule</literal> in the form
+        of a deferred-returning thunk (a thunk is a function whose
+        argument is of type <literal>unit</literal>). A deferred is
+        handed back to the caller of <literal>schedule</literal> that
+        will eventually be filled with the contents of the deferred
+        value returned by the thunk to be scheduled. We can implement
+        this using an <literal>ivar</literal> which we fill after the
+        thunk is called and the deferred it returns becomes determined.
+        Instead of using <literal>bind</literal> or
+        <literal>map</literal> for scheduling these events, we'll use a
+        different operator called <literal>upon</literal>. Here's the
+        signature of <literal>upon</literal>:
+      </para>
+      <programlisting language="ocaml">
+# upon;;
+- : 'a Deferred.t -&gt; ('a -&gt; unit) -&gt; unit = &lt;fun&gt;
+</programlisting>
+      <para>
+        Like <literal>bind</literal> and <literal>return</literal>,
+        <literal>upon</literal> schedules a callback to be executed when
+        the deferred it is passed is determined; but unlike those calls,
+        it doesn't create a new deferred for this callback to fill.
+      </para>
+      <para>
+        Our delayer implementation is organized around a queue of
+        thunks, where every call to <literal>schedule</literal> adds a
+        thunk to the queue, and also schedules a job in the future to
+        grab a thunk off the queue and run it. The waiting will be done
+        using the function <literal>after</literal> which takes a time
+        span and returns a deferred which becomes determined after that
+        time span elapses. The role of the <literal>ivar</literal> here
+        is to take the value returned by the thunk and use it to fill
+        the deferred returned by the provided thunk.
+      </para>
+      <programlisting language="ocaml">
+# module Delayer : Delayer_intf = struct
+    type t = { delay: Time.Span.t;
+               jobs: (unit -&gt; unit) Queue.t;
+             }
+
+    let create delay =
+      { delay; jobs = Queue.create () }
+
+    let schedule t thunk =
+      let ivar = Ivar.create () in
+      Queue.enqueue t.jobs (fun () -&gt;
+        upon (thunk ()) (fun x -&gt; Ivar.fill ivar x));
+      upon (after t.delay) (fun () -&gt;
+        let job = Queue.dequeue_exn t.jobs in
+        job ());
+      Ivar.read ivar
+  end;;
+module Delayer : Delayer_intf
+</programlisting>
+      <para>
+        This code isn't particularly long, but it is a bit subtle. This
+        is typical of code that involves ivars and
+        <literal>upon</literal>, and because of this, you should stick
+        to the simpler map/bind/return style of working with deferreds
+        when you can.
+      </para>
+    </sect2>
   </sect1>
-  <sect1 id="a-simple-tcp-echo-server">
-    <title>A simple TCP Echo Server</title>
+  <sect1 id="examples-an-echo-server">
+    <title>Examples: an echo server</title>
     <para>
       Now that we have the basics of Async under our belt, let's look at
       a small complete stand-alone Async program. In particular, we'll
@@ -16463,38 +16644,37 @@ val do_stuff : int -&gt; int = &lt;fun&gt;
       never returns.
     </para>
     </note>
-  </sect1>
-  <sect1 id="improving-the-echo-server">
-    <title>Improving the echo server</title>
-    <para>
-      Let's try to go a little bit farther with our echo server. Let's
-      walk through a few small improvements:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          Add a proper command-line interface with
-          <literal>Command</literal>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Add a flag to specify the port to listen on, and a flag to
-          make the server echo back the capitalized version of whatever
-          was sent to it.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Simplify the code using Async's <literal>Pipe</literal>
-          interface.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      Here's the improved code below.
-    </para>
-    <programlisting language="ocaml">
+    <sect2 id="improving-the-echo-server">
+      <title>Improving the echo server</title>
+      <para>
+        Let's try to go a little bit farther with our echo server. Let's
+        walk through a few small improvements:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Add a proper command-line interface with
+            <literal>Command</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Add a flag to specify the port to listen on, and a flag to
+            make the server echo back the capitalized version of
+            whatever was sent to it.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Simplify the code using Async's <literal>Pipe</literal>
+            interface.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Here's the improved code below.
+      </para>
+      <programlisting language="ocaml">
 let run ~uppercase ~port =
   let host_and_port =
     Tcp.Server.create
@@ -16520,47 +16700,47 @@ let () =
     (fun uppercase port () -&gt; run ~uppercase ~port)
   |&gt; Command.run
 </programlisting>
-    <para>
-      The most notable change in this function is the use of Async's
-      <literal>Pipe</literal>. A <literal>Pipe</literal> is a
-      communication channel that's used for connecting different parts
-      of your program. You can think of it as a consumer/producer queue
-      that uses deferreds for communicating when the pipe is ready to be
-      read from or written to. Our use of pipes is fairly minimal here,
-      but they are an important part of Async, so it's worth discussing
-      them in some detail.
-    </para>
-    <para>
-      Pipes are created in connected read/write pairs, as you can see
-      below.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The most notable change in this function is the use of Async's
+        <literal>Pipe</literal>. A <literal>Pipe</literal> is a
+        communication channel that's used for connecting different parts
+        of your program. You can think of it as a consumer/producer
+        queue that uses deferreds for communicating when the pipe is
+        ready to be read from or written to. Our use of pipes is fairly
+        minimal here, but they are an important part of Async, so it's
+        worth discussing them in some detail.
+      </para>
+      <para>
+        Pipes are created in connected read/write pairs, as you can see
+        below.
+      </para>
+      <programlisting language="ocaml">
 # let (r,w) = Pipe.create ();;
 val r : '_a Pipe.Reader.t = &lt;abstr&gt;
 val w : '_a Pipe.Writer.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      <literal>r</literal> and <literal>w</literal> are really just read
-      and write handles to the same underlying object. Note that
-      <literal>r</literal> and <literal>w</literal> have weakly
-      polymorphic types. That's because a pipe is mutable and so can
-      contain elements of only one type, which will be settled by the
-      compiler once we try to use the pipe for anything.
-    </para>
-    <para>
-      If we just try and write to the writer, we'll see that we block
-      indefinitely in utop. You can break out of the wait by hitting
-      <literal>Control-C</literal>.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        <literal>r</literal> and <literal>w</literal> are really just
+        read and write handles to the same underlying object. Note that
+        <literal>r</literal> and <literal>w</literal> have weakly
+        polymorphic types. That's because a pipe is mutable and so can
+        contain elements of only one type, which will be settled by the
+        compiler once we try to use the pipe for anything.
+      </para>
+      <para>
+        If we just try and write to the writer, we'll see that we block
+        indefinitely in utop. You can break out of the wait by hitting
+        <literal>Control-C</literal>.
+      </para>
+      <programlisting language="ocaml">
 # Pipe.write w &quot;Hello World!&quot;;;
 Interrupted.
 </programlisting>
-    <para>
-      The deferred returned by write completes on its own once the value
-      written into the pipe has been read out:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The deferred returned by write completes on its own once the
+        value written into the pipe has been read out:
+      </para>
+      <programlisting language="ocaml">
 # let (r,w) = Pipe.create ();;
 val r : '_a Pipe.Reader.t = &lt;abstr&gt;
 val w : '_a Pipe.Writer.t = &lt;abstr&gt;
@@ -16571,58 +16751,61 @@ val write_complete : unit Deferred.t = &lt;abstr&gt;
 # write_complete;;
 - : unit = ()
 </programlisting>
-    <para>
-      In the function <literal>run</literal> above, we're taking
-      advantage of one of the many utility functions provided for pipes
-      in the <literal>Pipe</literal> module. In particular, we're using
-      <literal>Pipe.transfer</literal> to set up a process that takes
-      data from a reader-pipe and moves it to a writer-pipe. Here's the
-      type of <literal>Pipe.transfer</literal>:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        In the function <literal>run</literal> above, we're taking
+        advantage of one of the many utility functions provided for
+        pipes in the <literal>Pipe</literal> module. In particular,
+        we're using <literal>Pipe.transfer</literal> to set up a process
+        that takes data from a reader-pipe and moves it to a
+        writer-pipe. Here's the type of
+        <literal>Pipe.transfer</literal>:
+      </para>
+      <programlisting language="ocaml">
 # Pipe.transfer;;
 - : 'a Pipe.Reader.t -&gt; 'b Pipe.Writer.t -&gt; f:('a -&gt; 'b) -&gt; unit Deferred.t =
 &lt;fun&gt;
 </programlisting>
-    <para>
-      The two pipes being connected are generated by the
-      <literal>Reader.pipe</literal> and <literal>Writer.pipe</literal>
-      call respectively. Note that pushback is preserved throughout the
-      process, so that if the writer gets blocked, the the writer's pipe
-      will stop pulling data from the reader's pipe, which will prevent
-      the reader from reading in more data.
-    </para>
-    <para>
-      Importantly, the deferred returned by
-      <literal>Pipe.transfer</literal> becomes determined once the
-      reader has been closed and the last element is transferred from
-      the reader to the writer. Once that deferred becomes determined,
-      the server will shut down that client connection. So, when a
-      client disconnects, the rest of the shutdown happens
-      transparently.
-    </para>
-    <para>
-      The command-line parsing for this program is based on the
-      <literal>Command</literal> library that we introduced in
-      <xref linkend="command-line-parsing"/>. When you open
-      <literal>Async.Std</literal>, the <literal>Command</literal>
-      module has added to it the <literal>async_basic</literal> call:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The two pipes being connected are generated by the
+        <literal>Reader.pipe</literal> and
+        <literal>Writer.pipe</literal> call respectively. Note that
+        pushback is preserved throughout the process, so that if the
+        writer gets blocked, the the writer's pipe will stop pulling
+        data from the reader's pipe, which will prevent the reader from
+        reading in more data.
+      </para>
+      <para>
+        Importantly, the deferred returned by
+        <literal>Pipe.transfer</literal> becomes determined once the
+        reader has been closed and the last element is transferred from
+        the reader to the writer. Once that deferred becomes determined,
+        the server will shut down that client connection. So, when a
+        client disconnects, the rest of the shutdown happens
+        transparently.
+      </para>
+      <para>
+        The command-line parsing for this program is based on the
+        <literal>Command</literal> library that we introduced in
+        <xref linkend="command-line-parsing"/>. When you open
+        <literal>Async.Std</literal>, the <literal>Command</literal>
+        module has added to it the <literal>async_basic</literal> call:
+      </para>
+      <programlisting language="ocaml">
 # Command.async_basic;;
 - : summary:string -&gt;
     ?readme:(unit -&gt; string) -&gt;
     ('a, unit -&gt; unit Deferred.t) Command.Spec.t -&gt; 'a -&gt; Command.t
 = &lt;fun&gt;
 </programlisting>
-    <para>
-      This differs from the ordinary <literal>Command.basic</literal>
-      call in that the main function must return a
-      <literal>Deferred.t</literal>, and that the running of the command
-      (using <literal>Command.run</literal>) automatically starts the
-      async scheduler, without requiring an explicit call to
-      <literal>Scheduler.go</literal>.
-    </para>
+      <para>
+        This differs from the ordinary <literal>Command.basic</literal>
+        call in that the main function must return a
+        <literal>Deferred.t</literal>, and that the running of the
+        command (using <literal>Command.run</literal>) automatically
+        starts the async scheduler, without requiring an explicit call
+        to <literal>Scheduler.go</literal>.
+      </para>
+    </sect2>
   </sect1>
   <sect1 id="example-searching-definitions-with-duckduckgo">
     <title>Example: searching definitions with DuckDuckGo</title>
@@ -16907,9 +17090,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
       an exception. The function <literal>maybe_raise</literal> below
       blocks for half a second, and then either throws an exception or
       returns unit, alternating between the two behaviors on subsequent
-      calls. The waiting will be done using the function
-      <literal>after</literal> which takes a time span and returns a
-      deferred which becomes determined after that time span elapses.
+      calls.
     </para>
     <programlisting language="ocaml">
 # let maybe_raise =
@@ -16990,12 +17171,11 @@ Exception:
 </programlisting>
     <para>
       <literal>try_with f</literal> takes as its argument a
-      deferred-returning thunk <literal>f</literal> (a thunk is a
-      function whose argument is unit), and returns a deferred that
-      becomes determined either as <literal>Ok</literal> of whatever
-      <literal>f</literal> returned, or <literal>Error exn</literal> if
-      <literal>f</literal> threw an exception before its return value
-      became determined.
+      deferred-returning thunk <literal>f</literal>, and returns a
+      deferred that becomes determined either as <literal>Ok</literal>
+      of whatever <literal>f</literal> returned, or
+      <literal>Error exn</literal> if <literal>f</literal> threw an
+      exception before its return value became determined.
     </para>
     <sect2 id="monitors">
       <title>Monitors</title>
@@ -17228,7 +17408,7 @@ let get_definition ~server word =
     (word, get_definition_from_json (String.concat strings)))
   &gt;&gt;| function
   | Ok (word,result) -&gt; (word, Ok result)
-  | Error exn        -&gt; (word, Error exn)
+  | Error _          -&gt; (word, Error &quot;Unexpected failure&quot;)
 </programlisting>
       <para>
         Here, we use <literal>try_with</literal> to capture the
@@ -17250,7 +17430,7 @@ let print_result (word,definition) =
     word
     (String.init (String.length word) ~f:(fun _ -&gt; '-'))
     (match definition with
-     | Error _ -&gt; &quot;DuckDuckGo query failed unexpectedly&quot;
+     | Error s -&gt; &quot;DuckDuckGo query failed: &quot; ^ s
      | Ok None -&gt; &quot;No definition found&quot;
      | Ok (Some def) -&gt;
        String.concat ~sep:&quot;\n&quot;
@@ -17277,7 +17457,8 @@ of the Caml programming language, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
 </programlisting>
       <para>
-        Now, only the query that went to the faulty server failed.
+        Now, only the query that went to <literal>localhost</literal>
+        failed.
       </para>
       <para>
         Note that in this code, we're relying on the fact that
@@ -17294,23 +17475,24 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
   <sect1 id="timeouts-cancellation-and-choices">
     <title>Timeouts, Cancellation and Choices</title>
     <para>
-      One common kind of operation in a concurrent programming is the
-      need to combine results from multiple distinct concurrent
-      processes going on in the same program. We already saw this in our
-      web-search example, using <literal>Deferred.all</literal> and
-      <literal>Deferred.all_unit</literal> to wait for all of a list of
+      In a concurrent program, one often needs to combine results from
+      multiple distinct concurrent sub-computations going on in the same
+      program. We already saw this in our DuckDuckGo example, where we
+      used <literal>Deferred.all</literal> and
+      <literal>Deferred.all_unit</literal> to wait for a list of
       deferreds to become determined. Another useful primitive is
       <literal>Deferred.both</literal>, which lets you wait until two
       deferreds of different types have returned, returning both values
-      as a tuple:
+      as a tuple. Here, we use the function <literal>sec</literal>,
+      which is shorthand for creating a time-span equal to a given
+      number of seconds.
     </para>
     <programlisting language="ocaml">
-# let both = Deferred.both
+# let string_and_float = Deferred.both
    (after (sec 0.5)  &gt;&gt;| fun () -&gt; &quot;A&quot;)
-   (after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33)
- ;; 
-val both : (string * float) Deferred.t = &lt;abstr&gt;
-# both;;
+   (after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33);;
+val string_and_float : (string * float) Deferred.t = &lt;abstr&gt;
+# string_and_float;;
 - : string * float = (&quot;A&quot;, 32.33)
 </programlisting>
     <para>
@@ -17327,13 +17509,11 @@ val both : (string * float) Deferred.t = &lt;abstr&gt;
 - : string = &quot;half a second&quot;
 </programlisting>
     <para>
-      We can see how this would work in action by extending our
-      definition search tool to timeout on any queries that take too
-      long to satisfy. We'll do this by writing a wrapper for
-      <literal>get_definition</literal> that takes a timeout (in the
-      form of a <literal>Time.Span.t</literal>) as an argument, and
-      returns either the definition, or the timeout, whichever finished
-      first.
+      Let's use this to add timeouts to our DuckDuckGo searches. We'll
+      do this by writing a wrapper for <literal>get_definition</literal>
+      that takes a timeout (in the form of a
+      <literal>Time.Span.t</literal>) as an argument, and returns either
+      the definition, or, if that takes too long, the timeout.
     </para>
     <programlisting language="ocaml">
 let get_definition_with_timeout ~server ~timeout word =
@@ -17356,12 +17536,126 @@ let get_definition_with_timeout ~server ~timeout word =
       same type.
     </para>
     <para>
-      One problem with the above code is that the HTTP query kicked off
-      by <literal>get_definition</literal> is not actually shut down
-      when the timeout fires. As such,
+      A problem with this code is that the HTTP query kicked off by
+      <literal>get_definition</literal> is not actually shut down when
+      the timeout fires. As such,
       <literal>get_definition_with_timeout</literal> essentially leaks
-      an open connection.
+      an open connection. Happily, Cohttp does provide a way of shutting
+      down a client. You can pass a deferred under the label
+      <literal>interrupt</literal> to
+      <literal>Cohttp_async.Client.get</literal>. Once
+      <literal>interrupt</literal> is determined, the client connection
+      will terminated and the corresponding connections closed.
     </para>
+    <para>
+      The following code shows how you can change
+      <literal>get_definition</literal> and
+      <literal>get_definition_with_timeout</literal> to cancel the
+      <literal>get</literal> call if the timeout expires.
+    </para>
+    <programlisting language="ocaml">
+(* Execute the DuckDuckGo search *)
+let get_definition ~server ~interrupt word =
+  try_with (fun () -&gt;
+    Cohttp_async.Client.get ~interrupt (query_uri ~server word)
+    &gt;&gt;= fun  (_, body) -&gt;
+    Pipe.to_list body
+    &gt;&gt;| fun strings -&gt;
+    (word, get_definition_from_json (String.concat strings)))
+  &gt;&gt;| function
+  | Ok (word,result) -&gt; (word, Ok result)
+  | Error exn        -&gt; (word, Error exn)
+</programlisting>
+    <para>
+      Next, we'll modify <literal>get_definition_with_timeout</literal>
+      to create a deferred to pass in to
+      <literal>get_definition</literal> which will become determined
+      when our timeout expires.
+    </para>
+    <programlisting language="ocaml">
+let get_definition_with_timeout ~server ~timeout word =
+  get_definition ~server ~interrupt:(after timeout) word
+  &gt;&gt;| fun (word,result) -&gt;
+  let result' = match result with
+    | Ok _ as x -&gt; x
+    | Error _ -&gt; Error &quot;Unexpected failure&quot;
+  in
+  (word,result')
+</programlisting>
+    <para>
+      This will work, and will cause the connection to shut-down cleanly
+      when we time out; but our code no longer explicitly knows whether
+      or not the timeout has kicked in. In particular, the error message
+      on a timeout will now be <literal>Unexpected failure</literal>
+      rather than <literal>Timed out</literal>, which it was in our
+      previous implementation. This is a minor issue in this case, but
+      if we wanted to have special behavior in the case of a timeout, it
+      would be a more serious issue.
+    </para>
+    <para>
+      We can get more precise handling of timeouts using Async's
+      <literal>choose</literal> operator, which lets you pick between a
+      collection of different deferreds, reacting to exactly one of
+      them. Each deferred is combined, using the function
+      <literal>choice</literal>, with a function that is called if and
+      only if that is the chosen deferred. Here's the type signature of
+      <literal>choice</literal> and <literal>choose</literal>:
+    </para>
+    <programlisting language="ocaml">
+# choice;;
+- : 'a Deferred.t -&gt; ('a -&gt; 'b) -&gt; 'b Deferred.choice = &lt;fun&gt;
+# choose;;
+- : 'a Deferred.choice list -&gt; 'a Deferred.t = &lt;fun&gt;
+</programlisting>
+    <para>
+      <literal>choose</literal> provides no guarantee that the
+      <literal>choice</literal> built around the first deferred to
+      become determined will in fact be chosen. But
+      <literal>choose</literal> does guarantee that only one
+      <literal>choice</literal> will be chosen, and only the chosen
+      <literal>choice</literal> will execute the attached closure.
+    </para>
+    <para>
+      In the following, we use <literal>choose</literal> to ensure that
+      the <literal>interrupt</literal> deferred becomes determined if
+      and only if the timeout-deferred is chosen. Here's the code.
+    </para>
+    <programlisting language="ocaml">
+let get_definition_with_timeout ~server ~timeout word =
+  let interrupt = Ivar.create () in
+  choose
+    [ choice (after timeout) (fun () -&gt;
+       Ivar.fill interrupt ();
+       (word,Error &quot;Timed out&quot;))
+    ; choice (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
+        (fun (word,result) -&gt;
+           let result' = match result with
+             | Ok _ as x -&gt; x
+             | Error _ -&gt; Error &quot;Unexpected failure&quot;
+           in
+           (word,result')
+        )
+    ]
+</programlisting>
+    <para>
+      Now, if we run this with a suitably small timeout, we'll see that
+      some queries succeed and some fail, and the timeouts are reported
+      as such.
+    </para>
+    <programlisting>
+$ ./search_with_timeout_no_leak.native &quot;concurrent programming&quot; ocaml -timeout 0.1s
+concurrent programming
+----------------------
+
+DuckDuckGo query failed: Timed out
+
+ocaml
+-----
+
+&quot;OCaml or Objective Caml, is the main implementation of the Caml
+programming language, created by Xavier Leroy, Jérôme Vouillon,
+Damien Doligez, Didier Rémy and others in 1996.&quot;
+</programlisting>
   </sect1>
 </chapter><chapter id="fast-binary-serialization-with-bin_prot">
   <title>Fast Binary Serialization with bin_prot</title>
@@ -18509,8 +18803,439 @@ $ ./service_client.byte
       changed dynamically, rather than just added at creation time.
     </para>
   </sect1>
-</chapter></part><part label="III"><title>Advanced Topics</title><chapter id="foreign-function-interface">
+</chapter><chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
+  <para>
+    OCaml has several options available to interact with non-OCaml code.
+    The compiler toolchain can of course link to external system
+    libraries, but can also produce shared libraries that let your OCaml
+    code be called from C, or even encode your OCaml as a standalone C
+    file that be compiled directly into other libraries.
+  </para>
+  <para>
+    In this chapter, we'll first describe the easiest way to bind to C
+    code, via the <literal>ctypes</literal> library. This can be done
+    without writing a single line of C code, and just requires a pure
+    OCaml definition of the C interfaces. We'll use the
+    <literal>ncurses</literal> terminal-drawing toolkit as our running
+    example, as it's widely available on most systems.
+  </para>
+  <note>
+  <title>
+  Installing the <literal>ctypes</literal> library
+  </title>
+  <para>
+    TODO <literal>ctypes</literal> is not yet available on OPAM, but
+    will be soon. For now, install it manually:
+  </para>
+  <programlisting>
+$ git clone git://github.com/ocamllabs/ocaml-ctypes
+$ cd ocaml-ctypes
+$ make &amp;&amp; make install
+</programlisting>
+  It will then be available via the <literal>ctypes</literal> ocamlfind
+  package.
+  </note>
+  <sect1 id="example-an-ncurses-terminal-interface">
+    <title>Example: an ncurses terminal interface</title>
+    <para>
+      Ncurses is a library to build terminal-independent text interfaces
+      in a reasonably efficient way. The manual page (usually via
+      <literal>man ncurses</literal>) explains the basics of the C
+      interface. The <literal>initscr</literal> function allocates some
+      state and returns as a <literal>WINDOW</literal> pointer. This C
+      pointer is then passed to various terminal drawing functions.
+    </para>
+    <para>
+      The <literal>ctypes</literal> library provides a combinator
+      interface that lets you declare these C functions as OCaml values.
+      The library takes care of converting the OCaml arguments into the
+      C calling convention, invoking the foreign call, and returning the
+      result as an OCaml value.
+    </para>
+    <programlisting language="ocaml">
+open Ctypes.Ffi.C
+open Type
+
+type window = unit ptr
+let window = ptr void
+</programlisting>
+    <para>
+      The <literal>window</literal> type represents the
+      <literal>WINDOW *</literal> pointer that ncurses returns. This can
+      be left abstract in the OCaml signature for this module, and is
+      represented as a <literal>ptr void</literal> (&quot;pointer to
+      void&quot;) value within the implementation.
+    </para>
+    <programlisting language="ocaml">
+let initscr =
+  foreign &quot;initscr&quot; (void @-&gt; (returning window))
+</programlisting>
+    <para>
+      The <literal>foreign</literal> function takes two parameters: the
+      C function call name, and a definition of the arguments and return
+      type. The definition is built up using the combinators defined in
+      <literal>Ctypes.Ffi.C</literal>. The <literal>@-&gt;</literal>
+      operator adds an argument to the parameter list, and the
+      <literal>returning</literal> function declares the return value.
+      The remainder of the <literal>Ncurses</literal> implementation
+      expands on these definitions for the other library functions.
+    </para>
+    <programlisting language="ocaml">
+let endwin =
+  foreign &quot;endwin&quot; (void @-&gt; (returning void))
+
+let refresh =
+  foreign &quot;refresh&quot; (void @-&gt; (returning void))
+
+let wrefresh =
+  foreign &quot;wrefresh&quot; (window @-&gt; (returning void))
+
+let newwin =
+  foreign &quot;newwin&quot; (int @-&gt; int @-&gt; int @-&gt; int @-&gt; (returning window))
+
+let mvwaddch =
+  foreign &quot;mvwaddch&quot; (window @-&gt; int @-&gt; int @-&gt; char @-&gt; (returning void))
+
+let addstr =
+  foreign &quot;addstr&quot; (string @-&gt; (returning void))
+
+let mvwaddstr =
+  foreign &quot;mvwaddstr&quot; (window @-&gt; int @-&gt; int @-&gt; string @-&gt; (returning void))
+
+let box =
+  foreign &quot;box&quot; (window @-&gt; int @-&gt; int @-&gt; (returning void))
+
+let cbreak =
+  foreign &quot;cbreak&quot; (void @-&gt; (returning void))
+</programlisting>
+    <para>
+      These function calls all have different arguments, but the basic C
+      types are provided by the <literal>Ffi.C</literal> module and can
+      be directly used. The module signature for
+      <literal>ncurses.mli</literal> looks much like a normal OCaml
+      signature:
+    </para>
+    <programlisting language="ocaml">
+type window
+val window : window Ffi.C.Type.t
+val initscr : unit -&gt; window
+val endwin : unit -&gt; unit
+val refresh : unit -&gt; unit
+val wrefresh : window -&gt; unit
+val newwin : int -&gt; int -&gt; int -&gt; int -&gt; window
+val addch : char -&gt; unit
+val mvwaddch : window -&gt; int -&gt; int -&gt; char -&gt; unit
+val addstr : string -&gt; unit
+val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
+val box : window -&gt; int -&gt; int -&gt; unit
+val cbreak : unit -&gt; unit
+</programlisting>
+    <para>
+      Notice that the <literal>window</literal> type is left abstract to
+      external users, so that it can only be constructed via
+      <literal>Ncurses.initscr</literal>. This interface is now safe to
+      use in example code. Here's what an ncurses hello world looks
+      like:
+    </para>
+    <programlisting language="ocaml">
+open Ncurses
+
+let () =
+  let main_window = initscr () in
+  cbreak ();
+  let small_window = newwin 10 10 5 5 in
+  mvwaddstr main_window 1 2 &quot;Hello&quot;;
+  mvwaddstr small_window 2 2 &quot;World&quot;;
+  box small_window 0 0;
+  refresh ();
+  Unix.sleep 1;
+  wrefresh small_window;
+  Unix.sleep 5;
+  endwin ()
+</programlisting>
+    <para>
+      This code can be compiled by:
+    </para>
+    <programlisting>
+$ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
+  -cclib -lncurses ncurses.mli ncurses.ml hello.ml -o hello
+</programlisting>
+    <para>
+      Running <literal>./hello</literal> should now display a Hello
+      World in your terminal with a box around the &quot;World&quot;.
+      Notice that the compilation line includes
+      <literal>-cclib -lncurses</literal>. This tells the OCaml compiler
+      to link the output binary to the ncurses library, which in turns
+      makes the symbols available to the program when it starts. If you
+      omit that line, you'll get an error when you try to run the
+      binary:
+    </para>
+    <programlisting>
+$ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
+  ncurses.mli ncurses.ml hello.ml -o hello_broken
+$ ./hello_broken 
+Fatal error: exception Dl.DL_error(&quot;dlsym(RTLD_DEFAULT, initscr): symbol not found&quot;)
+</programlisting>
+  </sect1>
+  <sect1 id="defining-c-values-in-ocaml">
+    <title>Defining C values in OCaml</title>
+    <para>
+      The <literal>Ctypes</literal> library provides an
+      <literal>FFi.C</literal> module that lets you describe not only
+      basic C types, but also more complex structures and unions. It
+      defines abstract OCaml types for all of these in
+      <literal>FFi.C</literal>:
+    </para>
+    <programlisting language="ocaml">
+type 'a typ        (** Basic C type  *)
+type 'a ptr        (** C pointer *)
+type 'a array      (** C array of 'a values *)
+type 'a structure  (** C `struct` *)
+type 'a union      (** C `union` *)
+type 'a abstract   (** Abstract C pointer *)
+</programlisting>
+    <para>
+      The <literal>Ffi.C.Type</literal> module defines constructors for
+      the familiar C basic types and lets you build `'a typ' values.
+    </para>
+    <programlisting language="ocaml">
+module Type : sig
+  type 'a t = 'a typ 
+  
+  val void  : unit t
+  val char : char t
+  val schar : int t
+  val float : float t
+  val double : float t
+  val short : int t
+  val int   : int t
+  val long  : long t
+  val llong  : llong t
+  val nativeint : nativeint t
+  val int8_t : int t
+  val int16_t : int t
+  val int32_t : int32 t
+  val int64_t : int64 t
+...
+</programlisting>
+    <para>
+      These functions all return an
+      <literal>'a typ', where the</literal>'a<literal>component is the OCaml representation of the C type. For example, OCaml only supports double-precision floating point numbers, and so both of the C</literal>float<literal>and</literal>double<literal>functions map to the OCaml</literal>float<literal>type.  The</literal>Ffi.Unsigned<literal>and</literal>Ffi.Signed<literal>modules provide some optimized implementations of specific C types, such as</literal>llong<literal>(for</literal>long
+      long` 64-bit values).
+    </para>
+    <para>
+      The module also defines some more advanced C types
+    </para>
+    <programlisting language="ocaml">
+... 
+  val string : string t
+  val abstract : size:int -&gt; alignment:int -&gt; 'a abstract t
+  val array : int -&gt; 'a t -&gt; 'a array t
+  val ptr : 'a t -&gt; 'a ptr t
+</programlisting>
+    <para>
+      Strings in C are null-terminator character arrays, whereas OCaml
+      strings have a fixed-length and can contain null values. The
+      <literal>string</literal> mapping safely copies between these two
+      strings. if you need an abstract C type (for example, from a
+      forward declaration of a <literal>struct</literal>), then just
+      define an <literal>abstract t</literal>. Arrays and pointers can
+      be built out of primitive types by using the corresponding
+      constructor functions.
+    </para>
+    <programlisting language="ocaml">
+...
+  val ( @-&gt; ) : 'a t -&gt; 'b f -&gt; ('a -&gt; 'b) f
+  val returning : 'a t -&gt; 'a f
+  val funptr : ('a -&gt; 'b) f -&gt; ('a -&gt; 'b) t
+</programlisting>
+    <para>
+      Sequences of <literal>'a typ</literal> values are constructed by
+      using the <literal>@-&gt;</literal> and
+      <literal>returning</literal> functions. You can even exchange
+      function pointers between OCaml and C by wrapping the OCaml
+      callback using <literal>funptr</literal>. The library takes care
+      of the garbage collector interface to ensure that the OCaml value
+      isn't moved around while the C library is holding a reference to
+      the value.
+    </para>
+    <sect2 id="arrays-structures-and-unions">
+      <title>Arrays, structures and unions</title>
+      <para>
+        Arrays in C are contiguous blocks of the same value. Any of the
+        basic types defined earlier can be allocated as blocks via the
+        <literal>Ffi.C.Type.Array</literal> module.
+      </para>
+      <programlisting language="ocaml">
+module Array : sig
+  type 'a t = 'a array
+
+  val get : 'a t -&gt; int -&gt; 'a
+  val set : 'a t -&gt; int -&gt; 'a -&gt; unit
+  val of_list : 'a typ -&gt; 'a list -&gt; 'a t
+  val to_list : 'a t -&gt; 'a list
+  val length : 'a t -&gt; int
+  val start : 'a t -&gt; 'a ptr
+  val from_ptr : 'a ptr -&gt; int -&gt; 'a t
+  val make : 'a typ -&gt; ?initial:'a -&gt; int -&gt; 'a t
+end
+</programlisting>
+      <para>
+        The array functions are similar to the standard library
+        <literal>Array</literal> module. The conversion between arrays
+        and lists involves reallocating the values, and can be expensive
+        for very large data structures. Notice that you can also convert
+        an array into a <literal>ptr</literal> pointer to the head of
+        buffer, which can be useful if you need to pass the pointer and
+        size arguments separately to a C function.
+      </para>
+      <para>
+        Structures in C can contain a mixture of types, and, like OCaml
+        records, their order is significant. The
+        <literal>Ffi.C.Type.Struct</literal> module defines combinators
+        to make this as easy as arrays and basic types. Let's start with
+        an example by binding some time-related UNIX functions.
+      </para>
+      <sect3 id="example-binding-unix-date-functions">
+        <title>Example: binding UNIX date functions</title>
+        <para>
+          The UNIX standard C library defines several useful time and
+          date functions in <literal>&lt;time.h&gt;</literal> (usually
+          found in <literal>/usr/include</literal> on a Linux or MacOS X
+          system). The <literal>localtime</literal> function has the
+          following signature and return value:
+        </para>
+        <programlisting language="c">
+struct tm {
+  int     tm_sec;         /* seconds after the minute [0-60] */
+  int     tm_min;         /* minutes after the hour [0-59] */
+  int     tm_hour;        /* hours since midnight [0-23] */
+  int     tm_mday;        /* day of the month [1-31] */
+  int     tm_mon;         /* months since January [0-11] */
+  int     tm_year;        /* years since 1900 */
+  int     tm_wday;        /* days since Sunday [0-6] */
+  int     tm_yday;        /* days since January 1 [0-365] */
+  int     tm_isdst;       /* Daylight Savings Time flag */
+};
+
+time_t time(time_t *);
+struct tm *localtime(const time_t *);
+</programlisting>
+        <para>
+          This example is more complicated than ncurses for a couple of
+          reasons. We need to allocate some memory to store a
+          <literal>time_t</literal> value, and pass that memory into the
+          <literal>time</literal> library call to obtain the current
+          timezone. This <literal>time_t</literal> is then passed to the
+          <literal>localtime</literal> library call, which returns a
+          pointer to the <literal>struct tm</literal>.
+        </para>
+        <para>
+          The <literal>time_t</literal>, and most other standard POSIX
+          types, are already provided by the
+          <literal>Ffi.PosixTypes</literal> module. Let's start by
+          defining the OCaml mapping to <literal>struct tm</literal>:
+        </para>
+        <programlisting language="ocaml">
+open Ffi.C
+open Type
+open PosixTypes
+open Struct
+
+type tm
+let tm = structure &quot;tm&quot;
+let tm_sec   = tm *:* int (* seconds *)
+let tm_min   = tm *:* int (* minutes *)
+let tm_hour  = tm *:* int (* hours *)
+let tm_mday  = tm *:* int (* day of the month *)
+let tm_mon   = tm *:* int (* month *)
+let tm_year  = tm *:* int (* year *)
+let tm_wday  = tm *:* int (* day of the week *)
+let tm_yday  = tm *:* int (* day in the year *)
+let tm_isdst = tm *:* int (* daylight saving time *)
+let () = seals (tm : tm structure typ)
+</programlisting>
+        <para>
+          This is a very mechanical translation from the C structure,
+          due to the magic of the <literal>*:*</literal> combinator
+          provided by the <literal>Struct</literal> module. We start
+          building the definition via the <literal>structure</literal>
+          allocator. Then the types are added in sequence, with each
+          application recording the position in the
+          <literal>tm</literal> structure. When all the fields have been
+          added, the structure is finalized via the
+          <literal>seals</literal> call. The definitions of
+          <literal>time</literal> and <literal>localtime</literal>
+          should now be familiar:
+        </para>
+        <programlisting language="ocaml">
+let time = foreign &quot;time&quot; (ptr time_t @-&gt; syscall time_t)
+let asctime = foreign &quot;asctime&quot; (ptr tm @-&gt; returning string)
+let localtime = foreign &quot;localtime&quot; (ptr time_t @-&gt; returning (ptr tm))
+</programlisting>
+        <para>
+          The complete signature for this definition looks like this:
+        </para>
+        <programlisting language="ocaml">
+open Ffi.C
+type tm
+val tm : tm structure typ
+val tm_sec : (int, tm) Struct.field
+val tm_min : (int, tm) Struct.field
+val tm_hour : (int, tm) Struct.field
+val tm_mday : (int, tm) Struct.field
+val tm_mon : (int, tm) Struct.field
+val tm_year : (int, tm) Struct.field
+val tm_wday : (int, tm) Struct.field
+val tm_yday : (int, tm) Struct.field
+val tm_isdst : (int, tm) Struct.field
+
+val time : PosixTypes.time_t ptr -&gt; PosixTypes.time_t
+val localtime : PosixTypes.time_t ptr -&gt; tm structure ptr
+val asctime : PosixTypes.time_t ptr -&gt; string
+</programlisting>
+        <para>
+          Unlike the ncurses example, some of the FFI types are still
+          exposed in this signature due to the manual memory interface
+          required by the C libraries. To use the OCaml
+          <literal>time</literal> and <literal>localtime</literal>
+          functions, we need to allocate some memory and construct
+          values of type <literal>time_t ptr</literal> to them.
+        </para>
+        <programlisting language="ocaml">
+let () =
+  let timep = Ptr.allocate ~count:1 time_t in
+  let time = time timep in
+  let tm = localtime timep in
+  print_endline (asctime tm)
+</programlisting>
+        <para>
+          The <literal>Ptr.allocate</literal> function allocates memory
+          via <literal>malloc</literal> and creates an OCaml value to
+          point to it. This OCaml value (<literal>timep</literal> in the
+          example) has a finalizer function which frees the external
+          memory when it is garbage collected. The
+          <literal>timep</literal> pointer is passed into the
+          <literal>time</literal> library call, which modifies it
+          in-place. The <literal>timep</literal> pointer is then passed
+          on to <literal>localtime</literal>, whose return value is
+          converted into an OCaml string via <literal>asctime</literal>.
+          The garbage collector can then collect
+          <literal>timep</literal> during the next collection cycle.
+        </para>
+        <para>
+          Unions in C are a collection of named structures that can be
+          mapped onto the same memory. They are also supported in the
+          <literal>ctypes</literal> library via the
+          <literal>Ffi.C.Union</literal> module, although we won't go
+          into more detail here.
+        </para>
+      </sect3>
+    </sect2>
+  </sect1>
+</chapter></part><part label="III"><title>Advanced Topics</title><chapter id="runtime-memory-layout">
+  <title>Runtime Memory Layout</title>
   <para>
     Much of the static type information contained within an OCaml
     program is checked and discarded at compilation time, leaving a much
