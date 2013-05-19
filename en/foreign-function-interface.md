@@ -172,7 +172,7 @@ type 'a abstract   (** Abstract C pointer *)
 ```
 
 The `Ffi.C.Type` module defines constructors for the familiar C basic types and
-lets you build `'a typ' values.
+lets you build `'a typ` values.
 
 ```ocaml
 module Type : sig
@@ -195,7 +195,7 @@ module Type : sig
 ...
 ```
 
-These functions all return an `'a typ', where the `'a` component is the OCaml
+These functions all return an `'a typ`, where the `'a` component is the OCaml
 representation of the C type. For example, OCaml only supports double-precision
 floating point numbers, and so both of the C `float` and `double` functions map
 to the OCaml `float` type.  The `Ffi.Unsigned` and `Ffi.Signed` modules provide
