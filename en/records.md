@@ -379,11 +379,14 @@ val create_log_entry :
 The module name `Log_entry` is required to qualify the fields, because
 this function is outside of the `Log_entry` module where the record
 was defined.  OCaml only requires the module qualification for one
-record field, however, so we can write this more concisely.
+record field, however, so we can write this more concisely.  Note that
+we are allowed to insert whitespace between the module-path and the
+field name.
 
 ```ocaml
 # let create_log_entry ~session_id ~important message =
-     { Log_entry. time = Time.now (); session_id; important; message }
+     { Log_entry.
+       time = Time.now (); session_id; important; message }
   ;;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
@@ -393,7 +396,7 @@ This is not restricted to constructing a record; we can use the same
 trick when pattern-matching:
 
 ```ocaml
-# let message_to_string { Log_entry. important; message; _ } =
+# let message_to_string { Log_entry.important; message; _ } =
     if important then String.uppercase message else message
   ;;
 val message_to_string : Log_entry.t -> string = <fun>
