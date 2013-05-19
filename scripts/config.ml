@@ -36,6 +36,7 @@ let from_anil =
   ; "green-gecko"             (* Alex Ho <a_green_gecko@yahoo.com> *)
   ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> *)
   ; "ChrisDodd"               (* Chris Dodd <dodd@csl.sri.com> *)
+  ; "jonludlam"               (* Jon Ludlam <jon@recoil.org> TODO *)
 ]
 
 let from_yminsky =
