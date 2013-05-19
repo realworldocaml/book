@@ -55,7 +55,7 @@ let print_result (word,definition) =
     word
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
-     | Error _ -> "DuckDuckGo query failed unexpectedly"
+     | Error s -> "DuckDuckGo query failed: " ^ s
      | Ok None -> "No definition found"
      | Ok (Some def) ->
        String.concat ~sep:"\n"

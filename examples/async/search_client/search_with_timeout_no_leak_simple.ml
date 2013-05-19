@@ -37,8 +37,7 @@ let get_definition ~server ~interrupt word =
   | Error exn        -> (word, Error exn)
 
 let get_definition_with_timeout ~server ~timeout word =
-  let timeout_d = after timeout in
-  get_definition ~server ~interrupt:timeout_d word
+  get_definition ~server ~interrupt:(after timeout) word
   >>| fun (word,result) ->
   let result' = match result with
     | Ok _ as x -> x

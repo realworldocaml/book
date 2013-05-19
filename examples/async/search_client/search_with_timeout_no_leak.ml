@@ -52,13 +52,14 @@ let get_definition_with_timeout ~server ~timeout word =
         )
     ]
 
+
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
     word
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
-     | Error _ -> "DuckDuckGo query failed unexpectedly"
+     | Error s -> "DuckDuckGo query failed: " ^ s
      | Ok None -> "No definition found"
      | Ok (Some def) ->
        String.concat ~sep:"\n"

@@ -25,9 +25,9 @@ let get_definition_from_json json =
   | _ -> None
 
 (* Execute the DuckDuckGo search *)
-let get_definition ~interrupt ~server word =
+let get_definition ~server word =
   try_with (fun () ->
-    Cohttp_async.Client.get ~interrupt (query_uri ~server word)
+    Cohttp_async.Client.get (query_uri ~server word)
     >>= fun (_, body) ->
     Pipe.to_list body
     >>| fun strings ->
@@ -36,21 +36,20 @@ let get_definition ~interrupt ~server word =
   | Ok (word,result) -> (word, Ok result)
   | Error exn        -> (word, Error exn)
 
-
-let get_definition_with_timeout ~server ~timeout word =
+let get_definition_with_timeout ~servers ~timeout word =
   let interrupt = Ivar.create () in
   choose
-    [ choice (after timeout)
-        (fun () ->
-           Ivar.fill interrupt ();
-           (word,Error "Timed out"))
-    ; choice (get_definition ~interrupt:(Ivar.read interrupt) ~server word)
+    [ choice (after timeout) (fun () ->
+       Ivar.fill interrupt ();
+       (word,Error "Timed out"))
+    ; choice (get_definition ~servers ~interrupt:(Ivar.read interrupt) word)
         (fun (word,result) ->
-           let result = match result with
+           let result' = match result with
              | Ok _ as x -> x
              | Error _ -> Error "Unexpected failure"
            in
-           (word,result))
+           (word,result')
+        )
     ]
 
 (* Print out a word/definition pair *)
