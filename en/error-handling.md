@@ -559,6 +559,19 @@ let load_config filename =
     ~finally:(fun () -> In_channel.close inc)
 ```
 
+This is a common enough problem that `In_channel` has a function
+called `with_file` that automates this pattern.
+
+```ocaml
+let load_config filename =
+  In_channel.with_file filename ~f:(fun inc ->
+    Config.t_of_sexp (Sexp.input_sexp inc))
+```
+
+`In_channel.with_file` is actually built on top of `protect` so that
+it can clean up after itself in the presence of exceptions.
+
+
 ### Catching specific exceptions
 
 OCaml's exception-handling system allows you to tune your
@@ -566,32 +579,19 @@ error-recovery logic to the particular error that was thrown.  For
 example, `List.find_exn` throws `Not_found` when the element in
 question can'tbe found.  You can take advantage of this in your code,
 for example, let's define a function called `lookup_weight`, with the
-following signature:
+following signature.
 
 ```ocaml
-(** [lookup_weight ~compute_weight alist key] Looks up a
-    floating-point weight by applying [compute_weight] to the data
-    associated with [key] by [alist].  If [key] is not found, then
-    return 0.
-*)
 val lookup_weight :
   compute_weight:('data -> float) -> ('key * 'data) list -> 'key -> float
 ```
 
-<note> <title> Doc comments </title>
+`lookup_weight ~compute_weight alist key` should return a
+floating-point weight by applying `compute_weight` to the data
+associated with `key` by `alist`.  If `key` is not found, then it
+shoudl return 0.
 
-You may have noticed that the comment in front of `lookup_weight`
-starts with two asterisks instead of one.  Such comments are called
-doc-comments, and are used by `ocamldoc` to auto-generate API
-documentation.  The text in square-brackets will be interpreted and
-formatted as OCaml code.
-
-We'll discuss how to use `ocamldoc` to build API documentation in
-[xref](#packaging).
-
-</note>
-
-We can implement such a function using exceptions as follows:
+We can implement `lookup_weight` as follows.
 
 ```ocaml
 # let lookup_weight ~compute_weight alist key =
@@ -605,10 +605,11 @@ val lookup_weight :
   <fun>
 ```
 
-This implementation is more problematic than it looks.  In particular,
-what happens if `compute_weight` itself throws an exception?  Ideally,
-`lookup_weight` should propagate that exception on, but if the
-exception happens to be `Not_found`, then that's not what will happen:
+Let's think about the behavior of this code in the presence of
+exceptions.  In particular, what happens if `compute_weight` throws an
+exception?  Ideally, `lookup_weight` should propagate that exception
+on, but if the exception happens to be `Not_found`, then that's not
+what will happen:
 
 ```ocaml
 # lookup_weight ~compute_weight:(fun _ -> raise Not_found)
@@ -617,12 +618,11 @@ exception happens to be `Not_found`, then that's not what will happen:
 ```
 
 This kind of problem is hard to detect in advance, because the type
-system doesn't tell us what kinds of exceptions a given function might
-throw.  Because of this kind of confusion, it's generally better to
-avoid relying on the identity of the exception to determine the nature
-of a failure.  A better approach is to narrow the scope of the
-exception handler, so that when it fires it's very clear what part of
-the code failed.
+system doesn't tell you what exceptions a given function might throw.
+For this reason, it's generally better to avoid relying on the
+identity of the exception to determine the nature of a failure.  A
+better approach is to narrow the scope of the exception handler, so
+that when it fires it's very clear what part of the code failed.
 
 ```ocaml
 # let lookup_weight ~compute_weight alist key =
@@ -686,9 +686,11 @@ where the error came from.  But in a complex program, simply knowing
 which exception was thrown is usually not enough information to figure
 out what went wrong.
 
-We can get more information from OCaml if we turn on stack traces.
-This can be done by setting the `OCAMLRUNPARAM` environment variable,
-as shown:
+We can get more information from OCaml if we turn on stack backtraces.
+A backtrace is essentially a summary of the stack of calls that were
+executed to get to the point where the exception was thrown.
+Backtraces can be enabled by setting the `OCAMLRUNPARAM` environment
+variable as shown.
 
 ```bash
 exn $ export OCAMLRUNPARAM=b=1
@@ -699,9 +701,10 @@ Raised at file "exn.ml", line 7, characters 16-26
 Called from file "exn.ml", line 12, characters 17-28
 ```
 
-Backtraces can also be obtained at runtime.  In particular,
-`Exn.backtrace` will return the backtrace of the most recently thrown
-exception.
+You can also capture a backtrace within your program by calling
+`Exn.backtrace`, which returns the backtrace of the most recently
+thrown exception.  This is useful for reporting detailed information
+on errors that did not cause your program to fail.
 
 ### From exceptions to error-aware types and back again ###
 
