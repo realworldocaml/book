@@ -16563,7 +16563,8 @@ This is an echo server
 It repeats whatever I write.
 It repeats whatever I write.
 </programlisting>
-    <note> <title>
+    <note>
+    <title>
     Functions that never return
     </title>
     <para>
