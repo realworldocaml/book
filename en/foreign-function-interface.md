@@ -25,6 +25,7 @@ $ make && make install
 ```
 
 It will then be available via the `ctypes` ocamlfind package.
+
 </note>
 
 ## Example: an ncurses terminal interface

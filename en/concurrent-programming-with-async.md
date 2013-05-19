@@ -430,7 +430,8 @@ It repeats whatever I write.
 It repeats whatever I write.
 ```
 
-<note> <title>Functions that never return</title>
+<note>
+<title>Functions that never return</title>
 
 You might wonder what's going on with the call to `never_returns`
 above.  `never_returns` is an idiom that comes from `Core` that is
@@ -1378,3 +1379,4 @@ ocaml
 programming language, created by Xavier Leroy, Jérôme Vouillon,
 Damien Doligez, Didier Rémy and others in 1996."
 ```
+

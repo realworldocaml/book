@@ -712,11 +712,11 @@ The compiler will now complain of invalid format strings when you compile this:
 
 ```
 $ ocamlopt -o hello -ccopt -Wall hello_stubs.c hello.ml
-hello_stubs.c: In function ‘caml_add_numbers’:
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘value’
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘value’
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘value’
-hello_stubs.c:7: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘value’
+hello_stubs.c: In function caml_add_numbers:
+hello_stubs.c:7: warning: format %d expects type int, but argument 2 has type value
+hello_stubs.c:7: warning: format %d expects type int, but argument 3 has type value
+hello_stubs.c:7: warning: format %d expects type int, but argument 2 has type value
+hello_stubs.c:7: warning: format %d expects type int, but argument 3 has type value
 $ ./hello 
 From C:     21 + 31
 From OCaml: 26
@@ -740,7 +740,6 @@ double-precision.
 
 Macro                   OCaml Type         C type
 -----                   ----------         ------
-
 `Long_val`              `int`             `long`
 `Int_val`               `int`             `int`
 `Unsigned_long_val`     `int`             `unsigned long`
@@ -799,14 +798,25 @@ We also need to allocate a tuple to store the result.  This is declared with the
 
 <note>
 <title>FFI rule: Use `CAMLparam` and `CAMLreturn` for OCaml values</title>
-A function that has parameters or local variables of type value must begin with a call to one of the `CAMLparam` macros and return with `CAMLreturn`, `CAMLreturn0`, or `CAMLreturnT`. Local variables of type `value` must be declared with one of the `CAMLlocal` macros. Arrays of values are declared with `CAMLlocalN`. These macros must be used at the beginning of the function, not in a nested block.
+
+A function that has parameters or local variables of type value must begin with
+a call to one of the `CAMLparam` macros and return with `CAMLreturn`,
+`CAMLreturn0`, or `CAMLreturnT`. Local variables of type `value` must be
+declared with one of the `CAMLlocal` macros. Arrays of values are declared with
+`CAMLlocalN`. These macros must be used at the beginning of the function, not
+in a nested block.
+
 </note>
 
 The tuple is then allocated via `caml_alloc_tuple`, with the number of fields representing the size of the tuple.  This must _immediately_ be followed by the `Store_field` macros to set the newly allocated tuple to sensible values.  In our example, we assign the first two fields to the local integers.  The `int32` requires another allocation, and  `caml_copy_int32` is used which copies a C `int32` into the correspondig OCaml `value`.  Once the tuple has been set, the function returns via `CAMLreturn`, which frees up the local roots that we registered at the beginning of the function.
 
 <note>
 <title>FFI rule: Use `Store_field` to assign to tuples, records and arrays</title>
-Assignments to the fields of structured blocks must be done with the `Store_field` macro (for normal blocks) or `Store_double_field` macro (for arrays and records of floating-point numbers). Other assignments must not use `Store_field` nor `Store_double_field`.
+Assignments to the fields of structured blocks must be done with the
+`Store_field` macro (for normal blocks) or `Store_double_field` macro (for
+arrays and records of floating-point numbers). Other assignments must not use
+`Store_field` nor `Store_double_field`.
+
 </note>
 
 The `caml/alloc.h` header file lists all of the functions that allocate OCaml values.
@@ -844,4 +854,5 @@ Records are never rearranged in memory, so the fields will appear in the same or
 <title>Faster bindings for zero-allocation functions</title>
 
 TODO Talk about "alloc" and "float" qualifiers to `external`
+
 </note>

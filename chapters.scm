@@ -105,7 +105,7 @@
  (public false)
  )
 ((part Practical)
- (name "fast-binary-serialization-with-bin_prot")
+ (name "fast-binary-serialization")
  (file "binio")
  (note "50% done (Anil)")
  (title "Fast Binary Serialization")
