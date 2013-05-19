@@ -18833,8 +18833,10 @@ $ git clone git://github.com/ocamllabs/ocaml-ctypes
 $ cd ocaml-ctypes
 $ make &amp;&amp; make install
 </programlisting>
-  It will then be available via the <literal>ctypes</literal> ocamlfind
-  package.
+  <para>
+    It will then be available via the <literal>ctypes</literal>
+    ocamlfind package.
+  </para>
   </note>
   <sect1 id="example-an-ncurses-terminal-interface">
     <title>Example: an ncurses terminal interface</title>
@@ -20480,15 +20482,17 @@ caml_add_numbers(value v_arg1, value v_arg2)
       FFI rule: Use <literal>CAMLparam</literal> and
       <literal>CAMLreturn</literal> for OCaml values
       </title>
-      A function that has parameters or local variables of type value
-      must begin with a call to one of the <literal>CAMLparam</literal>
-      macros and return with <literal>CAMLreturn</literal>,
-      <literal>CAMLreturn0</literal>, or <literal>CAMLreturnT</literal>.
-      Local variables of type <literal>value</literal> must be declared
-      with one of the <literal>CAMLlocal</literal> macros. Arrays of
-      values are declared with <literal>CAMLlocalN</literal>. These
-      macros must be used at the beginning of the function, not in a
-      nested block.
+      <para>
+        A function that has parameters or local variables of type value
+        must begin with a call to one of the
+        <literal>CAMLparam</literal> macros and return with
+        <literal>CAMLreturn</literal>, <literal>CAMLreturn0</literal>,
+        or <literal>CAMLreturnT</literal>. Local variables of type
+        <literal>value</literal> must be declared with one of the
+        <literal>CAMLlocal</literal> macros. Arrays of values are
+        declared with <literal>CAMLlocalN</literal>. These macros must
+        be used at the beginning of the function, not in a nested block.
+      </para>
       </note>
       <para>
         The tuple is then allocated via
@@ -20511,12 +20515,14 @@ caml_add_numbers(value v_arg1, value v_arg2)
       FFI rule: Use <literal>Store_field</literal> to assign to tuples,
       records and arrays
       </title>
-      Assignments to the fields of structured blocks must be done with
-      the <literal>Store_field</literal> macro (for normal blocks) or
-      <literal>Store_double_field</literal> macro (for arrays and
-      records of floating-point numbers). Other assignments must not use
-      <literal>Store_field</literal> nor
-      <literal>Store_double_field</literal>.
+      <para>
+        Assignments to the fields of structured blocks must be done with
+        the <literal>Store_field</literal> macro (for normal blocks) or
+        <literal>Store_double_field</literal> macro (for arrays and
+        records of floating-point numbers). Other assignments must not
+        use <literal>Store_field</literal> nor
+        <literal>Store_double_field</literal>.
+      </para>
       </note>
       <para>
         The <literal>caml/alloc.h</literal> header file lists all of the
@@ -20660,8 +20666,10 @@ let () =
       <title>
       Faster bindings for zero-allocation functions
       </title>
-      TODO Talk about &quot;alloc&quot; and &quot;float&quot; qualifiers
-      to <literal>external</literal>
+      <para>
+        TODO Talk about &quot;alloc&quot; and &quot;float&quot;
+        qualifiers to <literal>external</literal>
+      </para>
       </note>
     </sect2>
   </sect1>
