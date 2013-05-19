@@ -55,6 +55,7 @@ the shell to extract the information we need about the computer we're
 running on, and the `Time.now` call from Core's `Time` module.
 
 ```ocaml
+# #require "core_extended";;
 # open Core_extended.Std;;
 # let my_host =
     let sh = Shell.sh_one_exn in
@@ -378,11 +379,14 @@ val create_log_entry :
 The module name `Log_entry` is required to qualify the fields, because
 this function is outside of the `Log_entry` module where the record
 was defined.  OCaml only requires the module qualification for one
-record field, however, so we can write this more concisely.
+record field, however, so we can write this more concisely.  Note that
+we are allowed to insert whitespace between the module-path and the
+field name.
 
 ```ocaml
 # let create_log_entry ~session_id ~important message =
-     { Log_entry. time = Time.now (); session_id; important; message }
+     { Log_entry.
+       time = Time.now (); session_id; important; message }
   ;;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
@@ -392,7 +396,7 @@ This is not restricted to constructing a record; we can use the same
 trick when pattern-matching:
 
 ```ocaml
-# let message_to_string { Log_entry. important; message; _ } =
+# let message_to_string { Log_entry.important; message; _ } =
     if important then String.uppercase message else message
   ;;
 val message_to_string : Log_entry.t -> string = <fun>
@@ -457,6 +461,7 @@ Given this, we can rewrite `register_heartbeat` more concisely.
 ```ocaml
 # let register_heartbeat t hb =
     { t with last_heartbeat_time = hb.Heartbeat.time };;
+val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
 Functional updates make your code independent of the identity of the
@@ -523,9 +528,9 @@ follows.
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 ```
 
-Note that `<-` is not needed for initialization, because all fields of
-a record, including mutable ones, must be specified when the record is
-created.
+Note that mutable assignment, and thus the `<-` operator, is not
+needed for initialization, because all fields of a record, including
+mutable ones, are specified when the record is created.
 
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming does have its place.  We'll discuss more about how (and

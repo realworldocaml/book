@@ -34,7 +34,7 @@ let get_definition ~server word =
     (word, get_definition_from_json (String.concat strings)))
   >>| function
   | Ok (word,result) -> (word, Ok result)
-  | Error exn        -> (word, Error exn)
+  | Error _          -> (word, Error "Unexpected failure")
 
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
@@ -42,7 +42,7 @@ let print_result (word,definition) =
     word
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
-     | Error _ -> "DuckDuckGo query failed unexpectedly"
+     | Error s -> "DuckDuckGo query failed: " ^ s
      | Ok None -> "No definition found"
      | Ok (Some def) ->
        String.concat ~sep:"\n"

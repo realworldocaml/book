@@ -25,10 +25,10 @@ let get_definition_from_json json =
   | _ -> None
 
 (* Execute the DuckDuckGo search *)
-let get_definition ~interrupt ~server word =
+let get_definition ~server ~interrupt word =
   try_with (fun () ->
     Cohttp_async.Client.get ~interrupt (query_uri ~server word)
-    >>= fun (_, body) ->
+    >>= fun  (_, body) ->
     Pipe.to_list body
     >>| fun strings ->
     (word, get_definition_from_json (String.concat strings)))
@@ -36,22 +36,22 @@ let get_definition ~interrupt ~server word =
   | Ok (word,result) -> (word, Ok result)
   | Error exn        -> (word, Error exn)
 
-
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
-    [ choice (after timeout)
-        (fun () ->
-           Ivar.fill interrupt ();
-           (word,Error "Timed out"))
-    ; choice (get_definition ~interrupt:(Ivar.read interrupt) ~server word)
+    [ choice (after timeout) (fun () ->
+       Ivar.fill interrupt ();
+       (word,Error "Timed out"))
+    ; choice (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
         (fun (word,result) ->
-           let result = match result with
+           let result' = match result with
              | Ok _ as x -> x
              | Error _ -> Error "Unexpected failure"
            in
-           (word,result))
+           (word,result')
+        )
     ]
+
 
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
@@ -59,7 +59,7 @@ let print_result (word,definition) =
     word
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
-     | Error msg -> "ERROR: " ^ msg
+     | Error s -> "DuckDuckGo query failed: " ^ s
      | Ok None -> "No definition found"
      | Ok (Some def) ->
        String.concat ~sep:"\n"
@@ -67,9 +67,11 @@ let print_result (word,definition) =
 
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
-let search_and_print ~server ~timeout words =
-  Deferred.all (List.map words
-                  ~f:(get_definition_with_timeout ~timeout ~server))
+let search_and_print ~servers ~timeout words =
+  let servers = Array.of_list servers in
+  Deferred.all (List.mapi words ~f:(fun i word ->
+    let server = servers.(i mod Array.length servers) in
+    get_definition_with_timeout ~server ~timeout word))
   >>| fun results ->
   List.iter results ~f:print_result
 
@@ -77,13 +79,15 @@ let () =
   Command.async_basic
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
+      let string_list = Arg_type.create (String.split ~on:',') in
       empty
       +> anon (sequence ("word" %: string))
-      +> flag "-server" (optional_with_default "api.duckduckgo.com" string)
+      +> flag "-servers"
+           (optional_with_default ["api.duckduckgo.com"] string_list)
            ~doc:" Specify server to connect to"
       +> flag "-timeout" (optional_with_default (sec 5.) time_span)
            ~doc:" Abandon queries that take longer than this time"
     )
-    (fun words server timeout () ->
-       search_and_print ~server ~timeout words)
+    (fun words servers timeout () ->
+       search_and_print ~servers ~timeout words)
   |> Command.run
