@@ -1322,17 +1322,26 @@ timeout, it would be a more serious issue.
 
 We can get more precise handling of timeouts using Async's `choose`
 operator, which lets you pick between a collection of different
-deferreds.  Each deferred is combined, using the function `choice`,
-with a function that is called if and only if that is the chosen
-deferred.  If multiple deferreds become determined at around the same
-time, there's no guarantee that the one that became determined first
-will be chosen; but once any deferred becomes determined, then the
-`choose` will become determined, and only one of the paired functions
-will be called.
+deferreds, reacting to exactly one of them.  Each deferred is
+combined, using the function `choice`, with a function that is called
+if and only if that is the chosen deferred.   Here's the type
+signature of `choice` and `choose`:
 
-We can use `choose` to ensure that the `interrupt` deferred becomes
-determined if and only if the timeout-deferred is chosen.  Here's the
-code.
+```ocaml
+# choice;;
+- : 'a Deferred.t -> ('a -> 'b) -> 'b Deferred.choice = <fun>
+# choose;;
+- : 'a Deferred.choice list -> 'a Deferred.t = <fun>
+```
+
+`choose` provides no guarantee that the `choice` built around the
+first deferred to become determined will in fact be chosen.  But
+`choose` does guarantee that only one `choice` will be chosen, and
+only the chosen `choice` will execute the attached closure.
+
+In the following, we use `choose` to ensure that the `interrupt`
+deferred becomes determined if and only if the timeout-deferred is
+chosen.  Here's the code.
 
 ```ocaml
 let get_definition_with_timeout ~server ~timeout word =
@@ -1353,7 +1362,7 @@ let get_definition_with_timeout ~server ~timeout word =
 ```
 
 Now, if we run this with a suitably small timeout, we'll see that some
-queries succeed and some fail, and the errors are reported accordingly.
+queries succeed and some fail, and the timeouts are reported as such.
 
 ```
 $ ./search_with_timeout_no_leak.native "concurrent programming" ocaml -timeout 0.1s
