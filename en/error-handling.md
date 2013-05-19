@@ -597,15 +597,17 @@ exception happens to be `Not_found`, then that's not what will happen:
 
 This kind of problem is hard to detect in advance, because the type
 system doesn't tell us what kinds of exceptions a given function might
-throw.  Because of this kind of confusion, it's usually better to
-avoid catching specific exceptions.  In this case, we can improve the
-code by catching the exception in a narrower scope.
+throw.  Because of this kind of confusion, it's generally better to
+avoid relying on the identity of the exception to determine the nature
+of a failure.  A better approach is to narrow the scope of the
+exception handler, so that when it fires it's very clear what part of
+the code failed.
 
 ```ocaml
 # let lookup_weight ~compute_weight alist key =
     match
       try Some (List.Assoc.find_exn alist key)
-      with Not_found -> None
+      with _ -> None
     with
     | None -> 0.
     | Some data -> compute_weight data ;;
