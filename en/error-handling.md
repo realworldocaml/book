@@ -204,7 +204,7 @@ We can use this same idiom for generating an error.
 
 `Error` also supports operations for transforming errors.  For
 example, it's often useful to augment an error with some extra
-information about the context of the error, or to combine multiple
+information about the context of the error or to combine multiple
 errors together.  `Error.tag` and `Error.of_list` fulfill these roles.
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
