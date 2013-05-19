@@ -1,4 +1,4 @@
-open Ctypes.Ffi.C
+open Ffi.C
 open Type
 
 type window = unit ptr
@@ -36,4 +36,3 @@ let box =
 
 let cbreak =
   foreign "cbreak" (void @-> (returning void))
-
