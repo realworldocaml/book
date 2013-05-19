@@ -25,7 +25,6 @@ $ make && make install
 ```
 
 It will then be available via the `ctypes` ocamlfind package.
-
 </note>
 
 ## Example: an ncurses terminal interface
@@ -137,7 +136,7 @@ let () =
 
 This code can be compiled by:
 
-```sh
+```console
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
   -cclib -lncurses ncurses.mli ncurses.ml hello.ml -o hello
 ```
@@ -149,7 +148,7 @@ ncurses library, which in turns makes the symbols available to the program when
 it starts.  If you omit that line, you'll get an error when you try to run the
 binary:
 
-```sh
+```console
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
   ncurses.mli ncurses.ml hello.ml -o hello_broken
 $ ./hello_broken 
@@ -204,7 +203,8 @@ long` 64-bit values).
 
 The module also defines some more advanced C types
 
-```ocaml    
+```ocaml   
+... 
   val string : string t
   val abstract : size:int -> alignment:int -> 'a abstract t
   val array : int -> 'a t -> 'a array t
@@ -219,6 +219,7 @@ and pointers can be built out of primitive types by using the corresponding
 constructor functions.
 
 ```ocaml
+...
   val ( @-> ) : 'a t -> 'b f -> ('a -> 'b) f
   val returning : 'a t -> 'a f
   val funptr : ('a -> 'b) f -> ('a -> 'b) t
@@ -269,15 +270,15 @@ The `localtime` function has the following signature and return value:
 
 ```c
 struct tm {
-        int     tm_sec;         /* seconds after the minute [0-60] */
-        int     tm_min;         /* minutes after the hour [0-59] */
-        int     tm_hour;        /* hours since midnight [0-23] */
-        int     tm_mday;        /* day of the month [1-31] */
-        int     tm_mon;         /* months since January [0-11] */
-        int     tm_year;        /* years since 1900 */
-        int     tm_wday;        /* days since Sunday [0-6] */
-        int     tm_yday;        /* days since January 1 [0-365] */
-        int     tm_isdst;       /* Daylight Savings Time flag */
+  int     tm_sec;         /* seconds after the minute [0-60] */
+  int     tm_min;         /* minutes after the hour [0-59] */
+  int     tm_hour;        /* hours since midnight [0-23] */
+  int     tm_mday;        /* day of the month [1-31] */
+  int     tm_mon;         /* months since January [0-11] */
+  int     tm_year;        /* years since 1900 */
+  int     tm_wday;        /* days since Sunday [0-6] */
+  int     tm_yday;        /* days since January 1 [0-365] */
+  int     tm_isdst;       /* Daylight Savings Time flag */
 };
 
 time_t time(time_t *);
@@ -347,9 +348,10 @@ val localtime : PosixTypes.time_t ptr -> tm structure ptr
 val asctime : PosixTypes.time_t ptr -> string
 ```
 
-Unlike the ncurses example, some of the FFI is still exposed in this signature
-due to the more manual memory interface.  To use time` and `localtime`, we need
-to allocate some memory and construct pointers to them.
+Unlike the ncurses example, some of the FFI types are still exposed in this
+signature due to the manual memory interface required by the C libraries.  To
+use the OCaml `time` and `localtime` functions, we need to allocate some memory
+and construct values of type `time_t ptr` to them.
 
 ```ocaml
 let () =
@@ -359,11 +361,15 @@ let () =
   print_endline (asctime tm)
 ```
 
-The `Ptr.allocate` allocates memory via `malloc` and hooks it into the OCaml
-garbage collector to free it once the value has been garbage-collected.  This
-memory is passed into the `time` library call, which modifies it in-place.  The
-`timep` pointer is then passed to `localtime`, whose return value is converted
-into an OCaml string via `asctime`.  Once all these have completed, the garbage
-collector can collect `timep` during the next collection cycle.
+The `Ptr.allocate` function allocates memory via `malloc` and creates an OCaml
+value to point to it.  This OCaml value (`timep` in the example) has a finalizer
+function which frees the external memory when it is garbage collected.
+The `timep` pointer is passed into the `time` library call, which modifies it
+in-place.  The `timep` pointer is then passed on to `localtime`, whose return value
+is converted into an OCaml string via `asctime`.   The garbage
+collector can then collect `timep` during the next collection cycle.
 
+Unions in C are a collection of named structures that can be mapped onto the
+same memory.  They are also supported in the `ctypes` library via the
+`Ffi.C.Union` module, although we won't go into more detail here.
 
