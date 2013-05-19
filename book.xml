@@ -17858,10 +17858,12 @@ let publish_rpc = Rpc.Rpc.create
       </para>
     </listitem>
   </itemizedlist>
-  <literal>Bin_prot</literal> is a library that addresses these issues
-  by providing fast serialization in a compact binary format. We'll also
-  introduce the Core <literal>Bigstring</literal> library for handling
-  large binary strings efficiently during this chapter. ut
+  <para>
+    <literal>Bin_prot</literal> is a library that addresses these issues
+    by providing fast serialization in a compact binary format. We'll
+    also introduce the Core <literal>Bigstring</literal> library for
+    handling large binary strings efficiently during this chapter.
+  </para>
   <note>
   <title>
   Using <literal>bin_prot</literal> in the toplevel
@@ -18134,11 +18136,6 @@ module Fields :
   </sect1>
 </chapter><chapter id="first-class-modules">
   <title>First class modules</title>
-  <para>
-    _(jyh: I'm going to start some new text on FCM. We might want
-    another chapter, but let's see how it goes. I've kept Ron's original
-    text below.)
-  </para>
   <para>
     OCaml provides several mechanisms for organizing your programs,
     including modules and functors, files and compilation units, and
