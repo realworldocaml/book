@@ -5607,6 +5607,26 @@ val my_host : host_info =
 # my_host.cpu_arch;;
 - : string = &quot;i386&quot;
 </programlisting>
+  <para>
+    When declaring an OCaml type, you always have the option of
+    parameterizing it by a polymorphic type. Records are no different in
+    this regard. So, for example, here's a type one might to timestamp
+    arbitrary items.
+  </para>
+  <programlisting language="ocaml">
+# type 'a timestamped = { item: 'a; time: Time.t };;
+type 'a timestamped = { item : 'a; time : Time.t; }
+</programlisting>
+  <para>
+    We can then write polymorphic functions that operate over this
+    parameterized type.
+  </para>
+  <programlisting language="ocaml">
+# let first_timestamped list =
+    List.reduce list ~f:(fun a b -&gt; if a.time &lt; b.time then a else b)
+  ;;
+val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fun&gt;
+</programlisting>
   <sect1 id="patterns-and-exhaustiveness">
     <title>Patterns and exhaustiveness</title>
     <para>
@@ -6784,7 +6804,10 @@ val messages_for_user :
     <para>
       Note that the definition of the type <literal>blang</literal> is
       recursive, meaning that a <literal>blang</literal> may contain
-      other <literal>blang</literal>s.
+      other <literal>blang</literal>s. Also, <literal>blang</literal> is
+      parameterized by a polymorphic type <literal>'a</literal> which is
+      used for specifying the type of the value that goes under the
+      <literal>Base</literal> tag.
     </para>
     <para>
       The purpose of each tag is pretty straightforward.
