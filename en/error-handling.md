@@ -82,10 +82,10 @@ val find_mismatches :
 
 The use of options to encode errors underlines the fact that it's not
 clear whether a particular outcome, like not finding something on a
-list, is really an error, or just another valid outcome of your
-function.  This turns out to be very context-dependent, and
-error-aware return types give you a uniform way of handling the result
-that works well for both situations.
+list, is an error or is just another valid outcome.  This depends on
+the larger context of your program, and thus is not something that a
+general purpose library can know in advance.  One of the advantages of
+error-aware return types is that they work well in both situations.
 
 ### Encoding errors with `Result`
 
@@ -137,18 +137,17 @@ particularly if it includes expensive-to-convert numerical data.
 
 `Error` gets around this issue through laziness.  In particular, an
 `Error.t` allows you to put off generation of the error string until
-you need it, which means a lot of the time you never have to construct
-it at all. You can of course construct an error directly from a
-string:
+and unless you need it, which means a lot of the time you never have
+to construct it at all.  You can of course construct an error directly
+from a string:
 
 ```ocaml
 # Error.of_string "something went wrong";;
 - : Core.Std.Error.t = "something went wrong"
 ```
 
-A more interesting construction message from a performance point of
-view is to construct an `Error.t` from a _thunk_, _i.e._, a function
-that takes a single argument of type `unit`.
+But you can also construct an `Error.t` from a _thunk_, _i.e._, a
+function that takes a single argument of type `unit`.
 
 ```ocaml
 # Error.of_thunk (fun () ->
@@ -157,12 +156,11 @@ that takes a single argument of type `unit`.
 ```
 
 In this case, we can benefit from the laziness of `Error`, since the
-thunk won't be called until the `Error.t` is converted to a string.
+thunk won't be called unless the `Error.t` is converted to a string.
 
-The most common way to create an `Error.t` is based on an
-_s-expression_.  The basic idea is pretty simple.  An s-expression is
-a balanced parenthetical expression where the leaves of the
-expressions are strings.  Thus, the following is a simple
+The most common way to create `Error.t`s is using _s-expressions_.  An
+s-expression is a balanced parenthetical expression where the leaves
+of the expressions are strings.  Thus, the following is a simple
 s-expression:
 
 ```
@@ -435,9 +433,9 @@ can be found in the API documentation for the `Common` and `Exn`
 modules in Core.
 
 Another important way of throwing an exception is the `assert`
-directive.  `assert` is used for situations where violation of
-condition in question is a bug.  Consider the following piece of code
-for zipping together two lists.
+directive.  `assert` is used for situations where a violation of the
+condition in question indicates a bug.  Consider the following piece
+of code for zipping together two lists.
 
 ```ocaml
 # let merge_lists xs ys ~f =
