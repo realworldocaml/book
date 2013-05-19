@@ -37,7 +37,7 @@ compromises and synchronization woes of preemptive threads without the
 confusing inversion of control that usually comes with event-driven
 systems.
 
-## Async Basics
+## Async basics
 
 Consider a typical function for doing I/O in Core.
 
@@ -220,7 +220,107 @@ rewrite `count_lines` again a bit more succinctly:
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
-## A simple TCP Echo Server
+### Ivars and upon
+
+Deferreds are usually built using combinations of `bind`, `map` and
+`return`, but sometimes you want to construct a deferred that you can
+determine explicitly with user-code.  This is done using an _ivar_,
+which is a handle that lets you control precisely when a deferred
+becomes determined.
+
+There are three fundamental operations for working with an ivar; you
+can create one, using `Ivar.create`, you can read off the deferred
+that corresponds to the ivar in question, using `Ivar.read`, and you
+can fill an ivar, thus causing that deferred to become determined,
+using `Ivar.fill`.  These operations are illustrated below.
+
+```ocaml
+# let ivar = Ivar.create ();;
+val ivar : '_a Ivar.t = <abstr>
+# let def = Ivar.read ivar;;
+val def : '_a Ivar.Deferred.t = <abstr>
+# Deferred.peek def;;
+- : '_a option = None
+# Ivar.fill ivar "Hello";;
+- : unit = ()
+# Deferred.peek def;;
+- : string option = Some "Hello"
+```
+
+Ivars are something of a low-level feature; operators like map, bind
+and return are typically easier to use and think about.  But ivars can
+be useful when you want to build complicated synchronization patterns
+that can't be constructed naturally otherwise.
+
+As an example, imagine we wanted a way of scheduling a sequence of
+actions that would run after a fixed delay.  In addition, we'd like to
+guarantee that these delayed actions are executed in the same order
+they were scheduled in.  One could imagine building a module for
+handling this with the following interface.
+
+```ocaml
+# module type Delayer_intf = sig
+    type t
+    val create : Time.Span.t -> t
+    val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
+  end;;
+```
+
+An action is handed to `schedule` in the form of a deferred-returning
+thunk (a thunk is a function whose argument is of type `unit`).  A
+deferred is handed back to the caller of `schedule` that will
+eventually be filled with the contents of the deferred value returned
+by the thunk to be scheduled.  We can implement this using an `ivar`
+which we fill after the thunk is called and the deferred it returns
+becomes determined.  Instead of using `bind` or `map` for scheduling
+these events, we'll use a different operator called `upon`.  Here's
+the signature of `upon`:
+
+```ocaml
+# upon;;
+- : 'a Deferred.t -> ('a -> unit) -> unit = <fun>
+```
+
+Like `bind` and `return`, `upon` schedules a callback to be executed
+when the deferred it is passed is determined; but unlike those calls,
+it doesn't create a new deferred for this callback to fill.
+
+Our delayer implementation is organized around a queue of thunks,
+where every call to `schedule` adds a thunk to the queue, and also
+schedules a job in the future to grab a thunk off the queue and run
+it.  The waiting will be done using the function `after` which takes a
+time span and returns a deferred which becomes determined after that
+time span elapses.  The role of the `ivar` here is to take the value
+returned by the thunk and use it to fill the deferred returned by the
+provided thunk.
+
+```ocaml
+# module Delayer : Delayer_intf = struct
+    type t = { delay: Time.Span.t;
+               jobs: (unit -> unit) Queue.t;
+             }
+
+    let create delay =
+      { delay; jobs = Queue.create () }
+
+    let schedule t thunk =
+      let ivar = Ivar.create () in
+      Queue.enqueue t.jobs (fun () ->
+        upon (thunk ()) (fun x -> Ivar.fill ivar x));
+      upon (after t.delay) (fun () ->
+        let job = Queue.dequeue_exn t.jobs in
+        job ());
+      Ivar.read ivar
+  end;;
+module Delayer : Delayer_intf
+```
+
+This code isn't particularly long, but it is a bit subtle.  This is
+typical of code that involves ivars and `upon`, and because of this,
+you should stick to the simpler map/bind/return style of working with
+deferreds when you can.
+
+## Examples: an echo server
 
 Now that we have the basics of Async under our belt, let's look at a
 small complete stand-alone Async program. In particular, we'll write
@@ -401,7 +501,7 @@ the source that the call to `loop_forever` never returns.
 
 </note>
 
-## Improving the echo server
+### Improving the echo server
 
 Let's try to go a little bit farther with our echo server.  Let's walk
 through a few small improvements:
@@ -776,9 +876,7 @@ Let's get a better sense of how exceptions work in Async by creating
 an asynchronous computation that (sometimes) fails with an exception.
 The function `maybe_raise` below blocks for half a second, and then
 either throws an exception or returns unit, alternating between the
-two behaviors on subsequent calls.  The waiting will be done using the
-function `after` which takes a time span and returns a deferred which
-becomes determined after that time span elapses.
+two behaviors on subsequent calls.  
 
 ```ocaml
 # let maybe_raise =
@@ -854,11 +952,10 @@ function provided by Async:
   - : string = "failure"
 ```
 
-`try_with f` takes as its argument a deferred-returning thunk `f` (a
-thunk is a function whose argument is unit), and returns a deferred
-that becomes determined either as `Ok` of whatever `f` returned, or
-`Error exn` if `f` threw an exception before its return value became
-determined.
+`try_with f` takes as its argument a deferred-returning thunk `f`, and
+returns a deferred that becomes determined either as `Ok` of whatever
+`f` returned, or `Error exn` if `f` threw an exception before its
+return value became determined.
 
 ### Monitors
 
@@ -1109,7 +1206,7 @@ of the Caml programming language, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy and others in 1996."
 ```
 
-Now, only the query that went to the faulty server failed.
+Now, only the query that went to `localhost` failed.
 
 Note that in this code, we're relying on the fact that
 `Cohttp_async.Client.get` will clean up after itself after an
@@ -1120,13 +1217,13 @@ described in [xref](#cleaning-up-in-the-presence-of-exceptions).
 
 ## Timeouts, Cancellation and Choices
 
-One common kind of operation in a concurrent programming is the need
-to combine results from multiple distinct concurrent processes going
-on in the same program.  We already saw this in our web-search
-example, using `Deferred.all` and `Deferred.all_unit` to wait for all
-of a list of deferreds to become determined.  Another useful primitive
-is `Deferred.both`, which lets you wait until two deferreds of
-different types have returned, returning both values as a tuple:
+In a concurrent program, one often needs to combine results from
+multiple distinct concurrent sub-computations going on in the same
+program.  We already saw this in our DuckDuckGo example, where we used
+`Deferred.all` and `Deferred.all_unit` to wait for a list of deferreds
+to become determined.  Another useful primitive is `Deferred.both`,
+which lets you wait until two deferreds of different types have
+returned, returning both values as a tuple:
 
 ```ocaml
 # let both = Deferred.both
@@ -1150,11 +1247,10 @@ determined once any of the values on the list is determined.
 - : string = "half a second"
 ```
 
-We can see how this would work in action by extending our definition
-search tool to timeout on any queries that take too long to satisfy.
-We'll do this by writing a wrapper for `get_definition` that takes a
-timeout (in the form of a `Time.Span.t`) as an argument, and returns
-either the definition, or the timeout, whichever finished first.
+Let's use this to add timeouts to our DuckDuckGo searches.  We'll do
+this by writing a wrapper for `get_definition` that takes a timeout
+(in the form of a `Time.Span.t`) as an argument, and returns either
+the definition, or, if that takes too long, the timeout.
 
 ```ocaml
 let get_definition_with_timeout ~server ~timeout word =
@@ -1177,5 +1273,66 @@ so that `Deferred.any` can choose between values of the same type.
 One problem with the above code is that the HTTP query kicked off by
 `get_definition` is not actually shut down when the timeout fires.  As
 such, `get_definition_with_timeout` essentially leaks an open
-connection.
+connection.  Cohttp does provide a way of shutting down a client,
+though, by passing in a deferred that, when it is determined, will
+cause the client connection to be terminated and the corresponding
+connections closed.
 
+The following code shows how you can change `get_definition` and
+`get_definition_with_timeout` to actually cancel the process that's
+running.  First, we add an argument `~interrupt` to `get_definition`,
+which in turn just passed that to `Cohttp_async.Client.get`.
+
+```ocaml
+(* Execute the DuckDuckGo search *)
+let get_definition ~server ~interrupt word =
+  try_with (fun () ->
+    Cohttp_async.Client.get ~interrupt (query_uri ~server word)
+    >>= fun  (_, body) ->
+    Pipe.to_list body
+    >>| fun strings ->
+    (word, get_definition_from_json (String.concat strings)))
+  >>| function
+  | Ok (word,result) -> (word, Ok result)
+  | Error exn        -> (word, Error exn)
+```
+
+Next, we'll modify `get_definition_with_timeout` to create a deferred
+to pass in to `get_definition` which will become determined when our
+timeout expires.
+
+```ocaml
+let get_definition_with_timeout ~server ~timeout word =
+  let timeout_d = after timeout in
+  get_definition ~server ~interrupt:timeout_d word
+  >>| fun (word,result) ->
+  let result' = match result with
+    | Ok _ as x -> x
+    | Error _ -> Error "Unexpected failure"
+  in
+  (word,result')
+```
+
+This will work, and will cause the connection to fail if we time-out;
+but our code no longer explicitly knows whether or not the timeout has
+kicked in, and it shows when we use it, in that the error message in
+the case of a timeout will now be `Unexpected failure` rather than
+`Timed out`, which it was in our previous implementation.
+
+```ocaml
+let get_definition_with_timeout ~server ~timeout word =
+  let interrupt = Ivar.create () in
+  choose
+    [ choice (after timeout) (fun () ->
+       Ivar.fill interrupt ();
+       (word,Error "Timed out"))
+    ; choice (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
+        (fun (word,result) ->
+           let result' = match result with
+             | Ok _ as x -> x
+             | Error _ -> Error "Unexpected failure"
+           in
+           (word,result')
+        )
+    ]
+```
