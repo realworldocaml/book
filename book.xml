@@ -18135,6 +18135,778 @@ module Fields :
       with Sexplib.
     </para>
   </sect1>
+</chapter><chapter id="parsing-with-ocamllex-and-ocamlyacc">
+  <title>Parsing with OCamllex and OCamlyacc</title>
+  <para>
+    OCaml provides lexer and parser generators modeled on lex and yacc.
+    Similar tools are available in a variety of languages, and with them
+    you can parse a variety of kinds of input, including web formats or
+    full blown programming languages (for example, OCaml programs use an
+    <emphasis>ocamlyacc</emphasis> parser and
+    <emphasis>ocamllex</emphasis> for lexical analysis).
+  </para>
+  <para>
+    Let's be more precise about these terms. By
+    <emphasis>parsing</emphasis>, we mean reading a textual input into a
+    form that is easier for a program to manipulate. For example,
+    suppose we want to read a file containing a value in JSON format.
+    JSON has a variety of values, including numbers, strings, arrays,
+    and objects, and each of these has a precise textual representation.
+    For example, the following text represents an object containing a
+    string labeled <literal>title</literal>, and an array containing two
+    objects, each with a name and array of zip codes.
+  </para>
+  <programlisting language="json">
+{ title: &quot;Cities&quot;,
+  cities: [{ name: &quot;Chicago&quot;, zips: [60601] },
+           { name: &quot;New York&quot;, zips: [10004] }]
+}
+</programlisting>
+  <para>
+    The input text is represented as a sequence of characters.
+    Manipulating it in that form would be really hard, so what we want
+    is to give it a structured type that is easier for our programs to
+    manipulate. For our example, we'll use the following type to
+    represent JSON <emphasis>abstract syntax</emphasis>.
+  </para>
+  <programlisting language="ocaml">
+type value = [
+| `Object of (string * value) list
+| `Array of value array
+| `String of string
+| `Int of int
+| `Float of float
+| `True
+| `False
+| `Null ]
+</programlisting>
+  <para>
+    The objective of <emphasis>parsing</emphasis> is to convert the text
+    input into a value of type <literal>value</literal>. This is
+    normally done in two phase. First, <emphasis>lexical</emphasis>
+    analysis (or lexing, for short) is used to convert the text input
+    into a sequence of tokens, or words. For example, the JSON input
+    would be tokenized into a sequence of tokens like the following. In
+    most cases (and in this example), lexical analysis will choose to
+    omit white space from the token stream.
+  </para>
+  <programlisting>
+LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(&quot;cities&quot;), ...
+</programlisting>
+  <para>
+    The next step is to convert the token stream into a program value
+    that represents the abstract syntax tree, like the type
+    <literal>value</literal> above. This is called
+    <emphasis>parsing</emphasis>.
+  </para>
+  <programlisting>
+`Object
+  [&quot;title&quot;, `String &quot;Cities&quot;;
+   &quot;cities&quot;, `Array
+     [|`Object [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `Array [|Int 60601|]];
+       `Object [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `Array [|Int 10004|]]|]]
+</programlisting>
+  <para>
+    There are many techniques for lexing and parsing. In the lex/yacc
+    world, lexing is specified using regular expressions, and parsing is
+    specified using context-free grammars. These are concepts from
+    formal languages; the lex/yacc tools constructing the machinery for
+    you. For <literal>lex</literal>, this means constructing a finite
+    automaton; and for <literal>yacc</literal>, this means constructing
+    a pushdown automaton.
+  </para>
+  <para>
+    Parsing is a broad and often intricate topic, and our purpose here
+    is not to teach all of the ins and outs of yacc and lex, but to show
+    how to use these tools in OCaml. There are online resources, and
+    most experience you may have using lex/yacc in other languages will
+    also apply in OCaml. However, there are differences, and we'll try
+    to point out the larger ones here.
+  </para>
+  <para>
+    For illustration, let's continue with the JSON example. For lexing,
+    we'll use <literal>ocamllex</literal>, and for parsing, we'll use
+    <literal>menhir</literal>, which is somewhat easier to use than
+    <literal>ocamlyacc</literal>.
+  </para>
+  <sect1 id="defining-a-json-parser-with-menhir">
+    <title>Defining a JSON parser with menhir</title>
+    <para>
+      The process of building a parser is interleaved between
+      constructing the lexer and parser; you will have to do them
+      simultaneously. The first step is to define the set of tokens that
+      will be produced by the lexer. For various reasons, the tokens are
+      specified by the parser (to specify what it expects as input), so
+      we'll start with the parser first.
+    </para>
+    <para>
+      A parser file has suffix <literal>.mly</literal> (we'll use the
+      name <literal>parser.mly</literal>) and it contains several parts
+      in the following sequence:
+    </para>
+    <programlisting>
+  declarations
+  %%
+  rules
+  %%
+  optional OCaml code
+</programlisting>
+    <para>
+      The <literal>%%</literal> are section separators; they have to be
+      on a line by themselves. The declarations include token and type
+      specifications, precedence directives, and other things, but we
+      start by declaring the tokens.
+    </para>
+    <sect2 id="token-declarations">
+      <title>Token declarations</title>
+      <para>
+        A token is declared using the syntax
+        <literal>%token &lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
+        <emphasis>uid</emphasis>, where the
+        <literal>&lt;type&gt;</literal> is optional, and
+        <emphasis>uid</emphasis> is an capitalized identifier. For JSON,
+        we need tokens for numbers, strings, identifiers, and
+        punctuation. To start, let's define just the tokens in the
+        <literal>parser.mly</literal> file. For technical reasons, we
+        need to include a <literal>%start</literal> declaration. For
+        now, we'll include just a dummy grammer specification
+        <literal>exp: { () }</literal> (we'll replace this when we
+        implement the grammar below).
+      </para>
+      <programlisting language="ocaml">
+%token &lt;int&gt; INT
+%token &lt;float&gt; FLOAT
+%token &lt;string&gt; ID
+%token &lt;string&gt; STRING
+%token TRUE
+%token FALSE
+%token NULL
+%token LEFT_BRACE
+%token RIGHT_BRACE
+%token LEFT_BRACK
+%token RIGHT_BRACK
+%token COLON
+%token COMMA
+%token EOF
+
+%start &lt;unit&gt; exp
+
+%%
+
+exp: { () }
+</programlisting>
+      <para>
+        The
+        <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
+        specifications mean that a token carries a value. The
+        <literal>INT</literal> token carries an integer value with it,
+        <literal>FLOAT</literal> has a <literal>float</literal> value,
+        etc. Most of the remaning tokens, like <literal>TRUE</literal>,
+        <literal>FALSE</literal>, the punctuation, aren't associated
+        with any value, so we omit the
+        <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
+        specification.
+      </para>
+      <para>
+        Compile this file with <literal>menhir</literal>. It will issue
+        multiple warnings about unused tokens because we haven't
+        actually defined a grammar yet. It is ok to ignore the warnings
+        for now.
+      </para>
+      <programlisting>
+$ menhir parser.mly
+Warning: the token COLON is unused.
+...
+</programlisting>
+      <para>
+        The <literal>menhir</literal> tool is a parser generator,
+        meaning it generates the code to perform parsing from the
+        <literal>parser.mly</literal> description. The
+        <literal>parser.ml</literal> contains an automaton
+        implementation, and is generally difficult to read. However, the
+        <literal>parser.mli</literal> contains declarations that we need
+        to build a lexer.
+      </para>
+      <para>
+        $ cat parser.mli exception Error
+      </para>
+      <para>
+        type token = | TRUE | STRING of (string) | RIGHT_BRACK |
+        RIGHT_BRACE | NULL | LEFT_BRACK | LEFT_BRACE | INT of (int) | ID
+        of (string) | FLOAT of (float) | FALSE | EOF | COMMA | COLON
+      </para>
+      <para>
+        val exp: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt;
+        (unit) ```
+      </para>
+    </sect2>
+    <sect2 id="specifying-the-grammar-rules">
+      <title>Specifying the grammar rules</title>
+      <para>
+        The grammar itself is specified using a set of rules, where a
+        rule contains a set of productions. Abstractly, a production
+        looks like the following.
+      </para>
+      <programlisting>
+symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
+   { OCaml code }
+</programlisting>
+      <para>
+        A production can be interpreted as follows: given values
+        <literal>id1</literal>, ..., <literal>idN</literal> for the
+        input symbols <literal>symbol1</literal>, ...,
+        <literal>symbolN</literal>; the OCaml code computes a value for
+        the target <literal>symbol</literal>. That's too abstract, so
+        let's get down to defining productions for parsing JSON. Here is
+        the main production for a JSON value.
+      </para>
+      <programlisting>
+value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
+    { `Object obj }
+  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
+    { `Array vl }
+  | s = STRING
+    { `String s }
+  | i = INT
+    { `Int i }
+  | x = FLOAT
+    { `Float x }
+  | TRUE
+    { `True }
+  | FALSE
+    { `False }
+  | NULL
+    { `Null }
+  ;
+</programlisting>
+      <para>
+        We can read it like this, &quot;A JSON <literal>value</literal>
+        is either an object bracketed with curly braces, or an array
+        bracketed with square braces. or a string, integer, float, etc.
+        In each of the productions, the right hand side specfies the
+        expected sequence. For example, the object is specified with the
+        curly-bracket production.
+      </para>
+      <programlisting>
+value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
+    { `Object obj }
+</programlisting>
+      <para>
+        That is, an object value starts with a
+        <literal>LEFT_BRACE</literal>, contains some optional object
+        field values (to be defined), and end with a
+        <literal>RIGHT_BRACE</literal>. The returned value is
+        <literal>Object obj</literal>, where <literal>obj</literal> is
+        the sequence of object fields. Note that we've left out bindings
+        for <literal>LEFT_BRACE</literal> and
+        <literal>RIGHT_BRACE</literal>, because their tokens don't have
+        values.
+      </para>
+      <para>
+        Next, let's define the object fields. In the following rules,
+        the <literal>opt_object_fields</literal> are either empty, or a
+        non-empty sequence of fields in reverse order. Note that if you
+        wish to have comments in the rule definitions, you will have to
+        use C comment delimiters. By convention, the C comment
+        <literal>/* empty */</literal> is used to point out that a
+        production has an empty right hand side.
+      </para>
+      <programlisting>
+
+opt_object_fields: /* empty */
+    { [] }
+  | obj = rev_object_fields
+    { List.rev obj }
+  ;
+
+rev_object_fields: k = ID; COLON; v = value
+    { [k, v] }
+  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
+    { (k, v) :: obj }
+  ;
+</programlisting>
+      <para>
+        The rule <literal>rev_object_fields</literal> is defined
+        recursively. It has either one key/value field, or it is a
+        sequence of fields, followed by a <literal>COMMA</literal> and
+        one more field definition.
+      </para>
+      <para>
+        e <literal>rev_</literal> prefixed is intended to point out that
+        the fields are returned in reverse order. Why would we do that?
+        One reason is that the <literal>menhir</literal> parser
+        generator is left-recursive, which means that the constructed
+        pushdown automoton uses less stack space with left-recursive
+        definitions. The following right-recursive rule accepts the same
+        input, but during parsing it requires linear stack space to read
+        object field definitions.
+      </para>
+      <programlisting>
+/* Inefficient right-recursive rule */
+object_fields: k = ID; COLON; v = value
+    { [k, v] }
+  | k = ID; COLON; v = value; COMMA; obj = object_fields
+    { (k, v) :: obj }
+</programlisting>
+      <para>
+        Alternatively, we could keep the left-recursive definition and
+        simply construct the returned value in left-to-right order. This
+        is fine, though less efficient. You will have to choose you
+        technique according to circumstances.
+      </para>
+      <programlisting>
+/* Quadratic left-recursive rule */
+object_fields: k = ID; COLON; v = value
+    { [k, v] }
+  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
+    { obj @ [k, v] }
+  ;
+</programlisting>
+      <para>
+        Finally, we can finish off the grammar by defining the rules for
+        arrays, and adding a correct <literal>%start</literal>
+        production. For the <literal>%start</literal> production, we'll
+        return a <literal>value option</literal>, using
+        <literal>None</literal> to represent end of file. Here is the
+        complete file.
+      </para>
+      <programlisting>
+%token &lt;int&gt; INT
+%token &lt;float&gt; FLOAT
+%token &lt;string&gt; ID
+%token &lt;string&gt; STRING
+%token TRUE
+%token FALSE
+%token NULL
+%token LEFT_BRACE
+%token RIGHT_BRACE
+%token LEFT_BRACK
+%token RIGHT_BRACK
+%token COLON
+%token COMMA
+%token EOF
+
+%type &lt;Json.value option&gt; prog
+
+%start prog
+
+%%
+
+prog: v = value
+    { Some v }
+  | EOF
+    { None }
+  ;
+
+value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
+    { `Object obj }
+  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
+    { `Array vl }
+  | s = STRING
+    { `String s }
+  | i = INT
+    { `Int i }
+  | x = FLOAT
+    { `Float x }
+  | TRUE
+    { `True }
+  | FALSE
+    { `False }
+  | NULL
+    { `Null }
+  ;
+
+
+opt_object_fields: /* empty */
+    { [] }
+  | obj = rev_object_fields
+    { List.rev obj }
+  ;
+
+rev_object_fields: k = ID; COLON; v = value
+    { [k, v] }
+  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
+    { (k, v) :: obj }
+  ;
+
+array_values: /* empty */
+    { [||] }
+  | vl = rev_values
+    { Array.of_list (List.rev vl) }
+  ;
+
+rev_values: v = value
+    { [v] }
+  | vl = rev_values; COMMA; v = value
+    { v :: vl }
+  ;
+</programlisting>
+      <para>
+        That's it. We can compile this with <literal>menhir</literal>,
+        which will now no longer complain about unused symbols.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="defining-a-lexer-with-ocamllex">
+    <title>Defining a lexer with ocamllex</title>
+    <para>
+      For the next part, we need to define a lexer to tokenize the input
+      text, meaning that we break the input into a sequence of words or
+      tokens. For this, we'll define a lexer using
+      <literal>ocamllex</literal>. In this case, the specification is
+      placed in a file with a <literal>.mll</literal> suffix (we'll use
+      the name <literal>lexer.mll</literal>). A lexer file has several
+      parts in the following sequence.
+    </para>
+    <programlisting>
+{ OCaml code }
+let definitions...
+rules...
+{ OCaml code }
+</programlisting>
+    <sect2 id="let-definitions-for-regular-expressions">
+      <title>Let-definitions for regular expressions</title>
+      <para>
+        The OCaml code for the header and trailer is optional. The
+        let-definitions are used to ease the definition of regular
+        expressions. They are optional, but very useful. To get started,
+        we know that we'll need to match numbers and strings, so let's
+        define names for the regular expressions that specify their
+        form.
+      </para>
+      <para>
+        An integer is a sequence of digits, optionally preceded by a
+        minus sign. Leading zeroes are not allowed. The question mark
+        means that the preceding symbol <literal>-</literal> is
+        optional. The square brackets ['1'-'9'] define a character
+        range, meaning that the first digit of the integer should be
+        1-9. The final range <literal>['0'-'9']*</literal> includes star
+        <literal>*</literal>, which means zero-or-more occurrences of
+        the characters 0-9. Read formally then, an
+        <literal>int</literal> has an optional minus sign, followed by a
+        digit in the range 1-9, followed by zero or more digits in the
+        range 0-9.
+      </para>
+      <programlisting>
+let int = '-'? ['1'-'9'] ['0'-'9']*
+</programlisting>
+      <para>
+        Floating-point numbers are similar, but we deal with decimal
+        points and exponents. We can use multiple let-definitions for
+        the different parts.
+      </para>
+      <programlisting>
+let digits = ['0'-'9']+
+let frac = '.' digits
+let exp = ['e' 'E'] ['-' '+']? digits
+let float = int (frac | exp | frac exp)
+</programlisting>
+      <para>
+        The <literal>digits</literal> expression has a
+        <literal>+</literal> symbol, meaning that
+        <literal>digits</literal> has one or more occurrences of digits
+        in the range 0-9. A fractional part <literal>frac</literal> has
+        a decimal point followed by some digits; an exponent
+        <literal>exp</literal> begins with an <literal>e</literal>
+        followed by some digits; and a <literal>float</literal> has an
+        integer part, and one or both of a <literal>frac</literal> and
+        <literal>exp</literal> part. The vetical bar is a choice; the
+        expression <literal>(frac | exp | frac exp)</literal> is either
+        a <literal>frac</literal>, or an <literal>exp</literal>, or a
+        <literal>frac</literal> followed by an <literal>exp</literal>.
+      </para>
+      <para>
+        Finally, let's define identifiers and whitespace. An identifier
+        (label), is an alphanumeric sequence not beginning with a digit.
+      </para>
+      <programlisting>
+let white = [' ' '\t']+
+let newline = '\r' | '\n' | &quot;\r\n&quot;
+
+let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+</programlisting>
+    </sect2>
+    <sect2 id="lexing-rules">
+      <title>Lexing rules</title>
+      <para>
+        The lexing rules are specified as a set of
+        <literal>parse</literal> rules. A <literal>parse</literal> rule
+        has a regular expression followed by OCaml code that defines a
+        semantic action. Let's write JSON parse rule.
+      </para>
+      <programlisting>
+rule read = parse
+| white { read lexbuf }
+| newline { next_line lexbuf; read lexbuf }
+| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
+| float { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+| &quot;true&quot; { TRUE }
+| &quot;false&quot; { FALSE }
+| &quot;null&quot; { NULL }
+| id { ID (Lexing.lexeme lexbuf) }
+| '&quot;' { read_string (Buffer.create 17) lexbuf }
+| '{' { LEFT_BRACE }
+| '}' { RIGHT_BRACE }
+| '[' { LEFT_BRACK }
+| ']' { RIGHT_BRACK }
+| ':' { COLON }
+| ',' { COMMA }
+| _ { raise (SyntaxError (&quot;Unexpected character: &quot; ^ Lexing.lexeme lexbuf)) }
+| eof { EOF }
+</programlisting>
+      <para>
+        The OCaml code for the rules has a parameter called
+        <literal>lexbuf</literal> that defines the input, including the
+        position in the input file, as well as the text that was matched
+        by the regular expression. Let's skip to the third action.
+      </para>
+      <programlisting>
+| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
+</programlisting>
+      <para>
+        This action specifies that when the input matches the
+        <literal>int</literal> regular expression (defined as
+        <literal>'-'? ['1'-'9'] ['0'-'9']*</literal>, then the lexer
+        should return the expression
+        <literal>INT (int_of_string (Lexing.lexeme lexbuf))</literal>.
+        The expression <literal>Lexing.lexeme lexbuf</literal> returns
+        the complete string matched by the regular expression. In this
+        case, the string represents a number, so we use the
+        <literal>int_of_string</literal> function to convert it to a
+        number.
+      </para>
+      <para>
+        Going back to the first actions, the first
+        <literal>white { read lexbuf }</literal> calls the lexer
+        recursively. That's, it skips the input whitespace and returns
+        the following token. The action
+        <literal>newline { next_line lexbuf; read lexbuf }</literal> is
+        similar, but we use it to advance the line number for the lexer.
+        Here is the definition of the <literal>next_line</literal>
+        function, which updates the line number in the
+        <literal>lexbuf</literal>.
+      </para>
+      <programlisting>
+let next_line lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  lexbuf.lex_curr_p &lt;-
+    { pos with pos_bol = lexbuf.lex_curr_pos;
+               pos_lnum = pos.pos_lnum + 1
+    }
+</programlisting>
+      <para>
+        There are actions for each different kind of token. The string
+        expressions like <literal>&quot;true&quot; { TRUE }</literal>
+        are used for keywords, and the special characters have actions
+        too, like <literal>'{' { LEFT_BRACE }</literal>.
+      </para>
+      <para>
+        Some of these patterns overlap. For example, the regular
+        expression <literal>&quot;true&quot;</literal> is also matched
+        by the <literal>id</literal> pattern.
+        <literal>ocamllex</literal> used the following disambiguation
+        when a prefix of the input is matched by more than one pattern.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            The longest match always wins. For example, the first input
+            <literal>trueX: 167</literal> matches the regular expression
+            <literal>&quot;true&quot;</literal> for 4 characters, and it
+            matches <literal>id</literal> for 5 characters. The longer
+            match wins, and the return value is
+            <literal>ID &quot;trueX&quot;</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            If all matches have the same length, then the first action
+            wins. If the input were <literal>true: 167</literal>, then
+            both <literal>&quot;true&quot;</literal> and
+            <literal>id</literal> match the first 4 characters;
+            <literal>&quot;true&quot;</literal> is first, so the return
+            value is <literal>TRUE</literal>.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    <sect2 id="recursive-rules">
+      <title>Recursive rules</title>
+      <para>
+        Unlike many other lexer generators, <literal>ocamllex</literal>
+        allows the definion of multiple lexer in the same file, and the
+        definitions can be recursive. In this case, we use recursion to
+        match string literals, using the following rule definition.
+      </para>
+      <programlisting>
+and read_string buf = parse
+| '&quot;' { STRING (Buffer.contents buf) }
+| '\\' '/' { Buffer.add_char buf '/'; read_string buf lexbuf }
+| '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
+| '\\' 'b' { Buffer.add_char buf '\b'; read_string buf lexbuf }
+| '\\' 'f' { Buffer.add_char buf '\012'; read_string buf lexbuf }
+| '\\' 'n' { Buffer.add_char buf '\n'; read_string buf lexbuf }
+| '\\' 'r' { Buffer.add_char buf '\r'; read_string buf lexbuf }
+| '\\' 't' { Buffer.add_char buf '\t'; read_string buf lexbuf }
+| '\\' 'u' hex hex hex hex
+  { let string_code = String.sub (Lexing.lexeme lexbuf) 2 4 in
+    let code = int_of_string (&quot;0x&quot; ^ string_code) in
+    add_utf8 buf code;
+    read_string buf lexbuf
+  }
+| [^ '&quot;' '\\']+
+  { Buffer.add_string buf (Lexing.lexeme lexbuf);
+    read_string buf lexbuf
+  }
+| _ { raise (SyntaxError (&quot;Illegal string character: &quot; ^ Lexing.lexeme lexbuf)) }
+| eof { raise (SyntaxError (&quot;String is not terminated&quot;)) }
+</programlisting>
+      <para>
+        This rule takes a <literal>buf : Buffer.t</literal> as an
+        argument. If we reach the terminating double quote
+        <literal>&quot;</literal>, then we return the contents of the
+        buffer as a <literal>STRING</literal>.
+      </para>
+      <para>
+        The other cases are for handling the string contents. The action
+        <literal>[^ '&quot;' '\\']+ { ... }</literal> matches normal
+        input that does not contain a double-quote or backslash. The
+        actions beginning with a backslash <literal>\</literal> define
+        what to do for escape sequences. In each of these cases, the
+        final step includes a recursive call to the lexer.
+      </para>
+      <para>
+        As specified by JSON, we also handle Unicode code points,
+        <literal>'\\' 'u' hex hex hex hex</literal>. Ocaml doesn't have
+        any built-in handling for Unicode, so in this case we choose to
+        represent the code point in UTF-8. We define the following
+        function for adding the UTF-8 encoding to the buffer.
+      </para>
+      <programlisting language="ocaml">
+let add_utf8 buf code =
+  if code &lt;= 0x7f then
+    Buffer.add_char buf (Char.chr code)
+  else if code &lt;= 0x7ff then begin
+    Buffer.add_char buf (Char.chr (0b11000000 lor ((code lsr 6) land 0x3f)));
+    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
+  end else begin
+    Buffer.add_char buf (Char.chr (0b11100000 lor ((code lsr 12) land 0x3f)));
+    Buffer.add_char buf (Char.chr (0b10000000 lor ((code lsr 6) land 0x3f)));
+    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
+  end
+</programlisting>
+      <para>
+        That covers the lexer. Next, we need to combine the lexer with
+        the parser to bring it all together.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="bringing-it-all-together">
+    <title>Bringing it all together</title>
+    <para>
+      For the final part, we need to compose the lexer and parser. As we
+      saw the the type definition in <literal>parser.mli</literal>, the
+      parsing function expects a lexer of type
+      <literal>Lexing.lexbuf -&gt; token</literal>, and it also expects
+      a <literal>lexbuf</literal>.
+    </para>
+    <programlisting language="ocaml">
+val prog: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; (Json.value option)
+</programlisting>
+    <para>
+      The standard lexing library <literal>Lexing</literal> provides a
+      function <literal>from_channel</literal> to read the input from a
+      channel. The following function describes the structure, where the
+      <literal>Lexing.from_channel</literal> function is used to
+      construct a <literal>lexbuf</literal>, which is passed with the
+      lexing function <literal>Lexer.read</literal> to the
+      <literal>Parser.prog</literal> function.
+      <literal>Parsing.prog</literal> returns <literal>None</literal>
+      when it reaches end of file. We define a function
+      <literal>Json.output_value</literal>, not shown here, to print a
+      <literal>Json.value</literal>.
+    </para>
+    <programlisting language="ocaml">
+let rec parse_and_print lexbuf =
+  match Parser.prog Lexer.read lexbuf with
+  | Some value -&gt; Json.output_value stdout value; parse_and_print lexbuf
+  | None -&gt; ()
+  
+let loop filename =
+  let inx = open_in filename in
+  let lexbuf = Lexing.from_channel inx in
+  parse_and_print lexbuf;
+  close_in inx
+</programlisting>
+    <para>
+      This isn't quite right yet -- we need to handle parsing errors.
+      Currently there are two errors, <literal>Parser.Error</literal>
+      and <literal>Lexer.SyntaxError</literal>. A simple solution when
+      encountering an error is to print the error and give up.
+    </para>
+    <programlisting language="ocaml">
+let parse_with_error lexbuf =
+  try Parser.prog Lexer.read lexbuf with
+  | SyntaxError msg -&gt;
+      Printf.fprintf stderr &quot;%a: %s\n&quot; print_position lexbuf msg;
+      None
+  | Parser.Error -&gt;
+      Printf.fprintf stderr &quot;%a: syntax error\n&quot; print_position lexbuf;
+      None
+
+let rec parse_and_print lexbuf =
+  match parse_with_error lexbuf with
+  | Some value -&gt; Json.output_value stdout value; parse_and_print lexbuf
+  | None -&gt; ()
+</programlisting>
+    <para>
+      This approach, &quot;give up on the first error,&quot; is easy to
+      implement, but it isn't very friendly. In general, error handling
+      can be pretty intricate, and we won't discuss it here. However,
+      the menhir parser defines additional mechanisms you can use to try
+      and recover from errors, describe it its reference manual.
+    </para>
+    <para>
+      Here is an example of a successful run on the following input
+      file.
+    </para>
+    <programlisting>
+$ cat test1.json
+true
+false
+null
+[1, 2]
+&quot;Hello\r\n\t\b\\\/\u12345&quot;
+{ field1: &quot;Hello&quot;,
+  field2: 17e13,
+  field3: [1, 2, 3],
+  field4: { fieldA: 1, fieldB: &quot;Hello&quot; }
+}
+
+$ ./test test1.json
+true
+false
+null
+[1, 2]
+&quot;Hello
+       \/ሴ5&quot;
+{ field1: &quot;Hello&quot;, field2: 170000000000000.000000, field3: [1, 2, 3], field4: { fieldA: 1, fieldB: &quot;Hello&quot; } }
+</programlisting>
+    <para>
+      With our simple error handling scheme, errors are fatal.
+    </para>
+    <programlisting language="ocaml">
+$ cat test2.json
+{ name: &quot;Chicago&quot;,
+  zips: [12345,
+}
+{ name: &quot;New York&quot;,
+  zips: [10004]
+}
+$ ./test test2.json
+test2.json:3:2: syntax error
+</programlisting>
+  </sect1>
 </chapter><chapter id="first-class-modules">
   <title>First class modules</title>
   <para>
@@ -19017,8 +19789,9 @@ $ make &amp;&amp; make install
       in a reasonably efficient way. The manual page (usually via
       <literal>man ncurses</literal>) explains the basics of the C
       interface. The <literal>initscr</literal> function allocates some
-      state and returns as a <literal>WINDOW</literal> pointer. This C
-      pointer is then passed to various terminal drawing functions.
+      state and returns it as a point to the C <literal>WINDOW</literal>
+      typedef. This C pointer is then passed to various terminal drawing
+      functions.
     </para>
     <para>
       The <literal>ctypes</literal> library provides a combinator
@@ -19171,7 +19944,8 @@ type 'a abstract   (** Abstract C pointer *)
 </programlisting>
     <para>
       The <literal>Ffi.C.Type</literal> module defines constructors for
-      the familiar C basic types and lets you build `'a typ' values.
+      the familiar C basic types and lets you build
+      <literal>'a typ</literal> values.
     </para>
     <programlisting language="ocaml">
 module Type : sig
@@ -19194,9 +19968,16 @@ module Type : sig
 ...
 </programlisting>
     <para>
-      These functions all return an
-      <literal>'a typ', where the</literal>'a<literal>component is the OCaml representation of the C type. For example, OCaml only supports double-precision floating point numbers, and so both of the C</literal>float<literal>and</literal>double<literal>functions map to the OCaml</literal>float<literal>type.  The</literal>Ffi.Unsigned<literal>and</literal>Ffi.Signed<literal>modules provide some optimized implementations of specific C types, such as</literal>llong<literal>(for</literal>long
-      long` 64-bit values).
+      These functions all return an <literal>'a typ</literal>, where the
+      <literal>'a</literal> component is the OCaml representation of the
+      C type. For example, OCaml only supports double-precision floating
+      point numbers, and so both of the C <literal>float</literal> and
+      <literal>double</literal> functions map to the OCaml
+      <literal>float</literal> type. The <literal>Ffi.Unsigned</literal>
+      and <literal>Ffi.Signed</literal> modules provide some optimized
+      implementations of specific C types, such as
+      <literal>llong</literal> (for <literal>long long</literal> 64-bit
+      values).
     </para>
     <para>
       The module also defines some more advanced C types
@@ -21795,778 +22576,6 @@ immutable: 2.6186s (19073 minor collections)
         requires my dtrace/instruments patch for libasmrun
       </para>
     </sect2>
-  </sect1>
-</chapter><chapter id="parsing-with-ocamllex-and-ocamlyacc">
-  <title>Parsing with OCamllex and OCamlyacc</title>
-  <para>
-    OCaml provides lexer and parser generators modeled on lex and yacc.
-    Similar tools are available in a variety of languages, and with them
-    you can parse a variety of kinds of input, including web formats or
-    full blown programming languages (for example, OCaml programs use an
-    <emphasis>ocamlyacc</emphasis> parser and
-    <emphasis>ocamllex</emphasis> for lexical analysis).
-  </para>
-  <para>
-    Let's be more precise about these terms. By
-    <emphasis>parsing</emphasis>, we mean reading a textual input into a
-    form that is easier for a program to manipulate. For example,
-    suppose we want to read a file containing a value in JSON format.
-    JSON has a variety of values, including numbers, strings, arrays,
-    and objects, and each of these has a precise textual representation.
-    For example, the following text represents an object containing a
-    string labeled <literal>title</literal>, and an array containing two
-    objects, each with a name and array of zip codes.
-  </para>
-  <programlisting language="json">
-{ title: &quot;Cities&quot;,
-  cities: [{ name: &quot;Chicago&quot;, zips: [60601] },
-           { name: &quot;New York&quot;, zips: [10004] }]
-}
-</programlisting>
-  <para>
-    The input text is represented as a sequence of characters.
-    Manipulating it in that form would be really hard, so what we want
-    is to give it a structured type that is easier for our programs to
-    manipulate. For our example, we'll use the following type to
-    represent JSON <emphasis>abstract syntax</emphasis>.
-  </para>
-  <programlisting language="ocaml">
-type value = [
-| `Object of (string * value) list
-| `Array of value array
-| `String of string
-| `Int of int
-| `Float of float
-| `True
-| `False
-| `Null ]
-</programlisting>
-  <para>
-    The objective of <emphasis>parsing</emphasis> is to convert the text
-    input into a value of type <literal>value</literal>. This is
-    normally done in two phase. First, <emphasis>lexical</emphasis>
-    analysis (or lexing, for short) is used to convert the text input
-    into a sequence of tokens, or words. For example, the JSON input
-    would be tokenized into a sequence of tokens like the following. In
-    most cases (and in this example), lexical analysis will choose to
-    omit white space from the token stream.
-  </para>
-  <programlisting>
-LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(&quot;cities&quot;), ...
-</programlisting>
-  <para>
-    The next step is to convert the token stream into a program value
-    that represents the abstract syntax tree, like the type
-    <literal>value</literal> above. This is called
-    <emphasis>parsing</emphasis>.
-  </para>
-  <programlisting>
-`Object
-  [&quot;title&quot;, `String &quot;Cities&quot;;
-   &quot;cities&quot;, `Array
-     [|`Object [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `Array [|Int 60601|]];
-       `Object [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `Array [|Int 10004|]]|]]
-</programlisting>
-  <para>
-    There are many techniques for lexing and parsing. In the lex/yacc
-    world, lexing is specified using regular expressions, and parsing is
-    specified using context-free grammars. These are concepts from
-    formal languages; the lex/yacc tools constructing the machinery for
-    you. For <literal>lex</literal>, this means constructing a finite
-    automaton; and for <literal>yacc</literal>, this means constructing
-    a pushdown automaton.
-  </para>
-  <para>
-    Parsing is a broad and often intricate topic, and our purpose here
-    is not to teach all of the ins and outs of yacc and lex, but to show
-    how to use these tools in OCaml. There are online resources, and
-    most experience you may have using lex/yacc in other languages will
-    also apply in OCaml. However, there are differences, and we'll try
-    to point out the larger ones here.
-  </para>
-  <para>
-    For illustration, let's continue with the JSON example. For lexing,
-    we'll use <literal>ocamllex</literal>, and for parsing, we'll use
-    <literal>menhir</literal>, which is somewhat easier to use than
-    <literal>ocamlyacc</literal>.
-  </para>
-  <sect1 id="defining-a-json-parser-with-menhir">
-    <title>Defining a JSON parser with menhir</title>
-    <para>
-      The process of building a parser is interleaved between
-      constructing the lexer and parser; you will have to do them
-      simultaneously. The first step is to define the set of tokens that
-      will be produced by the lexer. For various reasons, the tokens are
-      specified by the parser (to specify what it expects as input), so
-      we'll start with the parser first.
-    </para>
-    <para>
-      A parser file has suffix <literal>.mly</literal> (we'll use the
-      name <literal>parser.mly</literal>) and it contains several parts
-      in the following sequence:
-    </para>
-    <programlisting>
-  declarations
-  %%
-  rules
-  %%
-  optional OCaml code
-</programlisting>
-    <para>
-      The <literal>%%</literal> are section separators; they have to be
-      on a line by themselves. The declarations include token and type
-      specifications, precedence directives, and other things, but we
-      start by declaring the tokens.
-    </para>
-    <sect2 id="token-declarations">
-      <title>Token declarations</title>
-      <para>
-        A token is declared using the syntax
-        <literal>%token &lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
-        <emphasis>uid</emphasis>, where the
-        <literal>&lt;type&gt;</literal> is optional, and
-        <emphasis>uid</emphasis> is an capitalized identifier. For JSON,
-        we need tokens for numbers, strings, identifiers, and
-        punctuation. To start, let's define just the tokens in the
-        <literal>parser.mly</literal> file. For technical reasons, we
-        need to include a <literal>%start</literal> declaration. For
-        now, we'll include just a dummy grammer specification
-        <literal>exp: { () }</literal> (we'll replace this when we
-        implement the grammar below).
-      </para>
-      <programlisting language="ocaml">
-%token &lt;int&gt; INT
-%token &lt;float&gt; FLOAT
-%token &lt;string&gt; ID
-%token &lt;string&gt; STRING
-%token TRUE
-%token FALSE
-%token NULL
-%token LEFT_BRACE
-%token RIGHT_BRACE
-%token LEFT_BRACK
-%token RIGHT_BRACK
-%token COLON
-%token COMMA
-%token EOF
-
-%start &lt;unit&gt; exp
-
-%%
-
-exp: { () }
-</programlisting>
-      <para>
-        The
-        <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
-        specifications mean that a token carries a value. The
-        <literal>INT</literal> token carries an integer value with it,
-        <literal>FLOAT</literal> has a <literal>float</literal> value,
-        etc. Most of the remaning tokens, like <literal>TRUE</literal>,
-        <literal>FALSE</literal>, the punctuation, aren't associated
-        with any value, so we omit the
-        <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
-        specification.
-      </para>
-      <para>
-        Compile this file with <literal>menhir</literal>. It will issue
-        multiple warnings about unused tokens because we haven't
-        actually defined a grammar yet. It is ok to ignore the warnings
-        for now.
-      </para>
-      <programlisting>
-$ menhir parser.mly
-Warning: the token COLON is unused.
-...
-</programlisting>
-      <para>
-        The <literal>menhir</literal> tool is a parser generator,
-        meaning it generates the code to perform parsing from the
-        <literal>parser.mly</literal> description. The
-        <literal>parser.ml</literal> contains an automaton
-        implementation, and is generally difficult to read. However, the
-        <literal>parser.mli</literal> contains declarations that we need
-        to build a lexer.
-      </para>
-      <para>
-        $ cat parser.mli exception Error
-      </para>
-      <para>
-        type token = | TRUE | STRING of (string) | RIGHT_BRACK |
-        RIGHT_BRACE | NULL | LEFT_BRACK | LEFT_BRACE | INT of (int) | ID
-        of (string) | FLOAT of (float) | FALSE | EOF | COMMA | COLON
-      </para>
-      <para>
-        val exp: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt;
-        (unit) ```
-      </para>
-    </sect2>
-    <sect2 id="specifying-the-grammar-rules">
-      <title>Specifying the grammar rules</title>
-      <para>
-        The grammar itself is specified using a set of rules, where a
-        rule contains a set of productions. Abstractly, a production
-        looks like the following.
-      </para>
-      <programlisting>
-symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
-   { OCaml code }
-</programlisting>
-      <para>
-        A production can be interpreted as follows: given values
-        <literal>id1</literal>, ..., <literal>idN</literal> for the
-        input symbols <literal>symbol1</literal>, ...,
-        <literal>symbolN</literal>; the OCaml code computes a value for
-        the target <literal>symbol</literal>. That's too abstract, so
-        let's get down to defining productions for parsing JSON. Here is
-        the main production for a JSON value.
-      </para>
-      <programlisting>
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
-  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
-  | s = STRING
-    { `String s }
-  | i = INT
-    { `Int i }
-  | x = FLOAT
-    { `Float x }
-  | TRUE
-    { `True }
-  | FALSE
-    { `False }
-  | NULL
-    { `Null }
-  ;
-</programlisting>
-      <para>
-        We can read it like this, &quot;A JSON <literal>value</literal>
-        is either an object bracketed with curly braces, or an array
-        bracketed with square braces. or a string, integer, float, etc.
-        In each of the productions, the right hand side specfies the
-        expected sequence. For example, the object is specified with the
-        curly-bracket production.
-      </para>
-      <programlisting>
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
-</programlisting>
-      <para>
-        That is, an object value starts with a
-        <literal>LEFT_BRACE</literal>, contains some optional object
-        field values (to be defined), and end with a
-        <literal>RIGHT_BRACE</literal>. The returned value is
-        <literal>Object obj</literal>, where <literal>obj</literal> is
-        the sequence of object fields. Note that we've left out bindings
-        for <literal>LEFT_BRACE</literal> and
-        <literal>RIGHT_BRACE</literal>, because their tokens don't have
-        values.
-      </para>
-      <para>
-        Next, let's define the object fields. In the following rules,
-        the <literal>opt_object_fields</literal> are either empty, or a
-        non-empty sequence of fields in reverse order. Note that if you
-        wish to have comments in the rule definitions, you will have to
-        use C comment delimiters. By convention, the C comment
-        <literal>/* empty */</literal> is used to point out that a
-        production has an empty right hand side.
-      </para>
-      <programlisting>
-
-opt_object_fields: /* empty */
-    { [] }
-  | obj = rev_object_fields
-    { List.rev obj }
-  ;
-
-rev_object_fields: k = ID; COLON; v = value
-    { [k, v] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
-    { (k, v) :: obj }
-  ;
-</programlisting>
-      <para>
-        The rule <literal>rev_object_fields</literal> is defined
-        recursively. It has either one key/value field, or it is a
-        sequence of fields, followed by a <literal>COMMA</literal> and
-        one more field definition.
-      </para>
-      <para>
-        e <literal>rev_</literal> prefixed is intended to point out that
-        the fields are returned in reverse order. Why would we do that?
-        One reason is that the <literal>menhir</literal> parser
-        generator is left-recursive, which means that the constructed
-        pushdown automoton uses less stack space with left-recursive
-        definitions. The following right-recursive rule accepts the same
-        input, but during parsing it requires linear stack space to read
-        object field definitions.
-      </para>
-      <programlisting>
-/* Inefficient right-recursive rule */
-object_fields: k = ID; COLON; v = value
-    { [k, v] }
-  | k = ID; COLON; v = value; COMMA; obj = object_fields
-    { (k, v) :: obj }
-</programlisting>
-      <para>
-        Alternatively, we could keep the left-recursive definition and
-        simply construct the returned value in left-to-right order. This
-        is fine, though less efficient. You will have to choose you
-        technique according to circumstances.
-      </para>
-      <programlisting>
-/* Quadratic left-recursive rule */
-object_fields: k = ID; COLON; v = value
-    { [k, v] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
-    { obj @ [k, v] }
-  ;
-</programlisting>
-      <para>
-        Finally, we can finish off the grammar by defining the rules for
-        arrays, and adding a correct <literal>%start</literal>
-        production. For the <literal>%start</literal> production, we'll
-        return a <literal>value option</literal>, using
-        <literal>None</literal> to represent end of file. Here is the
-        complete file.
-      </para>
-      <programlisting>
-%token &lt;int&gt; INT
-%token &lt;float&gt; FLOAT
-%token &lt;string&gt; ID
-%token &lt;string&gt; STRING
-%token TRUE
-%token FALSE
-%token NULL
-%token LEFT_BRACE
-%token RIGHT_BRACE
-%token LEFT_BRACK
-%token RIGHT_BRACK
-%token COLON
-%token COMMA
-%token EOF
-
-%type &lt;Json.value option&gt; prog
-
-%start prog
-
-%%
-
-prog: v = value
-    { Some v }
-  | EOF
-    { None }
-  ;
-
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
-  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
-  | s = STRING
-    { `String s }
-  | i = INT
-    { `Int i }
-  | x = FLOAT
-    { `Float x }
-  | TRUE
-    { `True }
-  | FALSE
-    { `False }
-  | NULL
-    { `Null }
-  ;
-
-
-opt_object_fields: /* empty */
-    { [] }
-  | obj = rev_object_fields
-    { List.rev obj }
-  ;
-
-rev_object_fields: k = ID; COLON; v = value
-    { [k, v] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
-    { (k, v) :: obj }
-  ;
-
-array_values: /* empty */
-    { [||] }
-  | vl = rev_values
-    { Array.of_list (List.rev vl) }
-  ;
-
-rev_values: v = value
-    { [v] }
-  | vl = rev_values; COMMA; v = value
-    { v :: vl }
-  ;
-</programlisting>
-      <para>
-        That's it. We can compile this with <literal>menhir</literal>,
-        which will now no longer complain about unused symbols.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="defining-a-lexer-with-ocamllex">
-    <title>Defining a lexer with ocamllex</title>
-    <para>
-      For the next part, we need to define a lexer to tokenize the input
-      text, meaning that we break the input into a sequence of words or
-      tokens. For this, we'll define a lexer using
-      <literal>ocamllex</literal>. In this case, the specification is
-      placed in a file with a <literal>.mll</literal> suffix (we'll use
-      the name <literal>lexer.mll</literal>). A lexer file has several
-      parts in the following sequence.
-    </para>
-    <programlisting>
-{ OCaml code }
-let definitions...
-rules...
-{ OCaml code }
-</programlisting>
-    <sect2 id="let-definitions-for-regular-expressions">
-      <title>Let-definitions for regular expressions</title>
-      <para>
-        The OCaml code for the header and trailer is optional. The
-        let-definitions are used to ease the definition of regular
-        expressions. They are optional, but very useful. To get started,
-        we know that we'll need to match numbers and strings, so let's
-        define names for the regular expressions that specify their
-        form.
-      </para>
-      <para>
-        An integer is a sequence of digits, optionally preceded by a
-        minus sign. Leading zeroes are not allowed. The question mark
-        means that the preceding symbol <literal>-</literal> is
-        optional. The square brackets ['1'-'9'] define a character
-        range, meaning that the first digit of the integer should be
-        1-9. The final range <literal>['0'-'9']*</literal> includes star
-        <literal>*</literal>, which means zero-or-more occurrences of
-        the characters 0-9. Read formally then, an
-        <literal>int</literal> has an optional minus sign, followed by a
-        digit in the range 1-9, followed by zero or more digits in the
-        range 0-9.
-      </para>
-      <programlisting>
-let int = '-'? ['1'-'9'] ['0'-'9']*
-</programlisting>
-      <para>
-        Floating-point numbers are similar, but we deal with decimal
-        points and exponents. We can use multiple let-definitions for
-        the different parts.
-      </para>
-      <programlisting>
-let digits = ['0'-'9']+
-let frac = '.' digits
-let exp = ['e' 'E'] ['-' '+']? digits
-let float = int (frac | exp | frac exp)
-</programlisting>
-      <para>
-        The <literal>digits</literal> expression has a
-        <literal>+</literal> symbol, meaning that
-        <literal>digits</literal> has one or more occurrences of digits
-        in the range 0-9. A fractional part <literal>frac</literal> has
-        a decimal point followed by some digits; an exponent
-        <literal>exp</literal> begins with an <literal>e</literal>
-        followed by some digits; and a <literal>float</literal> has an
-        integer part, and one or both of a <literal>frac</literal> and
-        <literal>exp</literal> part. The vetical bar is a choice; the
-        expression <literal>(frac | exp | frac exp)</literal> is either
-        a <literal>frac</literal>, or an <literal>exp</literal>, or a
-        <literal>frac</literal> followed by an <literal>exp</literal>.
-      </para>
-      <para>
-        Finally, let's define identifiers and whitespace. An identifier
-        (label), is an alphanumeric sequence not beginning with a digit.
-      </para>
-      <programlisting>
-let white = [' ' '\t']+
-let newline = '\r' | '\n' | &quot;\r\n&quot;
-
-let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-</programlisting>
-    </sect2>
-    <sect2 id="lexing-rules">
-      <title>Lexing rules</title>
-      <para>
-        The lexing rules are specified as a set of
-        <literal>parse</literal> rules. A <literal>parse</literal> rule
-        has a regular expression followed by OCaml code that defines a
-        semantic action. Let's write JSON parse rule.
-      </para>
-      <programlisting>
-rule read = parse
-| white { read lexbuf }
-| newline { next_line lexbuf; read lexbuf }
-| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-| float { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-| &quot;true&quot; { TRUE }
-| &quot;false&quot; { FALSE }
-| &quot;null&quot; { NULL }
-| id { ID (Lexing.lexeme lexbuf) }
-| '&quot;' { read_string (Buffer.create 17) lexbuf }
-| '{' { LEFT_BRACE }
-| '}' { RIGHT_BRACE }
-| '[' { LEFT_BRACK }
-| ']' { RIGHT_BRACK }
-| ':' { COLON }
-| ',' { COMMA }
-| _ { raise (SyntaxError (&quot;Unexpected character: &quot; ^ Lexing.lexeme lexbuf)) }
-| eof { EOF }
-</programlisting>
-      <para>
-        The OCaml code for the rules has a parameter called
-        <literal>lexbuf</literal> that defines the input, including the
-        position in the input file, as well as the text that was matched
-        by the regular expression. Let's skip to the third action.
-      </para>
-      <programlisting>
-| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-</programlisting>
-      <para>
-        This action specifies that when the input matches the
-        <literal>int</literal> regular expression (defined as
-        <literal>'-'? ['1'-'9'] ['0'-'9']*</literal>, then the lexer
-        should return the expression
-        <literal>INT (int_of_string (Lexing.lexeme lexbuf))</literal>.
-        The expression <literal>Lexing.lexeme lexbuf</literal> returns
-        the complete string matched by the regular expression. In this
-        case, the string represents a number, so we use the
-        <literal>int_of_string</literal> function to convert it to a
-        number.
-      </para>
-      <para>
-        Going back to the first actions, the first
-        <literal>white { read lexbuf }</literal> calls the lexer
-        recursively. That's, it skips the input whitespace and returns
-        the following token. The action
-        <literal>newline { next_line lexbuf; read lexbuf }</literal> is
-        similar, but we use it to advance the line number for the lexer.
-        Here is the definition of the <literal>next_line</literal>
-        function, which updates the line number in the
-        <literal>lexbuf</literal>.
-      </para>
-      <programlisting>
-let next_line lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  lexbuf.lex_curr_p &lt;-
-    { pos with pos_bol = lexbuf.lex_curr_pos;
-               pos_lnum = pos.pos_lnum + 1
-    }
-</programlisting>
-      <para>
-        There are actions for each different kind of token. The string
-        expressions like <literal>&quot;true&quot; { TRUE }</literal>
-        are used for keywords, and the special characters have actions
-        too, like <literal>'{' { LEFT_BRACE }</literal>.
-      </para>
-      <para>
-        Some of these patterns overlap. For example, the regular
-        expression <literal>&quot;true&quot;</literal> is also matched
-        by the <literal>id</literal> pattern.
-        <literal>ocamllex</literal> used the following disambiguation
-        when a prefix of the input is matched by more than one pattern.
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            The longest match always wins. For example, the first input
-            <literal>trueX: 167</literal> matches the regular expression
-            <literal>&quot;true&quot;</literal> for 4 characters, and it
-            matches <literal>id</literal> for 5 characters. The longer
-            match wins, and the return value is
-            <literal>ID &quot;trueX&quot;</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            If all matches have the same length, then the first action
-            wins. If the input were <literal>true: 167</literal>, then
-            both <literal>&quot;true&quot;</literal> and
-            <literal>id</literal> match the first 4 characters;
-            <literal>&quot;true&quot;</literal> is first, so the return
-            value is <literal>TRUE</literal>.
-          </para>
-        </listitem>
-      </itemizedlist>
-    </sect2>
-    <sect2 id="recursive-rules">
-      <title>Recursive rules</title>
-      <para>
-        Unlike many other lexer generators, <literal>ocamllex</literal>
-        allows the definion of multiple lexer in the same file, and the
-        definitions can be recursive. In this case, we use recursion to
-        match string literals, using the following rule definition.
-      </para>
-      <programlisting>
-and read_string buf = parse
-| '&quot;' { STRING (Buffer.contents buf) }
-| '\\' '/' { Buffer.add_char buf '/'; read_string buf lexbuf }
-| '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
-| '\\' 'b' { Buffer.add_char buf '\b'; read_string buf lexbuf }
-| '\\' 'f' { Buffer.add_char buf '\012'; read_string buf lexbuf }
-| '\\' 'n' { Buffer.add_char buf '\n'; read_string buf lexbuf }
-| '\\' 'r' { Buffer.add_char buf '\r'; read_string buf lexbuf }
-| '\\' 't' { Buffer.add_char buf '\t'; read_string buf lexbuf }
-| '\\' 'u' hex hex hex hex
-  { let string_code = String.sub (Lexing.lexeme lexbuf) 2 4 in
-    let code = int_of_string (&quot;0x&quot; ^ string_code) in
-    add_utf8 buf code;
-    read_string buf lexbuf
-  }
-| [^ '&quot;' '\\']+
-  { Buffer.add_string buf (Lexing.lexeme lexbuf);
-    read_string buf lexbuf
-  }
-| _ { raise (SyntaxError (&quot;Illegal string character: &quot; ^ Lexing.lexeme lexbuf)) }
-| eof { raise (SyntaxError (&quot;String is not terminated&quot;)) }
-</programlisting>
-      <para>
-        This rule takes a <literal>buf : Buffer.t</literal> as an
-        argument. If we reach the terminating double quote
-        <literal>&quot;</literal>, then we return the contents of the
-        buffer as a <literal>STRING</literal>.
-      </para>
-      <para>
-        The other cases are for handling the string contents. The action
-        <literal>[^ '&quot;' '\\']+ { ... }</literal> matches normal
-        input that does not contain a double-quote or backslash. The
-        actions beginning with a backslash <literal>\</literal> define
-        what to do for escape sequences. In each of these cases, the
-        final step includes a recursive call to the lexer.
-      </para>
-      <para>
-        As specified by JSON, we also handle Unicode code points,
-        <literal>'\\' 'u' hex hex hex hex</literal>. Ocaml doesn't have
-        any built-in handling for Unicode, so in this case we choose to
-        represent the code point in UTF-8. We define the following
-        function for adding the UTF-8 encoding to the buffer.
-      </para>
-      <programlisting language="ocaml">
-let add_utf8 buf code =
-  if code &lt;= 0x7f then
-    Buffer.add_char buf (Char.chr code)
-  else if code &lt;= 0x7ff then begin
-    Buffer.add_char buf (Char.chr (0b11000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end else begin
-    Buffer.add_char buf (Char.chr (0b11100000 lor ((code lsr 12) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end
-</programlisting>
-      <para>
-        That covers the lexer. Next, we need to combine the lexer with
-        the parser to bring it all together.
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="bringing-it-all-together">
-    <title>Bringing it all together</title>
-    <para>
-      For the final part, we need to compose the lexer and parser. As we
-      saw the the type definition in <literal>parser.mli</literal>, the
-      parsing function expects a lexer of type
-      <literal>Lexing.lexbuf -&gt; token</literal>, and it also expects
-      a <literal>lexbuf</literal>.
-    </para>
-    <programlisting language="ocaml">
-val prog: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; (Json.value option)
-</programlisting>
-    <para>
-      The standard lexing library <literal>Lexing</literal> provides a
-      function <literal>from_channel</literal> to read the input from a
-      channel. The following function describes the structure, where the
-      <literal>Lexing.from_channel</literal> function is used to
-      construct a <literal>lexbuf</literal>, which is passed with the
-      lexing function <literal>Lexer.read</literal> to the
-      <literal>Parser.prog</literal> function.
-      <literal>Parsing.prog</literal> returns <literal>None</literal>
-      when it reaches end of file. We define a function
-      <literal>Json.output_value</literal>, not shown here, to print a
-      <literal>Json.value</literal>.
-    </para>
-    <programlisting language="ocaml">
-let rec parse_and_print lexbuf =
-  match Parser.prog Lexer.read lexbuf with
-  | Some value -&gt; Json.output_value stdout value; parse_and_print lexbuf
-  | None -&gt; ()
-  
-let loop filename =
-  let inx = open_in filename in
-  let lexbuf = Lexing.from_channel inx in
-  parse_and_print lexbuf;
-  close_in inx
-</programlisting>
-    <para>
-      This isn't quite right yet -- we need to handle parsing errors.
-      Currently there are two errors, <literal>Parser.Error</literal>
-      and <literal>Lexer.SyntaxError</literal>. A simple solution when
-      encountering an error is to print the error and give up.
-    </para>
-    <programlisting language="ocaml">
-let parse_with_error lexbuf =
-  try Parser.prog Lexer.read lexbuf with
-  | SyntaxError msg -&gt;
-      Printf.fprintf stderr &quot;%a: %s\n&quot; print_position lexbuf msg;
-      None
-  | Parser.Error -&gt;
-      Printf.fprintf stderr &quot;%a: syntax error\n&quot; print_position lexbuf;
-      None
-
-let rec parse_and_print lexbuf =
-  match parse_with_error lexbuf with
-  | Some value -&gt; Json.output_value stdout value; parse_and_print lexbuf
-  | None -&gt; ()
-</programlisting>
-    <para>
-      This approach, &quot;give up on the first error,&quot; is easy to
-      implement, but it isn't very friendly. In general, error handling
-      can be pretty intricate, and we won't discuss it here. However,
-      the menhir parser defines additional mechanisms you can use to try
-      and recover from errors, describe it its reference manual.
-    </para>
-    <para>
-      Here is an example of a successful run on the following input
-      file.
-    </para>
-    <programlisting>
-$ cat test1.json
-true
-false
-null
-[1, 2]
-&quot;Hello\r\n\t\b\\\/\u12345&quot;
-{ field1: &quot;Hello&quot;,
-  field2: 17e13,
-  field3: [1, 2, 3],
-  field4: { fieldA: 1, fieldB: &quot;Hello&quot; }
-}
-
-$ ./test test1.json
-true
-false
-null
-[1, 2]
-&quot;Hello
-       \/ሴ5&quot;
-{ field1: &quot;Hello&quot;, field2: 170000000000000.000000, field3: [1, 2, 3], field4: { fieldA: 1, fieldB: &quot;Hello&quot; } }
-</programlisting>
-    <para>
-      With our simple error handling scheme, errors are fatal.
-    </para>
-    <programlisting language="ocaml">
-$ cat test2.json
-{ name: &quot;Chicago&quot;,
-  zips: [12345,
-}
-{ name: &quot;New York&quot;,
-  zips: [10004]
-}
-$ ./test test2.json
-test2.json:3:2: syntax error
-</programlisting>
   </sect1>
 </chapter><chapter id="object-subtyping-and-inheritance">
   <title>Object Subtyping and Inheritance</title>
