@@ -205,7 +205,8 @@ We can use this same idiom for generating an error.
 `Error` also supports operations for transforming errors.  For
 example, it's often useful to augment an error with some extra
 information about the context of the error or to combine multiple
-errors together.  `Error.tag` and `Error.of_list` fulfill these roles.
+errors together.  `Error.tag` and `Error.of_list` fulfill these roles,
+as you can see below.
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
 Result.t`, and it is, after `option`, the most common way of returning
@@ -486,12 +487,12 @@ can trigger the assert.
    ;;
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
 # merge_lists [1;2;3] [-1] ~f:(+);;
-Exception: (Assert_failure //toplevel// 25 15).
+Exception: (Assert_failure //toplevel// 6 15).
 ```
 
 This shows what's special about `assert`, which is that it captures
-the source location.
-
+the line number and character offset of the source location from which
+the assertion was made.
 
 ### Exception handlers
 
@@ -544,9 +545,9 @@ if the config file in question is malformed.  Unfortunately, that
 means that the `In_channel.t` that was opened will never be closed,
 leading to a file-descriptor leak.
 
-We can fix this using Core's `protect` function.  The basic purpose of
+We can fix this using Core's `protect` function.  The purpose of
 `protect` is to ensure that the `finally` thunk will be called when
-`f` exits, whether it exited normally or with an exception.  This is
+`f` exits, whether it exits normally or with an exception.  This is
 similar to the `try/finally` construct available in many programming
 languages, but it is implemented in a library, rather than being a
 built-in primitive.  Here's how it could be used to fix `load_config`.
@@ -562,9 +563,10 @@ let load_config filename =
 
 OCaml's exception-handling system allows you to tune your
 error-recovery logic to the particular error that was thrown.  For
-example, `List.find_exn` always throws `Not_found`.  You can take
-advantage of this in your code, for example, let's define a function
-called `lookup_weight`, with the following signature:
+example, `List.find_exn` throws `Not_found` when the element in
+question can'tbe found.  You can take advantage of this in your code,
+for example, let's define a function called `lookup_weight`, with the
+following signature:
 
 ```ocaml
 (** [lookup_weight ~compute_weight alist key] Looks up a
@@ -575,6 +577,19 @@ called `lookup_weight`, with the following signature:
 val lookup_weight :
   compute_weight:('data -> float) -> ('key * 'data) list -> 'key -> float
 ```
+
+<note> <title> Doc comments </title>
+
+You may have noticed that the comment in front of `lookup_weight`
+starts with two asterisks instead of one.  Such comments are called
+doc-comments, and are used by `ocamldoc` to auto-generate API
+documentation.  The text in square-brackets will be interpreted and
+formatted as OCaml code.
+
+We'll discuss how to use `ocamldoc` to build API documentation in
+[xref](#packaging).
+
+</note>
 
 We can implement such a function using exceptions as follows:
 
