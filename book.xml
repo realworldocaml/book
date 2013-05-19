@@ -16997,21 +16997,37 @@ let query_uri query =
         <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>.
         We'll parse the JSON data using the Yojson library, which we
         already introduced in
-        <ulink url="parsing-json-with-yojson">xref</ulink>.
+        <ulink url="handling-json-data">xref</ulink>.
       </para>
       <para>
         We expect the response from DuckDuckGo to come across as a JSON
-        record, which is represented by the <literal>``Assoc</literal>
-        tag in Yojson's JSON variant. We expect the definition itself to
+        record, which is represented by the <literal>Assoc</literal> tag
+        in Yojson's JSON variant. We expect the definition itself to
         come across under either the key &quot;Abstract&quot; or
         &quot;Definition&quot;, and so the code below looks under both
         keys, returning the first one for which a non-empty value is
         defined.
       </para>
-      <para>
-        <literal>ocaml (* Extract the &quot;Definition&quot; or &quot;Abstract&quot; field from the DuckDuckGo results *) let get_definition_from_json json =   match Yojson.Safe.from_string json with   | `Assoc kv_list -&gt;     let find key =       begin match List.Assoc.find kv_list key with       | None | Some (`String &quot;&quot;) -&gt; None       | Some s -&gt; Some (Yojson.Safe.to_string s)       end     in     begin match find &quot;Abstract&quot; with     | Some _ as x -&gt; x     | None -&gt; find &quot;Definition&quot;     end   | _ -&gt; None</literal>
-        ### Executing an HTTP client query
-      </para>
+      <programlisting language="ocaml">
+(* Extract the &quot;Definition&quot; or &quot;Abstract&quot; field from the DuckDuckGo results *)
+let get_definition_from_json json =
+  match Yojson.Safe.from_string json with
+  | `Assoc kv_list -&gt;
+    let find key =
+      begin match List.Assoc.find kv_list key with
+      | None | Some (`String &quot;&quot;) -&gt; None
+      | Some s -&gt; Some (Yojson.Safe.to_string s)
+      end
+    in
+    begin match find &quot;Abstract&quot; with
+    | Some _ as x -&gt; x
+    | None -&gt; find &quot;Definition&quot;
+    end
+  | _ -&gt; None
+</programlisting>
+    </sect2>
+    <sect2 id="executing-an-http-client-query">
+      <title>Executing an HTTP client query</title>
       <para>
         Now let's look at the code for dispatching the search queries
         over HTTP, using the Cohttp library.
