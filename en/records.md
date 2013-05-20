@@ -576,7 +576,7 @@ automatically.  The `fieldslib` syntax extension that ships with
 
 `fieldslib` is invoked by putting the `with fields` annotation at the
 end of the declaration of a record type.  So, for example, we could
-have defined `Logon` as follows.
+have defined `Logon` as follows.  
 
 ```ocaml
 # module Logon = struct
@@ -590,8 +590,13 @@ have defined `Logon` as follows.
   end;;
 ```
 
-Given that definition, we can use the function `Logon.user` to extract
-the user field from a logon message.
+Note that this will generate a _lot_ of output, because `fieldslib`
+generates a large collection of helper functions for working with
+record fields.  We'll only discuss a few of these; you can learn about
+the remainder from the documentation that comes with `fieldslib`.
+
+One of the functions we obtain is `Logon.user`, which we can use to
+extract the user field from a logon message.
 
 ```ocaml
 # let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
