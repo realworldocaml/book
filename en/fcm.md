@@ -1,9 +1,5 @@
 # First class modules
 
-_(jyh: I'm going to start some new text on FCM.  We might want another
-chapter, but let's see how it goes.  I've kept Ron's original text
-below.)
-
 OCaml provides several mechanisms for organizing your programs,
 including modules and functors, files and compilation units, and
 classes and objects.  Files and compilation units (`.ml` and `.mli`

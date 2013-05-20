@@ -1,4 +1,4 @@
-# Example: a message broker
+# Fast Binary Serialization
 
 Now that we've learned the basics of working with Async, let's walk
 through a small but non-trivial application: a message broker which
@@ -65,11 +65,6 @@ The details of the generated values are not particularly important,
 but they give you the functionality needed to serialize and
 deserialize binary messages efficiently.
 
-
-
-
-
-
 Clients can either publish values under a topic, or subscribe to
 the stream of values associated with a given topic.  The server will
 maintain a cache of the last value published under any given topic, so
@@ -77,9 +72,6 @@ that a subscriber immediately receives the most recently published
 value under said topic.  To make it easier to see what's going on,
 we'll also implement a query for dumping the current state of the
 server.
-
-
-
 
 We'll use Async's `Rpc` module for implementing that client/server
 protocol.  The following module specifies the specific message types
@@ -116,7 +108,6 @@ Note that the declaration of `Message.t` is followed by the annotation
 [xref](#data-serialization-with-s-expressions), but `bin_io` is new.
 S-expressions are a convenient serialization format, but like any
 human-readable serialization format, 
-
 
 Now we can move on to declaring the `Rpc` protocol we'll use.  The
 `Rpc` module actually supports two different kinds of RPC protocols:
@@ -163,9 +154,6 @@ let dump_rpc = Rpc.Rpc.create
   ~bin_query:Unit.bin_t
   ~bin_response:Dump.bin_t
 ```
-
-
-
 # Fast Binary Serialization with bin_prot
 
 S-expressions are a good serialization format when you need something
@@ -184,7 +172,7 @@ s-expressions are not particularly performant for a couple of reasons:
 serialization in a compact binary format.  We'll also introduce the
 Core `Bigstring` library for handling large binary strings efficiently
 during this chapter.
-ut
+
 <note>
 <title>Using `bin_prot` in the toplevel</title>
 
@@ -388,7 +376,6 @@ module Fields :
   end
 ```
 
-
 There are several syntax extensions distributed with Core, including:
 
 - **Sexplib**: provides serialization for s-expressions.
@@ -408,4 +395,3 @@ There are several syntax extensions distributed with Core, including:
 
 We'll discuss each of these syntax extensions in detail, starting with
 Sexplib.
-

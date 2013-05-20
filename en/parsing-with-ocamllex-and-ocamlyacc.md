@@ -142,7 +142,7 @@ Compile this file with `menhir`.  It will issue multiple warnings about unused
 tokens because we haven't actually defined a grammar yet.  It is ok to ignore
 the warnings for now.
 
-```
+```console
 $ menhir parser.mly
 Warning: the token COLON is unused.
 ...
@@ -153,6 +153,7 @@ perform parsing from the `parser.mly` description.  The `parser.ml` contains an
 automaton implementation, and is generally difficult to read.  However, the
 `parser.mli` contains declarations that we need to build a lexer.
 
+```console
 $ cat parser.mli
 exception Error
 
@@ -227,7 +228,6 @@ don't have values.
 Next, let's define the object fields.  In the following rules, the `opt_object_fields` are either empty, or a non-empty sequence of fields in reverse order.  Note that if you wish to have comments in the rule definitions, you will have to use C comment delimiters.  By convention, the C comment `/* empty */` is used to point out that a production has an empty right hand side.
 
 ```
-
 opt_object_fields: /* empty */
     { [] }
   | obj = rev_object_fields
@@ -245,7 +245,7 @@ The rule `rev_object_fields` is defined recursively.  It has either one
 key/value field, or it is a sequence of fields, followed by a `COMMA` and one
 more field definition.
 
-e `rev_` prefixed is intended to point out that the fields are returned in
+The `rev_` prefixed is intended to point out that the fields are returned in
 reverse order.  Why would we do that?  One reason is that the `menhir` parser
 generator is left-recursive, which means that the constructed pushdown automoton
 uses less stack space with left-recursive definitions.  The following
