@@ -12,6 +12,7 @@ At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
 using the `let` keyword.  We can type a so-called _top-level_ `let`
 binding into `utop` with the following syntax to bind a new variable.
+Note that variable names must start with a lowercase letter.
 
 ```ocaml
 let <identifier> = <expr>

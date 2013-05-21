@@ -37,6 +37,8 @@ type <record-name> =
   }
 ```
 
+Note that record field names must start with a lower-case letter.
+
 Here's a simple example, a `host_info` record that summarizes
 information about a given computer.
 
@@ -409,7 +411,7 @@ val create_log_entry :
 ```
 
 This is not restricted to constructing a record; we can use the same
-trick when pattern-matching:
+trick when pattern-matching.
 
 ```ocaml
 # let message_to_string { Log_entry.important; message; _ } =
@@ -419,12 +421,21 @@ val message_to_string : Log_entry.t -> string = <fun>
 ```
 
 When using dot-notation for accessing record fields, we can qualify
-the field by the module directly:
+the field by the module directly.  
 
 ```ocaml
 # let is_important t = t.Log_entry.important;;
 val is_important : Log_entry.t -> bool = <fun>
 ```
+
+The syntax here is a little surprising when you first encounter it.
+The thing to keep in mind is that the dot is being used in two ways:
+the first dot is a record field access, with everything to the right
+of the dot being interpreted as a field name; the second dot is
+accessing the contents of a module, referring to the record field
+`important` from within the module `Log_entry`.  The fact that
+`Log_entry` is capitalized and so can't be a field name is what
+disambiguates the two uses.
 
 For functions defined within the module where a given record is
 defined, the module qualification goes away entirely.
@@ -551,7 +562,7 @@ mutable ones, are specified when the record is created.
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming does have its place.  We'll discuss more about how (and
 when) to use OCaml's imperative features in
-[xref](#imperative-programming).
+[xref](#imperative-programming2).
 
 ## First-class fields
 
