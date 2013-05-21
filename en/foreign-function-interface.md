@@ -105,16 +105,19 @@ let wrefresh =
   foreign "wrefresh" (window @-> (returning void))
 
 let newwin =
-  foreign "newwin" (int @-> int @-> int @-> int @-> (returning window))
+  foreign "newwin" 
+    (int @-> int @-> int @-> int @-> (returning window))
 
 let mvwaddch =
-  foreign "mvwaddch" (window @-> int @-> int @-> char @-> (returning void))
+  foreign "mvwaddch" 
+    (window @-> int @-> int @-> char @-> (returning void))
 
 let addstr =
   foreign "addstr" (string @-> (returning void))
 
 let mvwaddstr =
-  foreign "mvwaddstr" (window @-> int @-> int @-> string @-> (returning void))
+  foreign "mvwaddstr"
+    (window @-> int @-> int @-> string @-> (returning void))
 
 let box =
   foreign "box" (window @-> int @-> int @-> (returning void))
