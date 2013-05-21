@@ -23,6 +23,7 @@ _records_ and _variants_, both of which we discussed briefly in
 [xref](#a-guided-tour).  In this chapter we'll cover records in more
 depth, covering more of the details of how they work, as well as
 advice on how to use them effectively in your software designs.
+Variants will be covered in more depth in [xref](#variants).
 
 A record represents a collection of values stored together as one,
 where each component is identified by a different field name.  The
@@ -82,6 +83,26 @@ record field using dot-notation.
 ```ocaml
 # my_host.cpu_arch;;
 - : string = "i386"
+```
+
+When declaring an OCaml type, you always have the option of
+parameterizing it by a polymorphic type.  Records are no different in
+this regard.  So, for example, here's a type one might to timestamp
+arbitrary items.
+
+```ocaml
+# type 'a timestamped = { item: 'a; time: Time.t };;
+type 'a timestamped = { item : 'a; time : Time.t; }
+```
+
+We can then write polymorphic functions that operate over this
+parameterized type.
+
+```ocaml
+# let first_timestamped list =
+    List.reduce list ~f:(fun a b -> if a.time < b.time then a else b)
+  ;;
+val first_timestamped : 'a timestamped list -> 'a timestamped option = <fun>
 ```
 
 ## Patterns and exhaustiveness
@@ -328,16 +349,11 @@ drove the type to be considered to be a `logon`, at which point
 
 We can avoid this ambiguity altogether, either by using
 non-overlapping field names or, more generally, by minting a module
-for each type.  We'll talk more about modules more in
-[xref](#files-modules-and-programs), but for now, you can think of a
-module as a way of collecting values and types together in a named
-package.
-
-Packing types into modules is a broadly useful idiom (and one used
-quite extensively by Core), providing for each type a name-space
-within which to put related values.  When using this style, it is
-standard practice to name the type associated with the module `t`.
-Using this style we would write:
+for each type.  Packing types into modules is a broadly useful idiom
+(and one used quite extensively by Core), providing for each type a
+name-space within which to put related values.  When using this style,
+it is standard practice to name the type associated with the module
+`t`.  Using this style we would write:
 
 ```ocaml
 # module Log_entry = struct
@@ -554,11 +570,14 @@ pattern that that it would be convenient to generate them
 automatically.  The `fieldslib` syntax extension that ships with
 `Core` does just that.
 
-`fieldslib` is invoked by putting the `with fields` annotation at the
-end of the declaration of a record type.  So, for example, we could
-have defined `Logon` as follows.
+You can enable the syntax extension by typing `#require
+"fieldslib.syntax"` into the top-level, at which point the `with
+fields` annotation at the end of the declaration of a record type will
+cause the extension to be applied to a given type declaration.  So,
+for example, we could have defined `Logon` as follows.
 
 ```ocaml
+# #require "fieldslib.syntax";;
 # module Logon = struct
     type t =
       { session_id: string;
@@ -570,8 +589,13 @@ have defined `Logon` as follows.
   end;;
 ```
 
-Given that definition, we can use the function `Logon.user` to extract
-the user field from a logon message.
+Note that this will generate a _lot_ of output, because `fieldslib`
+generates a large collection of helper functions for working with
+record fields.  We'll only discuss a few of these; you can learn about
+the remainder from the documentation that comes with `fieldslib`.
+
+One of the functions we obtain is `Logon.user`, which we can use to
+extract the user field from a logon message.
 
 ```ocaml
 # let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
@@ -636,7 +660,7 @@ val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string = <fun>
 
 This takes three arguments: the `Field.t`, a function for converting
 the contents of the field in question to a string, and a record from
-which the field can be grabbed..
+which the field can be grabbed.
 
 Here's an example of `show_field` in action.
 
@@ -659,8 +683,23 @@ dealing with functions.  `Fn.id` is the identity function.
 
 `fieldslib` also provides higher-level operators, like `Fields.fold`
 and `Fields.iter`, which let you iterate over all the fields of a
-record.  The following function uses `Logon.Fields.iter` and
-`show_field` to print out all the fields of a `Logon` record.
+record.  So, for example, in the case of `Logon.t`, the field iterator
+has the following type.
+
+```ocaml
+# Logon.Fields.iter;;
+- : session_id:((Logon.t, string) Field.t -> unit) ->
+    time:((Logon.t, Time.t) Field.t -> unit) ->
+    user:((Logon.t, string) Field.t -> unit) ->
+    credentials:((Logon.t, string) Field.t -> unit) ->
+    unit
+= <fun>
+```
+
+As you can see, each labeled argument is a function that takes the
+corresponding `Field.t` as an argument.  Now, let's use
+`Logon.Fields.iter` and `show_field` to print out all the fields of a
+`Logon` record.
 
 ```ocaml
 # let print_logon logon =

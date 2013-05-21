@@ -421,7 +421,9 @@ expression we want to support.
 ```
 
 Note that the definition of the type `blang` is recursive, meaning
-that a `blang` may contain other `blang`s.
+that a `blang` may contain other `blang`s.  Also, `blang` is
+parameterized by a polymorphic type `'a` which is used for specifying
+the type of the value that goes under the `Base` tag.
 
 The purpose of each tag is pretty straightforward.  `And`, `Or` and
 `Not` are the basic operators for building up boolean expression, and
