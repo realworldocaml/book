@@ -110,10 +110,10 @@ write:
 - : float = 25.1327412287183449
 ```
 
-It's important not to confuse this sequence of let bindings with the
-modification of a mutable variable.  How would `area_of_ring` be
-different, for example, if we had instead written this purposefully
-confusing bit of code:
+It's important not to confuse a sequence of let bindings with the
+modification of a mutable variable.  For example, consider how
+`area_of_ring` would work if we had instead written this purposefully
+confusing bit of code.
 
 ```ocaml
 # let area_of_ring inner_radius outer_radius =
@@ -142,8 +142,8 @@ Warning 26: unused variable pi.
 ```
 
 In OCaml, let bindings are immutable.  As we'll see in
-[xref](#imperative-programming), there are mutable values in OCaml, but
-no mutable variables.
+[xref](#imperative-programming), there are mutable values in OCaml,
+but no mutable variables.
 
 <note> <title> Why don't variables vary?  </title>
 
@@ -169,9 +169,9 @@ values, even though there's absolutely no mutation.
 ### Pattern matching and `let` ###
 
 Another useful feature of let bindings is that they support the use of
-patterns on the left-hand side of the bind.  Consider the following
-code, which uses `List.unzip`, a function for converting a list of
-pairs into a pair of lists.
+_patterns_ on the left-hand side.  Consider the following code, which
+uses `List.unzip`, a function for converting a list of pairs into a
+pair of lists.
 
 ```ocaml
 # let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
@@ -179,7 +179,13 @@ val ints : int list = [1; 2; 3]
 val strings : string list = ["one"; "two"; "three"]
 ```
 
-This actually binds two variables, one for each element of the pair.
+Here, `(ints,strings)` is a pattern, and the `let` binding assigns
+values to both of the identifiers that show up in that pattern.  A
+pattern is essentially a description of the shape of a data-structure,
+where some components are identifiers to be bound.  As we saw in
+[xref](#tuples-lists-options-and-pattern-matching), OCaml has patterns
+for a variety of different data-types.
+
 Using a pattern in a let-binding makes the most sense for a pattern
 that is _irrefutable_, _i.e._, where any value of the type in question
 is guaranteed to match the pattern.  Tuple and record patterns are
