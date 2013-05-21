@@ -637,9 +637,6 @@ naively expect from the above, as you can see below.
 - : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>
 ```
 
-The extra type parameter `'b` is there to keep track of permissions on
-the `Field.t`.  As we'll see later when we cover
-
 The type is `Field.t_with_perm` rather than a simple `Field.t` because
 fields have a notion of access control associated with them because
 there are some special cases where we may expose a field but not
@@ -688,18 +685,28 @@ has the following type.
 
 ```ocaml
 # Logon.Fields.iter;;
-- : session_id:((Logon.t, string) Field.t -> unit) ->
-    time:((Logon.t, Time.t) Field.t -> unit) ->
-    user:((Logon.t, string) Field.t -> unit) ->
-    credentials:((Logon.t, string) Field.t -> unit) ->
+- : session_id:(([< `Read | `Set_and_create ], Logon.t, string)
+                Field.t_with_perm -> unit) ->
+    time:(([< `Read | `Set_and_create ], Logon.t, Time.t) Field.t_with_perm ->
+          unit) ->
+    user:(([< `Read | `Set_and_create ], Logon.t, string) Field.t_with_perm ->
+          unit) ->
+    credentials:(([< `Read | `Set_and_create ], Logon.t, string)
+                 Field.t_with_perm -> unit) ->
     unit
 = <fun>
 ```
 
-As you can see, each labeled argument is a function that takes the
-corresponding `Field.t` as an argument.  Now, let's use
-`Logon.Fields.iter` and `show_field` to print out all the fields of a
-`Logon` record.
+This is a bit daunting to look at, largely because of the access
+control markers, but the structure is actually pretty simple.  Each
+labeled argument is a function that takes a first-class field of the
+necessary type as an argument.  Note that `iter` passes each of these
+callbacks the `Field.t`, not the contents of the specific record
+field.  The contents of the field, though, can be looked up using the
+combiation of the record and the `Field.t`.  
+
+Now, let's use `Logon.Fields.iter` and `show_field` to print out all
+the fields of a `Logon` record.
 
 ```ocaml
 # let print_logon logon =
@@ -721,16 +728,15 @@ credentials: Xy2d9W
 - : unit = ()
 ```
 
-One nice side effect of this approach is that it helps you refactor
-your code when changing the fields of a record.  In particular, if you
-add a field to `Logon`, the type of `iter` will change with it,
-acquiring a new argument.  Any code using `iter` won't be able to
-compile until it's fixed to take this new argument into account, and
-these compilation failiures will point out places you need to adapt
-your code.
+One nice side effect of this approach is that it helps you adapt your
+code when the fields of a record change.  If you were to add a field
+to `Logon.t`, the type of `Logon.Fields.iter` would change along with
+it, acquiring a new argument.  Any code using `Logon.Fields.iter`
+won't compile until it's fixed to take this new argument into account.
 
-Field iterators are useful for a variety of record-related tasks, from
-building record validation functions to scaffolding the definition of
-a web-form from a record type, all with a guarantee that you've
-considered all fields of the record type in question.
+This exhaustion guarntee is a valuable one.  Field iterators are
+useful for a variety of record-related tasks, from building record
+validation functions to scaffolding the definition of a web-form from
+a record type, and such applications can benefit from the guarantee
+that all fields of the record type in question have been considered.
 
