@@ -219,53 +219,6 @@ to use a match statement to handle such cases explicitly:
 val upcase_first_entry : string -> string = <fun>
 ```
 
-### `let`/`and` bindings ###
-
-Another variant on the let binding is the use of `and` to join
-multiple variable definitions into a single declaration.  For example,
-we can write:
-
-```ocaml
-# let x = 100 and y = 3.5;;
-val x : int = 100
-val y : float = 3.5
-```
-
-This can be useful when you want to create a number of new let
-bindings at once, without having each definition affect the next.  So,
-if we wanted to create new bindings that swapped the values of `x` and
-`y`, we could write:
-
-```ocaml
-# let x = y and y = x ;;
-val x : float = 3.5
-val y : int = 100
-```
-
-Note that this is just shadowing the definitions of `x` and `y`, not
-mutating anything.
-
-Without this trick, we would need to do something like the following:
-
-```ocaml
-# let tmp = x
-  let x = y
-  let y = tmp;;
-val tmp : int = 100
-val x : float = 3.5
-val y : int = 100
-```
-
-This use-case doesn't come up that often, however.  Most of the time
-that `and` comes into play, it's used to define multiple mutually
-recursive values, which we'll learn about later in the chapter.
-
-Note that when doing a `let`/`and` style declaration, the order of
-execution of the right-hand side of the binds is undefined by the
-language definition, so one should not write code that relies on it.
-If you want to make sure about the order of evaluation, you should use
-a sequence of `let`/`in` bindings.
-
 ## Functions ##
 
 OCaml being a functional language, it's no surprise that functions are
@@ -493,8 +446,8 @@ matching any single element list.  The `_` is there so we don't have
 to put an explicit name on that single element.
 
 We can also define multiple mutually recursive values by using `let
-rec` and `and` together, as in this (gratuitously inefficient)
-example.
+rec` combined with the `and` keyword.  Here's a (gratuitously
+inefficient) example.
 
 ```ocaml
 # let rec is_even x =
