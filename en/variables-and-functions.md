@@ -533,7 +533,7 @@ val ( +! ) : int * int -> int * int -> int * int = <fun>
 - : int * int = (1,6)
 ```
 
-The syntactic role of an operator is typically determined by first
+The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.  This table
 breaks the different operators and other syntactic forms into groups
 from highest to lowest precedence, explaining how each behaves
