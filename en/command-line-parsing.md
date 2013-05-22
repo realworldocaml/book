@@ -58,7 +58,7 @@ let command =
     )
   (fun file () -> do_hash file)
 
-let () = Command.run command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 You can compile this file the usual way with `ocamlfind`, but passing an
@@ -77,7 +77,20 @@ the inputs to this function via the command-line, and this is what the
 subsequent `command` value declares.  If you compile this program and run it,
 the help screen looks like this:
 
+```console
+$ ./md5 -version
+1.0
+$ ./md5 -build-info
+RWO
 ```
+
+The `version` and `build_info` optional arguments to `Command.run`
+let you specify versions in the command-line help.  You can leave
+these blank, or get your build system to generate them directly
+from your version control system (e.g. by running `hg tip` to generate
+a build revision number, in the case of Mercurial).
+
+```console
 $ ./md5
 Generate an MD5 hash of the input data
 
@@ -95,7 +108,7 @@ More detailed information
 missing anonymous argument: filename
 ```
 
-If we invoke the binary without any arguments, it emits a help screen
+If we invoke the binary without any arguments, it outputs a help screen
 that informs you that a required argument `filename` is missing.
 Supplying the argument to the command results in `do_hash` being
 called, and the MD5 output being displayed to the standard output.
