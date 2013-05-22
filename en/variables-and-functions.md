@@ -466,9 +466,9 @@ val is_odd : int -> bool = <fun>
 OCaml distinguishes between non-recursive definitions (using `let`)
 and recursive definitions (using `let rec`) largely for technical
 reasons: the type-inference algorithm needs to know when a set of
-function definitions are mutually recursive, and for some technical
-reasons that don't apply to a pure language like Haskell, these have
-to be marked explicitly by the programmer.
+function definitions are mutually recursive, and for reasons that
+don't apply to a pure language like Haskell, these have to be marked
+explicitly by the programmer.
 
 But this decision has some good effects.  For one thing, recursive
 (and especially mutually recursive) definitions are harder to reason
