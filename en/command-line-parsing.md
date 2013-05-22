@@ -392,7 +392,7 @@ their corresponding names. When executed, it looks for the appropriate
 sub-command from the name list, and dispatches it to the right command
 handler.
 
-Let's build the beginning of a calendar toool that does a few
+Let's build the beginning of a calendar tool that does a few
 operations over dates from the command line.  We first define a
 command that adds days to an input date and prints the resulting date.
 
