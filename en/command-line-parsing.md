@@ -37,6 +37,8 @@ applies the MD5 one-way hash function to the data, and outputs an
 ASCII hex representation of the result.
 
 ```ocaml
+(* md5.ml : calculate MD5 hash of input *)
+
 open Core.Std
 
 let do_hash file =
@@ -59,6 +61,16 @@ let command =
 let () = Command.run command
 ```
 
+You can compile this file the usual way with `ocamlfind`, but passing an
+additional `cryptokit` package.  You may need to install Cryptokit via
+OPAM if you didn't do so earlier.
+
+```console
+$ opam install cryptokit
+$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg -o md5 basic.ml
+$ ./md5
+```
+
 The `do_hash` function accepts a filename parameter and prints the
 human-readable MD5 string to the console standard output.  We want to control
 the inputs to this function via the command-line, and this is what the
@@ -66,10 +78,10 @@ subsequent `command` value declares.  If you compile this program and run it,
 the help screen looks like this:
 
 ```
-$ ./basic.byte
+$ ./md5
 Generate an MD5 hash of the input data
 
-  basic.byte filename
+  md5 filename
 
 More detailed information
 
@@ -89,7 +101,7 @@ Supplying the argument to the command results in `do_hash` being
 called, and the MD5 output being displayed to the standard output.
 
 ```
-$ ./basic.byte basic.byte
+$ ./md5 ./md5
 59562f5e4f790d16f1b2a095cd5de844
 ```
 
