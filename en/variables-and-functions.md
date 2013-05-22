@@ -947,7 +947,7 @@ concision of omitting the argument overwhelms the corresponding loss
 of explicitness.
 
 This means that rarely used functions should not have optional
-arguments.  A good rule of thumb is not to use optional arguments for
+arguments.  A good rule of thumb is to avoid optional arguments for
 functions internal to a module, _i.e._, functions that are not
 included in the module's interface, or `mli` file.  We'll learn more
 about `mli`s in [xref](#files-modules-and-programs).

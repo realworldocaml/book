@@ -178,15 +178,15 @@ As we've seen, the type errors identified the things that needed to be
 fixed to complete the refactoring of the code.  This is fantastically
 useful, but for it to work well and reliably, you need to write your
 code in a way that maximizes the compiler's chances of helping you
-find the bugs.  One important rule of thumb to follow to maximize what
-the compiler can do for you is to avoid catch-all cases in pattern
-matches.
+find the bugs.  To this end, a useful rule of thumb is to avoid
+catch-all cases in pattern matches.
 
-Here's an example of how a catch-all case plays in.  Imagine we wanted
-a version of `color_to_int` that works on older terminals by rendering
-the first 16 colors (the 8 `basic_color`s in regular and bold) in the
-normal way, but rendering everything else as white.  We might have
-written the function as follows.
+Here's an example that illustrates how catch-all cases interact with
+exhaustion checks.  Imagine we wanted a version of `color_to_int` that
+works on older terminals by rendering the first 16 colors (the 8
+`basic_color`s in regular and bold) in the normal way, but rendering
+everything else as white.  We might have written the function as
+follows.
 
 ```ocaml
 # let oldschool_color_to_int = function
@@ -200,8 +200,8 @@ val oldschool_color_to_int : color -> int = <fun>
 But because the catch-all case encompasses all possibilities, the type
 system will no longer warn us that we have missed the new `Bold` case
 when we change the type to include it.  We can get this check back by
-being more explicit about what we're ignoring.  We haven't changed the
-behavior of the code, but we have improved our robustness to change.
+being avoiding the catch-all case, and instead being explicit about
+the tags that are ignored.
 
 </note>
 
