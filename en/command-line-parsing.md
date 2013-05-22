@@ -62,8 +62,8 @@ let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 You can compile this file the usual way with `ocamlfind`, but passing an
-additional `cryptokit` package.  You may need to install Cryptokit via
-OPAM if you didn't do so earlier.
+additional `cryptokit` package.  You may need to install Cryptokit via OPAM if
+you didn't do so earlier.
 
 ```console
 $ opam install cryptokit
@@ -72,10 +72,10 @@ $ ./md5
 ```
 
 The `do_hash` function accepts a filename parameter and prints the
-human-readable MD5 string to the console standard output.  We want to control
-the inputs to this function via the command-line, and this is what the
-subsequent `command` value declares.  If you compile this program and run it,
-the help screen looks like this:
+human-readable MD5 string to the console standard output.  The subsequent
+`command` value declares how to invoke `do_hash` by parsing the command-line
+arguments.  When you compile this program and run it, you can query the
+version information simply by:
 
 ```console
 $ ./md5 -version
@@ -108,10 +108,10 @@ More detailed information
 missing anonymous argument: filename
 ```
 
-If we invoke the binary without any arguments, it outputs a help screen
-that informs you that a required argument `filename` is missing.
-Supplying the argument to the command results in `do_hash` being
-called, and the MD5 output being displayed to the standard output.
+When we invoke this binary without any arguments, it outputs a help screen that
+informs you that a required argument `filename` is missing.  Supplying the
+argument to the command results in `do_hash` being called, and the MD5 output
+being displayed to the standard output.
 
 ```
 $ ./md5 ./md5
@@ -125,7 +125,7 @@ arguments, what types they should map to, and whether to take special actions
 (such as interactive input) if certain fields are encountered.
 
 Let's build the specification for a single argument that is specified
-directly on the command-line.  This is known as an _anonymous_ argument.
+directly on the command-line (this is known as an _anonymous_ argument).
 
 ```ocaml
 Command.Spec.(
@@ -135,27 +135,49 @@ Command.Spec.(
 ```
 
 The specification above begins with an `empty` value, and then chains more
-parameters via the `+>` combinator.  Our example defines a single anonymous
-parameter via the `anon` function.  Anonymous functions can be assigned a name
-that is used in help text, and an OCaml type that they are mapped to.  In the
-example, the name is `filename`, and it maps to an OCaml `string` type.
+parameters via the `+>` combinator.  Our example uses the `anon` function to
+define a single anonymous parameter.  Anonymous parameters are assigned a
+string name that is used in help text, and an OCaml type that they are parsed
+into from the raw command-line string.  The example `filename` argument above
+is extracted from the command-line and kept as an OCaml `string`.
 
-The anonymous argument will be parsed from the command line, and passed
-to an OCaml callback function that you provide along with the specification.
-This function will be applied with the parsed command-line arguments, and
-should perform the actual work.  In our example, we had just one anonymous
-argument, so the callback is pretty simple:
+This specification is then bundled together with the callback functions
+using `Command.basic`.  For our `md5` example, we have:
+
+```ocaml
+Command.basic
+  ~summary:"Generate an MD5 hash of the input data"
+  ~readme:(fun () -> "More detailed information")
+  Command.Spec.(
+    empty
+    +> anon ("filename" %: string)
+  )
+  (fun file () -> do_hash file)
+```
+
+The `basic` function takes a few more arguments in addition to the
+specification.  The `summary` is a one-line description to go at the top of the
+command help screen, while `readme` is for longer help text when the command is
+called with `-help`.  The `readme` argument is a function that is only
+evaluated when the help text is actually needed.
+
+The final argument is the callback function where all the actual work happens
+after the command-line parsing is complete.  This function will be applied with
+the parsed command-line arguments, and should perform the actual work.  In our
+example, we had just one anonymous argument, so the callback function just has
+a single `string` parameter applied to it:
 
 ```ocaml
 (fun file () -> do_hash file)
 ```
 
-The function also has an extra `unit` argument after the command-line arguments.
-This is simply so that it can work when no command-line arguments are specified
+The function also needs an extra `unit` argument after `file`.  This is simply
+so that the command specifications can work even when they are empty
 (`Command.Spec.empty`).  Every OCaml function needs at least one argument, so
-the final `unit` guarantees that it will not be evaluated immediately as a value.
+the final `unit` guarantees that it will not be evaluated immediately as a
+value if there are no other arguments.
 
-You aren't just limited to parsing command lines as strings ouf course.
+You aren't just limited to parsing command lines as strings of course.
 `Command.Spec` defines several other conversion functions that validate and
 parse input into various types:
 
@@ -169,10 +191,9 @@ Argument type    OCaml type    Example
 `time_span`      `Span.t`      `5s`
 `file`           `string`      `/etc/passwd`
 
-Anonymous arguments don't have to be declared individually.  A more realistic
-`md5` function might also read from the standard input if a filename isn't
-specified.  We can change our specification with a single line to reflect this
-by writing:
+A more realistic `md5` function might also read from the standard input if a
+filename isn't specified.  We can change our specification with a single line
+to reflect this by writing:
 
 ```ocaml
 Command.Spec.(
@@ -186,7 +207,7 @@ indicates the value is now optional.  If you compile the example,
 you'll get a type error though:
 
 ```
-File "basic_broken.ml", line 18, characters 26-30:
+File "md5_broken.ml", line 18, characters 26-30:
 Error: This expression has type string option
        but an expression was expected of type string
 Command exited with code 2.
@@ -198,6 +219,7 @@ optional.  We can quickly adapt our example to use the new information
 and read from standard input if no file is specified.
 
 ```ocaml
+(* md5.ml : calculate md5 with an optional filename *)
 open Core.Std
 
 let get_file_data = function
@@ -238,70 +260,19 @@ maybe_with_default   argument with a default value if argument is missing
 
 ## Using flags to label the command line
 
-You aren't just limited to anonymous arguments on the command-line, of
-course.  Flags (such as `-v`) can be specified in the same manner as
-anonymous arguments.  These can appear in any order on the
-command-line, or multiple times, depending on how they're declared.
+You aren't just limited to anonymous arguments on the command-line, and you'll
+find that flags are useful once your program has more options.  A flag is a
+named field that can be followed by an optional argument.  These flags can
+appear in any order on the command-line, or multiple times, depending on how
+they're declared in the specification.
+
 Let's add two arguments to our `md5` command that mimic the Linux
-version: a `-s` flag to specify the string to be hashed directly, and
-a `-t` self-benchmark test.
+version. A `-s` flag specifies the string to be hashed directly on the
+command-line, and a `-t` runs a benchmarking self-test.  The complete
+example is:
 
 ```ocaml
-Command.Spec.(
-  empty
-  +> flag "-s" (optional string) ~doc:"string Checksum the given string"
-  +> flag "-t" no_arg ~doc:" run a built-in time trial"
-  +> anon (maybe ("filename" %: string))
-)
-```
-
-The `flag` command is quite similar to `anon`.  The first argument is
-the flag name, and aliases can be specified via an optional argument.
-The `doc` string should be formatted so that the first word is the
-short name that should appear in the usage text, with the remainder
-being the full help text.  Notice that the `-t` flag has no argument,
-and so we prepend the doc text with a blank space.  The help text for
-the above fragment looks like this:
-
-```
-$ mlmd5 -s
-Generate an MD5 hash of the input data
-
-  mlmd5 [filename]
-
-=== flags ===
-
-  [-s string]    Checksum the given string
-  [-t run]       a built-in time trial
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-
-missing argument for flag -s
-
-$ mlmd5 -s "ocaml rocks"
-5a118fe92ac3b6c7854c595ecf6419cb
-```
-
-The `-s` flag requires a `string` argument in our specification,
-and the parser outputs an error message if it isn't supplied.
-Here's a list of some of the functions that you can wrap flags in
-to control how they are parsed:
-
-Flag function            OCaml type
--------------            ----------
-`required` _arg_         _arg_ and error if not present
-`optional` _arg_         _arg_ `option`
-`optional_with_default`  _arg_ with a default if not present
-`listed` _arg_           _arg_ `list`, flag may appear multiple times
-`no_arg`                 `bool` that is true if flag is present.
-
-The flags affect the type of the callback function in exactly the same
-way as anonymous arguments do.  The full example of our `md5` function
-with flags is below.
-
-```ocaml
+(* mlmd5.ml : generate an MD5 hash of the input data *)
 open Core.Std
 
 let get_file_data file checksum =
@@ -324,7 +295,7 @@ let command =
     Command.Spec.(
       empty
       +> flag "-s" (optional string) ~doc:"string Checksum the given string"
-      +> flag "-t" no_arg ~doc:"run a built-in time trial"
+      +> flag "-t" no_arg ~doc:" run a built-in time trial"
       +> anon (maybe ("filename" %: string))
     )
   (fun checksum trial file () ->
@@ -335,10 +306,55 @@ let command =
 let () = Command.run command
 ```
 
-Notice how the `get_file_data` function now pattern matches across the
-`checksum` flag and the `file` anonymous argument.  It selects the
-flag in preference to the file argument, but emits a warning if
-there's ambiguity.
+The example specification uses the `flag` command now.  The first argument to
+`flag` is its name on the command-line, and the `doc` argument supplies the
+help text.  The `doc` string is formatted so that the first word is the short
+name that appears in the usage text, with the remainder being the full help
+text.  Notice that the `-t` flag has no argument, and so we prepend its `doc`
+text with a blank space.  The help text for the above code looks like this:
+
+```
+$ mlmd5 -s
+Generate an MD5 hash of the input data
+
+  mlmd5 [filename]
+
+=== flags ===
+
+  [-s string]    Checksum the given string
+  [-t run]       a built-in time trial
+  [-build-info]  print info about this build and exit
+  [-version]     print the version of this build and exit
+  [-help]        print this help text and exit
+                 (alias: -?)
+
+missing argument for flag -s
+
+$ mlmd5 -s "ocaml rocks"
+5a118fe92ac3b6c7854c595ecf6419cb
+```
+
+The `-s` flag in our specification requires a `string` argument, and the parser
+outputs an error message if it isn't supplied.  Here's a list of some of the
+functions that you can wrap flags in to control how they are parsed:
+
+Flag function            OCaml type
+-------------            ----------
+`required` _arg_         _arg_ and error if not present
+`optional` _arg_         _arg_ `option`
+`optional_with_default`  _arg_ with a default if not present
+`listed` _arg_           _arg_ `list`, flag may appear multiple times
+`no_arg`                 `bool` that is true if flag is present.
+
+The flags affect the type of the callback function in exactly the same way as
+anonymous arguments do.  This lets you change the specification and ensure
+that all the callback functions are updated appropriately, without runtime
+errors.
+
+Notice that the `get_file_data` function now pattern matches across the
+`checksum` flag and the `file` anonymous argument.  It selects the flag in
+preference to the anonymous argument, but emits a warning if there's ambiguity
+and both are specified.
 
 ## Grouping sub-commands together
 
