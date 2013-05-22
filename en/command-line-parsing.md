@@ -314,23 +314,22 @@ text.  Notice that the `-t` flag has no argument, and so we prepend its `doc`
 text with a blank space.  The help text for the above code looks like this:
 
 ```
-$ mlmd5 -s
+$ ./mlmd5 -help
 Generate an MD5 hash of the input data
 
-  mlmd5 [filename]
+  ./mlmd5 [filename]
 
 === flags ===
 
   [-s string]    Checksum the given string
-  [-t run]       a built-in time trial
+  [-t]           run a built-in time trial
   [-build-info]  print info about this build and exit
   [-version]     print the version of this build and exit
   [-help]        print this help text and exit
                  (alias: -?)
 
-missing argument for flag -s
 
-$ mlmd5 -s "ocaml rocks"
+$ ./mlmd5 -s "ocaml rocks"
 5a118fe92ac3b6c7854c595ecf6419cb
 ```
 
