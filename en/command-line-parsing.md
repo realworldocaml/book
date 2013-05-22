@@ -118,23 +118,14 @@ $ ./md5 ./md5
 59562f5e4f790d16f1b2a095cd5de844
 ```
 
-So how does all this work?  There are three parts to defining a
-command-line interface:
+So how does all this work?  Most of the interesting logic lies in how the
+specifications are defined.  The `Command.Spec` module defines several
+combinators that can be chained together to define flags and anonymous
+arguments, what types they should map to, and whether to take special actions
+(such as interactive input) if certain fields are encountered.
 
-* `Command.Spec.t` defines the steps required to convert a
-  command-line into an OCaml structure.
-* `Command.basic` takes a callback that is passed parameters parsed
-  from the command-line according to the `spec` parameter.  It takes a
-  `summary` string for a one-line description of the command behavior,
-  and an optional `readme` for longer help text.
-* `Command.run` actually executes a command and its specification, and
-  runs the callback function with the resulting parameters.
-
-Most of the interesting logic lies in how the specifications are
-defined.  The `Command.Spec` module defines several combinators that
-can be chained together to define flags and anonymous arguments, what
-types they should map to, and whether to take special actions (such as
-interactive input) if certain fields are encountered.
+Let's build the specification for a single argument that is specified
+directly on the command-line.  This is known as an _anonymous_ argument.
 
 ```ocaml
 Command.Spec.(
@@ -143,22 +134,30 @@ Command.Spec.(
 )
 ```
 
-We begin the specification above with an `empty` value, and then chain
-more parameters via the `+>` combinator.  Our example defines a single
-_anonymous_ parameter via the `anon` function (that is, a standalone
-token from the command-line).  Anonymous functions can be assigned a
-name that is used in help text, and an OCaml type that they are mapped
-to.  The parameters specified here are all eventually passed to a
-callback function which actually invokes the program logic.
+The specification above begins with an `empty` value, and then chains more
+parameters via the `+>` combinator.  Our example defines a single anonymous
+parameter via the `anon` function.  Anonymous functions can be assigned a name
+that is used in help text, and an OCaml type that they are mapped to.  In the
+example, the name is `filename`, and it maps to an OCaml `string` type.
+
+The anonymous argument will be parsed from the command line, and passed
+to an OCaml callback function that you provide along with the specification.
+This function will be applied with the parsed command-line arguments, and
+should perform the actual work.  In our example, we had just one anonymous
+argument, so the callback is pretty simple:
 
 ```ocaml
 (fun file () -> do_hash file)
 ```
 
-In our example, the function takes a `file` parameter that is a
-`string`, and maps it to the `do_hash` function.  You aren't just
-limited to strings though, as `Command.Spec` defines several other
-conversion functions that validate and parse input into various types:
+The function also has an extra `unit` argument after the command-line arguments.
+This is simply so that it can work when no command-line arguments are specified
+(`Command.Spec.empty`).  Every OCaml function needs at least one argument, so
+the final `unit` guarantees that it will not be evaluated immediately as a value.
+
+You aren't just limited to parsing command lines as strings ouf course.
+`Command.Spec` defines several other conversion functions that validate and
+parse input into various types:
 
 Argument type    OCaml type    Example
 -------------    -----------   -------
@@ -170,10 +169,10 @@ Argument type    OCaml type    Example
 `time_span`      `Span.t`      `5s`
 `file`           `string`      `/etc/passwd`
 
-Anonymous arguments don't have to be declared individually.  A more
-realistic `md5` function might also read from the standard input if a
-filename isn't specified.  We can change our specification with a
-single line to reflect this by writing:
+Anonymous arguments don't have to be declared individually.  A more realistic
+`md5` function might also read from the standard input if a filename isn't
+specified.  We can change our specification with a single line to reflect this
+by writing:
 
 ```ocaml
 Command.Spec.(
