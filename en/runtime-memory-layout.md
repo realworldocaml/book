@@ -3,8 +3,7 @@
 Much of the static type information contained within an OCaml program is
 checked and discarded at compilation time, leaving a much simpler *runtime*
 representation for values.  Understanding this difference is important for
-writing efficient programs, and also for interfacing with C libraries that work
-directly with the runtime system.
+writing efficient programs and profiling them at runtime.
 
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
@@ -26,8 +25,12 @@ dynamic patching, but OCaml prefers runtime simplicity instead.
 
 </note>
 
-Let's start by explaining the memory layout, and then move onto the details
-of how C bindings work.
+Another reason to use the C interface directly is if you need to build
+foreign-function interfaces directly instead of going through the `ctypes`
+library described in [xref](foreign-function-interface).  This could be for
+performance reasons, or some more specialised embedded or kernel environment.
+Let's start by explaining the memory layout, and then move onto the details of
+how low-level C bindings work.
 
 ## The garbage collector
 
@@ -488,8 +491,9 @@ that any C library functions can also cope with this.
 OCaml supports *custom* heap blocks via a `Custom_tag` that let the runtime
 perform user-defined operations over OCaml values.  A custom block lives in the
 OCaml heap like an ordinary block and can be of whatever size the user desires.
-The `Custom_tag` (255) is higher than `No_scan_tag` and so cannot contain any
-OCaml values.
+The `Custom_tag` (255) is higher than `No_scan_tag` and isn't scanned by the
+garbage collector.  This means that it cannot contain any OCaml values, but
+is useful to track pointers into the external C heap.
 
 The first word of the data within the custom block is a C pointer to a `struct`
 of custom operations. The custom block cannot have pointers to OCaml blocks and
@@ -519,7 +523,7 @@ used to call C cleanup functions such as `free`.
 When a custom block is allocated, you can also specify the proportion of
 "extra-heap resources" consumed by the block, which will affect the garbage
 collector's decision as to how much work to do in the next major slice.
-(_avsm_: elaborate on this or move to the C interface section)
+(_avsm_: TODO elaborate on this or move to the C interface section)
 
 ## Interfacing with C
 
@@ -738,6 +742,8 @@ macros to extract various C types from OCaml `values` for 64-bit architectures.
 Note that OCaml doesn't support a single-precision float, so these are always
 double-precision.
 
+TODO: buggy markdown below in table rendering
+
 Macro                   OCaml Type         C type
 -----                   ----------         ------
 `Long_val`              `int`             `long`
@@ -825,7 +831,7 @@ Function name                       Argument                          OCaml retu
 -------------                       --------                          -----------------
 `caml_alloc_tuple (<len>)`          Number of fields                  Tuple or record
 `caml_alloc_string (<len>)`         Size in bytes                     `string`
-`caml_copy_string (char *)          Pointer to a C string             `string`
+`caml_copy_string (char *)`         Pointer to a C string             `string`
 `caml_copy_string_array (char **)`  Pointer to array of C strings     `string array`
 `caml_copy_double (double)`         C `double` value                  `double`
 `caml_copy_int32 (int32)`           32-bit C integer                  `int32`
