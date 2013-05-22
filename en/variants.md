@@ -157,7 +157,7 @@ new `Bold` tag.
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i ;;
 Characters 19-154:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8: this pattern matching is not exhaustive.
 Here is an example of a value that is not matched:
 Bold _
 val color_to_int : color -> int = <fun>
@@ -401,13 +401,13 @@ And it's explicit at the type level that `handle_log_entry` sees only
 ## Variants and recursive data structures
 
 Another common application of variants is to represent tree-like
-recursive data-structures.  We'll show how this can be done by walking
+recursive data structures.  We'll show how this can be done by walking
 through the design of a simple Boolean expression language.  Such a
 language can be useful anywhere you need to specify filters, which are
 used in everything from packet analyzers to mail clients.
 
 An expression in this language will be defined by the variant `blang`
-(short for "boolean language") with one tag for each kind of
+(short for "Boolean language") with one tag for each kind of
 expression we want to support.
 
 ```ocaml
@@ -426,7 +426,7 @@ parameterized by a polymorphic type `'a` which is used for specifying
 the type of the value that goes under the `Base` tag.
 
 The purpose of each tag is pretty straightforward.  `And`, `Or` and
-`Not` are the basic operators for building up boolean expression, and
+`Not` are the basic operators for building up Boolean expression, and
 `Const` lets you enter constants `true` and `false`.
 
 The `Base` tag is what allows you to tie the `blang` to your
@@ -481,7 +481,7 @@ val eval : 'a blang  -> ('a -> bool) -> bool = <fun>
 ```
 
 The structure of the code is pretty straightforward --- we're just
-pattern-matching over the structure of the data, doing the appropriate
+pattern matching over the structure of the data, doing the appropriate
 calculation based on which tag we see.  To use this evaluator on a
 concrete example, we just need to write the `base_eval` function which
 is capable of evaluating a base predicate.
@@ -546,9 +546,9 @@ This example is more than a toy.  There's a module very much in this
 spirit in Core called `Blang`, and it gets a lot of practical use in a
 variety of applications.
 
-More generally, using variants to build recursive data-structures is a
+More generally, using variants to build recursive data structures is a
 common technique, and shows up everywhere from designing little
-languages to building efficient data-structures.
+languages to building efficient data structures.
 
 ## Polymorphic variants
 
@@ -889,10 +889,11 @@ kind of error that the compiler would catch with ordinary variants,
 but with polymorphic variants, this compiles without issue.  All that
 happened was that the compiler inferred a wider type for
 `extended_color_to_int`, which happens to be compatible with the
-narrower type that was listed in the mli.
+narrower type that was listed in the `mli`.
 
 If we add an explicit type annotation to the code itself (rather than
-just in the mli), then the compiler has enough information to warn us.
+just in the `mli`), then the compiler has enough information to warn
+us.
 
 ```ocaml
 let extended_color_to_int : extended_color -> int = function
@@ -910,7 +911,7 @@ Warning 11: this match case is unused.
 ```
 
 Once we have type definitions at our disposal, we can revisit the
-question of how we write the pattern-match that narrows the type.  In
+question of how we write the pattern match that narrows the type.  In
 particular, we can explicitly use the type name as part of the pattern
 match, by prefixing it with a `#`.
 

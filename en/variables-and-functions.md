@@ -719,7 +719,7 @@ val some_or_zero : int option -> int = <fun>
 
 We can also combine the different styles of function declaration
 together, as in the following example where we declare a two argument
-(curried) function with a pattern-match on the second argument.
+(curried) function with a pattern match on the second argument.
 
 ```ocaml
 # let some_or_default default = function

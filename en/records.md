@@ -411,7 +411,7 @@ val create_log_entry :
 ```
 
 This is not restricted to constructing a record; we can use the same
-trick when pattern-matching.
+trick when pattern matching.
 
 ```ocaml
 # let message_to_string { Log_entry.important; message; _ } =
