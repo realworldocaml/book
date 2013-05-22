@@ -11,19 +11,23 @@ invoked as a command needs a few features:
 * help needs to be shown for all the available options.
 * interactive auto-completion of commands to assist the user.
 
-Supporting all of this functionality manually is tedious and
-error-prone. Core provides the `Command` library that lets you declare
-your command-line options in one data structure, and the library takes
-care of parsing, help generation and auto-completion.  Command is
-simple to use for smaller applications, and has a sophisticated
-sub-command mode that groups related commands together (you may be
-familiar with this style from `git` or `hg`).
+It's tedious and error-prone to support all this functionality manually for
+every program you write. Core simplifies this by letting you declare all your
+command-line options in one place, using the `Command` library.  This then
+takes care of parsing the arguments, generating help text and providees
+interactive auto-completion to the user of the library.
 
-This chapter demonstrates how to use `Command` to extend the
-cryptographic utility from [xref](#object-oriented-programming) and
-builds a simple equivalent to the `md5` and `shasum` utilities. It
-also demonstrates how _functional combinators_ can be used to declare
-complex data structures in a type-safe and elegant way.
+The `Command` library also scales as you add more features to your programs.
+It's simple to use for small applications, but provides a sophisticated
+subcommand mode that groups related commands together as the application grows
+more options. You may also be familiar with this command-line style from the
+Git or Mercurial version control systems.
+
+This chapter demonstrates how to use `Command` to extend the cryptographic
+utility from [xref](#object-oriented-programming) and builds a simple
+equivalents to the `md5` and `shasum` utilities. It also demonstrates how
+_functional combinators_ can be used to declare complex data structures in a
+type-safe and elegant way.
 
 ## Basic command line parsing
 
