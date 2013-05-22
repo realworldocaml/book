@@ -195,16 +195,14 @@ comma-separated list.
 
 ```ocaml
 # let upcase_first_entry line =
-     let (key :: values) = String.split ~on:',' line in
-     String.concat ~sep:"," (String.uppercase key :: values)
+     let (first :: rest) = String.split ~on:',' line in
+     String.concat ~sep:"," (String.uppercase first :: rest)
   ;;
-      Characters 40-53:
-       let (key :: values) = String.split ~on:',' line in
-            ^^^^^^^^^^^^^
+val upcase_first_entry : string -> string = <fun>
+Characters 40-53:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
-val upcase_first_entry : string -> string = <fun>
 ```
 
 This case can't really come up in practice, because `String.split`
@@ -432,8 +430,8 @@ The practice of applying some of the arguments of a curried function
 to get a new function is called _partial application_.
 
 Note that the `fun` keyword supports its own syntax for currying, so
-we the following definition of `abs_diff` is equivalent to the
-definition above.
+the following definition of `abs_diff` is equivalent to the definition
+above.
 
 ```ocaml
 # let abs_diff = (fun x y -> abs (x - y));;
@@ -576,8 +574,8 @@ We can define (or redefine) the meaning of an operator as follows.
 Here's an example of a simple vector-addition operator on int pairs.
 
 ```ocaml
-# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
-val ( +! ) : int * int -> int * int -> int *int = <fun>
+# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
+val ( +! ) : int * int -> int * int -> int * int = <fun>
 # (3,2) +! (-2,4);;
 - : int * int = (1,6)
 ```
@@ -754,7 +752,8 @@ val some_or_zero : int option -> int = <fun>
 - : int list = [3; 0; 4]
 ```
 
-This is equivalent to combining a `fun` with `match`, as follows:
+This is equivalent to combining an ordinary function definition with a
+`match`.
 
 ```ocaml
 # let some_or_zero num_opt =
@@ -884,9 +883,9 @@ Labeled arguments are useful in a few different cases:
     ```
 
     In other cases, you want to put the function argument second.  One
-    common reason is readability.  In particular, a function that
-    spans multiple lines is easiest to read when it's the last
-    argument provided.
+    common reason is readability.  In particular, a multi-line
+    function passed as an argument to another function is easiest to
+    read when it is the final argument to that function.
 
 #### Higher-order functions and labels ####
 
@@ -948,7 +947,7 @@ above examples.
 
 An optional argument is like a labeled argument that the caller can
 choose whether or not to provide.  Optional arguments are passed in
-using the same syntax as labeled arguments, and, similarly to labeled
+using the same syntax as labeled arguments, and, like labeled
 arguments, optional arguments can be provided in any order.
 
 Here's an example of a string concatenation function with an optional
