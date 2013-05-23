@@ -44,12 +44,15 @@ The only languages that support these ideas well are statically-typed
 functional programming languages like OCaml, F#, Haskell, Scala and
 Standard ML.
 
-Among this worthy set of languages, OCaml stands apart because it
-manages to provide a great deal of power while remaining highly
-pragmatic, highly performant, and comparatively simple to use and
-understand.  It is this that makes OCaml a great choice for
-programmers who want to step up to a better programming language, and
-at the same time want to get practical work done.
+Among this worthy set of languages, OCaml stands apart because it manages to
+provide a great deal of power while remaining highly pragmatic. The compiler
+has a straightforward compilation strategy without excessive optimization
+passes, and the strict evaluation model makes runtime behaviour easy to
+predict.  The garbage collector is an incremental, precise implementation with
+no dynamic JIT compilation, and the runtime is simple and portable across
+platforms.  It is all of this that makes OCaml a great choice for programmers
+who want to step up to a better programming language, and at the same time want
+to get practical work done.
 
 #### A brief history from the 1960s
 
