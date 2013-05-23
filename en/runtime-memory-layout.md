@@ -8,11 +8,12 @@ writing efficient programs and profiling them at runtime.
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
 
-The OCaml compiler runs through several phases of during the compilation
-process.  After syntax checking, the next stage is *type checking*.  In a
-validly typed program, a function cannot be applied with an unexpected type.
-For example, the `print_endline` function must receive a single `string`
-argument, and an `int` will result in a type error.
+The OCaml compiler runs through several phases during the compilation
+process.  The first phase is syntax checking, during which source files are
+parsed into Abstract Syntax Trees (ASTs).  The next stage is a *type checking*
+pass over the AST.  In a validly typed program, a function cannot be applied
+with an unexpected type.  For example, the `print_endline` function must
+receive a single `string` argument, and an `int` will result in a type error.
 
 Since OCaml verifies these properties at compile time, it doesn't need to keep
 track of as much information at runtime. Thus, later stages of the compiler can
