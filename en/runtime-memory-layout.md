@@ -48,7 +48,7 @@ words of available space. One word holds the `foo` field and the second word
 holds the `bar` field.  The OCaml compiler translates such an expression into
 an explicit allocation for the block from OCaml's runtime system: a C library
 that provides a collection of routines that can be called by running OCaml
-programs.  The runtime system manages a *heap*, which a collection of memory
+programs.  The runtime system manages a *heap*, which is a collection of memory
 regions it obtains from the operating system using *malloc(3)*. The OCaml runtime
 uses these memory regions to hold *heap blocks*, which it then fills up in
 response to allocation requests by the OCaml program.
