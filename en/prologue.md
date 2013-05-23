@@ -91,21 +91,20 @@ usage, predictability and performance matters.
 
 ### The Core Standard Library
 
-A language on its own isn't enough.  You also need a rich set of
-libraries to base your applications on.  A common source of
-frustration for those learning OCaml is that the standard library that
-ships with the OCaml compiler is not ideal.  While it's well
-implemented, it is really intended for use within the compiler itself,
-and covers only a small subset of the functionality you expect for
-more general-purpose use.
+A language on its own isn't enough.  You also need a rich set of libraries to
+base your applications on.  A common source of frustration for those learning
+OCaml is that the standard library that ships with the compiler doesn't provide
+a lot of features.  The standard library was actually developed for use within
+the compiler itself, and by design covers only a small subset of the
+functionality you expect for more general-purpose use.
 
-In the world of open-source software, nothing stops alternative libraries
-from being written by the community, and this exactly what the Core standard
-library is.  Jane Street, a company that has been using OCaml for more than a
-decade, developed Core for its own internal use, but it was designed from the
-start with an eye towards being a general-purpose standard library, and has
-very broad applicability.  Core is also engineered with correctness,
-reliability and performance very much in mind.
+In the world of open-source software, nothing stops alternative libraries from
+being written to supplement the compiler standard library, and this exactly
+what the Core distribution is.  Jane Street, a company that has been using
+OCaml for more than a decade, developed Core for its own internal use, but it
+was designed from the start with an eye towards being a general-purpose
+standard library, and has very broad applicability.  Core is also engineered
+with correctness, reliability and performance very much in mind.
 
 Core is also distributed with syntax extensions which provide useful new
 functionality to OCaml, and there are additional libraries such as the Async
