@@ -408,8 +408,8 @@ present and `is_translated` will be `None`.
   let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
 ```
 
-The final use of JSON combinators is to extract the `name` fields from
-the `author` list.  We first construct the `author` list, and then
+The final use of JSON combinators is to extract all the `name` fields from
+the list of authors.  We first construct the `author list`, and then
 `map` it into a `string list`.  Notice that the example explicitly
 binds `authors` to a variable name.  It can also be written more
 succinctly using the pipe-forward operator:
