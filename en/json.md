@@ -167,9 +167,10 @@ library, and its use is considered deprecated when using the Core
 standard library.  This leaves us with two ways of parsing the JSON:
 either from a string or from a file on a filesystem.  The next example
 shows both in action, assuming the JSON record is stored in a file
-called `book.json`:
+called `book.json`.
 
 ```ocaml
+(* read_json.ml *)
 open Core.Std
 
 let () =
@@ -185,6 +186,20 @@ let () =
   (* Test that the two values are the same *)
   print_endline (if json1 = json2 then "OK" else "FAIL")
   print_endline (if phys_equal json1 json2 then "FAIL" else "OK")
+```
+
+You can build this by writing a `_tags` file to define the package
+dependencies, and then running `ocamlbuild`.
+
+```console
+$ cat _tags
+true: package(core,yojson)
+true: thread, debug, annot
+
+$ ocamlbuild -use-ocamlfind read_json.native
+$ ./read_json.native
+OK
+OK
 ```
 
 The `from_file` function accepts an input filename and takes care of
