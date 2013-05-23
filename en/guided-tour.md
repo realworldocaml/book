@@ -821,9 +821,9 @@ In OCaml, however, nulls are explicit.  A value of type `string *
 string` always actually contains two well-defined values of type
 `string`.  If you want to allow, say, the first of those to be absent,
 then you need to change the type to `string option * string`.  As
-we'll see, this explicitness allows the compiler to provide a great
-deal of help in making sure you're correctly handing the possibility
-of missing data.
+we'll see in [xref](#error-handling), this explicitness allows the
+compiler to provide a great deal of help in making sure you're
+correctly handing the possibility of missing data.
 
 ## Records and Variants
 
