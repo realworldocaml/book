@@ -597,15 +597,20 @@ val to_basic : json -> Yojson.Basic.json
 
 ## Automatically mapping JSON to OCaml types
 
-The combinators described earlier make it fairly easy to extract
-fields from JSON records, but the process is still pretty manual.
-We'll talk about how to do larger-scale JSON parsing now, using a
-domain-specific language known as [ATD](http://mjambon.com/atd-biniou-intro.html).
+The combinators described earlier make it easy to write functions that extract
+fields from JSON records, but the process is still pretty manual.  When you
+implement larger specifications, it's much easier to generate the mappings from
+JSON schemas to OCaml values more mechanically than writing conversion
+functions individually.  We'll cover an alternative JSON processing method that
+is better for larger-scale JSON handling now, using the
+[ATD](http://mjambon.com/atd-biniou-intro.html) tool.  This will introduce our
+first _Domain Specific Language_ that ccompiles JSON specifications into OCaml
+modules, which are then used throughout your application.
 
 <note>
 <title>Installing the ATDgen library and tool</title>
 
-ATDgen installs a few OCaml libraries that interface with Yojson,
+ATDgen installs some OCaml libraries that interface with Yojson,
 and also a command-line tool that generates code.  It can all be
 installed via OPAM:
 
