@@ -8681,8 +8681,8 @@ array.(index) &lt;- expr
           memory stored outside of the OCaml heap. These are mostly
           useful for interacting with C or Fortran libraries, and are
           discussed in
-          <xref linkend="managing-external-memory-with-bigarrays"/>.
-          Bigarrays too have their own getting and setting syntax:
+          <xref linkend="runtime-memory-layout"/>. Bigarrays
+          too have their own getting and setting syntax:
           <literal>bigarray.{index}</literal> and
           <literal>bigarray.{index} &lt;- expr</literal>. There is no
           literal syntax for bigarrays.
@@ -13389,21 +13389,124 @@ val authorization_response_of_string :
     <para>
       The full ATD specification is quite sophisticated (and well
       documented online at its homepage). The ATD compiler can also
-      target formats other than JSON, and also outputs code for other
+      target formats other than JSON, and outputs code for other
       languages such as Java if you need more interoperability. There
       are also several similar projects you can investigate which
       automate the code generation process:
       <ulink url="http://piqi.org">Piqi</ulink> uses the Google protobuf
       format, and <ulink url="http://thrift.apache.org">Thrift</ulink>
-      supports a huge variety of other programming languages.
+      supports many other programming languages and includes OCaml
+      bindings.
     </para>
-    <para>
-      We'll also return to the GitHub example here later in the book
-      when discussing the Async networking library, and you can find the
-      full ATD specification for GitHub in the
-      <ulink url="http://github.com/avsm/ocaml-github"><literal>ocaml-github</literal></ulink>
-      repository.
-    </para>
+    <sect2 id="example-querying-github-organization-information">
+      <title>Example: Querying Github organization information</title>
+      <para>
+        Let's finish up with an example of some live JSON parsing from
+        Github, and query the <literal>janestreet</literal> organisation
+        information via the API. First we look at the online
+        <ulink url="http://developer.github.com/v3/orgs/">API
+        documentation</ulink> for Github to see what the JSON schema
+        looks like for this interface. Create an ATD file that matches
+        this and includes the fields we need.
+      </para>
+      <programlisting>
+(* github_org.atd *)
+type org = {
+  login: string;
+  id: int;
+  url: string;
+  ?name: string option;
+  ?blog: string option;
+  ?email: string option;
+  public_repos: int
+}
+</programlisting>
+      <para>
+        The OCaml program that uses this will read in the JSON file, and
+        output a one-line summary.
+      </para>
+      <programlisting language="ocaml">
+(* github_org_info.ml *)
+open Core.Std
+
+let () =
+  let open Github_org_t in
+  In_channel.read_all &quot;js_org.json&quot;
+  |&gt; Github_org_j.org_of_string
+  |&gt; fun org -&gt;
+      let name = Option.value ~default:&quot;???&quot; org.name in
+      printf &quot;%s (%d) with %d public repos\n&quot;
+        name org.id org.public_repos
+</programlisting>
+      <para>
+        Finally, write a short shell script to generate the OCaml
+        modules via <literal>atdgen</literal>, and build the OCaml
+        parsing binary.
+      </para>
+      <programlisting>
+$ cat _tags 
+true: package(core,yojson,atdgen)
+true: thread, debug, annot
+
+$ cat buildgh.sh 
+#!/bin/sh
+
+atdgen -t github_org.atd
+atdgen -j github_org.atd
+ocamlbuild -use-ocamlfind github_org_info.native
+
+$ ./buildgh.sh
+</programlisting>
+      <para>
+        You should have either <literal>curl</literal> or
+        <literal>wget</literal> installed on your system to fetch HTTP
+        web pages. If you don't, it will definitely be available in your
+        system package manager. Assuming you use
+        <literal>curl</literal>, fetch the <literal>janestreet</literal>
+        API url and save it to a file called
+        <literal>js_org.json</literal>.
+      </para>
+      <programlisting>
+$ curl -o js_org.json https://api.github.com/orgs/janestreet 
+$ cat js_org.json
+{
+  &quot;login&quot;: &quot;janestreet&quot;,
+  &quot;id&quot;: 3384712,
+  &quot;url&quot;: &quot;https://api.github.com/orgs/janestreet&quot;,
+  &quot;public_repos&quot;: 31,
+  &quot;public_gists&quot;: 0,
+  &quot;followers&quot;: 0,
+  &quot;following&quot;: 0,
+  &quot;html_url&quot;: &quot;https://github.com/janestreet&quot;,
+  &quot;created_at&quot;: &quot;2013-01-25T19:35:43Z&quot;,
+  &quot;updated_at&quot;: &quot;2013-05-23T14:03:06Z&quot;,
+  &quot;type&quot;: &quot;Organization&quot;
+}
+$ ./github_org_info.native
+??? (3384712) with 31 public repos
+</programlisting>
+      <para>
+        The JSON returned from Github is missing an organization name,
+        and so the <literal>name</literal> field in the OCaml query will
+        be of value <literal>None</literal>. Our code explicitly handles
+        this case and doesn't have to worry about null-pointer
+        exceptions. Similarly, the JSON integer is mapped into a native
+        OCaml integer via the ATD conversion interface. While this
+        example is obviously quite simple, the ability to specify
+        optional and default fields is very powerful. For example, you
+        can find the full ATD specification for GitHub in the
+        <ulink url="http://github.com/avsm/ocaml-github"><literal>ocaml-github</literal></ulink>
+        repository online, which has lots of quirks typical in
+        real-world web APIs.
+      </para>
+      <para>
+        Our example also uses <literal>curl</literal> on the
+        command-line and parsed the JSON via a file. We'll explain how
+        to integrate the HTTP fetch directly into your OCaml application
+        later on in
+        <ulink url="concurrent-programming-with-async">xref</ulink>.
+      </para>
+    </sect2>
   </sect1>
 </chapter><chapter id="parsing-with-ocamllex-and-menhir">
   <title>Parsing with OCamllex and Menhir</title>
