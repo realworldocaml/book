@@ -1,8 +1,8 @@
 # Command Line Parsing
 
-Many of the OCaml programs you will write will end up as binaries that
-will be run directly from a command prompt.  Any non-trivial program
-invoked as a command needs a few features:
+Many of the OCaml programs that you'll write will end up as binaries that will
+be run directly from a command prompt.  Any non-trivial command-line program
+needs a few features:
 
 * program options and file inputs need to be parsed from the command
   line arguments.
@@ -11,11 +11,11 @@ invoked as a command needs a few features:
 * help needs to be shown for all the available options.
 * interactive auto-completion of commands to assist the user.
 
-It's tedious and error-prone to support all this functionality manually for
-every program you write. Core simplifies this by letting you declare all your
-command-line options in one place, using the `Command` library.  This then
-takes care of parsing the arguments, generating help text and providees
-interactive auto-completion to the user of the library.
+It's tedious and error-prone to code all this manually for every program you
+write. Core simplifies this by letting you declare all your command-line
+options in one place, using the `Command` library.  This then takes care of
+parsing the arguments, generating help text and provides interactive
+auto-completion to the user of the library.
 
 The `Command` library also scales as you add more features to your programs.
 It's simple to use for small applications, but provides a sophisticated
