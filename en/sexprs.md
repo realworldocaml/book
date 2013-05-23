@@ -1,18 +1,10 @@
 # Data Serialization with S-Expressions
 
-Data serialization, _i.e._ converting data to and from a sequence of
-bytes that's suitable for writing to disk or sending across the
-network, is an important and common programming task.  Sometimes you
-need to match someone else's data format (such as XML), sometimes you
-need a highly efficient format, and sometimes you just want something
-that is easy for humans to read and edit.  To this end, OCaml comes
-with several techniques for data serialization depending on what your
-problem is.
-
-We'll start by considering the question of how to serialize data in a
-human-readable and editable form when you're not constrained to using
-a particular third-party format.  Core's solution to this problem is
-to use s-expressions
+We've already shown you how to parse third-party data formats into OCaml in
+earlier chapters.   Sometimes though, you just want to quickly convert an OCaml
+type to and from a human-readable and editable form in your own code, and not
+worry about interoperability.  Core's solution to this problem is to use
+s-expressions.
 
 S-expressions are nested paranthetical expressions whose atomic values
 are strings.  They were first popularized by the Lisp programming

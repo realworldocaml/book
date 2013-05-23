@@ -1,10 +1,9 @@
-# Parsing with OCamllex and OCamlyacc
+# Parsing with OCamllex and Menhir
 
 OCaml provides lexer and parser generators modeled on lex and yacc.  Similar
 tools are available in a variety of languages, and with them you can parse a
 variety of kinds of input, including web formats or full blown programming
-languages (for example, OCaml programs use an _ocamlyacc_ parser and _ocamllex_
-for lexical analysis).
+languages.
 
 Let's be more precise about these terms.  By _parsing_, we mean reading a
 textual input into a form that is easier for a program to manipulate.  For
