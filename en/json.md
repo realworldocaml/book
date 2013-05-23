@@ -567,7 +567,7 @@ type-check against both the `Basic` module and also the non-standard
 with the `Basic` module, they will not be a valid sub-type and the
 compiler will complain.
 
-The extensions includes with Yojson include:
+Yojson supports the following JSON extensions:
 
 * The `lit` suffix denotes that the value is stored as a JSON
   string. For example, a `Floatlit` will be stored as `"1.234"`
