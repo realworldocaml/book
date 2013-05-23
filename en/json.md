@@ -438,16 +438,50 @@ caught statically via a type error.
 ### Constructing JSON values
 
 Building and printing JSON values is pretty straightforward given the
-`Yojson.Basic.json` type.  You can just construct values of type
-`json` and call the `to_string` function] on them.  There are also
-pretty-printing functions available that lay out the output in a more
-human-readable style:
+`Yojson.Basic.json` type.  You can just construct values of type `json` and
+call the `to_string` function] on them.  Let's remind ourselves of the
+`Yojson.Basic.type` again:
+
+```ocaml
+type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of json list
+  | `Null
+  | `String of string ]
+```
+
+We can directly build a JSON value against this type, and use the
+pretty-printing functions in the `Yojson.Basic` module to lay the
+output out in the JSON format.
 
 ```ocaml
 # let x = `Assoc [ ("key", `String "value") ] ;;
 val x : [> `Assoc of (string * [> `String of string ]) list ] =
   `Assoc [("key", `String "value")]
+```
 
+In the example above, we've constructed a value `x` that represents a simple
+JSON object.  We haven't actually defined the type of `x` explicitly here, as
+we're relying on the magic of polymorphic variants to make this all work.
+The OCaml type system infers a type for `x` based on how you construct the value.
+In this case only the `Assoc` and `String` variants are used, and the
+inferred type only contains these fields without knowledge of the other possible
+variants that you haven't used yet.
+
+```ocaml
+# Yojson.Basic.pretty_to_string ;;
+- : ?std:bool -> Yojson.Basic.json -> string = <fun>  
+```
+
+`pretty_to_string` has a more explicit signature that wants an argument of type
+`Yojson.Basic.json`.  When `x` is applied to `pretty_to_string`, the inferred
+type of `x` is statically checked against the structure of the `json` type to
+ensure that they're compatible.
+
+```ocaml
 # Yojson.Basic.pretty_to_string x ;;
 - : string = "{ \"key\": \"value\" }"
 
@@ -456,13 +490,7 @@ val x : [> `Assoc of (string * [> `String of string ]) list ] =
 - : unit = ()
 ```
 
-In the example above, although the type of `x` is compatible with the
-type `json`, it's not explicitly defined as such.  The type inference
-engine will figure out a type that is based on how the value `x` is
-used and in this case only the `Assoc` and `String` variants are
-present.  This "partial" type signature is checked against the bigger
-`json` type it is applied to the `pretty_to_string` function, and
-determined to be compatible.
+In this case, there are no problems.  Our `x` value has an inferred type that is a valid sub-type of `json`, and the function application just works without us ever having to explicitly specify a type for `x`.  Type inference lets you write more succinct code without sacrificing runtime reliability, as all the uses of polymorphic variants are still checked at compile-time.
 
 <sidebar>
 <title>Polymorphic variants and easier type checking</title>
