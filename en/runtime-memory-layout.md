@@ -115,7 +115,7 @@ free memory, and this list is used to satisfy allocation requests for OCaml
 blocks.  The major heap is cleaned via a mark and sweep garbage collection
 algorithm.
 
-* The *mark* phase to traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
+* The *mark* phase traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
 * The *sweep* phase sequentially scans the heap chunks and identifies dead blocks that weren't marked earlier.
 * The *compact* phase moves live blocks to eliminate the gaps of free memory into a freshly allocated heap, and ensures that memory does not fragment in long-lived programs.
 
