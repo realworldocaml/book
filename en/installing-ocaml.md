@@ -78,7 +78,7 @@ some OCaml libraries require more system libraries (for example,
 `libssl-dev`), but we'll highlight these in the book when we introduce
 the library.
 
-Fedora and Red Hat
+### Fedora and Red Hat
 
 OCaml has been included in the basic distribution since Fedora 8.  To install the
 latest compiler, just run:
