@@ -44,8 +44,8 @@
     <para>
       The programming languages that you use affect the software you
       create. They influence your software's reliability, security and
-      efficiency, and how easy it is to read, refactor, and extend. And
-      the languages you know can also deeply affect how you think about
+      efficiency, and how easy it is to read, refactor, and extend. The
+      languages you know can also deeply affect how you think about
       programming and software design.
     </para>
     <para>
@@ -78,8 +78,8 @@
       <listitem>
         <para>
           <emphasis>Generics</emphasis> to enable abstractions to be
-          constructed across different datatypes, available in Java and
-          C#.
+          constructed across different datatypes, available as C++
+          templates or in Java or C#.
         </para>
       </listitem>
       <listitem>
@@ -124,10 +124,14 @@
     <para>
       Among this worthy set of languages, OCaml stands apart because it
       manages to provide a great deal of power while remaining highly
-      pragmatic, highly performant, and comparatively simple to use and
-      understand. It is this that makes OCaml a great choice for
-      programmers who want to step up to a better programming language,
-      and at the same time want to get practical work done.
+      pragmatic. The compiler has a straightforward compilation strategy
+      without excessive optimization passes, and the strict evaluation
+      model makes runtime behaviour easy to predict. The garbage
+      collector is an incremental, precise implementation with no
+      dynamic JIT compilation, and the runtime is simple and portable
+      across platforms. It is all of this that makes OCaml a great
+      choice for programmers who want to step up to a better programming
+      language, and at the same time want to get practical work done.
     </para>
     <sect2 id="a-brief-history-from-the-1960s">
       <title>A brief history from the 1960s</title>
@@ -185,20 +189,22 @@
         A language on its own isn't enough. You also need a rich set of
         libraries to base your applications on. A common source of
         frustration for those learning OCaml is that the standard
-        library that ships with the OCaml compiler is not ideal. While
-        it's well implemented, it is really intended for use within the
-        compiler itself, and covers only a small subset of the
-        functionality you expect for more general-purpose use.
+        library that ships with the compiler doesn't provide a lot of
+        features. The standard library was actually developed for use
+        within the compiler itself, and by design covers only a small
+        subset of the functionality you expect for more general-purpose
+        use.
       </para>
       <para>
         In the world of open-source software, nothing stops alternative
-        libraries from being written by the community, and this exactly
-        what the Core standard library is. Jane Street, a company that
-        has been using OCaml for more than a decade, developed Core for
-        its own internal use, but it was designed from the start with an
-        eye towards being a general-purpose standard library, and has
-        very broad applicability. Core is also engineered with
-        correctness, reliability and performance very much in mind.
+        libraries from being written to supplement the compiler standard
+        library, and this exactly what the Core distribution is. Jane
+        Street, a company that has been using OCaml for more than a
+        decade, developed Core for its own internal use, but it was
+        designed from the start with an eye towards being a
+        general-purpose standard library, and has very broad
+        applicability. Core is also engineered with correctness,
+        reliability and performance very much in mind.
       </para>
       <para>
         Core is also distributed with syntax extensions which provide
@@ -21551,10 +21557,12 @@ type meta = {
   Why do OCaml types disappear at runtime?
   </title>
   <para>
-    The OCaml compiler runs through several phases of during the
-    compilation process. After syntax checking, the next stage is
-    <emphasis>type checking</emphasis>. In a validly typed program, a
-    function cannot be applied with an unexpected type. For example, the
+    The OCaml compiler runs through several phases during the
+    compilation process. The first phase is syntax checking, during
+    which source files are parsed into Abstract Syntax Trees (ASTs). The
+    next stage is a <emphasis>type checking</emphasis> pass over the
+    AST. In a validly typed program, a function cannot be applied with
+    an unexpected type. For example, the
     <literal>print_endline</literal> function must receive a single
     <literal>string</literal> argument, and an <literal>int</literal>
     will result in a type error.
@@ -21601,8 +21609,8 @@ type meta = {
       an expression into an explicit allocation for the block from
       OCaml's runtime system: a C library that provides a collection of
       routines that can be called by running OCaml programs. The runtime
-      system manages a <emphasis>heap</emphasis>, which a collection of
-      memory regions it obtains from the operating system using
+      system manages a <emphasis>heap</emphasis>, which is a collection
+      of memory regions it obtains from the operating system using
       <emphasis>malloc(3)</emphasis>. The OCaml runtime uses these
       memory regions to hold <emphasis>heap blocks</emphasis>, which it
       then fills up in response to allocation requests by the OCaml
@@ -21614,10 +21622,9 @@ type meta = {
       the <emphasis>garbage collector</emphasis> (or GC). An OCaml
       program does not explicitly free a heap block when it is done with
       it, and the GC must determine which heap blocks are
-      <emphasis>alive</emphasis> and which heap blocks are
-      <emphasis>dead</emphasis>, i.e. no longer in use. Dead blocks are
-      collected and their memory made available for re-use by the
-      application.
+      &quot;live&quot; and which heap blocks are &quot;dead&quot;, i.e.
+      no longer in use. Dead blocks are collected and their memory made
+      available for re-use by the application.
     </para>
     <para>
       The garbage collector does not keep constant track of blocks as
@@ -21639,15 +21646,14 @@ type meta = {
       fact to improve the performance of allocation and collection by
       using a <emphasis>generational</emphasis> garbage collector. This
       means that it has different memory regions to hold blocks based on
-      how long the blocks have been alive. OCaml's heap is split in two;
+      how long the blocks have been live. OCaml's heap is split in two;
       there is a small, fixed-size <emphasis>minor heap</emphasis> where
       most most blocks are initially allocated, and a large,
       variable-sized <emphasis>major heap</emphasis> for blocks that
-      have been alive longer or are larger than 4KB. A typical
-      functional programming style means that young blocks tend to die
-      young, and old blocks tend to stay around for longer than young
-      ones (this is referred to as the <emphasis>generational
-      hypothesis</emphasis>).
+      have been live longer or are larger than 4KB. A typical functional
+      programming style means that young blocks tend to die young, and
+      old blocks tend to stay around for longer than young ones (this is
+      referred to as the <emphasis>generational hypothesis</emphasis>).
     </para>
     <para>
       OCaml uses different memory layouts and garbage collection
@@ -21698,7 +21704,7 @@ type meta = {
       <itemizedlist>
         <listitem>
           <para>
-            The <emphasis>mark</emphasis> phase to traverses the block
+            The <emphasis>mark</emphasis> phase traverses the block
             graph and marks all live blocks by setting a bit in the tag
             of the block header (known as the <emphasis>color</emphasis>
             tag).
@@ -23962,9 +23968,10 @@ immutable: 2.6186s (19073 minor collections)
         The
         <ulink url="http://github.com/mxcl/homebrew">Homebrew</ulink>
         package manager has an OCaml installer, which is usually updated
-        pretty quickly to the latest stable release. Before installing
-        OCaml, make sure that you have the latest XCode installed from
-        the App Store so that a C compiler is available.
+        pretty quickly to the latest stable release. Make sure that you
+        have the latest XCode (and Command Line Tools for XCode)
+        installed from the App Store before starting the OCaml
+        installation.
       </para>
       <programlisting>
 $ brew install ocaml
@@ -24010,9 +24017,9 @@ $ sudo apt-get install git libpcre3-dev curl build-essential m4
         (for example, <literal>libssl-dev</literal>), but we'll
         highlight these in the book when we introduce the library.
       </para>
-      <para>
-        Fedora and Red Hat
-      </para>
+    </sect2>
+    <sect2 id="fedora-and-red-hat">
+      <title>Fedora and Red Hat</title>
       <para>
         OCaml has been included in the basic distribution since Fedora
         8. To install the latest compiler, just run:
@@ -24150,34 +24157,8 @@ deb http://www.recoil.org/~avsm/ wheezy main
 # apt-get update
 # apt-get install opam
 </programlisting>
-      <note>
-      <title>
-      Note to reviewers
-      </title>
-      <para>
-        The OPAM instructions will be simplified when integrated
-        upstream into Debian and Fedora, which is ongoing. Until then,
-        we're leaving source-code installation instructions here. Please
-        leave a comment with any amended instructions you encounter
-      </para>
-      </note>
-      <para>
-        If the binary packages aren't suitable, you need to install the
-        latest OPAM release from source. The distribution only requires
-        the OCaml compiler to be installed, so this should be pretty
-        straightforward. Download the latest version, which is always
-        marked with a <literal>stable</literal> tag on the project
-        <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>.
-      </para>
-      <programlisting>
-$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
-$ tar -zxvf latest.tar.gz
-$ cd opam-latest
-$ ./configure &amp;&amp; make
-$ sudo make install
-</programlisting>
     </sect2>
-    <sect2 id="fedora-and-red-hat">
+    <sect2 id="fedora-and-red-hat-1">
       <title>Fedora and Red Hat</title>
       <para>
         There is currently no RPM available for Fedora or Red Hat, so
@@ -24217,6 +24198,36 @@ $ tar -xvf opam.tar.gz &amp;&amp; cd opam
 $ makepkg
 $ sudo pacman -U opam-_version_.pkg.tar.gz
 </programlisting>
+    </sect2>
+    <sect2 id="source-installation">
+      <title>Source Installation</title>
+      <para>
+        If the binary packages aren't available for your system, you'll
+        need to install the latest OPAM release from source. The
+        distribution only requires the OCaml compiler to be installed,
+        so this should be straightforward. Download the latest version
+        from the
+        <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>.
+      </para>
+      <programlisting>
+$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
+$ tar -zxvf latest.tar.gz
+$ cd opam-latest
+$ ./configure &amp;&amp; make
+$ sudo make install
+</programlisting>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        The OPAM instructions will be simplified when integrated
+        upstream into Debian and Fedora, which is ongoing. Until then,
+        we're leaving source-code installation instructions here. Please
+        leave a comment with any amended instructions you encounter.
+      </para>
+      </note>
+
     </sect2>
   </sect1>
   <sect1 id="configuring-the-opam-package-manager">
@@ -24308,11 +24319,11 @@ $ opam list
     Note to reviewers
     </title>
     <para>
-      OPAM 1.0's always places the login commands into your
-      <literal>~/.profile</literal> directory, which isn't executed if
-      your shell is <literal>bash</literal>. This has been fixed in
-      subsequent versions, but for now you'll need to manually copy the
-      contents of <literal>~/.profile</literal> over to
+      OPAM 1.0.0 places the login commands into your
+      <literal>~/.profile</literal> directory, which isn't always
+      executed if your shell is <literal>bash</literal>. This has been
+      fixed in subsequent versions, but for now you'll need to manually
+      copy the contents of <literal>~/.profile</literal> over to
       <literal>~/.bash_profile</literal> via:
     </para>
     <programlisting>
@@ -24359,9 +24370,10 @@ $ opam switch 4.01.0dev+trunk
 $ opam install core core_extended async
 </programlisting>
     <para>
-      This will take about five minutes to install, and install a series
-      of packages. OPAM figures out the dependencies you need
-      automatically, but the three packages that really matter are:
+      This will take about five or ten minutes to build, and will
+      install a series of packages. OPAM figures out the dependencies
+      you need automatically, but the three packages that really matter
+      are:
     </para>
     <itemizedlist>
       <listitem>
@@ -24411,7 +24423,7 @@ $ opam install utop
         <literal>utop</literal> too. You'll find the binary in
         <literal>~/.opam/4.01.0dev+trunk/bin</literal>. However, just
         typing in <literal>utop</literal> from your shell should just
-        work, due to the <literal>opam config env</literal> step which
+        work, due to the <literal>opam config env</literal> step that
         configures your shell. Don't forget to automate this as
         described earlier, as it makes life much easier when developing
         OCaml code!
