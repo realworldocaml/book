@@ -852,11 +852,12 @@ $ ./github_org_info.native janestreet
 ??? (3384712) with 31 public repos
 ```
 
-The JSON returned from Github `janestreet` is missing an organization name, but
-this is cleanly reflected in the OCaml sice it is marked as an optional type
-and so has value `None`.  Our code explicitly handles this case and doesn't
-have to worry about null-pointer exceptions.  Similarly, the JSON integer for
-the `id` is mapped into a native OCaml integer via the ATD conversion.
+The JSON returned from the `janestreet` query is missing an organization name,
+but this is explicitly reflected in the OCaml type since the ATD spec marked
+`name` as an optional field.  Our OCaml code explicitly handles this case and
+doesn't have to worry about null-pointer exceptions.  Similarly, the JSON
+integer for the `id` is mapped into a native OCaml integer via the ATD
+conversion.
 
 While this tool is obviously quite simple, the ability to specify optional and
 default fields is very powerful.  Take a look at the full ATD specification for
