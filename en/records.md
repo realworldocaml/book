@@ -562,7 +562,7 @@ mutable ones, are specified when the record is created.
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming does have its place.  We'll discuss more about how (and
 when) to use OCaml's imperative features in
-[xref](#imperative-programming2).
+[xref](#imperative-programming).
 
 ## First-class fields
 
