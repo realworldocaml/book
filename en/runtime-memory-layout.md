@@ -1,4 +1,4 @@
-# Runtime Memory Layout
+# Memory Representation of Values
 
 Much of the static type information contained within an OCaml program is
 checked and discarded at compilation time, leaving a much simpler *runtime*
