@@ -767,9 +767,12 @@ programming languages and includes OCaml bindings.
 
 ### Example: Querying Github organization information
 
-Let's finish up with an example of some live JSON parsing from Github,
-and query the `janestreet` organisation information via the API.
-First we look at the online [API documentation](http://developer.github.com/v3/orgs/) for Github to see what the JSON schema looks like for this interface.  Create an ATD file that matches this and includes the fields we need.
+Let's finish up with an example of some live JSON parsing from Github, and
+build a tool to query organization information via their API.  Look at
+the online [API documentation](http://developer.github.com/v3/orgs/) for Github
+to see what the JSON schema looks like retrieving the organization information. 
+Then create an ATD file that covers the fields we need.  Any extra fields
+present in the response will be ignored by the ATD parser.
 
 ```
 (* github_org.atd *)
@@ -784,27 +787,36 @@ type org = {
 }
 ```
 
-The OCaml program that uses this will read in the JSON file, and output a one-line summary.
+The OCaml program that uses this will fetch the JSON and output a one-line summary.
+You'll also need the `curl` tool installed on your system to fetch the HTTP web pages, as
+our example below calls `curl` via the `Core_extended.Shell` interface.
 
 ```ocaml
 (* github_org_info.ml *)
 open Core.Std
 
-let () =
-  let open Github_org_t in
-  In_channel.read_all "js_org.json"
+let print_org file () =
+  let url = sprintf "https://api.github.com/orgs/%s" file in
+  Core_extended.Shell.run_full "curl" [url]
   |> Github_org_j.org_of_string
   |> fun org ->
+      let open Github_org_t in
       let name = Option.value ~default:"???" org.name in
       printf "%s (%d) with %d public repos\n"
         name org.id org.public_repos
+
+let () =
+  Command.basic ~summary:"Print Github organization information"
+    Command.Spec.(empty +> anon ("organization" %: string))
+    print_org
+  |> Command.run
 ```
 
-Finally, write a short shell script to generate the OCaml modules via `atdgen`, and build the OCaml parsing binary.
+Finally, write a short shell script to generate the OCaml `Github_org` parsers via `atdgen`, and build the OCaml command-line interface.
 
 ```console
 $ cat _tags 
-true: package(core,yojson,atdgen)
+true: package(core,core_extended,yojson,atdgen)
 true: thread, debug, annot
 
 $ cat buildgh.sh 
@@ -817,11 +829,10 @@ ocamlbuild -use-ocamlfind github_org_info.native
 $ ./buildgh.sh
 ```
 
-You should have either `curl` or `wget` installed on your system to fetch HTTP web pages.  If you don't, it will definitely be available in your system package manager.  Assuming you use `curl`, fetch the `janestreet` API url and save it to a file called `js_org.json`.
+You can now run the command-line tool with a single argument to specify the name of the organization, and it will dynamically fetch the JSON from the web, parse it, and render the summary to your console.
 
 ```
-$ curl -o js_org.json https://api.github.com/orgs/janestreet 
-$ cat js_org.json
+$ curl https://api.github.com/orgs/janestreet 
 {
   "login": "janestreet",
   "id": 3384712,
@@ -835,21 +846,23 @@ $ cat js_org.json
   "updated_at": "2013-05-23T14:03:06Z",
   "type": "Organization"
 }
-$ ./github_org_info.native
+$ ./github_org_info.native mirage
+Mirage account (131943) with 32 public repos
+$ ./github_org_info.native janestreet
 ??? (3384712) with 31 public repos
 ```
 
-The JSON returned from Github is missing an organization name, and so the
-`name` field in the OCaml query will be of value `None`.  Our code explicitly
-handles this case and doesn't have to worry about null-pointer exceptions.
-Similarly, the JSON integer is mapped into a native OCaml integer via the ATD
-conversion interface.  While this example is obviously quite simple, the
-ability to specify optional and default fields is very powerful.  For example,
-you can find the full ATD specification for GitHub in the
-[`ocaml-github`](http://github.com/avsm/ocaml-github) repository online, which
-has lots of quirks typical in real-world web APIs.
+The JSON returned from Github `janestreet` is missing an organization name, but
+this is cleanly reflected in the OCaml sice it is marked as an optional type
+and so has value `None`.  Our code explicitly handles this case and doesn't
+have to worry about null-pointer exceptions.  Similarly, the JSON integer for
+the `id` is mapped into a native OCaml integer via the ATD conversion.
 
-Our example also uses `curl` on the command-line and parsed the JSON via a file.
-We'll explain how to integrate the HTTP fetch directly into your OCaml application
-later on in [xref](concurrent-programming-with-async).
+While this tool is obviously quite simple, the ability to specify optional and
+default fields is very powerful.  Take a look at the full ATD specification for
+the GitHub API in the [`ocaml-github`](http://github.com/avsm/ocaml-github)
+repository online, which has lots of quirks typical in real-world web APIs.
 
+Our example shells out to `curl` on the command-line to obtain the JSON, which
+is rather inefficient.  We'll explain how to integrate the HTTP fetch directly
+into your OCaml application later on in [xref](concurrent-programming-with-async).
