@@ -371,22 +371,26 @@ structure.  Let's examine some of them in more detail:
   let title = json |> member "title" |> to_string in
 ```
 
-For the `title` field, the `member` combinator extracts the key from
-the `json` value, and converts it to an OCaml string.  An exception is
-raised if the JSON value is not a string, so the caller must be
-careful to `try/with` the result.
+The `member` function accepts a JSON object and named key and returns
+the JSON field associated with that key, or `Null`.  Since we know that
+the `title` value is always a string in our example schema, we want
+to convert it to an OCaml string.  The `to_string` function performs
+this conversion, and raises an exception if there is an unexpected JSON
+type.  The `|>` operator provides a convenient way to chain these
+operations together.
 
 ```ocaml
   let tags = json |> member "tags" |> to_list |> filter_string in
   let pages = json |> member "pages" |> to_int in
 ```
 
-The `tags` field is similar to `title`, but the field is a list of
-strings instead of a single one.  Converting this to an OCaml `string
-list` is a two stage process: first, we must convert it to a list of
-JSON values, and then filter out the `String` values.  Remember that
-OCaml lists must have a single type, so any other JSON values will be
-skipped from the output of `filter_string`.
+The `tags` field is similar to `title`, but the field is a list of strings
+instead of a single one.  Converting this to an OCaml `string list` is a two
+stage process.  First, we convert the JSON `List` to an OCaml list of JSON
+values, and then filter out the `String` values as an OCaml `string list`.
+Remember that OCaml lists must contain values of the same type, so any JSON
+values that cannot be converted to a `string` will be skipped from the output
+of `filter_string`.
 
 ```ocaml
   let is_online = json |> member "is_online" |> to_bool_option in
@@ -404,8 +408,8 @@ present and `is_translated` will be `None`.
   let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
 ```
 
-The final use of JSON combinators is to extract the `name` fields from
-the `author` list.  We first construct the `author` list, and then
+The final use of JSON combinators is to extract all the `name` fields from
+the list of authors.  We first construct the `author list`, and then
 `map` it into a `string list`.  Notice that the example explicitly
 binds `authors` to a variable name.  It can also be written more
 succinctly using the pipe-forward operator:
@@ -434,16 +438,50 @@ caught statically via a type error.
 ### Constructing JSON values
 
 Building and printing JSON values is pretty straightforward given the
-`Yojson.Basic.json` type.  You can just construct values of type
-`json` and call the `to_string` function] on them.  There are also
-pretty-printing functions available that lay out the output in a more
-human-readable style:
+`Yojson.Basic.json` type.  You can just construct values of type `json` and
+call the `to_string` function] on them.  Let's remind ourselves of the
+`Yojson.Basic.type` again:
+
+```ocaml
+type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of json list
+  | `Null
+  | `String of string ]
+```
+
+We can directly build a JSON value against this type, and use the
+pretty-printing functions in the `Yojson.Basic` module to lay the
+output out in the JSON format.
 
 ```ocaml
 # let x = `Assoc [ ("key", `String "value") ] ;;
 val x : [> `Assoc of (string * [> `String of string ]) list ] =
   `Assoc [("key", `String "value")]
+```
 
+In the example above, we've constructed a value `x` that represents a simple
+JSON object.  We haven't actually defined the type of `x` explicitly here, as
+we're relying on the magic of polymorphic variants to make this all work.
+The OCaml type system infers a type for `x` based on how you construct the value.
+In this case only the `Assoc` and `String` variants are used, and the
+inferred type only contains these fields without knowledge of the other possible
+variants that you haven't used yet.
+
+```ocaml
+# Yojson.Basic.pretty_to_string ;;
+- : ?std:bool -> Yojson.Basic.json -> string = <fun>  
+```
+
+`pretty_to_string` has a more explicit signature that wants an argument of type
+`Yojson.Basic.json`.  When `x` is applied to `pretty_to_string`, the inferred
+type of `x` is statically checked against the structure of the `json` type to
+ensure that they're compatible.
+
+```ocaml
 # Yojson.Basic.pretty_to_string x ;;
 - : string = "{ \"key\": \"value\" }"
 
@@ -452,13 +490,7 @@ val x : [> `Assoc of (string * [> `String of string ]) list ] =
 - : unit = ()
 ```
 
-In the example above, although the type of `x` is compatible with the
-type `json`, it's not explicitly defined as such.  The type inference
-engine will figure out a type that is based on how the value `x` is
-used and in this case only the `Assoc` and `String` variants are
-present.  This "partial" type signature is checked against the bigger
-`json` type it is applied to the `pretty_to_string` function, and
-determined to be compatible.
+In this case, there are no problems.  Our `x` value has an inferred type that is a valid sub-type of `json`, and the function application just works without us ever having to explicitly specify a type for `x`.  Type inference lets you write more succinct code without sacrificing runtime reliability, as all the uses of polymorphic variants are still checked at compile-time.
 
 <sidebar>
 <title>Polymorphic variants and easier type checking</title>
@@ -601,8 +633,8 @@ using a small portion of the GitHub API.  GitHub is a popular code
 hosting and sharing website that provides a JSON-based web
 [API](http://developer.github.com).  The ATD code fragment below
 describes the GitHub authorization API.  It is based on a
-pseudo-standard web protocol known as OAuth, and is used to authorized
-users to access GitHub services.
+pseudo-standard web protocol known as OAuth, and is used to authorize
+users for GitHub services.
 
 ```ocaml
 type scope = [
@@ -635,11 +667,11 @@ type authorization_response = {
 }
 ```
 
-ATD is (deliberately) similar to OCaml type definitions.  Each field
-can include extra annotations to customise the parsing code for a
-particular backend. For example, the GitHub `scope` field above is
-defined as a variant type, but with the actual JSON values being
-defined explicitly (as lower-case versions).
+ATD specifications are deliberately similar to OCaml type definitions.  Each
+field can include extra annotations to customise the parsing code for a
+particular backend. For example, the GitHub `scope` field above is defined as a
+variant type, but with the actual JSON values being defined explicitly (as
+lower-case versions).
 
 The ATD spec can be compiled to a number of OCaml targets. Let's run
 the compiler twice, to generate some OCaml type definitions, and a
