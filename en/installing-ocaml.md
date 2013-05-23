@@ -368,9 +368,9 @@ Finally, we're ready to install the Core libraries.  Run this:
 $ opam install core core_extended async
 ```
 
-This will take about five minutes to install, and install a series of packages.
-OPAM figures out the dependencies you need automatically, but the three
-packages that really matter are:
+This will take about five or ten minutes to build, and will install a series of
+packages.  OPAM figures out the dependencies you need automatically, but the
+three packages that really matter are:
 
 * `core` is the main, well-supported Core distribution from Jane Street.
 * `core_extended` contains a number of experimental, but useful,
