@@ -13662,9 +13662,9 @@ Exception: (Invalid_argument &quot;equal: functional value&quot;).
 </chapter><chapter id="command-line-parsing">
   <title>Command Line Parsing</title>
   <para>
-    Many of the OCaml programs you will write will end up as binaries
+    Many of the OCaml programs that you'll write will end up as binaries
     that will be run directly from a command prompt. Any non-trivial
-    program invoked as a command needs a few features:
+    command-line program needs a few features:
   </para>
   <itemizedlist>
     <listitem>
@@ -13691,12 +13691,12 @@ Exception: (Invalid_argument &quot;equal: functional value&quot;).
     </listitem>
   </itemizedlist>
   <para>
-    It's tedious and error-prone to support all this functionality
-    manually for every program you write. Core simplifies this by
-    letting you declare all your command-line options in one place,
-    using the <literal>Command</literal> library. This then takes care
-    of parsing the arguments, generating help text and providees
-    interactive auto-completion to the user of the library.
+    It's tedious and error-prone to code all this manually for every
+    program you write. Core simplifies this by letting you declare all
+    your command-line options in one place, using the
+    <literal>Command</literal> library. This then takes care of parsing
+    the arguments, generating help text and provides interactive
+    auto-completion to the user of the library.
   </para>
   <para>
     The <literal>Command</literal> library also scales as you add more
@@ -15593,14 +15593,15 @@ type json = [
   | `Variant of string * json option ]
 </programlisting>
     <para>
-      You should immediately be able to spot a benefit of using
-      polymorphic variants here. A standard JSON type such as a
+      The <literal>Safe.json</literal> type includes all of the variants
+      from <literal>Basic.json</literal> and extends it with a few more
+      useful ones. A standard JSON type such as a
       <literal>String</literal> will type-check against both the
       <literal>Basic</literal> module and also the non-standard
-      <literal>Safe</literal> module. However, if you use extension
-      values such as <literal>Tuple</literal> with the
-      <literal>Basic</literal> module, they will not be a valid sub-type
-      and the compiler will complain.
+      <literal>Safe</literal> module. If you use the extension values
+      with the <literal>Basic</literal> module however, the compiler
+      will reject your code until you make it compliant with the
+      portable subset of JSON.
     </para>
     <para>
       Yojson supports the following JSON extensions:
@@ -15860,12 +15861,13 @@ val authorization_response_of_string :
       <title>Example: Querying Github organization information</title>
       <para>
         Let's finish up with an example of some live JSON parsing from
-        Github, and query the <literal>janestreet</literal> organisation
-        information via the API. First we look at the online
+        Github, and build a tool to query organization information via
+        their API. Look at the online
         <ulink url="http://developer.github.com/v3/orgs/">API
         documentation</ulink> for Github to see what the JSON schema
-        looks like for this interface. Create an ATD file that matches
-        this and includes the fields we need.
+        looks like retrieving the organization information. Then create
+        an ATD file that covers the fields we need. Any extra fields
+        present in the response will be ignored by the ATD parser.
       </para>
       <programlisting>
 (* github_org.atd *)
@@ -15880,30 +15882,41 @@ type org = {
 }
 </programlisting>
       <para>
-        The OCaml program that uses this will read in the JSON file, and
-        output a one-line summary.
+        The OCaml program that uses this will fetch the JSON and output
+        a one-line summary. You'll also need the <literal>curl</literal>
+        tool installed on your system to fetch the HTTP web pages, as
+        our example below calls <literal>curl</literal> via the
+        <literal>Core_extended.Shell</literal> interface.
       </para>
       <programlisting language="ocaml">
 (* github_org_info.ml *)
 open Core.Std
 
-let () =
-  let open Github_org_t in
-  In_channel.read_all &quot;js_org.json&quot;
+let print_org file () =
+  let url = sprintf &quot;https://api.github.com/orgs/%s&quot; file in
+  Core_extended.Shell.run_full &quot;curl&quot; [url]
   |&gt; Github_org_j.org_of_string
   |&gt; fun org -&gt;
+      let open Github_org_t in
       let name = Option.value ~default:&quot;???&quot; org.name in
       printf &quot;%s (%d) with %d public repos\n&quot;
         name org.id org.public_repos
+
+let () =
+  Command.basic ~summary:&quot;Print Github organization information&quot;
+    Command.Spec.(empty +&gt; anon (&quot;organization&quot; %: string))
+    print_org
+  |&gt; Command.run
 </programlisting>
       <para>
         Finally, write a short shell script to generate the OCaml
-        modules via <literal>atdgen</literal>, and build the OCaml
-        parsing binary.
+        <literal>Github_org</literal> parsers via
+        <literal>atdgen</literal>, and build the OCaml command-line
+        interface.
       </para>
       <programlisting>
 $ cat _tags 
-true: package(core,yojson,atdgen)
+true: package(core,core_extended,yojson,atdgen)
 true: thread, debug, annot
 
 $ cat buildgh.sh 
@@ -15916,17 +15929,13 @@ ocamlbuild -use-ocamlfind github_org_info.native
 $ ./buildgh.sh
 </programlisting>
       <para>
-        You should have either <literal>curl</literal> or
-        <literal>wget</literal> installed on your system to fetch HTTP
-        web pages. If you don't, it will definitely be available in your
-        system package manager. Assuming you use
-        <literal>curl</literal>, fetch the <literal>janestreet</literal>
-        API url and save it to a file called
-        <literal>js_org.json</literal>.
+        You can now run the command-line tool with a single argument to
+        specify the name of the organization, and it will dynamically
+        fetch the JSON from the web, parse it, and render the summary to
+        your console.
       </para>
       <programlisting>
-$ curl -o js_org.json https://api.github.com/orgs/janestreet 
-$ cat js_org.json
+$ curl https://api.github.com/orgs/janestreet 
 {
   &quot;login&quot;: &quot;janestreet&quot;,
   &quot;id&quot;: 3384712,
@@ -15940,28 +15949,33 @@ $ cat js_org.json
   &quot;updated_at&quot;: &quot;2013-05-23T14:03:06Z&quot;,
   &quot;type&quot;: &quot;Organization&quot;
 }
-$ ./github_org_info.native
+$ ./github_org_info.native mirage
+Mirage account (131943) with 32 public repos
+$ ./github_org_info.native janestreet
 ??? (3384712) with 31 public repos
 </programlisting>
       <para>
-        The JSON returned from Github is missing an organization name,
-        and so the <literal>name</literal> field in the OCaml query will
-        be of value <literal>None</literal>. Our code explicitly handles
-        this case and doesn't have to worry about null-pointer
-        exceptions. Similarly, the JSON integer is mapped into a native
-        OCaml integer via the ATD conversion interface. While this
-        example is obviously quite simple, the ability to specify
-        optional and default fields is very powerful. For example, you
-        can find the full ATD specification for GitHub in the
+        The JSON returned from Github <literal>janestreet</literal> is
+        missing an organization name, but this is cleanly reflected in
+        the OCaml sice it is marked as an optional type and so has value
+        <literal>None</literal>. Our code explicitly handles this case
+        and doesn't have to worry about null-pointer exceptions.
+        Similarly, the JSON integer for the <literal>id</literal> is
+        mapped into a native OCaml integer via the ATD conversion.
+      </para>
+      <para>
+        While this tool is obviously quite simple, the ability to
+        specify optional and default fields is very powerful. Take a
+        look at the full ATD specification for the GitHub API in the
         <ulink url="http://github.com/avsm/ocaml-github"><literal>ocaml-github</literal></ulink>
         repository online, which has lots of quirks typical in
         real-world web APIs.
       </para>
       <para>
-        Our example also uses <literal>curl</literal> on the
-        command-line and parsed the JSON via a file. We'll explain how
-        to integrate the HTTP fetch directly into your OCaml application
-        later on in
+        Our example shells out to <literal>curl</literal> on the
+        command-line to obtain the JSON, which is rather inefficient.
+        We'll explain how to integrate the HTTP fetch directly into your
+        OCaml application later on in
         <ulink url="concurrent-programming-with-async">xref</ulink>.
       </para>
     </sect2>
