@@ -115,14 +115,11 @@ definition:
   algebraic data types includes a reference to the name of the type
   being defined). Fields such as `Assoc` can contain references to
   more JSON fields, and thus precisely describe the underlying JSON
-  data structure.
+  data structure.  The JSON `List` can contain fields of different types,
+  unlike the OCaml `list` whose contents must be uniform.
 * The definition specifically includes a `Null` variant for empty
   fields.  OCaml doesn't allow null values by default, so this must be
   encoded like any other value.
-* The differences between certain OCaml and JSON data structures is
-  more obvious. For example, a JSON `List` can contain more JSON
-  fields, whereas an OCaml `list` must contain values that are all the
-  same type.
 * The type definition uses polymorphic variants and not normal
   variants. This will become significant later when we extend it with
   custom extensions to the JSON format.
