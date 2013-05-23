@@ -271,8 +271,8 @@ value, let's manipulate it from OCaml code and extract specific
 fields.
 
 ```ocaml
+(* parse_book.ml *)
 open Core.Std
-open Printf
 
 let () =
   (* Read the JSON file *)
@@ -301,8 +301,21 @@ let () =
   printf "Translated: %s\n" (string_of_bool_option is_translated)
 ```
 
-This introduces the `Yojson.Basic.Util` module, which contains _combinator_
-functions for JSON manipulation.
+Build this with the same `_tags` file as the earlier example, and running
+ocamlbuild on the new file.
+
+```console
+$ ocamlbuild -use-ocamlfind parse_book.native
+$ ./parse_book.native 
+Title: Real World OCaml (450)
+Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
+Tags: functional programming, ocaml, algorithms
+Online: yes
+Translated: <none>
+```
+
+This code introduces the `Yojson.Basic.Util` module, which contains _combinator_
+functions that let you easily map a JSON object into a more strongly-typed OCaml value.
 
 <sidebar>
 <title>Functional Combinators</title>
