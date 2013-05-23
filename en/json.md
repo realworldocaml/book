@@ -568,6 +568,26 @@ fields from JSON records, but the process is still pretty manual.
 We'll talk about how to do larger-scale JSON parsing now, using a
 domain-specific language known as [ATD](http://mjambon.com/atd-biniou-intro.html).
 
+<note>
+<title>Installing the ATDgen library and tool</title>
+
+ATDgen installs a few OCaml libraries that interface with Yojson,
+and also a command-line tool that generates code.  It can all be
+installed via OPAM:
+
+```
+$ opam install atdgen
+$ atdgen -version
+1.2.3
+```
+
+The command-line tool will be installed within your `~/.opam` directory,
+and will already be on your `PATH` from running `opam config env`.  See
+[xref](#installation) this isn't working.
+
+</note>
+
+
 The idea behind ATD is to specify the format of the JSON in a separate
 file, and then run a compiler (`atdgen`) that outputs OCaml code to
 construct and parse JSON values.  This means that you don't need to
