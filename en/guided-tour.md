@@ -369,7 +369,7 @@ the exception.
 
 </note>
 
-## Tuples, Lists, Options and Pattern-matching
+## Tuples, Lists, Options and Pattern Matching
 
 ### Tuples
 
@@ -391,7 +391,7 @@ of the set of elements of type `t` and the set of elements of type
 `s`.
 
 You can extract the components of a tuple using OCaml's
-pattern-matching syntax. For example:
+pattern matching syntax. For example:
 
 ```ocaml
 # let (x,y) = a_tuple;;
@@ -410,7 +410,7 @@ can now be used in subsequent expressions.
 ```
 
 Note that the same syntax is used both for constructing and for
-pattern-matching on tuples.
+pattern matching on tuples.
 
 Pattern matching can also show up in function arguments.  Here's a
 function for computing the distance between two points on the plane,
@@ -540,7 +540,7 @@ first list.
 
 #### List patterns using `match`
 
-The elements of a list can be accessed through pattern-matching.  List
+The elements of a list can be accessed through pattern matching.  List
 patterns are based on the two list constructors, `[]` and `::`.
 Here's a simple example.
 
@@ -821,9 +821,9 @@ In OCaml, however, nulls are explicit.  A value of type `string *
 string` always actually contains two well-defined values of type
 `string`.  If you want to allow, say, the first of those to be absent,
 then you need to change the type to `string option * string`.  As
-we'll see, this explicitness allows the compiler to provide a great
-deal of help in making sure you're correctly handing the possibility
-of missing data.
+we'll see in [xref](#error-handling), this explicitness allows the
+compiler to provide a great deal of help in making sure you're
+correctly handing the possibility of missing data.
 
 ## Records and Variants
 

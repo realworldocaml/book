@@ -157,7 +157,7 @@ new `Bold` tag.
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i ;;
 Characters 19-154:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8: this pattern matching is not exhaustive.
 Here is an example of a value that is not matched:
 Bold _
 val color_to_int : color -> int = <fun>
@@ -178,15 +178,15 @@ As we've seen, the type errors identified the things that needed to be
 fixed to complete the refactoring of the code.  This is fantastically
 useful, but for it to work well and reliably, you need to write your
 code in a way that maximizes the compiler's chances of helping you
-find the bugs.  One important rule of thumb to follow to maximize what
-the compiler can do for you is to avoid catch-all cases in pattern
-matches.
+find the bugs.  To this end, a useful rule of thumb is to avoid
+catch-all cases in pattern matches.
 
-Here's an example of how a catch-all case plays in.  Imagine we wanted
-a version of `color_to_int` that works on older terminals by rendering
-the first 16 colors (the 8 `basic_color`s in regular and bold) in the
-normal way, but rendering everything else as white.  We might have
-written the function as follows.
+Here's an example that illustrates how catch-all cases interact with
+exhaustion checks.  Imagine we wanted a version of `color_to_int` that
+works on older terminals by rendering the first 16 colors (the 8
+`basic_color`s in regular and bold) in the normal way, but rendering
+everything else as white.  We might have written the function as
+follows.
 
 ```ocaml
 # let oldschool_color_to_int = function
@@ -200,8 +200,8 @@ val oldschool_color_to_int : color -> int = <fun>
 But because the catch-all case encompasses all possibilities, the type
 system will no longer warn us that we have missed the new `Bold` case
 when we change the type to include it.  We can get this check back by
-being more explicit about what we're ignoring.  We haven't changed the
-behavior of the code, but we have improved our robustness to change.
+being avoiding the catch-all case, and instead being explicit about
+the tags that are ignored.
 
 </note>
 
@@ -401,13 +401,13 @@ And it's explicit at the type level that `handle_log_entry` sees only
 ## Variants and recursive data structures
 
 Another common application of variants is to represent tree-like
-recursive data-structures.  We'll show how this can be done by walking
+recursive data structures.  We'll show how this can be done by walking
 through the design of a simple Boolean expression language.  Such a
 language can be useful anywhere you need to specify filters, which are
 used in everything from packet analyzers to mail clients.
 
 An expression in this language will be defined by the variant `blang`
-(short for "boolean language") with one tag for each kind of
+(short for "Boolean language") with one tag for each kind of
 expression we want to support.
 
 ```ocaml
@@ -426,8 +426,8 @@ parameterized by a polymorphic type `'a` which is used for specifying
 the type of the value that goes under the `Base` tag.
 
 The purpose of each tag is pretty straightforward.  `And`, `Or` and
-`Not` are the basic operators for building up boolean expression, and
-`Const` lets you enter constants `true` and `false`.
+`Not` are the basic operators for building up Boolean expressions, and
+`Const` lets you enter the constants `true` and `false`.
 
 The `Base` tag is what allows you to tie the `blang` to your
 application, by letting you specify an element of some base predicate
@@ -461,9 +461,9 @@ And
   Base {field = Subject; contains = "runtime"}]
 ```
 
-Being able to construct such expressions isn't enough: we also need to
+Being able to construct such expressions isn't enough; we also need to
 be able to evaluate such an expression.  The following code shows how
-you could write a general-purpose evaluator for `blang`'s.
+you could write a general-purpose evaluator for `blang`s.
 
 ```ocaml
 # let rec eval blang base_eval =
@@ -481,15 +481,14 @@ val eval : 'a blang  -> ('a -> bool) -> bool = <fun>
 ```
 
 The structure of the code is pretty straightforward --- we're just
-pattern-matching over the structure of the data, doing the appropriate
+pattern matching over the structure of the data, doing the appropriate
 calculation based on which tag we see.  To use this evaluator on a
 concrete example, we just need to write the `base_eval` function which
 is capable of evaluating a base predicate.
 
-Another useful operation to be able to do on expressions is
-simplification.  The following function applies some basic
-simplification rules, most of the simplifications being driven by the
-presence of constants.
+Another useful operation on expressions is simplification.  The
+following function applies some basic simplification rules, most of
+which are driven by the presence of constants.
 
 ```ocaml
 # let rec simplify = function
@@ -546,9 +545,9 @@ This example is more than a toy.  There's a module very much in this
 spirit in Core called `Blang`, and it gets a lot of practical use in a
 variety of applications.
 
-More generally, using variants to build recursive data-structures is a
+More generally, using variants to build recursive data structures is a
 common technique, and shows up everywhere from designing little
-languages to building efficient data-structures.
+languages to building efficient data structures.
 
 ## Polymorphic variants
 
@@ -575,10 +574,12 @@ val nan : [> `Not_a_number ] = `Not_a_number
 
 As you can see, polymorphic variant types are inferred automatically,
 and when we combine variants with different tags, the compiler infers
-a new type that knows about all of those tags.
+a new type that knows about all of those tags.  Note that in the above
+example, the tag name (_e.g._, `` `Int``) matches the type name
+(`int`).  This is a common convention in OCaml.
 
-The type system will complain, however, if it sees incompatible uses
-of the same tag:
+The type system will complain, if it sees incompatible uses of the
+same tag:
 
 ```ocaml
 # let five = `Int "five";;
@@ -628,7 +629,9 @@ val exact : [ `Float of float | `Int of int ] list
 ```
 
 Perhaps surprisingly, we can also create polymorphic variant types
-that have different upper and lower bounds.
+that have different upper and lower bounds.  Note that `Ok` and
+`Error` in the following example come from the `Result.t` type from
+Core.
 
 ```ocaml
 # let is_positive = function
@@ -637,7 +640,7 @@ that have different upper and lower bounds.
      | `Not_a_number -> Error "not a number";;
 val is_positive :
   [< `Float of float | `Int of int | `Not_a_number ] ->
-  (bool, string) Core.Result.t = <fun>
+  (bool, string) Result.t = <fun>
 # List.filter [three; four] ~f:(fun x ->
      match is_positive x with Error _ -> false | Ok b -> b);;
 - : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
@@ -889,10 +892,11 @@ kind of error that the compiler would catch with ordinary variants,
 but with polymorphic variants, this compiles without issue.  All that
 happened was that the compiler inferred a wider type for
 `extended_color_to_int`, which happens to be compatible with the
-narrower type that was listed in the mli.
+narrower type that was listed in the `mli`.
 
 If we add an explicit type annotation to the code itself (rather than
-just in the mli), then the compiler has enough information to warn us.
+just in the `mli`), then the compiler has enough information to warn
+us.
 
 ```ocaml
 let extended_color_to_int : extended_color -> int = function
@@ -901,16 +905,18 @@ let extended_color_to_int : extended_color -> int = function
   | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
 ```
 
-In particular, the compiler will complain that the `` `Grey`` case as
+In particular, the compiler will complain that the `` `Grey`` case is
 unused.
 
 ```ocaml
-File "terminal_color.ml", line 29, characters 4-11:
-Warning 11: this match case is unused.
+File "color.ml", line 29, characters 4-11:
+Error: This pattern matches values of type [? `Grey of 'a ]
+       but a pattern was expected which matches values of type extended_color
+       The second variant type does not allow tag(s) `Grey
 ```
 
 Once we have type definitions at our disposal, we can revisit the
-question of how we write the pattern-match that narrows the type.  In
+question of how we write the pattern match that narrows the type.  In
 particular, we can explicitly use the type name as part of the pattern
 match, by prefixing it with a `#`.
 
@@ -948,20 +954,19 @@ a price.  Here are some of the downsides.
 - _Efficiency:_ This isn't a huge effect, but polymorphic variants are
   somewhat heavier than regular variants, and OCaml can't generate
   code for matching on polymorphic variants that is quite as efficient
-  as what is generated for regular variants.
+  as what it generated for regular variants.
 
 All that said, polymorphic variants are still a useful and powerful
 feature, but it's worth understanding their limitations, and how to
 use them sensibly and modestly.
 
 Probably the safest and most common use-case for polymorphic variants
-is for cases where ordinary variants would be sufficient, but are
-syntactically too heavyweight.  For example, you often want to create
-a variant type for encoding the inputs or outputs to a function, where
-it's not worth declaring a separate type for it.  Polymorphic variants
-are very useful here, and as long as there are type annotations that
-constrain these to have explicit, exact types, this tends to work
-well.
+is where ordinary variants would be sufficient, but are syntactically
+too heavyweight.  For example, you often want to create a variant type
+for encoding the inputs or outputs to a function, where it's not worth
+declaring a separate type for it.  Polymorphic variants are very
+useful here, and as long as there are type annotations that constrain
+these to have explicit, exact types, this tends to work well.
 
 Variants are most problematic exactly where you take full advantage of
 their power; in particular, when you take advantage of the ability of

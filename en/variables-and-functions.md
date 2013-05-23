@@ -12,6 +12,7 @@ At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
 using the `let` keyword.  We can type a so-called _top-level_ `let`
 binding into `utop` with the following syntax to bind a new variable.
+Note that variable names must start with a lowercase letter.
 
 ```ocaml
 let <identifier> = <expr>
@@ -109,10 +110,10 @@ write:
 - : float = 25.1327412287183449
 ```
 
-It's important not to confuse this sequence of let bindings with the
-modification of a mutable variable.  How would `area_of_ring` be
-different, for example, if we had instead written this purposefully
-confusing bit of code:
+It's important not to confuse a sequence of let bindings with the
+modification of a mutable variable.  For example, consider how
+`area_of_ring` would work if we had instead written this purposefully
+confusing bit of code.
 
 ```ocaml
 # let area_of_ring inner_radius outer_radius =
@@ -141,8 +142,8 @@ Warning 26: unused variable pi.
 ```
 
 In OCaml, let bindings are immutable.  As we'll see in
-[xref](#imperative-programming), there are mutable values in OCaml, but
-no mutable variables.
+[xref](#imperative-programming), there are mutable values in OCaml,
+but no mutable variables.
 
 <note> <title> Why don't variables vary?  </title>
 
@@ -168,9 +169,9 @@ values, even though there's absolutely no mutation.
 ### Pattern matching and `let` ###
 
 Another useful feature of let bindings is that they support the use of
-patterns on the left-hand side of the bind.  Consider the following
-code, which uses `List.unzip`, a function for converting a list of
-pairs into a pair of lists.
+_patterns_ on the left-hand side.  Consider the following code, which
+uses `List.unzip`, a function for converting a list of pairs into a
+pair of lists.
 
 ```ocaml
 # let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
@@ -178,7 +179,13 @@ val ints : int list = [1; 2; 3]
 val strings : string list = ["one"; "two"; "three"]
 ```
 
-This actually binds two variables, one for each element of the pair.
+Here, `(ints,strings)` is a pattern, and the `let` binding assigns
+values to both of the identifiers that show up in that pattern.  A
+pattern is essentially a description of the shape of a data-structure,
+where some components are identifiers to be bound.  As we saw in
+[xref](#tuples-lists-options-and-pattern-matching), OCaml has patterns
+for a variety of different data-types.
+
 Using a pattern in a let-binding makes the most sense for a pattern
 that is _irrefutable_, _i.e._, where any value of the type in question
 is guaranteed to match the pattern.  Tuple and record patterns are
@@ -188,16 +195,14 @@ comma-separated list.
 
 ```ocaml
 # let upcase_first_entry line =
-     let (key :: values) = String.split ~on:',' line in
-     String.concat ~sep:"," (String.uppercase key :: values)
+     let (first :: rest) = String.split ~on:',' line in
+     String.concat ~sep:"," (String.uppercase first :: rest)
   ;;
-      Characters 40-53:
-       let (key :: values) = String.split ~on:',' line in
-            ^^^^^^^^^^^^^
+val upcase_first_entry : string -> string = <fun>
+Characters 40-53:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
-val upcase_first_entry : string -> string = <fun>
 ```
 
 This case can't really come up in practice, because `String.split`
@@ -213,53 +218,6 @@ to use a match statement to handle such cases explicitly:
   ;;
 val upcase_first_entry : string -> string = <fun>
 ```
-
-### `let`/`and` bindings ###
-
-Another variant on the let binding is the use of `and` to join
-multiple variable definitions into a single declaration.  For example,
-we can write:
-
-```ocaml
-# let x = 100 and y = 3.5;;
-val x : int = 100
-val y : float = 3.5
-```
-
-This can be useful when you want to create a number of new let
-bindings at once, without having each definition affect the next.  So,
-if we wanted to create new bindings that swapped the values of `x` and
-`y`, we could write:
-
-```ocaml
-# let x = y and y = x ;;
-val x : float = 3.5
-val y : int = 100
-```
-
-Note that this is just shadowing the definitions of `x` and `y`, not
-mutating anything.
-
-Without this trick, we would need to do something like the following:
-
-```ocaml
-# let tmp = x
-  let x = y
-  let y = tmp;;
-val tmp : int = 100
-val x : float = 3.5
-val y : int = 100
-```
-
-This use-case doesn't come up that often, however.  Most of the time
-that `and` comes into play, it's used to define multiple mutually
-recursive values, which we'll learn about later in the chapter.
-
-Note that when doing a `let`/`and` style declaration, the order of
-execution of the right-hand side of the binds is undefined by the
-language definition, so one should not write code that relies on it.
-If you want to make sure about the order of evaluation, you should use
-a sequence of `let`/`in` bindings.
 
 ## Functions ##
 
@@ -425,8 +383,8 @@ The practice of applying some of the arguments of a curried function
 to get a new function is called _partial application_.
 
 Note that the `fun` keyword supports its own syntax for currying, so
-we the following definition of `abs_diff` is equivalent to the
-definition above.
+the following definition of `abs_diff` is equivalent to the definition
+above.
 
 ```ocaml
 # let abs_diff = (fun x y -> abs (x - y));;
@@ -488,8 +446,8 @@ matching any single element list.  The `_` is there so we don't have
 to put an explicit name on that single element.
 
 We can also define multiple mutually recursive values by using `let
-rec` and `and` together, as in this (gratuitously inefficient)
-example.
+rec` combined with the `and` keyword.  Here's a (gratuitously
+inefficient) example.
 
 ```ocaml
 # let rec is_even x =
@@ -508,9 +466,9 @@ val is_odd : int -> bool = <fun>
 OCaml distinguishes between non-recursive definitions (using `let`)
 and recursive definitions (using `let rec`) largely for technical
 reasons: the type-inference algorithm needs to know when a set of
-function definitions are mutually recursive, and for some technical
-reasons that don't apply to a pure language like Haskell, these have
-to be marked explicitly by the programmer.
+function definitions are mutually recursive, and for reasons that
+don't apply to a pure language like Haskell, these have to be marked
+explicitly by the programmer.
 
 But this decision has some good effects.  For one thing, recursive
 (and especially mutually recursive) definitions are harder to reason
@@ -569,13 +527,13 @@ We can define (or redefine) the meaning of an operator as follows.
 Here's an example of a simple vector-addition operator on int pairs.
 
 ```ocaml
-# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
-val ( +! ) : int * int -> int * int -> int *int = <fun>
+# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
+val ( +! ) : int * int -> int * int -> int * int = <fun>
 # (3,2) +! (-2,4);;
 - : int * int = (1,6)
 ```
 
-The syntactic role of an operator is typically determined by first
+The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.  This table
 breaks the different operators and other syntactic forms into groups
 from highest to lowest precedence, explaining how each behaves
@@ -747,7 +705,8 @@ val some_or_zero : int option -> int = <fun>
 - : int list = [3; 0; 4]
 ```
 
-This is equivalent to combining a `fun` with `match`, as follows:
+This is equivalent to combining an ordinary function definition with a
+`match`.
 
 ```ocaml
 # let some_or_zero num_opt =
@@ -760,7 +719,7 @@ val some_or_zero : int option -> int = <fun>
 
 We can also combine the different styles of function declaration
 together, as in the following example where we declare a two argument
-(curried) function with a pattern-match on the second argument.
+(curried) function with a pattern match on the second argument.
 
 ```ocaml
 # let some_or_default default = function
@@ -877,9 +836,9 @@ Labeled arguments are useful in a few different cases:
     ```
 
     In other cases, you want to put the function argument second.  One
-    common reason is readability.  In particular, a function that
-    spans multiple lines is easiest to read when it's the last
-    argument provided.
+    common reason is readability.  In particular, a multi-line
+    function passed as an argument to another function is easiest to
+    read when it is the final argument to that function.
 
 #### Higher-order functions and labels ####
 
@@ -941,7 +900,7 @@ above examples.
 
 An optional argument is like a labeled argument that the caller can
 choose whether or not to provide.  Optional arguments are passed in
-using the same syntax as labeled arguments, and, similarly to labeled
+using the same syntax as labeled arguments, and, like labeled
 arguments, optional arguments can be provided in any order.
 
 Here's an example of a string concatenation function with an optional
@@ -988,7 +947,7 @@ concision of omitting the argument overwhelms the corresponding loss
 of explicitness.
 
 This means that rarely used functions should not have optional
-arguments.  A good rule of thumb is not to use optional arguments for
+arguments.  A good rule of thumb is to avoid optional arguments for
 functions internal to a module, _i.e._, functions that are not
 included in the module's interface, or `mli` file.  We'll learn more
 about `mli`s in [xref](#files-modules-and-programs).

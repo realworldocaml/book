@@ -837,7 +837,7 @@ clause.
   ;;
 ```
 
-This is a little less clear, however, than the direct pattern-matching
+This is a little less clear, however, than the direct pattern matching
 solution, where the meaning of each pattern is clearer on its own.
 
 
