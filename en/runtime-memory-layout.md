@@ -56,8 +56,8 @@ response to allocation requests by the OCaml program.
 When there isn't enough memory available to satisfy an allocation request from
 the allocated heap blocks, the runtime system invokes the *garbage collector*
 (or GC). An OCaml program does not explicitly free a heap block when it is done
-with it, and the GC must determine which heap blocks are *alive* and which heap
-blocks are *dead*, i.e. no longer in use. Dead blocks are collected and their
+with it, and the GC must determine which heap blocks are "live" and which heap
+blocks are "dead", i.e. no longer in use. Dead blocks are collected and their
 memory made available for re-use by the application.
 
 The garbage collector does not keep constant track of blocks as they are
@@ -74,9 +74,9 @@ blocks of memory that are used for a short period of time and then never
 accessed again.  OCaml takes advantage of this fact to improve the performance
 of allocation and collection by using a *generational* garbage collector. This
 means that it has different memory regions to hold blocks based on how long the
-blocks have been alive.  OCaml's heap is split in two; there is a small,
+blocks have been live.  OCaml's heap is split in two; there is a small,
 fixed-size *minor heap* where most most blocks are initially allocated, and a large,
-variable-sized *major heap* for blocks that have been alive longer or
+variable-sized *major heap* for blocks that have been live longer or
 are larger than 4KB.  A typical functional programming style means that young
 blocks tend to die young, and old blocks tend to stay around for longer than
 young ones (this is referred to as the *generational hypothesis*).
