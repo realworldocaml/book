@@ -527,11 +527,10 @@ Error: This expression has type 'a * 'b
 In this case, we've marked the `x` as being of type
 `Yojson.Basic.json`, and the compiler immediately spots that the
 argument to the `Assoc` variant has the incorrect type.  This
-illustrates the strengths and drawbacks of using polymorphic variants:
-they make it possible to easily subtype across module boundaries
-(`Basic` and `Safe` in Yojson's case), but the error messages can be
-more confusing.  However, a bit of careful manual type annotation is
-all it takes to make tracking down such issues much easier.
+illustrates the strengths and weaknesses of polymorphic variants: they make it
+possible to easily subtype across module boundaries, but the error messages can
+be more confusing.  However, a bit of careful manual type annotation is all it
+takes to make tracking down such issues much easier.
 
 </sidebar>
 
