@@ -198,31 +198,6 @@ OPAM is upstreamed into Debian mainline.
 # apt-get install opam
 ```
 
-<note>
-<title>Note to reviewers</title>
-
-The OPAM instructions will be simplified when integrated upstream into
-Debian and Fedora, which is ongoing.  Until then, we're leaving
-source-code installation instructions here. Please leave a comment
-with any amended instructions you encounter
-
-</note>
-
-If the binary packages aren't suitable, you need to install the latest
-OPAM release from source.  The distribution only requires the OCaml
-compiler to be installed, so this should be pretty
-straightforward. Download the latest version, which is always marked
-with a `stable` tag on the project
-[homepage](https://github.com/OCamlPro/opam/tags).
-
-```
-$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
-$ tar -zxvf latest.tar.gz
-$ cd opam-latest
-$ ./configure && make
-$ sudo make install
-```
-
 ### Fedora and Red Hat
 
 There is currently no RPM available for Fedora or Red Hat, so please
@@ -245,6 +220,32 @@ $ tar -xvf opam.tar.gz && cd opam
 $ makepkg
 $ sudo pacman -U opam-_version_.pkg.tar.gz
 ```
+
+### Source Installation
+
+If the binary packages aren't available for your system, you'll need to install
+the latest OPAM release from source.  The distribution only requires the OCaml
+compiler to be installed, so this should be straightforward.  Download
+the latest version from the [homepage](https://github.com/OCamlPro/opam/tags).
+
+```console
+$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
+$ tar -zxvf latest.tar.gz
+$ cd opam-latest
+$ ./configure && make
+$ sudo make install
+```
+
+<note>
+<title>Note to reviewers</title>
+
+The OPAM instructions will be simplified when integrated upstream into
+Debian and Fedora, which is ongoing.  Until then, we're leaving
+source-code installation instructions here. Please leave a comment
+with any amended instructions you encounter.
+
+</note>
+
 
 ## Configuring the OPAM package manager
 
