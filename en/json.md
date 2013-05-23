@@ -566,7 +566,7 @@ val to_basic : json -> Yojson.Basic.json
 The combinators described earlier make it fairly easy to extract
 fields from JSON records, but the process is still pretty manual.
 We'll talk about how to do larger-scale JSON parsing now, using a
-domain-specific language known as [ATD](http://oss.wink.com/atdgen/).
+domain-specific language known as [ATD](http://mjambon.com/atd-biniou-intro.html).
 
 The idea behind ATD is to specify the format of the JSON in a separate
 file, and then run a compiler (`atdgen`) that outputs OCaml code to
