@@ -750,8 +750,7 @@ JSON are:
   JSON extensions.
 * `-j-custom-fields FUNCTION`: call a custom function for every
   unknown field encountered, instead of raising a parsing exception.
-* `-j-defaults`: force the output a JSON value even if the
-  specification defines it as the default value for that field.
+* `-j-defaults`: always explicitly output a JSON value if possible. This requires the default value for that field to be defined in the ATD specification.
 
 The full ATD specification is quite sophisticated (and well documented
 online at its homepage).  The ATD compiler can also target formats
