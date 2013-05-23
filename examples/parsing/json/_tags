@@ -1,2 +1,2 @@
-true: package(core,yojson)
+true: package(core,yojson,atdgen)
 true: thread, debug, annot

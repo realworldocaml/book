@@ -143,7 +143,7 @@
  (public true)
  )
 ((part Advanced)
- (name "managing-external-memory-with-bigarrays")
+ (name "parsing-binary-protocols")
  (file "bigarrays")
  (note "50% done, on Anil's stack")
  (title "Parsing Binary Protocols")
