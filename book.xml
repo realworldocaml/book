@@ -12832,7 +12832,8 @@ let () =
 </programlisting>
         <para>
           Build this with the same <literal>_tags</literal> file as the
-          earlier example, and running ocamlbuild on the new file.
+          earlier example, and run <literal>ocamlbuild</literal> on the
+          new file.
         </para>
         <programlisting>
 $ ocamlbuild -use-ocamlfind parse_book.native
@@ -12867,7 +12868,6 @@ Translated: &lt;none&gt;
         </para>
         <programlisting language="ocaml">
 val map  : 'a list -&gt; f:('a -&gt; 'b)   -&gt; 'b list
-val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit
 val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum
 </programlisting>
         <para>
@@ -12879,13 +12879,16 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
           applies each value in the input list to a function that
           accumulates a single result, and returns that instead.
         </para>
+        <programlisting language="ocaml">
+val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit
+</programlisting>
         <para>
-          The final example above is a more specialised combinator that
+          <literal>iter</literal> is a more specialised combinator that
           is only useful in OCaml due to side-effects being allowed. The
           input function is applied to every value, but no result is
-          supplied. Instead, the function must directly result in some
-          side-effect, such as printing to the console or updating a
-          reference elsewhere in the environment.
+          supplied. The function must instead apply some side-effect
+          such as changing a mutable record field or printing to the
+          standard output.
         </para>
         </sidebar>
         <para>
@@ -13189,7 +13192,7 @@ $ atdgen -version
         <literal>~/.opam</literal> directory, and will already be on
         your <literal>PATH</literal> from running
         <literal>opam config env</literal>. See
-        <xref linkend="installation"/> this isn't working.
+        <xref linkend="installation"/> if this isn't working.
       </para>
       </note>
 
