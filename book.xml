@@ -907,7 +907,7 @@ Exception: Division_by_zero.
     </sect2>
   </sect1>
   <sect1 id="tuples-lists-options-and-pattern-matching">
-    <title>Tuples, Lists, Options and Pattern-matching</title>
+    <title>Tuples, Lists, Options and Pattern Matching</title>
     <sect2 id="tuples">
       <title>Tuples</title>
       <para>
@@ -932,8 +932,8 @@ val a_tuple : int * string = (3, &quot;three&quot;)
         elements of type <literal>s</literal>.
       </para>
       <para>
-        You can extract the components of a tuple using OCaml's
-        pattern-matching syntax. For example:
+        You can extract the components of a tuple using OCaml's pattern
+        matching syntax. For example:
       </para>
       <programlisting language="ocaml">
 # let (x,y) = a_tuple;;
@@ -954,7 +954,7 @@ val y : string = &quot;three&quot;
 </programlisting>
       <para>
         Note that the same syntax is used both for constructing and for
-        pattern-matching on tuples.
+        pattern matching on tuples.
       </para>
       <para>
         Pattern matching can also show up in function arguments. Here's
@@ -1099,8 +1099,8 @@ Error: This expression has type string but an expression was expected of type
       <sect3 id="list-patterns-using-match">
         <title>List patterns using <literal>match</literal></title>
         <para>
-          The elements of a list can be accessed through
-          pattern-matching. List patterns are based on the two list
+          The elements of a list can be accessed through pattern
+          matching. List patterns are based on the two list
           constructors, <literal>[]</literal> and <literal>::</literal>.
           Here's a simple example.
         </para>
@@ -1425,10 +1425,10 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
         well-defined values of type <literal>string</literal>. If you
         want to allow, say, the first of those to be absent, then you
         need to change the type to
-        <literal>string option * string</literal>. As we'll see, this
-        explicitness allows the compiler to provide a great deal of help
-        in making sure you're correctly handing the possibility of
-        missing data.
+        <literal>string option * string</literal>. As we'll see in
+        <xref linkend="error-handling"/>, this explicitness
+        allows the compiler to provide a great deal of help in making
+        sure you're correctly handing the possibility of missing data.
       </para>
     </sect2>
   </sect1>
@@ -1957,7 +1957,8 @@ Total: 100.5
       introduced using the <literal>let</literal> keyword. We can type a
       so-called <emphasis>top-level</emphasis> <literal>let</literal>
       binding into <literal>utop</literal> with the following syntax to
-      bind a new variable.
+      bind a new variable. Note that variable names must start with a
+      lowercase letter.
     </para>
     <programlisting language="ocaml">
 let &lt;identifier&gt; = &lt;expr&gt;
@@ -2067,10 +2068,10 @@ val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
 - : float = 25.1327412287183449
 </programlisting>
     <para>
-      It's important not to confuse this sequence of let bindings with
-      the modification of a mutable variable. How would
-      <literal>area_of_ring</literal> be different, for example, if we
-      had instead written this purposefully confusing bit of code:
+      It's important not to confuse a sequence of let bindings with the
+      modification of a mutable variable. For example, consider how
+      <literal>area_of_ring</literal> would work if we had instead
+      written this purposefully confusing bit of code.
     </para>
     <programlisting language="ocaml">
 # let area_of_ring inner_radius outer_radius =
@@ -2133,9 +2134,10 @@ Warning 26: unused variable pi.
       <title>Pattern matching and <literal>let</literal></title>
       <para>
         Another useful feature of let bindings is that they support the
-        use of patterns on the left-hand side of the bind. Consider the
-        following code, which uses <literal>List.unzip</literal>, a
-        function for converting a list of pairs into a pair of lists.
+        use of <emphasis>patterns</emphasis> on the left-hand side.
+        Consider the following code, which uses
+        <literal>List.unzip</literal>, a function for converting a list
+        of pairs into a pair of lists.
       </para>
       <programlisting language="ocaml">
 # let (ints,strings) = List.unzip [(1,&quot;one&quot;); (2,&quot;two&quot;); (3,&quot;three&quot;)];;
@@ -2143,9 +2145,17 @@ val ints : int list = [1; 2; 3]
 val strings : string list = [&quot;one&quot;; &quot;two&quot;; &quot;three&quot;]
 </programlisting>
       <para>
-        This actually binds two variables, one for each element of the
-        pair. Using a pattern in a let-binding makes the most sense for
-        a pattern that is <emphasis>irrefutable</emphasis>,
+        Here, <literal>(ints,strings)</literal> is a pattern, and the
+        <literal>let</literal> binding assigns values to both of the
+        identifiers that show up in that pattern. A pattern is
+        essentially a description of the shape of a data-structure,
+        where some components are identifiers to be bound. As we saw in
+        <xref linkend="tuples-lists-options-and-pattern-matching"/>,
+        OCaml has patterns for a variety of different data-types.
+      </para>
+      <para>
+        Using a pattern in a let-binding makes the most sense for a
+        pattern that is <emphasis>irrefutable</emphasis>,
         <emphasis>i.e.</emphasis>, where any value of the type in
         question is guaranteed to match the pattern. Tuple and record
         patterns are irrefutable, but list patterns are not. Consider
@@ -2154,16 +2164,14 @@ val strings : string list = [&quot;one&quot;; &quot;two&quot;; &quot;three&quot;
       </para>
       <programlisting language="ocaml">
 # let upcase_first_entry line =
-     let (key :: values) = String.split ~on:',' line in
-     String.concat ~sep:&quot;,&quot; (String.uppercase key :: values)
+     let (first :: rest) = String.split ~on:',' line in
+     String.concat ~sep:&quot;,&quot; (String.uppercase first :: rest)
   ;;
-      Characters 40-53:
-       let (key :: values) = String.split ~on:',' line in
-            ^^^^^^^^^^^^^
+val upcase_first_entry : string -&gt; string = &lt;fun&gt;
+Characters 40-53:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
-val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 </programlisting>
       <para>
         This case can't really come up in practice, because
@@ -2180,64 +2188,6 @@ val upcase_first_entry : string -&gt; string = &lt;fun&gt;
   ;;
 val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 </programlisting>
-    </sect2>
-    <sect2 id="letand-bindings">
-      <title><literal>let</literal>/<literal>and</literal>
-      bindings</title>
-      <para>
-        Another variant on the let binding is the use of
-        <literal>and</literal> to join multiple variable definitions
-        into a single declaration. For example, we can write:
-      </para>
-      <programlisting language="ocaml">
-# let x = 100 and y = 3.5;;
-val x : int = 100
-val y : float = 3.5
-</programlisting>
-      <para>
-        This can be useful when you want to create a number of new let
-        bindings at once, without having each definition affect the
-        next. So, if we wanted to create new bindings that swapped the
-        values of <literal>x</literal> and <literal>y</literal>, we
-        could write:
-      </para>
-      <programlisting language="ocaml">
-# let x = y and y = x ;;
-val x : float = 3.5
-val y : int = 100
-</programlisting>
-      <para>
-        Note that this is just shadowing the definitions of
-        <literal>x</literal> and <literal>y</literal>, not mutating
-        anything.
-      </para>
-      <para>
-        Without this trick, we would need to do something like the
-        following:
-      </para>
-      <programlisting language="ocaml">
-# let tmp = x
-  let x = y
-  let y = tmp;;
-val tmp : int = 100
-val x : float = 3.5
-val y : int = 100
-</programlisting>
-      <para>
-        This use-case doesn't come up that often, however. Most of the
-        time that <literal>and</literal> comes into play, it's used to
-        define multiple mutually recursive values, which we'll learn
-        about later in the chapter.
-      </para>
-      <para>
-        Note that when doing a
-        <literal>let</literal>/<literal>and</literal> style declaration,
-        the order of execution of the right-hand side of the binds is
-        undefined by the language definition, so one should not write
-        code that relies on it. If you want to make sure about the order
-        of evaluation, you should use a sequence of
-        <literal>let</literal>/<literal>in</literal> bindings.
-      </para>
     </sect2>
   </sect1>
   <sect1 id="functions">
@@ -2425,7 +2375,7 @@ val dist_from_3 : int -&gt; int = &lt;fun&gt;
       </para>
       <para>
         Note that the <literal>fun</literal> keyword supports its own
-        syntax for currying, so we the following definition of
+        syntax for currying, so the following definition of
         <literal>abs_diff</literal> is equivalent to the definition
         above.
       </para>
@@ -2501,8 +2451,9 @@ val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;
       </para>
       <para>
         We can also define multiple mutually recursive values by using
-        <literal>let rec</literal> and <literal>and</literal> together,
-        as in this (gratuitously inefficient) example.
+        <literal>let rec</literal> combined with the
+        <literal>and</literal> keyword. Here's a (gratuitously
+        inefficient) example.
       </para>
       <programlisting language="ocaml">
 # let rec is_even x =
@@ -2522,9 +2473,9 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
         <literal>let</literal>) and recursive definitions (using
         <literal>let rec</literal>) largely for technical reasons: the
         type-inference algorithm needs to know when a set of function
-        definitions are mutually recursive, and for some technical
-        reasons that don't apply to a pure language like Haskell, these
-        have to be marked explicitly by the programmer.
+        definitions are mutually recursive, and for reasons that don't
+        apply to a pure language like Haskell, these have to be marked
+        explicitly by the programmer.
       </para>
       <para>
         But this decision has some good effects. For one thing,
@@ -2593,13 +2544,13 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
         on int pairs.
       </para>
       <programlisting language="ocaml">
-# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
-val ( +! ) : int * int -&gt; int * int -&gt; int *int = &lt;fun&gt;
+# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
+val ( +! ) : int * int -&gt; int * int -&gt; int * int = &lt;fun&gt;
 # (3,2) +! (-2,4);;
 - : int * int = (1,6)
 </programlisting>
       <para>
-        The syntactic role of an operator is typically determined by
+        The syntactic role of an operator is typically determined by its
         first character or two, though there are a few exceptions. This
         table breaks the different operators and other syntactic forms
         into groups from highest to lowest precedence, explaining how
@@ -2894,8 +2845,8 @@ val some_or_zero : int option -&gt; int = &lt;fun&gt;
 - : int list = [3; 0; 4]
 </programlisting>
       <para>
-        This is equivalent to combining a <literal>fun</literal> with
-        <literal>match</literal>, as follows:
+        This is equivalent to combining an ordinary function definition
+        with a <literal>match</literal>.
       </para>
       <programlisting language="ocaml">
 # let some_or_zero num_opt =
@@ -2908,7 +2859,7 @@ val some_or_zero : int option -&gt; int = &lt;fun&gt;
       <para>
         We can also combine the different styles of function declaration
         together, as in the following example where we declare a two
-        argument (curried) function with a pattern-match on the second
+        argument (curried) function with a pattern match on the second
         argument.
       </para>
       <programlisting language="ocaml">
@@ -3049,8 +3000,9 @@ val create_hashtable : init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Ha
           <para>
             In other cases, you want to put the function argument
             second. One common reason is readability. In particular, a
-            function that spans multiple lines is easiest to read when
-            it's the last argument provided.
+            multi-line function passed as an argument to another
+            function is easiest to read when it is the final argument to
+            that function.
           </para>
         </listitem>
       </itemizedlist>
@@ -3122,9 +3074,9 @@ val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c 
       <para>
         An optional argument is like a labeled argument that the caller
         can choose whether or not to provide. Optional arguments are
-        passed in using the same syntax as labeled arguments, and,
-        similarly to labeled arguments, optional arguments can be
-        provided in any order.
+        passed in using the same syntax as labeled arguments, and, like
+        labeled arguments, optional arguments can be provided in any
+        order.
       </para>
       <para>
         Here's an example of a string concatenation function with an
@@ -3179,7 +3131,7 @@ val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
       </para>
       <para>
         This means that rarely used functions should not have optional
-        arguments. A good rule of thumb is not to use optional arguments
+        arguments. A good rule of thumb is to avoid optional arguments
         for functions internal to a module, <emphasis>i.e.</emphasis>,
         functions that are not included in the module's interface, or
         <literal>mli</literal> file. We'll learn more about
@@ -4402,9 +4354,9 @@ val count_some : 'a option list -&gt; int = &lt;fun&gt;
   ;;
 </programlisting>
     <para>
-      This is a little less clear, however, than the direct
-      pattern-matching solution, where the meaning of each pattern is
-      clearer on its own.
+      This is a little less clear, however, than the direct pattern
+      matching solution, where the meaning of each pattern is clearer on
+      its own.
     </para>
     <programlisting language="ocaml">
 # let rec count_some list =
@@ -4607,8 +4559,10 @@ $ ocamlbuild -use-ocamlfind freq.byte
     <para>
       We can now run the our program from the command-line. The
       following line extracts strings from the
-      <literal>ocamlopt</literal> executable, reporting the most
-      frequently occurring ones.
+      <literal>ocamlopt</literal> binary, reporting the most frequently
+      occurring ones. Note that the specific results will very from
+      platform to platform, since the binary itself will differ between
+      platforms.
     </para>
     <programlisting>
 $ strings `which ocamlopt` | ./freq.byte
@@ -4750,37 +4704,36 @@ let build_counts () =
     <para>
       you'll see that it depends on the fact that the empty set of
       frequency counts is represented as an empty list. We'd like to
-      prevent this kind of dependency, so that we can change the
+      prevent this kind of dependency so we can change the
       implementation of <literal>Counter</literal> without needing to
       change client code like that in <literal>freq.ml</literal>.
     </para>
     <para>
-      The first step towards hiding the implementation details of
-      <literal>Counter</literal> is to write down the
-      <emphasis>signature</emphasis> of the module. Note that the terms
+      The implementation details of a module can be hidden by attaching
+      an <emphasis>interface</emphasis>. (Note that the terms
       <emphasis>interface</emphasis>, <emphasis>signature</emphasis> and
-      <emphasis>module type</emphasis> are all used almost
-      interchangeably in the OCaml world.
+      <emphasis>module type</emphasis> are all used interchangeably.) A
+      module defined by a file <literal>filename.ml</literal> can be
+      constrained by a signature placed in a file called
+      <literal>filename.mli</literal>.
     </para>
     <para>
-      In this case, we'll put the signature in
-      <literal>counter.mli</literal>, which is the interface file
-      (that's where the <literal>i</literal> in <literal>mli</literal>
-      comes from) for <literal>counter.ml</literal>. We'll start by
-      writing down an interface that describes what's currently
-      available in <literal>Counter</literal> without hiding anything.
-      We'll use <literal>val</literal> declarations to specify values to
-      expose. The syntax of a <literal>val</literal> declaration is as
-      follows:
+      For <literal>counter.mli</literal>, we'll start by writing down an
+      interface that describes what's currently available in
+      <literal>counter.ml</literal>, without hiding anything.
+      <literal>val</literal> declarations are used to specify values in
+      a signature. The syntax of a <literal>val</literal> declaration is
+      as follows:
     </para>
     <programlisting>
 val &lt;identifier&gt; : &lt;type&gt;
 </programlisting>
     <para>
-      And here's the contents of the <literal>mli</literal> file.
+      Using this syntax, we can write the signature of
+      <literal>counter.ml</literal> as follows.
     </para>
     <programlisting language="ocaml">
-(* counter.mli: descriptive interface *)
+(* filename: counter.mli *)
 open Core.Std
 
 val touch : (string * int) list -&gt; string -&gt; (string * int) list
@@ -4794,10 +4747,9 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list
     Auto-generating <literal>mli</literal> files
     </title>
     <para>
-      In general, if you don't want to construct an mli entirely by
-      hand, you can ask OCaml to autogenerate one for you from the
-      source, which you can then adjust to fit your needs. In this case,
-      we can write:
+      If you don't want to construct an mli entirely by hand, you can
+      ask OCaml to autogenerate one for you from the source, which you
+      can then adjust to fit your needs. In this case, we can write:
     </para>
     <programlisting>
 $ ocamlbuild -use-ocamlfind counter.inferred.mli
@@ -4813,18 +4765,18 @@ val touch :
   ('a, int) Core.Std.List.Assoc.t -&gt; 'a -&gt; ('a, int) Core.Std.List.Assoc.t
 </programlisting>
     <para>
-      This is equivalent to the mli that we generated, but is a little
-      more verbose. In general, you want to use autogenerated
-      <literal>mli</literal>'s as a starting point only. There's no
-      replacement for a careful consideration of what should be included
-      in the interface of your module and of how that should be
-      organized, documented and formatted.
+      This is equivalent to the <literal>mli</literal> that we
+      generated, but is a little more verbose. In general, you want to
+      use autogenerated <literal>mli</literal>'s as a starting point
+      only. There's no replacement for a careful consideration of what
+      should be included in the interface of your module and of how that
+      should be organized, documented and formatted.
     </para>
     </note>
 
     <para>
-      To actually hide the fact that frequency counts are represented as
-      association lists, we need to make the type of frequency counts
+      To hide the fact that frequency counts are represented as
+      association lists, we'll need to make the type of frequency counts
       <emphasis>abstract</emphasis>. A type is abstract if its name is
       exposed in the interface, but its definition is not. Here's an
       abstract interface for <literal>Counter</literal>:
@@ -4885,11 +4837,22 @@ Error: This expression has type 'a list
       <literal>build_counts</literal> to use
       <literal>Counter.empty</literal> instead of <literal>[]</literal>
       and <literal>Counter.to_list</literal> to get the association list
-      out at the end for processing and printing, as below.
+      out at the end for processing and printing. The resulting
+      implementation is shown below.
     </para>
     <programlisting language="ocaml">
+(* filename: freq.ml *)
+open Core.Std
+
 let build_counts () =
   In_channel.fold_lines stdin ~init:Counter.empty ~f:Counter.touch
+
+let () =
+  build_counts ()
+  |&gt; Counter.to_list
+  |&gt; List.sort ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; (fun counts -&gt; List.take counts 10)
+  |&gt; List.iter ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
 </programlisting>
     <para>
       Now we can turn to optimizing the implementation of
@@ -5541,7 +5504,8 @@ opam switch 4.01.0dev+trunk
     <xref linkend="a-guided-tour"/>. In this chapter we'll
     cover records in more depth, covering more of the details of how
     they work, as well as advice on how to use them effectively in your
-    software designs.
+    software designs. Variants will be covered in more depth in
+    <xref linkend="variants"/>.
   </para>
   <para>
     A record represents a collection of values stored together as one,
@@ -5555,6 +5519,9 @@ type &lt;record-name&gt; =
     ...
   }
 </programlisting>
+  <para>
+    Note that record field names must start with a lower-case letter.
+  </para>
   <para>
     Here's a simple example, a <literal>host_info</literal> record that
     summarizes information about a given computer.
@@ -5896,17 +5863,12 @@ val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
     <para>
       We can avoid this ambiguity altogether, either by using
       non-overlapping field names or, more generally, by minting a
-      module for each type. We'll talk more about modules more in
-      <xref linkend="files-modules-and-programs"/>, but for
-      now, you can think of a module as a way of collecting values and
-      types together in a named package.
-    </para>
-    <para>
-      Packing types into modules is a broadly useful idiom (and one used
-      quite extensively by Core), providing for each type a name-space
-      within which to put related values. When using this style, it is
-      standard practice to name the type associated with the module
-      <literal>t</literal>. Using this style we would write:
+      module for each type. Packing types into modules is a broadly
+      useful idiom (and one used quite extensively by Core), providing
+      for each type a name-space within which to put related values.
+      When using this style, it is standard practice to name the type
+      associated with the module <literal>t</literal>. Using this style
+      we would write:
     </para>
     <programlisting language="ocaml">
 # module Log_entry = struct
@@ -5963,7 +5925,7 @@ val create_log_entry :
 </programlisting>
     <para>
       This is not restricted to constructing a record; we can use the
-      same trick when pattern-matching:
+      same trick when pattern matching.
     </para>
     <programlisting language="ocaml">
 # let message_to_string { Log_entry.important; message; _ } =
@@ -5973,12 +5935,23 @@ val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
       When using dot-notation for accessing record fields, we can
-      qualify the field by the module directly:
+      qualify the field by the module directly.
     </para>
     <programlisting language="ocaml">
 # let is_important t = t.Log_entry.important;;
 val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;
 </programlisting>
+    <para>
+      The syntax here is a little surprising when you first encounter
+      it. The thing to keep in mind is that the dot is being used in two
+      ways: the first dot is a record field access, with everything to
+      the right of the dot being interpreted as a field name; the second
+      dot is accessing the contents of a module, referring to the record
+      field <literal>important</literal> from within the module
+      <literal>Log_entry</literal>. The fact that
+      <literal>Log_entry</literal> is capitalized and so can't be a
+      field name is what disambiguates the two uses.
+    </para>
     <para>
       For functions defined within the module where a given record is
       defined, the module qualification goes away entirely.
@@ -6115,7 +6088,7 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
       OCaml's policy of immutable-by-default is a good one, but
       imperative programming does have its place. We'll discuss more
       about how (and when) to use OCaml's imperative features in
-      <xref linkend="imperative-programming"/>.
+      <xref linkend="imperative-programming2"/>.
     </para>
   </sect1>
   <sect1 id="first-class-fields">
@@ -6138,12 +6111,16 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
       extension that ships with <literal>Core</literal> does just that.
     </para>
     <para>
-      <literal>fieldslib</literal> is invoked by putting the
-      <literal>with fields</literal> annotation at the end of the
-      declaration of a record type. So, for example, we could have
-      defined <literal>Logon</literal> as follows.
+      You can enable the syntax extension by typing
+      <literal>#require &quot;fieldslib.syntax&quot;</literal> into the
+      top-level, at which point the <literal>with fields</literal>
+      annotation at the end of the declaration of a record type will
+      cause the extension to be applied to a given type declaration. So,
+      for example, we could have defined <literal>Logon</literal> as
+      follows.
     </para>
     <programlisting language="ocaml">
+# #require &quot;fieldslib.syntax&quot;;;
 # module Logon = struct
     type t =
       { session_id: string;
@@ -6155,9 +6132,15 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
   end;;
 </programlisting>
     <para>
-      Given that definition, we can use the function
-      <literal>Logon.user</literal> to extract the user field from a
-      logon message.
+      Note that this will generate a <emphasis>lot</emphasis> of output,
+      because <literal>fieldslib</literal> generates a large collection
+      of helper functions for working with record fields. We'll only
+      discuss a few of these; you can learn about the remainder from the
+      documentation that comes with <literal>fieldslib</literal>.
+    </para>
+    <para>
+      One of the functions we obtain is <literal>Logon.user</literal>,
+      which we can use to extract the user field from a logon message.
     </para>
     <programlisting language="ocaml">
 # let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
@@ -6232,11 +6215,6 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
 - : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;
 </programlisting>
     <para>
-      The extra type parameter <literal>'b</literal> is there to keep
-      track of permissions on the <literal>Field.t</literal>. As we'll
-      see later when we cover
-    </para>
-    <para>
       The type is <literal>Field.t_with_perm</literal> rather than a
       simple <literal>Field.t</literal> because fields have a notion of
       access control associated with them because there are some special
@@ -6258,7 +6236,7 @@ val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string 
     <para>
       This takes three arguments: the <literal>Field.t</literal>, a
       function for converting the contents of the field in question to a
-      string, and a record from which the field can be grabbed..
+      string, and a record from which the field can be grabbed.
     </para>
     <para>
       Here's an example of <literal>show_field</literal> in action.
@@ -6285,8 +6263,36 @@ val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string 
       <literal>fieldslib</literal> also provides higher-level operators,
       like <literal>Fields.fold</literal> and
       <literal>Fields.iter</literal>, which let you iterate over all the
-      fields of a record. The following function uses
-      <literal>Logon.Fields.iter</literal> and
+      fields of a record. So, for example, in the case of
+      <literal>Logon.t</literal>, the field iterator has the following
+      type.
+    </para>
+    <programlisting language="ocaml">
+# Logon.Fields.iter;;
+- : session_id:(([&lt; `Read | `Set_and_create ], Logon.t, string)
+                Field.t_with_perm -&gt; unit) -&gt;
+    time:(([&lt; `Read | `Set_and_create ], Logon.t, Time.t) Field.t_with_perm -&gt;
+          unit) -&gt;
+    user:(([&lt; `Read | `Set_and_create ], Logon.t, string) Field.t_with_perm -&gt;
+          unit) -&gt;
+    credentials:(([&lt; `Read | `Set_and_create ], Logon.t, string)
+                 Field.t_with_perm -&gt; unit) -&gt;
+    unit
+= &lt;fun&gt;
+</programlisting>
+    <para>
+      This is a bit daunting to look at, largely because of the access
+      control markers, but the structure is actually pretty simple. Each
+      labeled argument is a function that takes a first-class field of
+      the necessary type as an argument. Note that
+      <literal>iter</literal> passes each of these callbacks the
+      <literal>Field.t</literal>, not the contents of the specific
+      record field. The contents of the field, though, can be looked up
+      using the combiation of the record and the
+      <literal>Field.t</literal>.
+    </para>
+    <para>
+      Now, let's use <literal>Logon.Fields.iter</literal> and
       <literal>show_field</literal> to print out all the fields of a
       <literal>Logon</literal> record.
     </para>
@@ -6310,20 +6316,21 @@ credentials: Xy2d9W
 - : unit = ()
 </programlisting>
     <para>
-      One nice side effect of this approach is that it helps you
-      refactor your code when changing the fields of a record. In
-      particular, if you add a field to <literal>Logon</literal>, the
-      type of <literal>iter</literal> will change with it, acquiring a
-      new argument. Any code using <literal>iter</literal> won't be able
-      to compile until it's fixed to take this new argument into
-      account, and these compilation failiures will point out places you
-      need to adapt your code.
+      One nice side effect of this approach is that it helps you adapt
+      your code when the fields of a record change. If you were to add a
+      field to <literal>Logon.t</literal>, the type of
+      <literal>Logon.Fields.iter</literal> would change along with it,
+      acquiring a new argument. Any code using
+      <literal>Logon.Fields.iter</literal> won't compile until it's
+      fixed to take this new argument into account.
     </para>
     <para>
-      Field iterators are useful for a variety of record-related tasks,
-      from building record validation functions to scaffolding the
-      definition of a web-form from a record type, all with a guarantee
-      that you've considered all fields of the record type in question.
+      This exhaustion guarntee is a valuable one. Field iterators are
+      useful for a variety of record-related tasks, from building record
+      validation functions to scaffolding the definition of a web-form
+      from a record type, and such applications can benefit from the
+      guarantee that all fields of the record type in question have been
+      considered.
     </para>
   </sect1>
 </chapter><chapter id="variants">
@@ -6506,7 +6513,7 @@ Error: This pattern matches values of type 'a * 'b
     | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
     | Gray i -&gt; 232 + i ;;
 Characters 19-154:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8: this pattern matching is not exhaustive.
 Here is an example of a value that is not matched:
 Bold _
 val color_to_int : color -&gt; int = &lt;fun&gt;
@@ -6527,17 +6534,16 @@ val color_to_int : color -&gt; int = &lt;fun&gt;
     be fixed to complete the refactoring of the code. This is
     fantastically useful, but for it to work well and reliably, you need
     to write your code in a way that maximizes the compiler's chances of
-    helping you find the bugs. One important rule of thumb to follow to
-    maximize what the compiler can do for you is to avoid catch-all
-    cases in pattern matches.
+    helping you find the bugs. To this end, a useful rule of thumb is to
+    avoid catch-all cases in pattern matches.
   </para>
   <para>
-    Here's an example of how a catch-all case plays in. Imagine we
-    wanted a version of <literal>color_to_int</literal> that works on
-    older terminals by rendering the first 16 colors (the 8
-    <literal>basic_color</literal>s in regular and bold) in the normal
-    way, but rendering everything else as white. We might have written
-    the function as follows.
+    Here's an example that illustrates how catch-all cases interact with
+    exhaustion checks. Imagine we wanted a version of
+    <literal>color_to_int</literal> that works on older terminals by
+    rendering the first 16 colors (the 8 <literal>basic_color</literal>s
+    in regular and bold) in the normal way, but rendering everything
+    else as white. We might have written the function as follows.
   </para>
   <programlisting language="ocaml">
 # let oldschool_color_to_int = function
@@ -6551,9 +6557,8 @@ val oldschool_color_to_int : color -&gt; int = &lt;fun&gt;
     But because the catch-all case encompasses all possibilities, the
     type system will no longer warn us that we have missed the new
     <literal>Bold</literal> case when we change the type to include it.
-    We can get this check back by being more explicit about what we're
-    ignoring. We haven't changed the behavior of the code, but we have
-    improved our robustness to change.
+    We can get this check back by being avoiding the catch-all case, and
+    instead being explicit about the tags that are ignored.
   </para>
   </note>
   <sect1 id="combining-records-and-variants">
@@ -6781,7 +6786,7 @@ val messages_for_user :
     <title>Variants and recursive data structures</title>
     <para>
       Another common application of variants is to represent tree-like
-      recursive data-structures. We'll show how this can be done by
+      recursive data structures. We'll show how this can be done by
       walking through the design of a simple Boolean expression
       language. Such a language can be useful anywhere you need to
       specify filters, which are used in everything from packet
@@ -6789,7 +6794,7 @@ val messages_for_user :
     </para>
     <para>
       An expression in this language will be defined by the variant
-      <literal>blang</literal> (short for &quot;boolean language&quot;)
+      <literal>blang</literal> (short for &quot;Boolean language&quot;)
       with one tag for each kind of expression we want to support.
     </para>
     <programlisting language="ocaml">
@@ -6813,8 +6818,9 @@ val messages_for_user :
       The purpose of each tag is pretty straightforward.
       <literal>And</literal>, <literal>Or</literal> and
       <literal>Not</literal> are the basic operators for building up
-      boolean expression, and <literal>Const</literal> lets you enter
-      constants <literal>true</literal> and <literal>false</literal>.
+      Boolean expressions, and <literal>Const</literal> lets you enter
+      the constants <literal>true</literal> and
+      <literal>false</literal>.
     </para>
     <para>
       The <literal>Base</literal> tag is what allows you to tie the
@@ -6850,10 +6856,10 @@ And
   Base {field = Subject; contains = &quot;runtime&quot;}]
 </programlisting>
     <para>
-      Being able to construct such expressions isn't enough: we also
+      Being able to construct such expressions isn't enough; we also
       need to be able to evaluate such an expression. The following code
       shows how you could write a general-purpose evaluator for
-      <literal>blang</literal>'s.
+      <literal>blang</literal>s.
     </para>
     <programlisting language="ocaml">
 # let rec eval blang base_eval =
@@ -6871,17 +6877,16 @@ val eval : 'a blang  -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
 </programlisting>
     <para>
       The structure of the code is pretty straightforward --- we're just
-      pattern-matching over the structure of the data, doing the
+      pattern matching over the structure of the data, doing the
       appropriate calculation based on which tag we see. To use this
       evaluator on a concrete example, we just need to write the
       <literal>base_eval</literal> function which is capable of
       evaluating a base predicate.
     </para>
     <para>
-      Another useful operation to be able to do on expressions is
-      simplification. The following function applies some basic
-      simplification rules, most of the simplifications being driven by
-      the presence of constants.
+      Another useful operation on expressions is simplification. The
+      following function applies some basic simplification rules, most
+      of which are driven by the presence of constants.
     </para>
     <programlisting language="ocaml">
 # let rec simplify = function
@@ -6941,9 +6946,9 @@ val simplify : 'a blang -&gt; 'a blang = &lt;fun&gt;
       lot of practical use in a variety of applications.
     </para>
     <para>
-      More generally, using variants to build recursive data-structures
+      More generally, using variants to build recursive data structures
       is a common technique, and shows up everywhere from designing
-      little languages to building efficient data-structures.
+      little languages to building efficient data structures.
     </para>
   </sect1>
   <sect1 id="polymorphic-variants">
@@ -6976,10 +6981,14 @@ val nan : [&gt; `Not_a_number ] = `Not_a_number
       As you can see, polymorphic variant types are inferred
       automatically, and when we combine variants with different tags,
       the compiler infers a new type that knows about all of those tags.
+      Note that in the above example, the tag name
+      (<emphasis>e.g.</emphasis>, <literal>`Int</literal>) matches the
+      type name (<literal>int</literal>). This is a common convention in
+      OCaml.
     </para>
     <para>
-      The type system will complain, however, if it sees incompatible
-      uses of the same tag:
+      The type system will complain, if it sees incompatible uses of the
+      same tag:
     </para>
     <programlisting language="ocaml">
 # let five = `Int &quot;five&quot;;;
@@ -7037,7 +7046,10 @@ val exact : [ `Float of float | `Int of int ] list
 </programlisting>
     <para>
       Perhaps surprisingly, we can also create polymorphic variant types
-      that have different upper and lower bounds.
+      that have different upper and lower bounds. Note that
+      <literal>Ok</literal> and <literal>Error</literal> in the
+      following example come from the <literal>Result.t</literal> type
+      from Core.
     </para>
     <programlisting language="ocaml">
 # let is_positive = function
@@ -7046,7 +7058,7 @@ val exact : [ `Float of float | `Int of int ] list
      | `Not_a_number -&gt; Error &quot;not a number&quot;;;
 val is_positive :
   [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt;
-  (bool, string) Core.Result.t = &lt;fun&gt;
+  (bool, string) Result.t = &lt;fun&gt;
 # List.filter [three; four] ~f:(fun x -&gt;
      match is_positive x with Error _ -&gt; false | Ok b -&gt; b);;
 - : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ] list =
@@ -7317,12 +7329,13 @@ let extended_color_to_int = function
         compiles without issue. All that happened was that the compiler
         inferred a wider type for
         <literal>extended_color_to_int</literal>, which happens to be
-        compatible with the narrower type that was listed in the mli.
+        compatible with the narrower type that was listed in the
+        <literal>mli</literal>.
       </para>
       <para>
         If we add an explicit type annotation to the code itself (rather
-        than just in the mli), then the compiler has enough information
-        to warn us.
+        than just in the <literal>mli</literal>), then the compiler has
+        enough information to warn us.
       </para>
       <programlisting language="ocaml">
 let extended_color_to_int : extended_color -&gt; int = function
@@ -7332,15 +7345,17 @@ let extended_color_to_int : extended_color -&gt; int = function
 </programlisting>
       <para>
         In particular, the compiler will complain that the
-        <literal>`Grey</literal> case as unused.
+        <literal>`Grey</literal> case is unused.
       </para>
       <programlisting language="ocaml">
-File &quot;terminal_color.ml&quot;, line 29, characters 4-11:
-Warning 11: this match case is unused.
+File &quot;color.ml&quot;, line 29, characters 4-11:
+Error: This pattern matches values of type [? `Grey of 'a ]
+       but a pattern was expected which matches values of type extended_color
+       The second variant type does not allow tag(s) `Grey
 </programlisting>
       <para>
         Once we have type definitions at our disposal, we can revisit
-        the question of how we write the pattern-match that narrows the
+        the question of how we write the pattern match that narrows the
         type. In particular, we can explicitly use the type name as part
         of the pattern match, by prefixing it with a
         <literal>#</literal>.
@@ -7396,7 +7411,7 @@ let extended_color_to_int : extended_color -&gt; int = function
             <emphasis>Efficiency:</emphasis> This isn't a huge effect,
             but polymorphic variants are somewhat heavier than regular
             variants, and OCaml can't generate code for matching on
-            polymorphic variants that is quite as efficient as what is
+            polymorphic variants that is quite as efficient as what it
             generated for regular variants.
           </para>
         </listitem>
@@ -7408,13 +7423,13 @@ let extended_color_to_int : extended_color -&gt; int = function
       </para>
       <para>
         Probably the safest and most common use-case for polymorphic
-        variants is for cases where ordinary variants would be
-        sufficient, but are syntactically too heavyweight. For example,
-        you often want to create a variant type for encoding the inputs
-        or outputs to a function, where it's not worth declaring a
-        separate type for it. Polymorphic variants are very useful here,
-        and as long as there are type annotations that constrain these
-        to have explicit, exact types, this tends to work well.
+        variants is where ordinary variants would be sufficient, but are
+        syntactically too heavyweight. For example, you often want to
+        create a variant type for encoding the inputs or outputs to a
+        function, where it's not worth declaring a separate type for it.
+        Polymorphic variants are very useful here, and as long as there
+        are type annotations that constrain these to have explicit,
+        exact types, this tends to work well.
       </para>
       <para>
         Variants are most problematic exactly where you take full
@@ -12454,18 +12469,27 @@ end = SList
 </chapter></part><part label="II"><title>Tools and Techniques</title><chapter id="handling-json-data">
   <title>Handling JSON data</title>
   <para>
-    Now that you've seen how to convert OCaml values into s-expressions,
-    it's time to look at other useful serialization formats. We'll cover
-    JSON next, as it is a very common third-party data format on the
-    Internet, and much easier to parse than alternatives. This chapter
-    introduces you to a couple of new techniques that glue together the
-    basic ideas from Part I of the book:
+    Data serialization, <emphasis>i.e.</emphasis> converting data to and
+    from a sequence of bytes that's suitable for writing to disk or
+    sending across the network, is an important and common programming
+    task. Sometimes you need to match someone else's data format (such
+    as XML), sometimes you need a highly efficient format, and sometimes
+    you just want something that is easy for humans to read and edit. To
+    this end, OCaml comes with several techniques for data serialization
+    depending on what your problem is.
+  </para>
+  <para>
+    We'll start by using the popular and simple JSON data format, and
+    then look at other serialization formats later in in the book. This
+    chapter introduces you to a couple of new techniques that glue
+    together the basic ideas from Part I of the book:
   </para>
   <itemizedlist>
     <listitem>
       <para>
-        Using polymorphic variants to write more portable protocols (but
-        still retain the ability to extend them if needed)
+        Using polymorphic variants to write more extensible libraries
+        and protocols (but still retain the ability to extend them if
+        needed)
       </para>
     </listitem>
     <listitem>
@@ -12523,7 +12547,7 @@ end = SList
     <para>
       This free-form nature of JSON types is both a blessing and a
       curse. It's very easy to generate JSON values, but code that
-      parses them also has to handling subtle variations in how values
+      parses them also has to handle subtle variations in how the values
       are represented. For example, what if the <literal>pages</literal>
       value above is actually represented as a string value of
       <literal>&quot;450&quot;</literal> instead of an integer?
@@ -12590,7 +12614,10 @@ type json = [
             algebraic data types includes a reference to the name of the
             type being defined). Fields such as <literal>Assoc</literal>
             can contain references to more JSON fields, and thus
-            precisely describe the underlying JSON data structure.
+            precisely describe the underlying JSON data structure. The
+            JSON <literal>List</literal> can contain fields of different
+            types, unlike the OCaml <literal>list</literal> whose
+            contents must be uniform.
           </para>
         </listitem>
         <listitem>
@@ -12599,15 +12626,6 @@ type json = [
             <literal>Null</literal> variant for empty fields. OCaml
             doesn't allow null values by default, so this must be
             encoded like any other value.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The differences between certain OCaml and JSON data
-            structures is more obvious. For example, a JSON
-            <literal>List</literal> can contain more JSON fields,
-            whereas an OCaml <literal>list</literal> must contain values
-            that are all the same type.
           </para>
         </listitem>
         <listitem>
@@ -12664,9 +12682,10 @@ val from_channel : in_channel -&gt; json
         with two ways of parsing the JSON: either from a string or from
         a file on a filesystem. The next example shows both in action,
         assuming the JSON record is stored in a file called
-        <literal>book.json</literal>:
+        <literal>book.json</literal>.
       </para>
       <programlisting language="ocaml">
+(* read_json.ml *)
 open Core.Std
 
 let () =
@@ -12682,6 +12701,21 @@ let () =
   (* Test that the two values are the same *)
   print_endline (if json1 = json2 then &quot;OK&quot; else &quot;FAIL&quot;)
   print_endline (if phys_equal json1 json2 then &quot;FAIL&quot; else &quot;OK&quot;)
+</programlisting>
+      <para>
+        You can build this by writing a <literal>_tags</literal> file to
+        define the package dependencies, and then running
+        <literal>ocamlbuild</literal>.
+      </para>
+      <programlisting>
+$ cat _tags
+true: package(core,yojson)
+true: thread, debug, annot
+
+$ ocamlbuild -use-ocamlfind read_json.native
+$ ./read_json.native
+OK
+OK
 </programlisting>
       <para>
         The <literal>from_file</literal> function accepts an input
@@ -12767,8 +12801,8 @@ and t2 = { foo2 : int; bar2 : t1; }
           extract specific fields.
         </para>
         <programlisting language="ocaml">
+(* parse_book.ml *)
 open Core.Std
-open Printf
 
 let () =
   (* Read the JSON file *)
@@ -12797,9 +12831,23 @@ let () =
   printf &quot;Translated: %s\n&quot; (string_of_bool_option is_translated)
 </programlisting>
         <para>
-          This introduces the <literal>Yojson.Basic.Util</literal>
+          Build this with the same <literal>_tags</literal> file as the
+          earlier example, and running ocamlbuild on the new file.
+        </para>
+        <programlisting>
+$ ocamlbuild -use-ocamlfind parse_book.native
+$ ./parse_book.native 
+Title: Real World OCaml (450)
+Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
+Tags: functional programming, ocaml, algorithms
+Online: yes
+Translated: &lt;none&gt;
+</programlisting>
+        <para>
+          This code introduces the <literal>Yojson.Basic.Util</literal>
           module, which contains <emphasis>combinator</emphasis>
-          functions for JSON manipulation.
+          functions that let you easily map a JSON object into a more
+          strongly-typed OCaml value.
         </para>
         <sidebar>
         <title>
@@ -14114,20 +14162,26 @@ test2.json:3:2: syntax error
     </listitem>
   </itemizedlist>
   <para>
-    Supporting all of this functionality manually is tedious and
-    error-prone. Core provides the <literal>Command</literal> library
-    that lets you declare your command-line options in one data
-    structure, and the library takes care of parsing, help generation
-    and auto-completion. Command is simple to use for smaller
-    applications, and has a sophisticated sub-command mode that groups
-    related commands together (you may be familiar with this style from
-    <literal>git</literal> or <literal>hg</literal>).
+    It's tedious and error-prone to support all this functionality
+    manually for every program you write. Core simplifies this by
+    letting you declare all your command-line options in one place,
+    using the <literal>Command</literal> library. This then takes care
+    of parsing the arguments, generating help text and providees
+    interactive auto-completion to the user of the library.
+  </para>
+  <para>
+    The <literal>Command</literal> library also scales as you add more
+    features to your programs. It's simple to use for small
+    applications, but provides a sophisticated subcommand mode that
+    groups related commands together as the application grows more
+    options. You may also be familiar with this command-line style from
+    the Git or Mercurial version control systems.
   </para>
   <para>
     This chapter demonstrates how to use <literal>Command</literal> to
     extend the cryptographic utility from
     <xref linkend="object-oriented-programming"/> and builds a
-    simple equivalent to the <literal>md5</literal> and
+    simple equivalents to the <literal>md5</literal> and
     <literal>shasum</literal> utilities. It also demonstrates how
     <emphasis>functional combinators</emphasis> can be used to declare
     complex data structures in a type-safe and elegant way.
@@ -14141,6 +14195,8 @@ test2.json:3:2: syntax error
       data, and outputs an ASCII hex representation of the result.
     </para>
     <programlisting language="ocaml">
+(* md5.ml : calculate MD5 hash of input *)
+
 open Core.Std
 
 let do_hash file =
@@ -14160,21 +14216,47 @@ let command =
     )
   (fun file () -&gt; do_hash file)
 
-let () = Command.run command
+let () = Command.run ~version:&quot;1.0&quot; ~build_info:&quot;RWO&quot; command
+</programlisting>
+    <para>
+      You can compile this file the usual way with
+      <literal>ocamlfind</literal>, but passing an additional
+      <literal>cryptokit</literal> package. You may need to install
+      Cryptokit via OPAM if you didn't do so earlier.
+    </para>
+    <programlisting>
+$ opam install cryptokit
+$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg -o md5 basic.ml
+$ ./md5
 </programlisting>
     <para>
       The <literal>do_hash</literal> function accepts a filename
       parameter and prints the human-readable MD5 string to the console
-      standard output. We want to control the inputs to this function
-      via the command-line, and this is what the subsequent
-      <literal>command</literal> value declares. If you compile this
-      program and run it, the help screen looks like this:
+      standard output. The subsequent <literal>command</literal> value
+      declares how to invoke <literal>do_hash</literal> by parsing the
+      command-line arguments. When you compile this program and run it,
+      you can query the version information simply by:
     </para>
     <programlisting>
-$ ./basic.byte
+$ ./md5 -version
+1.0
+$ ./md5 -build-info
+RWO
+</programlisting>
+    <para>
+      The <literal>version</literal> and <literal>build_info</literal>
+      optional arguments to <literal>Command.run</literal> let you
+      specify versions in the command-line help. You can leave these
+      blank, or get your build system to generate them directly from
+      your version control system (e.g. by running
+      <literal>hg tip</literal> to generate a build revision number, in
+      the case of Mercurial).
+    </para>
+    <programlisting>
+$ ./md5
 Generate an MD5 hash of the input data
 
-  basic.byte filename
+  md5 filename
 
 More detailed information
 
@@ -14188,52 +14270,29 @@ More detailed information
 missing anonymous argument: filename
 </programlisting>
     <para>
-      If we invoke the binary without any arguments, it emits a help
-      screen that informs you that a required argument
+      When we invoke this binary without any arguments, it outputs a
+      help screen that informs you that a required argument
       <literal>filename</literal> is missing. Supplying the argument to
       the command results in <literal>do_hash</literal> being called,
       and the MD5 output being displayed to the standard output.
     </para>
     <programlisting>
-$ ./basic.byte basic.byte
+$ ./md5 ./md5
 59562f5e4f790d16f1b2a095cd5de844
 </programlisting>
     <para>
-      So how does all this work? There are three parts to defining a
-      command-line interface:
+      So how does all this work? Most of the interesting logic lies in
+      how the specifications are defined. The
+      <literal>Command.Spec</literal> module defines several combinators
+      that can be chained together to define flags and anonymous
+      arguments, what types they should map to, and whether to take
+      special actions (such as interactive input) if certain fields are
+      encountered.
     </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>Command.Spec.t</literal> defines the steps required
-          to convert a command-line into an OCaml structure.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>Command.basic</literal> takes a callback that is
-          passed parameters parsed from the command-line according to
-          the <literal>spec</literal> parameter. It takes a
-          <literal>summary</literal> string for a one-line description
-          of the command behavior, and an optional
-          <literal>readme</literal> for longer help text.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>Command.run</literal> actually executes a command and
-          its specification, and runs the callback function with the
-          resulting parameters.
-        </para>
-      </listitem>
-    </itemizedlist>
     <para>
-      Most of the interesting logic lies in how the specifications are
-      defined. The <literal>Command.Spec</literal> module defines
-      several combinators that can be chained together to define flags
-      and anonymous arguments, what types they should map to, and
-      whether to take special actions (such as interactive input) if
-      certain fields are encountered.
+      Let's build the specification for a single argument that is
+      specified directly on the command-line (this is known as an
+      <emphasis>anonymous</emphasis> argument).
     </para>
     <programlisting language="ocaml">
 Command.Spec.(
@@ -14242,26 +14301,65 @@ Command.Spec.(
 )
 </programlisting>
     <para>
-      We begin the specification above with an <literal>empty</literal>
-      value, and then chain more parameters via the
-      <literal>+&gt;</literal> combinator. Our example defines a single
-      <emphasis>anonymous</emphasis> parameter via the
-      <literal>anon</literal> function (that is, a standalone token from
-      the command-line). Anonymous functions can be assigned a name that
-      is used in help text, and an OCaml type that they are mapped to.
-      The parameters specified here are all eventually passed to a
-      callback function which actually invokes the program logic.
+      The specification above begins with an <literal>empty</literal>
+      value, and then chains more parameters via the
+      <literal>+&gt;</literal> combinator. Our example uses the
+      <literal>anon</literal> function to define a single anonymous
+      parameter. Anonymous parameters are assigned a string name that is
+      used in help text, and an OCaml type that they are parsed into
+      from the raw command-line string. The example
+      <literal>filename</literal> argument above is extracted from the
+      command-line and kept as an OCaml <literal>string</literal>.
+    </para>
+    <para>
+      This specification is then bundled together with the callback
+      functions using <literal>Command.basic</literal>. For our
+      <literal>md5</literal> example, we have:
+    </para>
+    <programlisting language="ocaml">
+Command.basic
+  ~summary:&quot;Generate an MD5 hash of the input data&quot;
+  ~readme:(fun () -&gt; &quot;More detailed information&quot;)
+  Command.Spec.(
+    empty
+    +&gt; anon (&quot;filename&quot; %: string)
+  )
+  (fun file () -&gt; do_hash file)
+</programlisting>
+    <para>
+      The <literal>basic</literal> function takes a few more arguments
+      in addition to the specification. The <literal>summary</literal>
+      is a one-line description to go at the top of the command help
+      screen, while <literal>readme</literal> is for longer help text
+      when the command is called with <literal>-help</literal>. The
+      <literal>readme</literal> argument is a function that is only
+      evaluated when the help text is actually needed.
+    </para>
+    <para>
+      The final argument is the callback function where all the actual
+      work happens after the command-line parsing is complete. This
+      function will be applied with the parsed command-line arguments,
+      and should perform the actual work. In our example, we had just
+      one anonymous argument, so the callback function just has a single
+      <literal>string</literal> parameter applied to it:
     </para>
     <programlisting language="ocaml">
 (fun file () -&gt; do_hash file)
 </programlisting>
     <para>
-      In our example, the function takes a <literal>file</literal>
-      parameter that is a <literal>string</literal>, and maps it to the
-      <literal>do_hash</literal> function. You aren't just limited to
-      strings though, as <literal>Command.Spec</literal> defines several
-      other conversion functions that validate and parse input into
-      various types:
+      The function also needs an extra <literal>unit</literal> argument
+      after <literal>file</literal>. This is simply so that the command
+      specifications can work even when they are empty
+      (<literal>Command.Spec.empty</literal>). Every OCaml function
+      needs at least one argument, so the final <literal>unit</literal>
+      guarantees that it will not be evaluated immediately as a value if
+      there are no other arguments.
+    </para>
+    <para>
+      You aren't just limited to parsing command lines as strings of
+      course. <literal>Command.Spec</literal> defines several other
+      conversion functions that validate and parse input into various
+      types:
     </para>
     <informaltable>
       <tgroup cols="3">
@@ -14363,10 +14461,10 @@ Command.Spec.(
       </tgroup>
     </informaltable>
     <para>
-      Anonymous arguments don't have to be declared individually. A more
-      realistic <literal>md5</literal> function might also read from the
-      standard input if a filename isn't specified. We can change our
-      specification with a single line to reflect this by writing:
+      A more realistic <literal>md5</literal> function might also read
+      from the standard input if a filename isn't specified. We can
+      change our specification with a single line to reflect this by
+      writing:
     </para>
     <programlisting language="ocaml">
 Command.Spec.(
@@ -14380,7 +14478,7 @@ Command.Spec.(
       If you compile the example, you'll get a type error though:
     </para>
     <programlisting>
-File &quot;basic_broken.ml&quot;, line 18, characters 26-30:
+File &quot;md5_broken.ml&quot;, line 18, characters 26-30:
 Error: This expression has type string option
        but an expression was expected of type string
 Command exited with code 2.
@@ -14393,6 +14491,7 @@ Command exited with code 2.
       standard input if no file is specified.
     </para>
     <programlisting language="ocaml">
+(* md5.ml : calculate md5 with an optional filename *)
 open Core.Std
 
 let get_file_data = function
@@ -14473,59 +14572,89 @@ let () = Command.run command
     <title>Using flags to label the command line</title>
     <para>
       You aren't just limited to anonymous arguments on the
-      command-line, of course. Flags (such as <literal>-v</literal>) can
-      be specified in the same manner as anonymous arguments. These can
-      appear in any order on the command-line, or multiple times,
-      depending on how they're declared. Let's add two arguments to our
-      <literal>md5</literal> command that mimic the Linux version: a
-      <literal>-s</literal> flag to specify the string to be hashed
-      directly, and a <literal>-t</literal> self-benchmark test.
+      command-line, and you'll find that flags are useful once your
+      program has more options. A flag is a named field that can be
+      followed by an optional argument. These flags can appear in any
+      order on the command-line, or multiple times, depending on how
+      they're declared in the specification.
+    </para>
+    <para>
+      Let's add two arguments to our <literal>md5</literal> command that
+      mimic the Linux version. A <literal>-s</literal> flag specifies
+      the string to be hashed directly on the command-line, and a
+      <literal>-t</literal> runs a benchmarking self-test. The complete
+      example is:
     </para>
     <programlisting language="ocaml">
-Command.Spec.(
-  empty
-  +&gt; flag &quot;-s&quot; (optional string) ~doc:&quot;string Checksum the given string&quot;
-  +&gt; flag &quot;-t&quot; no_arg ~doc:&quot; run a built-in time trial&quot;
-  +&gt; anon (maybe (&quot;filename&quot; %: string))
-)
+(* mlmd5.ml : generate an MD5 hash of the input data *)
+open Core.Std
+
+let get_file_data file checksum =
+  match file, checksum with
+  | None, Some buf -&gt; buf
+  | _, Some buf -&gt; eprintf &quot;Warning: ignoring file\n&quot;; buf
+  | (None|Some &quot;-&quot;), None -&gt; In_channel.(input_all stdin)
+  | Some file, None -&gt; In_channel.read_all file
+
+let do_hash file checksum =
+  let open Cryptokit in
+  get_file_data file checksum
+  |&gt; hash_string (Hash.md5 ())
+  |&gt; transform_string (Hexa.encode ())
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:&quot;Generate an MD5 hash of the input data&quot;
+    Command.Spec.(
+      empty
+      +&gt; flag &quot;-s&quot; (optional string) ~doc:&quot;string Checksum the given string&quot;
+      +&gt; flag &quot;-t&quot; no_arg ~doc:&quot; run a built-in time trial&quot;
+      +&gt; anon (maybe (&quot;filename&quot; %: string))
+    )
+  (fun checksum trial file () -&gt;
+    match trial with
+    | true -&gt; printf &quot;Running time trial\n&quot;
+    | false -&gt; do_hash file checksum)
+
+let () = Command.run command
 </programlisting>
     <para>
-      The <literal>flag</literal> command is quite similar to
-      <literal>anon</literal>. The first argument is the flag name, and
-      aliases can be specified via an optional argument. The
-      <literal>doc</literal> string should be formatted so that the
-      first word is the short name that should appear in the usage text,
-      with the remainder being the full help text. Notice that the
-      <literal>-t</literal> flag has no argument, and so we prepend the
-      doc text with a blank space. The help text for the above fragment
-      looks like this:
+      The example specification uses the <literal>flag</literal> command
+      now. The first argument to <literal>flag</literal> is its name on
+      the command-line, and the <literal>doc</literal> argument supplies
+      the help text. The <literal>doc</literal> string is formatted so
+      that the first word is the short name that appears in the usage
+      text, with the remainder being the full help text. Notice that the
+      <literal>-t</literal> flag has no argument, and so we prepend its
+      <literal>doc</literal> text with a blank space. The help text for
+      the above code looks like this:
     </para>
     <programlisting>
-$ mlmd5 -s
+$ ./mlmd5 -help
 Generate an MD5 hash of the input data
 
-  mlmd5 [filename]
+  ./mlmd5 [filename]
 
 === flags ===
 
   [-s string]    Checksum the given string
-  [-t run]       a built-in time trial
+  [-t]           run a built-in time trial
   [-build-info]  print info about this build and exit
   [-version]     print the version of this build and exit
   [-help]        print this help text and exit
                  (alias: -?)
 
-missing argument for flag -s
 
-$ mlmd5 -s &quot;ocaml rocks&quot;
+$ ./mlmd5 -s &quot;ocaml rocks&quot;
 5a118fe92ac3b6c7854c595ecf6419cb
 </programlisting>
     <para>
-      The <literal>-s</literal> flag requires a
-      <literal>string</literal> argument in our specification, and the
-      parser outputs an error message if it isn't supplied. Here's a
-      list of some of the functions that you can wrap flags in to
-      control how they are parsed:
+      The <literal>-s</literal> flag in our specification requires a
+      <literal>string</literal> argument, and the parser outputs an
+      error message if it isn't supplied. Here's a list of some of the
+      functions that you can wrap flags in to control how they are
+      parsed:
     </para>
     <informaltable>
       <tgroup cols="2">
@@ -14588,48 +14717,16 @@ $ mlmd5 -s &quot;ocaml rocks&quot;
     </informaltable>
     <para>
       The flags affect the type of the callback function in exactly the
-      same way as anonymous arguments do. The full example of our
-      <literal>md5</literal> function with flags is below.
+      same way as anonymous arguments do. This lets you change the
+      specification and ensure that all the callback functions are
+      updated appropriately, without runtime errors.
     </para>
-    <programlisting language="ocaml">
-open Core.Std
-
-let get_file_data file checksum =
-  match file, checksum with
-  | None, Some buf -&gt; buf
-  | _, Some buf -&gt; eprintf &quot;Warning: ignoring file\n&quot;; buf
-  | (None|Some &quot;-&quot;), None -&gt; In_channel.(input_all stdin)
-  | Some file, None -&gt; In_channel.read_all file
-
-let do_hash file checksum =
-  let open Cryptokit in
-  get_file_data file checksum
-  |&gt; hash_string (Hash.md5 ())
-  |&gt; transform_string (Hexa.encode ())
-  |&gt; print_endline
-
-let command =
-  Command.basic
-    ~summary:&quot;Generate an MD5 hash of the input data&quot;
-    Command.Spec.(
-      empty
-      +&gt; flag &quot;-s&quot; (optional string) ~doc:&quot;string Checksum the given string&quot;
-      +&gt; flag &quot;-t&quot; no_arg ~doc:&quot;run a built-in time trial&quot;
-      +&gt; anon (maybe (&quot;filename&quot; %: string))
-    )
-  (fun checksum trial file () -&gt;
-    match trial with
-    | true -&gt; printf &quot;Running time trial\n&quot;
-    | false -&gt; do_hash file checksum)
-
-let () = Command.run command
-</programlisting>
     <para>
-      Notice how the <literal>get_file_data</literal> function now
+      Notice that the <literal>get_file_data</literal> function now
       pattern matches across the <literal>checksum</literal> flag and
       the <literal>file</literal> anonymous argument. It selects the
-      flag in preference to the file argument, but emits a warning if
-      there's ambiguity.
+      flag in preference to the anonymous argument, but emits a warning
+      if there's ambiguity and both are specified.
     </para>
   </sect1>
   <sect1 id="grouping-sub-commands-together">
@@ -14675,7 +14772,7 @@ val group :
       name list, and dispatches it to the right command handler.
     </para>
     <para>
-      Let's build the beginning of a calendar toool that does a few
+      Let's build the beginning of a calendar tool that does a few
       operations over dates from the command line. We first define a
       command that adds days to an input date and prints the resulting
       date.
@@ -16198,20 +16295,12 @@ type meta = {
 </chapter><chapter id="data-serialization-with-s-expressions">
   <title>Data Serialization with S-Expressions</title>
   <para>
-    Data serialization, <emphasis>i.e.</emphasis> converting data to and
-    from a sequence of bytes that's suitable for writing to disk or
-    sending across the network, is an important and common programming
-    task. Sometimes you need to match someone else's data format (such
-    as XML), sometimes you need a highly efficient format, and sometimes
-    you just want something that is easy for humans to read and edit. To
-    this end, OCaml comes with several techniques for data serialization
-    depending on what your problem is.
-  </para>
-  <para>
-    We'll start by considering the question of how to serialize data in
-    a human-readable and editable form when you're not constrained to
-    using a particular third-party format. Core's solution to this
-    problem is to use s-expressions
+    We've already shown you how to parse third-party data formats into
+    OCaml in earlier chapters. Sometimes though, you just want to
+    quickly convert an OCaml type to and from a human-readable and
+    editable form in your own code, and not worry about
+    interoperability. Core's solution to this problem is to use
+    s-expressions.
   </para>
   <para>
     S-expressions are nested paranthetical expressions whose atomic
@@ -19800,53 +19889,87 @@ $ ./service_client.byte
   <title>Foreign Function Interface</title>
   <para>
     OCaml has several options available to interact with non-OCaml code.
-    The compiler toolchain can of course link to external system
-    libraries, but can also produce shared libraries that let your OCaml
-    code be called from C, or even encode your OCaml as a standalone C
-    file that be compiled directly into other libraries.
+    The compiler toolchain can link to external system libraries, and
+    also produce standalone object code. This object code can be turned
+    into shared libraries that that let your OCaml code be called from
+    C, or linked in more exotic ways to embed it directly into
+    applications or even kernel modules.
   </para>
   <para>
-    In this chapter, we'll first describe the easiest way to bind to C
-    code, via the <literal>ctypes</literal> library. This can be done
-    without writing a single line of C code, and just requires a pure
-    OCaml definition of the C interfaces. We'll use the
-    <literal>ncurses</literal> terminal-drawing toolkit as our running
-    example, as it's widely available on most systems.
+    This chapter walks you through the basics interfacing with C
+    libraries, and then moves onto how to embed your code for a variety
+    of other platforms.
   </para>
-  <note>
-  <title>
-  Installing the <literal>ctypes</literal> library
-  </title>
-  <para>
-    TODO <literal>ctypes</literal> is not yet available on OPAM, but
-    will be soon. For now, install it manually:
-  </para>
-  <programlisting>
+  <sect1 id="the-ctypes-ffi-library">
+    <title>The <literal>ctypes</literal> FFI library</title>
+    <para>
+      We'll introduce the foreign function interface via the simplest
+      method, which doesn't require writing any C code. The
+      <literal>ctypes</literal> library lets you describe the C
+      interface in pure OCaml, and it takes care of opening the foreign
+      library and invoking the correct function calls . We'll use the
+      <literal>ncurses</literal> terminal-drawing toolkit as our firts
+      example, as it's widely available on most systems.
+    </para>
+    <note>
+    <title>
+    Installing the <literal>ctypes</literal> library
+    </title>
+    <para>
+      TODO <literal>ctypes</literal> is not yet available on OPAM, but
+      will be soon. For now, install it manually:
+    </para>
+    <programlisting>
 $ git clone git://github.com/ocamllabs/ocaml-ctypes
 $ cd ocaml-ctypes
 $ make &amp;&amp; make install
 </programlisting>
-  <para>
-    It will then be available via the <literal>ctypes</literal>
-    ocamlfind package.
-  </para>
-  </note>
+    <para>
+      It will then be available via the <literal>ctypes</literal>
+      ocamlfind package.
+    </para>
+    </note>
+  </sect1>
   <sect1 id="example-an-ncurses-terminal-interface">
     <title>Example: an ncurses terminal interface</title>
     <para>
       Ncurses is a library to build terminal-independent text interfaces
       in a reasonably efficient way. The manual page (usually via
       <literal>man ncurses</literal>) explains the basics of the C
-      interface. The <literal>initscr</literal> function allocates some
-      state and returns it as a point to the C <literal>WINDOW</literal>
-      typedef. This C pointer is then passed to various terminal drawing
-      functions.
+      interface. Below is an excerpt of the header interface found in
+      <literal>&lt;ncurses.h</literal>&gt;.
+    </para>
+    <programlisting language="c">
+typedef struct _win_st WINDOW;
+
+WINDOW *initscr (void);
+WINDOW *newwin (int, int, int, int);
+void endwin (void);
+void refresh (void);
+void wrefresh (WINDOW *);
+void mvwaddstr (WINDOW *, int, int, char *);
+</programlisting>
+    <para>
+      The <literal>WINDOW</literal> typedef is a forward declaration of
+      a C structure that holds the internal ncurses library state. The
+      specific contents of the structure don't matter, as you need to
+      pass pointers to the structure to the various library calls. The
+      <literal>initscr</literal> function initialises this library state
+      and returns it as a <literal>WINDOW</literal> pointer, and the
+      <literal>newwin</literal> function allows further sub-windows to
+      be created. This pointer is passed to various terminal drawing
+      functions such as <literal>mvwaddrstr</literal>. The terminal is
+      only updated when <literal>refresh</literal> or
+      <literal>wrefresh</literal> are called, and all other drawing
+      calls just manipulate data structures without taking effect on the
+      screen.
     </para>
     <para>
-      The <literal>ctypes</literal> library provides a combinator
-      interface that lets you declare these C functions as OCaml values.
-      The library takes care of converting the OCaml arguments into the
-      C calling convention, invoking the foreign call, and returning the
+      The <literal>ctypes</literal> library provides an OCaml interface
+      that lets you declare these C functions as OCaml values. The
+      library takes care of converting the OCaml arguments into the C
+      calling convention, invoking the foreign call within the
+      <literal>ncurses</literal> library, and finally returning the
       result as an OCaml value.
     </para>
     <programlisting language="ocaml">
@@ -19854,14 +19977,19 @@ open Ctypes.Ffi.C
 open Type
 
 type window = unit ptr
-let window = ptr void
+let window : window t = ptr void
 </programlisting>
     <para>
-      The <literal>window</literal> type represents the
-      <literal>WINDOW *</literal> pointer that ncurses returns. This can
-      be left abstract in the OCaml signature for this module, and is
-      represented as a <literal>ptr void</literal> (&quot;pointer to
-      void&quot;) value within the implementation.
+      The <literal>window</literal> type is declared as a
+      <literal>void</literal> pointer. We also need a value to pass to
+      the <literal>ctypes</literal> library to represent this type, and
+      so the <literal>window</literal> value is built using the
+      <literal>Ctypes.Ffi.C.ptr</literal> function. The actual pointer
+      type from C is a <literal>WINDOW</literal> and not
+      <literal>void</literal>, but we'll show you shortly how we can
+      hide the details of the <literal>window</literal> type in the
+      OCaml module signature. The next step is to use these values to
+      build a foreign function call to <literal>initscr</literal>.
     </para>
     <programlisting language="ocaml">
 let initscr =
@@ -19888,16 +20016,19 @@ let wrefresh =
   foreign &quot;wrefresh&quot; (window @-&gt; (returning void))
 
 let newwin =
-  foreign &quot;newwin&quot; (int @-&gt; int @-&gt; int @-&gt; int @-&gt; (returning window))
+  foreign &quot;newwin&quot; 
+    (int @-&gt; int @-&gt; int @-&gt; int @-&gt; (returning window))
 
 let mvwaddch =
-  foreign &quot;mvwaddch&quot; (window @-&gt; int @-&gt; int @-&gt; char @-&gt; (returning void))
+  foreign &quot;mvwaddch&quot; 
+    (window @-&gt; int @-&gt; int @-&gt; char @-&gt; (returning void))
 
 let addstr =
   foreign &quot;addstr&quot; (string @-&gt; (returning void))
 
 let mvwaddstr =
-  foreign &quot;mvwaddstr&quot; (window @-&gt; int @-&gt; int @-&gt; string @-&gt; (returning void))
+  foreign &quot;mvwaddstr&quot;
+    (window @-&gt; int @-&gt; int @-&gt; string @-&gt; (returning void))
 
 let box =
   foreign &quot;box&quot; (window @-&gt; int @-&gt; int @-&gt; (returning void))
@@ -19914,18 +20045,19 @@ let cbreak =
     </para>
     <programlisting language="ocaml">
 type window
-val window : window Ffi.C.Type.t
-val initscr : unit -&gt; window
-val endwin : unit -&gt; unit
-val refresh : unit -&gt; unit
-val wrefresh : window -&gt; unit
-val newwin : int -&gt; int -&gt; int -&gt; int -&gt; window
-val addch : char -&gt; unit
-val mvwaddch : window -&gt; int -&gt; int -&gt; char -&gt; unit
-val addstr : string -&gt; unit
+
+val window    : window Ffi.C.Type.t
+val initscr   : unit   -&gt; window
+val endwin    : unit   -&gt; unit
+val refresh   : unit   -&gt; unit
+val wrefresh  : window -&gt; unit
+val newwin    : int    -&gt; int -&gt; int -&gt; int -&gt; window
+val addch     : char   -&gt; unit
+val mvwaddch  : window -&gt; int -&gt; int -&gt; char -&gt; unit
+val addstr    : string -&gt; unit
 val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
-val box : window -&gt; int -&gt; int -&gt; unit
-val cbreak : unit -&gt; unit
+val box       : window -&gt; int -&gt; int -&gt; unit
+val cbreak    : unit   -&gt; unit
 </programlisting>
     <para>
       Notice that the <literal>window</literal> type is left abstract to
@@ -19974,8 +20106,8 @@ $ ./hello_broken
 Fatal error: exception Dl.DL_error(&quot;dlsym(RTLD_DEFAULT, initscr): symbol not found&quot;)
 </programlisting>
   </sect1>
-  <sect1 id="defining-c-values-in-ocaml">
-    <title>Defining C values in OCaml</title>
+  <sect1 id="defining-basic-c-formats-from-ocaml">
+    <title>Defining basic C formats from OCaml</title>
     <para>
       The <literal>Ctypes</literal> library provides an
       <literal>FFi.C</literal> module that lets you describe not only
@@ -20101,16 +20233,17 @@ end
         to make this as easy as arrays and basic types. Let's start with
         an example by binding some time-related UNIX functions.
       </para>
-      <sect3 id="example-binding-unix-date-functions">
-        <title>Example: binding UNIX date functions</title>
-        <para>
-          The UNIX standard C library defines several useful time and
-          date functions in <literal>&lt;time.h&gt;</literal> (usually
-          found in <literal>/usr/include</literal> on a Linux or MacOS X
-          system). The <literal>localtime</literal> function has the
-          following signature and return value:
-        </para>
-        <programlisting language="c">
+    </sect2>
+    <sect2 id="example-binding-unix-date-functions">
+      <title>Example: binding UNIX date functions</title>
+      <para>
+        The UNIX standard C library defines several useful time and date
+        functions in <literal>&lt;time.h&gt;</literal> (usually found in
+        <literal>/usr/include</literal> on a Linux or MacOS X system).
+        The <literal>localtime</literal> function has the following
+        signature and return value:
+      </para>
+      <programlisting language="c">
 struct tm {
   int     tm_sec;         /* seconds after the minute [0-60] */
   int     tm_min;         /* minutes after the hour [0-59] */
@@ -20126,22 +20259,22 @@ struct tm {
 time_t time(time_t *);
 struct tm *localtime(const time_t *);
 </programlisting>
-        <para>
-          This example is more complicated than ncurses for a couple of
-          reasons. We need to allocate some memory to store a
-          <literal>time_t</literal> value, and pass that memory into the
-          <literal>time</literal> library call to obtain the current
-          timezone. This <literal>time_t</literal> is then passed to the
-          <literal>localtime</literal> library call, which returns a
-          pointer to the <literal>struct tm</literal>.
-        </para>
-        <para>
-          The <literal>time_t</literal>, and most other standard POSIX
-          types, are already provided by the
-          <literal>Ffi.PosixTypes</literal> module. Let's start by
-          defining the OCaml mapping to <literal>struct tm</literal>:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        This example is more complicated than ncurses for a couple of
+        reasons. We need to allocate some memory to store a
+        <literal>time_t</literal> value, and pass that memory into the
+        <literal>time</literal> library call to obtain the current
+        timezone. This <literal>time_t</literal> is then passed to the
+        <literal>localtime</literal> library call, which returns a
+        pointer to the <literal>struct tm</literal>.
+      </para>
+      <para>
+        The <literal>time_t</literal>, and most other standard POSIX
+        types, are already provided by the
+        <literal>Ffi.PosixTypes</literal> module. Let's start by
+        defining the OCaml mapping to <literal>struct tm</literal>:
+      </para>
+      <programlisting language="ocaml">
 open Ffi.C
 open Type
 open PosixTypes
@@ -20160,28 +20293,27 @@ let tm_yday  = tm *:* int (* day in the year *)
 let tm_isdst = tm *:* int (* daylight saving time *)
 let () = seals (tm : tm structure typ)
 </programlisting>
-        <para>
-          This is a very mechanical translation from the C structure,
-          due to the magic of the <literal>*:*</literal> combinator
-          provided by the <literal>Struct</literal> module. We start
-          building the definition via the <literal>structure</literal>
-          allocator. Then the types are added in sequence, with each
-          application recording the position in the
-          <literal>tm</literal> structure. When all the fields have been
-          added, the structure is finalized via the
-          <literal>seals</literal> call. The definitions of
-          <literal>time</literal> and <literal>localtime</literal>
-          should now be familiar:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        This is a very mechanical translation from the C structure, due
+        to the magic of the <literal>*:*</literal> combinator provided
+        by the <literal>Struct</literal> module. We start building the
+        definition via the <literal>structure</literal> allocator. Then
+        the types are added in sequence, with each application recording
+        the position in the <literal>tm</literal> structure. When all
+        the fields have been added, the structure is finalized via the
+        <literal>seals</literal> call. The definitions of
+        <literal>time</literal> and <literal>localtime</literal> should
+        now be familiar:
+      </para>
+      <programlisting language="ocaml">
 let time = foreign &quot;time&quot; (ptr time_t @-&gt; syscall time_t)
 let asctime = foreign &quot;asctime&quot; (ptr tm @-&gt; returning string)
 let localtime = foreign &quot;localtime&quot; (ptr time_t @-&gt; returning (ptr tm))
 </programlisting>
-        <para>
-          The complete signature for this definition looks like this:
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        The complete signature for this definition looks like this:
+      </para>
+      <programlisting language="ocaml">
 open Ffi.C
 type tm
 val tm : tm structure typ
@@ -20199,43 +20331,42 @@ val time : PosixTypes.time_t ptr -&gt; PosixTypes.time_t
 val localtime : PosixTypes.time_t ptr -&gt; tm structure ptr
 val asctime : PosixTypes.time_t ptr -&gt; string
 </programlisting>
-        <para>
-          Unlike the ncurses example, some of the FFI types are still
-          exposed in this signature due to the manual memory interface
-          required by the C libraries. To use the OCaml
-          <literal>time</literal> and <literal>localtime</literal>
-          functions, we need to allocate some memory and construct
-          values of type <literal>time_t ptr</literal> to them.
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        Unlike the ncurses example, some of the FFI types are still
+        exposed in this signature due to the manual memory interface
+        required by the C libraries. To use the OCaml
+        <literal>time</literal> and <literal>localtime</literal>
+        functions, we need to allocate some memory and construct values
+        of type <literal>time_t ptr</literal> to them.
+      </para>
+      <programlisting language="ocaml">
 let () =
   let timep = Ptr.allocate ~count:1 time_t in
   let time = time timep in
   let tm = localtime timep in
   print_endline (asctime tm)
 </programlisting>
-        <para>
-          The <literal>Ptr.allocate</literal> function allocates memory
-          via <literal>malloc</literal> and creates an OCaml value to
-          point to it. This OCaml value (<literal>timep</literal> in the
-          example) has a finalizer function which frees the external
-          memory when it is garbage collected. The
-          <literal>timep</literal> pointer is passed into the
-          <literal>time</literal> library call, which modifies it
-          in-place. The <literal>timep</literal> pointer is then passed
-          on to <literal>localtime</literal>, whose return value is
-          converted into an OCaml string via <literal>asctime</literal>.
-          The garbage collector can then collect
-          <literal>timep</literal> during the next collection cycle.
-        </para>
-        <para>
-          Unions in C are a collection of named structures that can be
-          mapped onto the same memory. They are also supported in the
-          <literal>ctypes</literal> library via the
-          <literal>Ffi.C.Union</literal> module, although we won't go
-          into more detail here.
-        </para>
-      </sect3>
+      <para>
+        The <literal>Ptr.allocate</literal> function allocates memory
+        via <literal>malloc</literal> and creates an OCaml value to
+        point to it. This OCaml value (<literal>timep</literal> in the
+        example) has a finalizer function which frees the external
+        memory when it is garbage collected. The
+        <literal>timep</literal> pointer is passed into the
+        <literal>time</literal> library call, which modifies it
+        in-place. The <literal>timep</literal> pointer is then passed on
+        to <literal>localtime</literal>, whose return value is converted
+        into an OCaml string via <literal>asctime</literal>. The garbage
+        collector can then collect <literal>timep</literal> during the
+        next collection cycle.
+      </para>
+      <para>
+        Unions in C are a collection of named structures that can be
+        mapped onto the same memory. They are also supported in the
+        <literal>ctypes</literal> library via the
+        <literal>Ffi.C.Union</literal> module, although we won't go into
+        more detail here.
+      </para>
     </sect2>
   </sect1>
 </chapter></part><part label="III"><title>Advanced Topics</title><chapter id="runtime-memory-layout">
@@ -20245,8 +20376,7 @@ let () =
     program is checked and discarded at compilation time, leaving a much
     simpler <emphasis>runtime</emphasis> representation for values.
     Understanding this difference is important for writing efficient
-    programs, and also for interfacing with C libraries that work
-    directly with the runtime system.
+    programs and profiling them at runtime.
   </para>
   <note>
   <title>
@@ -20275,8 +20405,13 @@ let () =
   </para>
   </note>
   <para>
-    Let's start by explaining the memory layout, and then move onto the
-    details of how C bindings work.
+    Another reason to use the C interface directly is if you need to
+    build foreign-function interfaces directly instead of going through
+    the <literal>ctypes</literal> library described in
+    <ulink url="foreign-function-interface">xref</ulink>. This could be
+    for performance reasons, or some more specialised embedded or kernel
+    environment. Let's start by explaining the memory layout, and then
+    move onto the details of how low-level C bindings work.
   </para>
   <sect1 id="the-garbage-collector">
     <title>The garbage collector</title>
@@ -21077,8 +21212,10 @@ number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
         user-defined operations over OCaml values. A custom block lives
         in the OCaml heap like an ordinary block and can be of whatever
         size the user desires. The <literal>Custom_tag</literal> (255)
-        is higher than <literal>No_scan_tag</literal> and so cannot
-        contain any OCaml values.
+        is higher than <literal>No_scan_tag</literal> and isn't scanned
+        by the garbage collector. This means that it cannot contain any
+        OCaml values, but is useful to track pointers into the external
+        C heap.
       </para>
       <para>
         The first word of the data within the custom block is a C
@@ -21115,8 +21252,8 @@ struct custom_operations {
         proportion of &quot;extra-heap resources&quot; consumed by the
         block, which will affect the garbage collector's decision as to
         how much work to do in the next major slice.
-        (<emphasis>avsm</emphasis>: elaborate on this or move to the C
-        interface section)
+        (<emphasis>avsm</emphasis>: TODO elaborate on this or move to
+        the C interface section)
       </para>
     </sect2>
   </sect1>
@@ -21375,6 +21512,9 @@ From OCaml: 26
         various C types from OCaml <literal>values</literal> for 64-bit
         architectures. Note that OCaml doesn't support a
         single-precision float, so these are always double-precision.
+      </para>
+      <para>
+        TODO: buggy markdown below in table rendering
       </para>
       <informaltable>
         <tgroup cols="3">
@@ -21665,7 +21805,7 @@ caml_add_numbers(value v_arg1, value v_arg2)
             </row>
             <row>
               <entry>
-                `caml_copy_string (char *)
+                <literal>caml_copy_string (char *)</literal>
               </entry>
               <entry>
                 Pointer to a C string
