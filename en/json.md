@@ -301,8 +301,8 @@ let () =
   printf "Translated: %s\n" (string_of_bool_option is_translated)
 ```
 
-Build this with the same `_tags` file as the earlier example, and running
-ocamlbuild on the new file.
+Build this with the same `_tags` file as the earlier example, and run
+`ocamlbuild` on the new file.
 
 ```console
 $ ocamlbuild -use-ocamlfind parse_book.native
@@ -330,7 +330,6 @@ You've already run across several of these in the `List` module:
 
 ```ocaml
 val map  : 'a list -> f:('a -> 'b)   -> 'b list
-val iter : 'a list -> f:('a -> unit) -> unit
 val fold : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
 ```
 
@@ -340,11 +339,14 @@ input list by applying a function to each value of the list.  The
 directly.  `fold` applies each value in the input list to a function
 that accumulates a single result, and returns that instead.
 
-The final example above is a more specialised combinator that is only
-useful in OCaml due to side-effects being allowed.  The input function
-is applied to every value, but no result is supplied.  Instead, the
-function must directly result in some side-effect, such as printing to
-the console or updating a reference elsewhere in the environment.
+```ocaml
+val iter : 'a list -> f:('a -> unit) -> unit
+```
+
+`iter` is a more specialised combinator that is only useful in OCaml due to
+side-effects being allowed.  The input function is applied to every value, but
+no result is supplied. The function must instead apply some side-effect such
+as changing a mutable record field or printing to the standard output.
 
 </sidebar>
 
@@ -583,7 +585,7 @@ $ atdgen -version
 
 The command-line tool will be installed within your `~/.opam` directory,
 and will already be on your `PATH` from running `opam config env`.  See
-[xref](#installation) this isn't working.
+[xref](#installation) if this isn't working.
 
 </note>
 
