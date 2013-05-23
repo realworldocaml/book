@@ -6088,7 +6088,7 @@ val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
       OCaml's policy of immutable-by-default is a good one, but
       imperative programming does have its place. We'll discuss more
       about how (and when) to use OCaml's imperative features in
-      <xref linkend="imperative-programming2"/>.
+      <xref linkend="imperative-programming"/>.
     </para>
   </sect1>
   <sect1 id="first-class-fields">
@@ -13168,8 +13168,31 @@ val to_basic : json -&gt; Yojson.Basic.json
         fields from JSON records, but the process is still pretty
         manual. We'll talk about how to do larger-scale JSON parsing
         now, using a domain-specific language known as
-        <ulink url="http://oss.wink.com/atdgen/">ATD</ulink>.
+        <ulink url="http://mjambon.com/atd-biniou-intro.html">ATD</ulink>.
       </para>
+      <note>
+      <title>
+      Installing the ATDgen library and tool
+      </title>
+      <para>
+        ATDgen installs a few OCaml libraries that interface with
+        Yojson, and also a command-line tool that generates code. It can
+        all be installed via OPAM:
+      </para>
+      <programlisting>
+$ opam install atdgen
+$ atdgen -version
+1.2.3
+</programlisting>
+      <para>
+        The command-line tool will be installed within your
+        <literal>~/.opam</literal> directory, and will already be on
+        your <literal>PATH</literal> from running
+        <literal>opam config env</literal>. See
+        <xref linkend="installation"/> this isn't working.
+      </para>
+      </note>
+
       <para>
         The idea behind ATD is to specify the format of the JSON in a
         separate file, and then run a compiler
