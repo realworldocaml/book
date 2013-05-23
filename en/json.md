@@ -91,7 +91,7 @@ open Yojson ;;
 
 </note>
 
-### Parsing JSON with Yojson
+## Parsing JSON with Yojson
 
 The JSON specification has very few data types, and the
 `Yojson.Basic.json` type shown below is sufficient to express any
@@ -264,7 +264,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 
 </sidebar>
 
-#### Selecting values from JSON structures
+## Selecting values from JSON structures
 
 Now that we've figured out how to parse the example JSON into an OCaml
 value, let's manipulate it from OCaml code and extract specific
@@ -435,7 +435,7 @@ combination with the OCaml type system. Many errors that don't make
 sense at runtime (for example, mixing up lists and objects) will be
 caught statically via a type error.
 
-### Constructing JSON values
+## Constructing JSON values
 
 Building and printing JSON values is pretty straightforward given the
 `Yojson.Basic.json` type.  You can just construct values of type `json` and
@@ -535,7 +535,7 @@ all it takes to make tracking down such issues much easier.
 
 </sidebar>
 
-#### Using non-standard JSON extensions
+## Using non-standard JSON extensions
 
 The standard JSON types are _really_ basic, and OCaml types are far
 more expressive. Yojson supports an extended JSON format for those
@@ -595,7 +595,7 @@ val to_basic : json -> Yojson.Basic.json
  *)
 ```
 
-### Automatically mapping JSON to OCaml types
+## Automatically mapping JSON to OCaml types
 
 The combinators described earlier make it fairly easy to extract
 fields from JSON records, but the process is still pretty manual.
