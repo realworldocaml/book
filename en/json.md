@@ -605,8 +605,8 @@ using a small portion of the GitHub API.  GitHub is a popular code
 hosting and sharing website that provides a JSON-based web
 [API](http://developer.github.com).  The ATD code fragment below
 describes the GitHub authorization API.  It is based on a
-pseudo-standard web protocol known as OAuth, and is used to authorized
-users to access GitHub services.
+pseudo-standard web protocol known as OAuth, and is used to authorize
+users for GitHub services.
 
 ```ocaml
 type scope = [
@@ -639,11 +639,11 @@ type authorization_response = {
 }
 ```
 
-ATD is (deliberately) similar to OCaml type definitions.  Each field
-can include extra annotations to customise the parsing code for a
-particular backend. For example, the GitHub `scope` field above is
-defined as a variant type, but with the actual JSON values being
-defined explicitly (as lower-case versions).
+ATD specifications are deliberately similar to OCaml type definitions.  Each
+field can include extra annotations to customise the parsing code for a
+particular backend. For example, the GitHub `scope` field above is defined as a
+variant type, but with the actual JSON values being defined explicitly (as
+lower-case versions).
 
 The ATD spec can be compiled to a number of OCaml targets. Let's run
 the compiler twice, to generate some OCaml type definitions, and a
