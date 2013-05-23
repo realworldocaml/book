@@ -4,7 +4,7 @@
 
 The programming languages that you use affect the software you create.
 They influence your software's reliability, security and efficiency,
-and how easy it is to read, refactor, and extend.  And the languages
+and how easy it is to read, refactor, and extend.  The languages
 you know can also deeply affect how you think about programming and
 software design.
 
