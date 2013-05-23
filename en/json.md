@@ -559,12 +559,12 @@ type json = [
   | `Variant of string * json option ]
 ```
 
-You should immediately be able to spot a benefit of using polymorphic
-variants here.  A standard JSON type such as a `String` will
-type-check against both the `Basic` module and also the non-standard
-`Safe` module.  However, if you use extension values such as `Tuple`
-with the `Basic` module, they will not be a valid sub-type and the
-compiler will complain.
+The `Safe.json` type includes all of the variants from `Basic.json` and extends
+it with a few more useful ones.  A standard JSON type such as a `String` will
+type-check against both the `Basic` module and also the non-standard `Safe`
+module.  If you use the extension values with the `Basic` module however, the
+compiler will reject your code until you make it compliant with the
+portable subset of JSON.
 
 Yojson supports the following JSON extensions:
 
