@@ -300,8 +300,6 @@ Strings also come with their own syntax for getting and setting
 values: `string.[index]` and `string.[index] <- expr` respectively,
 and string literals are bounded by quotes.  There's also a module
 `String` where you'll find useful functions for working with strings.
-We'll talk more about the `String` module in
-[xref](#text-processing-and-unicode).
 
 #### Bigarrays
 
