@@ -16,7 +16,7 @@ the book:
 
 * Using polymorphic variants to write more extensible libraries and protocols (but
   still retain the ability to extend them if needed)
-* The use of _combinator_ functions to compose common operations over data
+* The use of _combinators_ to compose common operations over data
   structures in a type-safe way.
 * Using external tools to generate boilerplate OCaml modules and
   signatures from external specification files.
@@ -58,7 +58,7 @@ different JSON types within a single list.
 
 This free-form nature of JSON types is both a blessing and a curse.
 It's very easy to generate JSON values, but code that parses them also
-has to handling subtle variations in how values are represented. For
+has to handle subtle variations in how the values are represented. For
 example, what if the `pages` value above is actually represented as a
 string value of `"450"` instead of an integer?
 
