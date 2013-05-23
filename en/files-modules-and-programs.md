@@ -328,11 +328,10 @@ module and of how that should be organized, documented and formatted.
 </note>
 
 
-To actually hide the fact that frequency counts are represented as
-association lists, we need to make the type of frequency counts
-_abstract_.  A type is abstract if its name is exposed in the
-interface, but its definition is not.  Here's an abstract interface
-for `Counter`:
+To hide the fact that frequency counts are represented as association
+lists, we'll need to make the type of frequency counts _abstract_.  A
+type is abstract if its name is exposed in the interface, but its
+definition is not.  Here's an abstract interface for `Counter`:
 
 ```ocaml
 (* counter.mli: abstract interface *)
@@ -384,11 +383,22 @@ This is because `freq.ml` depends on the fact that frequency counts
 are represented as association lists, a fact that we've just hidden.
 We just need to fix `build_counts` to use `Counter.empty` instead of
 `[]` and `Counter.to_list` to get the association list out at the end
-for processing and printing, as below.
+for processing and printing.  The resulting implementation is shown
+below.
 
 ```ocaml
+(* filename: freq.ml *)
+open Core.Std
+
 let build_counts () =
   In_channel.fold_lines stdin ~init:Counter.empty ~f:Counter.touch
+
+let () =
+  build_counts ()
+  |> Counter.to_list
+  |> List.sort ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
+  |> (fun counts -> List.take counts 10)
+  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
 ```
 
 Now we can turn to optimizing the implementation of `Counter`.  Here's
