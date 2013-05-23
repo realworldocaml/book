@@ -325,9 +325,9 @@ $ opam list
 <note>
 <title>Note to reviewers</title>
 
-OPAM 1.0's always places the login commands into your `~/.profile`
-directory, which isn't executed if your shell is `bash`.  This has
-been fixed in subsequent versions, but for now you'll need to manually
+OPAM 1.0.0 places the login commands into your `~/.profile`
+directory, which isn't always executed if your shell is `bash`.
+This has been fixed in subsequent versions, but for now you'll need to manually
 copy the contents of `~/.profile` over to `~/.bash_profile` via:
 
 ```
