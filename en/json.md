@@ -371,22 +371,26 @@ structure.  Let's examine some of them in more detail:
   let title = json |> member "title" |> to_string in
 ```
 
-For the `title` field, the `member` combinator extracts the key from
-the `json` value, and converts it to an OCaml string.  An exception is
-raised if the JSON value is not a string, so the caller must be
-careful to `try/with` the result.
+The `member` function accepts a JSON object and named key and returns
+the JSON field associated with that key, or `Null`.  Since we know that
+the `title` value is always a string in our example schema, we want
+to convert it to an OCaml string.  The `to_string` function performs
+this conversion, and raises an exception if there is an unexpected JSON
+type.  The `|>` operator provides a convenient way to chain these
+operations together.
 
 ```ocaml
   let tags = json |> member "tags" |> to_list |> filter_string in
   let pages = json |> member "pages" |> to_int in
 ```
 
-The `tags` field is similar to `title`, but the field is a list of
-strings instead of a single one.  Converting this to an OCaml `string
-list` is a two stage process: first, we must convert it to a list of
-JSON values, and then filter out the `String` values.  Remember that
-OCaml lists must have a single type, so any other JSON values will be
-skipped from the output of `filter_string`.
+The `tags` field is similar to `title`, but the field is a list of strings
+instead of a single one.  Converting this to an OCaml `string list` is a two
+stage process.  First, we convert the JSON `List` to an OCaml list of JSON
+values, and then filter out the `String` values as an OCaml `string list`.
+Remember that OCaml lists must contain values of the same type, so any JSON
+values that cannot be converted to a `string` will be skipped from the output
+of `filter_string`.
 
 ```ocaml
   let is_online = json |> member "is_online" |> to_bool_option in
