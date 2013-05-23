@@ -1,15 +1,22 @@
 # Handling JSON data
 
-Now that you've seen how to convert OCaml values into s-expressions,
-it's time to look at other useful serialization formats. We'll cover
-JSON next, as it is a very common third-party data format on the
-Internet, and much easier to parse than alternatives. This chapter
-introduces you to a couple of new techniques that glue together the
-basic ideas from Part I of the book:
+Data serialization, _i.e._ converting data to and from a sequence of
+bytes that's suitable for writing to disk or sending across the
+network, is an important and common programming task.  Sometimes you
+need to match someone else's data format (such as XML), sometimes you
+need a highly efficient format, and sometimes you just want something
+that is easy for humans to read and edit.  To this end, OCaml comes
+with several techniques for data serialization depending on what your
+problem is.
 
-* Using polymorphic variants to write more portable protocols (but
+We'll start by using the popular and simple JSON data format, and then look at
+other serialization formats later in in the book.  This chapter introduces you
+to a couple of new techniques that glue together the basic ideas from Part I of
+the book:
+
+* Using polymorphic variants to write more extensible libraries and protocols (but
   still retain the ability to extend them if needed)
-* The use of _combinators_ to compose common operations over data
+* The use of _combinator_ functions to compose common operations over data
   structures in a type-safe way.
 * Using external tools to generate boilerplate OCaml modules and
   signatures from external specification files.
