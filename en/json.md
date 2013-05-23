@@ -689,8 +689,8 @@ $ atdgen -j github.atd
 
 This will generate some new files in your current
 directory. `Github_t.ml` and `Github_t.mli` will contain an OCaml
-module with types defines that correspond to the ATD file.  It looks
-like this:
+module with types defines that correspond to the ATD file.  The
+signature looks like this:
 
 ```ocaml
 type scope = [
@@ -719,15 +719,15 @@ type authorization_response = {
 }
 ```
 
-There is an obvious correspondence to the ATD definition.  Note in
-particular that field names in separate OCaml records cannot shadow
-each other, and so we specifically prefix every field with a prefix to
-distinguish it from other records. For example, `<ocaml
-field_prefix="auth_req_">` in the ATD spec prefixes every field name
-in the generated `authorization_request` record with `auth_req`.
+There is an obvious correspondence to the ATD definition.  Note
+that field names in OCaml records in the same module cannot shadow
+each other, and so we instruct ATDgen to prefix every field with a
+name that distinguishes it from other records in the same module.
+For example, `<ocaml field_prefix="auth_req_">` in the ATD spec prefixes
+every field name in the generated `authorization_request` record with `auth_req`.
 
 The `Github_t` module only contains the type definitions, while
-`Github_j` has a concrete serialization module to and from JSON.  You
+`Github_j` provides serialization functions to and from JSON.  You
 can read the `github_j.mli` to see the full interface, but the
 important functions for most uses are the conversion functions to and
 from a string.  For our example above, this looks like:
