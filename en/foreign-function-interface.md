@@ -407,3 +407,6 @@ Unions in C are a collection of named structures that can be mapped onto the
 same memory.  They are also supported in the `ctypes` library via the
 `Ffi.C.Union` module, although we won't go into more detail here.
 
+## Callbacks between C and OCaml
+
+TODO: the fts(3) interface.

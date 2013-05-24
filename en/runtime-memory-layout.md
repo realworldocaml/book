@@ -1,4 +1,4 @@
-# Runtime Memory Layout
+# Memory Representation of Values
 
 Much of the static type information contained within an OCaml program is
 checked and discarded at compilation time, leaving a much simpler *runtime*
@@ -8,11 +8,12 @@ writing efficient programs and profiling them at runtime.
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
 
-The OCaml compiler runs through several phases of during the compilation
-process.  After syntax checking, the next stage is *type checking*.  In a
-validly typed program, a function cannot be applied with an unexpected type.
-For example, the `print_endline` function must receive a single `string`
-argument, and an `int` will result in a type error.
+The OCaml compiler runs through several phases during the compilation
+process.  The first phase is syntax checking, during which source files are
+parsed into Abstract Syntax Trees (ASTs).  The next stage is a *type checking*
+pass over the AST.  In a validly typed program, a function cannot be applied
+with an unexpected type.  For example, the `print_endline` function must
+receive a single `string` argument, and an `int` will result in a type error.
 
 Since OCaml verifies these properties at compile time, it doesn't need to keep
 track of as much information at runtime. Thus, later stages of the compiler can
@@ -48,7 +49,7 @@ words of available space. One word holds the `foo` field and the second word
 holds the `bar` field.  The OCaml compiler translates such an expression into
 an explicit allocation for the block from OCaml's runtime system: a C library
 that provides a collection of routines that can be called by running OCaml
-programs.  The runtime system manages a *heap*, which a collection of memory
+programs.  The runtime system manages a *heap*, which is a collection of memory
 regions it obtains from the operating system using *malloc(3)*. The OCaml runtime
 uses these memory regions to hold *heap blocks*, which it then fills up in
 response to allocation requests by the OCaml program.
@@ -56,8 +57,8 @@ response to allocation requests by the OCaml program.
 When there isn't enough memory available to satisfy an allocation request from
 the allocated heap blocks, the runtime system invokes the *garbage collector*
 (or GC). An OCaml program does not explicitly free a heap block when it is done
-with it, and the GC must determine which heap blocks are *alive* and which heap
-blocks are *dead*, i.e. no longer in use. Dead blocks are collected and their
+with it, and the GC must determine which heap blocks are "live" and which heap
+blocks are "dead", i.e. no longer in use. Dead blocks are collected and their
 memory made available for re-use by the application.
 
 The garbage collector does not keep constant track of blocks as they are
@@ -74,9 +75,9 @@ blocks of memory that are used for a short period of time and then never
 accessed again.  OCaml takes advantage of this fact to improve the performance
 of allocation and collection by using a *generational* garbage collector. This
 means that it has different memory regions to hold blocks based on how long the
-blocks have been alive.  OCaml's heap is split in two; there is a small,
+blocks have been live.  OCaml's heap is split in two; there is a small,
 fixed-size *minor heap* where most most blocks are initially allocated, and a large,
-variable-sized *major heap* for blocks that have been alive longer or
+variable-sized *major heap* for blocks that have been live longer or
 are larger than 4KB.  A typical functional programming style means that young
 blocks tend to die young, and old blocks tend to stay around for longer than
 young ones (this is referred to as the *generational hypothesis*).
@@ -115,7 +116,7 @@ free memory, and this list is used to satisfy allocation requests for OCaml
 blocks.  The major heap is cleaned via a mark and sweep garbage collection
 algorithm.
 
-* The *mark* phase to traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
+* The *mark* phase traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
 * The *sweep* phase sequentially scans the heap chunks and identifies dead blocks that weren't marked earlier.
 * The *compact* phase moves live blocks to eliminate the gaps of free memory into a freshly allocated heap, and ensures that memory does not fragment in long-lived programs.
 

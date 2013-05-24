@@ -4,7 +4,7 @@
 
 The programming languages that you use affect the software you create.
 They influence your software's reliability, security and efficiency,
-and how easy it is to read, refactor, and extend.  And the languages
+and how easy it is to read, refactor, and extend.  The languages
 you know can also deeply affect how you think about programming and
 software design.
 
@@ -20,7 +20,7 @@ design.  These features include:
 * _Static type-checking_ to reduce run-time errors, such as Java or Scala
   interfaces or variable type declarations in C#, Ada and Pascal.
 * _Generics_ to enable abstractions to be constructed across different
-  datatypes, available in Java and C#.
+  datatypes, available as C++ templates or in Java or C#.
 * _Immutable data structures_ that cannot be destructively updated,
   famously enforced in Haskell but also a common feature of many
   distributed big data frameworks.
@@ -44,12 +44,15 @@ The only languages that support these ideas well are statically-typed
 functional programming languages like OCaml, F#, Haskell, Scala and
 Standard ML.
 
-Among this worthy set of languages, OCaml stands apart because it
-manages to provide a great deal of power while remaining highly
-pragmatic, highly performant, and comparatively simple to use and
-understand.  It is this that makes OCaml a great choice for
-programmers who want to step up to a better programming language, and
-at the same time want to get practical work done.
+Among this worthy set of languages, OCaml stands apart because it manages to
+provide a great deal of power while remaining highly pragmatic. The compiler
+has a straightforward compilation strategy without excessive optimization
+passes, and the strict evaluation model makes runtime behaviour easy to
+predict.  The garbage collector is an incremental, precise implementation with
+no dynamic JIT compilation, and the runtime is simple and portable across
+platforms.  It is all of this that makes OCaml a great choice for programmers
+who want to step up to a better programming language, and at the same time want
+to get practical work done.
 
 #### A brief history from the 1960s
 
@@ -88,21 +91,20 @@ usage, predictability and performance matters.
 
 ### The Core Standard Library
 
-A language on its own isn't enough.  You also need a rich set of
-libraries to base your applications on.  A common source of
-frustration for those learning OCaml is that the standard library that
-ships with the OCaml compiler is not ideal.  While it's well
-implemented, it is really intended for use within the compiler itself,
-and covers only a small subset of the functionality you expect for
-more general-purpose use.
+A language on its own isn't enough.  You also need a rich set of libraries to
+base your applications on.  A common source of frustration for those learning
+OCaml is that the standard library that ships with the compiler doesn't provide
+a lot of features.  The standard library was actually developed for use within
+the compiler itself, and by design covers only a small subset of the
+functionality you expect for more general-purpose use.
 
-In the world of open-source software, nothing stops alternative libraries
-from being written by the community, and this exactly what the Core standard
-library is.  Jane Street, a company that has been using OCaml for more than a
-decade, developed Core for its own internal use, but it was designed from the
-start with an eye towards being a general-purpose standard library, and has
-very broad applicability.  Core is also engineered with correctness,
-reliability and performance very much in mind.
+In the world of open-source software, nothing stops alternative libraries from
+being written to supplement the compiler standard library, and this exactly
+what the Core distribution is.  Jane Street, a company that has been using
+OCaml for more than a decade, developed Core for its own internal use, but it
+was designed from the start with an eye towards being a general-purpose
+standard library, and has very broad applicability.  Core is also engineered
+with correctness, reliability and performance very much in mind.
 
 Core is also distributed with syntax extensions which provide useful new
 functionality to OCaml, and there are additional libraries such as the Async

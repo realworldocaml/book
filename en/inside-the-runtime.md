@@ -1,4 +1,4 @@
-# Inside the Runtime
+# Understanding the Garbage Collector
 
 (_avsm_: this chapter is still being chopped and changed)
 
