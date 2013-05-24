@@ -1,16 +1,21 @@
 # Foreign Function Interface
 
 OCaml has several options available to interact with non-OCaml code.  The
-compiler toolchain can of course link to external system libraries, but can
-also produce shared libraries that let your OCaml code be called from C, or
-even encode your OCaml as a standalone C file that be compiled directly into
-other libraries.
+compiler toolchain can link to external system libraries, and also produce
+standalone object code.  This object code can be turned into shared libraries
+that that let your OCaml code be called from C, or linked in more exotic ways
+to embed it directly into applications or even kernel modules.
 
-In this chapter, we'll first describe the easiest way to bind to C code, via
-the `ctypes` library.  This can be done without writing a single line of C
-code, and just requires a pure OCaml definition of the C interfaces.  We'll use
-the `ncurses` terminal-drawing toolkit as our running example, as it's widely
-available on most systems.
+This chapter walks you through the basics interfacing with C libraries, and
+then moves onto how to embed your code for a variety of other platforms.
+
+## The `ctypes` FFI library
+
+We'll introduce the foreign function interface via the simplest method, which
+doesn't require writing any C code.  The `ctypes` library lets you describe the
+C interface in pure OCaml, and it takes care of opening the foreign library and
+invoking the correct function calls .  We'll use the `ncurses` terminal-drawing
+toolkit as our firts example, as it's widely available on most systems.
 
 <note>
 <title>Installing the `ctypes` library</title>
@@ -32,26 +37,50 @@ It will then be available via the `ctypes` ocamlfind package.
 
 Ncurses is a library to build terminal-independent text interfaces in a
 reasonably efficient way.  The  manual page (usually via `man ncurses`)
-explains the basics of the C interface.  The `initscr` function allocates some
-state and returns it as a point to the C `WINDOW` typedef.  This C pointer is
-then passed to various terminal drawing functions.
+explains the basics of the C interface.  Below is an excerpt of the header
+interface found in `<ncurses.h`>.
 
-The `ctypes` library provides a combinator interface that lets you declare
-these C functions as OCaml values.  The library takes care of converting the
-OCaml arguments into the C calling convention, invoking the foreign call, and
-returning the result as an OCaml value.
+```c
+typedef struct _win_st WINDOW;
+
+WINDOW *initscr (void);
+WINDOW *newwin (int, int, int, int);
+void endwin (void);
+void refresh (void);
+void wrefresh (WINDOW *);
+void mvwaddstr (WINDOW *, int, int, char *);
+```
+
+The `WINDOW` typedef is a forward declaration of a C structure that holds the
+internal ncurses library state.  The specific contents of the structure don't
+matter, as you need to pass pointers to the structure to the various library
+calls.  The `initscr` function initialises this library state and returns it as
+a `WINDOW` pointer, and the `newwin` function allows further sub-windows to be
+created.  This pointer is passed to various terminal drawing functions such as
+`mvwaddrstr`.  The terminal is only updated when `refresh` or `wrefresh` are
+called, and all other drawing calls just manipulate data structures without
+taking effect on the screen.
+
+The `ctypes` library provides an OCaml interface that lets you declare these C
+functions as OCaml values.  The library takes care of converting the OCaml
+arguments into the C calling convention, invoking the foreign call within the
+`ncurses` library, and finally returning the result as an OCaml value.
 
 ```ocaml
 open Ctypes.Ffi.C
 open Type
 
 type window = unit ptr
-let window = ptr void
+let window : window t = ptr void
 ```
 
-The `window` type represents the `WINDOW *` pointer that ncurses returns.  This
-can be left abstract in the OCaml signature for this module, and is represented
-as a `ptr void` ("pointer to void") value within the implementation.
+The `window` type is declared as a `void` pointer.  We also need a value to pass
+to the `ctypes` library to represent this type, and so the `window` value is built
+using the `Ctypes.Ffi.C.ptr` function.  The actual pointer type from C is a
+`WINDOW` and not `void`, but we'll show you shortly how we can hide the details
+of the `window` type in the OCaml module signature.  The next step is to use
+these values to build a foreign function call to `initscr`.
+
 
 ```ocaml
 let initscr =
@@ -76,16 +105,19 @@ let wrefresh =
   foreign "wrefresh" (window @-> (returning void))
 
 let newwin =
-  foreign "newwin" (int @-> int @-> int @-> int @-> (returning window))
+  foreign "newwin" 
+    (int @-> int @-> int @-> int @-> (returning window))
 
 let mvwaddch =
-  foreign "mvwaddch" (window @-> int @-> int @-> char @-> (returning void))
+  foreign "mvwaddch" 
+    (window @-> int @-> int @-> char @-> (returning void))
 
 let addstr =
   foreign "addstr" (string @-> (returning void))
 
 let mvwaddstr =
-  foreign "mvwaddstr" (window @-> int @-> int @-> string @-> (returning void))
+  foreign "mvwaddstr"
+    (window @-> int @-> int @-> string @-> (returning void))
 
 let box =
   foreign "box" (window @-> int @-> int @-> (returning void))
@@ -100,23 +132,24 @@ for `ncurses.mli` looks much like a normal OCaml signature:
 
 ```ocaml
 type window
-val window : window Ffi.C.Type.t
-val initscr : unit -> window
-val endwin : unit -> unit
-val refresh : unit -> unit
-val wrefresh : window -> unit
-val newwin : int -> int -> int -> int -> window
-val addch : char -> unit
-val mvwaddch : window -> int -> int -> char -> unit
-val addstr : string -> unit
+
+val window    : window Ffi.C.Type.t
+val initscr   : unit   -> window
+val endwin    : unit   -> unit
+val refresh   : unit   -> unit
+val wrefresh  : window -> unit
+val newwin    : int    -> int -> int -> int -> window
+val addch     : char   -> unit
+val mvwaddch  : window -> int -> int -> char -> unit
+val addstr    : string -> unit
 val mvwaddstr : window -> int -> int -> string -> unit
-val box : window -> int -> int -> unit
-val cbreak : unit -> unit
+val box       : window -> int -> int -> unit
+val cbreak    : unit   -> unit
 ```
 
 Notice that the `window` type is left abstract to external users, so that it
-can only be constructed via `Ncurses.initscr`.  This interface is now safe to use in
-example code.  Here's what an ncurses hello world looks like:
+can only be constructed via `Ncurses.initscr`.  This interface is now safe to
+use in example code.  Here's what an ncurses hello world looks like:
 
 ```ocaml
 open Ncurses
@@ -156,7 +189,7 @@ $ ./hello_broken
 Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not found")
 ```
 
-## Defining C values in OCaml
+## Defining basic C formats from OCaml
 
 The `Ctypes` library provides an `FFi.C` module that lets you describe not only
 basic C types, but also more complex structures and unions.  It defines
@@ -263,7 +296,7 @@ order is significant.  The `Ffi.C.Type.Struct` module defines combinators to mak
 this as easy as arrays and basic types.  Let's start with an example by binding
 some time-related UNIX functions.
 
-#### Example: binding UNIX date functions
+### Example: binding UNIX date functions
 
 The UNIX standard C library defines several useful time and date functions 
 in `<time.h>` (usually found in `/usr/include` on a Linux or MacOS X system).

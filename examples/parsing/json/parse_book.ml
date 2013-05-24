@@ -1,5 +1,4 @@
 open Core.Std
-open Printf
 
 let _ =
   (* Read the JSON file *)

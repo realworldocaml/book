@@ -308,7 +308,7 @@ We'll talk more about the `String` module in
 A `Bigarray.t` is a handle to a block of memory stored outside of the
 OCaml heap.  These are mostly useful for interacting with C or Fortran
 libraries, and are discussed in
-[xref](#managing-external-memory-with-bigarrays).  Bigarrays too have
+[xref](#runtime-memory-layout).  Bigarrays too have
 their own getting and setting syntax: `bigarray.{index}` and
 `bigarray.{index} <- expr`.  There is no literal syntax for bigarrays.
 
