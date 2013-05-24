@@ -58,6 +58,18 @@ let from_yminsky =
   ; "orbitz"                  (* TODO Malcolm Matalka <mmatalka@gmail.com> *)
 ]
 
+let js_interns =
+  [ "imackler"               (* TODO izaakmeckler@me.com      *)
+  ; "billduff"               (* TODO wduff11@gmail.com        *)
+  ; "rawxfish"               (* TODO szhan@princeton.edu      *)
+  ; "bbohrer"                (* TODO bjbohrer@gmail.com       *)
+  ; "benmachine"             (* TODO bm280@srcf.net           *)
+  ; "awuprogs"               (* TODO awu@college.harvard.edu  *)
+  ; "ranchen"                (* TODO ranchen@seas.upenn.edu   *)
+  ; "apribadi"               (* TODO aaron.pribadi@gmail.com  *)
+  ; "nicolasavru"            (* TODO nicolasavru@gmail.com    *)
+  ]
+
 let from_email =
   [ "JakubOboza "             (* jakub.oboza@gmail.com *)
   ; "gour"                    (* gour@atmarama.net *)
@@ -108,7 +120,13 @@ let internal_reviewers =
 
 let external_reviewers =
   "External Reviewers",
-  (authors @ support @ from_anil @ from_yminsky @ from_email)
+  (authors
+   @ support
+   @ from_anil
+   @ from_yminsky
+   @ from_email
+   @ js_interns
+  )
 
 let allowed_users = function
   | "alpha1" -> internal_reviewers

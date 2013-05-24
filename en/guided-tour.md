@@ -85,9 +85,9 @@ at you.
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  This is a peculiarity of the toplevel that
   is not required in stand-alone programs (though it is sometimes
-  helpful to include `;;` to improve OCaml's error reporting.)
-- After evaluating an expression, the toplevel spits out both the type
-  of the result and the result itself.
+  helpful to include `;;` to improve OCaml's error reporting).
+- After evaluating an expression, the toplevel prints both the type of
+  the result and the result itself.
 - Function arguments are separated by spaces, instead of by
   parenthesis and commas, which is more like the UNIX shell than C or
   Java.
@@ -144,7 +144,8 @@ Now that we're creating more interesting values like functions, the
 types have gotten more interesting too.  `int -> int` is a function
 type, in this case indicating a function that takes an `int` and
 returns an `int`.  We can also write functions that take multiple
-arguments.
+arguments.  (Note that the following example will not work if you
+haven't opened `Core.Std`.)
 
 ```ocaml
 # let ratio x y =
@@ -156,19 +157,19 @@ val ratio : int -> int -> float = <fun>
 ```
 
 As a side note, the above is our first use of OCaml modules.  Here,
-`FLoat.of_int` refers to the `of_int` function contained in the
-`FLoat` module, and not, as you might expect from an object-oriented
+`Float.of_int` refers to the `of_int` function contained in the
+`Float` module, and not, as you might expect from an object-oriented
 language, accessing a method of an object.  The `Float` module in
 particular contains `of_int` as well as many other useful functions
 for dealing with floats.
 
-The notation for the type-signature of a multi-argument functions may
+The notation for the type-signature of a multi-argument function may
 be a little surprising at first, but we'll explain where it comes from
 when we get to function currying in [xref](#multi-argument-functions).
 For the moment, think of the arrows as separating different arguments
 of the function, with the type after the final arrow being the return
-value of the function.  Thus, `int -> int -> float` describes a
-function that takes two `int` arguments and returns a `float`.
+value.  Thus, `int -> int -> float` describes a function that takes
+two `int` arguments and returns a `float`.
 
 We can even write functions that take other functions as arguments.
 Here's an example of a function that takes three arguments: a test
@@ -201,8 +202,8 @@ val even : int -> bool = <fun>
 Note that in the definition of `even` we used `=` in two different
 ways: once as the part of the let binding that separates the thing
 being defined from its definition; and once as an equality test, when
-comparing `x mod 2` to `0`.  These two uses of `=` are basically
-unrelated.
+comparing `x mod 2` to `0`.  These are very different operations
+despite the fact that they share some syntax.
 
 ### Type inference
 
@@ -348,8 +349,9 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-are compile-time errors, whereas an error that can't be caught by the
-type system, like division by zero, leads to a runtime exception.
+are compile-time errors (because `+` requires that both its arguments
+be of type `int`), whereas errors that can't be caught by the type
+system, like division by zero, lead to runtime exceptions.
 
 ```ocaml
 # let is_a_multiple x y =
@@ -385,10 +387,10 @@ can create a tuple by joining values together with a comma:
 val a_tuple : int * string = (3, "three")
 ```
 
-For the mathematically inclined, the `*` character is used because the
-set of all pairs of type `t * s` corresponds to the Cartesian product
-of the set of elements of type `t` and the set of elements of type
-`s`.
+(For the mathematically inclined, the `*` character is used because
+the set of all pairs of type `t * s` corresponds to the Cartesian
+product of the set of elements of type `t` and the set of elements of
+type `s`.)
 
 You can extract the components of a tuple using OCaml's
 pattern matching syntax. For example:
@@ -534,9 +536,9 @@ two lists.
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
 
-It's important to remember that this is not a constant-time operation.
-Concatenating two lists takes time proportional to the length of the
-first list.
+It's important to remember that, unlike `::`, this is not a
+constant-time operation.  Concatenating two lists takes time
+proportional to the length of the first list.
 
 #### List patterns using `match`
 
@@ -700,8 +702,10 @@ _::[]
 ```
 
 This indicates that we're missing a case, in particular we don't
-handle one-element lists.  That's easy enough to fix by adding another
-case to the match:
+handle one-element lists.  Note how the underscore is used to indicate
+the presence of a value without specifying what that value is.
+
+We can fix this warning by adding another case to the match:
 
 ```ocaml
 # let rec destutter list =
@@ -804,8 +808,8 @@ new variable binding to what came before.
 ```
 
 This kind of nested let binding is a common way of building up a
-complex expression, with each `let` breaking off and naming an
-individual component, and then combining them in one final expression.
+complex expression, with each `let` naming some component, before
+combining them in one final expression.
 
 </note>
 
@@ -855,10 +859,14 @@ matching:
 val magnitude : point2d -> float = <fun>
 ```
 
-We can write the pattern match even more tersely, using what's called
-_field punning_.  In particular, when the name of the field and the
-name of the variable coincide, we don't have to write them both down.
-Thus, the magnitude function can be rewritten as follows.
+The pattern match here binds the variable `x_pos` to the value
+contained in the `x` field, and the variable `y_pos` to the value in
+the `y` field.
+
+We can write this more tersely using what's called _field punning_.
+When the name of the field and the name of the variable it is bound to
+in the match coincide, we don't have to write them both down.  Using
+this, our magnitude function can be rewritten as follows.
 
 ```ocaml
 # let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
@@ -955,7 +963,7 @@ sequences of instructions that operate by modifying state as they go.
 Functional code is the default in OCaml, with variable bindings and
 most data structures being immutable.  But OCaml also has excellent
 support for imperative programming, including mutable data structures
-like arrays and hashtables and control-flow constructs like for and
+like arrays and hashtables, and control-flow constructs like for and
 while loops.
 
 ### Arrays
@@ -999,7 +1007,10 @@ collection of numbers.  Here's the basic data structure:
 
 The fields in `running_sum` are designed to be easy to extend
 incrementally, and sufficient to compute means and standard
-deviations, as shown below.
+deviations, as shown below.  (Note that there are two let-bindings in
+a row without a double semicolon between them.  That's because the
+double semicolon is required only to tell utop to process the input,
+not to separate two expressions.)
 
 ```ocaml
 # let mean rsum = rsum.sum /. float rsum.samples
@@ -1123,12 +1134,11 @@ but it shows how you can use a ref in place of a mutable variable.
 
 ### For and while loops
 
-Along with mutable data structures, OCaml gives you constructs like
-while and for loops for interacting with them.  Here, for example, is
-some code that uses a for loop for permuting an array.  We use the
-`Random` module as our source of randomness.  `Random` starts out with
-a deterministic seed, but you can call `Random.self_init` to choose a
-new seed at random.
+OCaml also supports traditional imperative control-flow constructs
+like for and while loops.  Here, for example, is some code for
+permuting an array that uses a for loop.  We use the `Random` module
+as our source of randomness.  `Random` starts with a default seed, but
+you can call `Random.self_init` to choose a new seed at random.
 
 ```ocaml
 # let permute ar =

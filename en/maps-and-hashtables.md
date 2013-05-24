@@ -1,8 +1,7 @@
 # Maps and Hashtables
 
-Organizing data as key/value pairs representing bindings of keys to
-values is a useful and common programming pattern.  Maybe the simplest
-way of representing a collection of bindings is as a list of pairs,
+Data is often most naturally organized as key/value pairs.  Maybe the
+simplest way of representing this in OCaml is as a list of pairs,
 _i.e._, an _association list_.  Thus, you could write:
 
 ```ocaml
@@ -12,8 +11,8 @@ _i.e._, an _association list_.  Thus, you could write:
   ;;
 ```
 
-And we can use functions from the `List.Assoc` module to manipulate
-such an association list.
+We can use functions from the `List.Assoc` module to manipulate such a
+list.
 
 ```ocaml
 # List.Assoc.find digit_alist 6;;
@@ -26,29 +25,26 @@ such an association list.
  (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
 ```
 
-Association lists are simple and easy to use, and have the advantage
-of being an immutable data-structure.  But the performance of
-association lists is poor for most applications, since almost every
-non-trivial operation on an association list requires a linear-time
-scan of the list.
+Association lists are simple and easy to use, but their performance is
+poor for most applications, since almost every non-trivial operation
+on an association list requires a linear-time scan of the list.
 
 In this chapter, we'll talk about two more efficient alternatives to
 association lists: _maps_ and _hash-tables_.  A map is an immutable
-tree-based data structure where most operations on a map are take time
-logarithmic in the size of the map; a hash-table is a mutable data
-structure where most operations take constant time.  These are both
-very useful and very common tools.  In the following, we'll describe
-them both in some detail, and provide some advice as to when to use
-one or the other.
+tree-based data structure where most operations take time logarithmic
+in the size of the map; a hash-table is a mutable data structure where
+most operations have constant time complexity.  We'll describe both of
+these data structures in detail, and provide some advice as to when to
+use one or the other.
 
-## Constructing maps
+## Constructing a map
 
-Maps store their data in an ordered binary tree.  As such you need to
-know how to compare elements of the key type in order to construct the
-map.  Accordingly, functions for creating a map require that you pass
-in a value of type `Comparator.t`, which is available as part of any
-module that satisfies Core's `Comparable` interface.  Thus, we can
-create a map as follows.
+Maps are implemented as ordered binary trees, and as such you need to
+know how to compare the keys in order to build a map on those keys.
+Functions for creating a map require that you pass in a value of type
+`Comparator.t`, which is available as part of any module that
+satisfies Core's `Comparable` interface.  Thus, we can create a map as
+follows.
 
 ```ocaml
 # let digit_map = Map.of_alist_exn Int.comparator digit_alist;;
