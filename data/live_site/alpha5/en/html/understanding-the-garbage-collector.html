@@ -1,0 +1,672 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 24. Understanding the Garbage Collector / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha5',
+                        page: 'understanding\u002Dthe\u002Dgarbage\u002Dcollector.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="foreign-function-interface.html">21. Foreign Function Interface</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="memory-representation-of-values.html">22. Memory Representation of Values</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-binary-protocols-with-bigarray.html">23. Handling Binary Protocols with Bigarray</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="understanding-the-garbage-collector.html" class="here">24. Understanding the Garbage Collector</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 24. Understanding the Garbage Collector</h1>
+                
+                
+
+    <p id="idp11443840">
+    (<span><em>avsm</em></span>: this chapter is still being chopped and
+    changed)
+  </p><section><h1 id="runtime-memory-management">Runtime Memory Management</h1><p id="idp11445952">
+      The OCaml runtime divides the address space into memory pages of
+      4KB each (this is configurable by recompiling the runtime). At any
+      given time, every page that is in use is used for a single
+      purpose: major heap, minor heap, static data or code. The runtime
+      guarantees this by always allocating slightly more memory than
+      requested so that that it can choose align the memory it will
+      actually use at the beginning of a 4KB page.
+    </p><p id="idp11446832">
+      The runtime maintains a <span><em>page table</em></span> that
+      allows it to determine the status of any virtual memory address in
+      the operating system process. The status defines whether that
+      address is a page in use by the OCaml runtime, and if so, which of
+      the four purposes it is being used for.
+    </p><p id="idp11447968">
+      Since the virtual memory space can be very large and sparsely used
+      (especially on a 64-bit CPU), the page table is implemented as a
+      hash table in which keys are page-aligned addresses and values are
+      a single byte. The hash table is represented as an array of words,
+      with each word being a key-value pair. The key-value pair is the
+      bitwise <code>or</code> of the virtual address of the start
+      of the page (which has zeros for its lower 12-bits due to being
+      aligned to 4KB), and the lower 8 bits are used for the value. To
+      look up an address, one masks out the lower 12-bits of the memory
+      address, compute a multiplicative hash to get a table index, and
+      then compares against the address (i.e. the key) at that index.
+      Linear probing is used to resolve collisions.
+    </p><p id="idp11449872">
+      The byte value stored is a bitwise <code>or</code> of the
+      following status bits:
+    </p><table><thead><tr><th>
+              Page table status
+            </th><th>
+              Value
+            </th><th>
+              Meaning
+            </th></tr></thead><tbody><tr><td>
+<code>In_heap</code>
+</td><td>
+              1
+            </td><td>
+              in the major heap
+            </td></tr><tr><td>
+<code>In_young</code>
+</td><td>
+              2
+            </td><td>
+              in the minor heap
+            </td></tr><tr><td>
+<code>In_static_data</code>
+</td><td>
+              4
+            </td><td>
+              in the statically allocated data segment
+            </td></tr><tr><td>
+<code>In_code_area</code>
+</td><td>
+              8
+            </td><td>
+              in the statically allocated code segment
+            </td></tr></tbody></table><p id="idp11465472">
+      The page table starts with a size aiming to be between 25% and 50%
+      full of entries, and is automatically doubled in size if it
+      becomes half full. It is never shrunk.
+    </p><section><h1 id="allocating-on-the-minor-heap">Allocating on the minor heap</h1><p id="idp11467216">
+        The minor heap is a contiguous chunk of virtual memory. Its size
+        is set on program startup and decided by the
+        <code>OCAMLRUNPARAM</code> environment variable
+        (<span><em>avsm</em></span>: xref), and then only changed later
+        by calls to <code>Gc.set</code>. The default size is 256k.
+      </p><p id="idp11469712">
+        The range of memory usable for allocation goes from the
+        <code>caml_young_start</code> to
+        <code>caml_young_end</code> C variables managed by the
+        runtime.
+      </p><pre id="idp11471664">
+                &lt;---- size ----&gt;
+ base --- start ---------------- end
+          limit      ptr &lt;------
+                          blocks
+</pre><p id="idp11472544">
+        In a fresh minor heap, the <code>limit</code> will equal
+        the <code>start</code>, and the current
+        <code>ptr</code> will equal the <code>end</code>. As
+        blocks are allocated, <code>caml_young_ptr</code> will
+        decrease until it reaches <code>caml_young_limit</code>,
+        at which point a minor garbage collection is triggered. To
+        allocate a block in the minor heap, we decrement
+        <code>caml_young_ptr</code> by the size of the block
+        (including the header), and then set the the header to a valid
+        value. If there isn't enough space left for the block without
+        decrementing past the <code>limit</code>, a minor
+        collection is triggered.
+      </p><p id="idp11479072">
+        To force a minor gc to occur, one can set the
+        <code>caml_young_limit</code> to equal
+        <code>caml_young_end</code>, which causes signal handlers
+        to be run and to &quot;urge&quot; the runtime
+        (<span><em>avsm</em></span>: elaborate on this urging business,
+        and how to set young from within OCaml via
+        <code>Gc.??</code>).
+      </p></section><section><h1 id="allocating-on-the-major-heap">Allocating on the major heap</h1><p id="idp11483648">
+        The major heap is a singly linked list of contiguous memory
+        chunks, sorted in increasing order of virtual address. Each
+        chunk is a single memory chunk allocated via
+        <span><em>malloc(3)</em></span> and consists of a header and a
+        data area which contains OCaml blocks. A pointer to a heap chunk
+        points to the start of the data area, and access to the header
+        is done by a negative offset from this pointer. A chunk header
+        has:
+      </p><ul><li><p id="idp11485456">
+            the address of the memory that the chunk is in, as allocated
+            by <span><em>malloc(3)</em></span>. It is needed when the
+            chunk is freed.
+          </p></li><li><p id="idp11486832">
+            the size in bytes of the data area
+          </p></li><li><p id="idp11487680">
+            an allocation size in bytes, used during heap compaction to
+            merge small blocks to defragment the heap.
+          </p></li><li><p id="idp11488608">
+            a link to the next heap chunk in the list.
+          </p></li></ul><p id="idp11489328">
+        The chunk's data area always starts on a page boundary, and its
+        size is a multiple of the page size (4KB). It contains a
+        contiguous sequence of heap blocks. These can be as small as one
+        or two 4KB pages, but are usually allocated in 1MB chunks (or
+        512KB on 32-bit architectures). You can modify these defaults by
+        editing <code>Heap_chunk_def</code> in
+        <code>byterun/config.h</code> and recompiling the runtime.
+        (<span><em>avsm</em></span>: talk about modifying the defaults in
+        a separate callout, as there are quite a few variables which can
+        be tweaked)
+      </p><p id="idp11492128">
+        Allocating a block on the major heap first checks the free list
+        of blocks (see below). If there isn't enough room on the free
+        list, the runtime expands the major heap with a fresh block that
+        will be large enough. That block is then added to the free list,
+        and the free list is checked again (and this time will
+        definitely succeed).
+      </p></section><section><h1 id="the-major-heap-free-list">The major heap free list</h1><p id="idp11494624">
+        The free space in the major heap's chunks is organized as a
+        singly linked list of OCaml blocks, ordered by increasing
+        virtual address. The runtime has a pointer to the first block in
+        the free list. A free list block is at least two words: a header
+        followed by a pointer to the next free-list block. The header
+        specifies the length of the block just as with a normal block.
+        (<span><em>avsm</em></span>: I'm not sure that this is quite
+        true. It seems from <code>freelist.c</code> that the
+        freelist blocks are normal OCaml blocks, with the first data
+        entry being the next pointer. when detached, they become normal
+        ocaml blocks)
+      </p><p id="idp11496832">
+        As soon as the runtime finds a free block that is larger than
+        the request, there are three possibilities:
+      </p><ul><li><p id="idp11497872">
+            If the free block is exactly the right size, it is unlinked
+            from the free list and returned as the requested block.
+          </p></li><li><p id="idp11498800">
+            If the free block is one word too large, it is unlinked from
+            the free list, and the first word is given a special header
+            recognizable to the collector as an unused word, while the
+            rest of the block is returned as the requested block.
+          </p></li><li><p id="idp11499872">
+            If the free block is two or more words larger than the
+            requested block, it remains in the free list, with its
+            length shortened, and the end of the free block is returned
+            for the requested block. Since the allocated block is
+            right-justified within the free block, the linking of the
+            free list doesn't need to be changed at all as the block
+            that remains in the free list is the original one.
+          </p></li></ul></section><section><h1 id="memory-allocation-strategies">Memory allocation strategies</h1><p id="idp11502336">
+        Allocating a new block in the major heap always looks in the
+        free list. There are two allocation policies: first fit and next
+        fit (the default).
+      </p><section><h1 id="next-fit-allocation">Next-fit allocation</h1><p id="idp11504064">
+          Next-fit allocation keeps a pointer to the block in the free
+          list that was most recently used to satisfy a request. When a
+          new request comes in, the allocator searches from the next
+          block until the end of the free list, and then from the
+          beginning of the free list up to that block.
+        </p></section><section><h1 id="first-fit-allocation">First-fit allocation</h1><p id="idp11505968">
+          First-fit allocation focusses on reducing memory
+          fragmentation, at the expense of slower block allocation. For
+          some workloads, the reduction in the frequency in heap
+          compaction will outweigh the extra allocation cost.
+          (<span><em>avsm</em></span>: example?)
+        </p><p id="idp11507088">
+          The runtime maintains an ordered array of freelist chunks,
+          called the <code>flp</code> array. Imagine a function
+          mapping a block's index in the free list to its size. The flp
+          array pointers are to the high points of this graph. That is,
+          if you walk the free list between <code>flp[i]</code>
+          and <code>flp[i+1]</code>, you will come across blocks
+          that have sizes at most the size of <code>flp[i]</code>.
+          Furthermore this sequence of smaller-than-flp[i] blocks cannot
+          be extended, which is equivalent to saying
+          <code>size(flp[i+1]) &gt; size(flp[i])</code>.
+        </p><p id="idp11511552">
+          When allocating, we first check the flp-array. If
+          <code>flp[i]</code> is not big enough for our new block,
+          then we may as well skip to <code>flp[i+1]</code>,
+          because everything in the free list before then will also be
+          too small.
+        </p><p id="idp11513600">
+          If there's nothing big enough in the <code>flp</code>
+          array, we extend it by walking the free list starting at the
+          <span><em>last</em></span> pointer in the
+          <code>flp</code>-array, say <code>flp[N]</code>.
+          We extend the <code>flp</code> array along the way, so
+          that at each block, if this block is bigger than the current
+          last thing in <code>flp</code> (which is equivalent to
+          saying this is the biggest block we've ever seen, since the
+          blocks pointed to by the <sub>flp</sub> array are
+          increasing in size), we add it to the end of
+          <sub>flp</sub>. We stop this walk when we come
+          across a block big enough to house our desired new block.
+        </p><p id="idp11519280">
+          There's also the case when the <code>flp</code> array
+          has its ceiling size of <code>FLP_MAX</code> (default
+          100). Then we just start at the end of the
+          <code>flp</code> array and walk until we find something
+          big enough. This is known in the as a slow first-fit search,
+          since this linear walk may take a long time.
+        </p><p id="idp11522080">
+          If we did manage to find something suitable in the
+          <code>flp</code> array, say at index
+          <code>i</code>, we need to update
+          <code>flp</code>. This update is rather complex, and the
+          reason why first-fit allocation is slower than next-fit. We
+          walk through the free list between <code>flp[i-1]</code>
+          and <code>flp[i]</code> and record every high point we
+          come across. Say we find <code>j</code> such points. We
+          move the upper portion of <code>flp</code> (from
+          <code>flp[i+1]</code> to the end) to the right by
+          <code>j</code> places and insert each new high point
+          into the array. There is a further corner case when adding in
+          <code>j</code> new high points would make
+          <code>flp</code> bigger than <code>FLP_MAX</code>.
+        </p><p id="idp11531344">
+          (<span><em>avsm</em></span>: this really needs a diagram)
+        </p><aside class="note"><h1>
+        Which allocation policy should I use?
+        </h1><p id="idp11532928">
+          (<span><em>avsm</em></span>: 0 is the next-fit policy, which is
+          quite fast but can result in fragmentation. 1 is the first-fit
+          policy, which can be slower in some cases but can be better
+          for programs with fragmentation problems. )
+        </p></aside></section></section><section><h1 id="inter-generational-pointers">Inter-generational pointers</h1><p id="idp11535600">
+        Most incremental generational garbage collectors have to keep
+        careful track of values pointing from old generations to younger
+        ones. The OCaml runtime is no exception, and maintains a set of
+        addresses in the major heap that may point into the minor heap.
+        These addresses are <span><em>not</em></span> OCaml pointers, and
+        just literal memory addresses. The runtime ensures that it never
+        relocates values in the major heap unless this
+        &quot;remembered&quot; set is empty. The set is maintained as a
+        dynamically resized array of pointers, which is itself
+        maintained via a collection of pointers known as the
+        <code>caml_ref_table</code>.
+      </p><div class="highlight"><pre><span class="k">struct</span> <span class="n">caml_ref_table</span> <span class="p">{</span>
+  <span class="n">value</span> <span class="o">**</span><span class="n">base</span><span class="p">;</span>
+  <span class="n">value</span> <span class="o">**</span><span class="n">end</span><span class="p">;</span>
+  <span class="n">value</span> <span class="o">**</span><span class="n">threshold</span><span class="p">;</span>
+  <span class="n">value</span> <span class="o">**</span><span class="n">ptr</span><span class="p">;</span>
+  <span class="n">value</span> <span class="o">**</span><span class="n">limit</span><span class="p">;</span>
+  <span class="n">asize_t</span> <span class="n">size</span><span class="p">;</span>
+  <span class="n">asize_t</span> <span class="n">reserve</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div><p id="idp11539472">
+        The relationships of the pointers are as follows:
+      </p><pre id="idp11539936">
+                   limit
+   base &lt;= ptr     threshold          end
+     |----------------|----------------|
+           size            reserve
+</pre><p id="idp11540976">
+        An address is added to <code>caml_ref_table</code> when
+        all of these conditions are satisfied:
+      </p><ul><li><p id="idp11542688">
+            a field in a block in the major heap is mutated
+          </p></li><li><p id="idp11543536">
+            the field previously did not point to the minor heap
+          </p></li><li><p id="idp11544400">
+            the field is being changed to point into the minor heap
+          </p></li></ul><p id="idp11545136">
+        In that case the entry is added at
+        <code>caml_ref_table.ptr</code>, which is then
+        incremented. If <code>ptr</code> is already at
+        <code>limit</code>, the table is doubled in size before
+        adding the address.
+      </p><p id="idp11547808">
+        The same address can occur in <code>caml_ref_table</code>
+        multiple times if a block field is mutated repeatedly and
+        alternated between pointing at the minor heap and the major
+        heap. The field in <code>caml_ref_table</code> also may
+        not always point into the minor heap (if it was changed after
+        being added), since fields are never removed. The entire table
+        is cleared as part of the minor collection process.
+      </p><section><h1 id="the-write-barrier">The write barrier</h1><p id="idp11551184">
+          The write barrier is one of the reasons why using immutable
+          data structures can sometimes be faster than mutable records.
+          The OCaml compiler keeps track of any mutable types and adds a
+          call to <code>caml_modify</code> before making the
+          change. The <code>caml_modify</code> checks that the
+          remembered set is consistent, which, although reasonably
+          efficient, can be slower than simply allocating a fresh value
+          on the fast minor heap.
+        </p><p id="idp11553472">
+          Let's see this for ourselves with a simple test program:
+        </p><div class="highlight"><pre><span class="k">type</span> <span class="n">t1</span> <span class="o">=</span> <span class="o">{</span> <span class="k">mutable</span> <span class="n">iters1</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="k">mutable</span> <span class="n">count1</span><span class="o">:</span> <span class="kt">float</span> <span class="o">}</span>
+<span class="k">type</span> <span class="n">t2</span> <span class="o">=</span> <span class="o">{</span> <span class="n">iters2</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">count2</span><span class="o">:</span> <span class="kt">float</span> <span class="o">}</span>
+
+<span class="k">let</span> <span class="k">rec</span> <span class="n">test_mutable</span> <span class="n">t1</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="n">t1</span><span class="o">.</span><span class="n">iters1</span> <span class="k">with</span>
+  <span class="o">|</span><span class="mi">0</span> <span class="o">-&gt;</span> <span class="bp">()</span>
+  <span class="o">|</span><span class="n">n</span> <span class="o">-&gt;</span>
+    <span class="n">t1</span><span class="o">.</span><span class="n">iters1</span> <span class="o">&lt;-</span> <span class="n">t1</span><span class="o">.</span><span class="n">iters1</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">t1</span><span class="o">.</span><span class="n">count1</span> <span class="o">&lt;-</span> <span class="n">t1</span><span class="o">.</span><span class="n">count1</span> <span class="o">+.</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">;</span>
+    <span class="n">test_mutable</span> <span class="n">t1</span>
+
+<span class="k">let</span> <span class="k">rec</span> <span class="n">test_immutable</span> <span class="n">t2</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="n">t2</span><span class="o">.</span><span class="n">iters2</span> <span class="k">with</span>
+  <span class="o">|</span><span class="mi">0</span> <span class="o">-&gt;</span> <span class="bp">()</span>
+  <span class="o">|</span><span class="n">n</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">iters2</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">count2</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">count2</span> <span class="o">+.</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span> <span class="k">in</span>
+    <span class="n">test_immutable</span> <span class="o">{</span> <span class="n">iters2</span><span class="o">;</span> <span class="n">count2</span> <span class="o">}</span>
+
+<span class="k">open</span> <span class="nc">Printf</span>
+<span class="k">let</span> <span class="n">time</span> <span class="n">name</span> <span class="n">fn</span> <span class="n">arg</span> <span class="o">=</span>
+  <span class="nn">Gc</span><span class="p">.</span><span class="n">compact</span> <span class="bp">()</span><span class="o">;</span>
+  <span class="k">let</span> <span class="n">w1</span> <span class="o">=</span> <span class="nn">Gc</span><span class="p">.</span><span class="err">((</span><span class="n">stat</span> <span class="bp">()</span><span class="o">).</span><span class="n">minor_collections</span><span class="o">)</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">t1</span> <span class="o">=</span> <span class="nn">Unix</span><span class="p">.</span><span class="n">gettimeofday</span> <span class="bp">()</span> <span class="k">in</span>
+  <span class="n">fn</span> <span class="n">arg</span><span class="o">;</span>
+  <span class="k">let</span> <span class="n">w2</span> <span class="o">=</span> <span class="nn">Gc</span><span class="p">.</span><span class="err">((</span><span class="n">stat</span> <span class="bp">()</span><span class="o">).</span><span class="n">minor_collections</span><span class="o">)</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">t2</span> <span class="o">=</span> <span class="nn">Unix</span><span class="p">.</span><span class="n">gettimeofday</span> <span class="bp">()</span> <span class="k">in</span>
+  <span class="n">printf</span> <span class="s2">&quot;%s: %.4fs (%d minor collections)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">name</span> <span class="o">(</span><span class="n">t2</span> <span class="o">-.</span> <span class="n">t1</span><span class="o">)</span> <span class="o">(</span><span class="n">w2</span> <span class="o">-</span> <span class="n">w1</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="o">_</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">iters</span> <span class="o">=</span> <span class="mi">1000000000</span> <span class="k">in</span>
+  <span class="n">time</span> <span class="s2">&quot;mutable&quot;</span> <span class="n">test_mutable</span> <span class="o">{</span> <span class="n">iters1</span><span class="o">=</span><span class="n">iters</span><span class="o">;</span> <span class="n">count1</span><span class="o">=</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span> <span class="o">};</span>
+  <span class="n">time</span> <span class="s2">&quot;immutable&quot;</span> <span class="n">test_immutable</span> <span class="o">{</span> <span class="n">iters2</span><span class="o">=</span><span class="n">iters</span><span class="o">;</span> <span class="n">count2</span><span class="o">=</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span> <span class="o">}</span>
+</pre></div><p id="idp11556832">
+          This program defines a type <code>t1</code> that is
+          mutable, and <code>t2</code> that is immutable. The main
+          loop iterates over both fields and runs a simple counter. It
+          measures two things: the wallclock time that all the
+          iterations take, and the number of minor garbage collections
+          that occurred during the test. The results should look
+          something like this:
+        </p><pre id="idp11558976">
+mutable: 8.6923s (7629 minor collections)
+immutable: 2.6186s (19073 minor collections)
+</pre><p id="idp11559744">
+          Notice the space/time tradeoff here. The mutable version runs
+          almost 4 times slower than the immutable one, but has
+          significantly fewer garbage collection cycles. Minor
+          collections in OCaml are very fast, and so it is often
+          acceptable to use immutable data structures in preference to
+          the more conventional mutable versions. On the other hand, if
+          you only rarely mutable a value, it can be faster to take the
+          write barrier hit and not allocate at all.
+        </p><p id="idp11560688">
+          (<span><em>avsm</em></span>: it would be really nice to use a
+          benchmark suite here and shorten the example. Investigate the
+          options and edit this section)
+        </p><p id="idp11561696">
+          (<span><em>avsm</em></span>: need to mention when a value is
+          allocated directly into the major heap somewhere)
+        </p></section></section></section><section><h1 id="how-garbage-collection-works">How garbage collection works</h1><section><h1 id="collecting-the-minor-heap">Collecting the minor heap</h1><p id="idp11565424">
+        For those familiar with garbage collection terminology, here is
+        OCaml's minor colection in one sentence. OCaml's minor
+        collection uses copying collection with forwarding pointers, and
+        does a depth-first traversal of the block graph using a stack
+        represented as a linked list threaded through blocks that need
+        to be scanned.
+      </p><p id="idp11566208">
+        The goal of minor collection is to empty the minor heap by
+        moving to the major heap every block in the minor heap that
+        might be used in the future, and updating each pointer to a
+        moved block to the new version of the block. A block is
+        <span><em>live</em></span> if is reachable by starting at some
+        <span><em>root</em></span> pointer into a block in the minor
+        heap,a nd then following pointers in blocks. There are many
+        different kinds of roots:
+      </p><ul><li><p id="idp11568448">
+            OCaml stack(s)
+          </p></li><li><p id="idp11569264">
+            C stack(s), identified by <code>BeginRoots</code> or
+            <code>CAMLparam</code> in C code
+            (<span><em>avsm</em></span>: xref C bindings chapter)
+          </p></li><li><p id="idp11572000">
+            Global roots
+          </p></li><li><p id="idp11572816">
+            Finalized values (<span><em>avsm</em></span>: ?)
+          </p></li><li><p id="idp11574080">
+            Intergenerational pointers in the
+            <code>caml_ref_table</code>
+            (<span><em>avsm</em></span>: xref above?)
+          </p></li></ul><p id="idp11575984">
+        Moving a block between heaps is traditionally called
+        <span><em>forwarding</em></span>. The OCaml runtime code uses
+        that term as well as the term <span><em>oldify</em></span>, which
+        is useful to understand when profiling hotspots in your code.
+        The minor collector first visits all roots and forwards them if
+        they point to a block in the minor heap. When a block is
+        forwarded, the collector sets the tag of the original block to a
+        special <code>Forward_tag</code> (250), and the first
+        field of the original block to point to the new block. Then, if
+        the collector ever encounters a pointer to the original block
+        again, it can simply update the pointer directly into the
+        forwarded block.
+      </p><p id="idp11578640">
+        Because a forwarded block might itself contain pointers, it must
+        at some point be scanned to see if those pointers point to
+        blocks in the minor heap, so that those blocks can also be
+        forwarded. The collector maintains a linked list (called the
+        <code>oldify_todo_list</code>) of forwarded objects that
+        it still needs to scan. That linked list looks like:
+      </p><pre id="idp11580128">
+                oldify_todo_list
+                   |
+                   |
+                   v
+   minor heap  | 0 | v | f1 ... |      | 0 | v | f1 ... |
+                     |                     ^ |
+                     |      +--------------+ |      ---------- ...
+                     v      |                v      |
+   major heap    | h | f0 | ^ | ... |    | h | f0 | ^
+</pre><p id="idp11581184">
+        Each value on the <code>oldify_todo_list</code> is marked
+        as forwarded, and the first word points to the new block in the
+        major heap. That new version contains the actual value header,
+        the real first field of the value, and a link (pointer) to the
+        next value on the oldify_todo_list, or
+        <sub>NULL</sub> at the end of the list. Clearly this
+        approach won't work if an value has only one field, since there
+        will be no second field to store the link in. Values with
+        exactly one field are never put on the
+        <code>oldify_todo_list</code>; instead, the collector
+        immediately traverses them, essentially making a tail call in
+        the depth-first search.
+      </p><p id="idp11584096">
+        Values that are known from the tag in their header to not
+        contain pointers are simply forwarded and completely copied, and
+        never placed on the <code>oldify_todo_list</code>. These
+        tags are all greater than <code>No_scan_tag</code> and
+        include strings and float arrays.
+      </p><p id="idp11586176">
+        (<span><em>avsm</em></span>: note from sweeks to investigate:
+        There is a hack for objects whose tag is
+        <code>Forward_tag</code> that does some kind of path
+        compression, or at least removal of one link, but I'm not sure
+        what's going on.)
+      </p><p id="idp11587952">
+        (<span><em>avsm</em></span>: I dont think we've introduced weak
+        references yet, so this needs rearranging) At the end of the
+        depth-first search in minor collection, the collector scans the
+        <code>weak-ref</code> table, and clears any weak
+        references that are still pointing into the minor heap. The
+        collector then empties the <code>weak-ref</code> table and
+        the minor heap.
+      </p></section><section><h1 id="collecting-the-major-heap">Collecting the major heap</h1><p id="idp11591904">
+        The major heap collections operates incrementally, as the amount
+        of memory being tracked is a lot larger than the minor heap. The
+        major collector can be in any of a number of phases:
+      </p><ul><li><p id="idp11593024">
+<code>Phase_idle</code>
+</p></li><li><p id="idp11594480">
+<code>Phase_mark</code>
+</p><ul><li><p id="idp11596064">
+<code>Subphase_main</code>: main marking phase
+              </p></li><li><p id="idp11597568">
+<code>Subphase_weak1</code>: clear weak pointers
+              </p></li><li><p id="idp11599072">
+<code>Subphase_weak2</code>: remove dead weak
+                arrays, observe finalized values
+              </p></li><li><p id="idp11600624">
+<code>Subphase_final</code>: initialise for the
+                sweep phase
+              </p></li></ul></li><li><p id="idp11602416">
+<code>Phase_sweep</code>
+</p></li></ul></section><section><h1 id="marking-the-major-heap">Marking the major heap</h1><p id="idp11605024">
+        Marking maintains an array of gray blocks,
+        <code>gray_vals</code>. It uses as them as a stack,
+        pushing on a white block that is then colored gray, and popping
+        off a gray block when it is scanned and colored black. The
+        <code>gray_vals</code> array is allocated via
+        <span><em>malloc(3)</em></span>, and there is a pointer,
+        <code>gray_vals_cur</code>, to the next open spot in the
+        array.
+      </p><p id="idp11608320">
+        The <code>gray_vals</code> array initially has 2048
+        elements. <code>gray_vals_cur</code> starts at
+        <code>gray_vals</code>, and increases until it reachs
+        <code>gray_vals_end</code>, at which point the
+        <code>gray_vals</code> array is doubled, as long as its
+        size (in bytes) is less than 1/2^10th of the heap size
+        (<code>caml_stat_heap_size</code>). When the gray vals is
+        of its maximum allowed size, it isn't grown any further, and the
+        heap is marked as impure (<code>heap_is_pure=0</code>),
+        and last half of <code>gray_vals</code> is ignored (by
+        setting <code>gray_vals_cur</code> back to the middle of
+        the <code>gray_vals</code> array.
+      </p><p id="idp11616272">
+        If the marking is able to complete using just the gray list, it
+        will. Otherwise, once the gray list is emptied, the mark phase
+        will observe that the heap is impure and initiate a backup
+        approach to marking. In this approach it marks the heap as pure
+        and then walks through the entire heap block by block, in
+        increasing order of memory address. If it finds a gray block, it
+        adds it to the gray list and does a DFS marking using the gray
+        list as a stack in the usual way. Once the scan of the complete
+        heap is finished, the mark phase checks again whether the heap
+        has again become impure, and if so initiates another scan. These
+        full-heap scans will continue until a successful scan completes
+        without overflowing the gray list.
+      </p><p id="idp11617504">
+        (<span><em>avsm</em></span>: I need to clarify this more,
+        possibly a diagram too. It's not really clear what the
+        implications of an impure heap are atm)
+      </p></section><section><h1 id="sweeping-unused-blocks-from-the-major-heap">Sweeping unused blocks from the major heap</h1><p id="idp11619872">
+</p></section><section><h1 id="compaction-and-defragmenting-the-major-heap">Compaction and defragmenting the major heap</h1><p id="idp11621632">
+</p></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="parsing-binary-protocols-with-bigarray.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="installation.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
