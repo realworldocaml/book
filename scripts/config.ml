@@ -4,7 +4,7 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
-let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"; "mshinwell";"dsheets"]
+let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"; "mshinwell";"dsheets";"yallop"]
 let support = ["jamescotton"]
 
 let from_anil =
