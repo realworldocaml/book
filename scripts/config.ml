@@ -4,7 +4,7 @@ let auth = Cohttp.Auth.Basic ("rwo", "Whirly2")
 
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
-let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"]
+let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"; "mshinwell";"dsheets"]
 let support = ["jamescotton"]
 
 let from_anil =
@@ -36,7 +36,13 @@ let from_anil =
   ; "green-gecko"             (* Alex Ho <a_green_gecko@yahoo.com> *)
   ; "pmundkur"                (* Prashanth Mundkur <prashanth.mundkur@gmail.com> *)
   ; "ChrisDodd"               (* Chris Dodd <dodd@csl.sri.com> *)
-  ; "jonludlam"               (* Jon Ludlam <jon@recoil.org> TODO *)
+  ; "jonludlam"               (* Jon Ludlam <jon@recoil.org> *)
+  ; "nickludlam"              (* Nick Ludlam <nick@recoil.org> *)
+  ; "fehmi8"                  (* Fehmi Ben Abdesslem <fb375@cam.ac.uk> *)
+  ; "stass"                   (* Stanislav Sedov <stas@FreeBSD.org> *)
+  ; "afeinberg"               (* Alex Feinberg <alex@strlen.net> *)
+  ; "narseo"                  (* Narseo Vallina Rodriguez <narseo@gmail.com> *)
+  ; "mdales"                  (* Michael Dales <mdales@mac.com> *)
 ]
 
 let from_yminsky =
@@ -54,24 +60,24 @@ let from_yminsky =
   ; "nicholasbs"              (* Nicholas Bergson-Shilcock <me@nicholasbs.net> *)
   ; "happy4crazy"             (* Alan O'Donnell  <alan@hackerschool.com> *)
   ; "rnml"                    (* Nathan Linger <nlinger@janestreet.com> *)
-  ; "msaffer"                 (* TODO Matthew Saffer <msaffer@janestreet.com> *)
-  ; "orbitz"                  (* TODO Malcolm Matalka <mmatalka@gmail.com> *)
+  ; "msaffer"                 (* Matthew Saffer <msaffer@janestreet.com> *)
+  ; "orbitz"                  (* Malcolm Matalka <mmatalka@gmail.com> *)
 ]
 
 let js_interns =
-  [ "imackler"               (* TODO izaakmeckler@me.com      *)
-  ; "billduff"               (* TODO wduff11@gmail.com        *)
-  ; "rawxfish"               (* TODO szhan@princeton.edu      *)
-  ; "bbohrer"                (* TODO bjbohrer@gmail.com       *)
-  ; "benmachine"             (* TODO bm280@srcf.net           *)
-  ; "awuprogs"               (* TODO awu@college.harvard.edu  *)
-  ; "ranchen"                (* TODO ranchen@seas.upenn.edu   *)
-  ; "apribadi"               (* TODO aaron.pribadi@gmail.com  *)
-  ; "nicolasavru"            (* TODO nicolasavru@gmail.com    *)
+  [ "imackler"               (* izaakmeckler@me.com      *)
+  ; "billduff"               (* wduff11@gmail.com        *)
+  ; "rawxfish"               (* szhan@princeton.edu      *)
+  ; "bbohrer"                (* bjbohrer@gmail.com       *)
+  ; "benmachine"             (* bm280@srcf.net           *)
+  ; "awuprogs"               (* awu@college.harvard.edu  *)
+  ; "ranchen"                (* ranchen@seas.upenn.edu   *)
+  ; "apribadi"               (* aaron.pribadi@gmail.com  *)
+  ; "nicolasavru"            (* nicolasavru@gmail.com    *)
   ]
 
 let from_email =
-  [ "JakubOboza "             (* jakub.oboza@gmail.com *)
+  [ "JakubOboza"              (* jakub.oboza@gmail.com *)
   ; "gour"                    (* gour@atmarama.net *)
   ; "getauvi"                 (* getauvi@gmail.com *)
   ; "pdonadeo"                (* Paolo Donadeo <p.donadeo@gmail.com>  *)
@@ -95,6 +101,24 @@ let from_email =
   ; "HappyCrow"               (* Francois Berenger <berenger@riken.jp> *)
   ; "alexanderkyte"           (* alex kyte <alexanderkyte@gmail.com> *)
   ; "genos"                   (* Graham Enos <graham.enos@gmail.com> *)
+  ; "tianyicui"               (* Tianyi Cui <tianyicui@gmail.com> *)
+  ; "agarwal"                 (* Ashish Agarwal <agarwal1975@gmail.com> *)
+  ; "samebchase"              (* Samuel Chase <samebchase@gmail.com> *)
+  ; "rapha"                   (* Raphael Speyer <rspeyer@gmail.com> *)
+  ; "chollida1"               (* chris@chollida.com *)
+  ; "kruton"                  (* Kenny Root <kenny@the-b.org> *)
+  ; "pascalbertrand"          (* pascal bertrand <pascal.bertrand@gmail.com> *)
+  ; "farhanmannan"            (* Farhan Mannan <farhanmannan@mac.com> *)
+  ; "developernotes"          (* Nick Parker <nickp@developernotes.com> *)
+  ; "dinny"                   (* Haifeng WU <dinny.wu@gmail.com> *)
+  ; "biolumi"                 (* Vincent Royen <vince@royen.org> *)
+  ; "munch0"                  (* a1101 <a1101@comcast.net> *)
+  ; "blackswanburst"          (* Eireann Leverett <eireann.leverett@cantab.net> *)
+  ; "vsov"                    (* Victor Sovetov <victor.sovetov@gmail.com> *)
+  ; "gbarnett"                (* Granville Barnett <granvillebarnett@gmail.com> *)
+  ; "quarkcool"               (* Martin Cavaillès <quarkcool@gmail.com>*)
+  ; "cstrahan"                (* Charles Strahan <charles.strahan@livingsocial.com> *)
+  ; "joshmaxsilverman"        (* Josh Max Silverman <josh.silverman@gmail.com> *)
 
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
@@ -132,6 +156,7 @@ let allowed_users = function
   | "alpha1" -> internal_reviewers
   | "alpha2" -> internal_reviewers
   | "alpha3" -> internal_reviewers
-  | "alpha4" -> external_reviewers
+  | "alpha4" -> internal_reviewers
+  | "alpha5" -> external_reviewers
   | "trunk"  -> internal_reviewers
   |_ -> internal_reviewers
