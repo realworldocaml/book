@@ -144,7 +144,7 @@ let internal_reviewers =
 
 let external_reviewers =
   "External Reviewers",
-  (authors
+  (authors @ trusted
    @ support
    @ from_anil
    @ from_yminsky
