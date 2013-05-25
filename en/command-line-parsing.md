@@ -537,21 +537,11 @@ of type `'r`.  Let's look at some examples of specs, and their types:
 
 The empty specification is simple as it doesn't add any parameters to the
 callback type.  The second example adds an `int` anonymous parameter that is
-reflected in the inferred type.  Notice that the return value of this fragment
-has been inferred to be `'_a` instead of the usual `'a`.  The underscore
-denotes a _weakly polymorphic type_ which cannot be generalized further.  You
-should never see this in normal use, but you may encounter this if you define
-specifications in the top-level of a module.  You can work around this
-so-called _value restriction_ by moving the definitions under a `let` binding.
-
-One forms a command by combining a spec of type `('main, unit) Spec.t` with a
-main function of type `'main`.  All the combinators we've shown so far
-incrementally build up the type of `'main` according to the command-line
-parameters it expects, so the resulting type of `'main` is something like:
-
-```ocaml
-arg1 -> ... -> argN -> unit
-```
+reflected in the inferred type.  One forms a command by combining a spec of
+type `('main, unit) Spec.t` with a function of type `'main`.  The
+combinators we've shown so far incrementally build the type of `'main`
+according to the command-line parameters it expects, so the resulting type of
+`'main` is something like ```arg1 -> ... -> argN -> unit```.
 
 The type of `Command.basic` should make more sense now:
 
@@ -563,11 +553,12 @@ val basic :
 ```
 
 The final line is the important one. It shows that the callback function for a
-spec should consume identical arguments to the supplied `main` function, except
-that there is an additional `unit` argument.  This final `unit` is there in
-case there are no command-line arguments, as at least one parameter is required
-for the callback.  That's why you have to supply an additional `()` to the
-callback function in the previous examples.
+spec should consume identical arguments to the supplied `main` function, expect
+for an additional `unit` argument.  This final `unit` is there to make sure the
+callback is evaluated as a function, since if zero command-line arguments are
+specified (i.e. `Spec.empty`), the callback would otherwise have no arguments
+and be evaluated immediately.  That's why you have to supply an additional `()`
+to the callback function in all the previous examples.
 
 </sidebar>
 
@@ -660,41 +651,77 @@ information is sufficient to make the obvious fix.
 
 The `step` combinator lets you control the normal course of parsing by
 supplying a function that maps callback arguments to a new set of
-values.  For instance, let's suppose we want our first calendar
-application to prompt for the number of days to add if a value wasn't
-supplied on the command-line.
+values.  For instance, let's revisit our first calendar application
+that added a number of days onto a supplied base date.
 
 ```ocaml
+(* cal_add.ml *)
 open Core.Std
+
+let add_days base span () =
+  Date.add_days base span
+  |> Date.to_string
+  |> print_endline
 
 let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
     Command.Spec.(
-      step (fun m base days ->
-        match days with
-        | Some days -> m base days
-        | None ->
-            print_endline "enter days: ";
-            m base (read_int ())
-      )
+      empty
       +> anon ("base" %: date)
-      +> anon (maybe ("days" %: int))
+      +> anon ("days" %: int)
     )
-  (fun base span () ->
-    Date.add_days base span
-    |> Date.to_string
-    |> print_endline
-  )
+    add_days
 
 let () = Command.run add
 ```
 
-There are two main changes from the simple example that accepts a date and an
-integer.  Firstly, the `days` argument is now an optional integer instead of a
-required argument.  The `step` combinator takes the date and days parameters,
-and interactively reads an integer if no day value was supplied.  It then
-returns an `int` instead of the `int option` that was passed in.
+This `cal_add` program requires you to specify both the `base` date and the
+number of `days` to add onto it.  If `days` isn't supplied on the command-line,
+an error is output.  Now let's modify it to interactively prompt for a number
+of days if only the `base` date is supplied.
+
+```ocaml
+(* cal_add_interactive.ml *)
+open Core.Std
+
+let add_days base span () =
+  Date.add_days base span
+  |> Date.to_string
+  |> print_endline
+
+let add =
+  Command.basic
+    ~summary:"Add [days] to the [base] date and print day"
+    Command.Spec.( 
+      step 
+        (fun m base days ->
+           match days with
+           | Some days ->
+             m base days
+           | None ->
+             print_endline "enter days: ";
+             read_int ()
+             |> m base
+        )
+      +> anon ("base" %: date)
+      +> anon (maybe ("days" %: int))
+    )
+    add_days
+
+let () = Command.run add
+```
+
+The `days` anonymous argument is now an optional integer in the spec, and we
+want to transform it into a non-optional value before calling our `add_days`
+callback.
+The `step` combinator in the specification performs this transformation.  It
+applies its supplied callback function first, which checks if `day` is defined.
+If it's undefined, then it interactively reads an integer from the standard
+input.  The first `m` argument to the `step` callback is the next callback
+function in the chain.  The transformation is completed by calling `m base days`
+to continue processing with the new values we've just calculated.
+The `days` value that is passed onto the next callback now has a non-optional `int` type.
 
 ```
 $ cal_add_interactive 2013-12-01
@@ -703,10 +730,11 @@ enter days:
 2014-01-05
 ```
 
-Notice that the "program logic" in the final callback doesn't see any of this,
-and is exactly the same as in our original version.  The `step` combinator has
-transformed an `int option` argument into an `int`.  This is reflected in the
-type of the specification:
+The transformation means that the `add_days` callback can just keep its
+original definition of `Date.t -> int -> unit`.  The `step` function
+transformed the `int option` argument from the parsing into an `int` suitable
+for `add_days`.  This transformation is explicitly represented in the
+type of the `step` return value:
 
 ```ocaml
 # open Core.Std ;;
@@ -721,40 +749,47 @@ type of the specification:
 ```
 
 The first half of the `Spec.t` shows that the callback type is `Date.t -> int`,
-whereas the resulting value that is expected from the next specification in the
+whereas the resulting value expected from the next specification in the
 chain is a `Date.t -> int option`.
 
 ### Adding labelled arguments to callbacks
 
-The `step` chaining combinator lets you control the types of your callbacks
-very easily.  This can either help you fit in with existing interfaces, or make
-things more explicit by adding labelled arguments.
+The `step` chaining lets you control the types of your callbacks very easily.
+This can help you match existing interfaces or make things more explicit by
+adding labelled arguments.
 
 ```ocaml
+(* cal_add_labels.ml *)
 open Core.Std
+
+let add_days ~base_date ~num_days () =
+  Date.add_days base_date num_days
+  |> Date.to_string
+  |> print_endline
 
 let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
-    Command.Spec.(
-      step (fun m base days -> m ~base ~days)
+    Command.Spec.( 
+      step (fun m base days -> m ~base_date:base ~num_days:days)
       +> anon ("base" %: date)
       +> anon ("days" %: int)
     )
-  (fun ~base ~days () ->
-    Date.add_days base days
-    |> Date.to_string
-    |> print_endline
-  )
+  add_days
 
 let () = Command.run add
 ```
 
-This example goes back to our non-interactive calendar addition
-program, but adds a `step` combinator to turn the normal arguments
-into labelled ones.  This is reflected in the callback function below,
-and can help prevent errors with command-line arguments with similar
-types but different names.
+This `cal_add_labels` example goes back to our non-interactive calendar
+addition program, but the `add_days` main function now expects labelled
+arguments.  The `step` function in the specification simply converts
+the default `base` and `days` arguments into a labelled function,
+and everything compiles again.
+
+Labelled arguments are more verbose, but also help prevent errros with
+command-line arguments with similar types but different names and purposes.
+It's good form to use them when you have a lot of otherwise anonymous
+`int` and `string` arguments.
 
 ## Command-line auto-completion with `bash`
 
