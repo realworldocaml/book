@@ -1,0 +1,732 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 20. XML Streams and Trees / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha5',
+                        page: 'xml\u002Dstreams\u002Dand\u002Dtrees.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="maps-and-hashtables.html">12. Maps and Hashtables</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="command-line-parsing.html">13. Command Line Parsing</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="handling-json-data.html">14. Handling JSON data</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-with-ocamllex-and-menhir.html">15. Parsing with OCamllex and Menhir</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="data-serialization-with-s-expressions.html">16. Data Serialization with S-Expressions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="concurrent-programming-with-async.html">17. Concurrent Programming with Async</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="fast-binary-serialization.html">18. Fast Binary Serialization</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">19. Plugins with First-class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="xml-streams-and-trees.html" class="here">20. XML Streams and Trees</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 20. XML Streams and Trees</h1>
+                
+                
+
+    <p id="idp10804704">
+    XML is a markup language designed to store tree-structured data in a
+    format that is (somewhat) human- and machine-readable. Like JSON, it
+    is a textual format commonly used in web technologies, with a
+    complete
+    <a href="http://www.w3.org/TR/REC-xml/" target="_top">specification</a>
+    available online.
+  </p><p id="idp10806080">
+    We're going to explain the basics of XML manipulation here, and also
+    introduce the notion of a <span><em>visitor pattern</em></span> to
+    manipulate fragments of XML trees.
+  </p><aside class="note"><h1>
+  Obtaining and installing XMLM
+  </h1><p id="idp10807760">
+    The remainder of this chapter uses the freely available XMLM
+    library. It's easiest to obtain it via OPAM. See
+    <a href="installation.html">Appendix A, <i>Installation</i></a> for installation
+    instructions if you don't have OPAM.
+  </p><div class="highlight"><pre><span class="o">$</span> <span class="n">opam</span> <span class="n">install</span> <span class="n">xmlm</span>
+</pre></div><p id="idp10809968">
+    Once installed, the <code>xmlm</code> library will be
+    available in your toplevel.
+  </p><div class="highlight"><pre><span class="o">$</span> <span class="n">utop</span>
+<span class="o">#</span> <span class="o">#</span><span class="n">require</span> <span class="s2">&quot;xmlm&quot;</span><span class="o">;;</span>
+<span class="o">#</span> <span class="k">open</span> <span class="nc">Xmlm</span> <span class="o">;;</span>
+</pre></div><p id="idp10812208">
+    The library documentation is also available
+    <a href="http://erratique.ch/software/xmlm/doc/Xmlm" target="_top">online</a>.
+  </p></aside><p id="idp10813536">
+    Since XML is such a common web format, we've taken our example
+    document from the
+    <a href="http://duckduckgo.com" target="_top">DuckDuckGo</a> search engine.
+    This is a smaller search engine than the usual suspects, but has the
+    advantage of a freely available API that doesn't require you to
+    register before using it. We'll talk more about how to use the live
+    API later in
+    <a href="concurrent-programming-with-async.html">Chapter 17, <i>Concurrent Programming with Async</i></a>, but
+    for now here's what a shortened XML search response from DuckDuckGo
+    looks like:
+  </p><div class="highlight"><pre><span class="nt">&lt;DuckDuckGoResponse</span> <span class="na">version=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;Heading&gt;</span>DuckDuckGo<span class="nt">&lt;/Heading&gt;</span>
+<span class="nt">&lt;AbstractText&gt;</span>DuckDuckGo is an Internet search engine.<span class="nt">&lt;/AbstractText&gt;</span>
+<span class="nt">&lt;AbstractURL&gt;</span>https://en.wikipedia.org/wiki/DuckDuckGo<span class="nt">&lt;/AbstractURL&gt;</span>
+<span class="nt">&lt;AbstractSource&gt;</span>Wikipedia<span class="nt">&lt;/AbstractSource&gt;</span>
+<span class="nt">&lt;Results&gt;</span>
+<span class="nt">&lt;Result&gt;</span>
+  <span class="nt">&lt;Text&gt;</span>Official site<span class="nt">&lt;/Text&gt;</span>
+  <span class="nt">&lt;FirstURL&gt;</span>https://duckduckgo.com/<span class="nt">&lt;/FirstURL&gt;</span>
+  <span class="nt">&lt;/Result&gt;</span>
+<span class="nt">&lt;/Results&gt;</span>
+<span class="nt">&lt;RelatedTopics&gt;</span>
+ <span class="nt">&lt;RelatedTopic&gt;</span>
+   <span class="nt">&lt;Text&gt;</span>Companies based in Pennsylvania<span class="nt">&lt;/Text&gt;</span>
+   <span class="nt">&lt;FirstURL&gt;</span>
+     http://duckduckgo.com/c/Companies_based_in_Pennsylvania
+   <span class="nt">&lt;/FirstURL&gt;</span>
+ <span class="nt">&lt;/RelatedTopic&gt;</span>
+ <span class="nt">&lt;RelatedTopic&gt;</span>
+   <span class="nt">&lt;Text&gt;</span>Internet search engines<span class="nt">&lt;/Text&gt;</span>
+   <span class="nt">&lt;FirstURL&gt;</span>
+     http://duckduckgo.com/c/Internet_search_engines
+   <span class="nt">&lt;/FirstURL&gt;</span>
+ <span class="nt">&lt;/RelatedTopic&gt;</span>
+<span class="nt">&lt;/RelatedTopics&gt;</span>
+<span class="nt">&lt;/DuckDuckGoResponse&gt;</span>
+</pre></div><p id="idp10817968">
+    The XML document is structured as a set of opening
+    <code>&lt;tag&gt;</code> tokens that are closed by a
+    corresponding end <code>&lt;/tag&gt;</code> token. Opening
+    tags can have an optional set of key/value attributes, for example
+    <code>&lt;tag name=&quot;foo&quot; id=&quot;bar&quot;&gt;</code>.
+    A tag usually contains data that can contain further tags, thus
+    forming a tree structure.
+  </p><p id="idp10820816">
+    These XML documents can be very large, and we don't want to have to
+    read it all into memory before starting to process it. Luckily there
+    exists a low-level <span><em>streaming</em></span> interface that
+    parses an XML document incrementally. This can be cumbersome to use
+    for quick tasks, so we'll build a simpler tree API on top of it.
+    We'll start with the streaming API first though.
+  </p><section><h1 id="stream-parsing-xml">Stream parsing XML</h1><p id="idp10823136">
+      The XMLM documentation is a good place to read about the overall
+      layout of the library. It tells us that:
+    </p><div><blockquote><p id="idp10823920">
+        A well-formed sequence of <code>signal</code>s represents
+        an XML document tree traversal in depth-first order. Input pulls
+        a well-formed sequence of <code>signal</code>s from a data
+        source and output pushes a well-formed sequence of
+        <code>signal</code>s to a data destination. Functions are
+        provided to easily transform sequences of
+        <code>signal</code>s to/from arborescent data structures.
+      </p></blockquote></div><p id="idp10827600">
+      The <code>signal</code> type is at the heart of all XMLM
+      functions:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">signal</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Data</span> <span class="k">of</span> <span class="kt">string</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Dtd</span> <span class="k">of</span> <span class="n">dtd</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">El_end</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">El_start</span> <span class="k">of</span> <span class="n">tag</span>
+<span class="o">]</span>
+</pre></div><p id="idp10829808">
+      XMLM parses input XML documents into an ordered sequence of these
+      <code>signal</code> values. The first
+      <code>signal</code> that's received is always a
+      <code>Dtd</code>. The Document Type Description (DTD)
+      optionally defines which tags are allowed within the XML document.
+      Some XML parsers can validate a document against a DTD, but XMLM
+      is a <span><em>non-validating</em></span> parser that reads the DTD
+      if present but disregards its contents.
+    </p><p id="idp10833184">
+      The <code>El_start</code> and <code>El_end</code>
+      signals indicate the opening and closing of tags, and
+      <code>Data</code> passes the data contained between tags.
+    </p><pre id="idp10835840">
+let i = Xmlm.make_input (`Channel (open_in &quot;ddg.xml&quot;)) ;;
+let o = Xmlm.make_output (`Channel stdout) ;;
+</pre><p id="idp10836800">
+      We'll begin by defining the input source and output target for the
+      XML data. The <code>make_input</code> and
+      <code>make_output</code> functions use a polymorphic variant
+      to define how the library should use to read and write the XML.
+      <code>Channel</code> is used above, but there are several
+      others defined in the library:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">source</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Channel</span> <span class="k">of</span> <span class="n">in_channel</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Fun</span> <span class="k">of</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">int</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">string</span>
+<span class="o">]</span>
+</pre></div><p id="idp10840688">
+      Each of these sources uses a different strategy for obtaining
+      input data:
+    </p><ul><li><p id="idp10841696">
+<code>Channel</code> uses the OCaml standard library
+          channel system. When more data is required, a blocking read is
+          performed on that channel.
+        </p></li><li><p id="idp10843312">
+<code>String</code> accepts the whole document as an
+          OCaml <code>string</code>, starting from an integer
+          offset and continuing until the whole document has been
+          parsed.
+        </p></li><li><p id="idp10845648">
+<code>Fun</code> is more general than the others, and
+          supplies a function which can be called repeatedly to obtain
+          the next character. The function can do this by any means it
+          chooses: for example from the network (hopefully with
+          buffering so it's not reading a single character at a time),
+          or from a list of strings from elsewhere in the application.
+        </p></li></ul><p id="idp10847360">
+      Although we use <code>Channel</code> in this small example,
+      real applications will tend to use either
+      <code>String</code> or <code>Fun</code>. This is
+      because the <code>in_channel</code> interface is deprecated
+      in Core, and shouldn't be used in new code. <span><em>(avsm: this
+      is a somewhat unsatisfying explanation: what about adding a better
+      Core interface?)</em></span>.
+    </p><p id="idp10851312">
+      Regardless of which input method you choose, XMLM will convert it
+      into a sequence of signals. For example, take this simplified XML
+      fragment from our earlier search engine example.
+    </p><div class="highlight"><pre><span class="nt">&lt;DuckDuckGoResponse</span> <span class="na">version=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;Heading&gt;</span>DuckDuckGo<span class="nt">&lt;/Heading&gt;</span>
+<span class="nt">&lt;/DuckDuckGoResponse&gt;</span>
+</pre></div><p id="idp10852960">
+      This will be converted into the following sequence of signals:
+    </p><pre id="idp10853440">
+Dtd _
+El_start ((&quot;&quot;,&quot;DuckDuckGoResponse&quot;), [(&quot;&quot;,&quot;version&quot;), &quot;1.0&quot;]
+El_start ((&quot;&quot;,&quot;Heading&quot;), [])
+Data &quot;DuckDuckGo&quot;
+El_end
+El_end
+</pre><p id="idp10854368">
+      Only the opening <code>El_start</code> defines the tag name,
+      and the <code>El_end</code> signal closes the more recently
+      opened tag. The tag names are a little complicated due to the XML
+      facility for namespaces; just ignore the empty component of the
+      tag if you don't care about these. Now, let's define the
+      <code>xml_id</code> function that uses the input and output
+      values we defined above and parses this document.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">xml_id</span> <span class="n">i</span> <span class="n">o</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">pull</span> <span class="n">depth</span> <span class="o">=</span>
+    <span class="nn">Xmlm</span><span class="p">.</span><span class="n">output</span> <span class="n">o</span> <span class="o">(</span><span class="nn">Xmlm</span><span class="p">.</span><span class="n">peek</span> <span class="n">i</span><span class="o">);</span>
+    <span class="k">match</span> <span class="nn">Xmlm</span><span class="p">.</span><span class="n">input</span> <span class="n">i</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">El_start</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">pull</span> <span class="n">i</span> <span class="n">o</span> <span class="o">(</span><span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">El_end</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">then</span> <span class="n">pull</span> <span class="n">i</span> <span class="n">o</span> <span class="o">(</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">Data</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">pull</span> <span class="n">i</span> <span class="n">o</span> <span class="n">depth</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">Dtd</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="k">assert</span> <span class="bp">false</span>
+  <span class="k">in</span>
+  <span class="nn">Xmlm</span><span class="p">.</span><span class="n">output</span> <span class="n">o</span> <span class="o">(</span><span class="nn">Xmlm</span><span class="p">.</span><span class="n">input</span> <span class="n">i</span><span class="o">);</span> <span class="c">(* `Dtd *)</span>
+  <span class="n">pull</span> <span class="mi">0</span><span class="o">;</span>
+  <span class="k">if</span> <span class="n">not</span> <span class="o">(</span><span class="nn">Xmlm</span><span class="p">.</span><span class="n">eoi</span> <span class="n">i</span><span class="o">)</span> <span class="k">then</span> <span class="n">invalid_arg</span> <span class="s2">&quot;document not well-formed&quot;</span>
+</pre></div><p id="idp10858768">
+      The <code>xml_id</code> function begins by defining a
+      recursive helper <code>pull</code> function. The
+      <code>pull</code> function iterates over the
+      <code>signal</code> values until there are none left. It
+      first uses <code>Xmlm.peek</code> to inspect the current
+      input signal and immediately outputs it. The rest of the function
+      is not strictly necessary, but tracks that all of the tags that
+      have been started via the <code>El_start</code> signal are
+      also closed by a corresponding <code>El_end</code> signal.
+    </p><p id="idp10864512">
+      The <code>pull</code> function isn't invoked immediately.
+      The first thing we need to do is consume the
+      <code>Dtd</code> signal, which is present in every
+      well-formed XML input. Then we invoke <code>pull</code> with
+      a depth of <code>0</code>, and it consumes the whole
+      document. The final action is to call <code>Xmlm.eoi</code>
+      to verify that the end of input has been reached, since the
+      earlier <code>pull</code> should have consumed all of the
+      XML signals.
+    </p></section><section><h1 id="tree-parsing-xml">Tree parsing XML</h1><p id="idp10870736">
+      Signals enforce a very iterative style of parsing XML, as your
+      program has to deal with signals arriving serially. It's often
+      more convenient to deal with complete XML documents directly
+      in-memory as an OCaml tree data structure. We can convert a signal
+      stream into an OCaml structure by defining the following data type
+      and helper functions:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">tree</span> <span class="o">=</span>
+  <span class="o">|</span> <span class="nc">Element</span> <span class="k">of</span> <span class="nn">Xmlm</span><span class="p">.</span><span class="n">tag</span> <span class="o">*</span> <span class="n">tree</span> <span class="kt">list</span>
+  <span class="o">|</span> <span class="nc">Data</span> <span class="k">of</span> <span class="kt">string</span>
+
+<span class="k">let</span> <span class="n">in_tree</span> <span class="n">i</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">el</span> <span class="n">tag</span> <span class="n">children</span> <span class="o">=</span> <span class="nc">Element</span> <span class="o">(</span><span class="n">tag</span><span class="o">,</span> <span class="n">children</span><span class="o">)</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">data</span> <span class="n">d</span> <span class="o">=</span> <span class="nc">Data</span> <span class="n">d</span> <span class="k">in</span>
+  <span class="nn">Xmlm</span><span class="p">.</span><span class="n">input_doc_tree</span> <span class="o">~</span><span class="n">el</span> <span class="o">~</span><span class="n">data</span> <span class="n">i</span>
+
+<span class="k">let</span> <span class="n">out_tree</span> <span class="n">o</span> <span class="n">t</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">frag</span> <span class="o">=</span> <span class="k">function</span>
+  <span class="o">|</span> <span class="nc">Element</span> <span class="o">(</span><span class="n">tag</span><span class="o">,</span> <span class="n">childs</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">`</span><span class="nc">El</span> <span class="o">(</span><span class="n">tag</span><span class="o">,</span> <span class="n">childs</span><span class="o">)</span>
+  <span class="o">|</span> <span class="nc">Data</span> <span class="n">d</span> <span class="o">-&gt;</span> <span class="o">`</span><span class="nc">Data</span> <span class="n">d</span>
+  <span class="k">in</span>
+  <span class="nn">Xmlm</span><span class="p">.</span><span class="n">output_doc_tree</span> <span class="n">frag</span> <span class="n">o</span> <span class="n">t</span>
+</pre></div><p id="idp10872992">
+      The type <code>tree</code> can be pattern-matched and
+      traversed like a normal OCaml data structure. Let's see how this
+      works by extracting all the &quot;RelatedTopics&quot; in the
+      example XML document. First, we'll need a few helper combinator
+      functions to filter through tags and trees, with the following
+      signature:
+    </p><div class="highlight"><pre><span class="c">(* Extract a textual name from an XML tag.</span>
+<span class="c">   Discards the namespace information. *)</span>
+<span class="k">val</span> <span class="n">name</span> <span class="o">:</span> <span class="nn">Xmlm</span><span class="p">.</span><span class="n">tag</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+
+<span class="c">(* Given a list of [trees], concatenate all of the data contents</span>
+<span class="c">   into a string, and discard any sub-tags within it *)</span>
+<span class="k">val</span> <span class="n">concat_data</span> <span class="o">:</span> <span class="n">tree</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+
+<span class="c">(* Filter out the contents of a tag [n] from a tagset,</span>
+<span class="c">   and return the concatenated contents of all of them *)</span>
+<span class="k">val</span> <span class="n">filter_tag</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">tree</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">tree</span> <span class="kt">list</span>
+</pre></div><p id="idp10876688">
+      Let's look at the implementation of these functions in more
+      detail.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">name</span> <span class="o">((_,</span><span class="n">n</span><span class="o">),_)</span> <span class="o">=</span> <span class="n">n</span>
+</pre></div><p id="idp10878144">
+      The <code>name</code> function is a good example of how
+      pattern-matching can make data structure manipulation very
+      succinct. An <code>Xmlm.tag</code> consists of a tuple of
+      the tag name and its attributes. The tag name is itself a tuple of
+      the namespace and the local name (which is what we actually want).
+      The pattern matching in the <code>name</code> function binds
+      the local name portion of these tuples to <code>n</code>,
+      and ignores the rest of the argument input. The function body just
+      returns <code>n</code> to the caller.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">concat_data</span> <span class="n">tl</span> <span class="o">=</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">fold_left</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="s2">&quot;&quot;</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">acc</span> <span class="o">-&gt;</span>
+    <span class="k">function</span>
+    <span class="o">|</span><span class="nc">Data</span> <span class="n">s</span> <span class="o">-&gt;</span> <span class="n">acc</span> <span class="o">^</span> <span class="n">s</span>
+    <span class="o">|_</span> <span class="o">-&gt;</span> <span class="n">acc</span>
+  <span class="o">)</span> <span class="n">tl</span>
+</pre></div><p id="idp10883680">
+      The <code>concat_data</code> function accepts a
+      <code>tree list</code> parameter and looks for
+      <code>Data</code> tags that it concatenates into a single
+      string. All other tags are ignored and discarded (a more
+      sophisticated implementation would recurse into sub-tags and
+      concatenate any data within them too).
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">filter_tag</span> <span class="n">n</span> <span class="o">=</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">fold_left</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="bp">[]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">acc</span> <span class="o">-&gt;</span>
+    <span class="k">function</span>
+    <span class="o">|</span><span class="nc">Element</span> <span class="o">(</span><span class="n">tag</span><span class="o">,</span> <span class="n">ts</span><span class="o">)</span> <span class="k">when</span> <span class="n">name</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-&gt;</span>
+      <span class="n">ts</span> <span class="o">@</span> <span class="n">acc</span>
+    <span class="o">|_</span> <span class="o">-&gt;</span> <span class="n">acc</span>
+  <span class="o">)</span>
+</pre></div><p id="idp10887728">
+      The <code>filter_tag</code> function also folds over a
+      <code>tree list</code>, but uses a more specialised pattern
+      match. It looks for an <code>Element</code> value, but uses
+      the <code>when</code> clause to also check that the name of
+      the tag matches the <code>n</code> function argument. If it
+      does match then that pattern is selected, and otherwise matching
+      continues to the next option (in this case, a catch-all that
+      simply returns the accumulator and continues the fold). This use
+      of <code>when</code> in pattern matching is known as a
+      <span><em>guard pattern</em></span>.
+    </p><p id="idp10893264">
+      Once we have these helper functions, the selection of all the
+      <code>&lt;Text&gt;</code> tags is a matter of chaining the
+      filter functions we just defined together.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">topics</span> <span class="n">trees</span> <span class="o">=</span>
+  <span class="n">filter_tag</span> <span class="s2">&quot;DuckDuckGoResponse&quot;</span> <span class="n">trees</span>
+  <span class="o">|&gt;</span> <span class="n">filter_tag</span> <span class="s2">&quot;RelatedTopics&quot;</span>
+  <span class="o">|&gt;</span> <span class="n">filter_tag</span> <span class="s2">&quot;RelatedTopic&quot;</span>
+  <span class="o">|&gt;</span> <span class="n">filter_tag</span> <span class="s2">&quot;Text&quot;</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">concat_data</span> <span class="o">[</span><span class="n">x</span><span class="o">]</span> <span class="o">|&gt;</span> <span class="n">print_endline</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="o">_</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">i</span> <span class="o">=</span> <span class="nn">Xmlm</span><span class="p">.</span><span class="n">make_input</span> <span class="o">(`</span><span class="nc">Channel</span> <span class="o">(</span><span class="n">open_in</span> <span class="s2">&quot;ddg.xml&quot;</span><span class="o">))</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="o">(_,</span><span class="n">it</span><span class="o">)</span> <span class="o">=</span> <span class="n">in_tree</span> <span class="n">i</span> <span class="k">in</span>
+  <span class="n">topics</span> <span class="o">[</span><span class="n">it</span><span class="o">]</span>
+</pre></div><p id="idp10895840">
+      The <code>filter_tag</code> function accepts a
+      <code>tree list</code> and also outputs a
+      <code>tree list</code> that contains the sub-tags that
+      match. This lets us chain together the results of one filter to
+      another, and hence select hierarchical XML tags very easily. When
+      we get to the <code>&lt;Text&gt;</code> tag, we iterate over
+      all the results, concatenate the data contents, and print each one
+      individually.
+    </p></section><section><h1 id="building-xml-using-syntax-extensions">Building XML using syntax extensions</h1><p id="idp10900704">
+      In the earlier JSON chapter, we explained how to construct values
+      by creating the data structures directly. While this works for
+      small documents, it can get really confusing with bigger
+      structures. For example, look at:
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">mk_tag</span> <span class="n">n</span> <span class="n">a</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">Element</span><span class="o">(((</span><span class="s2">&quot;&quot;</span><span class="o">,</span><span class="n">n</span><span class="o">),</span><span class="n">a</span><span class="o">),</span><span class="n">c</span><span class="o">)</span>
+<span class="k">let</span> <span class="n">mk_data</span> <span class="n">d</span> <span class="o">=</span> <span class="nc">Data</span> <span class="n">d</span>
+
+<span class="k">let</span> <span class="n">response</span> <span class="o">=</span>
+  <span class="n">mk_tag</span> <span class="s2">&quot;DuckDuckGoResponse&quot;</span> <span class="o">[(</span><span class="s2">&quot;&quot;</span><span class="o">,</span><span class="s2">&quot;version&quot;</span><span class="o">),</span><span class="s2">&quot;1.0&quot;</span><span class="o">]</span> 
+    <span class="o">(</span><span class="n">mk_tag</span> <span class="s2">&quot;Heading&quot;</span> <span class="bp">[]</span> <span class="o">[</span><span class="n">mk_data</span> <span class="s2">&quot;DuckDuckGo&quot;</span><span class="o">])</span>
+</pre></div><p id="idp10902544">
+      This defines a couple of helper functions to construct
+      <code>Element</code> and <code>Data</code> values, and
+      then builds a <code>response</code> value. Wouldn't it be
+      nice if there were a way to write the XML we want directly?
+      Happily, OCaml's syntax extension mechanism comes to the rescue
+      via the <span><em>quotation</em></span> mechanism. It lets us write
+      this equivalent code:
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">response</span> <span class="o">=</span>
+  <span class="o">&lt;:</span><span class="n">xml</span>
+    <span class="o">&lt;</span><span class="nc">DuckDuckGoResponse</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nc">Heading</span><span class="o">&gt;</span><span class="nc">DuckDuckGo</span><span class="o">&lt;/</span><span class="nc">Heading</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="nc">DuckDuckGoResponse</span><span class="o">&gt;</span>
+  <span class="o">&gt;&gt;</span>
+</pre></div><p id="idp10906912">
+      We use the Sexplib syntax extension earlier to generate
+      boilerplate code from type definitions. The quotation shown above
+      is a little different: it lets the syntax of an entire block of
+      code to be completely different from OCaml's usual one. Camlp4
+      loads a syntax extension module that transforms the Abstract
+      Syntax Tree (AST) of the code fragment (in this case,
+      <code>xml</code>), and converts it into the desired data
+      structure.
+    </p><p id="idp10908448">
+      We'll use the Atom 1.0 syndication format as our example. Atom
+      feeds allow web-based programs such as browsers to poll a website
+      for updates. The website owner publishes a feed of content in a
+      standardized XML format via HTTP. This feed is then parsed by
+      clients and compared against previously downloaded versions to
+      determine which contents are available.
+    </p><p id="idp10909248">
+      Here's an example of an Atom feed:
+    </p><div class="highlight"><pre><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;feed</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/2005/Atom&quot;</span><span class="nt">&gt;</span>
+ <span class="nt">&lt;title&gt;</span>Example Feed<span class="nt">&lt;/title&gt;</span>
+ <span class="nt">&lt;subtitle&gt;</span>A subtitle.<span class="nt">&lt;/subtitle&gt;</span>
+ <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">&quot;http://example.org/feed/&quot;</span> <span class="na">rel=</span><span class="s">&quot;self&quot;</span> <span class="nt">/&gt;</span>
+ <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">&quot;http://example.org/&quot;</span> <span class="nt">/&gt;</span>
+ <span class="nt">&lt;id&gt;</span>urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6<span class="nt">&lt;/id&gt;</span>
+ <span class="nt">&lt;updated&gt;</span>2003-12-13T18:30:02Z<span class="nt">&lt;/updated&gt;</span>
+
+ <span class="nt">&lt;entry&gt;</span>
+  <span class="nt">&lt;title&gt;</span>Atom-Powered Robots Run Amok<span class="nt">&lt;/title&gt;</span>
+  <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">&quot;http://example.org/2003/12/13/atom03&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;alternate&quot;</span> <span class="na">type=</span><span class="s">&quot;text/html&quot;</span> <span class="na">href=</span><span class="s">&quot;http://example.org/atom03.html&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;edit&quot;</span> <span class="na">href=</span><span class="s">&quot;http://example.org/atom03/edit&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;id&gt;</span>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a<span class="nt">&lt;/id&gt;</span>
+  <span class="nt">&lt;updated&gt;</span>2003-12-13T18:30:02Z<span class="nt">&lt;/updated&gt;</span>
+  <span class="nt">&lt;summary&gt;</span>Some text.<span class="nt">&lt;/summary&gt;</span>
+  <span class="nt">&lt;author&gt;</span>
+    <span class="nt">&lt;name&gt;</span>John Doe<span class="nt">&lt;/name&gt;</span>
+    <span class="nt">&lt;email&gt;</span>johndoe@example.com<span class="nt">&lt;/email&gt;</span>
+  <span class="nt">&lt;/author&gt;</span>
+ <span class="nt">&lt;/entry&gt;</span>
+<span class="nt">&lt;/feed&gt;</span>
+</pre></div><p id="idp10911488">
+      We want to build this by minimising the amount of repetitive XML
+      generation code. The &quot;Caml on the Web&quot; (COW) library
+      provides the syntax extension we need.
+    </p><aside class="note"><h1>
+    Installing Caml on the Web (COW)
+    </h1><p id="idp10912800">
+      The COW library and syntax extension can be installed via OPAM via
+      <code>opam install cow</code>. There are two OCamlfind
+      packages installed: the library is called <code>cow</code>
+      and the syntax extension is activated with the
+      <code>cow.syntax</code> package.
+    </p><p id="idp10915568">
+      One caveat to bear in mind is that COW isn't fully compatible with
+      Core yet, and so you must use the syntax extension before opening
+      the Core modules. (<span><em>avsm</em></span>: we can fix this
+      easily, but the note is here as a warning to reviewers).
+    </p></aside><p id="idp10916784">
+      Let's start to build up an Atom specification using Cow. First,
+      the <code>&lt;author&gt;</code> tag can be represented with
+      the following type:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">author</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">uri</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">email</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+<span class="o">}</span> <span class="k">with</span> <span class="n">xml</span>
+</pre></div><p id="idp10919072">
+      This is a standard record type definition with the addition of
+      <code>with xml</code> at the end. This uses a syntax
+      extension to signify that we wish to generate boilerplate code for
+      handling this record as an XML document.
+    </p><section><h1><b>
+    Invoking <code>camlp4</code> syntax extensions
+    </b></h1><p id="idp10921808">
+      The OCaml compiler can call <code>camlp4</code>
+      automatically during a compilation to preprocess the source files.
+      This is specified via the <code>-pp</code> flag to the
+      compiler. You don't normally need to specify this flag yourself.
+      Use the <code>ocamlfind</code> utility instead to generate
+      the right command-line flags for you. Here's a small shell script
+      which preprocesses a source file with the COW syntax extension:
+    </p><div class="highlight"><pre><span class="c">#!/bin/sh -x</span>
+
+<span class="nv">file</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">lib</span><span class="o">=</span>cow.syntax
+<span class="nv">bin</span><span class="o">=</span>ocamlfind
+<span class="nv">args</span><span class="o">=</span><span class="sb">`</span><span class="nv">$bin</span> query -predicates syntax,preprocessor -r -format <span class="s1">'-I %d %a'</span> <span class="nv">$lib</span><span class="sb">`</span>
+camlp4o -printer o <span class="nv">$args</span> <span class="nv">$file</span>
+</pre></div><p id="idp10925808">
+      You can supply <code>ocamlfind</code> with a number of
+      different predicates to define the type of build you are running
+      (preprocessing, compilation or linking). The final part of the
+      script invokes the <code>camlp4o</code> binary on your ML
+      source file and outputs the transformed source code to your
+      terminal.
+    </p></section><p id="idp10928048">
+      Let's see the OCaml code that has been generated for our
+      <code>author</code> record after it has been preprocessed:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">author</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">uri</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">email</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="k">let</span> <span class="k">rec</span> <span class="n">xml_of_author</span> <span class="n">author</span> <span class="o">:</span> <span class="nn">Cow</span><span class="p">.</span><span class="nn">Xml</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">flatten</span>
+    <span class="o">[</span> <span class="o">(</span><span class="k">match</span> <span class="k">match</span> <span class="n">author</span><span class="o">.</span><span class="n">email</span> <span class="k">with</span>
+             <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+             <span class="o">|</span> <span class="nc">Some</span> <span class="n">var1</span> <span class="o">-&gt;</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Data</span> <span class="n">var1</span> <span class="o">]</span>
+       <span class="k">with</span>
+       <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+       <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span>
+         <span class="o">[</span> <span class="o">`</span><span class="nc">El</span> <span class="o">((((</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="s2">&quot;email&quot;</span><span class="o">),</span> <span class="bp">[]</span><span class="o">)</span> <span class="o">:</span> <span class="nn">Cow</span><span class="p">.</span><span class="nn">Xml</span><span class="p">.</span><span class="n">tag</span><span class="o">),</span>
+           <span class="o">(</span><span class="k">match</span> <span class="n">author</span><span class="o">.</span><span class="n">email</span> <span class="k">with</span>
+            <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+            <span class="o">|</span> <span class="nc">Some</span> <span class="n">var1</span> <span class="o">-&gt;</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Data</span> <span class="n">var1</span> <span class="o">]))</span> <span class="o">]);</span>
+      <span class="o">(</span><span class="k">match</span> <span class="k">match</span> <span class="n">author</span><span class="o">.</span><span class="n">uri</span> <span class="k">with</span>
+        <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="bp">[]</span> <span class="o">|</span> <span class="nc">Some</span> <span class="n">var2</span> <span class="o">-&gt;</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Data</span> <span class="n">var2</span> <span class="o">]</span>
+       <span class="k">with</span>
+       <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+       <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span>
+         <span class="o">[</span> <span class="o">`</span><span class="nc">El</span> <span class="o">((((</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="s2">&quot;uri&quot;</span><span class="o">),</span> <span class="bp">[]</span><span class="o">)</span> <span class="o">:</span> <span class="nn">Cow</span><span class="p">.</span><span class="nn">Xml</span><span class="p">.</span><span class="n">tag</span><span class="o">),</span>
+           <span class="o">(</span><span class="k">match</span> <span class="n">author</span><span class="o">.</span><span class="n">uri</span> <span class="k">with</span>
+             <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+             <span class="o">|</span> <span class="nc">Some</span> <span class="n">var2</span> <span class="o">-&gt;</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Data</span> <span class="n">var2</span> <span class="o">]))</span> <span class="o">]);</span>
+      <span class="o">(</span><span class="k">match</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Data</span> <span class="n">author</span><span class="o">.</span><span class="n">name</span> <span class="o">]</span> <span class="k">with</span>
+       <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+       <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span>
+         <span class="o">[</span> <span class="o">`</span><span class="nc">El</span> <span class="o">((((</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="s2">&quot;name&quot;</span><span class="o">),</span> <span class="bp">[]</span><span class="o">)</span> <span class="o">:</span> <span class="nn">Cow</span><span class="p">.</span><span class="nn">Xml</span><span class="p">.</span><span class="n">tag</span><span class="o">),</span>
+         <span class="o">[</span> <span class="o">`</span><span class="nc">Data</span> <span class="n">author</span><span class="o">.</span><span class="n">name</span> <span class="o">])</span> <span class="o">])</span> <span class="o">]</span>
+</pre></div><p id="idp10931840">
+      Notice that the <code>with xml</code> clause has been
+      replaced with a new <code>xml_of_author</code> function that
+      has been generated for you. It accepts an
+      <code>author</code> value and returns an
+      <code>Xml.t</code> value. The generated code isn't really
+      meant to be human-readable, but you don't normally see it when
+      using the syntax extension (we've only dumped it out here to
+      illustrate how <code>camlp4</code> works).
+    </p><p id="idp10936128">
+      If we run <code>xml_of_author</code> and convert the result
+      to a human-readable string, our complete example looks like:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">author</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">uri</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">email</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+<span class="o">}</span> <span class="k">with</span> <span class="n">xml</span>
+
+<span class="k">let</span> <span class="n">anil</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Anil Madhavapeddy&quot;</span><span class="o">;</span>
+  <span class="n">uri</span> <span class="o">=</span> <span class="nc">Some</span> <span class="s2">&quot;http://anil.recoil.org&quot;</span><span class="o">;</span>
+  <span class="n">email</span> <span class="o">=</span> <span class="nc">Some</span> <span class="s2">&quot;anil@recoil.org&quot;</span>
+<span class="o">}</span>
+
+<span class="k">let</span> <span class="o">_</span> <span class="o">=</span> <span class="n">print_endline</span> <span class="o">(</span><span class="nn">Cow</span><span class="p">.</span><span class="nn">Xml</span><span class="p">.</span><span class="n">to_string</span> <span class="o">(</span><span class="n">xml_of_author</span> <span class="n">anil</span><span class="o">))</span>
+</pre></div><p id="idp10938880">
+      This will generate the following XML output on the terminal when
+      you execute it:
+    </p><div class="highlight"><pre><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="nt">&lt;email&gt;</span>anil@recoil.org<span class="nt">&lt;/email&gt;</span>
+<span class="nt">&lt;uri&gt;</span>http://anil.recoil.org<span class="nt">&lt;/uri&gt;</span>
+<span class="nt">&lt;name&gt;</span>Anil Madhavapeddy<span class="nt">&lt;/name&gt;</span>
+</pre></div><p id="idp10940480">
+      This is convenient, but just one small portion of Atom. How do we
+      express the full Atom scheme from earlier? The answer is with just
+      a few more records that match the Atom XML schema.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">author</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">uri</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">email</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+<span class="o">}</span> <span class="k">with</span> <span class="n">xml</span>
+
+<span class="k">type</span> <span class="n">date</span> <span class="o">=</span>
+  <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="c">(* year, month, date, hour, minute *)</span>
+<span class="k">with</span> <span class="n">xml</span>
+
+<span class="k">let</span> <span class="n">xml_of_date</span> <span class="o">(</span><span class="n">year</span><span class="o">,</span><span class="n">month</span><span class="o">,</span><span class="n">day</span><span class="o">,</span><span class="n">hour</span><span class="o">,</span><span class="n">min</span><span class="o">)</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">d</span> <span class="o">=</span> <span class="nn">Printf</span><span class="p">.</span><span class="n">sprintf</span> <span class="s2">&quot;%.4d-%.2d-%.2dT%.2d:%.2d:00Z&quot;</span> <span class="n">year</span> <span class="n">month</span> <span class="n">day</span> <span class="n">hour</span> <span class="n">min</span> <span class="k">in</span>
+  <span class="o">&lt;:</span><span class="n">xml</span><span class="o">&lt;</span> <span class="o">$</span><span class="n">str</span><span class="o">:</span><span class="n">d</span><span class="o">$</span> <span class="o">&gt;&gt;</span>
+
+<span class="k">type</span> <span class="n">meta</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">title</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="n">subtitle</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">author</span><span class="o">:</span> <span class="n">author</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">rights</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
+  <span class="n">updated</span><span class="o">:</span> <span class="n">date</span><span class="o">;</span>
+<span class="o">}</span> <span class="k">with</span> <span class="n">xml</span>
+</pre></div><p id="idp10942528">
+      We've now filled in more of the Atom schema with these records.
+      The first problem we run into is that occasionally there is a
+      mismatch between the syntax extension's idea of what the
+      auto-generated XML should look like, and the reality of the
+      protocol you are mapping to.
+    </p><p id="idp10943232">
+      The Atom date field is a good example. We define it as a tuple of
+      integers, but the format mandated by the specification is actually
+      a free-form text format and not XML. However, because the syntax
+      extension generates normal OCaml functions, we can just override
+      the <code>xml_of_date</code> function with a custom one
+      which returns the correct XML fragment. Any references further
+      down the module will just use our overridden version and ignore
+      the auto-generated one.
+    </p><p id="idp10944848">
+      There's another interesting bit of new syntax in the
+      <code>xml_of_date</code> function known as a
+      <span><em>quotation</em></span>. OCaml not only allows code to be
+      generated during pre-processing, but also to override the core
+      language grammar with new constructs. The most common way of doing
+      this is by embedding the custom grammars inside
+      <code>&lt;:foo&lt; ... &gt;&gt;</code> tags, where
+      <code>foo</code> represents the particular grammar being
+      used. In the case of COW, this lets you generate XMLM-compatible
+      OCaml values just by typing in XML tags.
+    </p><p id="idp10948288">
+      TODO antiquotations.
+    </p><p id="idp10948720">
+      TODO finish the atom example.
+    </p><section><h1 id="working-with-xhtmlx">Working with XHTMLx</h1><p id="idp10950208">
+        TODO use Cow.Html to generate a more complete Atom feed.
+      </p></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="first-class-modules.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="pt03.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

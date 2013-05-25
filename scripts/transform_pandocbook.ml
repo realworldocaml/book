@@ -6,9 +6,9 @@ open Core.Std
 open Chapter
 
 let part_to_string = function
-  | Basic     -> "I"   , "Basic Concepts"
+  | Basic     -> "I"   , "Language Concepts"
   | Practical -> "II"  , "Tools and Techniques"
-  | Advanced  -> "III" , "Advanced Topics"
+  | Advanced  -> "III" , "The Runtime System"
   | Appendix | Preface -> assert false
 
 let all_parts = [ Basic; Practical; Advanced ]

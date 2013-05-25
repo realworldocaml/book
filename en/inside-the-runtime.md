@@ -1,4 +1,4 @@
-# Inside the Runtime
+# Understanding the Garbage Collector
 
 (_avsm_: this chapter is still being chopped and changed)
 
@@ -274,8 +274,9 @@ let _ =
 This program defines a type `t1` that is mutable, and `t2` that is immutable.
 The main loop iterates over both fields and runs a simple counter.  It measures
 two things: the wallclock time that all the iterations take, and the number of
-minor garbage collections that occurred during the test.  The results should
-look something like this:
+minor garbage collections that occurred during the test.  The results are very
+hardware-dependent, but on a modern Intel i7 processor they look something like
+this:
 
 ```
 mutable: 8.6923s (7629 minor collections)
@@ -308,8 +309,8 @@ be scanned.
 The goal of minor collection is to empty the minor heap by moving to the major
 heap every block in the minor heap that might be used in the future, and
 updating each pointer to a moved block to the new version of the block.  A
-block is *live* if is reachable by starting at some *root* pointer into a block
-in the minor heap,a nd then following pointers in blocks.  There are many
+block is *live* if it is reachable by starting at some *root* pointer into a block
+in the minor heap, and then following pointers in blocks.  There are many
 different kinds of roots:
 
 * OCaml stack(s)

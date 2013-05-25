@@ -300,15 +300,13 @@ Strings also come with their own syntax for getting and setting
 values: `string.[index]` and `string.[index] <- expr` respectively,
 and string literals are bounded by quotes.  There's also a module
 `String` where you'll find useful functions for working with strings.
-We'll talk more about the `String` module in
-[xref](#text-processing-and-unicode).
 
 #### Bigarrays
 
 A `Bigarray.t` is a handle to a block of memory stored outside of the
 OCaml heap.  These are mostly useful for interacting with C or Fortran
 libraries, and are discussed in
-[xref](#runtime-memory-layout).  Bigarrays too have
+[xref](#memory-representation-of-values).  Bigarrays too have
 their own getting and setting syntax: `bigarray.{index}` and
 `bigarray.{index} <- expr`.  There is no literal syntax for bigarrays.
 

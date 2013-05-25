@@ -34,9 +34,9 @@ last resort.
 ### Mac OS X
 
 The [Homebrew](http://github.com/mxcl/homebrew) package manager has an
-OCaml installer, which is usually updated pretty quickly to the latest
-stable release.  Before installing OCaml, make sure that you have the latest
-XCode installed from the App Store so that a C compiler is available.
+OCaml installer, which is usually updated pretty quickly to the latest stable
+release.  Make sure that you have the latest XCode (and Command Line Tools for
+XCode) installed from the App Store before starting the OCaml installation.
 
 ```
 $ brew install ocaml
@@ -78,7 +78,7 @@ some OCaml libraries require more system libraries (for example,
 `libssl-dev`), but we'll highlight these in the book when we introduce
 the library.
 
-Fedora and Red Hat
+### Fedora and Red Hat
 
 OCaml has been included in the basic distribution since Fedora 8.  To install the
 latest compiler, just run:
@@ -198,31 +198,6 @@ OPAM is upstreamed into Debian mainline.
 # apt-get install opam
 ```
 
-<note>
-<title>Note to reviewers</title>
-
-The OPAM instructions will be simplified when integrated upstream into
-Debian and Fedora, which is ongoing.  Until then, we're leaving
-source-code installation instructions here. Please leave a comment
-with any amended instructions you encounter
-
-</note>
-
-If the binary packages aren't suitable, you need to install the latest
-OPAM release from source.  The distribution only requires the OCaml
-compiler to be installed, so this should be pretty
-straightforward. Download the latest version, which is always marked
-with a `stable` tag on the project
-[homepage](https://github.com/OCamlPro/opam/tags).
-
-```
-$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
-$ tar -zxvf latest.tar.gz
-$ cd opam-latest
-$ ./configure && make
-$ sudo make install
-```
-
 ### Fedora and Red Hat
 
 There is currently no RPM available for Fedora or Red Hat, so please
@@ -245,6 +220,32 @@ $ tar -xvf opam.tar.gz && cd opam
 $ makepkg
 $ sudo pacman -U opam-_version_.pkg.tar.gz
 ```
+
+### Source Installation
+
+If the binary packages aren't available for your system, you'll need to install
+the latest OPAM release from source.  The distribution only requires the OCaml
+compiler to be installed, so this should be straightforward.  Download
+the latest version from the [homepage](https://github.com/OCamlPro/opam/tags).
+
+```console
+$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
+$ tar -zxvf latest.tar.gz
+$ cd opam-latest
+$ ./configure && make
+$ sudo make install
+```
+
+<note>
+<title>Note to reviewers</title>
+
+The OPAM instructions will be simplified when integrated upstream into
+Debian and Fedora, which is ongoing.  Until then, we're leaving
+source-code installation instructions here. Please leave a comment
+with any amended instructions you encounter.
+
+</note>
+
 
 ## Configuring the OPAM package manager
 
@@ -324,9 +325,9 @@ $ opam list
 <note>
 <title>Note to reviewers</title>
 
-OPAM 1.0's always places the login commands into your `~/.profile`
-directory, which isn't executed if your shell is `bash`.  This has
-been fixed in subsequent versions, but for now you'll need to manually
+OPAM 1.0.0 places the login commands into your `~/.profile`
+directory, which isn't always executed if your shell is `bash`.
+This has been fixed in subsequent versions, but for now you'll need to manually
 copy the contents of `~/.profile` over to `~/.bash_profile` via:
 
 ```
@@ -368,9 +369,9 @@ Finally, we're ready to install the Core libraries.  Run this:
 $ opam install core core_extended async
 ```
 
-This will take about five minutes to install, and install a series of packages.
-OPAM figures out the dependencies you need automatically, but the three
-packages that really matter are:
+This will take about five or ten minutes to build, and will install a series of
+packages.  OPAM figures out the dependencies you need automatically, but the
+three packages that really matter are:
 
 * `core` is the main, well-supported Core distribution from Jane Street.
 * `core_extended` contains a number of experimental, but useful,
@@ -399,7 +400,7 @@ Remember from earlier that OPAM never installs files directly into
 your system directories, and this applies to `utop` too.  You'll find
 the binary in `~/.opam/4.01.0dev+trunk/bin`.  However, just typing
 in `utop` from your shell should just work, due to the `opam config
-env` step which configures your shell.  Don't forget to automate this
+env` step that configures your shell.  Don't forget to automate this
 as described earlier, as it makes life much easier when developing
 OCaml code!
 
