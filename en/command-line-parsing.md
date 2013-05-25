@@ -553,11 +553,12 @@ val basic :
 ```
 
 The final line is the important one. It shows that the callback function for a
-spec should consume identical arguments to the supplied `main` function, except
-that there is an additional `unit` argument.  This final `unit` is there in
-case there are no command-line arguments, as at least one parameter is required
-for the callback.  That's why you have to supply an additional `()` to the
-callback function in the previous examples.
+spec should consume identical arguments to the supplied `main` function, expect
+for an additional `unit` argument.  This final `unit` is there to make sure the
+callback is evaluated as a function, since if zero command-line arguments are
+specified (i.e. `Spec.empty`), the callback would otherwise have no arguments
+and be evaluated immediately.  That's why you have to supply an additional `()`
+to the callback function in all the previous examples.
 
 </sidebar>
 
