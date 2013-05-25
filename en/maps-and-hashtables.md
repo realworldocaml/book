@@ -37,41 +37,179 @@ most operations have constant time complexity.  We'll describe both of
 these data structures in detail, and provide some advice as to when to
 use one or the other.
 
-## Constructing a map
+## An example
 
-Maps are implemented as ordered binary trees, and as such you need to
-know how to compare the keys in order to build a map on those keys.
-Functions for creating a map require that you pass in a value of type
-`Comparator.t`, which is available as part of any module that
-satisfies Core's `Comparable` interface.  Thus, we can create a map as
-follows.
+Let's start by considering an example of how one might use a map in
+practice.  In [xref](#files-modules-and-programs), we showed a module
+for keeping a count of the number of times a given string showed up in
+a file.  Here's the interface that this module provided:
 
 ```ocaml
-# let digit_map = Map.of_alist_exn Int.comparator digit_alist;;
+(* counter.mli: abstract interface *)
+
+open Core.Std
+
+type t
+
+val empty : t
+val to_list : t -> (string * int) list
+val touch : t -> string -> t
+```
+
+The intended behavior here is straightforward.  `Counter.empty`
+represents an empty collection of counts.  Every time you call
+`touch`, it increments the count of the proviced string by 1, and
+`to_list` returns the list of non-zero string counts.
+
+Here's the implementation.
+
+```ocaml
+(* counter.ml: efficient version *)
+
+open Core.Std
+
+type t = int String.Map.t
+
+let empty = String.Map.empty
+
+let to_list t = Map.to_alist t
+
+let touch t s =
+  let count = Option.value ~default:0 (Map.find t s) in
+  Map.add t ~key:s ~data:(count + 1)
+```
+
+The first thing to note about the implementation is that in some
+places we refer to `String.Map.t`, and in others we just use `Map.t`.
+The reason for this has to do with the fact that maps are implemented
+as as ordered binary trees, and as such you need to know how to
+compare the keys in order to build a map on those keys.  
+
+For that reason, when creating a map, you need somehow to specify the
+comparison function for working on that type.  The `Map` sub-module of
+`String` contains versions of the map creation functions that are
+specialized to strings by knowing the comparison functions for
+strings.  This `Map` sub-module is part of the `Comparable` interface
+in Core.
+
+Once them map is created, however, it's fully polymorphic, which means
+that we can use the accessor functions from the `Map` module on a map
+with keys of any type.
+
+## Creating maps with comparators
+
+The specialized `Map` sub-module is convenient, but you don't
+necessarily need to go through such a module to create a `Map.t`.  The
+information required to compare values of a given type is wrapped up
+in a value called a _comparator_, that can be used to create maps
+using the `Map` module directly.
+
+```ocaml
+# let digit_map = Map.of_alist_exn digit_alist
+                     ~comparator:Int.comparator;;
 val digit_map : (int, string, Int.comparator) Map.t = <abstr>
 # Map.find digit_map 3;;
 - : string option = Some "three"
-# let digit_map' = Map.add digit_map 0 "zip";;
-val digit_map' : (int, string, Int.comparator) Map.t = <abstr>
-# (Map.find digit_map' 0, Map.find digit_map 0);;
-- : string option * string option = (Some "zip", Some "zero")
 ```
 
 We use the function `Map.of_alist_exn` to construct our map.  This
 function throws an exception if it encounters entries with duplicate
-keys.  Note that we only need to include the comparator on functions
-that create new maps from scratch.  That's because the comparator is
-stashed inside the map, so it's available within the data-structure
-when you need to do a lookup or add a binding to a map.
+keys.
 
-We don't actually need to grab the comparator explicitly: the
-`Comparable` interface provides a type-specialized version of the
-`Map` module, so we can write:
+Note that the comparator is only required for operations that create
+maps from scratch.  Operations that update an existing map simply
+inherit the comparator of the map they start with.
 
 ```ocaml
-# let digit_map = Int.Map.of_alist_exn digit_alist;;
-val digit_map : string Int.Map.t = <abstr>
+# let digit_map_with_zero = Map.add digit_map ~key:0 ~data:"zilch";;
+val digit_map_with_zero : (int, string, Int.comparator) Map.t = <abstr>
 ```
+
+Note that the type `Map.t` has three type parameters: one for the key,
+one for the value, and one to identify the comparator used to build
+the map.  This isn't really a new type: `'b Int.Map.t` is just a type
+alias for `(int,'b,Int.comparator) Map.t`, as you can see.
+
+```ocaml
+# (digit_map : _ Int.Map.t);;
+- : string Int.Map.t = <abstr>
+```
+
+Identifying the comparator is important because because operations
+that work on multiple maps at the same time typically require that
+they're using the same comparison function.  As an example, consider
+the function `Map.symmetric_diff`, which gives you a summary of the
+differences between two maps.
+
+```ocaml
+# let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo", 0]
+  let right = String.Map.of_alist_exn ["foo",0; "snoo", 0]
+  let diff = Map.symmetric_diff ~data_equal:Int.equal left right
+  ;;
+val left : int String.Map.t = <abstr>
+val right : int String.Map.t = <abstr>
+val diff :
+  (string * [ `Left of int | `Right of int | `Unequal of int * int ]) list =
+  [("foo", `Unequal (1, 0)); ("bar", `Left 3)]
+```
+
+If we look at the type of `Map.symmetric_diff`, we'll see that it
+requires that the two maps it merges use the same comparator:
+
+```ocaml
+# Map.symmetric_diff;;
+- : ('k, 'v, 'cmp) Map.t ->
+    ('k, 'v, 'cmp) Map.t ->
+    data_equal:('v -> 'v -> bool) ->
+    ('k * [ `Left of 'v | `Right of 'v | `Unequal of 'v * 'v ]) list
+= <fun>
+```
+
+We can create a new comparator for an existing type using the
+comparator module.
+
+```ocaml
+# module Reverse = Comparator.Make(struct
+    type t = string
+    include (String : Sexpable with type t := t)
+    let compare x y = String.compare y x
+  end);;
+module Reverse :
+  sig
+    type t = string
+    val compare : t -> t -> int
+    val t_of_sexp : Sexp.t -> t
+    val sexp_of_t : t -> Sexp.t
+    type comparator
+    val comparator : (t, comparator) Comparator.t_
+  end
+```
+
+Now we can use `Reverse.comparator` to create a version of the `right`
+map we created above, but using this alternate comparison function.
+
+```ocaml
+# let right2 = Map.of_alist_exn ~comparator:Reverse.comparator
+                 ["foo",0; "snoo", 0];;
+val right2 : (string, int, Reverse.comparator) Map.t = <abstr>
+# Map.min_elt right;;
+- : (string * int) option = Some ("foo", 0)
+# Map.min_elt right2;;
+- : (string * int) option = Some ("snoo", 0)
+```
+
+Now, if we try to compute the symmetric diff of `left` and `right2`,
+the compiler will reject it as a type error.
+
+```ocaml
+# Map.symmetric_diff left right2;;
+Error: This expression has type (string, int, Reverse.comparator) Map.t
+       but an expression was expected of type
+         ('a, 'b, 'c) Map.t = (string, int, String.comparator) Map.t
+       Type Reverse.comparator is not compatible with type String.comparator 
+```
+
+## Using the polymorphic comparator
 
 If we don't want to go to the trouble of using the specialized
 comparison for a given type, we can use OCaml's build in polymorphic
