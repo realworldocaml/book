@@ -537,21 +537,11 @@ of type `'r`.  Let's look at some examples of specs, and their types:
 
 The empty specification is simple as it doesn't add any parameters to the
 callback type.  The second example adds an `int` anonymous parameter that is
-reflected in the inferred type.  Notice that the return value of this fragment
-has been inferred to be `'_a` instead of the usual `'a`.  The underscore
-denotes a _weakly polymorphic type_ which cannot be generalized further.  You
-should never see this in normal use, but you may encounter this if you define
-specifications in the top-level of a module.  You can work around this
-so-called _value restriction_ by moving the definitions under a `let` binding.
-
-One forms a command by combining a spec of type `('main, unit) Spec.t` with a
-main function of type `'main`.  All the combinators we've shown so far
-incrementally build up the type of `'main` according to the command-line
-parameters it expects, so the resulting type of `'main` is something like:
-
-```ocaml
-arg1 -> ... -> argN -> unit
-```
+reflected in the inferred type.  One forms a command by combining a spec of
+type `('main, unit) Spec.t` with a function of type `'main`.  The
+combinators we've shown so far incrementally build the type of `'main`
+according to the command-line parameters it expects, so the resulting type of
+`'main` is something like ```arg1 -> ... -> argN -> unit```.
 
 The type of `Command.basic` should make more sense now:
 
