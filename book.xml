@@ -531,13 +531,13 @@ $ utop
           peculiarity of the toplevel that is not required in
           stand-alone programs (though it is sometimes helpful to
           include <literal>;;</literal> to improve OCaml's error
-          reporting.)
+          reporting).
         </para>
       </listitem>
       <listitem>
         <para>
-          After evaluating an expression, the toplevel spits out both
-          the type of the result and the result itself.
+          After evaluating an expression, the toplevel prints both the
+          type of the result and the result itself.
         </para>
       </listitem>
       <listitem>
@@ -622,7 +622,8 @@ val square : int -&gt; int = &lt;fun&gt;
       <literal>int -&gt; int</literal> is a function type, in this case
       indicating a function that takes an <literal>int</literal> and
       returns an <literal>int</literal>. We can also write functions
-      that take multiple arguments.
+      that take multiple arguments. (Note that the following example
+      will not work if you haven't opened <literal>Core.Std</literal>.)
     </para>
     <programlisting language="ocaml">
 # let ratio x y =
@@ -634,25 +635,24 @@ val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
 </programlisting>
     <para>
       As a side note, the above is our first use of OCaml modules. Here,
-      <literal>FLoat.of_int</literal> refers to the
+      <literal>Float.of_int</literal> refers to the
       <literal>of_int</literal> function contained in the
-      <literal>FLoat</literal> module, and not, as you might expect from
+      <literal>Float</literal> module, and not, as you might expect from
       an object-oriented language, accessing a method of an object. The
       <literal>Float</literal> module in particular contains
       <literal>of_int</literal> as well as many other useful functions
       for dealing with floats.
     </para>
     <para>
-      The notation for the type-signature of a multi-argument functions
+      The notation for the type-signature of a multi-argument function
       may be a little surprising at first, but we'll explain where it
       comes from when we get to function currying in
       <xref linkend="multi-argument-functions"/>. For the
       moment, think of the arrows as separating different arguments of
       the function, with the type after the final arrow being the return
-      value of the function. Thus,
-      <literal>int -&gt; int -&gt; float</literal> describes a function
-      that takes two <literal>int</literal> arguments and returns a
-      <literal>float</literal>.
+      value. Thus, <literal>int -&gt; int -&gt; float</literal>
+      describes a function that takes two <literal>int</literal>
+      arguments and returns a <literal>float</literal>.
     </para>
     <para>
       We can even write functions that take other functions as
@@ -687,8 +687,8 @@ val even : int -&gt; bool = &lt;fun&gt;
       <literal>=</literal> in two different ways: once as the part of
       the let binding that separates the thing being defined from its
       definition; and once as an equality test, when comparing
-      <literal>x mod 2</literal> to <literal>0</literal>. These two uses
-      of <literal>=</literal> are basically unrelated.
+      <literal>x mod 2</literal> to <literal>0</literal>. These are very
+      different operations despite the fact that they share some syntax.
     </para>
     <sect2 id="type-inference">
       <title>Type inference</title>
@@ -886,9 +886,10 @@ Error: This expression has type string but an expression was expected of type
          int
 </programlisting>
       <para>
-        are compile-time errors, whereas an error that can't be caught
-        by the type system, like division by zero, leads to a runtime
-        exception.
+        are compile-time errors (because <literal>+</literal> requires
+        that both its arguments be of type <literal>int</literal>),
+        whereas errors that can't be caught by the type system, like
+        division by zero, lead to runtime exceptions.
       </para>
       <programlisting language="ocaml">
 # let is_a_multiple x y =
@@ -929,11 +930,11 @@ Exception: Division_by_zero.
 val a_tuple : int * string = (3, &quot;three&quot;)
 </programlisting>
       <para>
-        For the mathematically inclined, the <literal>*</literal>
+        (For the mathematically inclined, the <literal>*</literal>
         character is used because the set of all pairs of type
         <literal>t * s</literal> corresponds to the Cartesian product of
         the set of elements of type <literal>t</literal> and the set of
-        elements of type <literal>s</literal>.
+        elements of type <literal>s</literal>.)
       </para>
       <para>
         You can extract the components of a tuple using OCaml's pattern
@@ -1095,9 +1096,9 @@ Error: This expression has type string but an expression was expected of type
 - : int list = [1; 2; 3; 4; 5; 6]
 </programlisting>
         <para>
-          It's important to remember that this is not a constant-time
-          operation. Concatenating two lists takes time proportional to
-          the length of the first list.
+          It's important to remember that, unlike <literal>::</literal>,
+          this is not a constant-time operation. Concatenating two lists
+          takes time proportional to the length of the first list.
         </para>
       </sect3>
       <sect3 id="list-patterns-using-match">
@@ -1286,8 +1287,12 @@ _::[]
 </programlisting>
         <para>
           This indicates that we're missing a case, in particular we
-          don't handle one-element lists. That's easy enough to fix by
-          adding another case to the match:
+          don't handle one-element lists. Note how the underscore is
+          used to indicate the presence of a value without specifying
+          what that value is.
+        </para>
+        <para>
+          We can fix this warning by adding another case to the match:
         </para>
         <programlisting language="ocaml">
 # let rec destutter list =
@@ -1408,9 +1413,8 @@ val print_log_entry : Time.t option -&gt; string -&gt; unit
 </programlisting>
       <para>
         This kind of nested let binding is a common way of building up a
-        complex expression, with each <literal>let</literal> breaking
-        off and naming an individual component, and then combining them
-        in one final expression.
+        complex expression, with each <literal>let</literal> naming some
+        component, before combining them in one final expression.
       </para>
       </note>
       <para>
@@ -1468,10 +1472,16 @@ val p : point2d = {x = 3.; y = -4.}
 val magnitude : point2d -&gt; float = &lt;fun&gt;
 </programlisting>
     <para>
-      We can write the pattern match even more tersely, using what's
-      called <emphasis>field punning</emphasis>. In particular, when the
-      name of the field and the name of the variable coincide, we don't
-      have to write them both down. Thus, the magnitude function can be
+      The pattern match here binds the variable <literal>x_pos</literal>
+      to the value contained in the <literal>x</literal> field, and the
+      variable <literal>y_pos</literal> to the value in the
+      <literal>y</literal> field.
+    </para>
+    <para>
+      We can write this more tersely using what's called <emphasis>field
+      punning</emphasis>. When the name of the field and the name of the
+      variable it is bound to in the match coincide, we don't have to
+      write them both down. Using this, our magnitude function can be
       rewritten as follows.
     </para>
     <programlisting language="ocaml">
@@ -1584,7 +1594,7 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
       Functional code is the default in OCaml, with variable bindings
       and most data structures being immutable. But OCaml also has
       excellent support for imperative programming, including mutable
-      data structures like arrays and hashtables and control-flow
+      data structures like arrays and hashtables, and control-flow
       constructs like for and while loops.
     </para>
     <sect2 id="arrays">
@@ -1634,7 +1644,11 @@ val numbers : int array = [|1; 2; 3; 4|]
       <para>
         The fields in <literal>running_sum</literal> are designed to be
         easy to extend incrementally, and sufficient to compute means
-        and standard deviations, as shown below.
+        and standard deviations, as shown below. (Note that there are
+        two let-bindings in a row without a double semicolon between
+        them. That's because the double semicolon is required only to
+        tell utop to process the input, not to separate two
+        expressions.)
       </para>
       <programlisting language="ocaml">
 # let mean rsum = rsum.sum /. float rsum.samples
@@ -1780,14 +1794,13 @@ let (:=) r x = r.contents &lt;- x
     <sect2 id="for-and-while-loops">
       <title>For and while loops</title>
       <para>
-        Along with mutable data structures, OCaml gives you constructs
-        like while and for loops for interacting with them. Here, for
-        example, is some code that uses a for loop for permuting an
-        array. We use the <literal>Random</literal> module as our source
-        of randomness. <literal>Random</literal> starts out with a
-        deterministic seed, but you can call
-        <literal>Random.self_init</literal> to choose a new seed at
-        random.
+        OCaml also supports traditional imperative control-flow
+        constructs like for and while loops. Here, for example, is some
+        code for permuting an array that uses a for loop. We use the
+        <literal>Random</literal> module as our source of randomness.
+        <literal>Random</literal> starts with a default seed, but you
+        can call <literal>Random.self_init</literal> to choose a new
+        seed at random.
       </para>
       <programlisting language="ocaml">
 # let permute ar =
@@ -13477,11 +13490,10 @@ end;;
 </chapter></part><part label="II"><title>Tools and Techniques</title><chapter id="maps-and-hashtables">
   <title>Maps and Hashtables</title>
   <para>
-    Organizing data as key/value pairs representing bindings of keys to
-    values is a useful and common programming pattern. Maybe the
-    simplest way of representing a collection of bindings is as a list
-    of pairs, <emphasis>i.e.</emphasis>, an <emphasis>association
-    list</emphasis>. Thus, you could write:
+    Data is often most naturally organized as key/value pairs. Maybe the
+    simplest way of representing this in OCaml is as a list of pairs,
+    <emphasis>i.e.</emphasis>, an <emphasis>association list</emphasis>.
+    Thus, you could write:
   </para>
   <programlisting language="ocaml">
 # let digit_alist =
@@ -13490,8 +13502,8 @@ end;;
   ;;
 </programlisting>
   <para>
-    And we can use functions from the <literal>List.Assoc</literal>
-    module to manipulate such an association list.
+    We can use functions from the <literal>List.Assoc</literal> module
+    to manipulate such a list.
   </para>
   <programlisting language="ocaml">
 # List.Assoc.find digit_alist 6;;
@@ -13504,33 +13516,31 @@ end;;
  (5, &quot;five&quot;); (6, &quot;six&quot;); (7, &quot;seven&quot;); (8, &quot;eight&quot;); (9, &quot;nine&quot;)]
 </programlisting>
   <para>
-    Association lists are simple and easy to use, and have the advantage
-    of being an immutable data-structure. But the performance of
-    association lists is poor for most applications, since almost every
-    non-trivial operation on an association list requires a linear-time
-    scan of the list.
+    Association lists are simple and easy to use, but their performance
+    is poor for most applications, since almost every non-trivial
+    operation on an association list requires a linear-time scan of the
+    list.
   </para>
   <para>
     In this chapter, we'll talk about two more efficient alternatives to
     association lists: <emphasis>maps</emphasis> and
     <emphasis>hash-tables</emphasis>. A map is an immutable tree-based
-    data structure where most operations on a map are take time
-    logarithmic in the size of the map; a hash-table is a mutable data
-    structure where most operations take constant time. These are both
-    very useful and very common tools. In the following, we'll describe
-    them both in some detail, and provide some advice as to when to use
-    one or the other.
+    data structure where most operations take time logarithmic in the
+    size of the map; a hash-table is a mutable data structure where most
+    operations have constant time complexity. We'll describe both of
+    these data structures in detail, and provide some advice as to when
+    to use one or the other.
   </para>
-  <sect1 id="constructing-maps">
-    <title>Constructing maps</title>
+  <sect1 id="constructing-a-map">
+    <title>Constructing a map</title>
     <para>
-      Maps store their data in an ordered binary tree. As such you need
-      to know how to compare elements of the key type in order to
-      construct the map. Accordingly, functions for creating a map
-      require that you pass in a value of type
-      <literal>Comparator.t</literal>, which is available as part of any
-      module that satisfies Core's <literal>Comparable</literal>
-      interface. Thus, we can create a map as follows.
+      Maps are implemented as ordered binary trees, and as such you need
+      to know how to compare the keys in order to build a map on those
+      keys. Functions for creating a map require that you pass in a
+      value of type <literal>Comparator.t</literal>, which is available
+      as part of any module that satisfies Core's
+      <literal>Comparable</literal> interface. Thus, we can create a map
+      as follows.
     </para>
     <programlisting language="ocaml">
 # let digit_map = Map.of_alist_exn Int.comparator digit_alist;;
@@ -14481,27 +14491,14 @@ type ('main_in, 'main_out) t
       The empty specification is simple as it doesn't add any parameters
       to the callback type. The second example adds an
       <literal>int</literal> anonymous parameter that is reflected in
-      the inferred type. Notice that the return value of this fragment
-      has been inferred to be <literal>'_a</literal> instead of the
-      usual <literal>'a</literal>. The underscore denotes a
-      <emphasis>weakly polymorphic type</emphasis> which cannot be
-      generalized further. You should never see this in normal use, but
-      you may encounter this if you define specifications in the
-      top-level of a module. You can work around this so-called
-      <emphasis>value restriction</emphasis> by moving the definitions
-      under a <literal>let</literal> binding.
+      the inferred type. One forms a command by combining a spec of type
+      <literal>('main, unit) Spec.t</literal> with a function of type
+      <literal>'main</literal>. The combinators we've shown so far
+      incrementally build the type of <literal>'main</literal> according
+      to the command-line parameters it expects, so the resulting type
+      of <literal>'main</literal> is something like
+      <literal>arg1 -&gt; ... -&gt; argN -&gt; unit</literal>.
     </para>
-    <para>
-      One forms a command by combining a spec of type
-      <literal>('main, unit) Spec.t</literal> with a main function of
-      type <literal>'main</literal>. All the combinators we've shown so
-      far incrementally build up the type of <literal>'main</literal>
-      according to the command-line parameters it expects, so the
-      resulting type of <literal>'main</literal> is something like:
-    </para>
-    <programlisting language="ocaml">
-arg1 -&gt; ... -&gt; argN -&gt; unit
-</programlisting>
     <para>
       The type of <literal>Command.basic</literal> should make more
       sense now:
@@ -14515,12 +14512,14 @@ val basic :
     <para>
       The final line is the important one. It shows that the callback
       function for a spec should consume identical arguments to the
-      supplied <literal>main</literal> function, except that there is an
+      supplied <literal>main</literal> function, expect for an
       additional <literal>unit</literal> argument. This final
-      <literal>unit</literal> is there in case there are no command-line
-      arguments, as at least one parameter is required for the callback.
-      That's why you have to supply an additional <literal>()</literal>
-      to the callback function in the previous examples.
+      <literal>unit</literal> is there to make sure the callback is
+      evaluated as a function, since if zero command-line arguments are
+      specified (i.e. <literal>Spec.empty</literal>), the callback would
+      otherwise have no arguments and be evaluated immediately. That's
+      why you have to supply an additional <literal>()</literal> to the
+      callback function in all the previous examples.
     </para>
     </sidebar>
     <sect2 id="composing-specification-fragments-together">
@@ -14621,44 +14620,85 @@ Error: This expression has type
         The <literal>step</literal> combinator lets you control the
         normal course of parsing by supplying a function that maps
         callback arguments to a new set of values. For instance, let's
-        suppose we want our first calendar application to prompt for the
-        number of days to add if a value wasn't supplied on the
-        command-line.
+        revisit our first calendar application that added a number of
+        days onto a supplied base date.
       </para>
       <programlisting language="ocaml">
+(* cal_add.ml *)
 open Core.Std
+
+let add_days base span () =
+  Date.add_days base span
+  |&gt; Date.to_string
+  |&gt; print_endline
 
 let add =
   Command.basic
     ~summary:&quot;Add [days] to the [base] date and print day&quot;
     Command.Spec.(
-      step (fun m base days -&gt;
-        match days with
-        | Some days -&gt; m base days
-        | None -&gt;
-            print_endline &quot;enter days: &quot;;
-            m base (read_int ())
-      )
+      empty
       +&gt; anon (&quot;base&quot; %: date)
-      +&gt; anon (maybe (&quot;days&quot; %: int))
+      +&gt; anon (&quot;days&quot; %: int)
     )
-  (fun base span () -&gt;
-    Date.add_days base span
-    |&gt; Date.to_string
-    |&gt; print_endline
-  )
+    add_days
 
 let () = Command.run add
 </programlisting>
       <para>
-        There are two main changes from the simple example that accepts
-        a date and an integer. Firstly, the <literal>days</literal>
-        argument is now an optional integer instead of a required
-        argument. The <literal>step</literal> combinator takes the date
-        and days parameters, and interactively reads an integer if no
-        day value was supplied. It then returns an
-        <literal>int</literal> instead of the
-        <literal>int option</literal> that was passed in.
+        This <literal>cal_add</literal> program requires you to specify
+        both the <literal>base</literal> date and the number of
+        <literal>days</literal> to add onto it. If
+        <literal>days</literal> isn't supplied on the command-line, an
+        error is output. Now let's modify it to interactively prompt for
+        a number of days if only the <literal>base</literal> date is
+        supplied.
+      </para>
+      <programlisting language="ocaml">
+(* cal_add_interactive.ml *)
+open Core.Std
+
+let add_days base span () =
+  Date.add_days base span
+  |&gt; Date.to_string
+  |&gt; print_endline
+
+let add =
+  Command.basic
+    ~summary:&quot;Add [days] to the [base] date and print day&quot;
+    Command.Spec.( 
+      step 
+        (fun m base days -&gt;
+           match days with
+           | Some days -&gt;
+             m base days
+           | None -&gt;
+             print_endline &quot;enter days: &quot;;
+             read_int ()
+             |&gt; m base
+        )
+      +&gt; anon (&quot;base&quot; %: date)
+      +&gt; anon (maybe (&quot;days&quot; %: int))
+    )
+    add_days
+
+let () = Command.run add
+</programlisting>
+      <para>
+        The <literal>days</literal> anonymous argument is now an
+        optional integer in the spec, and we want to transform it into a
+        non-optional value before calling our
+        <literal>add_days</literal> callback. The
+        <literal>step</literal> combinator in the specification performs
+        this transformation. It applies its supplied callback function
+        first, which checks if <literal>day</literal> is defined. If
+        it's undefined, then it interactively reads an integer from the
+        standard input. The first <literal>m</literal> argument to the
+        <literal>step</literal> callback is the next callback function
+        in the chain. The transformation is completed by calling
+        <literal>m base days</literal> to continue processing with the
+        new values we've just calculated. The <literal>days</literal>
+        value that is passed onto the next callback now has a
+        non-optional <literal>int</literal> type.
       </para>
       <programlisting>
 $ cal_add_interactive 2013-12-01
@@ -14667,12 +14707,14 @@ enter days:
 2014-01-05
 </programlisting>
       <para>
-        Notice that the &quot;program logic&quot; in the final callback
-        doesn't see any of this, and is exactly the same as in our
-        original version. The <literal>step</literal> combinator has
-        transformed an <literal>int option</literal> argument into an
-        <literal>int</literal>. This is reflected in the type of the
-        specification:
+        The transformation means that the <literal>add_days</literal>
+        callback can just keep its original definition of
+        <literal>Date.t -&gt; int -&gt; unit</literal>. The
+        <literal>step</literal> function transformed the
+        <literal>int option</literal> argument from the parsing into an
+        <literal>int</literal> suitable for <literal>add_days</literal>.
+        This transformation is explicitly represented in the type of the
+        <literal>step</literal> return value:
       </para>
       <programlisting language="ocaml">
 # open Core.Std ;;
@@ -14688,43 +14730,54 @@ enter days:
       <para>
         The first half of the <literal>Spec.t</literal> shows that the
         callback type is <literal>Date.t -&gt; int</literal>, whereas
-        the resulting value that is expected from the next specification
-        in the chain is a <literal>Date.t -&gt; int option</literal>.
+        the resulting value expected from the next specification in the
+        chain is a <literal>Date.t -&gt; int option</literal>.
       </para>
     </sect2>
     <sect2 id="adding-labelled-arguments-to-callbacks">
       <title>Adding labelled arguments to callbacks</title>
       <para>
-        The <literal>step</literal> chaining combinator lets you control
-        the types of your callbacks very easily. This can either help
-        you fit in with existing interfaces, or make things more
-        explicit by adding labelled arguments.
+        The <literal>step</literal> chaining lets you control the types
+        of your callbacks very easily. This can help you match existing
+        interfaces or make things more explicit by adding labelled
+        arguments.
       </para>
       <programlisting language="ocaml">
+(* cal_add_labels.ml *)
 open Core.Std
+
+let add_days ~base_date ~num_days () =
+  Date.add_days base_date num_days
+  |&gt; Date.to_string
+  |&gt; print_endline
 
 let add =
   Command.basic
     ~summary:&quot;Add [days] to the [base] date and print day&quot;
-    Command.Spec.(
-      step (fun m base days -&gt; m ~base ~days)
+    Command.Spec.( 
+      step (fun m base days -&gt; m ~base_date:base ~num_days:days)
       +&gt; anon (&quot;base&quot; %: date)
       +&gt; anon (&quot;days&quot; %: int)
     )
-  (fun ~base ~days () -&gt;
-    Date.add_days base days
-    |&gt; Date.to_string
-    |&gt; print_endline
-  )
+  add_days
 
 let () = Command.run add
 </programlisting>
       <para>
-        This example goes back to our non-interactive calendar addition
-        program, but adds a <literal>step</literal> combinator to turn
-        the normal arguments into labelled ones. This is reflected in
-        the callback function below, and can help prevent errors with
-        command-line arguments with similar types but different names.
+        This <literal>cal_add_labels</literal> example goes back to our
+        non-interactive calendar addition program, but the
+        <literal>add_days</literal> main function now expects labelled
+        arguments. The <literal>step</literal> function in the
+        specification simply converts the default
+        <literal>base</literal> and <literal>days</literal> arguments
+        into a labelled function, and everything compiles again.
+      </para>
+      <para>
+        Labelled arguments are more verbose, but also help prevent
+        errros with command-line arguments with similar types but
+        different names and purposes. It's good form to use them when
+        you have a lot of otherwise anonymous <literal>int</literal> and
+        <literal>string</literal> arguments.
       </para>
     </sect2>
   </sect1>
@@ -23656,8 +23709,9 @@ let _ =
           loop iterates over both fields and runs a simple counter. It
           measures two things: the wallclock time that all the
           iterations take, and the number of minor garbage collections
-          that occurred during the test. The results should look
-          something like this:
+          that occurred during the test. The results are very
+          hardware-dependent, but on a modern Intel i7 processor they
+          look something like this:
         </para>
         <programlisting>
 mutable: 8.6923s (7629 minor collections)
@@ -23702,9 +23756,9 @@ immutable: 2.6186s (19073 minor collections)
         moving to the major heap every block in the minor heap that
         might be used in the future, and updating each pointer to a
         moved block to the new version of the block. A block is
-        <emphasis>live</emphasis> if is reachable by starting at some
+        <emphasis>live</emphasis> if it is reachable by starting at some
         <emphasis>root</emphasis> pointer into a block in the minor
-        heap,a nd then following pointers in blocks. There are many
+        heap, and then following pointers in blocks. There are many
         different kinds of roots:
       </para>
       <itemizedlist>
