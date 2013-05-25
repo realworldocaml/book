@@ -120,6 +120,7 @@ let from_email =
   ; "quarkcool"               (* Martin Cavaillès <quarkcool@gmail.com>*)
   ; "cstrahan"                (* Charles Strahan <charles.strahan@livingsocial.com> *)
   ; "joshmaxsilverman"        (* Josh Max Silverman <josh.silverman@gmail.com> *)
+  ; "andreas"                 (* TODO Andreas Garnæs <andreas.garnaes@gmail.com> *)
 
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
