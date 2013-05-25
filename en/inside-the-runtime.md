@@ -274,8 +274,9 @@ let _ =
 This program defines a type `t1` that is mutable, and `t2` that is immutable.
 The main loop iterates over both fields and runs a simple counter.  It measures
 two things: the wallclock time that all the iterations take, and the number of
-minor garbage collections that occurred during the test.  The results should
-look something like this:
+minor garbage collections that occurred during the test.  The results are very
+hardware-dependent, but on a modern Intel i7 processor they look something like
+this:
 
 ```
 mutable: 8.6923s (7629 minor collections)
