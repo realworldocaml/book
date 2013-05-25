@@ -308,8 +308,8 @@ be scanned.
 The goal of minor collection is to empty the minor heap by moving to the major
 heap every block in the minor heap that might be used in the future, and
 updating each pointer to a moved block to the new version of the block.  A
-block is *live* if is reachable by starting at some *root* pointer into a block
-in the minor heap,a nd then following pointers in blocks.  There are many
+block is *live* if it is reachable by starting at some *root* pointer into a block
+in the minor heap, and then following pointers in blocks.  There are many
 different kinds of roots:
 
 * OCaml stack(s)
