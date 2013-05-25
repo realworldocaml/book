@@ -62,6 +62,7 @@ let from_yminsky =
   ; "rnml"                    (* Nathan Linger <nlinger@janestreet.com> *)
   ; "msaffer"                 (* Matthew Saffer <msaffer@janestreet.com> *)
   ; "orbitz"                  (* Malcolm Matalka <mmatalka@gmail.com> *)
+  ; "aprimus"                 (* TODO: Aryeh Primus <aryeh@primusgroup.org> *)
 ]
 
 let js_interns =
