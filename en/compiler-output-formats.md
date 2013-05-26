@@ -390,9 +390,10 @@ let _ =
 ```
 
 The lambda form is the first representation that discards the OCaml type
-information.  It's quite similar to Lisp, and manipulates OCaml blocks and
-fields that should be familiar from [xref](#memory-representation-of-values).
-To see it for `pattern.ml`, compile as usual but add the `-dlambda` directive.
+information. It's begins to look like the runtime memory model from
+[xref](#memory-representation-of-values), and should be quite familiar to Lisp
+aficionados.  To see it for `pattern.ml`, compile as usual but add the
+`-dlambda` directive.
 
 ```console
 $ ocamlc -dlambda -c pattern.ml 
@@ -403,18 +404,26 @@ $ ocamlc -dlambda -c pattern.ml
     (makeblock 0)))
 ```
 
-This has no mention of modules or types any more.  The pattern match has
-turned into an integer comparison by checking the header tag of `Typedef.v`.
-Recall that variants without parameters are stored in memory as integers
-in the order which they appear.  The pattern matching engine understands
-this, and has transformed the pattern match into a single integer comparison.
-A tag of `0` is mapped to `Foo` and a non-zero value to `Bar`.
+It's not important to understand every detail of this internal form, but
+some interesting points are:
+
+* There are no mention of modules or types any more, and have been replaced by
+  references to global values instead.
+* The pattern match has turned into an integer comparison by checking 
+  the header tag of `v`.  Recall that variants without parameters are stored 
+  in memory as integers in the order which they appear.  The pattern matching 
+  engine knows this, and has transformed the pattern into a single integer
+  comparison.  If `v` has a tag of `0`, the function returns `"foo"`, and otherwise
+  returns `"bar"`.
+* The values are addressed direectly by their `field`.  The type safety checks
+  earlier have ensured that these fields will always exist, and so this untyped
+  form doesn't need to do any dynamic checks.  However, unwise use of unsafe
+  language features such as `Obj.magic` module can easily induce crashes at this
+  level.
 
 The lambda form is primarily a stepping-stone to the bytecode engine that we
-cover next.  However, it's worth examining performance-critical code at this
-level to check for any possible optimizations that the compiler missed.  It's
-often easier to look at the textual output here than work through native
-assembly code from compiled executables.
+cover next.  However, it's often easier to look at the textual output here than
+wade through native assembly code from compiled executables.
 
 TODO: mention ZINC papers here for more information?
 
