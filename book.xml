@@ -21834,9 +21834,9 @@ let () =
     Much of the static type information contained within an OCaml
     program is checked and discarded at compilation time, leaving a much
     simpler <emphasis>runtime</emphasis> representation for values.
-    Understanding the runtime memory format is important to write
-    efficient programs that are compact in memory, and understanding the
-    results of profiling tools.
+    You'll need to understand the runtime memory format in order to
+    write programs that are efficient and compact, and to to interpret
+    the output of profiling tools.
   </para>
   <para>
     In this chapter, you'll learn:
@@ -21855,7 +21855,7 @@ let () =
     </listitem>
     <listitem>
       <para>
-        The representation of the OCaml types within blocks.
+        The representation of all the OCaml types in runtime blocks.
       </para>
     </listitem>
   </itemizedlist>
@@ -22613,13 +22613,15 @@ type t = Apple | Orange of int | Pear of string | Kiwi
       <title>Polymorphic variants</title>
       <para>
         Polymorphic variants are more flexible than normal variants when
-        writing code, but can be less efficient at runtime. This is
-        because there isn't as much static compile-time information
-        available to optimise their memory layout. This isn't always the
-        case, however. A polymorphic variant without any parameters is
-        stored as an unboxed integer and so only takes up one word of
-        memory. Unlike normal variants, the integer value is determined
-        by apply a hash function to the <emphasis>name</emphasis> of the
+        writing code, but are slightly less efficient at runtime. This
+        is because there isn't as much static compile-time information
+        available to optimise their memory layout.
+      </para>
+      <para>
+        A polymorphic variant without any parameters is stored as an
+        unboxed integer and so only takes up one word of memory, just
+        like a normal variant. This integer value is determined by
+        applying a hash function to the <emphasis>name</emphasis> of the
         variant. The hash function isn't exposed directly by the
         compiler, but the <literal>type_conv</literal> library from Core
         provides an alternative implementation.
@@ -22637,25 +22639,37 @@ type t = Apple | Orange of int | Pear of string | Kiwi
         across different CPUs and host types.
       </para>
       <para>
-        Polymorphic variants use more memory space when parameters are
-        included in the datatype constructors. Normal variants use the
-        tag byte to encode the variant value, but this byte is
-        insufficient to encode the hashed value for polymoprhic
-        variants. Therefore, they must allocate a new block (with tag
-        <literal>0</literal>) and store the value in there instead. This
-        means that polymorphic variants with constructors use one word
-        of memory more than normal variant constructors.
+        Polymorphic variants use more memory space than normal variants
+        when parameters are included in the datatype constructors.
+        Normal variants use the tag byte to encode the variant value and
+        save the fields for the contents, but this single byte is
+        insufficient to encode the hashed value for polymorphic
+        variants. They must allocate a new block (with tag
+        <literal>0</literal>) and store the value in there instead.
+        Polymorphic variants with constructors thus use one word of
+        memory more than normal variant constructors.
       </para>
       <para>
-        Another inefficiency is when a polymorphic variant constructor
-        has more than one parameter. Normal variants hold parameters as
-        a single flat block with multiple fields for each entry, but
-        polymorphic variants must adopt a more flexible uniform memory
-        representation since they may be re-used in a different context.
-        They allocate a tuple block for the parameters that is pointed
-        to from the argument field of the variant. Thus, there are three
-        additional words for such variants, along with an extra memory
-        indirection due to the tuple.
+        Another inefficiency over normal variants is when a polymorphic
+        variant constructor has more than one parameter. Normal variants
+        hold parameters as a single flat block with multiple fields for
+        each entry, but polymorphic variants must adopt a more flexible
+        uniform memory representation since they may be re-used in a
+        different context across compilation units. They allocate a
+        tuple block for the parameters that is pointed to from the
+        argument field of the variant. There are thus three additional
+        words for such variants, along with an extra memory indirection
+        due to the tuple.
+      </para>
+      <para>
+        The extra space usage is generally not significant in a typical
+        application, and polymorphic variants offer a great deal more
+        flexibility than normal variants. However, if you're writing
+        code that demands high performance or must run within tight
+        memory bounds, the runtime layout is at least very predictable.
+        The OCaml compiler never switches memory representation due to
+        optimization passes. This lets you predict the precise runtime
+        layout by referring to these guidelines and your source code.
       </para>
     </sect2>
     <sect2 id="string-values">
@@ -22733,19 +22747,21 @@ type t = Apple | Orange of int | Pear of string | Kiwi
       </informaltable>
       <para>
         This string representation is a clever way to ensure that the
-        string contents are always zero-terminated by the padding word,
-        and still compute its length efficiently without scanning the
-        whole string. The following formula is used:
+        contents are always zero-terminated by the padding word, and
+        still compute its length efficiently without scanning the whole
+        string. The following formula is used:
       </para>
       <programlisting>
 number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
 </programlisting>
       <para>
-        The guaranteed NULL-termination comes in handy when passing a
-        string to C, but is not relied upon to compute the length from
-        OCaml code. Thus, OCaml strings can contain null bytes at any
-        point within the string, but care should be taken that any C
-        library functions can also cope with this.
+        The guaranteed <literal>NULL</literal>-termination comes in
+        handy when passing a string to C, but is not relied upon to
+        compute the length from OCaml code. OCaml strings can thus
+        contain <literal>NULL</literal> bytes at any point within the
+        string. Care should be taken that any C library functions that
+        receive these buffers can cope with arbitrary
+        <literal>NULL</literal> values within the buffer contents.
       </para>
     </sect2>
     <sect2 id="custom-heap-blocks">
@@ -22758,8 +22774,8 @@ number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
         size the user desires. The <literal>Custom_tag</literal> (255)
         is higher than <literal>No_scan_tag</literal> and isn't scanned
         by the garbage collector. This means that it cannot contain any
-        OCaml values, but is useful to track pointers into the external
-        C heap.
+        OCaml values, but is useful to track pointers into external
+        system memory.
       </para>
       <para>
         The first word of the data within the custom block is a C
@@ -22787,17 +22803,14 @@ struct custom_operations {
         the runtime calls just before the block is garbage collected.
         This finalizer has nothing to do with ordinary OCaml finalizers
         (as created by <literal>Gc.finalise</literal> and explained in
-        <ulink url="tuning-the-runtime">xref</ulink>). Instead, they are
-        used to call C cleanup functions such as
+        TODO. They are instead used to call C cleanup functions such as
         <literal>free</literal>.
       </para>
       <para>
-        When a custom block is allocated, you can also specify the
-        proportion of &quot;extra-heap resources&quot; consumed by the
-        block, which will affect the garbage collector's decision as to
-        how much work to do in the next major slice.
-        (<emphasis>avsm</emphasis>: TODO elaborate on this or move to
-        the C interface section)
+        A common use of custom blocks is to manage external system
+        memory directly from within OCaml, via the
+        <literal>Bigarray</literal> module. We'll cover this later on in
+        <ulink url="parsing-binary-protocols-with-bigarray">xref</ulink>.
       </para>
     </sect2>
   </sect1>
