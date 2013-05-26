@@ -22098,35 +22098,45 @@ let () =
   <sect1 id="the-representation-of-ocaml-values">
     <title>The representation of OCaml values</title>
     <para>
-      So far, we've described the overall memory layout, but not what
-      the contents of each block contains. Every OCaml variable points
-      to a <literal>value</literal> at runtime, which is a single memory
+      We've described the overall memory layout, but not what the
+      contents of each block contains. Every OCaml variable points to a
+      <literal>value</literal> at runtime. A value is a single memory
       word that is either an integer or a pointer. The OCaml runtime
       needs to understand the difference between the two so that it can
-      follow pointers, but not integers (which directly hold the value
-      and don't point to anything meaningful).
+      follow pointers to look for more values, but not integers (which
+      directly hold the value and don't point to anything meaningful).
     </para>
     <para>
-      If the lowest bit of the block word is non-zero, the value is an
-      unboxed integer. Several OCaml types map onto this integer
-      representation, including <literal>bool</literal>,
+      Values use a single tag bit the word to distinguish integers and
+      pointers at runtime. The value is an integer if the lowest bit of
+      the block word is non-zero. Several OCaml types map onto this
+      integer representation, including <literal>bool</literal>,
       <literal>int</literal>, the empty list, <literal>unit</literal>,
-      and variants without constructors. Integers are the only unboxed
-      runtime values in OCaml, which means that they can be stored
-      directly without having to allocate a wrapper structure that will
-      take up more memory. They can also be passed directly to other
-      function calls in registers, and so are generally the cheapest and
-      fastest values to use in OCaml.
+      and variants without constructors.
     </para>
     <para>
-      If the lowest bit of the <literal>value</literal> is zero, then
-      the value is a memory pointer. A pointer value is stored
-      unmodified, since pointers are guaranteed to be word-aligned and
-      so the bottom bits are always zero. If the pointer is inside a
-      memory chunk that is marked as being managed by the OCaml runtime,
-      it is assumed to point to an OCaml block (see below). If it points
-      outside the OCaml runtime area, it is is treated as an opaque C
-      pointer to some other system resource.
+      Integers are unboxed runtime values in OCaml, which means that
+      they can be stored directly without having to allocate a wrapper
+      block that will take up more memory. They can also be passed
+      directly to other function calls in registers, and are generally
+      the cheapest and fastest values to use in OCaml.
+    </para>
+    <para>
+      The value is treated as a memory pointer if the lowest bit of the
+      <literal>value</literal> is zero. A pointer value is stored
+      unmodified since pointers are guaranteed to be word-aligned with
+      the bottom bits always being zero. The next problem is
+      distinguishing between pointers to OCaml values (which should be
+      followed by the garbage collector) and C pointers (which shouldn't
+      be followed).
+    </para>
+    <para>
+      The mechanism for this is simple, since the runtime system keeps
+      track of the heap blocks it has allocated for OCaml values. If the
+      pointer is inside a heap chunk that is marked as being managed by
+      the OCaml runtime, it is assumed to point to an OCaml value. If it
+      points outside the OCaml runtime area, it is is treated as an
+      opaque C pointer to some other system resource.
     </para>
     <note>
     <title>
@@ -22156,11 +22166,10 @@ let () =
       representation. Since the bottom bit is set, any operation on the
       integer has to shift the bottom bit right to recover the
       &quot;native&quot; value. The native code OCaml compiler generates
-      very efficient x86 assembly code in this case, and takes advantage
-      of modern processor instructions to either hide the extra work, or
-      get it for free from the instruction set. Addition and
-      substraction are a single instruction, and multiplication is only
-      a few more.
+      efficient x86 assembly code in this case. It takes advantage of
+      modern processor instructions to hide the extra shifts as much as
+      possible. Addition and substraction are a single instruction, and
+      multiplication is only a few more.
     </para>
     </note>
     <sect2 id="blocks-and-values">
