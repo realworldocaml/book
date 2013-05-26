@@ -2,15 +2,15 @@
 
 Much of the static type information contained within an OCaml program is
 checked and discarded at compilation time, leaving a much simpler *runtime*
-representation for values.  Understanding the runtime memory format is
-important to write efficient programs that are compact in memory, and
-understanding the results of profiling tools.
+representation for values.  You'll need to understand the runtime memory format
+in order to write programs that are efficient and compact, and to to interpret
+the output of profiling tools.
 
 In this chapter, you'll learn:
 
 * The architecture of the OCaml garbage collector.
 * The layout of OCaml values as blocks within the major and minor heaps.
-* The representation of the OCaml types within blocks.
+* The representation of all the OCaml types in runtime blocks.
 
 This chapter is primarily informational, but it helps to know all this
 to understand the compilation process in [xref](#compiler-output-formats),
@@ -451,14 +451,14 @@ high numbered tags are reserved.
 ### Polymorphic variants
 
 Polymorphic variants are more flexible than normal variants when writing code,
-but can be less efficient at runtime. This is because there isn't as much
+but are slightly less efficient at runtime. This is because there isn't as much
 static compile-time information available to optimise their memory layout.
-This isn't always the case, however.  A polymorphic variant without any
-parameters is stored as an unboxed integer and so only takes up one word of
-memory. Unlike normal variants, the integer value is determined by apply a hash
-function to the *name* of the variant.  The hash function isn't exposed
-directly by the compiler, but the `type_conv` library from Core provides an
-alternative implementation.
+
+A polymorphic variant without any parameters is stored as an unboxed integer
+and so only takes up one word of memory, just like a normal variant.  This
+integer value is determined by applying a hash function to the *name* of the
+variant.  The hash function isn't exposed directly by the compiler, but the
+`type_conv` library from Core provides an alternative implementation.
 
 ```ocaml
 # #require "type_conv" ;;
