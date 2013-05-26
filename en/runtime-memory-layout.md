@@ -16,10 +16,11 @@ This chapter is primarily informational, but it helps to know all this
 to understand the compilation process in [xref](#compiler-output-formats),
 handling external memory in [xref](#parsing-binary-protocols-with-bigarray),
 or tracing and profiling your programs in [xref](#understanding-the-garbage-collector).
+
 You might also want to interface with the OCaml C runtime directly instead of
-using the simpler `ctypes` library described in
-[xref](#foreign-function-interface).  This could be for performance reasons or a
-more specialised embedded or kernel execution environment.
+using the simpler `ctypes` library described earlier in
+[xref](#foreign-function-interface).  This could be for performance reasons or
+a more specialised embedded or kernel execution environment.
 
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
