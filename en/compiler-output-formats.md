@@ -417,7 +417,7 @@ some interesting points are:
   engine knows this, and has transformed the pattern into a single integer
   comparison.  If `v` has a tag of `0`, the function returns `"foo"`, and otherwise
   returns `"bar"`.
-* Values are addressed directly by an index and `field (`v` got assigned to `1008`
+* Values are addressed directly by an index and `field` (`v` got assigned to `1008`
   during type checking).  The type safety checks earlier have ensured that these
   fields will always exist, and so the lambda form doesn't do any dynamic checks.
   However, unwise use of unsafe language features such as `Obj.magic` module can
