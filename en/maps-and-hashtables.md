@@ -1,9 +1,10 @@
 # Maps and Hashtables
 
-Data is often most naturally organized as key/value pairs.  Maybe the
-simplest way of representing this in OCaml is as a list of pairs,
-_i.e._, an _association list_.  Thus, you could represent a mapping
-between the 10 digits and their English names as follows.
+Many problems solve for representing data as key/value pairs.  Maybe
+the simplest way of doing so in OCaml is an _association list_,
+_i.e._, a list of pairs of keys and values.  For example, you could
+represent a mapping between the 10 digits and their English names as
+follows.
 
 ```ocaml
 # let digit_alist =
@@ -12,8 +13,8 @@ between the 10 digits and their English names as follows.
   ;;
 ```
 
-We can use functions from the `List.Assoc` module to manipulate such a
-list.
+We can use functions from the `List.Assoc` module to manipulate such
+an association list.
 
 ```ocaml
 # List.Assoc.find digit_alist 6;;
@@ -27,23 +28,23 @@ list.
 ```
 
 Association lists are simple and easy to use, but their performance is
-poor for most applications, since almost every non-trivial operation
-on an association list requires a linear-time scan of the list.
+not ideal, since almost every non-trivial operation on an association
+list requires a linear-time scan of the list.
 
 In this chapter, we'll talk about two more efficient alternatives to
 association lists: _maps_ and _hash-tables_.  A map is an immutable
 tree-based data structure where most operations take time logarithmic
-in the size of the map; a hash-table is a mutable data structure where
-most operations have constant time complexity.  We'll describe both of
-these data structures in detail, and provide some advice as to when to
-use one or the other.
+in the size of the map, whereas a hash-table is a mutable data
+structure where most operations have constant time complexity.  We'll
+describe both of these data structures in detail, and provide some
+advice as to how to choose between them.
 
 ## A map example
 
 Let's start by considering an example of how one might use a map in
 practice.  In [xref](#files-modules-and-programs), we showed a module
-for keeping a count of the number of times a given string showed up in
-a file.  Here's the interface that this module provided:
+`Counter` for keeping counts on a set of strings.  Here's the
+interface.
 
 ```ocaml
 (* counter.mli *)
@@ -59,7 +60,7 @@ val touch : t -> string -> t
 The intended behavior here is straightforward.  `Counter.empty`
 represents an empty collection of counts; `touch` increments the count
 of the specified string by 1; and `to_list` returns the list of
-non-zero string counts.
+non-zero string/count pairs.
 
 Here's the implementation.
 
@@ -80,16 +81,22 @@ let touch t s =
 
 Note that in some places the above code refers to `String.Map.t`, and
 in others `Map.t`.  This has to do with the fact that maps are
-implemented as ordered binary trees, and as such you need some way to
-compare keys in order to build a map.  The `Map` sub-module of
-`String` contains versions of the map creation functions that are
-specialized to strings, and that in particular know how to compare
-strings.  This `Map` sub-module is available in any module that
-satisfied the `Comparable` interface from Core.
+implemented as ordered binary trees, and as such, maps need a way of
+comparing keys.  To deal with this, a map actually stores the
+necessary comparison function within the data structure.
 
-Once them map is created, it's fully polymorphic, which means that we
-can use the accessor functions from the `Map` module on a map with
-keys of any type.
+Thus, operations that merely access the contents of an existing map,
+like `Map.find`, do so by using the comparison function embedded
+within the map.  Similarly, functions that generate a new map from an
+old one, like `Map.add`, do the same.  
+
+But in order to get a map in the first place, you need to get your
+hands on the comparison function.  For this reason, modules like
+`String` contain a `Map` sub-module that have values like
+`String.Map.empty` and `String.Map.of_alist` that are specialized to
+strings, and that in particular know how to compare strings.  Such a
+`Map` sub-module is included in any module that satisfies the
+`Comparable` interface from Core.
 
 ## Creating maps with comparators
 
@@ -120,16 +127,10 @@ inherit the comparator of the map they start with.
 val zilch_map : (int, string, Int.comparator) Map.t = <abstr>
 ```
 
-Note that the type `Map.t` has three type parameters: one for the key,
-one for the value, and one to identify the comparator used to build
-the map.  This isn't really a new type: `'a Int.Map.t` is just a type
-alias for `(int,'a,Int.comparator) Map.t`, as you can see by applying
-a type constraint to `digit_map`.
-
-```ocaml
-# (digit_map : _ Int.Map.t);;
-- : string Int.Map.t = <abstr>
-```
+The type `Map.t` has three type parameters: one for the key, one for
+the value, and one to identify the comparator used to build the map.
+The type `'a Int.Map.t` is actually just a type alias for
+`(int,'a,Int.comparator) Map.t`
 
 Including the comparator in the type is important because because
 operations that work on multiple maps at the same time often require
@@ -151,9 +152,9 @@ val diff :
 
 If we look at the type of `Map.symmetric_diff`, we'll see that it
 requires that the two maps it compares have the same comparator type,
-in addition to the same key type and value type.  Each comparator is
-created along with a fresh type, so the type of a comparator
-identifies it uniquely.
+in addition to the same key type and value type.  Each comparator has
+a fresh abstract type, so the type of a comparator identifies it
+uniquely.
 
 ```ocaml
 # Map.symmetric_diff;;
@@ -189,10 +190,6 @@ module Reverse :
   end
 ```
 
-Note that the type `comparator` is a new abstract type, and so can't
-be confused with a different comparator, even if the comparator
-applies to the same underlying type.
-
 Both `Reverse.comparator` and `String.comparator` can be used to
 create string maps.
 
@@ -203,13 +200,20 @@ val alist : (string * int) list = [("foo", 0); ("snoo", 3)]
 val ord_map : (string, int, String.comparator) Map.t = <abstr>
 # let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
 val rev_map : (string, int, Reverse.comparator) Map.t = <abstr>
+```
+
+And if we use `Map.min_elt`, that returns the key and value for the
+smallest key in the map, we can see that these two maps indeed do use
+different comparison fucntions.
+
+```ocaml
 # Map.min_elt ord_map;;
 - : (string * int) option = Some ("foo", 0)
 # Map.min_elt rev_map;;
 - : (string * int) option = Some ("snoo", 3)
 ```
 
-Now, if we try to compute the symmetric diff of these two maps, the
+If we try to compute the symmetric diff of these two maps, the
 compiler will reject it as a type error.
 
 ```ocaml
