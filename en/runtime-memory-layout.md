@@ -13,12 +13,12 @@ In this chapter, you'll learn:
 * The representation of the OCaml types within blocks.
 
 This chapter is primarily informational, but it helps to know all this
-to understand the compilation process in [xref](compiler-output-formats),
-handling external memory in [xref](parsing-binary-protocols-with-bigarray),
-or tracing and profiling your programs in [xref](understanding-the-runtime).
+to understand the compilation process in [xref](#compiler-output-formats),
+handling external memory in [xref](#parsing-binary-protocols-with-bigarray),
+or tracing and profiling your programs in [xref](#understanding-the-garbage-collector).
 You might also want to interface with the OCaml C runtime directly instead of
 using the simpler `ctypes` library described in
-[xref](foreign-function-interface).  This could be for performance reasons or a
+[xref](#foreign-function-interface).  This could be for performance reasons or a
 more specialised embedded or kernel execution environment.
 
 <note>
@@ -41,7 +41,7 @@ method call.  Those languages amortize some of the cost via "Just-in-Time"
 dynamic patching, but OCaml prefers runtime simplicity instead.
 
 We'll talk more about the compilation process in
-[xref](compiler-output-formats).
+[xref](#compiler-output-formats).
 
 </note>
 
@@ -132,31 +132,31 @@ heap.
 OCaml maintains a set of such *inter-generational pointers*, and the compiler
 introduces a write barrier to update this set whenever a major-heap block is
 modified to point at a minor-heap block. We'll talk more about the implications
-of the write barrier in [xref](inside-the-runtime).
+of the write barrier in [xref](#understanding-the-garbage-collector).
 
 ### The long-lived major heap
 
 The major heap consists of any number of non-contiguous chunks of virtual
 memory, each containing live blocks interspersed with regions of free memory.
-The runtime system maintains a free list data structure that indexes all the
-free memory, and this list is used to satisfy allocation requests for OCaml
-blocks.  The major heap is cleaned via a mark and sweep garbage collection
-algorithm.
+The runtime system maintains a free-list data structure that indexes all the
+free memory. This list is used to satisfy allocation requests for OCaml blocks.
+The major heap is typically much larger than the minor heap, and is cleaned via
+a mark-and-sweep garbage collection algorithm.
 
 * The *mark* phase traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
 * The *sweep* phase sequentially scans the heap chunks and identifies dead blocks that weren't marked earlier.
-* The *compact* phase moves live blocks to eliminate the gaps of free memory into a freshly allocated heap, and ensures that memory does not fragment in long-lived programs.
+* The *compact* phase moves live blocks to eliminate the gaps of free memory into a freshly allocated heap. This prevents heap blocks fragmenting in long-lived programs.
 
 A major heap garbage collection must *stop the world* (that is, halt the
 application) in order to ensure that blocks can be safely moved around without
-this move being observed by the live application. The mark and sweep phases run
-incrementally over slices of memory, and are broken up into a number of steps
-that are interspersed with the running OCaml program.  Only the compaction
-phase touches all the memory in one go, and is a relatively rare operation.
+this move being observed by the live application. The mark-and-sweep phases run
+incrementally over slices of memory to avoid pausing the application for long
+periods of time.  Only the compaction phase touches all the memory in one go,
+and is a relatively rare operation.
 
 The `Gc` module lets you control all these parameters from your application.
 Although the defaults are usually sensible, understanding them and tuning them
-is an important concern we will discuss later in [xref](tuning-and-profiling).
+is an important concern we will discuss later in [xref](#understanding-the-garbage-collector).
 
 ## The representation of OCaml values
 
@@ -233,7 +233,7 @@ process described earlier.
 The size field records the length of the block in memory words. Note that it is
 limited to 22-bits on 32-bit platforms, which is the reason why OCaml strings
 are limited to 16MB on that architecture. If you need bigger strings, either
-switch to a 64-bit host, or use the `Bigarray` module described in [xref](managing-external-memory-with-bigarrays).  The
+switch to a 64-bit host, or use the `Bigarray` module described in [xref](#parsing-binary-protocols-with-bigarray).  The
 2-bit color field is used by the garbage collector to keep track of its
 state during mark-and-sweep, and is not exposed directly to OCaml programs.
 
