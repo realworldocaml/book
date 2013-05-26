@@ -70,10 +70,10 @@ keywords (or indeed, any portion of the input program) into conventional OCaml
 code that can be understood by the rest of the compiler.  We've already seen
 several examples of using `camlp4` within Core:
 
-* **Sexplib** to convert types to s-expressions in [xref](#data-serialization-with-s-expressions)
-* **Bin_prot**: for efficient binary conversion in [xref](#fast-binary-serialization).
 * **Fieldslib** to generates first-class values that represent fields of
   a record in [xref](#records).
+* **Sexplib** to convert types to s-expressions in [xref](#data-serialization-with-s-expressions)
+* **Bin_prot**: for efficient binary conversion in [xref](#fast-binary-serialization).
 
 These all use a common `camlp4` library called `type_conv` to provide a common
 extension point.  Type_conv defines a new keyword `with` that can appear after
