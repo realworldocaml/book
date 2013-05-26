@@ -23376,14 +23376,231 @@ $ ocamlc -dlambda -c pattern.ml
         the textual output here than wade through native assembly code
         from compiled executables.
       </para>
-      <para>
-        TODO: mention ZINC papers here for more information?
-      </para>
     </sect2>
-    <sect2 id="bytecode-and-ocamlrun">
-      <title>Bytecode and <literal>ocamlrun</literal></title>
+    <sect2 id="bytecode-with-ocamlc-and-ocamlrun">
+      <title>Bytecode with <literal>ocamlc</literal> and
+      <literal>ocamlrun</literal></title>
       <para>
+        After the lambda form has been generated, we are very close to
+        having executable code. The OCaml tool-chain branches into two
+        separate compilers at this point. We'll describe the the
+        <literal>ocamlc</literal> bytecode compiler first, which
+        consists of two pieces:
       </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>ocamlc</literal> compiles files into a simple
+            bytecode that is a close mapping to the lambda form.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>ocamlrun</literal> is a portable interpreter that
+            executes the bytecode.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        <literal>ocamlrun</literal> is an interpreter that uses the
+        OCaml stack and an accumulator to store values, and only has
+        seven registers in total (the program counter, stack pointer,
+        accumulator, exception and argument pointers, and environment
+        and global data). It implements around 140 opcodes which form
+        the OCaml program. The full details of the opcodes are available
+        <ulink url="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</ulink>.
+      </para>
+      <para>
+        The big advantage of using <literal>ocamlc</literal> is
+        simplicity, portability and compilation speed. The mapping from
+        the lambda form to bytecode is straightforward, and this results
+        in predictable (but slow) execution speed.
+      </para>
+      <sect3 id="compiling-and-linking-ocaml-bytecode">
+        <title>Compiling and linking OCaml bytecode</title>
+        <para>
+          <literal>ocamlc</literal> compiles individual
+          <literal>ml</literal> files into bytecode
+          <literal>cmo</literal> files. These are linked together with
+          the OCaml standard library to produce an executable program.
+          The order in which <literal>.cmo</literal> arguments are
+          presented on the command line defines the order in which
+          compilation units are initialized at runtime (recall that
+          OCaml has no single <literal>main</literal> function like C
+          does).
+        </para>
+        <para>
+          A typical OCaml library consists of multiple modules (and
+          hence multiple <literal>cmo</literal> files).
+          <literal>ocamlc</literal> can combine these into a single
+          <literal>cma</literal> bytecode archive by using the
+          <literal>-a</literal> flag. The objects in the library are
+          linked as regular <literal>cmo</literal> files in the order
+          specified when the library file was built. However, if an
+          object file within the library isn't referenced elsewhere in
+          the program, it is not linked unless the
+          <literal>-linkall</literal> flag forces it to be included.
+          This behaviour is analogous to how C handles object files and
+          archives (<literal>.o</literal> and <literal>.a</literal>
+          respectively).
+        </para>
+        <para>
+          The bytecode runtime comprises three main parts: the bytecode
+          interpreter, garbage collector, and a set of C functions that
+          implement the primitive operations. Bytecode instructions are
+          provided to call these C functions. The OCaml linker produces
+          bytecode for the standard runtime system by default, and any
+          custom C functions in your code (e.g. from C bindings) require
+          the runtime to dynamically load a shared library.
+        </para>
+        <para>
+          This can be specified as follows:
+        </para>
+        <programlisting>
+$ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
+</programlisting>
+        <para>
+          The <literal>dllib</literal> flag embeds the arguments in the
+          archive file. Any subsequent packages including this archive
+          will also include the extra linking directive. This lets the
+          <literal>ocamlrun</literal> runtime locate the extra symbols
+          when it executes the bytecode.
+        </para>
+        <para>
+          You can also generate a complete standalone executable that
+          bundles the <literal>ocamlrun</literal> interpreter with the
+          bytecode in a single binary. This is known as the
+          &quot;custom&quot; runtime mode, and can be run by:
+        </para>
+        <programlisting>
+$ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
+</programlisting>
+        <para>
+          The custom mode is the most similar to native code
+          compilation, as both generate standalone executables. There
+          are quite a few other options available for compiling bytecode
+          (notably with shared libraries or building custom runtimes).
+          Full details can be found in the
+          <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html">manual</ulink>.
+        </para>
+      </sect3>
+      <sect3 id="embedding-ocaml-bytecode">
+        <title>Embedding OCaml bytecode</title>
+        <para>
+          A consequence of using the bytecode compiler is that the final
+          link phase must be performed by <literal>ocamlc</literal>.
+          However, you might sometimes want to embed your OCaml code
+          inside an existing C application. OCaml also supports this
+          mode of operation via the <literal>-output-obj</literal>
+          directive.
+        </para>
+        <para>
+          This mode causes <literal>ocamlc</literal> to output a C
+          object file that containing the bytecode for the OCaml part of
+          the program, as well as a <literal>caml_startup</literal>
+          function. The object file can then be linked with other C code
+          using the standard C compiler, or even turned in a standalone
+          C shared library.
+        </para>
+        <para>
+          The bytecode runtime library is installed as
+          <literal>libcamlrun</literal> in the standard OCaml directory
+          (obtained by <literal>ocamlc -where</literal>). Creating an
+          executable just requires you to link the runtime library with
+          the bytecode object file. Here's a quick example to show how
+          it all fits together.
+        </para>
+        <para>
+          Create two OCaml source files that contain a single print
+          line.
+        </para>
+        <programlisting>
+$ cat embed_me1.ml 
+let () = print_endline &quot;hello embedded world 1&quot;
+$ cat embed_me2.ml 
+let () = print_endline &quot;hello embedded world 2&quot;
+</programlisting>
+        <para>
+          Next, create a C file which will be your main entry point.
+        </para>
+        <programlisting language="c">
+/* main.c */
+#include &lt;stdio.h&gt;
+#include &lt;caml/alloc.h&gt;
+#include &lt;caml/mlvalues.h&gt;
+#include &lt;caml/memory.h&gt;
+#include &lt;caml/callback.h&gt;
+
+int 
+main (int argc, char **argv)
+{
+  puts(&quot;Before calling OCaml&quot;);
+  caml_startup (argv);
+  puts(&quot;After calling OCaml&quot;);
+  return 0;
+}
+</programlisting>
+        <para>
+          Now compile the OCaml files into a standalone object file.
+        </para>
+        <programlisting>
+$ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
+</programlisting>
+        <para>
+          After this point, you no longer need the OCaml compiler, as
+          <literal>embed_out.o</literal> has all of the OCaml code
+          compiled and linked into a single object file. Compile an
+          output binary using gcc to test this out.
+        </para>
+        <programlisting>
+$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lcamlrun -ltermcap \
+  -o final_out embed_out.o main.c
+$ ./final_out 
+Before calling OCaml
+hello embedded world 1
+hello embedded world 2
+After calling OCaml
+</programlisting>
+        <para>
+          Once inconvenience with <literal>gcc</literal> is that you
+          need to specify the location of the OCaml library directory.
+          The OCaml compiler can actually handle C object and source
+          files, and it adds the <literal>-I</literal> and
+          <literal>-L</literal> directives for you. You can compile the
+          previous object file with <literal>ocamlc</literal> to try
+          this.
+        </para>
+        <programlisting>
+$ ocamlc -o final_out2 embed_out.o main.c
+$ ./final_out2
+Before calling OCaml
+hello embedded world 1
+hello embedded world 2
+After calling OCaml
+</programlisting>
+        <para>
+          You can also verify the system commands that
+          <literal>ocamlc</literal> is invoking by adding
+          <literal>-verbose</literal> to the command line. You can even
+          obtain the source code to the <literal>-output-obj</literal>
+          result by specifying a <literal>.c</literal> output file
+          extension instead of the <literal>.o</literal> we used
+          earlier.
+        </para>
+        <programlisting>
+$ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
+$ cat embed_out.c
+</programlisting>
+        <para>
+          Embedding OCaml code like this lets you write OCaml code that
+          interfaces with any environment that works with a C compiler.
+          You can even cross back from the C code into OCaml by using
+          the <literal>Callback</literal> module to register named entry
+          points in the OCaml code. This is explained in detail in the
+          <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149">interfacing
+          with C</ulink> section of the OCaml manual.
+        </para>
+      </sect3>
     </sect2>
     <sect2 id="native-code-generation">
       <title>Native code generation</title>
