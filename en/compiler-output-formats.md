@@ -634,6 +634,62 @@ TODO add example of gdb breakpoint use
 
 TODOs
 
+#### Embedding native code in libraries
+
+The native code compiler also supports `output-obj` operation just like the
+bytecode compiler.  The native code runtime is called `libasmrun.a`, and should
+be linked instead of the bytecode `libcamlrun.a`.
+
+Try this out using the same files from the bytecode embedding example earlier.
+
+```console
+$ ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml
+$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lasmrun -ltermcap \
+  -o final_out_native embed_native.o main.c
+./final_out_native
+Before calling OCaml
+hello embedded world 1
+hello embedded world 2
+After calling OCaml
+```
+
+The `embed_native.o` is a standalone object file that has no further references
+to OCaml code beyond the runtime library, just as with the bytecode runtime.
+
+<tip>
+<title>Activating the debug runtime</title>
+
+Despite your best efforts, it is easy to introduce a bug into C bindings that
+cause heap invariants to be violated.  OCaml includes a variant of the runtime
+library `libasmrun.a` that is compiled with debugging symbols.  This is
+available as `libasmrund.a` and includes extra memory integrity checks upon
+every garbage collection cycle.  Running these often will abort the program
+near the point of corruption and helps isolate the bug.
+
+To use this debug library, just link with `-runtime-variant d` set:
+
+```
+$ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
+$ ./hello 
+### OCaml runtime: debug mode ###
+Initial minor heap size: 2048k bytes
+Initial major heap size: 992k bytes
+Initial space overhead: 80%
+Initial max overhead: 500%
+Initial heap increment: 992k bytes
+Initial allocation policy: 0
+Hello OCaml World!
+```
+
+If you get an error that `libasmrund.a` is not found, then this is probably
+because you're using OCaml 4.00 and not 4.01.  It's only installed by default
+in the very latest version, which you should be using via the `4.01.0dev+trunk`
+OPAM switch.
+
+</tip>
+
+
+
 ## Interfacing with C
 
 Now that you understand the runtime structure of the garbage collector, you can
@@ -731,37 +787,6 @@ You must be *very* careful that the value you return from the C function
 corresponds exactly to the memory representation of the types you declared
 earlier in the `external` declaration of the ML file, or else heap carnage and
 corruption will ensure.
-
-<tip>
-<title>Activating the debug runtime</title>
-
-Despite your best efforts, it is easy to introduce a bug into C bindings that
-cause heap invariants to be violated.  OCaml includes a variant of the runtime
-library that is compiled with debugging symbols, and includes regular memory
-integrity checks upon every garbage collection.  Running these often will abort
-the program near the point of corruption and helps track it down quickly.
-
-To use this, just recompile with `-runtime-variant d` set:
-
-```
-$ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
-$ ./hello 
-### OCaml runtime: debug mode ###
-Initial minor heap size: 2048k bytes
-Initial major heap size: 992k bytes
-Initial space overhead: 80%
-Initial max overhead: 500%
-Initial heap increment: 992k bytes
-Initial allocation policy: 0
-Hello OCaml World!
-```
-
-If you get an error that `libasmrund.a` is not found, then this is probably
-because you're using OCaml 4.00 and not 4.01.  It's only installed by default
-in the very latest version, which you should be using via the `4.01.0dev+trunk`
-OPAM switch.
-
-</tip>
 
 ### Converting from OCaml values in C
 
