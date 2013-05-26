@@ -390,7 +390,7 @@ let _ =
 ```
 
 The lambda form is the first representation that discards the OCaml type
-information. It's begins to look like the runtime memory model from
+information and begins to look like the runtime memory model from
 [xref](#memory-representation-of-values), and should be quite familiar to Lisp
 aficionados.  To see it for `pattern.ml`, compile as usual but add the
 `-dlambda` directive.
@@ -428,6 +428,8 @@ wade through native assembly code from compiled executables.
 TODO: mention ZINC papers here for more information?
 
 ### Bytecode and `ocamlrun`
+
+
 
 ### Native code generation
 
