@@ -13,7 +13,7 @@ In this chapter, you'll learn:
 * The representation of all the OCaml types in runtime blocks.
 
 This chapter is primarily informational, but it helps to know all this
-to understand the compilation process in [xref](#compiler-output-formats),
+to understand the compilation process in [xref](#the-compilation-pipeline),
 handling external memory in [xref](#parsing-binary-protocols-with-bigarray),
 or tracing and profiling your programs in [xref](#understanding-the-garbage-collector).
 
@@ -42,7 +42,7 @@ method call.  Those languages amortize some of the cost via "Just-in-Time"
 dynamic patching, but OCaml prefers runtime simplicity instead.
 
 We'll talk more about the compilation process in
-[xref](#compiler-output-formats).
+[xref](#the-compilation-pipeline).
 
 </note>
 
@@ -573,4 +573,4 @@ functions such as `free`.
 
 A common use of custom blocks is to manage external system memory directly
 from within OCaml, via the `Bigarray` module. We'll cover this later on
-in [xref](parsing-binary-protocols-with-bigarray).
+in [xref](#parsing-binary-protocols-with-bigarray).
