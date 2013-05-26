@@ -22300,11 +22300,11 @@ let () =
           <tbody>
             <row>
               <entry>
-                <literal>int</literal> or <literal>char</literal> dire
+                <literal>int</literal> or <literal>char</literal>
               </entry>
               <entry>
-                ctly as a value, shifted left by 1 bit, with the least
-                significant bit set to 1
+                directly as a value, shifted left by 1 bit, with the
+                least significant bit set to 1
               </entry>
             </row>
             <row>
