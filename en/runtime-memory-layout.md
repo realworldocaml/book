@@ -472,20 +472,30 @@ The hash function is designed to give the same results on 32-bit and 64-bit
 architectures, so the memory representation is stable across different CPUs and
 host types.
 
-Polymorphic variants use more memory space when parameters are included in the
-datatype constructors.  Normal variants use the tag byte to encode the variant
-value, but this byte is insufficient to encode the hashed value for polymoprhic
-variants.  Therefore, they must allocate a new block (with tag `0`) and store
-the value in there instead. This means that polymorphic variants with
-constructors use one word of memory more than normal variant constructors.
+Polymorphic variants use more memory space than normal variants when parameters
+are included in the datatype constructors.  Normal variants use the tag byte to
+encode the variant value and save the fields for the contents, but this single
+byte is insufficient to encode the hashed value for polymorphic variants.  They
+must allocate a new block (with tag `0`) and store the value in there instead.
+Polymorphic variants with constructors thus use one word of memory more than
+normal variant constructors.
 
-Another inefficiency is when a polymorphic variant constructor has more than
-one parameter.  Normal variants hold parameters as a single flat block with
-multiple fields for each entry, but polymorphic variants must adopt a more
-flexible uniform memory representation since they may be re-used in a different
-context. They allocate a tuple block for the parameters that is pointed to from
-the argument field of the variant. Thus, there are three additional words for
-such variants, along with an extra memory indirection due to the tuple.
+Another inefficiency over normal variants is when a polymorphic variant
+constructor has more than one parameter.  Normal variants hold parameters as a
+single flat block with multiple fields for each entry, but polymorphic variants
+must adopt a more flexible uniform memory representation since they may be
+re-used in a different context across compilation units. They allocate a tuple
+block for the parameters that is pointed to from the argument field of the
+variant. There are thus three additional words for such variants, along with
+an extra memory indirection due to the tuple.
+
+The extra space usage is generally not significant in a typical application,
+and polymorphic variants offer a great deal more flexibility than normal
+variants.  However, if you're writing code that demands high performance or
+must run within tight memory bounds, the runtime layout is at least very
+predictable.  The OCaml compiler never switches memory representation due to
+optimization passes. This lets you predict the precise runtime layout by
+referring to these guidelines and your source code.
 
 ### String values
 
