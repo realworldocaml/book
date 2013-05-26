@@ -198,18 +198,19 @@ let () =
   endwin ()
 ```
 
-This code can be compiled by linking against the `ctypes` and `unix` ocamlfind packages.
+This code can be compiled by linking against the `ctypes` and `unix` ocamlfind
+packages.
 
 ```console
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
   -cclib -lncurses ncurses.mli ncurses.ml hello.ml -o hello
 ```
 
-Running `./hello` should now display a Hello World in your terminal with a box
-around the "World"!  The compilation line  includes `-cclib -lncurses` to tell
-the OCaml compiler to link the output binary to the `ncurses` C library, which
-in turns makes the symbols available to the program when it starts.  If you
-omit that line, you'll get an error when you try to run the binary:
+Running `./hello` should now display a Hello World in your terminal!  The
+compilation line above includes `-cclib -lncurses` to make the OCaml compiler
+link the output to the `ncurses` C library, which in turns makes the C symbols
+available to the program when it starts.  You should get an
+error when you run the binary if you omit that link directive.
 
 ```console
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
@@ -220,11 +221,12 @@ Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not fou
 
 ## Defining basic C formats from OCaml
 
-The `Ctypes` library provides an `FFi.C` module that lets you describe not only
-basic C types, but also more complex structures and unions.  It defines
-abstract OCaml types for all of these in `FFi.C`:
+`Ctypes` provides an `Ffi.C` module that lets you describe not only basic C
+types, but also more complex structures and unions.  It defines abstract OCaml
+types for these within the module.
 
 ```ocaml
+(* Ctypes.Ffi.C *)
 type 'a typ        (** Basic C type  *)
 type 'a ptr        (** C pointer *)
 type 'a array      (** C array of 'a values *)
@@ -233,10 +235,12 @@ type 'a union      (** C `union` *)
 type 'a abstract   (** Abstract C pointer *)
 ```
 
-The `Ffi.C.Type` module defines constructors for the familiar C basic types and
-lets you build `'a typ` values.
+The module also defines constructors for the familiar C basic types.
+These constructors build a value of `Ctype.FFi.C.typ` that represents
+that basic C type.
 
 ```ocaml
+(* Ctypes.Ffi.C 1/3 *)
 module Type : sig
   type 'a t = 'a typ 
   
@@ -257,32 +261,43 @@ module Type : sig
 ...
 ```
 
-These functions all return an `'a typ`, where the `'a` component is the OCaml
+These functions return an `'a typ` where the `'a` component is the OCaml
 representation of the C type. For example, OCaml only supports double-precision
-floating point numbers, and so both of the C `float` and `double` functions map
-to the OCaml `float` type.  The `Ffi.Unsigned` and `Ffi.Signed` modules provide
-some optimized implementations of specific C types, such as `llong` (for `long
-long` 64-bit values).
+floating point numbers and so the C `float` and `double` functions both map to
+the OCaml `float` type.
 
-The module also defines some more advanced C types
+The `Ffi.Unsigned` and `Ffi.Signed` modules provide optimized implementations
+of C types such as `llong` (for `long long` 64-bit values) or `int32_t` (for
+signed 32-bit values).
+The module also defines some more advanced C types that aren't straightforward
+mappings to and from OCaml.
 
 ```ocaml   
-... 
+(* Ctypes.Ffi.C 2/3 *)
   val string : string t
   val abstract : size:int -> alignment:int -> 'a abstract t
   val array : int -> 'a t -> 'a array t
   val ptr : 'a t -> 'a ptr t
 ```
 
-Strings in C are null-terminator character arrays, whereas OCaml strings have a
-fixed-length and can contain null values. The `string` mapping safely copies
-between these two strings.  if you need an abstract C type (for example, from a
-forward declaration of a `struct`), then just define an `abstract t`.  Arrays
-and pointers can be built out of primitive types by using the corresponding
-constructor functions.
+Strings in C are null-terminated character arrays, while OCaml strings have a
+fixed-length specified in the value header. The `string` function creates a
+safe mapping between these two representations by copying the data to and from
+OCaml strings and C character buffers.
+
+Arrays and pointers can be built from basic types by using the corresponding
+`array` and `ptr` functions.  The `abstract` function accepts size and
+alignment requirements and ensures that these are satisfied when this type is
+used in a function call.  Notice that the result types of these functions all
+share the same `Ffi.Type.C.t` type as the basic C type definitions, which means
+that they can all be used interchangeably.
+
+The next step is to group collections of C types into function definitions,
+which are represented by type `'a Ffi.Type.f`.
 
 ```ocaml
-...
+(* Ctypes.Ffi.C 3/3 *)
+  type 'a f
   val ( @-> ) : 'a t -> 'b f -> ('a -> 'b) f
   val returning : 'a t -> 'a f
   val funptr : ('a -> 'b) f -> ('a -> 'b) t
@@ -292,7 +307,8 @@ Sequences of `'a typ` values are constructed by using the `@->` and `returning`
 functions.  You can even exchange function pointers between OCaml and C by
 wrapping the OCaml callback using `funptr`.  The library takes care of the
 garbage collector interface to ensure that the OCaml value isn't moved around
-while the C library is holding a reference to the value.
+while the C library is holding a reference to the value.  We'll come back to an
+example of using `funptr` later in the chapter.
 
 ### Arrays, structures and unions
 
@@ -314,16 +330,18 @@ module Array : sig
 end
 ```
 
-The array functions are similar to the standard library `Array` module.  The
-conversion between arrays and lists involves reallocating the values, and can
-be expensive for very large data structures.  Notice that you can also convert
-an array into a `ptr` pointer to the head of buffer, which can be useful if you
-need to pass the pointer and size arguments separately to a C function.
+The array functions are similar to the standard library `Array` module, except
+that they represent flat C arrays instead of OCaml ones.  The conversion
+between arrays and lists still requires copying the values, and can be
+expensive for large data structures.  Notice that you can also convert an array
+into a `ptr` pointer to the head of buffer, which can be useful if you need to
+pass the pointer and size arguments separately to a C function.
 
 Structures in C can contain a mixture of types, and, like OCaml records, their
-order is significant.  The `Ffi.C.Type.Struct` module defines combinators to make
-this as easy as arrays and basic types.  Let's start with an example by binding
-some time-related UNIX functions.
+order is significant.  The `Ffi.C.Type.Struct` module defines combinators to
+make this definition as easy basic types were.  Let's look at an with an
+example by binding some time-related UNIX functions that use C structures
+in their interface.
 
 ### Example: binding UNIX date functions
 
@@ -332,6 +350,8 @@ in `<time.h>` (usually found in `/usr/include` on a Linux or MacOS X system).
 The `localtime` function has the following signature and return value:
 
 ```c
+/* /usr/include/time.h */
+
 struct tm {
   int     tm_sec;         /* seconds after the minute [0-60] */
   int     tm_min;         /* minutes after the hour [0-59] */
@@ -349,13 +369,14 @@ struct tm *localtime(const time_t *);
 ```
 
 This example is more complicated than ncurses for a couple of reasons.  We need
-to allocate some memory to store a `time_t` value, and pass that memory into
-the `time` library call to obtain the current timezone.  This `time_t` is then
-passed to the `localtime` library call, which returns a pointer to the `struct
-tm`. 
+to allocate some external memory to store a `time_t` value, and pass that
+memory into the `time` library call to obtain the current timezone.  This
+`time_t` value is passed to the `localtime` library call, which then returns a
+pointer to the `struct tm`. 
 
-The `time_t`, and most other standard POSIX types, are already provided by the `Ffi.PosixTypes` module.
-Let's start by defining the OCaml mapping to `struct tm`:
+The `time_t` and many other standard POSIX types are already provided by the
+`Ffi.PosixTypes` module.  Let's start by defining the OCaml mapping to
+`struct tm`:
 
 ```ocaml
 open Ffi.C
@@ -377,12 +398,16 @@ let tm_isdst = tm *:* int (* daylight saving time *)
 let () = seals (tm : tm structure typ)
 ```
 
-This is a very mechanical translation from the C structure, due to the magic of
-the `*:*` combinator provided by the `Struct` module.  We start building the
-definition via the `structure` allocator.  Then the types are added in
-sequence, with each application recording the position in the `tm` structure.
-When all the fields have been added, the structure is finalized via the `seals`
-call.  The definitions of `time` and `localtime` should now be familiar:
+This is a fairly mechanical translation from the C structure by using the
+magic of the `*:*` combinator provided by the `Ffi.C.Struct` module.  The
+structure is initialised in the `tm` variable via the `structure` allocator.
+The fields of the structure are then added in sequence. Each new field mutates
+the `tm` structure to append its name and offset.  The structure is finalized
+via `seals` when all the fields have been added, and the structure can now
+be used.
+
+The OCaml definitions of `time` and `localtime` are now straightforward calls
+to `foreign`, just like our earlier `ncurses` example.
 
 ```ocaml
 let time = foreign "time" (ptr time_t @-> syscall time_t)
@@ -390,7 +415,7 @@ let asctime = foreign "asctime" (ptr tm @-> returning string)
 let localtime = foreign "localtime" (ptr time_t @-> returning (ptr tm))
 ```
 
-The complete signature for this definition looks like this:
+The OCaml signature for this definition looks like this:
 
 ```ocaml
 open Ffi.C
@@ -411,10 +436,10 @@ val localtime : PosixTypes.time_t ptr -> tm structure ptr
 val asctime : PosixTypes.time_t ptr -> string
 ```
 
-Unlike the ncurses example, some of the FFI types are still exposed in this
-signature due to the manual memory interface required by the C libraries.  To
-use the OCaml `time` and `localtime` functions, we need to allocate some memory
-and construct values of type `time_t ptr` to them.
+Some of the FFI types are still exposed in this signature due to the manual
+memory interface required by the C libraries.  The OCaml `time` and `localtime`
+can be used by allocating external memory and constructing values of type
+`time_t ptr`.
 
 ```ocaml
 let () =
@@ -425,12 +450,13 @@ let () =
 ```
 
 The `Ptr.allocate` function allocates memory via `malloc` and creates an OCaml
-value to point to it.  This OCaml value (`timep` in the example) has a finalizer
-function which frees the external memory when it is garbage collected.
-The `timep` pointer is passed into the `time` library call, which modifies it
-in-place.  The `timep` pointer is then passed on to `localtime`, whose return value
-is converted into an OCaml string via `asctime`.   The garbage
-collector can then collect `timep` during the next collection cycle.
+value to point to this external memory buffer.  This OCaml value (`timep` in the
+example) has a finalizer function which frees the external memory when it is
+garbage collected.  The `timep` pointer is passed into the `time` library call,
+which modifies it in-place.  The same pointer is subsequently passed to
+`localtime`, whose return `tm` structure is converted into an OCaml string via
+the `asctime` function.   The garbage collector is free to free `timep` during
+the next collection cycle.
 
 Unions in C are a collection of named structures that can be mapped onto the
 same memory.  They are also supported in the `ctypes` library via the
