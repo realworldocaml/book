@@ -182,7 +182,7 @@ times, `Time.sexp_of_t`.
 Note that the time isn't actually serialized into an s-expression
 until the error is printed out.  We're not restricted to doing this
 kind of error reporting with built-in types.  This will be discussed
-in more detail in [xref](data-serialization-with-s-expressions), but
+in more detail in [xref](#data-serialization-with-s-expressions), but
 Sexplib comes with a language extension that can auto-generate
 sexp-converters for newly generated types, as shown below.
 
@@ -422,7 +422,7 @@ path is trivial.
 
 This is all part of the support for s-expressions provided by the
 Sexplib library and syntax-extension, which is described in more
-detail in [xref](data-serialization-with-s-expressions).
+detail in [xref](#data-serialization-with-s-expressions).
 
 </note>
 

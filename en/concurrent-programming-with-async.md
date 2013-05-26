@@ -647,7 +647,7 @@ need.
 - `uri`, a library for handling URI's, or "Uniform Resource
   Identifiers", of which HTTP URL's are an example.
 - `yojson`, a JSON parsing library that was described in
-  [xref](#parsing-json-with-yojson)
+  [xref](#handling-json-data)
 - `cohttp`, a library for creating HTTP clients and servers.  We need
   Async support, which comes with the `cohttp.async` package.
 
@@ -688,7 +688,7 @@ The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
 [RFC4627](http://www.ietf.org/rfc/rfc4627.txt).  We'll parse the JSON
 data using the Yojson library, which we already introduced in
-[xref](handling-json-data).
+[xref](#handling-json-data).
 
 We expect the response from DuckDuckGo to come across as a JSON
 record, which is represented by the `Assoc` tag in Yojson's JSON
