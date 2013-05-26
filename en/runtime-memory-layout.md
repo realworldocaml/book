@@ -2,8 +2,24 @@
 
 Much of the static type information contained within an OCaml program is
 checked and discarded at compilation time, leaving a much simpler *runtime*
-representation for values.  Understanding this difference is important for
-writing efficient programs and profiling them at runtime.
+representation for values.  Understanding the runtime memory format is
+important to write efficient programs that are compact in memory, and
+understanding the results of profiling tools.
+
+In this chapter, you'll learn:
+
+* The architecture of the OCaml garbage collector.
+* The layout of OCaml values in blocks within the major and minor heaps.
+* The representation of the OCaml types within blocks.
+
+This chapter is primarily informational, but it helps to know all this
+to understand the compilation process in [xref](compiler-output-formats),
+handling external memory in [xref](parsing-binary-protocols-with-bigarray),
+or tracing and profiling your programs in [xref](understanding-the-runtime).
+You might also want to interface with the OCaml C runtime directly instead of
+using the simpler `ctypes` library described in
+[xref](foreign-function-interface).  This could be for performance reasons or a
+more specialised embedded or kernel execution environment.
 
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
@@ -26,12 +42,8 @@ dynamic patching, but OCaml prefers runtime simplicity instead.
 
 </note>
 
-Another reason to use the C interface directly is if you need to build
-foreign-function interfaces directly instead of going through the `ctypes`
-library described in [xref](foreign-function-interface).  This could be for
-performance reasons, or some more specialised embedded or kernel environment.
-Let's start by explaining the memory layout, and then move onto the details of
-how low-level C bindings work.
+Let's start by explaining the garbage collector architecture, and then move
+onto the memory layout of OCaml values.
 
 ## The garbage collector
 
