@@ -21866,12 +21866,15 @@ let () =
     external memory in
     <xref linkend="parsing-binary-protocols-with-bigarray"/>,
     or tracing and profiling your programs in
-    <xref linkend="understanding-the-garbage-collector"/>. You
-    might also want to interface with the OCaml C runtime directly
+    <xref linkend="understanding-the-garbage-collector"/>.
+  </para>
+  <para>
+    You might also want to interface with the OCaml C runtime directly
     instead of using the simpler <literal>ctypes</literal> library
-    described in <xref linkend="foreign-function-interface"/>.
-    This could be for performance reasons or a more specialised embedded
-    or kernel execution environment.
+    described earlier in
+    <xref linkend="foreign-function-interface"/>. This could
+    be for performance reasons or a more specialised embedded or kernel
+    execution environment.
   </para>
   <note>
   <title>
@@ -22106,72 +22109,75 @@ let () =
       follow pointers to look for more values, but not integers (which
       directly hold the value and don't point to anything meaningful).
     </para>
-    <para>
-      Values use a single tag bit the word to distinguish integers and
-      pointers at runtime. The value is an integer if the lowest bit of
-      the block word is non-zero. Several OCaml types map onto this
-      integer representation, including <literal>bool</literal>,
-      <literal>int</literal>, the empty list, <literal>unit</literal>,
-      and variants without constructors.
-    </para>
-    <para>
-      Integers are unboxed runtime values in OCaml, which means that
-      they can be stored directly without having to allocate a wrapper
-      block that will take up more memory. They can also be passed
-      directly to other function calls in registers, and are generally
-      the cheapest and fastest values to use in OCaml.
-    </para>
-    <para>
-      The value is treated as a memory pointer if the lowest bit of the
-      <literal>value</literal> is zero. A pointer value is stored
-      unmodified since pointers are guaranteed to be word-aligned with
-      the bottom bits always being zero. The next problem is
-      distinguishing between pointers to OCaml values (which should be
-      followed by the garbage collector) and C pointers (which shouldn't
-      be followed).
-    </para>
-    <para>
-      The mechanism for this is simple, since the runtime system keeps
-      track of the heap blocks it has allocated for OCaml values. If the
-      pointer is inside a heap chunk that is marked as being managed by
-      the OCaml runtime, it is assumed to point to an OCaml value. If it
-      points outside the OCaml runtime area, it is is treated as an
-      opaque C pointer to some other system resource.
-    </para>
-    <note>
-    <title>
-    Some history about OCaml's word-aligned pointers
-    </title>
-    <para>
-      The alert reader may be wondering how OCaml can guarantee that all
-      of its pointers are word-aligned. In the old days when RISC chips
-      such as Sparc, MIPS and Alpha were commonplace, unaligned memory
-      accesses were forbidden by the instruction set architecture and
-      would result in a CPU exception that terminated the program. Thus,
-      all pointers were historically rounded off to the architecture
-      word-size (usually 32- or 64-bits).
-    </para>
-    <para>
-      Modern CISC processors such as the Intel x86 do support unaligned
-      memory accesses, but the chip still runs faster if accesses are
-      word-aligned. OCaml therefore simply mandates that all pointers be
-      word-aligned, which guarantees that the bottom few bits of any
-      valid pointer will be zero. Setting the bottom bit to a non-zero
-      value is a simple way to mark an integer, at the cost of losing
-      that single bit of precision.
-    </para>
-    <para>
-      An even more alert reader will be wondering about the performance
-      implications are for integer arithmetic using this tagged
-      representation. Since the bottom bit is set, any operation on the
-      integer has to shift the bottom bit right to recover the
-      &quot;native&quot; value. The native code OCaml compiler generates
-      efficient x86 assembly code in this case. It takes advantage of
-      modern processor instructions to hide the extra shifts as much as
-      possible. Addition and substraction are a single instruction, and
-      multiplication is only a few more.
-    </para>
-    </note>
+    <sect2 id="distinguishing-integer-and-pointers-at-runtime">
+      <title>Distinguishing integer and pointers at runtime</title>
+      <para>
+        Values use a single tag bit the word to distinguish integers and
+        pointers at runtime. The value is an integer if the lowest bit
+        of the block word is non-zero. Several OCaml types map onto this
+        integer representation, including <literal>bool</literal>,
+        <literal>int</literal>, the empty list, <literal>unit</literal>,
+        and variants without constructors.
+      </para>
+      <para>
+        Integers are unboxed runtime values in OCaml, which means that
+        they can be stored directly without having to allocate a wrapper
+        block that will take up more memory. They can also be passed
+        directly to other function calls in registers, and are generally
+        the cheapest and fastest values to use in OCaml.
+      </para>
+      <para>
+        The value is treated as a memory pointer if the lowest bit of
+        the <literal>value</literal> is zero. A pointer value is stored
+        unmodified since pointers are guaranteed to be word-aligned with
+        the bottom bits always being zero. The next problem is
+        distinguishing between pointers to OCaml values (which should be
+        followed by the garbage collector) and C pointers (which
+        shouldn't be followed).
+      </para>
+      <para>
+        The mechanism for this is simple since the runtime system keeps
+        track of the heap blocks it has allocated for OCaml values. If
+        the pointer is inside a heap chunk that is marked as being
+        managed by the OCaml runtime, it is assumed to point to an OCaml
+        value. If it points outside the OCaml runtime area, it is is
+        treated as an opaque C pointer to some other system resource.
+      </para>
+      <note>
+      <title>
+      Some history about OCaml's word-aligned pointers
+      </title>
+      <para>
+        The alert reader may be wondering how OCaml can guarantee that
+        all of its pointers are word-aligned. In the old days when RISC
+        chips such as Sparc, MIPS and Alpha were commonplace, unaligned
+        memory accesses were forbidden by the instruction set
+        architecture and would result in a CPU exception that terminated
+        the program. Thus, all pointers were historically rounded off to
+        the architecture word-size (usually 32- or 64-bits).
+      </para>
+      <para>
+        Modern CISC processors such as the Intel x86 do support
+        unaligned memory accesses, but the chip still runs faster if
+        accesses are word-aligned. OCaml therefore simply mandates that
+        all pointers be word-aligned, which guarantees that the bottom
+        few bits of any valid pointer will be zero. Setting the bottom
+        bit to a non-zero value is a simple way to mark an integer, at
+        the cost of losing that single bit of precision.
+      </para>
+      <para>
+        An even more alert reader will be wondering about the
+        performance implications are for integer arithmetic using this
+        tagged representation. Since the bottom bit is set, any
+        operation on the integer has to shift the bottom bit right to
+        recover the &quot;native&quot; value. The native code OCaml
+        compiler generates efficient x86 assembly code in this case. It
+        takes advantage of modern processor instructions to hide the
+        extra shifts as much as possible. Addition and substraction are
+        a single instruction, and multiplication is only a few more.
+      </para>
+      </note>
+    </sect2>
     <sect2 id="blocks-and-values">
       <title>Blocks and values</title>
       <para>
@@ -22180,11 +22186,14 @@ let () =
         (either 32- or 64-bits) followed by variable-length data that is
         either opaque bytes or an array of <emphasis>fields</emphasis>.
         The header has a multi-purpose tag byte that defines whether to
-        interprete the subsequent data as opaque or OCaml fields. The
-        garbage collector never inspects opaque bytes, but the array of
-        fields are all treated as more valid OCaml values. The garbage
-        collector always inspects fields, and follows them as part of
-        the collection process described earlier.
+        interprete the subsequent data as opaque bytes or OCaml fields.
+      </para>
+      <para>
+        The garbage collector never inspects opaque bytes. If the tag
+        indicates an array of OCaml fields are present, their contents
+        are all treated as more valid OCaml values. The garbage
+        collector always inspects fields and follows them as part of the
+        collection process described earlier.
       </para>
       <programlisting>
 +------------------------+-------+----------+----------+----------+----
@@ -22193,16 +22202,19 @@ let () =
  &lt;-either 22 or 54 bits-&gt; &lt;2 bit&gt; &lt;--8 bit--&gt;
 </programlisting>
       <para>
-        The size field records the length of the block in memory words.
-        Note that it is limited to 22-bits on 32-bit platforms, which is
-        the reason why OCaml strings are limited to 16MB on that
-        architecture. If you need bigger strings, either switch to a
-        64-bit host, or use the <literal>Bigarray</literal> module
+        The <literal>size</literal> field records the length of the
+        block in memory words. This is 22 bits on 32-bit platforms,
+        which is the reason why OCaml strings are limited to 16MB on
+        that architecture. If you need bigger strings, either switch to
+        a 64-bit host, or use the <literal>Bigarray</literal> module
         described in
         <xref linkend="parsing-binary-protocols-with-bigarray"/>.
-        The 2-bit color field is used by the garbage collector to keep
-        track of its state during mark-and-sweep, and is not exposed
-        directly to OCaml programs.
+      </para>
+      <para>
+        The 2-bit <literal>color</literal> field is used by the garbage
+        collector to keep track of its state during mark-and-sweep
+        collection. This makes incremental collection possible, and
+        isn't exposed directly to OCaml programs.
       </para>
       <informaltable>
         <tgroup cols="2">
@@ -22264,8 +22276,8 @@ let () =
       </para>
       <para>
         The exact representation of values inside a block depends on
-        their OCaml type. They are summarised in the table below, and
-        then we'll examine some of them in greater detail.
+        their static OCaml type. All OCaml types are distilled down into
+        <literal>values</literal>, and summarised in the table below.
       </para>
       <informaltable>
         <tgroup cols="2">
@@ -22284,11 +22296,11 @@ let () =
           <tbody>
             <row>
               <entry>
-                any <literal>int</literal> or <literal>char</literal>
+                <literal>int</literal> or <literal>char</literal> dire
               </entry>
               <entry>
-                directly as a value, shifted left by 1 bit, with the
-                least significant bit set to 1
+                ctly as a value, shifted left by 1 bit, with the least
+                significant bit set to 1
               </entry>
             </row>
             <row>
@@ -22322,8 +22334,8 @@ let () =
                 <literal>Foo | Bar of int</literal>
               </entry>
               <entry>
-                variants with parameters are boxed, while entries with
-                no parameters are unboxed (see below).
+                variants with parameters are boxed, while variants with
+                no parameters are unboxed.
               </entry>
             </row>
             <row>
@@ -22332,7 +22344,7 @@ let () =
               </entry>
               <entry>
                 variable space usage depending on the number of
-                parameters (see below).
+                parameters.
               </entry>
             </row>
             <row>
@@ -22378,8 +22390,8 @@ let () =
                 records or arrays, all float
               </entry>
               <entry>
-                special tag for unboxed arrays of floats. Doesn't apply
-                to tuples.
+                special tag for unboxed arrays of floats, or records
+                that only have <literal>float</literal> fields.
               </entry>
             </row>
           </tbody>
@@ -22389,24 +22401,23 @@ let () =
     <sect2 id="integers-characters-and-other-basic-types">
       <title>Integers, characters and other basic types</title>
       <para>
-        Many basic types are stored directly as unboxed values at
+        Many basic types are efficiently stored as unboxed integers at
         runtime. The native <literal>int</literal> type is the most
         obvious, although it drops a single bit of precision due to the
-        tag bit described earlier. Other atomic types such as the
-        <literal>unit</literal> and empty list <literal>[]</literal>
-        value are stored as constant integers. Boolean values have a
-        value of <literal>0</literal> and <literal>1</literal> for
-        <literal>true</literal> and <literal>false</literal>
-        respectively.
+        tag bit. Other atomic types such as <literal>unit</literal> and
+        empty list <literal>[]</literal> value are stored as constant
+        integers. Boolean values have a value of <literal>0</literal>
+        and <literal>1</literal> for <literal>true</literal> and
+        <literal>false</literal> respectively.
       </para>
       <para>
-        Remember that since integers are never allocated on the heap,
-        all of these basic types such as empty lists and
-        <literal>unit</literal> are therefore very efficient to use.
-        They will often be passed in registers and never even appear on
-        the stack, if you don't have too many parameters to your
-        functions or are running on a modern architecture with lots of
-        spare registers (such as <literal>x86_64</literal>).
+        These basic types such as empty lists and
+        <literal>unit</literal> are very efficient to use since integers
+        are never allocated on the heap. They can be passed directly in
+        registers and not appear on the stack if you don't have too many
+        parameters to your functions. Modern architectures as as
+        <literal>x86_64</literal> have a lot of spare registers to
+        further improve the efficiency of using unboxed integers.
       </para>
     </sect2>
     <sect2 id="tuples-records-and-arrays">
