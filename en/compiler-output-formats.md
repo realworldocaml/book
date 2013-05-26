@@ -415,11 +415,11 @@ some interesting points are:
   engine knows this, and has transformed the pattern into a single integer
   comparison.  If `v` has a tag of `0`, the function returns `"foo"`, and otherwise
   returns `"bar"`.
-* The values are addressed direectly by their `field`.  The type safety checks
-  earlier have ensured that these fields will always exist, and so this untyped
-  form doesn't need to do any dynamic checks.  However, unwise use of unsafe
-  language features such as `Obj.magic` module can easily induce crashes at this
-  level.
+* Values are addressed directly by an index and `field (`v` got assigned to `1008`
+  during type checking).  The type safety checks earlier have ensured that these
+  fields will always exist, and so the lambda form doesn't do any dynamic checks.
+  However, unwise use of unsafe language features such as `Obj.magic` module can
+  easily induce crashes at this level.
 
 The lambda form is primarily a stepping-stone to the bytecode engine that we
 cover next.  However, it's often easier to look at the textual output here than
