@@ -95,8 +95,8 @@ blocks of memory that are used for a short period of time and then never
 accessed again.  OCaml takes advantage of this fact to improve performance by
 using a *generational* garbage collector.
 
-A generational GC keeps separate memory regions to hold blocks based on how long
-the blocks have been live.  OCaml's heap is split in two:
+A generational GC keeps separate memory regions to hold blocks based on how
+long the blocks have been live.  OCaml's heap is split in two:
 
 * a small, fixed-size *minor heap* where most most blocks are initially allocated
 * a large, variable-sized *major heap* for blocks that have been live longer or are
@@ -160,29 +160,34 @@ is an important concern we will discuss later in [xref](#understanding-the-garba
 
 ## The representation of OCaml values
 
-So far, we've described the overall memory layout, but not what the contents of
-each block contains.  Every OCaml variable points to a `value`
-at runtime, which is a single memory word that is either an integer or a
-pointer.  The OCaml runtime needs to understand the difference between the two so
-that it can follow pointers, but not integers (which directly hold the value
-and don't point to anything meaningful).
+We've described the overall memory layout, but not what the contents of
+each block contains.  Every OCaml variable points to a `value` at runtime.  A
+value is a single memory word that is either an integer or a pointer.  The
+OCaml runtime needs to understand the difference between the two so that it can
+follow pointers to look for more values, but not integers (which directly hold
+the value and don't point to anything meaningful).
 
-If the lowest bit of the block word is non-zero, the value is an unboxed
-integer.  Several OCaml types map onto this integer representation, including
+Values use a single tag bit the word to distinguish integers and pointers at
+runtime. The value is an integer if the lowest bit of the block word is
+non-zero.  Several OCaml types map onto this integer representation, including
 `bool`, `int`, the empty list, `unit`, and variants without constructors.
-Integers are the only unboxed runtime values in OCaml, which means that they
-can be stored directly without having to allocate a wrapper structure that will
-take up more memory. They can also be passed directly to other function calls
-in registers, and so are generally the cheapest and fastest values to use in
-OCaml.
 
-If the lowest bit of the `value` is zero, then the value is a memory pointer.
-A pointer value is stored unmodified, since pointers are guaranteed to be
-word-aligned and so the bottom bits are always zero. If the pointer is inside a
-memory chunk that is marked as being managed by the OCaml runtime, it is
-assumed to point to an OCaml block (see below).  If it points outside the OCaml
-runtime area, it is is treated as an opaque C pointer to some other system
-resource.
+Integers are unboxed runtime values in OCaml, which means that they can be
+stored directly without having to allocate a wrapper block that will take up
+more memory. They can also be passed directly to other function calls in
+registers, and are generally the cheapest and fastest values to use in OCaml.
+
+The value is treated as a memory pointer if the lowest bit of the `value` is
+zero. A pointer value is stored unmodified since pointers are guaranteed to be
+word-aligned with the bottom bits always being zero.  The next problem is
+distinguishing between pointers to OCaml values (which should be followed by
+the garbage collector) and C pointers (which shouldn't be followed).
+
+The mechanism for this is simple, since the runtime system keeps track of the
+heap blocks it has allocated for OCaml values. If the pointer is inside a heap
+chunk that is marked as being managed by the OCaml runtime, it is assumed to
+point to an OCaml value. If it points outside the OCaml runtime area, it is is
+treated as an opaque C pointer to some other system resource.
 
 <note>
 <title>Some history about OCaml's word-aligned pointers</title>
@@ -204,11 +209,10 @@ that single bit of precision.
 An even more alert reader will be wondering about the performance implications
 are for integer arithmetic using this tagged representation.  Since the bottom
 bit is set, any operation on the integer has to shift the bottom bit right to
-recover the "native" value.  The native code OCaml compiler generates very
-efficient x86 assembly code in this case, and takes advantage of modern
-processor instructions to either hide the extra work, or get it for free from
-the instruction set.  Addition and substraction are a single instruction, and
-multiplication is only a few more.
+recover the "native" value.  The native code OCaml compiler generates efficient
+x86 assembly code in this case.  It takes advantage of modern processor
+instructions to hide the extra shifts as much as possible.  Addition and
+substraction are a single instruction, and multiplication is only a few more.
 
 </note>
 
