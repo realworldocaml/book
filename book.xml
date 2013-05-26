@@ -23323,7 +23323,7 @@ let _ =
 </programlisting>
       <para>
         The lambda form is the first representation that discards the
-        OCaml type information. It's begins to look like the runtime
+        OCaml type information and begins to look like the runtime
         memory model from
         <xref linkend="memory-representation-of-values"/>, and
         should be quite familiar to Lisp aficionados. To see it for
@@ -23364,13 +23364,9 @@ $ ocamlc -dlambda -c pattern.ml
         </listitem>
         <listitem>
           <para>
-            The values are addressed direectly by their
-            <literal>field</literal>. The type safety checks earlier
-            have ensured that these fields will always exist, and so
-            this untyped form doesn't need to do any dynamic checks.
-            However, unwise use of unsafe language features such as
-            <literal>Obj.magic</literal> module can easily induce
-            crashes at this level.
+            Values are addressed directly by an index and
+            <literal>field (</literal>v<literal>got assigned to</literal>1008<literal>during type checking).  The type safety checks earlier have ensured that these   fields will always exist, and so the lambda form doesn't do any dynamic checks.   However, unwise use of unsafe language features such as</literal>Obj.magic`
+            module can easily induce crashes at this level.
           </para>
         </listitem>
       </itemizedlist>
