@@ -866,4 +866,4 @@ repository online, which has lots of quirks typical in real-world web APIs.
 
 Our example shells out to `curl` on the command-line to obtain the JSON, which
 is rather inefficient.  We'll explain how to integrate the HTTP fetch directly
-into your OCaml application later on in [xref](concurrent-programming-with-async).
+into your OCaml application later on in [xref](#concurrent-programming-with-async).

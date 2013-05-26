@@ -1,21 +1,20 @@
 # Foreign Function Interface
 
 OCaml has several options available to interact with non-OCaml code.  The
-compiler toolchain can link to external system libraries, and also produce
-standalone object code.  This object code can be turned into shared libraries
-that that let your OCaml code be called from C, or linked in more exotic ways
-to embed it directly into applications or even kernel modules.
+compiler toolchain can link to external system libraries and also produce
+standalone native object code that can be embedded within other non-OCaml
+libraries or applications.  
 
-This chapter walks you through the basics interfacing with C libraries, and
-then moves onto how to embed your code for a variety of other platforms.
+## The `ctypes` foreign function library
 
-## The `ctypes` FFI library
+The simplest foreign function interface in OCaml doesn't even require you to
+write any C code.  The `ctypes` library lets you describe the C interface in
+pure OCaml, and the library takes care of finding the C symbols and invoking
+the function call with the appropriate arguments.
 
-We'll introduce the foreign function interface via the simplest method, which
-doesn't require writing any C code.  The `ctypes` library lets you describe the
-C interface in pure OCaml, and it takes care of opening the foreign library and
-invoking the correct function calls .  We'll use the `ncurses` terminal-drawing
-toolkit as our firts example, as it's widely available on most systems.
+Let's dive straight into an example to show you how the library looks.  We'll
+use a binding to the `ncurses` terminal toolkit, as it's widely available on
+most systems and doesn't have any complex dependencies.
 
 <note>
 <title>Installing the `ctypes` library</title>
@@ -29,37 +28,47 @@ $ cd ocaml-ctypes
 $ make && make install
 ```
 
-It will then be available via the `ctypes` ocamlfind package.
+It will then be available via the `ctypes` ocamlfind package.  You will also
+need the `ncurses` library for the first example.  It is pre-installed on MacOS
+X and Debian Linux includes it as the `ncurses-dev` package.
 
 </note>
 
 ## Example: an ncurses terminal interface
 
 Ncurses is a library to build terminal-independent text interfaces in a
-reasonably efficient way.  The  manual page (usually via `man ncurses`)
-explains the basics of the C interface.  Below is an excerpt of the header
-interface found in `<ncurses.h`>.
+reasonably efficient way.  It's used in console mail clients like `mutt` and
+`pine`, and console web browsers such as `lynx`.  The
+[documentation](http://www.gnu.org/software/ncurses/) explains the full C
+interface, but here's an excerpt that we need for a basic binding to OCaml.
+The full header file can usually be found in `/usr/include/ncurses.h` on MacOS
+X or Linux.
 
 ```c
 typedef struct _win_st WINDOW;
 
-WINDOW *initscr (void);
-WINDOW *newwin (int, int, int, int);
-void endwin (void);
-void refresh (void);
-void wrefresh (WINDOW *);
-void mvwaddstr (WINDOW *, int, int, char *);
+WINDOW *initscr   (void);
+WINDOW *newwin    (int, int, int, int);
+void    endwin    (void);
+void    refresh   (void);
+void    wrefresh  (WINDOW *);
+void    mvwaddstr (WINDOW *, int, int, char *);
 ```
 
-The `WINDOW` typedef is a forward declaration of a C structure that holds the
-internal ncurses library state.  The specific contents of the structure don't
-matter, as you need to pass pointers to the structure to the various library
-calls.  The `initscr` function initialises this library state and returns it as
-a `WINDOW` pointer, and the `newwin` function allows further sub-windows to be
-created.  This pointer is passed to various terminal drawing functions such as
-`mvwaddrstr`.  The terminal is only updated when `refresh` or `wrefresh` are
-called, and all other drawing calls just manipulate data structures without
-taking effect on the screen.
+The `ncurses` library calls either work on the current pseudo-terminal, or on a
+window that has been created via the library.  The `WINDOW` typdef represents
+this external `ncurses` library state.  The specific contents of the structure
+don't matter; OCaml code just needs to store the pointer and pass it back to
+`ncurses` library calls that then dereference its contents.
+
+There are two library calls that create `WINDOW` pointers. The `initscr`
+function initialises the library and returns the global window, and `newwin`
+allows further windows to be created.  The `WINDOW` pointer can also be passed
+to terminal drawing functions such as `mvwaddrstr` (there are over 200 library
+calls in `ncurses`, so we are just binding a select few for this example).  The
+terminal is updated when `refresh` or `wrefresh` are called. All other drawing
+calls just manipulate library data structures without actually changing the
+screen layout.
 
 The `ctypes` library provides an OCaml interface that lets you declare these C
 functions as OCaml values.  The library takes care of converting the OCaml
@@ -67,34 +76,40 @@ arguments into the C calling convention, invoking the foreign call within the
 `ncurses` library, and finally returning the result as an OCaml value.
 
 ```ocaml
+(* ncurses.ml 1/3 *)
 open Ctypes.Ffi.C
 open Type
 
 type window = unit ptr
-let window : window t = ptr void
+let window = ptr void
 ```
 
-The `window` type is declared as a `void` pointer.  We also need a value to pass
-to the `ctypes` library to represent this type, and so the `window` value is built
-using the `Ctypes.Ffi.C.ptr` function.  The actual pointer type from C is a
-`WINDOW` and not `void`, but we'll show you shortly how we can hide the details
-of the `window` type in the OCaml module signature.  The next step is to use
-these values to build a foreign function call to `initscr`.
-
+We first define a `window` type to represent the C `WINDOW` pointer.  The
+`unit ptr` type is equivalent to a `void *` pointer (we'll constrain the
+signature later on to avoid mixing up different pointer types).  We also need a
+value representing this `window` type to pass to the `ctypes` library, The
+`window` value is built using the `Ctypes.Ffi.C.ptr` function.  The next step
+is to use this value to build a foreign function call to `initscr`.
 
 ```ocaml
+(* ncurses.ml 2/3 *)
 let initscr =
   foreign "initscr" (void @-> (returning window))
 ```
 
 The `foreign` function takes two parameters: the C function call name, and a
-definition of the arguments and return type.  The definition is built up using
-the combinators defined in `Ctypes.Ffi.C`.  The `@->` operator adds an argument
-to the parameter list, and the  `returning` function declares the return value.
-The remainder of the `Ncurses` implementation expands on these definitions for
-the other library functions.
+value that defines the C function arguments and return type.  This definition
+can contain any of the C types (including function pointers), and is built
+using functions defined in `Ctypes.Ffi.C`. 
+ 
+Basic C types such as `void` are defined as values in `Ffi.Types.C`, and we
+have previously defined `window` as a `void ptr`.  The `@->` operator adds an
+argument to the C parameter list and the `returning` function terminates the
+parameter list and declares the return value.  The remainder of the `Ncurses`
+implementation expands on these definitions for the other library functions.
 
 ```ocaml
+(* ncurses.ml 3/3 *)
 let endwin =
   foreign "endwin" (void @-> (returning void))
 
@@ -126,9 +141,21 @@ let cbreak =
   foreign "cbreak" (void @-> (returning void))
 ```
 
-These function calls all have different arguments, but the basic C types are
-provided by the `Ffi.C` module and can be directly used.  The module signature
-for `ncurses.mli` looks much like a normal OCaml signature:
+These definitions are all straightforward mappings from the C headers from
+earlier in the chapter.  They use the basic C types defined in `FFi.Types.C`
+such as `void` or `int`.  The `string` value maps from OCaml strings (which
+have a specific length) onto C character buffers (whose length is defined by a
+null characters).
+
+The module signature for `ncurses.mli` looks much like a normal OCaml
+signature. You can infer it from `ncurses.ml` by running:
+
+```console
+$ ocamlfind ocamlc -i -package ctypes ncurses.ml
+```
+
+We've tweaked the automatic signature to make the `type window` abstract,
+and the result is below:
 
 ```ocaml
 type window
@@ -147,11 +174,14 @@ val box       : window -> int -> int -> unit
 val cbreak    : unit   -> unit
 ```
 
-Notice that the `window` type is left abstract to external users, so that it
-can only be constructed via `Ncurses.initscr`.  This interface is now safe to
-use in example code.  Here's what an ncurses hello world looks like:
+The `window` type is left abstract to external users so that it can only be
+constructed via the `Ncurses.initscr` function.  This interface is now safe to
+use externally, since window pointers cannot be mixed up with other `void`
+pointers (e.g. those obtained by other libraries).  Here's what a "hello world"
+that uses the library looks like:
 
 ```ocaml
+(* hello.ml *)
 open Ncurses
 
 let () =
@@ -168,19 +198,19 @@ let () =
   endwin ()
 ```
 
-This code can be compiled by:
+This code can be compiled by linking against the `ctypes` and `unix` ocamlfind
+packages.
 
 ```console
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
   -cclib -lncurses ncurses.mli ncurses.ml hello.ml -o hello
 ```
 
-Running `./hello` should now display a Hello World in your terminal with a box
-around the "World".  Notice that the compilation line  includes `-cclib
--lncurses`.  This tells the OCaml compiler to link the output binary to the
-ncurses library, which in turns makes the symbols available to the program when
-it starts.  If you omit that line, you'll get an error when you try to run the
-binary:
+Running `./hello` should now display a Hello World in your terminal!  The
+compilation line above includes `-cclib -lncurses` to make the OCaml compiler
+link the output to the `ncurses` C library, which in turns makes the C symbols
+available to the program when it starts.  You should get an
+error when you run the binary if you omit that link directive.
 
 ```console
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
@@ -191,11 +221,12 @@ Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not fou
 
 ## Defining basic C formats from OCaml
 
-The `Ctypes` library provides an `FFi.C` module that lets you describe not only
-basic C types, but also more complex structures and unions.  It defines
-abstract OCaml types for all of these in `FFi.C`:
+`Ctypes` provides an `Ffi.C` module that lets you describe not only basic C
+types, but also more complex structures and unions.  It defines abstract OCaml
+types for these within the module.
 
 ```ocaml
+(* Ctypes.Ffi.C *)
 type 'a typ        (** Basic C type  *)
 type 'a ptr        (** C pointer *)
 type 'a array      (** C array of 'a values *)
@@ -204,10 +235,12 @@ type 'a union      (** C `union` *)
 type 'a abstract   (** Abstract C pointer *)
 ```
 
-The `Ffi.C.Type` module defines constructors for the familiar C basic types and
-lets you build `'a typ` values.
+The module also defines constructors for the familiar C basic types.
+These constructors build a value of `Ctype.FFi.C.typ` that represents
+that basic C type.
 
 ```ocaml
+(* Ctypes.Ffi.C 1/3 *)
 module Type : sig
   type 'a t = 'a typ 
   
@@ -228,32 +261,43 @@ module Type : sig
 ...
 ```
 
-These functions all return an `'a typ`, where the `'a` component is the OCaml
+These functions return an `'a typ` where the `'a` component is the OCaml
 representation of the C type. For example, OCaml only supports double-precision
-floating point numbers, and so both of the C `float` and `double` functions map
-to the OCaml `float` type.  The `Ffi.Unsigned` and `Ffi.Signed` modules provide
-some optimized implementations of specific C types, such as `llong` (for `long
-long` 64-bit values).
+floating point numbers and so the C `float` and `double` functions both map to
+the OCaml `float` type.
 
-The module also defines some more advanced C types
+The `Ffi.Unsigned` and `Ffi.Signed` modules provide optimized implementations
+of C types such as `llong` (for `long long` 64-bit values) or `int32_t` (for
+signed 32-bit values).
+The module also defines some more advanced C types that aren't straightforward
+mappings to and from OCaml.
 
 ```ocaml   
-... 
+(* Ctypes.Ffi.C 2/3 *)
   val string : string t
   val abstract : size:int -> alignment:int -> 'a abstract t
   val array : int -> 'a t -> 'a array t
   val ptr : 'a t -> 'a ptr t
 ```
 
-Strings in C are null-terminator character arrays, whereas OCaml strings have a
-fixed-length and can contain null values. The `string` mapping safely copies
-between these two strings.  if you need an abstract C type (for example, from a
-forward declaration of a `struct`), then just define an `abstract t`.  Arrays
-and pointers can be built out of primitive types by using the corresponding
-constructor functions.
+Strings in C are null-terminated character arrays, while OCaml strings have a
+fixed-length specified in the value header. The `string` function creates a
+safe mapping between these two representations by copying the data to and from
+OCaml strings and C character buffers.
+
+Arrays and pointers can be built from basic types by using the corresponding
+`array` and `ptr` functions.  The `abstract` function accepts size and
+alignment requirements and ensures that these are satisfied when this type is
+used in a function call.  Notice that the result types of these functions all
+share the same `Ffi.Type.C.t` type as the basic C type definitions, which means
+that they can all be used interchangeably.
+
+The next step is to group collections of C types into function definitions,
+which are represented by type `'a Ffi.Type.f`.
 
 ```ocaml
-...
+(* Ctypes.Ffi.C 3/3 *)
+  type 'a f
   val ( @-> ) : 'a t -> 'b f -> ('a -> 'b) f
   val returning : 'a t -> 'a f
   val funptr : ('a -> 'b) f -> ('a -> 'b) t
@@ -263,7 +307,8 @@ Sequences of `'a typ` values are constructed by using the `@->` and `returning`
 functions.  You can even exchange function pointers between OCaml and C by
 wrapping the OCaml callback using `funptr`.  The library takes care of the
 garbage collector interface to ensure that the OCaml value isn't moved around
-while the C library is holding a reference to the value.
+while the C library is holding a reference to the value.  We'll come back to an
+example of using `funptr` later in the chapter.
 
 ### Arrays, structures and unions
 
@@ -285,16 +330,18 @@ module Array : sig
 end
 ```
 
-The array functions are similar to the standard library `Array` module.  The
-conversion between arrays and lists involves reallocating the values, and can
-be expensive for very large data structures.  Notice that you can also convert
-an array into a `ptr` pointer to the head of buffer, which can be useful if you
-need to pass the pointer and size arguments separately to a C function.
+The array functions are similar to the standard library `Array` module, except
+that they represent flat C arrays instead of OCaml ones.  The conversion
+between arrays and lists still requires copying the values, and can be
+expensive for large data structures.  Notice that you can also convert an array
+into a `ptr` pointer to the head of buffer, which can be useful if you need to
+pass the pointer and size arguments separately to a C function.
 
 Structures in C can contain a mixture of types, and, like OCaml records, their
-order is significant.  The `Ffi.C.Type.Struct` module defines combinators to make
-this as easy as arrays and basic types.  Let's start with an example by binding
-some time-related UNIX functions.
+order is significant.  The `Ffi.C.Type.Struct` module defines combinators to
+make this definition as easy basic types were.  Let's look at an with an
+example by binding some time-related UNIX functions that use C structures
+in their interface.
 
 ### Example: binding UNIX date functions
 
@@ -303,6 +350,8 @@ in `<time.h>` (usually found in `/usr/include` on a Linux or MacOS X system).
 The `localtime` function has the following signature and return value:
 
 ```c
+/* /usr/include/time.h */
+
 struct tm {
   int     tm_sec;         /* seconds after the minute [0-60] */
   int     tm_min;         /* minutes after the hour [0-59] */
@@ -320,13 +369,14 @@ struct tm *localtime(const time_t *);
 ```
 
 This example is more complicated than ncurses for a couple of reasons.  We need
-to allocate some memory to store a `time_t` value, and pass that memory into
-the `time` library call to obtain the current timezone.  This `time_t` is then
-passed to the `localtime` library call, which returns a pointer to the `struct
-tm`. 
+to allocate some external memory to store a `time_t` value, and pass that
+memory into the `time` library call to obtain the current timezone.  This
+`time_t` value is passed to the `localtime` library call, which then returns a
+pointer to the `struct tm`. 
 
-The `time_t`, and most other standard POSIX types, are already provided by the `Ffi.PosixTypes` module.
-Let's start by defining the OCaml mapping to `struct tm`:
+The `time_t` and many other standard POSIX types are already provided by the
+`Ffi.PosixTypes` module.  Let's start by defining the OCaml mapping to
+`struct tm`:
 
 ```ocaml
 open Ffi.C
@@ -348,12 +398,16 @@ let tm_isdst = tm *:* int (* daylight saving time *)
 let () = seals (tm : tm structure typ)
 ```
 
-This is a very mechanical translation from the C structure, due to the magic of
-the `*:*` combinator provided by the `Struct` module.  We start building the
-definition via the `structure` allocator.  Then the types are added in
-sequence, with each application recording the position in the `tm` structure.
-When all the fields have been added, the structure is finalized via the `seals`
-call.  The definitions of `time` and `localtime` should now be familiar:
+This is a fairly mechanical translation from the C structure by using the
+magic of the `*:*` combinator provided by the `Ffi.C.Struct` module.  The
+structure is initialised in the `tm` variable via the `structure` allocator.
+The fields of the structure are then added in sequence. Each new field mutates
+the `tm` structure to append its name and offset.  The structure is finalized
+via `seals` when all the fields have been added, and the structure can now
+be used.
+
+The OCaml definitions of `time` and `localtime` are now straightforward calls
+to `foreign`, just like our earlier `ncurses` example.
 
 ```ocaml
 let time = foreign "time" (ptr time_t @-> syscall time_t)
@@ -361,7 +415,7 @@ let asctime = foreign "asctime" (ptr tm @-> returning string)
 let localtime = foreign "localtime" (ptr time_t @-> returning (ptr tm))
 ```
 
-The complete signature for this definition looks like this:
+The OCaml signature for this definition looks like this:
 
 ```ocaml
 open Ffi.C
@@ -382,10 +436,10 @@ val localtime : PosixTypes.time_t ptr -> tm structure ptr
 val asctime : PosixTypes.time_t ptr -> string
 ```
 
-Unlike the ncurses example, some of the FFI types are still exposed in this
-signature due to the manual memory interface required by the C libraries.  To
-use the OCaml `time` and `localtime` functions, we need to allocate some memory
-and construct values of type `time_t ptr` to them.
+Some of the FFI types are still exposed in this signature due to the manual
+memory interface required by the C libraries.  The OCaml `time` and `localtime`
+can be used by allocating external memory and constructing values of type
+`time_t ptr`.
 
 ```ocaml
 let () =
@@ -396,12 +450,13 @@ let () =
 ```
 
 The `Ptr.allocate` function allocates memory via `malloc` and creates an OCaml
-value to point to it.  This OCaml value (`timep` in the example) has a finalizer
-function which frees the external memory when it is garbage collected.
-The `timep` pointer is passed into the `time` library call, which modifies it
-in-place.  The `timep` pointer is then passed on to `localtime`, whose return value
-is converted into an OCaml string via `asctime`.   The garbage
-collector can then collect `timep` during the next collection cycle.
+value to point to this external memory buffer.  This OCaml value (`timep` in the
+example) has a finalizer function which frees the external memory when it is
+garbage collected.  The `timep` pointer is passed into the `time` library call,
+which modifies it in-place.  The same pointer is subsequently passed to
+`localtime`, whose return `tm` structure is converted into an OCaml string via
+the `asctime` function.   The garbage collector is free to free `timep` during
+the next collection cycle.
 
 Unions in C are a collection of named structures that can be mapped onto the
 same memory.  They are also supported in the `ctypes` library via the
