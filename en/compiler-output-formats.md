@@ -370,14 +370,14 @@ into a more compact form like this.
 
 ### The untyped lambda form
 
-Once OCaml gets to the typed AST phase, it begins eliminating all the static
-type information into a simpler intermediate *lambda form*.  The lambda form
-discards all the modules and objects, replacing them with simpler records
-and function pointers instead.  Pattern matches are also compiled into
-table automata that are highly optimized jump tables for the particular type.
+Once OCaml gets past the typed AST, it eliminates all the static type
+information into a simpler intermediate *lambda form*.  This discards all the
+modules and objects, replacing them direct references to values such as records
+and function pointers instead.  Pattern matches are compiled into automata that
+are highly optimized for the particular type involved.
 
-It' possible to examine all this behaviour via an intermediate form that the
-compiler can output.  Create a new `pattern.ml` file alongside the previous
+It's possible to examine all this behaviour via another intermediate output
+from the compiler.  Create a new `pattern.ml` file alongside the previous
 `typedef.ml`.
 
 ```ocaml
