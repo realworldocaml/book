@@ -23370,8 +23370,13 @@ $ ocamlc -dlambda -c pattern.ml
         <listitem>
           <para>
             Values are addressed directly by an index and
-            <literal>field (</literal>v<literal>got assigned to</literal>1008<literal>during type checking).  The type safety checks earlier have ensured that these   fields will always exist, and so the lambda form doesn't do any dynamic checks.   However, unwise use of unsafe language features such as</literal>Obj.magic`
-            module can easily induce crashes at this level.
+            <literal>field</literal> (<literal>v</literal> got assigned
+            to <literal>1008</literal> during type checking). The type
+            safety checks earlier have ensured that these fields will
+            always exist, and so the lambda form doesn't do any dynamic
+            checks. However, unwise use of unsafe language features such
+            as <literal>Obj.magic</literal> module can easily induce
+            crashes at this level.
           </para>
         </listitem>
       </itemizedlist>
