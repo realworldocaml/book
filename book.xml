@@ -21835,8 +21835,44 @@ let () =
     Much of the static type information contained within an OCaml
     program is checked and discarded at compilation time, leaving a much
     simpler <emphasis>runtime</emphasis> representation for values.
-    Understanding this difference is important for writing efficient
-    programs and profiling them at runtime.
+    Understanding the runtime memory format is important to write
+    efficient programs that are compact in memory, and understanding the
+    results of profiling tools.
+  </para>
+  <para>
+    In this chapter, you'll learn:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        The architecture of the OCaml garbage collector.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The layout of OCaml values as blocks within the major and minor
+        heaps.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The representation of the OCaml types within blocks.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    This chapter is primarily informational, but it helps to know all
+    this to understand the compilation process in
+    <ulink url="compiler-output-formats">xref</ulink>, handling external
+    memory in
+    <ulink url="parsing-binary-protocols-with-bigarray">xref</ulink>, or
+    tracing and profiling your programs in
+    <ulink url="understanding-the-runtime">xref</ulink>. You might also
+    want to interface with the OCaml C runtime directly instead of using
+    the simpler <literal>ctypes</literal> library described in
+    <ulink url="foreign-function-interface">xref</ulink>. This could be
+    for performance reasons or a more specialised embedded or kernel
+    execution environment.
   </para>
   <note>
   <title>
@@ -21865,15 +21901,14 @@ let () =
     cost via &quot;Just-in-Time&quot; dynamic patching, but OCaml
     prefers runtime simplicity instead.
   </para>
+  <para>
+    We'll talk more about the compilation process in
+    <ulink url="compiler-output-formats">xref</ulink>.
+  </para>
   </note>
   <para>
-    Another reason to use the C interface directly is if you need to
-    build foreign-function interfaces directly instead of going through
-    the <literal>ctypes</literal> library described in
-    <ulink url="foreign-function-interface">xref</ulink>. This could be
-    for performance reasons, or some more specialised embedded or kernel
-    environment. Let's start by explaining the memory layout, and then
-    move onto the details of how low-level C bindings work.
+    Let's start by explaining the garbage collector architecture, and
+    then move onto the memory layout of OCaml values.
   </para>
   <sect1 id="the-garbage-collector">
     <title>The garbage collector</title>
@@ -21893,87 +21928,117 @@ let () =
       <literal>foo</literal> field and the second word holds the
       <literal>bar</literal> field. The OCaml compiler translates such
       an expression into an explicit allocation for the block from
-      OCaml's runtime system: a C library that provides a collection of
+      OCaml's runtime system.
+    </para>
+    <para>
+      The OCaml runtime is a C library that provides a collection of
       routines that can be called by running OCaml programs. The runtime
-      system manages a <emphasis>heap</emphasis>, which is a collection
-      of memory regions it obtains from the operating system using
+      manages a <emphasis>heap</emphasis>, which is a collection of
+      memory regions it obtains from the operating system using
       <emphasis>malloc(3)</emphasis>. The OCaml runtime uses these
       memory regions to hold <emphasis>heap blocks</emphasis>, which it
-      then fills up in response to allocation requests by the OCaml
-      program.
+      fills up in response to allocation requests by the OCaml program.
     </para>
-    <para>
-      When there isn't enough memory available to satisfy an allocation
-      request from the allocated heap blocks, the runtime system invokes
-      the <emphasis>garbage collector</emphasis> (or GC). An OCaml
-      program does not explicitly free a heap block when it is done with
-      it, and the GC must determine which heap blocks are
-      &quot;live&quot; and which heap blocks are &quot;dead&quot;, i.e.
-      no longer in use. Dead blocks are collected and their memory made
-      available for re-use by the application.
-    </para>
-    <para>
-      The garbage collector does not keep constant track of blocks as
-      they are allocated and used. Instead, it regularly scans blocks by
-      starting from a set of <emphasis>roots</emphasis>, which are
-      values that the application always has access to (such as the
-      stack). The GC maintains a directed graph in which heap blocks are
-      nodes, and there is an edge from heap block <literal>b1</literal>
-      to heap block <literal>b2</literal> if some field of
-      <literal>b1</literal> points to <literal>b2</literal>. All blocks
-      reachable from the roots by following edges in the graph must be
-      retained, and unreachable blocks can be reused. This strategy is
-      commonly known as &quot;mark and sweep&quot; collection.
-    </para>
-    <para>
-      The typical OCaml programming style typically involves allocating
-      many small blocks of memory that are used for a short period of
-      time and then never accessed again. OCaml takes advantage of this
-      fact to improve the performance of allocation and collection by
-      using a <emphasis>generational</emphasis> garbage collector. This
-      means that it has different memory regions to hold blocks based on
-      how long the blocks have been live. OCaml's heap is split in two;
-      there is a small, fixed-size <emphasis>minor heap</emphasis> where
-      most most blocks are initially allocated, and a large,
-      variable-sized <emphasis>major heap</emphasis> for blocks that
-      have been live longer or are larger than 4KB. A typical functional
-      programming style means that young blocks tend to die young, and
-      old blocks tend to stay around for longer than young ones (this is
-      referred to as the <emphasis>generational hypothesis</emphasis>).
-    </para>
-    <para>
-      OCaml uses different memory layouts and garbage collection
-      algorithms for the major and minor heaps to account for this
-      generational difference. We're going to describe the memory layout
-      in this chapter, and move onto the garbage collections algorithms
-      in <ulink url="inside-the-runtime">xref</ulink>.
-    </para>
+    <sect2 id="the-mark-and-sweep-gc-strategy">
+      <title>The mark and sweep GC strategy</title>
+      <para>
+        When there isn't enough memory available to satisfy an
+        allocation request from the already-allocated heap blocks, the
+        runtime system invokes the <emphasis>garbage
+        collector</emphasis> (or GC). An OCaml program does not
+        explicitly free a heap block when it is done with it. The GC
+        determines which heap blocks are &quot;live&quot; and which heap
+        blocks are &quot;dead&quot;, i.e. no longer in use. Dead blocks
+        are collected and their memory made available for re-use by the
+        application.
+      </para>
+      <para>
+        The garbage collector does not keep constant track of blocks as
+        they are allocated and used. Instead, it regularly scans blocks
+        by starting from a set of <emphasis>roots</emphasis>, which are
+        values that the application always has access to (such as the
+        stack). The GC maintains a directed graph in which heap blocks
+        are nodes. There is an edge from heap block
+        <literal>b1</literal> to heap block <literal>b2</literal> if
+        some field of <literal>b1</literal> points to
+        <literal>b2</literal>. All blocks reachable from the roots by
+        following edges in the graph must be retained, and unreachable
+        blocks can be reused by the application. This strategy is
+        commonly known as &quot;mark and sweep&quot; collection.
+      </para>
+    </sect2>
+    <sect2 id="generational-garbage-collection">
+      <title>Generational garbage collection</title>
+      <para>
+        The typical OCaml programming style typically involves
+        allocating many small blocks of memory that are used for a short
+        period of time and then never accessed again. OCaml takes
+        advantage of this fact to improve performance by using a
+        <emphasis>generational</emphasis> garbage collector.
+      </para>
+      <para>
+        A generational GC keeps separate memory regions to hold blocks
+        based on how long the blocks have been live. OCaml's heap is
+        split in two:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            a small, fixed-size <emphasis>minor heap</emphasis> where
+            most most blocks are initially allocated
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            a large, variable-sized <emphasis>major heap</emphasis> for
+            blocks that have been live longer or are larger than 4KB.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        A typical functional programming style means that young blocks
+        tend to die young, and old blocks tend to stay around for longer
+        than young ones. This is often referred to as the
+        <emphasis>generational hypothesis</emphasis>.
+      </para>
+      <para>
+        OCaml uses different memory layouts and garbage collection
+        algorithms for the major and minor heaps to account for this
+        generational difference. We'll explain the two mechanisms next.
+      </para>
+    </sect2>
     <sect2 id="the-fast-minor-heap">
       <title>The fast minor heap</title>
       <para>
         The minor heap is one contiguous chunk of virtual memory
-        containing a sequence of heap blocks that have been allocated.
-        If there is space, allocating a new block is a fast
-        constant-time operation in which the pointer to the end of the
-        heap is incremented by the desired size. To garbage collect the
-        minor heap, OCaml uses <emphasis>copying collection</emphasis>
-        to copy all live blocks in the minor heap to the major heap.
-        This only takes work proportional to the number of live blocks
-        in the minor heap, which is typically small according to the
-        generational hypothesis.
+        containing a sequence of OCaml blocks. If there is space,
+        allocating a new block is a fast constant-time operation in
+        which the pointer to the end of the heap is incremented by the
+        desired size.
       </para>
       <para>
-        One complexity of generational collection is that in order to
-        know which blocks in the minor heap are live, the collector must
-        track which minor-heap blocks are directly pointed to by
-        major-heap blocks. Without this information, the minor
-        collection would require scanning the much larger major heap.
+        To garbage collect the minor heap, OCaml uses <emphasis>copying
+        collection</emphasis> to copy all live blocks in the minor heap
+        to the major heap. This takes work proportional to the number of
+        live blocks in the minor heap, which is typically small
+        according to the generational hypothesis.
+      </para>
+      <para>
+        One complexity of generational collection arises from the fact
+        that minor heap sweeps are much more frequent than major heap
+        collections. In order to know which blocks in the minor heap are
+        live, the collector must track which minor-heap blocks are
+        directly pointed to by major-heap blocks. Without this
+        information, the minor collection would require scanning the
+        much larger major heap.
+      </para>
+      <para>
         OCaml maintains a set of such <emphasis>inter-generational
-        pointers</emphasis>, and, through cooperation with the compiler,
-        introduces a write barrier to update this set whenever a
-        major-heap block is modified to point at a minor-heap block.
-        We'll talk more about the implications of the write barrier in
-        <ulink url="tuning-and-profiling">xref</ulink>.
+        pointers</emphasis>, and the compiler introduces a write barrier
+        to update this set whenever a major-heap block is modified to
+        point at a minor-heap block. We'll talk more about the
+        implications of the write barrier in
+        <ulink url="inside-the-runtime">xref</ulink>.
       </para>
     </sect2>
     <sect2 id="the-long-lived-major-heap">
