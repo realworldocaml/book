@@ -58,7 +58,7 @@ We'll now go through these stages and explain how the tools behind them operate.
 The first thing the compiler does is to parse the input source code into
 a more structured data type.  This immediately eliminates code which doesn't
 match basic syntactic requirements.  The OCaml lexer and parser use the same
-basic techniques described earlier in [xref](parsing-with-ocamllex-and-menhir).
+basic techniques described earlier in [xref](#parsing-with-ocamllex-and-menhir).
 
 One powerful feature present in OCaml is the facility to dynamically extend the
 syntax via the `camlp4` tool.  The compiler usually lexes the source code into
@@ -92,7 +92,7 @@ see exactly what's going on.  Let's look at a simple Core extension called
 
 OCaml provides a polymorphic comparison operator that inspects the runtime
 representation of two values to see if they are equal.  As we noted in
-[xref](maps-and-hashtables], this is not as efficient or as safe as defining
+[xref](#maps-and-hashtables], this is not as efficient or as safe as defining
 explicit comparison functions between values.
 
 The `pa_compare` syntax extension takes care of this boilerplate code
@@ -139,7 +139,7 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1
 
 This shell script uses the `ocamlfind` package manager to list the include and
 library paths required by the `comparelib` syntax extension.  The final
-`camlp4o` command invokes the `camlp4o` preprocessor directly and outputs the
+command invokes the `camlp4o` preprocessor directly and outputs the
 resulting AST to standard output as textual source code.
 
 ```console
@@ -211,7 +211,212 @@ extending the grammar via the `with` keyword.
 
 ### The type checking phase
 
-### The lambda form
+After obtaining a valid parsed AST, the compiler must then check that
+the code obeys the rules of the static type system.  At this stage,
+code that is syntactically correct but misuses values is rejected with
+an explanation of the problem.  We're not going to delve into the details
+of how type-checking works here (the rest of the book covers that), but
+rather how it fits in with the rest of the compilation process.
+
+Assuming that the source code is validly typed, the original AST is transformed
+into a typed AST. This has the same broad structure of the untyped AST,
+but syntactic phrases are replaced with typed variants instead.
+
+You can explore the type checking process very simply.  Create a file with a
+single type definition and value.
+
+```ocaml
+(* typedef.ml *)
+type t = Foo | Bar
+let v = Foo
+```
+
+Now run the compiler on this file to *infer* a default type for the compilation
+unit.  This will run the type checking process on the compilation unit you
+specify.
+
+```console
+$ ocamlc -i typedef.ml
+type t = Foo | Bar
+val v : t
+```
+
+The type checker has run and provided a default signature for the module.  It's
+often useful to redirect this output to an `mli` file to give you a starting
+signature to edit the external interface, without having to type it all in by
+hand.
+
+#### Using `ocamlobjinfo` to inspect compilation units
+
+Recall from [xref](#files-modules-and-programs) that `mli` files are optional.
+If you don't supply an explicit signature, then the inferred output from the
+module implementation is used instead.  The compiled version of the signature
+is stored in a filename ending with `cmi`.
+
+```console
+$ ocamlc -c typedef.ml
+$ ocamlobjinfo typedef.cmi
+File typedef.cmi
+Unit name: Typedef
+Interfaces imported:
+	559f8708a08ddf66822f08be4e9c3372	Typedef
+	65014ccc4d9329a2666360e6af2d7352	Pervasives
+```
+
+The `ocamlobjinfo` command examines the compiled interface and displays what
+other compilation units it depends on.  In this case, we don't use any external
+modules other than `Pervasives`.  Every module depends on `Pervasives` by
+default, unless you use the `-nopervasives` flag (this is an advanced use-case,
+and you shouldn't need it in normal use).
+
+The long alphanumeric identifier beside each module name is a hash calculated
+from all the types and values exported from that compilation unit.  This is
+used during type-checking and linking to check that all of the compilation
+units have been compiled consistently against each other.  A difference in the
+hashes means that a compilation unit with the same module name may have
+conflicting type signatures in different modules.  This violates static type
+safety if these conflicting instances are ever linked together, as every
+well-typed value has precisely one type in OCaml.
+
+This hash check ensures that separate compilation remains type safe all the way
+up to the final link phase.  Each source file is type checked separately, but
+the hash of the signature of any external modules is recorded with the compiled
+signature.
+
+#### Examining the typed syntax tree
+
+The compiler has a couple of advanced flags that can dump the raw output of the
+internal AST representation.  You can't depend on these flags to give the same
+output across compiler revisions, but they are a useful learning tool.
+
+First, let's look at the untyped AST from our `typedef.ml`.
+
+```console
+$ ocamlc -dparsetree typedef.ml
+[
+  structure_item (typedef.ml[1,0+0]..[1,0+18])
+    Pstr_type [
+      "t" (typedef.ml[1,0+5]..[1,0+6])
+        type_declaration (typedef.ml[1,0+5]..[1,0+18])
+          ptype_params = []
+          ptype_cstrs = []
+          ptype_kind =
+            Ptype_variant
+              [
+                (typedef.ml[1,0+9]..[1,0+12])
+                  "Foo" (typedef.ml[1,0+9]..[1,0+12])
+                  [] None
+                (typedef.ml[1,0+15]..[1,0+18])
+                  "Bar" (typedef.ml[1,0+15]..[1,0+18])
+                  [] None
+              ]
+          ptype_private = Public
+          ptype_manifest = None
+    ]
+  structure_item (typedef.ml[2,19+0]..[2,19+11])
+    Pstr_value Nonrec [
+      <def>
+        pattern (typedef.ml[2,19+4]..[2,19+5])
+          Ppat_var "v" (typedef.ml[2,19+4]..[2,19+5])
+        expression (typedef.ml[2,19+8]..[2,19+11])
+          Pexp_construct "Foo" (typedef.ml[2,19+8]..[2,19+11])
+          None false
+    ]
+]
+```
+
+This is rather a lot of output for a simple two-line program, but also reveals
+a lot about how the compiler works.  Each portion of the tree is decorated with
+the precise location information (including the filename and character location
+of the token).  This code hasn't been type checked yet, and so the raw tokens
+are all included.  After type checking, the structure is much simpler.
+
+```console
+$ ocamlc -dtypedtree typedef.m
+[
+  structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+    Pstr_type [
+      t/1008
+        type_declaration (typedef.ml[1,0+5]..typedef.ml[1,0+18])
+          ptype_params = []
+          ptype_cstrs = []
+          ptype_kind =
+            Ptype_variant
+              [
+                "Foo/1009" []
+                "Bar/1010" []
+              ]
+          ptype_private = Public
+          ptype_manifest = None
+    ]
+  structure_item (typedef.ml[2,19+0]..typedef.ml[2,19+11])
+    Pstr_value Nonrec [
+      <def>
+        pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
+          Ppat_var "v/1011"
+        expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
+          Pexp_construct "Foo" [] false
+    ]
+]
+```
+
+The typed AST is more explicit than the untyped syntax tree.  For instance, the
+type declaration has been given a unique name (`t/1008`), as has the `v` value
+(`v/1011`).
+
+You'll never need to use this information in day-to-day development, but it's
+always instructive to examine how the type checker folds in the source code
+into a more compact form like this.
+
+### The untyped lambda form
+
+Once OCaml gets to the typed AST phase, it begins eliminating all the static
+type information into a simpler intermediate *lambda form*.  The lambda form
+discards all the modules and objects, replacing them with simpler records
+and function pointers instead.  Pattern matches are also compiled into
+table automata that are highly optimized jump tables for the particular type.
+
+It' possible to examine all this behaviour via an intermediate form that the
+compiler can output.  Create a new `pattern.ml` file alongside the previous
+`typedef.ml`.
+
+```ocaml
+(* pattern.ml *)
+open Typedef
+let _ =
+  match v with
+  | Foo -> "foo"
+  | Bar -> "bar"
+```
+
+The lambda form is the first representation that discards the OCaml type
+information.  It's quite similar to Lisp, and manipulates OCaml blocks and
+fields that should be familiar from [xref](#runtime-memory-layout).  To see it
+for `pattern.ml`, compile as usual but add the `-dlambda` directive.
+
+```console
+$ ocamlc -dlambda -c pattern.ml 
+(setglobal Pattern!
+  (seq
+    (let (match/1008 (field 0 (global Typedef!)))
+      (if (!= match/1008 0) "bar" "foo"))
+    (makeblock 0)))
+```
+
+This has no mention of modules or types any more.  The pattern match has
+turned into an integer comparison by checking the header tag of `Typedef.v`.
+Recall that variants without parameters are stored in memory as integers
+in the order which they appear.  The pattern matching engine understands
+this, and has transformed the pattern match into a single integer comparison.
+A tag of `0` is mapped to `Foo` and a non-zero value to `Bar`.
+
+The lambda form is primarily a stepping-stone to the bytecode engine that we
+cover next.  However, it's worth examining performance-critical code at this
+level to check for any possible optimizations that the compiler missed.  It's
+often easier to look at the textual output here than work through native
+assembly code from compiled executables.
+
+TODO: mention ZINC papers here for more information?
 
 ### Bytecode and `ocamlrun`
 
