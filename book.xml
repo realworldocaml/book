@@ -21862,16 +21862,16 @@ let () =
   <para>
     This chapter is primarily informational, but it helps to know all
     this to understand the compilation process in
-    <ulink url="compiler-output-formats">xref</ulink>, handling external
-    memory in
-    <ulink url="parsing-binary-protocols-with-bigarray">xref</ulink>, or
-    tracing and profiling your programs in
-    <ulink url="understanding-the-runtime">xref</ulink>. You might also
-    want to interface with the OCaml C runtime directly instead of using
-    the simpler <literal>ctypes</literal> library described in
-    <ulink url="foreign-function-interface">xref</ulink>. This could be
-    for performance reasons or a more specialised embedded or kernel
-    execution environment.
+    <xref linkend="compiler-output-formats"/>, handling
+    external memory in
+    <xref linkend="parsing-binary-protocols-with-bigarray"/>,
+    or tracing and profiling your programs in
+    <xref linkend="understanding-the-garbage-collector"/>. You
+    might also want to interface with the OCaml C runtime directly
+    instead of using the simpler <literal>ctypes</literal> library
+    described in <xref linkend="foreign-function-interface"/>.
+    This could be for performance reasons or a more specialised embedded
+    or kernel execution environment.
   </para>
   <note>
   <title>
@@ -21902,7 +21902,7 @@ let () =
   </para>
   <para>
     We'll talk more about the compilation process in
-    <ulink url="compiler-output-formats">xref</ulink>.
+    <xref linkend="compiler-output-formats"/>.
   </para>
   </note>
   <para>
@@ -22037,7 +22037,7 @@ let () =
         to update this set whenever a major-heap block is modified to
         point at a minor-heap block. We'll talk more about the
         implications of the write barrier in
-        <ulink url="inside-the-runtime">xref</ulink>.
+        <xref linkend="understanding-the-garbage-collector"/>.
       </para>
     </sect2>
     <sect2 id="the-long-lived-major-heap">
@@ -22045,11 +22045,11 @@ let () =
       <para>
         The major heap consists of any number of non-contiguous chunks
         of virtual memory, each containing live blocks interspersed with
-        regions of free memory. The runtime system maintains a free list
-        data structure that indexes all the free memory, and this list
-        is used to satisfy allocation requests for OCaml blocks. The
-        major heap is cleaned via a mark and sweep garbage collection
-        algorithm.
+        regions of free memory. The runtime system maintains a free-list
+        data structure that indexes all the free memory. This list is
+        used to satisfy allocation requests for OCaml blocks. The major
+        heap is typically much larger than the minor heap, and is
+        cleaned via a mark-and-sweep garbage collection algorithm.
       </para>
       <itemizedlist>
         <listitem>
@@ -22071,8 +22071,8 @@ let () =
           <para>
             The <emphasis>compact</emphasis> phase moves live blocks to
             eliminate the gaps of free memory into a freshly allocated
-            heap, and ensures that memory does not fragment in
-            long-lived programs.
+            heap. This prevents heap blocks fragmenting in long-lived
+            programs.
           </para>
         </listitem>
       </itemizedlist>
@@ -22080,18 +22080,18 @@ let () =
         A major heap garbage collection must <emphasis>stop the
         world</emphasis> (that is, halt the application) in order to
         ensure that blocks can be safely moved around without this move
-        being observed by the live application. The mark and sweep
-        phases run incrementally over slices of memory, and are broken
-        up into a number of steps that are interspersed with the running
-        OCaml program. Only the compaction phase touches all the memory
-        in one go, and is a relatively rare operation.
+        being observed by the live application. The mark-and-sweep
+        phases run incrementally over slices of memory to avoid pausing
+        the application for long periods of time. Only the compaction
+        phase touches all the memory in one go, and is a relatively rare
+        operation.
       </para>
       <para>
         The <literal>Gc</literal> module lets you control all these
         parameters from your application. Although the defaults are
         usually sensible, understanding them and tuning them is an
         important concern we will discuss later in
-        <ulink url="tuning-and-profiling">xref</ulink>.
+        <xref linkend="understanding-the-garbage-collector"/>.
       </para>
     </sect2>
   </sect1>
@@ -22190,7 +22190,7 @@ let () =
         architecture. If you need bigger strings, either switch to a
         64-bit host, or use the <literal>Bigarray</literal> module
         described in
-        <ulink url="managing-external-memory-with-bigarrays">xref</ulink>.
+        <xref linkend="parsing-binary-protocols-with-bigarray"/>.
         The 2-bit color field is used by the garbage collector to keep
         track of its state during mark-and-sweep, and is not exposed
         directly to OCaml programs.
