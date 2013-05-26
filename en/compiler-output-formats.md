@@ -92,7 +92,7 @@ see exactly what's going on.  Let's look at a simple Core extension called
 
 OCaml provides a polymorphic comparison operator that inspects the runtime
 representation of two values to see if they are equal.  As we noted in
-[xref](#maps-and-hashtables], this is not as efficient or as safe as defining
+[xref](#maps-and-hashtables), this is not as efficient or as safe as defining
 explicit comparison functions between values.
 
 The `pa_compare` syntax extension takes care of this boilerplate code
