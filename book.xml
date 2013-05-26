@@ -37,6 +37,7 @@
 
 
 
+
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -2143,7 +2144,7 @@ Warning 26: unused variable pi.
     <para>
       The same is true in a functional language. A function can be
       applied to different inputs, and thus its variables will take on
-      different values, even though there's absolutely no mutation.
+      different values, even without mutation.
     </para>
     </note>
 
@@ -13493,7 +13494,8 @@ end;;
     Data is often most naturally organized as key/value pairs. Maybe the
     simplest way of representing this in OCaml is as a list of pairs,
     <emphasis>i.e.</emphasis>, an <emphasis>association list</emphasis>.
-    Thus, you could write:
+    Thus, you could represent a mapping between the 10 digits and their
+    English names as follows.
   </para>
   <programlisting language="ocaml">
 # let digit_alist =
@@ -13531,68 +13533,226 @@ end;;
     these data structures in detail, and provide some advice as to when
     to use one or the other.
   </para>
-  <sect1 id="constructing-a-map">
-    <title>Constructing a map</title>
+  <sect1 id="a-map-example">
+    <title>A map example</title>
     <para>
-      Maps are implemented as ordered binary trees, and as such you need
-      to know how to compare the keys in order to build a map on those
-      keys. Functions for creating a map require that you pass in a
-      value of type <literal>Comparator.t</literal>, which is available
-      as part of any module that satisfies Core's
-      <literal>Comparable</literal> interface. Thus, we can create a map
-      as follows.
+      Let's start by considering an example of how one might use a map
+      in practice. In
+      <xref linkend="files-modules-and-programs"/>, we showed
+      a module for keeping a count of the number of times a given string
+      showed up in a file. Here's the interface that this module
+      provided:
     </para>
     <programlisting language="ocaml">
-# let digit_map = Map.of_alist_exn Int.comparator digit_alist;;
+(* counter.mli *)
+open Core.Std
+
+type t
+
+val empty : t
+val to_list : t -&gt; (string * int) list
+val touch : t -&gt; string -&gt; t
+</programlisting>
+    <para>
+      The intended behavior here is straightforward.
+      <literal>Counter.empty</literal> represents an empty collection of
+      counts; <literal>touch</literal> increments the count of the
+      specified string by 1; and <literal>to_list</literal> returns the
+      list of non-zero string counts.
+    </para>
+    <para>
+      Here's the implementation.
+    </para>
+    <programlisting language="ocaml">
+(* counter.ml *)
+open Core.Std
+
+type t = int String.Map.t
+
+let empty = String.Map.empty
+
+let to_list t = Map.to_alist t
+
+let touch t s =
+  let count = Option.value ~default:0 (Map.find t s) in
+  Map.add t ~key:s ~data:(count + 1)
+</programlisting>
+    <para>
+      Note that in some places the above code refers to
+      <literal>String.Map.t</literal>, and in others
+      <literal>Map.t</literal>. This has to do with the fact that maps
+      are implemented as ordered binary trees, and as such you need some
+      way to compare keys in order to build a map. The
+      <literal>Map</literal> sub-module of <literal>String</literal>
+      contains versions of the map creation functions that are
+      specialized to strings, and that in particular know how to compare
+      strings. This <literal>Map</literal> sub-module is available in
+      any module that satisfied the <literal>Comparable</literal>
+      interface from Core.
+    </para>
+    <para>
+      Once them map is created, it's fully polymorphic, which means that
+      we can use the accessor functions from the <literal>Map</literal>
+      module on a map with keys of any type.
+    </para>
+  </sect1>
+  <sect1 id="creating-maps-with-comparators">
+    <title>Creating maps with comparators</title>
+    <para>
+      The specialized <literal>Map</literal> sub-module is convenient,
+      but you don't necessarily need to use it to create a
+      <literal>Map.t</literal>. The information required to compare
+      values of a given type is wrapped up in a value called a
+      <emphasis>comparator</emphasis>, that can be used to create maps
+      using the <literal>Map</literal> module directly.
+    </para>
+    <programlisting language="ocaml">
+# let digit_map = Map.of_alist_exn digit_alist
+                     ~comparator:Int.comparator;;
 val digit_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
 # Map.find digit_map 3;;
 - : string option = Some &quot;three&quot;
-# let digit_map' = Map.add digit_map 0 &quot;zip&quot;;;
-val digit_map' : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
-# (Map.find digit_map' 0, Map.find digit_map 0);;
-- : string option * string option = (Some &quot;zip&quot;, Some &quot;zero&quot;)
 </programlisting>
     <para>
-      We use the function <literal>Map.of_alist_exn</literal> to
-      construct our map. This function throws an exception if it
-      encounters entries with duplicate keys. Note that we only need to
-      include the comparator on functions that create new maps from
-      scratch. That's because the comparator is stashed inside the map,
-      so it's available within the data-structure when you need to do a
-      lookup or add a binding to a map.
+      Here, we're use <literal>Map.of_alist_exn</literal> to construct
+      our map. This function throws an exception if it encounters
+      entries with duplicate keys.
     </para>
     <para>
-      We don't actually need to grab the comparator explicitly: the
-      <literal>Comparable</literal> interface provides a
-      type-specialized version of the <literal>Map</literal> module, so
-      we can write:
+      Note that the comparator is only required for operations that
+      create maps from scratch. Operations that update an existing map
+      simply inherit the comparator of the map they start with.
     </para>
     <programlisting language="ocaml">
-# let digit_map = Int.Map.of_alist_exn digit_alist;;
-val digit_map : string Int.Map.t = &lt;abstr&gt;
+# let zilch_map = Map.add digit_map ~key:0 ~data:&quot;zilch&quot;;;
+val zilch_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
 </programlisting>
     <para>
-      If we don't want to go to the trouble of using the specialized
-      comparison for a given type, we can use OCaml's build in
-      polymorphic compare as well, as shown below.
+      Note that the type <literal>Map.t</literal> has three type
+      parameters: one for the key, one for the value, and one to
+      identify the comparator used to build the map. This isn't really a
+      new type: <literal>'a Int.Map.t</literal> is just a type alias for
+      <literal>(int,'a,Int.comparator) Map.t</literal>, as you can see
+      by applying a type constraint to <literal>digit_map</literal>.
+    </para>
+    <programlisting language="ocaml">
+# (digit_map : _ Int.Map.t);;
+- : string Int.Map.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      Including the comparator in the type is important because because
+      operations that work on multiple maps at the same time often
+      require that the maps share their comparison function. Consider,
+      for example, <literal>Map.symmetric_diff</literal>, which computes
+      a summary of the differences between two maps.
+    </para>
+    <programlisting language="ocaml">
+# let left = String.Map.of_alist_exn [&quot;foo&quot;,1; &quot;bar&quot;,3; &quot;snoo&quot;, 0]
+  let right = String.Map.of_alist_exn [&quot;foo&quot;,0; &quot;snoo&quot;, 0]
+  let diff = Map.symmetric_diff ~data_equal:Int.equal left right
+  ;;
+val left : int String.Map.t = &lt;abstr&gt;
+val right : int String.Map.t = &lt;abstr&gt;
+val diff :
+  (string * [ `Left of int | `Right of int | `Unequal of int * int ]) list =
+  [(&quot;foo&quot;, `Unequal (1, 0)); (&quot;bar&quot;, `Left 3)]
+</programlisting>
+    <para>
+      If we look at the type of <literal>Map.symmetric_diff</literal>,
+      we'll see that it requires that the two maps it compares have the
+      same comparator type, in addition to the same key type and value
+      type. Each comparator is created along with a fresh type, so the
+      type of a comparator identifies it uniquely.
+    </para>
+    <programlisting language="ocaml">
+# Map.symmetric_diff;;
+- : ('k, 'v, 'cmp) Map.t -&gt;
+    ('k, 'v, 'cmp) Map.t -&gt;
+    data_equal:('v -&gt; 'v -&gt; bool) -&gt;
+    ('k * [ `Left of 'v | `Right of 'v | `Unequal of 'v * 'v ]) list
+= &lt;fun&gt;
+</programlisting>
+    <para>
+      We could create a new comparator for an existing type using the
+      <literal>Make</literal> functor found in the
+      <literal>Comparator</literal> module. This functor takes as its
+      input a module containing the type of the object to be compared,
+      sexp-converter functions, and a comparison function. (The sexp
+      converters are included in the comparator to make it possible for
+      users of the comparator to generate better error messages.)
+    </para>
+    <programlisting language="ocaml">
+# module Reverse = Comparator.Make(struct
+    type t = string
+    let sexp_of_t = String.sexp_of_t
+    let t_of_sexp = String.t_of_sexp
+    let compare x y = String.compare y x
+  end);;
+module Reverse :
+  sig
+    type t = string
+    val compare : t -&gt; t -&gt; int
+    val t_of_sexp : Sexp.t -&gt; t
+    val sexp_of_t : t -&gt; Sexp.t
+    type comparator
+    val comparator : (t, comparator) Comparator.t_
+  end
+</programlisting>
+    <para>
+      Note that the type <literal>comparator</literal> is a new abstract
+      type, and so can't be confused with a different comparator, even
+      if the comparator applies to the same underlying type.
+    </para>
+    <para>
+      Both <literal>Reverse.comparator</literal> and
+      <literal>String.comparator</literal> can be used to create string
+      maps.
+    </para>
+    <programlisting language="ocaml">
+# let alist = [&quot;foo&quot;, 0; &quot;snoo&quot;, 3];;
+val alist : (string * int) list = [(&quot;foo&quot;, 0); (&quot;snoo&quot;, 3)]
+# let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
+val ord_map : (string, int, String.comparator) Map.t = &lt;abstr&gt;
+# let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
+val rev_map : (string, int, Reverse.comparator) Map.t = &lt;abstr&gt;
+# Map.min_elt ord_map;;
+- : (string * int) option = Some (&quot;foo&quot;, 0)
+# Map.min_elt rev_map;;
+- : (string * int) option = Some (&quot;snoo&quot;, 3)
+</programlisting>
+    <para>
+      Now, if we try to compute the symmetric diff of these two maps,
+      the compiler will reject it as a type error.
+    </para>
+    <programlisting language="ocaml">
+# Map.symmetric_diff ord_map rev_map;;
+
+Error: This expression has type (string, int, Reverse.comparator) Map.t
+       but an expression was expected of type
+         ('a, 'b, 'c) Map.t = (string, int, String.comparator) Map.t
+       Type Reverse.comparator is not compatible with type String.comparator 
+</programlisting>
+  </sect1>
+  <sect1 id="using-the-polymorphic-comparator">
+    <title>Using the polymorphic comparator</title>
+    <para>
+      We don't need to generate specialized comparison functions for
+      every type we encounter. Indeed, there's a special comparator
+      that's built on top of OCaml's polymorphic comparison function,
+      called <literal>Comparator.Poly.comparator</literal>. Thus, we can
+      write:
     </para>
     <programlisting language="ocaml">
 # Map.of_alist_exn Comparator.Poly.comparator digit_alist;;
 - : (int, string, Comparator.Poly.comparator) Map.t = &lt;abstr&gt;
 </programlisting>
     <para>
-      Or, more simply, and equivalently:
+      Or, equivalently:
     </para>
     <programlisting language="ocaml">
 # Map.Poly.of_alist_exn digit_alist;;
 - : (int, string) Map.Poly.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      All of these different construction methods end up returning maps
-      of the same polymorphic type, so that accessor functions like
-      <literal>Map.find</literal> or <literal>Map.add</literal> work no
-      matter what.
-    </para>
     <warning> <title> 
     The perils of polymorphic compare
     </title>
@@ -13667,13 +13827,7 @@ Exception: (Invalid_argument &quot;equal: functional value&quot;).
       equality function is not structural.
     </para>
     </warning>
-  </sect1>
-  <sect1 id="working-with-maps">
-    <title>Working with maps</title>
-    <para>
-      Maps come with a bunch of really useful primitives for interacting
-      with them.
-    </para>
+
   </sect1>
 </chapter><chapter id="command-line-parsing">
   <title>Command Line Parsing</title>
@@ -21117,27 +21271,25 @@ type meta = {
   <title>Foreign Function Interface</title>
   <para>
     OCaml has several options available to interact with non-OCaml code.
-    The compiler toolchain can link to external system libraries, and
-    also produce standalone object code. This object code can be turned
-    into shared libraries that that let your OCaml code be called from
-    C, or linked in more exotic ways to embed it directly into
-    applications or even kernel modules.
+    The compiler toolchain can link to external system libraries and
+    also produce standalone native object code that can be embedded
+    within other non-OCaml libraries or applications.
   </para>
-  <para>
-    This chapter walks you through the basics interfacing with C
-    libraries, and then moves onto how to embed your code for a variety
-    of other platforms.
-  </para>
-  <sect1 id="the-ctypes-ffi-library">
-    <title>The <literal>ctypes</literal> FFI library</title>
+  <sect1 id="the-ctypes-foreign-function-library">
+    <title>The <literal>ctypes</literal> foreign function
+    library</title>
     <para>
-      We'll introduce the foreign function interface via the simplest
-      method, which doesn't require writing any C code. The
-      <literal>ctypes</literal> library lets you describe the C
-      interface in pure OCaml, and it takes care of opening the foreign
-      library and invoking the correct function calls . We'll use the
-      <literal>ncurses</literal> terminal-drawing toolkit as our firts
-      example, as it's widely available on most systems.
+      The simplest foreign function interface in OCaml doesn't even
+      require you to write any C code. The <literal>ctypes</literal>
+      library lets you describe the C interface in pure OCaml, and the
+      library takes care of finding the C symbols and invoking the
+      function call with the appropriate arguments.
+    </para>
+    <para>
+      Let's dive straight into an example to show you how the library
+      looks. We'll use a binding to the <literal>ncurses</literal>
+      terminal toolkit, as it's widely available on most systems and
+      doesn't have any complex dependencies.
     </para>
     <note>
     <title>
@@ -21154,7 +21306,10 @@ $ make &amp;&amp; make install
 </programlisting>
     <para>
       It will then be available via the <literal>ctypes</literal>
-      ocamlfind package.
+      ocamlfind package. You will also need the
+      <literal>ncurses</literal> library for the first example. It is
+      pre-installed on MacOS X and Debian Linux includes it as the
+      <literal>ncurses-dev</literal> package.
     </para>
     </note>
   </sect1>
@@ -21162,35 +21317,47 @@ $ make &amp;&amp; make install
     <title>Example: an ncurses terminal interface</title>
     <para>
       Ncurses is a library to build terminal-independent text interfaces
-      in a reasonably efficient way. The manual page (usually via
-      <literal>man ncurses</literal>) explains the basics of the C
-      interface. Below is an excerpt of the header interface found in
-      <literal>&lt;ncurses.h</literal>&gt;.
+      in a reasonably efficient way. It's used in console mail clients
+      like <literal>mutt</literal> and <literal>pine</literal>, and
+      console web browsers such as <literal>lynx</literal>. The
+      <ulink url="http://www.gnu.org/software/ncurses/">documentation</ulink>
+      explains the full C interface, but here's an excerpt that we need
+      for a basic binding to OCaml. The full header file can usually be
+      found in <literal>/usr/include/ncurses.h</literal> on MacOS X or
+      Linux.
     </para>
     <programlisting language="c">
 typedef struct _win_st WINDOW;
 
-WINDOW *initscr (void);
-WINDOW *newwin (int, int, int, int);
-void endwin (void);
-void refresh (void);
-void wrefresh (WINDOW *);
-void mvwaddstr (WINDOW *, int, int, char *);
+WINDOW *initscr   (void);
+WINDOW *newwin    (int, int, int, int);
+void    endwin    (void);
+void    refresh   (void);
+void    wrefresh  (WINDOW *);
+void    mvwaddstr (WINDOW *, int, int, char *);
 </programlisting>
     <para>
-      The <literal>WINDOW</literal> typedef is a forward declaration of
-      a C structure that holds the internal ncurses library state. The
-      specific contents of the structure don't matter, as you need to
-      pass pointers to the structure to the various library calls. The
-      <literal>initscr</literal> function initialises this library state
-      and returns it as a <literal>WINDOW</literal> pointer, and the
-      <literal>newwin</literal> function allows further sub-windows to
-      be created. This pointer is passed to various terminal drawing
-      functions such as <literal>mvwaddrstr</literal>. The terminal is
-      only updated when <literal>refresh</literal> or
-      <literal>wrefresh</literal> are called, and all other drawing
-      calls just manipulate data structures without taking effect on the
-      screen.
+      The <literal>ncurses</literal> library calls either work on the
+      current pseudo-terminal, or on a window that has been created via
+      the library. The <literal>WINDOW</literal> typdef represents this
+      external <literal>ncurses</literal> library state. The specific
+      contents of the structure don't matter; OCaml code just needs to
+      store the pointer and pass it back to <literal>ncurses</literal>
+      library calls that then dereference its contents.
+    </para>
+    <para>
+      There are two library calls that create <literal>WINDOW</literal>
+      pointers. The <literal>initscr</literal> function initialises the
+      library and returns the global window, and
+      <literal>newwin</literal> allows further windows to be created.
+      The <literal>WINDOW</literal> pointer can also be passed to
+      terminal drawing functions such as <literal>mvwaddrstr</literal>
+      (there are over 200 library calls in <literal>ncurses</literal>,
+      so we are just binding a select few for this example). The
+      terminal is updated when <literal>refresh</literal> or
+      <literal>wrefresh</literal> are called. All other drawing calls
+      just manipulate library data structures without actually changing
+      the screen layout.
     </para>
     <para>
       The <literal>ctypes</literal> library provides an OCaml interface
@@ -21201,39 +21368,51 @@ void mvwaddstr (WINDOW *, int, int, char *);
       result as an OCaml value.
     </para>
     <programlisting language="ocaml">
+(* ncurses.ml 1/3 *)
 open Ctypes.Ffi.C
 open Type
 
 type window = unit ptr
-let window : window t = ptr void
+let window = ptr void
 </programlisting>
     <para>
-      The <literal>window</literal> type is declared as a
-      <literal>void</literal> pointer. We also need a value to pass to
-      the <literal>ctypes</literal> library to represent this type, and
-      so the <literal>window</literal> value is built using the
-      <literal>Ctypes.Ffi.C.ptr</literal> function. The actual pointer
-      type from C is a <literal>WINDOW</literal> and not
-      <literal>void</literal>, but we'll show you shortly how we can
-      hide the details of the <literal>window</literal> type in the
-      OCaml module signature. The next step is to use these values to
-      build a foreign function call to <literal>initscr</literal>.
+      We first define a <literal>window</literal> type to represent the
+      C <literal>WINDOW</literal> pointer. The
+      <literal>unit ptr</literal> type is equivalent to a
+      <literal>void *</literal> pointer (we'll constrain the signature
+      later on to avoid mixing up different pointer types). We also need
+      a value representing this <literal>window</literal> type to pass
+      to the <literal>ctypes</literal> library, The
+      <literal>window</literal> value is built using the
+      <literal>Ctypes.Ffi.C.ptr</literal> function. The next step is to
+      use this value to build a foreign function call to
+      <literal>initscr</literal>.
     </para>
     <programlisting language="ocaml">
+(* ncurses.ml 2/3 *)
 let initscr =
   foreign &quot;initscr&quot; (void @-&gt; (returning window))
 </programlisting>
     <para>
       The <literal>foreign</literal> function takes two parameters: the
-      C function call name, and a definition of the arguments and return
-      type. The definition is built up using the combinators defined in
-      <literal>Ctypes.Ffi.C</literal>. The <literal>@-&gt;</literal>
-      operator adds an argument to the parameter list, and the
-      <literal>returning</literal> function declares the return value.
-      The remainder of the <literal>Ncurses</literal> implementation
-      expands on these definitions for the other library functions.
+      C function call name, and a value that defines the C function
+      arguments and return type. This definition can contain any of the
+      C types (including function pointers), and is built using
+      functions defined in <literal>Ctypes.Ffi.C</literal>.
+    </para>
+    <para>
+      Basic C types such as <literal>void</literal> are defined as
+      values in <literal>Ffi.Types.C</literal>, and we have previously
+      defined <literal>window</literal> as a
+      <literal>void ptr</literal>. The <literal>@-&gt;</literal>
+      operator adds an argument to the C parameter list and the
+      <literal>returning</literal> function terminates the parameter
+      list and declares the return value. The remainder of the
+      <literal>Ncurses</literal> implementation expands on these
+      definitions for the other library functions.
     </para>
     <programlisting language="ocaml">
+(* ncurses.ml 3/3 *)
 let endwin =
   foreign &quot;endwin&quot; (void @-&gt; (returning void))
 
@@ -21265,11 +21444,25 @@ let cbreak =
   foreign &quot;cbreak&quot; (void @-&gt; (returning void))
 </programlisting>
     <para>
-      These function calls all have different arguments, but the basic C
-      types are provided by the <literal>Ffi.C</literal> module and can
-      be directly used. The module signature for
-      <literal>ncurses.mli</literal> looks much like a normal OCaml
-      signature:
+      These definitions are all straightforward mappings from the C
+      headers from earlier in the chapter. They use the basic C types
+      defined in <literal>FFi.Types.C</literal> such as
+      <literal>void</literal> or <literal>int</literal>. The
+      <literal>string</literal> value maps from OCaml strings (which
+      have a specific length) onto C character buffers (whose length is
+      defined by a null characters).
+    </para>
+    <para>
+      The module signature for <literal>ncurses.mli</literal> looks much
+      like a normal OCaml signature. You can infer it from
+      <literal>ncurses.ml</literal> by running:
+    </para>
+    <programlisting>
+$ ocamlfind ocamlc -i -package ctypes ncurses.ml
+</programlisting>
+    <para>
+      We've tweaked the automatic signature to make the
+      <literal>type window</literal> abstract, and the result is below:
     </para>
     <programlisting language="ocaml">
 type window
@@ -21288,13 +21481,16 @@ val box       : window -&gt; int -&gt; int -&gt; unit
 val cbreak    : unit   -&gt; unit
 </programlisting>
     <para>
-      Notice that the <literal>window</literal> type is left abstract to
-      external users, so that it can only be constructed via
-      <literal>Ncurses.initscr</literal>. This interface is now safe to
-      use in example code. Here's what an ncurses hello world looks
-      like:
+      The <literal>window</literal> type is left abstract to external
+      users so that it can only be constructed via the
+      <literal>Ncurses.initscr</literal> function. This interface is now
+      safe to use externally, since window pointers cannot be mixed up
+      with other <literal>void</literal> pointers (e.g. those obtained
+      by other libraries). Here's what a &quot;hello world&quot; that
+      uses the library looks like:
     </para>
     <programlisting language="ocaml">
+(* hello.ml *)
 open Ncurses
 
 let () =
@@ -21311,7 +21507,9 @@ let () =
   endwin ()
 </programlisting>
     <para>
-      This code can be compiled by:
+      This code can be compiled by linking against the
+      <literal>ctypes</literal> and <literal>unix</literal> ocamlfind
+      packages.
     </para>
     <programlisting>
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
@@ -21319,13 +21517,12 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
 </programlisting>
     <para>
       Running <literal>./hello</literal> should now display a Hello
-      World in your terminal with a box around the &quot;World&quot;.
-      Notice that the compilation line includes
-      <literal>-cclib -lncurses</literal>. This tells the OCaml compiler
-      to link the output binary to the ncurses library, which in turns
-      makes the symbols available to the program when it starts. If you
-      omit that line, you'll get an error when you try to run the
-      binary:
+      World in your terminal! The compilation line above includes
+      <literal>-cclib -lncurses</literal> to make the OCaml compiler
+      link the output to the <literal>ncurses</literal> C library, which
+      in turns makes the C symbols available to the program when it
+      starts. You should get an error when you run the binary if you
+      omit that link directive.
     </para>
     <programlisting>
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
@@ -21337,13 +21534,13 @@ Fatal error: exception Dl.DL_error(&quot;dlsym(RTLD_DEFAULT, initscr): symbol no
   <sect1 id="defining-basic-c-formats-from-ocaml">
     <title>Defining basic C formats from OCaml</title>
     <para>
-      The <literal>Ctypes</literal> library provides an
-      <literal>FFi.C</literal> module that lets you describe not only
-      basic C types, but also more complex structures and unions. It
-      defines abstract OCaml types for all of these in
-      <literal>FFi.C</literal>:
+      <literal>Ctypes</literal> provides an <literal>Ffi.C</literal>
+      module that lets you describe not only basic C types, but also
+      more complex structures and unions. It defines abstract OCaml
+      types for these within the module.
     </para>
     <programlisting language="ocaml">
+(* Ctypes.Ffi.C *)
 type 'a typ        (** Basic C type  *)
 type 'a ptr        (** C pointer *)
 type 'a array      (** C array of 'a values *)
@@ -21352,11 +21549,13 @@ type 'a union      (** C `union` *)
 type 'a abstract   (** Abstract C pointer *)
 </programlisting>
     <para>
-      The <literal>Ffi.C.Type</literal> module defines constructors for
-      the familiar C basic types and lets you build
-      <literal>'a typ</literal> values.
+      The module also defines constructors for the familiar C basic
+      types. These constructors build a value of
+      <literal>Ctype.FFi.C.typ</literal> that represents that basic C
+      type.
     </para>
     <programlisting language="ocaml">
+(* Ctypes.Ffi.C 1/3 *)
 module Type : sig
   type 'a t = 'a typ 
   
@@ -21377,39 +21576,55 @@ module Type : sig
 ...
 </programlisting>
     <para>
-      These functions all return an <literal>'a typ</literal>, where the
+      These functions return an <literal>'a typ</literal> where the
       <literal>'a</literal> component is the OCaml representation of the
       C type. For example, OCaml only supports double-precision floating
-      point numbers, and so both of the C <literal>float</literal> and
-      <literal>double</literal> functions map to the OCaml
-      <literal>float</literal> type. The <literal>Ffi.Unsigned</literal>
-      and <literal>Ffi.Signed</literal> modules provide some optimized
-      implementations of specific C types, such as
-      <literal>llong</literal> (for <literal>long long</literal> 64-bit
-      values).
+      point numbers and so the C <literal>float</literal> and
+      <literal>double</literal> functions both map to the OCaml
+      <literal>float</literal> type.
     </para>
     <para>
-      The module also defines some more advanced C types
+      The <literal>Ffi.Unsigned</literal> and
+      <literal>Ffi.Signed</literal> modules provide optimized
+      implementations of C types such as <literal>llong</literal> (for
+      <literal>long long</literal> 64-bit values) or
+      <literal>int32_t</literal> (for signed 32-bit values). The module
+      also defines some more advanced C types that aren't
+      straightforward mappings to and from OCaml.
     </para>
     <programlisting language="ocaml">
-... 
+(* Ctypes.Ffi.C 2/3 *)
   val string : string t
   val abstract : size:int -&gt; alignment:int -&gt; 'a abstract t
   val array : int -&gt; 'a t -&gt; 'a array t
   val ptr : 'a t -&gt; 'a ptr t
 </programlisting>
     <para>
-      Strings in C are null-terminator character arrays, whereas OCaml
-      strings have a fixed-length and can contain null values. The
-      <literal>string</literal> mapping safely copies between these two
-      strings. if you need an abstract C type (for example, from a
-      forward declaration of a <literal>struct</literal>), then just
-      define an <literal>abstract t</literal>. Arrays and pointers can
-      be built out of primitive types by using the corresponding
-      constructor functions.
+      Strings in C are null-terminated character arrays, while OCaml
+      strings have a fixed-length specified in the value header. The
+      <literal>string</literal> function creates a safe mapping between
+      these two representations by copying the data to and from OCaml
+      strings and C character buffers.
+    </para>
+    <para>
+      Arrays and pointers can be built from basic types by using the
+      corresponding <literal>array</literal> and <literal>ptr</literal>
+      functions. The <literal>abstract</literal> function accepts size
+      and alignment requirements and ensures that these are satisfied
+      when this type is used in a function call. Notice that the result
+      types of these functions all share the same
+      <literal>Ffi.Type.C.t</literal> type as the basic C type
+      definitions, which means that they can all be used
+      interchangeably.
+    </para>
+    <para>
+      The next step is to group collections of C types into function
+      definitions, which are represented by type
+      <literal>'a Ffi.Type.f</literal>.
     </para>
     <programlisting language="ocaml">
-...
+(* Ctypes.Ffi.C 3/3 *)
+  type 'a f
   val ( @-&gt; ) : 'a t -&gt; 'b f -&gt; ('a -&gt; 'b) f
   val returning : 'a t -&gt; 'a f
   val funptr : ('a -&gt; 'b) f -&gt; ('a -&gt; 'b) t
@@ -21422,7 +21637,8 @@ module Type : sig
       callback using <literal>funptr</literal>. The library takes care
       of the garbage collector interface to ensure that the OCaml value
       isn't moved around while the C library is holding a reference to
-      the value.
+      the value. We'll come back to an example of using
+      <literal>funptr</literal> later in the chapter.
     </para>
     <sect2 id="arrays-structures-and-unions">
       <title>Arrays, structures and unions</title>
@@ -21447,19 +21663,21 @@ end
 </programlisting>
       <para>
         The array functions are similar to the standard library
-        <literal>Array</literal> module. The conversion between arrays
-        and lists involves reallocating the values, and can be expensive
-        for very large data structures. Notice that you can also convert
-        an array into a <literal>ptr</literal> pointer to the head of
-        buffer, which can be useful if you need to pass the pointer and
-        size arguments separately to a C function.
+        <literal>Array</literal> module, except that they represent flat
+        C arrays instead of OCaml ones. The conversion between arrays
+        and lists still requires copying the values, and can be
+        expensive for large data structures. Notice that you can also
+        convert an array into a <literal>ptr</literal> pointer to the
+        head of buffer, which can be useful if you need to pass the
+        pointer and size arguments separately to a C function.
       </para>
       <para>
         Structures in C can contain a mixture of types, and, like OCaml
         records, their order is significant. The
         <literal>Ffi.C.Type.Struct</literal> module defines combinators
-        to make this as easy as arrays and basic types. Let's start with
-        an example by binding some time-related UNIX functions.
+        to make this definition as easy basic types were. Let's look at
+        an with an example by binding some time-related UNIX functions
+        that use C structures in their interface.
       </para>
     </sect2>
     <sect2 id="example-binding-unix-date-functions">
@@ -21472,6 +21690,8 @@ end
         signature and return value:
       </para>
       <programlisting language="c">
+/* /usr/include/time.h */
+
 struct tm {
   int     tm_sec;         /* seconds after the minute [0-60] */
   int     tm_min;         /* minutes after the hour [0-59] */
@@ -21489,16 +21709,16 @@ struct tm *localtime(const time_t *);
 </programlisting>
       <para>
         This example is more complicated than ncurses for a couple of
-        reasons. We need to allocate some memory to store a
+        reasons. We need to allocate some external memory to store a
         <literal>time_t</literal> value, and pass that memory into the
         <literal>time</literal> library call to obtain the current
-        timezone. This <literal>time_t</literal> is then passed to the
-        <literal>localtime</literal> library call, which returns a
+        timezone. This <literal>time_t</literal> value is passed to the
+        <literal>localtime</literal> library call, which then returns a
         pointer to the <literal>struct tm</literal>.
       </para>
       <para>
-        The <literal>time_t</literal>, and most other standard POSIX
-        types, are already provided by the
+        The <literal>time_t</literal> and many other standard POSIX
+        types are already provided by the
         <literal>Ffi.PosixTypes</literal> module. Let's start by
         defining the OCaml mapping to <literal>struct tm</literal>:
       </para>
@@ -21522,16 +21742,22 @@ let tm_isdst = tm *:* int (* daylight saving time *)
 let () = seals (tm : tm structure typ)
 </programlisting>
       <para>
-        This is a very mechanical translation from the C structure, due
-        to the magic of the <literal>*:*</literal> combinator provided
-        by the <literal>Struct</literal> module. We start building the
-        definition via the <literal>structure</literal> allocator. Then
-        the types are added in sequence, with each application recording
-        the position in the <literal>tm</literal> structure. When all
-        the fields have been added, the structure is finalized via the
-        <literal>seals</literal> call. The definitions of
-        <literal>time</literal> and <literal>localtime</literal> should
-        now be familiar:
+        This is a fairly mechanical translation from the C structure by
+        using the magic of the <literal>*:*</literal> combinator
+        provided by the <literal>Ffi.C.Struct</literal> module. The
+        structure is initialised in the <literal>tm</literal> variable
+        via the <literal>structure</literal> allocator. The fields of
+        the structure are then added in sequence. Each new field mutates
+        the <literal>tm</literal> structure to append its name and
+        offset. The structure is finalized via <literal>seals</literal>
+        when all the fields have been added, and the structure can now
+        be used.
+      </para>
+      <para>
+        The OCaml definitions of <literal>time</literal> and
+        <literal>localtime</literal> are now straightforward calls to
+        <literal>foreign</literal>, just like our earlier
+        <literal>ncurses</literal> example.
       </para>
       <programlisting language="ocaml">
 let time = foreign &quot;time&quot; (ptr time_t @-&gt; syscall time_t)
@@ -21539,7 +21765,7 @@ let asctime = foreign &quot;asctime&quot; (ptr tm @-&gt; returning string)
 let localtime = foreign &quot;localtime&quot; (ptr time_t @-&gt; returning (ptr tm))
 </programlisting>
       <para>
-        The complete signature for this definition looks like this:
+        The OCaml signature for this definition looks like this:
       </para>
       <programlisting language="ocaml">
 open Ffi.C
@@ -21560,12 +21786,11 @@ val localtime : PosixTypes.time_t ptr -&gt; tm structure ptr
 val asctime : PosixTypes.time_t ptr -&gt; string
 </programlisting>
       <para>
-        Unlike the ncurses example, some of the FFI types are still
-        exposed in this signature due to the manual memory interface
-        required by the C libraries. To use the OCaml
-        <literal>time</literal> and <literal>localtime</literal>
-        functions, we need to allocate some memory and construct values
-        of type <literal>time_t ptr</literal> to them.
+        Some of the FFI types are still exposed in this signature due to
+        the manual memory interface required by the C libraries. The
+        OCaml <literal>time</literal> and <literal>localtime</literal>
+        can be used by allocating external memory and constructing
+        values of type <literal>time_t ptr</literal>.
       </para>
       <programlisting language="ocaml">
 let () =
@@ -21577,16 +21802,17 @@ let () =
       <para>
         The <literal>Ptr.allocate</literal> function allocates memory
         via <literal>malloc</literal> and creates an OCaml value to
-        point to it. This OCaml value (<literal>timep</literal> in the
-        example) has a finalizer function which frees the external
-        memory when it is garbage collected. The
-        <literal>timep</literal> pointer is passed into the
-        <literal>time</literal> library call, which modifies it
-        in-place. The <literal>timep</literal> pointer is then passed on
-        to <literal>localtime</literal>, whose return value is converted
-        into an OCaml string via <literal>asctime</literal>. The garbage
-        collector can then collect <literal>timep</literal> during the
-        next collection cycle.
+        point to this external memory buffer. This OCaml value
+        (<literal>timep</literal> in the example) has a finalizer
+        function which frees the external memory when it is garbage
+        collected. The <literal>timep</literal> pointer is passed into
+        the <literal>time</literal> library call, which modifies it
+        in-place. The same pointer is subsequently passed to
+        <literal>localtime</literal>, whose return <literal>tm</literal>
+        structure is converted into an OCaml string via the
+        <literal>asctime</literal> function. The garbage collector is
+        free to free <literal>timep</literal> during the next collection
+        cycle.
       </para>
       <para>
         Unions in C are a collection of named structures that can be
@@ -22490,6 +22716,35 @@ struct custom_operations {
         the C interface section)
       </para>
     </sect2>
+  </sect1>
+</chapter><chapter id="compiler-output-formats">
+  <title>Compiler Output Formats</title>
+  <sect1 id="from-type-checking-to-executables">
+    <title>From type checking to executables</title>
+    <programlisting>
+             |
+             | parsing and preprocessing
+             v
+          Parsetree (untyped AST)
+             |
+             | type inference and checking
+             v
+          Typedtree (type-annotated AST)
+             |
+             | pattern-matching compilation, elimination of modules, classes
+             v
+          Lambda
+           /  \
+          /    \ closure conversion, inlining, uncurrying,
+         v      \  data representation strategy
+      Bytecode   \
+                  \
+                 Cmm
+                  |
+                  | code generation
+                  v
+               Assembly code
+</programlisting>
   </sect1>
   <sect1 id="interfacing-with-c">
     <title>Interfacing with C</title>
