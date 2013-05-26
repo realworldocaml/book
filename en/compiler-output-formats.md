@@ -594,6 +594,46 @@ section of the OCaml manual.
 
 ### Native code generation
 
+The native code compiler is ultimately the tool that production OCaml code goes
+through.  It compiles the lambda form into fast native code executables, with
+cross-module inlining and code optimization passes that the bytecode
+interpreter doesn't perform.  However, care is taken to ensure compatibility
+with the bytecode runtime, and the same code should run identically when
+compiled with either toolchain.
+
+The `ocamlopt` command is the frontend to the native code compiler, and has a
+very similar interface to `ocamlc`.  It also accepts `ml` and `mli` files, but
+compiles them to:
+
+* A `.o` file containing native object code.
+* A `.cmx` file containing extra information for linking and cross-module optimization.
+* A `.cmi` compiled interface file that is the same as the bytecode compiler.
+
+When the compiler links modules together into an executable, it uses the
+contents of the `cmx` files to perform cross-module inlining across compilation
+units.  This can be a significant speedup for standard library functions that
+are frequently used outside of their module.
+
+Collections of `.cmx` and `.o` files can also be be linked into a `.cmxa`
+archive by passing the `-a` flag to the compiler.  However, unlike the bytecode
+version, you must keep the individual `cmx` files in the compiler search path
+so that they are available for cross-module inlining.  If you don't do this,
+the compilation will still succeed, but you will have missed out on an
+important optimization and have slower binaries.
+
+#### Building debuggable libraries
+
+The native code compiler builds executables that can be debugged using
+conventional system debuggers such as GNU `gdb`.  You'll need to compile your
+libraries with the `-g` option to add the debug information to the output, just
+as you need to with C compilers.
+
+TODO add example of gdb breakpoint use
+
+#### Profiling native code libraries
+
+TODOs
+
 ## Interfacing with C
 
 Now that you understand the runtime structure of the garbage collector, you can
