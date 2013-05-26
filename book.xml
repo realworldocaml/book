@@ -13491,11 +13491,11 @@ end;;
 </chapter></part><part label="II"><title>Tools and Techniques</title><chapter id="maps-and-hashtables">
   <title>Maps and Hashtables</title>
   <para>
-    Data is often most naturally organized as key/value pairs. Maybe the
-    simplest way of representing this in OCaml is as a list of pairs,
-    <emphasis>i.e.</emphasis>, an <emphasis>association list</emphasis>.
-    Thus, you could represent a mapping between the 10 digits and their
-    English names as follows.
+    Many problems solve for representing data as key/value pairs. Maybe
+    the simplest way of doing so in OCaml is an <emphasis>association
+    list</emphasis>, <emphasis>i.e.</emphasis>, a list of pairs of keys
+    and values. For example, you could represent a mapping between the
+    10 digits and their English names as follows.
   </para>
   <programlisting language="ocaml">
 # let digit_alist =
@@ -13505,7 +13505,7 @@ end;;
 </programlisting>
   <para>
     We can use functions from the <literal>List.Assoc</literal> module
-    to manipulate such a list.
+    to manipulate such an association list.
   </para>
   <programlisting language="ocaml">
 # List.Assoc.find digit_alist 6;;
@@ -13519,19 +13519,18 @@ end;;
 </programlisting>
   <para>
     Association lists are simple and easy to use, but their performance
-    is poor for most applications, since almost every non-trivial
-    operation on an association list requires a linear-time scan of the
-    list.
+    is not ideal, since almost every non-trivial operation on an
+    association list requires a linear-time scan of the list.
   </para>
   <para>
     In this chapter, we'll talk about two more efficient alternatives to
     association lists: <emphasis>maps</emphasis> and
     <emphasis>hash-tables</emphasis>. A map is an immutable tree-based
     data structure where most operations take time logarithmic in the
-    size of the map; a hash-table is a mutable data structure where most
-    operations have constant time complexity. We'll describe both of
-    these data structures in detail, and provide some advice as to when
-    to use one or the other.
+    size of the map, whereas a hash-table is a mutable data structure
+    where most operations have constant time complexity. We'll describe
+    both of these data structures in detail, and provide some advice as
+    to how to choose between them.
   </para>
   <sect1 id="a-map-example">
     <title>A map example</title>
@@ -13539,9 +13538,8 @@ end;;
       Let's start by considering an example of how one might use a map
       in practice. In
       <xref linkend="files-modules-and-programs"/>, we showed
-      a module for keeping a count of the number of times a given string
-      showed up in a file. Here's the interface that this module
-      provided:
+      a module <literal>Counter</literal> for keeping counts on a set of
+      strings. Here's the interface.
     </para>
     <programlisting language="ocaml">
 (* counter.mli *)
@@ -13558,7 +13556,7 @@ val touch : t -&gt; string -&gt; t
       <literal>Counter.empty</literal> represents an empty collection of
       counts; <literal>touch</literal> increments the count of the
       specified string by 1; and <literal>to_list</literal> returns the
-      list of non-zero string counts.
+      list of non-zero string/count pairs.
     </para>
     <para>
       Here's the implementation.
@@ -13581,19 +13579,27 @@ let touch t s =
       Note that in some places the above code refers to
       <literal>String.Map.t</literal>, and in others
       <literal>Map.t</literal>. This has to do with the fact that maps
-      are implemented as ordered binary trees, and as such you need some
-      way to compare keys in order to build a map. The
-      <literal>Map</literal> sub-module of <literal>String</literal>
-      contains versions of the map creation functions that are
-      specialized to strings, and that in particular know how to compare
-      strings. This <literal>Map</literal> sub-module is available in
-      any module that satisfied the <literal>Comparable</literal>
-      interface from Core.
+      are implemented as ordered binary trees, and as such, maps need a
+      way of comparing keys. To deal with this, a map actually stores
+      the necessary comparison function within the data structure.
     </para>
     <para>
-      Once them map is created, it's fully polymorphic, which means that
-      we can use the accessor functions from the <literal>Map</literal>
-      module on a map with keys of any type.
+      Thus, operations that merely access the contents of an existing
+      map, like <literal>Map.find</literal>, do so by using the
+      comparison function embedded within the map. Similarly, functions
+      that generate a new map from an old one, like
+      <literal>Map.add</literal>, do the same.
+    </para>
+    <para>
+      But in order to get a map in the first place, you need to get your
+      hands on the comparison function. For this reason, modules like
+      <literal>String</literal> contain a <literal>Map</literal>
+      sub-module that have values like
+      <literal>String.Map.empty</literal> and
+      <literal>String.Map.of_alist</literal> that are specialized to
+      strings, and that in particular know how to compare strings. Such
+      a <literal>Map</literal> sub-module is included in any module that
+      satisfies the <literal>Comparable</literal> interface from Core.
     </para>
   </sect1>
   <sect1 id="creating-maps-with-comparators">
@@ -13628,17 +13634,12 @@ val digit_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
 val zilch_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
 </programlisting>
     <para>
-      Note that the type <literal>Map.t</literal> has three type
-      parameters: one for the key, one for the value, and one to
-      identify the comparator used to build the map. This isn't really a
-      new type: <literal>'a Int.Map.t</literal> is just a type alias for
-      <literal>(int,'a,Int.comparator) Map.t</literal>, as you can see
-      by applying a type constraint to <literal>digit_map</literal>.
+      The type <literal>Map.t</literal> has three type parameters: one
+      for the key, one for the value, and one to identify the comparator
+      used to build the map. The type <literal>'a Int.Map.t</literal> is
+      actually just a type alias for
+      <literal>(int,'a,Int.comparator) Map.t</literal>
     </para>
-    <programlisting language="ocaml">
-# (digit_map : _ Int.Map.t);;
-- : string Int.Map.t = &lt;abstr&gt;
-</programlisting>
     <para>
       Including the comparator in the type is important because because
       operations that work on multiple maps at the same time often
@@ -13661,8 +13662,8 @@ val diff :
       If we look at the type of <literal>Map.symmetric_diff</literal>,
       we'll see that it requires that the two maps it compares have the
       same comparator type, in addition to the same key type and value
-      type. Each comparator is created along with a fresh type, so the
-      type of a comparator identifies it uniquely.
+      type. Each comparator has a fresh abstract type, so the type of a
+      comparator identifies it uniquely.
     </para>
     <programlisting language="ocaml">
 # Map.symmetric_diff;;
@@ -13699,11 +13700,6 @@ module Reverse :
   end
 </programlisting>
     <para>
-      Note that the type <literal>comparator</literal> is a new abstract
-      type, and so can't be confused with a different comparator, even
-      if the comparator applies to the same underlying type.
-    </para>
-    <para>
       Both <literal>Reverse.comparator</literal> and
       <literal>String.comparator</literal> can be used to create string
       maps.
@@ -13715,14 +13711,21 @@ val alist : (string * int) list = [(&quot;foo&quot;, 0); (&quot;snoo&quot;, 3)]
 val ord_map : (string, int, String.comparator) Map.t = &lt;abstr&gt;
 # let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
 val rev_map : (string, int, Reverse.comparator) Map.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      And if we use <literal>Map.min_elt</literal>, that returns the key
+      and value for the smallest key in the map, we can see that these
+      two maps indeed do use different comparison fucntions.
+    </para>
+    <programlisting language="ocaml">
 # Map.min_elt ord_map;;
 - : (string * int) option = Some (&quot;foo&quot;, 0)
 # Map.min_elt rev_map;;
 - : (string * int) option = Some (&quot;snoo&quot;, 3)
 </programlisting>
     <para>
-      Now, if we try to compute the symmetric diff of these two maps,
-      the compiler will reject it as a type error.
+      If we try to compute the symmetric diff of these two maps, the
+      compiler will reject it as a type error.
     </para>
     <programlisting language="ocaml">
 # Map.symmetric_diff ord_map rev_map;;
@@ -22810,7 +22813,7 @@ struct custom_operations {
         A common use of custom blocks is to manage external system
         memory directly from within OCaml, via the
         <literal>Bigarray</literal> module. We'll cover this later on in
-        <ulink url="parsing-binary-protocols-with-bigarray">xref</ulink>.
+        <xref linkend="parsing-binary-protocols-with-bigarray"/>.
       </para>
     </sect2>
   </sect1>
@@ -22894,7 +22897,7 @@ struct custom_operations {
         eliminates code which doesn't match basic syntactic
         requirements. The OCaml lexer and parser use the same basic
         techniques described earlier in
-        <ulink url="parsing-with-ocamllex-and-menhir">xref</ulink>.
+        <xref linkend="parsing-with-ocamllex-and-menhir"/>.
       </para>
       <para>
         One powerful feature present in OCaml is the facility to
@@ -22913,6 +22916,13 @@ struct custom_operations {
       <itemizedlist>
         <listitem>
           <para>
+            <emphasis role="strong">Fieldslib</emphasis> to generates
+            first-class values that represent fields of a record in
+            <xref linkend="records"/>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
             <emphasis role="strong">Sexplib</emphasis> to convert types
             to s-expressions in
             <xref linkend="data-serialization-with-s-expressions"/>
@@ -22923,13 +22933,6 @@ struct custom_operations {
             <emphasis role="strong">Bin_prot</emphasis>: for efficient
             binary conversion in
             <xref linkend="fast-binary-serialization"/>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <emphasis role="strong">Fieldslib</emphasis> to generates
-            first-class values that represent fields of a record in
-            <xref linkend="records"/>.
           </para>
         </listitem>
       </itemizedlist>
@@ -22958,8 +22961,8 @@ struct custom_operations {
         <para>
           OCaml provides a polymorphic comparison operator that inspects
           the runtime representation of two values to see if they are
-          equal. As we noted in [xref](maps-and-hashtables], this is not
-          as efficient or as safe as defining explicit comparison
+          equal. As we noted in [xref](#maps-and-hashtables], this is
+          not as efficient or as safe as defining explicit comparison
           functions between values.
         </para>
         <para>
@@ -23018,9 +23021,9 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1
           This shell script uses the <literal>ocamlfind</literal>
           package manager to list the include and library paths required
           by the <literal>comparelib</literal> syntax extension. The
-          final <literal>camlp4o</literal> command invokes the
-          <literal>camlp4o</literal> preprocessor directly and outputs
-          the resulting AST to standard output as textual source code.
+          final command invokes the <literal>camlp4o</literal>
+          preprocessor directly and outputs the resulting AST to
+          standard output as textual source code.
         </para>
         <programlisting>
 $ sh camlp4_dump comparelib_test.ml
@@ -23107,11 +23110,253 @@ val compare : t -&gt; t -&gt; int
     <sect2 id="the-type-checking-phase">
       <title>The type checking phase</title>
       <para>
+        After obtaining a valid parsed AST, the compiler must then check
+        that the code obeys the rules of the static type system. At this
+        stage, code that is syntactically correct but misuses values is
+        rejected with an explanation of the problem. We're not going to
+        delve into the details of how type-checking works here (the rest
+        of the book covers that), but rather how it fits in with the
+        rest of the compilation process.
       </para>
-    </sect2>
-    <sect2 id="the-lambda-form">
-      <title>The lambda form</title>
       <para>
+        Assuming that the source code is validly typed, the original AST
+        is transformed into a typed AST. This has the same broad
+        structure of the untyped AST, but syntactic phrases are replaced
+        with typed variants instead.
+      </para>
+      <para>
+        You can explore the type checking process very simply. Create a
+        file with a single type definition and value.
+      </para>
+      <programlisting language="ocaml">
+(* typedef.ml *)
+type t = Foo | Bar
+let v = Foo
+</programlisting>
+      <para>
+        Now run the compiler on this file to <emphasis>infer</emphasis>
+        a default type for the compilation unit. This will run the type
+        checking process on the compilation unit you specify.
+      </para>
+      <programlisting>
+$ ocamlc -i typedef.ml
+type t = Foo | Bar
+val v : t
+</programlisting>
+      <para>
+        The type checker has run and provided a default signature for
+        the module. It's often useful to redirect this output to an
+        <literal>mli</literal> file to give you a starting signature to
+        edit the external interface, without having to type it all in by
+        hand.
+      </para>
+      <sect3 id="using-ocamlobjinfo-to-inspect-compilation-units">
+        <title>Using <literal>ocamlobjinfo</literal> to inspect
+        compilation units</title>
+        <para>
+          Recall from
+          <xref linkend="files-modules-and-programs"/> that
+          <literal>mli</literal> files are optional. If you don't supply
+          an explicit signature, then the inferred output from the
+          module implementation is used instead. The compiled version of
+          the signature is stored in a filename ending with
+          <literal>cmi</literal>.
+        </para>
+        <programlisting>
+$ ocamlc -c typedef.ml
+$ ocamlobjinfo typedef.cmi
+File typedef.cmi
+Unit name: Typedef
+Interfaces imported:
+    559f8708a08ddf66822f08be4e9c3372    Typedef
+    65014ccc4d9329a2666360e6af2d7352    Pervasives
+</programlisting>
+        <para>
+          The <literal>ocamlobjinfo</literal> command examines the
+          compiled interface and displays what other compilation units
+          it depends on. In this case, we don't use any external modules
+          other than <literal>Pervasives</literal>. Every module depends
+          on <literal>Pervasives</literal> by default, unless you use
+          the <literal>-nopervasives</literal> flag (this is an advanced
+          use-case, and you shouldn't need it in normal use).
+        </para>
+        <para>
+          The long alphanumeric identifier beside each module name is a
+          hash calculated from all the types and values exported from
+          that compilation unit. This is used during type-checking and
+          linking to check that all of the compilation units have been
+          compiled consistently against each other. A difference in the
+          hashes means that a compilation unit with the same module name
+          may have conflicting type signatures in different modules.
+          This violates static type safety if these conflicting
+          instances are ever linked together, as every well-typed value
+          has precisely one type in OCaml.
+        </para>
+        <para>
+          This hash check ensures that separate compilation remains type
+          safe all the way up to the final link phase. Each source file
+          is type checked separately, but the hash of the signature of
+          any external modules is recorded with the compiled signature.
+        </para>
+      </sect3>
+      <sect3 id="examining-the-typed-syntax-tree">
+        <title>Examining the typed syntax tree</title>
+        <para>
+          The compiler has a couple of advanced flags that can dump the
+          raw output of the internal AST representation. You can't
+          depend on these flags to give the same output across compiler
+          revisions, but they are a useful learning tool.
+        </para>
+        <para>
+          First, let's look at the untyped AST from our
+          <literal>typedef.ml</literal>.
+        </para>
+        <programlisting>
+$ ocamlc -dparsetree typedef.ml
+[
+  structure_item (typedef.ml[1,0+0]..[1,0+18])
+    Pstr_type [
+      &quot;t&quot; (typedef.ml[1,0+5]..[1,0+6])
+        type_declaration (typedef.ml[1,0+5]..[1,0+18])
+          ptype_params = []
+          ptype_cstrs = []
+          ptype_kind =
+            Ptype_variant
+              [
+                (typedef.ml[1,0+9]..[1,0+12])
+                  &quot;Foo&quot; (typedef.ml[1,0+9]..[1,0+12])
+                  [] None
+                (typedef.ml[1,0+15]..[1,0+18])
+                  &quot;Bar&quot; (typedef.ml[1,0+15]..[1,0+18])
+                  [] None
+              ]
+          ptype_private = Public
+          ptype_manifest = None
+    ]
+  structure_item (typedef.ml[2,19+0]..[2,19+11])
+    Pstr_value Nonrec [
+      &lt;def&gt;
+        pattern (typedef.ml[2,19+4]..[2,19+5])
+          Ppat_var &quot;v&quot; (typedef.ml[2,19+4]..[2,19+5])
+        expression (typedef.ml[2,19+8]..[2,19+11])
+          Pexp_construct &quot;Foo&quot; (typedef.ml[2,19+8]..[2,19+11])
+          None false
+    ]
+]
+</programlisting>
+        <para>
+          This is rather a lot of output for a simple two-line program,
+          but also reveals a lot about how the compiler works. Each
+          portion of the tree is decorated with the precise location
+          information (including the filename and character location of
+          the token). This code hasn't been type checked yet, and so the
+          raw tokens are all included. After type checking, the
+          structure is much simpler.
+        </para>
+        <programlisting>
+$ ocamlc -dtypedtree typedef.m
+[
+  structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+    Pstr_type [
+      t/1008
+        type_declaration (typedef.ml[1,0+5]..typedef.ml[1,0+18])
+          ptype_params = []
+          ptype_cstrs = []
+          ptype_kind =
+            Ptype_variant
+              [
+                &quot;Foo/1009&quot; []
+                &quot;Bar/1010&quot; []
+              ]
+          ptype_private = Public
+          ptype_manifest = None
+    ]
+  structure_item (typedef.ml[2,19+0]..typedef.ml[2,19+11])
+    Pstr_value Nonrec [
+      &lt;def&gt;
+        pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
+          Ppat_var &quot;v/1011&quot;
+        expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
+          Pexp_construct &quot;Foo&quot; [] false
+    ]
+]
+</programlisting>
+        <para>
+          The typed AST is more explicit than the untyped syntax tree.
+          For instance, the type declaration has been given a unique
+          name (<literal>t/1008</literal>), as has the
+          <literal>v</literal> value (<literal>v/1011</literal>).
+        </para>
+        <para>
+          You'll never need to use this information in day-to-day
+          development, but it's always instructive to examine how the
+          type checker folds in the source code into a more compact form
+          like this.
+        </para>
+      </sect3>
+    </sect2>
+    <sect2 id="the-untyped-lambda-form">
+      <title>The untyped lambda form</title>
+      <para>
+        Once OCaml gets to the typed AST phase, it begins eliminating
+        all the static type information into a simpler intermediate
+        <emphasis>lambda form</emphasis>. The lambda form discards all
+        the modules and objects, replacing them with simpler records and
+        function pointers instead. Pattern matches are also compiled
+        into table automata that are highly optimized jump tables for
+        the particular type.
+      </para>
+      <para>
+        It' possible to examine all this behaviour via an intermediate
+        form that the compiler can output. Create a new
+        <literal>pattern.ml</literal> file alongside the previous
+        <literal>typedef.ml</literal>.
+      </para>
+      <programlisting language="ocaml">
+(* pattern.ml *)
+open Typedef
+let _ =
+  match v with
+  | Foo -&gt; &quot;foo&quot;
+  | Bar -&gt; &quot;bar&quot;
+</programlisting>
+      <para>
+        The lambda form is the first representation that discards the
+        OCaml type information. It's quite similar to Lisp, and
+        manipulates OCaml blocks and fields that should be familiar from
+        <xref linkend="memory-representation-of-values"/>. To
+        see it for <literal>pattern.ml</literal>, compile as usual but
+        add the <literal>-dlambda</literal> directive.
+      </para>
+      <programlisting>
+$ ocamlc -dlambda -c pattern.ml 
+(setglobal Pattern!
+  (seq
+    (let (match/1008 (field 0 (global Typedef!)))
+      (if (!= match/1008 0) &quot;bar&quot; &quot;foo&quot;))
+    (makeblock 0)))
+</programlisting>
+      <para>
+        This has no mention of modules or types any more. The pattern
+        match has turned into an integer comparison by checking the
+        header tag of <literal>Typedef.v</literal>. Recall that variants
+        without parameters are stored in memory as integers in the order
+        which they appear. The pattern matching engine understands this,
+        and has transformed the pattern match into a single integer
+        comparison. A tag of <literal>0</literal> is mapped to
+        <literal>Foo</literal> and a non-zero value to
+        <literal>Bar</literal>.
+      </para>
+      <para>
+        The lambda form is primarily a stepping-stone to the bytecode
+        engine that we cover next. However, it's worth examining
+        performance-critical code at this level to check for any
+        possible optimizations that the compiler missed. It's often
+        easier to look at the textual output here than work through
+        native assembly code from compiled executables.
+      </para>
+      <para>
+        TODO: mention ZINC papers here for more information?
       </para>
     </sect2>
     <sect2 id="bytecode-and-ocamlrun">
