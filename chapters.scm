@@ -130,7 +130,7 @@
 ((part Advanced)
  (name "memory-representation-of-values")
  (file "runtime-memory-layout")
- (note "complete, awaiting review"
+ (note "complete, awaiting review")
  (title "Memory Representation of Values")
  (public true)
  )
