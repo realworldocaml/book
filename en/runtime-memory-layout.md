@@ -282,17 +282,17 @@ records or arrays, all float       special tag for unboxed arrays of floats, or 
 
 ### Integers, characters and other basic types
 
-Many basic types are stored directly as unboxed values at runtime.  The native
-`int` type is the most obvious, although it drops a single bit of precision due
-to the tag bit described earlier. Other atomic types such as the `unit` and
-empty list `[]` value are stored as constant integers.  Boolean values have a
-value of `0` and `1` for `true` and `false` respectively.
+Many basic types are efficiently stored as unboxed integers at runtime.  The
+native `int` type is the most obvious, although it drops a single bit of
+precision due to the tag bit. Other atomic types such as `unit` and empty list
+`[]` value are stored as constant integers.  Boolean values have a value of `0`
+and `1` for `true` and `false` respectively.
 
-Remember that since integers are never allocated on the heap, all of these
-basic types such as empty lists and `unit` are therefore very efficient to use.
-They will often be passed in registers and never even appear on the stack,
-if you don't have too many parameters to your functions or are running on
-a modern architecture with lots of spare registers (such as `x86_64`).
+These basic types such as empty lists and `unit` are very efficient to use
+since integers are never allocated on the heap.  They can be passed directly in
+registers and not appear on the stack if you don't have too many parameters to
+your functions.  Modern architectures as as `x86_64` have a lot of spare
+registers to further improve the efficiency of using unboxed integers.
 
 ### Tuples, records and arrays
 
