@@ -391,8 +391,8 @@ let _ =
 
 The lambda form is the first representation that discards the OCaml type
 information.  It's quite similar to Lisp, and manipulates OCaml blocks and
-fields that should be familiar from [xref](#runtime-memory-layout).  To see it
-for `pattern.ml`, compile as usual but add the `-dlambda` directive.
+fields that should be familiar from [xref](#memory-representation-of-values).
+To see it for `pattern.ml`, compile as usual but add the `-dlambda` directive.
 
 ```console
 $ ocamlc -dlambda -c pattern.ml 
