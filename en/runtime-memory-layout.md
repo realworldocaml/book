@@ -168,6 +168,8 @@ OCaml runtime needs to understand the difference between the two so that it can
 follow pointers to look for more values, but not integers (which directly hold
 the value and don't point to anything meaningful).
 
+### Distinguishing integer and pointers at runtime
+
 Values use a single tag bit the word to distinguish integers and pointers at
 runtime. The value is an integer if the lowest bit of the block word is
 non-zero.  Several OCaml types map onto this integer representation, including
@@ -184,7 +186,7 @@ word-aligned with the bottom bits always being zero.  The next problem is
 distinguishing between pointers to OCaml values (which should be followed by
 the garbage collector) and C pointers (which shouldn't be followed).
 
-The mechanism for this is simple, since the runtime system keeps track of the
+The mechanism for this is simple since the runtime system keeps track of the
 heap blocks it has allocated for OCaml values. If the pointer is inside a heap
 chunk that is marked as being managed by the OCaml runtime, it is assumed to
 point to an OCaml value. If it points outside the OCaml runtime area, it is is
@@ -223,10 +225,12 @@ An OCaml *block* is the basic unit of allocation on the heap.  A block consists
 of a one-word header (either 32- or 64-bits) followed by variable-length data
 that is either opaque bytes or an array of *fields*.  The header has a
 multi-purpose tag byte that defines whether to interprete the subsequent data
-as opaque or OCaml fields.  The garbage collector never inspects opaque bytes,
-but the array of fields are all treated as more valid OCaml values. The garbage
-collector always inspects fields, and follows them as part of the collection
-process described earlier.
+as opaque bytes or OCaml fields.
+
+The garbage collector never inspects opaque bytes. If the tag indicates an
+array of OCaml fields are present, their contents are all treated as more valid
+OCaml values. The garbage collector always inspects fields and follows them as
+part of the collection process described earlier.
 
 ```
 +------------------------+-------+----------+----------+----------+----
@@ -235,12 +239,15 @@ process described earlier.
  <-either 22 or 54 bits-> <2 bit> <--8 bit-->
 ```
 
-The size field records the length of the block in memory words. Note that it is
-limited to 22-bits on 32-bit platforms, which is the reason why OCaml strings
-are limited to 16MB on that architecture. If you need bigger strings, either
-switch to a 64-bit host, or use the `Bigarray` module described in [xref](#parsing-binary-protocols-with-bigarray).  The
-2-bit color field is used by the garbage collector to keep track of its
-state during mark-and-sweep, and is not exposed directly to OCaml programs.
+The `size` field records the length of the block in memory words.  This is 22
+bits on 32-bit platforms, which is the reason why OCaml strings are limited to
+16MB on that architecture. If you need bigger strings, either switch to a
+64-bit host, or use the `Bigarray` module described in
+[xref](#parsing-binary-protocols-with-bigarray).
+
+The 2-bit `color` field is used by the garbage collector to keep track of its
+state during mark-and-sweep collection.  This makes incremental collection 
+possible, and isn't exposed directly to OCaml programs. 
 
 Tag Color   Block Status
 ---------   ------------
@@ -255,23 +262,23 @@ to `No_scan_tag` (251), then the block's data are all opaque bytes, and are not
 scanned by the collector. The most common such block is the `string` type,
 which we describe more below.
 
-The exact representation of values inside a block depends on their OCaml type.
-They are summarised in the table below, and then we'll examine some of them in
-greater detail.
+The exact representation of values inside a block depends on their static OCaml
+type.  All OCaml types are distilled down into `values`, and summarised in the
+table below.
 
 OCaml Value                        Representation
 -----------                        --------------
-any `int` or `char`                directly as a value, shifted left by 1 bit, with the least significant bit set to 1
+`int` or `char`                directly as a value, shifted left by 1 bit, with the least significant bit set to 1
 `unit`, `[]`, `false`              as OCaml `int` 0.
 `true`                             as OCaml `int` 1.
 `Foo | Bar`                        as ascending OCaml `int`s, starting from 0.
-`Foo | Bar of int`                 variants with parameters are boxed, while entries with no parameters are unboxed (see below).
-polymorphic variants               variable space usage depending on the number of parameters (see below).
+`Foo | Bar of int`                 variants with parameters are boxed, while variants with no parameters are unboxed.
+polymorphic variants               variable space usage depending on the number of parameters.
 floating point number              as a block with a single field containing the double-precision float.
 string                             word-aligned byte arrays that are also directly compatible with C strings.
 `[1; 2; 3]`                        as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
 tuples, records and arrays         an array of values. Arrays can be variable size, but structs and tuples are fixed size.
-records or arrays, all float       special tag for unboxed arrays of floats. Doesn't apply to tuples.
+records or arrays, all float       special tag for unboxed arrays of floats, or records that only have `float` fields.
 
 ### Integers, characters and other basic types
 
