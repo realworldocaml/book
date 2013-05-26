@@ -523,18 +523,19 @@ String length mod 4  Padding
 2                    `00 01`
 3                    `00`
 
-This string representation is a clever way to ensure that the string contents
-are always zero-terminated by the padding word, and still compute its length
+This string representation is a clever way to ensure that the contents are
+always zero-terminated by the padding word, and still compute its length
 efficiently without scanning the whole string.  The following formula is used:
 
 ```
 number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
 ```
 
-The guaranteed NULL-termination comes in handy when passing a string to C, but
-is not relied upon to compute the length from OCaml code. Thus, OCaml strings
-can contain null bytes at any point within the string, but care should be taken
-that any C library functions can also cope with this.
+The guaranteed `NULL`-termination comes in handy when passing a string to C,
+but is not relied upon to compute the length from OCaml code. OCaml strings can
+thus contain `NULL` bytes at any point within the string. Care should be taken
+that any C library functions that receive these buffers can cope with arbitrary
+`NULL` values within the buffer contents.
 
 ### Custom heap blocks
 
@@ -543,7 +544,7 @@ perform user-defined operations over OCaml values.  A custom block lives in the
 OCaml heap like an ordinary block and can be of whatever size the user desires.
 The `Custom_tag` (255) is higher than `No_scan_tag` and isn't scanned by the
 garbage collector.  This means that it cannot contain any OCaml values, but
-is useful to track pointers into the external C heap.
+is useful to track pointers into external system memory.
 
 The first word of the data within the custom block is a C pointer to a `struct`
 of custom operations. The custom block cannot have pointers to OCaml blocks and
@@ -567,10 +568,9 @@ The custom operations specify how the runtime should perform polymorphic
 comparison, hashing and binary marshalling.  They also optionally contain a
 *finalizer* that the runtime calls just before the block is garbage collected.
 This finalizer has nothing to do with ordinary OCaml finalizers (as created by
-`Gc.finalise` and explained in [xref](tuning-the-runtime)).  Instead, they are
-used to call C cleanup functions such as `free`.
+`Gc.finalise` and explained in TODO.  They are instead used to call C cleanup
+functions such as `free`.
 
-When a custom block is allocated, you can also specify the proportion of
-"extra-heap resources" consumed by the block, which will affect the garbage
-collector's decision as to how much work to do in the next major slice.
-(_avsm_: TODO elaborate on this or move to the C interface section)
+A common use of custom blocks is to manage external system memory directly
+from within OCaml, via the `Bigarray` module. We'll cover this later on
+in [xref](parsing-binary-protocols-with-bigarray).

@@ -130,7 +130,7 @@
 ((part Advanced)
  (name "memory-representation-of-values")
  (file "runtime-memory-layout")
- (note "50%, on Anil's stack")
+ (note "complete, awaiting review"
  (title "Memory Representation of Values")
  (public true)
  )
