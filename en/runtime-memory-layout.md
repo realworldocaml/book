@@ -268,7 +268,7 @@ table below.
 
 OCaml Value                        Representation
 -----------                        --------------
-`int` or `char`                directly as a value, shifted left by 1 bit, with the least significant bit set to 1
+`int` or `char`                    directly as a value, shifted left by 1 bit, with the least significant bit set to 1
 `unit`, `[]`, `false`              as OCaml `int` 0.
 `true`                             as OCaml `int` 1.
 `Foo | Bar`                        as ascending OCaml `int`s, starting from 0.
