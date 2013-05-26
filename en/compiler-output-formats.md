@@ -1,32 +1,221 @@
 # Compiler Output Formats
 
-## From type checking to executables
+The process of converting OCaml source code to executable binaries is done in
+multiple steps.  Every stage generally checks and discards information from the
+source code, until the final output is untyped and low-level assembly code.
+
+Each of the compilation steps can be executed manually if you need to inspect
+something to hunt down a bug or performance regression.  It's even possible to
+compile OCaml to run efficiently on environments such as Javascript or the Java
+Virtual Machine.
+
+In this chapter, you'll learn:
+
+* The compilation pipeline and what each stage represents.
+* TODO
+
+## The compilation pipeline
+
+The OCaml compiler initially accepts textual source code as input.  Each source
+file is a separate *compilation unit* and can be compiled separately.  The
+compilation pipeline looks like this:
 
 ```
+    Source code
+        |
+        | parsing and preprocessing
+        v
+    Parsetree (untyped AST)
+        |
+        | syntax extensions
+        v
+    Camlp4 transformation (untyped AST)
+        |
+        | type inference and checking
+        v
+    Typedtree (type-annotated AST)
+        |
+        | pattern-matching compilation
+        | elimination of modules and classes
+        v
+     Lambda
+      /  \
+     /    \ closure conversion, inlining, uncurrying,
+    v      \  data representation strategy
+ Bytecode   \
+             \
+            Cmm
              |
-             | parsing and preprocessing
+             | code generation
              v
-          Parsetree (untyped AST)
-             |
-             | type inference and checking
-             v
-          Typedtree (type-annotated AST)
-             |
-             | pattern-matching compilation, elimination of modules, classes
-             v
-          Lambda
-           /  \
-          /    \ closure conversion, inlining, uncurrying,
-         v      \  data representation strategy
-      Bytecode   \
-                  \
-                 Cmm
-                  |
-                  | code generation
-                  v
-               Assembly code
+        Assembly code
 ```
 
+We'll now go through these stages and explain how the tools behind them operate.
+
+### Parsing and preprocessing with `camlp4`
+
+The first thing the compiler does is to parse the input source code into
+a more structured data type.  This immediately eliminates code which doesn't
+match basic syntactic requirements.  The OCaml lexer and parser use the same
+basic techniques described earlier in [xref](parsing-with-ocamllex-and-menhir).
+
+One powerful feature present in OCaml is the facility to dynamically extend the
+syntax via the `camlp4` tool.  The compiler usually lexes the source code into
+tokens, and then parses these into an Abstract Syntax Tree (AST) that represents the
+parsed source code.
+
+Camlp4 modules can extend the lexer with new keywords, and later transform these
+keywords (or indeed, any portion of the input program) into conventional OCaml
+code that can be understood by the rest of the compiler.  We've already seen
+several examples of using `camlp4` within Core:
+
+* **Sexplib** to convert types to s-expressions in [xref](#data-serialization-with-s-expressions)
+* **Bin_prot**: for efficient binary conversion in [xref](#fast-binary-serialization).
+* **Fieldslib** to generates first-class values that represent fields of
+  a record in [xref](#records).
+
+These all use a common `camlp4` library called `type_conv` to provide a common
+extension point.  Type_conv defines a new keyword `with` that can appear after
+a type definition, and passes on the type declaration to extensions.  The
+type_conv extensions all generate boiler-plate code based on the type you
+defined.  This approach avoids the inevitable performance hit of doing this
+work dynamically, but also doesn't require a complex Just-In-Time (JIT) runtime
+that is a source of unpredictable dynamic behaviour.
+
+All `camlp4` modules accept an input AST and output a modified one.  This lets
+you inspect the results of transformations at the source code level manually to
+see exactly what's going on.  Let's look at a simple Core extension called
+`pa_compare` for how to do this.
+
+#### Example: the `pa_compare` syntax transformer
+
+OCaml provides a polymorphic comparison operator that inspects the runtime
+representation of two values to see if they are equal.  As we noted in
+[xref](maps-and-hashtables], this is not as efficient or as safe as defining
+explicit comparison functions between values.
+
+The `pa_compare` syntax extension takes care of this boilerplate code
+generation via `camlp4`. Try it out from `utop`:
+
+```ocaml
+# #require "comparelib.syntax" ;;
+
+# type t = { foo: string; bar : t } ;;
+type t = { foo : string; bar : t; }
+
+# type t = { foo: string; bar: t } with compare ;;
+type t = { foo : string; bar : t; }
+val compare : t -> t -> int = <fun>
+val compare_t : t -> t -> int = <fun>
+```
+
+The first type definition of `t` is a standard OCaml phrase and results in the
+expected output.  The second one includes the `with compare` directive.  This
+is intercepted by `comparelib` and turned into two new functions that are generated
+from the type into the `compare` and `compare_t` functions.  How do we see what
+these functions actually do?  You can't do this from `utop` directly, since it
+embeds the `camlp4` compilation as an automated part of its operation.
+
+Let's turn to the command-line to inspect the result of the `comparelib`
+transformation instead.  Create a file that contains the type declaration from earlier:
+
+```ocaml
+(* comparelib_test.ml *)
+type t = { foo: string; bar: t } with compare
+```
+
+Now create a shell script to run the `camlp4` tool manually.
+
+```bash
+#!/bin/sh
+# camlp4_dump
+
+OCAMLFIND="ocamlfind query -predicates syntax,preprocessor -r"
+INCLUDE=`$OCAMLFIND -i-format comparelib.syntax`
+ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
+camlp4o -printer o $INCLUDE $ARCHIVES $1
+```
+
+This shell script uses the `ocamlfind` package manager to list the include and
+library paths required by the `comparelib` syntax extension.  The final
+`camlp4o` command invokes the `camlp4o` preprocessor directly and outputs the
+resulting AST to standard output as textual source code.
+
+```console
+$ sh camlp4_dump comparelib_test.ml
+type t = { foo : string; bar : t }
+
+let _ = fun (_ : t) -> ()
+  
+let rec compare : t -> t -> int =
+  fun a__001_ b__002_ ->
+    if Pervasives.( == ) a__001_ b__002_
+    then 0
+    else
+      (let ret =
+         (Pervasives.compare : string -> string -> int) a__001_.foo
+           b__002_.foo
+       in
+         if Pervasives.( <> ) ret 0
+         then ret
+         else compare a__001_.bar b__002_.bar)
+  
+let _ = compare
+let compare_t = compare
+let _ = compare_t
+```
+
+The result is the original type definition, and some automatically generated
+code that implements an explicit comparison function for each field in the
+record.  This generated code is then compiled as if you had typed it in
+yourself.
+
+Another useful feature of `type_conv` is that it can generate signatures too.
+Copy the earlier type definition into a `comparelib_test.mli` and rerun the
+camlp4 dumper script.
+
+```console
+$ ./camlp4_dump.sh test_comparelib.mli 
+type t = { foo : string; bar : t }
+
+val compare : t -> t -> int
+```
+
+The external signature generated by `comparelib` is much simpler than the
+actual code.  Running `camlp4` directly on the original source code lets you
+see these all these transformations precisely.
+
+<note>
+<title>Don't overdo the syntax extensions</title>
+
+Syntax extensions are a very powerful extension mechanism that can completely
+change your source code's layout and style.  Core includes a very conservative
+set of extensions that minimise the syntax changes.  There are a number of
+third-party libraries that perform much more wide-sweeping changes, such as
+introducing whitespace-sensitive indentation or even building entirely new
+languages.
+
+While it's tempting to compress all your boiler-plate code into `camlp4`
+extensions, it can make production source code much harder for other people to
+read and review.  Core mainly focuses on type-driven code generation using the
+`type_conv` extension, and doesn't fundamentally change the OCaml syntax.
+
+Another thing to consider before deploying your own syntax extension is
+compatibility with other syntax extensions.  Two separate extensions create a
+grammar clash can lead to hard-to-reproduce bugs. That's why most of Core's
+syntax extensions go through `type_conv`, which acts as a single point for
+extending the grammar via the `with` keyword.
+
+</note>
+
+### The type checking phase
+
+### The lambda form
+
+### Bytecode and `ocamlrun`
+
+### Native code generation
 
 ## Interfacing with C
 
