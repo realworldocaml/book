@@ -7677,7 +7677,7 @@ end
         s-expression until the error is printed out. We're not
         restricted to doing this kind of error reporting with built-in
         types. This will be discussed in more detail in
-        <ulink url="data-serialization-with-s-expressions">xref</ulink>,
+        <xref linkend="data-serialization-with-s-expressions"/>,
         but Sexplib comes with a language extension that can
         auto-generate sexp-converters for newly generated types, as
         shown below.
@@ -7952,7 +7952,7 @@ exception Wrong_date of Core.Std.Date.t
       This is all part of the support for s-expressions provided by the
       Sexplib library and syntax-extension, which is described in more
       detail in
-      <ulink url="data-serialization-with-s-expressions">xref</ulink>.
+      <xref linkend="data-serialization-with-s-expressions"/>.
     </para>
     </note>
     <sect2 id="helper-functions-for-throwing-exceptions">
@@ -16190,7 +16190,7 @@ $ ./github_org_info.native janestreet
         command-line to obtain the JSON, which is rather inefficient.
         We'll explain how to integrate the HTTP fetch directly into your
         OCaml application later on in
-        <ulink url="concurrent-programming-with-async">xref</ulink>.
+        <xref linkend="concurrent-programming-with-async"/>.
       </para>
     </sect2>
   </sect1>
@@ -18414,8 +18414,7 @@ val write_complete : unit Deferred.t = &lt;abstr&gt;
       <listitem>
         <para>
           <literal>yojson</literal>, a JSON parsing library that was
-          described in
-          <xref linkend="parsing-json-with-yojson"/>
+          described in <xref linkend="handling-json-data"/>
         </para>
       </listitem>
       <listitem>
@@ -18471,7 +18470,7 @@ let query_uri query =
         <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>.
         We'll parse the JSON data using the Yojson library, which we
         already introduced in
-        <ulink url="handling-json-data">xref</ulink>.
+        <xref linkend="handling-json-data"/>.
       </para>
       <para>
         We expect the response from DuckDuckGo to come across as a JSON
