@@ -573,4 +573,4 @@ functions such as `free`.
 
 A common use of custom blocks is to manage external system memory directly
 from within OCaml, via the `Bigarray` module. We'll cover this later on
-in [xref](parsing-binary-protocols-with-bigarray).
+in [xref](#parsing-binary-protocols-with-bigarray).
