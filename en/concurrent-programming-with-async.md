@@ -1094,7 +1094,7 @@ of monitors.  One example of a library that uses monitors directly is
 that handles the network connection and by the callback for responding
 to an individual request, in either case responding to an exception by
 closing the connection.  It is for building this kind of custom error
-handling that monitors can be helpful.n
+handling that monitors can be helpful.
 
 ### Example: Handling exceptions with DuckDuckGo
 
