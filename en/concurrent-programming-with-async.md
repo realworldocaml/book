@@ -3,7 +3,7 @@
 The logic of building programs that interact with the outside world is
 often dominated by waiting: waiting for the click of a mouse, or for
 data to be fetched from disk, or for space to be available on an
-outgoing network buffer.  Even mildly sophisticated sophisticated
+outgoing network buffer.  Even mildly sophisticated
 interactive applications are typically _concurrent_, needing to wait
 for multiple different events at the same time, responding immediately
 to whatever event happens first.
