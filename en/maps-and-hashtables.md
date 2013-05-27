@@ -225,6 +225,43 @@ Error: This expression has type (string, int, Reverse.comparator) Map.t
        Type Reverse.comparator is not compatible with type String.comparator 
 ```
 
+As we've mentioned, maps carry within them the comparator that they
+were created with.  Sometimes, often for space efficiency reasons, you
+want a version of the map data structure that doesn't include the
+comparator.  You can get this using the `Map.to_tree` function, which
+returns the tree underlying the map, without the comparator that was
+used to create it.
+
+```ocaml
+# let ord_tree = Map.to_tree ord_map;; 
+val ord_tree : (string, int, String.comparator) Map.Tree.t = <abstr>
+```
+
+Now, if we want to look something up in the tree, we need to provide
+the comparator explicitly.
+
+```ocaml
+# Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
+- : int option = Some 3
+```
+
+The algorithm of `Map.find` depends on the fact that you're using the
+same comparator when looking a value up as you were when you stored
+it.  Accordingly, using the wrong comparator will lead to a type
+error.
+
+```ocaml
+# Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
+
+Error: This expression has type (string, int, String.comparator) Map.Tree.t
+       but an expression was expected of type
+         ('a, 'b, 'c) Map.Tree.t = (string, 'b, Reverse.comparator) Map.Tree.t
+       Type String.comparator is not compatible with type Reverse.comparator 
+```
+
+Again, the integration of comparators into the type of maps allows the
+type system to catch what would otherwise be fairly subtle errors.
+
 ## Using the polymorphic comparator
 
 We don't need to generate specialized comparison functions for every
