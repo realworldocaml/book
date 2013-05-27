@@ -17656,11 +17656,10 @@ val cfg : http_server_config =
     The logic of building programs that interact with the outside world
     is often dominated by waiting: waiting for the click of a mouse, or
     for data to be fetched from disk, or for space to be available on an
-    outgoing network buffer. Even mildly sophisticated sophisticated
-    interactive applications are typically
-    <emphasis>concurrent</emphasis>, needing to wait for multiple
-    different events at the same time, responding immediately to
-    whatever event happens first.
+    outgoing network buffer. Even mildly sophisticated interactive
+    applications are typically <emphasis>concurrent</emphasis>, needing
+    to wait for multiple different events at the same time, responding
+    immediately to whatever event happens first.
   </para>
   <para>
     A common approach to concurrency is to use preemptive system
@@ -18928,7 +18927,7 @@ ignoring exn
         connection and by the callback for responding to an individual
         request, in either case responding to an exception by closing
         the connection. It is for building this kind of custom error
-        handling that monitors can be helpful.n
+        handling that monitors can be helpful.
       </para>
     </sect2>
     <sect2 id="example-handling-exceptions-with-duckduckgo">
@@ -23387,46 +23386,46 @@ $ ocamlc -dlambda -c pattern.ml
         from compiled executables.
       </para>
     </sect2>
-    <sect2 id="bytecode-with-ocamlc-and-ocamlrun">
-      <title>Bytecode with <literal>ocamlc</literal> and
-      <literal>ocamlrun</literal></title>
-      <para>
-        After the lambda form has been generated, we are very close to
-        having executable code. The OCaml tool-chain branches into two
-        separate compilers at this point. We'll describe the the
-        <literal>ocamlc</literal> bytecode compiler first, which
-        consists of two pieces:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            <literal>ocamlc</literal> compiles files into a simple
-            bytecode that is a close mapping to the lambda form.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>ocamlrun</literal> is a portable interpreter that
-            executes the bytecode.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        <literal>ocamlrun</literal> is an interpreter that uses the
-        OCaml stack and an accumulator to store values, and only has
-        seven registers in total (the program counter, stack pointer,
-        accumulator, exception and argument pointers, and environment
-        and global data). It implements around 140 opcodes which form
-        the OCaml program. The full details of the opcodes are available
-        <ulink url="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</ulink>.
-      </para>
-      <para>
-        The big advantage of using <literal>ocamlc</literal> is
-        simplicity, portability and compilation speed. The mapping from
-        the lambda form to bytecode is straightforward, and this results
-        in predictable (but slow) execution speed.
-      </para>
-    </sect2>
+  </sect1>
+  <sect1 id="portable-bytecode-with-ocamlc-and-ocamlrun">
+    <title>Portable bytecode with <literal>ocamlc</literal> and
+    <literal>ocamlrun</literal></title>
+    <para>
+      After the lambda form has been generated, we are very close to
+      having executable code. The OCaml tool-chain branches into two
+      separate compilers at this point. We'll describe the the
+      <literal>ocamlc</literal> bytecode compiler first, which consists
+      of two pieces:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>ocamlc</literal> compiles files into a simple
+          bytecode that is a close mapping to the lambda form.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>ocamlrun</literal> is a portable interpreter that
+          executes the bytecode.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      <literal>ocamlrun</literal> is an interpreter that uses the OCaml
+      stack and an accumulator to store values, and only has seven
+      registers in total (the program counter, stack pointer,
+      accumulator, exception and argument pointers, and environment and
+      global data). It implements around 140 opcodes which form the
+      OCaml program. The full details of the opcodes are available
+      <ulink url="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</ulink>.
+    </para>
+    <para>
+      The big advantage of using <literal>ocamlc</literal> is
+      simplicity, portability and compilation speed. The mapping from
+      the lambda form to bytecode is straightforward, and this results
+      in predictable (but slow) execution speed.
+    </para>
     <sect2 id="compiling-and-linking-ocaml-bytecode">
       <title>Compiling and linking OCaml bytecode</title>
       <para>
