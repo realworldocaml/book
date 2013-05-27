@@ -427,7 +427,7 @@ The lambda form is primarily a stepping-stone to the bytecode engine that we
 cover next.  However, it's often easier to look at the textual output here than
 wade through native assembly code from compiled executables.
 
-### Bytecode with `ocamlc` and `ocamlrun`
+## Portable bytecode with `ocamlc` and `ocamlrun`
 
 After the lambda form has been generated, we are very close to having
 executable code.  The OCaml tool-chain branches into two separate compilers at
