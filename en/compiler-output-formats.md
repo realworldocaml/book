@@ -333,8 +333,9 @@ We've already seen several examples of using `camlp4` within Core:
 * `Sexplib` to convert types to textual s-expressions.
 * `Bin_prot` for efficient binary conversion and parsing.
 
-These all extend the language with a single keyword that turns a `type` declaration
-into a `type <..> with` construct.
+These all extend the language with a single `with` keyword that extends a
+`type` declaration with additional directives that cause code to be generated.
+For example, here's a trivial use of Sexplib and Fieldslib.
 
 ```ocaml
 (* type_conv_example.ml *)
@@ -346,7 +347,8 @@ type t = {
 } with sexp, fields
 ```
 
-Compiling this code will normally give you a syntax error.
+Compiling this code will normally give you a syntax error if you do so without
+`camlp4`.
 
 ```console
 $ ocamlfind ocamlc -c type_conv_example.ml
@@ -354,20 +356,25 @@ File "type_conv_example.ml", line 7, characters 2-6:
 Error: Syntax error
 ```
 
-However, if you add in the ocamlfind syntax extension packages for `fieldslib`
-and `sexplib`, then all works again.
+Now add in the ocamlfind syntax extension packages for `fieldslib`
+and `sexplib`, and everything compiles again.
 
 ```console
 $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
   -package fieldslib.syntax type_conv_example.ml
 ```
 
-The syntax extension packages cause `ocamlfind` to generate a `-pp` option to
-the compiler, ith the preprocessing modules as arguments.  These preprocessor
-modules are dynamically loaded into the `camlp4o` command-line tool, which
-rewrites the input token stream from the source code into conventional OCaml
-code that has no trace of the new keywords.  The compiler then continues on to
-compile this transformed code.
+We've specified a couple of additional flags here.  The `-syntax` flag directs
+`ocamlfind` to add the `-pp` flag to the compiler command-line.  This flag
+instructs the compiler to run the preprocessor during its parsing phase.
+
+The `-package` flag adds third-party packages as normal, but the `.syntax`
+suffix in the package name is a convention that indicate that these are
+`camlp4` preprocessors instead of normal libraries.  These modules are
+dynamically loaded into `camlp4o` which then parses and rewrites the input
+source code into conventional OCaml code that has no trace of the new keywords.
+The compiler continues on to compile this transformed code with no
+knowledge of the preprocessor's actions.
 
 Both `fieldslib` and `sexplib` need this `with` keyword, so there is a common
 preprocessor library called `type_conv` that provides the extension framework
@@ -384,10 +391,11 @@ Instead, all code is generated at compilation time via `camlp4`.
 ### Inspecting `camlp4` output
 
 All `camlp4` modules accept an input AST and output a modified one.  If you're
-not familiar with the `camlp4` module in question, then you need to figure out 
-what transformations it has applied to your source code.  The first obvious way
-is to read the documentation that accompanies the package, but you can also
-use the top-level to explore this, or run `camlp4` manually.
+not familiar with the `camlp4` module in question, then how do you figure out
+what changes it's made to your code?  The first obvious way is to read the
+documentation that accompanies the extension.  Another more direct way is to
+use the top-level to explore the extension's behaviour, or to run `camlp4`
+manually yourself to see the transformation in action.
 
 #### Using `camlp4` in the interactive top-level
 
