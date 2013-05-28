@@ -408,9 +408,55 @@ but the smallest applications.
 
 # Hashtables
 
-Hashtables are the imperative cousing of maps.  We walked over an
-implementation of a hashtable in [xref](#imperative-programming-1), so
-in this section we'll mostly discuss the pragmatics of Core's
-`Hashtbl` module.
+Hashtables are the imperative cousin of maps.  We walked over a basic
+hashtable implementation in [xref](#imperative-programming-1), so in
+this section we'll mostly discuss the pragmatics of Core's `Hashtbl`.
 
+Hashtables differ from maps in a few key ways.  First, hashtables are
+mutable, meaning that adding a key/value pair to a hashtable modifies
+it, rather than creating a new table with the modification.  Second,
+hashtables are have better time-complexity than maps, providing
+constant time lookup and modifications to the table.  And finally,
+just as maps depend on having a comparison function for creating the
+ordered binary tree that underlies a map, hashtables depend on having
+a _hash function_, i.e., a function for converting a key to an
+integer.
+
+Just as creating a map require a comparator, creating a hashtables
+require a value of type `hashable`.  Thus, we can write:
+
+```ocaml
+# let table = Hashtbl.create ~hashable:String.hashable ();;
+val table : (string, '_a) Hashtbl.t = <abstr>
+# Hashtbl.replace table ~key:"three" ~data:3;;
+- : unit = ()
+# Hashtbl.find table "three";;
+- : int option = Some 3
+```
+
+The `hashable` value is included as part of the `Hashable` interface,
+which is satisfied by most types in Core.  The `Hashable` interface
+also includes a `Table` sub-module which gives you more convenient
+creation functions.
+
+```ocaml
+# let table = String.Table.create ();;
+val table : '_a String.Table.t = <abstr>
+```
+
+There is also a polymorphic `hashable` value, corresponding to the
+polymorphic hash function provided by the OCaml runtime, for cases
+where you don't have a hash function for your specific type.
+
+```ocaml
+# let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
+val table : ('_a, '_b) Hashtbl.t = <abstr>
+```
+
+Or, equivalently:
+
+```ocaml
+# let table = Hashtbl.Poly.create ();;
+val table : ('_a, '_b) Hashtbl.t = <abstr>
+```
 
