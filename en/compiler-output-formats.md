@@ -119,6 +119,7 @@ let _ =
 
 The fixed version of this locally opens the `module` correctly.
 
+```ocaml
 (* fixed_module.ml *)
 let _ =
   let module MyString = String in
