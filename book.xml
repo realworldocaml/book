@@ -22770,9 +22770,11 @@ $ man -M man Example
         </listitem>
       </itemizedlist>
       <para>
-        These all extend the language with a single keyword that turns a
-        <literal>type</literal> declaration into a
-        <literal>type &lt;..&gt; with</literal> construct.
+        These all extend the language with a single
+        <literal>with</literal> keyword that extends a
+        <literal>type</literal> declaration with additional directives
+        that cause code to be generated. For example, here's a trivial
+        use of Sexplib and Fieldslib.
       </para>
       <programlisting language="ocaml">
 (* type_conv_example.ml *)
@@ -22784,7 +22786,8 @@ type t = {
 } with sexp, fields
 </programlisting>
       <para>
-        Compiling this code will normally give you a syntax error.
+        Compiling this code will normally give you a syntax error if you
+        do so without <literal>camlp4</literal>.
       </para>
       <programlisting>
 $ ocamlfind ocamlc -c type_conv_example.ml
@@ -22792,23 +22795,32 @@ File &quot;type_conv_example.ml&quot;, line 7, characters 2-6:
 Error: Syntax error
 </programlisting>
       <para>
-        However, if you add in the ocamlfind syntax extension packages
-        for <literal>fieldslib</literal> and <literal>sexplib</literal>,
-        then all works again.
+        Now add in the ocamlfind syntax extension packages for
+        <literal>fieldslib</literal> and <literal>sexplib</literal>, and
+        everything compiles again.
       </para>
       <programlisting>
 $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
   -package fieldslib.syntax type_conv_example.ml
 </programlisting>
       <para>
-        The syntax extension packages cause <literal>ocamlfind</literal>
-        to generate a <literal>-pp</literal> option to the compiler, ith
-        the preprocessing modules as arguments. These preprocessor
-        modules are dynamically loaded into the
-        <literal>camlp4o</literal> command-line tool, which rewrites the
-        input token stream from the source code into conventional OCaml
-        code that has no trace of the new keywords. The compiler then
-        continues on to compile this transformed code.
+        We've specified a couple of additional flags here. The
+        <literal>-syntax</literal> flag directs
+        <literal>ocamlfind</literal> to add the <literal>-pp</literal>
+        flag to the compiler command-line. This flag instructs the
+        compiler to run the preprocessor during its parsing phase.
+      </para>
+      <para>
+        The <literal>-package</literal> flag adds third-party packages
+        as normal, but the <literal>.syntax</literal> suffix in the
+        package name is a convention that indicate that these are
+        <literal>camlp4</literal> preprocessors instead of normal
+        libraries. These modules are dynamically loaded into
+        <literal>camlp4o</literal> which then parses and rewrites the
+        input source code into conventional OCaml code that has no trace
+        of the new keywords. The compiler continues on to compile this
+        transformed code with no knowledge of the preprocessor's
+        actions.
       </para>
       <para>
         Both <literal>fieldslib</literal> and <literal>sexplib</literal>
@@ -22834,11 +22846,13 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
       <para>
         All <literal>camlp4</literal> modules accept an input AST and
         output a modified one. If you're not familiar with the
-        <literal>camlp4</literal> module in question, then you need to
-        figure out what transformations it has applied to your source
-        code. The first obvious way is to read the documentation that
-        accompanies the package, but you can also use the top-level to
-        explore this, or run <literal>camlp4</literal> manually.
+        <literal>camlp4</literal> module in question, then how do you
+        figure out what changes it's made to your code? The first
+        obvious way is to read the documentation that accompanies the
+        extension. Another more direct way is to use the top-level to
+        explore the extension's behaviour, or to run
+        <literal>camlp4</literal> manually yourself to see the
+        transformation in action.
       </para>
       <sect3 id="using-camlp4-in-the-interactive-top-level">
         <title>Using <literal>camlp4</literal> in the interactive
