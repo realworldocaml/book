@@ -298,12 +298,11 @@ several available that provide prettier or more detailed output.
 ### Preprocessing and code generation with `camlp4`
 
 One powerful feature present in OCaml is the facility to dynamically extend the
-syntax via the `camlp4` tool.
-
-Camlp4 modules can extend the lexer with new keywords, and later transform these
-keywords (or indeed, any portion of the input program) into conventional OCaml
-code that can be understood by the rest of the compiler.  We've already seen
-several examples of using `camlp4` within Core:
+syntax via the `camlp4` tool.  Camlp4 modules can extend the lexer with new
+keywords, and later transform these keywords (or indeed, any portion of the
+input program) into conventional OCaml code that can be understood by the rest
+of the compiler.  We've already seen several examples of using `camlp4` within
+Core:
 
 * **Fieldslib** to generates first-class values that represent fields of
   a record in [xref](#records).
