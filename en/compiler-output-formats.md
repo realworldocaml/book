@@ -2,19 +2,28 @@
 
 Compiling source code into executable programs is a fairly complex process that
 involves quite a few tools -- preprocessors, compilers, runtime libraries,
-linkers and assemblers.  OCaml has an emphasis on static type safety, and so it
-tries to reject source code that doesn't meet its requirements as early as
-possible.  The compiler toolchain implements this as a series of staged
-transformations starting with the source code. Each stage checks some
-properties and discards information from the previous stage, until the final
-output is low-level assembly code.
+linkers and assemblers.  It's important how to understand how these fit
+together to help with your day-to-day workflow of developing, debugging,
+maintaining and deploying applications.
 
-Most of this complexity is hidden away from you via the compiler and build
-system tools.  However, most of the compilation steps can be executed manually
-if you need to hunt down a bug or investigate a performance regression.  It's
-even possible to compile OCaml to run efficiently on environments such as
-Javascript or the Java Virtual Machine, and it helps to understand how the
-compilation pipeline works before trying out these more unconventional targets.
+OCaml has a strong emphasis on static type safety and tries to reject source
+code that doesn't meet its requirements as early as possible.  The compiler
+toolchain implements these checks as a series of transformations that start
+with the source code. Each stage checks some properties and discards
+information from the previous stage, until the final output is low-level
+assembly code that no longer knows anything about OCaml modules or objects.
+
+TODO note about how this different from JVM/NET w type erasure?
+
+Much of this complexity is hidden away via the OCaml build system.  However,
+you'll sometime need to dive into the toolchain to hunt down a bug or
+investigate a performance regression.  In these cases, you can manually run a
+stage and examine the output more closely.
+
+It's even possible to compile OCaml to run efficiently on environments such as
+Javascript or the Java Virtual Machine.  These are third-party tools that
+extend the core compilation toolchain, and so it helps to understand how
+everything fits together before starting to use them.
 
 In this chapter, you'll learn:
 
@@ -23,7 +32,7 @@ In this chapter, you'll learn:
 * the bytecode `ocamlc` compiler and `ocamlrun` interpreter.
 * the native code `ocamlopt` code generator.
 
-## The overview of the tools
+## An overview of the toolchain
 
 The OCaml tools accept textual source code as input with filename extensions of
 `.ml` and `.mli` for modules and signatures respectively.  Each source file
@@ -89,17 +98,207 @@ Once you've checked out a copy of the source tree, it has a few sub-directories
 We'll now go go through the compilation stages and explain how the tools behind
 them will be useful to you during OCaml development.
 
-## Parsing and preprocessing with `camlp4`
+## Parsing source code
 
-The first thing the compiler does is to parse the input source code into
-a more structured data type.  This immediately eliminates code which doesn't
-match basic syntactic requirements.  The OCaml lexer and parser use the same
-basic techniques described earlier in [xref](#parsing-with-ocamllex-and-menhir).
+The first thing the compiler does is parse the input source files into a more
+structured data type.  The compiler lexes the source text into a stream of
+tokens and parses them into an Abstract Syntax Tree (AST) data structure.  This
+parser is implemented in OCaml itself, using the techniques described earlier
+in [xref](#parsing-with-ocamllex-and-menhir).  The lexer and parser rules can
+be found in the `ocaml/parsing/` directory in the source distribution.
+
+Here's an example of a syntax error by using the `module` keyword within a
+`let` bindings.
+
+```ocaml
+(* broken_module.ml *)
+let _ =
+  module MyString = String;
+  ()
+```
+
+The fixed version of this locally opens the `module` correctly.
+
+(* fixed_module.ml *)
+let _ =
+  let module MyString = String in
+  ()
+```
+
+Parsing immediately eliminates code which doesn't match basic syntactic
+requirements, so the first example will result in a syntax error. 
+
+```console
+$ ocamlc -c broken_module.ml 
+File "broken_module.ml", line 3, characters 2-8:
+Error: Syntax error
+$ ocamlc -c fixed_module.ml 
+```
+
+The syntax error points to the line and character number of the first token
+that couldn't be parsed, which in this case is the `module` keyword.
+
+### Formatting source code with `ocp-indent`
+
+Some parsing errors aren't quite as simple to figure out as the earlier
+example, particularly in larger code bases.
+
+```ocaml
+(* follow_on_function.ml *)
+let concat_and_print x y =
+  let v = x ^ y in
+  print_endline v;
+  v;
+
+let add_and_print x y =
+  let v = x + y in
+  print_endline (string_of_int v);
+  v
+
+let _ =
+  let _ = add_and_print 1 2 in
+  let _ = concat_and_print "a" "b" in
+  ()
+```
+
+Compiling this will get you an error at the end of the second function
+definition.
+
+```console
+$ ocamlc -c follow_on_function.ml
+File "follow_on_function.ml", line 12, characters 0-3:
+Error: Syntax error
+```
+
+The real error is at the end of the *first* function definition though. There's
+an extra semicolon at the end of the first function definition that causes the second
+definition to become part of the first `let` binding.
+
+Luckily, there's a great tool available in OPAM called `ocp-indent` which
+applies a standard set of indenting rules to your source code.  This not only
+beautifies your code layout, but it also makes some syntax errors much more
+obvious.  For instance, let's run the erronous file through `ocp-indent`:
+
+```console
+$ opam install ocp-indent
+$ ocp-indent follow_on_function.ml
+(* follow_on_function.ml *)
+let concat_and_print x y =
+  let v = x ^ y in
+  print_endline v;
+  v;
+
+  let add_and_print x y =
+    let v = x + y in
+    print_endline (string_of_int v);
+    v
+
+let _ =
+  let _ = add_and_print 1 2 in
+  let _ = concat_and_print "a" "b" in
+  ()
+```
+
+The `add_and_print` definition has been indented as if it were part of the
+first `concat_and_print` definition, and the errant semicolon is now much
+easier to spot.  If we remove that semicolon, then the result is exactly what
+we expect:
+
+```console
+$ ocp-indent follow_on_function_fixed.ml 
+(* follow_on_function_fixed.ml *)
+let concat_and_print x y =
+  let v = x ^ y in
+  print_endline v;
+  v
+
+let add_and_print x y =
+  let v = x + y in
+  print_endline (string_of_int v);
+  v
+
+let _ =
+  let _ = add_and_print 1 2 in
+  let _ = concat_and_print "a" "b" in
+  ()
+$ ocamlc -i follow_on_function_fixed.ml 
+val concat_and_print : string -> string -> string
+val add_and_print : int -> int -> int
+```
+
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) has
+information on how to integrate it with your favourite editor.  All of the Core
+libraries are formatted in a mode compliant with `ocp-indent`, so it's a good
+one to match when you publish your own open-source project online.
+
+### Generating documentation via `ocamldoc`
+
+Whitespace and comments are removed from the source code during parsing, and
+aren't significant in determining the semantics of the program.  However, it is
+possible to embed specially formatted comments that annotate parts of the
+source code with documentation.  These comments are parsed by the `ocamldoc`
+command-line tool, which then outputs structured documentation in a variety of
+formats (HTML, LaTeX and even manual pages).
+
+```ocaml
+(** example.ml: The first special comment of the file is the comment 
+    associated with the whole module. *)
+
+(** Comment for exception My_exception. *)
+exception My_exception of (int -> int) * int
+
+(** Comment for type [weather]  *)
+type weather =
+| Rain of int (** The comment for construtor Rain *)
+| Sun         (** The comment for constructor Sun *)
+
+(** Find the current weather for a country
+   @author Anil Madhavapeddy
+   @param location The country to get the weather for.
+*)
+let what_is_the_weather_in location =
+  match location with
+  | `Cambridge  -> Rain 100
+  | `New_york   -> Rain 20
+  | `California -> Sun
+```
+
+The OCamldoc comments are distinguished from normal comments by beginning them with
+the double asterix. You can compile the documentation by running `ocamldoc` over the
+source file.
+
+```console
+$ mkdir -p html man/man3
+$ ocamldoc -html -d html example.ml
+$ ocamldoc -man -d man/man3 example.ml
+$ man -M man Example
+```
+
+These commands generate HTML and manual page format documentation, in the
+`html/` and `man/man3/` directories.  Checkout the OCaml
+
+<tip>
+<title>Using custom ocamldoc generators</title>
+
+The default HTML output stylesheets from `ocamldoc` are pretty spartan.
+The tool supports plugging in custom documentation generators, and there are
+several available that provide prettier or more detailed output.
+
+* [Argot](http://argot.x9c.fr/) is an enchanced HTML generator that supports
+  code folding and searching by name or type definition.
+* The custom generators available
+  [here](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
+  support for Bibtex references within comments, adding `TODO` notes, and
+  generating literate documentation that embeds the code alongside the
+  comments.
+* JSON output is available via `odoc_json` (TODO: avsm, pull out of Xen).
+
+</tip>
+
+### Preprocessing and code generation with `camlp4`
 
 One powerful feature present in OCaml is the facility to dynamically extend the
-syntax via the `camlp4` tool.  The compiler usually lexes the source code into
-tokens, and then parses these into an Abstract Syntax Tree (AST) that represents the
-parsed source code.
+syntax via the `camlp4` tool.
 
 Camlp4 modules can extend the lexer with new keywords, and later transform these
 keywords (or indeed, any portion of the input program) into conventional OCaml
@@ -108,8 +307,8 @@ several examples of using `camlp4` within Core:
 
 * **Fieldslib** to generates first-class values that represent fields of
   a record in [xref](#records).
-* **Sexplib** to convert types to s-expressions in [xref](#data-serialization-with-s-expressions)
-* **Bin_prot**: for efficient binary conversion in [xref](#fast-binary-serialization).
+* **Sexplib** to convert types to textual s-expressions.
+* **Bin_prot**: for efficient binary conversion and parsing.
 
 These all use a common `camlp4` library called `type_conv` to provide a common
 extension point.  Type_conv defines a new keyword `with` that can appear after
