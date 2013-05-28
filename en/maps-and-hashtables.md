@@ -1,15 +1,15 @@
 # Maps and Hashtables
 
-Many problems solve for representing data as key/value pairs.  Maybe
-the simplest way of doing so in OCaml is an _association list_,
-_i.e._, a list of pairs of keys and values.  For example, you could
-represent a mapping between the 10 digits and their English names as
-follows.
+Lots of programming problems require dealing with data organized as
+key/value pairs.  Maybe the simplest way of representing sets of
+key/value pairs in OCaml is an _association list_, which is simply a
+list of pairs of keys and values.  For example, you could represent a
+mapping between the 10 digits and their English names as follows.
 
 ```ocaml
 # let digit_alist =
-    [ 0, "zero"; 1, "one"; 2, "two"; 3, "three"; 4, "four"
-    ; 5, "five" ; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
+    [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
+    ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
   ;;
 ```
 
@@ -32,9 +32,9 @@ not ideal, since almost every non-trivial operation on an association
 list requires a linear-time scan of the list.
 
 In this chapter, we'll talk about two more efficient alternatives to
-association lists: _maps_ and _hash-tables_.  A map is an immutable
+association lists: _maps_ and _hashtables_.  A map is an immutable
 tree-based data structure where most operations take time logarithmic
-in the size of the map, whereas a hash-table is a mutable data
+in the size of the map, whereas a hashtable is a mutable data
 structure where most operations have constant time complexity.  We'll
 describe both of these data structures in detail, and provide some
 advice as to how to choose between them.
@@ -81,20 +81,20 @@ let touch t s =
 
 Note that in some places the above code refers to `String.Map.t`, and
 in others `Map.t`.  This has to do with the fact that maps are
-implemented as ordered binary trees, and as such, maps need a way of
-comparing keys.  To deal with this, a map actually stores the
-necessary comparison function within the data structure.
+implemented as ordered binary trees, and as such, need a way of
+comparing keys.
 
-Thus, operations that merely access the contents of an existing map,
-like `Map.find`, do so by using the comparison function embedded
-within the map.  Similarly, functions that generate a new map from an
-old one, like `Map.add`, do the same.  
+To deal with this, a map, once created, stores the necessary
+comparison function within the data structure.  Thus, operations like
+`Map.find` or `Map.add` that access the contents of a map, or create a
+new map from an existing one, do so by using the comparison function
+embedded within the map.
 
 But in order to get a map in the first place, you need to get your
-hands on the comparison function.  For this reason, modules like
-`String` contain a `Map` sub-module that have values like
+hands on the comparison function somehow.  For this reason, modules
+like `String` contain a `Map` sub-module that have values like
 `String.Map.empty` and `String.Map.of_alist` that are specialized to
-strings, and that in particular know how to compare strings.  Such a
+strings, and this have access to a string comparison function.  Such a
 `Map` sub-module is included in any module that satisfies the
 `Comparable` interface from Core.
 
@@ -114,9 +114,9 @@ val digit_map : (int, string, Int.comparator) Map.t = <abstr>
 - : string option = Some "three"
 ```
 
-Here, we're use `Map.of_alist_exn` to construct our map.  This
-function throws an exception if it encounters entries with duplicate
-keys.
+The above uses `Map.of_alist_exn` which creates a map from an
+association list, throwing an exception if there are duplicate keys in
+the list.
 
 Note that the comparator is only required for operations that create
 maps from scratch.  Operations that update an existing map simply
@@ -129,7 +129,7 @@ val zilch_map : (int, string, Int.comparator) Map.t = <abstr>
 
 The type `Map.t` has three type parameters: one for the key, one for
 the value, and one to identify the comparator used to build the map.
-The type `'a Int.Map.t` is actually just a type alias for
+Indeed, the type `'a Int.Map.t` is just a type alias for
 `(int,'a,Int.comparator) Map.t`
 
 Including the comparator in the type is important because because
@@ -202,7 +202,7 @@ val ord_map : (string, int, String.comparator) Map.t = <abstr>
 val rev_map : (string, int, Reverse.comparator) Map.t = <abstr>
 ```
 
-And if we use `Map.min_elt`, that returns the key and value for the
+And by using `Map.min_elt`, which returns the key and value for the
 smallest key in the map, we can see that these two maps indeed do use
 different comparison fucntions.
 
@@ -213,8 +213,10 @@ different comparison fucntions.
 - : (string * int) option = Some ("snoo", 3)
 ```
 
-If we try to compute the symmetric diff of these two maps, the
-compiler will reject it as a type error.
+Since the algorithm behind `Map.symmetric_diff` depends on both maps
+using the same comparison function, we shouldn't be able to run this
+function jointly on these two maps.  Indeed, if we try, the compiler
+will reject it as a type error.
 
 ```ocaml
 # Map.symmetric_diff ord_map rev_map;;
@@ -225,20 +227,23 @@ Error: This expression has type (string, int, Reverse.comparator) Map.t
        Type Reverse.comparator is not compatible with type String.comparator 
 ```
 
-As we've mentioned, maps carry within them the comparator that they
+As we've discussed, maps carry within them the comparator that they
 were created with.  Sometimes, often for space efficiency reasons, you
 want a version of the map data structure that doesn't include the
-comparator.  You can get this using the `Map.to_tree` function, which
-returns the tree underlying the map, without the comparator that was
-used to create it.
+comparator.  You can get this with `Map.to_tree`, which returns the
+tree type that the map is built on top of, which doesn't include the
+comparator directly.
 
 ```ocaml
 # let ord_tree = Map.to_tree ord_map;; 
 val ord_tree : (string, int, String.comparator) Map.Tree.t = <abstr>
 ```
 
-Now, if we want to look something up in the tree, we need to provide
-the comparator explicitly.
+Note that although it doesn't physically include the comparator, it
+still includes the comparator in its type.
+
+If we want to look something up in a tree, we need to provide the
+comparator explicitly.
 
 ```ocaml
 # Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
@@ -259,8 +264,8 @@ Error: This expression has type (string, int, String.comparator) Map.Tree.t
        Type String.comparator is not compatible with type Reverse.comparator 
 ```
 
-Again, the integration of comparators into the type of maps allows the
-type system to catch what would otherwise be fairly subtle errors.
+The integration of comparators into the type of maps allows the type
+system to catch what would otherwise be fairly subtle errors.
 
 ## Using the polymorphic comparator
 
