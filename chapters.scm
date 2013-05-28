@@ -114,11 +114,6 @@
  (title "Plugins with First-class Modules")
  (public false)
  )
-((part Practical)
- (name "xml-streams-and-trees")
- (file "stream-parsing-xml")
- (note "75% done, on Anil's stack")
- )
 ;; PART 3: ADVANCED TOPICS
 ((part Advanced)
  (name "foreign-function-interface")
