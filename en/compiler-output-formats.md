@@ -162,8 +162,7 @@ let _ =
   ()
 ```
 
-Compiling this will get you an error at the end of the second function
-definition.
+Attempting to compile this will result in another syntax error.
 
 ```console
 $ ocamlc -c follow_on_function.ml
@@ -171,14 +170,19 @@ File "follow_on_function.ml", line 12, characters 0-3:
 Error: Syntax error
 ```
 
-The real error is at the end of the *first* function definition though. There's
-an extra semicolon at the end of the first function definition that causes the second
-definition to become part of the first `let` binding.
+The line number in the error points to the end of the `add_and_print` function,
+but the actual error is at the end of the *first* function definition. There's
+an extra semicolon at the end of the first function definition that causes the
+second definition to become part of the first `let` binding.  This eventually
+results in a syntax error in the second function.
 
-Luckily, there's a great tool available in OPAM called `ocp-indent` which
-applies a standard set of indenting rules to your source code.  This not only
-beautifies your code layout, but it also makes some syntax errors much more
-obvious.  For instance, let's run the erronous file through `ocp-indent`:
+This sort of bug due to a single errant character can be hard to spot in a
+large body of code. Luckily, there's a great tool available in OPAM called
+`ocp-indent` that applies structured indenting rules to your source code. This
+not only beautifies your code layout, but it also works with partially complete
+code and makes some syntax errors much more obvious.
+
+Let's run our erronous file through `ocp-indent` and see how it processes it.
 
 ```console
 $ opam install ocp-indent
@@ -203,7 +207,7 @@ let _ =
 The `add_and_print` definition has been indented as if it were part of the
 first `concat_and_print` definition, and the errant semicolon is now much
 easier to spot.  If we remove that semicolon, then the result is exactly what
-we expect:
+we expect.
 
 ```console
 $ ocp-indent follow_on_function_fixed.ml 
@@ -227,15 +231,15 @@ val concat_and_print : string -> string -> string
 val add_and_print : int -> int -> int
 ```
 
-The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) has
-information on how to integrate it with your favourite editor.  All of the Core
-libraries are formatted in a mode compliant with `ocp-indent`, so it's a good
-one to match when you publish your own open-source project online.
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) has details
+on how to integrate it with your favourite editor.  All the Core libraries are
+formatted by `ocp-indent`, so it's a good idea to match this style when you
+publish your own open-source project online.
 
 ### Generating documentation via `ocamldoc`
 
 Whitespace and comments are removed from the source code during parsing, and
-aren't significant in determining the semantics of the program.  However, it is
+aren't significant in determining the semantics of the program. However, it's
 possible to embed specially formatted comments that annotate parts of the
 source code with documentation.  These comments are parsed by the `ocamldoc`
 command-line tool, which then outputs structured documentation in a variety of
