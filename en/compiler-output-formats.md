@@ -107,8 +107,8 @@ parser is implemented in OCaml itself, using the techniques described earlier
 in [xref](#parsing-with-ocamllex-and-menhir).  The lexer and parser rules can
 be found in the `ocaml/parsing/` directory in the source distribution.
 
-Here's an example of a syntax error by using the `module` keyword within a
-`let` bindings.
+Here's a syntax error that we obtain by using the `module` keyword
+incorrectly inside a `let` binding.
 
 ```ocaml
 (* broken_module.ml *)
@@ -127,7 +127,8 @@ let _ =
 ```
 
 Parsing immediately eliminates code which doesn't match basic syntactic
-requirements, so the first example will result in a syntax error. 
+requirements, so the first example will result in a syntax error when we run
+the OCaml compiler on it. 
 
 ```console
 $ ocamlc -c broken_module.ml 
@@ -137,12 +138,15 @@ $ ocamlc -c fixed_module.ml
 ```
 
 The syntax error points to the line and character number of the first token
-that couldn't be parsed, which in this case is the `module` keyword.
+that couldn't be parsed.  In the broken example, the `module` keyword
+shouldn't be encountered at that point in the `let` binding, so the error
+location information is correct.
 
 ### Formatting source code with `ocp-indent`
 
-Some parsing errors aren't quite as simple to figure out as the earlier
-example, particularly in larger code bases.
+Sadly, syntax errors do get more inaccurate sometimes, particularly in large
+codebases. Try to spot the deliberate error in the following function
+definitions.
 
 ```ocaml
 (* follow_on_function.ml *)
@@ -162,7 +166,7 @@ let _ =
   ()
 ```
 
-Attempting to compile this will result in another syntax error.
+When you compile this file, you'll get a syntax error.
 
 ```console
 $ ocamlc -c follow_on_function.ml
@@ -172,15 +176,15 @@ Error: Syntax error
 
 The line number in the error points to the end of the `add_and_print` function,
 but the actual error is at the end of the *first* function definition. There's
-an extra semicolon at the end of the first function definition that causes the
-second definition to become part of the first `let` binding.  This eventually
-results in a syntax error in the second function.
+an extra semicolon at the end of the first definition that causes the second
+definition to become part of the first `let` binding.  This eventually results
+in a syntax error in the second function.
 
-This sort of bug due to a single errant character can be hard to spot in a
+This class of bug (due to a single errant character) can be hard to spot in a
 large body of code. Luckily, there's a great tool available in OPAM called
 `ocp-indent` that applies structured indenting rules to your source code. This
-not only beautifies your code layout, but it also works with partially complete
-code and makes some syntax errors much more obvious.
+not only beautifies your code layout, but it also works with partially
+written code and makes this syntax error much more obvious.
 
 Let's run our erronous file through `ocp-indent` and see how it processes it.
 
@@ -238,12 +242,20 @@ publish your own open-source project online.
 
 ### Generating documentation via `ocamldoc`
 
-Whitespace and comments are removed from the source code during parsing, and
-aren't significant in determining the semantics of the program. However, it's
-possible to embed specially formatted comments that annotate parts of the
-source code with documentation.  These comments are parsed by the `ocamldoc`
-command-line tool, which then outputs structured documentation in a variety of
-formats (HTML, LaTeX and even manual pages).
+Whitespace and source code comments are removed during parsing and aren't
+significant in determining the semantics of the program for compilation
+purposes. However, other tools in the OCaml distribution can interpret them for
+their own ends.
+
+The `ocamldoc` tool looks for specially formatted comments in the source code
+to generate documentation bundles. These comments are combined with the
+function definitions and signatures, and output as structured documentation in
+a variety of formats. `ocamldoc` support generating HTML pages, LaTeX and PDF
+documents, UNIX manual pages, and even module dependency graphs that can be
+viewed using [Graphviz](http://www.graphviz.org).
+
+Here's a sample of some source code that's been annotated with `ocamldoc`-style
+comments.
 
 ```ocaml
 (** example.ml: The first special comment of the file is the comment 
@@ -268,9 +280,13 @@ let what_is_the_weather_in location =
   | `California -> Sun
 ```
 
-The OCamldoc comments are distinguished from normal comments by beginning them with
-the double asterix. You can compile the documentation by running `ocamldoc` over the
-source file.
+The `ocamldoc` comments are distinguished by beginning with the double asterix,
+with some text formatting conventions within the comment to mark metadata (most
+notably, the `@tag` fields to mark specific properties such as the author or
+argument description).
+
+Try compiling the HTML documentation and UNIX man pages by running `ocamldoc`
+over the source file.
 
 ```console
 $ mkdir -p html man/man3
@@ -279,23 +295,26 @@ $ ocamldoc -man -d man/man3 example.ml
 $ man -M man Example
 ```
 
-These commands generate HTML and manual page format documentation, in the
-`html/` and `man/man3/` directories.  Checkout the OCaml
+You should now have HTML files inside the `html/` directory, and be able to
+view the UNIX manual pages held in `man/man3`.  There are quite a few comment
+formats and options to control the output, so refer to the [OCaml
+manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html) for the
+complete list.
 
 <tip>
 <title>Using custom ocamldoc generators</title>
 
-The default HTML output stylesheets from `ocamldoc` are pretty spartan.
-The tool supports plugging in custom documentation generators, and there are
-several available that provide prettier or more detailed output.
+The default HTML output stylesheets from `ocamldoc` are pretty spartan and
+distinctly Web 1.0.  The tool supports plugging in custom documentation
+generators, and there are several available that provide prettier or more
+detailed output.
 
 * [Argot](http://argot.x9c.fr/) is an enchanced HTML generator that supports
   code folding and searching by name or type definition.
 * The custom generators available
   [here](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
-  support for Bibtex references within comments, adding `TODO` notes, and
-  generating literate documentation that embeds the code alongside the
-  comments.
+  support for Bibtex references within comments and generating literate
+  documentation that embeds the code alongside the comments.
 * JSON output is available via `odoc_json` (TODO: avsm, pull out of Xen).
 
 </tip>
