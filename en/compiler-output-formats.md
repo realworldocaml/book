@@ -1,13 +1,20 @@
 # The Compilation Pipeline
 
-The process of converting OCaml source code to executable binaries is done in
-multiple steps.  Every stage generally checks and discards information from the
-source code, until the final output is untyped and low-level assembly code.
+Compiling source code into executable programs is a fairly complex process that
+involves quite a few tools -- preprocessors, compilers, runtime libraries,
+linkers and assemblers.  OCaml has an emphasis on static type safety, and so it
+tries to reject source code that doesn't meet its requirements as early as
+possible.  The compiler toolchain implements this as a series of staged
+transformations starting with the source code. Each stage checks some
+properties and discards information from the previous stage, until the final
+output is low-level assembly code.
 
-Each of the compilation steps can be executed manually if you need to inspect
-something to hunt down a bug or performance regression.  It's even possible to
-compile OCaml to run efficiently on environments such as Javascript or the Java
-Virtual Machine.
+Most of this complexity is hidden away from you via the compiler and build
+system tools.  However, most of the compilation steps can be executed manually
+if you need to hunt down a bug or investigate a performance regression.  It's
+even possible to compile OCaml to run efficiently on environments such as
+Javascript or the Java Virtual Machine, and it helps to understand how the
+compilation pipeline works before trying out these more unconventional targets.
 
 In this chapter, you'll learn:
 
@@ -16,10 +23,17 @@ In this chapter, you'll learn:
 * the bytecode `ocamlc` compiler and `ocamlrun` interpreter.
 * the native code `ocamlopt` code generator.
 
-The OCaml toolchain accepts textual source code as input.  Each source file is
-a separate *compilation unit* that is compiled separately, and finally linked
-together into an executable or library.  The compilation pipeline looks like
-this:
+## The overview of the tools
+
+The OCaml tools accept textual source code as input with filename extensions of
+`.ml` and `.mli` for modules and signatures respectively.  Each source file
+represents a *compilation unit* that is built separately.  The compiler
+generates intermediate files with different filename extensions to use as it
+advances through the compilation stages.  Finally, the compiler linker gathers
+together a collection of compiled compilation units and produces a standalone
+executable or library archive that can be re-used by other applications.
+
+The overall compilation pipeline looks like this:
 
 ```
     Source code
@@ -44,16 +58,36 @@ this:
      /    \ closure conversion, inlining, uncurrying,
     v      \  data representation strategy
  Bytecode   \
-             \
-            Cmm
-             |
-             | code generation
-             v
-        Assembly code
+    |        +-----+
+    |             Cmm
+    |js_of_ocaml   |
+    |              | code generation
+    |              v
+ Javascript     Assembly code
 ```
 
-We'll now go through these stages and explain how the tools behind them
-operate.
+Notice that the pipeline branches towards the end. This is because OCaml has
+multiple compiler frontends that re-use the early stages of compilation, but
+produce very different final outputs.  The bytecode interpreter is portable and
+lightweight (and can be transformed into Javascript), whereas the native code
+compiler generates specialized native code binaries suitable for
+high-performance applications.
+
+### Obtaining the source code
+
+Although it's not necessary to understand the examples, you may find it useful
+to have a copy of the OCaml source tree checked out while you read through this
+chapter.  The source code is available from multiple places:
+
+* Stable releases as zip and tar archives from the [OCaml download site](http://caml.inria.fr/download.en.html).
+* A Subversion anonymous mirror of the main development sources available on the [development resources](http://caml.inria.fr/ocaml/anonsvn.en.html) page online.
+* A Git mirror of the Subversion repository with all the history and development branches included, browsable online at [Github](https://github.com/ocaml/ocaml).
+
+Once you've checked out a copy of the source tree, it has a few sub-directories
+(TODO: describe depending on the contents below).
+ 
+We'll now go go through the compilation stages and explain how the tools behind
+them will be useful to you during OCaml development.
 
 ## Parsing and preprocessing with `camlp4`
 
