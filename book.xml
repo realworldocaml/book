@@ -39,7 +39,6 @@
 
 
 
-
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -20753,706 +20752,6 @@ $ ./service_client.byte
       changed dynamically, rather than just added at creation time.
     </para>
   </sect1>
-</chapter><chapter id="xml-streams-and-trees">
-  <title>XML Streams and Trees</title>
-  <para>
-    XML is a markup language designed to store tree-structured data in a
-    format that is (somewhat) human- and machine-readable. Like JSON, it
-    is a textual format commonly used in web technologies, with a
-    complete
-    <ulink url="http://www.w3.org/TR/REC-xml/">specification</ulink>
-    available online.
-  </para>
-  <para>
-    We're going to explain the basics of XML manipulation here, and also
-    introduce the notion of a <emphasis>visitor pattern</emphasis> to
-    manipulate fragments of XML trees.
-  </para>
-  <note>
-  <title>
-  Obtaining and installing XMLM
-  </title>
-  <para>
-    The remainder of this chapter uses the freely available XMLM
-    library. It's easiest to obtain it via OPAM. See
-    <xref linkend="installation"/> for installation
-    instructions if you don't have OPAM.
-  </para>
-  <programlisting language="ocaml">
-$ opam install xmlm
-</programlisting>
-  <para>
-    Once installed, the <literal>xmlm</literal> library will be
-    available in your toplevel.
-  </para>
-  <programlisting language="ocaml">
-$ utop
-# #require &quot;xmlm&quot;;;
-# open Xmlm ;;
-</programlisting>
-  <para>
-    The library documentation is also available
-    <ulink url="http://erratique.ch/software/xmlm/doc/Xmlm">online</ulink>.
-  </para>
-  </note>
-  <para>
-    Since XML is such a common web format, we've taken our example
-    document from the
-    <ulink url="http://duckduckgo.com">DuckDuckGo</ulink> search engine.
-    This is a smaller search engine than the usual suspects, but has the
-    advantage of a freely available API that doesn't require you to
-    register before using it. We'll talk more about how to use the live
-    API later in
-    <xref linkend="concurrent-programming-with-async"/>, but
-    for now here's what a shortened XML search response from DuckDuckGo
-    looks like:
-  </para>
-  <programlisting language="xml">
-&lt;DuckDuckGoResponse version=&quot;1.0&quot;&gt;
-&lt;Heading&gt;DuckDuckGo&lt;/Heading&gt;
-&lt;AbstractText&gt;DuckDuckGo is an Internet search engine.&lt;/AbstractText&gt;
-&lt;AbstractURL&gt;https://en.wikipedia.org/wiki/DuckDuckGo&lt;/AbstractURL&gt;
-&lt;AbstractSource&gt;Wikipedia&lt;/AbstractSource&gt;
-&lt;Results&gt;
-&lt;Result&gt;
-  &lt;Text&gt;Official site&lt;/Text&gt;
-  &lt;FirstURL&gt;https://duckduckgo.com/&lt;/FirstURL&gt;
-  &lt;/Result&gt;
-&lt;/Results&gt;
-&lt;RelatedTopics&gt;
- &lt;RelatedTopic&gt;
-   &lt;Text&gt;Companies based in Pennsylvania&lt;/Text&gt;
-   &lt;FirstURL&gt;
-     http://duckduckgo.com/c/Companies_based_in_Pennsylvania
-   &lt;/FirstURL&gt;
- &lt;/RelatedTopic&gt;
- &lt;RelatedTopic&gt;
-   &lt;Text&gt;Internet search engines&lt;/Text&gt;
-   &lt;FirstURL&gt;
-     http://duckduckgo.com/c/Internet_search_engines
-   &lt;/FirstURL&gt;
- &lt;/RelatedTopic&gt;
-&lt;/RelatedTopics&gt;
-&lt;/DuckDuckGoResponse&gt;
-</programlisting>
-  <para>
-    The XML document is structured as a set of opening
-    <literal>&lt;tag&gt;</literal> tokens that are closed by a
-    corresponding end <literal>&lt;/tag&gt;</literal> token. Opening
-    tags can have an optional set of key/value attributes, for example
-    <literal>&lt;tag name=&quot;foo&quot; id=&quot;bar&quot;&gt;</literal>.
-    A tag usually contains data that can contain further tags, thus
-    forming a tree structure.
-  </para>
-  <para>
-    These XML documents can be very large, and we don't want to have to
-    read it all into memory before starting to process it. Luckily there
-    exists a low-level <emphasis>streaming</emphasis> interface that
-    parses an XML document incrementally. This can be cumbersome to use
-    for quick tasks, so we'll build a simpler tree API on top of it.
-    We'll start with the streaming API first though.
-  </para>
-  <sect1 id="stream-parsing-xml">
-    <title>Stream parsing XML</title>
-    <para>
-      The XMLM documentation is a good place to read about the overall
-      layout of the library. It tells us that:
-    </para>
-    <blockquote>
-      <para>
-        A well-formed sequence of <literal>signal</literal>s represents
-        an XML document tree traversal in depth-first order. Input pulls
-        a well-formed sequence of <literal>signal</literal>s from a data
-        source and output pushes a well-formed sequence of
-        <literal>signal</literal>s to a data destination. Functions are
-        provided to easily transform sequences of
-        <literal>signal</literal>s to/from arborescent data structures.
-      </para>
-    </blockquote>
-    <para>
-      The <literal>signal</literal> type is at the heart of all XMLM
-      functions:
-    </para>
-    <programlisting language="ocaml">
-type signal = [
-  | `Data of string
-  | `Dtd of dtd
-  | `El_end
-  | `El_start of tag
-]
-</programlisting>
-    <para>
-      XMLM parses input XML documents into an ordered sequence of these
-      <literal>signal</literal> values. The first
-      <literal>signal</literal> that's received is always a
-      <literal>Dtd</literal>. The Document Type Description (DTD)
-      optionally defines which tags are allowed within the XML document.
-      Some XML parsers can validate a document against a DTD, but XMLM
-      is a <emphasis>non-validating</emphasis> parser that reads the DTD
-      if present but disregards its contents.
-    </para>
-    <para>
-      The <literal>El_start</literal> and <literal>El_end</literal>
-      signals indicate the opening and closing of tags, and
-      <literal>Data</literal> passes the data contained between tags.
-    </para>
-    <programlisting>
-let i = Xmlm.make_input (`Channel (open_in &quot;ddg.xml&quot;)) ;;
-let o = Xmlm.make_output (`Channel stdout) ;;
-</programlisting>
-    <para>
-      We'll begin by defining the input source and output target for the
-      XML data. The <literal>make_input</literal> and
-      <literal>make_output</literal> functions use a polymorphic variant
-      to define how the library should use to read and write the XML.
-      <literal>Channel</literal> is used above, but there are several
-      others defined in the library:
-    </para>
-    <programlisting language="ocaml">
-type source = [
-  | `Channel of in_channel
-  | `Fun of unit -&gt; int
-  | `String of int * string
-]
-</programlisting>
-    <para>
-      Each of these sources uses a different strategy for obtaining
-      input data:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>Channel</literal> uses the OCaml standard library
-          channel system. When more data is required, a blocking read is
-          performed on that channel.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>String</literal> accepts the whole document as an
-          OCaml <literal>string</literal>, starting from an integer
-          offset and continuing until the whole document has been
-          parsed.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>Fun</literal> is more general than the others, and
-          supplies a function which can be called repeatedly to obtain
-          the next character. The function can do this by any means it
-          chooses: for example from the network (hopefully with
-          buffering so it's not reading a single character at a time),
-          or from a list of strings from elsewhere in the application.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      Although we use <literal>Channel</literal> in this small example,
-      real applications will tend to use either
-      <literal>String</literal> or <literal>Fun</literal>. This is
-      because the <literal>in_channel</literal> interface is deprecated
-      in Core, and shouldn't be used in new code. <emphasis>(avsm: this
-      is a somewhat unsatisfying explanation: what about adding a better
-      Core interface?)</emphasis>.
-    </para>
-    <para>
-      Regardless of which input method you choose, XMLM will convert it
-      into a sequence of signals. For example, take this simplified XML
-      fragment from our earlier search engine example.
-    </para>
-    <programlisting language="xml">
-&lt;DuckDuckGoResponse version=&quot;1.0&quot;&gt;
-&lt;Heading&gt;DuckDuckGo&lt;/Heading&gt;
-&lt;/DuckDuckGoResponse&gt;
-</programlisting>
-    <para>
-      This will be converted into the following sequence of signals:
-    </para>
-    <programlisting>
-Dtd _
-El_start ((&quot;&quot;,&quot;DuckDuckGoResponse&quot;), [(&quot;&quot;,&quot;version&quot;), &quot;1.0&quot;]
-El_start ((&quot;&quot;,&quot;Heading&quot;), [])
-Data &quot;DuckDuckGo&quot;
-El_end
-El_end
-</programlisting>
-    <para>
-      Only the opening <literal>El_start</literal> defines the tag name,
-      and the <literal>El_end</literal> signal closes the more recently
-      opened tag. The tag names are a little complicated due to the XML
-      facility for namespaces; just ignore the empty component of the
-      tag if you don't care about these. Now, let's define the
-      <literal>xml_id</literal> function that uses the input and output
-      values we defined above and parses this document.
-    </para>
-    <programlisting language="ocaml">
-let xml_id i o =
-  let rec pull depth =
-    Xmlm.output o (Xmlm.peek i);
-    match Xmlm.input i with
-    | `El_start _ -&gt; pull i o (depth + 1)
-    | `El_end -&gt; if depth &gt; 1 then pull i o (depth - 1)
-    | `Data _ -&gt; pull i o depth
-    | `Dtd _ -&gt; assert false
-  in
-  Xmlm.output o (Xmlm.input i); (* `Dtd *)
-  pull 0;
-  if not (Xmlm.eoi i) then invalid_arg &quot;document not well-formed&quot;
-</programlisting>
-    <para>
-      The <literal>xml_id</literal> function begins by defining a
-      recursive helper <literal>pull</literal> function. The
-      <literal>pull</literal> function iterates over the
-      <literal>signal</literal> values until there are none left. It
-      first uses <literal>Xmlm.peek</literal> to inspect the current
-      input signal and immediately outputs it. The rest of the function
-      is not strictly necessary, but tracks that all of the tags that
-      have been started via the <literal>El_start</literal> signal are
-      also closed by a corresponding <literal>El_end</literal> signal.
-    </para>
-    <para>
-      The <literal>pull</literal> function isn't invoked immediately.
-      The first thing we need to do is consume the
-      <literal>Dtd</literal> signal, which is present in every
-      well-formed XML input. Then we invoke <literal>pull</literal> with
-      a depth of <literal>0</literal>, and it consumes the whole
-      document. The final action is to call <literal>Xmlm.eoi</literal>
-      to verify that the end of input has been reached, since the
-      earlier <literal>pull</literal> should have consumed all of the
-      XML signals.
-    </para>
-  </sect1>
-  <sect1 id="tree-parsing-xml">
-    <title>Tree parsing XML</title>
-    <para>
-      Signals enforce a very iterative style of parsing XML, as your
-      program has to deal with signals arriving serially. It's often
-      more convenient to deal with complete XML documents directly
-      in-memory as an OCaml tree data structure. We can convert a signal
-      stream into an OCaml structure by defining the following data type
-      and helper functions:
-    </para>
-    <programlisting language="ocaml">
-type tree =
-  | Element of Xmlm.tag * tree list
-  | Data of string
-
-let in_tree i =
-  let el tag children = Element (tag, children) in
-  let data d = Data d in
-  Xmlm.input_doc_tree ~el ~data i
-
-let out_tree o t =
-  let frag = function
-  | Element (tag, childs) -&gt; `El (tag, childs)
-  | Data d -&gt; `Data d
-  in
-  Xmlm.output_doc_tree frag o t
-</programlisting>
-    <para>
-      The type <literal>tree</literal> can be pattern-matched and
-      traversed like a normal OCaml data structure. Let's see how this
-      works by extracting all the &quot;RelatedTopics&quot; in the
-      example XML document. First, we'll need a few helper combinator
-      functions to filter through tags and trees, with the following
-      signature:
-    </para>
-    <programlisting language="ocaml">
-(* Extract a textual name from an XML tag.
-   Discards the namespace information. *)
-val name : Xmlm.tag -&gt; string
-
-(* Given a list of [trees], concatenate all of the data contents
-   into a string, and discard any sub-tags within it *)
-val concat_data : tree list -&gt; string
-
-(* Filter out the contents of a tag [n] from a tagset,
-   and return the concatenated contents of all of them *)
-val filter_tag : string -&gt; tree list -&gt; tree list
-</programlisting>
-    <para>
-      Let's look at the implementation of these functions in more
-      detail.
-    </para>
-    <programlisting language="ocaml">
-let name ((_,n),_) = n
-</programlisting>
-    <para>
-      The <literal>name</literal> function is a good example of how
-      pattern-matching can make data structure manipulation very
-      succinct. An <literal>Xmlm.tag</literal> consists of a tuple of
-      the tag name and its attributes. The tag name is itself a tuple of
-      the namespace and the local name (which is what we actually want).
-      The pattern matching in the <literal>name</literal> function binds
-      the local name portion of these tuples to <literal>n</literal>,
-      and ignores the rest of the argument input. The function body just
-      returns <literal>n</literal> to the caller.
-    </para>
-    <programlisting language="ocaml">
-let concat_data tl =
-  List.fold_left ~init:&quot;&quot; ~f:(fun acc -&gt;
-    function
-    |Data s -&gt; acc ^ s
-    |_ -&gt; acc
-  ) tl
-</programlisting>
-    <para>
-      The <literal>concat_data</literal> function accepts a
-      <literal>tree list</literal> parameter and looks for
-      <literal>Data</literal> tags that it concatenates into a single
-      string. All other tags are ignored and discarded (a more
-      sophisticated implementation would recurse into sub-tags and
-      concatenate any data within them too).
-    </para>
-    <programlisting language="ocaml">
-let filter_tag n =
-  List.fold_left ~init:[] ~f:(fun acc -&gt;
-    function
-    |Element (tag, ts) when name tag = n -&gt;
-      ts @ acc
-    |_ -&gt; acc
-  )
-</programlisting>
-    <para>
-      The <literal>filter_tag</literal> function also folds over a
-      <literal>tree list</literal>, but uses a more specialised pattern
-      match. It looks for an <literal>Element</literal> value, but uses
-      the <literal>when</literal> clause to also check that the name of
-      the tag matches the <literal>n</literal> function argument. If it
-      does match then that pattern is selected, and otherwise matching
-      continues to the next option (in this case, a catch-all that
-      simply returns the accumulator and continues the fold). This use
-      of <literal>when</literal> in pattern matching is known as a
-      <emphasis>guard pattern</emphasis>.
-    </para>
-    <para>
-      Once we have these helper functions, the selection of all the
-      <literal>&lt;Text&gt;</literal> tags is a matter of chaining the
-      filter functions we just defined together.
-    </para>
-    <programlisting language="ocaml">
-let topics trees =
-  filter_tag &quot;DuckDuckGoResponse&quot; trees
-  |&gt; filter_tag &quot;RelatedTopics&quot;
-  |&gt; filter_tag &quot;RelatedTopic&quot;
-  |&gt; filter_tag &quot;Text&quot;
-  |&gt; List.iter ~f:(fun x -&gt; concat_data [x] |&gt; print_endline)
-
-let _ =
-  let i = Xmlm.make_input (`Channel (open_in &quot;ddg.xml&quot;)) in
-  let (_,it) = in_tree i in
-  topics [it]
-</programlisting>
-    <para>
-      The <literal>filter_tag</literal> function accepts a
-      <literal>tree list</literal> and also outputs a
-      <literal>tree list</literal> that contains the sub-tags that
-      match. This lets us chain together the results of one filter to
-      another, and hence select hierarchical XML tags very easily. When
-      we get to the <literal>&lt;Text&gt;</literal> tag, we iterate over
-      all the results, concatenate the data contents, and print each one
-      individually.
-    </para>
-  </sect1>
-  <sect1 id="building-xml-using-syntax-extensions">
-    <title>Building XML using syntax extensions</title>
-    <para>
-      In the earlier JSON chapter, we explained how to construct values
-      by creating the data structures directly. While this works for
-      small documents, it can get really confusing with bigger
-      structures. For example, look at:
-    </para>
-    <programlisting language="ocaml">
-let mk_tag n a c = Element(((&quot;&quot;,n),a),c)
-let mk_data d = Data d
-
-let response =
-  mk_tag &quot;DuckDuckGoResponse&quot; [(&quot;&quot;,&quot;version&quot;),&quot;1.0&quot;] 
-    (mk_tag &quot;Heading&quot; [] [mk_data &quot;DuckDuckGo&quot;])
-</programlisting>
-    <para>
-      This defines a couple of helper functions to construct
-      <literal>Element</literal> and <literal>Data</literal> values, and
-      then builds a <literal>response</literal> value. Wouldn't it be
-      nice if there were a way to write the XML we want directly?
-      Happily, OCaml's syntax extension mechanism comes to the rescue
-      via the <emphasis>quotation</emphasis> mechanism. It lets us write
-      this equivalent code:
-    </para>
-    <programlisting language="ocaml">
-let response =
-  &lt;:xml
-    &lt;DuckDuckGoResponse version=&quot;1.0&quot;&gt;
-      &lt;Heading&gt;DuckDuckGo&lt;/Heading&gt;
-    &lt;/DuckDuckGoResponse&gt;
-  &gt;&gt;
-</programlisting>
-    <para>
-      We use the Sexplib syntax extension earlier to generate
-      boilerplate code from type definitions. The quotation shown above
-      is a little different: it lets the syntax of an entire block of
-      code to be completely different from OCaml's usual one. Camlp4
-      loads a syntax extension module that transforms the Abstract
-      Syntax Tree (AST) of the code fragment (in this case,
-      <literal>xml</literal>), and converts it into the desired data
-      structure.
-    </para>
-    <para>
-      We'll use the Atom 1.0 syndication format as our example. Atom
-      feeds allow web-based programs such as browsers to poll a website
-      for updates. The website owner publishes a feed of content in a
-      standardized XML format via HTTP. This feed is then parsed by
-      clients and compared against previously downloaded versions to
-      determine which contents are available.
-    </para>
-    <para>
-      Here's an example of an Atom feed:
-    </para>
-    <programlisting language="xml">
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;feed xmlns=&quot;http://www.w3.org/2005/Atom&quot;&gt;
- &lt;title&gt;Example Feed&lt;/title&gt;
- &lt;subtitle&gt;A subtitle.&lt;/subtitle&gt;
- &lt;link href=&quot;http://example.org/feed/&quot; rel=&quot;self&quot; /&gt;
- &lt;link href=&quot;http://example.org/&quot; /&gt;
- &lt;id&gt;urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6&lt;/id&gt;
- &lt;updated&gt;2003-12-13T18:30:02Z&lt;/updated&gt;
-
- &lt;entry&gt;
-  &lt;title&gt;Atom-Powered Robots Run Amok&lt;/title&gt;
-  &lt;link href=&quot;http://example.org/2003/12/13/atom03&quot; /&gt;
-  &lt;link rel=&quot;alternate&quot; type=&quot;text/html&quot; href=&quot;http://example.org/atom03.html&quot;/&gt;
-  &lt;link rel=&quot;edit&quot; href=&quot;http://example.org/atom03/edit&quot;/&gt;
-  &lt;id&gt;urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a&lt;/id&gt;
-  &lt;updated&gt;2003-12-13T18:30:02Z&lt;/updated&gt;
-  &lt;summary&gt;Some text.&lt;/summary&gt;
-  &lt;author&gt;
-    &lt;name&gt;John Doe&lt;/name&gt;
-    &lt;email&gt;johndoe@example.com&lt;/email&gt;
-  &lt;/author&gt;
- &lt;/entry&gt;
-&lt;/feed&gt;
-</programlisting>
-    <para>
-      We want to build this by minimising the amount of repetitive XML
-      generation code. The &quot;Caml on the Web&quot; (COW) library
-      provides the syntax extension we need.
-    </para>
-    <note>
-    <title>
-    Installing Caml on the Web (COW)
-    </title>
-    <para>
-      The COW library and syntax extension can be installed via OPAM via
-      <literal>opam install cow</literal>. There are two OCamlfind
-      packages installed: the library is called <literal>cow</literal>
-      and the syntax extension is activated with the
-      <literal>cow.syntax</literal> package.
-    </para>
-    <para>
-      One caveat to bear in mind is that COW isn't fully compatible with
-      Core yet, and so you must use the syntax extension before opening
-      the Core modules. (<emphasis>avsm</emphasis>: we can fix this
-      easily, but the note is here as a warning to reviewers).
-    </para>
-    </note>
-    <para>
-      Let's start to build up an Atom specification using Cow. First,
-      the <literal>&lt;author&gt;</literal> tag can be represented with
-      the following type:
-    </para>
-    <programlisting language="ocaml">
-type author = {
-  name: string;
-  uri: string option;
-  email: string option;
-} with xml
-</programlisting>
-    <para>
-      This is a standard record type definition with the addition of
-      <literal>with xml</literal> at the end. This uses a syntax
-      extension to signify that we wish to generate boilerplate code for
-      handling this record as an XML document.
-    </para>
-    <sidebar>
-    <title>
-    Invoking <literal>camlp4</literal> syntax extensions
-    </title>
-    <para>
-      The OCaml compiler can call <literal>camlp4</literal>
-      automatically during a compilation to preprocess the source files.
-      This is specified via the <literal>-pp</literal> flag to the
-      compiler. You don't normally need to specify this flag yourself.
-      Use the <literal>ocamlfind</literal> utility instead to generate
-      the right command-line flags for you. Here's a small shell script
-      which preprocesses a source file with the COW syntax extension:
-    </para>
-    <programlisting language="bash">
-#!/bin/sh -x
-
-file=$1
-lib=cow.syntax
-bin=ocamlfind
-args=`$bin query -predicates syntax,preprocessor -r -format '-I %d %a' $lib`
-camlp4o -printer o $args $file
-</programlisting>
-    <para>
-      You can supply <literal>ocamlfind</literal> with a number of
-      different predicates to define the type of build you are running
-      (preprocessing, compilation or linking). The final part of the
-      script invokes the <literal>camlp4o</literal> binary on your ML
-      source file and outputs the transformed source code to your
-      terminal.
-    </para>
-    </sidebar>
-    <para>
-      Let's see the OCaml code that has been generated for our
-      <literal>author</literal> record after it has been preprocessed:
-    </para>
-    <programlisting language="ocaml">
-type author = {
-  name: string;
-  uri: string option;
-  email: string option;
-}
-
-let rec xml_of_author author : Cow.Xml.t =
-  List.flatten
-    [ (match match author.email with
-             | None -&gt; []
-             | Some var1 -&gt; [ `Data var1 ]
-       with
-       | [] -&gt; []
-       | _ -&gt;
-         [ `El ((((&quot;&quot;, &quot;email&quot;), []) : Cow.Xml.tag),
-           (match author.email with
-            | None -&gt; []
-            | Some var1 -&gt; [ `Data var1 ])) ]);
-      (match match author.uri with
-        | None -&gt; [] | Some var2 -&gt; [ `Data var2 ]
-       with
-       | [] -&gt; []
-       | _ -&gt;
-         [ `El ((((&quot;&quot;, &quot;uri&quot;), []) : Cow.Xml.tag),
-           (match author.uri with
-             | None -&gt; []
-             | Some var2 -&gt; [ `Data var2 ])) ]);
-      (match [ `Data author.name ] with
-       | [] -&gt; []
-       | _ -&gt;
-         [ `El ((((&quot;&quot;, &quot;name&quot;), []) : Cow.Xml.tag),
-         [ `Data author.name ]) ]) ]
-</programlisting>
-    <para>
-      Notice that the <literal>with xml</literal> clause has been
-      replaced with a new <literal>xml_of_author</literal> function that
-      has been generated for you. It accepts an
-      <literal>author</literal> value and returns an
-      <literal>Xml.t</literal> value. The generated code isn't really
-      meant to be human-readable, but you don't normally see it when
-      using the syntax extension (we've only dumped it out here to
-      illustrate how <literal>camlp4</literal> works).
-    </para>
-    <para>
-      If we run <literal>xml_of_author</literal> and convert the result
-      to a human-readable string, our complete example looks like:
-    </para>
-    <programlisting language="ocaml">
-type author = {
-  name: string;
-  uri: string option;
-  email: string option;
-} with xml
-
-let anil = {
-  name = &quot;Anil Madhavapeddy&quot;;
-  uri = Some &quot;http://anil.recoil.org&quot;;
-  email = Some &quot;anil@recoil.org&quot;
-}
-
-let _ = print_endline (Cow.Xml.to_string (xml_of_author anil))
-</programlisting>
-    <para>
-      This will generate the following XML output on the terminal when
-      you execute it:
-    </para>
-    <programlisting language="xml">
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;email&gt;anil@recoil.org&lt;/email&gt;
-&lt;uri&gt;http://anil.recoil.org&lt;/uri&gt;
-&lt;name&gt;Anil Madhavapeddy&lt;/name&gt;
-</programlisting>
-    <para>
-      This is convenient, but just one small portion of Atom. How do we
-      express the full Atom scheme from earlier? The answer is with just
-      a few more records that match the Atom XML schema.
-    </para>
-    <programlisting language="ocaml">
-type author = {
-  name: string;
-  uri: string option;
-  email: string option;
-} with xml
-
-type date =
-  int * int * int * int * int (* year, month, date, hour, minute *)
-with xml
-
-let xml_of_date (year,month,day,hour,min) =
-  let d = Printf.sprintf &quot;%.4d-%.2d-%.2dT%.2d:%.2d:00Z&quot; year month day hour min in
-  &lt;:xml&lt; $str:d$ &gt;&gt;
-
-type meta = {
-  id: string;
-  title: string;
-  subtitle: string option;
-  author: author option;
-  rights: string option;
-  updated: date;
-} with xml
-</programlisting>
-    <para>
-      We've now filled in more of the Atom schema with these records.
-      The first problem we run into is that occasionally there is a
-      mismatch between the syntax extension's idea of what the
-      auto-generated XML should look like, and the reality of the
-      protocol you are mapping to.
-    </para>
-    <para>
-      The Atom date field is a good example. We define it as a tuple of
-      integers, but the format mandated by the specification is actually
-      a free-form text format and not XML. However, because the syntax
-      extension generates normal OCaml functions, we can just override
-      the <literal>xml_of_date</literal> function with a custom one
-      which returns the correct XML fragment. Any references further
-      down the module will just use our overridden version and ignore
-      the auto-generated one.
-    </para>
-    <para>
-      There's another interesting bit of new syntax in the
-      <literal>xml_of_date</literal> function known as a
-      <emphasis>quotation</emphasis>. OCaml not only allows code to be
-      generated during pre-processing, but also to override the core
-      language grammar with new constructs. The most common way of doing
-      this is by embedding the custom grammars inside
-      <literal>&lt;:foo&lt; ... &gt;&gt;</literal> tags, where
-      <literal>foo</literal> represents the particular grammar being
-      used. In the case of COW, this lets you generate XMLM-compatible
-      OCaml values just by typing in XML tags.
-    </para>
-    <para>
-      TODO antiquotations.
-    </para>
-    <para>
-      TODO finish the atom example.
-    </para>
-    <sect2 id="working-with-xhtmlx">
-      <title>Working with XHTMLx</title>
-      <para>
-        TODO use Cow.Html to generate a more complete Atom feed.
-      </para>
-    </sect2>
-  </sect1>
 </chapter></part><part label="III"><title>The Runtime System</title><chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
   <para>
@@ -23006,22 +22305,35 @@ struct custom_operations {
   <para>
     Compiling source code into executable programs is a fairly complex
     process that involves quite a few tools -- preprocessors, compilers,
-    runtime libraries, linkers and assemblers. OCaml has an emphasis on
-    static type safety, and so it tries to reject source code that
-    doesn't meet its requirements as early as possible. The compiler
-    toolchain implements this as a series of staged transformations
-    starting with the source code. Each stage checks some properties and
-    discards information from the previous stage, until the final output
-    is low-level assembly code.
+    runtime libraries, linkers and assemblers. It's important how to
+    understand how these fit together to help with your day-to-day
+    workflow of developing, debugging, maintaining and deploying
+    applications.
   </para>
   <para>
-    Most of this complexity is hidden away from you via the compiler and
-    build system tools. However, most of the compilation steps can be
-    executed manually if you need to hunt down a bug or investigate a
-    performance regression. It's even possible to compile OCaml to run
-    efficiently on environments such as Javascript or the Java Virtual
-    Machine, and it helps to understand how the compilation pipeline
-    works before trying out these more unconventional targets.
+    OCaml has a strong emphasis on static type safety and tries to
+    reject source code that doesn't meet its requirements as early as
+    possible. The compiler toolchain implements these checks as a series
+    of transformations that start with the source code. Each stage
+    checks some properties and discards information from the previous
+    stage, until the final output is low-level assembly code that no
+    longer knows anything about OCaml modules or objects.
+  </para>
+  <para>
+    TODO note about how this different from JVM/NET w type erasure?
+  </para>
+  <para>
+    Much of this complexity is hidden away via the OCaml build system.
+    However, you'll sometime need to dive into the toolchain to hunt
+    down a bug or investigate a performance regression. In these cases,
+    you can manually run a stage and examine the output more closely.
+  </para>
+  <para>
+    It's even possible to compile OCaml to run efficiently on
+    environments such as Javascript or the Java Virtual Machine. These
+    are third-party tools that extend the core compilation toolchain,
+    and so it helps to understand how everything fits together before
+    starting to use them.
   </para>
   <para>
     In this chapter, you'll learn:
@@ -23050,8 +22362,8 @@ struct custom_operations {
       </para>
     </listitem>
   </itemizedlist>
-  <sect1 id="the-overview-of-the-tools">
-    <title>The overview of the tools</title>
+  <sect1 id="an-overview-of-the-toolchain">
+    <title>An overview of the toolchain</title>
     <para>
       The OCaml tools accept textual source code as input with filename
       extensions of <literal>.ml</literal> and <literal>.mli</literal>
@@ -23151,71 +22463,300 @@ struct custom_operations {
       </para>
     </sect2>
   </sect1>
-  <sect1 id="parsing-and-preprocessing-with-camlp4">
-    <title>Parsing and preprocessing with
-    <literal>camlp4</literal></title>
+  <sect1 id="parsing-source-code">
+    <title>Parsing source code</title>
     <para>
-      The first thing the compiler does is to parse the input source
-      code into a more structured data type. This immediately eliminates
-      code which doesn't match basic syntactic requirements. The OCaml
-      lexer and parser use the same basic techniques described earlier
-      in <xref linkend="parsing-with-ocamllex-and-menhir"/>.
+      The first thing the compiler does is parse the input source files
+      into a more structured data type. The compiler lexes the source
+      text into a stream of tokens and parses them into an Abstract
+      Syntax Tree (AST) data structure. This parser is implemented in
+      OCaml itself, using the techniques described earlier in
+      <xref linkend="parsing-with-ocamllex-and-menhir"/>. The
+      lexer and parser rules can be found in the
+      <literal>ocaml/parsing/</literal> directory in the source
+      distribution.
     </para>
     <para>
-      One powerful feature present in OCaml is the facility to
-      dynamically extend the syntax via the <literal>camlp4</literal>
-      tool. The compiler usually lexes the source code into tokens, and
-      then parses these into an Abstract Syntax Tree (AST) that
-      represents the parsed source code.
+      Here's an example of a syntax error by using the
+      <literal>module</literal> keyword within a <literal>let</literal>
+      bindings.
+    </para>
+    <programlisting language="ocaml">
+(* broken_module.ml *)
+let _ =
+  module MyString = String;
+  ()
+</programlisting>
+    <para>
+      The fixed version of this locally opens the
+      <literal>module</literal> correctly.
     </para>
     <para>
-      Camlp4 modules can extend the lexer with new keywords, and later
-      transform these keywords (or indeed, any portion of the input
-      program) into conventional OCaml code that can be understood by
-      the rest of the compiler. We've already seen several examples of
-      using <literal>camlp4</literal> within Core:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <emphasis role="strong">Fieldslib</emphasis> to generates
-          first-class values that represent fields of a record in
-          <xref linkend="records"/>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Sexplib</emphasis> to convert types to
-          s-expressions in
-          <xref linkend="data-serialization-with-s-expressions"/>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Bin_prot</emphasis>: for efficient
-          binary conversion in
-          <xref linkend="fast-binary-serialization"/>.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      These all use a common <literal>camlp4</literal> library called
-      <literal>type_conv</literal> to provide a common extension point.
-      Type_conv defines a new keyword <literal>with</literal> that can
-      appear after a type definition, and passes on the type declaration
-      to extensions. The type_conv extensions all generate boiler-plate
-      code based on the type you defined. This approach avoids the
-      inevitable performance hit of doing this work dynamically, but
-      also doesn't require a complex Just-In-Time (JIT) runtime that is
-      a source of unpredictable dynamic behaviour.
+      (* fixed_module.ml *) let _ = let module MyString = String in ()
+      ```
     </para>
     <para>
-      All <literal>camlp4</literal> modules accept an input AST and
-      output a modified one. This lets you inspect the results of
-      transformations at the source code level manually to see exactly
-      what's going on. Let's look at a simple Core extension called
-      <literal>pa_compare</literal> for how to do this.
+      Parsing immediately eliminates code which doesn't match basic
+      syntactic requirements, so the first example will result in a
+      syntax error.
     </para>
+    <programlisting>
+$ ocamlc -c broken_module.ml 
+File &quot;broken_module.ml&quot;, line 3, characters 2-8:
+Error: Syntax error
+$ ocamlc -c fixed_module.ml 
+</programlisting>
+    <para>
+      The syntax error points to the line and character number of the
+      first token that couldn't be parsed, which in this case is the
+      <literal>module</literal> keyword.
+    </para>
+    <sect2 id="formatting-source-code-with-ocp-indent">
+      <title>Formatting source code with
+      <literal>ocp-indent</literal></title>
+      <para>
+        Some parsing errors aren't quite as simple to figure out as the
+        earlier example, particularly in larger code bases.
+      </para>
+      <programlisting language="ocaml">
+(* follow_on_function.ml *)
+let concat_and_print x y =
+  let v = x ^ y in
+  print_endline v;
+  v;
+
+let add_and_print x y =
+  let v = x + y in
+  print_endline (string_of_int v);
+  v
+
+let _ =
+  let _ = add_and_print 1 2 in
+  let _ = concat_and_print &quot;a&quot; &quot;b&quot; in
+  ()
+</programlisting>
+      <para>
+        Compiling this will get you an error at the end of the second
+        function definition.
+      </para>
+      <programlisting>
+$ ocamlc -c follow_on_function.ml
+File &quot;follow_on_function.ml&quot;, line 12, characters 0-3:
+Error: Syntax error
+</programlisting>
+      <para>
+        The real error is at the end of the <emphasis>first</emphasis>
+        function definition though. There's an extra semicolon at the
+        end of the first function definition that causes the second
+        definition to become part of the first <literal>let</literal>
+        binding.
+      </para>
+      <para>
+        Luckily, there's a great tool available in OPAM called
+        <literal>ocp-indent</literal> which applies a standard set of
+        indenting rules to your source code. This not only beautifies
+        your code layout, but it also makes some syntax errors much more
+        obvious. For instance, let's run the erronous file through
+        <literal>ocp-indent</literal>:
+      </para>
+      <programlisting>
+$ opam install ocp-indent
+$ ocp-indent follow_on_function.ml
+(* follow_on_function.ml *)
+let concat_and_print x y =
+  let v = x ^ y in
+  print_endline v;
+  v;
+
+  let add_and_print x y =
+    let v = x + y in
+    print_endline (string_of_int v);
+    v
+
+let _ =
+  let _ = add_and_print 1 2 in
+  let _ = concat_and_print &quot;a&quot; &quot;b&quot; in
+  ()
+</programlisting>
+      <para>
+        The <literal>add_and_print</literal> definition has been
+        indented as if it were part of the first
+        <literal>concat_and_print</literal> definition, and the errant
+        semicolon is now much easier to spot. If we remove that
+        semicolon, then the result is exactly what we expect:
+      </para>
+      <programlisting>
+$ ocp-indent follow_on_function_fixed.ml 
+(* follow_on_function_fixed.ml *)
+let concat_and_print x y =
+  let v = x ^ y in
+  print_endline v;
+  v
+
+let add_and_print x y =
+  let v = x + y in
+  print_endline (string_of_int v);
+  v
+
+let _ =
+  let _ = add_and_print 1 2 in
+  let _ = concat_and_print &quot;a&quot; &quot;b&quot; in
+  ()
+$ ocamlc -i follow_on_function_fixed.ml 
+val concat_and_print : string -&gt; string -&gt; string
+val add_and_print : int -&gt; int -&gt; int
+</programlisting>
+      <para>
+        The <literal>ocp-indent</literal>
+        <ulink url="https://github.com/OCamlPro/ocp-indent">homepage</ulink>
+        has information on how to integrate it with your favourite
+        editor. All of the Core libraries are formatted in a mode
+        compliant with <literal>ocp-indent</literal>, so it's a good one
+        to match when you publish your own open-source project online.
+      </para>
+    </sect2>
+    <sect2 id="generating-documentation-via-ocamldoc">
+      <title>Generating documentation via
+      <literal>ocamldoc</literal></title>
+      <para>
+        Whitespace and comments are removed from the source code during
+        parsing, and aren't significant in determining the semantics of
+        the program. However, it is possible to embed specially
+        formatted comments that annotate parts of the source code with
+        documentation. These comments are parsed by the
+        <literal>ocamldoc</literal> command-line tool, which then
+        outputs structured documentation in a variety of formats (HTML,
+        LaTeX and even manual pages).
+      </para>
+      <programlisting language="ocaml">
+(** example.ml: The first special comment of the file is the comment 
+    associated with the whole module. *)
+
+(** Comment for exception My_exception. *)
+exception My_exception of (int -&gt; int) * int
+
+(** Comment for type [weather]  *)
+type weather =
+| Rain of int (** The comment for construtor Rain *)
+| Sun         (** The comment for constructor Sun *)
+
+(** Find the current weather for a country
+   @author Anil Madhavapeddy
+   @param location The country to get the weather for.
+*)
+let what_is_the_weather_in location =
+  match location with
+  | `Cambridge  -&gt; Rain 100
+  | `New_york   -&gt; Rain 20
+  | `California -&gt; Sun
+</programlisting>
+      <para>
+        The OCamldoc comments are distinguished from normal comments by
+        beginning them with the double asterix. You can compile the
+        documentation by running <literal>ocamldoc</literal> over the
+        source file.
+      </para>
+      <programlisting>
+$ mkdir -p html man/man3
+$ ocamldoc -html -d html example.ml
+$ ocamldoc -man -d man/man3 example.ml
+$ man -M man Example
+</programlisting>
+      <para>
+        These commands generate HTML and manual page format
+        documentation, in the <literal>html/</literal> and
+        <literal>man/man3/</literal> directories. Checkout the OCaml
+      </para>
+      <tip>
+      <title>
+      Using custom ocamldoc generators
+      </title>
+      <para>
+        The default HTML output stylesheets from
+        <literal>ocamldoc</literal> are pretty spartan. The tool
+        supports plugging in custom documentation generators, and there
+        are several available that provide prettier or more detailed
+        output.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <ulink url="http://argot.x9c.fr/">Argot</ulink> is an
+            enchanced HTML generator that supports code folding and
+            searching by name or type definition.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The custom generators available
+            <ulink url="https://gitorious.org/ocamldoc-generators/ocamldoc-generators">here</ulink>
+            add support for Bibtex references within comments, adding
+            <literal>TODO</literal> notes, and generating literate
+            documentation that embeds the code alongside the comments.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            JSON output is available via <literal>odoc_json</literal>
+            (TODO: avsm, pull out of Xen).
+          </para>
+        </listitem>
+      </itemizedlist>
+      </tip>
+    </sect2>
+    <sect2 id="preprocessing-and-code-generation-with-camlp4">
+      <title>Preprocessing and code generation with
+      <literal>camlp4</literal></title>
+      <para>
+        One powerful feature present in OCaml is the facility to
+        dynamically extend the syntax via the <literal>camlp4</literal>
+        tool. Camlp4 modules can extend the lexer with new keywords, and
+        later transform these keywords (or indeed, any portion of the
+        input program) into conventional OCaml code that can be
+        understood by the rest of the compiler. We've already seen
+        several examples of using <literal>camlp4</literal> within Core:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <emphasis role="strong">Fieldslib</emphasis> to generates
+            first-class values that represent fields of a record in
+            <xref linkend="records"/>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis role="strong">Sexplib</emphasis> to convert types
+            to textual s-expressions.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis role="strong">Bin_prot</emphasis>: for efficient
+            binary conversion and parsing.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        These all use a common <literal>camlp4</literal> library called
+        <literal>type_conv</literal> to provide a common extension
+        point. Type_conv defines a new keyword <literal>with</literal>
+        that can appear after a type definition, and passes on the type
+        declaration to extensions. The type_conv extensions all generate
+        boiler-plate code based on the type you defined. This approach
+        avoids the inevitable performance hit of doing this work
+        dynamically, but also doesn't require a complex Just-In-Time
+        (JIT) runtime that is a source of unpredictable dynamic
+        behaviour.
+      </para>
+      <para>
+        All <literal>camlp4</literal> modules accept an input AST and
+        output a modified one. This lets you inspect the results of
+        transformations at the source code level manually to see exactly
+        what's going on. Let's look at a simple Core extension called
+        <literal>pa_compare</literal> for how to do this.
+      </para>
+    </sect2>
     <sect2 id="example-the-pa_compare-syntax-transformer">
       <title>Example: the <literal>pa_compare</literal> syntax
       transformer</title>
