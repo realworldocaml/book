@@ -721,6 +721,7 @@ that was described earlier.
       if hd = hd' then destutter (hd' :: tl)
       else hd :: destutter (hd' :: tl)
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
 
 We'll consider some ways of making this code more concise and more
@@ -744,6 +745,7 @@ to eliminate the need for an explicit match.
       if hd = hd' then destutter tl
       else hd :: destutter tl
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
 
 We can further collapse this by combining the first two cases into
@@ -754,10 +756,11 @@ than `_ :: []`.
 ```ocaml
 # let rec destutter = function
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) when hd1 = ->
-      if hd1 = hd2 then destutter tl
-      else hd1 :: destutter tl
+    | hd :: (hd' :: _ as tl) ->
+      if hd = hd' then destutter tl
+      else hd :: destutter tl
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
 
 We can make the code slightly terser now by using a `when` clause.  A
@@ -772,7 +775,72 @@ it to include the check on whether the first two elements are equal.
     | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
     | hd :: tl -> hd :: destutter tl
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
+
+<note> <title> Polymorphic compare </title>
+
+In the `destutter` example above, we made use of the fact that OCaml
+lets us test equality between values of any type, using the `=`
+operator.  Thus, we can write:
+
+```ocaml
+# 3 = 4;;
+- : bool = false
+# [3;4;5] = [3;4;5];;
+- : bool = true
+# [Some 3; None] = [None; Some 3];;
+- : bool = false
+```
+
+Indeed, if we look at the type of the equality operator, we'll see
+that it is polymorphic:
+
+```ocaml
+# (=);;
+- : 'a -> 'a -> bool = <fun>
+```
+
+OCaml actually comes with a whole family of polymorphic comparison
+operators, including the standard infix comparators, `<`, `>=`,
+_etc._, as well as the function `compare` that returns `-1`, `0` or
+`1` to flag whether the first operator is smaller than, equal to, or
+greater than the second, respectively.
+
+You might wonder how you could build function like these yourself if
+OCaml didn't come with them built-in.  It turns out that you _can't_
+build these functions on your own.  OCaml's polymorphic comparison
+functions are actually built-in to the runtime to a low level.  These
+comparisons are polymorphic on the basis of ignoring almost everything
+about the types of the values that are being compared, paying
+attention only to the structure of the values as they're laid out in
+memory.
+
+Polymorphic compare does have some limitations.  For example, they
+will fail at runtime if they encounter functions:
+
+```ocaml
+# (fun x -> x + 1) = (fun x -> x + 1);;
+Exception: (Invalid_argument "equal: functional value").
+```
+
+Similarly, it will fail on values that come from outside the OCaml
+heap, like values from C-bindings.  But they will work in a reasonable
+way for other kinds of values.
+
+For simple atomic types, polymorphic compare has the semantics you
+would expect: for floating point numbers and integer, polymorphic
+compare corresponds to the expected numerical comparison functions.
+For strings, it's a lexicographic comparison.
+
+Sometimes, however, the type-ignoring nature of polymorphic compare is
+a problem, particularly when you have your own notion of equality and
+ordering that you want to impose.  We'll discuss this issue more, as
+well as some of the other downsides of polymorphic compare, in
+[xref](#maps-and-hashtables).
+
+</note>
+
 
 Note that `when` clauses have some downsides.  As we noted earlier,
 the static checks associated with pattern matches rely on the fact
