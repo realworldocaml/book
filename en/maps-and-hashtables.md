@@ -267,12 +267,13 @@ Error: This expression has type (string, int, String.comparator) Map.Tree.t
 The integration of comparators into the type of maps allows the type
 system to catch what would otherwise be fairly subtle errors.
 
-## Using the polymorphic comparator
+## The polymorphic comparator
 
-We don't need to generate specialized comparison functions for every
-type we encounter.  We can instead use a comparator based on OCaml's
-polymorphic comparison function, which was discussed in
-[xref](#lists-and-patterns).  Thus, we can write:
+We don't need to generate specialized comparators for every type we
+want to build a map on.  We can instead use a comparator based on
+OCaml's polymorphic comparison function, which was discussed in
+[xref](#lists-and-patterns).  This comparator is found in the
+`Map.Poly` module.  Thus, we can write:
 
 ```ocaml
 # Map.of_alist_exn Comparator.Poly.comparator digit_alist;;
@@ -287,10 +288,22 @@ Or, equivalently:
 ```
 
 Note that maps based on the polymorphic comparator are not equivalent
-to those based on the type-specific comparators, for good reasons:
-there's no general guarantee that the comparator associated with a
-given type will order things in the same way that polymorphic compare
-does.
+to those based on the type-specific comparators from the point of view
+of the type system.  Thus, the compiler rejects the following:
+
+```ocaml
+# Map.symmetric_diff (Map.Poly.singleton 3 "three")
+                     (Int.Map.singleton  3 "four" ) ;;
+
+Error: This expression has type 'a Int.Map.t = (int, 'a, Int.comparator) Map.t
+       but an expression was expected of type
+         ('b, 'c, 'd) Map.t = (int, string, Z.Poly.comparator) Map.t
+       Type Int.comparator is not compatible with type Z.Poly.comparator 
+```
+
+This is rejected for good reason: there's no guarantee that the
+comparator associated with a given type will order things in the same
+way that polymorphic compare does.
 
 <warning> <title> The perils of polymorphic compare </title>
 
