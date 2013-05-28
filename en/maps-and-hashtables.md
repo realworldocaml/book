@@ -265,9 +265,9 @@ type system to catch what would otherwise be fairly subtle errors.
 ## Using the polymorphic comparator
 
 We don't need to generate specialized comparison functions for every
-type we encounter.  Indeed, there's a special comparator that's built
-on top of OCaml's polymorphic comparison function, called
-`Comparator.Poly.comparator`.  Thus, we can write:
+type we encounter.  We can instead use a comparator based on OCaml's
+polymorphic comparison function, which was discussed in
+[xref](#lists-and-patterns).  Thus, we can write:
 
 ```ocaml
 # Map.of_alist_exn Comparator.Poly.comparator digit_alist;;
@@ -280,6 +280,12 @@ Or, equivalently:
 # Map.Poly.of_alist_exn digit_alist;;
 - : (int, string) Map.Poly.t = <abstr>
 ```
+
+Note that maps based on the polymorphic comparator are not equivalent
+to those based on the type-specific comparators, for good reasons:
+there's no general guarantee that the comparator associated with a
+given type will order things in the same way that polymorphic compare
+does.
 
 <warning> <title> The perils of polymorphic compare </title>
 
@@ -347,4 +353,38 @@ These problems show up on any data structure where the natural
 equality function is not structural.
 
 </warning>
+
+## Sets
+
+Sometimes, instead of keeping track of a set of key/value pairs, you
+just want a data-type for keeping track of a set set of keys.  You
+could just build this on top of the map type, by representing a set of
+values by a map where the type of the data is just `unit`.  A more
+idiomatic (and more efficient) solution is to use Core's set type,
+which is similar in design and spirit to the map type.  Here's a
+simple example:
+
+```ocaml
+# let dedup ~comparator l =
+    List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
+    |> Set.to_list
+  ;;
+val dedup : comparator:('a, 'b) Core.Comparator.t_ -> 'a list -> 'a list =
+  <fun>
+# dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
+- : int list = [2; 3; 7; 8; 10]
+```
+
+In addition to the operators you would expect to have in map, sets,
+also support other operations you would expect for sets, including
+functions for computing unions, intersections and set differences, as
+well as testing for whether one set is a subset of another.
+
+# Hashtables
+
+Hashtables are the imperative cousing of maps.  We walked over an
+implementation of a hashtable in [xref](#imperative-programming-1), so
+in this section we'll mostly discuss the pragmatics of Core's
+`Hashtbl` module.
+
 
