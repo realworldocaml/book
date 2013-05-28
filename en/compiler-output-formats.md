@@ -319,42 +319,102 @@ detailed output.
 
 </tip>
 
-### Preprocessing and code generation with `camlp4`
+### Preprocessing with `camlp4`
 
-One powerful feature present in OCaml is the facility to dynamically extend the
-syntax via the `camlp4` tool.  Camlp4 modules can extend the lexer with new
-keywords, and later transform these keywords (or indeed, any portion of the
-input program) into conventional OCaml code that can be understood by the rest
-of the compiler.  We've already seen several examples of using `camlp4` within
-Core:
+One powerful feature in OCaml is the facility to extend the language grammar
+via the `camlp4` macro tool.  Camlp4 modules can register new keywords with the
+lexer and later transform these keywords (or indeed, any portion of the input
+program) into conventional OCaml code that can be understood by the rest of the
+compiler.
 
-* **Fieldslib** to generates first-class values that represent fields of
-  a record in [xref](#records).
-* **Sexplib** to convert types to textual s-expressions.
-* **Bin_prot**: for efficient binary conversion and parsing.
+We've already seen several examples of using `camlp4` within Core:
 
-These all use a common `camlp4` library called `type_conv` to provide a common
-extension point.  Type_conv defines a new keyword `with` that can appear after
-a type definition, and passes on the type declaration to extensions.  The
-type_conv extensions all generate boiler-plate code based on the type you
-defined.  This approach avoids the inevitable performance hit of doing this
-work dynamically, but also doesn't require a complex Just-In-Time (JIT) runtime
-that is a source of unpredictable dynamic behaviour.
+* `Fieldslib` to generates first-class values that represent fields of a record.
+* `Sexplib` to convert types to textual s-expressions.
+* `Bin_prot` for efficient binary conversion and parsing.
 
-All `camlp4` modules accept an input AST and output a modified one.  This lets
-you inspect the results of transformations at the source code level manually to
-see exactly what's going on.  Let's look at a simple Core extension called
-`pa_compare` for how to do this.
+These all extend the language with a single keyword that turns a `type` declaration
+into a `type <..> with` construct.
 
-### Example: the `pa_compare` syntax transformer
+```ocaml
+(* type_conv_example.ml *)
+open Sexplib.Std
 
-OCaml provides a polymorphic comparison operator that inspects the runtime
+type t = {
+  foo: int;
+  bar: string
+} with sexp, fields
+```
+
+Compiling this code will normally give you a syntax error.
+
+```console
+$ ocamlfind ocamlc -c type_conv_example.ml
+File "type_conv_example.ml", line 7, characters 2-6:
+Error: Syntax error
+```
+
+However, if you add in the ocamlfind syntax extension packages for `fieldslib`
+and `sexplib`, then all works again.
+
+```console
+$ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
+  -package fieldslib.syntax type_conv_example.ml
+```
+
+The syntax extension packages cause `ocamlfind` to generate a `-pp` option to
+the compiler, ith the preprocessing modules as arguments.  These preprocessor
+modules are dynamically loaded into the `camlp4o` command-line tool, which
+rewrites the input token stream from the source code into conventional OCaml
+code that has no trace of the new keywords.  The compiler then continues on to
+compile this transformed code.
+
+Both `fieldslib` and `sexplib` need this `with` keyword, so there is a common
+preprocessor library called `type_conv` that provides the extension framework
+for them to use.
+Type_conv defines the `with` grammar extension and `ocamlfind` ensures that it's
+loaded before `variantslib` or `sexplib`.
+
+The preprocessor extensions can now generate boiler-plate OCaml code based on
+the type definition.  This approach avoids the inevitable performance hit of
+doing this generation dynamically, but also doesn't require a complex
+Just-In-Time (JIT) runtime that is a source of unpredictable dynamic behaviour.
+Instead, all code is generated at compilation time via `camlp4`.
+
+### Inspecting `camlp4` output
+
+All `camlp4` modules accept an input AST and output a modified one.  If you're
+not familiar with the `camlp4` module in question, then you need to figure out 
+what transformations it has applied to your source code.  The first obvious way
+is to read the documentation that accompanies the package, but you can also
+use the top-level to explore this, or run `camlp4` manually.
+
+#### Using `camlp4` in the interactive top-level
+
+The `utop` top-level can run phrase that you type in through `camlp4`
+automatically.  To get this to work, you should have at least these lines
+in your `~/.ocamlinit` file in your home directory (the contents of this file
+are automatically executed every time you run `utop`, so you can run them
+by hand too).
+
+```
+#use "topfind"
+#camlp4o
+```
+
+The first directive loads the extra `ocamlfind` top-level commands, which let
+you load `ocamlfind` packages directly (including all their dependent packages).
+The second directive instructs the top-level to filter all future phrases
+via `camlp4`.
+
+You can now run `utop` and load the syntax extension you want to experiment
+with.  We'll show you the `comparelib` syntax extension from Core.  OCaml
+provides a polymorphic comparison operator that inspects the runtime
 representation of two values to see if they are equal.  As we noted in
 [xref](#maps-and-hashtables), this is not as efficient or as safe as defining
 explicit comparison functions between values.
 
-The `pa_compare` syntax extension takes care of this boilerplate code
-generation via `camlp4`. Try it out from `utop`:
+Let's see how `comparelib` solves this problem in `utop`.
 
 ```ocaml
 # #require "comparelib.syntax" ;;
@@ -371,19 +431,28 @@ val compare_t : t -> t -> int = <fun>
 The first type definition of `t` is a standard OCaml phrase and results in the
 expected output.  The second one includes the `with compare` directive.  This
 is intercepted by `comparelib` and turned into two new functions that are generated
-from the type into the `compare` and `compare_t` functions.  How do we see what
-these functions actually do?  You can't do this from `utop` directly, since it
-embeds the `camlp4` compilation as an automated part of its operation.
+from the type into the `compare` and `compare_t` functions.
+
+#### Running `camlp4` directly on the source code
+
+While the top-level is quick and useful to figure out the function signatures
+generated from the extensions, how can we see what these functions actually do?
+You can't do this from `utop` directly, since it embeds the `camlp4`
+compilation as an automated part of its operation.
 
 Let's turn to the command-line to inspect the result of the `comparelib`
-transformation instead.  Create a file that contains the type declaration from earlier:
+transformation instead.  Create a file that contains the type declaration from
+earlier:
 
 ```ocaml
 (* comparelib_test.ml *)
-type t = { foo: string; bar: t } with compare
+type t = { 
+  foo: string; 
+  bar: t
+} with compare
 ```
 
-Now create a shell script to run the `camlp4` tool manually.
+Now create a shell script that runs `camlp4` directly.
 
 ```bash
 #!/bin/sh
@@ -396,9 +465,9 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1
 ```
 
 This shell script uses the `ocamlfind` package manager to list the include and
-library paths required by the `comparelib` syntax extension.  The final
-command invokes the `camlp4o` preprocessor directly and outputs the
-resulting AST to standard output as textual source code.
+library paths needed by `comparelib`.  The final command invokes the `camlp4o`
+preprocessor directly and outputs the resulting AST to standard output as
+textual source code.
 
 ```console
 $ sh camlp4_dump comparelib_test.ml
@@ -424,14 +493,15 @@ let compare_t = compare
 let _ = compare_t
 ```
 
-The result is the original type definition, and some automatically generated
-code that implements an explicit comparison function for each field in the
-record.  This generated code is then compiled as if you had typed it in
+The output code contains the original type definition accompanied by some
+automatically generated code that implements an explicit comparison function
+for each field in the record.  If you're using the extension in your compiler
+command-line, this generated code is then compiled as if you had typed it in
 yourself.
 
-Another useful feature of `type_conv` is that it can generate signatures too.
-Copy the earlier type definition into a `comparelib_test.mli` and rerun the
-camlp4 dumper script.
+Another useful feature of `type_conv` is that it can generate module signatures
+too.  Copy the earlier type definition into a `comparelib_test.mli` and rerun
+the camlp4 dumper script.
 
 ```console
 $ ./camlp4_dump.sh test_comparelib.mli 
@@ -467,18 +537,26 @@ extending the grammar via the `with` keyword.
 
 </note>
 
+We've only shown you how to use `camlp4` extensions here. The full details of
+building new extensions with `camlp4` are fairly daunting and could be the
+subject of an entirely new book.  The best resources to start with this are the
+online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4) and also
+by searching for existing extensions using OPAM and seeing how they implement
+their particular grammar extensions.  A series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html)
+are also a useful guide to the internals of extensions.
+
 ## The type checking phase
 
-After obtaining a valid parsed AST, the compiler must then check that
-the code obeys the rules of the static type system.  At this stage,
-code that is syntactically correct but misuses values is rejected with
-an explanation of the problem.  We're not going to delve into the details
-of how type-checking works here (the rest of the book covers that), but
-rather how it fits in with the rest of the compilation process.
+After obtaining a valid parsed AST (with or without `camlp4`) the compiler must
+then check that the code obeys the rules of the static type system.  Code that
+is syntactically correct but misuses values is rejected with an explanation of
+the problem at this stage.  We're not going to delve into the details of how
+type-checking works here (the rest of the book covers that), but rather how it
+fits in with the rest of the compilation process.
 
 Assuming that the source code is validly typed, the original AST is transformed
-into a typed AST. This has the same broad structure of the untyped AST,
-but syntactic phrases are replaced with typed variants instead.
+into a *typed AST*. This has the same broad structure of the untyped AST, but
+syntactic phrases are replaced with typed variants instead.
 
 You can explore the type checking process very simply.  Create a file with a
 single type definition and value.
