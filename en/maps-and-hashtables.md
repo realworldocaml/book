@@ -305,73 +305,6 @@ This is rejected for good reason: there's no guarantee that the
 comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
-<warning> <title> The perils of polymorphic compare </title>
-
-Polymorphic compare is highly convenient, but has serious downsides as
-well, and should be used with care.  One issue is that polymorphic
-compare is typically slower than type-specialized comparison
-functions.  But more important than that is the fact that polymorphic
-compare sometimes gives semantically surprising results.
-
-To understand what's wrong with polymorphic comparison, you need to
-know how it works.  Polymorphic compare operates directly on the
-runtime-representation of OCaml objects, going field by field and
-comparing items as they arise, not paying attention to the type of the
-objects in question.
-
-This is convenient because it works on most OCaml types, excluding
-only things like closures and objects from outside of the OCaml heap
-of the kind that arise from an external library binding.
-
-But sometimes, a structural comparison is just not what you want.
-Indeed, there are types for which you want two items to be considered
-equal even if they're structurally different.  Maps are actually a
-great example of this.  Consider the following.
-
-```ocaml
-# let (m1,m2) = (Int.Map.of_alist_exn [1,"one"; 2,"two"],
-                 Int.Map.of_alist_exn [2,"two"; 1,"one"]);;
-val m1 : string Int.Map.t = <abstr>
-val m2 : string Int.Map.t = <abstr>
-```
-
-Logically, these two maps should be equal, since they have the same
-set of key/value bindings.  But because the bindings were added in
-different orders, the structure of the trees turns out to be
-different, and so a structural comparison function will conclude that
-they're different.
-
-First, let's use the built in comparison function for maps.  Note
-that we need to pass in an equality test for strings so that the
-values can be compared as well.
-
-```ocaml
-# Map.equal String.equal m1 m2;;
-- : bool = true
-```
-
-Now, let's try to do a polymorphic comparison, using the `=` operator.
-Note that comparing the maps directly will fail at runtime because of
-the comparators stored within the map contain function values.
-
-```ocaml
-# m1 = m2;;
-Exception: (Invalid_argument "equal: functional value").
-```
-
-We can however use the function `Map.to_tree` to expose the underlying
-tree without the attached comparator.
-
-```ocaml
-# Map.to_tree m1 = Map.to_tree m2;;
-- : bool = false
-```
-
-These problems show up on any data structure where the natural
-equality function is not structural.
-
-</warning>
-
 ## Sets
 
 Sometimes, instead of keeping track of a set of key/value pairs, you
@@ -397,6 +330,81 @@ In addition to the operators you would expect to have in map, sets,
 also support other operations you would expect for sets, including
 functions for computing unions, intersections and set differences, as
 well as testing for whether one set is a subset of another.
+
+<warning> <title> The perils of polymorphic compare </title>
+
+Polymorphic compare is highly convenient, but it has serious downsides
+as well, and should be used with care.  The problem with polymorphic
+compare is that it has a fixed algorithm for comparing values of any
+type, and that that algorithm can sometimes yield surprising results.
+
+To understand what's wrong with polymorphic comparison, you need to
+consider how it works.  Polymorphic compare is a structural
+comparison, operating directly on the runtime-representation of OCaml
+values, walking the structure of the values in question without regard
+for their type.
+
+This is convenient because it provides a comparison function that
+behaves as you would expect for most OCaml types.  For example, on
+`int`s and `float`s it acts as you would expect a numeric comparison
+function to act.  For simple containers like strings and lists and
+arrays it operates as a lexicographic comparator.  And it provides a
+reasonable total comparison function for most OCaml types, excluding
+only things like closures and values from outside of the OCaml heap.
+
+But sometimes, a structural comparison is not what you want.  Maps and
+Sets are a great example of this.  Consider the following two sets.
+
+```ocaml
+# let (s1,s2) = (Int.Set.of_list [1;2],
+                 Int.Set.of_list [2;1]);;
+val s1 : Int.Set.t = <abstr>
+val s2 : Int.Set.t = <abstr>
+```
+
+Logically, these two sets should be equal, and that's the result that
+you get if you call `Set.equal` on them.
+
+```ocaml
+# Set.equal s1 s2;;
+- : bool = true
+```
+
+But because the elements were added in different orders, the layout of
+the trees trees will be different, and so a structural comparison
+function will conclude that they're different.
+
+Let's see what happens if we use polymorphic compare to test for
+equality by way of the `=` operator.  Comparing the maps directly will
+fail at runtime because of the comparators stored within the sets
+contain function values.
+
+```ocaml
+# s1 = s2;;
+Exception: (Invalid_argument "equal: functional value").
+```
+
+We can however use the function `Set.to_tree` to expose the underlying
+tree without the attached comparator.
+
+```ocaml
+# Set.to_tree s1 = Set.to_tree s2;;
+- : bool = false
+```
+
+This can cause real and quite subtle bugs.  If, for example, you use a
+map whose keys contain sets, then the map built with the polymorphic
+comparator will behave incorrectly, separating out keys that should be
+aggregated together.  Even worse, it will work sometimes and fail
+others, since if the sets are built in a consistent order, then they
+will work as expected, but once the order changes, the behavior will
+change.
+
+For this reason, it's preferable to avoid polymorphic compare for all
+but the smallest applications.
+
+</warning>
+
 
 # Hashtables
 
