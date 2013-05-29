@@ -811,13 +811,14 @@ $ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml
 ```
 
 The compiler has now reverted to testing the value as a set of nested
-conditionals.  This checks to see if the value is `Alice`, then if it's `Bob`,
-and finally falls back to the default `102` return value for everything else.
-It's not only good coding style, but also more efficient to make your pattern
-matches exhaustive when possible.
+conditionals.  The lambda code above checks to see if the value is `Alice`,
+then if it's `Bob`, and finally falls back to the default `102` return value
+for everything else.  Using exhaustive pattern matches is thus a better coding
+style at several levels: it rewards you with more useful compile-time warnings
+when you modify type definitions *and* generates more efficient runtime code too.
 
-Finally, let's look at the same example with polymorphic variants instead
-of normal variants.
+Finally, let's look at the same example with polymorphic variants instead of
+normal variants.
 
 ```ocaml
 (* pattern_polymorphic.ml *)
@@ -842,19 +843,21 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml
     (makeblock 0 test/1008)))
 ```
 
-Polymorphic variants have a runtime value that's calculated by hashing the
-variable name.  The pattern match is therefore always considered incomplete and
-the compiler tests for each possible value in sequence.  You'll need to decide
-for yourself if you can afford the extra runtime cost of polymorphic variants
-versus their greater flexibility and extensibility.
+We mentioned earlier in [xref](#variants) that pattern matching over
+polymorphic variants is slightly less efficient, and it should be clearer why
+this is the case now.  Polymorphic variants have a runtime value that's
+calculated by hashing the variant name, and so the compiler just tests each of
+these possible values in sequence.
 
 #### Benchmarking different pattern matching implementations
 
-Let's round this by by benchmarking all of our pattern matches by using the
-`Core_bench` library.  The `Bench` module runs the tests thousands of times
-and also calculates statistical variance.
+Let's benchmark these three pattern matching techniques to quantify their
+runtime costs better.  The `Core_bench` module runs the tests thousands of
+times and also calculates statistical variance of the results.  You'll need to
+`opam install core_bench` to get the library.
 
 ```ocaml
+(* pattern.ml: benchmark different pattern matching styles *)
 open Core.Std
 open Core_bench.Std
 
@@ -919,11 +922,12 @@ Estimated testing time 30s (change using -quota SECS).
 └────────────────────────────────┴───────────┴─────────────┴────────────┘
 ```
 
-The senumbers confirm our performance hypothesis from inspecting the lambda
-code. The shortest running time comes from the exhaustive pattern match, with
-polymorphic variants being the slowest.  There isn't a hugely significant
-difference in these examples, but you can use the same techniques to peer into
-the innards of your own source code and narrow down any performance hotspots.
+These numbers confirm our earlier performance hypothesis obtained from
+inspecting the lambda code. The shortest running time comes from the exhaustive
+pattern match and polymorphic variant pattern matching is the slowest.  There
+isn't a hugely significant difference in these examples, but you can use the
+same techniques to peer into the innards of your own source code and narrow
+down any performance hotspots.
 
 The lambda form is primarily a stepping stone to the bytecode executable format
 that we'll cover next.  It's often easier to look at the textual output from
@@ -950,12 +954,12 @@ lightweight language construct to use in OCaml code.
 
 </note>
 
-## Portable bytecode with `ocamlc` and `ocamlrun`
+## Generating portable bytecode
 
 After the lambda form has been generated, we are very close to having
 executable code.  The OCaml tool-chain branches into two separate compilers at
-this point.  We'll describe the the `ocamlc` bytecode compiler first, which consists
-of two pieces:
+this point.  We'll describe the the `ocamlc` bytecode compiler first, which
+consists of two pieces:
 
 * `ocamlc` compiles files into a simple bytecode that is a close mapping to the lambda form.
 * `ocamlrun` is a portable interpreter that executes the bytecode.
