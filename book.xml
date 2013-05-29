@@ -22418,50 +22418,50 @@ struct custom_operations {
       generates specialized native code binaries suitable for
       high-performance applications.
     </para>
-    <sect2 id="obtaining-the-source-code">
-      <title>Obtaining the source code</title>
-      <para>
-        Although it's not necessary to understand the examples, you may
-        find it useful to have a copy of the OCaml source tree checked
-        out while you read through this chapter. The source code is
-        available from multiple places:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            Stable releases as zip and tar archives from the
-            <ulink url="http://caml.inria.fr/download.en.html">OCaml
-            download site</ulink>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            A Subversion anonymous mirror of the main development
-            sources available on the
-            <ulink url="http://caml.inria.fr/ocaml/anonsvn.en.html">development
-            resources</ulink> page online.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            A Git mirror of the Subversion repository with all the
-            history and development branches included, browsable online
-            at
-            <ulink url="https://github.com/ocaml/ocaml">Github</ulink>.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        Once you've checked out a copy of the source tree, it has a few
-        sub-directories (TODO: describe depending on the contents
-        below).
-      </para>
-      <para>
-        We'll now go go through the compilation stages and explain how
-        the tools behind them will be useful to you during OCaml
-        development.
-      </para>
-    </sect2>
+    <sidebar>
+    <title>
+    Obtaining the compiler source code
+    </title>
+    <para>
+      Although it's not necessary to understand the examples, you may
+      find it useful to have a copy of the OCaml source tree checked out
+      while you read through this chapter. The source code is available
+      from multiple places:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Stable releases as zip and tar archives from the
+          <ulink url="http://caml.inria.fr/download.en.html">OCaml
+          download site</ulink>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          A Subversion anonymous mirror of the main development sources
+          available on the
+          <ulink url="http://caml.inria.fr/ocaml/anonsvn.en.html">development
+          resources</ulink> page online.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          A Git mirror of the Subversion repository with all the history
+          and development branches included, browsable online at
+          <ulink url="https://github.com/ocaml/ocaml">Github</ulink>.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Once you've checked out a copy of the source tree, it has a few
+      sub-directories (TODO: describe depending on the contents below).
+    </para>
+    </sidebar>
+    <para>
+      We'll now go through each of the compilation stages and show you
+      related tools that'll be useful to you during day-to-day OCaml
+      development.
+    </para>
   </sect1>
   <sect1 id="parsing-source-code">
     <title>Parsing source code</title>
@@ -23917,7 +23917,8 @@ let cmp a b =
 </programlisting>
         <para>
           Compiling this code with <literal>-S</literal> results in a
-          significantly more complex assembly out for the same function.
+          significantly more complex assembly output for the same
+          function.
         </para>
         <programlisting>
 _camlCompare_poly__cmp_1008:
@@ -23968,10 +23969,20 @@ _camlCompare_poly__cmp_1008:
           so frequently referenced in OCaml functions. This register
           isn't guaranteed to be preserved when calling into C code
           (which can clobber <literal>%r11</literal> for its own
-          purposes), and so this register is restored after returning
-          from the <literal>caml_greaterthan</literal> call. Finally the
-          return value is popped from the stack and returned.
+          purposes), and so <literal>%r11</literal> is restored after
+          returning from the <literal>caml_greaterthan</literal> call.
+          Finally the return value of the comparison is popped from the
+          stack and returned.
         </para>
+        <tip>
+        <title>
+        The implementation of <literal>compare_val</literal> in the
+        runtime
+        </title>
+        <para>
+          The ... TODO
+        </para>
+        </tip>
         <para>
           You don't have to fully understand the intricacies of assembly
           language to see that this polymorphic comparison is much
