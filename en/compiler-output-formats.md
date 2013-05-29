@@ -526,22 +526,23 @@ see these all these transformations precisely.
 <title>Don't overdo the syntax extensions</title>
 
 Syntax extensions are a very powerful extension mechanism that can completely
-change your source code's layout and style.  Core includes a very conservative
+alter your source code's layout and style.  Core includes a very conservative
 set of extensions that minimise the syntax changes.  There are a number of
-third-party libraries that perform much more wide-sweeping changes, such as
-introducing whitespace-sensitive indentation or even building entirely new
-languages.
+third-party libraries that are much more ambitious, such as introducing
+whitespace-sensitive indentation or even building entirely new embedded
+languages using OCaml as a host language.
 
 While it's tempting to compress all your boiler-plate code into `camlp4`
-extensions, it can make production source code much harder for other people to
-read and review.  Core mainly focuses on type-driven code generation using the
-`type_conv` extension, and doesn't fundamentally change the OCaml syntax.
+extensions, it can make your source code much harder for other people to
+quickly read and understand.  Core mainly focuses on type-driven code
+generation using the `type_conv` extension, and doesn't fundamentally change
+the OCaml syntax.
 
 Another thing to consider before deploying your own syntax extension is
-compatibility with other syntax extensions.  Two separate extensions create a
-grammar clash can lead to hard-to-reproduce bugs. That's why most of Core's
-syntax extensions go through `type_conv`, which acts as a single point for
-extending the grammar via the `with` keyword.
+compatibility with other extensions.  Two separate extensions can create a
+grammar clash that leads to odd syntax errors and hard-to-reproduce bugs.
+That's why most of Core's syntax extensions go through `type_conv`, which acts
+as a single point for extending the grammar via the `with` keyword.
 
 </note>
 
