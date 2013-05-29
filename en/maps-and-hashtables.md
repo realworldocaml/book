@@ -39,7 +39,7 @@ structure where most operations have constant time complexity.  We'll
 describe both of these data structures in detail, and provide some
 advice as to how to choose between them.
 
-## A map example
+## Maps
 
 Let's start by considering an example of how one might use a map in
 practice.  In [xref](#files-modules-and-programs), we showed a module
@@ -96,9 +96,9 @@ like `String` contain a `Map` sub-module that have values like
 `String.Map.empty` and `String.Map.of_alist` that are specialized to
 strings, and this have access to a string comparison function.  Such a
 `Map` sub-module is included in any module that satisfies the
-`Comparable` interface from Core.
+`Comparable.S` interface from Core.
 
-## Creating maps with comparators
+### Creating maps with comparators
 
 The specialized `Map` sub-module is convenient, but you don't
 necessarily need to use it to create a `Map.t`.  The information
@@ -267,7 +267,7 @@ Error: This expression has type (string, int, String.comparator) Map.Tree.t
 The integration of comparators into the type of maps allows the type
 system to catch what would otherwise be fairly subtle errors.
 
-## The polymorphic comparator
+### The polymorphic comparator
 
 We don't need to generate specialized comparators for every type we
 want to build a map on.  We can instead use a comparator based on
@@ -305,7 +305,7 @@ This is rejected for good reason: there's no guarantee that the
 comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
-## Sets
+### Sets
 
 Sometimes, instead of keeping track of a set of key/value pairs, you
 just want a data-type for keeping track of a set set of keys.  You
@@ -405,8 +405,109 @@ but the smallest applications.
 
 </warning>
 
+### Satisfying the `Comparable.S` interface
 
-# Hashtables
+Core's `Comparable.S` interface includes a lot of useful support for
+working with maps and sets, in particular, the presence of a
+comparator and the `Map` and `Set` sub-modules.
+
+`Comparable.S` is already satisfied by most of the modules in Core,
+but the question arises of how to satisfy the comparable interface for
+a custom type that you design, since implementing all of this
+functionality from scratch would be an absurd amount of work.
+
+The module `Comparable` contains a number of functors to help you do
+just this.  The simplest one of these is `Comparable.Make`, which
+takes as an input any module that satisfies the following interface:
+
+```ocaml
+module type Arg : sig
+  val sexp_of_t : t -> Sexp.t
+  val t_of_sexp : Sexp.t -> t
+  val compare : t -> t -> int
+end
+```
+
+In other words, it expects the input module to support a comparison
+function with the default signature, and it expects it to have
+functions for converting to and from s-expressions, which is a
+serialization format that we'll discuss more in
+[xref][#data-serialization-with-s-expressions].  In this case, we'll
+use the `with sexp` declaration that comes from the `Sexplib` syntax
+extension to create s-expression converters for us, but such
+converters can also be written by hand.
+
+Here's an example of how you can make a type satisfy `Comparable.S`
+using the `Comparable.Make` functor to generate most of the necessary
+functionality.  This follows the same basic pattern for using functors
+described in [xref](#extending-modules).  We do need to provide a
+comparison function, though, which we'll just do by hand.
+
+```ocaml
+# module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp
+      let compare t1 t2 =
+        let c = Int.Set.compare t1.foo t2.foo in
+        if c <> 0 then c else String.compare t1.bar t2.bar
+    end
+    include T
+    include Comparable.Make(T)
+  end;;
+```
+
+We don't include the full response from the top-level because it is
+quite lengthy, but `Foo_and_bar` does satisfy `Comparable.S`.
+
+We don't necessarily need to write out own comparison function by
+hand.  Core ships with a syntax extension called `pa_compare` which
+will write a simple comparison function for you.  Using it, we can
+rewrite the above example as follows without changing the behavior.
+
+```ocaml
+# module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp, compare
+    end
+    include T
+    include Comparable.Make(T)
+  end;;
+```
+
+The comparison function created by `pa_compare` for a given type will
+call out to the comparison functions for its component types, and so
+the `foo` field will be compared using `Int.Set.compare` rather than
+doing a structural comparison, as polymorphic compare would.  If you
+want your comparison function to behave in a specific way, you should
+still write your own comparison function by hand, but if all you want
+is a total order suitable for creating maps and sets with, then
+`pa_compare` is a good choice.
+
+You can also satisfy the `Comparable.S` interface using polymorphic
+compare, if that makes sense for the type in question.
+
+```ocaml
+# module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp
+    end
+    include T
+    include Comparable.Poly(T)
+  end;;
+```
+
+That said, this approach should be used sparingly.
+
+## Hashtables
 
 Hashtables are the imperative cousin of maps.  We walked over a basic
 hashtable implementation in [xref](#imperative-programming-1), so in
@@ -414,16 +515,17 @@ this section we'll mostly discuss the pragmatics of Core's `Hashtbl`.
 
 Hashtables differ from maps in a few key ways.  First, hashtables are
 mutable, meaning that adding a key/value pair to a hashtable modifies
-it, rather than creating a new table with the modification.  Second,
-hashtables are have better time-complexity than maps, providing
-constant time lookup and modifications to the table.  And finally,
-just as maps depend on having a comparison function for creating the
-ordered binary tree that underlies a map, hashtables depend on having
-a _hash function_, i.e., a function for converting a key to an
-integer.
+it, rather than creating a new table with the binding added.  Second,
+hashtables generally have better time-complexity than maps, providing
+constant time lookup and modifications as opposed to logarithmic for
+maps.  And finally, just as maps depend on having a comparison
+function for creating the ordered binary tree that underlies a map,
+hashtables depend on having a _hash function_, i.e., a function for
+converting a key to an integer.
 
-Just as creating a map require a comparator, creating a hashtables
-require a value of type `hashable`.  Thus, we can write:
+Accordingly, when creating a hashtable, we provide value of type
+_hashable_, which is analogous to the comaprator used for creating a
+map.
 
 ```ocaml
 # let table = Hashtbl.create ~hashable:String.hashable ();;
@@ -434,10 +536,10 @@ val table : (string, '_a) Hashtbl.t = <abstr>
 - : int option = Some 3
 ```
 
-The `hashable` value is included as part of the `Hashable` interface,
-which is satisfied by most types in Core.  The `Hashable` interface
-also includes a `Table` sub-module which gives you more convenient
-creation functions.
+The `hashable` value is included as part of the `Hashable.S`
+interface, which is satisfied by most types in Core.  The `Hashable.S`
+interface also includes a `Table` sub-module which provides more
+convenient creation functions.
 
 ```ocaml
 # let table = String.Table.create ();;
@@ -459,4 +561,46 @@ Or, equivalently:
 # let table = Hashtbl.Poly.create ();;
 val table : ('_a, '_b) Hashtbl.t = <abstr>
 ```
+
+Note that, unlike the comparators used with maps and sets, hashables
+don't show up in the type of a `Hashtbl.t`.  That's because hashtables
+don't have operations that operate on multiple hashtables that depend
+on those tables having the same hash function, in that way that
+`Map.symmetric_diff` and `Set.union` depend on their arguments using
+the same comparison function.
+
+### Satisfying the `Hashable.S` interface
+
+Most types in Core satisfy the `Hashable.S` interface, but as with the
+`Comparable.S` interface, the question remains of how one should
+satisfy this interface with a new type.  Again, the answer is to use a
+functor to build the necessary functionality; in this case,
+`Hashable.Make`.  Note that we use OCaml's `lxor` operator for doing
+the "logical" (_i.e._, bit-wise) exclusive-or of the hashes from the
+component values.
+
+```ocaml
+# module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Hashable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp, compare
+      let hash t =
+        (Int.hash t.foo) lxor (String.hash t.bar)
+    end
+    include T
+    include Hashable.Make(T)
+  end;;
+```
+
+Note that in order to satisfy hashable, one also needs to provide a
+comparison function.  That's because Core's hashtables use ordered
+binary tree data-structure for the hash-buckets, so that performance
+of the table degrades gracefully in the case of pathologically bad
+choice of hash function.
+
+There is currently no analogue of `comparelib` for auto-generation of
+hash-functions, so you do need to either write the hash-function by
+hand, or use the built-in polymorphic hash function, `Hashtbl.hash`.
 
