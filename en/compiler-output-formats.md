@@ -555,6 +555,9 @@ are also a useful guide to the internals of extensions.
 
 ## The type checking phase
 
+TODO: this section still needs a description of `-I` and how the compiler finds
+`cmi` files...
+
 After obtaining a valid parsed AST (with or without `camlp4`) the compiler must
 then check that the code obeys the rules of the static type system.  Code that
 is syntactically correct but misuses values is rejected with an explanation of
@@ -590,7 +593,8 @@ often useful to redirect this output to an `mli` file to give you a starting
 signature to edit the external interface, without having to type it all in by
 hand.
 
-### Using `ocamlobjinfo` to inspect compilation units
+<sidebar>
+<title>Using `ocamlobjinfo` to inspect compilation units</title>
 
 Recall from [xref](#files-modules-and-programs) that `mli` files are optional.
 If you don't supply an explicit signature, then the inferred output from the
@@ -626,6 +630,8 @@ This hash check ensures that separate compilation remains type safe all the way
 up to the final link phase.  Each source file is type checked separately, but
 the hash of the signature of any external modules is recorded with the compiled
 signature.
+
+</sidebar>
 
 ### Examining the typed syntax tree
 
@@ -790,7 +796,7 @@ The big advantage of using `ocamlc` is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
 this results in predictable (but slow) execution speed.
 
-### Compiling and linking OCaml bytecode
+### Compiling OCaml bytecode 
 
 `ocamlc` compiles individual `ml` files into bytecode `cmo` files.  These are
 linked together with the OCaml standard library to produce an executable
@@ -807,12 +813,14 @@ not linked unless the `-linkall` flag forces it to be included.  This behaviour
 is analogous to how C handles object files and archives (`.o` and `.a`
 respectively).
 
-The bytecode runtime comprises three main parts: the bytecode interpreter,
-garbage collector, and a set of C functions that implement the primitive
-operations.  Bytecode instructions are provided to call these C functions.  The
-OCaml linker produces bytecode for the standard runtime system by default, and
-any custom C functions in your code (e.g. from C bindings) require the runtime
-to dynamically load a shared library.
+### Linking OCaml bytecode
+
+The bytecode runtime comprises three parts: the bytecode interpreter, garbage
+collector, and a set of C functions that implement the primitive operations.
+Bytecode instructions are provided to call these C functions.  The OCaml linker
+produces bytecode for the standard runtime system by default, and any custom C
+functions in your code (e.g. from C bindings) require the runtime to
+dynamically load a shared library.
 
 This can be specified as follows:
 
@@ -839,7 +847,7 @@ for compiling bytecode (notably with shared libraries or building custom
 runtimes).  Full details can be found in the
 [manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html).
 
-#### Embedding OCaml bytecode
+#### Embedding OCaml bytecode in C code
 
 A consequence of using the bytecode compiler is that the final link phase must
 be performed by `ocamlc`.  However, you might sometimes want to embed your OCaml
@@ -938,12 +946,12 @@ section of the OCaml manual.
 
 ## Native code generation
 
-The native code compiler is ultimately the tool that production OCaml code goes
-through.  It compiles the lambda form into fast native code executables, with
-cross-module inlining and code optimization passes that the bytecode
-interpreter doesn't perform.  However, care is taken to ensure compatibility
-with the bytecode runtime, and the same code should run identically when
-compiled with either toolchain.
+The native code compiler is ultimately the tool that most production OCaml code
+goes through.  It compiles the lambda form into fast native code executables,
+with cross-module inlining and additional optimization passes that the bytecode
+interpreter doesn't perform.  Care is taken to ensure compatibility with the
+bytecode runtime, so the same code should run identically when compiled with
+either toolchain.
 
 The `ocamlopt` command is the frontend to the native code compiler, and has a
 very similar interface to `ocamlc`.  It also accepts `ml` and `mli` files, but
