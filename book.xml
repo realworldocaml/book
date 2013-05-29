@@ -23377,12 +23377,15 @@ $ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml
 </programlisting>
         <para>
           The compiler has now reverted to testing the value as a set of
-          nested conditionals. This checks to see if the value is
-          <literal>Alice</literal>, then if it's <literal>Bob</literal>,
-          and finally falls back to the default <literal>102</literal>
-          return value for everything else. It's not only good coding
-          style, but also more efficient to make your pattern matches
-          exhaustive when possible.
+          nested conditionals. The lambda code above checks to see if
+          the value is <literal>Alice</literal>, then if it's
+          <literal>Bob</literal>, and finally falls back to the default
+          <literal>102</literal> return value for everything else. Using
+          exhaustive pattern matches is thus a better coding style at
+          several levels: it rewards you with more useful compile-time
+          warnings when you modify type definitions
+          <emphasis>and</emphasis> generates more efficient runtime code
+          too.
         </para>
         <para>
           Finally, let's look at the same example with polymorphic
@@ -23411,24 +23414,27 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml
     (makeblock 0 test/1008)))
 </programlisting>
         <para>
-          Polymorphic variants have a runtime value that's calculated by
-          hashing the variable name. The pattern match is therefore
-          always considered incomplete and the compiler tests for each
-          possible value in sequence. You'll need to decide for yourself
-          if you can afford the extra runtime cost of polymorphic
-          variants versus their greater flexibility and extensibility.
+          We mentioned earlier in <xref linkend="variants"/>
+          that pattern matching over polymorphic variants is slightly
+          less efficient, and it should be clearer why this is the case
+          now. Polymorphic variants have a runtime value that's
+          calculated by hashing the variant name, and so the compiler
+          just tests each of these possible values in sequence.
         </para>
       </sect3>
       <sect3 id="benchmarking-different-pattern-matching-implementations">
         <title>Benchmarking different pattern matching
         implementations</title>
         <para>
-          Let's round this by by benchmarking all of our pattern matches
-          by using the <literal>Core_bench</literal> library. The
-          <literal>Bench</literal> module runs the tests thousands of
-          times and also calculates statistical variance.
+          Let's benchmark these three pattern matching techniques to
+          quantify their runtime costs better. The
+          <literal>Core_bench</literal> module runs the tests thousands
+          of times and also calculates statistical variance of the
+          results. You'll need to
+          <literal>opam install core_bench</literal> to get the library.
         </para>
         <programlisting language="ocaml">
+(* pattern.ml: benchmark different pattern matching styles *)
 open Core.Std
 open Core_bench.Std
 
@@ -23494,13 +23500,13 @@ Estimated testing time 30s (change using -quota SECS).
 └────────────────────────────────┴───────────┴─────────────┴────────────┘
 </programlisting>
         <para>
-          The senumbers confirm our performance hypothesis from
-          inspecting the lambda code. The shortest running time comes
-          from the exhaustive pattern match, with polymorphic variants
-          being the slowest. There isn't a hugely significant difference
-          in these examples, but you can use the same techniques to peer
-          into the innards of your own source code and narrow down any
-          performance hotspots.
+          These numbers confirm our earlier performance hypothesis
+          obtained from inspecting the lambda code. The shortest running
+          time comes from the exhaustive pattern match and polymorphic
+          variant pattern matching is the slowest. There isn't a hugely
+          significant difference in these examples, but you can use the
+          same techniques to peer into the innards of your own source
+          code and narrow down any performance hotspots.
         </para>
         <para>
           The lambda form is primarily a stepping stone to the bytecode
@@ -23539,9 +23545,8 @@ Estimated testing time 30s (change using -quota SECS).
       </sect3>
     </sect2>
   </sect1>
-  <sect1 id="portable-bytecode-with-ocamlc-and-ocamlrun">
-    <title>Portable bytecode with <literal>ocamlc</literal> and
-    <literal>ocamlrun</literal></title>
+  <sect1 id="generating-portable-bytecode">
+    <title>Generating portable bytecode</title>
     <para>
       After the lambda form has been generated, we are very close to
       having executable code. The OCaml tool-chain branches into two
