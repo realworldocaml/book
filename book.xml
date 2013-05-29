@@ -23060,6 +23060,11 @@ val compare : t -&gt; t -&gt; int
   <sect1 id="the-type-checking-phase">
     <title>The type checking phase</title>
     <para>
+      TODO: this section still needs a description of
+      <literal>-I</literal> and how the compiler finds
+      <literal>cmi</literal> files...
+    </para>
+    <para>
       After obtaining a valid parsed AST (with or without
       <literal>camlp4</literal>) the compiler must then check that the
       code obeys the rules of the static type system. Code that is
@@ -23101,19 +23106,19 @@ val v : t
       edit the external interface, without having to type it all in by
       hand.
     </para>
-    <sect2 id="using-ocamlobjinfo-to-inspect-compilation-units">
-      <title>Using <literal>ocamlobjinfo</literal> to inspect
-      compilation units</title>
-      <para>
-        Recall from
-        <xref linkend="files-modules-and-programs"/> that
-        <literal>mli</literal> files are optional. If you don't supply
-        an explicit signature, then the inferred output from the module
-        implementation is used instead. The compiled version of the
-        signature is stored in a filename ending with
-        <literal>cmi</literal>.
-      </para>
-      <programlisting>
+    <sidebar>
+    <title>
+    Using <literal>ocamlobjinfo</literal> to inspect compilation units
+    </title>
+    <para>
+      Recall from <xref linkend="files-modules-and-programs"/>
+      that <literal>mli</literal> files are optional. If you don't
+      supply an explicit signature, then the inferred output from the
+      module implementation is used instead. The compiled version of the
+      signature is stored in a filename ending with
+      <literal>cmi</literal>.
+    </para>
+    <programlisting>
 $ ocamlc -c typedef.ml
 $ ocamlobjinfo typedef.cmi
 File typedef.cmi
@@ -23122,34 +23127,34 @@ Interfaces imported:
     559f8708a08ddf66822f08be4e9c3372    Typedef
     65014ccc4d9329a2666360e6af2d7352    Pervasives
 </programlisting>
-      <para>
-        The <literal>ocamlobjinfo</literal> command examines the
-        compiled interface and displays what other compilation units it
-        depends on. In this case, we don't use any external modules
-        other than <literal>Pervasives</literal>. Every module depends
-        on <literal>Pervasives</literal> by default, unless you use the
-        <literal>-nopervasives</literal> flag (this is an advanced
-        use-case, and you shouldn't need it in normal use).
-      </para>
-      <para>
-        The long alphanumeric identifier beside each module name is a
-        hash calculated from all the types and values exported from that
-        compilation unit. This is used during type-checking and linking
-        to check that all of the compilation units have been compiled
-        consistently against each other. A difference in the hashes
-        means that a compilation unit with the same module name may have
-        conflicting type signatures in different modules. This violates
-        static type safety if these conflicting instances are ever
-        linked together, as every well-typed value has precisely one
-        type in OCaml.
-      </para>
-      <para>
-        This hash check ensures that separate compilation remains type
-        safe all the way up to the final link phase. Each source file is
-        type checked separately, but the hash of the signature of any
-        external modules is recorded with the compiled signature.
-      </para>
-    </sect2>
+    <para>
+      The <literal>ocamlobjinfo</literal> command examines the compiled
+      interface and displays what other compilation units it depends on.
+      In this case, we don't use any external modules other than
+      <literal>Pervasives</literal>. Every module depends on
+      <literal>Pervasives</literal> by default, unless you use the
+      <literal>-nopervasives</literal> flag (this is an advanced
+      use-case, and you shouldn't need it in normal use).
+    </para>
+    <para>
+      The long alphanumeric identifier beside each module name is a hash
+      calculated from all the types and values exported from that
+      compilation unit. This is used during type-checking and linking to
+      check that all of the compilation units have been compiled
+      consistently against each other. A difference in the hashes means
+      that a compilation unit with the same module name may have
+      conflicting type signatures in different modules. This violates
+      static type safety if these conflicting instances are ever linked
+      together, as every well-typed value has precisely one type in
+      OCaml.
+    </para>
+    <para>
+      This hash check ensures that separate compilation remains type
+      safe all the way up to the final link phase. Each source file is
+      type checked separately, but the hash of the signature of any
+      external modules is recorded with the compiled signature.
+    </para>
+    </sidebar>
     <sect2 id="examining-the-typed-syntax-tree">
       <title>Examining the typed syntax tree</title>
       <para>
@@ -23250,86 +23255,288 @@ $ ocamlc -dtypedtree typedef.m
       <para>
         Once OCaml gets past the typed AST, it eliminates all the static
         type information into a simpler intermediate <emphasis>lambda
-        form</emphasis>. This discards all the modules and objects,
-        replacing them direct references to values such as records and
-        function pointers instead. Pattern matches are compiled into
-        automata that are highly optimized for the particular type
-        involved.
+        form</emphasis>. The lambda form discards higher-level language
+        constructs such as modules and objects, and replaces them with
+        simpler values such as records and function pointers. Pattern
+        matches are also analyzed and compiled into highly optimized
+        automata.
       </para>
-      <para>
-        It's possible to examine all this behaviour via another
-        intermediate output from the compiler. Create a new
-        <literal>pattern.ml</literal> file alongside the previous
-        <literal>typedef.ml</literal>.
-      </para>
-      <programlisting language="ocaml">
-(* pattern.ml *)
-open Typedef
-let _ =
-  match v with
-  | Foo -&gt; &quot;foo&quot;
-  | Bar -&gt; &quot;bar&quot;
-</programlisting>
       <para>
         The lambda form is the first representation that discards the
-        OCaml type information and begins to look like the runtime
-        memory model from
-        <xref linkend="memory-representation-of-values"/>, and
-        should be quite familiar to Lisp aficionados. To see it for
-        <literal>pattern.ml</literal>, compile as usual but add the
-        <literal>-dlambda</literal> directive.
+        OCaml type information. The output begins to look like the
+        runtime memory model from
+        <xref linkend="memory-representation-of-values"/>. It
+        can be useful to manually inspect the lambda code to understand
+        the effect of early compiler optimizations, most notably pattern
+        matching compilation. The compiler can dump the lambda form in
+        an s-expression syntax if you add the
+        <literal>-dlambda</literal> directive to the compiler
+        command-line.
       </para>
-      <programlisting>
-$ ocamlc -dlambda -c pattern.ml 
-(setglobal Pattern!
-  (seq
-    (let (match/1008 (field 0 (global Typedef!)))
-      (if (!= match/1008 0) &quot;bar&quot; &quot;foo&quot;))
-    (makeblock 0)))
+      <sect3 id="pattern-matching-optimization">
+        <title>Pattern matching optimization</title>
+        <para>
+          Let's use this to learn more about how the OCaml pattern
+          matching engine works by building three styles of pattern
+          matching and checking the lambda form out. First create a
+          straightforward exhaustive pattern match using normal
+          variants.
+        </para>
+        <programlisting language="ocaml">
+(* pattern_monomorphic_exhaustive.ml *)
+type t = | Alice | Bob | Charlie | David
+
+let test v =
+  match v with
+  | Alice   -&gt; 100
+  | Bob     -&gt; 101
+  | Charlie -&gt; 102
+  | David   -&gt; 103
 </programlisting>
-      <para>
-        It's not important to understand every detail of this internal
-        form, but some interesting points are:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            There are no mention of modules or types any more, and have
-            been replaced by references to global values instead.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The pattern match has turned into an integer comparison by
-            checking the header tag of <literal>v</literal>. Recall that
-            variants without parameters are stored in memory as integers
-            in the order which they appear. The pattern matching engine
-            knows this, and has transformed the pattern into a single
-            integer comparison. If <literal>v</literal> has a tag of
-            <literal>0</literal>, the function returns
-            <literal>&quot;foo&quot;</literal>, and otherwise returns
-            <literal>&quot;bar&quot;</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Values are addressed directly by an index and
-            <literal>field</literal> (<literal>v</literal> got assigned
-            to <literal>1008</literal> during type checking). The type
-            safety checks earlier have ensured that these fields will
-            always exist, and so the lambda form doesn't do any dynamic
-            checks. However, unwise use of unsafe language features such
-            as <literal>Obj.magic</literal> module can easily induce
-            crashes at this level.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        The lambda form is primarily a stepping-stone to the bytecode
-        engine that we cover next. However, it's often easier to look at
-        the textual output here than wade through native assembly code
-        from compiled executables.
-      </para>
+        <para>
+          The lambda output for this code looks like this.
+        </para>
+        <programlisting>
+$ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
+(setglobal Pattern_monomorphic_exhaustive!
+  (let
+    (test/1013
+       (function v/1014
+         (switch* v/1014
+          case int 0: 100
+          case int 1: 101
+          case int 2: 102
+          case int 3: 103)))
+    (makeblock 0 test/1013)))
+</programlisting>
+        <para>
+          It's not important to understand every detail of this internal
+          form, but some interesting points are:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              There are no mention of modules or types any more. Global
+              values are created via <literal>setglobal</literal> and
+              OCaml values are constructed by
+              <literal>makeblock</literal>. The blocks are the runtime
+              values you should remember from
+              <xref linkend="memory-representation-of-values"/>.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The pattern match has turned into a switch case that jumps
+              to the right case depending on the header tag of
+              <literal>v</literal>. Recall that variants without
+              parameters are stored in memory as integers in the order
+              which they appear. The pattern matching engine knows this
+              and has transformed the pattern into an efficient jump
+              table.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Values are addressed by a unique name that distinguished
+              shadowed values by appending a number (e.g.
+              <literal>v/1014</literal>). The type safety checks in the
+              earlier phase ensure that these low-level accesses never
+              violate runtime memory safety, so this layer doesn't do
+              any dynamic checks. Unwise use of unsafe features such as
+              the <literal>Obj.magic</literal> module can still easily
+              induce crashes at this level.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          The first pattern match is <emphasis>exhaustive</emphasis>, so
+          there are no other cases that the comipler needed to worry
+          about. What happens if we make the same code use an incomplete
+          pattern match?
+        </para>
+        <programlisting language="ocaml">
+(* pattern_monomorphic_incomplete.ml *)
+type t = | Alice | Bob | Charlie | David
+
+let test v =
+  match v with
+  | Alice   -&gt; 100
+  | Bob     -&gt; 101
+  | _       -&gt; 102
+</programlisting>
+        <para>
+          The lambda output for this code is now quite different.
+        </para>
+        <programlisting>
+$ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml 
+(setglobal Pattern_monomorphic_incomplete!
+  (let
+    (test/1013
+       (function v/1014 (if (!= v/1014 1) (if (!= v/1014 0) 102 100) 101)))
+    (makeblock 0 test/1013)))
+</programlisting>
+        <para>
+          The compiler has now reverted to testing the value as a set of
+          nested conditionals. This checks to see if the value is
+          <literal>Alice</literal>, then if it's <literal>Bob</literal>,
+          and finally falls back to the default <literal>102</literal>
+          return value for everything else. It's not only good coding
+          style, but also more efficient to make your pattern matches
+          exhaustive when possible.
+        </para>
+        <para>
+          Finally, let's look at the same example with polymorphic
+          variants instead of normal variants.
+        </para>
+        <programlisting language="ocaml">
+(* pattern_polymorphic.ml *)
+let test v =
+  match v with
+  | `Alice   -&gt; 100
+  | `Bob     -&gt; 101
+  | `Charlie -&gt; 102
+  | `David   -&gt; 103
+</programlisting>
+        <para>
+          The lambda form for this is the most inefficient result yet.
+        </para>
+        <programlisting>
+$ ocamlc -dlambda -c pattern_polymorphic.ml 
+(setglobal Pattern_polymorphic!
+  (let
+    (test/1008
+       (function v/1009
+         (if (&gt;= v/1009 482771474) (if (&gt;= v/1009 884917024) 100 102)
+           (if (&gt;= v/1009 3306965) 101 103))))
+    (makeblock 0 test/1008)))
+</programlisting>
+        <para>
+          Polymorphic variants have a runtime value that's calculated by
+          hashing the variable name. The pattern match is therefore
+          always considered incomplete and the compiler tests for each
+          possible value in sequence. You'll need to decide for yourself
+          if you can afford the extra runtime cost of polymorphic
+          variants versus their greater flexibility and extensibility.
+        </para>
+      </sect3>
+      <sect3 id="benchmarking-different-pattern-matching-implementations">
+        <title>Benchmarking different pattern matching
+        implementations</title>
+        <para>
+          Let's round this by by benchmarking all of our pattern matches
+          by using the <literal>Core_bench</literal> library. The
+          <literal>Bench</literal> module runs the tests thousands of
+          times and also calculates statistical variance.
+        </para>
+        <programlisting language="ocaml">
+open Core.Std
+open Core_bench.Std
+
+type t = | Alice | Bob | Charlie | David
+
+let polymorphic_pattern () =
+  let test v =
+    match v with
+    | `Alice   -&gt; 100
+    | `Bob     -&gt; 101
+    | `Charlie -&gt; 102
+    | `David   -&gt; 103
+  in
+  List.iter ~f:(fun v -&gt; ignore(test v))
+    [`Alice; `Bob; `Charlie; `David]
+ 
+let monomorphic_pattern_exhaustive () =
+  let test v =
+    match v with
+    | Alice   -&gt; 100
+    | Bob     -&gt; 101
+    | Charlie -&gt; 102
+    | David   -&gt; 103
+  in
+  List.iter ~f:(fun v -&gt; ignore(test v))
+    [ Alice; Bob; Charlie; David ]
+
+ let monomorphic_pattern_incomplete () =
+  let test v =
+    match v with
+    | Alice   -&gt; 100
+    | Bob     -&gt; 101
+    | _       -&gt; 102
+  in
+  List.iter ~f:(fun v -&gt; ignore(test v))
+    [ Alice; Bob; Charlie; David ]
+ 
+let tests = [
+    &quot;Polymorphic pattern&quot;, polymorphic_pattern;
+    &quot;Monomorphic incomplete pattern&quot;, monomorphic_pattern_incomplete;
+    &quot;Monomorphic exhaustive pattern&quot;, monomorphic_pattern_exhaustive
+]
+
+let () =
+  List.map tests ~f:(fun (name,test) -&gt; Bench.Test.create ~name test)
+  |&gt; Bench.make_command
+  |&gt; Command.run
+</programlisting>
+        <para>
+          Building and executing this example will run for around 30
+          seconds by default, and you'll see the results summarised in a
+          neat table.
+        </para>
+        <programlisting>
+$ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
+Estimated testing time 30s (change using -quota SECS).
+┌────────────────────────────────┬───────────┬─────────────┬────────────┐
+│ Name                           │ Time (ns) │   Time 95ci │ Percentage │
+├────────────────────────────────┼───────────┼─────────────┼────────────┤
+│ Polymorphic pattern            │     22.38 │ 22.34-22.43 │     100.00 │
+│ Monomorphic incomplete pattern │     20.98 │ 20.95-21.02 │      93.77 │
+│ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
+└────────────────────────────────┴───────────┴─────────────┴────────────┘
+</programlisting>
+        <para>
+          The senumbers confirm our performance hypothesis from
+          inspecting the lambda code. The shortest running time comes
+          from the exhaustive pattern match, with polymorphic variants
+          being the slowest. There isn't a hugely significant difference
+          in these examples, but you can use the same techniques to peer
+          into the innards of your own source code and narrow down any
+          performance hotspots.
+        </para>
+        <para>
+          The lambda form is primarily a stepping stone to the bytecode
+          executable format that we'll cover next. It's often easier to
+          look at the textual output from this stage than to wade
+          through the native assembly code from compiled executables.
+        </para>
+        <note>
+        <title>
+        Learning more about pattern matching compilation
+        </title>
+        <para>
+          Pattern matching is a fundamental part of OCaml programming.
+          You'll often encounter deeply nested pattern matches over
+          complex data structures in real code. A good paper that
+          describes the fundamental algorithms implemented in OCaml is
+          the
+          <ulink url="http://dl.acm.org/citation.cfm?id=507641">&quot;Optimizing
+          pattern matching&quot;</ulink> ICFP 2001 paper by Fabrice Le
+          Fessant and Luc Maranget.
+        </para>
+        <para>
+          The paper describes the backtracking algorithm used in
+          classical pattern matching compilation, and also several
+          OCaml-specific optimizations such as the use of exhaustiveness
+          information and control flow optimizations via static
+          exceptions.
+        </para>
+        <para>
+          It's not essential that you understand all of this just to use
+          pattern matching of course, but it'll give you insight as to
+          why pattern matching is such a lightweight language construct
+          to use in OCaml code.
+        </para>
+        </note>
+      </sect3>
     </sect2>
   </sect1>
   <sect1 id="portable-bytecode-with-ocamlc-and-ocamlrun">
@@ -23371,8 +23578,8 @@ $ ocamlc -dlambda -c pattern.ml
       the lambda form to bytecode is straightforward, and this results
       in predictable (but slow) execution speed.
     </para>
-    <sect2 id="compiling-and-linking-ocaml-bytecode">
-      <title>Compiling and linking OCaml bytecode</title>
+    <sect2 id="compiling-ocaml-bytecode">
+      <title>Compiling OCaml bytecode</title>
       <para>
         <literal>ocamlc</literal> compiles individual
         <literal>ml</literal> files into bytecode <literal>cmo</literal>
@@ -23397,8 +23604,11 @@ $ ocamlc -dlambda -c pattern.ml
         how C handles object files and archives (<literal>.o</literal>
         and <literal>.a</literal> respectively).
       </para>
+    </sect2>
+    <sect2 id="linking-ocaml-bytecode">
+      <title>Linking OCaml bytecode</title>
       <para>
-        The bytecode runtime comprises three main parts: the bytecode
+        The bytecode runtime comprises three parts: the bytecode
         interpreter, garbage collector, and a set of C functions that
         implement the primitive operations. Bytecode instructions are
         provided to call these C functions. The OCaml linker produces
@@ -23436,8 +23646,8 @@ $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
         be found in the
         <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html">manual</ulink>.
       </para>
-      <sect3 id="embedding-ocaml-bytecode">
-        <title>Embedding OCaml bytecode</title>
+      <sect3 id="embedding-ocaml-bytecode-in-c-code">
+        <title>Embedding OCaml bytecode in C code</title>
         <para>
           A consequence of using the bytecode compiler is that the final
           link phase must be performed by <literal>ocamlc</literal>.
@@ -23558,13 +23768,13 @@ $ cat embed_out.c
   <sect1 id="native-code-generation">
     <title>Native code generation</title>
     <para>
-      The native code compiler is ultimately the tool that production
-      OCaml code goes through. It compiles the lambda form into fast
-      native code executables, with cross-module inlining and code
-      optimization passes that the bytecode interpreter doesn't perform.
-      However, care is taken to ensure compatibility with the bytecode
-      runtime, and the same code should run identically when compiled
-      with either toolchain.
+      The native code compiler is ultimately the tool that most
+      production OCaml code goes through. It compiles the lambda form
+      into fast native code executables, with cross-module inlining and
+      additional optimization passes that the bytecode interpreter
+      doesn't perform. Care is taken to ensure compatibility with the
+      bytecode runtime, so the same code should run identically when
+      compiled with either toolchain.
     </para>
     <para>
       The <literal>ocamlopt</literal> command is the frontend to the
