@@ -23823,6 +23823,210 @@ $ cat embed_out.c
       this, the compilation will still succeed, but you will have missed
       out on an important optimization and have slower binaries.
     </para>
+    <sect2 id="inspecting-assembly-output">
+      <title>Inspecting assembly output</title>
+      <para>
+        The native code compiler generates assembly language, which is
+        then passed to the system assembler for compiling into compiled
+        object files. You can instruct <literal>ocamlopt</literal> to
+        output the assembly by passing the <literal>-S</literal> flag to
+        the compiler command-line.
+      </para>
+      <para>
+        The assembly is highly architecture specific, so the discussion
+        below assumes an Intel or AMD 64-bit platform. We've generated
+        the example code using <literal>-inline 20</literal> and
+        <literal>-nodynlink</literal> since it's best to generate
+        assembly code with the full optimizations that the compiler
+        supports. Even though these optimizations make the code a bit
+        harder to read, it will give you a more accurate picture of what
+        executes on the CPU.
+      </para>
+      <para>
+        We warned you earlier in
+        <xref linkend="maps-and-hashtables"/> that using
+        polymorphic comparison is both convenient and perilous. Let's
+        look at precisely what the difference is at the assembly
+        language level now.
+      </para>
+      <para>
+        First create a comparison function where we've explicitly
+        annotated the types, so the compiler knows that only integers
+        are being compared.
+      </para>
+      <programlisting language="ocaml">
+(* compare_mono.ml *)
+let cmp (a:int) (b:int) =
+  if a &gt; b then a else b
+</programlisting>
+      <para>
+        Generate the assembly code into a
+        <literal>compare_mono.S</literal> file.
+      </para>
+      <programlisting>
+$ ocamlopt -inline 20 -nodynlink -S compare_mono.ml
+$ cat compare_mono.S
+</programlisting>
+      <para>
+        If you've never seen assembly language before, then the contents
+        will be rather unreadable. While you'll need to learn x86
+        assembly to fully understand it, we can give you some basic
+        instructions to spot patterns in this section.
+      </para>
+      <para>
+        The implementation of the <literal>cmp</literal> function is
+        this fragment:
+      </para>
+      <programlisting>
+_camlCompare_mono__cmp_1008:
+    .cfi_startproc
+.L101:
+    cmpq    %rbx, %rax
+    jle .L100
+    ret
+    .align  2
+.L100:
+    movq    %rbx, %rax
+    ret
+    .cfi_endproc
+</programlisting>
+      <para>
+        The <literal>_camlCompare_mono__cmp_1008</literal> is an
+        assembly label that has been generated from the module name
+        (<literal>Compare_mono</literal>) and the function name
+        (<literal>cmp_1008</literal>). The numeric suffix for the
+        function name comes straight from the lambda form (which you can
+        inspect using <literal>-dlambda</literal>, but in this case
+        isn't necessary).
+      </para>
+      <para>
+        The arguments to <literal>cmp</literal> are passed in the
+        <literal>%rbx</literal> and <literal>%rax</literal> registers,
+        and compares them using the <literal>jle</literal> &quot;jump if
+        less than or equal&quot; instruction. This requires that the
+        arguments are both immediate integers. Now let's see what
+        happens if our OCaml code omits the type annotations and is a
+        polymorphic comparison.
+      </para>
+      <programlisting language="ocaml">
+(* compare_poly.ml *)
+let cmp a b =
+  if a &gt; b then a else b
+</programlisting>
+      <para>
+        Compiling this code with <literal>-S</literal> will result in a
+        significantly more complex assembly implementation of the same
+        function.
+      </para>
+      <programlisting>
+_camlCompare_poly__cmp_1008:
+        .cfi_startproc
+        subq    $24, %rsp
+        .cfi_adjust_cfa_offset  24
+.L101:
+        movq    %rax, 8(%rsp)
+        movq    %rbx, 0(%rsp)
+        movq    %rax, %rdi
+        movq    %rbx, %rsi
+        leaq    _caml_greaterthan(%rip), %rax
+        call    _caml_c_call
+.L102:
+        leaq    _caml_young_ptr(%rip), %r11
+        movq    (%r11), %r15
+        cmpq    $1, %rax
+        je      .L100
+        movq    8(%rsp), %rax
+        addq    $24, %rsp
+        .cfi_adjust_cfa_offset  -24
+        ret
+        .cfi_adjust_cfa_offset  24
+        .align  2
+.L100:
+        movq    0(%rsp), %rax
+        addq    $24, %rsp
+        .cfi_adjust_cfa_offset  -24
+        ret
+        .cfi_adjust_cfa_offset  24
+        .cfi_endproc
+</programlisting>
+      <para>
+        The <literal>.cfi</literal> directives are assembler hints that
+        contain Call Frame Information, and let the GNU debugger provide
+        more sensible backtraces. The implementation is no longer a
+        simple register comparison. Instead, the arugments are passed on
+        the stack (the <literal>%rsp</literal> register), and a C
+        function call is invoked by placing a pointer to
+        <literal>caml_greaterthan</literal> in <literal>%rax</literal>
+        and jumping to <literal>caml_c_call</literal>.
+      </para>
+      <para>
+        OCaml on 64-bit Intel also caches the location of the minor heap
+        in the <literal>%r11</literal> register. This isn't guaranteed
+        to be preserved when calling into C code (which can use
+        <literal>%r11</literal> for its own purposes, and so this
+        register is restored after making the C call to
+        <literal>caml_greaterthan</literal>. Finally the return value is
+        popped from the stack and returned.
+      </para>
+      <para>
+        You don't have to fully understand the intricacies of assembly
+        language to see that this polymorphic comparison is much heavier
+        than the simple monomorphic integer comparison from earlier.
+        Let's confirm this hypothesis again by writing a quick
+        <literal>Core_bench</literal> test with both functions.
+      </para>
+      <programlisting language="ocaml">
+$ cat bench_poly_and_mono.ml 
+open Core.Std
+open Core_bench.Std
+
+let polymorphic_compare () =
+  let cmp a b = if a &gt; b then a else b in
+  for i = 0 to 1000 do
+    ignore(cmp 0 i)
+  done
+
+let monomorphic_compare () =
+  let cmp (a:int) (b:int) =
+    if a &gt; b then a else b in
+  for i = 0 to 1000 do
+    ignore(cmp 0 i)
+  done
+
+let tests = [
+    &quot;Polymorphic comparison&quot;, polymorphic_compare;
+    &quot;Monomorphic comparison&quot;, monomorphic_compare ]
+
+let () =
+  List.map tests ~f:(fun (name,test) -&gt; Bench.Test.create ~name test)
+  |&gt; Bench.make_command
+  |&gt; Command.run
+</programlisting>
+      <para>
+        Running this shows quite a significant runtime difference
+        between the two.
+      </para>
+      <programlisting>
+$ ./bench_poly_and_mono.native 
+Estimated testing time 20s (change using -quota SECS).
+┌────────────────────────┬───────────┬───────────────┬────────────┐
+│ Name                   │ Time (ns) │     Time 95ci │ Percentage │
+├────────────────────────┼───────────┼───────────────┼────────────┤
+│ Polymorphic comparison │    10_087 │ 10_080-10_096 │     100.00 │
+│ Monomorphic comparison │    585.51 │ 584.60-586.57 │       5.80 │
+└────────────────────────┴───────────┴───────────────┴────────────┘
+</programlisting>
+      <para>
+        We see that the polymorphic comparison is close to 20 times
+        slower! These results shouldn't be taken too seriously as this
+        is a microbenchmark, which, like all such narrow tests, aren't
+        representative of more complex codebases. However, if you're
+        building numerical code that runs inside many iterations in a
+        tight inner loop, it's worth manually peering at the produced
+        assembly code to see if you can hand-optimize that important bit
+        of code.
+      </para>
+    </sect2>
     <sect2 id="building-debuggable-libraries">
       <title>Building debuggable libraries</title>
       <para>
