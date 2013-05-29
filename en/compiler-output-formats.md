@@ -1154,17 +1154,20 @@ important optimization and have slower binaries.
 
 ### Inspecting assembly output
 
-The native code compiler generates assembly language, which is then passed to
-the system assembler for compiling into compiled object files.  You can
-instruct `ocamlopt` to output the assembly by passing the `-S` flag to the
-compiler command-line.
+The native code compiler generates assembly language that is then passed to the
+system assembler for compiling into object files.  You can get `ocamlopt` to
+output the assembly by passing the `-S` flag to the compiler command-line.
 
-The assembly is highly architecture specific, so the discussion below assumes
-an Intel or AMD 64-bit platform.  We've generated the example code using
-`-inline 20` and `-nodynlink` since it's best to generate assembly code with
-the full optimizations that the compiler supports. Even though these
+The assembly code is highly architecture specific, so the discussion below
+assumes an Intel or AMD 64-bit platform.  We've generated the example code
+using `-inline 20` and `-nodynlink` since it's best to generate assembly code
+with the full optimizations that the compiler supports. Even though these
 optimizations make the code a bit harder to read, it will give you a more
-accurate picture of what executes on the CPU. 
+accurate picture of what executes on the CPU.  Don't forget that you can use
+the lambda code from earlier to get a slightly higher level picture of the code
+if you get lost in the more verbose assembly.
+
+#### The impact of polymorphic comparison
 
 We warned you earlier in [xref](#maps-and-hashtables) that using polymorphic
 comparison is both convenient and perilous.  Let's look at precisely what
@@ -1179,19 +1182,17 @@ let cmp (a:int) (b:int) =
   if a > b then a else b
 ```
 
-Generate the assembly code into a `compare_mono.S` file.
+Now compile this into assembly and read the resulting `compare_mono.S` file.
 
 ```console
 $ ocamlopt -inline 20 -nodynlink -S compare_mono.ml
 $ cat compare_mono.S
 ```
 
-If you've never seen assembly language before, then the contents
-will be rather unreadable.  While you'll need to learn x86 assembly
-to fully understand it, we can give you some basic instructions to spot
-patterns in this section.
-
-The implementation of the `cmp` function is this fragment:
+If you've never seen assembly language before then the contents may be rather
+scary.  While you'll need to learn x86 assembly to fully understand it, we'll
+try to give you some basic instructions to spot patterns in this section.  The
+excerpt of the implementation of the `cmp` function can be found below.
 
 ```
 _camlCompare_mono__cmp_1008:
@@ -1207,15 +1208,16 @@ _camlCompare_mono__cmp_1008:
 	.cfi_endproc
 ```
 
-The `_camlCompare_mono__cmp_1008` is an assembly label that has been generated
+The `_camlCompare_mono__cmp_1008` is an assembly label that has been computed
 from the module name (`Compare_mono`) and the function name (`cmp_1008`).  The
 numeric suffix for the function name comes straight from the lambda form (which
 you can inspect using `-dlambda`, but in this case isn't necessary).
 
-The arguments to `cmp` are passed in the `%rbx` and `%rax` registers, and compares
-them using the `jle` "jump if less than or equal" instruction.  This requires that
-the arguments are both immediate integers.  Now let's see what happens if our
-OCaml code omits the type annotations and is a polymorphic comparison.
+The arguments to `cmp` are passed in the `%rbx` and `%rax` registers, and
+compared using the `jle` "jump if less than or equal" instruction.  This
+requires both the arguments to be immediate integers to work.  Now let's see
+what happens if our OCaml code omits the type annotations and is a polymorphic
+comparison instead.
 
 ```ocaml
 (* compare_poly.ml *)
@@ -1223,8 +1225,8 @@ let cmp a b =
   if a > b then a else b
 ```
 
-Compiling this code with `-S` will result in a significantly more complex
-assembly implementation of the same function.
+Compiling this code with `-S` results in a significantly more complex assembly
+out for the same function.
 
 ```
 _camlCompare_poly__cmp_1008:
@@ -1258,17 +1260,19 @@ _camlCompare_poly__cmp_1008:
         .cfi_endproc
 ```
 
-The `.cfi` directives are assembler hints that contain Call Frame Information,
-and let the GNU debugger provide more sensible backtraces.  The implementation
-is no longer a simple register comparison.  Instead, the arugments are passed
-on the stack (the `%rsp` register), and a C function call is invoked by placing
-a pointer to `caml_greaterthan` in `%rax` and jumping to `caml_c_call`.
+The `.cfi` directives are assembler hints that contain Call Frame Information
+that lets the GNU debugger provide more sensible backtraces, and have no effect
+on runtime performance.  Notice that the rest of the implementation is no
+longer a simple register comparison.  Instead, the arguments are pushed on the
+stack (the `%rsp` register) and a C function call is invoked by placing a
+pointer to `caml_greaterthan` in `%rax` and jumping to `caml_c_call`.
 
-OCaml on 64-bit Intel also caches the location of the minor heap in the `%r11`
-register.  This isn't guaranteed to be preserved when calling into C code (which
-can use `%r11` for its own purposes, and so this register is restored after making
-the C call to `caml_greaterthan`.  Finally the return value is popped from the
-stack and returned.
+OCaml on 64-bit Intel architectures caches the location of the minor heap in
+the `%r11` register since it's so frequently referenced in OCaml functions.
+This register isn't guaranteed to be preserved when calling into C code (which
+can clobber `%r11` for its own purposes), and so this register is restored
+after returning from the `caml_greaterthan` call.  Finally the return value is
+popped from the stack and returned.
 
 You don't have to fully understand the intricacies of assembly language to see
 that this polymorphic comparison is much heavier than the simple monomorphic
@@ -1317,11 +1321,11 @@ Estimated testing time 20s (change using -quota SECS).
 ```
 
 We see that the polymorphic comparison is close to 20 times slower!  These
-results shouldn't be taken too seriously as this is a microbenchmark, which,
-like all such narrow tests, aren't representative of more complex codebases.
-However, if you're building numerical code that runs inside many iterations in
-a tight inner loop, it's worth manually peering at the produced assembly code
-to see if you can hand-optimize that important bit of code.
+results shouldn't be taken too seriously as this is a very narrow test, which
+like all such microbenchmarks aren't representative of more complex codebases.
+However, if you're building numerical code that runs many iterations in a tight
+inner loop, it's worth manually peering at the produced assembly code to see if
+you can hand-optimize it.
 
 ### Building debuggable libraries
 
