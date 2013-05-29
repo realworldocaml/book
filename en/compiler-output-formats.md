@@ -82,7 +82,8 @@ lightweight (and can be transformed into Javascript), whereas the native code
 compiler generates specialized native code binaries suitable for
 high-performance applications.
 
-### Obtaining the source code
+<sidebar>
+<title>Obtaining the compiler source code</title>
 
 Although it's not necessary to understand the examples, you may find it useful
 to have a copy of the OCaml source tree checked out while you read through this
@@ -94,9 +95,11 @@ chapter.  The source code is available from multiple places:
 
 Once you've checked out a copy of the source tree, it has a few sub-directories
 (TODO: describe depending on the contents below).
+
+</sidebar>
  
-We'll now go go through the compilation stages and explain how the tools behind
-them will be useful to you during OCaml development.
+We'll now go through each of the compilation stages and show you related tools
+that'll be useful to you during day-to-day OCaml development.
 
 ## Parsing source code
 
@@ -1227,7 +1230,7 @@ let cmp a b =
 ```
 
 Compiling this code with `-S` results in a significantly more complex assembly
-out for the same function.
+output for the same function.
 
 ```
 _camlCompare_poly__cmp_1008:
@@ -1271,14 +1274,21 @@ pointer to `caml_greaterthan` in `%rax` and jumping to `caml_c_call`.
 OCaml on 64-bit Intel architectures caches the location of the minor heap in
 the `%r11` register since it's so frequently referenced in OCaml functions.
 This register isn't guaranteed to be preserved when calling into C code (which
-can clobber `%r11` for its own purposes), and so this register is restored
-after returning from the `caml_greaterthan` call.  Finally the return value is
-popped from the stack and returned.
+can clobber `%r11` for its own purposes), and so `%r11` is restored after
+returning from the `caml_greaterthan` call.  Finally the return value of the
+comparison is popped from the stack and returned.
+
+<tip>
+<title>The implementation of `compare_val` in the runtime</title>
+
+The ... TODO
+
+</tip>
 
 You don't have to fully understand the intricacies of assembly language to see
 that this polymorphic comparison is much heavier than the simple monomorphic
-integer comparison from earlier.  Let's confirm this hypothesis again by writing
-a quick `Core_bench` test with both functions.
+integer comparison from earlier.  Let's confirm this hypothesis again by
+writing a quick `Core_bench` test with both functions.
 
 ```ocaml
 $ cat bench_poly_and_mono.ml 
