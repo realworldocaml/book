@@ -79,6 +79,7 @@ let js_interns =
   ; "m-alvarez"              (* TODO mario.alvarezp@estudiante.uam.es *)
   ; "polasek"                (* TODO Jan Polášek <jp581@cam.ac.uk> *)
   ; "mkandalf"               (* TODO nmeyer@janestreet.com *)
+  ; "denyphi"                (* TODO pdenys@janestreet.com *)
   ]
 
 let from_email =
