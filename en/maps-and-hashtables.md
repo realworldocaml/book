@@ -1,10 +1,10 @@
 # Maps and Hashtables
 
 Lots of programming problems require dealing with data organized as
-key/value pairs.  Maybe the simplest way of representing sets of
-key/value pairs in OCaml is an _association list_, which is simply a
-list of pairs of keys and values.  For example, you could represent a
-mapping between the 10 digits and their English names as follows.
+key/value pairs.  Maybe the simplest way of representing such data in
+OCaml is an _association list_, which is simply a list of pairs of
+keys and values.  For example, you could represent a mapping between
+the 10 digits and their English names as follows.
 
 ```ocaml
 # let digit_alist =
@@ -41,10 +41,9 @@ advice as to how to choose between them.
 
 ## Maps
 
-Let's start by considering an example of how one might use a map in
-practice.  In [xref](#files-modules-and-programs), we showed a module
-`Counter` for keeping counts on a set of strings.  Here's the
-interface.
+Let's consider an example of how one might use a map in practice.  In
+[xref](#files-modules-and-programs), we showed a module `Counter` for
+keeping frequency counts on a set of strings.  Here's the interface.
 
 ```ocaml
 (* counter.mli *)
@@ -53,14 +52,14 @@ open Core.Std
 type t
 
 val empty : t
-val to_list : t -> (string * int) list
 val touch : t -> string -> t
+val to_list : t -> (string * int) list
 ```
 
 The intended behavior here is straightforward.  `Counter.empty`
-represents an empty collection of counts; `touch` increments the count
-of the specified string by 1; and `to_list` returns the list of
-non-zero string/count pairs.
+represents an empty collection of frequency counts; `touch` increments
+the frequency count of the specified string by 1; and `to_list`
+returns the list of non-zero frequencies.
 
 Here's the implementation.
 
@@ -86,7 +85,7 @@ comparing keys.
 
 To deal with this, a map, once created, stores the necessary
 comparison function within the data structure.  Thus, operations like
-`Map.find` or `Map.add` that access the contents of a map, or create a
+`Map.find` or `Map.add` that access the contents of a map or create a
 new map from an existing one, do so by using the comparison function
 embedded within the map.
 
@@ -94,17 +93,16 @@ But in order to get a map in the first place, you need to get your
 hands on the comparison function somehow.  For this reason, modules
 like `String` contain a `Map` sub-module that have values like
 `String.Map.empty` and `String.Map.of_alist` that are specialized to
-strings, and this have access to a string comparison function.  Such a
-`Map` sub-module is included in any module that satisfies the
+strings, and thus have access to a string comparison function.  Such a
+`Map` sub-module is included in every module that satisfies the
 `Comparable.S` interface from Core.
 
 ### Creating maps with comparators
 
-The specialized `Map` sub-module is convenient, but you don't
-necessarily need to use it to create a `Map.t`.  The information
-required to compare values of a given type is wrapped up in a value
-called a _comparator_, that can be used to create maps using the `Map`
-module directly.
+The specialized `Map` sub-module is convenient, but it's not the only
+way of creating a `Map.t`.  The information required to compare values
+of a given type is wrapped up in a value called a _comparator_, that
+can be used to create maps using the `Map` module directly.
 
 ```ocaml
 # let digit_map = Map.of_alist_exn digit_alist
@@ -118,9 +116,9 @@ The above uses `Map.of_alist_exn` which creates a map from an
 association list, throwing an exception if there are duplicate keys in
 the list.
 
-Note that the comparator is only required for operations that create
-maps from scratch.  Operations that update an existing map simply
-inherit the comparator of the map they start with.
+The comparator is only required for operations that create maps from
+scratch.  Operations that update an existing map simply inherit the
+comparator of the map they start with.
 
 ```ocaml
 # let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
@@ -128,9 +126,8 @@ val zilch_map : (int, string, Int.comparator) Map.t = <abstr>
 ```
 
 The type `Map.t` has three type parameters: one for the key, one for
-the value, and one to identify the comparator used to build the map.
-Indeed, the type `'a Int.Map.t` is just a type alias for
-`(int,'a,Int.comparator) Map.t`
+the value, and one to identify the comparator.  Indeed, the type `'a
+Int.Map.t` is just a type alias for `(int,'a,Int.comparator) Map.t`
 
 Including the comparator in the type is important because because
 operations that work on multiple maps at the same time often require
@@ -150,11 +147,10 @@ val diff :
   [("foo", `Unequal (1, 0)); ("bar", `Left 3)]
 ```
 
-If we look at the type of `Map.symmetric_diff`, we'll see that it
-requires that the two maps it compares have the same comparator type,
-in addition to the same key type and value type.  Each comparator has
-a fresh abstract type, so the type of a comparator identifies it
-uniquely.
+The type of `Map.symmetric_diff`, shown below, requires that the two
+maps it compares have the same comparator type.  Each comparator has a
+fresh abstract type, so the type of a comparator identifies the
+comparator uniquely.  
 
 ```ocaml
 # Map.symmetric_diff;;
@@ -165,7 +161,11 @@ uniquely.
 = <fun>
 ```
 
-We could create a new comparator for an existing type using the `Make`
+This constis is important because the algorithm that
+`Map.symmetric_diff` uses depends on the fact that both maps have the
+same comparator.
+
+We can create a new comparator for an existing type using the `Make`
 functor found in the `Comparator` module.  This functor takes as its
 input a module containing the type of the object to be compared,
 sexp-converter functions, and a comparison function.  (The sexp
@@ -202,8 +202,8 @@ val ord_map : (string, int, String.comparator) Map.t = <abstr>
 val rev_map : (string, int, Reverse.comparator) Map.t = <abstr>
 ```
 
-And by using `Map.min_elt`, which returns the key and value for the
-smallest key in the map, we can see that these two maps indeed do use
+`Map.min_elt` returns the key and value for the smallest key in the
+map, which lets us see that the two maps we created do indeed use
 different comparison fucntions.
 
 ```ocaml
@@ -213,10 +213,8 @@ different comparison fucntions.
 - : (string * int) option = Some ("snoo", 3)
 ```
 
-Since the algorithm behind `Map.symmetric_diff` depends on both maps
-using the same comparison function, we shouldn't be able to run this
-function jointly on these two maps.  Indeed, if we try, the compiler
-will reject it as a type error.
+And accordingly, if we try to use `Map.symmetric_diff` on these two
+maps, we'll get a compile-timer error.
 
 ```ocaml
 # Map.symmetric_diff ord_map rev_map;;
@@ -227,12 +225,14 @@ Error: This expression has type (string, int, Reverse.comparator) Map.t
        Type Reverse.comparator is not compatible with type String.comparator 
 ```
 
+### Trees
+
 As we've discussed, maps carry within them the comparator that they
 were created with.  Sometimes, often for space efficiency reasons, you
 want a version of the map data structure that doesn't include the
 comparator.  You can get this with `Map.to_tree`, which returns the
-tree type that the map is built on top of, which doesn't include the
-comparator directly.
+tree that the map is built on top of, which doesn't include the
+comparator.
 
 ```ocaml
 # let ord_tree = Map.to_tree ord_map;; 
@@ -240,17 +240,20 @@ val ord_tree : (string, int, String.comparator) Map.Tree.t = <abstr>
 ```
 
 Note that although it doesn't physically include the comparator, it
-still includes the comparator in its type.
+still includes the comparator in its type.  This is what is known as a
+_phantom type_, because the type reflects something about the logic of
+how the value was constructued, but the type doesn't correspond to any
+values directly represented in the underlying data structure.
 
-If we want to look something up in a tree, we need to provide the
-comparator explicitly.
+To look something up in a tree, we need to provide the comparator
+explicitly.
 
 ```ocaml
 # Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
 - : int option = Some 3
 ```
 
-The algorithm of `Map.find` depends on the fact that you're using the
+The algorithm of `Map.Tree.find` depends on the fact that you're using the
 same comparator when looking a value up as you were when you stored
 it.  Accordingly, using the wrong comparator will lead to a type
 error.
@@ -273,10 +276,10 @@ We don't need to generate specialized comparators for every type we
 want to build a map on.  We can instead use a comparator based on
 OCaml's polymorphic comparison function, which was discussed in
 [xref](#lists-and-patterns).  This comparator is found in the
-`Map.Poly` module.  Thus, we can write:
+`Comparator.Poly` module.  Thus, we can write:
 
 ```ocaml
-# Map.of_alist_exn Comparator.Poly.comparator digit_alist;;
+# Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
 - : (int, string, Comparator.Poly.comparator) Map.t = <abstr>
 ```
 
@@ -308,12 +311,12 @@ way that polymorphic compare does.
 ### Sets
 
 Sometimes, instead of keeping track of a set of key/value pairs, you
-just want a data-type for keeping track of a set set of keys.  You
-could just build this on top of the map type, by representing a set of
-values by a map where the type of the data is just `unit`.  A more
-idiomatic (and more efficient) solution is to use Core's set type,
-which is similar in design and spirit to the map type.  Here's a
-simple example:
+just want a data-type for keeping track of a set of keys.  You could
+just build this on top of the map type, by representing a set of
+values by a map where the type of the data is `unit`.  A more
+idiomatic (and efficient) solution is to use Core's set type, which is
+similar in design and spirit to the map type.  Here's a simple
+example:
 
 ```ocaml
 # let dedup ~comparator l =
@@ -329,31 +332,33 @@ val dedup : comparator:('a, 'b) Core.Comparator.t_ -> 'a list -> 'a list =
 In addition to the operators you would expect to have in map, sets,
 also support other operations you would expect for sets, including
 functions for computing unions, intersections and set differences, as
-well as testing for whether one set is a subset of another.
+well as testing for whether one set is a subset of another.  And, as
+with maps, we can create sets based on type-specific comparators or on
+the polymorphic comparato.rhe pr
 
 <warning> <title> The perils of polymorphic compare </title>
 
 Polymorphic compare is highly convenient, but it has serious downsides
-as well, and should be used with care.  The problem with polymorphic
-compare is that it has a fixed algorithm for comparing values of any
-type, and that that algorithm can sometimes yield surprising results.
+as well, and should be used with care.  In particular, polymorphic
+compare has a fixed algorithm for comparing values of any type, and
+that algorithm can sometimes yield surprising results.
 
-To understand what's wrong with polymorphic comparison, you need to
-consider how it works.  Polymorphic compare is a structural
-comparison, operating directly on the runtime-representation of OCaml
-values, walking the structure of the values in question without regard
-for their type.
+To understand what's wrong with polymorphic compare, you need to
+understand a bit about how it works.  Polymorphic compare is
+_structural_, in that it operates directly on the
+runtime-representation of OCaml values, walking the structure of the
+values in question without regard for their type.
 
 This is convenient because it provides a comparison function that
-behaves as you would expect for most OCaml types.  For example, on
-`int`s and `float`s it acts as you would expect a numeric comparison
-function to act.  For simple containers like strings and lists and
-arrays it operates as a lexicographic comparator.  And it provides a
-reasonable total comparison function for most OCaml types, excluding
-only things like closures and values from outside of the OCaml heap.
+works for most OCaml values, and largely behaves as you would expect.
+For example, on `int`s and `float`s it acts as you would expect a
+numeric comparison function to act.  For simple containers like
+strings and lists and arrays it operates as a lexicographic
+comparison.  And except for closures and values from outside of the
+OCaml heap, it works on almost every OCaml type.
 
-But sometimes, a structural comparison is not what you want.  Maps and
-Sets are a great example of this.  Consider the following two sets.
+But sometimes, a structural comparison is not what you want.  Sets are
+a great example of this.  Consider the following two sets.
 
 ```ocaml
 # let (s1,s2) = (Int.Set.of_list [1;2],
@@ -371,13 +376,13 @@ you get if you call `Set.equal` on them.
 ```
 
 But because the elements were added in different orders, the layout of
-the trees trees will be different, and so a structural comparison
-function will conclude that they're different.
+the trees underlying the sets will be different.  As such, a
+structural comparison function will conclude that they're different.
 
 Let's see what happens if we use polymorphic compare to test for
 equality by way of the `=` operator.  Comparing the maps directly will
-fail at runtime because of the comparators stored within the sets
-contain function values.
+fail at runtime because the comparators stored within the sets contain
+function values.
 
 ```ocaml
 # s1 = s2;;
@@ -400,8 +405,8 @@ others, since if the sets are built in a consistent order, then they
 will work as expected, but once the order changes, the behavior will
 change.
 
-For this reason, it's preferable to avoid polymorphic compare for all
-but the smallest applications.
+For this reason, it's preferable to avoid polymorphic compare for
+serious applications.
 
 </warning>
 
@@ -409,7 +414,7 @@ but the smallest applications.
 
 Core's `Comparable.S` interface includes a lot of useful support for
 working with maps and sets, in particular, the presence of a
-comparator and the `Map` and `Set` sub-modules.
+comparator as well as the `Map` and `Set` sub-modules.
 
 `Comparable.S` is already satisfied by most of the modules in Core,
 but the question arises of how to satisfy the comparable interface for
@@ -430,9 +435,9 @@ end
 
 In other words, it expects the input module to support a comparison
 function with the default signature, and it expects it to have
-functions for converting to and from s-expressions, which is a
-serialization format that we'll discuss more in
-[xref][#data-serialization-with-s-expressions].  In this case, we'll
+functions for converting to and from s-expressions, a serialization
+format that we'll discuss more in
+[xref](#data-serialization-with-s-expressions).  In this case, we'll
 use the `with sexp` declaration that comes from the `Sexplib` syntax
 extension to create s-expression converters for us, but such
 converters can also be written by hand.
@@ -603,4 +608,7 @@ choice of hash function.
 There is currently no analogue of `comparelib` for auto-generation of
 hash-functions, so you do need to either write the hash-function by
 hand, or use the built-in polymorphic hash function, `Hashtbl.hash`.
+
+
+
 
