@@ -751,25 +751,31 @@ into a more compact form like this.
 
 ### The untyped lambda form
 
-Once OCaml gets past the typed AST, it eliminates all the static type
-information into a simpler intermediate *lambda form*.  The lambda form
-discards higher-level language constructs such as modules and objects, and
-replaces them with simpler values such as records and function pointers.
-Pattern matches are also analyzed and compiled into highly optimized automata.
+Once OCaml has passed the type checking stage, it can stop emitting syntax
+and type errors and begin the process of compiling the well-formed modules
+into executable code.
 
-The lambda form is the first representation that discards the OCaml type
-information. The output begins to look like the runtime memory model from
-[xref](#memory-representation-of-values).  It can be useful to manually inspect
-the lambda code to understand the effect of early compiler optimizations, most
-notably pattern matching compilation.  The compiler can dump the lambda form in
-an s-expression syntax if you add the `-dlambda` directive to the compiler
-command-line.
+The next stage eliminates all the static type information into a simpler
+intermediate *lambda form*.  The lambda form discards higher-level constructs
+such as modules and objects and replaces them with simpler values such as
+records and function pointers.  Pattern matches are also analyzed and compiled
+into highly optimized automata.
+
+The lambda form is the key stage that discards the OCaml type information and
+maps the source code to the runtime memory model described in
+[xref](#memory-representation-of-values).  This stage also performs some
+optimizations, most notably converting pattern match statements into more
+optimized but low-level statements. 
 
 #### Pattern matching optimization
 
-Let's use this to learn more about how the OCaml pattern matching engine works
-by building three styles of pattern matching and checking the lambda form out.
-First create a straightforward exhaustive pattern match using normal variants.
+The compiler dumps the lambda form in an s-expression syntax if you add the
+`-dlambda` directive to the command-line.  Let's use this to learn more about
+how the OCaml pattern matching engine works by building three different pattern
+matches and comparing their lambda forms.
+
+Let's start by creating a straightforward exhaustive pattern match using normal
+variants.
 
 ```ocaml
 (* pattern_monomorphic_exhaustive.ml *)
