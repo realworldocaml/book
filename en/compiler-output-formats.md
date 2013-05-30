@@ -1222,12 +1222,12 @@ $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
 
 The `dllib` flag embeds the arguments in the archive file.  Any subsequent
 packages including this archive will also include the extra linking directive.
-This lets the `ocamlrun` runtime locate the extra symbols when it executes the
-bytecode.
+This lets the interpreter locate the external library symbols when it executes
+the bytecode.
 
 You can also generate a complete standalone executable that bundles the `ocamlrun`
-interpreter with the bytecode in a single binary.  This is known as the "custom"
-runtime mode, and can be run by:
+interpreter with the bytecode in a single binary.  This is known as the *custom
+runtime* mode, and can be built as follows.
 
 ```console
 $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
@@ -1248,13 +1248,14 @@ via the `-output-obj` directive.
 
 This mode causes `ocamlc` to output a C object file that containing the
 bytecode for the OCaml part of the program, as well as a `caml_startup`
-function.  The object file can then be linked with other C code using the
-standard C compiler, or even turned in a standalone C shared library.
+function.  All of the OCaml modules are linked into this object file as
+bytecode, just as they would be for an executable.
 
-The bytecode runtime library is installed as `libcamlrun` in the standard OCaml
-directory (obtained by `ocamlc -where`).  Creating an executable just requires
-you to link the runtime library with the bytecode object file.  Here's a quick
-example to show how it all fits together.
+This object file can then be linked with C code using the standard C compiler,
+and only needs the bytecode runtime library (which is installed as
+`libcamlrun.a`).  Creating an executable just requires you to link the runtime
+library with the bytecode object file.  Here's an example to show how it all
+fits together.
 
 Create two OCaml source files that contain a single print line.
 
@@ -1305,10 +1306,11 @@ hello embedded world 2
 After calling OCaml
 ```
 
-Once inconvenience with `gcc` is that you need to specify the location
-of the OCaml library directory.  The OCaml compiler can actually handle C
-object and source files, and it adds the `-I` and `-L` directives for you.  You
-can compile the previous object file with `ocamlc` to try this.
+Once inconvenience with `gcc` is that you need to specify the location of the
+OCaml library directory.  The OCaml compiler can actually handle C object and
+sources directly.  It passes these through to the system C compiler but adds
+its standard directory and runtime on the way.  You can thus compile the
+previous object file much more simply with `ocamlc`.
 
 ```console
 $ ocamlc -o final_out2 embed_out.o main.c
@@ -1319,22 +1321,22 @@ hello embedded world 2
 After calling OCaml
 ```
 
-You can also verify the system commands that `ocamlc` is invoking by adding
-`-verbose` to the command line.  You can even obtain the source code to
-the `-output-obj` result by specifying a `.c` output file extension instead
-of the `.o` we used earlier.
+You can inspect the commands that `ocamlc` is invoking by adding `-verbose` to
+the command line.  You can even obtain the C source code to the `-output-obj`
+result by specifying a `.c` output file extension instead of the `.o` we used
+earlier.
 
 ```console
 $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
 $ cat embed_out.c
 ```
 
-Embedding OCaml code like this lets you write OCaml code that interfaces with
-any environment that works with a C compiler.   You can even cross back from the
-C code into OCaml by using the `Callback` module to register named entry points
-in the OCaml code.  This is explained in detail in the
-[interfacing with C](http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149)
-section of the OCaml manual.
+Embedding OCaml code like this lets you write OCaml that interfaces with any
+environment that works with a C compiler.   You can even cross back from the C
+code into OCaml by using the `Callback` module to register named entry points
+in the OCaml code.  This is explained in detail in the [interfacing with
+C](http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149) section of
+the OCaml manual.
 
 ## Native code generation
 
