@@ -8,25 +8,25 @@ deploying applications.
 
 OCaml has a strong emphasis on static type safety and tries to reject source
 code that doesn't meet its requirements as early as possible.  The compiler
-runs the source code through a series of checks and transformations.  Each
-stage does its job (e.g. type checking, scheduling or code generation) and
-discards some information from the previous stage.  The final native code
-output ends up as low-level assembly code that doesn't know anything about the
-OCaml modules or objects that the compiler started with.
+runs the source code through a series of checks and transformations to
+accomplish this.  Each stage performs its job (e.g. type checking, optimization
+or code generation) and discards some information from the previous stage.  The
+final native code output is low-level assembly code that doesn't know anything
+about the OCaml modules or objects that the compiler started with.
 
 You don't have to do all this manually, of course.  The OCaml compiler
 frontends (`ocamlc` and `ocamlopt`) run through these stages for you,
 controlled by the command-line options your build system passes to them.
 Sometimes though, you'll need to dive into the toolchain to hunt down a bug or
 investigate a performance problem.  This chapter explains the compiler pipeline
-in more depth, and the tools you can use to help visualise them.
+in more depth, and the tools you need to help visualise them.
 
 It's even possible to compile OCaml to run efficiently on foreign environments
 such as Javascript or the Java Virtual Machine.  These aren't supported by the
 core OCaml distribution, but are third-party tools available on OPAM.  We'll
 mention these as we go through the chapter so you can experiment with them too.
 
-In this chapter, you'll learn:
+In this chapter, we'll cover the following topics:
 
 * the compilation pipeline and what each stage represents.
 * source preprocessing via `camlp4` and the intermediate forms.
