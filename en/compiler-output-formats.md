@@ -267,21 +267,21 @@ how to integrate it with your favourite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
 
-### Generating documentation via `ocamldoc`
+### Generating documentation via OCamldoc
 
 Whitespace and source code comments aren't significant in determining the
 semantics of the program, and are removed during the parsing process.  However,
 other tools in the OCaml distribution can interpret comments for their own
 ends.
 
-The `ocamldoc` tool uses specially formatted comments in the source code to
+The OCamldoc tool uses specially formatted comments in the source code to
 generate documentation bundles. These comments are combined with the function
 definitions and signatures and output as structured documentation in a variety
 of formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual
 pages and even module dependency graphs that can be viewed using
 [Graphviz](http://www.graphviz.org).
 
-Here's a sample of some source code that's been annotated with `ocamldoc`
+Here's a sample of some source code that's been annotated with OCamldoc
 comments.
 
 ```ocaml
@@ -307,7 +307,7 @@ let what_is_the_weather_in location =
   | `California -> Sun
 ```
 
-The `ocamldoc` comments are distinguished by beginning with the double asterix.
+The OCamldoc comments are distinguished by beginning with the double asterix.
 There are formatting conventions for the contents of the comment to mark
 metadata.  For instance, the `@tag` fields mark specific properties such as the
 author of that section of code.
@@ -329,9 +329,9 @@ the [OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html)
 for the complete list.
 
 <tip>
-<title>Using custom ocamldoc generators</title>
+<title>Using custom OCamldoc generators</title>
 
-The default HTML output stylesheets from `ocamldoc` are pretty spartan and
+The default HTML output stylesheets from OCamldoc are pretty spartan and
 distinctly Web 1.0.  The tool supports plugging in custom documentation
 generators, and there are several available that provide prettier or more
 detailed output.
@@ -405,15 +405,15 @@ code into conventional OCaml code that has no trace of the new keywords.  The
 compiler then compiles this transformed code with no knowledge of the
 preprocessor's actions.
 
-Both `fieldslib` and `sexplib` need this new `with` keyword and they both can't
-register the same extension. A preprocessor library called `type_conv` provides
-the common extension framework for them to use.  Type_conv defines the `with`
-grammar extension and `ocamlfind` ensures that it's loaded before `variantslib`
-or `sexplib`.
+Both `fieldslib` and `sexplib` need this new `with` keyword, but they both
+can't register the same extension. Instead, a library called `type_conv`
+provides the common extension framework for them to use.  Type_conv registers
+the `with` grammar extension to Camlp4, and the `ocamlfind` packaging ensures
+that it's loaded before `variantslib` or `sexplib`.
 
-The preprocessor extensions generate boilerplate OCaml code based on the type
-definition.  This avoids the inevitable performance hit of doing the code
-generation dynamically.  It also doesn't require a Just-In-Time (JIT) runtime
+The two extensions generate boilerplate OCaml code based on the type
+definition. This avoids the inevitable performance hit of doing the code
+generation dynamically. It also doesn't require a Just-In-Time (JIT) runtime
 that can be a source of unpredictable dynamic behaviour.  Instead, all code is
 simply generated at compile-time via Camlp4.
 
@@ -472,10 +472,10 @@ definition with two new functions also incuded.
 
 #### Running Camlp4 directly on the source code
 
-While the top-level is a quick and useful to examine the signatures generated
-from the extensions, how can we see what these new functions actually do?  You
-can't do this from `utop` directly since it embeds the Camlp4 invocation as
-an automated part of its operation.
+The top-level is a quick way to examine the signatures generated from the
+extensions, but how can we see what these new functions actually do?  You can't
+do this from `utop` directly since it embeds the Camlp4 invocation as an
+automated part of its operation.
 
 Let's turn to the command-line to obtain the result of the `comparelib`
 transformation instead.  Create a file that contains the type declaration from
@@ -489,7 +489,8 @@ type t = {
 } with compare
 ```
 
-Now create a shell script that runs Camlp4 directly.
+We need to run the Camlp4 binary with the library paths to Comparelib and
+Type_conv.  Let's use a small shell script to wrap this invocation.
 
 ```bash
 #!/bin/sh
@@ -501,9 +502,9 @@ ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
 camlp4o -printer o $INCLUDE $ARCHIVES $1
 ```
 
-This script uses the `ocamlfind` package manager to list the include and
-library paths needed by `comparelib`.  The final command invokes the `camlp4o`
-preprocessor with these paths and outputs the resulting AST to standard output.
+The script uses the `ocamlfind` package manager to list the include and library
+paths needed by `comparelib`.  It then invokes the `camlp4o` preprocessor with
+these paths and outputs the resulting AST to the standard output.
 
 
 ```console
