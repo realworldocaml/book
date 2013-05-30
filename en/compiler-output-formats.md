@@ -404,11 +404,11 @@ code into conventional OCaml code that has no trace of the new keywords.  The
 compiler then compiles this transformed code with no knowledge of the
 preprocessor's actions.
 
-Both `fieldslib` and `sexplib` need this new `with` keyword, but they both
-can't register the same extension. Instead, a library called `type_conv`
+Both Fieldslib and Sexplib need this new `with` keyword, but they both
+can't register the same extension. Instead, a library called Type_conv
 provides the common extension framework for them to use.  Type_conv registers
-the `with` grammar extension to Camlp4, and the `ocamlfind` packaging ensures
-that it's loaded before `variantslib` or `sexplib`.
+the `with` grammar extension to Camlp4, and the OCamlfind packaging ensures
+that it's loaded before Variantslib or Sexplib.
 
 The two extensions generate boilerplate OCaml code based on the type
 definition. This avoids the inevitable performance hit of doing the code
