@@ -15,11 +15,11 @@ output is low-level assembly code that doesn't know anything about the OCaml
 modules or objects that the compiler started with.
 
 You don't have to do all this manually, of course.  The compiler frontends
-(`ocamlc` and `ocamlopt`) run through these stages for you, controlled by the
-command-line options passed to them.  Sometimes though, you'll need to dive
-into the toolchain to hunt down a bug or investigate a performance problem.
-This chapter explains the compiler pipeline in more depth, and the tools you
-need to help visualise them.
+(`ocamlc` and `ocamlopt`) are invoked via the command-line and chain the stages
+together for you.  Sometimes though, you'll need to dive into the toolchain to
+hunt down a bug or investigate a performance problem.  This chapter explains
+the compiler pipeline in more depth so you understand how to harness the
+command-line tools effectively.
 
 It's even possible to compile OCaml to run efficiently on foreign environments
 such as Javascript or the Java Virtual Machine.  These aren't supported by the
@@ -30,6 +30,7 @@ In this chapter, we'll cover the following topics:
 
 * the compilation pipeline and what each stage represents.
 * source preprocessing via Camlp4 and the intermediate forms.
+* the untyped intermediate lambda code where pattern matching is optimized.
 * the bytecode `ocamlc` compiler and `ocamlrun` interpreter.
 * the native code `ocamlopt` code generator, and debugging and profiling native code.
 
