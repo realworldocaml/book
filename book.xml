@@ -37,7 +37,6 @@
 
 
 
-
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -22579,12 +22578,12 @@ struct custom_operations {
   <para>
     You don't have to do all this manually, of course. The compiler
     frontends (<literal>ocamlc</literal> and
-    <literal>ocamlopt</literal>) run through these stages for you,
-    controlled by the command-line options passed to them. Sometimes
-    though, you'll need to dive into the toolchain to hunt down a bug or
-    investigate a performance problem. This chapter explains the
-    compiler pipeline in more depth, and the tools you need to help
-    visualise them.
+    <literal>ocamlopt</literal>) are invoked via the command-line and
+    chain the stages together for you. Sometimes though, you'll need to
+    dive into the toolchain to hunt down a bug or investigate a
+    performance problem. This chapter explains the compiler pipeline in
+    more depth so you understand how to harness the command-line tools
+    effectively.
   </para>
   <para>
     It's even possible to compile OCaml to run efficiently on foreign
@@ -22605,6 +22604,12 @@ struct custom_operations {
     <listitem>
       <para>
         source preprocessing via Camlp4 and the intermediate forms.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        the untyped intermediate lambda code where pattern matching is
+        optimized.
       </para>
     </listitem>
     <listitem>
@@ -26091,84 +26096,6 @@ immutable: 2.6186s (19073 minor collections)
       <para>
       </para>
     </sect2>
-  </sect1>
-</chapter><chapter id="parsing-binary-protocols-with-bigarray">
-  <title>Parsing Binary Protocols with Bigarray</title>
-  <sect1 id="bigarrays-for-external-memory-blocks">
-    <title>Bigarrays for external memory blocks</title>
-    <para>
-      An OCaml bigarray is a useful custom block provided as standard to
-      manipulate memory blocks outside the OCaml heap. It has
-      <literal>Custom_tag</literal> in the header, and the first word
-      points to the <literal>custom_operations</literal> struct for
-      bigarrays. Following this is a <literal>caml_ba_array</literal>
-      struct.
-    </para>
-    <programlisting>
-struct caml_ba_array {
-  void * data;                  /* Pointer to raw data */
-  intnat num_dims;              /* Number of dimensions */
-  intnat flags;                 /* Kind of element array + memory layout + allocation status */
-  struct caml_ba_proxy * proxy; /* The proxy for sub-arrays, or NULL */
-  intnat dim[]  /*[num_dims]*/; /* Size in each dimension */
-};
-</programlisting>
-    <para>
-      The <literal>data</literal> is usually a pointer to a
-      <literal>malloc</literal>'ed chunk of memory, which the custom
-      finalizer operation <literal>free</literal>'s when the block is
-      free. The <literal>flags</literal> field encodes three values,
-      located in the bits as specified by three masks:
-    </para>
-    <programlisting>
-CAML_BA_KIND_MASK = 0xFF     /* Mask for kind in flags field */
-CAML_BA_LAYOUT_MASK = 0x100  /* Mask for layout in flags field */
-CAML_BA_MANAGED_MASK = 0x600 /* Mask for &quot;managed&quot; bits in flags field */
-</programlisting>
-    <para>
-      The <literal>CAML_BA_KIND_MASK</literal> bits hold a value of the
-      <literal>caml_ba_kind</literal> enum that identifies the kind of
-      value in the bigarray <literal>data</literal>.
-    </para>
-    <programlisting>
-enum caml_ba_kind {
-  CAML_BA_FLOAT32,             /* Single-precision floats */
-  CAML_BA_FLOAT64,             /* Double-precision floats */
-  CAML_BA_SINT8,               /* Signed 8-bit integers */
-  CAML_BA_UINT8,               /* Unsigned 8-bit integers */
-  CAML_BA_SINT16,              /* Signed 16-bit integers */
-  CAML_BA_UINT16,              /* Unsigned 16-bit integers */
-  CAML_BA_INT32,               /* Signed 32-bit integers */
-  CAML_BA_INT64,               /* Signed 64-bit integers */
-  CAML_BA_CAML_INT,            /* OCaml-style integers (signed 31 or 63 bits) */
-  CAML_BA_NATIVE_INT,          /* Platform-native long integers (32 or 64 bits) */
-  CAML_BA_COMPLEX32,           /* Single-precision complex */
-  CAML_BA_COMPLEX64,           /* Double-precision complex */
-}
-</programlisting>
-    <para>
-      The <literal>CAML_BA_LAYOUT_MASK</literal> bit says whether
-      multi-dimensional arrays are layed out C or Fortran style.
-    </para>
-    <programlisting>
-enum caml_ba_layout {
-  CAML_BA_C_LAYOUT = 0,           /* Row major, indices start at 0 */
-  CAML_BA_FORTRAN_LAYOUT = 0x100, /* Column major, indices start at 1 */
-};
-</programlisting>
-    <para>
-      The <literal>CAML_BA_MANAGED_MASK</literal> bits hold a value of
-      the <literal>caml_ba_managed</literal> enum that identifies
-      whether OCaml is responsible for freeing the
-      <literal>data</literal> or some other code is.
-    </para>
-    <programlisting>
-enum caml_ba_managed {
-  CAML_BA_EXTERNAL = 0,        /* Data is not allocated by OCaml */
-  CAML_BA_MANAGED = 0x200,     /* Data is allocated by OCaml */
-  CAML_BA_MAPPED_FILE = 0x400, /* Data is a memory mapped file */
-};
-</programlisting>
   </sect1>
 </chapter></part><appendix id="installation">
   <title>Installation</title>
