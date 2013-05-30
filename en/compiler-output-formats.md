@@ -116,20 +116,25 @@ There are a number of tools and scripts also built alongside the core compiler:
 
 </sidebar>
  
-We'll now go through each of the compilation stages and show you related tools
-that'll be useful to you during day-to-day OCaml development.
+We'll go through each of the compilation stages now and explain how that'll be
+useful to you during day-to-day OCaml development.
 
 ## Parsing source code
 
-The first thing the compiler does is parse the input source files into a more
-structured data type.  The compiler lexes the source text into a stream of
-tokens and parses them into an Abstract Syntax Tree (AST) data structure.  This
-parser is implemented in OCaml itself, using the techniques described earlier
-in [xref](#parsing-with-ocamllex-and-menhir).  The lexer and parser rules can
-be found in the `ocaml/parsing/` directory in the source distribution.
+We explained the basics of the build process earlier in
+[xref](#files-modules-and-programs), so we'll assume you've built a few OCaml
+programs already.
 
-Here's a syntax error that we obtain by using the `module` keyword
-incorrectly inside a `let` binding.
+When a source file is passed to the OCaml compiler, it parses the textual
+source code into a more structured data type known as an Abstract Syntax Tree
+(AST).  The parsing logic is implemented in OCaml itself using the techniques
+described earlier in [xref](#parsing-with-ocamllex-and-menhir).  The lexer and
+parser rules can be found in the `parsing` directory in the source
+distribution.
+
+The compiler emits a *syntax error* if it fails to convert the source code into
+an AST.  Here's an example syntax error that we obtain by using the `module`
+keyword incorrectly inside a `let` binding.
 
 ```ocaml
 (* broken_module.ml *)
@@ -138,7 +143,19 @@ let _ =
   ()
 ```
 
-The fixed version of this locally opens the `module` correctly.
+This fails because the `module A = B` syntax must be wrapped in a `let` binding
+unless it's a top-level phrase.  Parsing immediately eliminates code which
+doesn't match basic syntactic requirements, so the first example will result in
+a syntax error when we run the OCaml compiler on it. 
+
+```console
+$ ocamlc -c broken_module.ml 
+File "broken_module.ml", line 3, characters 2-8:
+Error: Syntax error
+```
+
+The fixed version of this source code creates the `MyString` module correctly
+via a local open, and compiles successfully.
 
 ```ocaml
 (* fixed_module.ml *)
@@ -147,26 +164,15 @@ let _ =
   ()
 ```
 
-Parsing immediately eliminates code which doesn't match basic syntactic
-requirements, so the first example will result in a syntax error when we run
-the OCaml compiler on it. 
-
-```console
-$ ocamlc -c broken_module.ml 
-File "broken_module.ml", line 3, characters 2-8:
-Error: Syntax error
-$ ocamlc -c fixed_module.ml 
-```
-
 The syntax error points to the line and character number of the first token
-that couldn't be parsed.  In the broken example, the `module` keyword
-shouldn't be encountered at that point in the `let` binding, so the error
-location information is correct.
+that couldn't be parsed.  In the broken example the `module` keyword isn't a
+valid token at that point in parsing, so the error location information is
+correct.
 
 ### Formatting source code with `ocp-indent`
 
-Sadly, syntax errors do get more inaccurate sometimes, particularly in large
-codebases. Try to spot the deliberate error in the following function
+Sadly, syntax errors do get more inaccurate sometimes depending on the nature
+of your mistake.  Try to spot the deliberate error in the following function
 definitions.
 
 ```ocaml
@@ -187,7 +193,7 @@ let _ =
   ()
 ```
 
-When you compile this file, you'll get a syntax error.
+When you compile this file you'll get a syntax error.
 
 ```console
 $ ocamlc -c follow_on_function.ml
@@ -199,13 +205,13 @@ The line number in the error points to the end of the `add_and_print` function,
 but the actual error is at the end of the *first* function definition. There's
 an extra semicolon at the end of the first definition that causes the second
 definition to become part of the first `let` binding.  This eventually results
-in a syntax error in the second function.
+in a parsing error at the very end of the second function.
 
 This class of bug (due to a single errant character) can be hard to spot in a
-large body of code. Luckily, there's a great tool available in OPAM called
-`ocp-indent` that applies structured indenting rules to your source code. This
-not only beautifies your code layout, but it also works with partially
-written code and makes this syntax error much more obvious.
+large body of code. Luckily, there's a great tool in OPAM called `ocp-indent`
+that applies structured indenting rules to your source code on a line-by-line
+basis. This not only beautifies your code layout, but it also makes this syntax
+error much easier to locate.
 
 Let's run our erronous file through `ocp-indent` and see how it processes it.
 
@@ -231,8 +237,8 @@ let _ =
 
 The `add_and_print` definition has been indented as if it were part of the
 first `concat_and_print` definition, and the errant semicolon is now much
-easier to spot.  If we remove that semicolon, then the result is exactly what
-we expect.
+easier to spot.  We just need to remove that semicolon and re-run `ocp-indent`
+to verify that the syntax is correct.
 
 ```console
 $ ocp-indent follow_on_function_fixed.ml 
@@ -251,15 +257,16 @@ let _ =
   let _ = add_and_print 1 2 in
   let _ = concat_and_print "a" "b" in
   ()
+
 $ ocamlc -i follow_on_function_fixed.ml 
 val concat_and_print : string -> string -> string
 val add_and_print : int -> int -> int
 ```
 
-The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) has details
-on how to integrate it with your favourite editor.  All the Core libraries are
-formatted by `ocp-indent`, so it's a good idea to match this style when you
-publish your own open-source project online.
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
+how to integrate it with your favourite editor.  All the Core libraries are
+formatted using it to ensure consistency, and it's a good idea to do this
+before publishing your own source code online.
 
 ### Generating documentation via `ocamldoc`
 
