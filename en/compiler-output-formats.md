@@ -63,23 +63,23 @@ The overall compilation pipeline looks like this:
         | elimination of modules and classes
         v
      Lambda
-      /  \
-     /    \ closure conversion, inlining, uncurrying,
-    v      \  data representation strategy
- Bytecode   \
-    |        +-----+
-    |             Cmm
-    |js_of_ocaml   |
-    |              | code generation
-    |              v
- Javascript     Assembly code
+      /   \
+     /     \ closure conversion, inlining, uncurrying,
+    v       \  data representation strategy
+ Bytecode    \
+    |         +-----+
+    |              Cmm
+    |js_of_ocaml    |
+    |               | code generation
+    |               v
+ Javascript      Assembly code
 ```
 
-Notice that the pipeline branches towards the end. This is because OCaml has
-multiple compiler frontends that re-use the early stages of compilation, but
-produce very different final outputs.  The bytecode interpreter is portable and
-lightweight (and can be transformed into Javascript), whereas the native code
-compiler generates specialized native code binaries suitable for
+Notice that the pipeline branches towards the end. OCaml has multiple compiler
+frontends that re-use the early stages of compilation, but produce very
+different final outputs.  The *bytecode interpreter* is portable and
+lightweight (it can even be transformed into Javascript), whereas the native
+code compiler generates specialized executable binaries suitable for
 high-performance applications.
 
 <sidebar>
@@ -93,8 +93,26 @@ chapter.  The source code is available from multiple places:
 * A Subversion anonymous mirror of the main development sources available on the [development resources](http://caml.inria.fr/ocaml/anonsvn.en.html) page online.
 * A Git mirror of the Subversion repository with all the history and development branches included, browsable online at [Github](https://github.com/ocaml/ocaml).
 
-Once you've checked out a copy of the source tree, it has a few sub-directories
-(TODO: describe depending on the contents below).
+The source tree is split up into sub-directories.  The core compiler consists of:
+
+* `config/`: configuration directives to tailor OCaml for your operating system and architecture.
+* `bytecomp/` and `byterun/`: byte-code compiler and runtime, including the garbage collector.
+* `asmcomp/` and `asmrun/`: native-code compiler and runtime.  The native runtime symlinks many modules from the `byterun` directory to share code, most notably the garbage collector.
+* `parsing/`: the OCaml lexer, parser and libraries for manipulating them.
+* `typing/`: the static type checking implementation and type definitions.
+* `camlp4/`: the source code macro preprocessor.
+* `driver/`: command-line interfaces for the compiler tools.
+
+There are a number of tools and scripts also built alongside the core compiler:
+
+* `debugger/`: the interactive byte-code debugger.
+* `toplevel/`: interactive top-level console.
+* `emacs/`: a *caml-mode* for the Emacs editor.
+* `stdlib/`: the compiler standard library, including the `Pervasives` module.
+* `ocamlbuild/`: build system that automates common OCaml compilation modes.
+* `otherlibs/`: optional libraries such as the Unix and graphics modules.
+* `tools/`: command-line utilities such as `ocamldep` that are installed with the compiler.
+* `testsuite/`: regression tests for the core compiler.
 
 </sidebar>
  
