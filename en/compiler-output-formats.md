@@ -737,7 +737,7 @@ case, just recompile with a clean source tree.
 ### Separate compilation and module search paths
 
 Modules are most useful for large applications which consist of many files (or
-"compilation units"). Modules let each file be compiled separately, thus
+*compilation units*). Modules let each file be compiled separately, thus
 minimizing recompilation after changes.  Compilation units are simply special
 cases of OCaml modules and signatures, and the relationship between the units
 can be explained in terms of the module system.
