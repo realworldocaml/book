@@ -307,10 +307,10 @@ let what_is_the_weather_in location =
   | `California -> Sun
 ```
 
-The `ocamldoc` comments are distinguished by beginning with the double asterix,
-with formatting conventions within the comment to mark metadata (most notably,
-the `@tag` fields to mark specific properties such as the author of that
-section of code).
+The `ocamldoc` comments are distinguished by beginning with the double asterix.
+There are formatting conventions for the contents of the comment to mark
+metadata.  For instance, the `@tag` fields mark specific properties such as the
+author of that section of code.
 
 Try compiling the HTML documentation and UNIX man pages by running `ocamldoc`
 over the source file.
