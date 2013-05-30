@@ -23618,11 +23618,12 @@ Error: This expression has type &lt; id : 'a; .. &gt;
       <title>Separate compilation and module search paths</title>
       <para>
         Modules are most useful for large applications which consist of
-        many files (or &quot;compilation units&quot;). Modules let each
-        file be compiled separately, thus minimizing recompilation after
-        changes. Compilation units are simply special cases of OCaml
-        modules and signatures, and the relationship between the units
-        can be explained in terms of the module system.
+        many files (or <emphasis>compilation units</emphasis>). Modules
+        let each file be compiled separately, thus minimizing
+        recompilation after changes. Compilation units are simply
+        special cases of OCaml modules and signatures, and the
+        relationship between the units can be explained in terms of the
+        module system.
       </para>
       <para>
         Create a file called <literal>alice.ml</literal> with the
@@ -23660,9 +23661,9 @@ end
       <para>
         The type checker needs to resolve such external module
         references into concrete structures and signatures in order to
-        unify types consistently across module boundaries. It does this
-        by searching a list of directories for a compiled interface file
-        matching that module's name. For example, it will look for
+        unify types across module boundaries. It does this by searching
+        a list of directories for a compiled interface file matching
+        that module's name. For example, it will look for
         <literal>alice.cmi</literal> and <literal>bob.cmi</literal> on
         the search path, and use the first ones it encounters as the
         interfaces for <literal>Alice</literal> and
@@ -23845,44 +23846,45 @@ $ ocamlc -dtypedtree typedef.m
         this.
       </para>
     </sect2>
-    <sect2 id="the-untyped-lambda-form">
-      <title>The untyped lambda form</title>
+  </sect1>
+  <sect1 id="the-untyped-lambda-form">
+    <title>The untyped lambda form</title>
+    <para>
+      Once OCaml has passed the type checking stage, it can stop
+      emitting syntax and type errors and begin the process of compiling
+      the well-formed modules into executable code.
+    </para>
+    <para>
+      The next stage eliminates all the static type information into a
+      simpler intermediate <emphasis>lambda form</emphasis>. The lambda
+      form discards higher-level constructs such as modules and objects
+      and replaces them with simpler values such as records and function
+      pointers. Pattern matches are also analyzed and compiled into
+      highly optimized automata.
+    </para>
+    <para>
+      The lambda form is the key stage that discards the OCaml type
+      information and maps the source code to the runtime memory model
+      described in
+      <xref linkend="memory-representation-of-values"/>. This
+      stage also performs some optimizations, most notably converting
+      pattern match statements into more optimized but low-level
+      statements.
+    </para>
+    <sect2 id="pattern-matching-optimization">
+      <title>Pattern matching optimization</title>
       <para>
-        Once OCaml has passed the type checking stage, it can stop
-        emitting syntax and type errors and begin the process of
-        compiling the well-formed modules into executable code.
+        The compiler dumps the lambda form in an s-expression syntax if
+        you add the <literal>-dlambda</literal> directive to the
+        command-line. Let's use this to learn more about how the OCaml
+        pattern matching engine works by building three different
+        pattern matches and comparing their lambda forms.
       </para>
       <para>
-        The next stage eliminates all the static type information into a
-        simpler intermediate <emphasis>lambda form</emphasis>. The
-        lambda form discards higher-level constructs such as modules and
-        objects and replaces them with simpler values such as records
-        and function pointers. Pattern matches are also analyzed and
-        compiled into highly optimized automata.
+        Let's start by creating a straightforward exhaustive pattern
+        match using normal variants.
       </para>
-      <para>
-        The lambda form is the key stage that discards the OCaml type
-        information and maps the source code to the runtime memory model
-        described in
-        <xref linkend="memory-representation-of-values"/>.
-        This stage also performs some optimizations, most notably
-        converting pattern match statements into more optimized but
-        low-level statements.
-      </para>
-      <sect3 id="pattern-matching-optimization">
-        <title>Pattern matching optimization</title>
-        <para>
-          The compiler dumps the lambda form in an s-expression syntax
-          if you add the <literal>-dlambda</literal> directive to the
-          command-line. Let's use this to learn more about how the OCaml
-          pattern matching engine works by building three different
-          pattern matches and comparing their lambda forms.
-        </para>
-        <para>
-          Let's start by creating a straightforward exhaustive pattern
-          match using normal variants.
-        </para>
-        <programlisting language="ocaml">
+      <programlisting language="ocaml">
 (* pattern_monomorphic_exhaustive.ml *)
 type t = | Alice | Bob | Charlie | David
 
@@ -23893,10 +23895,10 @@ let test v =
   | Charlie -&gt; 102
   | David   -&gt; 103
 </programlisting>
-        <para>
-          The lambda output for this code looks like this.
-        </para>
-        <programlisting>
+      <para>
+        The lambda output for this code looks like this.
+      </para>
+      <programlisting>
 $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
 (setglobal Pattern_monomorphic_exhaustive!
   (let
@@ -23909,52 +23911,52 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
           case int 3: 103)))
     (makeblock 0 test/1013)))
 </programlisting>
-        <para>
-          It's not important to understand every detail of this internal
-          form, but some interesting points are:
-        </para>
-        <itemizedlist>
-          <listitem>
-            <para>
-              There are no mention of modules or types any more. Global
-              values are created via <literal>setglobal</literal> and
-              OCaml values are constructed by
-              <literal>makeblock</literal>. The blocks are the runtime
-              values you should remember from
-              <xref linkend="memory-representation-of-values"/>.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              The pattern match has turned into a switch case that jumps
-              to the right case depending on the header tag of
-              <literal>v</literal>. Recall that variants without
-              parameters are stored in memory as integers in the order
-              which they appear. The pattern matching engine knows this
-              and has transformed the pattern into an efficient jump
-              table.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              Values are addressed by a unique name that distinguished
-              shadowed values by appending a number (e.g.
-              <literal>v/1014</literal>). The type safety checks in the
-              earlier phase ensure that these low-level accesses never
-              violate runtime memory safety, so this layer doesn't do
-              any dynamic checks. Unwise use of unsafe features such as
-              the <literal>Obj.magic</literal> module can still easily
-              induce crashes at this level.
-            </para>
-          </listitem>
-        </itemizedlist>
-        <para>
-          The first pattern match is <emphasis>exhaustive</emphasis>, so
-          there are no other cases that the comipler needed to worry
-          about. What happens if we make the same code use an incomplete
-          pattern match?
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        It's not important to understand every detail of this internal
+        form, but some interesting points are:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            There are no mention of modules or types any more. Global
+            values are created via <literal>setglobal</literal> and
+            OCaml values are constructed by
+            <literal>makeblock</literal>. The blocks are the runtime
+            values you should remember from
+            <xref linkend="memory-representation-of-values"/>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The pattern match has turned into a switch case that jumps
+            to the right case depending on the header tag of
+            <literal>v</literal>. Recall that variants without
+            parameters are stored in memory as integers in the order
+            which they appear. The pattern matching engine knows this
+            and has transformed the pattern into an efficient jump
+            table.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Values are addressed by a unique name that distinguished
+            shadowed values by appending a number (e.g.
+            <literal>v/1014</literal>). The type safety checks in the
+            earlier phase ensure that these low-level accesses never
+            violate runtime memory safety, so this layer doesn't do any
+            dynamic checks. Unwise use of unsafe features such as the
+            <literal>Obj.magic</literal> module can still easily induce
+            crashes at this level.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        The first pattern match is <emphasis>exhaustive</emphasis>, so
+        there are no other cases that the comipler needed to worry
+        about. What happens if we make the same code use an incomplete
+        pattern match?
+      </para>
+      <programlisting language="ocaml">
 (* pattern_monomorphic_incomplete.ml *)
 type t = | Alice | Bob | Charlie | David
 
@@ -23964,10 +23966,10 @@ let test v =
   | Bob     -&gt; 101
   | _       -&gt; 102
 </programlisting>
-        <para>
-          The lambda output for this code is now quite different.
-        </para>
-        <programlisting>
+      <para>
+        The lambda output for this code is now quite different.
+      </para>
+      <programlisting>
 $ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml 
 (setglobal Pattern_monomorphic_incomplete!
   (let
@@ -23975,23 +23977,23 @@ $ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml
        (function v/1014 (if (!= v/1014 1) (if (!= v/1014 0) 102 100) 101)))
     (makeblock 0 test/1013)))
 </programlisting>
-        <para>
-          The compiler has now reverted to testing the value as a set of
-          nested conditionals. The lambda code above checks to see if
-          the value is <literal>Alice</literal>, then if it's
-          <literal>Bob</literal>, and finally falls back to the default
-          <literal>102</literal> return value for everything else. Using
-          exhaustive pattern matches is thus a better coding style at
-          several levels: it rewards you with more useful compile-time
-          warnings when you modify type definitions
-          <emphasis>and</emphasis> generates more efficient runtime code
-          too.
-        </para>
-        <para>
-          Finally, let's look at the same example with polymorphic
-          variants instead of normal variants.
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        The compiler has now reverted to testing the value as a set of
+        nested conditionals. The lambda code above checks to see if the
+        value is <literal>Alice</literal>, then if it's
+        <literal>Bob</literal>, and finally falls back to the default
+        <literal>102</literal> return value for everything else. Using
+        exhaustive pattern matches is thus a better coding style at
+        several levels: it rewards you with more useful compile-time
+        warnings when you modify type definitions
+        <emphasis>and</emphasis> generates more efficient runtime code
+        too.
+      </para>
+      <para>
+        Finally, let's look at the same example with polymorphic
+        variants instead of normal variants.
+      </para>
+      <programlisting language="ocaml">
 (* pattern_polymorphic.ml *)
 let test v =
   match v with
@@ -24000,10 +24002,10 @@ let test v =
   | `Charlie -&gt; 102
   | `David   -&gt; 103
 </programlisting>
-        <para>
-          The lambda form for this is the most inefficient result yet.
-        </para>
-        <programlisting>
+      <para>
+        The lambda form for this is the most inefficient result yet.
+      </para>
+      <programlisting>
 $ ocamlc -dlambda -c pattern_polymorphic.ml 
 (setglobal Pattern_polymorphic!
   (let
@@ -24013,27 +24015,26 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml
            (if (&gt;= v/1009 3306965) 101 103))))
     (makeblock 0 test/1008)))
 </programlisting>
-        <para>
-          We mentioned earlier in <xref linkend="variants"/>
-          that pattern matching over polymorphic variants is slightly
-          less efficient, and it should be clearer why this is the case
-          now. Polymorphic variants have a runtime value that's
-          calculated by hashing the variant name, and so the compiler
-          just tests each of these possible values in sequence.
-        </para>
-      </sect3>
-      <sect3 id="benchmarking-different-pattern-matching-implementations">
-        <title>Benchmarking different pattern matching
-        implementations</title>
-        <para>
-          Let's benchmark these three pattern matching techniques to
-          quantify their runtime costs better. The
-          <literal>Core_bench</literal> module runs the tests thousands
-          of times and also calculates statistical variance of the
-          results. You'll need to
-          <literal>opam install core_bench</literal> to get the library.
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        We mentioned earlier in <xref linkend="variants"/>
+        that pattern matching over polymorphic variants is slightly less
+        efficient, and it should be clearer why this is the case now.
+        Polymorphic variants have a runtime value that's calculated by
+        hashing the variant name, and so the compiler just tests each of
+        these possible values in sequence.
+      </para>
+    </sect2>
+    <sect2 id="benchmarking-pattern-matching-implementations">
+      <title>Benchmarking pattern matching implementations</title>
+      <para>
+        Let's benchmark these three pattern matching techniques to
+        quantify their runtime costs better. The
+        <literal>Core_bench</literal> module runs the tests thousands of
+        times and also calculates statistical variance of the results.
+        You'll need to <literal>opam install core_bench</literal> to get
+        the library.
+      </para>
+      <programlisting language="ocaml">
 (* pattern.ml: benchmark different pattern matching styles *)
 open Core.Std
 open Core_bench.Std
@@ -24083,12 +24084,12 @@ let () =
   |&gt; Bench.make_command
   |&gt; Command.run
 </programlisting>
-        <para>
-          Building and executing this example will run for around 30
-          seconds by default, and you'll see the results summarised in a
-          neat table.
-        </para>
-        <programlisting>
+      <para>
+        Building and executing this example will run for around 30
+        seconds by default, and you'll see the results summarised in a
+        neat table.
+      </para>
+      <programlisting>
 $ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
 Estimated testing time 30s (change using -quota SECS).
 ┌────────────────────────────────┬───────────┬─────────────┬────────────┐
@@ -24099,50 +24100,47 @@ Estimated testing time 30s (change using -quota SECS).
 │ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
 └────────────────────────────────┴───────────┴─────────────┴────────────┘
 </programlisting>
-        <para>
-          These numbers confirm our earlier performance hypothesis
-          obtained from inspecting the lambda code. The shortest running
-          time comes from the exhaustive pattern match and polymorphic
-          variant pattern matching is the slowest. There isn't a hugely
-          significant difference in these examples, but you can use the
-          same techniques to peer into the innards of your own source
-          code and narrow down any performance hotspots.
-        </para>
-        <para>
-          The lambda form is primarily a stepping stone to the bytecode
-          executable format that we'll cover next. It's often easier to
-          look at the textual output from this stage than to wade
-          through the native assembly code from compiled executables.
-        </para>
-        <note>
-        <title>
-        Learning more about pattern matching compilation
-        </title>
-        <para>
-          Pattern matching is a fundamental part of OCaml programming.
-          You'll often encounter deeply nested pattern matches over
-          complex data structures in real code. A good paper that
-          describes the fundamental algorithms implemented in OCaml is
-          the
-          <ulink url="http://dl.acm.org/citation.cfm?id=507641">&quot;Optimizing
-          pattern matching&quot;</ulink> ICFP 2001 paper by Fabrice Le
-          Fessant and Luc Maranget.
-        </para>
-        <para>
-          The paper describes the backtracking algorithm used in
-          classical pattern matching compilation, and also several
-          OCaml-specific optimizations such as the use of exhaustiveness
-          information and control flow optimizations via static
-          exceptions.
-        </para>
-        <para>
-          It's not essential that you understand all of this just to use
-          pattern matching of course, but it'll give you insight as to
-          why pattern matching is such a lightweight language construct
-          to use in OCaml code.
-        </para>
-        </note>
-      </sect3>
+      <para>
+        These numbers confirm our earlier performance hypothesis
+        obtained from inspecting the lambda code. The shortest running
+        time comes from the exhaustive pattern match and polymorphic
+        variant pattern matching is the slowest. There isn't a hugely
+        significant difference in these examples, but you can use the
+        same techniques to peer into the innards of your own source code
+        and narrow down any performance hotspots.
+      </para>
+      <para>
+        The lambda form is primarily a stepping stone to the bytecode
+        executable format that we'll cover next. It's often easier to
+        look at the textual output from this stage than to wade through
+        the native assembly code from compiled executables.
+      </para>
+      <note>
+      <title>
+      Learning more about pattern matching compilation
+      </title>
+      <para>
+        Pattern matching is a fundamental part of OCaml programming.
+        You'll often encounter deeply nested pattern matches over
+        complex data structures in real code. A good paper that
+        describes the fundamental algorithms implemented in OCaml is the
+        <ulink url="http://dl.acm.org/citation.cfm?id=507641">&quot;Optimizing
+        pattern matching&quot;</ulink> ICFP 2001 paper by Fabrice Le
+        Fessant and Luc Maranget.
+      </para>
+      <para>
+        The paper describes the backtracking algorithm used in classical
+        pattern matching compilation, and also several OCaml-specific
+        optimizations such as the use of exhaustiveness information and
+        control flow optimizations via static exceptions.
+      </para>
+      <para>
+        It's not essential that you understand all of this just to use
+        pattern matching of course, but it'll give you insight as to why
+        pattern matching is such a lightweight language construct to use
+        in OCaml code.
+      </para>
+      </note>
     </sect2>
   </sect1>
   <sect1 id="generating-portable-bytecode">
