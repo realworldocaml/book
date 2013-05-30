@@ -270,17 +270,17 @@ before publishing your own source code online.
 
 ### Generating documentation via `ocamldoc`
 
-Whitespace and source code comments are removed during parsing and aren't
-significant in determining the semantics of the program for compilation
-purposes. However, other tools in the OCaml distribution can interpret them for
-their own ends.
+Whitespace and source code comments aren't significant in determining the
+semantics of the program, and are removed during the parsing process.  However,
+other tools in the OCaml distribution can interpret comments for their own
+ends.
 
-The `ocamldoc` tool looks for specially formatted comments in the source code
-to generate documentation bundles. These comments are combined with the
-function definitions and signatures, and output as structured documentation in
-a variety of formats. `ocamldoc` support generating HTML pages, LaTeX and PDF
-documents, UNIX manual pages, and even module dependency graphs that can be
-viewed using [Graphviz](http://www.graphviz.org).
+The `ocamldoc` tool uses specially formatted comments in the source code to
+generate documentation bundles. These comments are combined with the function
+definitions and signatures and output as structured documentation in a variety
+of formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual
+pages and even module dependency graphs that can be viewed using
+[Graphviz](http://www.graphviz.org).
 
 Here's a sample of some source code that's been annotated with `ocamldoc`-style
 comments.
