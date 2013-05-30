@@ -425,6 +425,11 @@ to load it every time you start `utop`, by adding this to it:
 #require "core.top"
 #require "core_extended"
 #require "async"
+#require "sexplib.syntax"
+#require "fieldslib.syntax"
+#require "variantslib.syntax"
+#require "comparelib.syntax"
+#require "bin_prot.syntax"
 open Core.Std
 ```
 
