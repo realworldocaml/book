@@ -429,8 +429,7 @@ yourself to see the transformation in action.
 
 The `utop` top-level can run the phrases that you type through `camlp4`
 automatically. You should have at least these lines in your `~/.ocamlinit` file
-in your home directory. The contents of this file are automatically executed
-every time you run `utop`.  See [xref](#installation) for more details.
+in your home directory (see [xref](#installation) for more information).
 
 ```
 #use "topfind"
