@@ -734,19 +734,75 @@ case, just recompile with a clean source tree.
 
 </sidebar>
 
-### Module search paths
+### Separate compilation and module search paths
 
-An OCaml module refers to 
+Modules are most useful for large applications which consist of many files (or
+"compilation units"). Modules let each file be compiled separately, thus
+minimizing recompilation after changes.  Compilation units are simply special
+cases of OCaml modules and signatures, and the relationship between the units
+can be explained in terms of the module system.
 
-TODO explain module search path and `-I` here.
+Create a file called `alice.ml` with the following contents.
+
+```ocaml
+(* alice.ml *)
+let friends = [ Bob.name ]
+```
+
+and a corresponding signature file.
+
+```ocaml
+(* alice.mli *)
+val friends : Bob.t list
+```
+
+These two files are exactly analogous to including this code directly in another
+module that references `Alice`.
+
+```ocaml
+module Alice : sig
+  val friends : Bob.t list
+end = struct
+  let friends = [ Bob.name ]
+end
+```
+
+However, `Alice` also has a reference to another module `Bob`, which must
+contain at least a `Bob.name` value and define a `Bob.t` type.
+
+The type checker needs to resolve such external module references into concrete
+structures and signatures in order to unify types consistently across module
+boundaries.  It does this by searching a list of directories for a compiled
+interface file matching that module's name.  For example, it will look for
+`alice.cmi` and `bob.cmi` on the search path, and use the first ones it
+encounters as the interfaces for `Alice` and `Bob`.
+
+You can set the search path by adding the `-I` flag to the compiler
+command-line.  This can get complex when you have lots of libraries, and is the
+reason why the `ocamlfind` frontend to the compiler exists.  OCamlfind
+automates the process of turning third-party package names into concrete `-I`
+flags that are added to the compiler invocation.
+
+By default, only the current directory and the OCaml standard library will be
+searched for `cmi` files.  The `Pervasives` module from the standard library
+will also be opened by default in every compilation unit.  The standard library
+location is obtained by running `ocamlc -where`, and can be overridden by
+setting the `CAMLLIB` environment variable.  Needless to say, don't override
+the default unless you have a good reason to, such as setting up a
+cross-compilation environment.
 
 <sidebar>
 <title>Inspecting compilation units with `ocamlobjinfo`</title>
 
-Recall from [xref](#files-modules-and-programs) that `mli` files are optional.
-If you don't supply an explicit signature, then the inferred output from the
-module implementation is used instead.  The compiled version of the signature
-is stored in a filename ending with `cmi`.
+For separate compilation to be sound, we need to ensure that all the `cmi`
+files used to type-check a module are the same across compilation runs.  If
+they vary, this raises the possibility of two modules checking different type
+signature for a common module with the same name.  This in turn lets the
+program completely violate the static type system and can lead to memory
+corruption and crashes.
+
+OCaml guards against this by recording a CRC checksum in every `cmi`.  Let's
+examine our earlier `typedef.ml` more closely.
 
 ```console
 $ ocamlc -c typedef.ml
@@ -758,25 +814,31 @@ Interfaces imported:
 	65014ccc4d9329a2666360e6af2d7352	Pervasives
 ```
 
-The `ocamlobjinfo` command examines the compiled interface and displays what
-other compilation units it depends on.  In this case, we don't use any external
+`ocamlobjinfo` examines the compiled interface and displays what other
+compilation units it depends on.  In this case, we don't use any external
 modules other than `Pervasives`.  Every module depends on `Pervasives` by
 default, unless you use the `-nopervasives` flag (this is an advanced use-case,
-and you shouldn't need it in normal use).
+and you shouldn't normally need it).
 
 The long alphanumeric identifier beside each module name is a hash calculated
-from all the types and values exported from that compilation unit.  This is
-used during type-checking and linking to check that all of the compilation
-units have been compiled consistently against each other.  A difference in the
-hashes means that a compilation unit with the same module name may have
-conflicting type signatures in different modules.  This violates static type
-safety if these conflicting instances are ever linked together, as every
-well-typed value has precisely one type in OCaml.
+from all the types and values exported from that compilation unit.  It's used
+during type-checking and linking to ensure that all of the compilation units
+have been compiled consistently against each other.  A difference in the hashes
+means that a compilation unit with the same module name may have conflicting
+type signatures in different modules.  The compiler will reject such programs
+with an error similar to this:
 
-This hash check ensures that separate compilation remains type safe all the way
-up to the final link phase.  Each source file is type checked separately, but
-the hash of the signature of any external modules is recorded with the compiled
-signature.
+```console
+File "foo.ml", line 1, characters 0-1:
+Error: The files /home/build/bar.cmi
+       and /usr/lib/ocaml/map.cmi make inconsistent assumptions
+       over interface Map
+```
+
+This hash check is very conservative, but ensures that separate compilation
+remains type-safe all the way up to the final link phase.  Your build system
+should ensure that you never see the error messages above, but if you do run
+into it, just clean out your intermediate files and recompile from scratch.
 
 </sidebar>
 
