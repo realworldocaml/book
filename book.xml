@@ -23409,67 +23409,167 @@ val compare : t -&gt; t -&gt; int
       </sect3>
     </sect2>
   </sect1>
-  <sect1 id="the-type-checking-phase">
-    <title>The type checking phase</title>
+  <sect1 id="static-type-checking">
+    <title>Static type checking</title>
     <para>
-      TODO: this section still needs a description of
-      <literal>-I</literal> and how the compiler finds
-      <literal>cmi</literal> files...
+      After obtaining a valid abstract syntax tree, the compiler then
+      verifies that the code obeys the rules of the static type system.
+      Code that is syntactically correct but misuses values is rejected
+      with an explanation of the problem.
     </para>
     <para>
-      After obtaining a valid parsed AST (with or without Camlp4) the
-      compiler must then check that the code obeys the rules of the
-      static type system. Code that is syntactically correct but misuses
-      values is rejected with an explanation of the problem at this
-      stage. We're not going to delve into the details of how
-      type-checking works here (the rest of the book covers that), but
-      rather how it fits in with the rest of the compilation process.
+      TODO: type inference / modules phases explanation?
     </para>
     <para>
-      Assuming that the source code is validly typed, the original AST
-      is transformed into a <emphasis>typed AST</emphasis>. This has the
-      same broad structure of the untyped AST, but syntactic phrases are
+      Type inference deduces OCaml types for all values in a module and
+      checks them for consistency against each other. Any
+      inconsistencies result in the compiler terminating with a type
+      error. If the type checking does succeed, the AST is replaced by a
+      <emphasis>typed abstract syntax tree</emphasis>. The typed AST has
+      the same broad structure as the untyped AST, but with phrases are
       replaced with typed variants instead.
     </para>
-    <para>
-      You can explore the type checking process very simply. Create a
-      file with a single type definition and value.
-    </para>
-    <programlisting language="ocaml">
+    <sect2 id="the-type-inference-process">
+      <title>The type inference process</title>
+      <para>
+        You can explore type inference very simply. Create a file with a
+        single type definition and value.
+      </para>
+      <programlisting language="ocaml">
 (* typedef.ml *)
 type t = Foo | Bar
 let v = Foo
 </programlisting>
-    <para>
-      Now run the compiler on this file to <emphasis>infer</emphasis> a
-      default type for the compilation unit. This will run the type
-      checking process on the compilation unit you specify.
-    </para>
-    <programlisting>
-$ ocamlc -i typedef.ml
-type t = Foo | Bar
-val v : t
+      <para>
+        Now run the compiler with the <literal>-i</literal> flag to
+        <emphasis>infer</emphasis> a default type for the compilation
+        unit. This will run the type checker on the compilation unit you
+        specify, but not compile it any further beyond the type checker.
+      </para>
+      <para>
+        <literal>console $ ocamlc -i typedef.ml type t = Foo | Bar val v : t</literal>
+        The output is the default signature for the module. It's often
+        useful to redirect this output to an <literal>mli</literal> file
+        to give you a starting signature to edit the external interface
+        without having to type it all in by hand.
+      </para>
+      <sidebar>
+      <title>
+      Enforcing principal typing
+      </title>
+      <para>
+        You can also pass a <literal>-principal</literal> flag to the
+        compiler to turn on a stricter <emphasis>principal type
+        checking</emphasis> mode. This detects &quot;risky&quot; uses of
+        type information to ensure that the type inference has a stable
+        result. A type is considered risky if the success or failure of
+        type inference depends on the order in which sub-expressions are
+        typed.
+      </para>
+      <para>
+        This only affects a limited number of language features:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            polymorphic methods.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            permuting the order of labeled arguments in a function from
+            their type definition.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            discarding optional labelled arguments.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The generalized algebraic data types (GADTs) present from
+            OCaml 4.0 onwards.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            automatic disambiguation of record field and constructor
+            names (since OCaml 4.1)
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Here's an example of principality warnings when used with
+        polymorphic methods.
+      </para>
+      <programlisting>
+$ utop -principal
+# type t = &lt; id: 'a. 'a -&gt; 'a &gt;;;
+type t = &lt; id : 'a. 'a -&gt; 'a &gt;
+
+# let f (x : t) = x, x#id;;  
+val f : t -&gt; t * ('a -&gt; 'a) = &lt;fun&gt;
+(* safe code: the type of x is known at all its use points *)
+
+# let f x = (x : t), x#id;;
+Warning 18: this use of a polymorphic method is not principal.
+val f : t -&gt; t * ('a -&gt; 'a) = &lt;fun&gt;
+(* unsafe code: the type is only known because typing goes from left to right *)
+
+# let f x = x#id, (x : t);;
+Error: This expression has type &lt; id : 'a; .. &gt;
+      but an expression was expected of type t
+      The universal variable 'a0 would escape its scope
+(* just exchanging the members of the pair causes a failure *)
 </programlisting>
-    <para>
-      The type checker has run and provided a default signature for the
-      module. It's often useful to redirect this output to an
-      <literal>mli</literal> file to give you a starting signature to
-      edit the external interface, without having to type it all in by
-      hand.
-    </para>
-    <sidebar>
-    <title>
-    Using <literal>ocamlobjinfo</literal> to inspect compilation units
-    </title>
-    <para>
-      Recall from <xref linkend="files-modules-and-programs"/>
-      that <literal>mli</literal> files are optional. If you don't
-      supply an explicit signature, then the inferred output from the
-      module implementation is used instead. The compiled version of the
-      signature is stored in a filename ending with
-      <literal>cmi</literal>.
-    </para>
-    <programlisting>
+      <para>
+        Ideally, all code should systematically use
+        <literal>-principal</literal>. It reduces variance in type
+        inference and provides the notion of a single known type.
+        However, there are drawbacks to this mode: type inference is
+        slower and the <literal>cmi</literal> files become larger. This
+        is generally only a problem if you use objects extensively,
+        which usually have larger type signature to cover all their
+        methods.
+      </para>
+      <para>
+        As a result, the suggested approach is to only compile with
+        <literal>-principal</literal> occasionally to check if your code
+        is compliant. If compiling in principal mode works, it is
+        guaranteed that the program will passing type checking in
+        non-principal mode too.
+      </para>
+      <para>
+        Bear in mind that the <literal>cmi</literal> files generated in
+        principal mode differ from the default mode. Try to ensure that
+        you compile your whole project with it activated. Getting the
+        files mixed up won't let you violate type safety, but can result
+        in the type checker failing unexpectedly very occasionally. In
+        this case, just recompile with a clean source tree.
+      </para>
+      </sidebar>
+      <sect3 id="the-module-search-path">
+        <title>The module search path</title>
+        <para>
+          TODO explain module search path and <literal>-I</literal>
+          here.
+        </para>
+        <sidebar>
+        <title>
+        Inspecting compilation units with
+        <literal>ocamlobjinfo</literal>
+        </title>
+        <para>
+          Recall from
+          <xref linkend="files-modules-and-programs"/> that
+          <literal>mli</literal> files are optional. If you don't supply
+          an explicit signature, then the inferred output from the
+          module implementation is used instead. The compiled version of
+          the signature is stored in a filename ending with
+          <literal>cmi</literal>.
+        </para>
+        <programlisting>
 $ ocamlc -c typedef.ml
 $ ocamlobjinfo typedef.cmi
 File typedef.cmi
@@ -23478,34 +23578,36 @@ Interfaces imported:
     559f8708a08ddf66822f08be4e9c3372    Typedef
     65014ccc4d9329a2666360e6af2d7352    Pervasives
 </programlisting>
-    <para>
-      The <literal>ocamlobjinfo</literal> command examines the compiled
-      interface and displays what other compilation units it depends on.
-      In this case, we don't use any external modules other than
-      <literal>Pervasives</literal>. Every module depends on
-      <literal>Pervasives</literal> by default, unless you use the
-      <literal>-nopervasives</literal> flag (this is an advanced
-      use-case, and you shouldn't need it in normal use).
-    </para>
-    <para>
-      The long alphanumeric identifier beside each module name is a hash
-      calculated from all the types and values exported from that
-      compilation unit. This is used during type-checking and linking to
-      check that all of the compilation units have been compiled
-      consistently against each other. A difference in the hashes means
-      that a compilation unit with the same module name may have
-      conflicting type signatures in different modules. This violates
-      static type safety if these conflicting instances are ever linked
-      together, as every well-typed value has precisely one type in
-      OCaml.
-    </para>
-    <para>
-      This hash check ensures that separate compilation remains type
-      safe all the way up to the final link phase. Each source file is
-      type checked separately, but the hash of the signature of any
-      external modules is recorded with the compiled signature.
-    </para>
-    </sidebar>
+        <para>
+          The <literal>ocamlobjinfo</literal> command examines the
+          compiled interface and displays what other compilation units
+          it depends on. In this case, we don't use any external modules
+          other than <literal>Pervasives</literal>. Every module depends
+          on <literal>Pervasives</literal> by default, unless you use
+          the <literal>-nopervasives</literal> flag (this is an advanced
+          use-case, and you shouldn't need it in normal use).
+        </para>
+        <para>
+          The long alphanumeric identifier beside each module name is a
+          hash calculated from all the types and values exported from
+          that compilation unit. This is used during type-checking and
+          linking to check that all of the compilation units have been
+          compiled consistently against each other. A difference in the
+          hashes means that a compilation unit with the same module name
+          may have conflicting type signatures in different modules.
+          This violates static type safety if these conflicting
+          instances are ever linked together, as every well-typed value
+          has precisely one type in OCaml.
+        </para>
+        <para>
+          This hash check ensures that separate compilation remains type
+          safe all the way up to the final link phase. Each source file
+          is type checked separately, but the hash of the signature of
+          any external modules is recorded with the compiled signature.
+        </para>
+        </sidebar>
+      </sect3>
+    </sect2>
     <sect2 id="examining-the-typed-syntax-tree">
       <title>Examining the typed syntax tree</title>
       <para>
