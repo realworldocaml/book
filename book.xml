@@ -22882,8 +22882,8 @@ let _ =
       <literal>module</literal> keyword isn't a valid token at that
       point in parsing, so the error location information is correct.
     </para>
-    <sect2 id="formatting-source-code-with-ocp-indent">
-      <title>Formatting source code with ocp-indent</title>
+    <sect2 id="formatting-source-code">
+      <title>Formatting source code</title>
       <para>
         Sadly, syntax errors do get more inaccurate sometimes depending
         on the nature of your mistake. Try to spot the deliberate error
@@ -22994,8 +22994,8 @@ val add_and_print : int -&gt; int -&gt; int
         publishing your own source code online.
       </para>
     </sect2>
-    <sect2 id="generating-documentation-via-ocamldoc">
-      <title>Generating documentation via OCamldoc</title>
+    <sect2 id="generating-documentation-from-interfaces">
+      <title>Generating documentation from interfaces</title>
       <para>
         Whitespace and source code comments are removed during parsing
         and aren't significant in determining the semantics of the
@@ -23098,8 +23098,8 @@ $ man -M man Example
       </itemizedlist>
       </tip>
     </sect2>
-    <sect2 id="preprocessing-with-camlp4">
-      <title>Preprocessing with Camlp4</title>
+    <sect2 id="preprocessing-source-code">
+      <title>Preprocessing source code</title>
       <para>
         One powerful feature in OCaml is the facility to extend the
         language grammar without having to modify the compiler. Camlp4
@@ -23203,18 +23203,18 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         dynamic behaviour. Instead, all code is simply generated at
         compile-time via Camlp4.
       </para>
-    </sect2>
-    <sect2 id="inspecting-camlp4-output">
-      <title>Inspecting Camlp4 output</title>
-      <para>
-        The syntax extensions accept an input AST and output a modified
-        one. If you're not familiar with the Camlp4 module in question,
-        how do you figure out what changes it's made to your code? The
-        obvious way is to read the documentation that accompanies the
-        extension. Another more direct approach is to use the top-level
-        to explore the extension's behaviour or run Camlp4 manually
-        yourself to see the transformation in action.
-      </para>
+      <sect3 id="inspecting-camlp4-output">
+        <title>Inspecting Camlp4 output</title>
+        <para>
+          The syntax extensions accept an input AST and output a
+          modified one. If you're not familiar with the Camlp4 module in
+          question, how do you figure out what changes it's made to your
+          code? The obvious way is to read the documentation that
+          accompanies the extension. Another more direct approach is to
+          use the top-level to explore the extension's behaviour or run
+          Camlp4 manually yourself to see the transformation in action.
+        </para>
+      </sect3>
       <sect3 id="using-camlp4-from-the-interactive-top-level">
         <title>Using Camlp4 from the interactive top-level</title>
         <para>
@@ -24029,8 +24029,8 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml
         these possible values in sequence.
       </para>
     </sect2>
-    <sect2 id="benchmarking-pattern-matching-implementations">
-      <title>Benchmarking pattern matching implementations</title>
+    <sect2 id="benchmarking-pattern-matching">
+      <title>Benchmarking pattern matching</title>
       <para>
         Let's benchmark these three pattern matching techniques to
         quantify their runtime costs better. The
@@ -24176,15 +24176,45 @@ Estimated testing time 30s (change using -quota SECS).
       stack and an accumulator to store values, and only has seven
       registers in total (the program counter, stack pointer,
       accumulator, exception and argument pointers, and environment and
-      global data). It implements around 140 opcodes which form the
-      OCaml program. The full details of the opcodes are available
-      <ulink url="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</ulink>.
+      global data).
     </para>
     <para>
       The big advantage of using <literal>ocamlc</literal> is
       simplicity, portability and compilation speed. The mapping from
       the lambda form to bytecode is straightforward, and this results
-      in predictable (but slow) execution speed.
+      in predictable (but slow) execution speed. <emphasis>TODO: more
+      about the conversion?</emphasis>
+    </para>
+    <para>
+      You can display the bytecode instructions in textual form via
+      <literal>-dinstr</literal>. Try this on one of our pattern
+      matching examples from earlier in the chapter.
+    </para>
+    <programlisting>
+$ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
+    branch L2
+L1: acc 0
+    switch 6 5 4 3/
+L6: const 100
+    return 1
+L5: const 101
+    return 1
+L4: const 102
+    return 1
+L3: const 103
+    return 1
+L2: closure L1, 0
+    push
+    acc 0
+    makeblock 1, 0
+    pop 1
+    setglobal Pattern_monomorphic_exhaustive!
+</programlisting>
+    <para>
+      There are around 140 instruction opcodes in total, with many being
+      optimizations for common operations such as function application
+      at a specific arity. You can find full details
+      <ulink url="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</ulink>.
     </para>
     <sect2 id="compiling-ocaml-bytecode">
       <title>Compiling OCaml bytecode</title>
@@ -24255,46 +24285,44 @@ $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
         be found in the
         <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html">manual</ulink>.
       </para>
-      <sect3 id="embedding-ocaml-bytecode-in-c-code">
-        <title>Embedding OCaml bytecode in C code</title>
-        <para>
-          A consequence of using the bytecode compiler is that the final
-          link phase must be performed by <literal>ocamlc</literal>.
-          However, you might sometimes want to embed your OCaml code
-          inside an existing C application. OCaml also supports this
-          mode of operation via the <literal>-output-obj</literal>
-          directive.
-        </para>
-        <para>
-          This mode causes <literal>ocamlc</literal> to output a C
-          object file that containing the bytecode for the OCaml part of
-          the program, as well as a <literal>caml_startup</literal>
-          function. All of the OCaml modules are linked into this object
-          file as bytecode, just as they would be for an executable.
-        </para>
-        <para>
-          This object file can then be linked with C code using the
-          standard C compiler, and only needs the bytecode runtime
-          library (which is installed as
-          <literal>libcamlrun.a</literal>). Creating an executable just
-          requires you to link the runtime library with the bytecode
-          object file. Here's an example to show how it all fits
-          together.
-        </para>
-        <para>
-          Create two OCaml source files that contain a single print
-          line.
-        </para>
-        <programlisting>
+    </sect2>
+    <sect2 id="embedding-ocaml-bytecode-in-c">
+      <title>Embedding OCaml bytecode in C</title>
+      <para>
+        A consequence of using the bytecode compiler is that the final
+        link phase must be performed by <literal>ocamlc</literal>.
+        However, you might sometimes want to embed your OCaml code
+        inside an existing C application. OCaml also supports this mode
+        of operation via the <literal>-output-obj</literal> directive.
+      </para>
+      <para>
+        This mode causes <literal>ocamlc</literal> to output a C object
+        file that containing the bytecode for the OCaml part of the
+        program, as well as a <literal>caml_startup</literal> function.
+        All of the OCaml modules are linked into this object file as
+        bytecode, just as they would be for an executable.
+      </para>
+      <para>
+        This object file can then be linked with C code using the
+        standard C compiler, and only needs the bytecode runtime library
+        (which is installed as <literal>libcamlrun.a</literal>).
+        Creating an executable just requires you to link the runtime
+        library with the bytecode object file. Here's an example to show
+        how it all fits together.
+      </para>
+      <para>
+        Create two OCaml source files that contain a single print line.
+      </para>
+      <programlisting>
 $ cat embed_me1.ml 
 let () = print_endline &quot;hello embedded world 1&quot;
 $ cat embed_me2.ml 
 let () = print_endline &quot;hello embedded world 2&quot;
 </programlisting>
-        <para>
-          Next, create a C file which will be your main entry point.
-        </para>
-        <programlisting language="c">
+      <para>
+        Next, create a C file which will be your main entry point.
+      </para>
+      <programlisting language="c">
 /* main.c */
 #include &lt;stdio.h&gt;
 #include &lt;caml/alloc.h&gt;
@@ -24311,19 +24339,19 @@ main (int argc, char **argv)
   return 0;
 }
 </programlisting>
-        <para>
-          Now compile the OCaml files into a standalone object file.
-        </para>
-        <programlisting>
+      <para>
+        Now compile the OCaml files into a standalone object file.
+      </para>
+      <programlisting>
 $ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
 </programlisting>
-        <para>
-          After this point, you no longer need the OCaml compiler, as
-          <literal>embed_out.o</literal> has all of the OCaml code
-          compiled and linked into a single object file. Compile an
-          output binary using gcc to test this out.
-        </para>
-        <programlisting>
+      <para>
+        After this point, you no longer need the OCaml compiler, as
+        <literal>embed_out.o</literal> has all of the OCaml code
+        compiled and linked into a single object file. Compile an output
+        binary using gcc to test this out.
+      </para>
+      <programlisting>
 $ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lcamlrun -ltermcap \
   -o final_out embed_out.o main.c
 $ ./final_out 
@@ -24332,16 +24360,16 @@ hello embedded world 1
 hello embedded world 2
 After calling OCaml
 </programlisting>
-        <para>
-          Once inconvenience with <literal>gcc</literal> is that you
-          need to specify the location of the OCaml library directory.
-          The OCaml compiler can actually handle C object and sources
-          directly. It passes these through to the system C compiler but
-          adds its standard directory and runtime on the way. You can
-          thus compile the previous object file much more simply with
-          <literal>ocamlc</literal>.
-        </para>
-        <programlisting>
+      <para>
+        Once inconvenience with <literal>gcc</literal> is that you need
+        to specify the location of the OCaml library directory. The
+        OCaml compiler can actually handle C object and sources
+        directly. It passes these through to the system C compiler but
+        adds its standard directory and runtime on the way. You can thus
+        compile the previous object file much more simply with
+        <literal>ocamlc</literal>.
+      </para>
+      <programlisting>
 $ ocamlc -o final_out2 embed_out.o main.c
 $ ./final_out2
 Before calling OCaml
@@ -24349,28 +24377,27 @@ hello embedded world 1
 hello embedded world 2
 After calling OCaml
 </programlisting>
-        <para>
-          You can inspect the commands that <literal>ocamlc</literal> is
-          invoking by adding <literal>-verbose</literal> to the command
-          line. You can even obtain the C source code to the
-          <literal>-output-obj</literal> result by specifying a
-          <literal>.c</literal> output file extension instead of the
-          <literal>.o</literal> we used earlier.
-        </para>
-        <programlisting>
+      <para>
+        You can inspect the commands that <literal>ocamlc</literal> is
+        invoking by adding <literal>-verbose</literal> to the command
+        line. You can even obtain the C source code to the
+        <literal>-output-obj</literal> result by specifying a
+        <literal>.c</literal> output file extension instead of the
+        <literal>.o</literal> we used earlier.
+      </para>
+      <programlisting>
 $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
 $ cat embed_out.c
 </programlisting>
-        <para>
-          Embedding OCaml code like this lets you write OCaml that
-          interfaces with any environment that works with a C compiler.
-          You can even cross back from the C code into OCaml by using
-          the <literal>Callback</literal> module to register named entry
-          points in the OCaml code. This is explained in detail in the
-          <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149">interfacing
-          with C</ulink> section of the OCaml manual.
-        </para>
-      </sect3>
+      <para>
+        Embedding OCaml code like this lets you write OCaml that
+        interfaces with any environment that works with a C compiler.
+        You can even cross back from the C code into OCaml by using the
+        <literal>Callback</literal> module to register named entry
+        points in the OCaml code. This is explained in detail in the
+        <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149">interfacing
+        with C</ulink> section of the OCaml manual.
+      </para>
     </sect2>
   </sect1>
   <sect1 id="native-code-generation">
