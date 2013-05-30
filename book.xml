@@ -22564,11 +22564,12 @@ struct custom_operations {
   <para>
     OCaml has a strong emphasis on static type safety and tries to
     reject source code that doesn't meet its requirements as early as
-    possible. The compiler does this by running through a series of
-    checks and transformations, beginning from the source code. Each
-    stage normally discards some information from the previous stage
-    until the final output is low-level assembly code that doesn't knows
-    anything about OCaml modules or objects.
+    possible. The compiler runs the source code through a series of
+    checks and transformations to accomplish this. Each stage performs
+    its job (e.g. type checking, optimization or code generation) and
+    discards some information from the previous stage. The final native
+    code output is low-level assembly code that doesn't know anything
+    about the OCaml modules or objects that the compiler started with.
   </para>
   <para>
     You don't have to do all this manually, of course. The OCaml
@@ -22577,8 +22578,8 @@ struct custom_operations {
     controlled by the command-line options your build system passes to
     them. Sometimes though, you'll need to dive into the toolchain to
     hunt down a bug or investigate a performance problem. This chapter
-    explains the compiler pipeline in more depth, and the tools you can
-    use to help visualise them.
+    explains the compiler pipeline in more depth, and the tools you need
+    to help visualise them.
   </para>
   <para>
     It's even possible to compile OCaml to run efficiently on foreign
@@ -22588,7 +22589,7 @@ struct custom_operations {
     chapter so you can experiment with them too.
   </para>
   <para>
-    In this chapter, you'll learn:
+    In this chapter, we'll cover the following topics:
   </para>
   <itemizedlist>
     <listitem>
