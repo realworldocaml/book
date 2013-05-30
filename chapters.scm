@@ -148,13 +148,6 @@
  (title "Understanding the Garbage Collector")
  (public true)
  )
-((part Advanced)
- (name "parsing-binary-protocols-with-bigarray")
- (file "bigarrays")
- (note "50% done, on Anil's stack")
- (title "Handling Binary Protocols with Bigarray")
- (public false)
- )
 ;; Part 4: APPENDIX
 
 ((part Appendix)
