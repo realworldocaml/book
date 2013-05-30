@@ -665,7 +665,7 @@ requiring any explicit type annotations.  The algorithm can deduce multiple
 types for an expression, and has the notion of a *principal type* that is the
 most general choice from the possible inferences.  Manual type annotations can
 always specialize the type explicitly, but the automatic inference selects the
-most general (or "principal") type.
+most general type unless told otherwise.
 
 OCaml does has some language extensions which strain the limits of principal
 type inference, but by and large most programs you write will never *require*
@@ -1150,7 +1150,7 @@ executables.
 <note>
 <title>Learning more about pattern matching compilation</title>
 
-Pattern matching is a fundamental part of OCaml programming. You'll often
+Pattern matching is an important part of OCaml programming. You'll often
 encounter deeply nested pattern matches over complex data structures in real
 code.  A good paper that describes the fundamental algorithms implemented in
 OCaml is the ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) ICFP 2001 paper by Fabrice
@@ -1174,7 +1174,7 @@ executable code.  The OCaml tool-chain branches into two separate compilers at
 this point.  We'll describe the the `ocamlc` bytecode compiler first, which
 consists of two pieces:
 
-* `ocamlc` compiles files into a simple bytecode that is a close mapping to the lambda form.
+* `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.
 * `ocamlrun` is a portable interpreter that executes the bytecode.
 
 `ocamlrun` is an interpreter that uses the OCaml stack and an accumulator to
@@ -1196,8 +1196,8 @@ program.  The order in which `.cmo` arguments are presented on the command line
 defines the order in which compilation units are initialized at runtime (recall
 that OCaml has no single `main` function like C does). 
 
-A typical OCaml library consists of multiple modules (and hence multiple `cmo`
-files).  `ocamlc` can combine these into a single `cma` bytecode archive by
+A typical OCaml library consists of multiple modules and hence multiple `cmo`
+files.  `ocamlc` can combine these into a single `cma` bytecode archive by
 using the `-a` flag. The objects in the library are linked as regular `cmo`
 files in the order specified when the library file was built.  However, if an
 object file within the library isn't referenced elsewhere in the program, it is
