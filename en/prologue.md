@@ -31,28 +31,28 @@ design.  These features include:
   based on how a value is used.  Available in Standard ML, F# and even modern
   C++11 via its `auto` keyword.
 
-Some of you will know and love these features, and others will be
-completely new to them.  Most of you will have seen _some_ of them in
-other languages that you've used.  As we'll demonstrate over the
-course of this book, it turns out that there is something
-transformative about having them all together and able to interact in
-a single language.  Despite their importance, these ideas have made
-only limited inroads into mainstream languages. And when they do
-arrive there, like higher-order functions in C# or parametric
-polymorphism in Java, it's typically in a limited and awkward form.
-The only languages that support these ideas well are statically-typed
-functional programming languages like OCaml, F#, Haskell, Scala and
-Standard ML.
+Some of you will know and love these features, and others will be completely
+new to them.  Most of you will have seen _some_ of them in other languages that
+you've used.  As we'll demonstrate over the course of this book, it turns out
+that there is something transformative about having them all together and able
+to interact in a single language.  Despite their importance, these ideas have
+made only limited inroads into mainstream languages and when they do arrive
+there, like higher-order functions in C# or parametric polymorphism in Java,
+it's typically in a limited and awkward form. The only languages that
+completely embody these ideas are statically-typed functional programming
+languages like OCaml, F#, Haskell, Scala and Standard ML.
 
 Among this worthy set of languages, OCaml stands apart because it manages to
 provide a great deal of power while remaining highly pragmatic. The compiler
 has a straightforward compilation strategy without excessive optimization
-passes, and the strict evaluation model makes runtime behaviour easy to
+passes, and its strict evaluation model makes runtime behaviour easy to
 predict.  The garbage collector is an incremental, precise implementation with
 no dynamic JIT compilation, and the runtime is simple and portable across
-platforms.  It is all of this that makes OCaml a great choice for programmers
-who want to step up to a better programming language, and at the same time want
-to get practical work done.
+platforms.
+
+It is all of this that makes OCaml a great choice for programmers who want to
+step up to a better programming language, and at the same time want to get
+practical work done.
 
 #### A brief history from the 1960s
 
@@ -94,7 +94,7 @@ usage, predictability and performance matters.
 A language on its own isn't enough.  You also need a rich set of libraries to
 base your applications on.  A common source of frustration for those learning
 OCaml is that the standard library that ships with the compiler doesn't provide
-a lot of features.  The standard library was actually developed for use within
+a lot of features.  This standard library was actually developed for use within
 the compiler itself, and by design covers only a small subset of the
 functionality you expect for more general-purpose use.
 
@@ -103,10 +103,11 @@ being written to supplement the compiler standard library, and this exactly
 what the Core distribution is.  Jane Street, a company that has been using
 OCaml for more than a decade, developed Core for its own internal use, but it
 was designed from the start with an eye towards being a general-purpose
-standard library, and has very broad applicability.  Core is also engineered
-with correctness, reliability and performance very much in mind.
+standard library, and has very broad applicability.  Like the OCaml language
+itself, Core is also engineered with correctness, reliability and performance
+in mind.
 
-Core is also distributed with syntax extensions which provide useful new
+Core is distributed with syntax extensions which provide useful new
 functionality to OCaml, and there are additional libraries such as the Async
 network communications library that extend the reach of Core into building
 complex distributed systems.  All of these libraries are distributed under a
@@ -114,36 +115,34 @@ liberal Apache 2 license to permit free use in hobby, academic and commercial
 settings.
 
 If you've learnt some OCaml before, this book may surprise you with some
-differences from your past experience.  The Core standard library redefines
-most of the standard modules to be much more consistent, and so you'll need to
-adapt older code.  We believe the Core model is worth learning; it's been
-successfully used on large, million-line codebases, and removes a big barrier
-to more widespread OCaml adoption.  There will always exist code that uses only
-the compiler standard library of course, but there are other online resources
-available to learn that.  Real World OCaml focuses on the techniques the
-authors have used in their personal experience to construct scalable, robust
-computer systems.
+differences from your past experience.  Core redefines most of the standard
+modules to be much more consistent, and so you'll need to adapt older code.  We
+believe the Core model is worth learning; it's been successfully used on large,
+million-line codebases  and removes a big barrier to more widespread OCaml
+adoption.  There will always exist code that uses only the compiler standard
+library of course, but there are other online resources available to learn
+that.  Real World OCaml focuses on the techniques the authors have used in
+their personal experience to construct scalable, robust computer systems.
 
 ### The OCaml Platform
 
-Core is comprehensive and effective standard library, but there's a
-lot more out there than Core.  A large community of programmers have
-been using OCaml since its first release in 1996 and have generated a
-lot of useful libraries and tools.  In Real World OCaml, we'll
-introduce some of these libraries for you to experiment with realistic
-examples.  The installation and management of these third-party
-libraries is made much easier via a package management tool known as
-OPAM.  We'll explain more about OPAM as the book unfolds, but it forms
-the basis of the Platform, which is a set of tools and libraries that,
-along with the OCaml compiler, let you build realistic applications
-quickly and effectively.
+Core is a comprehensive and effective standard library, but there's a lot more
+out software out there.  A large community of programmers have been using OCaml
+since its first release in 1996 and have generated a lot of useful libraries
+and tools.  In Real World OCaml, we'll introduce some of these libraries for
+you to experiment with realistic examples.  The installation and management of
+these third-party libraries is made much easier via a package management tool
+known as OPAM.  We'll explain more about OPAM as the book unfolds, but it forms
+the basis of the Platform, which is a set of tools and libraries that, along
+with the OCaml compiler, let you build realistic applications quickly and
+effectively.
 
-Another big improvement over the standard library is the `utop` command-line
-interface.  This is a modern interactive tool that supports command history,
-macro expansion, module completion, and other niceties that make it much more
-pleasant to work with the language.  We'll be using `utop` throughout the book
-instead of the normal OCaml toplevel.  It can, of course, be installed using
-OPAM, and [xref](#installation) guides you through that process.
+Another big improvement in Core is the `utop` command-line interface.  This is
+a modern interactive tool that supports command history, macro expansion,
+module completion, and other niceties that make it much more pleasant to work
+with the language.  We'll be using `utop` throughout the book instead of the
+normal OCaml toplevel.  It can, of course, be installed using OPAM, and
+[xref](#installation) guides you through that process.
 
 ## About this book
 
@@ -158,7 +157,7 @@ powerful module system that makes code re-use so much more robust.
 At the same time, OCaml is not Haskell.  It takes a much more pragmatic
 approach by being strictly evaluated by default and permitting arbitrary
 side-effects.  In fact, you can write OCaml code that looks very similar to
-imperative C but remains completely type-safe.  One of the major strengths of
+imperative C but remains completely type-safe. One of the major strengths of
 OCaml for systems programming is that, with some experience, you can predict
 the runtime behaviour of a block of code very easily, with very little compiler
 magic involved.  We'll explain some of these tricks to you as we go through the
@@ -168,7 +167,7 @@ book and gradually introduce more complex concepts.
 
 Real World OCaml is split into three parts and appendices:
 
-* Part I covers the basic concepts you'll need to know when building
+* Part I covers the basic language concepts you'll need to know when building
   OCaml programs.  You won't need to memorise all of this (objects,
   for example, are used rarely in practice), but understanding the
   concepts and examples is important.  This part opens up with a
@@ -179,7 +178,7 @@ Real World OCaml is split into three parts and appendices:
   switching to other languages, many of which have drawn inspiration
   from ML.
 
-* Part II builds on the basics by working through complete examples.
+* Part II builds on the basics by working through useful tools and techniques.
   Here you'll pick up useful techniques for building networked
   systems, as well as functional design patterns that help combine
   different features of the language to good effect.  The focus
@@ -193,27 +192,27 @@ Real World OCaml is split into three parts and appendices:
   read this to build very high performance systems that have to
   minimise resource usage or interface to C libraries.  This is also
   where we talk about profiling and debugging techniques using tools
-  such as GNU `gdb` and `gprof`.  Contributing your code back to the
-  community is also important (if only to get bug fixes from other
-  people!), and this part also explains how to do this via OPAM and
-  GitHub.
+  such as GNU `gdb`.
+
+Contributing your code back to the community is also important (if only to get
+bug fixes from other people!), and our appendices explain how to do this via
+OPAM and GitHub.
 
 <note>
 <title>Note to reviewers</title>
 
-Real World OCaml uses some tools that we've developed while writing
-this book.  Some of these resulted in improvements to the OCaml
-compiler, which means that you will need to ensure that you have an
-up-to-date development environment (using the 4.01.0 compiler).  We've
-automated everything you need via the OPAM package manager, so please
-do follow the installation instructions in [xref](#installation)
-carefully.
+Real World OCaml uses some tools that we've developed while writing this book.
+Some of these resulted in improvements to the OCaml compiler, which means that
+you will need to ensure that you have an up-to-date development environment
+(using the 4.01.0 compiler).  We've automated everything you need via the OPAM
+package manager, so please do follow the installation instructions in
+[xref](#installation) carefully.
 
-At this stage, the Windows operating system is also unsupported, and
-only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work
-reliably.  We realize this is a concern; there are no fundamental
-barriers to Windows support, but we're focussed on getting the main
-content finished before getting stuck into the porting effort.
+At this stage, the Windows operating system is also unsupported, and only Mac
+OS X, Linux, FreeBSD and OpenBSD can be expected to work reliably.  We realize
+this is a concern; there are no fundamental barriers to Windows support, but
+we're focussed on getting the main content finished before getting stuck into
+the porting effort.
 
 </note>
 
