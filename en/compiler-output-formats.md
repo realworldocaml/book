@@ -282,7 +282,7 @@ of formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual
 pages and even module dependency graphs that can be viewed using
 [Graphviz](http://www.graphviz.org).
 
-Here's a sample of some source code that's been annotated with `ocamldoc`-style
+Here's a sample of some source code that's been annotated with `ocamldoc`
 comments.
 
 ```ocaml
@@ -309,9 +309,9 @@ let what_is_the_weather_in location =
 ```
 
 The `ocamldoc` comments are distinguished by beginning with the double asterix,
-with some text formatting conventions within the comment to mark metadata (most
-notably, the `@tag` fields to mark specific properties such as the author or
-argument description).
+with formatting conventions within the comment to mark metadata (most notably,
+the `@tag` fields to mark specific properties such as the author of that
+section of code).
 
 Try compiling the HTML documentation and UNIX man pages by running `ocamldoc`
 over the source file.
@@ -323,11 +323,11 @@ $ ocamldoc -man -d man/man3 example.ml
 $ man -M man Example
 ```
 
-You should now have HTML files inside the `html/` directory, and be able to
+You should now have HTML files inside the `html/` directory and also be able to
 view the UNIX manual pages held in `man/man3`.  There are quite a few comment
-formats and options to control the output, so refer to the [OCaml
-manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html) for the
-complete list.
+formats and options to control the output for the various backends. Refer to
+the [OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html)
+for the complete list.
 
 <tip>
 <title>Using custom ocamldoc generators</title>
@@ -339,21 +339,22 @@ detailed output.
 
 * [Argot](http://argot.x9c.fr/) is an enchanced HTML generator that supports
   code folding and searching by name or type definition.
-* The custom generators available
-  [here](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
+* [ocamldoc-generators](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
   support for Bibtex references within comments and generating literate
   documentation that embeds the code alongside the comments.
-* JSON output is available via `odoc_json` (TODO: avsm, pull out of Xen).
+* JSON output is available via `odoc_json` (TODO: pull out of Xen).
 
 </tip>
 
 ### Preprocessing with `camlp4`
 
 One powerful feature in OCaml is the facility to extend the language grammar
-via the `camlp4` macro tool.  Camlp4 modules can register new keywords with the
-lexer and later transform these keywords (or indeed, any portion of the input
-program) into conventional OCaml code that can be understood by the rest of the
-compiler.
+without having to modify the compiler. `camlp4` is a system included with OCaml
+for writing extensible parsers. It provides a set of OCaml libraries that are
+used to define grammars and dynamically loadable syntax extensions of such
+grammars.  Camlp4 modules register new language keywords and later transform
+these keywords (or indeed, any portion of the input program) into conventional
+OCaml code that can be understood by the rest of the compiler.
 
 We've already seen several examples of using `camlp4` within Core:
 
@@ -361,9 +362,9 @@ We've already seen several examples of using `camlp4` within Core:
 * `Sexplib` to convert types to textual s-expressions.
 * `Bin_prot` for efficient binary conversion and parsing.
 
-These all extend the language with a single `with` keyword that extends a
-`type` declaration with additional directives that cause code to be generated.
-For example, here's a trivial use of Sexplib and Fieldslib.
+These all extend the language in quite a minimal way by adding a `with` keyword
+to type declarations to signify that extra code should be generated from that
+declaration.  For example, here's a trivial use of Sexplib and Fieldslib.
 
 ```ocaml
 (* type_conv_example.ml *)
@@ -376,7 +377,8 @@ type t = {
 ```
 
 Compiling this code will normally give you a syntax error if you do so without
-`camlp4`.
+`camlp4` since the `with` keyword isn't normally allowed after a type
+definition.
 
 ```console
 $ ocamlfind ocamlc -c type_conv_example.ml
@@ -384,8 +386,8 @@ File "type_conv_example.ml", line 7, characters 2-6:
 Error: Syntax error
 ```
 
-Now add in the ocamlfind syntax extension packages for `fieldslib`
-and `sexplib`, and everything compiles again.
+Now add in the syntax extension packages for `fieldslib` and `sexplib`, and
+everything will compile again.
 
 ```console
 $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
@@ -396,61 +398,61 @@ We've specified a couple of additional flags here.  The `-syntax` flag directs
 `ocamlfind` to add the `-pp` flag to the compiler command-line.  This flag
 instructs the compiler to run the preprocessor during its parsing phase.
 
-The `-package` flag adds third-party packages as normal, but the `.syntax`
-suffix in the package name is a convention that indicate that these are
-`camlp4` preprocessors instead of normal libraries.  These modules are
-dynamically loaded into `camlp4o` which then parses and rewrites the input
-source code into conventional OCaml code that has no trace of the new keywords.
-The compiler continues on to compile this transformed code with no
-knowledge of the preprocessor's actions.
+The `-package` flag imports other OCaml libraries. The `.syntax` suffix in the
+package name is a convention that indicates these libraries are preprocessors
+that should be run during parsing.  The syntax extension modules are
+dynamically loaded into the `camlp4o` command which rewrites the input source
+code into conventional OCaml code that has no trace of the new keywords.  The
+compiler then compiles this transformed code with no knowledge of the
+preprocessor's actions.
 
-Both `fieldslib` and `sexplib` need this `with` keyword, so there is a common
-preprocessor library called `type_conv` that provides the extension framework
-for them to use.
-Type_conv defines the `with` grammar extension and `ocamlfind` ensures that it's
-loaded before `variantslib` or `sexplib`.
+Both `fieldslib` and `sexplib` need this new `with` keyword and they both can't
+register the same extension. A preprocessor library called `type_conv` provides
+the common extension framework for them to use.  Type_conv defines the `with`
+grammar extension and `ocamlfind` ensures that it's loaded before `variantslib`
+or `sexplib`.
 
-The preprocessor extensions can now generate boiler-plate OCaml code based on
-the type definition.  This approach avoids the inevitable performance hit of
-doing this generation dynamically, but also doesn't require a complex
-Just-In-Time (JIT) runtime that is a source of unpredictable dynamic behaviour.
-Instead, all code is generated at compilation time via `camlp4`.
+The preprocessor extensions generate boilerplate OCaml code based on the type
+definition.  This avoids the inevitable performance hit of doing the code
+generation dynamically.  It also doesn't require a Just-In-Time (JIT) runtime
+that can be a source of unpredictable dynamic behaviour.  Instead, all code is
+simply generated at compile-time via `camlp4`.
 
 ### Inspecting `camlp4` output
 
-All `camlp4` modules accept an input AST and output a modified one.  If you're
-not familiar with the `camlp4` module in question, then how do you figure out
-what changes it's made to your code?  The first obvious way is to read the
-documentation that accompanies the extension.  Another more direct way is to
-use the top-level to explore the extension's behaviour, or to run `camlp4`
-manually yourself to see the transformation in action.
+The syntax extensions accept an input AST and output a modified one.  If you're
+not familiar with the `camlp4` module in question, how do you figure out what
+changes it's made to your code?  The obvious way is to read the documentation
+that accompanies the extension.  Another more direct approach is to use the
+top-level to explore the extension's behaviour or run `camlp4` manually
+yourself to see the transformation in action.
 
 #### Using `camlp4` in the interactive top-level
 
-The `utop` top-level can run phrase that you type in through `camlp4`
-automatically.  To get this to work, you should have at least these lines
-in your `~/.ocamlinit` file in your home directory (the contents of this file
-are automatically executed every time you run `utop`, so you can run them
-by hand too).
+The `utop` top-level can run the phrases that you type through `camlp4`
+automatically. You should have at least these lines in your `~/.ocamlinit` file
+in your home directory. The contents of this file are automatically executed
+every time you run `utop`.  See [xref](#installation) for more details.
 
 ```
 #use "topfind"
 #camlp4o
 ```
 
-The first directive loads the extra `ocamlfind` top-level commands, which let
-you load `ocamlfind` packages directly (including all their dependent packages).
-The second directive instructs the top-level to filter all future phrases
-via `camlp4`.
+The first directive loads the `ocamlfind` top-level interface that lets you
+require `ocamlfind` packages (including all their dependent packages).  The
+second directive instructs the top-level to filter all phrases via `camlp4`.
+You can now run `utop` and load the syntax extensions in.  We'll use the
+`comparelib` syntax extension for our experiments.
 
-You can now run `utop` and load the syntax extension you want to experiment
-with.  We'll show you the `comparelib` syntax extension from Core.  OCaml
-provides a polymorphic comparison operator that inspects the runtime
-representation of two values to see if they are equal.  As we noted in
-[xref](#maps-and-hashtables), this is not as efficient or as safe as defining
-explicit comparison functions between values.
+OCaml provides a built-in polymorphic comparison operator that inspects the runtime
+representation of two values to see if they're equal.  As we noted in
+[xref](#maps-and-hashtables), the polymorphic comparison is less efficient
+than defining explicit comparison functions between values. However, it quickly
+become tedious to manually define comparison functions for complex type
+definitions.
 
-Let's see how `comparelib` solves this problem in `utop`.
+Let's see how `comparelib` solves this problem by running it in `utop`.
 
 ```ocaml
 # #require "comparelib.syntax" ;;
@@ -464,19 +466,19 @@ val compare : t -> t -> int = <fun>
 val compare_t : t -> t -> int = <fun>
 ```
 
-The first type definition of `t` is a standard OCaml phrase and results in the
+The first definition of `t` is a standard OCaml phrase and results in the
 expected output.  The second one includes the `with compare` directive.  This
-is intercepted by `comparelib` and turned into two new functions that are generated
-from the type into the `compare` and `compare_t` functions.
+is intercepted by `comparelib` and transformed into the original type
+definition with two new functions also incuded.
 
 #### Running `camlp4` directly on the source code
 
-While the top-level is quick and useful to figure out the function signatures
-generated from the extensions, how can we see what these functions actually do?
-You can't do this from `utop` directly, since it embeds the `camlp4`
-compilation as an automated part of its operation.
+While the top-level is a quick and useful to examine the signatures generated
+from the extensions, how can we see what these new functions actually do?  You
+can't do this from `utop` directly since it embeds the `camlp4` invocation as
+an automated part of its operation.
 
-Let's turn to the command-line to inspect the result of the `comparelib`
+Let's turn to the command-line to obtain the result of the `comparelib`
 transformation instead.  Create a file that contains the type declaration from
 earlier:
 
@@ -500,10 +502,10 @@ ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
 camlp4o -printer o $INCLUDE $ARCHIVES $1
 ```
 
-This shell script uses the `ocamlfind` package manager to list the include and
+This script uses the `ocamlfind` package manager to list the include and
 library paths needed by `comparelib`.  The final command invokes the `camlp4o`
-preprocessor directly and outputs the resulting AST to standard output as
-textual source code.
+preprocessor with these paths and outputs the resulting AST to standard output.
+
 
 ```console
 $ sh camlp4_dump comparelib_test.ml
@@ -529,7 +531,7 @@ let compare_t = compare
 let _ = compare_t
 ```
 
-The output code contains the original type definition accompanied by some
+The output contains the original type definition accompanied by some
 automatically generated code that implements an explicit comparison function
 for each field in the record.  If you're using the extension in your compiler
 command-line, this generated code is then compiled as if you had typed it in
@@ -553,18 +555,18 @@ see these all these transformations precisely.
 <note>
 <title>Don't overdo the syntax extensions</title>
 
-Syntax extensions are a very powerful extension mechanism that can completely
-alter your source code's layout and style.  Core includes a very conservative
-set of extensions that minimise the syntax changes.  There are a number of
-third-party libraries that are much more ambitious, such as introducing
-whitespace-sensitive indentation or even building entirely new embedded
+Syntax extensions are a powerful extension mechanism that can completely alter
+your source code's layout and style.  Core includes a very conservative set of
+extensions that take care to minimise the syntax changes.  There are a number
+of third-party libraries that are much more ambitious -- some introduce
+whitespace-sensitive indentation while others build entirely new embedded
 languages using OCaml as a host language.
 
 While it's tempting to compress all your boiler-plate code into `camlp4`
 extensions, it can make your source code much harder for other people to
 quickly read and understand.  Core mainly focuses on type-driven code
-generation using the `type_conv` extension, and doesn't fundamentally change
-the OCaml syntax.
+generation using the `type_conv` extension and doesn't fundamentally change the
+OCaml syntax.
 
 Another thing to consider before deploying your own syntax extension is
 compatibility with other extensions.  Two separate extensions can create a
@@ -574,13 +576,14 @@ as a single point for extending the grammar via the `with` keyword.
 
 </note>
 
-We've only shown you how to use `camlp4` extensions here. The full details of
-building new extensions with `camlp4` are fairly daunting and could be the
-subject of an entirely new book.  The best resources to start with this are the
-online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4) and also
-by searching for existing extensions using OPAM and seeing how they implement
-their particular grammar extensions.  A series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html)
-are also a useful guide to the internals of extensions.
+We've deliberately only shown you how to use `camlp4` extensions here, and not
+how to build your own. The full details of building new extensions with
+`camlp4` are fairly daunting and could be the subject of an entirely new book.
+
+The best resources to get started are the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4), and
+using OPAM to obtain existing camlp4 extensions and inspecting their source code.
+A series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html)
+by Jake Donham also serve as a useful guide to the internals of syntax extensions.
 
 ## The type checking phase
 
