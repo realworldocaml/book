@@ -3,7 +3,7 @@
 The logic of building programs that interact with the outside world is
 often dominated by waiting: waiting for the click of a mouse, or for
 data to be fetched from disk, or for space to be available on an
-outgoing network buffer.  Even mildly sophisticated sophisticated
+outgoing network buffer.  Even mildly sophisticated
 interactive applications are typically _concurrent_, needing to wait
 for multiple different events at the same time, responding immediately
 to whatever event happens first.
@@ -1094,7 +1094,7 @@ of monitors.  One example of a library that uses monitors directly is
 that handles the network connection and by the callback for responding
 to an individual request, in either case responding to an exception by
 closing the connection.  It is for building this kind of custom error
-handling that monitors can be helpful.n
+handling that monitors can be helpful.
 
 ### Example: Handling exceptions with DuckDuckGo
 

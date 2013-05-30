@@ -127,6 +127,7 @@ let from_email =
   ; "cstrahan"                (* Charles Strahan <charles.strahan@livingsocial.com> *)
   ; "joshmaxsilverman"        (* Josh Max Silverman <josh.silverman@gmail.com> *)
   ; "andreas"                 (* TODO Andreas Garnæs <andreas.garnaes@gmail.com> *)
+  ; "darioteixeira"           (* TODO Dario Teixeira <dario.teixeira@yahoo.com> *)
 
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
