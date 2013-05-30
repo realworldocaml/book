@@ -771,11 +771,11 @@ However, `Alice` also has a reference to another module `Bob`, which must
 contain at least a `Bob.name` value and define a `Bob.t` type.
 
 The type checker needs to resolve such external module references into concrete
-structures and signatures in order to unify types consistently across module
-boundaries.  It does this by searching a list of directories for a compiled
-interface file matching that module's name.  For example, it will look for
-`alice.cmi` and `bob.cmi` on the search path, and use the first ones it
-encounters as the interfaces for `Alice` and `Bob`.
+structures and signatures in order to unify types across module boundaries.  It
+does this by searching a list of directories for a compiled interface file
+matching that module's name.  For example, it will look for `alice.cmi` and
+`bob.cmi` on the search path, and use the first ones it encounters as the
+interfaces for `Alice` and `Bob`.
 
 You can set the search path by adding the `-I` flag to the compiler
 command-line.  This can get complex when you have lots of libraries, and is the
@@ -927,7 +927,7 @@ You'll never need to use this information in day-to-day development, but it's
 always instructive to examine how the type checker folds in the source code
 into a more compact form like this.
 
-### The untyped lambda form
+## The untyped lambda form
 
 Once OCaml has passed the type checking stage, it can stop emitting syntax
 and type errors and begin the process of compiling the well-formed modules
@@ -945,7 +945,7 @@ maps the source code to the runtime memory model described in
 optimizations, most notably converting pattern match statements into more
 optimized but low-level statements. 
 
-#### Pattern matching optimization
+### Pattern matching optimization
 
 The compiler dumps the lambda form in an s-expression syntax if you add the
 `-dlambda` directive to the command-line.  Let's use this to learn more about
@@ -1064,7 +1064,7 @@ this is the case now.  Polymorphic variants have a runtime value that's
 calculated by hashing the variant name, and so the compiler just tests each of
 these possible values in sequence.
 
-#### Benchmarking different pattern matching implementations
+### Benchmarking pattern matching implementations
 
 Let's benchmark these three pattern matching techniques to quantify their
 runtime costs better.  The `Core_bench` module runs the tests thousands of
