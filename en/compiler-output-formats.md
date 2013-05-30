@@ -591,38 +591,39 @@ After obtaining a valid abstract syntax tree, the compiler then verifies that
 the code obeys the rules of the static type system. Code that is syntactically
 correct but misuses values is rejected with an explanation of the problem.
 
-TODO: type inference / modules phases explanation?
+Static type checking is split into two logical phases in OCaml.  The core
+language has a sophisticated type inference engine that automatically figures
+out types for your code without you having to write them out by hand.  The
+module language lets you group functions together and explicitly manipulate
+and re-use them.
 
-Type inference deduces OCaml types for all values in a module and checks them for
-consistency against each other.  Any inconsistencies result in the compiler
-terminating with a type error.  If the type checking does succeed, the AST is
-replaced by a *typed abstract syntax tree*.  The typed AST has the same broad
-structure as the untyped AST, but with phrases are replaced with typed variants
-instead.
+While the core language has a strong emphasis on automatic inference, the
+module language is much more explicit about matching signatures and
+implementations against each other. You can consider type inference well suited
+to local bits of code (i.e. individual modules), and modules to establish
+abstraction boundaries between components.  The module system scales up to the
+needs of large-scale software engineering -- some of the larger OCaml
+code-bases contain thousands of files and modules.
 
 ### The type inference process
 
-You can explore type inference very simply.  Create a file with a single type
-definition and value.
+Type inference is the process of determining the appropriate types for
+expressions based on their use.  It's a feature that's partially present in
+many languages such as Haskell and Scala, but OCaml embeds it as a fundamental
+feature throughout the core language.
 
-```ocaml
-(* typedef.ml *)
-type t = Foo | Bar
-let v = Foo
-```
+OCaml type inference is based on the Hindley-Milner algorithm, which is notable
+for its ability to infer the most general type for an expression without
+requiring any explicit type annotations.  The algorithm can deduce multiple
+types for an expression, and has the notion of a *principal type* that is the
+most general choice from the possible inferences.  Manual type annotations can
+always specialize the type explicitly, but the automatic inference selects the
+most general (or "principal") type.
 
-Now run the compiler with the `-i` flag to *infer* a default type for the
-compilation unit.  This will run the type checker on the compilation unit you
-specify, but not compile it any further beyond the type checker.
-
-```console
-$ ocamlc -i typedef.ml
-type t = Foo | Bar
-val v : t
-```
-The output is the default signature for the module.  It's often useful to
-redirect this output to an `mli` file to give you a starting signature to edit
-the external interface without having to type it all in by hand.
+OCaml does has some language extensions which strain the limits of principal
+type inference, but by and large most programs you write will never *require*
+annotations (although they sometimes help the compiler produce better error
+messages).
 
 <sidebar>
 <title>Enforcing principal typing</title>
@@ -683,6 +684,30 @@ can result in the type checker failing unexpectedly very occasionally.  In this
 case, just recompile with a clean source tree.
 
 </sidebar>
+
+You can explore type inference very simply.  Create a file with a single type
+definition and value.
+
+```ocaml
+(* typedef.ml *)
+type t = Foo | Bar
+let v = Foo
+```
+
+Now run the compiler with the `-i` flag to *infer* a default type for the
+compilation unit.  This will run the type checker on the compilation unit you
+specify, but not compile it any further beyond the type checker.
+
+```console
+$ ocamlc -i typedef.ml
+type t = Foo | Bar
+val v : t
+```
+The output is the default signature for the module.  It's often useful to
+redirect this output to an `mli` file to give you a starting signature to edit
+the external interface without having to type it all in by hand.
+
+
 
 #### The module search path
 
