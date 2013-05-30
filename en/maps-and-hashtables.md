@@ -161,16 +161,16 @@ comparator uniquely.
 = <fun>
 ```
 
-This constis is important because the algorithm that
+This constraint is important because the algorithm that
 `Map.symmetric_diff` uses depends on the fact that both maps have the
 same comparator.
 
-We can create a new comparator for an existing type using the `Make`
-functor found in the `Comparator` module.  This functor takes as its
-input a module containing the type of the object to be compared,
-sexp-converter functions, and a comparison function.  (The sexp
-converters are included in the comparator to make it possible for
-users of the comparator to generate better error messages.)
+We can create a new comparator using the `Comparator.Make` functor,
+which takes as its input a module containing the type of the object to
+be compared, sexp-converter functions, and a comparison function.  The
+sexp converters are included in the comparator to make it possible for
+users of the comparator to generate better error messages.  Here's an
+example.
 
 ```ocaml
 # module Reverse = Comparator.Make(struct
@@ -190,8 +190,9 @@ module Reverse :
   end
 ```
 
-Both `Reverse.comparator` and `String.comparator` can be used to
-create string maps.
+As you can see below, both `Reverse.comparator` and
+`String.comparator` can be used to create maps with a key type of
+`string`.
 
 ```ocaml
 # let alist = ["foo", 0; "snoo", 3];;
@@ -203,8 +204,8 @@ val rev_map : (string, int, Reverse.comparator) Map.t = <abstr>
 ```
 
 `Map.min_elt` returns the key and value for the smallest key in the
-map, which lets us see that the two maps we created do indeed use
-different comparison fucntions.
+map, which lets us see that these two maps do indeed use different
+comparison fucntions.
 
 ```ocaml
 # Map.min_elt ord_map;;
@@ -230,33 +231,36 @@ Error: This expression has type (string, int, Reverse.comparator) Map.t
 As we've discussed, maps carry within them the comparator that they
 were created with.  Sometimes, often for space efficiency reasons, you
 want a version of the map data structure that doesn't include the
-comparator.  You can get this with `Map.to_tree`, which returns the
-tree that the map is built on top of, which doesn't include the
-comparator.
+comparator.  You can get such a representation with `Map.to_tree`,
+which returns just the tree that the map is built out of, and not
+including the comparator.
 
 ```ocaml
 # let ord_tree = Map.to_tree ord_map;; 
 val ord_tree : (string, int, String.comparator) Map.Tree.t = <abstr>
 ```
 
-Note that although it doesn't physically include the comparator, it
-still includes the comparator in its type.  This is what is known as a
-_phantom type_, because the type reflects something about the logic of
-how the value was constructued, but the type doesn't correspond to any
-values directly represented in the underlying data structure.
+Even though a `Map.Tree.t` doesn't physically include a comparator, it
+does include the comparator in its type.  This is what is known as a
+_phantom type parameter_, because it reflects something about the
+logic of value in question, even though it doesn't correspond to any
+values directly represented in the underlying physical structure of
+the value.
 
-To look something up in a tree, we need to provide the comparator
-explicitly.
+Since the comparator isn't included in the tree, we need to provide
+the comparator explicitly when we, say, search for a key, as shown
+below.
 
 ```ocaml
 # Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
 - : int option = Some 3
 ```
 
-The algorithm of `Map.Tree.find` depends on the fact that you're using the
-same comparator when looking a value up as you were when you stored
-it.  Accordingly, using the wrong comparator will lead to a type
-error.
+The algorithm of `Map.Tree.find` depends on the fact that it's using
+the same comparator when looking a value up as you were when you
+stored it.  That's the invariant that the phantom type is there to
+enforce.  As you can see below, using the wrong comparator will lead
+to a type error.
 
 ```ocaml
 # Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
@@ -267,16 +271,13 @@ Error: This expression has type (string, int, String.comparator) Map.Tree.t
        Type String.comparator is not compatible with type Reverse.comparator 
 ```
 
-The integration of comparators into the type of maps allows the type
-system to catch what would otherwise be fairly subtle errors.
-
 ### The polymorphic comparator
 
 We don't need to generate specialized comparators for every type we
 want to build a map on.  We can instead use a comparator based on
-OCaml's polymorphic comparison function, which was discussed in
-[xref](#lists-and-patterns).  This comparator is found in the
-`Comparator.Poly` module.  Thus, we can write:
+OCaml's build-in polymorphic comparison function, which was discussed
+in [xref](#lists-and-patterns).  This comparator is found in the
+`Comparator.Poly` module, allowing us to write:
 
 ```ocaml
 # Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
