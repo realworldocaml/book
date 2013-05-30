@@ -22852,9 +22852,8 @@ let _ =
       This fails because the <literal>module A = B</literal> syntax must
       be wrapped in a <literal>let</literal> binding unless it's a
       top-level phrase. Parsing immediately eliminates code which
-      doesn't match basic syntactic requirements, so the first example
-      will result in a syntax error when we run the OCaml compiler on
-      it.
+      doesn't match basic syntactic requirements, so this will result in
+      a syntax error when we compile it.
     </para>
     <programlisting>
 $ ocamlc -c broken_module.ml 
@@ -22879,8 +22878,7 @@ let _ =
       point in parsing, so the error location information is correct.
     </para>
     <sect2 id="formatting-source-code-with-ocp-indent">
-      <title>Formatting source code with
-      <literal>ocp-indent</literal></title>
+      <title>Formatting source code with ocp-indent</title>
       <para>
         Sadly, syntax errors do get more inaccurate sometimes depending
         on the nature of your mistake. Try to spot the deliberate error
@@ -22924,14 +22922,14 @@ Error: Syntax error
       <para>
         This class of bug (due to a single errant character) can be hard
         to spot in a large body of code. Luckily, there's a great tool
-        in OPAM called <literal>ocp-indent</literal> that applies
-        structured indenting rules to your source code on a line-by-line
-        basis. This not only beautifies your code layout, but it also
-        makes this syntax error much easier to locate.
+        in OPAM called ocp-indent that applies structured indenting
+        rules to your source code on a line-by-line basis. This not only
+        beautifies your code layout, but it also makes this syntax error
+        much easier to locate.
       </para>
       <para>
-        Let's run our erronous file through
-        <literal>ocp-indent</literal> and see how it processes it.
+        Let's run our erronous file through ocp-indent and see how it
+        processes it.
       </para>
       <programlisting>
 $ opam install ocp-indent
@@ -22957,8 +22955,8 @@ let _ =
         indented as if it were part of the first
         <literal>concat_and_print</literal> definition, and the errant
         semicolon is now much easier to spot. We just need to remove
-        that semicolon and re-run <literal>ocp-indent</literal> to
-        verify that the syntax is correct.
+        that semicolon and re-run ocp-indent to verify that the syntax
+        is correct.
       </para>
       <programlisting>
 $ ocp-indent follow_on_function_fixed.ml 
@@ -22983,21 +22981,21 @@ val concat_and_print : string -&gt; string -&gt; string
 val add_and_print : int -&gt; int -&gt; int
 </programlisting>
       <para>
-        The <literal>ocp-indent</literal>
-        <ulink url="https://github.com/OCamlPro/ocp-indent">homepage</ulink>
-        documents how to integrate it with your favourite editor. All
-        the Core libraries are formatted using it to ensure consistency,
-        and it's a good idea to do this before publishing your own
-        source code online.
+        The
+        <ulink url="https://github.com/OCamlPro/ocp-indent">ocp-indent
+        homepage</ulink> documents how to integrate it with your
+        favourite editor. All the Core libraries are formatted using it
+        to ensure consistency, and it's a good idea to do this before
+        publishing your own source code online.
       </para>
     </sect2>
     <sect2 id="generating-documentation-via-ocamldoc">
       <title>Generating documentation via OCamldoc</title>
       <para>
-        Whitespace and source code comments aren't significant in
-        determining the semantics of the program, and are removed during
-        the parsing process. However, other tools in the OCaml
-        distribution can interpret comments for their own ends.
+        Whitespace and source code comments are removed during parsing
+        and aren't significant in determining the semantics of the
+        program. However, other tools in the OCaml distribution can
+        interpret comments for their own ends.
       </para>
       <para>
         The OCamldoc tool uses specially formatted comments in the
@@ -23184,15 +23182,13 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         code with no knowledge of the preprocessor's actions.
       </para>
       <para>
-        Both <literal>fieldslib</literal> and <literal>sexplib</literal>
-        need this new <literal>with</literal> keyword, but they both
-        can't register the same extension. Instead, a library called
-        <literal>type_conv</literal> provides the common extension
-        framework for them to use. Type_conv registers the
+        Both Fieldslib and Sexplib need this new <literal>with</literal>
+        keyword, but they both can't register the same extension.
+        Instead, a library called Type_conv provides the common
+        extension framework for them to use. Type_conv registers the
         <literal>with</literal> grammar extension to Camlp4, and the
-        <literal>ocamlfind</literal> packaging ensures that it's loaded
-        before <literal>variantslib</literal> or
-        <literal>sexplib</literal>.
+        OCamlfind packaging ensures that it's loaded before Variantslib
+        or Sexplib.
       </para>
       <para>
         The two extensions generate boilerplate OCaml code based on the
@@ -23220,10 +23216,9 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
           The <literal>utop</literal> top-level can run the phrases that
           you type through <literal>camlp4</literal> automatically. You
           should have at least these lines in your
-          <literal>~/.ocamlinit</literal> file in your home directory.
-          The contents of this file are automatically executed every
-          time you run <literal>utop</literal>. See
-          <xref linkend="installation"/> for more details.
+          <literal>~/.ocamlinit</literal> file in your home directory
+          (see <xref linkend="installation"/> for more
+          information).
         </para>
         <programlisting>
 #use &quot;topfind&quot;
