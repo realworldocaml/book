@@ -67,7 +67,7 @@ let from_yminsky =
 ]
 
 let js_interns =
-  [ "imackler"               (* izaakmeckler@me.com      *)
+  [ "imeckler"               (* izaakmeckler@me.com      *)
   ; "billduff"               (* wduff11@gmail.com        *)
   ; "rawxfish"               (* szhan@princeton.edu      *)
   ; "bbohrer"                (* bjbohrer@gmail.com       *)
