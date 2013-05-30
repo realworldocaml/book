@@ -438,7 +438,7 @@ function with the default signature, and it expects it to have
 functions for converting to and from s-expressions, a serialization
 format that we'll discuss more in
 [xref](#data-serialization-with-s-expressions).  In this case, we'll
-use the `with sexp` declaration that comes from the `Sexplib` syntax
+use the `with sexp` declaration that comes from the `sexplib` syntax
 extension to create s-expression converters for us, but such
 converters can also be written by hand.
 
@@ -467,10 +467,11 @@ comparison function, though, which we'll just do by hand.
 We don't include the full response from the top-level because it is
 quite lengthy, but `Foo_and_bar` does satisfy `Comparable.S`.
 
-We don't necessarily need to write out own comparison function by
-hand.  Core ships with a syntax extension called `pa_compare` which
-will write a simple comparison function for you.  Using it, we can
-rewrite the above example as follows without changing the behavior.
+We don't necessarily need to write the comparison function by hand.
+Core ships with another syntax extension called `comparelib` which
+will create a comparison function based on a type definition.  Using
+it, we can rewrite the above example as follows without changing the
+behavior.
 
 ```ocaml
 # module Foo_and_bar : sig
@@ -510,27 +511,30 @@ compare, if that makes sense for the type in question.
   end;;
 ```
 
-That said, this approach should be used sparingly.
+That said, for reasons we discussed earlier, polymorphic compare
+should be used sparingly.
 
 ## Hashtables
 
 Hashtables are the imperative cousin of maps.  We walked over a basic
 hashtable implementation in [xref](#imperative-programming-1), so in
-this section we'll mostly discuss the pragmatics of Core's `Hashtbl`.
+this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
+module.  We'll cover this material more briefly than we did with maps,
+because many of the concepts are shared.
 
 Hashtables differ from maps in a few key ways.  First, hashtables are
 mutable, meaning that adding a key/value pair to a hashtable modifies
-it, rather than creating a new table with the binding added.  Second,
-hashtables generally have better time-complexity than maps, providing
-constant time lookup and modifications as opposed to logarithmic for
-maps.  And finally, just as maps depend on having a comparison
-function for creating the ordered binary tree that underlies a map,
-hashtables depend on having a _hash function_, i.e., a function for
-converting a key to an integer.
+the table, rather than creating a new table with the binding added.
+Second, hashtables generally have better time-complexity than maps,
+providing constant time lookup and modifications as opposed to
+logarithmic for maps.  And finally, just as maps depend on having a
+comparison function for creating the ordered binary tree that
+underlies a map, hashtables depend on having a _hash function_,
+_i.e._, a function for converting a key to an integer.
 
-Accordingly, when creating a hashtable, we provide value of type
-_hashable_, which is analogous to the comaprator used for creating a
-map.
+When creating a hashtable, we need to provide value of type _hashable_
+which includes among other things the function for hashing the key
+type.  This is analogous to the comaprator used for creating maps.
 
 ```ocaml
 # let table = Hashtbl.create ~hashable:String.hashable ();;
