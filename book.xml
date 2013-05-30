@@ -21604,10 +21604,8 @@ let () =
   <para>
     This chapter is primarily informational, but it helps to know all
     this to understand the compilation process in
-    <xref linkend="the-compilation-pipeline"/>, handling
-    external memory in
-    <xref linkend="parsing-binary-protocols-with-bigarray"/>,
-    or tracing and profiling your programs in
+    <xref linkend="the-compilation-pipeline"/> or tracing and
+    profiling your programs in
     <xref linkend="understanding-the-garbage-collector"/>.
   </para>
   <para>
@@ -21948,9 +21946,7 @@ let () =
         block in memory words. This is 22 bits on 32-bit platforms,
         which is the reason why OCaml strings are limited to 16MB on
         that architecture. If you need bigger strings, either switch to
-        a 64-bit host, or use the <literal>Bigarray</literal> module
-        described in
-        <xref linkend="parsing-binary-protocols-with-bigarray"/>.
+        a 64-bit host, or use the <literal>Bigarray</literal> module.
       </para>
       <para>
         The 2-bit <literal>color</literal> field is used by the garbage
@@ -22551,8 +22547,7 @@ struct custom_operations {
       <para>
         A common use of custom blocks is to manage external system
         memory directly from within OCaml, via the
-        <literal>Bigarray</literal> module. We'll cover this later on in
-        <xref linkend="parsing-binary-protocols-with-bigarray"/>.
+        <literal>Bigarray</literal> module.
       </para>
     </sect2>
   </sect1>
@@ -23364,7 +23359,7 @@ val compare : t -&gt; t -&gt; int
           code. Running Camlp4 directly on the original source code lets
           you see these all these transformations precisely.
         </para>
-        <note>
+        <caution>
         <title>
         Don't overdo the syntax extensions
         </title>
@@ -23395,7 +23390,7 @@ val compare : t -&gt; t -&gt; int
           which acts as a single point for extending the grammar via the
           <literal>with</literal> keyword.
         </para>
-        </note>
+        </caution>
         <para>
           We've deliberately only shown you how to use Camlp4 extensions
           here, and not how to build your own. The full details of
