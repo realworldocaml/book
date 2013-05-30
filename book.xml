@@ -38,7 +38,6 @@
 
 
 
-
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -13570,11 +13569,10 @@ end;;
   <title>Maps and Hashtables</title>
   <para>
     Lots of programming problems require dealing with data organized as
-    key/value pairs. Maybe the simplest way of representing sets of
-    key/value pairs in OCaml is an <emphasis>association
-    list</emphasis>, which is simply a list of pairs of keys and values.
-    For example, you could represent a mapping between the 10 digits and
-    their English names as follows.
+    key/value pairs. Maybe the simplest way of representing such data in
+    OCaml is an <emphasis>association list</emphasis>, which is simply a
+    list of pairs of keys and values. For example, you could represent a
+    mapping between the 10 digits and their English names as follows.
   </para>
   <programlisting language="ocaml">
 # let digit_alist =
@@ -13611,14 +13609,13 @@ end;;
     both of these data structures in detail, and provide some advice as
     to how to choose between them.
   </para>
-  <sect1 id="a-map-example">
-    <title>A map example</title>
+  <sect1 id="maps">
+    <title>Maps</title>
     <para>
-      Let's start by considering an example of how one might use a map
-      in practice. In
-      <xref linkend="files-modules-and-programs"/>, we showed
-      a module <literal>Counter</literal> for keeping counts on a set of
-      strings. Here's the interface.
+      Let's consider an example of how one might use a map in practice.
+      In <xref linkend="files-modules-and-programs"/>, we
+      showed a module <literal>Counter</literal> for keeping frequency
+      counts on a set of strings. Here's the interface.
     </para>
     <programlisting language="ocaml">
 (* counter.mli *)
@@ -13627,15 +13624,16 @@ open Core.Std
 type t
 
 val empty : t
-val to_list : t -&gt; (string * int) list
 val touch : t -&gt; string -&gt; t
+val to_list : t -&gt; (string * int) list
 </programlisting>
     <para>
       The intended behavior here is straightforward.
       <literal>Counter.empty</literal> represents an empty collection of
-      counts; <literal>touch</literal> increments the count of the
-      specified string by 1; and <literal>to_list</literal> returns the
-      list of non-zero string/count pairs.
+      frequency counts; <literal>touch</literal> increments the
+      frequency count of the specified string by 1; and
+      <literal>to_list</literal> returns the list of non-zero
+      frequencies.
     </para>
     <para>
       Here's the implementation.
@@ -13665,7 +13663,7 @@ let touch t s =
       To deal with this, a map, once created, stores the necessary
       comparison function within the data structure. Thus, operations
       like <literal>Map.find</literal> or <literal>Map.add</literal>
-      that access the contents of a map, or create a new map from an
+      that access the contents of a map or create a new map from an
       existing one, do so by using the comparison function embedded
       within the map.
     </para>
@@ -13676,58 +13674,57 @@ let touch t s =
       sub-module that have values like
       <literal>String.Map.empty</literal> and
       <literal>String.Map.of_alist</literal> that are specialized to
-      strings, and this have access to a string comparison function.
-      Such a <literal>Map</literal> sub-module is included in any module
-      that satisfies the <literal>Comparable</literal> interface from
-      Core.
+      strings, and thus have access to a string comparison function.
+      Such a <literal>Map</literal> sub-module is included in every
+      module that satisfies the <literal>Comparable.S</literal>
+      interface from Core.
     </para>
-  </sect1>
-  <sect1 id="creating-maps-with-comparators">
-    <title>Creating maps with comparators</title>
-    <para>
-      The specialized <literal>Map</literal> sub-module is convenient,
-      but you don't necessarily need to use it to create a
-      <literal>Map.t</literal>. The information required to compare
-      values of a given type is wrapped up in a value called a
-      <emphasis>comparator</emphasis>, that can be used to create maps
-      using the <literal>Map</literal> module directly.
-    </para>
-    <programlisting language="ocaml">
+    <sect2 id="creating-maps-with-comparators">
+      <title>Creating maps with comparators</title>
+      <para>
+        The specialized <literal>Map</literal> sub-module is convenient,
+        but it's not the only way of creating a
+        <literal>Map.t</literal>. The information required to compare
+        values of a given type is wrapped up in a value called a
+        <emphasis>comparator</emphasis>, that can be used to create maps
+        using the <literal>Map</literal> module directly.
+      </para>
+      <programlisting language="ocaml">
 # let digit_map = Map.of_alist_exn digit_alist
                      ~comparator:Int.comparator;;
 val digit_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
 # Map.find digit_map 3;;
 - : string option = Some &quot;three&quot;
 </programlisting>
-    <para>
-      The above uses <literal>Map.of_alist_exn</literal> which creates a
-      map from an association list, throwing an exception if there are
-      duplicate keys in the list.
-    </para>
-    <para>
-      Note that the comparator is only required for operations that
-      create maps from scratch. Operations that update an existing map
-      simply inherit the comparator of the map they start with.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The above uses <literal>Map.of_alist_exn</literal> which creates
+        a map from an association list, throwing an exception if there
+        are duplicate keys in the list.
+      </para>
+      <para>
+        The comparator is only required for operations that create maps
+        from scratch. Operations that update an existing map simply
+        inherit the comparator of the map they start with.
+      </para>
+      <programlisting language="ocaml">
 # let zilch_map = Map.add digit_map ~key:0 ~data:&quot;zilch&quot;;;
 val zilch_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      The type <literal>Map.t</literal> has three type parameters: one
-      for the key, one for the value, and one to identify the comparator
-      used to build the map. Indeed, the type
-      <literal>'a Int.Map.t</literal> is just a type alias for
-      <literal>(int,'a,Int.comparator) Map.t</literal>
-    </para>
-    <para>
-      Including the comparator in the type is important because because
-      operations that work on multiple maps at the same time often
-      require that the maps share their comparison function. Consider,
-      for example, <literal>Map.symmetric_diff</literal>, which computes
-      a summary of the differences between two maps.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The type <literal>Map.t</literal> has three type parameters: one
+        for the key, one for the value, and one to identify the
+        comparator. Indeed, the type <literal>'a Int.Map.t</literal> is
+        just a type alias for
+        <literal>(int,'a,Int.comparator) Map.t</literal>
+      </para>
+      <para>
+        Including the comparator in the type is important because
+        because operations that work on multiple maps at the same time
+        often require that the maps share their comparison function.
+        Consider, for example, <literal>Map.symmetric_diff</literal>,
+        which computes a summary of the differences between two maps.
+      </para>
+      <programlisting language="ocaml">
 # let left = String.Map.of_alist_exn [&quot;foo&quot;,1; &quot;bar&quot;,3; &quot;snoo&quot;, 0]
   let right = String.Map.of_alist_exn [&quot;foo&quot;,0; &quot;snoo&quot;, 0]
   let diff = Map.symmetric_diff ~data_equal:Int.equal left right
@@ -13738,14 +13735,13 @@ val diff :
   (string * [ `Left of int | `Right of int | `Unequal of int * int ]) list =
   [(&quot;foo&quot;, `Unequal (1, 0)); (&quot;bar&quot;, `Left 3)]
 </programlisting>
-    <para>
-      If we look at the type of <literal>Map.symmetric_diff</literal>,
-      we'll see that it requires that the two maps it compares have the
-      same comparator type, in addition to the same key type and value
-      type. Each comparator has a fresh abstract type, so the type of a
-      comparator identifies it uniquely.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The type of <literal>Map.symmetric_diff</literal>, shown below,
+        requires that the two maps it compares have the same comparator
+        type. Each comparator has a fresh abstract type, so the type of
+        a comparator identifies the comparator uniquely.
+      </para>
+      <programlisting language="ocaml">
 # Map.symmetric_diff;;
 - : ('k, 'v, 'cmp) Map.t -&gt;
     ('k, 'v, 'cmp) Map.t -&gt;
@@ -13753,16 +13749,21 @@ val diff :
     ('k * [ `Left of 'v | `Right of 'v | `Unequal of 'v * 'v ]) list
 = &lt;fun&gt;
 </programlisting>
-    <para>
-      We could create a new comparator for an existing type using the
-      <literal>Make</literal> functor found in the
-      <literal>Comparator</literal> module. This functor takes as its
-      input a module containing the type of the object to be compared,
-      sexp-converter functions, and a comparison function. (The sexp
-      converters are included in the comparator to make it possible for
-      users of the comparator to generate better error messages.)
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        This constraint is important because the algorithm that
+        <literal>Map.symmetric_diff</literal> uses depends on the fact
+        that both maps have the same comparator.
+      </para>
+      <para>
+        We can create a new comparator using the
+        <literal>Comparator.Make</literal> functor, which takes as its
+        input a module containing the type of the object to be compared,
+        sexp-converter functions, and a comparison function. The sexp
+        converters are included in the comparator to make it possible
+        for users of the comparator to generate better error messages.
+        Here's an example.
+      </para>
+      <programlisting language="ocaml">
 # module Reverse = Comparator.Make(struct
     type t = string
     let sexp_of_t = String.sexp_of_t
@@ -13779,12 +13780,12 @@ module Reverse :
     val comparator : (t, comparator) Comparator.t_
   end
 </programlisting>
-    <para>
-      Both <literal>Reverse.comparator</literal> and
-      <literal>String.comparator</literal> can be used to create string
-      maps.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        As you can see below, both <literal>Reverse.comparator</literal>
+        and <literal>String.comparator</literal> can be used to create
+        maps with a key type of <literal>string</literal>.
+      </para>
+      <programlisting language="ocaml">
 # let alist = [&quot;foo&quot;, 0; &quot;snoo&quot;, 3];;
 val alist : (string * int) list = [(&quot;foo&quot;, 0); (&quot;snoo&quot;, 3)]
 # let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
@@ -13792,24 +13793,23 @@ val ord_map : (string, int, String.comparator) Map.t = &lt;abstr&gt;
 # let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
 val rev_map : (string, int, Reverse.comparator) Map.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      And by using <literal>Map.min_elt</literal>, which returns the key
-      and value for the smallest key in the map, we can see that these
-      two maps indeed do use different comparison fucntions.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        <literal>Map.min_elt</literal> returns the key and value for the
+        smallest key in the map, which lets us see that these two maps
+        do indeed use different comparison fucntions.
+      </para>
+      <programlisting language="ocaml">
 # Map.min_elt ord_map;;
 - : (string * int) option = Some (&quot;foo&quot;, 0)
 # Map.min_elt rev_map;;
 - : (string * int) option = Some (&quot;snoo&quot;, 3)
 </programlisting>
-    <para>
-      Since the algorithm behind <literal>Map.symmetric_diff</literal>
-      depends on both maps using the same comparison function, we
-      shouldn't be able to run this function jointly on these two maps.
-      Indeed, if we try, the compiler will reject it as a type error.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        And accordingly, if we try to use
+        <literal>Map.symmetric_diff</literal> on these two maps, we'll
+        get a compile-timer error.
+      </para>
+      <programlisting language="ocaml">
 # Map.symmetric_diff ord_map rev_map;;
 
 Error: This expression has type (string, int, Reverse.comparator) Map.t
@@ -13817,38 +13817,48 @@ Error: This expression has type (string, int, Reverse.comparator) Map.t
          ('a, 'b, 'c) Map.t = (string, int, String.comparator) Map.t
        Type Reverse.comparator is not compatible with type String.comparator 
 </programlisting>
-    <para>
-      As we've discussed, maps carry within them the comparator that
-      they were created with. Sometimes, often for space efficiency
-      reasons, you want a version of the map data structure that doesn't
-      include the comparator. You can get this with
-      <literal>Map.to_tree</literal>, which returns the tree type that
-      the map is built on top of, which doesn't include the comparator
-      directly.
-    </para>
-    <programlisting language="ocaml">
+    </sect2>
+    <sect2 id="trees">
+      <title>Trees</title>
+      <para>
+        As we've discussed, maps carry within them the comparator that
+        they were created with. Sometimes, often for space efficiency
+        reasons, you want a version of the map data structure that
+        doesn't include the comparator. You can get such a
+        representation with <literal>Map.to_tree</literal>, which
+        returns just the tree that the map is built out of, and not
+        including the comparator.
+      </para>
+      <programlisting language="ocaml">
 # let ord_tree = Map.to_tree ord_map;; 
 val ord_tree : (string, int, String.comparator) Map.Tree.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      Note that although it doesn't physically include the comparator,
-      it still includes the comparator in its type.
-    </para>
-    <para>
-      If we want to look something up in a tree, we need to provide the
-      comparator explicitly.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        Even though a <literal>Map.Tree.t</literal> doesn't physically
+        include a comparator, it does include the comparator in its
+        type. This is what is known as a <emphasis>phantom type
+        parameter</emphasis>, because it reflects something about the
+        logic of value in question, even though it doesn't correspond to
+        any values directly represented in the underlying physical
+        structure of the value.
+      </para>
+      <para>
+        Since the comparator isn't included in the tree, we need to
+        provide the comparator explicitly when we, say, search for a
+        key, as shown below.
+      </para>
+      <programlisting language="ocaml">
 # Map.Tree.find ~comparator:String.comparator ord_tree &quot;snoo&quot;;;
 - : int option = Some 3
 </programlisting>
-    <para>
-      The algorithm of <literal>Map.find</literal> depends on the fact
-      that you're using the same comparator when looking a value up as
-      you were when you stored it. Accordingly, using the wrong
-      comparator will lead to a type error.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The algorithm of <literal>Map.Tree.find</literal> depends on the
+        fact that it's using the same comparator when looking a value up
+        as you were when you stored it. That's the invariant that the
+        phantom type is there to enforce. As you can see below, using
+        the wrong comparator will lead to a type error.
+      </para>
+      <programlisting language="ocaml">
 # Map.Tree.find ~comparator:Reverse.comparator ord_tree &quot;snoo&quot;;;
 
 Error: This expression has type (string, int, String.comparator) Map.Tree.t
@@ -13856,39 +13866,35 @@ Error: This expression has type (string, int, String.comparator) Map.Tree.t
          ('a, 'b, 'c) Map.Tree.t = (string, 'b, Reverse.comparator) Map.Tree.t
        Type String.comparator is not compatible with type Reverse.comparator 
 </programlisting>
-    <para>
-      The integration of comparators into the type of maps allows the
-      type system to catch what would otherwise be fairly subtle errors.
-    </para>
-  </sect1>
-  <sect1 id="the-polymorphic-comparator">
-    <title>The polymorphic comparator</title>
-    <para>
-      We don't need to generate specialized comparators for every type
-      we want to build a map on. We can instead use a comparator based
-      on OCaml's polymorphic comparison function, which was discussed in
-      <xref linkend="lists-and-patterns"/>. This comparator is
-      found in the <literal>Map.Poly</literal> module. Thus, we can
-      write:
-    </para>
-    <programlisting language="ocaml">
-# Map.of_alist_exn Comparator.Poly.comparator digit_alist;;
+    </sect2>
+    <sect2 id="the-polymorphic-comparator">
+      <title>The polymorphic comparator</title>
+      <para>
+        We don't need to generate specialized comparators for every type
+        we want to build a map on. We can instead use a comparator based
+        on OCaml's build-in polymorphic comparison function, which was
+        discussed in <xref linkend="lists-and-patterns"/>.
+        This comparator is found in the
+        <literal>Comparator.Poly</literal> module, allowing us to write:
+      </para>
+      <programlisting language="ocaml">
+# Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
 - : (int, string, Comparator.Poly.comparator) Map.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      Or, equivalently:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        Or, equivalently:
+      </para>
+      <programlisting language="ocaml">
 # Map.Poly.of_alist_exn digit_alist;;
 - : (int, string) Map.Poly.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      Note that maps based on the polymorphic comparator are not
-      equivalent to those based on the type-specific comparators from
-      the point of view of the type system. Thus, the compiler rejects
-      the following:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        Note that maps based on the polymorphic comparator are not
+        equivalent to those based on the type-specific comparators from
+        the point of view of the type system. Thus, the compiler rejects
+        the following:
+      </para>
+      <programlisting language="ocaml">
 # Map.symmetric_diff (Map.Poly.singleton 3 &quot;three&quot;)
                      (Int.Map.singleton  3 &quot;four&quot; ) ;;
 
@@ -13897,24 +13903,25 @@ Error: This expression has type 'a Int.Map.t = (int, 'a, Int.comparator) Map.t
          ('b, 'c, 'd) Map.t = (int, string, Z.Poly.comparator) Map.t
        Type Int.comparator is not compatible with type Z.Poly.comparator 
 </programlisting>
-    <para>
-      This is rejected for good reason: there's no guarantee that the
-      comparator associated with a given type will order things in the
-      same way that polymorphic compare does.
-    </para>
-  </sect1>
-  <sect1 id="sets">
-    <title>Sets</title>
-    <para>
-      Sometimes, instead of keeping track of a set of key/value pairs,
-      you just want a data-type for keeping track of a set set of keys.
-      You could just build this on top of the map type, by representing
-      a set of values by a map where the type of the data is just
-      <literal>unit</literal>. A more idiomatic (and more efficient)
-      solution is to use Core's set type, which is similar in design and
-      spirit to the map type. Here's a simple example:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        This is rejected for good reason: there's no guarantee that the
+        comparator associated with a given type will order things in the
+        same way that polymorphic compare does.
+      </para>
+    </sect2>
+    <sect2 id="sets">
+      <title>Sets</title>
+      <para>
+        Sometimes, instead of keeping track of a set of key/value pairs,
+        you just want a data-type for keeping track of a set of keys.
+        You could build this on top of a map by representing a set of
+        values by a map whose data type is <literal>unit</literal>. But
+        a more idiomatic (and efficient) solution is to use Core's set
+        type, which is similar in design and spirit to the map type,
+        while having an API better tuned to working with sets, and a
+        lower memory footprint. Here's a simple example:
+      </para>
+      <programlisting language="ocaml">
 # let dedup ~comparator l =
     List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
     |&gt; Set.to_list
@@ -13924,97 +13931,342 @@ val dedup : comparator:('a, 'b) Core.Comparator.t_ -&gt; 'a list -&gt; 'a list =
 # dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
 - : int list = [2; 3; 7; 8; 10]
 </programlisting>
-    <para>
-      In addition to the operators you would expect to have in map,
-      sets, also support other operations you would expect for sets,
-      including functions for computing unions, intersections and set
-      differences, as well as testing for whether one set is a subset of
-      another.
-    </para>
-    <warning> <title> 
-    The perils of polymorphic compare
-    </title>
-    <para>
-      Polymorphic compare is highly convenient, but it has serious
-      downsides as well, and should be used with care. The problem with
-      polymorphic compare is that it has a fixed algorithm for comparing
-      values of any type, and that that algorithm can sometimes yield
-      surprising results.
-    </para>
-    <para>
-      To understand what's wrong with polymorphic comparison, you need
-      to consider how it works. Polymorphic compare is a structural
-      comparison, operating directly on the runtime-representation of
-      OCaml values, walking the structure of the values in question
-      without regard for their type.
-    </para>
-    <para>
-      This is convenient because it provides a comparison function that
-      behaves as you would expect for most OCaml types. For example, on
-      <literal>int</literal>s and <literal>float</literal>s it acts as
-      you would expect a numeric comparison function to act. For simple
-      containers like strings and lists and arrays it operates as a
-      lexicographic comparator. And it provides a reasonable total
-      comparison function for most OCaml types, excluding only things
-      like closures and values from outside of the OCaml heap.
-    </para>
-    <para>
-      But sometimes, a structural comparison is not what you want. Maps
-      and Sets are a great example of this. Consider the following two
-      sets.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        In addition to the operators you would expect to have for maps,
+        sets support the traditional set operations, including union,
+        intersection and set difference. And, as with maps, we can
+        create sets based on type-specific comparators or on the
+        polymorphic comparator.
+      </para>
+      <warning> <title> 
+      The perils of polymorphic compare
+      </title>
+      <para>
+        Polymorphic compare is highly convenient, but it has serious
+        downsides as well, and should be used with care. In particular,
+        polymorphic compare has a fixed algorithm for comparing values
+        of any type, and that algorithm can sometimes yield surprising
+        results.
+      </para>
+      <para>
+        To understand what's wrong with polymorphic compare, you need to
+        understand a bit about how it works. Polymorphic compare is
+        <emphasis>structural</emphasis>, in that it operates directly on
+        the runtime-representation of OCaml values, walking the
+        structure of the values in question without regard for their
+        type.
+      </para>
+      <para>
+        This is convenient because it provides a comparison function
+        that works for most OCaml values, and largely behaves as you
+        would expect. For example, on <literal>int</literal>s and
+        <literal>float</literal>s it acts as you would expect a numeric
+        comparison function to act. For simple containers like strings
+        and lists and arrays it operates as a lexicographic comparison.
+        And except for closures and values from outside of the OCaml
+        heap, it works on almost every OCaml type.
+      </para>
+      <para>
+        But sometimes, a structural comparison is not what you want.
+        Sets are a great example of this. Consider the following two
+        sets.
+      </para>
+      <programlisting language="ocaml">
 # let (s1,s2) = (Int.Set.of_list [1;2],
                  Int.Set.of_list [2;1]);;
 val s1 : Int.Set.t = &lt;abstr&gt;
 val s2 : Int.Set.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      Logically, these two sets should be equal, and that's the result
-      that you get if you call <literal>Set.equal</literal> on them.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        Logically, these two sets should be equal, and that's the result
+        that you get if you call <literal>Set.equal</literal> on them.
+      </para>
+      <programlisting language="ocaml">
 # Set.equal s1 s2;;
 - : bool = true
 </programlisting>
-    <para>
-      But because the elements were added in different orders, the
-      layout of the trees trees will be different, and so a structural
-      comparison function will conclude that they're different.
-    </para>
-    <para>
-      Let's see what happens if we use polymorphic compare to test for
-      equality by way of the <literal>=</literal> operator. Comparing
-      the maps directly will fail at runtime because of the comparators
-      stored within the sets contain function values.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        But because the elements were added in different orders, the
+        layout of the trees underlying the sets will be different. As
+        such, a structural comparison function will conclude that
+        they're different.
+      </para>
+      <para>
+        Let's see what happens if we use polymorphic compare to test for
+        equality by way of the <literal>=</literal> operator. Comparing
+        the maps directly will fail at runtime because the comparators
+        stored within the sets contain function values.
+      </para>
+      <programlisting language="ocaml">
 # s1 = s2;;
 Exception: (Invalid_argument &quot;equal: functional value&quot;).
 </programlisting>
-    <para>
-      We can however use the function <literal>Set.to_tree</literal> to
-      expose the underlying tree without the attached comparator.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        We can however use the function <literal>Set.to_tree</literal>
+        to expose the underlying tree without the attached comparator.
+      </para>
+      <programlisting language="ocaml">
 # Set.to_tree s1 = Set.to_tree s2;;
 - : bool = false
 </programlisting>
+      <para>
+        This can cause real and quite subtle bugs. If, for example, you
+        use a map whose keys contain sets, then the map built with the
+        polymorphic comparator will behave incorrectly, separating out
+        keys that should be aggregated together. Even worse, it will
+        work sometimes and fail others, since if the sets are built in a
+        consistent order, then they will work as expected, but once the
+        order changes, the behavior will change.
+      </para>
+      <para>
+        For this reason, it's preferable to avoid polymorphic compare
+        for serious applications.
+      </para>
+      </warning>
+    </sect2>
+    <sect2 id="satisfying-the-comparable.s-interface">
+      <title>Satisfying the <literal>Comparable.S</literal>
+      interface</title>
+      <para>
+        Core's <literal>Comparable.S</literal> interface includes a lot
+        of useful functionality, including support for working with maps
+        and sets. In particular, <literal>Comparable.S</literal>
+        requires the presence of the <literal>Map</literal> and
+        <literal>Set</literal> sub-modules as well as a comparator.
+      </para>
+      <para>
+        <literal>Comparable.S</literal> is satisfied by most of the
+        types in Core, but the question arises of how to satisfy the
+        comparable interface for a new type that you design. Certainly
+        implementing all of the required functionality from scratch
+        would be an absurd amount of work.
+      </para>
+      <para>
+        The module <literal>Comparable</literal> contains a number of
+        functors to help you do just this. The simplest one of these is
+        <literal>Comparable.Make</literal>, which takes as an input any
+        module that satisfies the following interface:
+      </para>
+      <programlisting language="ocaml">
+sig
+  type t
+  val sexp_of_t : t -&gt; Sexp.t
+  val t_of_sexp : Sexp.t -&gt; t
+  val compare : t -&gt; t -&gt; int
+end
+</programlisting>
+      <para>
+        In other words, it expects a type with a comparison function as
+        well as functions for converting to and from
+        <emphasis>s-expressions</emphasis>. S-expressions are a
+        serialization format used commonly in Core, which we'll discuss
+        more in
+        <xref linkend="data-serialization-with-s-expressions"/>.
+        In the meantime, we can just use the
+        <literal>with sexp</literal> declaration that comes from the
+        <literal>sexplib</literal> syntax extension to create
+        s-expression converters for us. S-expression converters can also
+        be written by hand.
+      </para>
+      <para>
+        The following example shows how this all fits together,
+        following the same basic pattern for using functors described in
+        <xref linkend="extending-modules"/>.
+      </para>
+      <programlisting language="ocaml">
+# module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp
+      let compare t1 t2 =
+        let c = Int.Set.compare t1.foo t2.foo in
+        if c &lt;&gt; 0 then c else String.compare t1.bar t2.bar
+    end
+    include T
+    include Comparable.Make(T)
+  end;;
+</programlisting>
+      <para>
+        We don't include the full response from the top-level because it
+        is quite lengthy, but <literal>Foo_and_bar</literal> does
+        satisfy <literal>Comparable.S</literal>.
+      </para>
+      <para>
+        In the above, we wrote the comparison function by hand, but this
+        isn't strictly necessary. Core ships with a syntax extension
+        called <literal>comparelib</literal> which will create a
+        comparison function from a type definition. Using it, we can
+        rewrite the above example as follows.
+      </para>
+      <programlisting language="ocaml">
+# module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp, compare
+    end
+    include T
+    include Comparable.Make(T)
+  end;;
+</programlisting>
+      <para>
+        The comparison function created by <literal>comparelib</literal>
+        for a given type will call out to the comparison functions for
+        its component types. As a result, the <literal>foo</literal>
+        field will be compared using <literal>Int.Set.compare</literal>.
+        This is different, and sander, than the structural comparison
+        done by polymorphic compare.
+      </para>
+      <para>
+        If you want your comparison function to behave in a specific
+        way, you should still write your own comparison function by
+        hand; but if all you want is a total order suitable for creating
+        maps and sets with, then <literal>comparelib</literal> is a good
+        way to go.
+      </para>
+      <para>
+        You can also satisfy the <literal>Comparable.S</literal>
+        interface using polymorphic compare.
+      </para>
+      <programlisting language="ocaml">
+# module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp
+    end
+    include T
+    include Comparable.Poly(T)
+  end;;
+</programlisting>
+      <para>
+        That said, for reasons we discussed earlier, polymorphic compare
+        should be used sparingly.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="hashtables">
+    <title>Hashtables</title>
     <para>
-      This can cause real and quite subtle bugs. If, for example, you
-      use a map whose keys contain sets, then the map built with the
-      polymorphic comparator will behave incorrectly, separating out
-      keys that should be aggregated together. Even worse, it will work
-      sometimes and fail others, since if the sets are built in a
-      consistent order, then they will work as expected, but once the
-      order changes, the behavior will change.
+      Hashtables are the imperative cousin of maps. We walked over a
+      basic hashtable implementation in
+      <xref linkend="imperative-programming-1"/>, so in this
+      section we'll mostly discuss the pragmatics of Core's
+      <literal>Hashtbl</literal> module. We'll cover this material more
+      briefly than we did with maps, because many of the concepts are
+      shared.
     </para>
     <para>
-      For this reason, it's preferable to avoid polymorphic compare for
-      all but the smallest applications.
+      Hashtables differ from maps in a few key ways. First, hashtables
+      are mutable, meaning that adding a key/value pair to a hashtable
+      modifies the table, rather than creating a new table with the
+      binding added. Second, hashtables generally have better
+      time-complexity than maps, providing constant time lookup and
+      modifications as opposed to logarithmic for maps. And finally,
+      just as maps depend on having a comparison function for creating
+      the ordered binary tree that underlies a map, hashtables depend on
+      having a <emphasis>hash function</emphasis>,
+      <emphasis>i.e.</emphasis>, a function for converting a key to an
+      integer.
     </para>
-    </warning>
-
+    <para>
+      When creating a hashtable, we need to provide a value of type
+      <emphasis>hashable</emphasis> which includes among other things
+      the function for hashing the key type. This is analogous to the
+      comparator used for creating maps.
+    </para>
+    <programlisting language="ocaml">
+# let table = Hashtbl.create ~hashable:String.hashable ();;
+val table : (string, '_a) Hashtbl.t = &lt;abstr&gt;
+# Hashtbl.replace table ~key:&quot;three&quot; ~data:3;;
+- : unit = ()
+# Hashtbl.find table &quot;three&quot;;;
+- : int option = Some 3
+</programlisting>
+    <para>
+      The <literal>hashable</literal> value is included as part of the
+      <literal>Hashable.S</literal> interface, which is satisfied by
+      most types in Core. The <literal>Hashable.S</literal> interface
+      also includes a <literal>Table</literal> sub-module which provides
+      more convenient creation functions.
+    </para>
+    <programlisting language="ocaml">
+# let table = String.Table.create ();;
+val table : '_a String.Table.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      There is also a polymorphic <literal>hashable</literal> value,
+      corresponding to the polymorphic hash function provided by the
+      OCaml runtime, for cases where you don't have a hash function for
+      your specific type.
+    </para>
+    <programlisting language="ocaml">
+# let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
+val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      Or, equivalently:
+    </para>
+    <programlisting language="ocaml">
+# let table = Hashtbl.Poly.create ();;
+val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      Note that, unlike the comparators used with maps and sets,
+      hashables don't show up in the type of a
+      <literal>Hashtbl.t</literal>. That's because hashtables don't have
+      operations that operate on multiple hashtables that depend on
+      those tables having the same hash function, in that way that
+      <literal>Map.symmetric_diff</literal> and
+      <literal>Set.union</literal> depend on their arguments using the
+      same comparison function.
+    </para>
+    <sect2 id="satisfying-the-hashable.s-interface">
+      <title>Satisfying the <literal>Hashable.S</literal>
+      interface</title>
+      <para>
+        Most types in Core satisfy the <literal>Hashable.S</literal>
+        interface, but as with the <literal>Comparable.S</literal>
+        interface, the question remains of how one should satisfy this
+        interface with a new type. Again, the answer is to use a functor
+        to build the necessary functionality; in this case,
+        <literal>Hashable.Make</literal>. Note that we use OCaml's
+        <literal>lxor</literal> operator for doing the
+        &quot;logical&quot; (<emphasis>i.e.</emphasis>, bit-wise)
+        exclusive-or of the hashes from the component values.
+      </para>
+      <programlisting language="ocaml">
+# module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Hashable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp, compare
+      let hash t =
+        (Int.hash t.foo) lxor (String.hash t.bar)
+    end
+    include T
+    include Hashable.Make(T)
+  end;;
+</programlisting>
+      <para>
+        Note that in order to satisfy hashable, one also needs to
+        provide a comparison function. That's because Core's hashtables
+        use ordered binary tree data-structure for the hash-buckets, so
+        that performance of the table degrades gracefully in the case of
+        pathologically bad choice of hash function.
+      </para>
+      <para>
+        There is currently no analogue of <literal>comparelib</literal>
+        for auto-generation of hash-functions, so you do need to either
+        write the hash-function by hand, or use the built-in polymorphic
+        hash function, <literal>Hashtbl.hash</literal>.
+      </para>
+    </sect2>
   </sect1>
 </chapter><chapter id="command-line-parsing">
   <title>Command Line Parsing</title>
@@ -22307,33 +22559,33 @@ struct custom_operations {
     process that involves quite a few tools -- preprocessors, compilers,
     runtime libraries, linkers and assemblers. It's important how to
     understand how these fit together to help with your day-to-day
-    workflow of developing, debugging, maintaining and deploying
-    applications.
+    workflow of developing, debugging and deploying applications.
   </para>
   <para>
     OCaml has a strong emphasis on static type safety and tries to
     reject source code that doesn't meet its requirements as early as
-    possible. The compiler toolchain implements these checks as a series
-    of transformations that start with the source code. Each stage
-    checks some properties and discards information from the previous
-    stage, until the final output is low-level assembly code that no
-    longer knows anything about OCaml modules or objects.
+    possible. The compiler does this by running through a series of
+    checks and transformations, beginning from the source code. Each
+    stage normally discards some information from the previous stage
+    until the final output is low-level assembly code that doesn't knows
+    anything about OCaml modules or objects.
   </para>
   <para>
-    TODO note about how this different from JVM/NET w type erasure?
+    You don't have to do all this manually, of course. The OCaml
+    compiler frontends (<literal>ocamlc</literal> and
+    <literal>ocamlopt</literal>) run through these stages for you,
+    controlled by the command-line options your build system passes to
+    them. Sometimes though, you'll need to dive into the toolchain to
+    hunt down a bug or investigate a performance problem. This chapter
+    explains the compiler pipeline in more depth, and the tools you can
+    use to help visualise them.
   </para>
   <para>
-    Much of this complexity is hidden away via the OCaml build system.
-    However, you'll sometime need to dive into the toolchain to hunt
-    down a bug or investigate a performance regression. In these cases,
-    you can manually run a stage and examine the output more closely.
-  </para>
-  <para>
-    It's even possible to compile OCaml to run efficiently on
+    It's even possible to compile OCaml to run efficiently on foreign
     environments such as Javascript or the Java Virtual Machine. These
-    are third-party tools that extend the core compilation toolchain,
-    and so it helps to understand how everything fits together before
-    starting to use them.
+    aren't supported by the core OCaml distribution, but are third-party
+    tools available on OPAM. We'll mention these as we go through the
+    chapter so you can experiment with them too.
   </para>
   <para>
     In this chapter, you'll learn:
@@ -22358,7 +22610,8 @@ struct custom_operations {
     </listitem>
     <listitem>
       <para>
-        the native code <literal>ocamlopt</literal> code generator.
+        the native code <literal>ocamlopt</literal> code generator, and
+        debugging and profiling native code.
       </para>
     </listitem>
   </itemizedlist>
@@ -22398,25 +22651,25 @@ struct custom_operations {
         | elimination of modules and classes
         v
      Lambda
-      /  \
-     /    \ closure conversion, inlining, uncurrying,
-    v      \  data representation strategy
- Bytecode   \
-    |        +-----+
-    |             Cmm
-    |js_of_ocaml   |
-    |              | code generation
-    |              v
- Javascript     Assembly code
+      /   \
+     /     \ closure conversion, inlining, uncurrying,
+    v       \  data representation strategy
+ Bytecode    \
+    |         +-----+
+    |              Cmm
+    |js_of_ocaml    |
+    |               | code generation
+    |               v
+ Javascript      Assembly code
 </programlisting>
     <para>
-      Notice that the pipeline branches towards the end. This is because
-      OCaml has multiple compiler frontends that re-use the early stages
-      of compilation, but produce very different final outputs. The
-      bytecode interpreter is portable and lightweight (and can be
-      transformed into Javascript), whereas the native code compiler
-      generates specialized native code binaries suitable for
-      high-performance applications.
+      Notice that the pipeline branches towards the end. OCaml has
+      multiple compiler frontends that re-use the early stages of
+      compilation, but produce very different final outputs. The
+      <emphasis>bytecode interpreter</emphasis> is portable and
+      lightweight (it can even be transformed into Javascript), whereas
+      the native code compiler generates specialized executable binaries
+      suitable for high-performance applications.
     </para>
     <sidebar>
     <title>
@@ -22453,9 +22706,110 @@ struct custom_operations {
       </listitem>
     </itemizedlist>
     <para>
-      Once you've checked out a copy of the source tree, it has a few
-      sub-directories (TODO: describe depending on the contents below).
+      The source tree is split up into sub-directories. The core
+      compiler consists of:
     </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>config/</literal>: configuration directives to tailor
+          OCaml for your operating system and architecture.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>bytecomp/</literal> and <literal>byterun/</literal>:
+          byte-code compiler and runtime, including the garbage
+          collector.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>asmcomp/</literal> and <literal>asmrun/</literal>:
+          native-code compiler and runtime. The native runtime symlinks
+          many modules from the <literal>byterun</literal> directory to
+          share code, most notably the garbage collector.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>parsing/</literal>: the OCaml lexer, parser and
+          libraries for manipulating them.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>typing/</literal>: the static type checking
+          implementation and type definitions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>camlp4/</literal>: the source code macro
+          preprocessor.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>driver/</literal>: command-line interfaces for the
+          compiler tools.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      There are a number of tools and scripts also built alongside the
+      core compiler:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>debugger/</literal>: the interactive byte-code
+          debugger.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>toplevel/</literal>: interactive top-level console.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>emacs/</literal>: a <emphasis>caml-mode</emphasis>
+          for the Emacs editor.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>stdlib/</literal>: the compiler standard library,
+          including the <literal>Pervasives</literal> module.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>ocamlbuild/</literal>: build system that automates
+          common OCaml compilation modes.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>otherlibs/</literal>: optional libraries such as the
+          Unix and graphics modules.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>tools/</literal>: command-line utilities such as
+          <literal>ocamldep</literal> that are installed with the
+          compiler.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>testsuite/</literal>: regression tests for the core
+          compiler.
+        </para>
+      </listitem>
+    </itemizedlist>
     </sidebar>
     <para>
       We'll now go through each of the compilation stages and show you
@@ -26121,6 +26475,11 @@ $ opam install utop
 #require &quot;core.top&quot;
 #require &quot;core_extended&quot;
 #require &quot;async&quot;
+#require &quot;sexplib.syntax&quot;
+#require &quot;fieldslib.syntax&quot;
+#require &quot;variantslib.syntax&quot;
+#require &quot;comparelib.syntax&quot;
+#require &quot;bin_prot.syntax&quot;
 open Core.Std
 </programlisting>
       <para>
