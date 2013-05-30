@@ -169,7 +169,7 @@ that couldn't be parsed.  In the broken example the `module` keyword isn't a
 valid token at that point in parsing, so the error location information is
 correct.
 
-### Formatting source code with ocp-indent
+### Formatting source code
 
 Sadly, syntax errors do get more inaccurate sometimes depending on the nature
 of your mistake.  Try to spot the deliberate error in the following function
@@ -268,7 +268,7 @@ how to integrate it with your favourite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
 
-### Generating documentation via OCamldoc
+### Generating documentation from interfaces
 
 Whitespace and source code comments are removed during parsing and aren't
 significant in determining the semantics of the program.  However, other tools
@@ -345,7 +345,7 @@ detailed output.
 
 </tip>
 
-### Preprocessing with Camlp4
+### Preprocessing source code
 
 One powerful feature in OCaml is the facility to extend the language grammar
 without having to modify the compiler. Camlp4 is a system included with OCaml
@@ -417,7 +417,7 @@ generation dynamically. It also doesn't require a Just-In-Time (JIT) runtime
 that can be a source of unpredictable dynamic behaviour.  Instead, all code is
 simply generated at compile-time via Camlp4.
 
-### Inspecting Camlp4 output
+#### Inspecting Camlp4 output
 
 The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
@@ -1063,7 +1063,7 @@ this is the case now.  Polymorphic variants have a runtime value that's
 calculated by hashing the variant name, and so the compiler just tests each of
 these possible values in sequence.
 
-### Benchmarking pattern matching implementations
+### Benchmarking pattern matching
 
 Let's benchmark these three pattern matching techniques to quantify their
 runtime costs better.  The `Core_bench` module runs the tests thousands of
@@ -1181,13 +1181,39 @@ consists of two pieces:
 `ocamlrun` is an interpreter that uses the OCaml stack and an accumulator to
 store values, and only has seven registers in total (the program counter, stack
 pointer, accumulator, exception and argument pointers, and environment and
-global data).  It implements around 140 opcodes which form the OCaml program.
-The full details of the opcodes are available
-[online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
+global data).
 
 The big advantage of using `ocamlc` is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
-this results in predictable (but slow) execution speed.
+this results in predictable (but slow) execution speed. _TODO: more about the conversion?_
+
+You can display the bytecode instructions in textual form via `-dinstr`.  Try
+this on one of our pattern matching examples from earlier in the chapter.
+
+```console
+$ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
+	branch L2
+L1:	acc 0
+	switch 6 5 4 3/
+L6:	const 100
+	return 1
+L5:	const 101
+	return 1
+L4:	const 102
+	return 1
+L3:	const 103
+	return 1
+L2:	closure L1, 0
+	push
+	acc 0
+	makeblock 1, 0
+	pop 1
+	setglobal Pattern_monomorphic_exhaustive!
+```
+
+There are around 140 instruction opcodes in total, with many being
+optimizations for common operations such as function application at a specific
+arity.  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
 
 ### Compiling OCaml bytecode 
 
@@ -1240,7 +1266,7 @@ for compiling bytecode (notably with shared libraries or building custom
 runtimes).  Full details can be found in the
 [manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html).
 
-#### Embedding OCaml bytecode in C code
+### Embedding OCaml bytecode in C
 
 A consequence of using the bytecode compiler is that the final link phase must
 be performed by `ocamlc`.  However, you might sometimes want to embed your OCaml
