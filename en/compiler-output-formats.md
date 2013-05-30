@@ -23,8 +23,8 @@ need to help visualise them.
 
 It's even possible to compile OCaml to run efficiently on foreign environments
 such as Javascript or the Java Virtual Machine.  These aren't supported by the
-core OCaml distribution, but are third-party tools available on OPAM.  We'll
-mention these as we go through the chapter so you can experiment with them too.
+core OCaml distribution, but are available on OPAM.  We'll mention these as we
+go through the chapter so you can experiment with them too.
 
 In this chapter, we'll cover the following topics:
 
@@ -36,12 +36,15 @@ In this chapter, we'll cover the following topics:
 ## An overview of the toolchain
 
 The OCaml tools accept textual source code as input with filename extensions of
-`.ml` and `.mli` for modules and signatures respectively.  Each source file
-represents a *compilation unit* that is built separately.  The compiler
-generates intermediate files with different filename extensions to use as it
-advances through the compilation stages.  Finally, the compiler linker gathers
-together a collection of compiled compilation units and produces a standalone
-executable or library archive that can be re-used by other applications.
+`.ml` and `.mli` for modules and signatures respectively.  We explained the
+basics of the build process earlier in [xref](#files-modules-and-programs), so
+we'll assume you've built a few OCaml programs already by this point.
+
+Each source file represents a *compilation unit* that is built separately.  The
+compiler generates intermediate files with different filename extensions to use
+as it advances through the compilation stages.  The linker takes a collection
+of compiled units and produces a standalone executable or library archive that
+can be re-used by other applications.
 
 The overall compilation pipeline looks like this:
 
@@ -78,10 +81,9 @@ The overall compilation pipeline looks like this:
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
 frontends that re-use the early stages of compilation, but produce very
-different final outputs.  The *bytecode interpreter* is portable and
-lightweight (it can even be transformed into Javascript), whereas the native
-code compiler generates specialized executable binaries suitable for
-high-performance applications.
+different final outputs. The *bytecode interpreter* is portable and can even be
+transformed into Javascript. The *native code compiler* generates specialized
+executable binaries suitable for high-performance applications.
 
 <sidebar>
 <title>Obtaining the compiler source code</title>
@@ -121,10 +123,6 @@ We'll go through each of the compilation stages now and explain how that'll be
 useful to you during day-to-day OCaml development.
 
 ## Parsing source code
-
-We explained the basics of the build process earlier in
-[xref](#files-modules-and-programs), so we'll assume you've built a few OCaml
-programs already.
 
 When a source file is passed to the OCaml compiler, it parses the textual
 source code into a more structured data type known as an Abstract Syntax Tree
