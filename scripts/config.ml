@@ -63,6 +63,7 @@ let from_yminsky =
   ; "msaffer"                 (* Matthew Saffer <msaffer@janestreet.com> *)
   ; "orbitz"                  (* Malcolm Matalka <mmatalka@gmail.com> *)
   ; "aprimus"                 (* TODO: Aryeh Primus <aryeh@primusgroup.org> *)
+  ; "davidbalbert"            (* TODO: dave@hackerschool.com *)
 ]
 
 let js_interns =
@@ -77,6 +78,8 @@ let js_interns =
   ; "nicolasavru"            (* nicolasavru@gmail.com    *)
   ; "m-alvarez"              (* TODO mario.alvarezp@estudiante.uam.es *)
   ; "polasek"                (* TODO Jan Polášek <jp581@cam.ac.uk> *)
+  ; "mkandalf"               (* TODO nmeyer@janestreet.com *)
+  ; "denyphi"                (* TODO pdenys@janestreet.com *)
   ]
 
 let from_email =
