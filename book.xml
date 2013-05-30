@@ -23509,7 +23509,7 @@ Error: The implementation test.ml does not match the interface test.cmi:
         type</emphasis> that is the most general choice from the
         possible inferences. Manual type annotations can always
         specialize the type explicitly, but the automatic inference
-        selects the most general (or &quot;principal&quot;) type.
+        selects the most general type unless told otherwise.
       </para>
       <para>
         OCaml does has some language extensions which strain the limits
@@ -24120,7 +24120,7 @@ Estimated testing time 30s (change using -quota SECS).
       Learning more about pattern matching compilation
       </title>
       <para>
-        Pattern matching is a fundamental part of OCaml programming.
+        Pattern matching is an important part of OCaml programming.
         You'll often encounter deeply nested pattern matches over
         complex data structures in real code. A good paper that
         describes the fundamental algorithms implemented in OCaml is the
@@ -24155,8 +24155,8 @@ Estimated testing time 30s (change using -quota SECS).
     <itemizedlist>
       <listitem>
         <para>
-          <literal>ocamlc</literal> compiles files into a simple
-          bytecode that is a close mapping to the lambda form.
+          <literal>ocamlc</literal> compiles files into a bytecode that
+          is a close mapping to the lambda form.
         </para>
       </listitem>
       <listitem>
@@ -24194,18 +24194,18 @@ Estimated testing time 30s (change using -quota SECS).
         <literal>main</literal> function like C does).
       </para>
       <para>
-        A typical OCaml library consists of multiple modules (and hence
-        multiple <literal>cmo</literal> files).
-        <literal>ocamlc</literal> can combine these into a single
-        <literal>cma</literal> bytecode archive by using the
-        <literal>-a</literal> flag. The objects in the library are
-        linked as regular <literal>cmo</literal> files in the order
-        specified when the library file was built. However, if an object
-        file within the library isn't referenced elsewhere in the
-        program, it is not linked unless the <literal>-linkall</literal>
-        flag forces it to be included. This behaviour is analogous to
-        how C handles object files and archives (<literal>.o</literal>
-        and <literal>.a</literal> respectively).
+        A typical OCaml library consists of multiple modules and hence
+        multiple <literal>cmo</literal> files. <literal>ocamlc</literal>
+        can combine these into a single <literal>cma</literal> bytecode
+        archive by using the <literal>-a</literal> flag. The objects in
+        the library are linked as regular <literal>cmo</literal> files
+        in the order specified when the library file was built. However,
+        if an object file within the library isn't referenced elsewhere
+        in the program, it is not linked unless the
+        <literal>-linkall</literal> flag forces it to be included. This
+        behaviour is analogous to how C handles object files and
+        archives (<literal>.o</literal> and <literal>.a</literal>
+        respectively).
       </para>
     </sect2>
     <sect2 id="linking-ocaml-bytecode">
