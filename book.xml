@@ -22812,28 +22812,31 @@ struct custom_operations {
     </itemizedlist>
     </sidebar>
     <para>
-      We'll now go through each of the compilation stages and show you
-      related tools that'll be useful to you during day-to-day OCaml
-      development.
+      We'll go through each of the compilation stages now and explain
+      how that'll be useful to you during day-to-day OCaml development.
     </para>
   </sect1>
   <sect1 id="parsing-source-code">
     <title>Parsing source code</title>
     <para>
-      The first thing the compiler does is parse the input source files
-      into a more structured data type. The compiler lexes the source
-      text into a stream of tokens and parses them into an Abstract
-      Syntax Tree (AST) data structure. This parser is implemented in
-      OCaml itself, using the techniques described earlier in
-      <xref linkend="parsing-with-ocamllex-and-menhir"/>. The
-      lexer and parser rules can be found in the
-      <literal>ocaml/parsing/</literal> directory in the source
-      distribution.
+      We explained the basics of the build process earlier in
+      <xref linkend="files-modules-and-programs"/>, so we'll
+      assume you've built a few OCaml programs already.
     </para>
     <para>
-      Here's a syntax error that we obtain by using the
-      <literal>module</literal> keyword incorrectly inside a
-      <literal>let</literal> binding.
+      When a source file is passed to the OCaml compiler, it parses the
+      textual source code into a more structured data type known as an
+      Abstract Syntax Tree (AST). The parsing logic is implemented in
+      OCaml itself using the techniques described earlier in
+      <xref linkend="parsing-with-ocamllex-and-menhir"/>. The
+      lexer and parser rules can be found in the
+      <literal>parsing</literal> directory in the source distribution.
+    </para>
+    <para>
+      The compiler emits a <emphasis>syntax error</emphasis> if it fails
+      to convert the source code into an AST. Here's an example syntax
+      error that we obtain by using the <literal>module</literal>
+      keyword incorrectly inside a <literal>let</literal> binding.
     </para>
     <programlisting language="ocaml">
 (* broken_module.ml *)
@@ -22842,8 +22845,22 @@ let _ =
   ()
 </programlisting>
     <para>
-      The fixed version of this locally opens the
-      <literal>module</literal> correctly.
+      This fails because the <literal>module A = B</literal> syntax must
+      be wrapped in a <literal>let</literal> binding unless it's a
+      top-level phrase. Parsing immediately eliminates code which
+      doesn't match basic syntactic requirements, so the first example
+      will result in a syntax error when we run the OCaml compiler on
+      it.
+    </para>
+    <programlisting>
+$ ocamlc -c broken_module.ml 
+File &quot;broken_module.ml&quot;, line 3, characters 2-8:
+Error: Syntax error
+</programlisting>
+    <para>
+      The fixed version of this source code creates the
+      <literal>MyString</literal> module correctly via a local open, and
+      compiles successfully.
     </para>
     <programlisting language="ocaml">
 (* fixed_module.ml *)
@@ -22852,30 +22869,18 @@ let _ =
   ()
 </programlisting>
     <para>
-      Parsing immediately eliminates code which doesn't match basic
-      syntactic requirements, so the first example will result in a
-      syntax error when we run the OCaml compiler on it.
-    </para>
-    <programlisting>
-$ ocamlc -c broken_module.ml 
-File &quot;broken_module.ml&quot;, line 3, characters 2-8:
-Error: Syntax error
-$ ocamlc -c fixed_module.ml 
-</programlisting>
-    <para>
       The syntax error points to the line and character number of the
-      first token that couldn't be parsed. In the broken example, the
-      <literal>module</literal> keyword shouldn't be encountered at that
-      point in the <literal>let</literal> binding, so the error location
-      information is correct.
+      first token that couldn't be parsed. In the broken example the
+      <literal>module</literal> keyword isn't a valid token at that
+      point in parsing, so the error location information is correct.
     </para>
     <sect2 id="formatting-source-code-with-ocp-indent">
       <title>Formatting source code with
       <literal>ocp-indent</literal></title>
       <para>
-        Sadly, syntax errors do get more inaccurate sometimes,
-        particularly in large codebases. Try to spot the deliberate
-        error in the following function definitions.
+        Sadly, syntax errors do get more inaccurate sometimes depending
+        on the nature of your mistake. Try to spot the deliberate error
+        in the following function definitions.
       </para>
       <programlisting language="ocaml">
 (* follow_on_function.ml *)
@@ -22895,7 +22900,7 @@ let _ =
   ()
 </programlisting>
       <para>
-        When you compile this file, you'll get a syntax error.
+        When you compile this file you'll get a syntax error.
       </para>
       <programlisting>
 $ ocamlc -c follow_on_function.ml
@@ -22909,16 +22914,16 @@ Error: Syntax error
         definition. There's an extra semicolon at the end of the first
         definition that causes the second definition to become part of
         the first <literal>let</literal> binding. This eventually
-        results in a syntax error in the second function.
+        results in a parsing error at the very end of the second
+        function.
       </para>
       <para>
         This class of bug (due to a single errant character) can be hard
         to spot in a large body of code. Luckily, there's a great tool
-        available in OPAM called <literal>ocp-indent</literal> that
-        applies structured indenting rules to your source code. This not
-        only beautifies your code layout, but it also works with
-        partially written code and makes this syntax error much more
-        obvious.
+        in OPAM called <literal>ocp-indent</literal> that applies
+        structured indenting rules to your source code on a line-by-line
+        basis. This not only beautifies your code layout, but it also
+        makes this syntax error much easier to locate.
       </para>
       <para>
         Let's run our erronous file through
@@ -22947,8 +22952,9 @@ let _ =
         The <literal>add_and_print</literal> definition has been
         indented as if it were part of the first
         <literal>concat_and_print</literal> definition, and the errant
-        semicolon is now much easier to spot. If we remove that
-        semicolon, then the result is exactly what we expect.
+        semicolon is now much easier to spot. We just need to remove
+        that semicolon and re-run <literal>ocp-indent</literal> to
+        verify that the syntax is correct.
       </para>
       <programlisting>
 $ ocp-indent follow_on_function_fixed.ml 
@@ -22967,6 +22973,7 @@ let _ =
   let _ = add_and_print 1 2 in
   let _ = concat_and_print &quot;a&quot; &quot;b&quot; in
   ()
+
 $ ocamlc -i follow_on_function_fixed.ml 
 val concat_and_print : string -&gt; string -&gt; string
 val add_and_print : int -&gt; int -&gt; int
@@ -22974,35 +22981,34 @@ val add_and_print : int -&gt; int -&gt; int
       <para>
         The <literal>ocp-indent</literal>
         <ulink url="https://github.com/OCamlPro/ocp-indent">homepage</ulink>
-        has details on how to integrate it with your favourite editor.
-        All the Core libraries are formatted by
-        <literal>ocp-indent</literal>, so it's a good idea to match this
-        style when you publish your own open-source project online.
+        documents how to integrate it with your favourite editor. All
+        the Core libraries are formatted using it to ensure consistency,
+        and it's a good idea to do this before publishing your own
+        source code online.
       </para>
     </sect2>
     <sect2 id="generating-documentation-via-ocamldoc">
       <title>Generating documentation via
       <literal>ocamldoc</literal></title>
       <para>
-        Whitespace and source code comments are removed during parsing
-        and aren't significant in determining the semantics of the
-        program for compilation purposes. However, other tools in the
-        OCaml distribution can interpret them for their own ends.
+        Whitespace and source code comments aren't significant in
+        determining the semantics of the program, and are removed during
+        the parsing process. However, other tools in the OCaml
+        distribution can interpret comments for their own ends.
       </para>
       <para>
-        The <literal>ocamldoc</literal> tool looks for specially
-        formatted comments in the source code to generate documentation
-        bundles. These comments are combined with the function
-        definitions and signatures, and output as structured
-        documentation in a variety of formats.
-        <literal>ocamldoc</literal> support generating HTML pages, LaTeX
-        and PDF documents, UNIX manual pages, and even module dependency
-        graphs that can be viewed using
+        The <literal>ocamldoc</literal> tool uses specially formatted
+        comments in the source code to generate documentation bundles.
+        These comments are combined with the function definitions and
+        signatures and output as structured documentation in a variety
+        of formats. It can generate HTML pages, LaTeX and PDF documents,
+        UNIX manual pages and even module dependency graphs that can be
+        viewed using
         <ulink url="http://www.graphviz.org">Graphviz</ulink>.
       </para>
       <para>
         Here's a sample of some source code that's been annotated with
-        <literal>ocamldoc</literal>-style comments.
+        <literal>ocamldoc</literal> comments.
       </para>
       <programlisting language="ocaml">
 (** example.ml: The first special comment of the file is the comment 
@@ -23028,10 +23034,10 @@ let what_is_the_weather_in location =
 </programlisting>
       <para>
         The <literal>ocamldoc</literal> comments are distinguished by
-        beginning with the double asterix, with some text formatting
-        conventions within the comment to mark metadata (most notably,
-        the <literal>@tag</literal> fields to mark specific properties
-        such as the author or argument description).
+        beginning with the double asterix, with formatting conventions
+        within the comment to mark metadata (most notably, the
+        <literal>@tag</literal> fields to mark specific properties such
+        as the author of that section of code).
       </para>
       <para>
         Try compiling the HTML documentation and UNIX man pages by
@@ -23045,10 +23051,10 @@ $ man -M man Example
 </programlisting>
       <para>
         You should now have HTML files inside the
-        <literal>html/</literal> directory, and be able to view the UNIX
-        manual pages held in <literal>man/man3</literal>. There are
-        quite a few comment formats and options to control the output,
-        so refer to the
+        <literal>html/</literal> directory and also be able to view the
+        UNIX manual pages held in <literal>man/man3</literal>. There are
+        quite a few comment formats and options to control the output
+        for the various backends. Refer to the
         <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml
         manual</ulink> for the complete list.
       </para>
@@ -23073,8 +23079,7 @@ $ man -M man Example
         </listitem>
         <listitem>
           <para>
-            The custom generators available
-            <ulink url="https://gitorious.org/ocamldoc-generators/ocamldoc-generators">here</ulink>
+            <ulink url="https://gitorious.org/ocamldoc-generators/ocamldoc-generators">ocamldoc-generators</ulink>
             add support for Bibtex references within comments and
             generating literate documentation that embeds the code
             alongside the comments.
@@ -23083,7 +23088,7 @@ $ man -M man Example
         <listitem>
           <para>
             JSON output is available via <literal>odoc_json</literal>
-            (TODO: avsm, pull out of Xen).
+            (TODO: pull out of Xen).
           </para>
         </listitem>
       </itemizedlist>
@@ -23093,11 +23098,14 @@ $ man -M man Example
       <title>Preprocessing with <literal>camlp4</literal></title>
       <para>
         One powerful feature in OCaml is the facility to extend the
-        language grammar via the <literal>camlp4</literal> macro tool.
-        Camlp4 modules can register new keywords with the lexer and
-        later transform these keywords (or indeed, any portion of the
-        input program) into conventional OCaml code that can be
-        understood by the rest of the compiler.
+        language grammar without having to modify the compiler.
+        <literal>camlp4</literal> is a system included with OCaml for
+        writing extensible parsers. It provides a set of OCaml libraries
+        that are used to define grammars and dynamically loadable syntax
+        extensions of such grammars. Camlp4 modules register new
+        language keywords and later transform these keywords (or indeed,
+        any portion of the input program) into conventional OCaml code
+        that can be understood by the rest of the compiler.
       </para>
       <para>
         We've already seen several examples of using
@@ -23124,11 +23132,10 @@ $ man -M man Example
         </listitem>
       </itemizedlist>
       <para>
-        These all extend the language with a single
-        <literal>with</literal> keyword that extends a
-        <literal>type</literal> declaration with additional directives
-        that cause code to be generated. For example, here's a trivial
-        use of Sexplib and Fieldslib.
+        These all extend the language in quite a minimal way by adding a
+        <literal>with</literal> keyword to type declarations to signify
+        that extra code should be generated from that declaration. For
+        example, here's a trivial use of Sexplib and Fieldslib.
       </para>
       <programlisting language="ocaml">
 (* type_conv_example.ml *)
@@ -23141,7 +23148,9 @@ type t = {
 </programlisting>
       <para>
         Compiling this code will normally give you a syntax error if you
-        do so without <literal>camlp4</literal>.
+        do so without <literal>camlp4</literal> since the
+        <literal>with</literal> keyword isn't normally allowed after a
+        type definition.
       </para>
       <programlisting>
 $ ocamlfind ocamlc -c type_conv_example.ml
@@ -23149,9 +23158,9 @@ File &quot;type_conv_example.ml&quot;, line 7, characters 2-6:
 Error: Syntax error
 </programlisting>
       <para>
-        Now add in the ocamlfind syntax extension packages for
+        Now add in the syntax extension packages for
         <literal>fieldslib</literal> and <literal>sexplib</literal>, and
-        everything compiles again.
+        everything will compile again.
       </para>
       <programlisting>
 $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
@@ -23165,46 +23174,44 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         compiler to run the preprocessor during its parsing phase.
       </para>
       <para>
-        The <literal>-package</literal> flag adds third-party packages
-        as normal, but the <literal>.syntax</literal> suffix in the
-        package name is a convention that indicate that these are
-        <literal>camlp4</literal> preprocessors instead of normal
-        libraries. These modules are dynamically loaded into
-        <literal>camlp4o</literal> which then parses and rewrites the
-        input source code into conventional OCaml code that has no trace
-        of the new keywords. The compiler continues on to compile this
-        transformed code with no knowledge of the preprocessor's
-        actions.
+        The <literal>-package</literal> flag imports other OCaml
+        libraries. The <literal>.syntax</literal> suffix in the package
+        name is a convention that indicates these libraries are
+        preprocessors that should be run during parsing. The syntax
+        extension modules are dynamically loaded into the
+        <literal>camlp4o</literal> command which rewrites the input
+        source code into conventional OCaml code that has no trace of
+        the new keywords. The compiler then compiles this transformed
+        code with no knowledge of the preprocessor's actions.
       </para>
       <para>
         Both <literal>fieldslib</literal> and <literal>sexplib</literal>
-        need this <literal>with</literal> keyword, so there is a common
-        preprocessor library called <literal>type_conv</literal> that
-        provides the extension framework for them to use. Type_conv
-        defines the <literal>with</literal> grammar extension and
+        need this new <literal>with</literal> keyword and they both
+        can't register the same extension. A preprocessor library called
+        <literal>type_conv</literal> provides the common extension
+        framework for them to use. Type_conv defines the
+        <literal>with</literal> grammar extension and
         <literal>ocamlfind</literal> ensures that it's loaded before
         <literal>variantslib</literal> or <literal>sexplib</literal>.
       </para>
       <para>
-        The preprocessor extensions can now generate boiler-plate OCaml
-        code based on the type definition. This approach avoids the
-        inevitable performance hit of doing this generation dynamically,
-        but also doesn't require a complex Just-In-Time (JIT) runtime
-        that is a source of unpredictable dynamic behaviour. Instead,
-        all code is generated at compilation time via
-        <literal>camlp4</literal>.
+        The preprocessor extensions generate boilerplate OCaml code
+        based on the type definition. This avoids the inevitable
+        performance hit of doing the code generation dynamically. It
+        also doesn't require a Just-In-Time (JIT) runtime that can be a
+        source of unpredictable dynamic behaviour. Instead, all code is
+        simply generated at compile-time via <literal>camlp4</literal>.
       </para>
     </sect2>
     <sect2 id="inspecting-camlp4-output">
       <title>Inspecting <literal>camlp4</literal> output</title>
       <para>
-        All <literal>camlp4</literal> modules accept an input AST and
-        output a modified one. If you're not familiar with the
-        <literal>camlp4</literal> module in question, then how do you
-        figure out what changes it's made to your code? The first
-        obvious way is to read the documentation that accompanies the
-        extension. Another more direct way is to use the top-level to
-        explore the extension's behaviour, or to run
+        The syntax extensions accept an input AST and output a modified
+        one. If you're not familiar with the <literal>camlp4</literal>
+        module in question, how do you figure out what changes it's made
+        to your code? The obvious way is to read the documentation that
+        accompanies the extension. Another more direct approach is to
+        use the top-level to explore the extension's behaviour or run
         <literal>camlp4</literal> manually yourself to see the
         transformation in action.
       </para>
@@ -23212,40 +23219,41 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         <title>Using <literal>camlp4</literal> in the interactive
         top-level</title>
         <para>
-          The <literal>utop</literal> top-level can run phrase that you
-          type in through <literal>camlp4</literal> automatically. To
-          get this to work, you should have at least these lines in your
-          <literal>~/.ocamlinit</literal> file in your home directory
-          (the contents of this file are automatically executed every
-          time you run <literal>utop</literal>, so you can run them by
-          hand too).
+          The <literal>utop</literal> top-level can run the phrases that
+          you type through <literal>camlp4</literal> automatically. You
+          should have at least these lines in your
+          <literal>~/.ocamlinit</literal> file in your home directory.
+          The contents of this file are automatically executed every
+          time you run <literal>utop</literal>. See
+          <xref linkend="installation"/> for more details.
         </para>
         <programlisting>
 #use &quot;topfind&quot;
 #camlp4o
 </programlisting>
         <para>
-          The first directive loads the extra
-          <literal>ocamlfind</literal> top-level commands, which let you
-          load <literal>ocamlfind</literal> packages directly (including
-          all their dependent packages). The second directive instructs
-          the top-level to filter all future phrases via
-          <literal>camlp4</literal>.
+          The first directive loads the <literal>ocamlfind</literal>
+          top-level interface that lets you require
+          <literal>ocamlfind</literal> packages (including all their
+          dependent packages). The second directive instructs the
+          top-level to filter all phrases via <literal>camlp4</literal>.
+          You can now run <literal>utop</literal> and load the syntax
+          extensions in. We'll use the <literal>comparelib</literal>
+          syntax extension for our experiments.
         </para>
         <para>
-          You can now run <literal>utop</literal> and load the syntax
-          extension you want to experiment with. We'll show you the
-          <literal>comparelib</literal> syntax extension from Core.
-          OCaml provides a polymorphic comparison operator that inspects
-          the runtime representation of two values to see if they are
-          equal. As we noted in
-          <xref linkend="maps-and-hashtables"/>, this is not
-          as efficient or as safe as defining explicit comparison
-          functions between values.
+          OCaml provides a built-in polymorphic comparison operator that
+          inspects the runtime representation of two values to see if
+          they're equal. As we noted in
+          <xref linkend="maps-and-hashtables"/>, the
+          polymorphic comparison is less efficient than defining
+          explicit comparison functions between values. However, it
+          quickly become tedious to manually define comparison functions
+          for complex type definitions.
         </para>
         <para>
           Let's see how <literal>comparelib</literal> solves this
-          problem in <literal>utop</literal>.
+          problem by running it in <literal>utop</literal>.
         </para>
         <programlisting language="ocaml">
 # #require &quot;comparelib.syntax&quot; ;;
@@ -23259,29 +23267,27 @@ val compare : t -&gt; t -&gt; int = &lt;fun&gt;
 val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;
 </programlisting>
         <para>
-          The first type definition of <literal>t</literal> is a
-          standard OCaml phrase and results in the expected output. The
-          second one includes the <literal>with compare</literal>
-          directive. This is intercepted by
-          <literal>comparelib</literal> and turned into two new
-          functions that are generated from the type into the
-          <literal>compare</literal> and <literal>compare_t</literal>
-          functions.
+          The first definition of <literal>t</literal> is a standard
+          OCaml phrase and results in the expected output. The second
+          one includes the <literal>with compare</literal> directive.
+          This is intercepted by <literal>comparelib</literal> and
+          transformed into the original type definition with two new
+          functions also incuded.
         </para>
       </sect3>
       <sect3 id="running-camlp4-directly-on-the-source-code">
         <title>Running <literal>camlp4</literal> directly on the source
         code</title>
         <para>
-          While the top-level is quick and useful to figure out the
-          function signatures generated from the extensions, how can we
-          see what these functions actually do? You can't do this from
-          <literal>utop</literal> directly, since it embeds the
-          <literal>camlp4</literal> compilation as an automated part of
+          While the top-level is a quick and useful to examine the
+          signatures generated from the extensions, how can we see what
+          these new functions actually do? You can't do this from
+          <literal>utop</literal> directly since it embeds the
+          <literal>camlp4</literal> invocation as an automated part of
           its operation.
         </para>
         <para>
-          Let's turn to the command-line to inspect the result of the
+          Let's turn to the command-line to obtain the result of the
           <literal>comparelib</literal> transformation instead. Create a
           file that contains the type declaration from earlier:
         </para>
@@ -23306,12 +23312,11 @@ ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
 camlp4o -printer o $INCLUDE $ARCHIVES $1
 </programlisting>
         <para>
-          This shell script uses the <literal>ocamlfind</literal>
-          package manager to list the include and library paths needed
-          by <literal>comparelib</literal>. The final command invokes
-          the <literal>camlp4o</literal> preprocessor directly and
-          outputs the resulting AST to standard output as textual source
-          code.
+          This script uses the <literal>ocamlfind</literal> package
+          manager to list the include and library paths needed by
+          <literal>comparelib</literal>. The final command invokes the
+          <literal>camlp4o</literal> preprocessor with these paths and
+          outputs the resulting AST to standard output.
         </para>
         <programlisting>
 $ sh camlp4_dump comparelib_test.ml
@@ -23337,12 +23342,12 @@ let compare_t = compare
 let _ = compare_t
 </programlisting>
         <para>
-          The output code contains the original type definition
-          accompanied by some automatically generated code that
-          implements an explicit comparison function for each field in
-          the record. If you're using the extension in your compiler
-          command-line, this generated code is then compiled as if you
-          had typed it in yourself.
+          The output contains the original type definition accompanied
+          by some automatically generated code that implements an
+          explicit comparison function for each field in the record. If
+          you're using the extension in your compiler command-line, this
+          generated code is then compiled as if you had typed it in
+          yourself.
         </para>
         <para>
           Another useful feature of <literal>type_conv</literal> is that
@@ -23368,20 +23373,21 @@ val compare : t -&gt; t -&gt; int
         Don't overdo the syntax extensions
         </title>
         <para>
-          Syntax extensions are a very powerful extension mechanism that
-          can completely alter your source code's layout and style. Core
-          includes a very conservative set of extensions that minimise
-          the syntax changes. There are a number of third-party
-          libraries that are much more ambitious, such as introducing
-          whitespace-sensitive indentation or even building entirely new
-          embedded languages using OCaml as a host language.
+          Syntax extensions are a powerful extension mechanism that can
+          completely alter your source code's layout and style. Core
+          includes a very conservative set of extensions that take care
+          to minimise the syntax changes. There are a number of
+          third-party libraries that are much more ambitious -- some
+          introduce whitespace-sensitive indentation while others build
+          entirely new embedded languages using OCaml as a host
+          language.
         </para>
         <para>
           While it's tempting to compress all your boiler-plate code
           into <literal>camlp4</literal> extensions, it can make your
           source code much harder for other people to quickly read and
           understand. Core mainly focuses on type-driven code generation
-          using the <literal>type_conv</literal> extension, and doesn't
+          using the <literal>type_conv</literal> extension and doesn't
           fundamentally change the OCaml syntax.
         </para>
         <para>
@@ -23395,18 +23401,20 @@ val compare : t -&gt; t -&gt; int
         </para>
         </note>
         <para>
-          We've only shown you how to use <literal>camlp4</literal>
-          extensions here. The full details of building new extensions
+          We've deliberately only shown you how to use
+          <literal>camlp4</literal> extensions here, and not how to
+          build your own. The full details of building new extensions
           with <literal>camlp4</literal> are fairly daunting and could
-          be the subject of an entirely new book. The best resources to
-          start with this are the online
+          be the subject of an entirely new book.
+        </para>
+        <para>
+          The best resources to get started are the online
           <ulink url="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
-          wiki</ulink> and also by searching for existing extensions
-          using OPAM and seeing how they implement their particular
-          grammar extensions. A series of
+          wiki</ulink>, and using OPAM to obtain existing camlp4
+          extensions and inspecting their source code. A series of
           <ulink url="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
-          posts</ulink> are also a useful guide to the internals of
-          extensions.
+          posts</ulink> by Jake Donham also serve as a useful guide to
+          the internals of syntax extensions.
         </para>
       </sect3>
     </sect2>
