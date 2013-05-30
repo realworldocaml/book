@@ -788,8 +788,8 @@ searched for `cmi` files.  The `Pervasives` module from the standard library
 will also be opened by default in every compilation unit.  The standard library
 location is obtained by running `ocamlc -where`, and can be overridden by
 setting the `CAMLLIB` environment variable.  Needless to say, don't override
-the default unless you have a good reason to, such as setting up a
-cross-compilation environment.
+the default path unless you have a good reason to (such as setting up a
+cross-compilation environment).
 
 <sidebar>
 <title>Inspecting compilation units with `ocamlobjinfo`</title>
