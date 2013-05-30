@@ -3,34 +3,34 @@
 Compiling source code into executable programs is a fairly complex process that
 involves quite a few tools -- preprocessors, compilers, runtime libraries,
 linkers and assemblers.  It's important how to understand how these fit
-together to help with your day-to-day workflow of developing, debugging,
-maintaining and deploying applications.
+together to help with your day-to-day workflow of developing, debugging and
+deploying applications.
 
 OCaml has a strong emphasis on static type safety and tries to reject source
 code that doesn't meet its requirements as early as possible.  The compiler
-toolchain implements these checks as a series of transformations that start
-with the source code. Each stage checks some properties and discards
-information from the previous stage, until the final output is low-level
-assembly code that no longer knows anything about OCaml modules or objects.
+does this by running through a series of checks and transformations, beginning
+from the source code.  Each stage normally discards some information from the
+previous stage until the final output is low-level assembly code that doesn't
+knows anything about OCaml modules or objects.
 
-TODO note about how this different from JVM/NET w type erasure?
+You don't have to do all this manually, of course.  The OCaml compiler
+frontends (`ocamlc` and `ocamlopt`) run through these stages for you,
+controlled by the command-line options your build system passes to them.
+Sometimes though, you'll need to dive into the toolchain to hunt down a bug or
+investigate a performance problem.  This chapter explains the compiler pipeline
+in more depth, and the tools you can use to help visualise them.
 
-Much of this complexity is hidden away via the OCaml build system.  However,
-you'll sometime need to dive into the toolchain to hunt down a bug or
-investigate a performance regression.  In these cases, you can manually run a
-stage and examine the output more closely.
-
-It's even possible to compile OCaml to run efficiently on environments such as
-Javascript or the Java Virtual Machine.  These are third-party tools that
-extend the core compilation toolchain, and so it helps to understand how
-everything fits together before starting to use them.
+It's even possible to compile OCaml to run efficiently on foreign environments
+such as Javascript or the Java Virtual Machine.  These aren't supported by the
+core OCaml distribution, but are third-party tools available on OPAM.  We'll
+mention these as we go through the chapter so you can experiment with them too.
 
 In this chapter, you'll learn:
 
 * the compilation pipeline and what each stage represents.
 * source preprocessing via `camlp4` and the intermediate forms.
 * the bytecode `ocamlc` compiler and `ocamlrun` interpreter.
-* the native code `ocamlopt` code generator.
+* the native code `ocamlopt` code generator, and debugging and profiling native code.
 
 ## An overview of the toolchain
 
