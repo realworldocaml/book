@@ -313,11 +313,11 @@ way that polymorphic compare does.
 
 Sometimes, instead of keeping track of a set of key/value pairs, you
 just want a data-type for keeping track of a set of keys.  You could
-just build this on top of the map type, by representing a set of
-values by a map where the type of the data is `unit`.  A more
-idiomatic (and efficient) solution is to use Core's set type, which is
-similar in design and spirit to the map type.  Here's a simple
-example:
+build this on top of a map by representing a set of values by a map
+whose data type is `unit`.  But a more idiomatic (and efficient)
+solution is to use Core's set type, which is similar in design and
+spirit to the map type, while having an API better tuned to working
+with sets, and a lower memory footprint.  Here's a simple example:
 
 ```ocaml
 # let dedup ~comparator l =
@@ -330,12 +330,10 @@ val dedup : comparator:('a, 'b) Core.Comparator.t_ -> 'a list -> 'a list =
 - : int list = [2; 3; 7; 8; 10]
 ```
 
-In addition to the operators you would expect to have in map, sets,
-also support other operations you would expect for sets, including
-functions for computing unions, intersections and set differences, as
-well as testing for whether one set is a subset of another.  And, as
-with maps, we can create sets based on type-specific comparators or on
-the polymorphic comparato.rhe pr
+In addition to the operators you would expect to have for maps, sets
+support the traditional set operations, including union, intersection
+and set difference.  And, as with maps, we can create sets based on
+type-specific comparators or on the polymorphic comparator.
 
 <warning> <title> The perils of polymorphic compare </title>
 
@@ -413,13 +411,14 @@ serious applications.
 
 ### Satisfying the `Comparable.S` interface
 
-Core's `Comparable.S` interface includes a lot of useful support for
-working with maps and sets, in particular, the presence of a
-comparator as well as the `Map` and `Set` sub-modules.
+Core's `Comparable.S` interface includes a lot of useful
+functionality, including support for working with maps and sets.  In
+particular, `Comparable.S` requires the presence of the `Map` and
+`Set` sub-modules as well as a comparator.
 
-`Comparable.S` is already satisfied by most of the modules in Core,
-but the question arises of how to satisfy the comparable interface for
-a custom type that you design, since implementing all of this
+`Comparable.S` is satisfied by most of the types in Core, but the
+question arises of how to satisfy the comparable interface for a new
+type that you design.  Certainly implementing all of the required
 functionality from scratch would be an absurd amount of work.
 
 The module `Comparable` contains a number of functors to help you do
@@ -427,27 +426,26 @@ just this.  The simplest one of these is `Comparable.Make`, which
 takes as an input any module that satisfies the following interface:
 
 ```ocaml
-module type Arg : sig
+sig
+  type t
   val sexp_of_t : t -> Sexp.t
   val t_of_sexp : Sexp.t -> t
   val compare : t -> t -> int
 end
 ```
 
-In other words, it expects the input module to support a comparison
-function with the default signature, and it expects it to have
-functions for converting to and from s-expressions, a serialization
-format that we'll discuss more in
-[xref](#data-serialization-with-s-expressions).  In this case, we'll
-use the `with sexp` declaration that comes from the `sexplib` syntax
-extension to create s-expression converters for us, but such
-converters can also be written by hand.
+In other words, it expects a type with a comparison function as well
+as functions for converting to and from _s-expressions_.
+S-expressions are a serialization format used commonly in Core, which
+we'll discuss more in [xref](#data-serialization-with-s-expressions).
+In the meantime, we can just use the `with sexp` declaration that
+comes from the `sexplib` syntax extension to create s-expression
+converters for us.  S-expression converters can also be written by
+hand.
 
-Here's an example of how you can make a type satisfy `Comparable.S`
-using the `Comparable.Make` functor to generate most of the necessary
-functionality.  This follows the same basic pattern for using functors
-described in [xref](#extending-modules).  We do need to provide a
-comparison function, though, which we'll just do by hand.
+The following example shows how this all fits together, following the
+same basic pattern for using functors described in
+[xref](#extending-modules).
 
 ```ocaml
 # module Foo_and_bar : sig
@@ -468,11 +466,10 @@ comparison function, though, which we'll just do by hand.
 We don't include the full response from the top-level because it is
 quite lengthy, but `Foo_and_bar` does satisfy `Comparable.S`.
 
-We don't necessarily need to write the comparison function by hand.
-Core ships with another syntax extension called `comparelib` which
-will create a comparison function based on a type definition.  Using
-it, we can rewrite the above example as follows without changing the
-behavior.
+In the above, we wrote the comparison function by hand, but this isn't
+strictly necessary.  Core ships with a syntax extension called
+`comparelib` which will create a comparison function from a type
+definition.  Using it, we can rewrite the above example as follows.
 
 ```ocaml
 # module Foo_and_bar : sig
@@ -487,17 +484,19 @@ behavior.
   end;;
 ```
 
-The comparison function created by `pa_compare` for a given type will
-call out to the comparison functions for its component types, and so
-the `foo` field will be compared using `Int.Set.compare` rather than
-doing a structural comparison, as polymorphic compare would.  If you
-want your comparison function to behave in a specific way, you should
-still write your own comparison function by hand, but if all you want
-is a total order suitable for creating maps and sets with, then
-`pa_compare` is a good choice.
+The comparison function created by `comparelib` for a given type will
+call out to the comparison functions for its component types.  As a
+result, the `foo` field will be compared using `Int.Set.compare`.
+This is different, and sander, than the structural comparison done by
+polymorphic compare.  
+
+If you want your comparison function to behave in a specific way, you
+should still write your own comparison function by hand; but if all
+you want is a total order suitable for creating maps and sets with,
+then `comparelib` is a good way to go.
 
 You can also satisfy the `Comparable.S` interface using polymorphic
-compare, if that makes sense for the type in question.
+compare.
 
 ```ocaml
 # module Foo_and_bar : sig
@@ -533,9 +532,10 @@ comparison function for creating the ordered binary tree that
 underlies a map, hashtables depend on having a _hash function_,
 _i.e._, a function for converting a key to an integer.
 
-When creating a hashtable, we need to provide value of type _hashable_
-which includes among other things the function for hashing the key
-type.  This is analogous to the comaprator used for creating maps.
+When creating a hashtable, we need to provide a value of type
+_hashable_ which includes among other things the function for hashing
+the key type.  This is analogous to the comparator used for creating
+maps.
 
 ```ocaml
 # let table = Hashtbl.create ~hashable:String.hashable ();;
