@@ -144,8 +144,8 @@ let _ =
 
 This fails because the `module A = B` syntax must be wrapped in a `let` binding
 unless it's a top-level phrase.  Parsing immediately eliminates code which
-doesn't match basic syntactic requirements, so the first example will result in
-a syntax error when we run the OCaml compiler on it. 
+doesn't match basic syntactic requirements, so this will result in a syntax
+error when we compile it.
 
 ```console
 $ ocamlc -c broken_module.ml 
@@ -168,7 +168,7 @@ that couldn't be parsed.  In the broken example the `module` keyword isn't a
 valid token at that point in parsing, so the error location information is
 correct.
 
-### Formatting source code with `ocp-indent`
+### Formatting source code with ocp-indent
 
 Sadly, syntax errors do get more inaccurate sometimes depending on the nature
 of your mistake.  Try to spot the deliberate error in the following function
@@ -207,12 +207,12 @@ definition to become part of the first `let` binding.  This eventually results
 in a parsing error at the very end of the second function.
 
 This class of bug (due to a single errant character) can be hard to spot in a
-large body of code. Luckily, there's a great tool in OPAM called `ocp-indent`
+large body of code. Luckily, there's a great tool in OPAM called ocp-indent
 that applies structured indenting rules to your source code on a line-by-line
 basis. This not only beautifies your code layout, but it also makes this syntax
 error much easier to locate.
 
-Let's run our erronous file through `ocp-indent` and see how it processes it.
+Let's run our erronous file through ocp-indent and see how it processes it.
 
 ```console
 $ opam install ocp-indent
@@ -236,7 +236,7 @@ let _ =
 
 The `add_and_print` definition has been indented as if it were part of the
 first `concat_and_print` definition, and the errant semicolon is now much
-easier to spot.  We just need to remove that semicolon and re-run `ocp-indent`
+easier to spot.  We just need to remove that semicolon and re-run ocp-indent
 to verify that the syntax is correct.
 
 ```console
@@ -262,17 +262,16 @@ val concat_and_print : string -> string -> string
 val add_and_print : int -> int -> int
 ```
 
-The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
+The [ocp-indent homepage](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favourite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
 
 ### Generating documentation via OCamldoc
 
-Whitespace and source code comments aren't significant in determining the
-semantics of the program, and are removed during the parsing process.  However,
-other tools in the OCaml distribution can interpret comments for their own
-ends.
+Whitespace and source code comments are removed during parsing and aren't
+significant in determining the semantics of the program.  However, other tools
+in the OCaml distribution can interpret comments for their own ends.
 
 The OCamldoc tool uses specially formatted comments in the source code to
 generate documentation bundles. These comments are combined with the function
