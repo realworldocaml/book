@@ -6,20 +6,20 @@ linkers and assemblers.  It's important how to understand how these fit
 together to help with your day-to-day workflow of developing, debugging and
 deploying applications.
 
-OCaml has a strong emphasis on static type safety and tries to reject source
-code that doesn't meet its requirements as early as possible.  The compiler
-runs the source code through a series of checks and transformations to
-accomplish this.  Each stage performs its job (e.g. type checking, optimization
-or code generation) and discards some information from the previous stage.  The
-final native code output is low-level assembly code that doesn't know anything
-about the OCaml modules or objects that the compiler started with.
+OCaml has a strong emphasis on static type safety and rejects source code that
+doesn't meet its requirements as early as possible.  The compiler does this by
+running the source code through a series of checks and transformations.  Each
+stage performs its job (e.g. type checking, optimization or code generation)
+and discards some information from the previous stage.  The final native code
+output is low-level assembly code that doesn't know anything about the OCaml
+modules or objects that the compiler started with.
 
-You don't have to do all this manually, of course.  The OCaml compiler
-frontends (`ocamlc` and `ocamlopt`) run through these stages for you,
-controlled by the command-line options your build system passes to them.
-Sometimes though, you'll need to dive into the toolchain to hunt down a bug or
-investigate a performance problem.  This chapter explains the compiler pipeline
-in more depth, and the tools you need to help visualise them.
+You don't have to do all this manually, of course.  The compiler frontends
+(`ocamlc` and `ocamlopt`) run through these stages for you, controlled by the
+command-line options passed to them.  Sometimes though, you'll need to dive
+into the toolchain to hunt down a bug or investigate a performance problem.
+This chapter explains the compiler pipeline in more depth, and the tools you
+need to help visualise them.
 
 It's even possible to compile OCaml to run efficiently on foreign environments
 such as Javascript or the Java Virtual Machine.  These aren't supported by the
