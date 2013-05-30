@@ -23033,10 +23033,10 @@ let what_is_the_weather_in location =
 </programlisting>
       <para>
         The <literal>ocamldoc</literal> comments are distinguished by
-        beginning with the double asterix, with formatting conventions
-        within the comment to mark metadata (most notably, the
-        <literal>@tag</literal> fields to mark specific properties such
-        as the author of that section of code).
+        beginning with the double asterix. There are formatting
+        conventions for the contents of the comment to mark metadata.
+        For instance, the <literal>@tag</literal> fields mark specific
+        properties such as the author of that section of code.
       </para>
       <para>
         Try compiling the HTML documentation and UNIX man pages by
@@ -23604,34 +23604,39 @@ $ ocamlc -dtypedtree typedef.m
     <sect2 id="the-untyped-lambda-form">
       <title>The untyped lambda form</title>
       <para>
-        Once OCaml gets past the typed AST, it eliminates all the static
-        type information into a simpler intermediate <emphasis>lambda
-        form</emphasis>. The lambda form discards higher-level language
-        constructs such as modules and objects, and replaces them with
-        simpler values such as records and function pointers. Pattern
-        matches are also analyzed and compiled into highly optimized
-        automata.
+        Once OCaml has passed the type checking stage, it can stop
+        emitting syntax and type errors and begin the process of
+        compiling the well-formed modules into executable code.
       </para>
       <para>
-        The lambda form is the first representation that discards the
-        OCaml type information. The output begins to look like the
-        runtime memory model from
-        <xref linkend="memory-representation-of-values"/>. It
-        can be useful to manually inspect the lambda code to understand
-        the effect of early compiler optimizations, most notably pattern
-        matching compilation. The compiler can dump the lambda form in
-        an s-expression syntax if you add the
-        <literal>-dlambda</literal> directive to the compiler
-        command-line.
+        The next stage eliminates all the static type information into a
+        simpler intermediate <emphasis>lambda form</emphasis>. The
+        lambda form discards higher-level constructs such as modules and
+        objects and replaces them with simpler values such as records
+        and function pointers. Pattern matches are also analyzed and
+        compiled into highly optimized automata.
+      </para>
+      <para>
+        The lambda form is the key stage that discards the OCaml type
+        information and maps the source code to the runtime memory model
+        described in
+        <xref linkend="memory-representation-of-values"/>.
+        This stage also performs some optimizations, most notably
+        converting pattern match statements into more optimized but
+        low-level statements.
       </para>
       <sect3 id="pattern-matching-optimization">
         <title>Pattern matching optimization</title>
         <para>
-          Let's use this to learn more about how the OCaml pattern
-          matching engine works by building three styles of pattern
-          matching and checking the lambda form out. First create a
-          straightforward exhaustive pattern match using normal
-          variants.
+          The compiler dumps the lambda form in an s-expression syntax
+          if you add the <literal>-dlambda</literal> directive to the
+          command-line. Let's use this to learn more about how the OCaml
+          pattern matching engine works by building three different
+          pattern matches and comparing their lambda forms.
+        </para>
+        <para>
+          Let's start by creating a straightforward exhaustive pattern
+          match using normal variants.
         </para>
         <programlisting language="ocaml">
 (* pattern_monomorphic_exhaustive.ml *)
