@@ -585,24 +585,25 @@ using OPAM to obtain existing Camlp4 extensions and inspecting their source code
 A series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html)
 by Jake Donham also serve as a useful guide to the internals of syntax extensions.
 
-## The type checking phase
+## Static type checking
 
-TODO: this section still needs a description of `-I` and how the compiler finds
-`cmi` files...
+After obtaining a valid abstract syntax tree, the compiler then verifies that
+the code obeys the rules of the static type system. Code that is syntactically
+correct but misuses values is rejected with an explanation of the problem.
 
-After obtaining a valid parsed AST (with or without Camlp4) the compiler must
-then check that the code obeys the rules of the static type system.  Code that
-is syntactically correct but misuses values is rejected with an explanation of
-the problem at this stage.  We're not going to delve into the details of how
-type-checking works here (the rest of the book covers that), but rather how it
-fits in with the rest of the compilation process.
+TODO: type inference / modules phases explanation?
 
-Assuming that the source code is validly typed, the original AST is transformed
-into a *typed AST*. This has the same broad structure of the untyped AST, but
-syntactic phrases are replaced with typed variants instead.
+Type inference deduces OCaml types for all values in a module and checks them for
+consistency against each other.  Any inconsistencies result in the compiler
+terminating with a type error.  If the type checking does succeed, the AST is
+replaced by a *typed abstract syntax tree*.  The typed AST has the same broad
+structure as the untyped AST, but with phrases are replaced with typed variants
+instead.
 
-You can explore the type checking process very simply.  Create a file with a
-single type definition and value.
+### The type inference process
+
+You can explore type inference very simply.  Create a file with a single type
+definition and value.
 
 ```ocaml
 (* typedef.ml *)
@@ -610,23 +611,85 @@ type t = Foo | Bar
 let v = Foo
 ```
 
-Now run the compiler on this file to *infer* a default type for the compilation
-unit.  This will run the type checking process on the compilation unit you
-specify.
+Now run the compiler with the `-i` flag to *infer* a default type for the
+compilation unit.  This will run the type checker on the compilation unit you
+specify, but not compile it any further beyond the type checker.
 
 ```console
 $ ocamlc -i typedef.ml
 type t = Foo | Bar
 val v : t
 ```
-
-The type checker has run and provided a default signature for the module.  It's
-often useful to redirect this output to an `mli` file to give you a starting
-signature to edit the external interface, without having to type it all in by
-hand.
+The output is the default signature for the module.  It's often useful to
+redirect this output to an `mli` file to give you a starting signature to edit
+the external interface without having to type it all in by hand.
 
 <sidebar>
-<title>Using `ocamlobjinfo` to inspect compilation units</title>
+<title>Enforcing principal typing</title>
+
+You can also pass a `-principal` flag to the compiler to turn on a stricter
+*principal type checking* mode.  This detects "risky" uses of type information
+to ensure that the type inference has a stable result.  A type is considered
+risky if the success or failure of type inference depends on the order in which
+sub-expressions are typed.
+
+This only affects a limited number of language features:
+
+* polymorphic methods.
+* permuting the order of labeled arguments in a function from their type definition.
+* discarding optional labelled arguments.
+* The generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
+* automatic disambiguation of record field and constructor names (since OCaml 4.1)
+
+Here's an example of principality warnings when used with polymorphic methods.
+
+```console
+$ utop -principal
+# type t = < id: 'a. 'a -> 'a >;;
+type t = < id : 'a. 'a -> 'a >
+
+# let f (x : t) = x, x#id;;  
+val f : t -> t * ('a -> 'a) = <fun>
+(* safe code: the type of x is known at all its use points *)
+
+# let f x = (x : t), x#id;;
+Warning 18: this use of a polymorphic method is not principal.
+val f : t -> t * ('a -> 'a) = <fun>
+(* unsafe code: the type is only known because typing goes from left to right *)
+
+# let f x = x#id, (x : t);;
+Error: This expression has type < id : 'a; .. >
+      but an expression was expected of type t
+      The universal variable 'a0 would escape its scope
+(* just exchanging the members of the pair causes a failure *)
+```
+
+Ideally, all code should systematically use `-principal`.  It reduces variance
+in type inference and provides the notion of a single known type.  However,
+there are drawbacks to this mode: type inference is slower and the `cmi` files
+become larger.  This is generally only a problem if you use objects
+extensively, which usually have larger type signature to cover all their
+methods.
+
+As a result, the suggested approach is to only compile with `-principal`
+occasionally to check if your code is compliant.  If compiling in principal
+mode works, it is guaranteed that the program will passing type checking in
+non-principal mode too.
+
+Bear in mind that the `cmi` files generated in principal mode differ from the
+default mode. Try to ensure that you compile your whole project with it
+activated.  Getting the files mixed up won't let you violate type safety, but
+can result in the type checker failing unexpectedly very occasionally.  In this
+case, just recompile with a clean source tree.
+
+</sidebar>
+
+#### The module search path
+
+TODO explain module search path and `-I` here.
+
+<sidebar>
+<title>Inspecting compilation units with `ocamlobjinfo`</title>
 
 Recall from [xref](#files-modules-and-programs) that `mli` files are optional.
 If you don't supply an explicit signature, then the inferred output from the
