@@ -605,12 +605,61 @@ abstraction boundaries between components.  The module system scales up to the
 needs of large-scale software engineering -- some of the larger OCaml
 code-bases contain thousands of files and modules.
 
+You can explore basic type inference very easily from the top-level, or by
+asking the compiler to display the types it infers. Create a file with a single
+type definition and value.
+
+```ocaml
+(* typedef.ml *)
+type t = Foo | Bar
+let v = Foo
+```
+
+Now run the compiler with the `-i` flag to infer the types for the compilation
+unit. This runs the type checker but doesn't compile it any further after
+displaying the interface to the standard output.
+
+```console
+$ ocamlc -i typedef.ml
+type t = Foo | Bar
+val v : t
+```
+
+For a file, the output is the default signature for the module.  It's often useful to
+redirect this output to an `mli` file to give you a starting signature to edit
+the external interface without having to type it all in by hand.  The compiler
+also stores a compiled version of the interface as a `cmi` file.  This interface
+is either obtained from compiling an `mli` signature file for a module, or 
+by the inferred type if there is only an `ml` implementation present.
+
+If you have a mismatch between the `ml` and `mli` signatures, the type-checker
+will give you an immediate error. 
+
+```console
+$ echo type t = Foo > test.ml
+$ echo type t = Bar > test.mli
+$ ocamlc -c test.mli test.ml
+File "test.ml", line 1:
+Error: The implementation test.ml does not match the interface test.cmi:
+       Type declarations do not match:
+         type t = Foo
+       is not included in
+         type t = Bar
+       File "test.ml", line 1, characters 5-12: Actual declaration
+       Their first fields have different names, Foo and Bar.
+```
+
+It's good coding style to have an explicit `mli` signature file as this is also
+where you can put OCamldoc comments as documentation for that module.  Since
+the compiler ensures that the external signature matches your implementation,
+it adds very little maintenance burden.
+
 ### The type inference process
 
 Type inference is the process of determining the appropriate types for
 expressions based on their use.  It's a feature that's partially present in
-many languages such as Haskell and Scala, but OCaml embeds it as a fundamental
-feature throughout the core language.
+many other languages such as Haskell and Scala, but OCaml embeds it as a
+fundamental feature throughout the core language.
 
 OCaml type inference is based on the Hindley-Milner algorithm, which is notable
 for its ability to infer the most general type for an expression without
@@ -629,17 +678,17 @@ messages).
 <title>Enforcing principal typing</title>
 
 You can also pass a `-principal` flag to the compiler to turn on a stricter
-*principal type checking* mode.  This detects "risky" uses of type information
-to ensure that the type inference has a stable result.  A type is considered
+principal type checking mode.  This detects risky uses of type information to
+ensure that the type inference has one principal result.  A type is considered
 risky if the success or failure of type inference depends on the order in which
 sub-expressions are typed.
 
-This only affects a limited number of language features:
+The principality check only affects a few language features:
 
-* polymorphic methods.
+* polymorphic methods for objects.
 * permuting the order of labeled arguments in a function from their type definition.
 * discarding optional labelled arguments.
-* The generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
+* generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
 * automatic disambiguation of record field and constructor names (since OCaml 4.1)
 
 Here's an example of principality warnings when used with polymorphic methods.
@@ -666,7 +715,7 @@ Error: This expression has type < id : 'a; .. >
 ```
 
 Ideally, all code should systematically use `-principal`.  It reduces variance
-in type inference and provides the notion of a single known type.  However,
+in type inference and enforces the notion of a single known type.  However,
 there are drawbacks to this mode: type inference is slower and the `cmi` files
 become larger.  This is generally only a problem if you use objects
 extensively, which usually have larger type signature to cover all their
@@ -685,31 +734,9 @@ case, just recompile with a clean source tree.
 
 </sidebar>
 
-You can explore type inference very simply.  Create a file with a single type
-definition and value.
+### Module search paths
 
-```ocaml
-(* typedef.ml *)
-type t = Foo | Bar
-let v = Foo
-```
-
-Now run the compiler with the `-i` flag to *infer* a default type for the
-compilation unit.  This will run the type checker on the compilation unit you
-specify, but not compile it any further beyond the type checker.
-
-```console
-$ ocamlc -i typedef.ml
-type t = Foo | Bar
-val v : t
-```
-The output is the default signature for the module.  It's often useful to
-redirect this output to an `mli` file to give you a starting signature to edit
-the external interface without having to type it all in by hand.
-
-
-
-#### The module search path
+An OCaml module refers to 
 
 TODO explain module search path and `-I` here.
 
