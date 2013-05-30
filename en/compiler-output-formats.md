@@ -8,10 +8,11 @@ deploying applications.
 
 OCaml has a strong emphasis on static type safety and tries to reject source
 code that doesn't meet its requirements as early as possible.  The compiler
-does this by running through a series of checks and transformations, beginning
-from the source code.  Each stage normally discards some information from the
-previous stage until the final output is low-level assembly code that doesn't
-knows anything about OCaml modules or objects.
+runs the source code through a series of checks and transformations.  Each
+stage does its job (e.g. type checking, scheduling or code generation) and
+discards some information from the previous stage.  The final native code
+output ends up as low-level assembly code that doesn't know anything about the
+OCaml modules or objects that the compiler started with.
 
 You don't have to do all this manually, of course.  The OCaml compiler
 frontends (`ocamlc` and `ocamlopt`) run through these stages for you,
