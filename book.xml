@@ -22987,8 +22987,7 @@ val add_and_print : int -&gt; int -&gt; int
       </para>
     </sect2>
     <sect2 id="generating-documentation-via-ocamldoc">
-      <title>Generating documentation via
-      <literal>ocamldoc</literal></title>
+      <title>Generating documentation via OCamldoc</title>
       <para>
         Whitespace and source code comments aren't significant in
         determining the semantics of the program, and are removed during
@@ -22996,18 +22995,17 @@ val add_and_print : int -&gt; int -&gt; int
         distribution can interpret comments for their own ends.
       </para>
       <para>
-        The <literal>ocamldoc</literal> tool uses specially formatted
-        comments in the source code to generate documentation bundles.
-        These comments are combined with the function definitions and
-        signatures and output as structured documentation in a variety
-        of formats. It can generate HTML pages, LaTeX and PDF documents,
-        UNIX manual pages and even module dependency graphs that can be
-        viewed using
+        The OCamldoc tool uses specially formatted comments in the
+        source code to generate documentation bundles. These comments
+        are combined with the function definitions and signatures and
+        output as structured documentation in a variety of formats. It
+        can generate HTML pages, LaTeX and PDF documents, UNIX manual
+        pages and even module dependency graphs that can be viewed using
         <ulink url="http://www.graphviz.org">Graphviz</ulink>.
       </para>
       <para>
         Here's a sample of some source code that's been annotated with
-        <literal>ocamldoc</literal> comments.
+        OCamldoc comments.
       </para>
       <programlisting language="ocaml">
 (** example.ml: The first special comment of the file is the comment 
@@ -23032,11 +23030,11 @@ let what_is_the_weather_in location =
   | `California -&gt; Sun
 </programlisting>
       <para>
-        The <literal>ocamldoc</literal> comments are distinguished by
-        beginning with the double asterix. There are formatting
-        conventions for the contents of the comment to mark metadata.
-        For instance, the <literal>@tag</literal> fields mark specific
-        properties such as the author of that section of code.
+        The OCamldoc comments are distinguished by beginning with the
+        double asterix. There are formatting conventions for the
+        contents of the comment to mark metadata. For instance, the
+        <literal>@tag</literal> fields mark specific properties such as
+        the author of that section of code.
       </para>
       <para>
         Try compiling the HTML documentation and UNIX man pages by
@@ -23059,14 +23057,13 @@ $ man -M man Example
       </para>
       <tip>
       <title>
-      Using custom ocamldoc generators
+      Using custom OCamldoc generators
       </title>
       <para>
-        The default HTML output stylesheets from
-        <literal>ocamldoc</literal> are pretty spartan and distinctly
-        Web 1.0. The tool supports plugging in custom documentation
-        generators, and there are several available that provide
-        prettier or more detailed output.
+        The default HTML output stylesheets from OCamldoc are pretty
+        spartan and distinctly Web 1.0. The tool supports plugging in
+        custom documentation generators, and there are several available
+        that provide prettier or more detailed output.
       </para>
       <itemizedlist>
         <listitem>
@@ -23183,21 +23180,22 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
       </para>
       <para>
         Both <literal>fieldslib</literal> and <literal>sexplib</literal>
-        need this new <literal>with</literal> keyword and they both
-        can't register the same extension. A preprocessor library called
+        need this new <literal>with</literal> keyword, but they both
+        can't register the same extension. Instead, a library called
         <literal>type_conv</literal> provides the common extension
-        framework for them to use. Type_conv defines the
-        <literal>with</literal> grammar extension and
-        <literal>ocamlfind</literal> ensures that it's loaded before
-        <literal>variantslib</literal> or <literal>sexplib</literal>.
+        framework for them to use. Type_conv registers the
+        <literal>with</literal> grammar extension to Camlp4, and the
+        <literal>ocamlfind</literal> packaging ensures that it's loaded
+        before <literal>variantslib</literal> or
+        <literal>sexplib</literal>.
       </para>
       <para>
-        The preprocessor extensions generate boilerplate OCaml code
-        based on the type definition. This avoids the inevitable
-        performance hit of doing the code generation dynamically. It
-        also doesn't require a Just-In-Time (JIT) runtime that can be a
-        source of unpredictable dynamic behaviour. Instead, all code is
-        simply generated at compile-time via Camlp4.
+        The two extensions generate boilerplate OCaml code based on the
+        type definition. This avoids the inevitable performance hit of
+        doing the code generation dynamically. It also doesn't require a
+        Just-In-Time (JIT) runtime that can be a source of unpredictable
+        dynamic behaviour. Instead, all code is simply generated at
+        compile-time via Camlp4.
       </para>
     </sect2>
     <sect2 id="inspecting-camlp4-output">
@@ -23273,9 +23271,9 @@ val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;
       <sect3 id="running-camlp4-directly-on-the-source-code">
         <title>Running Camlp4 directly on the source code</title>
         <para>
-          While the top-level is a quick and useful to examine the
-          signatures generated from the extensions, how can we see what
-          these new functions actually do? You can't do this from
+          The top-level is a quick way to examine the signatures
+          generated from the extensions, but how can we see what these
+          new functions actually do? You can't do this from
           <literal>utop</literal> directly since it embeds the Camlp4
           invocation as an automated part of its operation.
         </para>
@@ -23292,7 +23290,9 @@ type t = {
 } with compare
 </programlisting>
         <para>
-          Now create a shell script that runs Camlp4 directly.
+          We need to run the Camlp4 binary with the library paths to
+          Comparelib and Type_conv. Let's use a small shell script to
+          wrap this invocation.
         </para>
         <programlisting language="bash">
 #!/bin/sh
@@ -23304,11 +23304,11 @@ ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
 camlp4o -printer o $INCLUDE $ARCHIVES $1
 </programlisting>
         <para>
-          This script uses the <literal>ocamlfind</literal> package
+          The script uses the <literal>ocamlfind</literal> package
           manager to list the include and library paths needed by
-          <literal>comparelib</literal>. The final command invokes the
+          <literal>comparelib</literal>. It then invokes the
           <literal>camlp4o</literal> preprocessor with these paths and
-          outputs the resulting AST to standard output.
+          outputs the resulting AST to the standard output.
         </para>
         <programlisting>
 $ sh camlp4_dump comparelib_test.ml
