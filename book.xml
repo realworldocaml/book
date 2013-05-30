@@ -22599,8 +22599,7 @@ struct custom_operations {
     </listitem>
     <listitem>
       <para>
-        source preprocessing via <literal>camlp4</literal> and the
-        intermediate forms.
+        source preprocessing via Camlp4 and the intermediate forms.
       </para>
     </listitem>
     <listitem>
@@ -23095,21 +23094,20 @@ $ man -M man Example
       </tip>
     </sect2>
     <sect2 id="preprocessing-with-camlp4">
-      <title>Preprocessing with <literal>camlp4</literal></title>
+      <title>Preprocessing with Camlp4</title>
       <para>
         One powerful feature in OCaml is the facility to extend the
-        language grammar without having to modify the compiler.
-        <literal>camlp4</literal> is a system included with OCaml for
-        writing extensible parsers. It provides a set of OCaml libraries
-        that are used to define grammars and dynamically loadable syntax
-        extensions of such grammars. Camlp4 modules register new
-        language keywords and later transform these keywords (or indeed,
-        any portion of the input program) into conventional OCaml code
-        that can be understood by the rest of the compiler.
+        language grammar without having to modify the compiler. Camlp4
+        is a system included with OCaml for writing extensible parsers.
+        It provides a set of OCaml libraries that are used to define
+        grammars and dynamically loadable syntax extensions of such
+        grammars. Camlp4 modules register new language keywords and
+        later transform these keywords (or indeed, any portion of the
+        input program) into conventional OCaml code that can be
+        understood by the rest of the compiler.
       </para>
       <para>
-        We've already seen several examples of using
-        <literal>camlp4</literal> within Core:
+        We've already seen several examples of using Camlp4 within Core:
       </para>
       <itemizedlist>
         <listitem>
@@ -23148,9 +23146,8 @@ type t = {
 </programlisting>
       <para>
         Compiling this code will normally give you a syntax error if you
-        do so without <literal>camlp4</literal> since the
-        <literal>with</literal> keyword isn't normally allowed after a
-        type definition.
+        do so without Camlp4 since the <literal>with</literal> keyword
+        isn't normally allowed after a type definition.
       </para>
       <programlisting>
 $ ocamlfind ocamlc -c type_conv_example.ml
@@ -23200,24 +23197,22 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         performance hit of doing the code generation dynamically. It
         also doesn't require a Just-In-Time (JIT) runtime that can be a
         source of unpredictable dynamic behaviour. Instead, all code is
-        simply generated at compile-time via <literal>camlp4</literal>.
+        simply generated at compile-time via Camlp4.
       </para>
     </sect2>
     <sect2 id="inspecting-camlp4-output">
-      <title>Inspecting <literal>camlp4</literal> output</title>
+      <title>Inspecting Camlp4 output</title>
       <para>
         The syntax extensions accept an input AST and output a modified
-        one. If you're not familiar with the <literal>camlp4</literal>
-        module in question, how do you figure out what changes it's made
-        to your code? The obvious way is to read the documentation that
-        accompanies the extension. Another more direct approach is to
-        use the top-level to explore the extension's behaviour or run
-        <literal>camlp4</literal> manually yourself to see the
-        transformation in action.
+        one. If you're not familiar with the Camlp4 module in question,
+        how do you figure out what changes it's made to your code? The
+        obvious way is to read the documentation that accompanies the
+        extension. Another more direct approach is to use the top-level
+        to explore the extension's behaviour or run Camlp4 manually
+        yourself to see the transformation in action.
       </para>
-      <sect3 id="using-camlp4-in-the-interactive-top-level">
-        <title>Using <literal>camlp4</literal> in the interactive
-        top-level</title>
+      <sect3 id="using-camlp4-from-the-interactive-top-level">
+        <title>Using Camlp4 from the interactive top-level</title>
         <para>
           The <literal>utop</literal> top-level can run the phrases that
           you type through <literal>camlp4</literal> automatically. You
@@ -23236,10 +23231,10 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
           top-level interface that lets you require
           <literal>ocamlfind</literal> packages (including all their
           dependent packages). The second directive instructs the
-          top-level to filter all phrases via <literal>camlp4</literal>.
-          You can now run <literal>utop</literal> and load the syntax
-          extensions in. We'll use the <literal>comparelib</literal>
-          syntax extension for our experiments.
+          top-level to filter all phrases via Camlp4. You can now run
+          <literal>utop</literal> and load the syntax extensions in.
+          We'll use the <literal>comparelib</literal> syntax extension
+          for our experiments.
         </para>
         <para>
           OCaml provides a built-in polymorphic comparison operator that
@@ -23276,15 +23271,13 @@ val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;
         </para>
       </sect3>
       <sect3 id="running-camlp4-directly-on-the-source-code">
-        <title>Running <literal>camlp4</literal> directly on the source
-        code</title>
+        <title>Running Camlp4 directly on the source code</title>
         <para>
           While the top-level is a quick and useful to examine the
           signatures generated from the extensions, how can we see what
           these new functions actually do? You can't do this from
-          <literal>utop</literal> directly since it embeds the
-          <literal>camlp4</literal> invocation as an automated part of
-          its operation.
+          <literal>utop</literal> directly since it embeds the Camlp4
+          invocation as an automated part of its operation.
         </para>
         <para>
           Let's turn to the command-line to obtain the result of the
@@ -23299,8 +23292,7 @@ type t = {
 } with compare
 </programlisting>
         <para>
-          Now create a shell script that runs <literal>camlp4</literal>
-          directly.
+          Now create a shell script that runs Camlp4 directly.
         </para>
         <programlisting language="bash">
 #!/bin/sh
@@ -23353,7 +23345,7 @@ let _ = compare_t
           Another useful feature of <literal>type_conv</literal> is that
           it can generate module signatures too. Copy the earlier type
           definition into a <literal>comparelib_test.mli</literal> and
-          rerun the camlp4 dumper script.
+          rerun the Camlp4 dumper script.
         </para>
         <programlisting>
 $ ./camlp4_dump.sh test_comparelib.mli 
@@ -23364,9 +23356,8 @@ val compare : t -&gt; t -&gt; int
         <para>
           The external signature generated by
           <literal>comparelib</literal> is much simpler than the actual
-          code. Running <literal>camlp4</literal> directly on the
-          original source code lets you see these all these
-          transformations precisely.
+          code. Running Camlp4 directly on the original source code lets
+          you see these all these transformations precisely.
         </para>
         <note>
         <title>
@@ -23384,10 +23375,10 @@ val compare : t -&gt; t -&gt; int
         </para>
         <para>
           While it's tempting to compress all your boiler-plate code
-          into <literal>camlp4</literal> extensions, it can make your
-          source code much harder for other people to quickly read and
-          understand. Core mainly focuses on type-driven code generation
-          using the <literal>type_conv</literal> extension and doesn't
+          into Camlp4 extensions, it can make your source code much
+          harder for other people to quickly read and understand. Core
+          mainly focuses on type-driven code generation using the
+          <literal>type_conv</literal> extension and doesn't
           fundamentally change the OCaml syntax.
         </para>
         <para>
@@ -23401,16 +23392,15 @@ val compare : t -&gt; t -&gt; int
         </para>
         </note>
         <para>
-          We've deliberately only shown you how to use
-          <literal>camlp4</literal> extensions here, and not how to
-          build your own. The full details of building new extensions
-          with <literal>camlp4</literal> are fairly daunting and could
-          be the subject of an entirely new book.
+          We've deliberately only shown you how to use Camlp4 extensions
+          here, and not how to build your own. The full details of
+          building new extensions are fairly daunting and could be the
+          subject of an entirely new book.
         </para>
         <para>
           The best resources to get started are the online
           <ulink url="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
-          wiki</ulink>, and using OPAM to obtain existing camlp4
+          wiki</ulink>, and using OPAM to obtain existing Camlp4
           extensions and inspecting their source code. A series of
           <ulink url="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
           posts</ulink> by Jake Donham also serve as a useful guide to
@@ -23427,14 +23417,13 @@ val compare : t -&gt; t -&gt; int
       <literal>cmi</literal> files...
     </para>
     <para>
-      After obtaining a valid parsed AST (with or without
-      <literal>camlp4</literal>) the compiler must then check that the
-      code obeys the rules of the static type system. Code that is
-      syntactically correct but misuses values is rejected with an
-      explanation of the problem at this stage. We're not going to delve
-      into the details of how type-checking works here (the rest of the
-      book covers that), but rather how it fits in with the rest of the
-      compilation process.
+      After obtaining a valid parsed AST (with or without Camlp4) the
+      compiler must then check that the code obeys the rules of the
+      static type system. Code that is syntactically correct but misuses
+      values is rejected with an explanation of the problem at this
+      stage. We're not going to delve into the details of how
+      type-checking works here (the rest of the book covers that), but
+      rather how it fits in with the rest of the compilation process.
     </para>
     <para>
       Assuming that the source code is validly typed, the original AST
