@@ -618,26 +618,28 @@ hand, or use the built-in polymorphic hash function, `Hashtbl.hash`.
 
 Maps and hashtables overlap enough in functionality that it's not
 always clear when to choose one or the other.  Maps, by virtue of
-being immutable, are generally the default choice in OCaml.  Most of
-OCaml code is in a functional style, and immutable data structures
-simply fit into such code more naturally.  OCaml also has good support
-for imperative programming, though, and when programming in an
-imperative idiom, hashtables are often the more natural choice.
+being immutable, are generally the default choice in OCaml by virtue
+of fitting most naturally with otherwise functional code.  OCaml also
+has good support for imperative programming, though, and when
+programming in an imperative idiom, hashtables are often the more
+natural choice.
 
 Programming idioms aside, there are significant performance
 differences between maps and hashtables as well.  For code that is
-dominated by a series of updates and lookups, hashtables are a clear
+dominated by updates and lookups, hashtables are a clear performance
 win, and the win is clearer the larger the size of the tables.
 
-Generally speaking, the best way of answering a performance question
-is by running a benchmark.  Here's a simple benchmark using the
-`core_bench` library that compares maps and hashtables under a very
+The best way of answering a performance question is by running a
+benchmark, so let's do just that.  The following benchmark uses the
+`core_bench` library, and it compares maps and hashtables under a very
 simple workload.  Here, we're keeping track of a set of 1000 different
 integer keys, and cycling over the keys and updating the values they
 contain.  Note that we use the `Map.change` and `Hashtbl.change`
-operators to update the values in the maps.
+functions to update the respective data structures.
 
 ```ocaml
+(* file: map_vs_hash.ml *)
+
 open Core.Std
 open Core_bench.Std
 
@@ -674,11 +676,9 @@ let () =
   |> Command.run
 ```
 
-If we run this, we'll see that the table based code is about four
-times faster than the map-based code.  This behavior will be larger
-the more keys are used, since the computational complexity of finding
-elements in and modifying the map is logarithmic in the number of
-keys.
+
+The results, shown below, show the hashtable version to be around four
+times faster than the map version.  
 
 ```
 bench $ ./map_vs_hash.native -clear-columns name time speedup
@@ -691,14 +691,86 @@ Estimated testing time 20s (change using -quota SECS).
 └───────┴────────────┴─────────┘
 ```
 
-Hashtables are not always faster than maps, it's worth noting.  Maps
-can be more efficient when one needs to maintain multiple snapshots of
-a given map at different states.  To do this with hashtables would
-require copying the hashtable explicitly before changing it, whereas
-updating a map doesn't disturb the previous version of the map, and
-only requires allocating a new spine for the tree.
+We can make the speedup smaller or larger depending on the details of
+the test; for example, it will very with the number of distinct keys.
+But overall, for code that is heavy on sequences of querying and
+updating a set of key/value pairs, hashtables will significantly
+outperform maps.
 
-Of course, whether any of this matters for a given application depends
-greatly on how much of the applications time is spent looking things
-up versus other parts of the logic, so performance may not be an
-important consideration.
+Hashtables are not always the faster choice, though.  In particular,
+maps are often more performant in situations where you want to take
+advantage of maps as a persistent data-structure.  In particular, if
+you create map `m'` by calling `Map.add` on some other map `m`, then
+`m` and `m'` can be used independently, and in fact share most of
+their underlying storage.  Thus, if you need to keep in memory at the
+same time multiple different related collections of key/value paris,
+then a map is typically a much more efficient data structure to do it
+with.
+
+Here's a benchmark to demonstrates this.  In it, we create a list of
+maps (or hashtables) that are built up by iteratively applying
+updates, starting from an empty map.  In the hashtable implementation,
+we do this by calling `Hashtbl.copy` to get the list entries.
+
+```ocaml
+(* file: map_vs_hash2.ml *)
+
+open Core.Std
+open Core_bench.Std
+
+let create_maps ~num_keys ~iterations =
+  let rec loop i map =
+    if i <= 0 then []
+    else
+      let new_map =
+        Map.change map (i mod num_keys) (fun current ->
+          Some (1 + Option.value ~default:0 current))
+      in
+      new_map :: loop (i - 1) new_map
+  in
+  loop iterations Int.Map.empty
+
+let create_tables ~num_keys ~iterations =
+  let table = Int.Table.create ~size:num_keys () in
+  let rec loop i =
+    if i <= 0 then []
+    else (
+      Hashtbl.change table (i mod num_keys) (fun current ->
+        Some (1 + Option.value ~default:0 current));
+      let new_table = Hashtbl.copy table in
+      new_table :: loop (i - 1)
+    )
+  in
+  loop iterations
+
+let tests ~num_keys ~iterations =
+  let test name f = Bench.Test.create f ~name in
+  [ test "map"   (fun () -> ignore (create_maps   ~num_keys ~iterations))
+  ; test "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
+  ]
+
+let () =
+  tests ~num_keys:50 ~iterations:1000
+  |> Bench.make_command
+  |> Command.run
+```
+
+Unsurprisingly, maps perform far better than hashtables on this
+benchmark, and the numbers can be made more extreme by increasing the
+size of the tables or the length of the list.
+
+```
+$ ./map_vs_hash2.native -clear-columns name time speedup
+Estimated testing time 20s (change using -quota SECS).
+┌───────┬───────────┬─────────┐
+│ Name  │ Time (ns) │ Speedup │
+├───────┼───────────┼─────────┤
+│ map   │   208_438 │   12.62 │
+│ table │ 2_630_707 │    1.00 │
+└───────┴───────────┴─────────┘
+```
+
+As you can see, the relative performance of trees and maps depends a
+great deal on the details of how they're used, and so whether to
+choose one data structure or the other will depend on the details of
+the application.
