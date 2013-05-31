@@ -1,45 +1,7 @@
 # First class modules
 
-OCaml provides several mechanisms for organizing your programs,
-including modules and functors, files and compilation units, and
-classes and objects.  Files and compilation units (`.ml` and `.mli`
-files) are really just a simplified module system.  Classes and
-objects are a different form of organization altogether (as we'll see
-in [xref](#object-oriented-programming).  Yet, in each of these cases,
-there is a clear separation between types and values -- values cannot
-contain types, and types cannot contain values.  And since modules can
-contain types, modules can't be values.
-
-_(yminsky: Instead of saying that ml and mli files are a simplified
-module system, maybe say that they "provide a simple way of creating
-modules and interfaces", or some such?  It's not like there's a
-simplified module system floating around)_
-
-_(yminsky: consider dropping "Yet" in the above.)_
-
-Next, we'll relax this restriction with _first-class modules_.
-"First-class" means that modules can be passed around as ordinary
-values that can be created from and converted back to regular modules.
-This is a relatively recent addition to the OCaml language, and while
-it might seem trivial to say, it has profound consequences on the
-language.  First-class modules are strictly more expressive than any
-other organization mechanism, including classes and objects.  Once you
-use first-class modules, you'll never want to go back.
-
-_(yminsky: I wouldn't say they're strictly more expressive.  For
-example, they don't give you a way of expressing sub typing
-relationships effectively, which objects do.)_
-
-This is not say that first-class modules should be used
-indiscriminately.  When you pass modules as values, the reason is to
-support dynamic behavior, and this can have a negative impact on
-understandability.  As we proceed, we'll compare first-class modules
-to other techniques, and suggest alternatives when it seems
-appropriate.
-
-_(jyh: Original text
-You can think of OCaml as being broken up into two sub-language: a
-core language that is concerned with values and types, and a module
+You can think of OCaml as being broken up into two parts: a core
+language that is concerned with values and types, and a module
 language that is concerned with modules and module signatures.  These
 sub-languages are stratified, in that modules can contain types and
 values, but ordinary values can't contain modules or module types.
@@ -50,13 +12,13 @@ OCaml provides a way around this stratification in the form of
 _first-class modules_.  First-class modules are ordinary values that
 can be created from and converted back to regular modules.  As we'll
 see, letting modules into the core language makes it possible to use
-more flexible and dynamic module-oriented designs.)_
+more flexible and dynamic module-oriented designs.
 
-### Another trivial example
+### A trivial example
 
-Much as we did with functors, we'll start out with an utterly trivial
-example, to allow us to show the basic mechanics of first class
-modules with a minimum of fuss.
+Much as we did with functors, we'll start out with a trivial example,
+to allow us to show the basic mechanics of first class modules with a
+minimum of fuss.
 
 A first-class module is created by packaging up a module with a
 signature that it satisfies.  The following defines a simple signature
