@@ -23,15 +23,13 @@ let table_iter ~num_keys ~iterations =
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let name container =
-    sprintf "%s (#keys: %d, #iter: %d)" container num_keys iterations
-  in
-  [ Bench.Test.create ~name:(name "map")
-      (fun () -> map_iter ~num_keys ~iterations)
-  ; Bench.Test.create ~name:(name "table")
-      (fun () -> table_iter ~num_keys ~iterations)
+  let test name f = Bench.Test.create f ~name in
+  [ test "map"   (fun () -> map_iter   ~num_keys ~iterations)
+  ; test "table" (fun () -> table_iter ~num_keys ~iterations)
   ]
 
 let () =
-  Command.run (Bench.make_command (tests ~num_keys:1000 ~iterations:100_000))
+  tests ~num_keys:1000 ~iterations:100_000
+  |> Bench.make_command
+  |> Command.run
 

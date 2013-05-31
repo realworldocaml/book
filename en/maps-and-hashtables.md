@@ -663,33 +663,32 @@ let table_iter ~num_keys ~iterations =
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let name container =
-    sprintf "%s (#keys: %d, #iter: %d)" container num_keys iterations
-  in
-  [ Bench.Test.create ~name:(name "map")
-      (fun () -> map_iter ~num_keys ~iterations)
-  ; Bench.Test.create ~name:(name "table")
-      (fun () -> table_iter ~num_keys ~iterations)
+  let test name f = Bench.Test.create f ~name in
+  [ test "map"   (fun () -> map_iter   ~num_keys ~iterations)
+  ; test "table" (fun () -> table_iter ~num_keys ~iterations)
   ]
 
 let () =
-  Command.run (Bench.make_command (tests ~num_keys:1000 ~iterations:100_000))
+  tests ~num_keys:1000 ~iterations:100_000
+  |> Bench.make_command
+  |> Command.run
 ```
 
-If we run this, we'll see that the table based code is more than 4x
-faster than the map-based code.  This behavior will be larger the more
-keys are used, since the computational complexity of finding elements
-in and modifying the map is logarithmic in the number of keys.
+If we run this, we'll see that the table based code is about four
+times faster than the map-based code.  This behavior will be larger
+the more keys are used, since the computational complexity of finding
+elements in and modifying the map is logarithmic in the number of
+keys.
 
 ```
 bench $ ./map_vs_hash.native -clear-columns name time speedup
 Estimated testing time 20s (change using -quota SECS).
-┌────────────────────────────────────────┬────────────┬─────────┐
-│ Name                                   │  Time (ns) │ Speedup │
-├────────────────────────────────────────┼────────────┼─────────┤
-│ map (#keys: 1000, #iter: 100000)       │ 31_073_290 │    1.00 │
-│ table (#keys: 1000, #iter: 100000)     │  7_665_114 │    4.05 │
-└────────────────────────────────────────┴────────────┴─────────┘
+┌───────┬────────────┬─────────┐
+│ Name  │  Time (ns) │ Speedup │
+├───────┼────────────┼─────────┤
+│ map   │ 31_584_468 │    1.00 │
+│ table │  8_157_439 │    3.87 │
+└───────┴────────────┴─────────┘
 ```
 
 Hashtables are not always faster than maps, it's worth noting.  Maps
