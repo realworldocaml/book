@@ -614,6 +614,92 @@ There is currently no analogue of `comparelib` for auto-generation of
 hash-functions, so you do need to either write the hash-function by
 hand, or use the built-in polymorphic hash function, `Hashtbl.hash`.
 
+## Choosing between maps and hashtables
 
+Maps and hashtables overlap enough in functionality that it's not
+always clear when to choose one or the other.  Maps, by virtue of
+being immutable, are generally the default choice in OCaml.  Most of
+OCaml code is in a functional style, and immutable data structures
+simply fit into such code more naturally.  OCaml also has good support
+for imperative programming, though, and when programming in an
+imperative idiom, hashtables are often the more natural choice.
 
+Programming idioms aside, there are significant performance
+differences between maps and hashtables as well.  For code that is
+dominated by a series of updates and lookups, hashtables are a clear
+win, and the win is clearer the larger the size of the tables.
 
+Generally speaking, the best way of answering a performance question
+is by running a benchmark.  Here's a simple benchmark using the
+`core_bench` library that compares maps and hashtables under a very
+simple workload.  Here, we're keeping track of a set of 1000 different
+integer keys, and cycling over the keys and updating the values they
+contain.  Note that we use the `Map.change` and `Hashtbl.change`
+operators to update the values in the maps.
+
+```ocaml
+open Core.Std
+open Core_bench.Std
+
+let map_iter ~num_keys ~iterations =
+  let rec loop i map =
+    if i <= 0 then ()
+    else loop (i - 1)
+           (Map.change map (i mod num_keys) (fun current ->
+              Some (1 + Option.value ~default:0 current)))
+  in
+  loop iterations Int.Map.empty
+
+let table_iter ~num_keys ~iterations =
+  let table = Int.Table.create ~size:num_keys () in
+  let rec loop i =
+    if i <= 0 then ()
+    else (
+      Hashtbl.change table (i mod num_keys) (fun current ->
+        Some (1 + Option.value ~default:0 current));
+      loop (i - 1)
+    )
+  in
+  loop iterations
+
+let tests ~num_keys ~iterations =
+  let name container =
+    sprintf "%s (#keys: %d, #iter: %d)" container num_keys iterations
+  in
+  [ Bench.Test.create ~name:(name "map")
+      (fun () -> map_iter ~num_keys ~iterations)
+  ; Bench.Test.create ~name:(name "table")
+      (fun () -> table_iter ~num_keys ~iterations)
+  ]
+
+let () =
+  Command.run (Bench.make_command (tests ~num_keys:1000 ~iterations:100_000))
+```
+
+If we run this, we'll see that the table based code is more than 4x
+faster than the map-based code.  This behavior will be larger the more
+keys are used, since the computational complexity of finding elements
+in and modifying the map is logarithmic in the number of keys.
+
+```
+bench $ ./map_vs_hash.native -clear-columns name time speedup
+Estimated testing time 20s (change using -quota SECS).
+┌────────────────────────────────────────┬────────────┬─────────┐
+│ Name                                   │  Time (ns) │ Speedup │
+├────────────────────────────────────────┼────────────┼─────────┤
+│ map (#keys: 1000, #iter: 100000)       │ 31_073_290 │    1.00 │
+│ table (#keys: 1000, #iter: 100000)     │  7_665_114 │    4.05 │
+└────────────────────────────────────────┴────────────┴─────────┘
+```
+
+Hashtables are not always faster than maps, it's worth noting.  Maps
+can be more efficient when one needs to maintain multiple snapshots of
+a given map at different states.  To do this with hashtables would
+require copying the hashtable explicitly before changing it, whereas
+updating a map doesn't disturb the previous version of the map, and
+only requires allocating a new spine for the tree.
+
+Of course, whether any of this matters for a given application depends
+greatly on how much of the applications time is spent looking things
+up versus other parts of the logic, so performance may not be an
+important consideration.
