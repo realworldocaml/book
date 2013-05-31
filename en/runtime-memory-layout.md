@@ -13,8 +13,7 @@ In this chapter, you'll learn:
 * The representation of all the OCaml types in runtime blocks.
 
 This chapter is primarily informational, but it helps to know all this
-to understand the compilation process in [xref](#the-compilation-pipeline),
-handling external memory in [xref](#parsing-binary-protocols-with-bigarray),
+to understand the compilation process in [xref](#the-compilation-pipeline)
 or tracing and profiling your programs in [xref](#understanding-the-garbage-collector).
 
 You might also want to interface with the OCaml C runtime directly instead of
@@ -242,8 +241,7 @@ part of the collection process described earlier.
 The `size` field records the length of the block in memory words.  This is 22
 bits on 32-bit platforms, which is the reason why OCaml strings are limited to
 16MB on that architecture. If you need bigger strings, either switch to a
-64-bit host, or use the `Bigarray` module described in
-[xref](#parsing-binary-protocols-with-bigarray).
+64-bit host, or use the `Bigarray` module.
 
 The 2-bit `color` field is used by the garbage collector to keep track of its
 state during mark-and-sweep collection.  This makes incremental collection 
@@ -268,7 +266,7 @@ table below.
 
 OCaml Value                        Representation
 -----------                        --------------
-`int` or `char`                directly as a value, shifted left by 1 bit, with the least significant bit set to 1
+`int` or `char`                    directly as a value, shifted left by 1 bit, with the least significant bit set to 1
 `unit`, `[]`, `false`              as OCaml `int` 0.
 `true`                             as OCaml `int` 1.
 `Foo | Bar`                        as ascending OCaml `int`s, starting from 0.
@@ -572,5 +570,4 @@ This finalizer has nothing to do with ordinary OCaml finalizers (as created by
 functions such as `free`.
 
 A common use of custom blocks is to manage external system memory directly
-from within OCaml, via the `Bigarray` module. We'll cover this later on
-in [xref](#parsing-binary-protocols-with-bigarray).
+from within OCaml, via the `Bigarray` module.

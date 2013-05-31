@@ -67,7 +67,7 @@ let from_yminsky =
 ]
 
 let js_interns =
-  [ "imackler"               (* izaakmeckler@me.com      *)
+  [ "imeckler"               (* izaakmeckler@me.com      *)
   ; "billduff"               (* wduff11@gmail.com        *)
   ; "rawxfish"               (* szhan@princeton.edu      *)
   ; "bbohrer"                (* bjbohrer@gmail.com       *)
@@ -80,6 +80,7 @@ let js_interns =
   ; "polasek"                (* TODO Jan Polášek <jp581@cam.ac.uk> *)
   ; "mkandalf"               (* TODO nmeyer@janestreet.com *)
   ; "denyphi"                (* TODO pdenys@janestreet.com *)
+  ; "dhouck"                 (* TODO dhouck@janestreet.com *)
   ]
 
 let from_email =
@@ -126,6 +127,7 @@ let from_email =
   ; "cstrahan"                (* Charles Strahan <charles.strahan@livingsocial.com> *)
   ; "joshmaxsilverman"        (* Josh Max Silverman <josh.silverman@gmail.com> *)
   ; "andreas"                 (* TODO Andreas Garnæs <andreas.garnaes@gmail.com> *)
+  ; "darioteixeira"           (* TODO Dario Teixeira <dario.teixeira@yahoo.com> *)
 
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)

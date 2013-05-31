@@ -114,11 +114,6 @@
  (title "Plugins with First-class Modules")
  (public false)
  )
-((part Practical)
- (name "xml-streams-and-trees")
- (file "stream-parsing-xml")
- (note "75% done, on Anil's stack")
- )
 ;; PART 3: ADVANCED TOPICS
 ((part Advanced)
  (name "foreign-function-interface")
@@ -152,13 +147,6 @@
  (note "50% done, on Anil's stack")
  (title "Understanding the Garbage Collector")
  (public true)
- )
-((part Advanced)
- (name "parsing-binary-protocols-with-bigarray")
- (file "bigarrays")
- (note "50% done, on Anil's stack")
- (title "Handling Binary Protocols with Bigarray")
- (public false)
  )
 ;; Part 4: APPENDIX
 
