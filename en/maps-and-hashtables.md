@@ -756,8 +756,7 @@ let () =
 ```
 
 Unsurprisingly, maps perform far better than hashtables on this
-benchmark, and the numbers can be made more extreme by increasing the
-size of the tables or the length of the list.
+benchmark, in this case by more than a factor of ten.  
 
 ```
 $ ./map_vs_hash2.native -clear-columns name time speedup
@@ -769,6 +768,9 @@ Estimated testing time 20s (change using -quota SECS).
 │ table │ 2_630_707 │    1.00 │
 └───────┴───────────┴─────────┘
 ```
+
+These numbers can be made more extreme by increasing the size of the
+tables or the length of the list.
 
 As you can see, the relative performance of trees and maps depends a
 great deal on the details of how they're used, and so whether to
