@@ -15,9 +15,8 @@ including:
   components of a system swappable.  This is particularly useful when
   you want to mock up parts of your system for testing and simulation
   purposes.
-* _Auto-extension of modules_.  Sometimes, there is some functionality
-  that you want to build in a standard way for different types, in
-  each case based on a some piece of type-specific logic.  For
+* _Auto-extension of modules_.  Functors give you a way of extending
+  existing modules with new functionality in a standardized way.  For
   example, you might want to add a slew of comparison operators
   derived from a base comparison function.  To do this by hand would
   require a lot of repetitive code for each type, but functors let you
@@ -31,11 +30,11 @@ including:
 ### A trivial example
 
 We'll start by considering the simplest possible example: a functor
-for incrementing an integer.
-
-More precisely, we'll create a functor that takes a module containing
-a single integer variable `x`, and returns a new module with `x`
-incremented by one.
+for incrementing an integer.  More precisely, we'll create a functor
+that takes a module containing a single integer variable `x`, and
+returns a new module with `x` incremented by one.  This is in no way a
+useful example, but it's a useful way to walk through the basic
+mechanics of functors.
 
 ```ocaml
 # module type X_int = sig val x : int end;;
@@ -81,8 +80,8 @@ module Four : sig val x : int end
 
 In this case, we applied `Increment` to a module whose signature is
 exactly equal to `X_int`.  But we can apply `Increment` to any module
-that satisfies the interface `X_int`, in the same way that a the
-contents of an `ml` file can satisfy the `mli`.  That means that the
+that _satisfies_ the interface `X_int`, in the same way that the
+contents of an `ml` file must satisfy the `mli`.  That means that the
 module type can omit some information available in the module, either
 by dropping fields or by leaving some fields abstract.  Here's an
 example:
@@ -92,20 +91,20 @@ example:
     let x = 3
     let y = "three"
   end;;
-module Three_and_more : sig val x : int val x_string : string end
+module Three_and_more : sig val x : int val y : string end
 # module Four = Increment(Three_and_more);;
 module Four : sig val x : int end
 ```
 
 ### A bigger example: computing with intervals
 
-Let's now consider a more realistic example of how to use functors: a
+Let's consider a more realistic example of how to use functors: a
 library for computing with intervals.  This library will be
 functorized over the type of the endpoints of the intervals and the
 ordering of those endpoints.
 
 First we'll define a module type that captures the information we'll
-need about the endpoint type.  This interface, which we'll call
+need about the endpoints.  This interface, which we'll call
 `Comparable`, contains just two things: a comparison function, and the
 type of the values to be compared.
 
@@ -194,10 +193,10 @@ module Int_interval :
   end
 ```
 
-When we choose our interfaces that are aligned with the standards of
-our libraries, we don't need to construct a custom module to feed to
-the functor.  In this case, for example, we can directly use the `Int`
-or `String` modules provided by Core.
+If the input interface for your functor is aligned with the standards
+of the libraries you use, then you don't need to construct a custom
+module to feed to the functor.  In this case, we can directly use the
+`Int` or `String` modules provided by Core.
 
 ```ocaml
 # module Int_interval = Make_interval(Int) ;;
@@ -206,9 +205,9 @@ or `String` modules provided by Core.
 
 This works because many modules in Core, including `Int` and `String`,
 satisfy an extended version of the `Comparable` signature described
-above.  Standardized signatures are generally good practice, both
-because they makes functors easier to use, and because they make the
-codebase generally easier to navigate.
+above.  Such standardized signatures are good practice, both because
+they makes functors easier to use, and because they make your codebase
+generally easier to navigate.
 
 Now we can use the newly defined `Int_interval` module like any
 ordinary module.
