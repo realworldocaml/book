@@ -1579,11 +1579,172 @@ you can hand-optimize it.
 ### Building debuggable libraries
 
 The native code compiler builds executables that can be debugged using
-conventional system debuggers such as GNU `gdb`.  You'll need to compile your
+conventional system debuggers such as GNU `gdb`.  You need to compile your
 libraries with the `-g` option to add the debug information to the output, just
 as you need to with C compilers.
 
-TODO add example of gdb breakpoint use
+Extra debugging information is inserted into the output assembly when the
+library is compiled in debug mode.  These include the CFI stubs you will have
+noticed in the profiling output earlier (`.cfi_start_proc` and `.cfi_end_proc`
+to delimit an OCaml function call, for example).
+
+#### Understanding name mangling
+
+So how do these map into an interactive debugger like `gdb`?  The first thing
+you need to know is how OCaml functions map into C symbol names; a procedure is
+known as *name mangling*.  C symbols must be unambiguous within a compilation
+unit and so the conversion from OCaml variable bindings (which can shadow each
+other) also encodes additional information such as the module name into the
+symbol.
+
+The conversion follows some straightforward rules:
+
+* The symbol is prefixed by `caml` and the local module name, with dots
+  replaced by underscores.
+* This is followed by a double `__` suffix and the variable name.
+* The variable name is also suffixed by a `_` and a number.  This is
+  the result of the lambda compilation that replaces each variable name
+  with a unique value within the module.  You can determine this number
+  by examining the `-dlambda` output from `ocamlopt`.
+
+#### Interactive breakpoints with the GNU debugger
+
+Let's see name mangling in action with some interactive debugging in the
+GNU `gdb` debugger.
+
+<caution>
+<title>Beware `gdb` on MacOS X</title>
+
+The examples here assume that you are running `gdb` on either Linux or FreeBSD.
+MacOS X does also `gdb` installed, but it's a rather quirky experience that
+doesn't reliably interpret the debugging output in the native binaries.  This
+can result in function names showing up as raw symbols such as `.L101` instead
+of their more human-readable form.
+
+For OCaml 4.1, we'd recommend you do native code debugging on an alternate
+platform, or manually look at the assembly code output to map the symbol names
+onto their precise OCaml functions.
+
+</caution>
+
+For our example, let's write a mutually recursive function that selects alternating
+values from a list.  This isn't tail recursive, and so our stack size will grow
+as we single-step through the execution.
+
+```ocaml
+(* alternate_list.ml : select every other value from an input list *)
+open Core.Std
+
+let rec take =
+  function
+  |[] -> []
+  |hd::tl -> hd :: (skip tl)
+and skip =
+  function
+  |[] -> []
+  |hd::tl -> take tl
+
+let () =
+  take [1;2;3;4;5;6;7;8;9]
+  |> List.map ~f:string_of_int
+  |> String.concat ~sep:","
+  |> print_endline
+```
+
+Compile and run this with debugging symbols. You should see the following
+output:
+
+```console
+$ ocamlfind ocamlopt -g -package core -thread -linkpkg -o alternate alternate_list.ml
+$ ./alternate
+1,3,5,7,9
+```
+
+Now we can run this interactively within `gdb`.
+
+```console
+$ gdb ./alternate
+GNU gdb (GDB) 7.4.1-debian
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /home/avsm/alternate...done.
+(gdb)
+```
+
+The `gdb` prompt lets you enter debug directives.  Let's set the program
+to break just before the first call to `take`.
+
+```console
+(gdb) break camlAlternate_list__take_69242 
+Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.
+```
+
+We used the C symbol name by following the name mangling rules defined
+earlier.  A convenient way to figure out the full name is by tab-completion.
+Just type in a portion of the name and press the `<tab>` key to see
+a list of possible completions.
+
+Once you've set the breakpoint, start the program executing.
+
+```console
+(gdb) run
+Starting program: /home/avsm/alternate
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4	  function
+```
+
+The binary has run until the first take invocation and stopped, waiting
+for further instructions.  GDB has lots of features, so let's continue
+the program and check the stacktrace after a couple of recursions.
+
+```console
+(gdb) cont
+Continuing.
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4	  function
+(gdb) cont
+Continuing.
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4	  function
+(gdb) bt
+#0  camlAlternate_list__take_69242 () at alternate_list.ml:4
+#1  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#2  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#3  0x00000000005659f7 in camlAlternate_list__entry () at alternate_list.ml:14
+#4  0x0000000000560029 in caml_program ()
+#5  0x000000000080984a in caml_start_program ()
+#6  0x00000000008099a0 in ?? ()
+#7  0x0000000000000000 in ?? ()
+(gdb) clear camlAlternate_list__take_69242
+Deleted breakpoint 1 
+(gdb) cont
+Continuing.
+1,3,5,7,9
+[Inferior 1 (process 3546) exited normally]
+```
+
+We used `cont` to resume execution after a breakpoint has paused it, `bt` to
+display a stack backtrace, and `clear` to delete the breakpoint and let the
+program execute until completion.  GDB has a wealth of other features we won't
+cover here, but you view more guidelines via Mark Shinwell's 2012 talk on
+["Real-world debugging in OCaml"](http://www.youtube.com/watch?v=NF2WpWnB-nk<).
+
+One very useful feature of OCaml native code is that C and OCaml both share the
+same stack.  This means that GDB backtraces can give you a combined view of
+what's going on in your program *and* runtime library.  This includes any calls
+to C libraries or even callbacks into OCaml from the C layer if you're in an
+embedded environment.
 
 #### Profiling native code libraries
 
