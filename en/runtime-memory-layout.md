@@ -1,25 +1,25 @@
 # Memory Representation of Values
 
-Much of the static type information contained within an OCaml program is
-checked and discarded at compilation time, leaving a much simpler *runtime*
-representation for values.  You'll need to understand the runtime memory format
-in order to write programs that are efficient and compact, and to to interpret
-the output of profiling tools.
+The `ctypes` FFI library we described earlier does its best to hide the details
+of how values are exchanged across C libraries and the OCaml runtime.  There is
+a simple reason for this: manipulating these values directly is a delicate
+operation that requires understanding a few different moving parts before you
+can get it right.  
 
-In this chapter, you'll learn:
+You need to know the exact mapping between OCaml types and their runtime memory
+representation, since you're bypassing the OCaml compiler that normally
+performs this translation for you.  You also need to ensure that your code is
+interfacing correctly with OCaml runtime's memory management.  This knowledge
+is useful beyond just writing foreign function interfaces, especially as you
+build and maintain more complex OCaml applications.  Profiling tools will
+report output based on the runtime memory layout.  Debuggers will execute OCaml
+binaries without any knowledge of the static types, and you'll need to do some
+translation to use them effectively.
 
-* The architecture of the OCaml garbage collector.
-* The layout of OCaml values as blocks within the major and minor heaps.
-* The representation of all the OCaml types in runtime blocks.
-
-This chapter is primarily informational, but it helps to know all this
-to understand the compilation process in [xref](#the-compilation-pipeline)
-or tracing and profiling your programs in [xref](#understanding-the-garbage-collector).
-
-You might also want to interface with the OCaml C runtime directly instead of
-using the simpler `ctypes` library described earlier in
-[xref](#foreign-function-interface).  This could be for performance reasons or
-a more specialised embedded or kernel execution environment.
+Luckily, the OCaml compiler minimizes the amount of optimization magic that it
+performs, and relies instead on its straightforward execution model for good
+performance.  With some experience, you can predict rather precisely where a
+block of performance-critical OCaml code is spending its time.
 
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
@@ -40,132 +40,23 @@ the runtime must look up the concrete instance of the object and dispatch the
 method call.  Those languages amortize some of the cost via "Just-in-Time"
 dynamic patching, but OCaml prefers runtime simplicity instead.
 
-We'll talk more about the compilation process in
-[xref](#the-compilation-pipeline).
+TODO xref to pipeline chapter.
 
 </note>
 
-Let's start by explaining the garbage collector architecture, and then move
-onto the memory layout of OCaml values.
+This chapter covers the mapping from OCaml types to runtime values, and walks
+you through them via the toplevel.  We'll cover the integration with
+the runtime in [xref](#understanding-the-garbage-collector), and TODO.
 
-## The garbage collector
+## OCaml blocks and values
 
-A running OCaml program uses blocks of memory (i.e. contiguous sequences of
-words in RAM) to represent many of the values that it deals with such as
-tuples, records, closures or arrays.  An OCaml program implicitly allocates a
-block of memory when such a value is created. 
-
-```
-# let x = { foo = 13; bar = 14 } ;;
-```
-
-An expression such as the record above requires a new block of memory with two
-words of available space. One word holds the `foo` field and the second word
-holds the `bar` field.  The OCaml compiler translates such an expression into
-an explicit allocation for the block from OCaml's runtime system.
-
-The OCaml runtime is a C library that provides a collection of routines that
-can be called by running OCaml programs.  The runtime manages a *heap*, which
-is a collection of memory regions it obtains from the operating system using
-*malloc(3)*. The OCaml runtime uses these memory regions to hold *heap blocks*,
-which it fills up in response to allocation requests by the OCaml program.
-
-### The mark and sweep GC strategy
-
-When there isn't enough memory available to satisfy an allocation request from
-the already-allocated heap blocks, the runtime system invokes the *garbage
-collector* (or GC). An OCaml program does not explicitly free a heap block when
-it is done with it. The GC determines which heap blocks are "live" and which
-heap blocks are "dead", i.e. no longer in use. Dead blocks are collected and
-their memory made available for re-use by the application.
-
-The garbage collector does not keep constant track of blocks as they are
-allocated and used.  Instead, it regularly scans blocks by starting from a set
-of *roots*, which are values that the application always has access to (such as
-the stack).  The GC maintains a directed graph in which heap blocks are nodes.
-There is an edge from heap block `b1` to heap block `b2` if some field of `b1`
-points to `b2`.  All blocks reachable from the roots by following edges in the
-graph must be retained, and unreachable blocks can be reused by the
-application.  This strategy is commonly known as "mark and sweep" collection.
-
-### Generational garbage collection
-
-The typical OCaml programming style typically involves allocating many small
-blocks of memory that are used for a short period of time and then never
-accessed again.  OCaml takes advantage of this fact to improve performance by
-using a *generational* garbage collector.
-
-A generational GC keeps separate memory regions to hold blocks based on how
-long the blocks have been live.  OCaml's heap is split in two:
-
-* a small, fixed-size *minor heap* where most most blocks are initially allocated
-* a large, variable-sized *major heap* for blocks that have been live longer or are
-  larger than 4KB.
-
-A typical functional programming style means that young blocks tend to die
-young, and old blocks tend to stay around for longer than young ones.  This is
-often referred to as the *generational hypothesis*. 
-
-OCaml uses different memory layouts and garbage collection algorithms for the
-major and minor heaps to account for this generational difference.  We'll
-explain the two mechanisms next.
-
-### The fast minor heap
-
-The minor heap is one contiguous chunk of virtual memory containing a sequence
-of OCaml blocks.  If there is space, allocating a new block is a fast
-constant-time operation in which the pointer to the end of the heap is
-incremented by the desired size.
-
-To garbage collect the minor heap, OCaml uses *copying collection* to copy all
-live blocks in the minor heap to the major heap.  This takes work proportional
-to the number of live blocks in the minor heap, which is typically small
-according to the generational hypothesis.
-
-One complexity of generational collection arises from the fact that minor heap
-sweeps are much more frequent than major heap collections. In order to know
-which blocks in the minor heap are live, the collector must track which
-minor-heap blocks are directly pointed to by major-heap blocks.  Without this
-information, the minor collection would require scanning the much larger major
-heap.
-
-OCaml maintains a set of such *inter-generational pointers*, and the compiler
-introduces a write barrier to update this set whenever a major-heap block is
-modified to point at a minor-heap block. We'll talk more about the implications
-of the write barrier in [xref](#understanding-the-garbage-collector).
-
-### The long-lived major heap
-
-The major heap consists of any number of non-contiguous chunks of virtual
-memory, each containing live blocks interspersed with regions of free memory.
-The runtime system maintains a free-list data structure that indexes all the
-free memory. This list is used to satisfy allocation requests for OCaml blocks.
-The major heap is typically much larger than the minor heap, and is cleaned via
-a mark-and-sweep garbage collection algorithm.
-
-* The *mark* phase traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
-* The *sweep* phase sequentially scans the heap chunks and identifies dead blocks that weren't marked earlier.
-* The *compact* phase moves live blocks to eliminate the gaps of free memory into a freshly allocated heap. This prevents heap blocks fragmenting in long-lived programs.
-
-A major heap garbage collection must *stop the world* (that is, halt the
-application) in order to ensure that blocks can be safely moved around without
-this move being observed by the live application. The mark-and-sweep phases run
-incrementally over slices of memory to avoid pausing the application for long
-periods of time.  Only the compaction phase touches all the memory in one go,
-and is a relatively rare operation.
-
-The `Gc` module lets you control all these parameters from your application.
-Although the defaults are usually sensible, understanding them and tuning them
-is an important concern we will discuss later in [xref](#understanding-the-garbage-collector).
-
-## The representation of OCaml values
-
-We've described the overall memory layout, but not what the contents of
-each block contains.  Every OCaml variable points to a `value` at runtime.  A
-value is a single memory word that is either an integer or a pointer.  The
-OCaml runtime needs to understand the difference between the two so that it can
-follow pointers to look for more values, but not integers (which directly hold
-the value and don't point to anything meaningful).
+Every OCaml variable maps to a uniform `value` structure at runtime.  A value
+is a single memory word that is either an immediate integer or a pointer to
+some other memory.  The OCaml runtime keeps track of all values so that it can
+free them when they are unused in the future. It thus needs to understand the
+difference an integer and a pointer, since it scans pointers to find further
+values, but doesn't follow integers that don't point to anything meaningful
+beyond their immediate value.
 
 ### Distinguishing integer and pointers at runtime
 
@@ -183,7 +74,8 @@ The value is treated as a memory pointer if the lowest bit of the `value` is
 zero. A pointer value is stored unmodified since pointers are guaranteed to be
 word-aligned with the bottom bits always being zero.  The next problem is
 distinguishing between pointers to OCaml values (which should be followed by
-the garbage collector) and C pointers (which shouldn't be followed).
+the garbage collector) and pointers into the system heap to C values (which
+shouldn't be followed).
 
 The mechanism for this is simple since the runtime system keeps track of the
 heap blocks it has allocated for OCaml values. If the pointer is inside a heap
