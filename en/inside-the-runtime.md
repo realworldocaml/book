@@ -1,6 +1,113 @@
 # Understanding the Garbage Collector
 
-(_avsm_: this chapter is still being chopped and changed)
+A running OCaml program uses blocks of memory (i.e. contiguous sequences of
+words in RAM) to represent many of the values that it deals with such as
+tuples, records, closures or arrays.  An OCaml program implicitly allocates a
+block of memory when such a value is created. 
+
+```
+# let x = { foo = 13; bar = 14 } ;;
+```
+
+An expression such as the record above requires a new block of memory with two
+words of available space. One word holds the `foo` field and the second word
+holds the `bar` field.  The OCaml compiler translates such an expression into
+an explicit allocation for the block from OCaml's runtime system.
+
+The OCaml runtime is a C library that provides a collection of routines that
+can be called by running OCaml programs.  The runtime manages a *heap*, which
+is a collection of memory regions it obtains from the operating system using
+*malloc(3)*. The OCaml runtime uses these memory regions to hold *heap blocks*,
+which it fills up in response to allocation requests by the OCaml program.
+
+### The mark and sweep GC strategy
+
+When there isn't enough memory available to satisfy an allocation request from
+the already-allocated heap blocks, the runtime system invokes the *garbage
+collector* (or GC). An OCaml program does not explicitly free a heap block when
+it is done with it. The GC determines which heap blocks are "live" and which
+heap blocks are "dead", i.e. no longer in use. Dead blocks are collected and
+their memory made available for re-use by the application.
+
+The garbage collector does not keep constant track of blocks as they are
+allocated and used.  Instead, it regularly scans blocks by starting from a set
+of *roots*, which are values that the application always has access to (such as
+the stack).  The GC maintains a directed graph in which heap blocks are nodes.
+There is an edge from heap block `b1` to heap block `b2` if some field of `b1`
+points to `b2`.  All blocks reachable from the roots by following edges in the
+graph must be retained, and unreachable blocks can be reused by the
+application.  This strategy is commonly known as "mark and sweep" collection.
+
+### Generational garbage collection
+
+The typical OCaml programming style typically involves allocating many small
+blocks of memory that are used for a short period of time and then never
+accessed again.  OCaml takes advantage of this fact to improve performance by
+using a *generational* garbage collector.
+
+A generational GC keeps separate memory regions to hold blocks based on how
+long the blocks have been live.  OCaml's heap is split in two:
+
+* a small, fixed-size *minor heap* where most most blocks are initially allocated
+* a large, variable-sized *major heap* for blocks that have been live longer or are
+  larger than 4KB.
+
+A typical functional programming style means that young blocks tend to die
+young, and old blocks tend to stay around for longer than young ones.  This is
+often referred to as the *generational hypothesis*. 
+
+OCaml uses different memory layouts and garbage collection algorithms for the
+major and minor heaps to account for this generational difference.  We'll
+explain the two mechanisms next.
+
+### The fast minor heap
+
+The minor heap is one contiguous chunk of virtual memory containing a sequence
+of OCaml blocks.  If there is space, allocating a new block is a fast
+constant-time operation in which the pointer to the end of the heap is
+incremented by the desired size.
+
+To garbage collect the minor heap, OCaml uses *copying collection* to copy all
+live blocks in the minor heap to the major heap.  This takes work proportional
+to the number of live blocks in the minor heap, which is typically small
+according to the generational hypothesis.
+
+One complexity of generational collection arises from the fact that minor heap
+sweeps are much more frequent than major heap collections. In order to know
+which blocks in the minor heap are live, the collector must track which
+minor-heap blocks are directly pointed to by major-heap blocks.  Without this
+information, the minor collection would require scanning the much larger major
+heap.
+
+OCaml maintains a set of such *inter-generational pointers*, and the compiler
+introduces a write barrier to update this set whenever a major-heap block is
+modified to point at a minor-heap block. We'll talk more about the implications
+of the write barrier in [xref](#understanding-the-garbage-collector).
+
+### The long-lived major heap
+
+The major heap consists of any number of non-contiguous chunks of virtual
+memory, each containing live blocks interspersed with regions of free memory.
+The runtime system maintains a free-list data structure that indexes all the
+free memory. This list is used to satisfy allocation requests for OCaml blocks.
+The major heap is typically much larger than the minor heap, and is cleaned via
+a mark-and-sweep garbage collection algorithm.
+
+* The *mark* phase traverses the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
+* The *sweep* phase sequentially scans the heap chunks and identifies dead blocks that weren't marked earlier.
+* The *compact* phase moves live blocks to eliminate the gaps of free memory into a freshly allocated heap. This prevents heap blocks fragmenting in long-lived programs.
+
+A major heap garbage collection must *stop the world* (that is, halt the
+application) in order to ensure that blocks can be safely moved around without
+this move being observed by the live application. The mark-and-sweep phases run
+incrementally over slices of memory to avoid pausing the application for long
+periods of time.  Only the compaction phase touches all the memory in one go,
+and is a relatively rare operation.
+
+The `Gc` module lets you control all these parameters from your application.
+Although the defaults are usually sensible, understanding them and tuning them
+is an important concern we will discuss later in [xref](#understanding-the-garbage-collector).
+
 
 ## Runtime Memory Management
 
