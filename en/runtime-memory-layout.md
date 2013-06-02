@@ -471,8 +471,8 @@ The custom operations specify how the runtime should perform polymorphic
 comparison, hashing and binary marshalling. They also optionally contain a
 *finalizer* that the runtime calls just before the block is garbage collected.
 This finalizer has nothing to do with ordinary OCaml finalizers (as created by
-`Gc.finalise` and explained in [xref](#inside-the-runtime)).  They are instead
-used to call C cleanup functions such as `free`.
+`Gc.finalise` and explained in [xref](#understanding-the-garbage-collector)).
+They are instead used to call C cleanup functions such as `free`.
 
 ### Managing external memory with Bigarray
 
