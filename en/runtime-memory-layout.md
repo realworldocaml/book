@@ -110,7 +110,7 @@ substraction are a single instruction, and multiplication is only a few more.
 
 </note>
 
-### Blocks and values
+## Blocks and values
 
 An OCaml *block* is the basic unit of allocation on the heap.  A block consists
 of a one-word header (either 32- or 64-bits) followed by variable-length data
@@ -184,7 +184,7 @@ registers and not appear on the stack if you don't have too many parameters to
 your functions.  Modern architectures as as `x86_64` have a lot of spare
 registers to further improve the efficiency of using unboxed integers.
 
-### Tuples, records and arrays
+## Tuples, records and arrays
 
 ```
 +---------+----------+----------- - - - - 
@@ -261,7 +261,7 @@ or arrays, and so they have the usual tuple tag value of `0`. Only records
 and arrays can have the array optimization, and only if every single field is
 a float.
 
-### Variants and lists
+## Variants and lists
 
 Basic variant types with no extra parameters for any of their branches are
 simply stored as an OCaml integer, starting with `0` for the first option and
@@ -338,7 +338,7 @@ without parameters is the size of the native integer (either 31- or 63-bits).
 This limit arises because of the size of the tag byte, and that some of the
 high numbered tags are reserved.
 
-### Polymorphic variants
+## Polymorphic variants
 
 Polymorphic variants are more flexible than normal variants when writing code,
 but are slightly less efficient at runtime. This is because there isn't as much
@@ -387,7 +387,7 @@ predictable.  The OCaml compiler never switches memory representation due to
 optimization passes. This lets you predict the precise runtime layout by
 referring to these guidelines and your source code.
 
-### String values
+## String values
 
 Strings are standard OCaml blocks with the header size defining the size
 of the string in machine words. The `String_tag` (252) is higher than the
@@ -427,14 +427,13 @@ thus contain `NULL` bytes at any point within the string. Care should be taken
 that any C library functions that receive these buffers can cope with arbitrary
 `NULL` values within the buffer contents.
 
-### Custom heap blocks
+## Custom heap blocks
 
 OCaml supports *custom* heap blocks via a `Custom_tag` that let the runtime
 perform user-defined operations over OCaml values.  A custom block lives in the
 OCaml heap like an ordinary block and can be of whatever size the user desires.
-The `Custom_tag` (255) is higher than `No_scan_tag` and isn't scanned by the
-garbage collector.  This means that it cannot contain any OCaml values, but
-is useful to track pointers into external system memory.
+The `Custom_tag` (255) is higher than `No_scan_tag` and so isn't scanned by the
+garbage collector.
 
 The first word of the data within the custom block is a C pointer to a `struct`
 of custom operations. The custom block cannot have pointers to OCaml blocks and
@@ -455,11 +454,36 @@ struct custom_operations {
 ```
 
 The custom operations specify how the runtime should perform polymorphic
-comparison, hashing and binary marshalling.  They also optionally contain a
+comparison, hashing and binary marshalling. They also optionally contain a
 *finalizer* that the runtime calls just before the block is garbage collected.
 This finalizer has nothing to do with ordinary OCaml finalizers (as created by
-`Gc.finalise` and explained in TODO.  They are instead used to call C cleanup
-functions such as `free`.
+`Gc.finalise` and explained in [xref](#inside-the-runtime)).  They are instead
+used to call C cleanup functions such as `free`.
 
-A common use of custom blocks is to manage external system memory directly
-from within OCaml, via the `Bigarray` module.
+### Managing external memory with Bigarray
+
+A common use of custom blocks is to manage external system memory directly from
+within OCaml via the Bigarray module.  The Bigarray interface was originally
+intended to exchange data with Fortran code for scientific computation.  It can
+map a block of system memory as a multi-dimensional array that can be accessed
+from OCaml.  Array operations work directly on the external memory, without
+requiring it to be copied into the OCaml heap (which is a potentially expensive
+operation for large arrays).
+
+Bigarray sees a lot of use beyond just scientific computing, and several Core
+libraries use it:
+
+* The `Iobuf` module maps I/O buffers as a 1-dimensional array of bytes.  It provides
+  a sliding window interface that lets consumer processes read from the buffer
+  while it's being filled by producers.  This lets OCaml use I/O buffers that have been
+  externally allocated by the operating system without any extra data copying.
+* The `Bigstring` module provides a `String`-like interface that uses `Bigarray`
+  internally.  The `Bigbuffer` module then collects these into a set of
+  extensible string buffers that can operate entirely on external system memory.
+* The [Lacaml](https://bitbucket.org/mmottl/lacaml) library isn't part of Core, but 
+  provides the recommended interfaces to the widely used BLAS and LAPACK mathematical
+  Fortran libraries.  These allow developers to write high-performance numerical
+  code for applications that require linear algebra.  It supports large vectors and
+  matrices, but with static typing safety of OCaml to make it easier to write safe
+  algorithms.
+
