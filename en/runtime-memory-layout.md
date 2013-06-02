@@ -50,13 +50,27 @@ the runtime in [xref](#understanding-the-garbage-collector), and TODO.
 
 ## OCaml blocks and values
 
-Every OCaml variable maps to a uniform `value` structure at runtime.  A value
-is a single memory word that is either an immediate integer or a pointer to
-some other memory.  The OCaml runtime keeps track of all values so that it can
-free them when they are unused in the future. It thus needs to understand the
-difference an integer and a pointer, since it scans pointers to find further
-values, but doesn't follow integers that don't point to anything meaningful
-beyond their immediate value.
+A running OCaml program uses blocks of memory (i.e. contiguous sequences of
+words in RAM) to represent values such as tuples, records, closures or arrays.
+An OCaml program implicitly allocates a block of memory when such a value is
+created. 
+
+```ocaml
+# let x = { foo = 13; bar = 14 } ;;
+```
+
+An expression such as the record above requires a new block of memory with two
+words of available space. One word holds the `foo` field and the second word
+holds the `bar` field.  The OCaml compiler translates such an expression into
+an explicit allocation for the block from OCaml's runtime system.
+
+OCaml uses a uniform memory representation for every OCaml variable known as a
+`value`. An OCaml value is a single memory word that is either an immediate
+integer or a pointer to some other memory.  The OCaml runtime tracks all values
+so that it can free them when they are no longer needed. It thus needs to
+understand the difference an integer and a pointer since it scans pointers to
+find further values, but doesn't follow integers that don't point to anything
+meaningful beyond their immediate value.
 
 ### Distinguishing integer and pointers at runtime
 

@@ -1,49 +1,47 @@
 # Understanding the Garbage Collector
 
-A running OCaml program uses blocks of memory (i.e. contiguous sequences of
-words in RAM) to represent many of the values that it deals with such as
-tuples, records, closures or arrays.  An OCaml program implicitly allocates a
-block of memory when such a value is created. 
+We described the runtime format of individual OCaml variables earlier in
+[xref](#runtime-memory-layout).  OCaml automatically manages the runtime
+lifecycle of these variables by keeping track of allocated values and freeing
+them when they're no longer needed.  This in turn means that your applications
+don't need to manually track memory management, and reduces the likelihood of
+memory leaks creeping into your applications.
 
-```
-# let x = { foo = 13; bar = 14 } ;;
-```
+The OCaml runtime is a standard C library that provides a collection of
+routines that can be called by running OCaml programs.  The runtime manages a
+*heap*, which is a collection of memory regions it obtains from the operating
+system. The runtime uses these memory regions to hold *heap blocks* that it
+fills up with OCaml values in response to allocation requests by the OCaml
+program.
 
-An expression such as the record above requires a new block of memory with two
-words of available space. One word holds the `foo` field and the second word
-holds the `bar` field.  The OCaml compiler translates such an expression into
-an explicit allocation for the block from OCaml's runtime system.
-
-The OCaml runtime is a C library that provides a collection of routines that
-can be called by running OCaml programs.  The runtime manages a *heap*, which
-is a collection of memory regions it obtains from the operating system using
-*malloc(3)*. The OCaml runtime uses these memory regions to hold *heap blocks*,
-which it fills up in response to allocation requests by the OCaml program.
-
-### The mark and sweep GC strategy
+## Mark and sweep garbage collection
 
 When there isn't enough memory available to satisfy an allocation request from
-the already-allocated heap blocks, the runtime system invokes the *garbage
-collector* (or GC). An OCaml program does not explicitly free a heap block when
-it is done with it. The GC determines which heap blocks are "live" and which
-heap blocks are "dead", i.e. no longer in use. Dead blocks are collected and
-their memory made available for re-use by the application.
+the existing heap blocks, the runtime system invokes the *garbage collector*
+(or GC). An OCaml program can't explicitly free a heap block when it is done
+with it. Instead, the GC regularly determines which heap blocks are *live* and
+which heap blocks are *dead*, i.e. no longer in use. Dead blocks are collected
+and their memory made available for re-use by the application.
 
-The garbage collector does not keep constant track of blocks as they are
-allocated and used.  Instead, it regularly scans blocks by starting from a set
-of *roots*, which are values that the application always has access to (such as
-the stack).  The GC maintains a directed graph in which heap blocks are nodes.
-There is an edge from heap block `b1` to heap block `b2` if some field of `b1`
-points to `b2`.  All blocks reachable from the roots by following edges in the
-graph must be retained, and unreachable blocks can be reused by the
-application.  This strategy is commonly known as "mark and sweep" collection.
+The garbage collector doesn't keep constant track of blocks as they are
+allocated and used. It regularly scans blocks by starting from a set of *root*
+values that the application always has access to (such as the stack).  The GC
+maintains a directed graph in which:
 
-### Generational garbage collection
+* Heap blocks are nodes.
+* There is an edge from heap block `b1` to heap block `b2` if some field of `b1`
+points to `b2`.
 
-The typical OCaml programming style typically involves allocating many small
-blocks of memory that are used for a short period of time and then never
-accessed again.  OCaml takes advantage of this fact to improve performance by
-using a *generational* garbage collector.
+All blocks reachable from the roots by following edges in the graph must be
+retained, and unreachable blocks can be reused by the application.  This
+strategy is commonly known as *mark and sweep* garbage collection.
+
+## Generational garbage collection
+
+The usual OCaml programming style involves allocating many small blocks of
+memory that are used for a short period of time and then never accessed again.
+OCaml takes advantage of this fact to improve performance by using a
+*generational* garbage collector.
 
 A generational GC keeps separate memory regions to hold blocks based on how
 long the blocks have been live.  OCaml's heap is split in two:
@@ -53,7 +51,7 @@ long the blocks have been live.  OCaml's heap is split in two:
   larger than 4KB.
 
 A typical functional programming style means that young blocks tend to die
-young, and old blocks tend to stay around for longer than young ones.  This is
+young and old blocks tend to stay around for longer than young ones.  This is
 often referred to as the *generational hypothesis*. 
 
 OCaml uses different memory layouts and garbage collection algorithms for the
@@ -106,8 +104,7 @@ and is a relatively rare operation.
 
 The `Gc` module lets you control all these parameters from your application.
 Although the defaults are usually sensible, understanding them and tuning them
-is an important concern we will discuss later in [xref](#understanding-the-garbage-collector).
-
+is an important concern that we'll discuss later.
 
 ## Runtime Memory Management
 
