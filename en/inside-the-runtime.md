@@ -1,16 +1,16 @@
 # Understanding the Garbage Collector
 
-We described the runtime format of individual OCaml variables earlier in
-[xref](#memory-representation-of-values).  OCaml automatically manages the runtime
-lifecycle of these variables by keeping track of allocated values and freeing
-them when they're no longer needed.  This in turn means that your applications
-don't need to manually track memory management, and reduces the likelihood of
-memory leaks creeping into your applications.
+We've described the runtime format of individual OCaml variables earlier in
+[xref](#memory-representation-of-values).  When you run your program, OCaml
+manages the lifecycle of these variables by keeping track of allocated values
+and freeing them when they're no longer needed.  This in turn means that your
+applications don't need to manually implement memory management and reduces the
+likelihood of memory leaks creeping into your code.
 
 The OCaml runtime is a standard C library that provides a collection of
 routines that can be called by running OCaml programs.  The runtime manages a
-*heap*, which is a collection of memory regions it obtains from the operating
-system. The runtime uses these memory regions to hold *heap blocks* that it
+*heap*, which is a collection of memory blocks that it obtains from the
+operating system. The runtime uses this memory to hold *heap blocks* that it
 fills up with OCaml values in response to allocation requests by the OCaml
 program.
 
@@ -18,17 +18,16 @@ program.
 
 When there isn't enough memory available to satisfy an allocation request from
 the existing heap blocks, the runtime system invokes the *garbage collector*
-(or GC). An OCaml program can't explicitly free a heap block when it is done
-with it. Instead, the GC regularly determines which heap blocks are *live* and
-which heap blocks are *dead*, i.e. no longer in use. Dead blocks are collected
-and their memory made available for re-use by the application.
+(or GC). An OCaml program can't explicitly free a value when it is done with
+it. Instead, the GC regularly determines which values are *live* and which
+values are *dead*, i.e. no longer in use. Dead values are collected and their
+memory made available for re-use by the application.
 
-The garbage collector doesn't keep constant track of blocks as they are
-allocated and used. It regularly scans blocks by starting from a set of *root*
+The garbage collector doesn't keep constant track of values as they are
+allocated and used. It regularly scans them by starting from a set of *root*
 values that the application always has access to (such as the stack).  The GC
-maintains a directed graph in which heap blocks are nodes, and there
-is an edge from heap block `b1` to heap block `b2` if some field of `b1`
-points to `b2`.
+maintains a directed graph in which heap blocks are nodes, and there is an edge
+from heap block `b1` to heap block `b2` if some field of `b1` points to `b2`.
 
 All blocks reachable from the roots by following edges in the graph must be
 retained, and unreachable blocks can be reused by the application.  This
@@ -36,17 +35,16 @@ strategy is commonly known as *mark and sweep* garbage collection.
 
 ## Generational garbage collection
 
-The usual OCaml programming style involves allocating many small blocks of
-memory that are used for a short period of time and then never accessed again.
-OCaml takes advantage of this fact to improve performance by using a
-*generational* garbage collector.
+The usual OCaml programming style involves allocating many small variables that
+are used for a short period of time and then never accessed again. OCaml takes
+advantage of this fact to improve performance by using a *generational* garbage
+collector.
 
-A generational GC keeps separate memory regions to hold blocks based on how
-long the blocks have been live.  OCaml's heap is split in two:
+A generational GC maintains separate memory regions to hold blocks based on how
+long the blocks have been live.  OCaml's heap is split in two such regions:
 
-* a small, fixed-size *minor heap* where most most blocks are initially allocated
-* a large, variable-sized *major heap* for blocks that have been live longer or are
-  larger than 4KB.
+* a small fixed-size *minor heap* where most most blocks are initially allocated.
+* a larger variable-sized *major heap* for blocks that have been live longer.
 
 A typical functional programming style means that young blocks tend to die
 young and old blocks tend to stay around for longer than young ones.  This is
@@ -54,7 +52,7 @@ often referred to as the *generational hypothesis*.
 
 OCaml uses different memory layouts and garbage collection algorithms for the
 major and minor heaps to account for this generational difference.  We'll
-explain the two heaps in more detail next.
+explain how they differ in more detail next.
 
 <sidebar>
 <title>The `Gc` module and `OCAMLRUNPARAM`</title>
@@ -62,16 +60,15 @@ explain the two heaps in more detail next.
 OCaml provides several mechanisms to query and alter the behaviour of the
 runtime system.  The `Gc` module provides this functionality from within OCaml
 code, and we'll frequently refer to it in the rest of the chapter.  As with
-several other standard library modules, Core alters the interface from the
-standard OCaml library, so we'll assume that you've opened `Core.Std` in our
+several other standard library modules, Core alters the `Gc` interface from the
+standard OCaml library.  We'll assume that you've opened `Core.Std` in our
 explanations.
 
-You can also control the behaviour of OCaml programs externally, since the
-runtime uses the contents of the `OCAMLRUNPARAM` environment variable before it
-starts executing any OCaml code.  This lets you set garbage collector
-parameters independently of your source code, for example to benchmark the
-effects of different settings.  The format of `OCAMLRUNPARAM` is defined in the
-[manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual024.html).
+You can also control the behaviour of OCaml programs by setting the
+`OCAMLRUNPARAM` environment variable before launching your application.  This
+lets you set garbage collector parameters without recompiling, for example to
+benchmark the effects of different settings.  The format of `OCAMLRUNPARAM` is
+documented in the [OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual024.html).
 
 </sidebar>
 
@@ -164,24 +161,24 @@ relatively rare operation.
 The major heap consists of a singly-linked list of contiguous memory chunks
 sorted in increasing order of virtual address.  Each chunk is a single memory
 region allocated via *malloc(3)* and consists of a header and data area which
-contains OCaml blocks.  A chunk header contains:
+contains OCaml heap chunks.  A heap chunk header contains:
 
-* the *malloc*'ed virtual address of the memory containing the hunk.
+* the *malloc*'ed virtual address of the memory region containing the hunk.
 * the size in bytes of the data area.
 * an allocation size in bytes used during heap compaction to merge small blocks to defragment the heap.
 * a link to the next heap chunk in the list.
 
-Each chunk's data area starts on a page boundary and its size is a
-multiple of the page size (4KB).  It contains a contiguous sequence of heap
-blocks which can be as small as one or two 4KB pages, but are usually
-allocated in 1MB chunks (or 512KB on 32-bit architectures).
+Each chunk's data area starts on a page boundary and its size is a multiple of
+the page size (4KB).  It contains a contiguous sequence of heap blocks which
+can be as small as one or two 4KB pages, but are usually allocated in 1MB
+chunks (or 512KB on 32-bit architectures).
 
 <note>
 <title>Controlling major heap growth</title>
 
-The `Gc.control` block exposes the `major_heap_increment` to control the major
-heap growth.  The field defines the number of words to add to the major heap
-per expansion, and is the only memory allocation operation that the operating
+The `Gc` module uses the `major_heap_increment` value to control the major heap
+growth.  This defines the number of words to add to the major heap per
+expansion, and is the only memory allocation operation that the operating
 system observes from the OCaml runtime after initial startup (since the minor
 is fixed in size).  
 
@@ -190,6 +187,11 @@ increment to a larger value will let the operating system return a contiguous
 block of memory.  This is preferable to lots of smaller heap chunks that may be
 spread across different regions of virtual memory, and require more
 housekeeping in the OCaml runtime to keep track of them.
+
+```ocaml
+# open Core.Std;;
+# Gc.tune ~major_heap_increment:(1000448 * 4) ();;
+```
 
 </note>
 
