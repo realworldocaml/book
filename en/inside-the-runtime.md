@@ -265,6 +265,73 @@ in `OCAMLRUNPARAM`.
 
 </note>
 
+### Marking and scanning the heap
+
+The marking process can take a long time to run over the complete major heap,
+and has to pause the main application while it's active.  It therefore runs
+incrementally by marking the heap in *slices*.  Each value in the heap has a
+2-bit *color* field in its header that is used to store information about
+whether the value has been marked, so that the GC can resume easily between
+slices.
+
+Tag Color   Block Status
+---------   ------------
+blue        on the free list and not currently in use
+white       not reached yet, but possibly reachable
+gray        reachable, but its fields have not been scanned
+black       reachable, and its fields have been scanned
+
+
+The marking process starts with a set of *root* values that are always live
+(such as the application stack).  All values on the heap are initially marked
+as white values that are possibly reachable, but haven't been scanned yet.  It
+recursively follows all the fields in the roots via a depth-first search, and
+pushes newly encountered white blocks onto an intermediate stack of *gray
+values* while it follows their fields.  When a gray value's fields have all
+been followed it is popped off the stack and colored black.
+
+This process is repeated until the gray value stack is empty and there are no
+further values to mark.  There's one important edge case in this process,
+though.  The gray value stack can only grow to a certain size, after which the
+GC can no longer recurse into intermediate values since it has nowhere to store
+them while it follows their fields.  If this happens, the heap is marked as
+*impure* and a more expensive check is initiated once the existing gray values
+have been processed.
+
+To mark an impure heap. the GC first marks it as pure and walks through the
+entire heap block-by-block in increasing order of memory address. If it finds a
+gray block, it adds it to the gray list and recursively marks it using the
+usual strategy for a pure heap.  Once the scan of the complete heap is
+finished, the mark phase checks again whether the heap has again become impure,
+and repeats the scan if it is . These full-heap scans will continue until a
+successful scan completes without overflowing the gray list.
+
+<note>
+<title>Controlling major heap collections</title>
+
+You can trigger a single slice of the major GC via the `major_slice` call.
+This performs a minor collection first, and then a single slice.  The size of
+the slice is normally automatically computed by the GC to an appropriate value,
+and returns this value so that you can modify it in future calls if necessary.
+
+```ocaml
+# open Core.Std;;
+# Gc.major_slice 0 ;;
+- : int = 232340
+# Gc.full_major ();;
+- : unit = ()
+```
+
+The `space_overhead` setting controls how aggressive the GC is about setting
+the slice size to a large size.  This represents the proportion of memory used
+for live data that will be "wasted" because the GC doesn't immediately collect
+unreachable blocks.  Core defaults this to `100` to reflect a typical system
+that isn't overly memory-constrained. Set this even higher if you have lots of
+memory, or lower to cause the GC to work harder and collect blocks faster at
+the expense of using more CPU time.
+
+</note>
+
 ### Inter-generational pointers
 
 One complexity of generational collection arises from the fact that minor heap

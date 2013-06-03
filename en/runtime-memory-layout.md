@@ -152,15 +152,9 @@ bits on 32-bit platforms, which is the reason why OCaml strings are limited to
 64-bit host, or use the `Bigarray` module.
 
 The 2-bit `color` field is used by the garbage collector to keep track of its
-state during mark-and-sweep collection.  This makes incremental collection 
-possible, and isn't exposed directly to OCaml programs. 
-
-Tag Color   Block Status
----------   ------------
-blue        on the free list and not currently in use
-white       not reached yet, but possibly reachable
-gray        reachable, but its fields have not been scanned
-black       reachable, and its fields have been scanned
+state during mark-and-sweep collection.  We'll come back to this field in
+[xref](#understanding-the-garbage-collector).  This tag isn't exposed to
+OCaml source code in any case.
 
 A block's tag byte is multi-purpose, and indicates whether the data array
 represents opaque bytes or fields.  If a block's tag is greater than or equal
