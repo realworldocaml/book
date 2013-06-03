@@ -1,36 +1,34 @@
 # Understanding the Garbage Collector
 
 We've described the runtime format of individual OCaml variables earlier in
-[xref](#memory-representation-of-values).  When you run your program, OCaml
-manages the lifecycle of these variables by keeping track of allocated values
+[xref](#memory-representation-of-values).  When you execute your program, OCaml
+manages the lifecycle of these variables by regularly scanning allocated values
 and freeing them when they're no longer needed.  This in turn means that your
-applications don't need to manually implement memory management and reduces the
-likelihood of memory leaks creeping into your code.
+applications don't need to manually implement memory management and greatly
+reduces the likelihood of memory leaks creeping into your code.
 
-The OCaml runtime is a standard C library that provides a collection of
-routines that can be called by running OCaml programs.  The runtime manages a
-*heap*, which is a collection of memory blocks that it obtains from the
-operating system. The runtime uses this memory to hold *heap blocks* that it
-fills up with OCaml values in response to allocation requests by the OCaml
-program.
+The OCaml runtime is a C library that provides routines that can be called from
+running OCaml programs.  The runtime manages a *heap*, which is a collection of
+memory regions that it obtains from the operating system. The runtime uses this
+memory to hold *heap blocks* that it fills up with OCaml values in response to
+allocation requests by the OCaml program.
 
 ## Mark and sweep garbage collection
 
 When there isn't enough memory available to satisfy an allocation request from
-the existing heap blocks, the runtime system invokes the *garbage collector*
-(or GC). An OCaml program can't explicitly free a value when it is done with
-it. Instead, the GC regularly determines which values are *live* and which
-values are *dead*, i.e. no longer in use. Dead values are collected and their
-memory made available for re-use by the application.
+the pool of allocated heap blocks, the runtime system invokes the *garbage
+collector* (or GC). An OCaml program can't explicitly free a value when it is
+done with it. Instead, the GC regularly determines which values are *live* and
+which values are *dead*, i.e. no longer in use. Dead values are collected and
+their memory made available for re-use by the application.
 
 The garbage collector doesn't keep constant track of values as they are
-allocated and used. It regularly scans them by starting from a set of *root*
-values that the application always has access to (such as the stack).  The GC
-maintains a directed graph in which heap blocks are nodes, and there is an edge
-from heap block `b1` to heap block `b2` if some field of `b1` points to `b2`.
-
-All blocks reachable from the roots by following edges in the graph must be
-retained, and unreachable blocks can be reused by the application.  This
+allocated and used. Instead, it regularly scans them by starting from a set of
+*root* values that the application always has access to (such as the stack).
+The GC maintains a directed graph in which heap blocks are nodes, and there is
+an edge from heap block `b1` to heap block `b2` if some field of `b1` points to
+`b2`.  All blocks reachable from the roots by following edges in the graph must
+be retained, and unreachable blocks can be reused by the application.  This
 strategy is commonly known as *mark and sweep* garbage collection.
 
 ## Generational garbage collection
@@ -98,25 +96,25 @@ that delimit the start and end.
 ```
 
 In a fresh minor heap, the `limit` equals the `start` and the current `ptr`
-will equal the `end`.  As blocks are allocated, `ptr` decreases until it
-reaches `limit`, at which point a minor garbage collection is triggered.  To
-allocate a block in the minor heap, `ptr` is decremented by the size of the
-block (including the header) and the header area is immediately set to a valid
-value.  If there isn't enough space left for the block without decrementing
-past the `limit`, a minor garbage collection is triggered.
+will equal the `end`.  `ptr` decreases as blocks are allocated until it reaches
+`limit`, at which point a minor garbage collection is triggered.  To allocate a
+block in the minor heap, `ptr` is decremented by the size of the block
+(including the header) and the header area is immediately set to a valid value.
+If there isn't enough space left for the block without decrementing past the
+`limit`, a minor garbage collection is triggered.
 
 You may wonder why `limit` is required at all, since it always seems to equal
-`start`.  It's because the easiest way to schedule a minor heap collection is
-by setting `limit` to equal `end`.  The next allocation will never have enough
-space, and a normal minor garbage collection will result.
+`start`.  It's because the easiest way for the runtime to schedule a minor heap
+collection is by setting `limit` to equal `end`.  The next allocation will
+never have enough space after this is done and will always trigger a garbage
+collection.
 
 <note>
 <title>Setting the size of the minor heap</title>
 
-The minor heap size is set on program startup and defaults to 256kB on 64-bit
-platforms, unless overridden by the `s=<words>` argument to `OCAMLRUNPARAM`.
-You can change it after the program has started by calling the `Gc.set`
-function.
+The minor heap size defaults to 8MB on 64-bit platforms, unless overridden by
+the `s=<words>` argument to `OCAMLRUNPARAM`.  You can change it after the
+program has started by calling the `Gc.set` function.
 
 ```ocaml
 # open Gc;;
@@ -130,7 +128,9 @@ val c : Gc.control =
 ```
 
 Changing the GC size dynamically will trigger an immediate minor heap
-collection.
+collection.  Note that Core increases the default minor heap size from the
+standard OCaml installation quite significantly, and you'll want to reduce this
+if running in very memory-constrained environments.
 
 </note>
 
@@ -145,9 +145,13 @@ The major heap is typically much larger than the minor heap and can scale to
 gigabytes in size. It is cleaned via a mark-and-sweep garbage collection
 algorithm that operates in several phases:
 
-* The *mark* phase scans the block graph and marks all live blocks by setting a bit in the tag of the block header (known as the *color* tag).
-* The *sweep* phase sequentially scans the heap chunks and identifies dead blocks that weren't marked earlier.
-* The *compact* phase relocates live blocks into a freshly allocated heap to eliminate gaps in the free list. This prevents the fragmentation of heap blocks in long-running programs.
+* The *mark* phase scans the block graph and marks all live blocks by setting
+  a bit in the tag of the block header (known as the *color* tag).
+* The *sweep* phase sequentially scans the heap chunks and identifies dead blocks 
+  that weren't marked earlier.
+* The *compact* phase relocates live blocks into a freshly allocated heap to 
+  eliminate gaps in the free list. This prevents the fragmentation of heap blocks
+  in long-running programs.
 
 A major garbage collection must *stop the world* (that is, halt the
 application) to ensure that blocks can be moved around without this being
@@ -274,7 +278,7 @@ block is modified to point at a minor-heap block.
 
 #### The mutable write barrier
 
-This write barrier can have profound implications for the structure of your
+The write barrier can have profound implications for the structure of your
 code.  It's one of the reasons why using immutable data structures and
 allocating a fresh copy with changes can sometimes be faster than mutating a
 record in-place.
@@ -341,18 +345,18 @@ Estimated testing time 20s (change using -quota SECS).
 └───────────┴───────────┴─────────────────────┴───────────┴────────┴──────────┴────────────┘
 ```
 
-There is a stark space/time tradeoff here. The mutable version takes significantly
-longer to complete than the immutable one, but allocates many fewer minor heap
-words than the immutable version.  Minor allocation in OCaml is very fast and
-so it is often better to use immutable data structures in preference to the
-more conventional mutable versions.  On the other hand, if you only rarely
-mutable a value, it can be faster to take the write barrier hit and not
-allocate at all.
+There is a stark space/time tradeoff here. The mutable version takes
+significantly longer to complete than the immutable one, but allocates many
+fewer minor heap words than the immutable version.  Minor allocation in OCaml
+is very fast and so it is often better to use immutable data structures in
+preference to the more conventional mutable versions.  On the other hand, if
+you only rarely mutable a value, it can be faster to take the write barrier hit
+and not allocate at all.
 
 The only way to know for sure is to benchmark your program under real-world
-scenarios using `Core_bench`, and experiment with the tradeoffs.  The command-line
-benchmark binaries have a number of useful options that affect garbage collection
-behaviour.
+scenarios using `Core_bench`, and experiment with the tradeoffs.  The
+command-line benchmark binaries have a number of useful options that affect
+garbage collection behaviour.
 
 ```
 Benchmark for mutable, immutable
@@ -399,10 +403,10 @@ prefix the column name with a '+'.
 
 ```
 
-The `-no-compactions` and `-stabilize-gc` options can help force a situation where
-your application has fragmented memory.  This can simulate the behaviour of a
-long-running application without you having to actually wait that long to recreate
-the behaviour in a performance unit test.
+The `-no-compactions` and `-stabilize-gc` options can help force a situation
+where your application has fragmented memory.  This can simulate the behaviour
+of a long-running application without you having to actually wait that long to
+recreate the behaviour in a performance unit test.
 
 ## Attaching finalizer functions to values
 
@@ -444,8 +448,9 @@ suitable for finalizing.  This block is then passed to Async's
 `Gc.add_finalizer` function that schedules the finalizer safely with respect to
 all the other concurrent program threads.
 
-Let's explore this with a small example that finalizes values of different types,
-some of which are heap-allocated and others which are compile-time constants.
+Let's explore this with a small example that finalizes values of different
+types, some of which are heap-allocated and others which are compile-time
+constants.
 
 ```ocaml
 (* finalizer.ml : explore finalizers for different types *)
