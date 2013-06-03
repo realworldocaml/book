@@ -22548,29 +22548,30 @@ struct custom_operations {
     We've described the runtime format of individual OCaml variables
     earlier in
     <xref linkend="memory-representation-of-values"/>. When
-    you run your program, OCaml manages the lifecycle of these variables
-    by keeping track of allocated values and freeing them when they're
-    no longer needed. This in turn means that your applications don't
-    need to manually implement memory management and reduces the
-    likelihood of memory leaks creeping into your code.
+    you execute your program, OCaml manages the lifecycle of these
+    variables by regularly scanning allocated values and freeing them
+    when they're no longer needed. This in turn means that your
+    applications don't need to manually implement memory management and
+    greatly reduces the likelihood of memory leaks creeping into your
+    code.
   </para>
   <para>
-    The OCaml runtime is a standard C library that provides a collection
-    of routines that can be called by running OCaml programs. The
-    runtime manages a <emphasis>heap</emphasis>, which is a collection
-    of memory blocks that it obtains from the operating system. The
-    runtime uses this memory to hold <emphasis>heap blocks</emphasis>
-    that it fills up with OCaml values in response to allocation
-    requests by the OCaml program.
+    The OCaml runtime is a C library that provides routines that can be
+    called from running OCaml programs. The runtime manages a
+    <emphasis>heap</emphasis>, which is a collection of memory regions
+    that it obtains from the operating system. The runtime uses this
+    memory to hold <emphasis>heap blocks</emphasis> that it fills up
+    with OCaml values in response to allocation requests by the OCaml
+    program.
   </para>
   <sect1 id="mark-and-sweep-garbage-collection">
     <title>Mark and sweep garbage collection</title>
     <para>
       When there isn't enough memory available to satisfy an allocation
-      request from the existing heap blocks, the runtime system invokes
-      the <emphasis>garbage collector</emphasis> (or GC). An OCaml
-      program can't explicitly free a value when it is done with it.
-      Instead, the GC regularly determines which values are
+      request from the pool of allocated heap blocks, the runtime system
+      invokes the <emphasis>garbage collector</emphasis> (or GC). An
+      OCaml program can't explicitly free a value when it is done with
+      it. Instead, the GC regularly determines which values are
       <emphasis>live</emphasis> and which values are
       <emphasis>dead</emphasis>, i.e. no longer in use. Dead values are
       collected and their memory made available for re-use by the
@@ -22578,19 +22579,17 @@ struct custom_operations {
     </para>
     <para>
       The garbage collector doesn't keep constant track of values as
-      they are allocated and used. It regularly scans them by starting
-      from a set of <emphasis>root</emphasis> values that the
+      they are allocated and used. Instead, it regularly scans them by
+      starting from a set of <emphasis>root</emphasis> values that the
       application always has access to (such as the stack). The GC
       maintains a directed graph in which heap blocks are nodes, and
       there is an edge from heap block <literal>b1</literal> to heap
       block <literal>b2</literal> if some field of <literal>b1</literal>
-      points to <literal>b2</literal>.
-    </para>
-    <para>
-      All blocks reachable from the roots by following edges in the
-      graph must be retained, and unreachable blocks can be reused by
-      the application. This strategy is commonly known as <emphasis>mark
-      and sweep</emphasis> garbage collection.
+      points to <literal>b2</literal>. All blocks reachable from the
+      roots by following edges in the graph must be retained, and
+      unreachable blocks can be reused by the application. This strategy
+      is commonly known as <emphasis>mark and sweep</emphasis> garbage
+      collection.
     </para>
   </sect1>
   <sect1 id="generational-garbage-collection">
@@ -22693,8 +22692,8 @@ struct custom_operations {
       <para>
         In a fresh minor heap, the <literal>limit</literal> equals the
         <literal>start</literal> and the current <literal>ptr</literal>
-        will equal the <literal>end</literal>. As blocks are allocated,
-        <literal>ptr</literal> decreases until it reaches
+        will equal the <literal>end</literal>. <literal>ptr</literal>
+        decreases as blocks are allocated until it reaches
         <literal>limit</literal>, at which point a minor garbage
         collection is triggered. To allocate a block in the minor heap,
         <literal>ptr</literal> is decremented by the size of the block
@@ -22706,19 +22705,19 @@ struct custom_operations {
       <para>
         You may wonder why <literal>limit</literal> is required at all,
         since it always seems to equal <literal>start</literal>. It's
-        because the easiest way to schedule a minor heap collection is
-        by setting <literal>limit</literal> to equal
+        because the easiest way for the runtime to schedule a minor heap
+        collection is by setting <literal>limit</literal> to equal
         <literal>end</literal>. The next allocation will never have
-        enough space, and a normal minor garbage collection will result.
+        enough space after this is done and will always trigger a
+        garbage collection.
       </para>
       <note>
       <title>
       Setting the size of the minor heap
       </title>
       <para>
-        The minor heap size is set on program startup and defaults to
-        256kB on 64-bit platforms, unless overridden by the
-        <literal>s=&lt;words&gt;</literal> argument to
+        The minor heap size defaults to 8MB on 64-bit platforms, unless
+        overridden by the <literal>s=&lt;words&gt;</literal> argument to
         <literal>OCAMLRUNPARAM</literal>. You can change it after the
         program has started by calling the <literal>Gc.set</literal>
         function.
@@ -22735,7 +22734,10 @@ val c : Gc.control =
 </programlisting>
       <para>
         Changing the GC size dynamically will trigger an immediate minor
-        heap collection.
+        heap collection. Note that Core increases the default minor heap
+        size from the standard OCaml installation quite significantly,
+        and you'll want to reduce this if running in very
+        memory-constrained environments.
       </para>
       </note>
     </sect2>
@@ -22965,7 +22967,7 @@ val c : Gc.control =
       <sect3 id="the-mutable-write-barrier">
         <title>The mutable write barrier</title>
         <para>
-          This write barrier can have profound implications for the
+          The write barrier can have profound implications for the
           structure of your code. It's one of the reasons why using
           immutable data structures and allocating a fresh copy with
           changes can sometimes be faster than mutating a record
