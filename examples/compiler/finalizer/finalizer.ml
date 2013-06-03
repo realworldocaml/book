@@ -1,5 +1,6 @@
 (* finalizer.ml : explore finalizers for different types *)
 open Core.Std
+open Async.Std
 
 let attach_finalizer n v =
   match Heap_block.create v with
@@ -25,4 +26,4 @@ let () =
   attach_finalizer "allocated string" alloced_string;
   attach_finalizer "allocated record" { foo=alloced_bool };
   Gc.compact ();
-  Unix.sleep 1
+  never_returns (Scheduler.go ())

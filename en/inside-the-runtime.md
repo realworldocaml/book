@@ -408,24 +408,49 @@ the behaviour in a performance unit test.
 
 OCaml's automatic memory management guarantees that a value will eventually be
 freed when it's no longer in use, either via the garbage collector sweeping it
-or the program terminating.  It's sometimes useful to run additional cleanup
-code after a value is freed by the garbage collector, such as ensuring that
-file descriptors have been closed or that a log message is recorded.
+or the program terminating.  It's sometimes useful to run extra code just
+before a value is freed by the garbage collector, for example to check that a
+file descriptor has been closed, or that a log message is recorded.
 
-You can do just this for most OCaml values via the `Gc.add_finalizer` function.
-One caveat is that this only works for values that are heap-allocated (on
-either the major or minor heap).   Immediate values such as `int`, `bool` or
-`unit` cannot be finalized, as they do not have a header area to attach the
-finalizer value to.
+<note>
+<title>What values can be finalized?</title>
+
+Various values cannot have finalizers attached since they aren't
+heap-allocated.  Some examples of values that are not heap-allocated are
+integers, constant constructors, booleans, the empty array, the empty list and
+the unit value. The exact list of what is heap-allocated or not is
+implementation-dependent, which is why Core provides the `Heap_block` module to
+explicitly check before attaching the finalizer.
+
+Some constant values can be heap-allocated but never deallocated during the
+lifetime of the program, for example a list of integer constants.  `Heap_block`
+explicitly checks to see if the value is in the major or minor heap, and
+rejects most constant values.  Compiler optimisations may also duplicate some
+immutable values such as floating-point values in arrays. These may be
+finalised while another duplicate copy is being used by the program.
+
+For this reason, attach finalizers only to values that you are explicitly sure
+are heap-allocated and aren't immutable.  A common use is to attach them to
+file descriptors to ensure it is closed.  However, the finalizer normally
+shouldn't be the primary way of closing the file descriptor, since it depends
+on the garbage collector running in order to collect the value.  For a busy
+system, you can easily run out of a scarce resource such as file descriptors
+before the GC catches up.
+
+</note>
 
 Core provides a `Heap_block` module that dynamically checks if a given value is
-suitable for finalizing.  Let's explore this with an example that finalizes
-values of different types, some of which are heap-allocated and others which
-are compile-time constants.
+suitable for finalizing.  This block is then passed to Async's
+`Gc.add_finalizer` function that schedules the finalizer safely with respect to
+all the other concurrent program threads.
+
+Let's explore this with a small example that finalizes values of different types,
+some of which are heap-allocated and others which are compile-time constants.
 
 ```ocaml
 (* finalizer.ml : explore finalizers for different types *)
 open Core.Std
+open Async.Std
 
 let attach_finalizer n v =
   match Heap_block.create v with
@@ -451,13 +476,14 @@ let () =
   attach_finalizer "allocated string" alloced_string;
   attach_finalizer "allocated record" { foo=alloced_bool };
   Gc.compact ();
-  Unix.sleep 1
+  never_returns (Scheduler.go ())
 ```
 
 Building and running this should show the following output.
 
 ```console
-$ ocamlfind ocamlopt -package core -thread -o finalizer -linkpkg finalizer.ml
+$ ocamlfind ocamlopt -package core -package async -thread \
+  -o finalizer -linkpkg finalizer.ml
 $ ./finalizer
        immediate int: FAIL
      immediate float: FAIL
@@ -487,34 +513,5 @@ not cause all the finalizers to be run before the runtime exits.
 The finalizer can use all features of OCaml, including assignments that make
 the value reachable again and thus prevent it from being garbage collected. It
 can also loop forever, which will cause other finalizers to be interleaved with
-it.  Raising exceptions from a finalizer isn't recommended, as it interrupts
-whatever the main program was doing before the finalizer is called and delivers
-the exception there.
-
-<note>
-<title>What values can be finalized?</title>
-
-Various values cannot have finalizers attached since they aren't
-heap-allocated.  Some examples of values that are not heap-allocated are
-integers, constant constructors, booleans, the empty array, the empty list and
-the unit value. The exact list of what is heap-allocated or not is
-implementation-dependent, which is why Core uses the `Heap_block` module to
-explicitly check before attaching the finalizer.
-
-Some constant values can be heap-allocated but never deallocated during the
-lifetime of the program, for example a list of integer constants.  `Heap_block`
-explicitly checks to see if the value is in the major or minor heap, and
-rejects most constant values.  Compiler optimisations may also duplicate some
-immutable values such as floating-point values in arrays. These may be
-finalised while another duplicate copy is being used by the program.
-
-For this reason, attach finalizers only to values that you are explicitly sure
-are heap-allocated and aren't immutable.  A common use is to attach them to
-file descriptors to ensure it is closed.  However, the finalizer normally
-shouldn't be the primary way of closing the file descriptor, since it depends
-on the garbage collector running in order to collect the value.  For a busy
-system, you can easily run out of a scarce resource such as file descriptors
-before the GC catches up.
-
-</note>
+it.  
 
