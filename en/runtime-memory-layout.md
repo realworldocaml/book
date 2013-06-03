@@ -1,35 +1,36 @@
 # Memory Representation of Values
 
-The `ctypes` FFI library we described earlier does its best to hide the details
-of how values are exchanged across C libraries and the OCaml runtime.  There is
-a simple reason for this: manipulating these values directly is a delicate
-operation that requires understanding a few different moving parts before you
-can get it right.  
+The FFI interface we described in [xref](#foreign-function-interface) hides the
+precise details of how values are exchanged across C libraries and the OCaml
+runtime.  There is a simple reason for this: using this interface directly is a
+delicate operation that requires understanding a few different moving parts
+before you can get it right.  You first need to know the mapping between OCaml
+types and their runtime memory representation.  You also need to ensure that
+your code is interfacing correctly with OCaml runtime's memory management.
 
-You need to know the exact mapping between OCaml types and their runtime memory
-representation, since you're bypassing the OCaml compiler that normally
-performs this translation for you.  You also need to ensure that your code is
-interfacing correctly with OCaml runtime's memory management.  This knowledge
-is useful beyond just writing foreign function interfaces, especially as you
-build and maintain more complex OCaml applications.  Profiling tools will
-report output based on the runtime memory layout.  Debuggers will execute OCaml
-binaries without any knowledge of the static types, and you'll need to do some
-translation to use them effectively.
+However, knowledge of the OCaml internals is useful beyond just writing foreign
+function interfaces.  As you build and maintain more complex OCaml
+applications, you'll need to interface with various external system tools that
+operate on compiled OCaml binaries.  For example, profiling tools report output
+based on the runtime memory layout and debuggers execute binaries without any
+knowledge of the static OCaml types.  To use these tools effectively, you'll
+need to do some translation between the OCaml and C worlds.
 
-Luckily, the OCaml compiler minimizes the amount of optimization magic that it
-performs, and relies instead on its straightforward execution model for good
-performance.  With some experience, you can predict rather precisely where a
-block of performance-critical OCaml code is spending its time.
+Luckily, the OCaml toolchain is very predictable. The compiler minimizes the
+amount of optimization magic that it performs, and relies instead on its
+straightforward execution model for good performance.  With some experience,
+you can know rather precisely where a block of performance-critical OCaml code
+is spending its time.
 
 <note>
 <title>Why do OCaml types disappear at runtime?</title>
 
-The OCaml compiler runs through several phases during the compilation
-process.  The first phase is syntax checking, during which source files are
-parsed into Abstract Syntax Trees (ASTs).  The next stage is a *type checking*
-pass over the AST.  In a validly typed program, a function cannot be applied
-with an unexpected type.  For example, the `print_endline` function must
-receive a single `string` argument, and an `int` will result in a type error.
+The OCaml compiler runs through several phases during the compilation process.
+The first phase is syntax checking, during which source files are parsed into
+Abstract Syntax Trees (ASTs).  The next stage is a *type checking* pass over
+the AST.  In a validly typed program, a function cannot be applied with an
+unexpected type.  For example, the `print_endline` function must receive a
+single `string` argument, and an `int` will result in a type error.
 
 Since OCaml verifies these properties at compile time, it doesn't need to keep
 track of as much information at runtime. Thus, later stages of the compiler can
@@ -44,9 +45,10 @@ TODO xref to pipeline chapter.
 
 </note>
 
-This chapter covers the mapping from OCaml types to runtime values, and walks
-you through them via the toplevel.  We'll cover the integration with
-the runtime in [xref](#understanding-the-garbage-collector), and TODO.
+This chapter covers the precise mapping from OCaml types to runtime values and
+walks you through them via the toplevel.  We'll cover how these values are
+managed by the runtime later on in
+[xref](#understanding-the-garbage-collector).
 
 ## OCaml blocks and values
 
