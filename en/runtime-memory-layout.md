@@ -501,3 +501,4 @@ libraries use it:
   matrices, but with static typing safety of OCaml to make it easier to write safe
   algorithms.
 
+TODO mention mmap here for large files.

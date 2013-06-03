@@ -406,4 +406,115 @@ the behaviour in a performance unit test.
 
 ## Attaching finalizer functions to values
 
-TODO
+OCaml's automatic memory management guarantees that a value will eventually be
+freed when it's no longer in use, either via the garbage collector sweeping it
+or the program terminating.  It's sometimes useful to run additional cleanup
+code after a value is freed by the garbage collector, such as ensuring that
+file descriptors have been closed or that a log message is recorded.
+
+You can do just this for most OCaml values via the `Gc.add_finalizer` function.
+One caveat is that this only works for values that are heap-allocated (on
+either the major or minor heap).   Immediate values such as `int`, `bool` or
+`unit` cannot be finalized, as they do not have a header area to attach the
+finalizer value to.
+
+Core provides a `Heap_block` module that dynamically checks if a given value is
+suitable for finalizing.  Let's explore this with an example that finalizes
+values of different types, some of which are heap-allocated and others which
+are compile-time constants.
+
+```ocaml
+(* finalizer.ml : explore finalizers for different types *)
+open Core.Std
+
+let attach_finalizer n v =
+  match Heap_block.create v with
+  | None -> printf "%20s: FAIL\n%!" n
+  | Some hb ->
+      let final _ = printf "%20s: OK\n%!" n in
+      Gc.add_finalizer hb final
+
+type t = { foo: bool }
+
+let () =
+  let alloced_float = Unix.gettimeofday () in
+  let alloced_bool = alloced_float > 0.0 in
+  let alloced_string = String.create 4 in
+  attach_finalizer "immediate int" 1;
+  attach_finalizer "immediate float" 1.0;
+  attach_finalizer "immediate variant" (`Foo "hello");
+  attach_finalizer "immediate string" "hello world";
+  attach_finalizer "immediate record" { foo=false };
+  attach_finalizer "allocated float" alloced_float;
+  attach_finalizer "allocated bool" alloced_bool;
+  attach_finalizer "allocated variant" (`Foo alloced_bool);
+  attach_finalizer "allocated string" alloced_string;
+  attach_finalizer "allocated record" { foo=alloced_bool };
+  Gc.compact ();
+  Unix.sleep 1
+```
+
+Building and running this should show the following output.
+
+```console
+$ ocamlfind ocamlopt -package core -thread -o finalizer -linkpkg finalizer.ml
+$ ./finalizer
+       immediate int: FAIL
+     immediate float: FAIL
+   immediate variant: FAIL
+    immediate string: FAIL
+    immediate record: FAIL
+      allocated bool: FAIL
+    allocated record: OK
+    allocated string: OK
+   allocated variant: OK
+     allocated float: OK
+```
+
+The GC calls the finalization functions in the order of the deallocation. If
+several values become unreachable during the same GC cycle, the finalisation
+functions will be called in the reverse order of the corresponding calls to
+`add_finalizer`.  Each call to `add_finalizer` adds to the set of functions
+that are run when the value becomes unreachable. You can have many finalizers
+all pointing to the same heap block if you wish.
+
+After a garbage collection determines that a heap block `b` is unreachable, it
+removes from the set of finalizers all the functions associated with `b`, and
+serially applies each of those functions to `b`. Thus, every finalizer function
+attached to `b` will run at most most once.  However, program termination will
+not cause all the finalizers to be run before the runtime exits.
+
+The finalizer can use all features of OCaml, including assignments that make
+the value reachable again and thus prevent it from being garbage collected. It
+can also loop forever, which will cause other finalizers to be interleaved with
+it.  Raising exceptions from a finalizer isn't recommended, as it interrupts
+whatever the main program was doing before the finalizer is called and delivers
+the exception there.
+
+<note>
+<title>What values can be finalized?</title>
+
+Various values cannot have finalizers attached since they aren't
+heap-allocated.  Some examples of values that are not heap-allocated are
+integers, constant constructors, booleans, the empty array, the empty list and
+the unit value. The exact list of what is heap-allocated or not is
+implementation-dependent, which is why Core uses the `Heap_block` module to
+explicitly check before attaching the finalizer.
+
+Some constant values can be heap-allocated but never deallocated during the
+lifetime of the program, for example a list of integer constants.  `Heap_block`
+explicitly checks to see if the value is in the major or minor heap, and
+rejects most constant values.  Compiler optimisations may also duplicate some
+immutable values such as floating-point values in arrays. These may be
+finalised while another duplicate copy is being used by the program.
+
+For this reason, attach finalizers only to values that you are explicitly sure
+are heap-allocated and aren't immutable.  A common use is to attach them to
+file descriptors to ensure it is closed.  However, the finalizer normally
+shouldn't be the primary way of closing the file descriptor, since it depends
+on the garbage collector running in order to collect the value.  For a busy
+system, you can easily run out of a scarce resource such as file descriptors
+before the GC catches up.
+
+</note>
+
