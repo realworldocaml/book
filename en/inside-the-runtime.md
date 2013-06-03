@@ -72,9 +72,10 @@ documented in the [OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manu
 
 ## The fast minor heap
 
-The minor heap is one contiguous chunk of virtual memory containing a sequence
-of OCaml blocks.  If there is space, allocating a new block is a fast
-constant-time operation that requires just a couple of CPU instructions.
+The minor heap is where most of your short-lived values are held.  It consists
+of one contiguous chunk of virtual memory containing a sequence of OCaml
+blocks.  If there is space, allocating a new block is a fast constant-time
+operation that requires just a couple of CPU instructions.
 
 To garbage collect the minor heap, OCaml uses *copying collection* to move all
 live blocks in the minor heap to the major heap.  This takes work proportional
@@ -83,10 +84,10 @@ according to the generational hypothesis.
 
 ### Allocating on the minor heap
 
-The minor heap is a contiguous chunk of virtual memory that is usually less
-than a megabyte in size so that it can be scanned quickly.  The runtime stores
-the the minor heap in two pointers (`caml_young_start` and `caml_young_end`)
-that delimit the start and end.
+The minor heap is a contiguous chunk of virtual memory that is usually a few
+megabytes in size so that it can be scanned quickly.  The runtime stores the
+the minor heap in two pointers (`caml_young_start` and `caml_young_end`) that
+delimit the start and end of the heap region.
 
 ```
                 <---- size ---->
@@ -136,10 +137,12 @@ if running in very memory-constrained environments.
 
 ## The long-lived major heap
 
-The major heap consists of any number of non-contiguous chunks of virtual
-memory, each containing live blocks interspersed with regions of free memory.
-The runtime system maintains a free-list data structure that indexes all the
-free memory and uses it to satisfy allocation requests for OCaml blocks.
+The major heap is where the bulk of the longer-lived and larger values in your
+program are stored.  It consists of any number of non-contiguous chunks of
+virtual memory, each containing live blocks interspersed with regions of free
+memory.  The runtime system maintains a free-list data structure that indexes
+all the free memory that it has allocated, and uses it to satisfy allocation
+requests for OCaml blocks.
 
 The major heap is typically much larger than the minor heap and can scale to
 gigabytes in size. It is cleaned via a mark-and-sweep garbage collection
