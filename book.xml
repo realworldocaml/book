@@ -24538,8 +24538,8 @@ val f : s -&gt; int
         this case, just recompile with a clean source tree.
       </para>
       </sidebar>
-      <sect3 id="adding-type-annotations-to-fix-type-errors">
-        <title>Adding type annotations to fix type errors</title>
+      <sect3 id="adding-type-annotations-to-find-errors">
+        <title>Adding type annotations to find errors</title>
         <para>
           It's often said that the hardest part of writing OCaml code is
           getting past the type checker -- but once the code does
@@ -24843,6 +24843,23 @@ Error: The files /home/build/bar.cmi
     </sect2>
     <sect2 id="examining-the-typed-syntax-tree">
       <title>Examining the typed syntax tree</title>
+      <caution>
+      <title>
+      Note to reviewers: uses for the typed syntax tree?
+      </title>
+      <para>
+        We've added this section on the <literal>-dtypedtree</literal>
+        and <literal>-dparsetree</literal> for completeness, but will
+        probably remove them from the final book since we can't think of
+        any concrete examples where inspecting this would be useful for
+        the average developer. It's primarily useful to track down
+        internal type checker or camlp4 extension errors.
+      </para>
+      <para>
+        But if you can think of a good use-case to justify keeping this
+        in the final book, then please leave a comment here!
+      </para>
+      </caution>
       <para>
         The compiler has a couple of advanced flags that can dump the
         raw output of the internal AST representation. You can't depend
