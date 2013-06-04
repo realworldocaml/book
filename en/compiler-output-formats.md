@@ -1454,18 +1454,21 @@ arity).  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-i
 <title>The ZINC machine</title>
 
 The bytecode interpreter is much slower than compiled native code, but is still
-remarkably efficient for something that interprets a functional language.  Its
+remarkably performant for an interpreter without a JIT compiler.  Its
 efficiency can be traced back to Xavier Leroy's ground-breaking work in 1990 on
-"[The ZINC experiment: An Economical Implementation of the ML
-Language](http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps)".
+["The ZINC experiment: An Economical Implementation of the ML
+Language"](http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps).
 
-This paper laid the theoretical basis for the implementation of an efficient
-instruction set for a strictly evaluated functional language such as OCaml.
-The bytecode interpreter in modern OCaml is still based on the ZINC model.
+This paper laid the theoretical basis for the implementation of an instruction
+set for a strictly evaluated functional language such as OCaml.  The bytecode
+interpreter in modern OCaml is still based on the ZINC model.  The native code
+compiler uses a different model since it uses CPU registers for function calls
+instead of always passing arguments on the stack as the bytecode interpreter
+does.
 
-Interestingly, the native code compiler uses a different model since it has to
-use hardware CPU registers for function calls instead of always passing
-arguments on the stack as the bytecode interpreter does. 
+Understanding the reasoning behind the different implementations of the
+bytecode interpreter and the native compiler is a very useful exercise for any
+budding language hacker.
 
 </note>
 
