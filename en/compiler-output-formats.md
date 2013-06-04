@@ -1451,7 +1451,7 @@ commonly encountered operations (e.g. function application at a specific
 arity).  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
 
 <note>
-<title>The ZINC machine</title>
+<title>Where did the bytecode instruction set come from?</title>
 
 The bytecode interpreter is much slower than compiled native code, but is still
 remarkably performant for an interpreter without a JIT compiler.  Its
@@ -1497,35 +1497,38 @@ presented on the command line defines the order in which compilation units are
 initialized at runtime.  Remember that OCaml has no single `main` function like
 C, so this link is order is more important than in C.
 
-### Linking OCaml bytecode
+### Executing bytecode
 
 The bytecode runtime comprises three parts: the bytecode interpreter, garbage
 collector, and a set of C functions that implement the primitive operations.
-Bytecode instructions are provided to call these C functions.  The OCaml linker
-produces bytecode for the standard runtime system by default, and any custom C
-functions in your code (e.g. from C bindings) require the runtime to
-dynamically load a shared library.
+The bytecode contains instructions to call these C functions when required.
 
-This can be specified as follows:
+The OCaml linker produces bytecode targeted the standard OCaml runtime by
+default, and so needs to know about any C functions that are referenced from
+other libraries that aren't loaded by default.
+
+Information about these extra libraries can be specified while linking a
+bytecode archive.
+
 
 ```console
 $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
 ```
 
 The `dllib` flag embeds the arguments in the archive file.  Any subsequent
-packages including this archive will also include the extra linking directive.
-This lets the interpreter locate the external library symbols when it executes
-the bytecode.
+packages linking this archive will also include the extra C linking directive.
+This in turn lets the interpreter dynamically load the external library symbols
+when it executes the bytecode.
 
-You can also generate a complete standalone executable that bundles the `ocamlrun`
-interpreter with the bytecode in a single binary.  This is known as the *custom
-runtime* mode, and can be built as follows.
+You can also generate a complete standalone executable that bundles the
+`ocamlrun` interpreter with the bytecode in a single binary.  This is known as
+a *custom runtime* mode and is built as follows.
 
 ```console
 $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 ```
 
-The custom mode is the most similar to native code compilation, as both
+The custom mode is the most similar mode to native code compilation, as both
 generate standalone executables.  There are quite a few other options available
 for compiling bytecode (notably with shared libraries or building custom
 runtimes).  Full details can be found in the
