@@ -1627,7 +1627,7 @@ in the OCaml code.  This is explained in detail in the [interfacing with
 C](http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149) section of
 the OCaml manual.
 
-## Native code generation
+## Compiling fast native code
 
 The native code compiler is ultimately the tool that most production OCaml code
 goes through.  It compiles the lambda form into fast native code executables,
@@ -1864,12 +1864,15 @@ to delimit an OCaml function call, for example).
 
 #### Understanding name mangling
 
-So how do these map into an interactive debugger like `gdb`?  The first thing
-you need to know is how OCaml functions map into C symbol names; a procedure is
-known as *name mangling*.  C symbols must be unambiguous within a compilation
-unit and so the conversion from OCaml variable bindings (which can shadow each
-other) also encodes additional information such as the module name into the
-symbol.
+So how do you refer to OCaml functions into an interactive debugger like `gdb`?
+The first thing you need to know is how function names compile down into C
+symbols; a procedure generally called *name mangling*.
+
+Each compilation unit compiles into a native object file that can only
+export a unique collection of symbols.  This means that OCaml values need to be
+mapped into a unique name within that compilation unit.  This mapping has to
+account for language features such as nested modules, anonymous functions and
+variable names that shadow each other.
 
 The conversion follows some straightforward rules:
 
@@ -1880,6 +1883,10 @@ The conversion follows some straightforward rules:
   the result of the lambda compilation that replaces each variable name
   with a unique value within the module.  You can determine this number
   by examining the `-dlambda` output from `ocamlopt`.
+
+Anonymous functions are hard to predict without inspecting intermediate
+compiler output.  If you need to debug them it's usually easier to modify the
+source code to let-bind the anonymous function to a variable name.
 
 #### Interactive breakpoints with the GNU debugger
 
