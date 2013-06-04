@@ -928,24 +928,24 @@ case, just recompile with a clean source tree.
 
 ### Modules and separate compilation
 
-We explained the basic relationship between source files and modules earlier in
-[xref](#files-modules-and-programs).  We'll cover how the compiler pipeline
-implements this in more detail now.
+The OCaml module system composes software components by explicitly defining
+type signatures for a collection of functions.  We explained the basics of
+using source files and modules in [xref](#files-modules-and-programs).  The
+module language that operates over these signatures also extends to advanced
+functionality such as functors and first-class modules, described in
+[xref](#functors) and [xref](#first-class-modules) respectively.
 
-The OCaml module system composes software components together by explicitly
-defining type signatures for a collection of functions.  The module language
-that operates over these takes the form of functors and first-class modules,
-described in [xref](#functors) and [xref](#first-class-modules) respectively.
-
-Modules are essential for larger applications which consist of many files (also
-known as *compilation units*).  Compilations units are each processed with a
-separate compiler invocation and the module system helps minimizes the amount of
-recompilation required after changing a few source files.
+We'll now discuss how the compiler implements this functionality in more
+detail.  Modules are essential for larger projects that consist of many files
+(also known as *compilation units*).   It's impractical to recompile every
+source file when making local changes, and the module system is designed to
+minimize such recompilation and encourage code reuse.
 
 #### The mapping between files and modules
 
-Compilation units are simply special cases of OCaml modules and signatures, and
-the relationship between them can be explained in terms of the module system.
+Compilation units are just special cases of OCaml modules and signatures. The
+relationship between them can be explained directly in terms of the usual
+module system.
 
 Create a file called `alice.ml` with the following contents.
 
@@ -961,8 +961,8 @@ and a corresponding signature file.
 val friends : Bob.t list
 ```
 
-These two files are exactly analogous to including this code directly in another
-module that references `Alice`.
+These two files are exactly analogous to including the following code directly
+in another module that references `Alice`.
 
 ```ocaml
 module Alice : sig
