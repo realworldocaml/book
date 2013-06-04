@@ -1207,7 +1207,7 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
 ```
 
 It's not important to understand every detail of this internal form, but
-some interesting points are:
+some interesting points emerge from reading it.
 
 * There are no mention of modules or types any more.  Global values are
   created via `setglobal` and OCaml values are constructed by `makeblock`.  The
@@ -1222,9 +1222,9 @@ some interesting points are:
   doesn't do any dynamic checks.  Unwise use of unsafe features such as the
   `Obj.magic` module can still easily induce crashes at this level.
 
-The first pattern match is *exhaustive*, so there are no other cases that the
-comipler needed to worry about.  What happens if we make the same code use an
-incomplete pattern match?
+The first pattern match is *exhaustive*, so there are no unknown match cases
+that the compiler needs to check for (e.g. a value greater than 3).  What
+happens if we modify the code to use an incomplete pattern match instead?
 
 ```ocaml
 (* pattern_monomorphic_incomplete.ml *)
@@ -1248,14 +1248,16 @@ $ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml
     (makeblock 0 test/1013)))
 ```
 
-The compiler has now reverted to testing the value as a set of nested
-conditionals.  The lambda code above checks to see if the value is `Alice`,
-then if it's `Bob`, and finally falls back to the default `102` return value
-for everything else.  Using exhaustive pattern matches is thus a better coding
-style at several levels: it rewards you with more useful compile-time warnings
-when you modify type definitions *and* generates more efficient runtime code too.
+The compiler has reverted to testing the value as a set of nested conditionals.
+The lambda code above first checks to see if the value is `Alice`, then if it's
+`Bob` and finally falls back to the default `102` return value for everything
+else.
 
-Finally, let's look at the same example with polymorphic variants instead of
+Exhaustive pattern matching is thus a better coding style at several levels.
+It rewards you with more useful compile-time warnings when you modify type
+definitions *and* generates more efficient runtime code too.
+
+Finally, let's look at the same code, but with polymorphic variants instead of
 normal variants.
 
 ```ocaml
@@ -1268,7 +1270,7 @@ let test v =
   | `David   -> 103
 ```
 
-The lambda form for this is the most inefficient result yet.
+The lambda form for this reveals the most inefficient result yet.
 
 ```console
 $ ocamlc -dlambda -c pattern_polymorphic.ml 
@@ -1284,15 +1286,15 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml
 We mentioned earlier in [xref](#variants) that pattern matching over
 polymorphic variants is slightly less efficient, and it should be clearer why
 this is the case now.  Polymorphic variants have a runtime value that's
-calculated by hashing the variant name, and so the compiler just tests each of
-these possible values in sequence.
+calculated by hashing the variant name, and so the compiler has to test each of
+these possible hash values in sequence.
 
 ### Benchmarking pattern matching
 
 Let's benchmark these three pattern matching techniques to quantify their
-runtime costs better.  The `Core_bench` module runs the tests thousands of
-times and also calculates statistical variance of the results.  You'll need to
-`opam install core_bench` to get the library.
+runtime costs more accurately.  The `Core_bench` module runs the tests
+thousands of times and also calculates statistical variance of the results.
+You'll need to `opam install core_bench` to get the library.
 
 ```ocaml
 (* pattern.ml: benchmark different pattern matching styles *)
@@ -1351,16 +1353,16 @@ and you'll see the results summarised in a neat table.
 ```console
 $ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
 Estimated testing time 30s (change using -quota SECS).
-┌────────────────────────────────┬───────────┬─────────────┬────────────┐
++────────────────────────────────+───────────+─────────────+────────────+
 │ Name                           │ Time (ns) │   Time 95ci │ Percentage │
-├────────────────────────────────┼───────────┼─────────────┼────────────┤
++────────────────────────────────+───────────+─────────────+────────────+
 │ Polymorphic pattern            │     22.38 │ 22.34-22.43 │     100.00 │
 │ Monomorphic incomplete pattern │     20.98 │ 20.95-21.02 │      93.77 │
 │ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
-└────────────────────────────────┴───────────┴─────────────┴────────────┘
++────────────────────────────────+───────────┴─────────────+────────────+
 ```
 
-These numbers confirm our earlier performance hypothesis obtained from
+These results confirm our earlier performance hypothesis obtained from
 inspecting the lambda code. The shortest running time comes from the exhaustive
 pattern match and polymorphic variant pattern matching is the slowest.  There
 isn't a hugely significant difference in these examples, but you can use the
@@ -1378,8 +1380,8 @@ executables.
 Pattern matching is an important part of OCaml programming. You'll often
 encounter deeply nested pattern matches over complex data structures in real
 code.  A good paper that describes the fundamental algorithms implemented in
-OCaml is the ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) ICFP 2001 paper by Fabrice
-Le Fessant and Luc Maranget.
+OCaml is ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) by
+Fabrice Le Fessant and Luc Maranget.
 
 The paper describes the backtracking algorithm used in classical pattern
 matching compilation, and also several OCaml-specific optimizations such as the
