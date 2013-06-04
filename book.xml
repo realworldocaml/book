@@ -24361,12 +24361,13 @@ Error: The implementation test.ml does not match the interface test.cmi:
         above, and the exported functions documented.
       </para>
       <para>
-        If you're writing code that spans multiple files, then it's
-        easier to start by writing all the <literal>mli</literal>
-        signatures and checking that they type check with each other.
-        Once the signatures are in place, you can write the
-        implementations with the confidence that they will all glue
-        together correctly with no cyclic dependencies.
+        If you're writing code that spans multiple files though, it's
+        sometimes easier to start by writing all the
+        <literal>mli</literal> signatures and checking that they type
+        check against each other. Once the signatures are in place, you
+        can write the implementations with the confidence that they'll
+        all glue together correctly with no cyclic dependencies between
+        the modules.
       </para>
       <para>
         As with any such stylistic debate, you should experiment with
@@ -24542,7 +24543,7 @@ val f : s -&gt; int
         <para>
           It's often said that the hardest part of writing OCaml code is
           getting past the type checker -- but once the code does
-          compile, it often works correctly the first time you run it!
+          compile, it works correctly the first time!
         </para>
         <para>
           There are a couple of tricks to make it easier to quickly
@@ -24666,13 +24667,20 @@ Error: This expression has type [&gt; `Nu of int ]
           This error points directly to the correct line number that
           contains the typo. Once you fix the problem, you can remove
           the manual annotations if you prefer more succinct code. You
-          can also leave the annotations there, of course, to help with
+          can also leave the annotations there of course, to help with
           future refactoring and debugging.
         </para>
       </sect3>
     </sect2>
     <sect2 id="modules-and-separate-compilation">
       <title>Modules and separate compilation</title>
+      <para>
+        We explained the basic relationship between source files and
+        modules earlier in
+        <xref linkend="files-modules-and-programs"/>. We'll
+        cover how the compiler pipeline implements this in more detail
+        now.
+      </para>
       <para>
         The OCaml module system composes software components together by
         explicitly defining type signatures for a collection of
