@@ -133,9 +133,14 @@ found in the `parsing` directory in the source distribution.
 
 ### Syntax errors
 
-The compiler emits a *syntax error* if it fails to convert the source code into
-an AST.  Here's an example syntax error that we obtain by using the `module`
-keyword incorrectly inside a `let` binding.
+The OCaml parser's goal is to output a well-formed AST data structure to the
+next phase of compilation, and so it rejects source code which doesn't match
+basic syntactic requirements.  The compiler emits a *syntax error* in this
+situation, with a pointer to the filename and line and character number that's
+as close to the error as possible.
+
+Here's an example syntax error that we obtain by performing a module assignment
+as a statement instead of as a let-binding.
 
 ```ocaml
 (* broken_module.ml *)
@@ -144,10 +149,7 @@ let _ =
   ()
 ```
 
-This fails because the `module A = B` syntax must be wrapped in a `let` binding
-unless it's a top-level phrase.  Parsing immediately eliminates code which
-doesn't match basic syntactic requirements, so this will result in a syntax
-error when we compile it.
+The above code results in a syntax error when compiled.
 
 ```console
 $ ocamlc -c broken_module.ml 
@@ -155,7 +157,7 @@ File "broken_module.ml", line 3, characters 2-8:
 Error: Syntax error
 ```
 
-The fixed version of this source code creates the `MyString` module correctly
+The correct version of this source code creates the `MyString` module correctly
 via a local open, and compiles successfully.
 
 ```ocaml
