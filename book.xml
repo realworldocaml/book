@@ -23648,11 +23648,16 @@ $ ./finalizer
     <sect2 id="syntax-errors">
       <title>Syntax errors</title>
       <para>
-        The compiler emits a <emphasis>syntax error</emphasis> if it
-        fails to convert the source code into an AST. Here's an example
-        syntax error that we obtain by using the
-        <literal>module</literal> keyword incorrectly inside a
-        <literal>let</literal> binding.
+        The OCaml parser's goal is to output a well-formed AST data
+        structure to the next phase of compilation, and so it rejects
+        source code which doesn't match basic syntactic requirements.
+        The compiler emits a <emphasis>syntax error</emphasis> in this
+        situation, with a pointer to the filename and line and character
+        number that's as close to the error as possible.
+      </para>
+      <para>
+        Here's an example syntax error that we obtain by performing a
+        module assignment as a statement instead of as a let-binding.
       </para>
       <programlisting language="ocaml">
 (* broken_module.ml *)
@@ -23661,11 +23666,7 @@ let _ =
   ()
 </programlisting>
       <para>
-        This fails because the <literal>module A = B</literal> syntax
-        must be wrapped in a <literal>let</literal> binding unless it's
-        a top-level phrase. Parsing immediately eliminates code which
-        doesn't match basic syntactic requirements, so this will result
-        in a syntax error when we compile it.
+        The above code results in a syntax error when compiled.
       </para>
       <programlisting>
 $ ocamlc -c broken_module.ml 
@@ -23673,7 +23674,7 @@ File &quot;broken_module.ml&quot;, line 3, characters 2-8:
 Error: Syntax error
 </programlisting>
       <para>
-        The fixed version of this source code creates the
+        The correct version of this source code creates the
         <literal>MyString</literal> module correctly via a local open,
         and compiles successfully.
       </para>
@@ -23910,17 +23911,20 @@ $ man -M man Example
   <sect1 id="preprocessing-source-code">
     <title>Preprocessing source code</title>
     <para>
-      One powerful feature in OCaml is the facility to extend the core
-      language grammar without having to modify the compiler.
+      One powerful feature in OCaml is a facility to extend the standard
+      language grammar without having to modify the compiler. You can
+      roughly think of it as a type-safe version to the
+      <literal>cpp</literal> preprocessor used in C/C++ to control
+      conditional compilation directives.
     </para>
     <para>
-      Camlp4 is a system included with OCaml for writing extensible
-      parsers. It provides a set of OCaml libraries that are used to
-      define grammars, and dynamically loadable syntax extensions of
-      such grammars. Camlp4 modules register new language keywords and
-      later transform these keywords (or indeed, any portion of the
-      input program) into conventional OCaml code that can be understood
-      by the rest of the compiler.
+      The OCaml distribution includes a system called Camlp4 for writing
+      extensible parsers. This provides some OCaml libraries that are
+      used to define grammars and also dynamically loadable syntax
+      extensions of such grammars. Camlp4 modules register new language
+      keywords and later transform these keywords (or indeed, any
+      portion of the input program) into conventional OCaml code that
+      can be understood by the rest of the compiler.
     </para>
     <para>
       We've already seen several Core libraries that use Camlp4:
@@ -24020,9 +24024,13 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         one. If you're not familiar with the Camlp4 module in question,
         how do you figure out what changes it's made to your code? The
         obvious way is to read the documentation that accompanies the
-        extension. Another more direct approach is to use the top-level
-        to explore the extension's behaviour or run Camlp4 manually
-        yourself to see the transformation in action.
+        extension.
+      </para>
+      <para>
+        Another approach is to use the top-level to explore the
+        extension's behaviour or run Camlp4 manually yourself to see the
+        transformation in action. We'll show you how to do both of these
+        now.
       </para>
       <sect3 id="using-camlp4-from-the-interactive-top-level">
         <title>Using Camlp4 from the interactive top-level</title>
