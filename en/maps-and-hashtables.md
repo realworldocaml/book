@@ -205,7 +205,7 @@ val rev_map : (string, int, Reverse.comparator) Map.t = <abstr>
 
 `Map.min_elt` returns the key and value for the smallest key in the
 map, which lets us see that these two maps do indeed use different
-comparison fucntions.
+comparison functions.
 
 ```ocaml
 # Map.min_elt ord_map;;
@@ -703,7 +703,7 @@ advantage of maps as a persistent data-structure.  In particular, if
 you create map `m'` by calling `Map.add` on some other map `m`, then
 `m` and `m'` can be used independently, and in fact share most of
 their underlying storage.  Thus, if you need to keep in memory at the
-same time multiple different related collections of key/value paris,
+same time multiple different related collections of key/value pairs,
 then a map is typically a much more efficient data structure to do it
 with.
 
