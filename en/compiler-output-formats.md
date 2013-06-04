@@ -430,9 +430,11 @@ simply generated at compile-time via Camlp4.
 The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
 changes it's made to your code?  The obvious way is to read the documentation
-that accompanies the extension.  Another more direct approach is to use the
-top-level to explore the extension's behaviour or run Camlp4 manually
-yourself to see the transformation in action.
+that accompanies the extension.
+
+Another approach is to use the top-level to explore the extension's behaviour
+or run Camlp4 manually yourself to see the transformation in action.  We'll
+show you how to do both of these now.
 
 #### Using Camlp4 from the interactive top-level
 
