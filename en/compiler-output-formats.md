@@ -125,12 +125,13 @@ useful to you during day-to-day OCaml development.
 
 ## Parsing source code
 
-When a source file is passed to the OCaml compiler, it parses the textual
-source code into a more structured data type known as an Abstract Syntax Tree
-(AST).  The parsing logic is implemented in OCaml itself using the techniques
-described earlier in [xref](#parsing-with-ocamllex-and-menhir).  The lexer and
-parser rules can be found in the `parsing` directory in the source
-distribution.
+When a source file is passed to the OCaml compiler, its first task is to parse
+the text into a more structured Abstract Syntax Tree (AST). The parsing logic
+is implemented in OCaml itself using the techniques described earlier in
+[xref](#parsing-with-ocamllex-and-menhir).  The lexer and parser rules can be
+found in the `parsing` directory in the source distribution.
+
+### Syntax errors
 
 The compiler emits a *syntax error* if it fails to convert the source code into
 an AST.  Here's an example syntax error that we obtain by using the `module`
@@ -169,7 +170,7 @@ that couldn't be parsed.  In the broken example the `module` keyword isn't a
 valid token at that point in parsing, so the error location information is
 correct.
 
-### Formatting source code
+### Automatically indenting source code
 
 Sadly, syntax errors do get more inaccurate sometimes depending on the nature
 of your mistake.  Try to spot the deliberate error in the following function
@@ -345,25 +346,28 @@ detailed output.
 
 </tip>
 
-### Preprocessing source code
+## Preprocessing source code
 
-One powerful feature in OCaml is the facility to extend the language grammar
-without having to modify the compiler. Camlp4 is a system included with OCaml
-for writing extensible parsers. It provides a set of OCaml libraries that are
-used to define grammars and dynamically loadable syntax extensions of such
-grammars.  Camlp4 modules register new language keywords and later transform
-these keywords (or indeed, any portion of the input program) into conventional
-OCaml code that can be understood by the rest of the compiler.
+One powerful feature in OCaml is the facility to extend the core language
+grammar without having to modify the compiler.
 
-We've already seen several examples of using Camlp4 within Core:
+Camlp4 is a system included with OCaml for writing extensible parsers. It
+provides a set of OCaml libraries that are used to define grammars, and
+dynamically loadable syntax extensions of such grammars.  Camlp4 modules
+register new language keywords and later transform these keywords (or indeed,
+any portion of the input program) into conventional OCaml code that can be
+understood by the rest of the compiler.
 
-* `Fieldslib` to generates first-class values that represent fields of a record.
+We've already seen several Core libraries that use Camlp4:
+
+* `Fieldslib` generates first-class values that represent fields of a record.
 * `Sexplib` to convert types to textual s-expressions.
 * `Bin_prot` for efficient binary conversion and parsing.
 
-These all extend the language in quite a minimal way by adding a `with` keyword
-to type declarations to signify that extra code should be generated from that
-declaration.  For example, here's a trivial use of Sexplib and Fieldslib.
+These libraries all extend the language in quite a minimal way by adding a
+`with` keyword to type declarations to signify that extra code should be
+generated from that declaration.  For example, here's a trivial use of Sexplib
+and Fieldslib.
 
 ```ocaml
 (* type_conv_example.ml *)
@@ -417,7 +421,7 @@ generation dynamically. It also doesn't require a Just-In-Time (JIT) runtime
 that can be a source of unpredictable dynamic behaviour.  Instead, all code is
 simply generated at compile-time via Camlp4.
 
-#### Inspecting Camlp4 output
+### Using Camlp4 interactively
 
 The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
@@ -469,7 +473,7 @@ expected output.  The second one includes the `with compare` directive.  This
 is intercepted by `comparelib` and transformed into the original type
 definition with two new functions also incuded.
 
-#### Running Camlp4 directly on the source code
+### Running Camlp4 from the command-line
 
 The top-level is a quick way to examine the signatures generated from the
 extensions, but how can we see what these new functions actually do?  You can't
@@ -504,7 +508,6 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1
 The script uses the `ocamlfind` package manager to list the include and library
 paths needed by `comparelib`.  It then invokes the `camlp4o` preprocessor with
 these paths and outputs the resulting AST to the standard output.
-
 
 ```console
 $ sh camlp4_dump comparelib_test.ml
@@ -575,14 +578,18 @@ as a single point for extending the grammar via the `with` keyword.
 
 </caution>
 
+### Further reading on Camlp4
+
 We've deliberately only shown you how to use Camlp4 extensions here, and not
 how to build your own. The full details of building new extensions are fairly
 daunting and could be the subject of an entirely new book.
 
-The best resources to get started are the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4), and
-using OPAM to obtain existing Camlp4 extensions and inspecting their source code.
-A series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html)
-by Jake Donham also serve as a useful guide to the internals of syntax extensions.
+The best resources to get started are:
+
+* the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4)
+* using OPAM to install existing Camlp4 extensions and inspecting their source code.
+* a series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html) by
+Jake Donham describe the internals of Camlp4 and its syntax extension mechanism.
 
 ## Static type checking
 
