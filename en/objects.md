@@ -688,7 +688,7 @@ method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
 
 Many people consider object-oriented programming to be intrinsically
 imperative, where an object is like a state machine.  Sending a
-message to an object causes it to change state, possibily sending
+message to an object causes it to change state, possibly sending
 messages to other objects.
 
 Indeed, in many programs, this makes sense, but it is by no means

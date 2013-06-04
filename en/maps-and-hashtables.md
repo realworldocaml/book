@@ -205,7 +205,7 @@ val rev_map : (string, int, Reverse.comparator) Map.t = <abstr>
 
 `Map.min_elt` returns the key and value for the smallest key in the
 map, which lets us see that these two maps do indeed use different
-comparison fucntions.
+comparison functions.
 
 ```ocaml
 # Map.min_elt ord_map;;
