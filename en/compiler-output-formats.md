@@ -786,14 +786,18 @@ Error: This expression has type
        The second variant type does not allow tag(s) `Nu
 ```
 
-The type error is perfectly accurate, but the best it can do is to point you in
-the general direction of the `algebra` function application.  The type checker
-is trying to match the inferred type of the `algebra` definition to its
-application a few lines down.  Since they don't match, the type checker does
-its best to figure out where the difference is in the nested data structure.
+The type error is perfectly accurate, but rather verbose and with a line number
+that doesn't point to the exact location of the incorrect variant name.  The
+best the compiler can do is to point you in the general direction of the
+`algebra` function application. 
 
-Now try the same code with an explicit type annotation to define the data type
-you want.
+This is because the type checker doesn't have enough information to match the
+inferred type of the `algebra` definition to its application a few lines down.
+It calculates types for both expressions separately, and when they don't match
+up, outputs the difference as best it can.
+
+Let's see what happens with an explicit type annotation to help the compiler
+out.
 
 ```ocaml
 (* broken_poly_with_annot.ml *)
@@ -825,8 +829,9 @@ let _ =
     ))
 ```
 
-This code contains exactly the same error as before, but we've added an explicit
-type annotation for the `algebra` definition.  The error we get is far more direct.
+This code contains exactly the same error as before, but we've added a closed
+type definition of the polymorphic variants, and a type annotation to the
+`algebra` definition.  The compiler error we get is much more useful now.
 
 ```console
 $ ocamlc -i broken_poly_with_annot.ml 
@@ -843,11 +848,11 @@ help with future refactoring and debugging.
 
 #### Enforcing principal typing
 
-You can pass a `-principal` flag to the compiler to turn on a stricter
-principal type checking mode.  This detects risky uses of type information to
-ensure that the type inference has one principal result.  A type is considered
-risky if the success or failure of type inference depends on the order in which
-sub-expressions are typed.
+The compiler also has a stricter *principal type checking* mode that is
+activated via the `-principal` flag.  This warns about risky uses of type
+information to ensure that the type inference has one principal result.  A type
+is considered risky if the success or failure of type inference depends on the
+order in which sub-expressions are typed.
 
 The principality check only affects a few language features:
 
@@ -881,7 +886,7 @@ val f : s -> int
 ```
 
 This example isn't principal since the inferred type for `x.foo` is guided by
-the inferred type of `x.bar`.  If the `x.bar` use is removed from the
+the inferred type of `x.bar`. If the `x.bar` use is removed from the
 definition of `f`, its argument would be of type `t` and not `type s`.
 
 You can fix this either by permuting the order of the type declarations, or by
