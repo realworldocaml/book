@@ -14409,7 +14409,10 @@ $ ./service_client.byte
       changed dynamically, rather than just added at creation time.
     </para>
   </sect1>
-</chapter></part><part label="II"><title>Tools and Techniques</title><partintro/><chapter id="maps-and-hashtables">
+</chapter></part><part label="II"><title>Tools and Techniques</title><partintro><para>Part II builds on the basics by working through useful tools and techniques for using OCaml. 
+     Here you'll pick up useful techniques for building networked systems, as well as functional 
+     design patterns that help combine different features of the language to good effect.</para><para>The focus throughout this section is on networked systems, and among other examples we'll 
+      build a running example that will perform Internet queries using the DuckDuckGo search engine.</para></partintro><chapter id="maps-and-hashtables">
   <title>Maps and Hashtables</title>
   <para>
     Lots of programming problems require dealing with data organized as
@@ -21182,7 +21185,11 @@ module Fields :
       with Sexplib.
     </para>
   </sect1>
-</chapter></part><part label="III"><title>The Runtime System</title><partintro/><chapter id="foreign-function-interface">
+</chapter></part><part label="III"><title>The Runtime System</title><partintro><para>Part III is all about understanding the compiler toolchain and runtime system in OCaml.  
+     It's a remarkably simple system in comparison to other language runtimes (such as Java or 
+     the .NET CLR).</para><para>You'll need to read this to build very high performance systems that have to minimise 
+      resource usage or interface to C libraries. This is also where we talk about profiling and 
+      debugging techniques using tools such as GNU gdb.</para></partintro><chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
   <para>
     OCaml has several options available to interact with non-OCaml code.
