@@ -1398,23 +1398,22 @@ lightweight language construct to use in OCaml code.
 
 After the lambda form has been generated, we are very close to having
 executable code.  The OCaml tool-chain branches into two separate compilers at
-this point.  We'll describe the the `ocamlc` bytecode compiler first, which
+this point.  We'll describe the the bytecode compiler first, which
 consists of two pieces:
 
 * `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.
 * `ocamlrun` is a portable interpreter that executes the bytecode.
 
-`ocamlrun` is an interpreter that uses the OCaml stack and an accumulator to
-store values, and only has seven registers in total (the program counter, stack
-pointer, accumulator, exception and argument pointers, and environment and
-global data).
+The interpreter uses the OCaml stack and an accumulator to store values.  It
+only has seven registers in total (the program counter, stack pointer,
+accumulator, exception and argument pointers, and environment and global data).
 
-The big advantage of using `ocamlc` is simplicity, portability and compilation
+The big advantage of using bytecode is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
-this results in predictable (but slow) execution speed. _TODO: more about the conversion?_
+this results in predictable (but slow) execution speed.
 
 You can display the bytecode instructions in textual form via `-dinstr`.  Try
-this on one of our pattern matching examples from earlier in the chapter.
+this on one of our pattern matching examples from earlier.
 
 ```console
 $ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
@@ -1437,9 +1436,31 @@ L2:	closure L1, 0
 	setglobal Pattern_monomorphic_exhaustive!
 ```
 
-There are around 140 instruction opcodes in total, with many being
-optimizations for common operations such as function application at a specific
-arity.  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
+The bytecode above has been simplified from the lambda form into a set of
+simple instructions that are executed in serial by the interpreter.
+
+There are around 140 instructions in total, but most are just minor variants of
+commonly encountered operations (e.g. function application at a specific
+arity).  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
+
+<note>
+<title>The ZINC machine</title>
+
+The bytecode interpreter is much slower than compiled native code, but is still
+remarkably efficient for something that interprets a functional language.  Its
+efficiency can be traced back to Xavier Leroy's ground-breaking work in 1990 on
+"[The ZINC experiment: An Economical Implementation of the ML
+Language](http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps)".
+
+This paper laid the theoretical basis for the implementation of an efficient
+instruction set for a strictly evaluated functional language such as OCaml.
+The bytecode interpreter in modern OCaml is still based on the ZINC model.
+
+Interestingly, the native code compiler uses a different model since it has to
+use hardware CPU registers for function calls instead of always passing
+arguments on the stack as the bytecode interpreter does. 
+
+</note>
 
 ### Compiling OCaml bytecode 
 
