@@ -697,7 +697,7 @@ implementation to native code.
 
 </note>
 
-### Guiding type inference
+### Type inference
 
 Type inference is the process of determining the appropriate types for
 expressions based on their use.  It's a feature that's partially present in
@@ -802,6 +802,122 @@ can result in the type checker failing unexpectedly very occasionally.  In this
 case, just recompile with a clean source tree.
 
 </sidebar>
+
+#### Adding type annotations to fix type errors
+
+It's often said that the hardest part of writing OCaml code is getting past the
+type checker -- but once the code does compile, it often works correctly the
+first time you run it!
+
+There are a couple of tricks to make it easier to quickly locate type errors in
+your code.  The first is to introduce manual type annotations to narrow down
+the source of your error more concretely.  These shouldn't actually change your
+overall types and can removed once your code is correct, but act as explicit
+anchors to find the problem while you're still fixing the code.
+
+Manual type annotations are particulary useful if you use lots of
+polymorphic variants or objects.  Type inference with row polymorphism can
+generate some very large signatures, and errors tend to propagate more widely
+than if you are using more explicitly typed variants or classes.
+
+For instance, consider this broken example that expresses some simple 
+algebraic operations over integers.
+
+```ocaml
+(* broken_poly.ml *)
+
+let rec algebra =
+  function
+  | `Add (x,y) -> (algebra x) + (algebra y)
+  | `Sub (x,y) -> (algebra x) - (algebra y)
+  | `Mul (x,y) -> (algebra x) * (algebra y)
+  | `Num x     -> x
+
+let _ =
+  algebra (
+    `Add (
+      (`Num 0),
+      (`Sub (
+          (`Num 1),
+          (`Mul (
+              (`Nu 3),(`Num 2)
+            ))
+        ))
+    ))
+```
+
+There's a single character typo in the code so that it uses `Nu` instead of `Num`.  The resulting type error is impressive.
+
+```console
+$ ocamlc -c broken_poly.ml 
+File "broken_poly.ml", line 11, characters 10-154:
+Error: This expression has type
+         [> `Add of
+              ([< `Add of 'a * 'a
+                | `Mul of 'a * 'a
+                | `Num of int
+                | `Sub of 'a * 'a
+                > `Num ]
+               as 'a) *
+              [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ] ] ]
+       but an expression was expected of type 'a
+       The second variant type does not allow tag(s) `Nu
+```
+
+The type error is perfectly accurate, but the best it can do is to point you in
+the general direction of the `algebra` function application.  The type checker
+is trying to match the inferred type of the `algebra` definition to its
+application a few lines down.  Since they don't match, the type checker does
+its best to figure out where the difference is in the nested data structure.
+
+Now try the same code with an explicit type annotation to define the data type
+you want.
+
+```ocaml
+(* broken_poly_with_annot.ml *)
+
+type t = [
+  | `Add of t * t
+  | `Sub of t * t
+  | `Mul of t * t
+  | `Num of int
+]
+
+let rec algebra (x:t) =
+  match x with
+  | `Add (x,y) -> (algebra x) + (algebra y)
+  | `Sub (x,y) -> (algebra x) - (algebra y)
+  | `Mul (x,y) -> (algebra x) * (algebra y)
+  | `Num x     -> x
+
+let _ =
+  algebra (
+    `Add (
+      (`Num 0),
+      (`Sub (
+          (`Num 1),
+          (`Mul (
+              (`Nu 3),(`Num 2)
+            ))
+        ))
+    ))
+```
+
+This code contains exactly the same error as before, but we've added an explicit
+type annotation for the `algebra` definition.  The error we get is far more direct.
+
+```console
+$ ocamlc -i broken_poly_with_annot.ml 
+File "broken_poly_with_annot.ml", line 24, characters 14-21:
+Error: This expression has type [> `Nu of int ]
+       but an expression was expected of type t
+       The second variant type does not allow tag(s) `Nu
+```
+
+This error points directly to the correct line number that contains the typo.
+Once you fix the problem, you can remove the manual annotations if you prefer
+more succinct code.  You can also leave the annotations there, of course, to
+help with future refactoring and debugging.
 
 ### Modules and separate compilation
 
