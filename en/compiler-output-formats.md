@@ -734,27 +734,53 @@ The principality check only affects a few language features:
 * generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
 * automatic disambiguation of record field and constructor names (since OCaml 4.1)
 
-Here's an example of principality warnings when used with polymorphic methods.
+Here's an example of principality warnings when used with record disambiguation.
+
+```ocaml
+(* non_principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f x =
+  x.bar;
+  x.foo
+```
+
+Inferring the signature with `-principal` will show you a new warning.
 
 ```console
-$ utop -principal
-# type t = < id: 'a. 'a -> 'a >;;
-type t = < id : 'a. 'a -> 'a >
+$ ocamlc -i -principal non_principal.ml 
+File "non_principal.ml", line 7, characters 4-7:
+Warning 18: this type-based field disambiguation is not principal.
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -> int
+```
 
-# let f (x : t) = x, x#id;;  
-val f : t -> t * ('a -> 'a) = <fun>
-(* safe code: the type of x is known at all its use points *)
+This example isn't principal since the inferred type for `x.foo` is guided
+by the inferred type of `x.bar`.  If the `x.bar` is removed, the argument would
+be of type `t` and not `type s`.  You can fix this either by permuting the order
+of the type declarations or by adding an explicit type annotation as follows.
 
-# let f x = (x : t), x#id;;
-Warning 18: this use of a polymorphic method is not principal.
-val f : t -> t * ('a -> 'a) = <fun>
-(* unsafe code: the type is only known because typing goes from left to right *)
+```ocaml
+(* principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
 
-# let f x = x#id, (x : t);;
-Error: This expression has type < id : 'a; .. >
-      but an expression was expected of type t
-      The universal variable 'a0 would escape its scope
-(* just exchanging the members of the pair causes a failure *)
+let f (x:s) =
+  x.bar;
+  x.foo
+```
+
+There is now no ambiguity about the inferred types, since we've explicitly
+given the argument a type and the order of inference of the sub-expressions no
+longer matters.
+
+```console
+$ ocamlc -i -principal principal.ml 
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -> int
 ```
 
 Ideally, all code should systematically use `-principal`.  It reduces variance
@@ -777,7 +803,7 @@ case, just recompile with a clean source tree.
 
 </sidebar>
 
-### Separate compilation and module search paths
+### Modules and separate compilation
 
 Modules are most useful for large applications which consist of many files (or
 *compilation units*). Modules let each file be compiled separately, thus
