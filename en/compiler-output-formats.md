@@ -805,11 +805,20 @@ case, just recompile with a clean source tree.
 
 ### Modules and separate compilation
 
-Modules are most useful for large applications which consist of many files (or
-*compilation units*). Modules let each file be compiled separately, thus
-minimizing recompilation after changes.  Compilation units are simply special
-cases of OCaml modules and signatures, and the relationship between the units
-can be explained in terms of the module system.
+The OCaml module system composes software components together by explicitly
+defining type signatures for a collection of functions.  The module language
+that operates over these takes the form of functors and first-class modules,
+described in [xref](#functors) and [xref](#first-class-modules) respectively.
+
+Modules are essential for larger applications which consist of many files (also
+known as *compilation units*).  Compilations units are each processed with a
+separate compiler invocation and the module system helps minimizes the amount of
+recompilation required after changing a few source files.
+
+#### The mapping between files and modules
+
+Compilation units are simply special cases of OCaml modules and signatures, and
+the relationship between them can be explained in terms of the module system.
 
 Create a file called `alice.ml` with the following contents.
 
@@ -836,21 +845,26 @@ end = struct
 end
 ```
 
-However, `Alice` also has a reference to another module `Bob`, which must
-contain at least a `Bob.name` value and define a `Bob.t` type.
+#### Defining a module search path
 
-The type checker needs to resolve such external module references into concrete
-structures and signatures in order to unify types across module boundaries.  It
-does this by searching a list of directories for a compiled interface file
-matching that module's name.  For example, it will look for `alice.cmi` and
-`bob.cmi` on the search path, and use the first ones it encounters as the
-interfaces for `Alice` and `Bob`.
+In the example above, `Alice` also has a reference to another module `Bob`.
+For the overall type of `Alice` to be valid, the compiler also needs to check
+that the `Bob` module contains at least a `Bob.name` value and defines a
+`Bob.t` type.
 
-You can set the search path by adding the `-I` flag to the compiler
-command-line.  This can get complex when you have lots of libraries, and is the
-reason why the `ocamlfind` frontend to the compiler exists.  OCamlfind
-automates the process of turning third-party package names into concrete `-I`
-flags that are added to the compiler invocation.
+The type checker resolves such module references into concrete structures and
+signatures in order to unify types across module boundaries.  It does this by
+searching a list of directories for a compiled interface file matching that
+module's name.  For example, it will look for `alice.cmi` and `bob.cmi` on the
+search path, and use the first ones it encounters as the interfaces for `Alice`
+and `Bob`.
+
+The module search path is set by adding `-I` flags to the compiler command-line
+with the directory containing the `cmi` files as the argument.  Manually
+specifying these flags gets complex when you have lots of libraries, and is the
+reason why the OCamlfind frontend to the compiler exists.  OCamlfind automates
+the process of turning third-party package names and build descriptions into
+command-line flags that are passed to the compiler command-line.
 
 By default, only the current directory and the OCaml standard library will be
 searched for `cmi` files.  The `Pervasives` module from the standard library
