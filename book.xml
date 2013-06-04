@@ -25298,21 +25298,21 @@ Estimated testing time 30s (change using -quota SECS).
       </listitem>
     </itemizedlist>
     <para>
-      The interpreter uses the OCaml stack and an accumulator to store
-      values. It only has seven registers in total (the program counter,
-      stack pointer, accumulator, exception and argument pointers, and
-      environment and global data).
-    </para>
-    <para>
       The big advantage of using bytecode is simplicity, portability and
       compilation speed. The mapping from the lambda form to bytecode is
       straightforward, and this results in predictable (but slow)
       execution speed.
     </para>
     <para>
+      The interpreter uses the OCaml stack and an accumulator to store
+      values. It only has seven registers in total: the program counter,
+      stack pointer, accumulator, exception and argument pointers, and
+      environment and global data.
+    </para>
+    <para>
       You can display the bytecode instructions in textual form via
-      <literal>-dinstr</literal>. Try this on one of our pattern
-      matching examples from earlier.
+      <literal>-dinstr</literal>. Try this on one of our earlier pattern
+      matching examples.
     </para>
     <programlisting>
 $ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
@@ -25382,10 +25382,11 @@ L2: closure L1, 0
         units.
       </para>
       <para>
-        A typical OCaml library consists of multiple modules and hence
-        multiple <literal>cmo</literal> files. The compiler can combine
-        these into a single archive file by using the
-        <literal>-a</literal> flag. Bytecode archives are denoted by a
+        A typical OCaml library consists of multiple source files and
+        hence multiple <literal>cmo</literal> files that all need to
+        passed on the command line to use the library. The compiler can
+        combine these into a more convenient archive file by using the
+        <literal>-a</literal> flag. Bytecode archives are denoted by the
         <literal>cma</literal> extension.
       </para>
       <para>
@@ -25566,8 +25567,8 @@ $ cat embed_out.c
       </para>
     </sect2>
   </sect1>
-  <sect1 id="native-code-generation">
-    <title>Native code generation</title>
+  <sect1 id="compiling-fast-native-code">
+    <title>Compiling fast native code</title>
     <para>
       The native code compiler is ultimately the tool that most
       production OCaml code goes through. It compiles the lambda form
@@ -25772,13 +25773,30 @@ _camlCompare_poly__cmp_1008:
         </para>
         <tip>
         <title>
-        The implementation of <literal>compare_val</literal> in the
-        runtime
+        Reading the implementation of the C primitives
         </title>
         <para>
-          The ... TODO
+          If you have a copy of the OCaml source tree handy, it's worth
+          reading through the definition of
+          <literal>caml_greaterthan()</literal>. The built-in primitives
+          for polymorphic comparison can be found in
+          <literal>caml/byterun/compare.c</literal>.
+        </para>
+        <para>
+          The key function is <literal>compare_val()</literal>, which
+          directly examines the runtime representation of two OCaml
+          values to decide which is greater. This requires the header
+          tag to be examined, and recursive structures must be tested
+          step-by-step.
+        </para>
+        <para>
+          Avoiding running all of this code is why you should try to
+          write explicit comparison functions in OCaml instead.
         </para>
         </tip>
+      </sect3>
+      <sect3 id="benchmarking-polymorphic-comparison">
+        <title>Benchmarking polymorphic comparison</title>
         <para>
           You don't have to fully understand the intricacies of assembly
           language to see that this polymorphic comparison is much
@@ -25838,8 +25856,8 @@ Estimated testing time 20s (change using -quota SECS).
         </para>
       </sect3>
     </sect2>
-    <sect2 id="building-debuggable-libraries">
-      <title>Building debuggable libraries</title>
+    <sect2 id="building-debuggable-native-libraries">
+      <title>Building debuggable native libraries</title>
       <para>
         The native code compiler builds executables that can be debugged
         using conventional system debuggers such as GNU
@@ -25858,14 +25876,18 @@ Estimated testing time 20s (change using -quota SECS).
       <sect3 id="understanding-name-mangling">
         <title>Understanding name mangling</title>
         <para>
-          So how do these map into an interactive debugger like
-          <literal>gdb</literal>? The first thing you need to know is
-          how OCaml functions map into C symbol names; a procedure is
-          known as <emphasis>name mangling</emphasis>. C symbols must be
-          unambiguous within a compilation unit and so the conversion
-          from OCaml variable bindings (which can shadow each other)
-          also encodes additional information such as the module name
-          into the symbol.
+          So how do you refer to OCaml functions into an interactive
+          debugger like <literal>gdb</literal>? The first thing you need
+          to know is how function names compile down into C symbols; a
+          procedure generally called <emphasis>name mangling</emphasis>.
+        </para>
+        <para>
+          Each compilation unit compiles into a native object file that
+          can only export a unique collection of symbols. This means
+          that OCaml values need to be mapped into a unique name within
+          that compilation unit. This mapping has to account for
+          language features such as nested modules, anonymous functions
+          and variable names that shadow each other.
         </para>
         <para>
           The conversion follows some straightforward rules:
@@ -25894,6 +25916,12 @@ Estimated testing time 20s (change using -quota SECS).
             </para>
           </listitem>
         </itemizedlist>
+        <para>
+          Anonymous functions are hard to predict without inspecting
+          intermediate compiler output. If you need to debug them it's
+          usually easier to modify the source code to let-bind the
+          anonymous function to a variable name.
+        </para>
       </sect3>
       <sect3 id="interactive-breakpoints-with-the-gnu-debugger">
         <title>Interactive breakpoints with the GNU debugger</title>
