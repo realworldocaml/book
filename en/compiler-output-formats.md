@@ -678,11 +678,11 @@ using the type inference to guide you as you build up your functions.  The
 `mli` file can then be generated as described above, and the exported functions
 documented.
 
-If you're writing code that spans multiple files, then it's easier to start by
-writing all the `mli` signatures and checking that they type check with each
-other.  Once the signatures are in place, you can write the implementations
-with the confidence that they will all glue together correctly with no cyclic
-dependencies.
+If you're writing code that spans multiple files though, it's sometimes easier
+to start by writing all the `mli` signatures and checking that they type check
+against each other.  Once the signatures are in place, you can write the
+implementations with the confidence that they'll all glue together correctly
+with no cyclic dependencies between the modules.
 
 As with any such stylistic debate, you should experiment with which system
 works best for you.  Everyone agrees on one thing though: no matter what order
