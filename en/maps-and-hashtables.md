@@ -703,7 +703,7 @@ advantage of maps as a persistent data-structure.  In particular, if
 you create map `m'` by calling `Map.add` on some other map `m`, then
 `m` and `m'` can be used independently, and in fact share most of
 their underlying storage.  Thus, if you need to keep in memory at the
-same time multiple different related collections of key/value paris,
+same time multiple different related collections of key/value pairs,
 then a map is typically a much more efficient data structure to do it
 with.
 
