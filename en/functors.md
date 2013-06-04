@@ -488,10 +488,10 @@ example.
 - : Sexp.t = (This is (an s-expression))
 ```
 
-Core comes with a syntax extension called `sexplib` which will
+Core comes with a syntax extension called `sexplib` which can
 auto-generate s-expression conversion functions from a type
-declaration.  These convereters will be generated for any type that
-one attaches `with sexp` to.  Thus, we can write:
+declaration.  Attaching `with sexp` to a type definition signals to
+the extension to generate the converters.  Thus, we can write:
 
 ```ocaml
 # type some_type = int * string list with sexp;;
@@ -500,12 +500,12 @@ val some_type_of_sexp : Sexp.t -> int * string list = <fun>
 val sexp_of_some_type : int * string list -> Sexp.t = <fun>
 # sexp_of_some_type (33, ["one"; "two"]);;
 - : Sexp.t = (33 (one two))
-# some_type_of_sexp (Sexp.of_string "(44 (five six))");;
+# Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
 - : int * string list = (44, ["five"; "six"])
 ```
 
 We'll discuss s-expressions and `sexplib` in more detail in
-[xref](#data-serialization-with-s-expressions) But for now, let's see
+[xref](#data-serialization-with-s-expressions), but for now, let's see
 what happens if attach the `with sexp` declaration to the definition
 of `t` within the functor.
 
@@ -681,11 +681,12 @@ let fold (in_list,out_list) ~init ~f =
 
 One problem with our `Fqueue` is that the interface is quite skeletal.
 There are lots of useful helper functions that one might want that
-aren't there.  For example, for lists we have `List.iter` which runs a
-function on each node; and a `List.find` that finds the first element
-on the list that matches a given predicate.  Such helper functions
+aren't there.  The list module, by way of contrast, has functions like
+`List.iter`, which runs a function on each element; and
+`List.for_all`, which returns true if and only if the given predicate
+evaluates to try on every element of the list.  Such helper functions
 come up for pretty much every container type, and implementing them
-over and over is a bit of a dull and repetitive affair.
+over and over is a dull and repetitive affair.
 
 As it happens, many of these helper functions can be derived
 mechanically from just the fold function we already implemented.
@@ -780,10 +781,11 @@ module T = struct
     | hd :: tl -> Some (hd, (in_list,tl))
     | [] -> dequeue ([], List.rev in_list)
 
-  let fold (in_list,out_list) ~init ~f =
-    List.fold ~init:(List.fold ~init ~f out_list) ~f
-      (List.rev in_list)
+let fold (in_list,out_list) ~init ~f =
+  let after_out = List.fold ~init ~f out_list in
+  List.fold_right ~init:after_out ~f in_list
 end
+
 include T
 include Foldable.Extend(T)
 ```
@@ -802,4 +804,3 @@ variety of purposes.
   [xref](#concurrent-programming-with-async).  Here, the functor is
   used to provide a collection of standard helper functions based on
   the core `bind` and `return` operators.
-
