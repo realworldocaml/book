@@ -432,7 +432,14 @@
       </para>
     </sect2>
   </sect1>
-</preface><part label="I"><title>Language Concepts</title><partintro><para>Testing how the partintro tag is displayed.</para></partintro><chapter id="a-guided-tour">
+</preface><part label="I"><title>Language Concepts</title><partintro><para>Part I covers the basic language concepts you'll need to know when building OCaml programs.
+      You won't need to memorise all of this (objects, for example, are used rarely in practice)
+      but understanding the concepts and examples is important.</para><para>This part opens up with a guided tour to give you a quick overview of the language using
+      an interactive command-line interface.</para><para>It then moves onto covering language features such as records, algebraic data types and the
+      module system.</para><para>The final portion covers more advanced features such as functors, objects and first-class 
+      modules, which may all take some time to digest. Persevere though; even though these concepts 
+      may be difficult at first, they will put you in good stead even when switching to other 
+      languages, many of which have drawn inspiration from ML.</para></partintro><chapter id="a-guided-tour">
   <title>A Guided Tour</title>
   <para>
     This chapter gives an overview of OCaml by walking through a series
@@ -14402,7 +14409,7 @@ $ ./service_client.byte
       changed dynamically, rather than just added at creation time.
     </para>
   </sect1>
-</chapter></part><part label="II"><title>Tools and Techniques</title><partintro><para>Testing how the partintro tag is displayed.</para></partintro><chapter id="maps-and-hashtables">
+</chapter></part><part label="II"><title>Tools and Techniques</title><partintro/><chapter id="maps-and-hashtables">
   <title>Maps and Hashtables</title>
   <para>
     Lots of programming problems require dealing with data organized as
@@ -21175,7 +21182,7 @@ module Fields :
       with Sexplib.
     </para>
   </sect1>
-</chapter></part><part label="III"><title>The Runtime System</title><partintro><para>Testing how the partintro tag is displayed.</para></partintro><chapter id="foreign-function-interface">
+</chapter></part><part label="III"><title>The Runtime System</title><partintro/><chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
   <para>
     OCaml has several options available to interact with non-OCaml code.
