@@ -25347,28 +25347,29 @@ L2: closure L1, 0
     </para>
     <note>
     <title>
-    The ZINC machine
+    Where did the bytecode instruction set come from?
     </title>
     <para>
       The bytecode interpreter is much slower than compiled native code,
-      but is still remarkably efficient for something that interprets a
-      functional language. Its efficiency can be traced back to Xavier
-      Leroy's ground-breaking work in 1990 on
-      &quot;<ulink url="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps">The
+      but is still remarkably performant for an interpreter without a
+      JIT compiler. Its efficiency can be traced back to Xavier Leroy's
+      ground-breaking work in 1990 on
+      <ulink url="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps">&quot;The
       ZINC experiment: An Economical Implementation of the ML
-      Language</ulink>&quot;.
+      Language&quot;</ulink>.
     </para>
     <para>
       This paper laid the theoretical basis for the implementation of an
-      efficient instruction set for a strictly evaluated functional
-      language such as OCaml. The bytecode interpreter in modern OCaml
-      is still based on the ZINC model.
+      instruction set for a strictly evaluated functional language such
+      as OCaml. The bytecode interpreter in modern OCaml is still based
+      on the ZINC model. The native code compiler uses a different model
+      since it uses CPU registers for function calls instead of always
+      passing arguments on the stack as the bytecode interpreter does.
     </para>
     <para>
-      Interestingly, the native code compiler uses a different model
-      since it has to use hardware CPU registers for function calls
-      instead of always passing arguments on the stack as the bytecode
-      interpreter does.
+      Understanding the reasoning behind the different implementations
+      of the bytecode interpreter and the native compiler is a very
+      useful exercise for any budding language hacker.
     </para>
     </note>
     <sect2 id="compiling-and-linking-bytecode">
@@ -25410,46 +25411,49 @@ L2: closure L1, 0
         is more important than in C.
       </para>
     </sect2>
-    <sect2 id="linking-ocaml-bytecode">
-      <title>Linking OCaml bytecode</title>
+    <sect2 id="executing-bytecode">
+      <title>Executing bytecode</title>
       <para>
         The bytecode runtime comprises three parts: the bytecode
         interpreter, garbage collector, and a set of C functions that
-        implement the primitive operations. Bytecode instructions are
-        provided to call these C functions. The OCaml linker produces
-        bytecode for the standard runtime system by default, and any
-        custom C functions in your code (e.g. from C bindings) require
-        the runtime to dynamically load a shared library.
+        implement the primitive operations. The bytecode contains
+        instructions to call these C functions when required.
       </para>
       <para>
-        This can be specified as follows:
+        The OCaml linker produces bytecode targeted the standard OCaml
+        runtime by default, and so needs to know about any C functions
+        that are referenced from other libraries that aren't loaded by
+        default.
+      </para>
+      <para>
+        Information about these extra libraries can be specified while
+        linking a bytecode archive.
       </para>
       <programlisting>
 $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
 </programlisting>
       <para>
         The <literal>dllib</literal> flag embeds the arguments in the
-        archive file. Any subsequent packages including this archive
-        will also include the extra linking directive. This lets the
-        interpreter locate the external library symbols when it executes
-        the bytecode.
+        archive file. Any subsequent packages linking this archive will
+        also include the extra C linking directive. This in turn lets
+        the interpreter dynamically load the external library symbols
+        when it executes the bytecode.
       </para>
       <para>
         You can also generate a complete standalone executable that
         bundles the <literal>ocamlrun</literal> interpreter with the
-        bytecode in a single binary. This is known as the
-        <emphasis>custom runtime</emphasis> mode, and can be built as
-        follows.
+        bytecode in a single binary. This is known as a <emphasis>custom
+        runtime</emphasis> mode and is built as follows.
       </para>
       <programlisting>
 $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 </programlisting>
       <para>
-        The custom mode is the most similar to native code compilation,
-        as both generate standalone executables. There are quite a few
-        other options available for compiling bytecode (notably with
-        shared libraries or building custom runtimes). Full details can
-        be found in the
+        The custom mode is the most similar mode to native code
+        compilation, as both generate standalone executables. There are
+        quite a few other options available for compiling bytecode
+        (notably with shared libraries or building custom runtimes).
+        Full details can be found in the
         <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html">manual</ulink>.
       </para>
     </sect2>
