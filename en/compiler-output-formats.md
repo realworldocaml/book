@@ -1411,16 +1411,16 @@ consists of two pieces:
 * `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.
 * `ocamlrun` is a portable interpreter that executes the bytecode.
 
-The interpreter uses the OCaml stack and an accumulator to store values.  It
-only has seven registers in total (the program counter, stack pointer,
-accumulator, exception and argument pointers, and environment and global data).
-
 The big advantage of using bytecode is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
 this results in predictable (but slow) execution speed.
 
+The interpreter uses the OCaml stack and an accumulator to store values. It
+only has seven registers in total: the program counter, stack pointer,
+accumulator, exception and argument pointers, and environment and global data.
+
 You can display the bytecode instructions in textual form via `-dinstr`.  Try
-this on one of our pattern matching examples from earlier.
+this on one of our earlier pattern matching examples.
 
 ```console
 $ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
