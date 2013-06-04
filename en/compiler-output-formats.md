@@ -886,8 +886,10 @@ val f : s -> int
 ```
 
 This example isn't principal since the inferred type for `x.foo` is guided by
-the inferred type of `x.bar`. If the `x.bar` use is removed from the
-definition of `f`, its argument would be of type `t` and not `type s`.
+the inferred type of `x.bar`, whereas principal typing requires that each
+sub-expression's type can be calculated independently.  If the `x.bar` use is
+removed from the definition of `f`, its argument would be of type `t` and not
+`type s`.
 
 You can fix this either by permuting the order of the type declarations, or by
 adding an explicit type annotation.
@@ -933,24 +935,24 @@ case, just recompile with a clean source tree.
 
 ### Modules and separate compilation
 
-The OCaml module system composes software components by explicitly defining
-type signatures for a collection of functions.  We explained the basics of
-using source files and modules in [xref](#files-modules-and-programs).  The
-module language that operates over these signatures also extends to advanced
-functionality such as functors and first-class modules, described in
+The OCaml module system enables smaller components to be reused effectively in
+large projects while still retaining all the benefits of static type safety.
+We covered the basics of using modules earlier in
+[xref](#files-modules-and-programs).  The module language that operates over
+these signatures also extends to functors and first-class modules, described in
 [xref](#functors) and [xref](#first-class-modules) respectively.
 
-We'll now discuss how the compiler implements this functionality in more
-detail.  Modules are essential for larger projects that consist of many files
+This section discusses how the compiler implements them in more detail.
+Modules are essential for larger projects that consist of many source files
 (also known as *compilation units*).   It's impractical to recompile every
-source file when making local changes, and the module system is designed to
-minimize such recompilation and encourage code reuse.
+single source file when changing just one or two files, and the module system
+minimizes such recompilation while still encouraging code reuse.
 
 #### The mapping between files and modules
 
-Compilation units are just special cases of OCaml modules and signatures. The
-relationship between them can be explained directly in terms of the usual
-module system.
+Individual compilation units provide a convenient way to break up a big module
+hierarchy into a collection of files.  The relationship between files and
+modules can be explained directly in terms of the module system.
 
 Create a file called `alice.ml` with the following contents.
 
