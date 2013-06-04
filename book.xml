@@ -24260,13 +24260,14 @@ val compare : t -&gt; t -&gt; int
     </para>
     <para>
       Although type checking is done in a single pass in OCaml, it
-      actually consists of three distinct steps:
+      actually consists of three distinct steps that happen
+      simultaneously:
     </para>
     <itemizedlist>
       <listitem>
         <para>
-          an <emphasis>automatic type inference</emphasis> engine that
-          calculates types for a module without requiring any manual
+          an <emphasis>automatic type inference</emphasis> algorithm
+          that calculates types for a module without requiring manual
           type annotations.
         </para>
       </listitem>
@@ -24496,18 +24497,23 @@ Error: This expression has type
        The second variant type does not allow tag(s) `Nu
 </programlisting>
         <para>
-          The type error is perfectly accurate, but the best it can do
-          is to point you in the general direction of the
-          <literal>algebra</literal> function application. The type
-          checker is trying to match the inferred type of the
-          <literal>algebra</literal> definition to its application a few
-          lines down. Since they don't match, the type checker does its
-          best to figure out where the difference is in the nested data
-          structure.
+          The type error is perfectly accurate, but rather verbose and
+          with a line number that doesn't point to the exact location of
+          the incorrect variant name. The best the compiler can do is to
+          point you in the general direction of the
+          <literal>algebra</literal> function application.
         </para>
         <para>
-          Now try the same code with an explicit type annotation to
-          define the data type you want.
+          This is because the type checker doesn't have enough
+          information to match the inferred type of the
+          <literal>algebra</literal> definition to its application a few
+          lines down. It calculates types for both expressions
+          separately, and when they don't match up, outputs the
+          difference as best it can.
+        </para>
+        <para>
+          Let's see what happens with an explicit type annotation to
+          help the compiler out.
         </para>
         <programlisting language="ocaml">
 (* broken_poly_with_annot.ml *)
@@ -24540,9 +24546,9 @@ let _ =
 </programlisting>
         <para>
           This code contains exactly the same error as before, but we've
-          added an explicit type annotation for the
-          <literal>algebra</literal> definition. The error we get is far
-          more direct.
+          added a closed type definition of the polymorphic variants,
+          and a type annotation to the <literal>algebra</literal>
+          definition. The compiler error we get is much more useful now.
         </para>
         <programlisting>
 $ ocamlc -i broken_poly_with_annot.ml 
@@ -24562,12 +24568,13 @@ Error: This expression has type [&gt; `Nu of int ]
       <sect3 id="enforcing-principal-typing">
         <title>Enforcing principal typing</title>
         <para>
-          You can pass a <literal>-principal</literal> flag to the
-          compiler to turn on a stricter principal type checking mode.
-          This detects risky uses of type information to ensure that the
-          type inference has one principal result. A type is considered
-          risky if the success or failure of type inference depends on
-          the order in which sub-expressions are typed.
+          The compiler also has a stricter <emphasis>principal type
+          checking</emphasis> mode that is activated via the
+          <literal>-principal</literal> flag. This warns about risky
+          uses of type information to ensure that the type inference has
+          one principal result. A type is considered risky if the
+          success or failure of type inference depends on the order in
+          which sub-expressions are typed.
         </para>
         <para>
           The principality check only affects a few language features:
@@ -25361,31 +25368,42 @@ L2: closure L1, 0
       interpreter does.
     </para>
     </note>
-    <sect2 id="compiling-ocaml-bytecode">
-      <title>Compiling OCaml bytecode</title>
+    <sect2 id="compiling-and-linking-bytecode">
+      <title>Compiling and linking bytecode</title>
       <para>
-        <literal>ocamlc</literal> compiles individual
-        <literal>ml</literal> files into bytecode <literal>cmo</literal>
-        files. These are linked together with the OCaml standard library
-        to produce an executable program. The order in which
-        <literal>.cmo</literal> arguments are presented on the command
-        line defines the order in which compilation units are
-        initialized at runtime (recall that OCaml has no single
-        <literal>main</literal> function like C does).
+        The <literal>ocamlc</literal> command compiles individual
+        <literal>ml</literal> files into bytecode files that have a
+        <literal>cmo</literal> extension. The compiled bytecode files
+        are matched with the associated <literal>cmi</literal> interface
+        which contains the type signature exported to other compilation
+        units.
       </para>
       <para>
         A typical OCaml library consists of multiple modules and hence
-        multiple <literal>cmo</literal> files. <literal>ocamlc</literal>
-        can combine these into a single <literal>cma</literal> bytecode
-        archive by using the <literal>-a</literal> flag. The objects in
-        the library are linked as regular <literal>cmo</literal> files
-        in the order specified when the library file was built. However,
-        if an object file within the library isn't referenced elsewhere
-        in the program, it is not linked unless the
-        <literal>-linkall</literal> flag forces it to be included. This
+        multiple <literal>cmo</literal> files. The compiler can combine
+        these into a single archive file by using the
+        <literal>-a</literal> flag. Bytecode archives are denoted by a
+        <literal>cma</literal> extension.
+      </para>
+      <para>
+        The individual objects in the library are linked as regular
+        <literal>cmo</literal> files in the order specified when the
+        library file was built. If an object file within the library
+        isn't referenced elsewhere in the program, then it isn't
+        included in the final binary unless the
+        <literal>-linkall</literal> flag forces its inclusion. This
         behaviour is analogous to how C handles object files and
         archives (<literal>.o</literal> and <literal>.a</literal>
         respectively).
+      </para>
+      <para>
+        The bytecode files are then linked together with the OCaml
+        standard library to produce an executable program. The order in
+        which <literal>.cmo</literal> arguments are presented on the
+        command line defines the order in which compilation units are
+        initialized at runtime. Remember that OCaml has no single
+        <literal>main</literal> function like C, so this link is order
+        is more important than in C.
       </para>
     </sect2>
     <sect2 id="linking-ocaml-bytecode">
