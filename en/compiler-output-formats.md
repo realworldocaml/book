@@ -803,7 +803,7 @@ case, just recompile with a clean source tree.
 
 </sidebar>
 
-#### Adding type annotations to fix type errors
+#### Adding type annotations to find errors
 
 It's often said that the hardest part of writing OCaml code is getting past the
 type checker -- but once the code does compile, it works correctly the first
@@ -846,7 +846,8 @@ let _ =
     ))
 ```
 
-There's a single character typo in the code so that it uses `Nu` instead of `Num`.  The resulting type error is impressive.
+There's a single character typo in the code so that it uses `Nu` instead of
+`Num`.  The resulting type error is impressive.
 
 ```console
 $ ocamlc -c broken_poly.ml 
@@ -1046,6 +1047,19 @@ into it, just clean out your intermediate files and recompile from scratch.
 </sidebar>
 
 ### Examining the typed syntax tree
+
+<caution>
+<title>Note to reviewers: uses for the typed syntax tree?</title>
+
+We've added this section on the `-dtypedtree` and `-dparsetree` for completeness,
+but will probably remove them from the final book since we can't think of any
+concrete examples where inspecting this would be useful for the average developer.
+It's primarily useful to track down internal type checker or camlp4 extension errors.
+
+But if you can think of a good use-case to justify keeping this in the final book,
+then please leave a comment here!
+
+</caution>
 
 The compiler has a couple of advanced flags that can dump the raw output of the
 internal AST representation.  You can't depend on these flags to give the same
