@@ -350,14 +350,14 @@ detailed output.
 
 ## Preprocessing source code
 
-One powerful feature in OCaml is an extension facility to alter the core
-language grammar without having to modify the compiler.  You can roughly think
-of it as a type-safe version to the `cpp` preprocessor used in C/C++ to control
+One powerful feature in OCaml is a facility to extend the standard language
+grammar without having to modify the compiler.  You can roughly think of it as
+a type-safe version to the `cpp` preprocessor used in C/C++ to control
 conditional compilation directives.
 
 The OCaml distribution includes a system called Camlp4 for writing extensible
-parsers. This provides a set of OCaml libraries that are used to define
-grammars, and dynamically loadable syntax extensions of such grammars.  Camlp4
+parsers. This provides some OCaml libraries that are used to define grammars
+and also dynamically loadable syntax extensions of such grammars.  Camlp4
 modules register new language keywords and later transform these keywords (or
 indeed, any portion of the input program) into conventional OCaml code that can
 be understood by the rest of the compiler.
