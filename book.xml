@@ -24637,9 +24637,11 @@ val f : s -&gt; int
         <para>
           This example isn't principal since the inferred type for
           <literal>x.foo</literal> is guided by the inferred type of
-          <literal>x.bar</literal>. If the <literal>x.bar</literal> use
-          is removed from the definition of <literal>f</literal>, its
-          argument would be of type <literal>t</literal> and not
+          <literal>x.bar</literal>, whereas principal typing requires
+          that each sub-expression's type can be calculated
+          independently. If the <literal>x.bar</literal> use is removed
+          from the definition of <literal>f</literal>, its argument
+          would be of type <literal>t</literal> and not
           <literal>type s</literal>.
         </para>
         <para>
@@ -24697,31 +24699,32 @@ val f : s -&gt; int
     <sect2 id="modules-and-separate-compilation">
       <title>Modules and separate compilation</title>
       <para>
-        The OCaml module system composes software components by
-        explicitly defining type signatures for a collection of
-        functions. We explained the basics of using source files and
-        modules in
+        The OCaml module system enables smaller components to be reused
+        effectively in large projects while still retaining all the
+        benefits of static type safety. We covered the basics of using
+        modules earlier in
         <xref linkend="files-modules-and-programs"/>. The
         module language that operates over these signatures also extends
-        to advanced functionality such as functors and first-class
-        modules, described in <xref linkend="functors"/> and
+        to functors and first-class modules, described in
+        <xref linkend="functors"/> and
         <xref linkend="first-class-modules"/> respectively.
       </para>
       <para>
-        We'll now discuss how the compiler implements this functionality
-        in more detail. Modules are essential for larger projects that
-        consist of many files (also known as <emphasis>compilation
-        units</emphasis>). It's impractical to recompile every source
-        file when making local changes, and the module system is
-        designed to minimize such recompilation and encourage code
+        This section discusses how the compiler implements them in more
+        detail. Modules are essential for larger projects that consist
+        of many source files (also known as <emphasis>compilation
+        units</emphasis>). It's impractical to recompile every single
+        source file when changing just one or two files, and the module
+        system minimizes such recompilation while still encouraging code
         reuse.
       </para>
       <sect3 id="the-mapping-between-files-and-modules">
         <title>The mapping between files and modules</title>
         <para>
-          Compilation units are just special cases of OCaml modules and
-          signatures. The relationship between them can be explained
-          directly in terms of the usual module system.
+          Individual compilation units provide a convenient way to break
+          up a big module hierarchy into a collection of files. The
+          relationship between files and modules can be explained
+          directly in terms of the module system.
         </para>
         <para>
           Create a file called <literal>alice.ml</literal> with the
