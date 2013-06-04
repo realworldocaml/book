@@ -806,8 +806,8 @@ case, just recompile with a clean source tree.
 #### Adding type annotations to fix type errors
 
 It's often said that the hardest part of writing OCaml code is getting past the
-type checker -- but once the code does compile, it often works correctly the
-first time you run it!
+type checker -- but once the code does compile, it works correctly the first
+time! 
 
 There are a couple of tricks to make it easier to quickly locate type errors in
 your code.  The first is to introduce manual type annotations to narrow down
@@ -916,10 +916,14 @@ Error: This expression has type [> `Nu of int ]
 
 This error points directly to the correct line number that contains the typo.
 Once you fix the problem, you can remove the manual annotations if you prefer
-more succinct code.  You can also leave the annotations there, of course, to
+more succinct code.  You can also leave the annotations there of course, to
 help with future refactoring and debugging.
 
 ### Modules and separate compilation
+
+We explained the basic relationship between source files and modules earlier in
+[xref](#files-modules-and-programs).  We'll cover how the compiler pipeline
+implements this in more detail now.
 
 The OCaml module system composes software components together by explicitly
 defining type signatures for a collection of functions.  The module language
