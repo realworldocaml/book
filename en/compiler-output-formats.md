@@ -604,27 +604,27 @@ the code obeys the rules of the OCaml type system. Code that is syntactically
 correct but misuses values is rejected with an explanation of the problem.
 
 Although type checking is done in a single pass in OCaml, it actually consists
-of three logically different phases:
+of three distinct steps:
 
-* a type inference engine that automatically calculates types
+* an *automatic type inference* engine that calculates types
   for a module without requiring any manual type annotations.
-* a module system that assembles software components together via explicit
+* a *module system* that combines software components with explicit
   knowledge of their type signatures.
-* explicit subtyping checks for objects and polymorphic variants.
+* performing *explicit subtyping* checks for objects and polymorphic variants.
 
-Automatic type inference is useful for writing succinct code for a particular
-task and having the compiler ensure that your use of variables is locally
-consistent.  However, type inference doesn't scale to very large code bases
-that depend on separate compilation of files.  A small change in one module may
-ripple through may thousands of other files and require all of them to be
-recompiled.
+Automatic type inference lets you write succinct code for a particular task and
+have the compiler ensure that your use of variables is locally consistent.
 
-The module system solves this by providing the ability to explicitly specify
-type signatures for a module, and also to re-use these signatures via functors
-and first-class modules.
+Type inference doesn't scale to very large code bases that depend on separate
+compilation of files.  A small change in one module may ripple through
+thousands of other files and libraries and require all of them to be
+recompiled.  The module system solves this by providing the facility to combine
+and manipulate explicit type signatures for modules within a large project, and
+also to reuse them via functors and first-class modules.
 
-Subtyping in OCaml objects is always explicit via the `:>` operator, and so
-doesn't complicate the core type inference engine at all. 
+Subtyping in OCaml objects is always an explicit operation (via the `:>`
+operator).  This means that it doesn't complicate the core type inference
+engine and can be tested as a separate concern.
 
 ### Displaying inferred types from the compiler
 
