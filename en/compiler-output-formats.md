@@ -593,23 +593,34 @@ Jake Donham describe the internals of Camlp4 and its syntax extension mechanism.
 
 ## Static type checking
 
-After obtaining a valid abstract syntax tree, the compiler then verifies that
-the code obeys the rules of the static type system. Code that is syntactically
+After obtaining a valid abstract syntax tree, the compiler has to verify that
+the code obeys the rules of the OCaml type system. Code that is syntactically
 correct but misuses values is rejected with an explanation of the problem.
 
-Static type checking is split into two logical phases in OCaml.  The core
-language has a sophisticated type inference engine that automatically figures
-out types for your code without you having to write them out by hand.  The
-module language lets you group functions together and explicitly manipulate
-and re-use them.
+Although type checking is done in a single pass in OCaml, it actually consists
+of three logically different phases:
 
-While the core language has a strong emphasis on automatic inference, the
-module language is much more explicit about matching signatures and
-implementations against each other. You can consider type inference well suited
-to local bits of code (i.e. individual modules), and modules to establish
-abstraction boundaries between components.  The module system scales up to the
-needs of large-scale software engineering -- some of the larger OCaml
-code-bases contain thousands of files and modules.
+* a type inference engine that automatically calculates types
+  for a module without requiring any manual type annotations.
+* a module system that assembles software components together via explicit
+  knowledge of their type signatures.
+* explicit subtyping checks for objects and polymorphic variants.
+
+Automatic type inference is useful for writing succinct code for a particular
+task and having the compiler ensure that your use of variables is locally
+consistent.  However, type inference doesn't scale to very large code bases
+that depend on separate compilation of files.  A small change in one module may
+ripple through may thousands of other files and require all of them to be
+recompiled.
+
+The module system solves this by providing the ability to explicitly specify
+type signatures for a module, and also to re-use these signatures via functors
+and first-class modules.
+
+Subtyping in OCaml objects is always explicit via the `:>` operator, and so
+doesn't complicate the core type inference engine at all. 
+
+### Displaying inferred types from the compiler
 
 You can explore basic type inference very easily from the top-level, or by
 asking the compiler to display the types it infers. Create a file with a single
@@ -622,7 +633,7 @@ let v = Foo
 ```
 
 Now run the compiler with the `-i` flag to infer the types for the compilation
-unit. This runs the type checker but doesn't compile it any further after
+unit. This runs the type checker but doesn't compile the code any further after
 displaying the interface to the standard output.
 
 ```console
@@ -631,15 +642,18 @@ type t = Foo | Bar
 val v : t
 ```
 
-For a file, the output is the default signature for the module.  It's often useful to
-redirect this output to an `mli` file to give you a starting signature to edit
-the external interface without having to type it all in by hand.  The compiler
-also stores a compiled version of the interface as a `cmi` file.  This interface
-is either obtained from compiling an `mli` signature file for a module, or 
-by the inferred type if there is only an `ml` implementation present.
+The output is the default signature for the module which represents the input
+file.  It's often useful to redirect this output to an `mli` file to give you a
+starting signature to edit the external interface without having to type it all
+in by hand.
 
-If you have a mismatch between the `ml` and `mli` signatures, the type-checker
-will give you an immediate error. 
+The compiler stores a compiled version of the interface as a `cmi` file.  This
+interface is either obtained from compiling an `mli` signature file for a
+module, or by the inferred type if there is only an `ml` implementation
+present.
+
+The compiler makes sure that your `ml` and `mli` files have compatible
+signatures. The type checker throws an immediate error if this isn't the case. 
 
 ```console
 $ echo type t = Foo > test.ml
@@ -655,12 +669,35 @@ Error: The implementation test.ml does not match the interface test.cmi:
        Their first fields have different names, Foo and Bar.
 ```
 
-It's good coding style to have an explicit `mli` signature file as this is also
-where you can put OCamldoc comments as documentation for that module.  Since
-the compiler ensures that the external signature matches your implementation,
-it adds very little maintenance burden.
+<note>
+<title>Which comes first: the `ml` or the `mli`?</title>
 
-### The type inference process
+There are two schools of thought on which order OCaml code should be written
+in.  It's very easy to begin writing code by starting with an `ml` file and
+using the type inference to guide you as you build up your functions.  The
+`mli` file can then be generated as described above, and the exported functions
+documented.
+
+If you're writing code that spans multiple files, then it's easier to start by
+writing all the `mli` signatures and checking that they type check with each
+other.  Once the signatures are in place, you can write the implementations
+with the confidence that they will all glue together correctly with no cyclic
+dependencies.
+
+As with any such stylistic debate, you should experiment with which system
+works best for you.  Everyone agrees on one thing though: no matter what order
+you write them, production code should always have explicitly defined `mli`
+files.
+
+Signature files provide a place to write succinct documentation and to abstract
+internal details that shouldn't be exported.  Maintaining separate signature
+files also speeds up incremental compilation in larger code-bases, since
+recompiling a `mli` signature is much faster than a full compilation of the
+implementation to native code.
+
+</note>
+
+### Guiding type inference
 
 Type inference is the process of determining the appropriate types for
 expressions based on their use.  It's a feature that's partially present in
@@ -672,8 +709,8 @@ for its ability to infer the most general type for an expression without
 requiring any explicit type annotations.  The algorithm can deduce multiple
 types for an expression, and has the notion of a *principal type* that is the
 most general choice from the possible inferences.  Manual type annotations can
-always specialize the type explicitly, but the automatic inference selects the
-most general type unless told otherwise.
+specialize the type explicitly, but the automatic inference selects the most
+general type unless told otherwise.
 
 OCaml does has some language extensions which strain the limits of principal
 type inference, but by and large most programs you write will never *require*
