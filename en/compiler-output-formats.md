@@ -1476,9 +1476,10 @@ have a `cmo` extension.  The compiled bytecode files are matched with the
 associated `cmi` interface which contains the type signature exported to
 other compilation units.
 
-A typical OCaml library consists of multiple modules and hence multiple `cmo`
-files.  The compiler can combine these into a single archive file by
-using the `-a` flag.  Bytecode archives are denoted by a `cma` extension.
+A typical OCaml library consists of multiple source files and hence multiple
+`cmo` files that all need to passed on the command line to use the library.
+The compiler can combine these into a more convenient archive file by using the
+`-a` flag.  Bytecode archives are denoted by the `cma` extension.
 
 The individual objects in the library are linked as regular `cmo` files in the
 order specified when the library file was built.  If an object file within the
@@ -1778,11 +1779,23 @@ returning from the `caml_greaterthan` call.  Finally the return value of the
 comparison is popped from the stack and returned.
 
 <tip>
-<title>The implementation of `compare_val` in the runtime</title>
+<title>Reading the implementation of the C primitives</title>
 
-The ... TODO
+If you have a copy of the OCaml source tree handy, it's worth reading through
+the definition of `caml_greaterthan()`.  The built-in primitives for
+polymorphic comparison can be found in `caml/byterun/compare.c`.
+
+The key function is `compare_val()`, which directly examines the runtime
+representation of two OCaml values to decide which is greater.  This requires
+the header tag to be examined, and recursive structures must be tested
+step-by-step.
+
+Avoiding running all of this code is why you should try to write explicit
+comparison functions in OCaml instead.
 
 </tip>
+
+#### Benchmarking polymorphic comparison
 
 You don't have to fully understand the intricacies of assembly language to see
 that this polymorphic comparison is much heavier than the simple monomorphic
@@ -1837,7 +1850,7 @@ However, if you're building numerical code that runs many iterations in a tight
 inner loop, it's worth manually peering at the produced assembly code to see if
 you can hand-optimize it.
 
-### Building debuggable libraries
+### Building debuggable native libraries
 
 The native code compiler builds executables that can be debugged using
 conventional system debuggers such as GNU `gdb`.  You need to compile your
