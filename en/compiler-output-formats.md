@@ -732,9 +732,9 @@ time!
 
 There are a couple of tricks to make it easier to quickly locate type errors in
 your code.  The first is to introduce manual type annotations to narrow down
-the source of your error more concretely.  These shouldn't actually change your
-overall types and can removed once your code is correct, but act as explicit
-anchors to find the problem while you're still fixing the code.
+the source of your error more accurately.  These annotations shouldn't actually
+change your types and can removed once your code is correct, but act as anchors
+to locate errors while you're still writing your code.
 
 Manual type annotations are particulary useful if you use lots of
 polymorphic variants or objects.  Type inference with row polymorphism can
