@@ -628,9 +628,10 @@ engine and can be tested as a separate concern.
 
 ### Displaying inferred types from the compiler
 
-You can explore basic type inference very easily from the top-level, or by
-asking the compiler to display the types it infers. Create a file with a single
-type definition and value.
+We've already seen how you can explore type inference directly from the
+top-level.  It's also possible to generate type signatures for an entire file
+by asking the compiler to do the work for you. Create a file with a single type
+definition and value.
 
 ```ocaml
 (* typedef.ml *)
@@ -638,9 +639,9 @@ type t = Foo | Bar
 let v = Foo
 ```
 
-Now run the compiler with the `-i` flag to infer the types for the compilation
-unit. This runs the type checker but doesn't compile the code any further after
-displaying the interface to the standard output.
+Now run the compiler with the `-i` flag to infer the type signature for that
+file.  This runs the type checker but doesn't compile the code any further
+after displaying the interface to the standard output.
 
 ```console
 $ ocamlc -i typedef.ml
@@ -684,7 +685,7 @@ using the type inference to guide you as you build up your functions.  The
 `mli` file can then be generated as described above, and the exported functions
 documented.
 
-If you're writing code that spans multiple files though, it's sometimes easier
+If you're writing code that spans multiple files, it's sometimes easier
 to start by writing all the `mli` signatures and checking that they type check
 against each other.  Once the signatures are in place, you can write the
 implementations with the confidence that they'll all glue together correctly
@@ -692,8 +693,8 @@ with no cyclic dependencies between the modules.
 
 As with any such stylistic debate, you should experiment with which system
 works best for you.  Everyone agrees on one thing though: no matter what order
-you write them, production code should always have explicitly defined `mli`
-files.
+you write them, production code should always explicitly define an `mli` file
+for every `ml` file in the project.
 
 Signature files provide a place to write succinct documentation and to abstract
 internal details that shouldn't be exported.  Maintaining separate signature
@@ -722,92 +723,6 @@ OCaml does has some language extensions which strain the limits of principal
 type inference, but by and large most programs you write will never *require*
 annotations (although they sometimes help the compiler produce better error
 messages).
-
-<sidebar>
-<title>Enforcing principal typing</title>
-
-You can also pass a `-principal` flag to the compiler to turn on a stricter
-principal type checking mode.  This detects risky uses of type information to
-ensure that the type inference has one principal result.  A type is considered
-risky if the success or failure of type inference depends on the order in which
-sub-expressions are typed.
-
-The principality check only affects a few language features:
-
-* polymorphic methods for objects.
-* permuting the order of labeled arguments in a function from their type definition.
-* discarding optional labelled arguments.
-* generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
-* automatic disambiguation of record field and constructor names (since OCaml 4.1)
-
-Here's an example of principality warnings when used with record disambiguation.
-
-```ocaml
-(* non_principal.ml *)
-type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f x =
-  x.bar;
-  x.foo
-```
-
-Inferring the signature with `-principal` will show you a new warning.
-
-```console
-$ ocamlc -i -principal non_principal.ml 
-File "non_principal.ml", line 7, characters 4-7:
-Warning 18: this type-based field disambiguation is not principal.
-type s = { foo : int; bar : unit; }
-type t = { foo : int; }
-val f : s -> int
-```
-
-This example isn't principal since the inferred type for `x.foo` is guided
-by the inferred type of `x.bar`.  If the `x.bar` is removed, the argument would
-be of type `t` and not `type s`.  You can fix this either by permuting the order
-of the type declarations or by adding an explicit type annotation as follows.
-
-```ocaml
-(* principal.ml *)
-type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f (x:s) =
-  x.bar;
-  x.foo
-```
-
-There is now no ambiguity about the inferred types, since we've explicitly
-given the argument a type and the order of inference of the sub-expressions no
-longer matters.
-
-```console
-$ ocamlc -i -principal principal.ml 
-type s = { foo : int; bar : unit; }
-type t = { foo : int; }
-val f : s -> int
-```
-
-Ideally, all code should systematically use `-principal`.  It reduces variance
-in type inference and enforces the notion of a single known type.  However,
-there are drawbacks to this mode: type inference is slower and the `cmi` files
-become larger.  This is generally only a problem if you use objects
-extensively, which usually have larger type signature to cover all their
-methods.
-
-As a result, the suggested approach is to only compile with `-principal`
-occasionally to check if your code is compliant.  If compiling in principal
-mode works, it is guaranteed that the program will passing type checking in
-non-principal mode too.
-
-Bear in mind that the `cmi` files generated in principal mode differ from the
-default mode. Try to ensure that you compile your whole project with it
-activated.  Getting the files mixed up won't let you violate type safety, but
-can result in the type checker failing unexpectedly very occasionally.  In this
-case, just recompile with a clean source tree.
-
-</sidebar>
 
 #### Adding type annotations to find errors
 
@@ -925,6 +840,91 @@ This error points directly to the correct line number that contains the typo.
 Once you fix the problem, you can remove the manual annotations if you prefer
 more succinct code.  You can also leave the annotations there of course, to
 help with future refactoring and debugging.
+
+#### Enforcing principal typing
+
+You can pass a `-principal` flag to the compiler to turn on a stricter
+principal type checking mode.  This detects risky uses of type information to
+ensure that the type inference has one principal result.  A type is considered
+risky if the success or failure of type inference depends on the order in which
+sub-expressions are typed.
+
+The principality check only affects a few language features:
+
+* polymorphic methods for objects.
+* permuting the order of labeled arguments in a function from their type definition.
+* discarding optional labelled arguments.
+* generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
+* automatic disambiguation of record field and constructor names (since OCaml 4.1)
+
+Here's an example of principality warnings when used with record disambiguation.
+
+```ocaml
+(* non_principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f x =
+  x.bar;
+  x.foo
+```
+
+Inferring the signature with `-principal` will show you a new warning.
+
+```console
+$ ocamlc -i -principal non_principal.ml 
+File "non_principal.ml", line 7, characters 4-7:
+Warning 18: this type-based field disambiguation is not principal.
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -> int
+```
+
+This example isn't principal since the inferred type for `x.foo` is guided by
+the inferred type of `x.bar`.  If the `x.bar` use is removed from the
+definition of `f`, its argument would be of type `t` and not `type s`.
+
+You can fix this either by permuting the order of the type declarations, or by
+adding an explicit type annotation.
+
+```ocaml
+(* principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f (x:s) =
+  x.bar;
+  x.foo
+```
+
+There is now no ambiguity about the inferred types, since we've explicitly
+given the argument a type and the order of inference of the sub-expressions no
+longer matters.
+
+```console
+$ ocamlc -i -principal principal.ml 
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -> int
+```
+
+Ideally, all code should systematically use `-principal`.  It reduces variance
+in type inference and enforces the notion of a single known type.  However,
+there are drawbacks to this mode: type inference is slower and the `cmi` files
+become larger.  This is generally only a problem if you use objects
+extensively, which usually have larger type signature to cover all their
+methods.
+
+As a result, the suggested approach is to only compile with `-principal`
+occasionally to check if your code is compliant.  If compiling in principal
+mode works, it is guaranteed that the program will passing type checking in
+non-principal mode too.
+
+Bear in mind that the `cmi` files generated in principal mode differ from the
+default mode. Try to ensure that you compile your whole project with it
+activated.  Getting the files mixed up won't let you violate type safety, but
+can result in the type checker failing unexpectedly very occasionally.  In this
+case, just recompile with a clean source tree.
 
 ### Modules and separate compilation
 
