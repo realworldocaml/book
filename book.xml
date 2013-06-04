@@ -2131,7 +2131,7 @@ Warning 26: unused variable pi.
     Why don't variables vary?
     </title>
     <para>
-      One source of confusion for people new to functional langauges is
+      One source of confusion for people new to functional languages is
       the fact that variables are typically immutable. This seems pretty
       surprising even on linguistic terms. Isn't the whole point of a
       variable that it can vary?
@@ -3541,9 +3541,9 @@ val sum : int list -&gt; int = &lt;fun&gt;
       lets you name sub-structures within the data-structure being
       matched. In this case, the variables <literal>hd</literal> and
       <literal>tl</literal> are bound by the pattern that defines the
-      first case of the match statment. Variables that are bound in this
-      way can be used in the expression to the right of the arrow for
-      the pattern in question.
+      first case of the match statement. Variables that are bound in
+      this way can be used in the expression to the right of the arrow
+      for the pattern in question.
     </para>
     <para>
       The fact that match statements can be used to bind new variables
@@ -3835,7 +3835,7 @@ Exception: (Invalid_argument &quot;length mismatch in rev_map2_exn: 3 &lt;&gt; 4
 </programlisting>
     <para>
       <literal>List.fold</literal> is the most complicated of the three,
-      takin three arguments: a list to process, an initial accumulator
+      taking three arguments: a list to process, an initial accumulator
       value, and a function for updating the accumulator with the
       information from a list element. <literal>List.fold</literal>
       walks over the list from left to right, updating the accumulator
@@ -4015,7 +4015,7 @@ val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
         this example also uses some functions from other modules,
         including <literal>Sys.ls_dir</literal> to get a directory
         listing, and <literal>String.rsplit2</literal> to split a string
-        on the rightmost appearance ofa given character.
+        on the rightmost appearance of a given character.
       </para>
       <programlisting language="ocaml">
 # List.filter_map (Sys.ls_dir &quot;.&quot;) ~f:(fun fname -&gt;
@@ -4195,7 +4195,7 @@ utop[41]&gt; length [1;2;3;4];;
       <literal>n</literal> acts as an accumulator in which the answer is
       built up, step by step. As a result, we can do the additions along
       the way rather than doing them as we unwind the nested sequence of
-      function calls, as we did in our first implemenation of
+      function calls, as we did in our first implementation of
       <literal>length</literal>.
     </para>
     <para>
@@ -4224,7 +4224,7 @@ utop[41]&gt; length [1;2;3;4];;
       optimization makes sense because, when a caller makes a tail call,
       the caller's stack frame need never be used again, and so you
       don't need to keep it around. Thus, instead of allocating a new
-      stack frame for the callee, the compiler is free to resuse the
+      stack frame for the callee, the compiler is free to reuse the
       caller's stack frame.
     </para>
     <para>
@@ -6387,7 +6387,7 @@ val show_field : ('a, 'b) Field.t -&gt; ('b -&gt; string) -&gt; 'a -&gt; string 
       <literal>iter</literal> passes each of these callbacks the
       <literal>Field.t</literal>, not the contents of the specific
       record field. The contents of the field, though, can be looked up
-      using the combiation of the record and the
+      using the combination of the record and the
       <literal>Field.t</literal>.
     </para>
     <para>
@@ -6424,7 +6424,7 @@ credentials: Xy2d9W
       fixed to take this new argument into account.
     </para>
     <para>
-      This exhaustion guarntee is a valuable one. Field iterators are
+      This exhaustion guarantee is a valuable one. Field iterators are
       useful for a variety of record-related tasks, from building record
       validation functions to scaffolding the definition of a web-form
       from a record type, and such applications can benefit from the
@@ -8211,8 +8211,8 @@ let load_config filename =
         OCaml's exception-handling system allows you to tune your
         error-recovery logic to the particular error that was thrown.
         For example, <literal>List.find_exn</literal> throws
-        <literal>Not_found</literal> when the element in question
-        can'tbe found. You can take advantage of this in your code, for
+        <literal>Not_found</literal> when the element in question can't
+        be found. You can take advantage of this in your code, for
         example, let's define a function called
         <literal>lookup_weight</literal>, with the following signature.
       </para>
@@ -8225,7 +8225,7 @@ val lookup_weight :
         should return a floating-point weight by applying
         <literal>compute_weight</literal> to the data associated with
         <literal>key</literal> by <literal>alist</literal>. If
-        <literal>key</literal> is not found, then it shoudl return 0.
+        <literal>key</literal> is not found, then it should return 0.
       </para>
       <para>
         We can implement <literal>lookup_weight</literal> as follows.
@@ -8674,7 +8674,7 @@ let remove t key =
 &lt;exprN&gt;
 </programlisting>
     <para>
-      is eqivalent to
+      is equivalent to
     </para>
     <programlisting language="ocaml">
 let () = &lt;expr1&gt; in
@@ -9325,7 +9325,7 @@ performing lazy computation
 - : float = 4.
 </programlisting>
     <para>
-      The main user-visisble difference between our implementation of
+      The main user-visible difference between our implementation of
       laziness and the built-in version is syntax. Rather than writing
       <literal>create_lazy (fun () -&gt; sqrt 16.)</literal>, we can
       with the built-in <literal>lazy</literal> just write
@@ -12426,8 +12426,8 @@ method fold : 'b. ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b =
     <para>
       Many people consider object-oriented programming to be
       intrinsically imperative, where an object is like a state machine.
-      Sending a message to an object causes it to change state,
-      possibily sending messages to other objects.
+      Sending a message to an object causes it to change state, possibly
+      sending messages to other objects.
     </para>
     <para>
       Indeed, in many programs, this makes sense, but it is by no means
@@ -12856,7 +12856,7 @@ val total_area : &lt; area : float; .. &gt; slist -&gt; float = &lt;fun&gt;
         Since <literal>shape</literal> is an object type, we can't write
         <literal>#shape</literal>. However, if a class definition is
         available, this abbreviation can be useful. The following
-        definition is exactly equivalent to the preceeding.
+        definition is exactly equivalent to the preceding one.
       </para>
       <programlisting language="ocaml">
 # class cshape = object method area = 0.0 end;;
@@ -14634,7 +14634,7 @@ val rev_map : (string, int, Reverse.comparator) Map.t = &lt;abstr&gt;
       <para>
         <literal>Map.min_elt</literal> returns the key and value for the
         smallest key in the map, which lets us see that these two maps
-        do indeed use different comparison fucntions.
+        do indeed use different comparison functions.
       </para>
       <programlisting language="ocaml">
 # Map.min_elt ord_map;;
@@ -15203,7 +15203,7 @@ Estimated testing time 20s (change using -quota SECS).
       then <literal>m</literal> and <literal>m'</literal> can be used
       independently, and in fact share most of their underlying storage.
       Thus, if you need to keep in memory at the same time multiple
-      different related collections of key/value paris, then a map is
+      different related collections of key/value pairs, then a map is
       typically a much more efficient data structure to do it with.
     </para>
     <para>
@@ -16379,7 +16379,7 @@ let () = Command.run add
       </para>
       <para>
         Labelled arguments are more verbose, but also help prevent
-        errros with command-line arguments with similar types but
+        errors with command-line arguments with similar types but
         different names and purposes. It's good form to use them when
         you have a lot of otherwise anonymous <literal>int</literal> and
         <literal>string</literal> arguments.
@@ -17103,7 +17103,7 @@ let names =
       increased difficulty of debugging intermediate values. If an
       explicit name is assigned to each stage of the transformations,
       debuggers in particular have an easier time making the program
-      flow easier to represent to the programer.
+      flow easier to represent to the programmer.
     </para>
     <para>
       This technique of using chained parsing functions is very powerful
@@ -17328,7 +17328,7 @@ val to_basic : json -&gt; Yojson.Basic.json
       for larger-scale JSON handling now, using the
       <ulink url="http://mjambon.com/atd-biniou-intro.html">ATD</ulink>
       tool. This will introduce our first <emphasis>Domain Specific
-      Language</emphasis> that ccompiles JSON specifications into OCaml
+      Language</emphasis> that compiles JSON specifications into OCaml
       modules, which are then used throughout your application.
     </para>
     <note>
@@ -17411,7 +17411,7 @@ type authorization_response = {
     <para>
       The ATD spec can be compiled to a number of OCaml targets. Let's
       run the compiler twice, to generate some OCaml type definitions,
-      and a JSON serialiser.
+      and a JSON serializer.
     </para>
     <programlisting language="bash">
 $ atdgen -t github.atd
@@ -17777,7 +17777,7 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
         punctuation. To start, let's define just the tokens in the
         <literal>parser.mly</literal> file. For technical reasons, we
         need to include a <literal>%start</literal> declaration. For
-        now, we'll include just a dummy grammer specification
+        now, we'll include just a dummy grammar specification
         <literal>exp: { () }</literal> (we'll replace this when we
         implement the grammar below).
       </para>
@@ -17809,7 +17809,7 @@ exp: { () }
         specifications mean that a token carries a value. The
         <literal>INT</literal> token carries an integer value with it,
         <literal>FLOAT</literal> has a <literal>float</literal> value,
-        etc. Most of the remaning tokens, like <literal>TRUE</literal>,
+        etc. Most of the remaining tokens, like <literal>TRUE</literal>,
         <literal>FALSE</literal>, the punctuation, aren't associated
         with any value, so we omit the
         <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
@@ -17902,7 +17902,7 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
         We can read it like this, &quot;A JSON <literal>value</literal>
         is either an object bracketed with curly braces, or an array
         bracketed with square braces. or a string, integer, float, etc.
-        In each of the productions, the right hand side specfies the
+        In each of the productions, the right hand side specifies the
         expected sequence. For example, the object is specified with the
         curly-bracket production.
       </para>
@@ -18128,7 +18128,7 @@ let float = int (frac | exp | frac exp)
         <literal>exp</literal> begins with an <literal>e</literal>
         followed by some digits; and a <literal>float</literal> has an
         integer part, and one or both of a <literal>frac</literal> and
-        <literal>exp</literal> part. The vetical bar is a choice; the
+        <literal>exp</literal> part. The vertical bar is a choice; the
         expression <literal>(frac | exp | frac exp)</literal> is either
         a <literal>frac</literal>, or an <literal>exp</literal>, or a
         <literal>frac</literal> followed by an <literal>exp</literal>.
@@ -18252,9 +18252,9 @@ let next_line lexbuf =
       <title>Recursive rules</title>
       <para>
         Unlike many other lexer generators, <literal>ocamllex</literal>
-        allows the definion of multiple lexer in the same file, and the
-        definitions can be recursive. In this case, we use recursion to
-        match string literals, using the following rule definition.
+        allows the definition of multiple lexer in the same file, and
+        the definitions can be recursive. In this case, we use recursion
+        to match string literals, using the following rule definition.
       </para>
       <programlisting>
 and read_string buf = parse
@@ -18514,10 +18514,10 @@ val sexp_of_t : t -&gt; Core.Std.Sexp.t = &lt;fun&gt;
     conversion code for you. As it turns out, we can do just that using
     <literal>Sexplib</literal>. The <literal>Sexplib</literal> package,
     which is included with Core, provides both a library for
-    manipulating s-exressions and a syntax extension for generating such
-    conversion functions. With that synax extension enabled, any type
-    that has <literal>with sexp</literal> as an annotation will trigger
-    the generation of the functions we want for free.
+    manipulating s-expressions and a syntax extension for generating
+    such conversion functions. With that syntax extension enabled, any
+    type that has <literal>with sexp</literal> as an annotation will
+    trigger the generation of the functions we want for free.
   </para>
   <programlisting language="ocaml">
 # type t = { foo: int; bar: float } with sexp;;
@@ -24222,7 +24222,7 @@ val compare : t -&gt; t -&gt; int
           <para>
             the online
             <ulink url="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
-            wiki</ulink>
+            wiki</ulink>.
           </para>
         </listitem>
         <listitem>
