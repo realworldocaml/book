@@ -292,11 +292,11 @@ we can use for that purpose.
   end;;
 ```
 
-This interface includes the type `endpoint` to represent the type of
-the endpoints of the interval.  Given this interface, we can redo our
+This interface includes the type `endpoint` to give us a way of
+referring to the endpoint type.  Given this interface, we can redo our
 definition of `Make_interval`.  Notice that we added the type
-`endpoint` to the implementation of the module to make the
-implementation match `Interval_intf`.
+`endpoint` to the implementation of the module to match
+`Interval_intf`.
 
 ```ocaml
 # module Make_interval(Endpoint : Comparable) : Interval_intf = struct
@@ -313,9 +313,9 @@ module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
 
 #### Sharing constraints
 
-The resulting module is abstract, but unfortunately, it's too
-abstract.  In particular, we haven't exposed the type `endpoint`,
-which means that we can't even construct an interval anymore.
+The resulting module is abstract, but it's unfortunately too abstract.
+In particular, we haven't exposed the type `endpoint`, which means
+that we can't even construct an interval anymore.
 
 ```ocaml
 # module Int_interval = Make_interval(Int);;
@@ -333,7 +333,7 @@ To fix this, we need to expose the fact that `endpoint` is equal to
 argument to the functor).  One way of doing this is through a _sharing
 constraint_, which allows you to tell the compiler to expose the fact
 that a given type is equal to some other type.  The syntax for a
-sharing constraint on a module type is as follows.
+simple sharing constraint is as follows.
 
 ```ocaml
 S with type s = t
@@ -346,7 +346,8 @@ equal to `t`.  We can use a sharing constraint to create a specialized
 version of `Interval_intf` for integer intervals.
 
 ```ocaml
-# module type Int_interval_intf = Interval_intf with type endpoint = int;;
+# module type Int_interval_intf =
+    Interval_intf with type endpoint = int;;
 module type Int_interval_intf =
   sig
     type t
@@ -415,11 +416,9 @@ S with type s := t
 
 The following shows how we could use this with `Make_interval`.
 
-Here's an example of what we get if we use destructive substitution to
-specialize the `Interval_intf` interface to integer intervals.
-
 ```ocaml
-# module type Int_interval_intf = Interval_intf with type endpoint := int;;
+# module type Int_interval_intf =
+    Interval_intf with type endpoint := int;;
 module type Int_interval_intf =
   sig
     type t
@@ -430,9 +429,9 @@ module type Int_interval_intf =
   end
 ```
 
-There's now no mention of n `endpoint`, all occurrences of that type
-having been replaced by `int`.  As with sharing constraints, we can
-also use this in the context of a functor.
+There's now no `endpoint` type: all of its occurrences of have been
+replaced by `int`.  As with sharing constraints, we can also use this
+in the context of a functor.
 
 ```ocaml
 # module Make_interval(Endpoint : Comparable)
@@ -456,8 +455,8 @@ module Make_interval :
     end
 ```
 
-The interface is precisely what we want, and we didn't need to define
-the `endpoint` type alias in the body of the module.  If we
+The interface is precisely what we want, and we no longer need to
+define the `endpoint` type alias in the body of the module.  If we
 instantiate this module, we'll see that it works properly: we can
 construct new intervals, but `t` is abstract, and so we can't directly
 access the constructors and violate the invariants of the data
@@ -477,9 +476,38 @@ Error: Unbound constructor Int_interval.Interval
 #### Using multiple interfaces
 
 Another feature that we might want for our interval module is the
-ability to serialize the type, in particular, by converting to
-s-expressions.  If we simply invoke the `sexplib` macros by adding
-`with sexp` to the definition of `t`, though, we'll get an error:
+ability to _serialize_, _i.e._, to be able to read and write intervals
+as a stream of bytes.  In this case, we'll do this by converting to
+and from _s-expressions_. An s-expression is essentially a
+parenthesized expression whose atoms are strings, and it is a
+serialization format that is used commonly in Core.  Here's an
+example.
+
+```ocaml
+# Sexp.of_string "(This is (an s-expression))";;
+- : Sexp.t = (This is (an s-expression))
+```
+
+Core comes with a syntax extension called `sexplib` which will
+auto-generate s-expression conversion functions from a type
+declaration.  These convereters will be generated for any type that
+one attaches `with sexp` to.  Thus, we can write:
+
+```ocaml
+# type some_type = int * string list with sexp;;
+type some_type = int * string list
+val some_type_of_sexp : Sexp.t -> int * string list = <fun>
+val sexp_of_some_type : int * string list -> Sexp.t = <fun>
+# sexp_of_some_type (33, ["one"; "two"]);;
+- : Sexp.t = (33 (one two))
+# some_type_of_sexp (Sexp.of_string "(44 (five six))");;
+- : int * string list = (44, ["five"; "six"])
+```
+
+We'll discuss s-expressions and `sexplib` in more detail in
+[xref](#data-serialization-with-s-expressions) But for now, let's see
+what happens if attach the `with sexp` declaration to the definition
+of `t` within the functor.
 
 ```ocaml
 # module Make_interval(Endpoint : Comparable)
@@ -519,7 +547,7 @@ We can modify `Make_interval` to use the `Sexpable` interface, for
 both its input and its output.  Note the use of destructive
 substitution to combine multiple signatures together.  This is
 important because it stops the `type t`'s from the different
-signatures from interfering with each other.
+signatures from shadowing each other.
 
 Also note that we have been careful to override the sexp-converter
 here to ensure that the data structures invariants are still maintained
@@ -531,6 +559,17 @@ when reading in from an s-expression.
    include Interval_intf with type t := t
    include Sexpable      with type t := t
   end;;
+module type Interval_intf_with_sexp =
+  sig
+    type t
+    type endpoint
+    val create : endpoint -> endpoint -> t
+    val is_empty : t -> bool
+    val contains : t -> endpoint -> bool
+    val intersect : t -> t -> t
+    val t_of_sexp : Sexp.t -> t
+    val sexp_of_t : t -> Sexp.t
+  end
 # module Make_interval(Endpoint : sig
     type t
     include Comparable with type t := t
@@ -593,7 +632,7 @@ functional version of a FIFO (first-in, first-out) queue.  Being
 functional, operations on the queue return new queues, rather than
 modifying the queues that were passed in.
 
-Here's a reasonable mli
+Here's a reasonable `mli` for such a module.
 
 ```ocaml
 (* file: fqueue.mli *)
@@ -612,7 +651,7 @@ val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
 
 Now let's implement `Fqueue`.  A standard trick is for the `Fqueue` to
 maintain an input and an output list, so that one can efficiently
-`enqueue` on the first list, and can efficiently dequeue from the out
+`enqueue` on the input list and efficiently dequeue from the output
 list.  If you attempt to dequeue when the output list is empty, the
 input list is reversed and becomes the new output list.  Here's an
 implementation that uses that trick.
@@ -633,11 +672,11 @@ let dequeue (in_list,out_list) =
   | [] ->
     match List.rev in_list with
     | [] -> None
-    | hd::tl -> Some (hd, ([], tl))
+    | hd :: tl -> Some (hd, ([], tl))
 
 let fold (in_list,out_list) ~init ~f =
-  List.fold ~init:(List.fold ~init ~f out_list) ~f
-    (List.rev in_list)
+  let after_out = List.fold ~init ~f out_list in
+  List.fold_right ~init:after_out ~f in_list
 ```
 
 One problem with our `Fqueue` is that the interface is quite skeletal.
@@ -748,6 +787,9 @@ end
 include T
 include Foldable.Extend(T)
 ```
+
+This is a sufficiently useful pattern that it is implemented in Core,
+under the name `Container.Make`.
 
 This pattern comes up quite a bit in Core, and is used to for a
 variety of purposes.
