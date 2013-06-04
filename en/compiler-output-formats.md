@@ -604,10 +604,10 @@ the code obeys the rules of the OCaml type system. Code that is syntactically
 correct but misuses values is rejected with an explanation of the problem.
 
 Although type checking is done in a single pass in OCaml, it actually consists
-of three distinct steps:
+of three distinct steps that happen simultaneously:
 
-* an *automatic type inference* engine that calculates types
-  for a module without requiring any manual type annotations.
+* an *automatic type inference* algorithm that calculates types
+  for a module without requiring manual type annotations.
 * a *module system* that combines software components with explicit
   knowledge of their type signatures.
 * performing *explicit subtyping* checks for objects and polymorphic variants.
@@ -1462,22 +1462,29 @@ arguments on the stack as the bytecode interpreter does.
 
 </note>
 
-### Compiling OCaml bytecode 
+### Compiling and linking bytecode 
 
-`ocamlc` compiles individual `ml` files into bytecode `cmo` files.  These are
-linked together with the OCaml standard library to produce an executable
-program.  The order in which `.cmo` arguments are presented on the command line
-defines the order in which compilation units are initialized at runtime (recall
-that OCaml has no single `main` function like C does). 
+The `ocamlc` command compiles individual `ml` files into bytecode files that
+have a `cmo` extension.  The compiled bytecode files are matched with the
+associated `cmi` interface which contains the type signature exported to
+other compilation units.
 
 A typical OCaml library consists of multiple modules and hence multiple `cmo`
-files.  `ocamlc` can combine these into a single `cma` bytecode archive by
-using the `-a` flag. The objects in the library are linked as regular `cmo`
-files in the order specified when the library file was built.  However, if an
-object file within the library isn't referenced elsewhere in the program, it is
-not linked unless the `-linkall` flag forces it to be included.  This behaviour
-is analogous to how C handles object files and archives (`.o` and `.a`
-respectively).
+files.  The compiler can combine these into a single archive file by
+using the `-a` flag.  Bytecode archives are denoted by a `cma` extension.
+
+The individual objects in the library are linked as regular `cmo` files in the
+order specified when the library file was built.  If an object file within the
+library isn't referenced elsewhere in the program, then it isn't included in
+the final binary unless the `-linkall` flag forces its inclusion.  This
+behaviour is analogous to how C handles object files and archives (`.o` and
+`.a` respectively).
+
+The bytecode files are then linked together with the OCaml standard library to
+produce an executable program.  The order in which `.cmo` arguments are
+presented on the command line defines the order in which compilation units are
+initialized at runtime.  Remember that OCaml has no single `main` function like
+C, so this link is order is more important than in C.
 
 ### Linking OCaml bytecode
 
