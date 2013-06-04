@@ -432,7 +432,7 @@
       </para>
     </sect2>
   </sect1>
-</preface><part label="I"><title>Language Concepts</title><chapter id="a-guided-tour">
+</preface><part label="I"><title>Language Concepts</title><partintro><para>Testing how the partintro tag is displayed.</para></partintro><chapter id="a-guided-tour">
   <title>A Guided Tour</title>
   <para>
     This chapter gives an overview of OCaml by walking through a series
@@ -14402,7 +14402,7 @@ $ ./service_client.byte
       changed dynamically, rather than just added at creation time.
     </para>
   </sect1>
-</chapter></part><part label="II"><title>Tools and Techniques</title><chapter id="maps-and-hashtables">
+</chapter></part><part label="II"><title>Tools and Techniques</title><partintro><para>Testing how the partintro tag is displayed.</para></partintro><chapter id="maps-and-hashtables">
   <title>Maps and Hashtables</title>
   <para>
     Lots of programming problems require dealing with data organized as
@@ -21175,7 +21175,7 @@ module Fields :
       with Sexplib.
     </para>
   </sect1>
-</chapter></part><part label="III"><title>The Runtime System</title><chapter id="foreign-function-interface">
+</chapter></part><part label="III"><title>The Runtime System</title><partintro><para>Testing how the partintro tag is displayed.</para></partintro><chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
   <para>
     OCaml has several options available to interact with non-OCaml code.
