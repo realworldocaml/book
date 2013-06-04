@@ -473,28 +473,27 @@ They are instead used to call C cleanup functions such as `free`.
 ### Managing external memory with Bigarray
 
 A common use of custom blocks is to manage external system memory directly from
-within OCaml via the Bigarray module.  The Bigarray interface was originally
-intended to exchange data with Fortran code for scientific computation.  It can
-map a block of system memory as a multi-dimensional array that can be accessed
-from OCaml.  Array operations work directly on the external memory, without
-requiring it to be copied into the OCaml heap (which is a potentially expensive
-operation for large arrays).
+within OCaml.  The Bigarray interface was originally intended to exchange data
+with Fortran code, and maps a block of system memory as a multi-dimensional
+array that can be accessed from OCaml.  Bigarray operations work directly on
+the external memory without requiring it to be copied into the OCaml heap
+(which is a potentially expensive operation for large arrays).
 
 Bigarray sees a lot of use beyond just scientific computing, and several Core
-libraries use it:
+libraries use it for general-purpose I/O:
 
 * The `Iobuf` module maps I/O buffers as a 1-dimensional array of bytes.  It provides
   a sliding window interface that lets consumer processes read from the buffer
   while it's being filled by producers.  This lets OCaml use I/O buffers that have been
   externally allocated by the operating system without any extra data copying.
 * The `Bigstring` module provides a `String`-like interface that uses `Bigarray`
-  internally.  The `Bigbuffer` module then collects these into a set of
-  extensible string buffers that can operate entirely on external system memory.
-* The [Lacaml](https://bitbucket.org/mmottl/lacaml) library isn't part of Core, but 
-  provides the recommended interfaces to the widely used BLAS and LAPACK mathematical
-  Fortran libraries.  These allow developers to write high-performance numerical
-  code for applications that require linear algebra.  It supports large vectors and
-  matrices, but with static typing safety of OCaml to make it easier to write safe
-  algorithms.
+  internally.  The `Bigbuffer` collects these into extensible string buffers 
+  that can operate entirely on external system memory.
 
-TODO mention mmap here for large files.
+The [Lacaml](https://bitbucket.org/mmottl/lacaml) library isn't part of Core,
+but provides the recommended interfaces to the widely used BLAS and LAPACK
+mathematical Fortran libraries.  These allow developers to write
+high-performance numerical code for applications that require linear algebra.
+It supports large vectors and matrices, but with static typing safety of OCaml
+to make it easier to write safe algorithms.
+
