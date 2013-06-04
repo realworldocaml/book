@@ -24458,28 +24458,58 @@ Error: The implementation test.ml does not match the interface test.cmi:
         </listitem>
       </itemizedlist>
       <para>
-        Here's an example of principality warnings when used with
-        polymorphic methods.
+        Here's an example of principality warnings when used with record
+        disambiguation.
+      </para>
+      <programlisting language="ocaml">
+(* non_principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f x =
+  x.bar;
+  x.foo
+</programlisting>
+      <para>
+        Inferring the signature with <literal>-principal</literal> will
+        show you a new warning.
       </para>
       <programlisting>
-$ utop -principal
-# type t = &lt; id: 'a. 'a -&gt; 'a &gt;;;
-type t = &lt; id : 'a. 'a -&gt; 'a &gt;
+$ ocamlc -i -principal non_principal.ml 
+File &quot;non_principal.ml&quot;, line 7, characters 4-7:
+Warning 18: this type-based field disambiguation is not principal.
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -&gt; int
+</programlisting>
+      <para>
+        This example isn't principal since the inferred type for
+        <literal>x.foo</literal> is guided by the inferred type of
+        <literal>x.bar</literal>. If the <literal>x.bar</literal> is
+        removed, the argument would be of type <literal>t</literal> and
+        not <literal>type s</literal>. You can fix this either by
+        permuting the order of the type declarations or by adding an
+        explicit type annotation as follows.
+      </para>
+      <programlisting language="ocaml">
+(* principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
 
-# let f (x : t) = x, x#id;;  
-val f : t -&gt; t * ('a -&gt; 'a) = &lt;fun&gt;
-(* safe code: the type of x is known at all its use points *)
-
-# let f x = (x : t), x#id;;
-Warning 18: this use of a polymorphic method is not principal.
-val f : t -&gt; t * ('a -&gt; 'a) = &lt;fun&gt;
-(* unsafe code: the type is only known because typing goes from left to right *)
-
-# let f x = x#id, (x : t);;
-Error: This expression has type &lt; id : 'a; .. &gt;
-      but an expression was expected of type t
-      The universal variable 'a0 would escape its scope
-(* just exchanging the members of the pair causes a failure *)
+let f (x:s) =
+  x.bar;
+  x.foo
+</programlisting>
+      <para>
+        There is now no ambiguity about the inferred types, since we've
+        explicitly given the argument a type and the order of inference
+        of the sub-expressions no longer matters.
+      </para>
+      <programlisting>
+$ ocamlc -i -principal principal.ml 
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -&gt; int
 </programlisting>
       <para>
         Ideally, all code should systematically use
@@ -24508,8 +24538,8 @@ Error: This expression has type &lt; id : 'a; .. &gt;
       </para>
       </sidebar>
     </sect2>
-    <sect2 id="separate-compilation-and-module-search-paths">
-      <title>Separate compilation and module search paths</title>
+    <sect2 id="modules-and-separate-compilation">
+      <title>Modules and separate compilation</title>
       <para>
         Modules are most useful for large applications which consist of
         many files (or <emphasis>compilation units</emphasis>). Modules
