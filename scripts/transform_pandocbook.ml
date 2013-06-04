@@ -4,6 +4,7 @@
 
 open Core.Std
 open Chapter
+open Xml_tree
 
 let part_to_string = function
   | Basic     -> "I"   , "Language Concepts"
@@ -11,9 +12,40 @@ let part_to_string = function
   | Advanced  -> "III" , "The Runtime System"
   | Appendix | Preface -> assert false
 
+let part_to_intro =
+  let map_paras = List.map ~f:(fun p -> mk_tag "para" [Data p]) in
+  function
+  | Basic     -> map_paras [
+     "Part I covers the basic language concepts you'll need to know when building OCaml programs.
+      You won't need to memorise all of this (objects, for example, are used rarely in practice)
+      but understanding the concepts and examples is important.";
+     "This part opens up with a guided tour to give you a quick overview of the language using
+      an interactive command-line interface. It then moves onto covering language features such 
+      as records, algebraic data types and the module system.";
+     "The final portion covers more advanced features such as functors, objects and first-class 
+      modules, which may all take some time to digest. Persevere though; even though these concepts 
+      may be difficult at first, they will put you in good stead even when switching to other 
+      languages, many of which have drawn inspiration from ML."
+   ]
+  | Practical  -> map_paras [
+    "Part II builds on the basics by working through useful tools and techniques for using OCaml. 
+     Here you'll pick up useful techniques for building networked systems, as well as functional 
+     design patterns that help combine different features of the language to good effect.";
+     "The focus throughout this section is on networked systems, and among other examples we'll 
+      build a running example that will perform Internet queries using the DuckDuckGo search engine."
+    ]
+  | Advanced -> map_paras [
+    "Part III is all about understanding the compiler toolchain and runtime system in OCaml.  
+     It's a remarkably simple system in comparison to other language runtimes (such as Java or 
+     the .NET CLR).";
+     "You'll need to read this to build very high performance systems that have to minimise 
+      resource usage or interface to C libraries. This is also where we talk about profiling and 
+      debugging techniques using tools such as GNU gdb.";
+    ]
+  | Appendix | Preface -> assert false
+
 let all_parts = [ Basic; Practical; Advanced ]
 
-open Xml_tree
 module Transform = struct
 
   (* Turn a <linkend> tag from Pandoc into an <xref> tag that OReilly want *)
@@ -61,7 +93,9 @@ module Transform = struct
     (* Construct a <part> tag *)
     let mk_part part =
       let label_num,label_name = part_to_string part in
+      let intro_elements = part_to_intro part in
       let title = mk_tag "title" [Data label_name] in
+      let intro = mk_tag "partintro" intro_elements in
       let chapters =
         List.filter_map parts ~f:(fun c ->
           if c.part = part then begin
@@ -75,7 +109,7 @@ module Transform = struct
           else None
         )
       in
-      mk_tag ~attrs:["label",label_num] "part" (title :: chapters)
+      mk_tag ~attrs:["label",label_num] "part" (title :: intro :: chapters)
     in
     let appendices =
       List.filter_map parts ~f:(fun c ->
