@@ -22484,17 +22484,17 @@ struct custom_operations {
       <title>Managing external memory with Bigarray</title>
       <para>
         A common use of custom blocks is to manage external system
-        memory directly from within OCaml via the Bigarray module. The
-        Bigarray interface was originally intended to exchange data with
-        Fortran code for scientific computation. It can map a block of
-        system memory as a multi-dimensional array that can be accessed
-        from OCaml. Array operations work directly on the external
-        memory, without requiring it to be copied into the OCaml heap
-        (which is a potentially expensive operation for large arrays).
+        memory directly from within OCaml. The Bigarray interface was
+        originally intended to exchange data with Fortran code, and maps
+        a block of system memory as a multi-dimensional array that can
+        be accessed from OCaml. Bigarray operations work directly on the
+        external memory without requiring it to be copied into the OCaml
+        heap (which is a potentially expensive operation for large
+        arrays).
       </para>
       <para>
         Bigarray sees a lot of use beyond just scientific computing, and
-        several Core libraries use it:
+        several Core libraries use it for general-purpose I/O:
       </para>
       <itemizedlist>
         <listitem>
@@ -22512,27 +22512,22 @@ struct custom_operations {
             The <literal>Bigstring</literal> module provides a
             <literal>String</literal>-like interface that uses
             <literal>Bigarray</literal> internally. The
-            <literal>Bigbuffer</literal> module then collects these into
-            a set of extensible string buffers that can operate entirely
-            on external system memory.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The
-            <ulink url="https://bitbucket.org/mmottl/lacaml">Lacaml</ulink>
-            library isn't part of Core, but provides the recommended
-            interfaces to the widely used BLAS and LAPACK mathematical
-            Fortran libraries. These allow developers to write
-            high-performance numerical code for applications that
-            require linear algebra. It supports large vectors and
-            matrices, but with static typing safety of OCaml to make it
-            easier to write safe algorithms.
+            <literal>Bigbuffer</literal> collects these into extensible
+            string buffers that can operate entirely on external system
+            memory.
           </para>
         </listitem>
       </itemizedlist>
       <para>
-        TODO mention mmap here for large files.
+        The
+        <ulink url="https://bitbucket.org/mmottl/lacaml">Lacaml</ulink>
+        library isn't part of Core, but provides the recommended
+        interfaces to the widely used BLAS and LAPACK mathematical
+        Fortran libraries. These allow developers to write
+        high-performance numerical code for applications that require
+        linear algebra. It supports large vectors and matrices, but with
+        static typing safety of OCaml to make it easier to write safe
+        algorithms.
       </para>
     </sect2>
   </sect1>
@@ -23642,57 +23637,61 @@ $ ./finalizer
   <sect1 id="parsing-source-code">
     <title>Parsing source code</title>
     <para>
-      When a source file is passed to the OCaml compiler, it parses the
-      textual source code into a more structured data type known as an
-      Abstract Syntax Tree (AST). The parsing logic is implemented in
-      OCaml itself using the techniques described earlier in
+      When a source file is passed to the OCaml compiler, its first task
+      is to parse the text into a more structured Abstract Syntax Tree
+      (AST). The parsing logic is implemented in OCaml itself using the
+      techniques described earlier in
       <xref linkend="parsing-with-ocamllex-and-menhir"/>. The
       lexer and parser rules can be found in the
       <literal>parsing</literal> directory in the source distribution.
     </para>
-    <para>
-      The compiler emits a <emphasis>syntax error</emphasis> if it fails
-      to convert the source code into an AST. Here's an example syntax
-      error that we obtain by using the <literal>module</literal>
-      keyword incorrectly inside a <literal>let</literal> binding.
-    </para>
-    <programlisting language="ocaml">
+    <sect2 id="syntax-errors">
+      <title>Syntax errors</title>
+      <para>
+        The compiler emits a <emphasis>syntax error</emphasis> if it
+        fails to convert the source code into an AST. Here's an example
+        syntax error that we obtain by using the
+        <literal>module</literal> keyword incorrectly inside a
+        <literal>let</literal> binding.
+      </para>
+      <programlisting language="ocaml">
 (* broken_module.ml *)
 let _ =
   module MyString = String;
   ()
 </programlisting>
-    <para>
-      This fails because the <literal>module A = B</literal> syntax must
-      be wrapped in a <literal>let</literal> binding unless it's a
-      top-level phrase. Parsing immediately eliminates code which
-      doesn't match basic syntactic requirements, so this will result in
-      a syntax error when we compile it.
-    </para>
-    <programlisting>
+      <para>
+        This fails because the <literal>module A = B</literal> syntax
+        must be wrapped in a <literal>let</literal> binding unless it's
+        a top-level phrase. Parsing immediately eliminates code which
+        doesn't match basic syntactic requirements, so this will result
+        in a syntax error when we compile it.
+      </para>
+      <programlisting>
 $ ocamlc -c broken_module.ml 
 File &quot;broken_module.ml&quot;, line 3, characters 2-8:
 Error: Syntax error
 </programlisting>
-    <para>
-      The fixed version of this source code creates the
-      <literal>MyString</literal> module correctly via a local open, and
-      compiles successfully.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The fixed version of this source code creates the
+        <literal>MyString</literal> module correctly via a local open,
+        and compiles successfully.
+      </para>
+      <programlisting language="ocaml">
 (* fixed_module.ml *)
 let _ =
   let module MyString = String in
   ()
 </programlisting>
-    <para>
-      The syntax error points to the line and character number of the
-      first token that couldn't be parsed. In the broken example the
-      <literal>module</literal> keyword isn't a valid token at that
-      point in parsing, so the error location information is correct.
-    </para>
-    <sect2 id="formatting-source-code">
-      <title>Formatting source code</title>
+      <para>
+        The syntax error points to the line and character number of the
+        first token that couldn't be parsed. In the broken example the
+        <literal>module</literal> keyword isn't a valid token at that
+        point in parsing, so the error location information is correct.
+      </para>
+    </sect2>
+    <sect2 id="automatically-indenting-source-code">
+      <title>Automatically indenting source code</title>
       <para>
         Sadly, syntax errors do get more inaccurate sometimes depending
         on the nature of your mistake. Try to spot the deliberate error
@@ -23907,49 +23906,52 @@ $ man -M man Example
       </itemizedlist>
       </tip>
     </sect2>
-    <sect2 id="preprocessing-source-code">
-      <title>Preprocessing source code</title>
-      <para>
-        One powerful feature in OCaml is the facility to extend the
-        language grammar without having to modify the compiler. Camlp4
-        is a system included with OCaml for writing extensible parsers.
-        It provides a set of OCaml libraries that are used to define
-        grammars and dynamically loadable syntax extensions of such
-        grammars. Camlp4 modules register new language keywords and
-        later transform these keywords (or indeed, any portion of the
-        input program) into conventional OCaml code that can be
-        understood by the rest of the compiler.
-      </para>
-      <para>
-        We've already seen several examples of using Camlp4 within Core:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            <literal>Fieldslib</literal> to generates first-class values
-            that represent fields of a record.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>Sexplib</literal> to convert types to textual
-            s-expressions.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>Bin_prot</literal> for efficient binary conversion
-            and parsing.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        These all extend the language in quite a minimal way by adding a
-        <literal>with</literal> keyword to type declarations to signify
-        that extra code should be generated from that declaration. For
-        example, here's a trivial use of Sexplib and Fieldslib.
-      </para>
-      <programlisting language="ocaml">
+  </sect1>
+  <sect1 id="preprocessing-source-code">
+    <title>Preprocessing source code</title>
+    <para>
+      One powerful feature in OCaml is the facility to extend the core
+      language grammar without having to modify the compiler.
+    </para>
+    <para>
+      Camlp4 is a system included with OCaml for writing extensible
+      parsers. It provides a set of OCaml libraries that are used to
+      define grammars, and dynamically loadable syntax extensions of
+      such grammars. Camlp4 modules register new language keywords and
+      later transform these keywords (or indeed, any portion of the
+      input program) into conventional OCaml code that can be understood
+      by the rest of the compiler.
+    </para>
+    <para>
+      We've already seen several Core libraries that use Camlp4:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>Fieldslib</literal> generates first-class values that
+          represent fields of a record.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>Sexplib</literal> to convert types to textual
+          s-expressions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>Bin_prot</literal> for efficient binary conversion
+          and parsing.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      These libraries all extend the language in quite a minimal way by
+      adding a <literal>with</literal> keyword to type declarations to
+      signify that extra code should be generated from that declaration.
+      For example, here's a trivial use of Sexplib and Fieldslib.
+    </para>
+    <programlisting language="ocaml">
 (* type_conv_example.ml *)
 open Sexplib.Std
 
@@ -23958,72 +23960,70 @@ type t = {
   bar: string
 } with sexp, fields
 </programlisting>
-      <para>
-        Compiling this code will normally give you a syntax error if you
-        do so without Camlp4 since the <literal>with</literal> keyword
-        isn't normally allowed after a type definition.
-      </para>
-      <programlisting>
+    <para>
+      Compiling this code will normally give you a syntax error if you
+      do so without Camlp4 since the <literal>with</literal> keyword
+      isn't normally allowed after a type definition.
+    </para>
+    <programlisting>
 $ ocamlfind ocamlc -c type_conv_example.ml
 File &quot;type_conv_example.ml&quot;, line 7, characters 2-6:
 Error: Syntax error
 </programlisting>
-      <para>
-        Now add in the syntax extension packages for
-        <literal>fieldslib</literal> and <literal>sexplib</literal>, and
-        everything will compile again.
-      </para>
-      <programlisting>
+    <para>
+      Now add in the syntax extension packages for
+      <literal>fieldslib</literal> and <literal>sexplib</literal>, and
+      everything will compile again.
+    </para>
+    <programlisting>
 $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
   -package fieldslib.syntax type_conv_example.ml
 </programlisting>
+    <para>
+      We've specified a couple of additional flags here. The
+      <literal>-syntax</literal> flag directs
+      <literal>ocamlfind</literal> to add the <literal>-pp</literal>
+      flag to the compiler command-line. This flag instructs the
+      compiler to run the preprocessor during its parsing phase.
+    </para>
+    <para>
+      The <literal>-package</literal> flag imports other OCaml
+      libraries. The <literal>.syntax</literal> suffix in the package
+      name is a convention that indicates these libraries are
+      preprocessors that should be run during parsing. The syntax
+      extension modules are dynamically loaded into the
+      <literal>camlp4o</literal> command which rewrites the input source
+      code into conventional OCaml code that has no trace of the new
+      keywords. The compiler then compiles this transformed code with no
+      knowledge of the preprocessor's actions.
+    </para>
+    <para>
+      Both Fieldslib and Sexplib need this new <literal>with</literal>
+      keyword, but they both can't register the same extension. Instead,
+      a library called Type_conv provides the common extension framework
+      for them to use. Type_conv registers the <literal>with</literal>
+      grammar extension to Camlp4, and the OCamlfind packaging ensures
+      that it's loaded before Variantslib or Sexplib.
+    </para>
+    <para>
+      The two extensions generate boilerplate OCaml code based on the
+      type definition. This avoids the inevitable performance hit of
+      doing the code generation dynamically. It also doesn't require a
+      Just-In-Time (JIT) runtime that can be a source of unpredictable
+      dynamic behaviour. Instead, all code is simply generated at
+      compile-time via Camlp4.
+    </para>
+    <sect2 id="using-camlp4-interactively">
+      <title>Using Camlp4 interactively</title>
       <para>
-        We've specified a couple of additional flags here. The
-        <literal>-syntax</literal> flag directs
-        <literal>ocamlfind</literal> to add the <literal>-pp</literal>
-        flag to the compiler command-line. This flag instructs the
-        compiler to run the preprocessor during its parsing phase.
+        The syntax extensions accept an input AST and output a modified
+        one. If you're not familiar with the Camlp4 module in question,
+        how do you figure out what changes it's made to your code? The
+        obvious way is to read the documentation that accompanies the
+        extension. Another more direct approach is to use the top-level
+        to explore the extension's behaviour or run Camlp4 manually
+        yourself to see the transformation in action.
       </para>
-      <para>
-        The <literal>-package</literal> flag imports other OCaml
-        libraries. The <literal>.syntax</literal> suffix in the package
-        name is a convention that indicates these libraries are
-        preprocessors that should be run during parsing. The syntax
-        extension modules are dynamically loaded into the
-        <literal>camlp4o</literal> command which rewrites the input
-        source code into conventional OCaml code that has no trace of
-        the new keywords. The compiler then compiles this transformed
-        code with no knowledge of the preprocessor's actions.
-      </para>
-      <para>
-        Both Fieldslib and Sexplib need this new <literal>with</literal>
-        keyword, but they both can't register the same extension.
-        Instead, a library called Type_conv provides the common
-        extension framework for them to use. Type_conv registers the
-        <literal>with</literal> grammar extension to Camlp4, and the
-        OCamlfind packaging ensures that it's loaded before Variantslib
-        or Sexplib.
-      </para>
-      <para>
-        The two extensions generate boilerplate OCaml code based on the
-        type definition. This avoids the inevitable performance hit of
-        doing the code generation dynamically. It also doesn't require a
-        Just-In-Time (JIT) runtime that can be a source of unpredictable
-        dynamic behaviour. Instead, all code is simply generated at
-        compile-time via Camlp4.
-      </para>
-      <sect3 id="inspecting-camlp4-output">
-        <title>Inspecting Camlp4 output</title>
-        <para>
-          The syntax extensions accept an input AST and output a
-          modified one. If you're not familiar with the Camlp4 module in
-          question, how do you figure out what changes it's made to your
-          code? The obvious way is to read the documentation that
-          accompanies the extension. Another more direct approach is to
-          use the top-level to explore the extension's behaviour or run
-          Camlp4 manually yourself to see the transformation in action.
-        </para>
-      </sect3>
       <sect3 id="using-camlp4-from-the-interactive-top-level">
         <title>Using Camlp4 from the interactive top-level</title>
         <para>
@@ -24082,33 +24082,34 @@ val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;
           functions also incuded.
         </para>
       </sect3>
-      <sect3 id="running-camlp4-directly-on-the-source-code">
-        <title>Running Camlp4 directly on the source code</title>
-        <para>
-          The top-level is a quick way to examine the signatures
-          generated from the extensions, but how can we see what these
-          new functions actually do? You can't do this from
-          <literal>utop</literal> directly since it embeds the Camlp4
-          invocation as an automated part of its operation.
-        </para>
-        <para>
-          Let's turn to the command-line to obtain the result of the
-          <literal>comparelib</literal> transformation instead. Create a
-          file that contains the type declaration from earlier:
-        </para>
-        <programlisting language="ocaml">
+    </sect2>
+    <sect2 id="running-camlp4-from-the-command-line">
+      <title>Running Camlp4 from the command-line</title>
+      <para>
+        The top-level is a quick way to examine the signatures generated
+        from the extensions, but how can we see what these new functions
+        actually do? You can't do this from <literal>utop</literal>
+        directly since it embeds the Camlp4 invocation as an automated
+        part of its operation.
+      </para>
+      <para>
+        Let's turn to the command-line to obtain the result of the
+        <literal>comparelib</literal> transformation instead. Create a
+        file that contains the type declaration from earlier:
+      </para>
+      <programlisting language="ocaml">
 (* comparelib_test.ml *)
 type t = { 
   foo: string; 
   bar: t
 } with compare
 </programlisting>
-        <para>
-          We need to run the Camlp4 binary with the library paths to
-          Comparelib and Type_conv. Let's use a small shell script to
-          wrap this invocation.
-        </para>
-        <programlisting language="bash">
+      <para>
+        We need to run the Camlp4 binary with the library paths to
+        Comparelib and Type_conv. Let's use a small shell script to wrap
+        this invocation.
+      </para>
+      <programlisting language="bash">
 #!/bin/sh
 # camlp4_dump
 
@@ -24117,14 +24118,14 @@ INCLUDE=`$OCAMLFIND -i-format comparelib.syntax`
 ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
 camlp4o -printer o $INCLUDE $ARCHIVES $1
 </programlisting>
-        <para>
-          The script uses the <literal>ocamlfind</literal> package
-          manager to list the include and library paths needed by
-          <literal>comparelib</literal>. It then invokes the
-          <literal>camlp4o</literal> preprocessor with these paths and
-          outputs the resulting AST to the standard output.
-        </para>
-        <programlisting>
+      <para>
+        The script uses the <literal>ocamlfind</literal> package manager
+        to list the include and library paths needed by
+        <literal>comparelib</literal>. It then invokes the
+        <literal>camlp4o</literal> preprocessor with these paths and
+        outputs the resulting AST to the standard output.
+      </para>
+      <programlisting>
 $ sh camlp4_dump comparelib_test.ml
 type t = { foo : string; bar : t }
 
@@ -24147,80 +24148,98 @@ let _ = compare
 let compare_t = compare
 let _ = compare_t
 </programlisting>
-        <para>
-          The output contains the original type definition accompanied
-          by some automatically generated code that implements an
-          explicit comparison function for each field in the record. If
-          you're using the extension in your compiler command-line, this
-          generated code is then compiled as if you had typed it in
-          yourself.
-        </para>
-        <para>
-          Another useful feature of <literal>type_conv</literal> is that
-          it can generate module signatures too. Copy the earlier type
-          definition into a <literal>comparelib_test.mli</literal> and
-          rerun the Camlp4 dumper script.
-        </para>
-        <programlisting>
+      <para>
+        The output contains the original type definition accompanied by
+        some automatically generated code that implements an explicit
+        comparison function for each field in the record. If you're
+        using the extension in your compiler command-line, this
+        generated code is then compiled as if you had typed it in
+        yourself.
+      </para>
+      <para>
+        Another useful feature of <literal>type_conv</literal> is that
+        it can generate module signatures too. Copy the earlier type
+        definition into a <literal>comparelib_test.mli</literal> and
+        rerun the Camlp4 dumper script.
+      </para>
+      <programlisting>
 $ ./camlp4_dump.sh test_comparelib.mli 
 type t = { foo : string; bar : t }
 
 val compare : t -&gt; t -&gt; int
 </programlisting>
-        <para>
-          The external signature generated by
-          <literal>comparelib</literal> is much simpler than the actual
-          code. Running Camlp4 directly on the original source code lets
-          you see these all these transformations precisely.
-        </para>
-        <caution>
-        <title>
-        Don't overdo the syntax extensions
-        </title>
-        <para>
-          Syntax extensions are a powerful extension mechanism that can
-          completely alter your source code's layout and style. Core
-          includes a very conservative set of extensions that take care
-          to minimise the syntax changes. There are a number of
-          third-party libraries that are much more ambitious -- some
-          introduce whitespace-sensitive indentation while others build
-          entirely new embedded languages using OCaml as a host
-          language.
-        </para>
-        <para>
-          While it's tempting to compress all your boiler-plate code
-          into Camlp4 extensions, it can make your source code much
-          harder for other people to quickly read and understand. Core
-          mainly focuses on type-driven code generation using the
-          <literal>type_conv</literal> extension and doesn't
-          fundamentally change the OCaml syntax.
-        </para>
-        <para>
-          Another thing to consider before deploying your own syntax
-          extension is compatibility with other extensions. Two separate
-          extensions can create a grammar clash that leads to odd syntax
-          errors and hard-to-reproduce bugs. That's why most of Core's
-          syntax extensions go through <literal>type_conv</literal>,
-          which acts as a single point for extending the grammar via the
-          <literal>with</literal> keyword.
-        </para>
-        </caution>
-        <para>
-          We've deliberately only shown you how to use Camlp4 extensions
-          here, and not how to build your own. The full details of
-          building new extensions are fairly daunting and could be the
-          subject of an entirely new book.
-        </para>
-        <para>
-          The best resources to get started are the online
-          <ulink url="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
-          wiki</ulink>, and using OPAM to obtain existing Camlp4
-          extensions and inspecting their source code. A series of
-          <ulink url="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
-          posts</ulink> by Jake Donham also serve as a useful guide to
-          the internals of syntax extensions.
-        </para>
-      </sect3>
+      <para>
+        The external signature generated by
+        <literal>comparelib</literal> is much simpler than the actual
+        code. Running Camlp4 directly on the original source code lets
+        you see these all these transformations precisely.
+      </para>
+      <caution>
+      <title>
+      Don't overdo the syntax extensions
+      </title>
+      <para>
+        Syntax extensions are a powerful extension mechanism that can
+        completely alter your source code's layout and style. Core
+        includes a very conservative set of extensions that take care to
+        minimise the syntax changes. There are a number of third-party
+        libraries that are much more ambitious -- some introduce
+        whitespace-sensitive indentation while others build entirely new
+        embedded languages using OCaml as a host language.
+      </para>
+      <para>
+        While it's tempting to compress all your boiler-plate code into
+        Camlp4 extensions, it can make your source code much harder for
+        other people to quickly read and understand. Core mainly focuses
+        on type-driven code generation using the
+        <literal>type_conv</literal> extension and doesn't fundamentally
+        change the OCaml syntax.
+      </para>
+      <para>
+        Another thing to consider before deploying your own syntax
+        extension is compatibility with other extensions. Two separate
+        extensions can create a grammar clash that leads to odd syntax
+        errors and hard-to-reproduce bugs. That's why most of Core's
+        syntax extensions go through <literal>type_conv</literal>, which
+        acts as a single point for extending the grammar via the
+        <literal>with</literal> keyword.
+      </para>
+      </caution>
+    </sect2>
+    <sect2 id="further-reading-on-camlp4">
+      <title>Further reading on Camlp4</title>
+      <para>
+        We've deliberately only shown you how to use Camlp4 extensions
+        here, and not how to build your own. The full details of
+        building new extensions are fairly daunting and could be the
+        subject of an entirely new book.
+      </para>
+      <para>
+        The best resources to get started are:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            the online
+            <ulink url="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
+            wiki</ulink>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            using OPAM to install existing Camlp4 extensions and
+            inspecting their source code.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            a series of
+            <ulink url="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
+            posts</ulink> by Jake Donham describe the internals of
+            Camlp4 and its syntax extension mechanism.
+          </para>
+        </listitem>
+      </itemizedlist>
     </sect2>
   </sect1>
   <sect1 id="static-type-checking">
