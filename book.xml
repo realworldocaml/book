@@ -24690,34 +24690,31 @@ val f : s -&gt; int
     <sect2 id="modules-and-separate-compilation">
       <title>Modules and separate compilation</title>
       <para>
-        We explained the basic relationship between source files and
-        modules earlier in
-        <xref linkend="files-modules-and-programs"/>. We'll
-        cover how the compiler pipeline implements this in more detail
-        now.
-      </para>
-      <para>
-        The OCaml module system composes software components together by
+        The OCaml module system composes software components by
         explicitly defining type signatures for a collection of
-        functions. The module language that operates over these takes
-        the form of functors and first-class modules, described in
-        <xref linkend="functors"/> and
+        functions. We explained the basics of using source files and
+        modules in
+        <xref linkend="files-modules-and-programs"/>. The
+        module language that operates over these signatures also extends
+        to advanced functionality such as functors and first-class
+        modules, described in <xref linkend="functors"/> and
         <xref linkend="first-class-modules"/> respectively.
       </para>
       <para>
-        Modules are essential for larger applications which consist of
-        many files (also known as <emphasis>compilation
-        units</emphasis>). Compilations units are each processed with a
-        separate compiler invocation and the module system helps
-        minimizes the amount of recompilation required after changing a
-        few source files.
+        We'll now discuss how the compiler implements this functionality
+        in more detail. Modules are essential for larger projects that
+        consist of many files (also known as <emphasis>compilation
+        units</emphasis>). It's impractical to recompile every source
+        file when making local changes, and the module system is
+        designed to minimize such recompilation and encourage code
+        reuse.
       </para>
       <sect3 id="the-mapping-between-files-and-modules">
         <title>The mapping between files and modules</title>
         <para>
-          Compilation units are simply special cases of OCaml modules
-          and signatures, and the relationship between them can be
-          explained in terms of the module system.
+          Compilation units are just special cases of OCaml modules and
+          signatures. The relationship between them can be explained
+          directly in terms of the usual module system.
         </para>
         <para>
           Create a file called <literal>alice.ml</literal> with the
@@ -24735,8 +24732,8 @@ let friends = [ Bob.name ]
 val friends : Bob.t list
 </programlisting>
         <para>
-          These two files are exactly analogous to including this code
-          directly in another module that references
+          These two files are exactly analogous to including the
+          following code directly in another module that references
           <literal>Alice</literal>.
         </para>
         <programlisting language="ocaml">
@@ -25035,7 +25032,7 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
 </programlisting>
       <para>
         It's not important to understand every detail of this internal
-        form, but some interesting points are:
+        form, but some interesting points emerge from reading it.
       </para>
       <itemizedlist>
         <listitem>
@@ -25074,9 +25071,9 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
       </itemizedlist>
       <para>
         The first pattern match is <emphasis>exhaustive</emphasis>, so
-        there are no other cases that the comipler needed to worry
-        about. What happens if we make the same code use an incomplete
-        pattern match?
+        there are no unknown match cases that the compiler needs to
+        check for (e.g. a value greater than 3). What happens if we
+        modify the code to use an incomplete pattern match instead?
       </para>
       <programlisting language="ocaml">
 (* pattern_monomorphic_incomplete.ml *)
@@ -25100,19 +25097,21 @@ $ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml
     (makeblock 0 test/1013)))
 </programlisting>
       <para>
-        The compiler has now reverted to testing the value as a set of
-        nested conditionals. The lambda code above checks to see if the
-        value is <literal>Alice</literal>, then if it's
-        <literal>Bob</literal>, and finally falls back to the default
-        <literal>102</literal> return value for everything else. Using
-        exhaustive pattern matches is thus a better coding style at
-        several levels: it rewards you with more useful compile-time
+        The compiler has reverted to testing the value as a set of
+        nested conditionals. The lambda code above first checks to see
+        if the value is <literal>Alice</literal>, then if it's
+        <literal>Bob</literal> and finally falls back to the default
+        <literal>102</literal> return value for everything else.
+      </para>
+      <para>
+        Exhaustive pattern matching is thus a better coding style at
+        several levels. It rewards you with more useful compile-time
         warnings when you modify type definitions
         <emphasis>and</emphasis> generates more efficient runtime code
         too.
       </para>
       <para>
-        Finally, let's look at the same example with polymorphic
+        Finally, let's look at the same code, but with polymorphic
         variants instead of normal variants.
       </para>
       <programlisting language="ocaml">
@@ -25125,7 +25124,8 @@ let test v =
   | `David   -&gt; 103
 </programlisting>
       <para>
-        The lambda form for this is the most inefficient result yet.
+        The lambda form for this reveals the most inefficient result
+        yet.
       </para>
       <programlisting>
 $ ocamlc -dlambda -c pattern_polymorphic.ml 
@@ -25142,15 +25142,15 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml
         that pattern matching over polymorphic variants is slightly less
         efficient, and it should be clearer why this is the case now.
         Polymorphic variants have a runtime value that's calculated by
-        hashing the variant name, and so the compiler just tests each of
-        these possible values in sequence.
+        hashing the variant name, and so the compiler has to test each
+        of these possible hash values in sequence.
       </para>
     </sect2>
     <sect2 id="benchmarking-pattern-matching">
       <title>Benchmarking pattern matching</title>
       <para>
         Let's benchmark these three pattern matching techniques to
-        quantify their runtime costs better. The
+        quantify their runtime costs more accurately. The
         <literal>Core_bench</literal> module runs the tests thousands of
         times and also calculates statistical variance of the results.
         You'll need to <literal>opam install core_bench</literal> to get
@@ -25214,16 +25214,16 @@ let () =
       <programlisting>
 $ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
 Estimated testing time 30s (change using -quota SECS).
-┌────────────────────────────────┬───────────┬─────────────┬────────────┐
++────────────────────────────────+───────────+─────────────+────────────+
 │ Name                           │ Time (ns) │   Time 95ci │ Percentage │
-├────────────────────────────────┼───────────┼─────────────┼────────────┤
++────────────────────────────────+───────────+─────────────+────────────+
 │ Polymorphic pattern            │     22.38 │ 22.34-22.43 │     100.00 │
 │ Monomorphic incomplete pattern │     20.98 │ 20.95-21.02 │      93.77 │
 │ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
-└────────────────────────────────┴───────────┴─────────────┴────────────┘
++────────────────────────────────+───────────┴─────────────+────────────+
 </programlisting>
       <para>
-        These numbers confirm our earlier performance hypothesis
+        These results confirm our earlier performance hypothesis
         obtained from inspecting the lambda code. The shortest running
         time comes from the exhaustive pattern match and polymorphic
         variant pattern matching is the slowest. There isn't a hugely
@@ -25245,10 +25245,10 @@ Estimated testing time 30s (change using -quota SECS).
         Pattern matching is an important part of OCaml programming.
         You'll often encounter deeply nested pattern matches over
         complex data structures in real code. A good paper that
-        describes the fundamental algorithms implemented in OCaml is the
+        describes the fundamental algorithms implemented in OCaml is
         <ulink url="http://dl.acm.org/citation.cfm?id=507641">&quot;Optimizing
-        pattern matching&quot;</ulink> ICFP 2001 paper by Fabrice Le
-        Fessant and Luc Maranget.
+        pattern matching&quot;</ulink> by Fabrice Le Fessant and Luc
+        Maranget.
       </para>
       <para>
         The paper describes the backtracking algorithm used in classical
