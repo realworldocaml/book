@@ -586,7 +586,7 @@ daunting and could be the subject of an entirely new book.
 
 The best resources to get started are:
 
-* the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4)
+* the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4).
 * using OPAM to install existing Camlp4 extensions and inspecting their source code.
 * a series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html) by
 Jake Donham describe the internals of Camlp4 and its syntax extension mechanism.
