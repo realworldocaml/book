@@ -25860,8 +25860,8 @@ Estimated testing time 20s (change using -quota SECS).
         </para>
       </sect3>
     </sect2>
-    <sect2 id="building-debuggable-native-libraries">
-      <title>Building debuggable native libraries</title>
+    <sect2 id="debugging-native-code-binaries">
+      <title>Debugging native code binaries</title>
       <para>
         The native code compiler builds executables that can be debugged
         using conventional system debuggers such as GNU
@@ -25886,15 +25886,17 @@ Estimated testing time 20s (change using -quota SECS).
           procedure generally called <emphasis>name mangling</emphasis>.
         </para>
         <para>
-          Each compilation unit compiles into a native object file that
-          can only export a unique collection of symbols. This means
-          that OCaml values need to be mapped into a unique name within
-          that compilation unit. This mapping has to account for
-          language features such as nested modules, anonymous functions
-          and variable names that shadow each other.
+          Each OCaml source file is compiled into a native object file
+          that must export a unique set of symbols to comply with the C
+          binary interface. This means that any OCaml values that may be
+          used by another compilation unit need to be mapped into a
+          symbol name. This mapping fhas to account for OCaml language
+          features such as nested modules, anonymous functions and
+          variable names that shadow each other.
         </para>
         <para>
-          The conversion follows some straightforward rules:
+          The conversion follows some straightforward rules for named
+          variables and functions:
         </para>
         <itemizedlist>
           <listitem>
@@ -25940,25 +25942,25 @@ Estimated testing time 20s (change using -quota SECS).
         <para>
           The examples here assume that you are running
           <literal>gdb</literal> on either Linux or FreeBSD. MacOS X
-          does also <literal>gdb</literal> installed, but it's a rather
+          does have <literal>gdb</literal> installed, but it's a rather
           quirky experience that doesn't reliably interpret the
-          debugging output in the native binaries. This can result in
-          function names showing up as raw symbols such as
+          debugging information contained in the native binaries. This
+          can result in function names showing up as raw symbols such as
           <literal>.L101</literal> instead of their more human-readable
           form.
         </para>
         <para>
           For OCaml 4.1, we'd recommend you do native code debugging on
-          an alternate platform, or manually look at the assembly code
-          output to map the symbol names onto their precise OCaml
-          functions.
+          an alternate platform such as Linux, or manually look at the
+          assembly code output to map the symbol names onto their
+          precise OCaml functions.
         </para>
         </caution>
         <para>
-          For our example, let's write a mutually recursive function
-          that selects alternating values from a list. This isn't tail
-          recursive, and so our stack size will grow as we single-step
-          through the execution.
+          Let's write a mutually recursive function that selects
+          alternating values from a list. This isn't tail recursive and
+          so our stack size will grow as we single-step through the
+          execution.
         </para>
         <programlisting language="ocaml">
 (* alternate_list.ml : select every other value from an input list *)
@@ -26068,12 +26070,12 @@ Continuing.
 [Inferior 1 (process 3546) exited normally]
 </programlisting>
         <para>
-          We used <literal>cont</literal> to resume execution after a
-          breakpoint has paused it, <literal>bt</literal> to display a
-          stack backtrace, and <literal>clear</literal> to delete the
-          breakpoint and let the program execute until completion. GDB
-          has a wealth of other features we won't cover here, but you
-          view more guidelines via Mark Shinwell's 2012 talk on
+          The <literal>cont</literal> command resumes execution after a
+          breakpoint has paused it, <literal>bt</literal> displays a
+          stack backtrace, and <literal>clear</literal> deletes the
+          breakpoint so that the application can execute until
+          completion. GDB has a host of other features we won't cover
+          here, but you view more guidelines via Mark Shinwell's talk on
           <ulink url="http://www.youtube.com/watch?v=NF2WpWnB-nk&lt;">&quot;Real-world
           debugging in OCaml&quot;</ulink>.
         </para>
@@ -26086,26 +26088,160 @@ Continuing.
           from the C layer if you're in an embedded environment.
         </para>
       </sect3>
-      <sect3 id="profiling-native-code-libraries">
-        <title>Profiling native code libraries</title>
+    </sect2>
+    <sect2 id="profiling-native-code">
+      <title>Profiling native code</title>
+      <para>
+        The recording and analysis of where your application spends its
+        execution time is known as <emphasis>performance
+        profiling</emphasis>. OCaml native code binaries can be profiled
+        just like any other C binary, by using the name mangling
+        described earlier to map between OCaml variable names and the
+        profiler output.
+      </para>
+      <para>
+        Most profiling tools benefit from having some instrumentation
+        included in the binary. OCaml supports two such tools:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            GNU Gprof to measure execution time and call graphs.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The <ulink url="https://perf.wiki.kernel.org/">Perf</ulink>
+            profiling framework in modern versions of Linux.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <sect3 id="gprof">
+        <title>Gprof</title>
         <para>
-          TODOs
+          Gprof produces an execution profile of an OCaml program by
+          recording a call graph of which functions call each other, and
+          recording the time these calls take during the program
+          execution.
+        </para>
+        <para>
+          Getting precise information out of Gprof requires passing the
+          <literal>-p</literal> flag to the native code compiler when
+          compiling <emphasis>and</emphasis> linking the binary. This
+          generates extra code that records profile information to a
+          file called <literal>gmon.out</literal> when the program is
+          executed. This profile information then can then be examined
+          using Gprof.
         </para>
       </sect3>
-      <sect3 id="embedding-native-code-in-libraries">
-        <title>Embedding native code in libraries</title>
+      <sect3 id="perf">
+        <title>Perf</title>
         <para>
-          The native code compiler also supports
-          <literal>output-obj</literal> operation just like the bytecode
-          compiler. The native code runtime is called
-          <literal>libasmrun.a</literal>, and should be linked instead
-          of the bytecode <literal>libcamlrun.a</literal>.
+          Perf is a more modern alternative to Gprof that doesn't
+          require you to instrument the binary. Instead, it uses
+          hardware counters and debug information within the binary to
+          record information accurately.
         </para>
         <para>
-          Try this out using the same files from the bytecode embedding
-          example earlier.
+          Run Perf on a compiled binary to record information first.
+          We'll use our write barrier benchmark from earlier which
+          measures memory allocation versus in-place modification.
         </para>
         <programlisting>
+$ perf record -g ./barrier.native 
+Estimated testing time 20s (change using -quota SECS).
+┌───────────┬───────────┬─────────────────────┬────────────┐
+│ Name      │ Time (ns) │           Time 95ci │ Percentage │
+├───────────┼───────────┼─────────────────────┼────────────┤
+│ mutable   │ 7_306_219 │ 7_250_234-7_372_469 │      96.83 │
+│ immutable │ 7_545_126 │ 7_537_837-7_551_193 │     100.00 │
+└───────────┴───────────┴─────────────────────┴────────────┘
+[ perf record: Woken up 11 times to write data ]
+[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
+</programlisting>
+        <para>
+          When this completes, you can interactively explore the
+          results.
+        </para>
+        <programlisting>
+$ perf report -g
++  48.86%  barrier.native  barrier.native     [.] camlBarrier__test_immutable_69282
++  30.22%  barrier.native  barrier.native     [.] camlBarrier__test_mutable_69279
++  20.22%  barrier.native  barrier.native     [.] caml_modify
+</programlisting>
+        <para>
+          This trace broadly reflects the results of the benchmark
+          itself. The mutable benchmark consists of the combination of
+          the call to <literal>test_mutable</literal> and the
+          <literal>caml_modify</literal> write barrier function in the
+          runtime. This adds up to slightly over half the execution time
+          of the application.
+        </para>
+        <para>
+          Perf has a growing collection of other commands that let you
+          archive these runs and compare them against each other. You
+          can read more on the
+          <ulink url="http://perf.wiki.kernel.org">homepage</ulink>.
+        </para>
+        <tip>
+        <title>
+        Using the frame-pointer to get more accurate traces
+        </title>
+        <para>
+          Although Perf doesn't require adding in explicit probes to the
+          binary, it does need to understand how to unwind function
+          calls so that the kernel can accurately record the function
+          backtrace for every event.
+        </para>
+        <para>
+          OCaml stack frames are too complex for Perf to understand
+          directly, and so it needs the compiler to fall back to using
+          the same conventions as C for function calls. On 64-bit Intel
+          systems, this means that a special register known as the
+          <emphasis>frame pointer</emphasis> is used to record function
+          call history.
+        </para>
+        <para>
+          Using the frame pointer in this fashion means a slowdown
+          (typically around 3-5%) since it's no longer available for
+          general-purpose use. OCaml 4.1 thus makes the frame pointer an
+          optional feature that can be used to improve the resolution of
+          Perf traces.
+        </para>
+        <para>
+          OPAM provides a compiler switch that compiles OCaml with the
+          frame pointer activated.
+        </para>
+        <programlisting>
+$ opam switch 4.01.0dev+fp
+</programlisting>
+        <para>
+          Using the frame pointer changes the OCaml calling convention,
+          but OPAM takes care of recompiling all your libraries with the
+          new interface. You can read more about this on the OCamlPro
+          <ulink url="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">blog</ulink>.
+        </para>
+        </tip>
+      </sect3>
+    </sect2>
+    <sect2 id="embedding-native-code-in-c">
+      <title>Embedding native code in C</title>
+      <para>
+        The native code compiler normally links a complete executable,
+        but can also output a standalone native object file just as the
+        bytecode compiler can. This object file has no further
+        dependencies on OCaml except for the runtime library.
+      </para>
+      <para>
+        The native code runtime is a different library from the bytecode
+        one and is installed as <literal>libasmrun.a</literal> in the
+        OCaml standard library directory.
+      </para>
+      <para>
+        Try this custom linking by using the same source files from the
+        bytecode embedding example earlier in this chapter.
+      </para>
+      <programlisting>
 $ ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml
 $ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lasmrun -ltermcap \
   -o final_out_native embed_native.o main.c
@@ -26115,30 +26251,30 @@ hello embedded world 1
 hello embedded world 2
 After calling OCaml
 </programlisting>
-        <para>
-          The <literal>embed_native.o</literal> is a standalone object
-          file that has no further references to OCaml code beyond the
-          runtime library, just as with the bytecode runtime.
-        </para>
-        <tip>
-        <title>
-        Activating the debug runtime
-        </title>
-        <para>
-          Despite your best efforts, it is easy to introduce a bug into
-          C bindings that cause heap invariants to be violated. OCaml
-          includes a variant of the runtime library
-          <literal>libasmrun.a</literal> that is compiled with debugging
-          symbols. This is available as <literal>libasmrund.a</literal>
-          and includes extra memory integrity checks upon every garbage
-          collection cycle. Running these often will abort the program
-          near the point of corruption and helps isolate the bug.
-        </para>
-        <para>
-          To use this debug library, just link with
-          <literal>-runtime-variant d</literal> set:
-        </para>
-        <programlisting>
+      <para>
+        The <literal>embed_native.o</literal> is a standalone object
+        file that has no further references to OCaml code beyond the
+        runtime library, just as with the bytecode runtime.
+      </para>
+      <tip>
+      <title>
+      Activating the debug runtime
+      </title>
+      <para>
+        Despite your best efforts, it is easy to introduce a bug into
+        some components such as C bindings that cause heap invariants to
+        be violated. OCaml includes a <literal>libasmrund.a</literal>
+        variant of the runtime library that is compiled with extra
+        debugging checks that perform extra memory integrity checks
+        during every garbage collection cycle. Running these extra
+        checks will abort the program nearer the point of corruption and
+        help isolate the bug in the C code.
+      </para>
+      <para>
+        To use the debug library, just link your program with the
+        <literal>-runtime-variant d</literal> flag.
+      </para>
+      <programlisting>
 $ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
 $ ./hello 
 ### OCaml runtime: debug mode ###
@@ -26150,16 +26286,15 @@ Initial heap increment: 992k bytes
 Initial allocation policy: 0
 Hello OCaml World!
 </programlisting>
-        <para>
-          If you get an error that <literal>libasmrund.a</literal> is
-          not found, then this is probably because you're using OCaml
-          4.00 and not 4.01. It's only installed by default in the very
-          latest version, which you should be using via the
-          <literal>4.01.0dev+trunk</literal> OPAM switch.
-        </para>
-        </tip>
+      <para>
+        If you get an error that <literal>libasmrund.a</literal> is not
+        found, then this is probably because you're using OCaml 4.00 and
+        not 4.01. It's only installed by default in the very latest
+        version, which you should be using via the
+        <literal>4.01.0dev+trunk</literal> OPAM switch.
+      </para>
+      </tip>
 
-      </sect3>
     </sect2>
   </sect1>
 </chapter><chapter id="using-the-direct-c-interface">
