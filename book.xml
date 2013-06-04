@@ -24260,52 +24260,57 @@ val compare : t -&gt; t -&gt; int
     </para>
     <para>
       Although type checking is done in a single pass in OCaml, it
-      actually consists of three logically different phases:
+      actually consists of three distinct steps:
     </para>
     <itemizedlist>
       <listitem>
         <para>
-          a type inference engine that automatically calculates types
-          for a module without requiring any manual type annotations.
+          an <emphasis>automatic type inference</emphasis> engine that
+          calculates types for a module without requiring any manual
+          type annotations.
         </para>
       </listitem>
       <listitem>
         <para>
-          a module system that assembles software components together
-          via explicit knowledge of their type signatures.
+          a <emphasis>module system</emphasis> that combines software
+          components with explicit knowledge of their type signatures.
         </para>
       </listitem>
       <listitem>
         <para>
-          explicit subtyping checks for objects and polymorphic
-          variants.
+          performing <emphasis>explicit subtyping</emphasis> checks for
+          objects and polymorphic variants.
         </para>
       </listitem>
     </itemizedlist>
     <para>
-      Automatic type inference is useful for writing succinct code for a
-      particular task and having the compiler ensure that your use of
-      variables is locally consistent. However, type inference doesn't
-      scale to very large code bases that depend on separate compilation
-      of files. A small change in one module may ripple through may
-      thousands of other files and require all of them to be recompiled.
+      Automatic type inference lets you write succinct code for a
+      particular task and have the compiler ensure that your use of
+      variables is locally consistent.
     </para>
     <para>
-      The module system solves this by providing the ability to
-      explicitly specify type signatures for a module, and also to
-      re-use these signatures via functors and first-class modules.
+      Type inference doesn't scale to very large code bases that depend
+      on separate compilation of files. A small change in one module may
+      ripple through thousands of other files and libraries and require
+      all of them to be recompiled. The module system solves this by
+      providing the facility to combine and manipulate explicit type
+      signatures for modules within a large project, and also to reuse
+      them via functors and first-class modules.
     </para>
     <para>
-      Subtyping in OCaml objects is always explicit via the
-      <literal>:&gt;</literal> operator, and so doesn't complicate the
-      core type inference engine at all.
+      Subtyping in OCaml objects is always an explicit operation (via
+      the <literal>:&gt;</literal> operator). This means that it doesn't
+      complicate the core type inference engine and can be tested as a
+      separate concern.
     </para>
     <sect2 id="displaying-inferred-types-from-the-compiler">
       <title>Displaying inferred types from the compiler</title>
       <para>
-        You can explore basic type inference very easily from the
-        top-level, or by asking the compiler to display the types it
-        infers. Create a file with a single type definition and value.
+        We've already seen how you can explore type inference directly
+        from the top-level. It's also possible to generate type
+        signatures for an entire file by asking the compiler to do the
+        work for you. Create a file with a single type definition and
+        value.
       </para>
       <programlisting language="ocaml">
 (* typedef.ml *)
@@ -24314,7 +24319,7 @@ let v = Foo
 </programlisting>
       <para>
         Now run the compiler with the <literal>-i</literal> flag to
-        infer the types for the compilation unit. This runs the type
+        infer the type signature for that file. This runs the type
         checker but doesn't compile the code any further after
         displaying the interface to the standard output.
       </para>
@@ -24369,20 +24374,20 @@ Error: The implementation test.ml does not match the interface test.cmi:
         above, and the exported functions documented.
       </para>
       <para>
-        If you're writing code that spans multiple files though, it's
-        sometimes easier to start by writing all the
-        <literal>mli</literal> signatures and checking that they type
-        check against each other. Once the signatures are in place, you
-        can write the implementations with the confidence that they'll
-        all glue together correctly with no cyclic dependencies between
-        the modules.
+        If you're writing code that spans multiple files, it's sometimes
+        easier to start by writing all the <literal>mli</literal>
+        signatures and checking that they type check against each other.
+        Once the signatures are in place, you can write the
+        implementations with the confidence that they'll all glue
+        together correctly with no cyclic dependencies between the
+        modules.
       </para>
       <para>
         As with any such stylistic debate, you should experiment with
         which system works best for you. Everyone agrees on one thing
         though: no matter what order you write them, production code
-        should always have explicitly defined <literal>mli</literal>
-        files.
+        should always explicitly define an <literal>mli</literal> file
+        for every <literal>ml</literal> file in the project.
       </para>
       <para>
         Signature files provide a place to write succinct documentation
@@ -24421,131 +24426,6 @@ Error: The implementation test.ml does not match the interface test.cmi:
         (although they sometimes help the compiler produce better error
         messages).
       </para>
-      <sidebar>
-      <title>
-      Enforcing principal typing
-      </title>
-      <para>
-        You can also pass a <literal>-principal</literal> flag to the
-        compiler to turn on a stricter principal type checking mode.
-        This detects risky uses of type information to ensure that the
-        type inference has one principal result. A type is considered
-        risky if the success or failure of type inference depends on the
-        order in which sub-expressions are typed.
-      </para>
-      <para>
-        The principality check only affects a few language features:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            polymorphic methods for objects.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            permuting the order of labeled arguments in a function from
-            their type definition.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            discarding optional labelled arguments.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            generalized algebraic data types (GADTs) present from OCaml
-            4.0 onwards.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            automatic disambiguation of record field and constructor
-            names (since OCaml 4.1)
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        Here's an example of principality warnings when used with record
-        disambiguation.
-      </para>
-      <programlisting language="ocaml">
-(* non_principal.ml *)
-type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f x =
-  x.bar;
-  x.foo
-</programlisting>
-      <para>
-        Inferring the signature with <literal>-principal</literal> will
-        show you a new warning.
-      </para>
-      <programlisting>
-$ ocamlc -i -principal non_principal.ml 
-File &quot;non_principal.ml&quot;, line 7, characters 4-7:
-Warning 18: this type-based field disambiguation is not principal.
-type s = { foo : int; bar : unit; }
-type t = { foo : int; }
-val f : s -&gt; int
-</programlisting>
-      <para>
-        This example isn't principal since the inferred type for
-        <literal>x.foo</literal> is guided by the inferred type of
-        <literal>x.bar</literal>. If the <literal>x.bar</literal> is
-        removed, the argument would be of type <literal>t</literal> and
-        not <literal>type s</literal>. You can fix this either by
-        permuting the order of the type declarations or by adding an
-        explicit type annotation as follows.
-      </para>
-      <programlisting language="ocaml">
-(* principal.ml *)
-type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f (x:s) =
-  x.bar;
-  x.foo
-</programlisting>
-      <para>
-        There is now no ambiguity about the inferred types, since we've
-        explicitly given the argument a type and the order of inference
-        of the sub-expressions no longer matters.
-      </para>
-      <programlisting>
-$ ocamlc -i -principal principal.ml 
-type s = { foo : int; bar : unit; }
-type t = { foo : int; }
-val f : s -&gt; int
-</programlisting>
-      <para>
-        Ideally, all code should systematically use
-        <literal>-principal</literal>. It reduces variance in type
-        inference and enforces the notion of a single known type.
-        However, there are drawbacks to this mode: type inference is
-        slower and the <literal>cmi</literal> files become larger. This
-        is generally only a problem if you use objects extensively,
-        which usually have larger type signature to cover all their
-        methods.
-      </para>
-      <para>
-        As a result, the suggested approach is to only compile with
-        <literal>-principal</literal> occasionally to check if your code
-        is compliant. If compiling in principal mode works, it is
-        guaranteed that the program will passing type checking in
-        non-principal mode too.
-      </para>
-      <para>
-        Bear in mind that the <literal>cmi</literal> files generated in
-        principal mode differ from the default mode. Try to ensure that
-        you compile your whole project with it activated. Getting the
-        files mixed up won't let you violate type safety, but can result
-        in the type checker failing unexpectedly very occasionally. In
-        this case, just recompile with a clean source tree.
-      </para>
-      </sidebar>
       <sect3 id="adding-type-annotations-to-find-errors">
         <title>Adding type annotations to find errors</title>
         <para>
@@ -24677,6 +24557,133 @@ Error: This expression has type [&gt; `Nu of int ]
           the manual annotations if you prefer more succinct code. You
           can also leave the annotations there of course, to help with
           future refactoring and debugging.
+        </para>
+      </sect3>
+      <sect3 id="enforcing-principal-typing">
+        <title>Enforcing principal typing</title>
+        <para>
+          You can pass a <literal>-principal</literal> flag to the
+          compiler to turn on a stricter principal type checking mode.
+          This detects risky uses of type information to ensure that the
+          type inference has one principal result. A type is considered
+          risky if the success or failure of type inference depends on
+          the order in which sub-expressions are typed.
+        </para>
+        <para>
+          The principality check only affects a few language features:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              polymorphic methods for objects.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              permuting the order of labeled arguments in a function
+              from their type definition.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              discarding optional labelled arguments.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              generalized algebraic data types (GADTs) present from
+              OCaml 4.0 onwards.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              automatic disambiguation of record field and constructor
+              names (since OCaml 4.1)
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          Here's an example of principality warnings when used with
+          record disambiguation.
+        </para>
+        <programlisting language="ocaml">
+(* non_principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f x =
+  x.bar;
+  x.foo
+</programlisting>
+        <para>
+          Inferring the signature with <literal>-principal</literal>
+          will show you a new warning.
+        </para>
+        <programlisting>
+$ ocamlc -i -principal non_principal.ml 
+File &quot;non_principal.ml&quot;, line 7, characters 4-7:
+Warning 18: this type-based field disambiguation is not principal.
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -&gt; int
+</programlisting>
+        <para>
+          This example isn't principal since the inferred type for
+          <literal>x.foo</literal> is guided by the inferred type of
+          <literal>x.bar</literal>. If the <literal>x.bar</literal> use
+          is removed from the definition of <literal>f</literal>, its
+          argument would be of type <literal>t</literal> and not
+          <literal>type s</literal>.
+        </para>
+        <para>
+          You can fix this either by permuting the order of the type
+          declarations, or by adding an explicit type annotation.
+        </para>
+        <programlisting language="ocaml">
+(* principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f (x:s) =
+  x.bar;
+  x.foo
+</programlisting>
+        <para>
+          There is now no ambiguity about the inferred types, since
+          we've explicitly given the argument a type and the order of
+          inference of the sub-expressions no longer matters.
+        </para>
+        <programlisting>
+$ ocamlc -i -principal principal.ml 
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -&gt; int
+</programlisting>
+        <para>
+          Ideally, all code should systematically use
+          <literal>-principal</literal>. It reduces variance in type
+          inference and enforces the notion of a single known type.
+          However, there are drawbacks to this mode: type inference is
+          slower and the <literal>cmi</literal> files become larger.
+          This is generally only a problem if you use objects
+          extensively, which usually have larger type signature to cover
+          all their methods.
+        </para>
+        <para>
+          As a result, the suggested approach is to only compile with
+          <literal>-principal</literal> occasionally to check if your
+          code is compliant. If compiling in principal mode works, it is
+          guaranteed that the program will passing type checking in
+          non-principal mode too.
+        </para>
+        <para>
+          Bear in mind that the <literal>cmi</literal> files generated
+          in principal mode differ from the default mode. Try to ensure
+          that you compile your whole project with it activated. Getting
+          the files mixed up won't let you violate type safety, but can
+          result in the type checker failing unexpectedly very
+          occasionally. In this case, just recompile with a clean source
+          tree.
         </para>
       </sect3>
     </sect2>
