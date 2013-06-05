@@ -428,7 +428,7 @@ succinct style, but shouldn't be overused due to the increased
 difficulty of debugging intermediate values.  If an explicit name is
 assigned to each stage of the transformations, debuggers in particular
 have an easier time making the program flow easier to represent to the
-programer.
+programmer.
 
 This technique of using chained parsing functions is very powerful in
 combination with the OCaml type system. Many errors that don't make
@@ -603,7 +603,7 @@ JSON schemas to OCaml values more mechanically than writing conversion
 functions individually.  We'll cover an alternative JSON processing method that
 is better for larger-scale JSON handling now, using the
 [ATD](http://mjambon.com/atd-biniou-intro.html) tool.  This will introduce our
-first _Domain Specific Language_ that ccompiles JSON specifications into OCaml
+first _Domain Specific Language_ that compiles JSON specifications into OCaml
 modules, which are then used throughout your application.
 
 <note>
@@ -679,7 +679,7 @@ lower-case versions).
 
 The ATD spec can be compiled to a number of OCaml targets. Let's run
 the compiler twice, to generate some OCaml type definitions, and a
-JSON serialiser.
+JSON serializer.
 
 ```bash
 $ atdgen -t github.atd

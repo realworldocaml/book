@@ -714,7 +714,7 @@ labeled argument is a function that takes a first-class field of the
 necessary type as an argument.  Note that `iter` passes each of these
 callbacks the `Field.t`, not the contents of the specific record
 field.  The contents of the field, though, can be looked up using the
-combiation of the record and the `Field.t`.  
+combination of the record and the `Field.t`.  
 
 Now, let's use `Logon.Fields.iter` and `show_field` to print out all
 the fields of a `Logon` record.
@@ -745,7 +745,7 @@ to `Logon.t`, the type of `Logon.Fields.iter` would change along with
 it, acquiring a new argument.  Any code using `Logon.Fields.iter`
 won't compile until it's fixed to take this new argument into account.
 
-This exhaustion guarntee is a valuable one.  Field iterators are
+This exhaustion guarantee is a valuable one.  Field iterators are
 useful for a variety of record-related tasks, from building record
 validation functions to scaffolding the definition of a web-form from
 a record type, and such applications can benefit from the guarantee

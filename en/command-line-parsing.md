@@ -786,7 +786,7 @@ arguments.  The `step` function in the specification simply converts
 the default `base` and `days` arguments into a labelled function,
 and everything compiles again.
 
-Labelled arguments are more verbose, but also help prevent errros with
+Labelled arguments are more verbose, but also help prevent errors with
 command-line arguments with similar types but different names and purposes.
 It's good form to use them when you have a lot of otherwise anonymous
 `int` and `string` arguments.

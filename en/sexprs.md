@@ -78,8 +78,8 @@ Given how mechanical the code is, you could imagine writing a program
 that inspected the type definition and auto-generated the conversion
 code for you.  As it turns out, we can do just that using `Sexplib`.
 The `Sexplib` package, which is included with Core, provides both a
-library for manipulating s-exressions and a syntax extension for
-generating such conversion functions.  With that synax extension
+library for manipulating s-expressions and a syntax extension for
+generating such conversion functions.  With that syntax extension
 enabled, any type that has `with sexp` as an annotation will trigger
 the generation of the functions we want for free.
 
