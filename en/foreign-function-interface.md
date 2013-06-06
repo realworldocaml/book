@@ -1,50 +1,58 @@
 # Foreign Function Interface
 
 OCaml has several options available to interact with non-OCaml code.  The
-compiler toolchain can link to external system libraries and also produce
-standalone native object code that can be embedded within other non-OCaml
-libraries or applications.  
+compiler can link to external system libraries via C code, and also produce
+standalone native object files that can be embedded within other non-OCaml
+applications. 
 
-## The `ctypes` foreign function library
+## The Ctypes foreign function library
 
 The simplest foreign function interface in OCaml doesn't even require you to
-write any C code.  The `ctypes` library lets you describe the C interface in
-pure OCaml, and the library takes care of finding the C symbols and invoking
-the function call with the appropriate arguments.
+write any C code.  The `ctypes` library lets you define the C interface in pure
+OCaml, and the library takes care of dynamically loading the C symbols and
+invoking the function call with the appropriate arguments.
 
 Let's dive straight into an example to show you how the library looks.  We'll
 use a binding to the `ncurses` terminal toolkit, as it's widely available on
 most systems and doesn't have any complex dependencies.
 
 <note>
-<title>Installing the `ctypes` library</title>
+<title>Installing the Ctypes library</title>
 
-TODO `ctypes` is not yet available on OPAM, but will be soon.  For now, install
-it manually:
+Ctypes is available via OPAM as usual.  You'll need to install the
+[`libffi`](https://github.com/atgreen/libffi) library before starting the OPAM
+installtion . It's a fairly popular library and should be available in your OS
+package manager.
+
+A special note for Mac user: the version of `libffi` installed by default in
+MacOS X 10.8 is too old for some of the features that Ctypes needs.  Use
+Homebrew to `brew install libffi` to get the latest version before installing
+the OCaml library.
 
 ```
-$ git clone git://github.com/ocamllabs/ocaml-ctypes
-$ cd ocaml-ctypes
-$ make && make install
+$ brew install libffi     # for MacOS X users
+$ opam install ctypes
 ```
 
-It will then be available via the `ctypes` ocamlfind package.  You will also
-need the `ncurses` library for the first example.  It is pre-installed on MacOS
-X and Debian Linux includes it as the `ncurses-dev` package.
+It will then be available via the `ctypes` OCamlfind package.  You'll also need
+the `ncurses` library for the first example.  This comes pre-installed on MacOS
+X and Debian Linux provides it as the `ncurses-dev` package.
 
 </note>
 
 ## Example: an ncurses terminal interface
 
-Ncurses is a library to build terminal-independent text interfaces in a
+Ncurses is a library to help build terminal-independent text interfaces in a
 reasonably efficient way.  It's used in console mail clients like `mutt` and
-`pine`, and console web browsers such as `lynx`.  The
-[documentation](http://www.gnu.org/software/ncurses/) explains the full C
-interface, but here's an excerpt that we need for a basic binding to OCaml.
-The full header file can usually be found in `/usr/include/ncurses.h` on MacOS
-X or Linux.
+`pine`, and console web browsers such as `lynx`.
+
+The full C interface is quite large and explained in the online
+[documentation](http://www.gnu.org/software/ncurses/).  We'll use the excerpt
+below since it's all we need for a basic binding in OCaml.  The header
+file is usually installed in `/usr/include/ncurses.h`.
 
 ```c
+// <ncurses.h>
 typedef struct _win_st WINDOW;
 
 WINDOW *initscr   (void);
@@ -55,11 +63,11 @@ void    wrefresh  (WINDOW *);
 void    mvwaddstr (WINDOW *, int, int, char *);
 ```
 
-The `ncurses` library calls either work on the current pseudo-terminal, or on a
+The Ncurses functions either operate on the current pseudo-terminal or on a
 window that has been created via the library.  The `WINDOW` typdef represents
-this external `ncurses` library state.  The specific contents of the structure
-don't matter; OCaml code just needs to store the pointer and pass it back to
-`ncurses` library calls that then dereference its contents.
+the library state and is considered abstract to users of the library.  OCaml
+code just needs to store the pointer somewhere and pass it back to Ncurses.
+library calls that then dereference its contents.
 
 There are two library calls that create `WINDOW` pointers. The `initscr`
 function initialises the library and returns the global window, and `newwin`
@@ -77,19 +85,19 @@ arguments into the C calling convention, invoking the foreign call within the
 
 ```ocaml
 (* ncurses.ml 1/3 *)
-open Ctypes.Ffi.C
-open Type
+open Ctypes
 
 type window = unit ptr
-let window = ptr void
+let window : window typ = ptr void
 ```
 
-We first define a `window` type to represent the C `WINDOW` pointer.  The
-`unit ptr` type is equivalent to a `void *` pointer (we'll constrain the
-signature later on to avoid mixing up different pointer types).  We also need a
-value representing this `window` type to pass to the `ctypes` library, The
-`window` value is built using the `Ctypes.Ffi.C.ptr` function.  The next step
-is to use this value to build a foreign function call to `initscr`.
+We first define a `window` type to represent the C `WINDOW` pointer.  The `unit
+ptr` type represents a `void *` pointer in C, but we'll constrain the signature
+later on to avoid mixing up different void pointers.
+
+We also define a value representing a pointer to the `window` type, which can
+be used later in the Ctypes function definitions.  The next step is to to build
+a foreign function call to `initscr`.
 
 ```ocaml
 (* ncurses.ml 2/3 *)
@@ -97,16 +105,16 @@ let initscr =
   foreign "initscr" (void @-> (returning window))
 ```
 
-The `foreign` function takes two parameters: the C function call name, and a
-value that defines the C function arguments and return type.  This definition
-can contain any of the C types (including function pointers), and is built
-using functions defined in `Ctypes.Ffi.C`. 
- 
-Basic C types such as `void` are defined as values in `Ffi.Types.C`, and we
-have previously defined `window` as a `void ptr`.  The `@->` operator adds an
-argument to the C parameter list and the `returning` function terminates the
-parameter list and declares the return value.  The remainder of the `Ncurses`
-implementation expands on these definitions for the other library functions.
+The `foreign` function is defined takes two parameters:
+
+- the C function call name, which is looked up using the *dlsym(3)* linker function.
+- a value that defines all the C function arguments and return type.
+  Basic C types such as `void` are defined as values in `Ctypes` and we
+  defined `window` in our own code.  The `@->` operator adds an
+  argument to the C parameter list, while the `returning` function terminates the
+  parameter list with the return type.
+
+The remainder of the Ncurses binding simply expands on these definitions.
 
 ```ocaml
 (* ncurses.ml 3/3 *)
@@ -142,7 +150,7 @@ let cbreak =
 ```
 
 These definitions are all straightforward mappings from the C headers from
-earlier in the chapter.  They use the basic C types defined in `FFi.Types.C`
+earlier in the chapter.  They use the basic C types defined in `Ctypes`
 such as `void` or `int`.  The `string` value maps from OCaml strings (which
 have a specific length) onto C character buffers (whose length is defined by a
 null characters).
@@ -151,7 +159,7 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it from `ncurses.ml` by running:
 
 ```console
-$ ocamlfind ocamlc -i -package ctypes ncurses.ml
+$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.mli 
 ```
 
 We've tweaked the automatic signature to make the `type window` abstract,
@@ -160,7 +168,7 @@ and the result is below:
 ```ocaml
 type window
 
-val window    : window Ffi.C.Type.t
+val window    : window Ctypes.typ
 val initscr   : unit   -> window
 val endwin    : unit   -> unit
 val refresh   : unit   -> unit
@@ -174,11 +182,12 @@ val box       : window -> int -> int -> unit
 val cbreak    : unit   -> unit
 ```
 
-The `window` type is left abstract to external users so that it can only be
-constructed via the `Ncurses.initscr` function.  This interface is now safe to
-use externally, since window pointers cannot be mixed up with other `void`
-pointers (e.g. those obtained by other libraries).  Here's what a "hello world"
-that uses the library looks like:
+The `window` type is left abstract in the signature so that it can only be
+constructed via the `Ncurses.initscr` function.  This makes the Ncurses binding
+safer to use externally, since window pointers cannot be mixed up with other
+`void` pointers obtained by other libraries.
+
+Here's what a "hello world" that uses the library looks like:
 
 ```ocaml
 (* hello.ml *)
@@ -198,19 +207,20 @@ let () =
   endwin ()
 ```
 
-This code can be compiled by linking against the `ctypes` and `unix` ocamlfind
-packages.
+This code can be compiled by linking against the `ctypes` and `ctypes.foreign`
+OCamlfind packages.
 
 ```console
-$ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
-  -cclib -lncurses ncurses.mli ncurses.ml hello.ml -o hello
+$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
+    ncurses.mli ncurses.ml hello.ml -o hello
 ```
 
-Running `./hello` should now display a Hello World in your terminal!  The
-compilation line above includes `-cclib -lncurses` to make the OCaml compiler
+Running `./hello` should now display a Hello World in your terminal!
+
+The command-line above includes `-cclib -lncurses` to make the OCaml compiler
 link the output to the `ncurses` C library, which in turns makes the C symbols
-available to the program when it starts.  You should get an
-error when you run the binary if you omit that link directive.
+available to the program when it starts.  You should get an error when you run
+the binary if you omit that link directive.
 
 ```console
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
@@ -221,12 +231,12 @@ Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not fou
 
 ## Defining basic C formats from OCaml
 
-`Ctypes` provides an `Ffi.C` module that lets you describe not only basic C
-types, but also more complex structures and unions.  It defines abstract OCaml
-types for these within the module.
+`Ctypes` wouldn't be very interesting if it were limited to only defining basic
+C types. You can also build up more complex C structures and unions in OCaml as
+well.
 
 ```ocaml
-(* Ctypes.Ffi.C *)
+(* Ctypes *)
 type 'a typ        (** Basic C type  *)
 type 'a ptr        (** C pointer *)
 type 'a array      (** C array of 'a values *)
