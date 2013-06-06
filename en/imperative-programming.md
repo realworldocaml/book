@@ -227,7 +227,7 @@ but `;` is more concise and idiomatic.  More generally,
 <exprN>
 ```
 
-is eqivalent to
+is equivalent to
 
 ```ocaml
 let () = <expr1> in
@@ -757,7 +757,7 @@ performing lazy computation
 - : float = 4.
 ```
 
-The main user-visisble difference between our implementation of
+The main user-visible difference between our implementation of
 laziness and the built-in version is syntax.  Rather than writing
 `create_lazy (fun () -> sqrt 16.)`, we can with the built-in `lazy`
 just write `lazy (sqrt 16.)`.

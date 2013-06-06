@@ -206,7 +206,7 @@ named class, and more.  Since `shape` is an object type, we can't
 write `#shape`.  However, if a
 class definition is available, this
 abbreviation can be useful.  The following definition is exactly
-equivalent to the preceeding.
+equivalent to the preceding one.
 
 ```ocaml
 # class cshape = object method area = 0.0 end;;

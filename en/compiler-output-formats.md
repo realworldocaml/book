@@ -125,16 +125,22 @@ useful to you during day-to-day OCaml development.
 
 ## Parsing source code
 
-When a source file is passed to the OCaml compiler, it parses the textual
-source code into a more structured data type known as an Abstract Syntax Tree
-(AST).  The parsing logic is implemented in OCaml itself using the techniques
-described earlier in [xref](#parsing-with-ocamllex-and-menhir).  The lexer and
-parser rules can be found in the `parsing` directory in the source
-distribution.
+When a source file is passed to the OCaml compiler, its first task is to parse
+the text into a more structured Abstract Syntax Tree (AST). The parsing logic
+is implemented in OCaml itself using the techniques described earlier in
+[xref](#parsing-with-ocamllex-and-menhir).  The lexer and parser rules can be
+found in the `parsing` directory in the source distribution.
 
-The compiler emits a *syntax error* if it fails to convert the source code into
-an AST.  Here's an example syntax error that we obtain by using the `module`
-keyword incorrectly inside a `let` binding.
+### Syntax errors
+
+The OCaml parser's goal is to output a well-formed AST data structure to the
+next phase of compilation, and so it rejects source code which doesn't match
+basic syntactic requirements.  The compiler emits a *syntax error* in this
+situation, with a pointer to the filename and line and character number that's
+as close to the error as possible.
+
+Here's an example syntax error that we obtain by performing a module assignment
+as a statement instead of as a let-binding.
 
 ```ocaml
 (* broken_module.ml *)
@@ -143,10 +149,7 @@ let _ =
   ()
 ```
 
-This fails because the `module A = B` syntax must be wrapped in a `let` binding
-unless it's a top-level phrase.  Parsing immediately eliminates code which
-doesn't match basic syntactic requirements, so this will result in a syntax
-error when we compile it.
+The above code results in a syntax error when compiled.
 
 ```console
 $ ocamlc -c broken_module.ml 
@@ -154,7 +157,7 @@ File "broken_module.ml", line 3, characters 2-8:
 Error: Syntax error
 ```
 
-The fixed version of this source code creates the `MyString` module correctly
+The correct version of this source code creates the `MyString` module correctly
 via a local open, and compiles successfully.
 
 ```ocaml
@@ -169,7 +172,7 @@ that couldn't be parsed.  In the broken example the `module` keyword isn't a
 valid token at that point in parsing, so the error location information is
 correct.
 
-### Formatting source code
+### Automatically indenting source code
 
 Sadly, syntax errors do get more inaccurate sometimes depending on the nature
 of your mistake.  Try to spot the deliberate error in the following function
@@ -345,25 +348,30 @@ detailed output.
 
 </tip>
 
-### Preprocessing source code
+## Preprocessing source code
 
-One powerful feature in OCaml is the facility to extend the language grammar
-without having to modify the compiler. Camlp4 is a system included with OCaml
-for writing extensible parsers. It provides a set of OCaml libraries that are
-used to define grammars and dynamically loadable syntax extensions of such
-grammars.  Camlp4 modules register new language keywords and later transform
-these keywords (or indeed, any portion of the input program) into conventional
-OCaml code that can be understood by the rest of the compiler.
+One powerful feature in OCaml is a facility to extend the standard language
+grammar without having to modify the compiler.  You can roughly think of it as
+a type-safe version to the `cpp` preprocessor used in C/C++ to control
+conditional compilation directives.
 
-We've already seen several examples of using Camlp4 within Core:
+The OCaml distribution includes a system called Camlp4 for writing extensible
+parsers. This provides some OCaml libraries that are used to define grammars
+and also dynamically loadable syntax extensions of such grammars.  Camlp4
+modules register new language keywords and later transform these keywords (or
+indeed, any portion of the input program) into conventional OCaml code that can
+be understood by the rest of the compiler.
 
-* `Fieldslib` to generates first-class values that represent fields of a record.
+We've already seen several Core libraries that use Camlp4:
+
+* `Fieldslib` generates first-class values that represent fields of a record.
 * `Sexplib` to convert types to textual s-expressions.
 * `Bin_prot` for efficient binary conversion and parsing.
 
-These all extend the language in quite a minimal way by adding a `with` keyword
-to type declarations to signify that extra code should be generated from that
-declaration.  For example, here's a trivial use of Sexplib and Fieldslib.
+These libraries all extend the language in quite a minimal way by adding a
+`with` keyword to type declarations to signify that extra code should be
+generated from that declaration.  For example, here's a trivial use of Sexplib
+and Fieldslib.
 
 ```ocaml
 (* type_conv_example.ml *)
@@ -417,14 +425,16 @@ generation dynamically. It also doesn't require a Just-In-Time (JIT) runtime
 that can be a source of unpredictable dynamic behaviour.  Instead, all code is
 simply generated at compile-time via Camlp4.
 
-#### Inspecting Camlp4 output
+### Using Camlp4 interactively
 
 The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
 changes it's made to your code?  The obvious way is to read the documentation
-that accompanies the extension.  Another more direct approach is to use the
-top-level to explore the extension's behaviour or run Camlp4 manually
-yourself to see the transformation in action.
+that accompanies the extension.
+
+Another approach is to use the top-level to explore the extension's behaviour
+or run Camlp4 manually yourself to see the transformation in action.  We'll
+show you how to do both of these now.
 
 #### Using Camlp4 from the interactive top-level
 
@@ -469,7 +479,7 @@ expected output.  The second one includes the `with compare` directive.  This
 is intercepted by `comparelib` and transformed into the original type
 definition with two new functions also incuded.
 
-#### Running Camlp4 directly on the source code
+### Running Camlp4 from the command-line
 
 The top-level is a quick way to examine the signatures generated from the
 extensions, but how can we see what these new functions actually do?  You can't
@@ -504,7 +514,6 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1
 The script uses the `ocamlfind` package manager to list the include and library
 paths needed by `comparelib`.  It then invokes the `camlp4o` preprocessor with
 these paths and outputs the resulting AST to the standard output.
-
 
 ```console
 $ sh camlp4_dump comparelib_test.ml
@@ -575,38 +584,54 @@ as a single point for extending the grammar via the `with` keyword.
 
 </caution>
 
+### Further reading on Camlp4
+
 We've deliberately only shown you how to use Camlp4 extensions here, and not
 how to build your own. The full details of building new extensions are fairly
 daunting and could be the subject of an entirely new book.
 
-The best resources to get started are the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4), and
-using OPAM to obtain existing Camlp4 extensions and inspecting their source code.
-A series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html)
-by Jake Donham also serve as a useful guide to the internals of syntax extensions.
+The best resources to get started are:
+
+* the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4).
+* using OPAM to install existing Camlp4 extensions and inspecting their source code.
+* a series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html) by
+Jake Donham describe the internals of Camlp4 and its syntax extension mechanism.
 
 ## Static type checking
 
-After obtaining a valid abstract syntax tree, the compiler then verifies that
-the code obeys the rules of the static type system. Code that is syntactically
+After obtaining a valid abstract syntax tree, the compiler has to verify that
+the code obeys the rules of the OCaml type system. Code that is syntactically
 correct but misuses values is rejected with an explanation of the problem.
 
-Static type checking is split into two logical phases in OCaml.  The core
-language has a sophisticated type inference engine that automatically figures
-out types for your code without you having to write them out by hand.  The
-module language lets you group functions together and explicitly manipulate
-and re-use them.
+Although type checking is done in a single pass in OCaml, it actually consists
+of three distinct steps that happen simultaneously:
 
-While the core language has a strong emphasis on automatic inference, the
-module language is much more explicit about matching signatures and
-implementations against each other. You can consider type inference well suited
-to local bits of code (i.e. individual modules), and modules to establish
-abstraction boundaries between components.  The module system scales up to the
-needs of large-scale software engineering -- some of the larger OCaml
-code-bases contain thousands of files and modules.
+* an *automatic type inference* algorithm that calculates types
+  for a module without requiring manual type annotations.
+* a *module system* that combines software components with explicit
+  knowledge of their type signatures.
+* performing *explicit subtyping* checks for objects and polymorphic variants.
 
-You can explore basic type inference very easily from the top-level, or by
-asking the compiler to display the types it infers. Create a file with a single
-type definition and value.
+Automatic type inference lets you write succinct code for a particular task and
+have the compiler ensure that your use of variables is locally consistent.
+
+Type inference doesn't scale to very large code bases that depend on separate
+compilation of files.  A small change in one module may ripple through
+thousands of other files and libraries and require all of them to be
+recompiled.  The module system solves this by providing the facility to combine
+and manipulate explicit type signatures for modules within a large project, and
+also to reuse them via functors and first-class modules.
+
+Subtyping in OCaml objects is always an explicit operation (via the `:>`
+operator).  This means that it doesn't complicate the core type inference
+engine and can be tested as a separate concern.
+
+### Displaying inferred types from the compiler
+
+We've already seen how you can explore type inference directly from the
+top-level.  It's also possible to generate type signatures for an entire file
+by asking the compiler to do the work for you. Create a file with a single type
+definition and value.
 
 ```ocaml
 (* typedef.ml *)
@@ -614,9 +639,9 @@ type t = Foo | Bar
 let v = Foo
 ```
 
-Now run the compiler with the `-i` flag to infer the types for the compilation
-unit. This runs the type checker but doesn't compile it any further after
-displaying the interface to the standard output.
+Now run the compiler with the `-i` flag to infer the type signature for that
+file.  This runs the type checker but doesn't compile the code any further
+after displaying the interface to the standard output.
 
 ```console
 $ ocamlc -i typedef.ml
@@ -624,15 +649,18 @@ type t = Foo | Bar
 val v : t
 ```
 
-For a file, the output is the default signature for the module.  It's often useful to
-redirect this output to an `mli` file to give you a starting signature to edit
-the external interface without having to type it all in by hand.  The compiler
-also stores a compiled version of the interface as a `cmi` file.  This interface
-is either obtained from compiling an `mli` signature file for a module, or 
-by the inferred type if there is only an `ml` implementation present.
+The output is the default signature for the module which represents the input
+file.  It's often useful to redirect this output to an `mli` file to give you a
+starting signature to edit the external interface without having to type it all
+in by hand.
 
-If you have a mismatch between the `ml` and `mli` signatures, the type-checker
-will give you an immediate error. 
+The compiler stores a compiled version of the interface as a `cmi` file.  This
+interface is either obtained from compiling an `mli` signature file for a
+module, or by the inferred type if there is only an `ml` implementation
+present.
+
+The compiler makes sure that your `ml` and `mli` files have compatible
+signatures. The type checker throws an immediate error if this isn't the case. 
 
 ```console
 $ echo type t = Foo > test.ml
@@ -648,12 +676,35 @@ Error: The implementation test.ml does not match the interface test.cmi:
        Their first fields have different names, Foo and Bar.
 ```
 
-It's good coding style to have an explicit `mli` signature file as this is also
-where you can put OCamldoc comments as documentation for that module.  Since
-the compiler ensures that the external signature matches your implementation,
-it adds very little maintenance burden.
+<note>
+<title>Which comes first: the `ml` or the `mli`?</title>
 
-### The type inference process
+There are two schools of thought on which order OCaml code should be written
+in.  It's very easy to begin writing code by starting with an `ml` file and
+using the type inference to guide you as you build up your functions.  The
+`mli` file can then be generated as described above, and the exported functions
+documented.
+
+If you're writing code that spans multiple files, it's sometimes easier
+to start by writing all the `mli` signatures and checking that they type check
+against each other.  Once the signatures are in place, you can write the
+implementations with the confidence that they'll all glue together correctly
+with no cyclic dependencies between the modules.
+
+As with any such stylistic debate, you should experiment with which system
+works best for you.  Everyone agrees on one thing though: no matter what order
+you write them, production code should always explicitly define an `mli` file
+for every `ml` file in the project.
+
+Signature files provide a place to write succinct documentation and to abstract
+internal details that shouldn't be exported.  Maintaining separate signature
+files also speeds up incremental compilation in larger code-bases, since
+recompiling a `mli` signature is much faster than a full compilation of the
+implementation to native code.
+
+</note>
+
+### Type inference
 
 Type inference is the process of determining the appropriate types for
 expressions based on their use.  It's a feature that's partially present in
@@ -665,22 +716,143 @@ for its ability to infer the most general type for an expression without
 requiring any explicit type annotations.  The algorithm can deduce multiple
 types for an expression, and has the notion of a *principal type* that is the
 most general choice from the possible inferences.  Manual type annotations can
-always specialize the type explicitly, but the automatic inference selects the
-most general type unless told otherwise.
+specialize the type explicitly, but the automatic inference selects the most
+general type unless told otherwise.
 
 OCaml does has some language extensions which strain the limits of principal
 type inference, but by and large most programs you write will never *require*
 annotations (although they sometimes help the compiler produce better error
 messages).
 
-<sidebar>
-<title>Enforcing principal typing</title>
+#### Adding type annotations to find errors
 
-You can also pass a `-principal` flag to the compiler to turn on a stricter
-principal type checking mode.  This detects risky uses of type information to
-ensure that the type inference has one principal result.  A type is considered
-risky if the success or failure of type inference depends on the order in which
-sub-expressions are typed.
+It's often said that the hardest part of writing OCaml code is getting past the
+type checker -- but once the code does compile, it works correctly the first
+time! 
+
+There are a couple of tricks to make it easier to quickly locate type errors in
+your code.  The first is to introduce manual type annotations to narrow down
+the source of your error more accurately.  These annotations shouldn't actually
+change your types and can removed once your code is correct, but act as anchors
+to locate errors while you're still writing your code.
+
+Manual type annotations are particulary useful if you use lots of
+polymorphic variants or objects.  Type inference with row polymorphism can
+generate some very large signatures, and errors tend to propagate more widely
+than if you are using more explicitly typed variants or classes.
+
+For instance, consider this broken example that expresses some simple 
+algebraic operations over integers.
+
+```ocaml
+(* broken_poly.ml *)
+
+let rec algebra =
+  function
+  | `Add (x,y) -> (algebra x) + (algebra y)
+  | `Sub (x,y) -> (algebra x) - (algebra y)
+  | `Mul (x,y) -> (algebra x) * (algebra y)
+  | `Num x     -> x
+
+let _ =
+  algebra (
+    `Add (
+      (`Num 0),
+      (`Sub (
+          (`Num 1),
+          (`Mul (
+              (`Nu 3),(`Num 2)
+            ))
+        ))
+    ))
+```
+
+There's a single character typo in the code so that it uses `Nu` instead of
+`Num`.  The resulting type error is impressive.
+
+```console
+$ ocamlc -c broken_poly.ml 
+File "broken_poly.ml", line 11, characters 10-154:
+Error: This expression has type
+         [> `Add of
+              ([< `Add of 'a * 'a
+                | `Mul of 'a * 'a
+                | `Num of int
+                | `Sub of 'a * 'a
+                > `Num ]
+               as 'a) *
+              [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ] ] ]
+       but an expression was expected of type 'a
+       The second variant type does not allow tag(s) `Nu
+```
+
+The type error is perfectly accurate, but rather verbose and with a line number
+that doesn't point to the exact location of the incorrect variant name.  The
+best the compiler can do is to point you in the general direction of the
+`algebra` function application. 
+
+This is because the type checker doesn't have enough information to match the
+inferred type of the `algebra` definition to its application a few lines down.
+It calculates types for both expressions separately, and when they don't match
+up, outputs the difference as best it can.
+
+Let's see what happens with an explicit type annotation to help the compiler
+out.
+
+```ocaml
+(* broken_poly_with_annot.ml *)
+
+type t = [
+  | `Add of t * t
+  | `Sub of t * t
+  | `Mul of t * t
+  | `Num of int
+]
+
+let rec algebra (x:t) =
+  match x with
+  | `Add (x,y) -> (algebra x) + (algebra y)
+  | `Sub (x,y) -> (algebra x) - (algebra y)
+  | `Mul (x,y) -> (algebra x) * (algebra y)
+  | `Num x     -> x
+
+let _ =
+  algebra (
+    `Add (
+      (`Num 0),
+      (`Sub (
+          (`Num 1),
+          (`Mul (
+              (`Nu 3),(`Num 2)
+            ))
+        ))
+    ))
+```
+
+This code contains exactly the same error as before, but we've added a closed
+type definition of the polymorphic variants, and a type annotation to the
+`algebra` definition.  The compiler error we get is much more useful now.
+
+```console
+$ ocamlc -i broken_poly_with_annot.ml 
+File "broken_poly_with_annot.ml", line 24, characters 14-21:
+Error: This expression has type [> `Nu of int ]
+       but an expression was expected of type t
+       The second variant type does not allow tag(s) `Nu
+```
+
+This error points directly to the correct line number that contains the typo.
+Once you fix the problem, you can remove the manual annotations if you prefer
+more succinct code.  You can also leave the annotations there of course, to
+help with future refactoring and debugging.
+
+#### Enforcing principal typing
+
+The compiler also has a stricter *principal type checking* mode that is
+activated via the `-principal` flag.  This warns about risky uses of type
+information to ensure that the type inference has one principal result.  A type
+is considered risky if the success or failure of type inference depends on the
+order in which sub-expressions are typed.
 
 The principality check only affects a few language features:
 
@@ -690,27 +862,57 @@ The principality check only affects a few language features:
 * generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
 * automatic disambiguation of record field and constructor names (since OCaml 4.1)
 
-Here's an example of principality warnings when used with polymorphic methods.
+Here's an example of principality warnings when used with record disambiguation.
+
+```ocaml
+(* non_principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f x =
+  x.bar;
+  x.foo
+```
+
+Inferring the signature with `-principal` will show you a new warning.
 
 ```console
-$ utop -principal
-# type t = < id: 'a. 'a -> 'a >;;
-type t = < id : 'a. 'a -> 'a >
+$ ocamlc -i -principal non_principal.ml 
+File "non_principal.ml", line 7, characters 4-7:
+Warning 18: this type-based field disambiguation is not principal.
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -> int
+```
 
-# let f (x : t) = x, x#id;;  
-val f : t -> t * ('a -> 'a) = <fun>
-(* safe code: the type of x is known at all its use points *)
+This example isn't principal since the inferred type for `x.foo` is guided by
+the inferred type of `x.bar`, whereas principal typing requires that each
+sub-expression's type can be calculated independently.  If the `x.bar` use is
+removed from the definition of `f`, its argument would be of type `t` and not
+`type s`.
 
-# let f x = (x : t), x#id;;
-Warning 18: this use of a polymorphic method is not principal.
-val f : t -> t * ('a -> 'a) = <fun>
-(* unsafe code: the type is only known because typing goes from left to right *)
+You can fix this either by permuting the order of the type declarations, or by
+adding an explicit type annotation.
 
-# let f x = x#id, (x : t);;
-Error: This expression has type < id : 'a; .. >
-      but an expression was expected of type t
-      The universal variable 'a0 would escape its scope
-(* just exchanging the members of the pair causes a failure *)
+```ocaml
+(* principal.ml *)
+type s = { foo: int; bar: unit }
+type t = { foo: int }
+
+let f (x:s) =
+  x.bar;
+  x.foo
+```
+
+There is now no ambiguity about the inferred types, since we've explicitly
+given the argument a type and the order of inference of the sub-expressions no
+longer matters.
+
+```console
+$ ocamlc -i -principal principal.ml 
+type s = { foo : int; bar : unit; }
+type t = { foo : int; }
+val f : s -> int
 ```
 
 Ideally, all code should systematically use `-principal`.  It reduces variance
@@ -731,15 +933,26 @@ activated.  Getting the files mixed up won't let you violate type safety, but
 can result in the type checker failing unexpectedly very occasionally.  In this
 case, just recompile with a clean source tree.
 
-</sidebar>
+### Modules and separate compilation
 
-### Separate compilation and module search paths
+The OCaml module system enables smaller components to be reused effectively in
+large projects while still retaining all the benefits of static type safety.
+We covered the basics of using modules earlier in
+[xref](#files-modules-and-programs).  The module language that operates over
+these signatures also extends to functors and first-class modules, described in
+[xref](#functors) and [xref](#first-class-modules) respectively.
 
-Modules are most useful for large applications which consist of many files (or
-*compilation units*). Modules let each file be compiled separately, thus
-minimizing recompilation after changes.  Compilation units are simply special
-cases of OCaml modules and signatures, and the relationship between the units
-can be explained in terms of the module system.
+This section discusses how the compiler implements them in more detail.
+Modules are essential for larger projects that consist of many source files
+(also known as *compilation units*).   It's impractical to recompile every
+single source file when changing just one or two files, and the module system
+minimizes such recompilation while still encouraging code reuse.
+
+#### The mapping between files and modules
+
+Individual compilation units provide a convenient way to break up a big module
+hierarchy into a collection of files.  The relationship between files and
+modules can be explained directly in terms of the module system.
 
 Create a file called `alice.ml` with the following contents.
 
@@ -755,8 +968,8 @@ and a corresponding signature file.
 val friends : Bob.t list
 ```
 
-These two files are exactly analogous to including this code directly in another
-module that references `Alice`.
+These two files are exactly analogous to including the following code directly
+in another module that references `Alice`.
 
 ```ocaml
 module Alice : sig
@@ -766,21 +979,26 @@ end = struct
 end
 ```
 
-However, `Alice` also has a reference to another module `Bob`, which must
-contain at least a `Bob.name` value and define a `Bob.t` type.
+#### Defining a module search path
 
-The type checker needs to resolve such external module references into concrete
-structures and signatures in order to unify types across module boundaries.  It
-does this by searching a list of directories for a compiled interface file
-matching that module's name.  For example, it will look for `alice.cmi` and
-`bob.cmi` on the search path, and use the first ones it encounters as the
-interfaces for `Alice` and `Bob`.
+In the example above, `Alice` also has a reference to another module `Bob`.
+For the overall type of `Alice` to be valid, the compiler also needs to check
+that the `Bob` module contains at least a `Bob.name` value and defines a
+`Bob.t` type.
 
-You can set the search path by adding the `-I` flag to the compiler
-command-line.  This can get complex when you have lots of libraries, and is the
-reason why the `ocamlfind` frontend to the compiler exists.  OCamlfind
-automates the process of turning third-party package names into concrete `-I`
-flags that are added to the compiler invocation.
+The type checker resolves such module references into concrete structures and
+signatures in order to unify types across module boundaries.  It does this by
+searching a list of directories for a compiled interface file matching that
+module's name.  For example, it will look for `alice.cmi` and `bob.cmi` on the
+search path, and use the first ones it encounters as the interfaces for `Alice`
+and `Bob`.
+
+The module search path is set by adding `-I` flags to the compiler command-line
+with the directory containing the `cmi` files as the argument.  Manually
+specifying these flags gets complex when you have lots of libraries, and is the
+reason why the OCamlfind frontend to the compiler exists.  OCamlfind automates
+the process of turning third-party package names and build descriptions into
+command-line flags that are passed to the compiler command-line.
 
 By default, only the current directory and the OCaml standard library will be
 searched for `cmi` files.  The `Pervasives` module from the standard library
@@ -842,6 +1060,19 @@ into it, just clean out your intermediate files and recompile from scratch.
 </sidebar>
 
 ### Examining the typed syntax tree
+
+<caution>
+<title>Note to reviewers: uses for the typed syntax tree?</title>
+
+We've added this section on the `-dtypedtree` and `-dparsetree` for completeness,
+but will probably remove them from the final book since we can't think of any
+concrete examples where inspecting this would be useful for the average developer.
+It's primarily useful to track down internal type checker or camlp4 extension errors.
+
+But if you can think of a good use-case to justify keeping this in the final book,
+then please leave a comment here!
+
+</caution>
 
 The compiler has a couple of advanced flags that can dump the raw output of the
 internal AST representation.  You can't depend on these flags to give the same
@@ -983,7 +1214,7 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
 ```
 
 It's not important to understand every detail of this internal form, but
-some interesting points are:
+some interesting points emerge from reading it.
 
 * There are no mention of modules or types any more.  Global values are
   created via `setglobal` and OCaml values are constructed by `makeblock`.  The
@@ -998,9 +1229,9 @@ some interesting points are:
   doesn't do any dynamic checks.  Unwise use of unsafe features such as the
   `Obj.magic` module can still easily induce crashes at this level.
 
-The first pattern match is *exhaustive*, so there are no other cases that the
-comipler needed to worry about.  What happens if we make the same code use an
-incomplete pattern match?
+The first pattern match is *exhaustive*, so there are no unknown match cases
+that the compiler needs to check for (e.g. a value greater than 3).  What
+happens if we modify the code to use an incomplete pattern match instead?
 
 ```ocaml
 (* pattern_monomorphic_incomplete.ml *)
@@ -1024,14 +1255,16 @@ $ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml
     (makeblock 0 test/1013)))
 ```
 
-The compiler has now reverted to testing the value as a set of nested
-conditionals.  The lambda code above checks to see if the value is `Alice`,
-then if it's `Bob`, and finally falls back to the default `102` return value
-for everything else.  Using exhaustive pattern matches is thus a better coding
-style at several levels: it rewards you with more useful compile-time warnings
-when you modify type definitions *and* generates more efficient runtime code too.
+The compiler has reverted to testing the value as a set of nested conditionals.
+The lambda code above first checks to see if the value is `Alice`, then if it's
+`Bob` and finally falls back to the default `102` return value for everything
+else.
 
-Finally, let's look at the same example with polymorphic variants instead of
+Exhaustive pattern matching is thus a better coding style at several levels.
+It rewards you with more useful compile-time warnings when you modify type
+definitions *and* generates more efficient runtime code too.
+
+Finally, let's look at the same code, but with polymorphic variants instead of
 normal variants.
 
 ```ocaml
@@ -1044,7 +1277,7 @@ let test v =
   | `David   -> 103
 ```
 
-The lambda form for this is the most inefficient result yet.
+The lambda form for this reveals the most inefficient result yet.
 
 ```console
 $ ocamlc -dlambda -c pattern_polymorphic.ml 
@@ -1060,15 +1293,15 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml
 We mentioned earlier in [xref](#variants) that pattern matching over
 polymorphic variants is slightly less efficient, and it should be clearer why
 this is the case now.  Polymorphic variants have a runtime value that's
-calculated by hashing the variant name, and so the compiler just tests each of
-these possible values in sequence.
+calculated by hashing the variant name, and so the compiler has to test each of
+these possible hash values in sequence.
 
 ### Benchmarking pattern matching
 
 Let's benchmark these three pattern matching techniques to quantify their
-runtime costs better.  The `Core_bench` module runs the tests thousands of
-times and also calculates statistical variance of the results.  You'll need to
-`opam install core_bench` to get the library.
+runtime costs more accurately.  The `Core_bench` module runs the tests
+thousands of times and also calculates statistical variance of the results.
+You'll need to `opam install core_bench` to get the library.
 
 ```ocaml
 (* pattern.ml: benchmark different pattern matching styles *)
@@ -1127,16 +1360,16 @@ and you'll see the results summarised in a neat table.
 ```console
 $ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
 Estimated testing time 30s (change using -quota SECS).
-┌────────────────────────────────┬───────────┬─────────────┬────────────┐
++────────────────────────────────+───────────+─────────────+────────────+
 │ Name                           │ Time (ns) │   Time 95ci │ Percentage │
-├────────────────────────────────┼───────────┼─────────────┼────────────┤
++────────────────────────────────+───────────+─────────────+────────────+
 │ Polymorphic pattern            │     22.38 │ 22.34-22.43 │     100.00 │
 │ Monomorphic incomplete pattern │     20.98 │ 20.95-21.02 │      93.77 │
 │ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
-└────────────────────────────────┴───────────┴─────────────┴────────────┘
++────────────────────────────────+───────────┴─────────────+────────────+
 ```
 
-These numbers confirm our earlier performance hypothesis obtained from
+These results confirm our earlier performance hypothesis obtained from
 inspecting the lambda code. The shortest running time comes from the exhaustive
 pattern match and polymorphic variant pattern matching is the slowest.  There
 isn't a hugely significant difference in these examples, but you can use the
@@ -1154,8 +1387,8 @@ executables.
 Pattern matching is an important part of OCaml programming. You'll often
 encounter deeply nested pattern matches over complex data structures in real
 code.  A good paper that describes the fundamental algorithms implemented in
-OCaml is the ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) ICFP 2001 paper by Fabrice
-Le Fessant and Luc Maranget.
+OCaml is ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) by
+Fabrice Le Fessant and Luc Maranget.
 
 The paper describes the backtracking algorithm used in classical pattern
 matching compilation, and also several OCaml-specific optimizations such as the
@@ -1172,23 +1405,22 @@ lightweight language construct to use in OCaml code.
 
 After the lambda form has been generated, we are very close to having
 executable code.  The OCaml tool-chain branches into two separate compilers at
-this point.  We'll describe the the `ocamlc` bytecode compiler first, which
+this point.  We'll describe the the bytecode compiler first, which
 consists of two pieces:
 
 * `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.
 * `ocamlrun` is a portable interpreter that executes the bytecode.
 
-`ocamlrun` is an interpreter that uses the OCaml stack and an accumulator to
-store values, and only has seven registers in total (the program counter, stack
-pointer, accumulator, exception and argument pointers, and environment and
-global data).
-
-The big advantage of using `ocamlc` is simplicity, portability and compilation
+The big advantage of using bytecode is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
-this results in predictable (but slow) execution speed. _TODO: more about the conversion?_
+this results in predictable (but slow) execution speed.
+
+The interpreter uses the OCaml stack and an accumulator to store values. It
+only has seven registers in total: the program counter, stack pointer,
+accumulator, exception and argument pointers, and environment and global data.
 
 You can display the bytecode instructions in textual form via `-dinstr`.  Try
-this on one of our pattern matching examples from earlier in the chapter.
+this on one of our earlier pattern matching examples.
 
 ```console
 $ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
@@ -1211,56 +1443,92 @@ L2:	closure L1, 0
 	setglobal Pattern_monomorphic_exhaustive!
 ```
 
-There are around 140 instruction opcodes in total, with many being
-optimizations for common operations such as function application at a specific
-arity.  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
+The bytecode above has been simplified from the lambda form into a set of
+simple instructions that are executed in serial by the interpreter.
 
-### Compiling OCaml bytecode 
+There are around 140 instructions in total, but most are just minor variants of
+commonly encountered operations (e.g. function application at a specific
+arity).  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
 
-`ocamlc` compiles individual `ml` files into bytecode `cmo` files.  These are
-linked together with the OCaml standard library to produce an executable
-program.  The order in which `.cmo` arguments are presented on the command line
-defines the order in which compilation units are initialized at runtime (recall
-that OCaml has no single `main` function like C does). 
+<note>
+<title>Where did the bytecode instruction set come from?</title>
 
-A typical OCaml library consists of multiple modules and hence multiple `cmo`
-files.  `ocamlc` can combine these into a single `cma` bytecode archive by
-using the `-a` flag. The objects in the library are linked as regular `cmo`
-files in the order specified when the library file was built.  However, if an
-object file within the library isn't referenced elsewhere in the program, it is
-not linked unless the `-linkall` flag forces it to be included.  This behaviour
-is analogous to how C handles object files and archives (`.o` and `.a`
-respectively).
+The bytecode interpreter is much slower than compiled native code, but is still
+remarkably performant for an interpreter without a JIT compiler.  Its
+efficiency can be traced back to Xavier Leroy's ground-breaking work in 1990 on
+["The ZINC experiment: An Economical Implementation of the ML
+Language"](http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps).
 
-### Linking OCaml bytecode
+This paper laid the theoretical basis for the implementation of an instruction
+set for a strictly evaluated functional language such as OCaml.  The bytecode
+interpreter in modern OCaml is still based on the ZINC model.  The native code
+compiler uses a different model since it uses CPU registers for function calls
+instead of always passing arguments on the stack as the bytecode interpreter
+does.
+
+Understanding the reasoning behind the different implementations of the
+bytecode interpreter and the native compiler is a very useful exercise for any
+budding language hacker.
+
+</note>
+
+### Compiling and linking bytecode 
+
+The `ocamlc` command compiles individual `ml` files into bytecode files that
+have a `cmo` extension.  The compiled bytecode files are matched with the
+associated `cmi` interface which contains the type signature exported to
+other compilation units.
+
+A typical OCaml library consists of multiple source files and hence multiple
+`cmo` files that all need to passed on the command line to use the library.
+The compiler can combine these into a more convenient archive file by using the
+`-a` flag.  Bytecode archives are denoted by the `cma` extension.
+
+The individual objects in the library are linked as regular `cmo` files in the
+order specified when the library file was built.  If an object file within the
+library isn't referenced elsewhere in the program, then it isn't included in
+the final binary unless the `-linkall` flag forces its inclusion.  This
+behaviour is analogous to how C handles object files and archives (`.o` and
+`.a` respectively).
+
+The bytecode files are then linked together with the OCaml standard library to
+produce an executable program.  The order in which `.cmo` arguments are
+presented on the command line defines the order in which compilation units are
+initialized at runtime.  Remember that OCaml has no single `main` function like
+C, so this link is order is more important than in C.
+
+### Executing bytecode
 
 The bytecode runtime comprises three parts: the bytecode interpreter, garbage
 collector, and a set of C functions that implement the primitive operations.
-Bytecode instructions are provided to call these C functions.  The OCaml linker
-produces bytecode for the standard runtime system by default, and any custom C
-functions in your code (e.g. from C bindings) require the runtime to
-dynamically load a shared library.
+The bytecode contains instructions to call these C functions when required.
 
-This can be specified as follows:
+The OCaml linker produces bytecode targeted the standard OCaml runtime by
+default, and so needs to know about any C functions that are referenced from
+other libraries that aren't loaded by default.
+
+Information about these extra libraries can be specified while linking a
+bytecode archive.
+
 
 ```console
 $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
 ```
 
 The `dllib` flag embeds the arguments in the archive file.  Any subsequent
-packages including this archive will also include the extra linking directive.
-This lets the interpreter locate the external library symbols when it executes
-the bytecode.
+packages linking this archive will also include the extra C linking directive.
+This in turn lets the interpreter dynamically load the external library symbols
+when it executes the bytecode.
 
-You can also generate a complete standalone executable that bundles the `ocamlrun`
-interpreter with the bytecode in a single binary.  This is known as the *custom
-runtime* mode, and can be built as follows.
+You can also generate a complete standalone executable that bundles the
+`ocamlrun` interpreter with the bytecode in a single binary.  This is known as
+a *custom runtime* mode and is built as follows.
 
 ```console
 $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 ```
 
-The custom mode is the most similar to native code compilation, as both
+The custom mode is the most similar mode to native code compilation, as both
 generate standalone executables.  There are quite a few other options available
 for compiling bytecode (notably with shared libraries or building custom
 runtimes).  Full details can be found in the
@@ -1365,7 +1633,7 @@ in the OCaml code.  This is explained in detail in the [interfacing with
 C](http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149) section of
 the OCaml manual.
 
-## Native code generation
+## Compiling fast native code
 
 The native code compiler is ultimately the tool that most production OCaml code
 goes through.  It compiles the lambda form into fast native code executables,
@@ -1517,11 +1785,23 @@ returning from the `caml_greaterthan` call.  Finally the return value of the
 comparison is popped from the stack and returned.
 
 <tip>
-<title>The implementation of `compare_val` in the runtime</title>
+<title>Reading the implementation of the C primitives</title>
 
-The ... TODO
+If you have a copy of the OCaml source tree handy, it's worth reading through
+the definition of `caml_greaterthan()`.  The built-in primitives for
+polymorphic comparison can be found in `caml/byterun/compare.c`.
+
+The key function is `compare_val()`, which directly examines the runtime
+representation of two OCaml values to decide which is greater.  This requires
+the header tag to be examined, and recursive structures must be tested
+step-by-step.
+
+Avoiding running all of this code is why you should try to write explicit
+comparison functions in OCaml instead.
 
 </tip>
+
+#### Benchmarking polymorphic comparison
 
 You don't have to fully understand the intricacies of assembly language to see
 that this polymorphic comparison is much heavier than the simple monomorphic
@@ -1576,26 +1856,293 @@ However, if you're building numerical code that runs many iterations in a tight
 inner loop, it's worth manually peering at the produced assembly code to see if
 you can hand-optimize it.
 
-### Building debuggable libraries
+### Debugging native code binaries
 
 The native code compiler builds executables that can be debugged using
-conventional system debuggers such as GNU `gdb`.  You'll need to compile your
+conventional system debuggers such as GNU `gdb`.  You need to compile your
 libraries with the `-g` option to add the debug information to the output, just
 as you need to with C compilers.
 
-TODO add example of gdb breakpoint use
+Extra debugging information is inserted into the output assembly when the
+library is compiled in debug mode.  These include the CFI stubs you will have
+noticed in the profiling output earlier (`.cfi_start_proc` and `.cfi_end_proc`
+to delimit an OCaml function call, for example).
 
-#### Profiling native code libraries
+#### Understanding name mangling
 
-TODOs
+So how do you refer to OCaml functions into an interactive debugger like `gdb`?
+The first thing you need to know is how function names compile down into C
+symbols; a procedure generally called *name mangling*.
 
-#### Embedding native code in libraries
+Each OCaml source file is compiled into a native object file that must export a
+unique set of symbols to comply with the C binary interface.  This means that
+any OCaml values that may be used by another compilation unit need to be mapped
+into a symbol name.  This mapping fhas to account for OCaml language features
+such as nested modules, anonymous functions and variable names that shadow each
+other.
 
-The native code compiler also supports `output-obj` operation just like the
-bytecode compiler.  The native code runtime is called `libasmrun.a`, and should
-be linked instead of the bytecode `libcamlrun.a`.
+The conversion follows some straightforward rules for named variables and
+functions:
 
-Try this out using the same files from the bytecode embedding example earlier.
+* The symbol is prefixed by `caml` and the local module name, with dots
+  replaced by underscores.
+* This is followed by a double `__` suffix and the variable name.
+* The variable name is also suffixed by a `_` and a number.  This is
+  the result of the lambda compilation that replaces each variable name
+  with a unique value within the module.  You can determine this number
+  by examining the `-dlambda` output from `ocamlopt`.
+
+Anonymous functions are hard to predict without inspecting intermediate
+compiler output.  If you need to debug them it's usually easier to modify the
+source code to let-bind the anonymous function to a variable name.
+
+#### Interactive breakpoints with the GNU debugger
+
+Let's see name mangling in action with some interactive debugging in the
+GNU `gdb` debugger.
+
+<caution>
+<title>Beware `gdb` on MacOS X</title>
+
+The examples here assume that you are running `gdb` on either Linux or FreeBSD.
+MacOS X does have `gdb` installed, but it's a rather quirky experience that
+doesn't reliably interpret the debugging information contained in the native
+binaries. This can result in function names showing up as raw symbols such as
+`.L101` instead of their more human-readable form.
+
+For OCaml 4.1, we'd recommend you do native code debugging on an alternate
+platform such as Linux, or manually look at the assembly code output to map the
+symbol names onto their precise OCaml functions.
+
+</caution>
+
+Let's write a mutually recursive function that selects alternating values from
+a list.  This isn't tail recursive and so our stack size will grow as we
+single-step through the execution.
+
+```ocaml
+(* alternate_list.ml : select every other value from an input list *)
+open Core.Std
+
+let rec take =
+  function
+  |[] -> []
+  |hd::tl -> hd :: (skip tl)
+and skip =
+  function
+  |[] -> []
+  |hd::tl -> take tl
+
+let () =
+  take [1;2;3;4;5;6;7;8;9]
+  |> List.map ~f:string_of_int
+  |> String.concat ~sep:","
+  |> print_endline
+```
+
+Compile and run this with debugging symbols. You should see the following
+output:
+
+```console
+$ ocamlfind ocamlopt -g -package core -thread -linkpkg -o alternate alternate_list.ml
+$ ./alternate
+1,3,5,7,9
+```
+
+Now we can run this interactively within `gdb`.
+
+```console
+$ gdb ./alternate
+GNU gdb (GDB) 7.4.1-debian
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /home/avsm/alternate...done.
+(gdb)
+```
+
+The `gdb` prompt lets you enter debug directives.  Let's set the program
+to break just before the first call to `take`.
+
+```console
+(gdb) break camlAlternate_list__take_69242 
+Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.
+```
+
+We used the C symbol name by following the name mangling rules defined
+earlier.  A convenient way to figure out the full name is by tab-completion.
+Just type in a portion of the name and press the `<tab>` key to see
+a list of possible completions.
+
+Once you've set the breakpoint, start the program executing.
+
+```console
+(gdb) run
+Starting program: /home/avsm/alternate
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4	  function
+```
+
+The binary has run until the first take invocation and stopped, waiting
+for further instructions.  GDB has lots of features, so let's continue
+the program and check the stacktrace after a couple of recursions.
+
+```console
+(gdb) cont
+Continuing.
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4	  function
+(gdb) cont
+Continuing.
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4	  function
+(gdb) bt
+#0  camlAlternate_list__take_69242 () at alternate_list.ml:4
+#1  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#2  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#3  0x00000000005659f7 in camlAlternate_list__entry () at alternate_list.ml:14
+#4  0x0000000000560029 in caml_program ()
+#5  0x000000000080984a in caml_start_program ()
+#6  0x00000000008099a0 in ?? ()
+#7  0x0000000000000000 in ?? ()
+(gdb) clear camlAlternate_list__take_69242
+Deleted breakpoint 1 
+(gdb) cont
+Continuing.
+1,3,5,7,9
+[Inferior 1 (process 3546) exited normally]
+```
+
+The `cont` command resumes execution after a breakpoint has paused it, `bt`
+displays a stack backtrace, and `clear` deletes the breakpoint so that the
+application can execute until completion.  GDB has a host of other features
+we won't cover here, but you view more guidelines via Mark Shinwell's talk
+on ["Real-world debugging in OCaml"](http://www.youtube.com/watch?v=NF2WpWnB-nk<).
+
+One very useful feature of OCaml native code is that C and OCaml both share the
+same stack.  This means that GDB backtraces can give you a combined view of
+what's going on in your program *and* runtime library.  This includes any calls
+to C libraries or even callbacks into OCaml from the C layer if you're in an
+embedded environment.
+
+### Profiling native code 
+
+The recording and analysis of where your application spends its execution time
+is known as *performance profiling*.
+OCaml native code binaries can be profiled just like any other C binary, by
+using the name mangling described earlier to map between OCaml variable names
+and the profiler output.
+
+Most profiling tools benefit from having some instrumentation included in the
+binary.  OCaml supports two such tools:
+
+* GNU Gprof to measure execution time and call graphs.
+* The [Perf](https://perf.wiki.kernel.org/) profiling framework in modern versions of Linux.
+
+#### Gprof
+
+Gprof produces an execution profile of an OCaml program by recording a call
+graph of which functions call each other, and recording the time these calls
+take during the program execution.
+
+Getting precise information out of Gprof requires passing the `-p` flag to the
+native code compiler when compiling *and* linking the binary.  This generates
+extra code that records profile information to a file called `gmon.out` when
+the program is executed.  This profile information then can then be examined
+using Gprof.
+
+#### Perf
+
+Perf is a more modern alternative to Gprof that doesn't require you to
+instrument the binary.  Instead, it uses hardware counters and debug
+information within the binary to record information accurately.
+
+Run Perf on a compiled binary to record information first.  We'll use our
+write barrier benchmark from earlier which measures memory allocation versus
+in-place modification.
+
+```console
+$ perf record -g ./barrier.native 
+Estimated testing time 20s (change using -quota SECS).
+┌───────────┬───────────┬─────────────────────┬────────────┐
+│ Name      │ Time (ns) │           Time 95ci │ Percentage │
+├───────────┼───────────┼─────────────────────┼────────────┤
+│ mutable   │ 7_306_219 │ 7_250_234-7_372_469 │      96.83 │
+│ immutable │ 7_545_126 │ 7_537_837-7_551_193 │     100.00 │
+└───────────┴───────────┴─────────────────────┴────────────┘
+[ perf record: Woken up 11 times to write data ]
+[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
+```
+
+When this completes, you can interactively explore the results.
+
+```console
+$ perf report -g
++  48.86%  barrier.native  barrier.native     [.] camlBarrier__test_immutable_69282
++  30.22%  barrier.native  barrier.native     [.] camlBarrier__test_mutable_69279
++  20.22%  barrier.native  barrier.native     [.] caml_modify
+```
+
+This trace broadly reflects the results of the benchmark itself.  The mutable 
+benchmark consists of the combination of the call to `test_mutable` and the
+`caml_modify` write barrier function in the runtime.  This adds up to slightly
+over half the execution time of the application.
+
+Perf has a growing collection of other commands that let you archive these
+runs and compare them against each other.  You can read more on the [homepage](http://perf.wiki.kernel.org).
+
+<tip>
+<title>Using the frame-pointer to get more accurate traces</title>
+
+Although Perf doesn't require adding in explicit probes to the binary,
+it does need to understand how to unwind function calls so that the kernel
+can accurately record the function backtrace for every event.
+
+OCaml stack frames are too complex for Perf to understand directly, and so
+it needs the compiler to fall back to using the same conventions as C for
+function calls.  On 64-bit Intel systems, this means that a special register
+known as the *frame pointer* is used to record function call history.
+
+Using the frame pointer in this fashion means a slowdown (typically around
+3-5%) since it's no longer available for general-purpose use.  OCaml 4.1 thus
+makes the frame pointer an optional feature that can be used to improve the
+resolution of Perf traces.
+
+OPAM provides a compiler switch that compiles OCaml with the frame pointer
+activated.
+
+```console
+$ opam switch 4.01.0dev+fp
+```
+
+Using the frame pointer changes the OCaml calling convention, but OPAM takes
+care of recompiling all your libraries with the new interface.  You can read
+more about this on the OCamlPro
+[blog](http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html).
+
+</tip>
+
+### Embedding native code in C
+
+The native code compiler normally links a complete executable, but can also
+output a standalone native object file just as the bytecode compiler can.  This
+object file has no further dependencies on OCaml except for the runtime library.
+
+The native code runtime is a different library from the bytecode one and is
+installed as `libasmrun.a` in the OCaml standard library directory. 
+
+Try this custom linking by using the same source files from the bytecode
+embedding example earlier in this chapter.
 
 ```console
 $ ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml
@@ -1614,14 +2161,14 @@ to OCaml code beyond the runtime library, just as with the bytecode runtime.
 <tip>
 <title>Activating the debug runtime</title>
 
-Despite your best efforts, it is easy to introduce a bug into C bindings that
-cause heap invariants to be violated.  OCaml includes a variant of the runtime
-library `libasmrun.a` that is compiled with debugging symbols.  This is
-available as `libasmrund.a` and includes extra memory integrity checks upon
-every garbage collection cycle.  Running these often will abort the program
-near the point of corruption and helps isolate the bug.
+Despite your best efforts, it is easy to introduce a bug into some components
+such as C bindings that cause heap invariants to be violated.  OCaml includes a
+`libasmrund.a` variant of the runtime library that is compiled with extra
+debugging checks that perform extra memory integrity checks during every
+garbage collection cycle.  Running these extra checks will abort the program
+nearer the point of corruption and help isolate the bug in the C code.
 
-To use this debug library, just link with `-runtime-variant d` set:
+To use the debug library, just link your program with the `-runtime-variant d` flag.
 
 ```
 $ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c

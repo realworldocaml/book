@@ -86,7 +86,7 @@ acting as a case-analysis tool, breaking down the possibilities into a
 pattern-indexed list of cases.  Second, it lets you name
 sub-structures within the data-structure being matched.  In this case,
 the variables `hd` and `tl` are bound by the pattern that defines the
-first case of the match statment.  Variables that are bound in this
+first case of the match statement.  Variables that are bound in this
 way can be used in the expression to the right of the arrow for the
 pattern in question.
 
@@ -344,7 +344,7 @@ lists are of mismatched length.
 Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 <> 4 ").
 ```
 
-`List.fold` is the most complicated of the three, takin three
+`List.fold` is the most complicated of the three, taking three
 arguments: a list to process, an initial accumulator value, and a
 function for updating the accumulator with the information from a list
 element.  `List.fold` walks over the list from left to right, updating
@@ -507,7 +507,7 @@ file extensions in the current directory, piping the results through
 `List.dedup` to remove duplicates.  Note that this example also uses
 some functions from other modules, including `Sys.ls_dir` to get a
 directory listing, and `String.rsplit2` to split a string on the
-rightmost appearance ofa  given character.
+rightmost appearance of a given character.
 
 ```ocaml
 # List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
@@ -670,7 +670,7 @@ that computes the length of a given list plus a given `n`.  In
 practice, `n` acts as an accumulator in which the answer is built up,
 step by step.  As a result, we can do the additions along the way
 rather than doing them as we unwind the nested sequence of function
-calls, as we did in our first implemenation of `length`.
+calls, as we did in our first implementation of `length`.
 
 The advantage of this approach is that the recursive call in
 `length_plus_n` is a _tail call_.  We'll explain more precisely what
@@ -693,7 +693,7 @@ anything with the value returned by the callee except to return it.
 The tail-call optimization makes sense because, when a caller makes a
 tail call, the caller's stack frame need never be used again, and so
 you don't need to keep it around.  Thus, instead of allocating a new
-stack frame for the callee, the compiler is free to resuse the
+stack frame for the callee, the compiler is free to reuse the
 caller's stack frame.
 
 Tail recursion are important for more than just lists.  Ordinary
