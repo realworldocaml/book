@@ -423,13 +423,9 @@ to load it every time you start `utop`, by adding this to it:
 #use "topfind"
 #camlp4o
 #require "core.top"
+#require "core.syntax"
 #require "core_extended"
 #require "async"
-#require "sexplib.syntax"
-#require "fieldslib.syntax"
-#require "variantslib.syntax"
-#require "comparelib.syntax"
-#require "bin_prot.syntax"
 open Core.Std
 ```
 
