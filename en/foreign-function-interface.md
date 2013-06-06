@@ -256,8 +256,10 @@ used to read and write OCaml values of type `t`.  There are various uses of
 * constructing pointers for reading and writing locations in C-managed storage using `ptr`.
 * describing the fields of structured types built with `structure` and `union`.
 
-The other core types follow the same style, with the type parameter defining
-the corresponding OCaml value for that C type.
+Pointers are at the heart of C, so they are necessarily part of Ctypes, which
+provides support for pointer arithmetic, pointer conversions, reading and
+writing through pointers, and passing and returning pointers to and from
+functions.  Ctypes also provides support for structures and unions.
 
 Type             Purpose
 ----             -------
@@ -334,24 +336,45 @@ representation of values, which we explain later in
 * OCaml only supports double-precision floating point numbers, so the C `float` and
   `double` functions both map to the OCaml `float` type.
 
-### Declaring strings, arrays and pointers
+### Using views to map character buffers
 
-Ctypes also contains the more advanced C types that build over the basic scalar C types defined earlier.
+Views create new C type descriptions that have special behaviour when used to
+read or write C values. For instance, the `string` view wraps the C type `char
+*` (written as `ptr char` in OCaml), and converts between the C and OCaml
+string representations each time the value is written or read.
+
+The `view` function is predictably used to create views, with the following
+signature. 
+
+```ocaml
+val view : read:('a -> 'b) -> write:('b -> 'a) -> 'a typ -> 'b typ
+val string_of_char_ptr : char ptr -> string
+val char_ptr_of_string : string -> char ptr
+val string : string typ
+```
+
+The definition of `string` uses views as follows.
+
+```ocaml
+let string = 
+  view 
+    ~read:string_of_char_ptr 
+    ~write:char_ptr_of_string 
+    (char ptr)
+```
+
+Views can often make slightly awkward C types more natural to map into OCaml
+types.
+
+### Pointers and arrays
+
 
 ```ocaml   
 (* Ctypes 3/4 *)
-val string : string typ
 val abstract : size:int -> alignment:int -> 'a abstract typ
 val array : int -> 'a t -> 'a array typ
 val ptr : 'a t -> 'a ptr typ
 ```
-
-Strings in C are null-terminated character arrays, while OCaml strings have a
-fixed-length specified in the value header. The `string` function creates a
-safe mapping between these two representations by copying the data to and from
-OCaml strings and C character buffers.  This avoids any problems with the
-garbage collector relocating buffers that a C library expects to remain
-immovable.
 
 Arrays and pointers can be built from basic types by using the corresponding
 `array` and `ptr` functions.  The `abstract` function accepts size and
@@ -641,4 +664,4 @@ detail here.
 
 ## Callbacks between C and OCaml
 
-TODO: the fts(3) interface.
+
