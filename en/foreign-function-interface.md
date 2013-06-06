@@ -232,98 +232,165 @@ Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not fou
 ## Defining basic C formats from OCaml
 
 `Ctypes` wouldn't be very interesting if it were limited to only defining basic
-C types. You can also build up more complex C structures and unions in OCaml as
+C types. You can build up more complex C structures and unions using it as
 well.
 
-```ocaml
-(* Ctypes *)
-type 'a typ        (** Basic C type  *)
-type 'a ptr        (** C pointer *)
-type 'a array      (** C array of 'a values *)
-type 'a structure  (** C `struct` *)
-type 'a union      (** C `union` *)
-type 'a abstract   (** Abstract C pointer *)
-```
+### Defining basic scalar types
 
-The module also defines constructors for the familiar C basic types.
-These constructors build a value of `Ctype.FFi.C.typ` that represents
-that basic C type.
+Let's go over over some of the basic Ctypes definitions first.
 
 ```ocaml
-(* Ctypes.Ffi.C 1/3 *)
-module Type : sig
-  type 'a t = 'a typ 
-  
-  val void  : unit t
-  val char : char t
-  val schar : int t
-  val float : float t
-  val double : float t
-  val short : int t
-  val int   : int t
-  val long  : long t
-  val llong  : llong t
-  val nativeint : nativeint t
-  val int8_t : int t
-  val int16_t : int t
-  val int32_t : int32 t
-  val int64_t : int64 t
-...
+(* Ctypes 1/4 *)
+type 'a typ
 ```
 
-These functions return an `'a typ` where the `'a` component is the OCaml
-representation of the C type. For example, OCaml only supports double-precision
-floating point numbers and so the C `float` and `double` functions both map to
-the OCaml `float` type.
+This is the type of values representing C types.  There are two types associated
+with each `typ` value: the C type used to store and pass values and the
+corresponding OCaml type.
 
-The `Ffi.Unsigned` and `Ffi.Signed` modules provide optimized implementations
-of C types such as `llong` (for `long long` 64-bit values) or `int32_t` (for
-signed 32-bit values).
-The module also defines some more advanced C types that aren't straightforward
-mappings to and from OCaml.
+The `'a` type parameter indicates the OCaml type, so a value of type `t typ` is
+used to read and write OCaml values of type `t`.  There are various uses of
+`typ` values within Ctypes.
+
+* constructing function types for binding native functions using the `Foreign` module, as shown earlier.
+* constructing pointers for reading and writing locations in C-managed storage using `ptr`.
+* describing the fields of structured types built with `structure` and `union`.
+
+The other core types follow the same style, with the type parameter defining
+the corresponding OCaml value for that C type.
+
+Type             Purpose
+----             -------
+
+`'a ptr`         The type of pointer values, used to read and write values of type '`a' at particular addresses.
+`'a array`       C array
+`'a structure`   C `struct` types
+`'a union`       C `union` types
+'`a abstract`    The type of abstract values, used represent values whose type varies from platform to platform.
+
+
+Abstract types are typically used to interface with platform-dependent
+definitions often found in system headers.  For example, the type `pthread_t`
+is a pointer on some platforms, an integer on other platforms, and a `struct`
+on a third set of platforms.  One way to deal with this is to have build-time
+code which interrogates the C type in some way to determine an appropriate
+representation.  Another way is to use `abstract` and leave the representation
+opaque.
+
+<caution>
+<title>Abstract values can't be passed by value</title>
+
+Although `pthread_t` is a convenient example since the type used to implement
+it varies significantly across platforms, it's not actually a good match for
+`abstract` since values of type `pthread_t` are passed and returned by value
+and so can't be fully abstract.
+
+</caution>
+
+Ctypes also defines constructors for the familiar C scalar types.
+
+```ocaml
+(* Ctypes.Ffi.C 2/4 *)
+val void  : unit typ
+val char : char typ
+val schar : int typ
+val short : int typ
+val int   : int typ
+val long  : long typ
+val llong  : llong typ
+val nativeint : nativeint typ
+
+val int8_t : int typ
+val int16_t : int typ
+val int32_t : int32 typ
+val int64_t : int64 typ
+val uchar : uchar typ
+val uchar : uchar typ
+val uint8_t : uint8 typ
+val uint16_t : uint16 typ
+val uint32_t : uint32 typ
+val uint64_t : uint64 typ
+val size_t : size_t typ
+val ushort : ushort typ
+val uint : uint typ
+val ulong : ulong typ
+val ullong : ullong typ
+
+val float : float typ
+val double : float typ
+```
+
+These return an `'a typ` where the `'a` component is the OCaml representation
+of the C type. Some of these mappings are due to OCaml's in-memory
+representation of values, which we explain later in
+[xref](#memory-representation-of-values).
+
+* Void values appear in OCaml as the `unit` type, so using `void` in an argument 
+  or result type specification produces a function which accepts or returns unit.
+  Dereferencing a pointer to `void` is an error, as in C, and will raise the `IncompleteType` exception.
+* The C `size_t` type is an alias for one of the unsigned integer types.  The actual 
+  size and alignment requirements for `size_t` varys between platforms. Ctypes provides
+  an OCaml `size_t` type that is aliased to the appropriate integer type.
+* OCaml only supports double-precision floating point numbers, so the C `float` and
+  `double` functions both map to the OCaml `float` type.
+
+### Declaring strings, arrays and pointers
+
+Ctypes also contains the more advanced C types that build over the basic scalar C types defined earlier.
 
 ```ocaml   
-(* Ctypes.Ffi.C 2/3 *)
-  val string : string t
-  val abstract : size:int -> alignment:int -> 'a abstract t
-  val array : int -> 'a t -> 'a array t
-  val ptr : 'a t -> 'a ptr t
+(* Ctypes 3/4 *)
+val string : string typ
+val abstract : size:int -> alignment:int -> 'a abstract typ
+val array : int -> 'a t -> 'a array typ
+val ptr : 'a t -> 'a ptr typ
 ```
 
 Strings in C are null-terminated character arrays, while OCaml strings have a
 fixed-length specified in the value header. The `string` function creates a
 safe mapping between these two representations by copying the data to and from
-OCaml strings and C character buffers.
+OCaml strings and C character buffers.  This avoids any problems with the
+garbage collector relocating buffers that a C library expects to remain
+immovable.
 
 Arrays and pointers can be built from basic types by using the corresponding
 `array` and `ptr` functions.  The `abstract` function accepts size and
 alignment requirements and ensures that these are satisfied when this type is
-used in a function call.  Notice that the result types of these functions all
-share the same `Ffi.Type.C.t` type as the basic C type definitions, which means
-that they can all be used interchangeably.
+used in a function call.
 
-The next step is to group collections of C types into function definitions,
-which are represented by type `'a Ffi.Type.f`.
+Notice that the result types of these functions all share the same `Ctypes.typ`
+type that the scalar type definitionss.  This means that they can be used
+interchangeably, for example to create an `float array typ` to represent a
+buffer of floating-point numbers.
+
+### Assembling function declarations
+
+The next step is to arrange sets of C types into function definitions that
+match the C function calls.  A value of type `'a fn` is used to bind to C
+functions and to describe the type of OCaml functions passed to C.
 
 ```ocaml
-(* Ctypes.Ffi.C 3/3 *)
-  type 'a f
-  val ( @-> ) : 'a t -> 'b f -> ('a -> 'b) f
-  val returning : 'a t -> 'a f
-  val funptr : ('a -> 'b) f -> ('a -> 'b) t
+(* Ctypes.Ffi.C 4/4 *)
+type 'a fn
+val ( @-> ) : 'a typ -> 'b fn -> ('a -> 'b) fn
+val returning : 'a typ -> 'a fn
+val funptr : ?name:string -> ('a -> 'b) fn -> ('a -> 'b) typ
 ```
 
-Sequences of `'a typ` values are constructed by using the `@->` and `returning`
-functions.  You can even exchange function pointers between OCaml and C by
-wrapping the OCaml callback using `funptr`.  The library takes care of the
-garbage collector interface to ensure that the OCaml value isn't moved around
-while the C library is holding a reference to the value.  We'll come back to an
-example of using `funptr` later in the chapter.
+A function is declared by composing sequences of `'a typ` values using the
+`@->` operator, and closing it with `returning` to define the return type.
+
+The ctypes library, like C itself, distinguishes *functions* and *function
+pointers*. Functions are not first class: it isn't possible to use them as
+arguments or return values of calls, or store them in addressable memory.
+Function pointers are first class, and so have none of these restrictions.
+Function pointers are defined using `funptr` and can be passed around as any
+other `typ` value in argument lists.
 
 ### Arrays, structures and unions
 
 Arrays in C are contiguous blocks of the same value.  Any of the basic types
-defined earlier can be allocated as blocks via the `Ffi.C.Type.Array` module.
+defined earlier can be allocated as blocks via the `Ctypes.Array` module.
 
 ```ocaml
 module Array : sig
@@ -348,16 +415,17 @@ into a `ptr` pointer to the head of buffer, which can be useful if you need to
 pass the pointer and size arguments separately to a C function.
 
 Structures in C can contain a mixture of types, and, like OCaml records, their
-order is significant.  The `Ffi.C.Type.Struct` module defines combinators to
-make this definition as easy basic types were.  Let's look at an with an
-example by binding some time-related UNIX functions that use C structures
-in their interface.
+order is significant.  The `Ctypes.Struct` module defines combinators to
+make this definition as easy as using the scalar types.
 
-### Example: binding UNIX date functions
+Let's look at an example by binding some time-related UNIX functions that use C
+structures in their interface.
 
-The UNIX standard C library defines several useful time and date functions 
-in `<time.h>` (usually found in `/usr/include` on a Linux or MacOS X system).
-The `localtime` function has the following signature and return value:
+#### Example: binding UNIX date functions
+
+The UNIX standard C library defines several useful time and date functions in
+`<time.h>` (usually found in `/usr/include` on a Linux or MacOS X system).  The
+`localtime` function has the following signature and return value:
 
 ```c
 /* /usr/include/time.h */
@@ -389,10 +457,9 @@ The `time_t` and many other standard POSIX types are already provided by the
 `struct tm`:
 
 ```ocaml
-open Ffi.C
-open Type
+(* ffi_date.ml *)
+open Ctypes
 open PosixTypes
-open Struct
 
 type tm
 let tm = structure "tm"
@@ -405,72 +472,172 @@ let tm_year  = tm *:* int (* year *)
 let tm_wday  = tm *:* int (* day of the week *)
 let tm_yday  = tm *:* int (* day in the year *)
 let tm_isdst = tm *:* int (* daylight saving time *)
-let () = seals (tm : tm structure typ)
+let () = seal (tm : tm structure typ)
 ```
 
-This is a fairly mechanical translation from the C structure by using the
-magic of the `*:*` combinator provided by the `Ffi.C.Struct` module.  The
-structure is initialised in the `tm` variable via the `structure` allocator.
-The fields of the structure are then added in sequence. Each new field mutates
-the `tm` structure to append its name and offset.  The structure is finalized
-via `seals` when all the fields have been added, and the structure can now
-be used.
+This code looks like a fairly mechanical translation from the C structure
+definition thanks to the magic of the Ctypes `*:*` combinator.
+
+The `tm` structure is initialised via the `structure` allocator and its fields
+are added sequentially. Every invocation of `*:*` mutates `tm` to record its
+type and offset within the structure.  The structure is finalized via `seal`
+after all the fields have been added.  A sealed structure has a concrete size
+and alignment and can now be used in other type definition.
 
 The OCaml definitions of `time` and `localtime` are now straightforward calls
 to `foreign`, just like our earlier `ncurses` example.
 
 ```ocaml
-let time = foreign "time" (ptr time_t @-> syscall time_t)
-let asctime = foreign "asctime" (ptr tm @-> returning string)
-let localtime = foreign "localtime" (ptr time_t @-> returning (ptr tm))
+open Foreign
+
+let time =
+  foreign "time" (ptr time_t @-> returning_checking_errno time_t)
+
+let asctime =
+  foreign "asctime" (ptr tm @-> returning string)
+
+let localtime =
+  foreign "localtime" (ptr time_t @-> returning (ptr tm))
 ```
 
 The OCaml signature for this definition looks like this:
 
 ```ocaml
-open Ffi.C
-type tm
-val tm : tm structure typ
-val tm_sec : (int, tm) Struct.field
-val tm_min : (int, tm) Struct.field
-val tm_hour : (int, tm) Struct.field
-val tm_mday : (int, tm) Struct.field
-val tm_mon : (int, tm) Struct.field
-val tm_year : (int, tm) Struct.field
-val tm_wday : (int, tm) Struct.field
-val tm_yday : (int, tm) Struct.field
-val tm_isdst : (int, tm) Struct.field
+(* ffi_date.mli *)
 
-val time : PosixTypes.time_t ptr -> PosixTypes.time_t
-val localtime : PosixTypes.time_t ptr -> tm structure ptr
-val asctime : PosixTypes.time_t ptr -> string
+open Ctypes
+open PosixTypes
+
+type tm
+val tm_sec : (int, tm structure) field
+val tm_min : (int, tm structure) field
+val tm_hour : (int, tm structure) field
+val tm_mday : (int, tm structure) field
+val tm_mon : (int, tm structure) field
+val tm_year : (int, tm structure) field
+val tm_wday : (int, tm structure) field
+val tm_yday : (int, tm structure) field
+val tm_isdst : (int, tm structure) field
+
+val time : time_t ptr -> time_t
+val asctime : tm structure ptr -> string
+val localtime : time_t ptr -> tm structure ptr
 ```
 
-Some of the FFI types are still exposed in this signature due to the manual
-memory interface required by the C libraries.  The OCaml `time` and `localtime`
-can be used by allocating external memory and constructing values of type
-`time_t ptr`.
+The structure fields are exposed as separate values to provide a way to 
+extract their values from a buffer at runtime.  Let's see how to tie
+these functions together.
 
 ```ocaml
-let () =
-  let timep = Ptr.allocate ~count:1 time_t in
+let () = begin
+  let timep = allocate_n ~count:1 time_t in
   let time = time timep in
+  assert (time = !@timep);
   let tm = localtime timep in
+  Printf.printf "tm.tm_mon  = %d\n" (getf !@tm tm_mon);
+  Printf.printf "tm.tm_year = %d\n" (getf !@tm tm_year);
   print_endline (asctime tm)
+end
 ```
 
-The `Ptr.allocate` function allocates memory via `malloc` and creates an OCaml
-value to point to this external memory buffer.  This OCaml value (`timep` in the
-example) has a finalizer function which frees the external memory when it is
-garbage collected.  The `timep` pointer is passed into the `time` library call,
-which modifies it in-place.  The same pointer is subsequently passed to
-`localtime`, whose return `tm` structure is converted into an OCaml string via
-the `asctime` function.   The garbage collector is free to free `timep` during
-the next collection cycle.
+The `allocate_n` is analagous to a type-safe version of the POSIX `calloc`
+function.  The freshly allocated `timep` buffer is automatically garbage
+collected as usual when it's no longer referenced within the OCaml code.
 
-Unions in C are a collection of named structures that can be mapped onto the
-same memory.  They are also supported in the `ctypes` library via the
-`Ffi.C.Union` module, although we won't go into more detail here.
+The `timep` pointer is passed into the `time` library call which modifies it
+in-place (and, due to a quirky historical interface, also returns a pointer to
+the same buffer).  This duplicated return value gives us an excuse to try out
+the `!@` operator, which dereferences the structure pointer and provides access
+to the structure value.
+
+The same `timep` pointer is subsequently passed to `localtime`, which returns a
+pointer to a `tm` structure.  We dereference a couple of its fields and print
+them from OCaml, and then pass it to `asctime` to print a nice human-readable
+time.
+
+
+<sidebar>
+<title>Why do we need to use `returning`?</title>
+
+The alert reader may be curious why all these function definitions have to be
+terminated by `returning`.
+
+```ocaml
+val time: ptr time_t @-> returning time_t
+val difftime: time_t @-> time_t @-> returning double
+```
+
+The `returning` function may appear superfluous here. Why couldn't we simply
+give the types as follows?
+
+``` ocaml
+val time: ptr time_t @-> time_t
+val difftime: time_t @-> time_t @-> double
+```
+
+The reason involves higher types and two differences between the way that
+functions are treated in OCaml and C.
+Functions are first-class values in OCaml, but not in C. For example, in C,
+it is possible to return a function pointer from a function, but not to return
+an actual function.
+
+Secondly, OCaml functions are typically defined in a curried style. The signature of 
+a two-argument function is written as follows:
+
+``` ocaml
+val curried : int -> int -> int
+```
+
+but this really means
+
+``` ocaml
+val curried : int -> (int -> int)
+```
+
+and the arguments can be supplied one at a time to create a closure.  In
+contrast, C functions receive their arguments all at once.  The equivalent C
+function type is the following:
+
+```c
+int uncurried_C(int, int);
+```
+
+and the arguments must always be supplied together:
+
+```c
+uncurried_C(3, 4);
+```
+
+A C function that's written in curried style looks very different:
+
+```c
+/* A function that accepts an int, and returns a function pointer that
+   accepts a second int and returns an int. */
+typedef int (function_t)(int);
+function_t *curried_C(int);
+
+/* supply both arguments */
+curried_C(3)(4);
+
+/* supply one argument at a time */
+function_t *f = curried_C(3); f(4);
+```
+
+The OCaml type of `uncurried_C` when bound by Ctypes is `int -> int -> int`: a
+two-argument function.  The OCaml type of `curried_C` when bound by `ctypes` is
+`int -> (int -> int)`: a one-argument function that returns a one-argument
+function.
+
+In OCaml, of course, these types are absolutely equivalent.  Since the OCaml
+types are the same but the C semantics are quite different, we need some kind
+of marker to distinguish the cases.  This is the purpose of `returning` in
+function definitions.
+
+</sidebar>
+
+Unions in C are named structures that can be mapped onto the same underlying
+memory.  They are also fully supported in in Ctypes, but we won't go into more
+detail here.
 
 ## Callbacks between C and OCaml
 
