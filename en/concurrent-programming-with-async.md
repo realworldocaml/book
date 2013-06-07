@@ -3,10 +3,10 @@
 The logic of building programs that interact with the outside world is
 often dominated by waiting: waiting for the click of a mouse, or for
 data to be fetched from disk, or for space to be available on an
-outgoing network buffer.  Even mildly sophisticated
-interactive applications are typically _concurrent_, needing to wait
-for multiple different events at the same time, responding immediately
-to whatever event happens first.
+outgoing network buffer.  Even mildly sophisticated interactive
+applications are typically _concurrent_, needing to wait for multiple
+different events at the same time, responding immediately to whatever
+event happens first.
 
 A common approach to concurrency is to use preemptive system threads,
 which is the most common solution in languages like Java or C#.  In
@@ -89,7 +89,7 @@ val contents : string Deferred.t = <abstr>
 The value in `contents` isn't yet determined in part because there's
 nothing running that could do the necessary I/O.  When using Async,
 processing of I/O and other events is handled by the Async scheduler.
-When writing a stand-along program, you need to start the scheduler
+When writing a stand-alone program, you need to start the scheduler
 explicitly, but utop knows about Async, and can start the scheduler
 automatically.  More than that, utop knows about deferred values, and
 when you type in an expression of type `Deferred.t`, it will make sure
@@ -113,9 +113,9 @@ let's consider the type-signature of bind.
 ```
 
 Thus, `Deferred.bind d f` takes a deferred value `d` and a function f
-that is to be run with value of `d` once it's determined.  The call to
-`Deferred.bind` returns a new deferred that becomes determined when
-the deferred returned by `f` is determined.  It also implicitly
+that is to be run with the value of `d` once it's determined.  The
+call to `Deferred.bind` returns a new deferred that becomes determined
+when the deferred returned by `f` is determined.  It also implicitly
 registers with the scheduler an _Async job_ that is responsible for
 running `f` once `d` is determined.
 
@@ -148,9 +148,9 @@ val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
 In the above we've dropped the parenthesis around the function on the
-right-hand side of the bind, and we've didn't add a level of
-indentation for the contents of that function.  This is standard
-practice for using the bind operator.
+right-hand side of the bind, and we didn't add a level of indentation
+for the contents of that function.  This is standard practice for
+using the bind operator.
 
 Now let's look at another potential use of bind.  In this case, we'll
 write a function that counts the number of lines in a file.
@@ -351,13 +351,13 @@ let rec copy_blocks buffer r w =
 ```
 
 Bind is used in the above code to sequence the operations: first, we
-call `Reader.read` to get a block of input, then, when that's complete
-and if a new block was returned, we write that block to the writer.
-Finally, we wait until the writer's buffers are flushed, waiting on
-the deferred returned by `Writer.flushed`, at which point we recur.
-If we hit an end-of-file condition, the loop is ended.  The deferred
-returned by a call to `copy_blocks` becomes determined only once the
-end-of-file condition is hit.
+call `Reader.read` to get a block of input.  Then, when that's
+complete and if a new block was returned, we write that block to the
+writer.  Finally, we wait until the writer's buffers are flushed,
+waiting on the deferred returned by `Writer.flushed`, at which point
+we recur.  If we hit an end-of-file condition, the loop is ended.  The
+deferred returned by a call to `copy_blocks` becomes determined only
+once the end-of-file condition is hit.
 
 One important aspect of how this is written is that it uses
 _pushback_, which is to say that if the writer can't make progress
@@ -365,6 +365,16 @@ writing, the reader will stop reading.  If you don't implement
 pushback in your servers, then a stopped client can cause your program
 to leak memory, since you'll need to allocate space for the data
 that's been read in but not yet written out.
+
+Another memory leak you might be concerned with is the chain of
+deferreds that is built up as you go through the loop.  After all,
+this code constructs an ever-growing chain of binds, each of which
+creates a deferred.  In this case, however, all of the deferreds
+should become determined precisely when the final deferred in the
+chain is determined, in this case, when the `Eof` condition is hit.
+Because of this, we could safely replace all of these deferreds with a
+single deferred.  Async has logic to do just this, which is
+essentially a form of tail-call optimization.
 
 `copy_blocks` provides the logic for handling a client connection, but
 we still need to set up a server to receive such connections and
@@ -374,7 +384,7 @@ and servers.
 
 ```ocaml
 (** Starts a TCP server, which listens on the specified port, invoking
-    copy_lines every time a client connects. *)
+    copy_blocks every time a client connects. *)
 let run () =
   let buffer = String.create (16 * 1024) in
   let host_and_port =
