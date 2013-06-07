@@ -12,12 +12,13 @@ let rec copy_blocks buffer r w =
     copy_blocks buffer r w
 
 let run () =
-  let buffer = String.create (16 * 1024) in
   let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
       (Tcp.on_port 8765)
-      (fun _addr r w -> copy_blocks buffer r w)
+      (fun _addr r w ->
+         let buffer = String.create (16 * 1024) in
+         copy_blocks buffer r w)
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
   Deferred.never ()
