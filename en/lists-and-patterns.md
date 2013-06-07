@@ -42,8 +42,8 @@ the box containing `3`) points to the empty list.
 +---+---+   +---+---+   +---+---+
 ```
 
-The `::` operator essentially adds a new block to the picture above.
-Such a block contains two things: a reference to the data in that list
+Each `::` essentially adds a new block to the picture above.  Such a
+block contains two things: a reference to the data in that list
 element, and a reference to the remainder of the list.  This is why
 `::` can extend a list without modifying it; extension allocates a new
 list element but doesn't need to change any of the existing ones, as
@@ -193,23 +193,49 @@ incrementing an integer by one.  The first is implemented with a match
 statement, and the second with a sequence of if statements.
 
 ```ocaml
-let plus_one x =
-  match x with
-  | 0 -> 1
-  | 1 -> 2
-  | 2 -> 3
-  | _ -> x + 1
+# let plus_one_match x =
+    match x with
+    | 0 -> 1
+    | 1 -> 2
+    | 2 -> 3
+    | _ -> x + 1
 
-let plus_one_slow x =
-  if      x = 0 then 1
-  else if x = 1 then 2
-  else if x = 2 then 3
-  else x + 1
+  let plus_one_if x =
+    if      x = 0 then 1
+    else if x = 1 then 2
+    else if x = 2 then 3
+    else x + 1
+  ;;
+val plus_one_match : int -> int = <fun>
+val plus_one_if : int -> int = <fun>
 ```
 
-If you benchmark these, you'll see that `plus_one_slow` is about 35%
-slower than `plus_one`, and the advantage gets larger as the number of
-cases increases.
+Note the use of `_` in the above match.  This is a wild-card pattern
+that matches any value, but without binding a variable name to the
+value in question.
+
+If you benchmark these functions, you'll see that `plus_one_if` is
+considerably slower than `plus_one_match`, and the advantage gets
+larger as the number of cases increases.  Here, we'll benchmark these
+functions using the `core_bench` library.
+
+```ocaml
+# #require "core_bench";;
+# open Core_bench.Std;;
+# [ Bench.Test.create ~name:"plus_one_match" (fun () ->
+      ignore (plus_one_match 10))
+  ; Bench.Test.create ~name:"plus_one_if" (fun () ->
+      ignore (plus_one_if 10)) ]
+  |> Bench.bench
+  ;;
+Estimated testing time 20s (change using -quota SECS).
+┌────────────────┬───────────┬──────────┐
+│ Name           │ Time (ns) │ % of max │
+├────────────────┼───────────┼──────────┤
+│ plus_one_match │    369.38 │    83.40 │
+│ plus_one_if    │    442.88 │   100.00 │
+└────────────────┴───────────┴──────────┘
+```              
 
 Here's another less artificial example.  We can rewrite the `sum`
 function we described earlier in the chapter using an `if` statement
@@ -217,24 +243,44 @@ rather than a match.  We can then use the functions `is_empty`,
 `hd_exn` and `tl_exn` from the `List` module to deconstruct the list,
 allowing us to implement the entire function without pattern matching.
 
-```
-let rec sum_slow l =
-  if List.is_empty l then 0
-  else List.hd_exn l + sum_slow (List.tl_exn l)
-;;
+```ocaml
+# let rec sum_if l =
+    if List.is_empty l then 0
+    else List.hd_exn l + sum_if (List.tl_exn l)
+  ;;
+val sum_if : int list -> int = <fun>
 ```
 
-In this case, the match-based implementation is 70% faster than the
-one using if.  The difference comes because we need to effectively do
-the same work multiple times, since each function we call has to
-re-examine the first element of the list to determine whether or not
-it's the empty cell.  With a match statement, this work happens
-exactly once per list element.
+Again, we can benchmark these to see the difference.
 
-Generally, pattern matching is typically more efficient than the
-alternatives you might code by hand.  One notable exception is matches
-over strings, which are in fact tested sequentially.  But most of the
-time, using pattern matching is a clear performance win.
+```ocaml
+# let numbers = List.range 0 1000 in
+  [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
+  ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
+  |> Bench.bench
+  ;;
+Estimated testing time 20s (change using -quota SECS).
+┌────────┬───────────┬──────────┐
+│ Name   │ Time (ns) │ % of max │
+├────────┼───────────┼──────────┤
+│ sum_if │   650_463 │   100.00 │
+│ sum    │   177_740 │    27.32 │
+└────────┴───────────┴──────────┘
+- : unit = ()
+```
+
+In this case, the match-based implementation is more than three times
+faster than the one using if.  The difference comes because we need to
+effectively do the same work multiple times, since each function we
+call has to re-examine the first element of the list to determine
+whether or not it's the empty cell.  With a match statement, this work
+happens exactly once per list element.
+
+Generally, pattern matching is more efficient than the alternatives
+you might code by hand.  One notable exception is matches over
+strings, which are in fact tested sequentially, and which for long
+lists can be outperformed by a hashtable.  But most of the time,
+pattern matching is a clear performance win.
 
 ### Detecting errors
 
@@ -571,6 +617,7 @@ there's`List.append`, for concatenating a pair of lists.
 # List.concat [[1;2];[3;4;5];[6];[]];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
+
 Here's an example of using `List.concat` along with `List.map` to
 compute a recursive listing of a directory tree.
 
@@ -923,7 +970,7 @@ useful, one should prefer patterns wherever they are sufficient.
 
 As a side note, the above implementation of `count_some` is longer
 than necessary, and to boot is not tail recursive.  For real work, you
-should probably just use the`List.count` function from `Core` as
+should probably just use the `List.count` function from `Core` as
 follows:
 
 ```ocaml
