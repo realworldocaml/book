@@ -105,9 +105,7 @@ particular value.  You might be tempted to write that code as follows.
 ```
 
 But when we type this in, the compiler will immediately warn us that
-something is wrong.  Moreover, the function clearly does the wrong
-thing, filtering out all elements of the list rather than just those
-equal to the provided value.
+something is wrong.  
 
 ```
 Characters 114-122:
@@ -115,6 +113,13 @@ Characters 114-122:
         ^^^^^^^^
 Warning 11: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
+```
+
+Moreover, the function clearly does the wrong thing, filtering out all
+elements of the list rather than just those equal to the provided
+value, as you can see below.
+
+```ocaml
 # drop_value [1;2;3] 2;;
 - : int list = []
 ```
@@ -548,8 +553,11 @@ just a subset of values.  The `List.filter` function does just that.
 
 Sometimes, you want to both transform and filter as part of the same
 computation.  `List.filter_map` allows you to do just that.  The
-following expression uses `List.filter_map` to produce the list of
-file extensions in the current directory, piping the results through
+function passed to `List.filter_map` returns an optional value, and
+`List.filter_map` drops all elements for which `None` is returned.
+
+Here's an example.  The following expression computes the list of file
+extensions in the current directory, piping the results through
 `List.dedup` to remove duplicates.  Note that this example also uses
 some functions from other modules, including `Sys.ls_dir` to get a
 directory listing, and `String.rsplit2` to split a string on the
@@ -566,17 +574,11 @@ rightmost appearance of a given character.
 - : string list = ["byte"; "ml"; "mli"; "native"; "txt"]
 ```
 
-In the match statement above, you may notice that we for the first
-time used an underscore in a pattern match.  You use an underscore
-when you want to indicate that the pattern doesn't depend on some
-sub-component of the data structure, but that you don't want to name
-it is an explicit variable.
-
-Another feature of OCaml's pattern language that we encounter here is
-_or-patterns_, which allow you to have multiple sub-patterns within a
-larger pattern.  In this case, `None | Some ("",_)` is an or-pattern.
-As we'll see later, or-patterns can be nested anywhere within larger
-patterns.
+One feature of OCaml's pattern language that we've encountered here
+for the first time is _or-patterns_, which allow you to have multiple
+sub-patterns within a larger pattern.  In this case, `None | Some
+("",_)` is an or-pattern.  As we'll see later, or-patterns can be
+nested anywhere within larger patterns.
 
 Another function that is similar to `filter` is `partition_tf`, which
 takes a list and partitions it into a pair of lists based on a boolean
@@ -601,17 +603,22 @@ Note the use of a nested or-pattern in `is_ocaml_source`.
 
 Another very common operation on lists is concatenation.  The list
 module actually comes with a few different ways of doing this.  First,
-there's`List.append`, for concatenating a pair of lists.
+there's `List.append`, for concatenating a pair of lists.
 
 ```ocaml
 # List.append [1;2;3] [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
+```
+
+There's also `@`, an operator equivalent of `List.append`.
+
+```ocaml
 # [1;2;3] @ [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
 
-`@` is just a synonym for `List.append`.  In addition, there is
-`List.concat`, for concatenating a list of lists.
+In addition, there is `List.concat`, for concatenating a list of
+lists.
 
 ```ocaml
 # List.concat [[1;2];[3;4;5];[6];[]];;
@@ -743,7 +750,7 @@ you don't need to keep it around.  Thus, instead of allocating a new
 stack frame for the callee, the compiler is free to reuse the
 caller's stack frame.
 
-Tail recursion are important for more than just lists.  Ordinary
+Tail recursion is important for more than just lists.  Ordinary
 (non-tail) recursive calls are reasonable when the dealing with
 data-structures like binary trees where the depth of the tree is
 logarithmic in the size of your data.  But when dealing with
@@ -755,7 +762,7 @@ approach.
 
 Now that we know more about how lists and patterns work, let's
 consider how we can improve on an example from
-(xref)(#recursive-list-functions): the function `destutter`, which
+[xref](#recursive-list-functions): the function `destutter`, which
 removes sequential duplicates from a list.  Here's the implementation
 that was described earlier.
 
@@ -763,7 +770,7 @@ that was described earlier.
 # let rec destutter list =
     match list with
     | [] -> []
-    | hd :: [] -> hd :: []
+    | [hd] -> [hd]
     | hd :: hd' :: tl ->
       if hd = hd' then destutter (hd' :: tl)
       else hd :: destutter (hd' :: tl)
@@ -777,7 +784,7 @@ efficient.
 First, let's consider efficiency.  One problem with the `destutter`
 code above is that it in some cases recreates on the right-hand side
 of the arrow a value that already existed on the left hand side.
-Thus, the pattern `hd :: [] -> hd :: []` actually allocates a new list
+Thus, the pattern `[hd] -> [hd]` actually allocates a new list
 element, which really, it should be able to just return the list being
 matched.  We can reduce allocation here by using an `as` pattern,
 which allows us to declare a name for the thing matched by a pattern
@@ -787,7 +794,7 @@ to eliminate the need for an explicit match.
 ```ocaml
 # let rec destutter = function
     | [] as l -> l
-    | _ :: [] as l -> l
+    | [_] as l -> l
     | hd :: (hd' :: _ as tl) ->
       if hd = hd' then destutter tl
       else hd :: destutter tl
@@ -796,9 +803,7 @@ val destutter : 'a list -> 'a list = <fun>
 ```
 
 We can further collapse this by combining the first two cases into
-one, using an or-pattern.  At the same time, we'll use the more
-concise `[_]` pattern to match a list with a single element, rather
-than `_ :: []`.
+one, using an or-pattern.
 
 ```ocaml
 # let rec destutter = function
@@ -814,7 +819,6 @@ We can make the code slightly terser now by using a `when` clause.  A
 `when` clause allows one to add an extra precondition on a pattern in
 the form of an arbitrary OCaml expression.  In this case, we can use
 it to include the check on whether the first two elements are equal.
-
 
 ```ocaml
 # let rec destutter = function
@@ -969,9 +973,8 @@ The takeaway from all of this is that, while `when` clauses can be
 useful, one should prefer patterns wherever they are sufficient.
 
 As a side note, the above implementation of `count_some` is longer
-than necessary, and to boot is not tail recursive.  For real work, you
-should probably just use the `List.count` function from `Core` as
-follows:
+than necessary, and even worse is not tail recursive.  In real life,
+you would probably just use the `List.count` function from `Core`:
 
 ```ocaml
 # let count_some l = List.count ~f:Option.is_some l;;
