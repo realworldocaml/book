@@ -32,7 +32,8 @@ $ eval `opam config -env`
 ```
 
 Note that the above commands will take some time to run.  When they're
-done, create a file called `~/.ocamlinit` in your home directory:
+done, you should have a file called `~/.ocamlinit` in your home
+directory, to which you should add the following.
 
 ```ocaml
 #use "topfind"
@@ -44,7 +45,7 @@ done, create a file called `~/.ocamlinit` in your home directory:
 Then type in `utop`, and you'll be in an interactive toplevel
 environment.  OCaml phrases are only evaluated when you enter a double
 semicolon (`;;`), so you can split your typing over multiple lines.
-You can exit `utop` by pressing `control-D`. For complete
+You can exit `utop` by pressing `control-d`. For complete
 instructions, please refer to [xref](#installation).
 
 </note>
@@ -247,12 +248,13 @@ As an example, let's walk through the process of inferring the type of
 `sum_if_true`.
 
 - OCaml requires that both arms of an `if` statement return the same
-  type, so the expression `if test x then x else 0` requires that `x`
-  must be the same type as `0`, which is `int`.  By the same logic we
-  can conclude that `y` has type `int`.
-- `test` is passed `x` as an argument.  Since `x` has type `int`, the
+  type, so the expression `if test first then first else 0` requires
+  that `first` must be the same type as `0`, which is `int`.
+  Similarly, from `if test second then second else 0` we can conclude
+  that `second` has type `int`.
+- `test` is passed `first` as an argument.  Since `first` has type `int`, the
   input type of `test` must be `int`.
-- `test x` is used as the condition in an `if` statement, so the
+- `test first` is used as the condition in an `if` statement, so the
   return type of `test` must be `bool`.
 - The fact that `+` returns an int implies that the return value of
   `sum_if_true` must be int.
@@ -440,7 +442,17 @@ can now be used in subsequent expressions.
 ```
 
 Note that the same syntax is used both for constructing and for
-pattern matching on tuples.
+pattern matching on tuples.  Another syntactic note: it's the commas,
+rather than the parens, that make a tuple.  Thus, we can write:
+
+```ocaml
+# let x,y = a_tuple;;        
+val x : int = 3
+val y : string = "three"
+```
+
+That said, it's more idiomatic to include the parens even when they're
+not strictly necessary.
 
 Pattern matching can also show up in function arguments.  Here's a
 function for computing the distance between two points on the plane,
@@ -488,8 +500,8 @@ Error: This expression has type string but an expression was expected of type
 
 Core comes with a `List` module that has a rich collection of
 functions for working with lists.  We can access values from within a
-module by using dot-notation.  Here, for example, is how we compute
-the length of a list.
+module by using dot-notation.  For example, this is how we compute the
+length of a list.
 
 ```ocaml
 # List.length languages;;
@@ -509,10 +521,9 @@ the elements of that list.  Note that `List.map` creates a new list
 and does not modify the original.
 
 In this example, the function `String.length` is passed under the
-_labeled argument_ `~f`.  Labels allow you to specify function
-arguments by name rather than by position.  As you can see below, we
-can change the order of labeled arguments without changing the
-function's behavior.
+_labeled argument_ `~f`.  Labels allow you to specify arguments by
+name rather than by position.  As you can see below, we can change the
+order of labeled arguments without changing the function's behavior.
 
 ```ocaml
 # List.map ~f:String.length languages;;
@@ -600,12 +611,12 @@ Here is an example of a value that is not matched:
 val my_favorite_language : 'a list -> 'a = <fun>
 ```
 
-The warning comes because the compiler can't be certain that the
-pattern match won't lead to a runtime error.  Indeed, the warning
-gives an example of a list, (`[]`, the empty list) that doesn't match
-the provided pattern.  Indeed, if we try to run
-`my_favorite_language`, we'll see that it works on non-empty list, and
-fails on empty ones.
+The warning indicates that the pattern is not exhaustive, meaning
+there are values of the type in question that won't be captured by the
+pattern. The warning even gives an example of a value that doesn't
+match the provided pattern, in particular, `[]`, the empty list.  If
+we try to run `my_favorite_language`, we'll see that it works on
+non-empty list, and fails on empty ones.
 
 ```ocaml
 # my_favorite_language ["English";"Spanish";"French"];;
@@ -1005,7 +1016,7 @@ utilization than most other data structures in OCaml, including lists.
 Here's an example:
 
 ```ocaml
-# let numbers = [| 1;2;3;4 |];;
+# let numbers = [| 1; 2; 3; 4 |];;
 val numbers : int array = [|1; 2; 3; 4|]
 # numbers.(2) <- 4;;
 - : unit = ()
@@ -1101,9 +1112,10 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 
 ### Refs
 
-We can declare a single mutable value by using a `ref`, which is a
-record type with a single mutable field that is defined in the
-standard library.
+We can create a single mutable value by using a `ref`.  The `ref` type
+comes pre-defined in the standard library, but there's nothing really
+special about it.  It's just a record type with a single mutable field
+called `contents`.
 
 ```ocaml
 # let x = { contents = 0 };;
@@ -1114,8 +1126,8 @@ val x : int ref = {contents = 0}
 - : int ref = {contents = 1}
 ```
 
-There are a handful of useful functions and operators defined for refs
-to make them more convenient to work with.
+There are a handful of useful functions and operators defined for
+`ref`s to make them more convenient to work with.
 
 ```ocaml
 # let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
@@ -1128,10 +1140,9 @@ val x : int ref = {contents = 0}
 - : int = 1
 ```
 
-The definition of all this is quite straightforward.  Here is the
-complete implementation of the `ref` type.  The `'a` before the ref
-indicates that the `ref` type is polymorphic, in the same way that
-lists are polymorphic, meaning it can contain values of any type.
+There's nothing magical with these operators either.  You can complete
+reimplement the `ref` type and all of these operators in just a few
+lines of code.
 
 ```ocaml
 type 'a ref = { mutable contents : 'a }
@@ -1141,15 +1152,17 @@ let (!) r = r.contents
 let (:=) r x = r.contents <- x
 ```
 
-Here, `!` and `:=` are operators that we're defining, where the
-parenthetical syntax marks them as such.
+The `'a` before the ref indicates that the `ref` type is polymorphic,
+in the same way that lists are polymorphic, meaning it can contain
+values of any type.  The parenthesis around `!` and `:=` are needed
+because these are operators, rather than ordinary functions.
 
-Even though a `ref` is just another record type, it's notable because
-it is the standard way of simulating the traditional mutable variable
-you'll find in most imperative languages.  For example, we can sum
-over the elements of a list imperatively by calling `List.iter` to
-call a simple function on every element of a list, using a ref to
-accumulate the results.
+Even though a `ref` is just another record type, it's important
+because it is the standard way of simulating the traditional mutable
+variable you'll find in most imperative languages.  For example, we
+can sum over the elements of a list imperatively by calling
+`List.iter` to call a simple function on every element of a list,
+using a ref to accumulate the results.
 
 ```ocaml
 # let sum list =
@@ -1299,10 +1312,8 @@ handling, all of which is covered in [xref](#command-line-parsing).
 
 ## Where to go from here
 
-That's it for our guided tour!  There are plenty of features left to
-touch upon and lots of details to explain, but the hope is that this
-has given you enough of a feel for the language that you have a sense
-as to what to expect, and will be comfortable reading examples in the
-rest of the book.
-
+That's it for the guided tour! There are plenty of features left and
+lots of details to explain, but we hope that you now have a sense of
+what to expect from OCaml, and that you'll be more comfortable reading
+the rest of the book as a result.
 
