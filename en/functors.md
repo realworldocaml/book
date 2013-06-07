@@ -27,7 +27,7 @@ including:
   and independent mutable state.  Functors let you automate the
   construction of such modules.
 
-### A trivial example
+## A trivial example
 
 We'll start by considering the simplest possible example: a functor
 for incrementing an integer.  More precisely, we'll create a functor
@@ -96,7 +96,7 @@ module Three_and_more : sig val x : int val y : string end
 module Four : sig val x : int end
 ```
 
-### A bigger example: computing with intervals
+## A bigger example: computing with intervals
 
 Let's consider a more realistic example of how to use functors: a
 library for computing with intervals.  This library will be
@@ -262,7 +262,7 @@ This is important, because confusing the two kinds of intervals would
 be a semantic error, and it's an easy one to make.  The ability of
 functors to mint new types is a useful trick that comes up a lot.
 
-#### Making the functor abstract
+### Making the functor abstract
 
 There's a problem with `Make_interval`.  The code we wrote depends on
 the invariant that the upper bound of an interval is greater than its
@@ -311,7 +311,7 @@ definition of `Make_interval`.  Notice that we added the type
 module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
 ```
 
-#### Sharing constraints
+### Sharing constraints
 
 The resulting module is abstract, but it's unfortunately too abstract.
 In particular, we haven't exposed the type `endpoint`, which means
@@ -399,7 +399,7 @@ val i : Int_interval.t = <abstr>
 - : bool = false
 ```
 
-#### Destructive substitution
+### Destructive substitution
 
 Sharing constraints basically do the job, but they have some
 downsides.  In particular, we've now been stuck with the useless type
@@ -473,7 +473,7 @@ Characters 0-27:
 Error: Unbound constructor Int_interval.Interval
 ```
 
-#### Using multiple interfaces
+### Using multiple interfaces
 
 Another feature that we might want for our interval module is the
 ability to _serialize_, _i.e._, to be able to read and write intervals
@@ -623,7 +623,7 @@ And now, we can use that sexp-converter in the ordinary way:
 - : Sexplib.Sexp.t = Empty
 ```
 
-### Extending modules
+## Extending modules
 
 Another common use of functors is to generate type-specific
 functionality for a given module in a standardized way.  Let's see how
