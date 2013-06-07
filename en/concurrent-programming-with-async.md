@@ -141,7 +141,8 @@ operator, we can rewrite `uppercase_file` as follows.
 
 ```ocaml
 # let uppercase_file filename =
-    Reader.file_contents filename >>= fun text ->
+    Reader.file_contents filename
+    >>= fun text ->
     Writer.save filename ~contents:(String.uppercase text)
   ;;
 val uppercase_file : string -> unit Deferred.t = <fun>
@@ -157,7 +158,8 @@ write a function that counts the number of lines in a file.
 
 ```ocaml
 # let count_lines filename =
-    Reader.file_contents filename >>= fun text ->
+    Reader.file_contents filename
+    >>= fun text ->
     List.length (String.split text ~on:'\n')
   ;;
 ```
@@ -189,7 +191,8 @@ Using `return`, we can make `count_lines` compile.
 
 ```ocaml
 # let count_lines filename =
-    Reader.file_contents filename >>= fun text ->
+    Reader.file_contents filename
+    >>= fun text ->
     return (List.length (String.split text ~on:'\n'))
   ;;
 val count_lines : string -> int Deferred.t = <fun>
@@ -214,7 +217,8 @@ rewrite `count_lines` again a bit more succinctly:
 
 ```ocaml
 # let count_lines filename =
-    Reader.file_contents filename >>| fun text ->
+    Reader.file_contents filename
+    >>| fun text ->
     List.length (String.split text ~on:'\n')
   ;;
 val count_lines : string -> int Deferred.t = <fun>
@@ -270,7 +274,7 @@ An action is handed to `schedule` in the form of a deferred-returning
 thunk (a thunk is a function whose argument is of type `unit`).  A
 deferred is handed back to the caller of `schedule` that will
 eventually be filled with the contents of the deferred value returned
-by the thunk to be scheduled.  We can implement this using an `ivar`
+by the thunk to be scheduled.  We can implement this using an ivar
 which we fill after the thunk is called and the deferred it returns
 becomes determined.  Instead of using `bind` or `map` for scheduling
 these events, we'll use a different operator called `upon`.  Here's
@@ -290,7 +294,7 @@ where every call to `schedule` adds a thunk to the queue, and also
 schedules a job in the future to grab a thunk off the queue and run
 it.  The waiting will be done using the function `after` which takes a
 time span and returns a deferred which becomes determined after that
-time span elapses.  The role of the `ivar` here is to take the value
+time span elapses.  The role of the ivar here is to take the value
 returned by the thunk and use it to fill the deferred returned by the
 provided thunk.
 
@@ -880,7 +884,7 @@ When programming with external resources, errors are everywhere:
 everything from a flaky server to a network outage to exhausting of
 local resources can lead to a run-time error.  When programming in
 OCaml, some of these errors will show up explicitly in a function's
-return type, and of them will show up as exceptions.  We covered
+return type, and some of them will show up as exceptions.  We covered
 exception handling in OCaml in [xref](#exceptions), but as we'll see,
 exception handling in a concurrent program presents some new
 challenges.
