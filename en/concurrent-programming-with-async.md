@@ -158,7 +158,7 @@ write a function that counts the number of lines in a file.
 ```ocaml
 # let count_lines filename =
     Reader.file_contents filename >>= fun text ->
-    List.length (String.split text ~on:'\n');;
+    List.length (String.split text ~on:'\n')
   ;;
 ```
 
@@ -190,7 +190,7 @@ Using `return`, we can make `count_lines` compile.
 ```ocaml
 # let count_lines filename =
     Reader.file_contents filename >>= fun text ->
-    return (List.length (String.split text ~on:'\n'));;
+    return (List.length (String.split text ~on:'\n'))
   ;;
 val count_lines : string -> int Deferred.t = <fun>
 ```
@@ -215,7 +215,7 @@ rewrite `count_lines` again a bit more succinctly:
 ```ocaml
 # let count_lines filename =
     Reader.file_contents filename >>| fun text ->
-    List.length (String.split text ~on:'\n');;
+    List.length (String.split text ~on:'\n')
   ;;
 val count_lines : string -> int Deferred.t = <fun>
 ```
@@ -754,9 +754,9 @@ for `Cohttp_async.Client.get`, which we can do in utop.
 ```
 
 The `get` call takes as a required argument a URI, and returns a
-deferred value is returned, containing a `Cohttp.Response.t` (which we
-ignore) and a pipe reader to which the body of the request will be
-written to as it is received.
+deferred value containing a `Cohttp.Response.t` (which we ignore) and
+a pipe reader to which the body of the request will be written to as
+it is received.
 
 In this case, the HTTP body probably isn't very large, so we call
 `Pipe.to_list` to collect the strings from the pipe as a single
@@ -786,7 +786,7 @@ line-wrapping.  It may not be obvious that this routine is using
 Async, but it does: the version of `printf` that's called here is
 actually Async's specialized `printf` that goes through the Async
 scheduler rather than printing directly.  The original definition of
-`printf` is shadowed by this ne one when you open `Async.Std`.  An
+`printf` is shadowed by this new one when you open `Async.Std`.  An
 important side effect of this is that if you write an Async program
 and forget to start the scheduler, calls like `printf` won't actually
 generate any output!
@@ -814,7 +814,7 @@ We used `List.map` to call `get_definition` on each word, and
 
 Note that the list returned by `Deferred.all` reflects the order of
 the deferreds passed to it.  As such, the definitions will be printed
-out in the same order that the search wrods are passed in, no matter
+out in the same order that the search words are passed in, no matter
 what orders the queries return in.  We could rewrite this code to
 print out the results as they're received (and thus potentially out of
 order) as follows.
@@ -1114,10 +1114,11 @@ client.  In particular, we'll change it so that any individual queries
 that fail are reported as such, without preventing other queries from
 succeeding.
 
-The search code as it is fails rarely, so let's make make a change
-that can cause it to fail more predictably, by making it possible to
-distribute the requests over multiple servers.  Then, we'll handle the
-errors that occur when one of those servers is mis-specified.
+The search code as it is fails rarely, so let's make a change that
+allows us to trigger failures more predictably.  We'll do this by
+making it possible to distribute the requests over multiple servers.
+Then, we'll handle the errors that occur when one of those servers is
+misspecified.
 
 First we'll need to change `query_uri` to take an argument specifying
 the server to connect to, as follows.
