@@ -557,8 +557,10 @@ let sessions_have_same_user s1 s2 =
   s1.user = s2.host
 ```
 
-The above code has a fairly obvious bug, and indeed, the compiler will
-refuse to compile it, spitting out the following error.
+The above code has a bug: it compares the username in one session to
+the host in the other session, when it should be comparing the
+usernames in both cases.  Because of howe defined our types, however,
+the compiler will flag this bug for us.
 
 ```
 File "buggy.ml", line 25, characters 12-19:
@@ -567,11 +569,10 @@ Error: This expression has type Hostname.t
 Command exited with code 2.
 ```
 
-We can also combine this with the use of the include statement to add
-some extra functionality to such a module.  Thus, we could have
-rewritten the definition of `Hostname` above as follows to add a
-function `Hostname.mine` that returns the hostname of the present
-machine.
+Using the `include` statement, we can build abstract types that have
+extended functionality.  Thus, we can rewrite the definition of
+`Hostname` to add a function `Hostname.mine` that returns the hostname
+of the present machine.
 
 ```ocaml
 module Hostname : sig
