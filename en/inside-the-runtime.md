@@ -590,3 +590,10 @@ the value reachable again and thus prevent it from being garbage collected. It
 can also loop forever, which will cause other finalizers to be interleaved with
 it.  
 
+<note>
+<title>Production note</title>
+
+This chapter contains significant contributions from Stephen Weeks.
+
+</note>
+
