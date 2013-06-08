@@ -21218,15 +21218,16 @@ Fatal error: exception Dl.DL_error(&quot;dlsym(RTLD_DEFAULT, initscr): symbol no
     <title>Basic scalar C types</title>
     <para>
       First, let's look at how to define basic scalar C types. Every C
-      type is mapped into an OCaml equivalent via the definition below.
+      type is represented by an OCaml equivalent via the single type
+      definition below.
     </para>
     <programlisting language="ocaml">
-(* Ctypes 1/4 *)
+(* Ctypes *)
 type 'a typ
 </programlisting>
     <para>
-      This <literal>Ctypes.typ</literal> is the type of values
-      representing C types to OCaml. There are two types associated with
+      <literal>Ctypes.typ</literal> is the type of values that
+      represents C types to OCaml. There are two types associated with
       each instance of <literal>typ</literal>:
     </para>
     <itemizedlist>
@@ -21272,7 +21273,7 @@ type 'a typ
       types, including some platform-dependent ones.
     </para>
     <programlisting language="ocaml">
-(* Ctypes.Ffi.C 2/4 *)
+(* Ctypes *)
 val void  : unit typ
 val char : char typ
 val schar : int typ
@@ -21579,7 +21580,6 @@ let string =
       </para>
       </caution>
       <programlisting language="ocaml">
-(* Ctypes 3/4 *)
 val abstract : size:int -&gt; alignment:int -&gt; 'a abstract typ
 </programlisting>
       <para>
