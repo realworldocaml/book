@@ -244,19 +244,19 @@ chapter, using some POSIX date functions as running examples.
 ## Basic scalar C types
 
 First, let's look at how to define basic scalar C types.  Every C type is
-mapped into an OCaml equivalent via the definition below.
+represented by an OCaml equivalent via the single type definition below.
 
 ```ocaml
-(* Ctypes 1/4 *)
+(* Ctypes *)
 type 'a typ
 ```
 
-This `Ctypes.typ` is the type of values representing C types to OCaml.  There
-are two types associated with each instance of `typ`: 
+`Ctypes.typ` is the type of values that represents C types to OCaml.  There are
+two types associated with each instance of `typ`: 
 
 * the C type used to store and pass values to the foreign library.
-* the corresponding OCaml type.  The `'a` type parameter contains the OCaml type such that a value of type 
-`t typ` is used to read and write OCaml values of type `t`.
+* the corresponding OCaml type.  The `'a` type parameter contains the OCaml type
+  such that a value of type `t typ` is used to read and write OCaml values of type `t`.
 
 There are various other uses of `typ` values within Ctypes.
 
@@ -268,7 +268,7 @@ Here are the definitions for most of the standard C99 scalar types, including
 some platform-dependent ones.
 
 ```ocaml
-(* Ctypes.Ffi.C 2/4 *)
+(* Ctypes *)
 val void  : unit typ
 val char : char typ
 val schar : int typ
@@ -503,7 +503,6 @@ and so can't be fully abstract.
 </caution>
 
 ```ocaml   
-(* Ctypes 3/4 *)
 val abstract : size:int -> alignment:int -> 'a abstract typ
 ```
 
