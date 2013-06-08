@@ -1,5 +1,9 @@
 # The Compiler Backend: Byte-code and Native-code
 
+Once OCaml has passed the type checking stage, it can stop emitting syntax and
+type errors and begin the process of compiling the well-formed modules into
+executable code.
+
 It's even possible to compile OCaml to run efficiently on foreign environments
 such as Javascript or the Java Virtual Machine.  These aren't supported by the
 core OCaml distribution, but are available on OPAM.  We'll mention these as we
@@ -13,15 +17,11 @@ In this chapter, we'll cover the following topics:
 
 ## The untyped lambda form
 
-Once OCaml has passed the type checking stage, it can stop emitting syntax
-and type errors and begin the process of compiling the well-formed modules
-into executable code.
-
-The next stage eliminates all the static type information into a simpler
-intermediate *lambda form*.  The lambda form discards higher-level constructs
-such as modules and objects and replaces them with simpler values such as
-records and function pointers.  Pattern matches are also analyzed and compiled
-into highly optimized automata.
+The first code generation phase eliminates all the static type information into
+a simpler intermediate *lambda form*.  The lambda form discards higher-level
+constructs such as modules and objects and replaces them with simpler values
+such as records and function pointers.  Pattern matches are also analyzed and
+compiled into highly optimized automata.
 
 The lambda form is the key stage that discards the OCaml type information and
 maps the source code to the runtime memory model described in
