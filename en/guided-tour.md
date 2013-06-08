@@ -12,7 +12,7 @@ the standard toplevel (which you can start by typing `ocaml` at the
 command line).  These instructions will assume you're using `utop`
 specifically.
 
-Before getting started, do make sure you have a working OCaml
+Before getting started, make sure you have a working OCaml
 installation and toplevel as you read through this chapter so you can
 try out the examples.
 
@@ -32,7 +32,8 @@ $ eval `opam config -env`
 ```
 
 Note that the above commands will take some time to run.  When they're
-done, create a file called `~/.ocamlinit` in your home directory:
+done, you should have a file called `~/.ocamlinit` in your home
+directory, to which you should add the following.
 
 ```ocaml
 #use "topfind"
@@ -41,11 +42,11 @@ done, create a file called `~/.ocamlinit` in your home directory:
 #require "core.top"
 ```
 
-Then type in `utop`, and you'll be in an interactive toplevel environment.
-OCaml phrases are only evaluated when you enter a double semicolon (`;;`), so
-you can split your typing over multiple lines.  You can exit `utop` by pressing
-`control-D` and return. For complete instructions, please refer to
-[xref](#installation).
+Then type in `utop`, and you'll be in an interactive toplevel
+environment.  OCaml phrases are only evaluated when you enter a double
+semicolon (`;;`), so you can split your typing over multiple lines.
+You can exit `utop` by pressing `control-d`. For complete
+instructions, please refer to [xref](#installation).
 
 </note>
 
@@ -96,7 +97,7 @@ at you.
   can be placed anywhere in within the number, not just every three
   digits.
 - OCaml carefully distinguishes between `float`, the type for floating
-  point numbers and `int` the type for integers.  The types have
+  point numbers and `int`, the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
   operators (`+.` instead of `+`), and OCaml doesn't automatically
   cast between types.  This can be a bit of a nuisance, but it has its
@@ -115,8 +116,34 @@ val y : int = 14
 ```
 
 After a new variable is created, the toplevel tells us the name of the
-variable (`x` or `y`), in addition to its type (`int`) and value (`7` or `14`).
+variable (`x` or `y`), in addition to its type (`int`) and value (`7`
+or `14`).  
 
+Note that there are some constraints on what identifiers can be used
+for variable names.  Punctuation is excluded, except for `_` and `'`,
+and variables must start with a lowercase letter.  Thus, these are
+legal:
+
+```ocaml
+# let x7 = 3 + 4;;
+val x7 : int = 7
+# let x_plus_y = x + y;;
+val x_plus_y : int = 21
+# let x' = x + 1;;
+val x' : int = 8
+```
+
+But these are not:
+
+```ocaml
+# let Seven = 3 + 4;;
+Error: Unbound constructor Seven
+# let 7x = 7;;
+Error: This expression should not be a function, the expected type is
+int
+# let x-plus-y = x + y;;
+Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
+```
 ## Functions and type Inference
 
 The `let` syntax can also be used for creating functions.
@@ -221,12 +248,13 @@ As an example, let's walk through the process of inferring the type of
 `sum_if_true`.
 
 - OCaml requires that both arms of an `if` statement return the same
-  type, so the expression `if test x then x else 0` requires that `x`
-  must be the same type as `0`, which is `int`.  By the same logic we
-  can conclude that `y` has type `int`.
-- `test` is passed `x` as an argument.  Since `x` has type `int`, the
+  type, so the expression `if test first then first else 0` requires
+  that `first` must be the same type as `0`, which is `int`.
+  Similarly, from `if test second then second else 0` we can conclude
+  that `second` has type `int`.
+- `test` is passed `first` as an argument.  Since `first` has type `int`, the
   input type of `test` must be `int`.
-- `test x` is used as the condition in an `if` statement, so the
+- `test first` is used as the condition in an `if` statement, so the
   return type of `test` must be `bool`.
 - The fact that `+` returns an int implies that the return value of
   `sum_if_true` must be int.
@@ -385,6 +413,8 @@ can create a tuple by joining values together with a comma:
 ```ocaml
 # let a_tuple = (3,"three");;
 val a_tuple : int * string = (3, "three")
+# let another_tuple = (3,"four",5.);;
+val another_tuple : int * string * float = (3, "four", 5.)
 ```
 
 (For the mathematically inclined, the `*` character is used because
@@ -412,7 +442,17 @@ can now be used in subsequent expressions.
 ```
 
 Note that the same syntax is used both for constructing and for
-pattern matching on tuples.
+pattern matching on tuples.  Another syntactic note: it's the commas,
+rather than the parens, that make a tuple.  Thus, we can write:
+
+```ocaml
+# let x,y = a_tuple;;        
+val x : int = 3
+val y : string = "three"
+```
+
+That said, it's more idiomatic to include the parens even when they're
+not strictly necessary.
 
 Pattern matching can also show up in function arguments.  Here's a
 function for computing the distance between two points on the plane,
@@ -444,7 +484,7 @@ type.  For example:
 val languages : string list = ["OCaml"; "Perl"; "C"]
 ```
 
-Note that you can't mix elements of different types on the same list,
+Note that you can't mix elements of different types in the same list,
 as we did with tuples.
 
 ```ocaml
@@ -460,8 +500,8 @@ Error: This expression has type string but an expression was expected of type
 
 Core comes with a `List` module that has a rich collection of
 functions for working with lists.  We can access values from within a
-module by using dot-notation.  Here, for example, is how we compute
-the length of a list.
+module by using dot-notation.  For example, this is how we compute the
+length of a list.
 
 ```ocaml
 # List.length languages;;
@@ -481,10 +521,9 @@ the elements of that list.  Note that `List.map` creates a new list
 and does not modify the original.
 
 In this example, the function `String.length` is passed under the
-_labeled argument_ `~f`.  Labels allow you to specify function
-arguments by name rather than by position.  As you can see below, we
-can change the order of labeled arguments without changing the
-function's behavior.
+_labeled argument_ `~f`.  Labels allow you to specify arguments by
+name rather than by position.  As you can see below, we can change the
+order of labeled arguments without changing the function's behavior.
 
 ```ocaml
 # List.map ~f:String.length languages;;
@@ -515,7 +554,8 @@ started with, as you can see below.
 
 The bracket notation for lists is really just syntactic sugar for
 `::`.  Thus, the following declarations are all equivalent.  Note that
-`[]` is used to represent the empty list.
+`[]` is used to represent the empty list, and that `::` is
+right-associative.
 
 ```ocaml
 # [1; 2; 3];;
@@ -571,12 +611,12 @@ Here is an example of a value that is not matched:
 val my_favorite_language : 'a list -> 'a = <fun>
 ```
 
-The warning comes because the compiler can't be certain that the
-pattern match won't lead to a runtime error.  Indeed, the warning
-gives an example of a list, (`[]`, the empty list) that doesn't match
-the provided pattern.  Indeed, if we try to run
-`my_favorite_language`, we'll see that it works on non-empty list, and
-fails on empty ones.
+The warning indicates that the pattern is not exhaustive, meaning
+there are values of the type in question that won't be captured by the
+pattern. The warning even gives an example of a value that doesn't
+match the provided pattern, in particular, `[]`, the empty list.  If
+we try to run `my_favorite_language`, we'll see that it works on
+non-empty list, and fails on empty ones.
 
 ```ocaml
 # my_favorite_language ["English";"Spanish";"French"];;
@@ -711,7 +751,7 @@ We can fix this warning by adding another case to the match:
 # let rec destutter list =
     match list with
     | [] -> []
-    | hd :: [] -> hd :: []
+    | [hd] -> [hd]
     | hd1 :: hd2 :: tl ->
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
@@ -940,10 +980,10 @@ types that happen to be important enough to be defined in the standard
 library (and in the case of lists, to have some special syntax).
 
 We also made our first use of an _anonymous function_ in the call to
-`List.exists`.  An anonymous function is a function that is defined
-but not named, in this case, using the `fun` keyword.  Anonymous
-functions are common in OCaml, particularly when using iteration
-functions like `List.exists`.
+`List.exists`.  Anonymous functions are declared using the `fun`
+keyword, and don't need to be explicitly named.  Such functions are
+common in OCaml, particularly when using iteration functions like
+`List.exists`.
 
 The purpose of `List.exists` is to check if there are any elements of
 the given list in question on which the provided function evaluates to
@@ -976,7 +1016,7 @@ utilization than most other data structures in OCaml, including lists.
 Here's an example:
 
 ```ocaml
-# let numbers = [| 1;2;3;4 |];;
+# let numbers = [| 1; 2; 3; 4 |];;
 val numbers : int array = [|1; 2; 3; 4|]
 # numbers.(2) <- 4;;
 - : unit = ()
@@ -987,6 +1027,19 @@ val numbers : int array = [|1; 2; 3; 4|]
 the `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
 counted starting at zero, element `.(2)` is the third element.
+
+A new and somewhat odd type has cropped up in this example: `unit`.
+What makes `unit` different is that there is only one value of type
+`unit`, which is written `()`.  Because there is only one value of
+type `unit` that value doesn't really convey any information.
+
+If it doesn't convey any information, then what is `unit` good for?
+Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
+for the return value of an operation like setting a mutable field that
+operates by side effect rather than by returning a value.  It's also
+used as the argument to functions that don't require an input value.
+This is similar to the role that `void` plays in languages like C and
+Java.
 
 ### Mutable record fields
 
@@ -1041,21 +1094,8 @@ sum of squares.
 
 Note the use in the above code of single semi-colons to sequence
 operations.  When we were working purely functionally, this wasn't
-necessary, but you start needing it when your code is acting by
-side-effect.
-
-A new and somewhat odd type has cropped up in this example: `unit`.
-What makes `unit` different is that there is only one value of type
-`unit`, which is written `()`.  Because there is only one value of
-type `unit` that value doesn't really convey any information.
-
-If it doesn't convey any information, then what is `unit` good for?
-Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
-for the return value of a function like `update` that operates by side
-effect rather than by returning a value, and for the argument to a
-function like `create` that doesn't require any information to be
-passed into it in order to run.  This is similar to the role that
-`void` plays in languages like C and Java.
+necessary, but you start needing it when you're writing imperative
+code.
 
 Here's an example of `create` and `update` in action.
 
@@ -1072,9 +1112,10 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 
 ### Refs
 
-We can declare a single mutable value by using a `ref`, which is a
-record type with a single mutable field that is defined in the
-standard library.
+We can create a single mutable value by using a `ref`.  The `ref` type
+comes pre-defined in the standard library, but there's nothing really
+special about it.  It's just a record type with a single mutable field
+called `contents`.
 
 ```ocaml
 # let x = { contents = 0 };;
@@ -1085,8 +1126,8 @@ val x : int ref = {contents = 0}
 - : int ref = {contents = 1}
 ```
 
-There are a handful of useful functions and operators defined for refs
-to make them more convenient to work with.
+There are a handful of useful functions and operators defined for
+`ref`s to make them more convenient to work with.
 
 ```ocaml
 # let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
@@ -1099,10 +1140,9 @@ val x : int ref = {contents = 0}
 - : int = 1
 ```
 
-The definition of all this is quite straightforward.  Here is the
-complete implementation of the `ref` type.  The `'a` before the ref
-indicates that the `ref` type is polymorphic, in the same way that
-lists are polymorphic, meaning it can contain values of any type.
+There's nothing magical with these operators either.  You can complete
+reimplement the `ref` type and all of these operators in just a few
+lines of code.
 
 ```ocaml
 type 'a ref = { mutable contents : 'a }
@@ -1112,15 +1152,17 @@ let (!) r = r.contents
 let (:=) r x = r.contents <- x
 ```
 
-Here, `!` and `:=` are infix operators that we're defining, where the
-parenthetical syntax marks them as such.
+The `'a` before the ref indicates that the `ref` type is polymorphic,
+in the same way that lists are polymorphic, meaning it can contain
+values of any type.  The parenthesis around `!` and `:=` are needed
+because these are operators, rather than ordinary functions.
 
-Even though a `ref` is just another record type, it's notable because
-it is the standard way of simulating the traditional mutable variable
-you'll find in most imperative languages.  For example, we can sum
-over the elements of a list imperatively by calling `List.iter` to
-call a simple function on every element of a list, using a ref to
-accumulate the results.
+Even though a `ref` is just another record type, it's important
+because it is the standard way of simulating the traditional mutable
+variable you'll find in most imperative languages.  For example, we
+can sum over the elements of a list imperatively by calling
+`List.iter` to call a simple function on every element of a list,
+using a ref to accumulate the results.
 
 ```ocaml
 # let sum list =
@@ -1182,7 +1224,7 @@ for finding the first non-negative position in an array.  Note that
      done;
      if !pos = Array.length ar then None else Some !pos
   ;;
-            val find_first_negative_entry : int Core.Std.Array.t -> int option = <fun>
+val find_first_negative_entry : int Core.Std.Array.t -> int option = <fun>
 # find_first_negative_entry [|1;2;0;3|];;
 - : int option = None
 # find_first_negative_entry [|1;-2;0;3|];;
@@ -1192,11 +1234,13 @@ for finding the first non-negative position in an array.  Note that
 ## A complete program
 
 So far, we've played with the basic features of the language using the
-toplevel.  Now we'll create a simple, complete stand-along program
+toplevel.  Now we'll create a simple, complete stand-alone program
 that does something useful: sum up a list of numbers read in from the
 standard input.
 
-Here's the code, which you can save in a file called `sum.ml`.
+Here's the code, which you can save in a file called `sum.ml`.  Note
+that we don't terminate expressions with `;;` here, since it's not
+required outside the toplevel.
 
 ```ocaml
 (* file: sum.ml *)
@@ -1254,7 +1298,7 @@ example, we can just type in a sequence of numbers, one per line,
 hitting control-d to exit when the input is complete.
 
 ```
-max $ ./sum.native
+$ ./sum.native
 1
 2
 3
@@ -1268,10 +1312,8 @@ handling, all of which is covered in [xref](#command-line-parsing).
 
 ## Where to go from here
 
-That's it for our guided tour!  There are plenty of features left to
-touch upon and lots of details to explain, but the hope is that this
-has given you enough of a feel for the language that you have a sense
-as to what to expect, and will be comfortable reading examples in the
-rest of the book.
-
+That's it for the guided tour! There are plenty of features left and
+lots of details to explain, but we hope that you now have a sense of
+what to expect from OCaml, and that you'll be more comfortable reading
+the rest of the book as a result.
 

@@ -1,29 +1,29 @@
 open Core.Std
 
-(** A trainable model *)
-module type MODEL = sig
+(* A model suitable for training *)
+module type Model = sig
   type t
-  type config
   type predictor
   type responder
+  type config
 
   (** Creates an (empty) model from a model config *)
   val create : config -> t
 
-  (** Updates a model with a predictor/responder pair to be used for training the model *)
+  (** Updates a model with a predictor/responder pair to be used for training
+      the model *)
   val train : t -> predictor * responder -> unit
 end
 
-(** A Predictive_model is a distillation of a model optimized for fast construction of
-    predictions.  *)
-module type PREDICTIVE_MODEL = sig
+(** A distillation of a [Model.t] optimized for making predictions. *)
+module type Predictive_model = sig
   type t
   type model
   type predictor
   type responder
 
-  (** Construct a predictive model based on the current training data.  This is may be a
-      compute-intensive operation.  *)
+  (** Construct a predictive model based on the current training data.  This may
+      be a compute-intensive operation.  *)
   val create : model -> t
 
     (** Construct a predicted responder *)
@@ -32,56 +32,63 @@ end
 
 
 (** A mechanism for reporting on the efficiency of a given predictor *)
-module type REPORT = sig
+module type Report = sig
   type t
+  type predictor
   type responder
 
   (** Creates an empty report *)
   val create : unit -> t
 
   (** Updates a report with a pair of a prediction and an actual outcome.  *)
-  val update : t -> predicted : responder -> actual : responder -> unit
+  val update
+    :  t
+    -> predictor:predictor
+    -> predicted:responder
+    -> actual:responder
+    -> unit
 
   (** Returns a human-readable summary of the data generated thus far *)
   val summarize : t -> string
 end
 
 module Make_harness
-  (Model : MODEL)
-  (Predictive_model : PREDICTIVE_MODEL
-   with type model := Model.t
-   and type predictor := Model.predictor
-   and type responder := Model.responder)
-  (Report : REPORT
-   with type responder := Model.responder) :
+  (Predictor : T)
+  (Responder : T)
+  (Config    : T)
+  (Model : Model
+   with type config := Config.t
+    and type predictor := Predictor.t
+    and type responder := Responder.t
+  )
+  (Predictive_model : Predictive_model
+   with type model     := Model.t
+    and type predictor := Predictor.t
+    and type responder := Responder.t)
+  (Report : Report
+   with type predictor := Predictor.t
+   with type responder := Responder.t
+  ) :
 sig
 
   val train_and_evaluate
-    :  Model.config
-    -> training      : (Model.predictor * Model.responder) array
-    -> out_of_sample : (Model.predictor * Model.responder) array
+    :  Config.t
+    -> training      : (Predictor.t * Responder.t) array
+    -> out_of_sample : (Predictor.t * Responder.t) array
     -> Report.t
 
 end = struct
-    let train_and_evaluate config ~training ~out_of_sample =
+  let train_and_evaluate config ~training ~out_of_sample =
     (* Create the initial (empty) model *)
-      let model = Model.create config in
+    let model = Model.create config in
     (* Train the model *)
-      Array.iter training ~f:(Model.train model);
-    (* Create a predictive model, and then generate a report based on the predictions of
-       that model on the out-of-sample data *)
-      let pmodel = Predictive_model.create model in
-      let report = Report.create () in
-      Array.iter out_of_sample ~f:(fun (p,r) ->
-        let predicted = Predictive_model.predict pmodel p in
-        Report.update report ~predicted ~actual:r);
-      report
-  end
-
-(* Version of MODEL that is suitable for parallelization *)
-module type PAR_MODEL = sig
-  type t with bin_io
-  val merge : t list -> t
-  include MODEL with type t := t
+    Array.iter training ~f:(Model.train model);
+    (* Create a predictive model, and then generate a report based on the
+       predictions of that model on the out-of-sample data *)
+    let pmodel = Predictive_model.create model in
+    let report = Report.create () in
+    Array.iter out_of_sample ~f:(fun (p,r) ->
+      let predicted = Predictive_model.predict pmodel p in
+      Report.update report ~predictor:p ~predicted ~actual:r);
+    report
 end
-
