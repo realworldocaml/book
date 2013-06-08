@@ -25246,7 +25246,7 @@ Error: The files /home/build/bar.cmi
         complete replacement standard library. It collects these modules
         into a single <literal>Std</literal> module which provides a
         single module that needs to be opened to import the replacement
-        function.
+        modules and functions.
       </para>
       <para>
         There's one downside to this approach: type errors suddenly get
@@ -25507,6 +25507,11 @@ $ ocamlc -dtypedtree typedef.m
 </chapter><chapter id="the-compiler-backend-byte-code-and-native-code">
   <title>The Compiler Backend: Byte-code and Native-code</title>
   <para>
+    Once OCaml has passed the type checking stage, it can stop emitting
+    syntax and type errors and begin the process of compiling the
+    well-formed modules into executable code.
+  </para>
+  <para>
     It's even possible to compile OCaml to run efficiently on foreign
     environments such as Javascript or the Java Virtual Machine. These
     aren't supported by the core OCaml distribution, but are available
@@ -25539,17 +25544,12 @@ $ ocamlc -dtypedtree typedef.m
   <sect1 id="the-untyped-lambda-form">
     <title>The untyped lambda form</title>
     <para>
-      Once OCaml has passed the type checking stage, it can stop
-      emitting syntax and type errors and begin the process of compiling
-      the well-formed modules into executable code.
-    </para>
-    <para>
-      The next stage eliminates all the static type information into a
-      simpler intermediate <emphasis>lambda form</emphasis>. The lambda
-      form discards higher-level constructs such as modules and objects
-      and replaces them with simpler values such as records and function
-      pointers. Pattern matches are also analyzed and compiled into
-      highly optimized automata.
+      The first code generation phase eliminates all the static type
+      information into a simpler intermediate <emphasis>lambda
+      form</emphasis>. The lambda form discards higher-level constructs
+      such as modules and objects and replaces them with simpler values
+      such as records and function pointers. Pattern matches are also
+      analyzed and compiled into highly optimized automata.
     </para>
     <para>
       The lambda form is the key stage that discards the OCaml type
