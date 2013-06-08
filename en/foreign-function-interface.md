@@ -939,3 +939,10 @@ This chapter hasn't really needed you to understand the innards of OCaml at
 all.  Ctypes does its best to make function bindings easy, but the rest of this
 part will also fill you in about how interactions with OCaml memory layout and
 the garbage collector work.
+
+<note>
+<title>Production note</title>
+
+This chapter contains significant contributions from Jeremy Yallop.
+
+</note>
