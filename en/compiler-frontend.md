@@ -131,7 +131,7 @@ found in the `parsing` directory in the source distribution.
 ### Syntax errors
 
 The OCaml parser's goal is to output a well-formed AST data structure to the
-next phase of compilation, and so it rejects source code which doesn't match
+next phase of compilation, and so it rejects any source code that doesn't match
 basic syntactic requirements.  The compiler emits a *syntax error* in this
 situation, with a pointer to the filename and line and character number that's
 as close to the error as possible.
