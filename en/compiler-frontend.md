@@ -1056,7 +1056,7 @@ into it, just clean out your intermediate files and recompile from scratch.
 
 </sidebar>
 
-### The typed syntax tree
+## The typed syntax tree
 
 When the type checking process has successfully completed, it is combined with
 the AST to form a *typed abstract syntax tree*.  This contains precise location
@@ -1070,7 +1070,7 @@ This is activated by passing the `-bin-annot` flag to the compiler.
 The `cmt` files are particularly useful for IDE tools to match up OCaml source
 code at a specific location to the inferred or external types.  
 
-#### Using ocp-index for auto-completion
+### Using ocp-index for auto-completion
 
 One such command-line tool to display auto-completion information in your
 editor is `ocp-index`.  Install it via OPAM as follows.
@@ -1120,7 +1120,7 @@ As you can imagine, autocompletion is invaluable on larger codebases.  See the
 [ocp-index](https://github.com/ocamlpro/ocp-index) homepage for more
 information on how to integrate it with your favourite editor.
 
-#### Examining the typed syntax tree directly
+### Examining the typed syntax tree directly
 
 The compiler has a couple of advanced flags that can dump the raw output of the
 internal AST representation.  You can't depend on these flags to give the same
