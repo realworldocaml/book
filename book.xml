@@ -25239,6 +25239,74 @@ Error: The files /home/build/bar.cmi
         </sidebar>
       </sect3>
     </sect2>
+    <sect2 id="shorter-module-paths-in-type-errors">
+      <title>Shorter module paths in type errors</title>
+      <para>
+        Core uses the OCaml module system quite extensively to provide a
+        complete replacement standard library. It collects these modules
+        into a single <literal>Std</literal> module which provides a
+        single module that needs to be opened to import the replacement
+        function.
+      </para>
+      <para>
+        There's one downside to this approach: type errors suddenly get
+        much more verbose. We can see this if you run the vanilla OCaml
+        top-level (not <literal>utop</literal>).
+      </para>
+      <programlisting>
+$ ocaml
+# List.map print_endline &quot;&quot; ;;
+Error: This expression has type string but an expression was expected of type
+         string list
+</programlisting>
+      <para>
+        This type error without <literal>Core.Std</literal> has a
+        straightforward type error. When we switch to Core, though, it
+        gets more verbose.
+      </para>
+      <programlisting>
+# open Core.Std ;;
+# List.map ~f:print_endline &quot;&quot; ;;
+Error: This expression has type string but an expression was expected of type
+         'a Core.Std.List.t = 'a list
+</programlisting>
+      <para>
+        The default <literal>List</literal> module in OCaml is
+        overridden by <literal>Core.Std.List</literal>. The compiler
+        does its best to show the type equivalence, but at the cost of a
+        more verbose error message.
+      </para>
+      <para>
+        The compiler can remedy this via a so-called &quot;short
+        paths&quot; heuristic. This causes the compiler to search all
+        the type aliases for the shortest module path, and use that as
+        the preferred output type. The option is activated by passing
+        <literal>-short-paths</literal> to the compiler, and works on
+        the top-level too.
+      </para>
+      <programlisting>
+$ ocaml -short-paths
+# open Core.Std;;
+# List.map ~f:print_endline &quot;foo&quot;;;
+Error: This expression has type string but an expression was expected of type
+         'a list
+</programlisting>
+      <para>
+        The <literal>utop</literal> enhanced top-level activates short
+        paths by default, which is why you've not had to do this before
+        in our interactive examples. However, the compiler doesn't
+        default to the short path heuristic since there are some
+        situations where the type aliasing information is useful to
+        know, and would be lost in the error if the shortest module path
+        is always picked.
+      </para>
+      <para>
+        You'll need to choose for yourself if you prefer short paths or
+        the default behaviour in your own projects, and pass the
+        <literal>-short-paths</literal> flag to the compiler if you need
+        it.
+      </para>
+    </sect2>
   </sect1>
   <sect1 id="the-typed-syntax-tree">
     <title>The typed syntax tree</title>
