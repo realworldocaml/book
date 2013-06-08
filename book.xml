@@ -36,6 +36,7 @@
 
 
 
+
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -23749,8 +23750,8 @@ $ ./finalizer
     </note>
 
   </sect1>
-</chapter><chapter id="the-compilation-pipeline">
-  <title>The Compilation Pipeline</title>
+</chapter><chapter id="the-compiler-frontend-parsing-and-type-checking">
+  <title>The Compiler Frontend: Parsing and Type Checking</title>
   <para>
     Compiling source code into executable programs is a fairly complex
     process that involves quite a few tools -- preprocessors, compilers,
@@ -23779,13 +23780,6 @@ $ ./finalizer
     effectively.
   </para>
   <para>
-    It's even possible to compile OCaml to run efficiently on foreign
-    environments such as Javascript or the Java Virtual Machine. These
-    aren't supported by the core OCaml distribution, but are available
-    on OPAM. We'll mention these as we go through the chapter so you can
-    experiment with them too.
-  </para>
-  <para>
     In this chapter, we'll cover the following topics:
   </para>
   <itemizedlist>
@@ -23801,30 +23795,22 @@ $ ./finalizer
     </listitem>
     <listitem>
       <para>
-        the untyped intermediate lambda code where pattern matching is
-        optimized.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        the bytecode <literal>ocamlc</literal> compiler and
-        <literal>ocamlrun</literal> interpreter.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        the native code <literal>ocamlopt</literal> code generator, and
-        debugging and profiling native code.
+        the type-checking process, including module resolution.
       </para>
     </listitem>
   </itemizedlist>
+  <para>
+    The details of the compilation process into executable code can be
+    found next in
+    <xref linkend="the-compiler-backend-byte-code-and-native-code"/>.
+  </para>
   <sect1 id="an-overview-of-the-toolchain">
     <title>An overview of the toolchain</title>
     <para>
-      The OCaml tools accept textual source code as input with filename
-      extensions of <literal>.ml</literal> and <literal>.mli</literal>
-      for modules and signatures respectively. We explained the basics
-      of the build process earlier in
+      The OCaml tools accept textual source code as input, using
+      filename extensions of <literal>.ml</literal> and
+      <literal>.mli</literal> for modules and signatures respectively.
+      We explained the basics of the build process earlier in
       <xref linkend="files-modules-and-programs"/>, so we'll
       assume you've built a few OCaml programs already by this point.
     </para>
@@ -23864,10 +23850,11 @@ $ ./finalizer
  Bytecode    \
     |         +-----+
     |              Cmm
-    |js_of_ocaml    |
+    |ocamlrun       |
     |               | code generation
-    |               v
- Javascript      Assembly code
+    |               | assembly &amp; linking
+    v               v
+ Interpreted    Compiled
 </programlisting>
     <para>
       Notice that the pipeline branches towards the end. OCaml has
@@ -25252,36 +25239,108 @@ Error: The files /home/build/bar.cmi
         </sidebar>
       </sect3>
     </sect2>
-    <sect2 id="examining-the-typed-syntax-tree">
-      <title>Examining the typed syntax tree</title>
-      <caution>
-      <title>
-      Note to reviewers: uses for the typed syntax tree?
-      </title>
+    <sect2 id="the-typed-syntax-tree">
+      <title>The typed syntax tree</title>
       <para>
-        We've added this section on the <literal>-dtypedtree</literal>
-        and <literal>-dparsetree</literal> for completeness, but will
-        probably remove them from the final book since we can't think of
-        any concrete examples where inspecting this would be useful for
-        the average developer. It's primarily useful to track down
-        internal type checker or camlp4 extension errors.
+        When the type checking process has successfully completed, it is
+        combined with the AST to form a <emphasis>typed abstract syntax
+        tree</emphasis>. This contains precise location information for
+        every token in the input file, and decorates each token with
+        concrete type information.
       </para>
       <para>
-        But if you can think of a good use-case to justify keeping this
-        in the final book, then please leave a comment here!
-      </para>
-      </caution>
-      <para>
-        The compiler has a couple of advanced flags that can dump the
-        raw output of the internal AST representation. You can't depend
-        on these flags to give the same output across compiler
-        revisions, but they are a useful learning tool.
+        The compiler can output this as compiled <literal>cmt</literal>
+        and <literal>cmti</literal> files that contain the typed AST for
+        the implementation and signatures of a compilation unit. This is
+        activated by passing the <literal>-bin-annot</literal> flag to
+        the compiler.
       </para>
       <para>
-        First, let's look at the untyped AST from our
-        <literal>typedef.ml</literal>.
+        The <literal>cmt</literal> files are particularly useful for IDE
+        tools to match up OCaml source code at a specific location to
+        the inferred or external types.
       </para>
-      <programlisting>
+      <sect3 id="using-ocp-index-for-auto-completion">
+        <title>Using ocp-index for auto-completion</title>
+        <para>
+          One such command-line tool to display auto-completion
+          information in your editor is <literal>ocp-index</literal>.
+          Install it via OPAM as follows.
+        </para>
+        <programlisting>
+$ opam install ocp-index
+$ ocp-index
+</programlisting>
+        <para>
+          Let's refer back to our Ncurses binding example from the
+          beginning of
+          <xref linkend="foreign-function-interface"/>. This
+          module defined bindings for the Ncurses library. First,
+          compile the interfaces with <literal>-bin-annot</literal> so
+          that we can obtain the <literal>cmt</literal> and
+          <literal>cmti</literal> files.
+        </para>
+        <programlisting>
+$ ocamlfind ocamlopt -bin-annot -c -package ctypes.foreign \
+    ncurses.mli ncurses.ml
+</programlisting>
+        <para>
+          Next, run <literal>ocp-index</literal> in completion mode. You
+          pass it a set of directories to search for
+          <literal>cmt</literal> files in, and a fragment of text to
+          autocomplete.
+        </para>
+        <programlisting>
+$ ocp-index complete -I . Ncur
+Ncurses module
+
+$ ocp-index complete -I . Ncurses.a
+Ncurses.addstr val string -&gt; unit
+Ncurses.addch val char -&gt; unit
+
+$ ocp-index complete -I . Ncurses.
+Ncurses.cbreak val unit -&gt; unit
+Ncurses.box val Ncurses.window -&gt; int -&gt; int -&gt; unit
+Ncurses.mvwaddstr val Ncurses.window -&gt; int -&gt; int -&gt; string -&gt; unit
+Ncurses.mvwaddch val Ncurses.window -&gt; int -&gt; int -&gt; char -&gt; unit
+Ncurses.addstr val string -&gt; unit
+Ncurses.addch val char -&gt; unit
+Ncurses.newwin val int -&gt; int -&gt; int -&gt; int -&gt; Ncurses.window
+Ncurses.refresh val unit -&gt; unit
+Ncurses.endwin val unit -&gt; unit
+Ncurses.initscr val unit -&gt; Ncurses.window
+Ncurses.wrefresh val Ncurses.window -&gt; unit
+Ncurses.window val Ncurses.window Ctypes.typ
+</programlisting>
+        <para>
+          As you can imagine, autocompletion is invaluable on larger
+          codebases. See the
+          <ulink url="https://github.com/ocamlpro/ocp-index">ocp-index</ulink>
+          homepage for more information on how to integrate it with your
+          favourite editor.
+        </para>
+      </sect3>
+      <sect3 id="examining-the-typed-syntax-tree-directly">
+        <title>Examining the typed syntax tree directly</title>
+        <para>
+          The compiler has a couple of advanced flags that can dump the
+          raw output of the internal AST representation. You can't
+          depend on these flags to give the same output across compiler
+          revisions, but they are a useful learning tool.
+        </para>
+        <para>
+          We'll use our toy <literal>typedef.ml</literal> again.
+        </para>
+        <programlisting language="ocaml">
+(* typedef.ml *)
+type t = Foo | Bar
+let v = Foo
+</programlisting>
+        <para>
+          Let's first look at the untyped syntax tree that's generated
+          from the parsing phase.
+        </para>
+        <programlisting>
 $ ocamlc -dparsetree typedef.ml
 [
   structure_item (typedef.ml[1,0+0]..[1,0+18])
@@ -25314,16 +25373,24 @@ $ ocamlc -dparsetree typedef.ml
     ]
 ]
 </programlisting>
-      <para>
-        This is rather a lot of output for a simple two-line program,
-        but also reveals a lot about how the compiler works. Each
-        portion of the tree is decorated with the precise location
-        information (including the filename and character location of
-        the token). This code hasn't been type checked yet, and so the
-        raw tokens are all included. After type checking, the structure
-        is much simpler.
-      </para>
-      <programlisting>
+        <para>
+          This is rather a lot of output for a simple two-line program,
+          but it shows just how much structure the OCaml parser
+          generates even from a small source file.
+        </para>
+        <para>
+          Each portion of the AST is decorated with the precise location
+          information (including the filename and character location of
+          the token). This code hasn't been type checked yet, and so the
+          raw tokens are all included.
+        </para>
+        <para>
+          The typed AST that is normally output as a compiled
+          <literal>cmt</literal> file can be displayed in a more
+          developer-readable form via the <literal>-dtypedtree</literal>
+          option.
+        </para>
+        <programlisting>
 $ ocamlc -dtypedtree typedef.m
 [
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
@@ -25351,20 +25418,56 @@ $ ocamlc -dtypedtree typedef.m
     ]
 ]
 </programlisting>
-      <para>
-        The typed AST is more explicit than the untyped syntax tree. For
-        instance, the type declaration has been given a unique name
-        (<literal>t/1008</literal>), as has the <literal>v</literal>
-        value (<literal>v/1011</literal>).
-      </para>
-      <para>
-        You'll never need to use this information in day-to-day
-        development, but it's always instructive to examine how the type
-        checker folds in the source code into a more compact form like
-        this.
-      </para>
+        <para>
+          The typed AST is more explicit than the untyped syntax tree.
+          For instance, the type declaration has been given a unique
+          name (<literal>t/1008</literal>), as has the
+          <literal>v</literal> value (<literal>v/1011</literal>).
+        </para>
+        <para>
+          You'll rarely need to look at this raw output from the
+          compiler unless you're building IDE tools such as
+          <literal>ocp-index</literal>, or are hacking on extensions to
+          the core compiler itself. However, it's useful to know that
+          this intermediate form exists before we delve further into the
+          code generation process next in
+          <ulink url="the-compiler-backend-byte-code-and-native-code">xref</ulink>.
+        </para>
+      </sect3>
     </sect2>
   </sect1>
+</chapter><chapter id="the-compiler-backend-byte-code-and-native-code">
+  <title>The Compiler Backend: Byte-code and Native-code</title>
+  <para>
+    It's even possible to compile OCaml to run efficiently on foreign
+    environments such as Javascript or the Java Virtual Machine. These
+    aren't supported by the core OCaml distribution, but are available
+    on OPAM. We'll mention these as we go through the chapter so you can
+    experiment with them too.
+  </para>
+  <para>
+    In this chapter, we'll cover the following topics:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        the untyped intermediate lambda code where pattern matching is
+        optimized.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        the bytecode <literal>ocamlc</literal> compiler and
+        <literal>ocamlrun</literal> interpreter.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        the native code <literal>ocamlopt</literal> code generator, and
+        debugging and profiling native code.
+      </para>
+    </listitem>
+  </itemizedlist>
   <sect1 id="the-untyped-lambda-form">
     <title>The untyped lambda form</title>
     <para>
