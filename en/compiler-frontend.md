@@ -32,8 +32,8 @@ in [xref](#the-compiler-backend-byte-code-and-native-code).
 
 ## An overview of the toolchain
 
-The OCaml tools accept textual source code as input with filename extensions of
-`.ml` and `.mli` for modules and signatures respectively.  We explained the
+The OCaml tools accept textual source code as input, using filename extensions
+of `.ml` and `.mli` for modules and signatures respectively.  We explained the
 basics of the build process earlier in [xref](#files-modules-and-programs), so
 we'll assume you've built a few OCaml programs already by this point.
 
@@ -70,10 +70,11 @@ The overall compilation pipeline looks like this:
  Bytecode    \
     |         +-----+
     |              Cmm
-    |js_of_ocaml    |
+    |ocamlrun       |
     |               | code generation
-    |               v
- Javascript      Assembly code
+    |               | assembly & linking
+    v               v
+ Interpreted    Compiled
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
