@@ -1056,26 +1056,85 @@ into it, just clean out your intermediate files and recompile from scratch.
 
 </sidebar>
 
-### Examining the typed syntax tree
+### The typed syntax tree
 
-<caution>
-<title>Note to reviewers: uses for the typed syntax tree?</title>
+When the type checking process has successfully completed, it is combined with
+the AST to form a *typed abstract syntax tree*.  This contains precise location
+information for every token in the input file, and decorates each token with
+concrete type information.
 
-We've added this section on the `-dtypedtree` and `-dparsetree` for completeness,
-but will probably remove them from the final book since we can't think of any
-concrete examples where inspecting this would be useful for the average developer.
-It's primarily useful to track down internal type checker or camlp4 extension errors.
+The compiler can output this as compiled `cmt` and `cmti` files that contain
+the typed AST for the implementation and signatures of a compilation unit.
+This is activated by passing the `-bin-annot` flag to the compiler.
 
-But if you can think of a good use-case to justify keeping this in the final book,
-then please leave a comment here!
+The `cmt` files are particularly useful for IDE tools to match up OCaml source
+code at a specific location to the inferred or external types.  
 
-</caution>
+#### Using ocp-index for auto-completion
+
+One such command-line tool to display auto-completion information in your
+editor is `ocp-index`.  Install it via OPAM as follows.
+
+```console
+$ opam install ocp-index
+$ ocp-index
+```
+
+Let's refer back to our Ncurses binding example from the beginning of
+[xref](#foreign-function-interface).  This module defined bindings for the
+Ncurses library.  First, compile the interfaces with `-bin-annot` so that we
+can obtain the `cmt` and `cmti` files.
+
+```console
+$ ocamlfind ocamlopt -bin-annot -c -package ctypes.foreign \
+    ncurses.mli ncurses.ml
+```
+
+Next, run `ocp-index` in completion mode.  You pass it a set of directories to
+search for `cmt` files in, and a fragment of text to autocomplete.
+
+```console
+$ ocp-index complete -I . Ncur
+Ncurses module
+
+$ ocp-index complete -I . Ncurses.a
+Ncurses.addstr val string -> unit
+Ncurses.addch val char -> unit
+
+$ ocp-index complete -I . Ncurses.
+Ncurses.cbreak val unit -> unit
+Ncurses.box val Ncurses.window -> int -> int -> unit
+Ncurses.mvwaddstr val Ncurses.window -> int -> int -> string -> unit
+Ncurses.mvwaddch val Ncurses.window -> int -> int -> char -> unit
+Ncurses.addstr val string -> unit
+Ncurses.addch val char -> unit
+Ncurses.newwin val int -> int -> int -> int -> Ncurses.window
+Ncurses.refresh val unit -> unit
+Ncurses.endwin val unit -> unit
+Ncurses.initscr val unit -> Ncurses.window
+Ncurses.wrefresh val Ncurses.window -> unit
+Ncurses.window val Ncurses.window Ctypes.typ
+```
+
+As you can imagine, autocompletion is invaluable on larger codebases.  See the
+[ocp-index](https://github.com/ocamlpro/ocp-index) homepage for more
+information on how to integrate it with your favourite editor.
+
+#### Examining the typed syntax tree directly
 
 The compiler has a couple of advanced flags that can dump the raw output of the
 internal AST representation.  You can't depend on these flags to give the same
 output across compiler revisions, but they are a useful learning tool.
 
-First, let's look at the untyped AST from our `typedef.ml`.
+We'll use our toy `typedef.ml` again.
+
+```ocaml
+(* typedef.ml *)
+type t = Foo | Bar
+let v = Foo
+```
+
+Let's first look at the untyped syntax tree that's generated from the parsing phase.
 
 ```console
 $ ocamlc -dparsetree typedef.ml
@@ -1111,11 +1170,15 @@ $ ocamlc -dparsetree typedef.ml
 ]
 ```
 
-This is rather a lot of output for a simple two-line program, but also reveals
-a lot about how the compiler works.  Each portion of the tree is decorated with
-the precise location information (including the filename and character location
-of the token).  This code hasn't been type checked yet, and so the raw tokens
-are all included.  After type checking, the structure is much simpler.
+This is rather a lot of output for a simple two-line program, but it shows just
+how much structure the OCaml parser generates even from a small source file.
+
+Each portion of the AST is decorated with the precise location information
+(including the filename and character location of the token).  This code hasn't
+been type checked yet, and so the raw tokens are all included.
+
+The typed AST that is normally output as a compiled `cmt` file can be displayed
+in a more developer-readable form via the `-dtypedtree` option.
 
 ```console
 $ ocamlc -dtypedtree typedef.m
@@ -1150,8 +1213,9 @@ The typed AST is more explicit than the untyped syntax tree.  For instance, the
 type declaration has been given a unique name (`t/1008`), as has the `v` value
 (`v/1011`).
 
-You'll never need to use this information in day-to-day development, but it's
-always instructive to examine how the type checker folds in the source code
-into a more compact form like this.
-
+You'll rarely need to look at this raw output from the compiler unless you're
+building IDE tools such as `ocp-index`, or are hacking on extensions to the
+core compiler itself.  However, it's useful to know that this intermediate form
+exists before we delve further into the code generation process next in
+[xref](the-compiler-backend-byte-code-and-native-code).
 
