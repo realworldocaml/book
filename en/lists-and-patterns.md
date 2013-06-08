@@ -715,7 +715,7 @@ alternative implementation.
 val length_plus_n : 'a list -> int -> int = <fun>
 # let length l = length_plus_n l 0 ;;
 val length : 'a list -> int = <fun>
-utop[41]> length [1;2;3;4];;
+# length [1;2;3;4];;
 - : int = 4
 ```
 
