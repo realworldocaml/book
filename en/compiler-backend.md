@@ -1,9 +1,259 @@
 # The Compiler Backend: Byte-code and Native-code
 
+It's even possible to compile OCaml to run efficiently on foreign environments
+such as Javascript or the Java Virtual Machine.  These aren't supported by the
+core OCaml distribution, but are available on OPAM.  We'll mention these as we
+go through the chapter so you can experiment with them too.
+
 In this chapter, we'll cover the following topics:
 
+* the untyped intermediate lambda code where pattern matching is optimized.
 * the bytecode `ocamlc` compiler and `ocamlrun` interpreter.
 * the native code `ocamlopt` code generator, and debugging and profiling native code.
+
+## The untyped lambda form
+
+Once OCaml has passed the type checking stage, it can stop emitting syntax
+and type errors and begin the process of compiling the well-formed modules
+into executable code.
+
+The next stage eliminates all the static type information into a simpler
+intermediate *lambda form*.  The lambda form discards higher-level constructs
+such as modules and objects and replaces them with simpler values such as
+records and function pointers.  Pattern matches are also analyzed and compiled
+into highly optimized automata.
+
+The lambda form is the key stage that discards the OCaml type information and
+maps the source code to the runtime memory model described in
+[xref](#memory-representation-of-values).  This stage also performs some
+optimizations, most notably converting pattern match statements into more
+optimized but low-level statements. 
+
+### Pattern matching optimization
+
+The compiler dumps the lambda form in an s-expression syntax if you add the
+`-dlambda` directive to the command-line.  Let's use this to learn more about
+how the OCaml pattern matching engine works by building three different pattern
+matches and comparing their lambda forms.
+
+Let's start by creating a straightforward exhaustive pattern match using normal
+variants.
+
+```ocaml
+(* pattern_monomorphic_exhaustive.ml *)
+type t = | Alice | Bob | Charlie | David
+
+let test v =
+  match v with
+  | Alice   -> 100
+  | Bob     -> 101
+  | Charlie -> 102
+  | David   -> 103
+```
+
+The lambda output for this code looks like this.
+
+```console
+$ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
+(setglobal Pattern_monomorphic_exhaustive!
+  (let
+    (test/1013
+       (function v/1014
+         (switch* v/1014
+          case int 0: 100
+          case int 1: 101
+          case int 2: 102
+          case int 3: 103)))
+    (makeblock 0 test/1013)))
+```
+
+It's not important to understand every detail of this internal form, but
+some interesting points emerge from reading it.
+
+* There are no mention of modules or types any more.  Global values are
+  created via `setglobal` and OCaml values are constructed by `makeblock`.  The
+  blocks are the runtime values you should remember from [xref](#memory-representation-of-values).
+* The pattern match has turned into a switch case that jumps to the right case
+  depending on the header tag of `v`.  Recall that variants without parameters are stored 
+  in memory as integers in the order which they appear.  The pattern matching 
+  engine knows this and has transformed the pattern into an efficient jump table. 
+* Values are addressed by a unique name that distinguished shadowed values by appending
+  a number (e.g. `v/1014`). The type safety checks in the earlier phase ensure that
+  these low-level accesses never violate runtime memory safety, so this layer
+  doesn't do any dynamic checks.  Unwise use of unsafe features such as the
+  `Obj.magic` module can still easily induce crashes at this level.
+
+The first pattern match is *exhaustive*, so there are no unknown match cases
+that the compiler needs to check for (e.g. a value greater than 3).  What
+happens if we modify the code to use an incomplete pattern match instead?
+
+```ocaml
+(* pattern_monomorphic_incomplete.ml *)
+type t = | Alice | Bob | Charlie | David
+
+let test v =
+  match v with
+  | Alice   -> 100
+  | Bob     -> 101
+  | _       -> 102
+```
+
+The lambda output for this code is now quite different.
+
+```console
+$ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml 
+(setglobal Pattern_monomorphic_incomplete!
+  (let
+    (test/1013
+       (function v/1014 (if (!= v/1014 1) (if (!= v/1014 0) 102 100) 101)))
+    (makeblock 0 test/1013)))
+```
+
+The compiler has reverted to testing the value as a set of nested conditionals.
+The lambda code above first checks to see if the value is `Alice`, then if it's
+`Bob` and finally falls back to the default `102` return value for everything
+else.
+
+Exhaustive pattern matching is thus a better coding style at several levels.
+It rewards you with more useful compile-time warnings when you modify type
+definitions *and* generates more efficient runtime code too.
+
+Finally, let's look at the same code, but with polymorphic variants instead of
+normal variants.
+
+```ocaml
+(* pattern_polymorphic.ml *)
+let test v =
+  match v with
+  | `Alice   -> 100
+  | `Bob     -> 101
+  | `Charlie -> 102
+  | `David   -> 103
+```
+
+The lambda form for this reveals the most inefficient result yet.
+
+```console
+$ ocamlc -dlambda -c pattern_polymorphic.ml 
+(setglobal Pattern_polymorphic!
+  (let
+    (test/1008
+       (function v/1009
+         (if (>= v/1009 482771474) (if (>= v/1009 884917024) 100 102)
+           (if (>= v/1009 3306965) 101 103))))
+    (makeblock 0 test/1008)))
+```
+
+We mentioned earlier in [xref](#variants) that pattern matching over
+polymorphic variants is slightly less efficient, and it should be clearer why
+this is the case now.  Polymorphic variants have a runtime value that's
+calculated by hashing the variant name, and so the compiler has to test each of
+these possible hash values in sequence.
+
+### Benchmarking pattern matching
+
+Let's benchmark these three pattern matching techniques to quantify their
+runtime costs more accurately.  The `Core_bench` module runs the tests
+thousands of times and also calculates statistical variance of the results.
+You'll need to `opam install core_bench` to get the library.
+
+```ocaml
+(* pattern.ml: benchmark different pattern matching styles *)
+open Core.Std
+open Core_bench.Std
+
+type t = | Alice | Bob | Charlie | David
+
+let polymorphic_pattern () =
+  let test v =
+    match v with
+    | `Alice   -> 100
+    | `Bob     -> 101
+    | `Charlie -> 102
+    | `David   -> 103
+  in
+  List.iter ~f:(fun v -> ignore(test v))
+    [`Alice; `Bob; `Charlie; `David]
+ 
+let monomorphic_pattern_exhaustive () =
+  let test v =
+    match v with
+    | Alice   -> 100
+    | Bob     -> 101
+    | Charlie -> 102
+    | David   -> 103
+  in
+  List.iter ~f:(fun v -> ignore(test v))
+    [ Alice; Bob; Charlie; David ]
+
+ let monomorphic_pattern_incomplete () =
+  let test v =
+    match v with
+    | Alice   -> 100
+    | Bob     -> 101
+    | _       -> 102
+  in
+  List.iter ~f:(fun v -> ignore(test v))
+    [ Alice; Bob; Charlie; David ]
+ 
+let tests = [
+    "Polymorphic pattern", polymorphic_pattern;
+    "Monomorphic incomplete pattern", monomorphic_pattern_incomplete;
+    "Monomorphic exhaustive pattern", monomorphic_pattern_exhaustive
+]
+
+let () =
+  List.map tests ~f:(fun (name,test) -> Bench.Test.create ~name test)
+  |> Bench.make_command
+  |> Command.run
+```
+
+Building and executing this example will run for around 30 seconds by default,
+and you'll see the results summarised in a neat table.
+
+```console
+$ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
+Estimated testing time 30s (change using -quota SECS).
++────────────────────────────────+───────────+─────────────+────────────+
+│ Name                           │ Time (ns) │   Time 95ci │ Percentage │
++────────────────────────────────+───────────+─────────────+────────────+
+│ Polymorphic pattern            │     22.38 │ 22.34-22.43 │     100.00 │
+│ Monomorphic incomplete pattern │     20.98 │ 20.95-21.02 │      93.77 │
+│ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
++────────────────────────────────+───────────┴─────────────+────────────+
+```
+
+These results confirm our earlier performance hypothesis obtained from
+inspecting the lambda code. The shortest running time comes from the exhaustive
+pattern match and polymorphic variant pattern matching is the slowest.  There
+isn't a hugely significant difference in these examples, but you can use the
+same techniques to peer into the innards of your own source code and narrow
+down any performance hotspots.
+
+The lambda form is primarily a stepping stone to the bytecode executable format
+that we'll cover next.  It's often easier to look at the textual output from
+this stage than to wade through the native assembly code from compiled
+executables.
+
+<note>
+<title>Learning more about pattern matching compilation</title>
+
+Pattern matching is an important part of OCaml programming. You'll often
+encounter deeply nested pattern matches over complex data structures in real
+code.  A good paper that describes the fundamental algorithms implemented in
+OCaml is ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) by
+Fabrice Le Fessant and Luc Maranget.
+
+The paper describes the backtracking algorithm used in classical pattern
+matching compilation, and also several OCaml-specific optimizations such as the
+use of exhaustiveness information and control flow optimizations via static
+exceptions.
+
+It's not essential that you understand all of this just to use pattern matching
+of course, but it'll give you insight as to why pattern matching is such a
+lightweight language construct to use in OCaml code.
+
+</note>
 
 ## Generating portable bytecode
 
