@@ -457,7 +457,7 @@
     <literal>utop</literal> specifically.
   </para>
   <para>
-    Before getting started, do make sure you have a working OCaml
+    Before getting started, make sure you have a working OCaml
     installation and toplevel as you read through this chapter so you
     can try out the examples.
   </para>
@@ -480,8 +480,9 @@ $ eval `opam config -env`
 </programlisting>
   <para>
     Note that the above commands will take some time to run. When
-    they're done, create a file called <literal>~/.ocamlinit</literal>
-    in your home directory:
+    they're done, you should have a file called
+    <literal>~/.ocamlinit</literal> in your home directory, to which you
+    should add the following.
   </para>
   <programlisting language="ocaml">
 #use &quot;topfind&quot;
@@ -494,8 +495,8 @@ $ eval `opam config -env`
     interactive toplevel environment. OCaml phrases are only evaluated
     when you enter a double semicolon (<literal>;;</literal>), so you
     can split your typing over multiple lines. You can exit
-    <literal>utop</literal> by pressing <literal>control-D</literal> and
-    return. For complete instructions, please refer to
+    <literal>utop</literal> by pressing <literal>control-d</literal>.
+    For complete instructions, please refer to
     <xref linkend="installation"/>.
   </para>
   </note>
@@ -570,7 +571,7 @@ $ utop
         <para>
           OCaml carefully distinguishes between
           <literal>float</literal>, the type for floating point numbers
-          and <literal>int</literal> the type for integers. The types
+          and <literal>int</literal>, the type for integers. The types
           have different literals (<literal>6.</literal> instead of
           <literal>6</literal>) and different infix operators
           (<literal>+.</literal> instead of <literal>+</literal>), and
@@ -599,9 +600,27 @@ val y : int = 14
       addition to its type (<literal>int</literal>) and value
       (<literal>7</literal> or <literal>14</literal>).
     </para>
-  </sect1>
-  <sect1 id="functions-and-type-inference">
-    <title>Functions and type Inference</title>
+    <para>
+      Note that there are some constraints on what identifiers can be
+      used for variable names. Punctuation is excluded, except for
+      <literal>_</literal> and <literal>'</literal>, and variables must
+      start with a lowercase letter. Thus, these are legal:
+    </para>
+    <programlisting language="ocaml">
+# let x7 = 3 + 4;;
+val x7 : int = 7
+# let x_plus_y = x + y;;
+val x_plus_y : int = 21
+# let x' = x + 1;;
+val x' : int = 8
+</programlisting>
+    <para>
+      But these are not:
+    </para>
+    <para>
+      <literal>ocaml # let Seven = 3 + 4;; Error: Unbound constructor Seven # let 7x = 7;; Error: This expression should not be a function, the expected type is int # let x-plus-y = x + y;; Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</literal>
+      ## Functions and type Inference
+    </para>
     <para>
       The <literal>let</literal> syntax can also be used for creating
       functions.
@@ -724,24 +743,26 @@ val even : int -&gt; bool = &lt;fun&gt;
           <para>
             OCaml requires that both arms of an <literal>if</literal>
             statement return the same type, so the expression
-            <literal>if test x then x else 0</literal> requires that
-            <literal>x</literal> must be the same type as
-            <literal>0</literal>, which is <literal>int</literal>. By
-            the same logic we can conclude that <literal>y</literal> has
-            type <literal>int</literal>.
+            <literal>if test first then first else 0</literal> requires
+            that <literal>first</literal> must be the same type as
+            <literal>0</literal>, which is <literal>int</literal>.
+            Similarly, from
+            <literal>if test second then second else 0</literal> we can
+            conclude that <literal>second</literal> has type
+            <literal>int</literal>.
           </para>
         </listitem>
         <listitem>
           <para>
-            <literal>test</literal> is passed <literal>x</literal> as an
-            argument. Since <literal>x</literal> has type
+            <literal>test</literal> is passed <literal>first</literal>
+            as an argument. Since <literal>first</literal> has type
             <literal>int</literal>, the input type of
             <literal>test</literal> must be <literal>int</literal>.
           </para>
         </listitem>
         <listitem>
           <para>
-            <literal>test x</literal> is used as the condition in an
+            <literal>test first</literal> is used as the condition in an
             <literal>if</literal> statement, so the return type of
             <literal>test</literal> must be <literal>bool</literal>.
           </para>
@@ -939,6 +960,8 @@ Exception: Division_by_zero.
       <programlisting language="ocaml">
 # let a_tuple = (3,&quot;three&quot;);;
 val a_tuple : int * string = (3, &quot;three&quot;)
+# let another_tuple = (3,&quot;four&quot;,5.);;
+val another_tuple : int * string * float = (3, &quot;four&quot;, 5.)
 </programlisting>
       <para>
         (For the mathematically inclined, the <literal>*</literal>
@@ -970,7 +993,18 @@ val y : string = &quot;three&quot;
 </programlisting>
       <para>
         Note that the same syntax is used both for constructing and for
-        pattern matching on tuples.
+        pattern matching on tuples. Another syntactic note: it's the
+        commas, rather than the parens, that make a tuple. Thus, we can
+        write:
+      </para>
+      <programlisting language="ocaml">
+# let x,y = a_tuple;;        
+val x : int = 3
+val y : string = &quot;three&quot;
+</programlisting>
+      <para>
+        That said, it's more idiomatic to include the parens even when
+        they're not strictly necessary.
       </para>
       <para>
         Pattern matching can also show up in function arguments. Here's
@@ -1007,7 +1041,7 @@ val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
 val languages : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
 </programlisting>
       <para>
-        Note that you can't mix elements of different types on the same
+        Note that you can't mix elements of different types in the same
         list, as we did with tuples.
       </para>
       <programlisting language="ocaml">
@@ -1023,8 +1057,8 @@ Error: This expression has type string but an expression was expected of type
         <para>
           Core comes with a <literal>List</literal> module that has a
           rich collection of functions for working with lists. We can
-          access values from within a module by using dot-notation.
-          Here, for example, is how we compute the length of a list.
+          access values from within a module by using dot-notation. For
+          example, this is how we compute the length of a list.
         </para>
         <programlisting language="ocaml">
 # List.length languages;;
@@ -1047,10 +1081,10 @@ Error: This expression has type string but an expression was expected of type
         <para>
           In this example, the function <literal>String.length</literal>
           is passed under the <emphasis>labeled argument</emphasis>
-          <literal>~f</literal>. Labels allow you to specify function
-          arguments by name rather than by position. As you can see
-          below, we can change the order of labeled arguments without
-          changing the function's behavior.
+          <literal>~f</literal>. Labels allow you to specify arguments
+          by name rather than by position. As you can see below, we can
+          change the order of labeled arguments without changing the
+          function's behavior.
         </para>
         <programlisting language="ocaml">
 # List.map ~f:String.length languages;;
@@ -1085,7 +1119,8 @@ Error: This expression has type string but an expression was expected of type
           The bracket notation for lists is really just syntactic sugar
           for <literal>::</literal>. Thus, the following declarations
           are all equivalent. Note that <literal>[]</literal> is used to
-          represent the empty list.
+          represent the empty list, and that <literal>::</literal> is
+          right-associative.
         </para>
         <programlisting language="ocaml">
 # [1; 2; 3];;
@@ -1148,13 +1183,13 @@ Here is an example of a value that is not matched:
 val my_favorite_language : 'a list -&gt; 'a = &lt;fun&gt;
 </programlisting>
         <para>
-          The warning comes because the compiler can't be certain that
-          the pattern match won't lead to a runtime error. Indeed, the
-          warning gives an example of a list, (<literal>[]</literal>,
-          the empty list) that doesn't match the provided pattern.
-          Indeed, if we try to run
-          <literal>my_favorite_language</literal>, we'll see that it
-          works on non-empty list, and fails on empty ones.
+          The warning indicates that the pattern is not exhaustive,
+          meaning there are values of the type in question that won't be
+          captured by the pattern. The warning even gives an example of
+          a value that doesn't match the provided pattern, in
+          particular, <literal>[]</literal>, the empty list. If we try
+          to run <literal>my_favorite_language</literal>, we'll see that
+          it works on non-empty list, and fails on empty ones.
         </para>
         <programlisting language="ocaml">
 # my_favorite_language [&quot;English&quot;;&quot;Spanish&quot;;&quot;French&quot;];;
@@ -1309,7 +1344,7 @@ _::[]
 # let rec destutter list =
     match list with
     | [] -&gt; []
-    | hd :: [] -&gt; hd :: []
+    | [hd] -&gt; [hd]
     | hd1 :: hd2 :: tl -&gt;
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
@@ -1575,10 +1610,10 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
     <para>
       We also made our first use of an <emphasis>anonymous
       function</emphasis> in the call to <literal>List.exists</literal>.
-      An anonymous function is a function that is defined but not named,
-      in this case, using the <literal>fun</literal> keyword. Anonymous
-      functions are common in OCaml, particularly when using iteration
-      functions like <literal>List.exists</literal>.
+      Anonymous functions are declared using the <literal>fun</literal>
+      keyword, and don't need to be explicitly named. Such functions are
+      common in OCaml, particularly when using iteration functions like
+      <literal>List.exists</literal>.
     </para>
     <para>
       The purpose of <literal>List.exists</literal> is to check if there
@@ -1619,7 +1654,7 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
         data structures in OCaml, including lists. Here's an example:
       </para>
       <programlisting language="ocaml">
-# let numbers = [| 1;2;3;4 |];;
+# let numbers = [| 1; 2; 3; 4 |];;
 val numbers : int array = [|1; 2; 3; 4|]
 # numbers.(2) &lt;- 4;;
 - : unit = ()
@@ -1632,6 +1667,25 @@ val numbers : int array = [|1; 2; 3; 4|]
         for modification. Because the elements of the array are counted
         starting at zero, element <literal>.(2)</literal> is the third
         element.
+      </para>
+      <para>
+        A new and somewhat odd type has cropped up in this example:
+        <literal>unit</literal>. What makes <literal>unit</literal>
+        different is that there is only one value of type
+        <literal>unit</literal>, which is written <literal>()</literal>.
+        Because there is only one value of type <literal>unit</literal>
+        that value doesn't really convey any information.
+      </para>
+      <para>
+        If it doesn't convey any information, then what is
+        <literal>unit</literal> good for? Most of the time,
+        <literal>unit</literal> acts as a placeholder. Thus, we use
+        <literal>unit</literal> for the return value of an operation
+        like setting a mutable field that operates by side effect rather
+        than by returning a value. It's also used as the argument to
+        functions that don't require an input value. This is similar to
+        the role that <literal>void</literal> plays in languages like C
+        and Java.
       </para>
     </sect2>
     <sect2 id="mutable-record-fields">
@@ -1694,28 +1748,8 @@ val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
       <para>
         Note the use in the above code of single semi-colons to sequence
         operations. When we were working purely functionally, this
-        wasn't necessary, but you start needing it when your code is
-        acting by side-effect.
-      </para>
-      <para>
-        A new and somewhat odd type has cropped up in this example:
-        <literal>unit</literal>. What makes <literal>unit</literal>
-        different is that there is only one value of type
-        <literal>unit</literal>, which is written <literal>()</literal>.
-        Because there is only one value of type <literal>unit</literal>
-        that value doesn't really convey any information.
-      </para>
-      <para>
-        If it doesn't convey any information, then what is
-        <literal>unit</literal> good for? Most of the time,
-        <literal>unit</literal> acts as a placeholder. Thus, we use
-        <literal>unit</literal> for the return value of a function like
-        <literal>update</literal> that operates by side effect rather
-        than by returning a value, and for the argument to a function
-        like <literal>create</literal> that doesn't require any
-        information to be passed into it in order to run. This is
-        similar to the role that <literal>void</literal> plays in
-        languages like C and Java.
+        wasn't necessary, but you start needing it when you're writing
+        imperative code.
       </para>
       <para>
         Here's an example of <literal>create</literal> and
@@ -1735,9 +1769,11 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
     <sect2 id="refs">
       <title>Refs</title>
       <para>
-        We can declare a single mutable value by using a
-        <literal>ref</literal>, which is a record type with a single
-        mutable field that is defined in the standard library.
+        We can create a single mutable value by using a
+        <literal>ref</literal>. The <literal>ref</literal> type comes
+        pre-defined in the standard library, but there's nothing really
+        special about it. It's just a record type with a single mutable
+        field called <literal>contents</literal>.
       </para>
       <programlisting language="ocaml">
 # let x = { contents = 0 };;
@@ -1749,7 +1785,8 @@ val x : int ref = {contents = 0}
 </programlisting>
       <para>
         There are a handful of useful functions and operators defined
-        for refs to make them more convenient to work with.
+        for <literal>ref</literal>s to make them more convenient to work
+        with.
       </para>
       <programlisting language="ocaml">
 # let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
@@ -1762,12 +1799,9 @@ val x : int ref = {contents = 0}
 - : int = 1
 </programlisting>
       <para>
-        The definition of all this is quite straightforward. Here is the
-        complete implementation of the <literal>ref</literal> type. The
-        <literal>'a</literal> before the ref indicates that the
-        <literal>ref</literal> type is polymorphic, in the same way that
-        lists are polymorphic, meaning it can contain values of any
-        type.
+        There's nothing magical with these operators either. You can
+        complete reimplement the <literal>ref</literal> type and all of
+        these operators in just a few lines of code.
       </para>
       <programlisting language="ocaml">
 type 'a ref = { mutable contents : 'a }
@@ -1777,18 +1811,21 @@ let (!) r = r.contents
 let (:=) r x = r.contents &lt;- x
 </programlisting>
       <para>
-        Here, <literal>!</literal> and <literal>:=</literal> are infix
-        operators that we're defining, where the parenthetical syntax
-        marks them as such.
+        The <literal>'a</literal> before the ref indicates that the
+        <literal>ref</literal> type is polymorphic, in the same way that
+        lists are polymorphic, meaning it can contain values of any
+        type. The parenthesis around <literal>!</literal> and
+        <literal>:=</literal> are needed because these are operators,
+        rather than ordinary functions.
       </para>
       <para>
         Even though a <literal>ref</literal> is just another record
-        type, it's notable because it is the standard way of simulating
-        the traditional mutable variable you'll find in most imperative
-        languages. For example, we can sum over the elements of a list
-        imperatively by calling <literal>List.iter</literal> to call a
-        simple function on every element of a list, using a ref to
-        accumulate the results.
+        type, it's important because it is the standard way of
+        simulating the traditional mutable variable you'll find in most
+        imperative languages. For example, we can sum over the elements
+        of a list imperatively by calling <literal>List.iter</literal>
+        to call a simple function on every element of a list, using a
+        ref to accumulate the results.
       </para>
       <programlisting language="ocaml">
 # let sum list =
@@ -1859,7 +1896,7 @@ val ar : int array =
      done;
      if !pos = Array.length ar then None else Some !pos
   ;;
-            val find_first_negative_entry : int Core.Std.Array.t -&gt; int option = &lt;fun&gt;
+val find_first_negative_entry : int Core.Std.Array.t -&gt; int option = &lt;fun&gt;
 # find_first_negative_entry [|1;2;0;3|];;
 - : int option = None
 # find_first_negative_entry [|1;-2;0;3|];;
@@ -1871,13 +1908,15 @@ val ar : int array =
     <title>A complete program</title>
     <para>
       So far, we've played with the basic features of the language using
-      the toplevel. Now we'll create a simple, complete stand-along
+      the toplevel. Now we'll create a simple, complete stand-alone
       program that does something useful: sum up a list of numbers read
       in from the standard input.
     </para>
     <para>
       Here's the code, which you can save in a file called
-      <literal>sum.ml</literal>.
+      <literal>sum.ml</literal>. Note that we don't terminate
+      expressions with <literal>;;</literal> here, since it's not
+      required outside the toplevel.
     </para>
     <programlisting language="ocaml">
 (* file: sum.ml *)
@@ -1943,7 +1982,7 @@ ocamlbuild -use-ocamlfind sum.native
         when the input is complete.
       </para>
       <programlisting>
-max $ ./sum.native
+$ ./sum.native
 1
 2
 3
@@ -1961,11 +2000,10 @@ Total: 100.5
   <sect1 id="where-to-go-from-here">
     <title>Where to go from here</title>
     <para>
-      That's it for our guided tour! There are plenty of features left
-      to touch upon and lots of details to explain, but the hope is that
-      this has given you enough of a feel for the language that you have
-      a sense as to what to expect, and will be comfortable reading
-      examples in the rest of the book.
+      That's it for the guided tour! There are plenty of features left
+      and lots of details to explain, but we hope that you now have a
+      sense of what to expect from OCaml, and that you'll be more
+      comfortable reading the rest of the book as a result.
     </para>
   </sect1>
 </chapter><chapter id="variables-and-functions">
@@ -3500,10 +3538,10 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
 +---+---+   +---+---+   +---+---+
 </programlisting>
     <para>
-      The <literal>::</literal> operator essentially adds a new block to
-      the picture above. Such a block contains two things: a reference
-      to the data in that list element, and a reference to the remainder
-      of the list. This is why <literal>::</literal> can extend a list
+      Each <literal>::</literal> essentially adds a new block to the
+      picture above. Such a block contains two things: a reference to
+      the data in that list element, and a reference to the remainder of
+      the list. This is why <literal>::</literal> can extend a list
       without modifying it; extension allocates a new list element but
       doesn't need to change any of the existing ones, as you can see:
     </para>
@@ -3568,9 +3606,7 @@ val sum : int list -&gt; int = &lt;fun&gt;
 </programlisting>
     <para>
       But when we type this in, the compiler will immediately warn us
-      that something is wrong. Moreover, the function clearly does the
-      wrong thing, filtering out all elements of the list rather than
-      just those equal to the provided value.
+      that something is wrong.
     </para>
     <programlisting>
 Characters 114-122:
@@ -3578,6 +3614,13 @@ Characters 114-122:
         ^^^^^^^^
 Warning 11: this match case is unused.
 val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
+</programlisting>
+    <para>
+      Moreover, the function clearly does the wrong thing, filtering out
+      all elements of the list rather than just those equal to the
+      provided value, as you can see below.
+    </para>
+    <programlisting language="ocaml">
 # drop_value [1;2;3] 2;;
 - : int list = []
 </programlisting>
@@ -3668,25 +3711,51 @@ val drop_zero : int list -&gt; int list = &lt;fun&gt;
         statements.
       </para>
       <programlisting language="ocaml">
-let plus_one x =
-  match x with
-  | 0 -&gt; 1
-  | 1 -&gt; 2
-  | 2 -&gt; 3
-  | _ -&gt; x + 1
+# let plus_one_match x =
+    match x with
+    | 0 -&gt; 1
+    | 1 -&gt; 2
+    | 2 -&gt; 3
+    | _ -&gt; x + 1
 
-let plus_one_slow x =
-  if      x = 0 then 1
-  else if x = 1 then 2
-  else if x = 2 then 3
-  else x + 1
+  let plus_one_if x =
+    if      x = 0 then 1
+    else if x = 1 then 2
+    else if x = 2 then 3
+    else x + 1
+  ;;
+val plus_one_match : int -&gt; int = &lt;fun&gt;
+val plus_one_if : int -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
-        If you benchmark these, you'll see that
-        <literal>plus_one_slow</literal> is about 35% slower than
-        <literal>plus_one</literal>, and the advantage gets larger as
-        the number of cases increases.
+        Note the use of <literal>_</literal> in the above match. This is
+        a wild-card pattern that matches any value, but without binding
+        a variable name to the value in question.
       </para>
+      <para>
+        If you benchmark these functions, you'll see that
+        <literal>plus_one_if</literal> is considerably slower than
+        <literal>plus_one_match</literal>, and the advantage gets larger
+        as the number of cases increases. Here, we'll benchmark these
+        functions using the <literal>core_bench</literal> library.
+      </para>
+      <programlisting language="ocaml">
+# #require &quot;core_bench&quot;;;
+# open Core_bench.Std;;
+# [ Bench.Test.create ~name:&quot;plus_one_match&quot; (fun () -&gt;
+      ignore (plus_one_match 10))
+  ; Bench.Test.create ~name:&quot;plus_one_if&quot; (fun () -&gt;
+      ignore (plus_one_if 10)) ]
+  |&gt; Bench.bench
+  ;;
+Estimated testing time 20s (change using -quota SECS).
+┌────────────────┬───────────┬──────────┐
+│ Name           │ Time (ns) │ % of max │
+├────────────────┼───────────┼──────────┤
+│ plus_one_match │    369.38 │    83.40 │
+│ plus_one_if    │    442.88 │   100.00 │
+└────────────────┴───────────┴──────────┘
+</programlisting>
       <para>
         Here's another less artificial example. We can rewrite the
         <literal>sum</literal> function we described earlier in the
@@ -3697,26 +3766,46 @@ let plus_one_slow x =
         module to deconstruct the list, allowing us to implement the
         entire function without pattern matching.
       </para>
-      <programlisting>
-let rec sum_slow l =
-  if List.is_empty l then 0
-  else List.hd_exn l + sum_slow (List.tl_exn l)
-;;
+      <programlisting language="ocaml">
+# let rec sum_if l =
+    if List.is_empty l then 0
+    else List.hd_exn l + sum_if (List.tl_exn l)
+  ;;
+val sum_if : int list -&gt; int = &lt;fun&gt;
 </programlisting>
       <para>
-        In this case, the match-based implementation is 70% faster than
-        the one using if. The difference comes because we need to
-        effectively do the same work multiple times, since each function
-        we call has to re-examine the first element of the list to
-        determine whether or not it's the empty cell. With a match
-        statement, this work happens exactly once per list element.
+        Again, we can benchmark these to see the difference.
+      </para>
+      <programlisting language="ocaml">
+# let numbers = List.range 0 1000 in
+  [ Bench.Test.create ~name:&quot;sum_if&quot; (fun () -&gt; ignore (sum_if numbers))
+  ; Bench.Test.create ~name:&quot;sum&quot;    (fun () -&gt; ignore (sum numbers)) ]
+  |&gt; Bench.bench
+  ;;
+Estimated testing time 20s (change using -quota SECS).
+┌────────┬───────────┬──────────┐
+│ Name   │ Time (ns) │ % of max │
+├────────┼───────────┼──────────┤
+│ sum_if │   650_463 │   100.00 │
+│ sum    │   177_740 │    27.32 │
+└────────┴───────────┴──────────┘
+- : unit = ()
+</programlisting>
+      <para>
+        In this case, the match-based implementation is more than three
+        times faster than the one using if. The difference comes because
+        we need to effectively do the same work multiple times, since
+        each function we call has to re-examine the first element of the
+        list to determine whether or not it's the empty cell. With a
+        match statement, this work happens exactly once per list
+        element.
       </para>
       <para>
-        Generally, pattern matching is typically more efficient than the
+        Generally, pattern matching is more efficient than the
         alternatives you might code by hand. One notable exception is
-        matches over strings, which are in fact tested sequentially. But
-        most of the time, using pattern matching is a clear performance
-        win.
+        matches over strings, which are in fact tested sequentially, and
+        which for long lists can be outperformed by a hashtable. But
+        most of the time, pattern matching is a clear performance win.
       </para>
     </sect2>
     <sect2 id="detecting-errors">
@@ -4014,11 +4103,16 @@ val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
       <para>
         Sometimes, you want to both transform and filter as part of the
         same computation. <literal>List.filter_map</literal> allows you
-        to do just that. The following expression uses
-        <literal>List.filter_map</literal> to produce the list of file
-        extensions in the current directory, piping the results through
-        <literal>List.dedup</literal> to remove duplicates. Note that
-        this example also uses some functions from other modules,
+        to do just that. The function passed to
+        <literal>List.filter_map</literal> returns an optional value,
+        and <literal>List.filter_map</literal> drops all elements for
+        which <literal>None</literal> is returned.
+      </para>
+      <para>
+        Here's an example. The following expression computes the list of
+        file extensions in the current directory, piping the results
+        through <literal>List.dedup</literal> to remove duplicates. Note
+        that this example also uses some functions from other modules,
         including <literal>Sys.ls_dir</literal> to get a directory
         listing, and <literal>String.rsplit2</literal> to split a string
         on the rightmost appearance of a given character.
@@ -4034,17 +4128,11 @@ val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
 - : string list = [&quot;byte&quot;; &quot;ml&quot;; &quot;mli&quot;; &quot;native&quot;; &quot;txt&quot;]
 </programlisting>
       <para>
-        In the match statement above, you may notice that we for the
-        first time used an underscore in a pattern match. You use an
-        underscore when you want to indicate that the pattern doesn't
-        depend on some sub-component of the data structure, but that you
-        don't want to name it is an explicit variable.
-      </para>
-      <para>
-        Another feature of OCaml's pattern language that we encounter
-        here is <emphasis>or-patterns</emphasis>, which allow you to
-        have multiple sub-patterns within a larger pattern. In this
-        case, <literal>None | Some (&quot;&quot;,_)</literal> is an
+        One feature of OCaml's pattern language that we've encountered
+        here for the first time is <emphasis>or-patterns</emphasis>,
+        which allow you to have multiple sub-patterns within a larger
+        pattern. In this case,
+        <literal>None | Some (&quot;&quot;,_)</literal> is an
         or-pattern. As we'll see later, or-patterns can be nested
         anywhere within larger patterns.
       </para>
@@ -4076,23 +4164,30 @@ val other_files : string list = [&quot;_build&quot;; &quot;_tags&quot;]
       <para>
         Another very common operation on lists is concatenation. The
         list module actually comes with a few different ways of doing
-        this. First, there's<literal>List.append</literal>, for
+        this. First, there's <literal>List.append</literal>, for
         concatenating a pair of lists.
       </para>
       <programlisting language="ocaml">
 # List.append [1;2;3] [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
+</programlisting>
+      <para>
+        There's also <literal>@</literal>, an operator equivalent of
+        <literal>List.append</literal>.
+      </para>
+      <programlisting language="ocaml">
 # [1;2;3] @ [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
 </programlisting>
       <para>
-        <literal>@</literal> is just a synonym for
-        <literal>List.append</literal>. In addition, there is
-        <literal>List.concat</literal>, for concatenating a list of
-        lists.
+        In addition, there is <literal>List.concat</literal>, for
+        concatenating a list of lists.
       </para>
+      <programlisting language="ocaml">
+# List.concat [[1;2];[3;4;5];[6];[]];;
+- : int list = [1; 2; 3; 4; 5; 6]
+</programlisting>
       <para>
-        <literal>ocaml # List.concat [[1;2];[3;4;5];[6];[]];; - : int list = [1; 2; 3; 4; 5; 6]</literal>
         Here's an example of using <literal>List.concat</literal> along
         with <literal>List.map</literal> to compute a recursive listing
         of a directory tree.
@@ -4191,7 +4286,7 @@ Stack overflow during evaluation (looping recursion?).
 val length_plus_n : 'a list -&gt; int -&gt; int = &lt;fun&gt;
 # let length l = length_plus_n l 0 ;;
 val length : 'a list -&gt; int = &lt;fun&gt;
-utop[41]&gt; length [1;2;3;4];;
+# length [1;2;3;4];;
 - : int = 4
 </programlisting>
     <para>
@@ -4234,7 +4329,7 @@ utop[41]&gt; length [1;2;3;4];;
       caller's stack frame.
     </para>
     <para>
-      Tail recursion are important for more than just lists. Ordinary
+      Tail recursion is important for more than just lists. Ordinary
       (non-tail) recursive calls are reasonable when the dealing with
       data-structures like binary trees where the depth of the tree is
       logarithmic in the size of your data. But when dealing with
@@ -4248,7 +4343,7 @@ utop[41]&gt; length [1;2;3;4];;
     <para>
       Now that we know more about how lists and patterns work, let's
       consider how we can improve on an example from
-      (xref)(#recursive-list-functions): the function
+      <xref linkend="recursive-list-functions"/>: the function
       <literal>destutter</literal>, which removes sequential duplicates
       from a list. Here's the implementation that was described earlier.
     </para>
@@ -4256,7 +4351,7 @@ utop[41]&gt; length [1;2;3;4];;
 # let rec destutter list =
     match list with
     | [] -&gt; []
-    | hd :: [] -&gt; hd :: []
+    | [hd] -&gt; [hd]
     | hd :: hd' :: tl -&gt;
       if hd = hd' then destutter (hd' :: tl)
       else hd :: destutter (hd' :: tl)
@@ -4272,9 +4367,9 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
       <literal>destutter</literal> code above is that it in some cases
       recreates on the right-hand side of the arrow a value that already
       existed on the left hand side. Thus, the pattern
-      <literal>hd :: [] -&gt; hd :: []</literal> actually allocates a
-      new list element, which really, it should be able to just return
-      the list being matched. We can reduce allocation here by using an
+      <literal>[hd] -&gt; [hd]</literal> actually allocates a new list
+      element, which really, it should be able to just return the list
+      being matched. We can reduce allocation here by using an
       <literal>as</literal> pattern, which allows us to declare a name
       for the thing matched by a pattern or sub-pattern. While we're at
       it, we'll use the <literal>function</literal> keyword to eliminate
@@ -4283,7 +4378,7 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
     <programlisting language="ocaml">
 # let rec destutter = function
     | [] as l -&gt; l
-    | _ :: [] as l -&gt; l
+    | [_] as l -&gt; l
     | hd :: (hd' :: _ as tl) -&gt;
       if hd = hd' then destutter tl
       else hd :: destutter tl
@@ -4292,9 +4387,7 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 </programlisting>
     <para>
       We can further collapse this by combining the first two cases into
-      one, using an or-pattern. At the same time, we'll use the more
-      concise <literal>[_]</literal> pattern to match a list with a
-      single element, rather than <literal>_ :: []</literal>.
+      one, using an or-pattern.
     </para>
     <programlisting language="ocaml">
 # let rec destutter = function
@@ -4478,10 +4571,10 @@ val count_some : 'a option list -&gt; int = &lt;fun&gt;
     </para>
     <para>
       As a side note, the above implementation of
-      <literal>count_some</literal> is longer than necessary, and to
-      boot is not tail recursive. For real work, you should probably
-      just use the<literal>List.count</literal> function from
-      <literal>Core</literal> as follows:
+      <literal>count_some</literal> is longer than necessary, and even
+      worse is not tail recursive. In real life, you would probably just
+      use the <literal>List.count</literal> function from
+      <literal>Core</literal>:
     </para>
     <programlisting language="ocaml">
 # let count_some l = List.count ~f:Option.is_some l;;
@@ -11238,10 +11331,10 @@ Error: Unbound constructor Int_interval.Interval
 </programlisting>
       <para>
         Core comes with a syntax extension called
-        <literal>sexplib</literal> which will auto-generate s-expression
-        conversion functions from a type declaration. These convereters
-        will be generated for any type that one attaches
-        <literal>with sexp</literal> to. Thus, we can write:
+        <literal>sexplib</literal> which can auto-generate s-expression
+        conversion functions from a type declaration. Attaching
+        <literal>with sexp</literal> to a type definition signals to the
+        extension to generate the converters. Thus, we can write:
       </para>
       <programlisting language="ocaml">
 # type some_type = int * string list with sexp;;
@@ -11250,14 +11343,14 @@ val some_type_of_sexp : Sexp.t -&gt; int * string list = &lt;fun&gt;
 val sexp_of_some_type : int * string list -&gt; Sexp.t = &lt;fun&gt;
 # sexp_of_some_type (33, [&quot;one&quot;; &quot;two&quot;]);;
 - : Sexp.t = (33 (one two))
-# some_type_of_sexp (Sexp.of_string &quot;(44 (five six))&quot;);;
+# Sexp.of_string &quot;(44 (five six))&quot; |&gt; some_type_of_sexp;;
 - : int * string list = (44, [&quot;five&quot;; &quot;six&quot;])
 </programlisting>
       <para>
         We'll discuss s-expressions and <literal>sexplib</literal> in
         more detail in
-        <xref linkend="data-serialization-with-s-expressions"/>
-        But for now, let's see what happens if attach the
+        <xref linkend="data-serialization-with-s-expressions"/>,
+        but for now, let's see what happens if attach the
         <literal>with sexp</literal> declaration to the definition of
         <literal>t</literal> within the functor.
       </para>
@@ -11444,13 +11537,14 @@ let fold (in_list,out_list) ~init ~f =
     <para>
       One problem with our <literal>Fqueue</literal> is that the
       interface is quite skeletal. There are lots of useful helper
-      functions that one might want that aren't there. For example, for
-      lists we have <literal>List.iter</literal> which runs a function
-      on each node; and a <literal>List.find</literal> that finds the
-      first element on the list that matches a given predicate. Such
-      helper functions come up for pretty much every container type, and
-      implementing them over and over is a bit of a dull and repetitive
-      affair.
+      functions that one might want that aren't there. The list module,
+      by way of contrast, has functions like
+      <literal>List.iter</literal>, which runs a function on each
+      element; and <literal>List.for_all</literal>, which returns true
+      if and only if the given predicate evaluates to try on every
+      element of the list. Such helper functions come up for pretty much
+      every container type, and implementing them over and over is a
+      dull and repetitive affair.
     </para>
     <para>
       As it happens, many of these helper functions can be derived
@@ -11553,10 +11647,11 @@ module T = struct
     | hd :: tl -&gt; Some (hd, (in_list,tl))
     | [] -&gt; dequeue ([], List.rev in_list)
 
-  let fold (in_list,out_list) ~init ~f =
-    List.fold ~init:(List.fold ~init ~f out_list) ~f
-      (List.rev in_list)
+let fold (in_list,out_list) ~init ~f =
+  let after_out = List.fold ~init ~f out_list in
+  List.fold_right ~init:after_out ~f in_list
 end
+
 include T
 include Foldable.Extend(T)
 </programlisting>
@@ -11592,6 +11687,416 @@ include Foldable.Extend(T)
         </para>
       </listitem>
     </itemizedlist>
+  </sect1>
+</chapter><chapter id="first-class-modules">
+  <title>First class modules</title>
+  <para>
+    You can think of OCaml as being broken up into two parts: a core
+    language that is concerned with values and types, and a module
+    language that is concerned with modules and module signatures. These
+    sub-languages are stratified, in that modules can contain types and
+    values, but ordinary values can't contain modules or module types.
+    That means you can't do things like define a variable whose value is
+    a module, or a function that takes a module as an argument.
+  </para>
+  <para>
+    OCaml provides a way around this stratification in the form of
+    <emphasis>first-class modules</emphasis>. First-class modules are
+    ordinary values that can be created from and converted back to
+    regular modules. As we'll see, letting modules into the core
+    language makes it possible build more modular programs.
+  </para>
+  <sect1 id="a-trivial-example-1">
+    <title>A trivial example</title>
+    <para>
+      As we did with functors, we'll start out by considering a trivial
+      example so we can cover the basic mechanics of first class modules
+      with a minimum of fuss. We'll actually use essentially the same
+      example we used with functors: a module containing a single
+      integer variable.
+    </para>
+    <para>
+      A first-class module is created by packaging up a module with a
+      signature that it satisfies. The following defines a simple
+      signature and a module that matches it.
+    </para>
+    <programlisting language="ocaml">
+# module type X_int = sig val x : int end;;
+module type X_int = sig val x : int end
+# module Three : X_int = struct let x = 3 end;;
+module Three : X_int
+# Three.x;;
+- : int = 3
+</programlisting>
+    <para>
+      We can convert this ordinary module into a first-class module
+      using the <literal>module</literal> keyword.
+    </para>
+    <programlisting language="ocaml">
+# let three = (module Three : X_int);;
+val three : (module X_int) = &lt;module&gt;
+</programlisting>
+    <para>
+      Note that the type of the first-class module,
+      <literal>(module X_int)</literal>, is based on the name of the
+      signature that we used in constructing it.
+    </para>
+    <para>
+      To get at the contents of <literal>three</literal>, we need to
+      unpack it into a module again, which we can do using the
+      <literal>val</literal> keyword.
+    </para>
+    <programlisting language="ocaml">
+# module New_three = (val three : X_int) ;;
+module New_three : X_int
+# New_three.x;;
+- : int = 3
+</programlisting>
+    <para>
+      We can also write ordinary functions which consume and create
+      first class modules. The following shows the definition of two
+      function, <literal>to_int</literal>, which converts a
+      <literal>(module X_int)</literal> into an <literal>int</literal>.
+      And <literal>plus</literal>, which adds two
+      <literal>(module X_int)</literal>s.
+    </para>
+    <programlisting language="ocaml">
+# let to_int m =
+    let module M = (val m : X_int) in
+    M.x
+  ;;
+val to_int : (module X_int) -&gt; int = &lt;fun&gt;
+# let plus m1 m2 =
+    (module struct
+       let x = to_int m1 + to_int m2
+     end : X_int)
+  ;;
+val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;
+</programlisting>
+    <para>
+      With these functions in hand, we can now work with
+      <literal>(module X_int)</literal>'s in a more natural style,
+      taking full advantage of the concision and simplicity of the core
+      language.
+    </para>
+    <programlisting language="ocaml">
+# let six = plus three three;;
+val six : (module X_int) = &lt;module&gt;
+# to_int (List.fold ~init:six ~f:plus [three;three]);;
+- : int = 12
+</programlisting>
+    <para>
+      Of course, all we've really done with this example is come up with
+      a more cumbersome way of working with integers. In the following,
+      we'll look at a more realistic example.
+    </para>
+  </sect1>
+  <sect1 id="example-a-log-processor">
+    <title>Example: A log processor</title>
+    <para>
+    </para>
+  </sect1>
+  <sect1 id="dynamically-choosing-a-module">
+    <title>Dynamically choosing a module</title>
+    <para>
+      Perhaps the simplest thing you can do with first-class modules
+      that you can't do without them is to pick the implementation of a
+      module at runtime.
+    </para>
+    <para>
+      Consider an application that does I/O multiplexing using a system
+      call like <literal>select</literal> to determine which file
+      descriptors are ready to use. There are in fact multiple APIs you
+      might want to use, including <literal>select</literal> itself,
+      <literal>epoll</literal>, and <literal>libev</literal>, where
+      different multiplexers make somewhat different performance and
+      portability trade-offs. You could support all of these in one
+      application by defining a single module, let's call it
+      <literal>Mutliplexer</literal>, whose implementation is chosen at
+      run-time based on an environment variable.
+    </para>
+    <para>
+      To do this, you'd first need an interface <literal>S</literal>
+      that all of the different multiplexer implementations would need
+      to match, and then an implementation of each multiplexer.
+    </para>
+    <programlisting language="ocaml">
+(* file: multiplexer.ml *)
+
+(* An interface the OS-specific functionality *)
+module type S = sig ... end
+
+(* The implementations of each individual multiplexer *)
+module Select : S = struct ... end
+module Epoll  : S = struct ... end
+module Libev  : S = struct ... end
+</programlisting>
+    <para>
+      We can choose the first-class module that we want based on looking
+      up an environment variable.
+    </para>
+    <programlisting language="ocaml">
+let multiplexer =
+  match Sys.getenv &quot;MULTIPLEXER&quot; with
+  | None
+  | Some &quot;select&quot; -&gt; (module Select : S)
+  | Some &quot;epoll&quot;  -&gt; (module Epoll : S)
+  | Some &quot;libev&quot;  -&gt; (module Libev : S)
+  | Some other -&gt; failwithf &quot;Unknown multiplexer: %s&quot; other ()
+</programlisting>
+    <para>
+      Finally, we can convert the resulting first-class module back to
+      an ordinary module, and then include that so it becomes part of
+      the body of our module.
+    </para>
+    <programlisting language="ocaml">
+(* The final, dynamically chosen, implementation *)
+include (val multiplexer : S)
+</programlisting>
+  </sect1>
+  <sect1 id="example-a-service-bundle">
+    <title>Example: A service bundle</title>
+    <para>
+      This section describes the design of a library for bundling
+      together multiple services, where a service is a piece of code
+      that exports a query interface. A service bundle combines together
+      multiple individual services under a single query interface that
+      works by dispatching incoming queries to the appropriate
+      underlying service.
+    </para>
+    <para>
+      The following is a first attempt at an interface for our
+      <literal>Service</literal> module, which contains both a module
+      type <literal>S</literal>, which is the interface that a service
+      should meet, as well as a <literal>Bundle</literal> module which
+      is for combining multiple services.
+    </para>
+    <programlisting language="ocaml">
+(* file: service.mli *)
+
+open Core.Std
+
+(** The module type for a service. *)
+module type S = sig
+  type t
+  val name           : string
+  val create         : unit -&gt; t
+  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
+end
+
+(** Bundles multiple services together *)
+module Bundle : sig
+  type t
+  val create : (module S) list -&gt; t
+  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
+  val service_names  : t -&gt; string list
+end
+</programlisting>
+    <para>
+      Here, a service has a state, represented by the type
+      <literal>t</literal>, a name by which the service can be
+      referenced, a function <literal>create</literal> for instantiating
+      a service, and a function by which a service can actually handle a
+      request. Here, requests and responses are delivered as
+      s-expressions. At the <literal>Bundle</literal> level, the
+      s-expression of a request is expected to be formatted as follows:
+    </para>
+    <programlisting>
+(&lt;service-name&gt; &lt;body&gt;)
+</programlisting>
+    <para>
+      where <literal>&lt;service_name&gt;</literal> is the service that
+      should handle the request, and <literal>&lt;body&gt;</literal> is
+      the body of the request.
+    </para>
+    <para>
+      Now let's look at how to implement <literal>Service</literal>. The
+      core datastructure of <literal>Bundle</literal> is a hashtable of
+      request handlers, one per service. Each request handler is a
+      function of type
+      <literal>(Sexp.t -&gt; Sexp.t Or_error.t)</literal>. These request
+      handlers really stand in for the underlying service, with the
+      particular state of the service in question being hidden inside of
+      the request handler.
+    </para>
+    <para>
+      The first part of <literal>service.ml</literal> is just the
+      preliminaries: the definition of the module type
+      <literal>S</literal>, and the definition of the type
+      <literal>Bundle.t</literal>.
+    </para>
+    <programlisting language="ocaml">
+(* file: service.ml *)
+
+open Core.Std
+
+module type S = sig
+  type t
+  val name           : string
+  val create         : unit -&gt; t
+  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
+end
+
+module Bundle = struct
+  type t = { handlers: (Sexp.t -&gt; Sexp.t Or_error.t) String.Table.t; }
+</programlisting>
+    <para>
+      The next thing we need is a function for creating a
+      <literal>Bundle.t</literal>. This <literal>create</literal>
+      function builds a table to hold the request handlers, and then
+      iterates through the services, unpacking each module, constructing
+      the request handler, and then putting that request handler in the
+      table.
+    </para>
+    <programlisting language="ocaml">
+  (** Creates a handler given a list of services *)
+  let create services =
+    let handlers = String.Table.create () in
+    List.iter services ~f:(fun service_m -&gt;
+      let module Service = (val service_m : S) in
+      let service = Service.create () in
+      if Hashtbl.mem handlers Service.name then
+        failwith (&quot;Attempt to register duplicate handler for &quot;^Service.name);
+      Hashtbl.replace handlers ~key:Service.name
+        ~data:(fun sexp -&gt; Service.handle_request service sexp)
+    );
+    {handlers}
+</programlisting>
+    <para>
+      Note that the <literal>Service.t</literal> that is created is
+      referenced by the corresponding request handler, so that it is
+      effectively hidden behind the function in the
+      <literal>handlers</literal> table.
+    </para>
+    <para>
+      Now we can write the function for the bundle to handle requests.
+      The handler will examine the s-expression to determine the body of
+      the query and the name of the service to dispatch to. It then
+      looks up the handler calls it to generate the response.
+    </para>
+    <programlisting language="ocaml">
+  let handle_request t sexp =
+    match sexp with
+    | Sexp.List [Sexp.Atom name;query] -&gt;
+      begin match Hashtbl.find t.handlers name with
+      | None -&gt; Or_error.error_string (&quot;Unknown service: &quot;^name)
+      | Some handler -&gt;
+        try handler query
+        with exn -&gt; Error (Error.of_exn exn)
+      end
+    | _ -&gt; Or_error.error_string &quot;Malformed query&quot;
+</programlisting>
+    <para>
+      Last of all, we define a function for looking up the names of the
+      available services.
+    </para>
+    <programlisting language="ocaml">
+  let service_names t = Hashtbl.keys t.handlers
+
+end
+</programlisting>
+    <para>
+      To see this system in action, we need to define some services,
+      create the corresponding bundle, and then hook that bundle up to
+      some kind of client. For simplicity, we'll build a simple
+      command-line interface. There are two functions below:
+      <literal>handle_one</literal>, which handles a single interaction;
+      and <literal>handle_loop</literal>, which creates the bundle and
+      then runs <literal>handle_one</literal> in a loop.
+    </para>
+    <programlisting language="ocaml">
+(* file: service_client.ml *)
+
+open Core.Std
+
+(** Handles a single request coming from stdin *)
+let handle_one bundle =
+  printf &quot;&gt;&gt;&gt; %!&quot;; (* prompt *)
+  match In_channel.input_line stdin with
+  | None -&gt; `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
+  | Some line -&gt;
+    let line = String.strip line in (* drop leading and trailing whitespace *)
+    if line = &quot;&quot; then `Continue
+    else match Or_error.try_with (fun () -&gt; Sexp.of_string line) with
+    | Error err -&gt;
+      eprintf &quot;Couldn't parse query: %s\n%!&quot; (Error.to_string_hum err);
+      `Continue
+    | Ok query_sexp -&gt;
+      let resp = Service.Bundle.handle_request bundle query_sexp in
+      Sexp.output_hum stdout (&lt;:sexp_of&lt;Sexp.t Or_error.t&gt;&gt; resp);
+      Out_channel.newline stdout;
+      `Continue
+
+let handle_loop services =
+  let bundle = Service.Bundle.create services in
+  let rec loop () =
+    match handle_one bundle with
+    | `Stop -&gt; ()
+    | `Continue -&gt; loop ()
+  in
+  loop ()
+</programlisting>
+    <para>
+      Now we'll create a couple of toy services. One service is a
+      counter that can be updated by query; and the other service lists
+      a directory. The last line then kicks off the shell with the
+      services we've defined.
+    </para>
+    <programlisting language="ocaml">
+module Counter : Service.S = struct
+  type t = int ref
+
+  let name = &quot;update-counter&quot;
+  let create () = ref 0
+
+  let handle_request t sexp =
+    match Or_error.try_with (fun () -&gt; int_of_sexp sexp) with
+    | Error _ as err -&gt; err
+    | Ok x -&gt;
+      t := !t + x;
+      Ok (sexp_of_int !t)
+end
+
+module List_dir : Service.S = struct
+  type t = unit
+
+  let name = &quot;ls&quot;
+  let create () = ()
+
+  let handle_request () sexp =
+    match Or_error.try_with (fun () -&gt; string_of_sexp sexp) with
+    | Error _ as err -&gt; err
+    | Ok dir -&gt; Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
+end
+
+let () =
+  handle_loop [(module List_dir : Service.S); (module Counter : Service.S)]
+</programlisting>
+    <para>
+      And now we can go ahead and start up the client.
+    </para>
+    <programlisting>
+$ ./service_client.byte
+&gt;&gt;&gt; (update-counter 1)
+(Ok 1)
+&gt;&gt;&gt; (update-counter 10)
+(Ok 11)
+&gt;&gt;&gt; (ls .)
+(Ok
+ (_build _tags service.ml service.mli service.mli~ service.ml~
+  service_client.byte service_client.ml service_client.ml~))
+&gt;&gt;&gt;
+</programlisting>
+    <para>
+      Now, let's consider what happens to the design when we want to
+      make the interface of a service a bit more realistic. In
+      particular, right now services are created without any
+      configuration. Let's add a config type to each service, and change
+      the interface of <literal>Bundle</literal> so that services can be
+      registered along with their configs. At the same time, we'll
+      change the <literal>Bundle</literal> API to allow services to be
+      changed dynamically, rather than just added at creation time.
+    </para>
   </sect1>
 </chapter><chapter id="object-oriented-programming">
   <title>Object Oriented Programming</title>
@@ -13615,799 +14120,6 @@ object
 end;;
 </programlisting>
     </sect2>
-  </sect1>
-</chapter><chapter id="first-class-modules">
-  <title>First class modules</title>
-  <para>
-    You can think of OCaml as being broken up into two parts: a core
-    language that is concerned with values and types, and a module
-    language that is concerned with modules and module signatures. These
-    sub-languages are stratified, in that modules can contain types and
-    values, but ordinary values can't contain modules or module types.
-    That means you can't do things like define a variable whose
-    definition is a module, or a function that takes a module as an
-    argument.
-  </para>
-  <para>
-    OCaml provides a way around this stratification in the form of
-    <emphasis>first-class modules</emphasis>. First-class modules are
-    ordinary values that can be created from and converted back to
-    regular modules. As we'll see, letting modules into the core
-    language makes it possible to use more flexible and dynamic
-    module-oriented designs.
-  </para>
-  <sect1 id="a-trivial-example-1">
-    <title>A trivial example</title>
-    <para>
-      Much as we did with functors, we'll start out with a trivial
-      example, to allow us to show the basic mechanics of first class
-      modules with a minimum of fuss.
-    </para>
-    <para>
-      A first-class module is created by packaging up a module with a
-      signature that it satisfies. The following defines a simple
-      signature and a module that matches it.
-    </para>
-    <programlisting language="ocaml">
-# module type X_int = sig val x : int end;;
-module type X_int = sig val x : int end
-# module Three : X_int = struct let x = 3 end;;
-module Three : X_int
-# Three.x;;
-- : int = 3
-</programlisting>
-    <para>
-      We can then create a first-class module using the
-      <literal>module</literal> keyword.
-    </para>
-    <programlisting language="ocaml">
-# let three = (module Three : X_int);;
-val three : (module X_int) = &lt;module&gt;
-</programlisting>
-    <para>
-      Note that the type of the first-class module,
-      <literal>(module X_int)</literal>, is based on the name of the
-      signature that we used in constructing it.
-    </para>
-    <para>
-      To get at the contents of <literal>three</literal>, we need to
-      unpack it into a module again, which we can do using the
-      <literal>val</literal> keyword.
-    </para>
-    <programlisting language="ocaml">
-# module New_three = (val three : X_int) ;;
-module New_three : X_int
-# New_three.x;;
-- : int = 3
-</programlisting>
-    <para>
-      Using these conversions as building blocks, we can create tools
-      for working with first-class modules in a natural way. The
-      following shows the definition of two function,
-      <literal>to_int</literal>, which converts a
-      <literal>(module X_int)</literal> into an <literal>int</literal>.
-      And <literal>plus</literal>, which adds two
-      <literal>(module X_int)</literal>s.
-    </para>
-    <programlisting language="ocaml">
-# let to_int m =
-    let module M = (val m : X_int) in
-    M.x
-  ;;
-val to_int : (module X_int) -&gt; int = &lt;fun&gt;
-# let plus m1 m2 =
-    (module struct
-       let x = to_int m1 + to_int m2
-     end : X_int)
-  ;;
-val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;
-</programlisting>
-    <para>
-      With these functions in hand, we can start operating on our
-      <literal>(module X_int)</literal>'s in a more natural style,
-      taking full advantage of the concision and simplicity of the core
-      language.
-    </para>
-    <programlisting language="ocaml">
-# let six = plus three three;;
-val six : (module X_int) = &lt;module&gt;
-# to_int (List.fold ~init:six ~f:plus [three;three]);;
-- : int = 12
-</programlisting>
-    <para>
-      Of course, all we've really done with this example is come up with
-      a more cumbersome way of working with integers. Let's see what
-      happens when with work with more complex abstract types.
-    </para>
-  </sect1>
-  <sect1 id="standard-vs.-first-class-modules">
-    <title>Standard vs. first-class modules</title>
-    <para>
-      <emphasis>(yminsky: I'm not in solve with the example. It feels in
-      some sense too artificial, and that aside, when you get to the end
-      of the example, you haven't really gotten any juice of first-class
-      modules)</emphasis>
-    </para>
-    <para>
-      <emphasis>(yminsky: using &quot;standard&quot; in quotes seems a
-      little awkward. Maybe just drop the quotes, and talk about
-      standard or ordinary modules directly?)</emphasis>
-    </para>
-    <para>
-      Let's compare the style of &quot;standard&quot; modules to
-      first-class modules, using a simple library of abstract geometric
-      shapes. In a &quot;standard&quot; module definition, we would
-      define the shapes using abstract data types, where there is a type
-      <literal>t</literal> that defines the actual representation, and
-      the module would include functions that operate on the values of
-      type <literal>t</literal>. In the following code, the module type
-      <literal>Shape</literal> defines the type of generic shape, and
-      the modules <literal>Rectangle</literal> and
-      <literal>Line</literal> implement some concrete shapes.
-    </para>
-    <programlisting language="ocaml">
-module type Shape = sig
-  type t
-  val area : t -&gt; int
-  val position : t -&gt; int * int
-end
-
-module Rectangle = struct
-   type t = { width : int; height : int; x : int; y : int }
-   let make ~x ~y ~width ~height =
-      { width = width; height = height; x = x; y = y }
-   let area { width = width; height = height } = width * height
-   let position { x = x; y = y } = (x, y)
-end
-
-module Line = struct
-   type t = { dx : int; dy : int; x : int; y : int }
-   let make ~x ~y ~dx ~dy = { dx = dx; dy = dy; x = x; y = y }
-   let area _ = 0
-   let position { x = x; y = y } = (x, y)
-end
-</programlisting>
-    <para>
-      Next, if we want to define a generic shape that is either a
-      rectangle or a line, we would probably use a variant type. The
-      following module <literal>Shapes</literal> is entirely
-      boilerplate. We define the variant type, then functions to perform
-      a dynamic dispatch based on the type of object.
-    </para>
-    <programlisting language="ocaml">
-module Shapes = struct
-   type t = [ `Rect of Rectangle.t | `Line of Line.t ]
-   let make_rectangle = Rectangle.make
-   let make_line = Line.make
-   let area = function
-      `Rect r -&gt; Rectangle.area r
-    | `Line l -&gt; Line.area l
-   let position = function
-      `Rect r -&gt; Rectangle.position r
-    | `Line l -&gt; Line.position l
-end;;
-</programlisting>
-    <para>
-      In fact, confronted with this boilerplate, we would probably
-      choose not use modules at all, but simply define a single module
-      with a variant type and the code for all of the shapes. This isn't
-      to say that separate code for separate shapes is bad, it just
-      means that the language doesn't support it well (at least with
-      standard modules).
-    </para>
-    <para>
-      With first-class modules, the situation changes, but we have to
-      dispense with the representation type altogether. For immutable
-      shapes, the implementation is now trivial.
-    </para>
-    <programlisting language="ocaml">
-# module type Shape = sig
-    val area : int
-    val position : int * int
-  end;;
-module type Shape = sig val area : int val position : int * int end
-# let make_rectangle ~x ~y ~width ~height =
-   let module Rectangle = struct
-      let area = width * height
-      let position = (x, y)
-   end in
-   (module Rectangle : Shape);;
-val make_rectangle :
-  x:int -&gt; y:int -&gt; width:int -&gt; height:int -&gt; (module Shape) = &lt;fun&gt;
-# let make_line ~x ~y ~dx ~dy =
-   let module Line = struct
-      let area = 0
-      let position = (x, y)
-   end in
-   (module Line : Shape);;
-val make_line : x:int -&gt; y:int -&gt; dx:'a -&gt; dy:'b -&gt; (module Shape) = &lt;fun&gt;
-</programlisting>
-    <para>
-      For mutable shapes, it isn't much different, but we have to
-      include the state as values in the module implementations. For
-      this, we'll define a representation type <literal>t</literal> in
-      the module implementation, and for rectangles, a value
-      <literal>rect</literal> of that type. The code for lines is
-      similar.
-    </para>
-    <programlisting language="ocaml">
-# module type Shape = sig
-     val area : unit -&gt; int
-     val position : unit -&gt; int * int
-     val moveby : dx:int -&gt; dy:int -&gt; unit
-     val enlargeby : size:int -&gt; unit
-  end;;
-module type Shape = ...
-# let make_rectangle ~x ~y ~width ~height =
-    let module Rectangle = struct
-      type t = { mutable x : int; mutable y : int;
-                 mutable width : int; mutable height : int }
-      let rect = { x = x; y = y; width = width; height = height }
-      let area () = rect.width * rect.height
-      let position () = (rect.x, rect.y)
-      let moveby ~dx ~dy =
-         rect.x &lt;- rect.x + dx;
-         rect.y &lt;- rect.y + dy
-      let enlargeby ~size =
-         rect.width &lt;- rect.width * size;
-         rect.height &lt;- rect.height * size
-    end in
-    (module Rectangle : Shape);;
-val make_rectangle :
-  x:int -&gt; y:int -&gt; width:int -&gt; height:int -&gt; (module Shape) = &lt;fun&gt;
-</programlisting>
-  </sect1>
-  <sect1 id="a-more-complete-example----containers">
-    <title>A more complete example -- containers</title>
-    <para>
-      So far, we haven't done anything that really needs modules. The
-      type <literal>Shape</literal> could just as well be specified as a
-      record type
-      <literal>type shape = { area : int; position : int * int; ... }</literal>.
-    </para>
-    <para>
-      To explore the topic more fully, let's implement a system of
-      dynamic containers. OCaml already provides a set of standard
-      containers like <literal>List</literal>, <literal>Set</literal>,
-      <literal>Hashtbl</literal>, etc., but these types have to be
-      selected statically. If a function expects a value of type
-      <literal>Set.Make(ElementType).t</literal>, then you have to pass
-      it a set of exactly that type. What we would like is a kind of
-      container where the container implementation is chosen by the
-      caller. We define an abstract <emphasis>interface</emphasis>, as a
-      module type, then define one or more concrete module
-      implementations.
-    </para>
-    <para>
-      Let's start by defining an abstract container interface. It
-      contains some elements of type <literal>elt</literal>, and
-      functions to examine and iterate through the contents. For
-      convenience, we also define a normal type
-      <literal>'a container</literal> to represent containers with
-      elements of type <literal>'a</literal>.
-    </para>
-    <programlisting language="ocaml">
-module type Container = sig
-   type elt
-   val empty : unit -&gt; bool
-   val iter : (elt -&gt; unit) -&gt; unit
-   val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
-end;;
-
-type 'a container = (module Container with type elt = 'a)
-</programlisting>
-    <sect2 id="imperative-containers">
-      <title>Imperative containers</title>
-      <para>
-        For imperative containers, will also want functions to mutate
-        the contents by adding or removing elements. For example, a
-        stack can be implemented as a module <literal>Stack</literal>
-        that includes all the functions in the generic
-        <literal>Container</literal> module, as well as functions to
-        push and pop elements.
-      </para>
-      <programlisting language="ocaml">
-module type Stack = sig
-   include Container
-   val push : elt -&gt; unit
-   val pop : unit -&gt; elt
-end;;
-
-type 'a stack = (module Stack with type elt = 'a)
-</programlisting>
-      <para>
-        Now that the types are defined, the next step is to define a
-        concrete container implementation. For this simple example,
-        we'll use a list to represent a stack. The function
-        <literal>make_list_stack</literal> constructs module
-        implementation using a <literal>let module</literal>
-        construction, then returns the result.
-      </para>
-      <programlisting language="ocaml">
-# let make_list_stack (type element) () : element stack =
-    let module ListStack = struct
-      type elt = element
-      let contents = ref []
-      let empty () = !contents = []
-      let iter f = List.iter f !contents
-      let fold f x = List.fold_left f x !contents
-      let push x = contents := x :: !contents
-      let pop () =
-         match !contents with
-            x :: rest -&gt; contents := rest; x
-          | [] -&gt; raise (Invalid_argument &quot;stack is empty&quot;)
-    end in
-    (module ListStack : Stack with type elt = element);;
-val make_list_stack : unit -&gt; 'a stack = &lt;fun&gt;
-</programlisting>
-      <para>
-        Note the use of the explicit type parameter
-        <literal>element</literal>. This is required because the use of
-        a type variable in the module definition (like
-        <literal>type elt = 'a</literal>) would be rejected by the
-        compiler. The construction and use of the stack is
-        straightforward.
-      </para>
-      <programlisting language="ocaml">
-# let demo (s : int stack) =
-    let module S = (val s) in
-    S.push 5;
-    S.push 17;
-    S.iter (fun i -&gt; Printf.printf &quot;Element: %d\n&quot; i);;
-val demo : int stack -&gt; unit = &lt;fun&gt;
-# demo (make_list_stack ());;
-Element: 17
-Element: 5
-- : unit = ()
-</programlisting>
-      <para>
-        The <literal>demo</literal> function is entirely oblivious to
-        the implementation of the stack. Instead of passing a module
-        implementation based on lists, we could pass a different
-        implementation based on arrays.
-      </para>
-      <para>
-        We could go on to define other containers, sets, dictionaries,
-        queues, etc. but the implementations would be similar to what we
-        have seen. Instead, let's look at functional data structures,
-        which require a little more work to express.
-      </para>
-    </sect2>
-    <sect2 id="pure-functional-containers">
-      <title>Pure functional containers</title>
-      <para>
-        Imperative data structures have simpler types that functional
-        ones because the return type of imperative functions is just
-        <literal>unit</literal>. When we look at pure functional data
-        structures, we immediately run into a problem with type
-        recursion.
-      </para>
-      <programlisting language="ocaml">
-# module type Container = sig
-    type elt
-    val empty : bool
-    val iter : (elt -&gt; unit) -&gt; unit
-    val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
-    val add : elt -&gt; (module Container)
-  end;;
-Characters 160-178:
-     val add : elt -&gt; (module Container)
-                      ^^^^^^^^^^^^^^^^^^
-Error: Unbound module type Container
-</programlisting>
-      <para>
-        The problem here is that module type definitions are not
-        recursive -- we can't use the type being defined in its own
-        definition.
-      </para>
-      <para>
-        Recursive modules provide a solution, but it requires a
-        &quot;trick&quot;, where we define a module that is equal to
-        itself. This module contains only type definitions, and the only
-        purpose of the outer recursive module is to allow the recursion
-        in the definition. While we're at it, let's include a
-        <literal>map</literal> function with the usual semantics.
-      </para>
-      <programlisting language="ocaml">
-module rec Container : sig
-   module type T = sig
-      type elt
-      val empty : bool
-      val iter : (elt -&gt; unit) -&gt; unit
-      val fold : ('a -&gt; elt -&gt; 'a) -&gt; 'a -&gt; 'a
-      val map : (elt -&gt; 'a) -&gt; 'a Container.t
-      val add : elt -&gt; elt Container.t
-   end
-   type 'a t = (module Container.T with type elt = 'a)
-end = Container;;
-</programlisting>
-      <para>
-        There are several ways to write this model, but this definition
-        is convenient because it defines both a module type
-        <literal>Container.T</literal> and a value type
-        <literal>'a Container.t</literal>. The outer recursive module
-        <literal>Container</literal> allows the module type
-        <literal>T</literal> to refer to the value type
-        <literal>t</literal> and <emphasis>vice versa</emphasis>. Note
-        that the module <literal>Container</literal> is defined as
-        itself (as <literal>Container</literal>).
-      </para>
-      <para>
-        With this first technicality out of the way, the next one is how
-        to construct values of type <literal>Container.t</literal>. In
-        the imperative version of the stack, we used a function
-        <literal>make_list_stack</literal>. We want to do the same here,
-        but the function definition must be both recursive and
-        polymorphic.
-      </para>
-      <programlisting language="ocaml">
-# let make_stack () =
-    let rec make : 'a. 'a list -&gt; 'a Container.t = fun
-      (type element) (contents : element list) -&gt;
-      let module NewList = struct
-         type elt = element
-         let empty = contents = []
-         let iter f = List.iter f contents
-         let fold f x = List.fold_left f x contents
-         let map f = make (List.map f contents)
-         let add x = make (x :: contents)
-      end in
-      (module NewList : Container.T with type elt = element)
-   in
-   make [];;
-val make_stack : unit -&gt; 'a Container.t = &lt;fun&gt;
-</programlisting>
-      <para>
-        The recursion here is particularly important. The functions
-        <literal>map</literal> and <literal>add</literal> return new
-        collections, so they call the function <literal>make</literal>
-        recursively. The explicit polymorphic type
-        <literal>make : 'a. 'a list -&gt; 'a Container.t</literal> means
-        that the function <literal>make</literal> is properly
-        polymorphic, so that the <literal>map</literal> function is
-        polymorphic.
-      </para>
-      <para>
-        Now that the construction is done, the usage is similar to the
-        imperative case, except that now the data structure is
-        functional.
-      </para>
-      <programlisting language="ocaml">
-# let demo (s : int Container.t) =
-    let module S = (val s) in
-    let module S = (val (S.add 5)) in
-    let module S = (val (S.add 17)) in
-    S.iter (fun i -&gt; Printf.printf &quot;Int Element: %d\n&quot; i);
-    let s = S.map (fun i -&gt; float_of_int i +. 0.1) in
-    let module S = (val s) in
-    S.iter (fun x -&gt; Printf.printf &quot;Float Element: %f\n&quot; x);
-    s;;
-val demo : int Container.t -&gt; float Container.t = &lt;fun&gt;
-# demo (make_stack ());;
-Int Element: 17
-Int Element: 5
-Float Element: 17.100000
-Float Element: 5.100000
-- : unit = ()
-</programlisting>
-      <para>
-        The syntactic load here is pretty high, requiring a
-        <literal>let module</literal> expression to name every
-        intermediate value. First-class modules are fairly new to the
-        language, and this is likely to change, but in the meantime the
-        syntactic load can be pretty daunting.
-      </para>
-      <para>
-        Let's look a some other more typical examples, where dynamic
-        module selection is more localized.
-      </para>
-      <para>
-        _(jyh: This is a rough draft, I'm not sure about the ordering
-        and the topics, yet. Switching back to Ron's text now.)
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="dynamically-choosing-a-module">
-    <title>Dynamically choosing a module</title>
-    <para>
-      Perhaps the simplest thing you can do with first-class modules
-      that you can't do without them is to pick the implementation of a
-      module at runtime.
-    </para>
-    <para>
-      Consider an application that does I/O multiplexing using a system
-      call like <literal>select</literal> to determine which file
-      descriptors are ready to use. There are in fact multiple APIs you
-      might want to use, including <literal>select</literal> itself,
-      <literal>epoll</literal>, and <literal>libev</literal>, where
-      different multiplexers make somewhat different performance and
-      portability trade-offs. You could support all of these in one
-      application by defining a single module, let's call it
-      <literal>Mutliplexer</literal>, whose implementation is chosen at
-      run-time based on an environment variable.
-    </para>
-    <para>
-      To do this, you'd first need an interface <literal>S</literal>
-      that all of the different multiplexer implementations would need
-      to match, and then an implementation of each multiplexer.
-    </para>
-    <programlisting language="ocaml">
-(* file: multiplexer.ml *)
-
-(* An interface the OS-specific functionality *)
-module type S = sig ... end
-
-(* The implementations of each individual multiplexer *)
-module Select : S = struct ... end
-module Epoll  : S = struct ... end
-module Libev  : S = struct ... end
-</programlisting>
-    <para>
-      We can choose the first-class module that we want based on looking
-      up an environment variable.
-    </para>
-    <programlisting language="ocaml">
-let multiplexer =
-  match Sys.getenv &quot;MULTIPLEXER&quot; with
-  | None
-  | Some &quot;select&quot; -&gt; (module Select : S)
-  | Some &quot;epoll&quot;  -&gt; (module Epoll : S)
-  | Some &quot;libev&quot;  -&gt; (module Libev : S)
-  | Some other -&gt; failwithf &quot;Unknown multiplexer: %s&quot; other ()
-</programlisting>
-    <para>
-      Finally, we can convert the resulting first-class module back to
-      an ordinary module, and then include that so it becomes part of
-      the body of our module.
-    </para>
-    <programlisting language="ocaml">
-(* The final, dynamically chosen, implementation *)
-include (val multiplexer : S)
-</programlisting>
-  </sect1>
-  <sect1 id="example-a-service-bundle">
-    <title>Example: A service bundle</title>
-    <para>
-      This section describes the design of a library for bundling
-      together multiple services, where a service is a piece of code
-      that exports a query interface. A service bundle combines together
-      multiple individual services under a single query interface that
-      works by dispatching incoming queries to the appropriate
-      underlying service.
-    </para>
-    <para>
-      The following is a first attempt at an interface for our
-      <literal>Service</literal> module, which contains both a module
-      type <literal>S</literal>, which is the interface that a service
-      should meet, as well as a <literal>Bundle</literal> module which
-      is for combining multiple services.
-    </para>
-    <programlisting language="ocaml">
-(* file: service.mli *)
-
-open Core.Std
-
-(** The module type for a service. *)
-module type S = sig
-  type t
-  val name           : string
-  val create         : unit -&gt; t
-  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
-end
-
-(** Bundles multiple services together *)
-module Bundle : sig
-  type t
-  val create : (module S) list -&gt; t
-  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
-  val service_names  : t -&gt; string list
-end
-</programlisting>
-    <para>
-      Here, a service has a state, represented by the type
-      <literal>t</literal>, a name by which the service can be
-      referenced, a function <literal>create</literal> for instantiating
-      a service, and a function by which a service can actually handle a
-      request. Here, requests and responses are delivered as
-      s-expressions. At the <literal>Bundle</literal> level, the
-      s-expression of a request is expected to be formatted as follows:
-    </para>
-    <programlisting>
-(&lt;service-name&gt; &lt;body&gt;)
-</programlisting>
-    <para>
-      where <literal>&lt;service_name&gt;</literal> is the service that
-      should handle the request, and <literal>&lt;body&gt;</literal> is
-      the body of the request.
-    </para>
-    <para>
-      Now let's look at how to implement <literal>Service</literal>. The
-      core datastructure of <literal>Bundle</literal> is a hashtable of
-      request handlers, one per service. Each request handler is a
-      function of type
-      <literal>(Sexp.t -&gt; Sexp.t Or_error.t)</literal>. These request
-      handlers really stand in for the underlying service, with the
-      particular state of the service in question being hidden inside of
-      the request handler.
-    </para>
-    <para>
-      The first part of <literal>service.ml</literal> is just the
-      preliminaries: the definition of the module type
-      <literal>S</literal>, and the definition of the type
-      <literal>Bundle.t</literal>.
-    </para>
-    <programlisting language="ocaml">
-(* file: service.ml *)
-
-open Core.Std
-
-module type S = sig
-  type t
-  val name           : string
-  val create         : unit -&gt; t
-  val handle_request : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
-end
-
-module Bundle = struct
-  type t = { handlers: (Sexp.t -&gt; Sexp.t Or_error.t) String.Table.t; }
-</programlisting>
-    <para>
-      The next thing we need is a function for creating a
-      <literal>Bundle.t</literal>. This <literal>create</literal>
-      function builds a table to hold the request handlers, and then
-      iterates through the services, unpacking each module, constructing
-      the request handler, and then putting that request handler in the
-      table.
-    </para>
-    <programlisting language="ocaml">
-  (** Creates a handler given a list of services *)
-  let create services =
-    let handlers = String.Table.create () in
-    List.iter services ~f:(fun service_m -&gt;
-      let module Service = (val service_m : S) in
-      let service = Service.create () in
-      if Hashtbl.mem handlers Service.name then
-        failwith (&quot;Attempt to register duplicate handler for &quot;^Service.name);
-      Hashtbl.replace handlers ~key:Service.name
-        ~data:(fun sexp -&gt; Service.handle_request service sexp)
-    );
-    {handlers}
-</programlisting>
-    <para>
-      Note that the <literal>Service.t</literal> that is created is
-      referenced by the corresponding request handler, so that it is
-      effectively hidden behind the function in the
-      <literal>handlers</literal> table.
-    </para>
-    <para>
-      Now we can write the function for the bundle to handle requests.
-      The handler will examine the s-expression to determine the body of
-      the query and the name of the service to dispatch to. It then
-      looks up the handler calls it to generate the response.
-    </para>
-    <programlisting language="ocaml">
-  let handle_request t sexp =
-    match sexp with
-    | Sexp.List [Sexp.Atom name;query] -&gt;
-      begin match Hashtbl.find t.handlers name with
-      | None -&gt; Or_error.error_string (&quot;Unknown service: &quot;^name)
-      | Some handler -&gt;
-        try handler query
-        with exn -&gt; Error (Error.of_exn exn)
-      end
-    | _ -&gt; Or_error.error_string &quot;Malformed query&quot;
-</programlisting>
-    <para>
-      Last of all, we define a function for looking up the names of the
-      available services.
-    </para>
-    <programlisting language="ocaml">
-  let service_names t = Hashtbl.keys t.handlers
-
-end
-</programlisting>
-    <para>
-      To see this system in action, we need to define some services,
-      create the corresponding bundle, and then hook that bundle up to
-      some kind of client. For simplicity, we'll build a simple
-      command-line interface. There are two functions below:
-      <literal>handle_one</literal>, which handles a single interaction;
-      and <literal>handle_loop</literal>, which creates the bundle and
-      then runs <literal>handle_one</literal> in a loop.
-    </para>
-    <programlisting language="ocaml">
-(* file: service_client.ml *)
-
-open Core.Std
-
-(** Handles a single request coming from stdin *)
-let handle_one bundle =
-  printf &quot;&gt;&gt;&gt; %!&quot;; (* prompt *)
-  match In_channel.input_line stdin with
-  | None -&gt; `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
-  | Some line -&gt;
-    let line = String.strip line in (* drop leading and trailing whitespace *)
-    if line = &quot;&quot; then `Continue
-    else match Or_error.try_with (fun () -&gt; Sexp.of_string line) with
-    | Error err -&gt;
-      eprintf &quot;Couldn't parse query: %s\n%!&quot; (Error.to_string_hum err);
-      `Continue
-    | Ok query_sexp -&gt;
-      let resp = Service.Bundle.handle_request bundle query_sexp in
-      Sexp.output_hum stdout (&lt;:sexp_of&lt;Sexp.t Or_error.t&gt;&gt; resp);
-      Out_channel.newline stdout;
-      `Continue
-
-let handle_loop services =
-  let bundle = Service.Bundle.create services in
-  let rec loop () =
-    match handle_one bundle with
-    | `Stop -&gt; ()
-    | `Continue -&gt; loop ()
-  in
-  loop ()
-</programlisting>
-    <para>
-      Now we'll create a couple of toy services. One service is a
-      counter that can be updated by query; and the other service lists
-      a directory. The last line then kicks off the shell with the
-      services we've defined.
-    </para>
-    <programlisting language="ocaml">
-module Counter : Service.S = struct
-  type t = int ref
-
-  let name = &quot;update-counter&quot;
-  let create () = ref 0
-
-  let handle_request t sexp =
-    match Or_error.try_with (fun () -&gt; int_of_sexp sexp) with
-    | Error _ as err -&gt; err
-    | Ok x -&gt;
-      t := !t + x;
-      Ok (sexp_of_int !t)
-end
-
-module List_dir : Service.S = struct
-  type t = unit
-
-  let name = &quot;ls&quot;
-  let create () = ()
-
-  let handle_request () sexp =
-    match Or_error.try_with (fun () -&gt; string_of_sexp sexp) with
-    | Error _ as err -&gt; err
-    | Ok dir -&gt; Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
-end
-
-let () =
-  handle_loop [(module List_dir : Service.S); (module Counter : Service.S)]
-</programlisting>
-    <para>
-      And now we can go ahead and start up the client.
-    </para>
-    <programlisting>
-$ ./service_client.byte
-&gt;&gt;&gt; (update-counter 1)
-(Ok 1)
-&gt;&gt;&gt; (update-counter 10)
-(Ok 11)
-&gt;&gt;&gt; (ls .)
-(Ok
- (_build _tags service.ml service.mli service.mli~ service.ml~
-  service_client.byte service_client.ml service_client.ml~))
-&gt;&gt;&gt;
-</programlisting>
-    <para>
-      Now, let's consider what happens to the design when we want to
-      make the interface of a service a bit more realistic. In
-      particular, right now services are created without any
-      configuration. Let's add a config type to each service, and change
-      the interface of <literal>Bundle</literal> so that services can be
-      registered along with their configs. At the same time, we'll
-      change the <literal>Bundle</literal> API to allow services to be
-      changed dynamically, rather than just added at creation time.
-    </para>
   </sect1>
 </chapter></part><part label="II"><title>Tools and Techniques</title><partintro><para>Part II builds on the basics by working through useful tools and techniques for using OCaml. 
      Here you'll pick up useful techniques for building networked systems, as well as functional 
@@ -19208,7 +18920,7 @@ val contents : string Deferred.t = &lt;abstr&gt;
       The value in <literal>contents</literal> isn't yet determined in
       part because there's nothing running that could do the necessary
       I/O. When using Async, processing of I/O and other events is
-      handled by the Async scheduler. When writing a stand-along
+      handled by the Async scheduler. When writing a stand-alone
       program, you need to start the scheduler explicitly, but utop
       knows about Async, and can start the scheduler automatically. More
       than that, utop knows about deferred values, and when you type in
@@ -19234,8 +18946,8 @@ val contents : string Deferred.t = &lt;abstr&gt;
 </programlisting>
     <para>
       Thus, <literal>Deferred.bind d f</literal> takes a deferred value
-      <literal>d</literal> and a function f that is to be run with value
-      of <literal>d</literal> once it's determined. The call to
+      <literal>d</literal> and a function f that is to be run with the
+      value of <literal>d</literal> once it's determined. The call to
       <literal>Deferred.bind</literal> returns a new deferred that
       becomes determined when the deferred returned by
       <literal>f</literal> is determined. It also implicitly registers
@@ -19268,14 +18980,15 @@ val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 # let uppercase_file filename =
-    Reader.file_contents filename &gt;&gt;= fun text -&gt;
+    Reader.file_contents filename
+    &gt;&gt;= fun text -&gt;
     Writer.save filename ~contents:(String.uppercase text)
   ;;
 val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;
 </programlisting>
     <para>
       In the above we've dropped the parenthesis around the function on
-      the right-hand side of the bind, and we've didn't add a level of
+      the right-hand side of the bind, and we didn't add a level of
       indentation for the contents of that function. This is standard
       practice for using the bind operator.
     </para>
@@ -19285,8 +18998,9 @@ val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 # let count_lines filename =
-    Reader.file_contents filename &gt;&gt;= fun text -&gt;
-    List.length (String.split text ~on:'\n');;
+    Reader.file_contents filename
+    &gt;&gt;= fun text -&gt;
+    List.length (String.split text ~on:'\n')
   ;;
 </programlisting>
     <para>
@@ -19319,8 +19033,9 @@ val three : int Deferred.t = &lt;abstr&gt;
     </para>
     <programlisting language="ocaml">
 # let count_lines filename =
-    Reader.file_contents filename &gt;&gt;= fun text -&gt;
-    return (List.length (String.split text ~on:'\n'));;
+    Reader.file_contents filename
+    &gt;&gt;= fun text -&gt;
+    return (List.length (String.split text ~on:'\n'))
   ;;
 val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
 </programlisting>
@@ -19349,8 +19064,9 @@ val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 # let count_lines filename =
-    Reader.file_contents filename &gt;&gt;| fun text -&gt;
-    List.length (String.split text ~on:'\n');;
+    Reader.file_contents filename
+    &gt;&gt;| fun text -&gt;
+    List.length (String.split text ~on:'\n')
   ;;
 val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
 </programlisting>
@@ -19414,12 +19130,12 @@ val def : '_a Ivar.Deferred.t = &lt;abstr&gt;
         handed back to the caller of <literal>schedule</literal> that
         will eventually be filled with the contents of the deferred
         value returned by the thunk to be scheduled. We can implement
-        this using an <literal>ivar</literal> which we fill after the
-        thunk is called and the deferred it returns becomes determined.
-        Instead of using <literal>bind</literal> or
-        <literal>map</literal> for scheduling these events, we'll use a
-        different operator called <literal>upon</literal>. Here's the
-        signature of <literal>upon</literal>:
+        this using an ivar which we fill after the thunk is called and
+        the deferred it returns becomes determined. Instead of using
+        <literal>bind</literal> or <literal>map</literal> for scheduling
+        these events, we'll use a different operator called
+        <literal>upon</literal>. Here's the signature of
+        <literal>upon</literal>:
       </para>
       <programlisting language="ocaml">
 # upon;;
@@ -19438,9 +19154,9 @@ val def : '_a Ivar.Deferred.t = &lt;abstr&gt;
         grab a thunk off the queue and run it. The waiting will be done
         using the function <literal>after</literal> which takes a time
         span and returns a deferred which becomes determined after that
-        time span elapses. The role of the <literal>ivar</literal> here
-        is to take the value returned by the thunk and use it to fill
-        the deferred returned by the provided thunk.
+        time span elapses. The role of the ivar here is to take the
+        value returned by the thunk and use it to fill the deferred
+        returned by the provided thunk.
       </para>
       <programlisting language="ocaml">
 # module Delayer : Delayer_intf = struct
@@ -19506,8 +19222,8 @@ let rec copy_blocks buffer r w =
 </programlisting>
     <para>
       Bind is used in the above code to sequence the operations: first,
-      we call <literal>Reader.read</literal> to get a block of input,
-      then, when that's complete and if a new block was returned, we
+      we call <literal>Reader.read</literal> to get a block of input.
+      Then, when that's complete and if a new block was returned, we
       write that block to the writer. Finally, we wait until the
       writer's buffers are flushed, waiting on the deferred returned by
       <literal>Writer.flushed</literal>, at which point we recur. If we
@@ -19525,6 +19241,17 @@ let rec copy_blocks buffer r w =
       written out.
     </para>
     <para>
+      Another memory leak you might be concerned with is the chain of
+      deferreds that is built up as you go through the loop. After all,
+      this code constructs an ever-growing chain of binds, each of which
+      creates a deferred. In this case, however, all of the deferreds
+      should become determined precisely when the final deferred in the
+      chain is determined, in this case, when the <literal>Eof</literal>
+      condition is hit. Because of this, we could safely replace all of
+      these deferreds with a single deferred. Async has logic to do just
+      this, which is essentially a form of tail-call optimization.
+    </para>
+    <para>
       <literal>copy_blocks</literal> provides the logic for handling a
       client connection, but we still need to set up a server to receive
       such connections and dispatch to <literal>copy_blocks</literal>.
@@ -19534,14 +19261,15 @@ let rec copy_blocks buffer r w =
     </para>
     <programlisting language="ocaml">
 (** Starts a TCP server, which listens on the specified port, invoking
-    copy_lines every time a client connects. *)
+    copy_blocks every time a client connects. *)
 let run () =
-  let buffer = String.create (16 * 1024) in
   let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
       (Tcp.on_port 8765)
-      (fun _addr r w -&gt; copy_blocks buffer r w)
+      (fun _addr r w -&gt;
+         let buffer = String.create (16 * 1024) in
+         copy_blocks buffer r w)
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 </programlisting>
@@ -19988,7 +19716,7 @@ let get_definition word =
 </programlisting>
       <para>
         The <literal>get</literal> call takes as a required argument a
-        URI, and returns a deferred value is returned, containing a
+        URI, and returns a deferred value containing a
         <literal>Cohttp.Response.t</literal> (which we ignore) and a
         pipe reader to which the body of the request will be written to
         as it is received.
@@ -20026,7 +19754,7 @@ let print_result (word,definition) =
         here is actually Async's specialized <literal>printf</literal>
         that goes through the Async scheduler rather than printing
         directly. The original definition of <literal>printf</literal>
-        is shadowed by this ne one when you open
+        is shadowed by this new one when you open
         <literal>Async.Std</literal>. An important side effect of this
         is that if you write an Async program and forget to start the
         scheduler, calls like <literal>printf</literal> won't actually
@@ -20058,7 +19786,7 @@ let search_and_print words =
         Note that the list returned by <literal>Deferred.all</literal>
         reflects the order of the deferreds passed to it. As such, the
         definitions will be printed out in the same order that the
-        search wrods are passed in, no matter what orders the queries
+        search words are passed in, no matter what orders the queries
         return in. We could rewrite this code to print out the results
         as they're received (and thus potentially out of order) as
         follows.
@@ -20128,8 +19856,8 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
       everything from a flaky server to a network outage to exhausting
       of local resources can lead to a run-time error. When programming
       in OCaml, some of these errors will show up explicitly in a
-      function's return type, and of them will show up as exceptions. We
-      covered exception handling in OCaml in
+      function's return type, and some of them will show up as
+      exceptions. We covered exception handling in OCaml in
       <xref linkend="exceptions"/>, but as we'll see,
       exception handling in a concurrent program presents some new
       challenges.
@@ -20395,11 +20123,11 @@ ignoring exn
         preventing other queries from succeeding.
       </para>
       <para>
-        The search code as it is fails rarely, so let's make make a
-        change that can cause it to fail more predictably, by making it
-        possible to distribute the requests over multiple servers. Then,
-        we'll handle the errors that occur when one of those servers is
-        mis-specified.
+        The search code as it is fails rarely, so let's make a change
+        that allows us to trigger failures more predictably. We'll do
+        this by making it possible to distribute the requests over
+        multiple servers. Then, we'll handle the errors that occur when
+        one of those servers is misspecified.
       </para>
       <para>
         First we'll need to change <literal>query_uri</literal> to take
@@ -21197,67 +20925,68 @@ module Fields :
     also produce standalone native object files that can be embedded
     within other non-OCaml applications.
   </para>
-  <sect1 id="the-ctypes-foreign-function-library">
-    <title>The Ctypes foreign function library</title>
+  <sect1 id="the-ctypes-library">
+    <title>The Ctypes library</title>
     <para>
       The simplest foreign function interface in OCaml doesn't even
-      require you to write any C code. The <literal>ctypes</literal>
-      library lets you define the C interface in pure OCaml, and the
-      library takes care of dynamically loading the C symbols and
-      invoking the function call with the appropriate arguments.
+      require you to write any C code at all! The Ctypes library lets
+      you define the C interface in pure OCaml, and the library takes
+      care of dynamically loading the C symbols and invoking the
+      function call with the appropriate arguments.
     </para>
     <para>
-      Let's dive straight into an example to show you how the library
-      looks. We'll use a binding to the <literal>ncurses</literal>
-      terminal toolkit, as it's widely available on most systems and
-      doesn't have any complex dependencies.
+      Let's dive straight into a realistic example to show you how the
+      library looks. We'll create a binding to the Ncurses terminal
+      toolkit, as it's widely available on most systems and doesn't have
+      any complex dependencies.
     </para>
     <note>
     <title>
     Installing the Ctypes library
     </title>
     <para>
-      Ctypes is available via OPAM as usual. You'll need to install the
+      You'll need to install the
       <ulink url="https://github.com/atgreen/libffi"><literal>libffi</literal></ulink>
-      library before starting the OPAM installtion . It's a fairly
-      popular library and should be available in your OS package
-      manager.
+      library as a prerequisite to using Ctypes. It's a fairly popular
+      library and should be available in your OS package manager.
     </para>
     <para>
-      A special note for Mac user: the version of
+      A special note for Mac users: the version of
       <literal>libffi</literal> installed by default in MacOS X 10.8 is
       too old for some of the features that Ctypes needs. Use Homebrew
       to <literal>brew install libffi</literal> to get the latest
       version before installing the OCaml library.
     </para>
+    <para>
+      Once that's done, Ctypes is available via OPAM as usual.
+    </para>
     <programlisting>
 $ brew install libffi     # for MacOS X users
 $ opam install ctypes
+$ utop
+# require &quot;ctypes.foreign&quot; ;;
 </programlisting>
     <para>
-      It will then be available via the <literal>ctypes</literal>
-      OCamlfind package. You'll also need the <literal>ncurses</literal>
-      library for the first example. This comes pre-installed on MacOS X
-      and Debian Linux provides it as the <literal>ncurses-dev</literal>
+      You'll also need the Ncurses library for the first example. This
+      comes pre-installed on many operating systems such as MacOS X.
+      Debian Linux provides it as the <literal>ncurses-dev</literal>
       package.
     </para>
     </note>
   </sect1>
-  <sect1 id="example-an-ncurses-terminal-interface">
-    <title>Example: an ncurses terminal interface</title>
+  <sect1 id="example-a-terminal-interface">
+    <title>Example: a terminal interface</title>
     <para>
       Ncurses is a library to help build terminal-independent text
       interfaces in a reasonably efficient way. It's used in console
-      mail clients like <literal>mutt</literal> and
-      <literal>pine</literal>, and console web browsers such as
-      <literal>lynx</literal>.
+      mail clients like Mutt and Pine, and console web browsers such as
+      Lynx.
     </para>
     <para>
-      The full C interface is quite large and explained in the online
+      The full C interface is quite large and is explained in the online
       <ulink url="http://www.gnu.org/software/ncurses/">documentation</ulink>.
-      We'll use the excerpt below since it's all we need for a basic
-      binding in OCaml. The header file is usually installed in
-      <literal>/usr/include/ncurses.h</literal>.
+      We'll just use the smaller excerpt that's shown below since we
+      just want to demonstrate Ctypes in action.
     </para>
     <programlisting language="c">
 // &lt;ncurses.h&gt;
@@ -21272,33 +21001,34 @@ void    mvwaddstr (WINDOW *, int, int, char *);
 </programlisting>
     <para>
       The Ncurses functions either operate on the current
-      pseudo-terminal or on a window that has been created via the
-      library. The <literal>WINDOW</literal> typdef represents the
-      library state and is considered abstract to users of the library.
-      OCaml code just needs to store the pointer somewhere and pass it
-      back to Ncurses. library calls that then dereference its contents.
+      pseudo-terminal or on a window that has been created via
+      <literal>newwin</literal>. The <literal>WINDOW</literal> structure
+      holds the internal library state and is considered abstract
+      outside of Ncurses. Ncurses clients just needs to store the
+      pointer somewhere and pass it back to Ncurses library calls, which
+      can then dereference its contents.
     </para>
     <para>
-      There are two library calls that create <literal>WINDOW</literal>
-      pointers. The <literal>initscr</literal> function initialises the
-      library and returns the global window, and
-      <literal>newwin</literal> allows further windows to be created.
-      The <literal>WINDOW</literal> pointer can also be passed to
-      terminal drawing functions such as <literal>mvwaddrstr</literal>
-      (there are over 200 library calls in <literal>ncurses</literal>,
-      so we are just binding a select few for this example). The
-      terminal is updated when <literal>refresh</literal> or
-      <literal>wrefresh</literal> are called. All other drawing calls
-      just manipulate library data structures without actually changing
-      the screen layout.
+      Note that there are over 200 library calls in Ncurses, so we're
+      only binding a select few for this example. The
+      <literal>initscr</literal> and <literal>newwin</literal> create
+      <literal>WINDOW</literal> pointers for the global and sub-windows
+      respectively. The <literal>mvwaddrstr</literal> takes a window,
+      x/y offsets and a string and writes to the screen at that
+      location. The terminal is only updated after
+      <literal>refresh</literal> or <literal>wrefresh</literal> are
+      called.
     </para>
     <para>
-      The <literal>ctypes</literal> library provides an OCaml interface
-      that lets you declare these C functions as OCaml values. The
-      library takes care of converting the OCaml arguments into the C
-      calling convention, invoking the foreign call within the
-      <literal>ncurses</literal> library, and finally returning the
-      result as an OCaml value.
+      Ctypes provides an OCaml interface that lets you map these C
+      functions to equivalent OCaml functions. The library takes care of
+      converting OCaml function calls and arguments into the C calling
+      convention, invoking the foreign call within the C library and
+      finally returning the result as an OCaml value.
+    </para>
+    <para>
+      Let's begin by defining the basic values we need, starting with
+      the <literal>WINDOW</literal> state pointer.
     </para>
     <programlisting language="ocaml">
 (* ncurses.ml 1/3 *)
@@ -21308,17 +21038,16 @@ type window = unit ptr
 let window : window typ = ptr void
 </programlisting>
     <para>
-      We first define a <literal>window</literal> type to represent the
-      C <literal>WINDOW</literal> pointer. The
-      <literal>unit ptr</literal> type represents a
-      <literal>void *</literal> pointer in C, but we'll constrain the
-      signature later on to avoid mixing up different void pointers.
+      We don't know the internal representation of the window pointer,
+      so we treat it as a C void pointer. We'll improve on this later on
+      in the chapter, but it's good enough for now. The second statement
+      defines an OCaml value that represents the
+      <literal>WINDOW</literal> C pointer. This value is used later in
+      the Ctypes function definitions.
     </para>
     <para>
-      We also define a value representing a pointer to the
-      <literal>window</literal> type, which can be used later in the
-      Ctypes function definitions. The next step is to to build a
-      foreign function call to <literal>initscr</literal>.
+      That's all we need to invoke our first function call to
+      <literal>initscr</literal> to initalize the terminal.
     </para>
     <programlisting language="ocaml">
 (* ncurses.ml 2/3 *)
@@ -21326,25 +21055,22 @@ let initscr =
   foreign &quot;initscr&quot; (void @-&gt; (returning window))
 </programlisting>
     <para>
-      The <literal>foreign</literal> function is defined takes two
-      parameters:
+      The <literal>foreign</literal> function accepts two parameters:
     </para>
     <itemizedlist>
       <listitem>
         <para>
-          the C function call name, which is looked up using the
-          <emphasis>dlsym(3)</emphasis> linker function.
+          the C function call name, which is looked up using
+          <emphasis>dlsym(3)</emphasis>.
         </para>
       </listitem>
       <listitem>
         <para>
-          a value that defines all the C function arguments and return
-          type. Basic C types such as <literal>void</literal> are
-          defined as values in <literal>Ctypes</literal> and we defined
-          <literal>window</literal> in our own code. The
-          <literal>@-&gt;</literal> operator adds an argument to the C
-          parameter list, while the <literal>returning</literal>
-          function terminates the parameter list with the return type.
+          a value that defines the complete set of C function arguments
+          and its return type. The <literal>@-&gt;</literal> operator
+          adds an argument to the C parameter list and
+          <literal>returning</literal> terminates the parameter list
+          with the return type.
         </para>
       </listitem>
     </itemizedlist>
@@ -21386,26 +21112,26 @@ let cbreak =
 </programlisting>
     <para>
       These definitions are all straightforward mappings from the C
-      headers from earlier in the chapter. They use the basic C types
-      defined in <literal>Ctypes</literal> such as
-      <literal>void</literal> or <literal>int</literal>. The
-      <literal>string</literal> value maps from OCaml strings (which
-      have a specific length) onto C character buffers (whose length is
-      defined by a null characters).
+      declarations in the Ncurses header file. The scalar C types such
+      as <literal>int</literal> come pre-defined in Ctypes. The
+      <literal>string</literal> in these definitions maps from OCaml
+      strings (which have a specific length) onto C character buffers
+      (whose length is defined by a null characters).
     </para>
     <para>
       The module signature for <literal>ncurses.mli</literal> looks much
-      like a normal OCaml signature. You can infer it from
+      like a normal OCaml signature. You can infer it directly from the
       <literal>ncurses.ml</literal> by running:
     </para>
     <programlisting>
 $ ocamlfind ocamlc -i -package ctypes.foreign ncurses.mli 
 </programlisting>
     <para>
-      We've tweaked the automatic signature to make the
-      <literal>type window</literal> abstract, and the result is below:
+      The OCaml signature can be customized to improve its safety for
+      external callers by making some of its internals more abstract.
     </para>
     <programlisting language="ocaml">
+(* ncurses.mli *)
 type window
 
 val window    : window Ctypes.typ
@@ -21423,15 +21149,14 @@ val cbreak    : unit   -&gt; unit
 </programlisting>
     <para>
       The <literal>window</literal> type is left abstract in the
-      signature so that it can only be constructed via the
-      <literal>Ncurses.initscr</literal> function. This makes the
-      Ncurses binding safer to use externally, since window pointers
-      cannot be mixed up with other <literal>void</literal> pointers
-      obtained by other libraries.
+      signature, ensure that window pointers can only be constructed via
+      the <literal>Ncurses.initscr</literal> function. This prevents
+      void pointers obtained from other sources from being mistakenly
+      passed to an Ncurses library call.
     </para>
     <para>
-      Here's what a &quot;hello world&quot; that uses the library looks
-      like:
+      Now compile a &quot;hello world&quot; terminal drawing program to
+      tie this all together.
     </para>
     <programlisting language="ocaml">
 (* hello.ml *)
@@ -21451,9 +21176,8 @@ let () =
   endwin ()
 </programlisting>
     <para>
-      This code can be compiled by linking against the
-      <literal>ctypes</literal> and <literal>ctypes.foreign</literal>
-      OCamlfind packages.
+      The <literal>hello</literal> executable is compiled by linking
+      against the <literal>ctypes.foreign</literal> OCamlfind package.
     </para>
     <programlisting>
 $ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
@@ -21466,10 +21190,10 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
     <para>
       The command-line above includes
       <literal>-cclib -lncurses</literal> to make the OCaml compiler
-      link the output to the <literal>ncurses</literal> C library, which
-      in turns makes the C symbols available to the program when it
-      starts. You should get an error when you run the binary if you
-      omit that link directive.
+      link the executable to the <literal>ncurses</literal> C library,
+      which in turns makes the C symbols available to the program when
+      it starts. You'll get an error when you run the binary if you omit
+      that link directive.
     </para>
     <programlisting>
 $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
@@ -21477,120 +21201,77 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
 $ ./hello_broken 
 Fatal error: exception Dl.DL_error(&quot;dlsym(RTLD_DEFAULT, initscr): symbol not found&quot;)
 </programlisting>
-  </sect1>
-  <sect1 id="defining-basic-c-formats-from-ocaml">
-    <title>Defining basic C formats from OCaml</title>
     <para>
-      <literal>Ctypes</literal> wouldn't be very interesting if it were
-      limited to only defining basic C types. You can build up more
-      complex C structures and unions using it as well.
+      Ctypes wouldn't be very useful if it were limited to only defining
+      simple C types of course. It provides full support for C pointer
+      arithmetic, pointer conversions, reading and writing through
+      pointers, using OCaml functions as function pointers to C code, as
+      well as struct and union definitions.
     </para>
-    <sect2 id="defining-basic-scalar-types">
-      <title>Defining basic scalar types</title>
-      <para>
-        Let's go over over some of the basic Ctypes definitions first.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      We'll go over some of these features in more detail for the
+      remainder of the chapter, using some POSIX date functions as
+      running examples.
+    </para>
+  </sect1>
+  <sect1 id="basic-scalar-c-types">
+    <title>Basic scalar C types</title>
+    <para>
+      First, let's look at how to define basic scalar C types. Every C
+      type is mapped into an OCaml equivalent via the definition below.
+    </para>
+    <programlisting language="ocaml">
 (* Ctypes 1/4 *)
 type 'a typ
 </programlisting>
-      <para>
-        This is the type of values representing C types. There are two
-        types associated with each <literal>typ</literal> value: the C
-        type used to store and pass values and the corresponding OCaml
-        type.
-      </para>
-      <para>
-        The <literal>'a</literal> type parameter indicates the OCaml
-        type, so a value of type <literal>t typ</literal> is used to
-        read and write OCaml values of type <literal>t</literal>. There
-        are various uses of <literal>typ</literal> values within Ctypes.
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            constructing function types for binding native functions
-            using the <literal>Foreign</literal> module, as shown
-            earlier.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            constructing pointers for reading and writing locations in
-            C-managed storage using <literal>ptr</literal>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            describing the fields of structured types built with
-            <literal>structure</literal> and <literal>union</literal>.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        Pointers are at the heart of C, so they are necessarily part of
-        Ctypes, which provides support for pointer arithmetic, pointer
-        conversions, reading and writing through pointers, and passing
-        and returning pointers to and from functions. Ctypes also
-        provides support for structures and unions.
-      </para>
-      <informaltable>
-        <tgroup cols="2">
-          <colspec align="left"/>
-          <colspec align="left"/>
-          <thead>
-            <row>
-              <entry>
-                Type
-              </entry>
-              <entry>
-                Purpose
-              </entry>
-            </row>
-          </thead>
-          <tbody>
-          </tbody>
-        </tgroup>
-      </informaltable>
-      <para>
-        <literal>'a ptr</literal> The type of pointer values, used to
-        read and write values of type
-        '<literal>a' at particular addresses.</literal>'a
-        array<literal>C array</literal>'a
-        structure<literal>C</literal>struct<literal>types</literal>'a
-        union<literal>C</literal>union<literal>types '</literal>a
-        abstract` The type of abstract values, used represent values
-        whose type varies from platform to platform.
-      </para>
-      <para>
-        Abstract types are typically used to interface with
-        platform-dependent definitions often found in system headers.
-        For example, the type <literal>pthread_t</literal> is a pointer
-        on some platforms, an integer on other platforms, and a
-        <literal>struct</literal> on a third set of platforms. One way
-        to deal with this is to have build-time code which interrogates
-        the C type in some way to determine an appropriate
-        representation. Another way is to use
-        <literal>abstract</literal> and leave the representation opaque.
-      </para>
-      <caution>
-      <title>
-      Abstract values can't be passed by value
-      </title>
-      <para>
-        Although <literal>pthread_t</literal> is a convenient example
-        since the type used to implement it varies significantly across
-        platforms, it's not actually a good match for
-        <literal>abstract</literal> since values of type
-        <literal>pthread_t</literal> are passed and returned by value
-        and so can't be fully abstract.
-      </para>
-      </caution>
-      <para>
-        Ctypes also defines constructors for the familiar C scalar
-        types.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      This <literal>Ctypes.typ</literal> is the type of values
+      representing C types to OCaml. There are two types associated with
+      each instance of <literal>typ</literal>:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          the C type used to store and pass values to the foreign
+          library.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          the corresponding OCaml type. The <literal>'a</literal> type
+          parameter contains the OCaml type such that a value of type
+          <literal>t typ</literal> is used to read and write OCaml
+          values of type <literal>t</literal>.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      There are various other uses of <literal>typ</literal> values
+      within Ctypes.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          constructing function types for binding native functions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          constructing pointers for reading and writing locations in
+          C-managed storage.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          describing the fields of arrays, structures and unions.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Here are the definitions for most of the standard C99 scalar
+      types, including some platform-dependent ones.
+    </para>
+    <programlisting language="ocaml">
 (* Ctypes.Ffi.C 2/4 *)
 val void  : unit typ
 val char : char typ
@@ -21620,68 +21301,248 @@ val ullong : ullong typ
 val float : float typ
 val double : float typ
 </programlisting>
+    <para>
+      These values are all of type <literal>'a typ</literal>, where the
+      function name tells you the C type, and the <literal>'a</literal>
+      component is the OCaml representation of that C type. Most of the
+      mappings are straightforward, but some of them need a bit more
+      explanation.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Void values appear in OCaml as the <literal>unit</literal>
+          type. Using <literal>void</literal> in an argument or result
+          type specification produces an OCaml function which accepts or
+          returns unit. Dereferencing a pointer to
+          <literal>void</literal> is an error, as in C, and will raise
+          the <literal>IncompleteType</literal> exception.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The C <literal>size_t</literal> type is an alias for one of
+          the unsigned integer types. The actual size and alignment
+          requirements for <literal>size_t</literal> varys between
+          platforms. Ctypes provides an OCaml <literal>size_t</literal>
+          type that is aliased to the appropriate integer type.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          OCaml only supports double-precision floating point numbers,
+          and so the C <literal>float</literal> and
+          <literal>double</literal> functions both map onto the OCaml
+          <literal>float</literal> type.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </sect1>
+  <sect1 id="pointers-and-arrays">
+    <title>Pointers and arrays</title>
+    <para>
+      Pointers are at the heart of C, so they are necessarily part of
+      Ctypes, which provides support for pointer arithmetic, pointer
+      conversions, reading and writing through pointers, and passing and
+      returning pointers to and from functions.
+    </para>
+    <para>
+      We've already seen a simple use of pointers in the Ncurses
+      example. Let's start a new example by binding some POSIX
+      functions. The <literal>time</literal> function returns the
+      current calendar time, and has the following C signature:
+    </para>
+    <para>
+      <literal>c time_t time(time_t *);</literal> The first step is to
+      open some of the Ctypes modules.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          The <literal>Ctypes</literal> module provides functions for
+          describing C types in OCaml.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <literal>PosixTypes</literal> module includes some extra
+          POSIX-specific types (such as <literal>time_t</literal>).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <literal>Foreign</literal> module exposes the
+          <literal>foreign</literal> function that makes it possible to
+          invoke C functions.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      We can now create a binding to <literal>time</literal> directly
+      from the top-level.
+    </para>
+    <programlisting language="ocaml">
+$ utop
+# require &quot;ctypes.foreign&quot; ;;
+# open Ctypes ;;
+# open PosixTypes ;;
+# open Foreign ;;
+# let time = foreign &quot;time&quot; (ptr time_t @-&gt; returning time_t) ;;
+val time : time_t ptr -&gt; time_t = &lt;fun&gt;
+</programlisting>
+    <para>
+      The <literal>foreign</literal> function is the main link between
+      OCaml and C. It takes two arguments: the name of the C function to
+      bind, and a value describing the type of the bound function. In
+      the <literal>time</literal> binding, the function type specifies
+      one argument of type <literal>ptr time_t</literal> and a return
+      type of <literal>time_t</literal>.
+    </para>
+    <para>
+      We can now call <literal>time</literal> immediately in the same
+      top-level. The argument is actually optional, so we'll just pass a
+      null pointer that has been coerced into becoming a null pointer to
+      <literal>time_t</literal>.
+    </para>
+    <programlisting language="ocaml">
+# let cur_time = time (from_voidp time_t null) ;;
+val cur_time : time_t = &lt;abstr&gt;
+</programlisting>
+    <para>
+      Since we're going to call <literal>time</literal> a few times,
+      let's create a wrapper function that passes the null pointer
+      through.
+    </para>
+    <programlisting language="ocaml">
+# let time' () = time (from_voidp time_t null) ;;
+val time' : unit -&gt; time_t = &lt;fun&gt;
+</programlisting>
+    <para>
+      Since <literal>time_t</literal> is an abstract type, we can't
+      actually do anything useful with it directly. We need to bind a
+      second function to do anything useful with the return values from
+      <literal>time</literal>. We'll use the standard C function
+      <literal>difftime</literal>, which has the following signature:
+    </para>
+    <programlisting language="c">
+double difftime(time_t, time_t);
+</programlisting>
+    <para>
+      A binding to <literal>difftime</literal> is sufficient to compare
+      two <literal>time_t</literal> values.
+    </para>
+    <programlisting language="ocaml">
+# let difftime = foreign &quot;difftime&quot; (time_t @-&gt; time_t @-&gt; returning double) ;;
+val difftime : time_t -&gt; time_t -&gt; float = &lt;fun&gt;
+# let t1 = time' () in
+  Unix.sleep 2;
+  let t2 = time' () in 
+  difftime t2 t1 ;;
+ - : float = 2.
+</programlisting>
+    <sect2 id="allocating-typed-memory-for-pointers">
+      <title>Allocating typed memory for pointers</title>
       <para>
-        These return an <literal>'a typ</literal> where the
-        <literal>'a</literal> component is the OCaml representation of
-        the C type. Some of these mappings are due to OCaml's in-memory
-        representation of values, which we explain later in
-        <xref linkend="memory-representation-of-values"/>.
+        Let's look at a slightly less trivial example where we pass a
+        non-null pointer to a function. Continuing with the theme from
+        earlier, we'll bind to the <literal>ctime</literal> function
+        which converts a <literal>time_t</literal> value to a
+        human-readable string. The C signature of
+        <literal>ctime</literal> is as follows:
       </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            Void values appear in OCaml as the <literal>unit</literal>
-            type, so using <literal>void</literal> in an argument or
-            result type specification produces a function which accepts
-            or returns unit. Dereferencing a pointer to
-            <literal>void</literal> is an error, as in C, and will raise
-            the <literal>IncompleteType</literal> exception.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The C <literal>size_t</literal> type is an alias for one of
-            the unsigned integer types. The actual size and alignment
-            requirements for <literal>size_t</literal> varys between
-            platforms. Ctypes provides an OCaml
-            <literal>size_t</literal> type that is aliased to the
-            appropriate integer type.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            OCaml only supports double-precision floating point numbers,
-            so the C <literal>float</literal> and
-            <literal>double</literal> functions both map to the OCaml
-            <literal>float</literal> type.
-          </para>
-        </listitem>
-      </itemizedlist>
-    </sect2>
-    <sect2 id="using-views-to-map-character-buffers">
-      <title>Using views to map character buffers</title>
+      <programlisting language="c">
+char *ctime(const time_t *timep);
+</programlisting>
       <para>
-        Views create new C type descriptions that have special behaviour
-        when used to read or write C values. For instance, the
-        <literal>string</literal> view wraps the C type
-        <literal>char *</literal> (written as
-        <literal>ptr char</literal> in OCaml), and converts between the
+        The corresponding binding can be written in the top-level to add
+        to our growing collection.
+      </para>
+      <programlisting language="ocaml">
+# let ctime = foreign &quot;ctime&quot; (ptr time_t @-&gt; returning string) ;;
+val ctime : time_t ptr -&gt; string = &lt;fun&gt;
+</programlisting>
+      <para>
+        However, we can't just pass the result of
+        <literal>time</literal> to <literal>ctime</literal>.
+      </para>
+      <programlisting language="ocaml">
+# ctime (time' ());;
+Error: This expression has type time_t but an expression was expected
+of type time_t ptr
+</programlisting>
+      <para>
+        This is because <literal>ctime</literal> needs a pointer to the
+        <literal>time_t</literal> rather than passing it by value. We
+        thus need to allocate some memory for the
+        <literal>time_t</literal> and obtain its memory address.
+      </para>
+      <programlisting language="ocaml">
+# let t_ptr = allocate time_t (time' ()) ;;
+val t_ptr : time_t ptr = &lt;abstr&gt;
+</programlisting>
+      <para>
+        The <literal>allocate</literal> function takes the type of the
+        memory to be allocated and the initial value, and it returns a
+        suitably-typed pointer. We can now call <literal>ctime</literal>
+        using passing the pointer as an argument:
+      </para>
+      <programlisting language="ocaml">
+# ctime t_ptr;;
+- : string = &quot;Sat Jun  8 12:20:42 2013\n&quot;
+</programlisting>
+    </sect2>
+    <sect2 id="using-views-to-map-complex-values">
+      <title>Using views to map complex values</title>
+      <para>
+        While scalar types typically have a 1-1 representation, other C
+        types require extra work to convert them into OCaml. Views
+        create new C type descriptions that have special behaviour when
+        used to read or write C values.
+      </para>
+      <para>
+        We've already used one view in the definition of
+        <literal>ctime</literal> earlier. The <literal>string</literal>
+        view wraps the C type <literal>char *</literal> (written in
+        OCaml as <literal>ptr char</literal>), and converts between the
         C and OCaml string representations each time the value is
         written or read.
       </para>
+      <note>
+      <title>
+      OCaml strings versus C character buffers
+      </title>
       <para>
-        The <literal>view</literal> function is predictably used to
-        create views, with the following signature.
+        Although OCaml strings may look like C character buffers from an
+        interface perspective, they're very different in terms of their
+        memory representations.
+      </para>
+      <para>
+        OCaml strings are stored in the OCaml heap with a header that
+        explicitly defines its length. C buffers are also fixed-length,
+        but by convention a C string is terminated by a null (a
+        <literal>0</literal> byte) character. The C string functions
+        calculate their length by scanning the buffer until the first
+        null character is encountered.
+      </para>
+      <para>
+        This means you need to be careful when passing OCaml strings to
+        C buffers that they don't contain any null values within the
+        OCaml string, or else the C string will be rudely truncated.
+      </para>
+      </note>
+      <para>
+        Here are the type signatures of the view functions in Ctypes.
       </para>
       <programlisting language="ocaml">
+(* Ctypes *)
 val view : read:('a -&gt; 'b) -&gt; write:('b -&gt; 'a) -&gt; 'a typ -&gt; 'b typ
 val string_of_char_ptr : char ptr -&gt; string
 val char_ptr_of_string : string -&gt; char ptr
 val string : string typ
 </programlisting>
       <para>
-        The definition of <literal>string</literal> uses views as
-        follows.
+        The actual definition of <literal>string</literal> that uses
+        views is quite simple and is written using these functions.
       </para>
       <programlisting language="ocaml">
 let string = 
@@ -21690,266 +21551,251 @@ let string =
     ~write:char_ptr_of_string 
     (char ptr)
 </programlisting>
-      <para>
-        Views can often make slightly awkward C types more natural to
-        map into OCaml types.
-      </para>
     </sect2>
-    <sect2 id="pointers-and-arrays">
-      <title>Pointers and arrays</title>
+    <sect2 id="abstract-pointers">
+      <title>Abstract pointers</title>
+      <para>
+        Abstract types are typically used to interface with
+        platform-dependent definitions often found in system headers.
+        For example, the type <literal>pthread_t</literal> is a pointer
+        on some platforms, an integer on other platforms, and a
+        <literal>struct</literal> on a third set of platforms. One way
+        to deal with this is to have build-time code which interrogates
+        the C type in some way to determine an appropriate
+        representation. Another way is to use
+        <literal>abstract</literal> and leave the representation opaque.
+      </para>
+      <caution>
+      <title>
+      Abstract values can't be passed by value
+      </title>
+      <para>
+        Although <literal>pthread_t</literal> is a convenient example
+        since the type used to implement it varies significantly across
+        platforms, it's not actually a good match for
+        <literal>abstract</literal> since values of type
+        <literal>pthread_t</literal> are passed and returned by value
+        and so can't be fully abstract.
+      </para>
+      </caution>
       <programlisting language="ocaml">
 (* Ctypes 3/4 *)
 val abstract : size:int -&gt; alignment:int -&gt; 'a abstract typ
-val array : int -&gt; 'a t -&gt; 'a array typ
-val ptr : 'a t -&gt; 'a ptr typ
 </programlisting>
       <para>
-        Arrays and pointers can be built from basic types by using the
-        corresponding <literal>array</literal> and
-        <literal>ptr</literal> functions. The
-        <literal>abstract</literal> function accepts size and alignment
-        requirements and ensures that these are satisfied when this type
-        is used in a function call.
-      </para>
-      <para>
-        Notice that the result types of these functions all share the
-        same <literal>Ctypes.typ</literal> type that the scalar type
-        definitionss. This means that they can be used interchangeably,
-        for example to create an <literal>float array typ</literal> to
-        represent a buffer of floating-point numbers.
+        The <literal>abstract</literal> function accepts size and
+        alignment requirements and ensures that these are satisfied when
+        this type is used in a function call.
       </para>
     </sect2>
-    <sect2 id="assembling-function-declarations">
-      <title>Assembling function declarations</title>
+  </sect1>
+  <sect1 id="structs-and-unions">
+    <title>Structs and unions</title>
+    <para>
+      The C constructs <literal>struct</literal> and
+      <literal>union</literal> make it possible to build new types from
+      existing types. Ctypes contains counterparts that work similarly.
+    </para>
+    <sect2 id="defining-a-structure">
+      <title>Defining a structure</title>
       <para>
-        The next step is to arrange sets of C types into function
-        definitions that match the C function calls. A value of type
-        <literal>'a fn</literal> is used to bind to C functions and to
-        describe the type of OCaml functions passed to C.
+        Let's improve the timer function that we wrote earlier. The
+        POSIX function <literal>gettimeofday</literal> retrieves the
+        time with microsecond resolution. The signature of
+        <literal>gettimeofday</literal> is as follows, including the
+        structure definitions.
       </para>
-      <programlisting language="ocaml">
-(* Ctypes.Ffi.C 4/4 *)
-type 'a fn
-val ( @-&gt; ) : 'a typ -&gt; 'b fn -&gt; ('a -&gt; 'b) fn
-val returning : 'a typ -&gt; 'a fn
-val funptr : ?name:string -&gt; ('a -&gt; 'b) fn -&gt; ('a -&gt; 'b) typ
-</programlisting>
-      <para>
-        A function is declared by composing sequences of
-        <literal>'a typ</literal> values using the
-        <literal>@-&gt;</literal> operator, and closing it with
-        <literal>returning</literal> to define the return type.
-      </para>
-      <para>
-        The ctypes library, like C itself, distinguishes
-        <emphasis>functions</emphasis> and <emphasis>function
-        pointers</emphasis>. Functions are not first class: it isn't
-        possible to use them as arguments or return values of calls, or
-        store them in addressable memory. Function pointers are first
-        class, and so have none of these restrictions. Function pointers
-        are defined using <literal>funptr</literal> and can be passed
-        around as any other <literal>typ</literal> value in argument
-        lists.
-      </para>
-    </sect2>
-    <sect2 id="arrays-structures-and-unions">
-      <title>Arrays, structures and unions</title>
-      <para>
-        Arrays in C are contiguous blocks of the same value. Any of the
-        basic types defined earlier can be allocated as blocks via the
-        <literal>Ctypes.Array</literal> module.
-      </para>
-      <programlisting language="ocaml">
-module Array : sig
-  type 'a t = 'a array
-
-  val get : 'a t -&gt; int -&gt; 'a
-  val set : 'a t -&gt; int -&gt; 'a -&gt; unit
-  val of_list : 'a typ -&gt; 'a list -&gt; 'a t
-  val to_list : 'a t -&gt; 'a list
-  val length : 'a t -&gt; int
-  val start : 'a t -&gt; 'a ptr
-  val from_ptr : 'a ptr -&gt; int -&gt; 'a t
-  val make : 'a typ -&gt; ?initial:'a -&gt; int -&gt; 'a t
-end
-</programlisting>
-      <para>
-        The array functions are similar to the standard library
-        <literal>Array</literal> module, except that they represent flat
-        C arrays instead of OCaml ones. The conversion between arrays
-        and lists still requires copying the values, and can be
-        expensive for large data structures. Notice that you can also
-        convert an array into a <literal>ptr</literal> pointer to the
-        head of buffer, which can be useful if you need to pass the
-        pointer and size arguments separately to a C function.
-      </para>
-      <para>
-        Structures in C can contain a mixture of types, and, like OCaml
-        records, their order is significant. The
-        <literal>Ctypes.Struct</literal> module defines combinators to
-        make this definition as easy as using the scalar types.
-      </para>
-      <para>
-        Let's look at an example by binding some time-related UNIX
-        functions that use C structures in their interface.
-      </para>
-      <sect3 id="example-binding-unix-date-functions">
-        <title>Example: binding UNIX date functions</title>
-        <para>
-          The UNIX standard C library defines several useful time and
-          date functions in <literal>&lt;time.h&gt;</literal> (usually
-          found in <literal>/usr/include</literal> on a Linux or MacOS X
-          system). The <literal>localtime</literal> function has the
-          following signature and return value:
-        </para>
-        <programlisting language="c">
-/* /usr/include/time.h */
-
-struct tm {
-  int     tm_sec;         /* seconds after the minute [0-60] */
-  int     tm_min;         /* minutes after the hour [0-59] */
-  int     tm_hour;        /* hours since midnight [0-23] */
-  int     tm_mday;        /* day of the month [1-31] */
-  int     tm_mon;         /* months since January [0-11] */
-  int     tm_year;        /* years since 1900 */
-  int     tm_wday;        /* days since Sunday [0-6] */
-  int     tm_yday;        /* days since January 1 [0-365] */
-  int     tm_isdst;       /* Daylight Savings Time flag */
+      <programlisting language="c">
+struct timeval {
+  long tv_sec;
+  long tv_usec;
 };
 
-time_t time(time_t *);
-struct tm *localtime(const time_t *);
+int gettimeofday(struct timeval *, struct timezone *tv);
 </programlisting>
+      <para>
+        Using Ctypes, we can describe this type as follows in our
+        top-level.
+      </para>
+      <programlisting language="ocaml">
+# type timeval;;
+type timeval
+# let timeval : timeval structure typ = structure &quot;timeval&quot; ;;
+val timeval : timeval structure typ = &lt;abstr&gt;
+</programlisting>
+      <para>
+        The first command defines a new OCaml type
+        <literal>typeval</literal> that we'll use to instantiate the
+        OCaml version of the <literal>struct</literal>. Creating a new
+        OCaml type to reflect the underlying C type in this way means
+        that the structure we define will be distinct from other
+        structures we define elsewhere, which helps to avoid getting
+        them mixed up.
+      </para>
+      <para>
+        The second command calls <literal>structure</literal> to create
+        a fresh structure type. At this point the structure type is
+        incomplete, so we can add fields, but cannot yet use it in
+        <literal>foreign</literal> calls.
+      </para>
+    </sect2>
+    <sect2 id="adding-fields-to-structures">
+      <title>Adding fields to structures</title>
+      <para>
+        The <literal>timeval</literal> structure definition still
+        doesn't have any fields, so we need to add those next.
+      </para>
+      <programlisting language="ocaml">
+# let tv_sec  = timeval *:* long ;;
+val tv_sec : (Signed.long, timeval structure) field = &lt;abstr&gt;
+# let tv_usec = timeval *:* long ;;
+val tv_usec : (Signed.long, timeval structure) field = &lt;abstr&gt;
+# seal timeval ;;
+- : unit = ()
+</programlisting>
+      <para>
+        The <literal>*:*</literal> operator appends a field to the
+        structure, as shown with <literal>tv_sec</literal> and
+        <literal>tv_usec</literal> above. Structure fields are typed
+        accessors that are associated with a particular structure, and
+        they correspond to the labels in C. Note that there's no
+        explicit requirement that the OCaml variable names for a field
+        are the same as the corresponding C struct label names, but it
+        helps avoid confusion.
+      </para>
+      <para>
+        Every field addition mutates the structure variable and records
+        a new size (the exact value of which depends on the type of the
+        field that was just added). Once we <literal>seal</literal> the
+        structure the situation is reversed: we will be able to create
+        values, but adding fields to a sealed structure is an error.
+      </para>
+    </sect2>
+    <sect2 id="incomplete-structure-definitions">
+      <title>Incomplete structure definitions</title>
+      <para>
+        Since <literal>gettimeofday</literal> needs a
+        <literal>struct timezone</literal> pointer for its second
+        argument, we also need to define a second structure type.
+      </para>
+      <programlisting language="ocaml">
+# type timezone ;;
+type timezone
+# let timezone : timezone structure typ = structure &quot;timezone&quot; ;;
+val timezone : timezone structure typ = &lt;abstr&gt;
+</programlisting>
+      <para>
+        We don't ever need to create <literal>struct timezone</literal>
+        values, so we can leave this struct as incomplete without adding
+        any fields or sealing it. If you ever try to use it in a
+        situation where its concrete size needs to be known, the library
+        will raise an <literal>IncompleteType</literal> exception.
+      </para>
+      <para>
+        We're finally ready to bind to <literal>gettimeofday</literal>.
+      </para>
+      <programlisting language="ocaml">
+# let gettimeofday = foreign &quot;gettimeofday&quot;
+    (ptr timeval @-&gt; ptr timezone @-&gt; returning_checking_errno int) ;;
+val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int = &lt;fun&gt;
+</programlisting>
+      <para>
+        There's one other new feature here: the
+        <literal>returning_checking_errno</literal> function behaves
+        like <literal>returning</literal>, except that it checks whether
+        the bound C function modifies the C error flag. Changes to
+        <literal>errno</literal> are mapped into OCaml exceptions by the
+        <literal>PosixTypes</literal> module. .
+      </para>
+      <para>
+        As before we can create a wrapper to make
+        <literal>gettimeofday</literal> easier to use. The functions
+        <literal>make</literal>, <literal>addr</literal> and
+        <literal>getf</literal> create a structure value, retrieve the
+        address of a structure value, and retrieve the value of a field
+        from a structure.
+      </para>
+      <programlisting language="ocaml">
+# let gettimeofday' () =
+  let tv = make timeval in
+  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
+  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
+  Pervasives.(float secs +. float usecs /. 1000000.0) ;;
+val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int = &lt;fun&gt;
+
+# gettimeofday' () ;;
+- : float = 1370714234.606070
+</programlisting>
+      <para>
+        You need to be a little careful not to get all the open modules
+        mixed up here. Both Pervasives and Ctypes define different
+        <literal>float</literal> functions. The Ctypes module we opened
+        up earlier overrides the Pervasives definition. As seen above
+        though, you just need to locally open Pervasives again to bring
+        the usual <literal>float</literal> function back in scope,
+      </para>
+      <sect3 id="recap-a-time-printing-command">
+        <title>Recap: a time-printing command</title>
         <para>
-          This example is more complicated than ncurses for a couple of
-          reasons. We need to allocate some external memory to store a
-          <literal>time_t</literal> value, and pass that memory into the
-          <literal>time</literal> library call to obtain the current
-          timezone. This <literal>time_t</literal> value is passed to
-          the <literal>localtime</literal> library call, which then
-          returns a pointer to the <literal>struct tm</literal>.
-        </para>
-        <para>
-          The <literal>time_t</literal> and many other standard POSIX
-          types are already provided by the
-          <literal>Ffi.PosixTypes</literal> module. Let's start by
-          defining the OCaml mapping to <literal>struct tm</literal>:
+          We built up a lot of bindings in the earlier section, so let's
+          recap them with a complete example that ties it together with
+          a command-line frontend.
         </para>
         <programlisting language="ocaml">
-(* ffi_date.ml *)
+(* datetime.ml: display time in various formats *)
+open Core.Std
 open Ctypes
 open PosixTypes
-
-type tm
-let tm = structure &quot;tm&quot;
-let tm_sec   = tm *:* int (* seconds *)
-let tm_min   = tm *:* int (* minutes *)
-let tm_hour  = tm *:* int (* hours *)
-let tm_mday  = tm *:* int (* day of the month *)
-let tm_mon   = tm *:* int (* month *)
-let tm_year  = tm *:* int (* year *)
-let tm_wday  = tm *:* int (* day of the week *)
-let tm_yday  = tm *:* int (* day in the year *)
-let tm_isdst = tm *:* int (* daylight saving time *)
-let () = seal (tm : tm structure typ)
-</programlisting>
-        <para>
-          This code looks like a fairly mechanical translation from the
-          C structure definition thanks to the magic of the Ctypes
-          <literal>*:*</literal> combinator.
-        </para>
-        <para>
-          The <literal>tm</literal> structure is initialised via the
-          <literal>structure</literal> allocator and its fields are
-          added sequentially. Every invocation of <literal>*:*</literal>
-          mutates <literal>tm</literal> to record its type and offset
-          within the structure. The structure is finalized via
-          <literal>seal</literal> after all the fields have been added.
-          A sealed structure has a concrete size and alignment and can
-          now be used in other type definition.
-        </para>
-        <para>
-          The OCaml definitions of <literal>time</literal> and
-          <literal>localtime</literal> are now straightforward calls to
-          <literal>foreign</literal>, just like our earlier
-          <literal>ncurses</literal> example.
-        </para>
-        <programlisting language="ocaml">
 open Foreign
 
-let time =
-  foreign &quot;time&quot; (ptr time_t @-&gt; returning_checking_errno time_t)
+let time     = foreign &quot;time&quot; (ptr time_t @-&gt; returning time_t)
+let difftime = foreign &quot;difftime&quot; (time_t @-&gt; time_t @-&gt; returning double)
+let ctime    = foreign &quot;ctime&quot; (ptr time_t @-&gt; returning string)
 
-let asctime =
-  foreign &quot;asctime&quot; (ptr tm @-&gt; returning string)
+type timeval
+let timeval : timeval structure typ = structure &quot;timeval&quot;
+let tv_sec   = timeval *:* long 
+let tv_usec  = timeval *:* long 
+let ()       = seal timeval
 
-let localtime =
-  foreign &quot;localtime&quot; (ptr time_t @-&gt; returning (ptr tm))
+type timezone
+let timezone : timezone structure typ = structure &quot;timezone&quot;
+
+let gettimeofday = foreign &quot;gettimeofday&quot;
+    (ptr timeval @-&gt; ptr timezone @-&gt; returning_checking_errno int)
+
+let time' () = time (from_voidp time_t null)
+
+let gettimeofday' () =
+  let tv = make timeval in
+  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
+  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
+  Pervasives.(float secs +. float usecs /. 1_000_000.)
+
+let float_time () = printf &quot;%f%!\n&quot; (gettimeofday' ())
+
+let ascii_time () =
+  let t_ptr = allocate time_t (time' ()) in
+  printf &quot;%s%!\n&quot; (ctime t_ptr)
+
+let () =
+  let open Command in
+  basic ~summary:&quot;Display the current time in various formats&quot;
+    Spec.(empty +&gt; flag &quot;-a&quot; no_arg ~doc:&quot; Human-readable output format&quot;)
+    (fun human () -&gt; if human then ascii_time () else float_time ())
+  |&gt; Command.run 
 </programlisting>
         <para>
-          The OCaml signature for this definition looks like this:
+          This can be compiled as usual with ocamlfind and ocamlopt.
         </para>
-        <programlisting language="ocaml">
-(* ffi_date.mli *)
-
-open Ctypes
-open PosixTypes
-
-type tm
-val tm_sec : (int, tm structure) field
-val tm_min : (int, tm structure) field
-val tm_hour : (int, tm structure) field
-val tm_mday : (int, tm structure) field
-val tm_mon : (int, tm structure) field
-val tm_year : (int, tm structure) field
-val tm_wday : (int, tm structure) field
-val tm_yday : (int, tm structure) field
-val tm_isdst : (int, tm structure) field
-
-val time : time_t ptr -&gt; time_t
-val asctime : tm structure ptr -&gt; string
-val localtime : time_t ptr -&gt; tm structure ptr
+        <programlisting>
+$ ocamlfind ocamlopt -o datetime -package core -package ctypes.foreign \
+  -thread -linkpkg datetime.ml
+$ ./datetime -a
+Sat Jun  8 19:28:59 2013
 </programlisting>
-        <para>
-          The structure fields are exposed as separate values to provide
-          a way to extract their values from a buffer at runtime. Let's
-          see how to tie these functions together.
-        </para>
-        <programlisting language="ocaml">
-let () = begin
-  let timep = allocate_n ~count:1 time_t in
-  let time = time timep in
-  assert (time = !@timep);
-  let tm = localtime timep in
-  Printf.printf &quot;tm.tm_mon  = %d\n&quot; (getf !@tm tm_mon);
-  Printf.printf &quot;tm.tm_year = %d\n&quot; (getf !@tm tm_year);
-  print_endline (asctime tm)
-end
-</programlisting>
-        <para>
-          The <literal>allocate_n</literal> is analagous to a type-safe
-          version of the POSIX <literal>calloc</literal> function. The
-          freshly allocated <literal>timep</literal> buffer is
-          automatically garbage collected as usual when it's no longer
-          referenced within the OCaml code.
-        </para>
-        <para>
-          The <literal>timep</literal> pointer is passed into the
-          <literal>time</literal> library call which modifies it
-          in-place (and, due to a quirky historical interface, also
-          returns a pointer to the same buffer). This duplicated return
-          value gives us an excuse to try out the <literal>!@</literal>
-          operator, which dereferences the structure pointer and
-          provides access to the structure value.
-        </para>
-        <para>
-          The same <literal>timep</literal> pointer is subsequently
-          passed to <literal>localtime</literal>, which returns a
-          pointer to a <literal>tm</literal> structure. We dereference a
-          couple of its fields and print them from OCaml, and then pass
-          it to <literal>asctime</literal> to print a nice
-          human-readable time.
-        </para>
         <sidebar>
         <title>
         Why do we need to use <literal>returning</literal>?
@@ -22040,17 +21886,226 @@ function_t *f = curried_C(3); f(4);
           in function definitions.
         </para>
         </sidebar>
-        <para>
-          Unions in C are named structures that can be mapped onto the
-          same underlying memory. They are also fully supported in in
-          Ctypes, but we won't go into more detail here.
-        </para>
       </sect3>
     </sect2>
+    <sect2 id="defining-arrays">
+      <title>Defining arrays</title>
+      <para>
+        Arrays in C are contiguous blocks of the same value. Any of the
+        basic types defined earlier can be allocated as blocks via the
+        <literal>Array</literal> module.
+      </para>
+      <programlisting language="ocaml">
+module Array : sig
+  type 'a t = 'a array
+
+  val get : 'a t -&gt; int -&gt; 'a
+  val set : 'a t -&gt; int -&gt; 'a -&gt; unit
+  val of_list : 'a typ -&gt; 'a list -&gt; 'a t
+  val to_list : 'a t -&gt; 'a list
+  val length : 'a t -&gt; int
+  val start : 'a t -&gt; 'a ptr
+  val from_ptr : 'a ptr -&gt; int -&gt; 'a t
+  val make : 'a typ -&gt; ?initial:'a -&gt; int -&gt; 'a t
+end
+</programlisting>
+      <para>
+        The array functions are similar to the standard library
+        <literal>Array</literal> module except that they represent flat
+        C arrays instead of OCaml ones.
+      </para>
+      <para>
+        The conversion between arrays and lists still requires copying
+        the values, and can be expensive for large data structures.
+        Notice that you can also convert an array into a
+        <literal>ptr</literal> pointer to the head of buffer, which can
+        be useful if you need to pass the pointer and size arguments
+        separately to a C function.
+      </para>
+      <para>
+        Unions in C are named structures that can be mapped onto the
+        same underlying memory. They are also fully supported in in
+        Ctypes, but we won't go into more detail here.
+      </para>
+    </sect2>
   </sect1>
-  <sect1 id="callbacks-between-c-and-ocaml">
-    <title>Callbacks between C and OCaml</title>
+  <sect1 id="passing-functions-to-c">
+    <title>Passing functions to C</title>
     <para>
+      It's also straightforward to pass OCaml function values to C. The
+      C standard library function <literal>qsort</literal> has the
+      following signature that requires a function pointer to use.
+    </para>
+    <programlisting language="c">
+void qsort(void *base, size_t nmemb, size_t size,
+           int(*compar)(const void *, const void *));
+</programlisting>
+    <para>
+      C programmers often use <literal>typedef</literal> to make type
+      definitions involving function pointers easier to read. Using a
+      typedef, the type of <literal>qsort</literal> looks a little more
+      palatable.
+    </para>
+    <programlisting language="c">
+typedef int(compare_t)(const void *, const void *);
+void qsort(void *base, size_t nmemb, size_t size, compare_t *);
+</programlisting>
+    <para>
+      This also happens to be a close mapping to the corresponding
+      Ctypes definition. Since type descriptions are regular values, we
+      can just use <literal>let</literal> in place of
+      <literal>typedef</literal>. The type of <literal>qsort</literal>
+      is defined as follows.
+    </para>
+    <programlisting language="ocaml">
+let compare_t = ptr void @-&gt; ptr void @-&gt; returning int
+
+let qsort = foreign &quot;qsort&quot;
+   (ptr void @-&gt; size_t @-&gt; size_t @-&gt; funptr compare_t @-&gt; returning void)
+</programlisting>
+    <para>
+      The resulting value is a higher-order function, as shown by its
+      type.
+    </para>
+    <programlisting language="ocaml">
+val qsort: void ptr -&gt; size_t -&gt; size_t -&gt;
+           (void ptr -&gt; void ptr -&gt; int) -&gt; unit
+</programlisting>
+    <para>
+      As before, let's define a wrapper function to make
+      <literal>qsort</literal> easier to use. The second and third
+      arguments to <literal>qsort</literal> specify the length (number
+      of elements) of the array and the element size.
+    </para>
+    <para>
+      Arrays created using Ctypes have a richer runtime structure than C
+      arrays, so we don't need to pass size information around.
+      Furthermore, we can use OCaml polymorphism in place of the unsafe
+      <literal>void ptr</literal> type.
+    </para>
+    <sect2 id="example-a-command-line-quicksort">
+      <title>Example: a command-line quicksort</title>
+      <para>
+        Below is a command-line tool that uses the
+        <literal>qsort</literal> binding to sort all of the integers
+        supplied on the standard input.
+      </para>
+      <programlisting>
+(* qsort.ml: quicksort integers from stdin *)
+open Core.Std
+open Ctypes
+open PosixTypes
+open Foreign
+
+let compare_t = ptr void @-&gt; ptr void @-&gt; returning int
+
+let qsort = foreign &quot;qsort&quot;
+   (ptr void @-&gt; size_t @-&gt; size_t @-&gt; funptr compare_t @-&gt; 
+    returning void)
+
+let qsort' cmp arr =
+  let open Unsigned.Size_t in
+  let ty = Array.element_type arr in
+  let len = of_int (Array.length arr) in
+  let elsize = of_int (sizeof ty) in
+  let start = to_voidp (Array.start arr) in
+  let compare l r = cmp (!@ (from_voidp ty l)) (!@ (from_voidp ty r)) in
+  qsort start len elsize compare;
+  arr
+
+let sort_stdin () =
+  In_channel.input_lines stdin
+  |&gt; List.map ~f:int_of_string
+  |&gt; Array.of_list int
+  |&gt; qsort' Int.compare
+  |&gt; Array.to_list
+  |&gt; List.iter ~f:(fun a -&gt; printf &quot;%d\n&quot; a)
+
+let () =
+  Command.basic ~summary:&quot;Sort integers on standard input&quot;
+    Command.Spec.empty sort_stdin
+  |&gt; Command.run
+</programlisting>
+      <para>
+        Compile it in the usual way with ocamlfind, but also examine the
+        inferred interface of the module.
+      </para>
+      <programlisting>
+$ ocamlfind ocamlopt -package core -package ctypes.foreign -thread -linkpkg \
+    -o qsort qsort.ml
+$ ./qsort
+5
+3
+2
+1
+# press &lt;Control-D&gt; to end the standard input
+1
+2
+3
+5
+$ ocamlfind ocamlopt -i -package core -package ctypes.foreign -thread qsort.ml
+val compare_t : (unit Ctypes.ptr -&gt; unit Ctypes.ptr -&gt; int) Ctypes.fn
+val qsort :
+  unit Ctypes.ptr -&gt;
+  PosixTypes.size_t -&gt;
+  PosixTypes.size_t -&gt; (unit Ctypes.ptr -&gt; unit Ctypes.ptr -&gt; int) -&gt; unit
+val qsort' : ('a -&gt; 'a -&gt; int) -&gt; 'a Ctypes.array -&gt; 'a Ctypes.array
+val sort_stdin : unit -&gt; unit
+</programlisting>
+      <para>
+        The <literal>qsort'</literal> wrapper function has a much more
+        canonical OCaml interface than the raw binding. It accepts a
+        comparator function and a Ctypes array, and returns the same
+        Ctypes array. It's not strictly required that it returns the
+        array since it modifies it in-place, but it makes it easier to
+        chain the function using the <literal>|&gt;</literal> operator
+        (as <literal>sort_stdin</literal> does in the example).
+      </para>
+      <para>
+        Using <literal>qsort'</literal> to sort arrays is
+        straightforward. Our example code reads the standard input as a
+        list, converts it to a C array, passes it through qsort, and
+        outputs the result to the standard output. Again, remember to
+        not confuse the <literal>Ctypes.Array</literal> module with the
+        <literal>Core.Std.Array</literal> module: the former is in scope
+        since we opened <literal>Ctypes</literal> at the start of the
+        file.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1 id="learning-more-about-c-bindings">
+    <title>Learning more about C bindings</title>
+    <para>
+      The Ctypes
+      <ulink url="http://github.com/ocamllabs/ocaml-types">distribution</ulink>
+      contains a number of larger-scale examples, including:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          bindings to the POSIX <literal>fts</literal> API which
+          demonstrates C callbacks more comprehensively.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          a more complete Ncurses binding than the example we opened the
+          chapter with.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          a comprehensive test suite that covers the complete library,
+          and can provide useful snippets for your own bindings.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      This chapter hasn't really needed you to understand the innards of
+      OCaml at all. Ctypes does its best to make function bindings easy,
+      but the rest of this part will also fill you in about how
+      interactions with OCaml memory layout and the garbage collector
+      work.
     </para>
   </sect1>
 </chapter><chapter id="memory-representation-of-values">
@@ -27159,13 +27214,9 @@ $ opam install utop
 #use &quot;topfind&quot;
 #camlp4o
 #require &quot;core.top&quot;
+#require &quot;core.syntax&quot;
 #require &quot;core_extended&quot;
 #require &quot;async&quot;
-#require &quot;sexplib.syntax&quot;
-#require &quot;fieldslib.syntax&quot;
-#require &quot;variantslib.syntax&quot;
-#require &quot;comparelib.syntax&quot;
-#require &quot;bin_prot.syntax&quot;
 open Core.Std
 </programlisting>
       <para>
