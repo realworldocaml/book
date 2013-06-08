@@ -1056,6 +1056,60 @@ into it, just clean out your intermediate files and recompile from scratch.
 
 </sidebar>
 
+### Shorter module paths in type errors
+
+Core uses the OCaml module system quite extensively to provide a complete
+replacement standard library.  It collects these modules into a single `Std`
+module which provides a single module that needs to be opened to import
+the replacement function.
+
+There's one downside to this approach: type errors suddenly get much more
+verbose.  We can see this if you run the vanilla OCaml top-level (not `utop`).
+
+```console
+$ ocaml
+# List.map print_endline "" ;;
+Error: This expression has type string but an expression was expected of type
+         string list
+```
+
+This type error without `Core.Std` has a straightforward type error.  When
+we switch to Core, though, it gets more verbose.
+
+```console
+# open Core.Std ;;
+# List.map ~f:print_endline "" ;;
+Error: This expression has type string but an expression was expected of type
+         'a Core.Std.List.t = 'a list
+```
+
+The default `List` module in OCaml is overridden by `Core.Std.List`.  The
+compiler does its best to show the type equivalence, but at the cost of
+a more verbose error message.
+
+The compiler can remedy this via a so-called "short paths" heuristic.  This
+causes the compiler to search all the type aliases for the shortest module
+path, and use that as the preferred output type.  The option is activated
+by passing `-short-paths` to the compiler, and works on the top-level too.
+
+```console
+$ ocaml -short-paths
+# open Core.Std;;
+# List.map ~f:print_endline "foo";;
+Error: This expression has type string but an expression was expected of type
+         'a list
+```
+
+The `utop` enhanced top-level activates short paths by default, which is why
+you've not had to do this before in our interactive examples.  However, the
+compiler doesn't default to the short path heuristic since there are some
+situations where the type aliasing information is useful to know, and would be
+lost in the error if the shortest module path is always picked.
+
+You'll need to choose for yourself if you prefer short paths or the default
+behaviour in your own projects, and pass the `-short-paths` flag to the
+compiler if you need it.
+
 ## The typed syntax tree
 
 When the type checking process has successfully completed, it is combined with
