@@ -1061,7 +1061,7 @@ into it, just clean out your intermediate files and recompile from scratch.
 Core uses the OCaml module system quite extensively to provide a complete
 replacement standard library.  It collects these modules into a single `Std`
 module which provides a single module that needs to be opened to import
-the replacement function.
+the replacement modules and functions.
 
 There's one downside to this approach: type errors suddenly get much more
 verbose.  We can see this if you run the vanilla OCaml top-level (not `utop`).
