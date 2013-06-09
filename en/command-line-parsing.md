@@ -812,18 +812,16 @@ OS package manager to see if you have it available.
 
 Operating System  Package Manager  Package
 ----------------  ---------------  -------
-Debian Linux      `apt`            `TODO`
-CentOS            `yum`            `TODO`
-Mac OS X           Homebrew         `bash-completion`
-Mac OS X           MacPorts         `TODO`
-FreeBSD           Ports System     `/usr/ports TODO`
-OpenBSD           `pkg_add`        `TODO`
+Debian Linux      `apt`            `bash-completion`
+Mac OS X          Homebrew         `bash-completion`
+FreeBSD           Ports System     `/usr/ports/shells/bash-completion`
 
-Once you have bash completion installed and configured, check that it works by
-typing the `ssh` command, and pressing `tab`.  This should show you the list of
-known hosts from your `~/.ssh/known_hosts` file.  If it lists those, then you
-can continue on, but if it lists the files in your current directory instead,
-then check your OS documentation to configure completion correctly.
+Once bash completion is installed and configured, check that it works by typing
+the `ssh` command, and pressing `<tab>`.  This should show you the list of
+known hosts from your `~/.ssh/known_hosts` file.  If it lists some hosts that
+you've recently connected to, you can continue on.  If it lists the files in
+your current directory instead, then check your OS documentation to configure
+completion correctly.
 
 One last bit of information you'll need to find is the location of the
 `bash_completion.d` directory. This is where all the shell fragments that
