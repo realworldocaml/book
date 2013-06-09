@@ -6,7 +6,7 @@ type to and from a human-readable and editable form in your own code, and not
 worry about interoperability.  Core's solution to this problem is to use
 s-expressions.
 
-S-expressions are nested paranthetical expressions whose atomic values
+S-expressions are nested parenthetical expressions whose atomic values
 are strings.  They were first popularized by the Lisp programming
 language in the 1960s, and have remained one of the simplest and most
 effective ways to encode structured data.  An example s-expression
