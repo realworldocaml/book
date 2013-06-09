@@ -885,7 +885,7 @@ classes are better suited for situations where there are multiple
 (useful) implementations of the virtual parts.  In most cases, this
 will be public virtual methods.
 
-## Multiple inheritance ##
+## Multiple inheritance
 
 When a class inherits from more than one superclass, it is using
 _multiple inheritance_.  Multiple inheritance extends the variety of
@@ -894,7 +894,7 @@ particularly with virtual classes.  However, it can be tricky to use,
 particularly when the inheritance hierarchy is a graph rather than a
 tree, so it should be used with care.
 
-### How names are resolved ###
+### How names are resolved
 
 The main "trickiness" of multiple inheritance is due to naming -- what
 happens when a method or field with some name is defined in more than
@@ -1016,7 +1016,7 @@ val x : m9 = <obj>
 - : int = 3
 ```
 
-### Mixins ###
+### Mixins
 
 When should you use multiple inheritance?  If you ask multiple people,
 you're likely to get multiple (perhaps heated) answers.  Some will
