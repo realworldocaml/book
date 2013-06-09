@@ -67,8 +67,8 @@
  (note "Largely complete")
  )
 ((part Basic)
- (name "object-subtyping-and-inheritance")
- (file "advanced-objects")
+ (name "classes")
+ (file "classes")
  (note "Largely complete")
  )
 ;; PART 2: PRACTICAL EXAMPLES
