@@ -56,7 +56,7 @@ let command =
       empty
       +> anon ("filename" %: string)
     )
-  (fun file () -> do_hash file)
+  (fun filename () -> do_hash filename)
 
 let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
@@ -146,9 +146,13 @@ Command.Spec.(
 
 The specification above begins with an `empty` value and then adds more
 parameters via the `+>` combinator.  Our example uses the `anon` function to
-define a single anonymous parameter.  Anonymous parameters are assigned a
-string name that is used in help text, and an OCaml type that they are parsed
-into from the raw command-line string.
+define a single anonymous parameter.
+
+Anonymous parameters are created using the `%:` operator, which binds a textual
+string name (used in help text) to an OCaml conversion function.  The
+conversion function is responsible for parsing the command-line fragment into
+an OCaml data type.  In the example above, this is just a `string`, but we'll
+see more complex conversion options below
 
 ### Callback functions
 
@@ -195,7 +199,7 @@ Command.basic
     empty
     +> anon ("filename" %: string)
   )
-  (fun file () -> do_hash file)
+  (fun filename () -> do_hash filename)
 ```
 
 The `basic` function takes the following arguments:
