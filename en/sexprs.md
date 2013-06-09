@@ -487,7 +487,7 @@ alternate syntax:
 ### `sexp_option`
 
 Another common directive is `sexp_option`, which is used to to make a
-record field optional in the s-expressoin.  Normally, optional values
+record field optional in the s-expression.  Normally, optional values
 are represented either as `()` for `None`, or as `(x)` for `Some x`,
 and a record field containing an option would be rendered accordingly.
 For example:
