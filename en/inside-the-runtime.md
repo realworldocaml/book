@@ -41,7 +41,7 @@ collector.
 A generational GC maintains separate memory regions to hold blocks based on how
 long the blocks have been live.  OCaml's heap is split in two such regions:
 
-* a small fixed-size *minor heap* where most most blocks are initially allocated.
+* a small fixed-size *minor heap* where most blocks are initially allocated.
 * a larger variable-sized *major heap* for blocks that have been live longer.
 
 A typical functional programming style means that young blocks tend to die
@@ -582,7 +582,7 @@ all pointing to the same heap block if you wish.
 After a garbage collection determines that a heap block `b` is unreachable, it
 removes from the set of finalizers all the functions associated with `b`, and
 serially applies each of those functions to `b`. Thus, every finalizer function
-attached to `b` will run at most most once.  However, program termination will
+attached to `b` will run at most once.  However, program termination will
 not cause all the finalizers to be run before the runtime exits.
 
 The finalizer can use all features of OCaml, including assignments that make
