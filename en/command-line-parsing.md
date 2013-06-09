@@ -1,8 +1,8 @@
 # Command Line Parsing
 
-Many of the OCaml programs that you'll write will end up as binaries that will
-be run directly from a command prompt.  Any non-trivial command-line program
-needs a few features:
+Many of the OCaml programs that you'll write will end up as binaries that need
+to be run from a command prompt.  Any non-trivial command-line program needs a
+few features:
 
 * program options and file inputs need to be parsed from the command
   line arguments.
@@ -12,33 +12,33 @@ needs a few features:
 * interactive auto-completion of commands to assist the user.
 
 It's tedious and error-prone to code all this manually for every program you
-write. Core simplifies this by letting you declare all your command-line
-options in one place, using the `Command` library.  This then takes care of
+write. Core provides the Command library that simplifies all this by letting
+you declare all your command-line options in one place.  Command takes care of
 parsing the arguments, generating help text and provides interactive
 auto-completion to the user of the library.
 
-The `Command` library also scales as you add more features to your programs.
-It's simple to use for small applications, but provides a sophisticated
-subcommand mode that groups related commands together as the application grows
-more options. You may also be familiar with this command-line style from the
-Git or Mercurial version control systems.
+Command also copes as you add more features to your programs.  It's a simple
+library to use for small applications, and provides a sophisticated subcommand
+mode that grouping related commands together as the number of options grow.
+You may already be familiar with this command-line style from the Git or
+Mercurial version control systems.
 
-This chapter demonstrates how to use `Command` to extend the cryptographic
-utility from [xref](#object-oriented-programming) and builds a simple
-equivalents to the `md5` and `shasum` utilities. It also demonstrates how
-_functional combinators_ can be used to declare complex data structures in a
-type-safe and elegant way.
+In this chapter, we'll:
 
-## Basic command line parsing
+* learn how to use Command to construct basic and grouped command-line interfaces.
+* read examples that extend the cryptographic utility from [xref](#object-oriented-programming) and builds a simple
+equivalents to the `md5` and `shasum` utilities.
+* demonstrate how _functional combinators_ can be used to declare complex data structures in a type-safe and elegant way.
 
-We'll begin by cloning the `md5` binary that is present on most Linux
-distributions and Mac OS X.  It reads in the contents of a file,
-applies the MD5 one-way hash function to the data, and outputs an
-ASCII hex representation of the result.
+## Basic command-line parsing
+
+Let's start by cloning the `md5` binary that is present on most Linux and Mac
+OS X installations. It reads in the contents of a file, applies the MD5 one-way
+cryptographic hash function to the data, and outputs an ASCII hex
+representation of the result.
 
 ```ocaml
-(* md5.ml : calculate MD5 hash of input *)
-
+(* basic_md5.ml : calculate MD5 hash of input *)
 open Core.Std
 
 let do_hash file =
@@ -56,26 +56,30 @@ let command =
       empty
       +> anon ("filename" %: string)
     )
-  (fun file () -> do_hash file)
+  (fun filename () -> do_hash filename)
 
 let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
-You can compile this file the usual way with `ocamlfind`, but passing an
-additional `cryptokit` package.  You may need to install Cryptokit via OPAM if
-you didn't do so earlier.
+You can compile this file the usual way with `ocamlfind` by passing an
+additional `cryptokit` package.  Install Cryptokit via OPAM if you didn't do so
+earlier.
 
 ```console
 $ opam install cryptokit
-$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg -o md5 basic.ml
+$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg \
+  -o md5 basic_md5.ml
 $ ./md5
 ```
 
 The `do_hash` function accepts a filename parameter and prints the
-human-readable MD5 string to the console standard output.  The subsequent
-`command` value declares how to invoke `do_hash` by parsing the command-line
-arguments.  When you compile this program and run it, you can query the
-version information simply by:
+human-readable MD5 string to the console standard output.
+
+The subsequent `command` variable defines how to invoke `do_hash` by parsing
+the command-line arguments.  When you compile and run this program, it already
+defines a number of useful default command-line options.
+
+For instance, query the version information for the binary you just compiled.
 
 ```console
 $ ./md5 -version
@@ -84,11 +88,10 @@ $ ./md5 -build-info
 RWO
 ```
 
-The `version` and `build_info` optional arguments to `Command.run`
-let you specify versions in the command-line help.  You can leave
-these blank, or get your build system to generate them directly
-from your version control system (e.g. by running `hg tip` to generate
-a build revision number, in the case of Mercurial).
+The actual versions are defined via optional arguments to `Command.run`.  You
+can leave these blank or get your build system to generate them directly from
+your version control system (e.g. by running `hg tip` to generate a build
+revision number, in the case of Mercurial).
 
 ```console
 $ ./md5
@@ -108,21 +111,28 @@ More detailed information
 missing anonymous argument: filename
 ```
 
-When we invoke this binary without any arguments, it outputs a help screen that
-informs you that a required argument `filename` is missing.  Supplying the
-argument to the command results in `do_hash` being called, and the MD5 output
-being displayed to the standard output.
+When we invoke this binary without any arguments, it helpfully displays a help
+screen that informs you that a required argument `filename` is missing.
+
+If you do supply the filename argument, then `do_hash` is called with the
+argument and the MD5 output is displayed to the standard output.
 
 ```
 $ ./md5 ./md5
 59562f5e4f790d16f1b2a095cd5de844
 ```
 
+## Defining parsing specifications
+
 So how does all this work?  Most of the interesting logic lies in how the
-specifications are defined.  The `Command.Spec` module defines several
-combinators that can be chained together to define flags and anonymous
-arguments, what types they should map to, and whether to take special actions
-(such as interactive input) if certain fields are encountered.
+specifications are constructed.
+
+The `Command.Spec` module defines several combinators that can be chained
+together to define flags and anonymous arguments, what types they should map
+to, and whether to take special actions (such as interactive input) if certain
+fields are encountered.
+
+### Anonymous arguments
 
 Let's build the specification for a single argument that is specified
 directly on the command-line (this is known as an _anonymous_ argument).
@@ -134,15 +144,52 @@ Command.Spec.(
 )
 ```
 
-The specification above begins with an `empty` value, and then chains more
+The specification above begins with an `empty` value and then adds more
 parameters via the `+>` combinator.  Our example uses the `anon` function to
-define a single anonymous parameter.  Anonymous parameters are assigned a
-string name that is used in help text, and an OCaml type that they are parsed
-into from the raw command-line string.  The example `filename` argument above
-is extracted from the command-line and kept as an OCaml `string`.
+define a single anonymous parameter.
 
-This specification is then bundled together with the callback functions
-using `Command.basic`.  For our `md5` example, we have:
+Anonymous parameters are created using the `%:` operator, which binds a textual
+string name (used in help text) to an OCaml conversion function.  The
+conversion function is responsible for parsing the command-line fragment into
+an OCaml data type.  In the example above, this is just a `string`, but we'll
+see more complex conversion options below
+
+### Callback functions
+
+This specification is usually combined with a callback function that accepts
+all the command-line parameters as its function arguments.  Multiple arguments
+are passed to the callback in the same order as they appeared in the
+specification (using the `+>` operator).
+
+The callback function is where all the actual work happens after the
+command-line parsing is complete.  This function is applied with the arguments
+containing the parsed command-line arguments, and takes over as the main thread
+of the application.
+
+In our example, we had just one anonymous argument, so the callback function
+just has a single `string` parameter applied to it:
+
+```ocaml
+(fun file () -> do_hash file)
+```
+
+<note>
+<title>The extra `unit` argument to callbacks</title>
+
+The callback above needs an extra `unit` argument after `file`.  This is to
+ensure that specifications can work even when they are empty (i.e. the
+`Command.Spec.empty` value).
+
+Every OCaml function needs at least one argument, so the final `unit`
+guarantees that it will not be evaluated immediately as a value if there are no
+other arguments.
+
+</note>
+
+### Creating basic commands
+
+The specification and the function callback are glued together using the
+`basic` command.  Let's see how this looks in our `md5` command.
 
 ```ocaml
 Command.basic
@@ -152,34 +199,25 @@ Command.basic
     empty
     +> anon ("filename" %: string)
   )
-  (fun file () -> do_hash file)
+  (fun filename () -> do_hash filename)
 ```
 
-The `basic` function takes a few more arguments in addition to the
-specification.  The `summary` is a one-line description to go at the top of the
-command help screen, while `readme` is for longer help text when the command is
-called with `-help`.  The `readme` argument is a function that is only
-evaluated when the help text is actually needed.
+The `basic` function takes the following arguments:
 
-The final argument is the callback function where all the actual work happens
-after the command-line parsing is complete.  This function will be applied with
-the parsed command-line arguments, and should perform the actual work.  In our
-example, we had just one anonymous argument, so the callback function just has
-a single `string` parameter applied to it:
+* `summary` is a required one-line description to go at the top of the command
+  help screen.
+* `readme` is for longer help text when the command is called with `-help`.
+  The `readme` argument is a function that is only evaluated when the help
+  text is actually needed.
+* The specification and the callback function follow, with the arguments to
+  the callback matching the order in which the specification binds
+  arguments. 
 
-```ocaml
-(fun file () -> do_hash file)
-```
+### Command argument types
 
-The function also needs an extra `unit` argument after `file`.  This is simply
-so that the command specifications can work even when they are empty
-(`Command.Spec.empty`).  Every OCaml function needs at least one argument, so
-the final `unit` guarantees that it will not be evaluated immediately as a
-value if there are no other arguments.
-
-You aren't just limited to parsing command lines as strings of course.
-`Command.Spec` defines several other conversion functions that validate and
-parse input into various types:
+You aren't just limited to parsing command lines as strings, of course.  The
+`Command.Spec` module defines several other conversion functions that validate
+and parse input into various types:
 
 Argument type    OCaml type    Example
 -------------    -----------   -------
@@ -258,18 +296,33 @@ sequence             `list` of arguments
 maybe                `option` argument
 maybe_with_default   argument with a default value if argument is missing
 
-## Using flags to label the command line
+<note>
+<title>Defining your own argument types</title>
 
-You aren't just limited to anonymous arguments on the command-line, and you'll
-find that flags are useful once your program has more options.  A flag is a
-named field that can be followed by an optional argument.  These flags can
+You can also define your own argument parsers by using the 
+`Spec.Arg_type` module directly.  For instance, the `time_span`
+converter is defined as follows.
+
+```ocaml
+# open Command.Spec ;;
+# let time_span = Command.Spec.Arg_type.create Time.Span.of_string;;
+val time_span : Core.Span.t Command.Spec.Arg_type.t = <abstr>
+# Command.Spec.(empty +> anon ("span" %: time_span));;
+- : (Core.Span.t -> '_a, '_a) Command.Spec.t = <abstr>
+```
+
+</note>
+
+## Adding flags to label the command line
+
+You aren't just limited to anonymous arguments on the command-line.  A *flag*
+is a named field that can be followed by an optional argument.  These flags can
 appear in any order on the command-line, or multiple times, depending on how
 they're declared in the specification.
 
-Let's add two arguments to our `md5` command that mimic the Linux
-version. A `-s` flag specifies the string to be hashed directly on the
-command-line, and a `-t` runs a benchmarking self-test.  The complete
-example is:
+Let's add two arguments to our `md5` command that mimics the Linux version. A
+`-s` flag specifies the string to be hashed directly on the command-line and a
+`-t` runs a self-test.  The complete example is:
 
 ```ocaml
 (* mlmd5.ml : generate an MD5 hash of the input data *)
@@ -306,12 +359,13 @@ let command =
 let () = Command.run command
 ```
 
-The example specification uses the `flag` command now.  The first argument to
-`flag` is its name on the command-line, and the `doc` argument supplies the
-help text.  The `doc` string is formatted so that the first word is the short
-name that appears in the usage text, with the remainder being the full help
-text.  Notice that the `-t` flag has no argument, and so we prepend its `doc`
-text with a blank space.  The help text for the above code looks like this:
+The specification now uses the `flag` command.  The first argument to `flag` is
+its name on the command-line, and the `doc` argument supplies the help text.
+
+The `doc` string is formatted so that the first word is the short name that
+appears in the usage text, with the remainder being the full help text.  Notice
+that the `-t` flag has no argument, and so we prepend its `doc` text with a
+blank space.  The help text for the above code looks like this:
 
 ```
 $ ./mlmd5 -help
@@ -327,7 +381,6 @@ Generate an MD5 hash of the input data
   [-version]     print the version of this build and exit
   [-help]        print this help text and exit
                  (alias: -?)
-
 
 $ ./mlmd5 -s "ocaml rocks"
 5a118fe92ac3b6c7854c595ecf6419cb
@@ -812,18 +865,16 @@ OS package manager to see if you have it available.
 
 Operating System  Package Manager  Package
 ----------------  ---------------  -------
-Debian Linux      `apt`            `TODO`
-CentOS            `yum`            `TODO`
-Mac OS X           Homebrew         `bash-completion`
-Mac OS X           MacPorts         `TODO`
-FreeBSD           Ports System     `/usr/ports TODO`
-OpenBSD           `pkg_add`        `TODO`
+Debian Linux      `apt`            `bash-completion`
+Mac OS X          Homebrew         `bash-completion`
+FreeBSD           Ports System     `/usr/ports/shells/bash-completion`
 
-Once you have bash completion installed and configured, check that it works by
-typing the `ssh` command, and pressing `tab`.  This should show you the list of
-known hosts from your `~/.ssh/known_hosts` file.  If it lists those, then you
-can continue on, but if it lists the files in your current directory instead,
-then check your OS documentation to configure completion correctly.
+Once bash completion is installed and configured, check that it works by typing
+the `ssh` command, and pressing `<tab>`.  This should show you the list of
+known hosts from your `~/.ssh/known_hosts` file.  If it lists some hosts that
+you've recently connected to, you can continue on.  If it lists the files in
+your current directory instead, then check your OS documentation to configure
+completion correctly.
 
 One last bit of information you'll need to find is the location of the
 `bash_completion.d` directory. This is where all the shell fragments that

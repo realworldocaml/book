@@ -658,3 +658,11 @@ val shape_ref : shape ref = {contents = <obj>}
 # shape_ref := (circle 2.0 :> shape);;
 - : unit = ()
 ```
+
+<note>
+<title>Production note</title>
+
+This chapter contains significant external contributions from Leo White.
+
+</note>
+

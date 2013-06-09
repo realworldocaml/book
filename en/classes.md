@@ -1119,5 +1119,10 @@ object
 end;;
 ```
 
+<note>
+<title>Production note</title>
 
-  
+This chapter contains significant external contributions from Leo White.
+
+</note>
+
