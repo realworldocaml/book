@@ -528,7 +528,7 @@ very simple web-server.
   } with sexp;;
 ```
 
-One could imagine making some of these paramters optional; in particular, by
+One could imagine making some of these parameters optional; in particular, by
 default, we might want the web server to bind to port 80, and to listen as
 localhost.  The sexp-syntax allows this as follows.
 
