@@ -755,14 +755,15 @@ JSON are:
   unknown field encountered, instead of raising a parsing exception.
 * `-j-defaults`: always explicitly output a JSON value if possible. This requires the default value for that field to be defined in the ATD specification.
 
-The full ATD specification is quite sophisticated (and well documented
-online at its homepage).  The ATD compiler can also target formats
-other than JSON, and outputs code for other languages such as
-Java if you need more interoperability.  There are also several
-similar projects you can investigate which automate the code
-generation process: [Piqi](http://piqi.org) uses the Google protobuf
-format, and [Thrift](http://thrift.apache.org) supports many other
-programming languages and includes OCaml bindings.
+The full ATD specification is quite sophisticated (and well documented online
+at its homepage).  The ATD compiler can also target formats other than JSON,
+and outputs code for other languages such as Java if you need more
+interoperability.
+
+There are also several similar projects that automate the code generation
+process: [Piqi](http://piqi.org) uses the Google protobuf format, and
+[Thrift](http://thrift.apache.org) supports many other programming languages
+and includes OCaml bindings.
 
 ### Example: Querying Github organization information
 
@@ -811,7 +812,8 @@ let () =
   |> Command.run
 ```
 
-Finally, write a short shell script to generate the OCaml `Github_org` parsers via `atdgen`, and build the OCaml command-line interface.
+Finally, write a short shell script to generate the OCaml `Github_org` parsers
+via `atdgen`, and build the OCaml command-line interface.
 
 ```console
 $ cat _tags 
