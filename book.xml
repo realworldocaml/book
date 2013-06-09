@@ -16469,11 +16469,11 @@ add      diff     help     version
     Data serialization, <emphasis>i.e.</emphasis> converting data to and
     from a sequence of bytes that's suitable for writing to disk or
     sending across the network, is an important and common programming
-    task. Sometimes you need to match someone else's data format (such
-    as XML), sometimes you need a highly efficient format, and sometimes
-    you just want something that is easy for humans to read and edit. To
-    this end, OCaml comes with several techniques for data serialization
-    depending on what your problem is.
+    task. You often have to match someone else's data format (such as
+    XML), sometimes you need a highly efficient format, and other times
+    you want something that is easy for humans to edit. To this end,
+    OCaml comes with several techniques for data serialization depending
+    on what your problem is.
   </para>
   <para>
     We'll start by using the popular and simple JSON data format, and
@@ -17387,13 +17387,14 @@ val authorization_response_of_string :
       The full ATD specification is quite sophisticated (and well
       documented online at its homepage). The ATD compiler can also
       target formats other than JSON, and outputs code for other
-      languages such as Java if you need more interoperability. There
-      are also several similar projects you can investigate which
-      automate the code generation process:
-      <ulink url="http://piqi.org">Piqi</ulink> uses the Google protobuf
-      format, and <ulink url="http://thrift.apache.org">Thrift</ulink>
-      supports many other programming languages and includes OCaml
-      bindings.
+      languages such as Java if you need more interoperability.
+    </para>
+    <para>
+      There are also several similar projects that automate the code
+      generation process: <ulink url="http://piqi.org">Piqi</ulink> uses
+      the Google protobuf format, and
+      <ulink url="http://thrift.apache.org">Thrift</ulink> supports many
+      other programming languages and includes OCaml bindings.
     </para>
     <sect2 id="example-querying-github-organization-information">
       <title>Example: Querying Github organization information</title>
@@ -18310,11 +18311,15 @@ test2.json:3:2: syntax error
     s-expressions.
   </para>
   <para>
-    S-expressions are nested paranthetical expressions whose atomic
+    S-expressions are nested parenthetical expressions whose atomic
     values are strings. They were first popularized by the Lisp
     programming language in the 1960s, and have remained one of the
-    simplest and most effective ways to encode structured data. An
-    example s-expression might look like this:
+    simplest and most effective ways to encode structured data. There's
+    a full definition of them available
+    <ulink url="http://people.csail.mit.edu/rivest/Sexp.txt">online</ulink>.
+  </para>
+  <para>
+    An example s-expression might look like this:
   </para>
   <programlisting language="scheme">
 (this (is an) (s expression))
@@ -18782,11 +18787,13 @@ Uncaught exception:
         component of a type as being unconvertible. Anything marked with
         <literal>sexp_opaque</literal> will be presented as the atom
         <literal>&lt;opaque&gt;</literal> by the to-sexp converter, and
-        will trigger an exception from the from-sexp converter. Note
-        that the type of a component marked as opaque doesn't need to
-        have a sexp-converter defined. Here, if we define a type without
-        a sexp-converter, and then try to use it another type with a
-        sexp-converter, we'll error out:
+        will trigger an exception from the from-sexp converter.
+      </para>
+      <para>
+        Note that the type of a component marked as opaque doesn't need
+        to have a sexp-converter defined. Here, if we define a type
+        without a sexp-converter, and then try to use another type with
+        a sexp-converter, we'll error out:
       </para>
       <programlisting language="ocaml">
 # type no_converter = int * int;;
@@ -18848,7 +18855,7 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
       <para>
         Another common directive is <literal>sexp_option</literal>,
         which is used to to make a record field optional in the
-        s-expressoin. Normally, optional values are represented either
+        s-expression. Normally, optional values are represented either
         as <literal>()</literal> for <literal>None</literal>, or as
         <literal>(x)</literal> for <literal>Some x</literal>, and a
         record field containing an option would be rendered accordingly.
@@ -18897,10 +18904,10 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
   } with sexp;;
 </programlisting>
       <para>
-        One could imagine making some of these paramters optional; in
+        One could imagine making some of these parameters optional; in
         particular, by default, we might want the web server to bind to
         port 80, and to listen as localhost. The sexp-syntax allows this
-        to do this, as follows.
+        as follows.
       </para>
       <programlisting language="ocaml">
 # type http_server_config = {
@@ -18908,19 +18915,31 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
      port: int with default(80);
      addr: string with default(&quot;localhost&quot;);
   } with sexp;;
+</programlisting>
+      <para>
+        The top-level will echo back the type you just defined as usual,
+        but also generate some additional conversion functions.
+      </para>
+      <programlisting language="ocaml">
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp__ : Sexplib.Sexp.t -&gt; http_server_config =
   &lt;fun&gt;
 val http_server_config_of_sexp : Sexplib.Sexp.t -&gt; http_server_config = &lt;fun&gt;
 val sexp_of_http_server_config : http_server_config -&gt; Sexplib.Sexp.t = &lt;fun&gt;
+</programlisting>
+      <para>
+        These new functions let you convert to and from s-expressions.
+      </para>
+      <programlisting language="ocaml">
 # http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;;;
-# let cfg = http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;);;
+# let cfg =
+  http_server_config_of_sexp (Sexp.of_string &quot;((web_root /var/www/html))&quot;);;
 val cfg : http_server_config =
   {web_root = &quot;/var/www/html&quot;; port = 80; addr = &quot;localhost&quot;}
 </programlisting>
       <para>
-        When we convert that back out to an s-expression, you'll notice
-        that no data is dropped.
+        When we convert the configuration back out to an s-expression,
+        you'll notice that no data is dropped.
       </para>
       <programlisting language="ocaml">
 # sexp_of_http_server_config cfg;;
@@ -18965,7 +18984,7 @@ val cfg : http_server_config =
         This can be very useful in designing config file formats that
         are both reasonably terse and easy to generate and maintain. It
         can also be useful for backwards compatibility: if you add a new
-        field to your config record, but you make that field optiona,
+        field to your config record, but you make that field optional,
         then you should still be able to parse older version of your
         config.
       </para>
@@ -23131,7 +23150,7 @@ struct custom_operations {
       <listitem>
         <para>
           a small fixed-size <emphasis>minor heap</emphasis> where most
-          most blocks are initially allocated.
+          blocks are initially allocated.
         </para>
       </listitem>
       <listitem>
@@ -23881,7 +23900,7 @@ $ ./finalizer
       finalizers all the functions associated with <literal>b</literal>,
       and serially applies each of those functions to
       <literal>b</literal>. Thus, every finalizer function attached to
-      <literal>b</literal> will run at most most once. However, program
+      <literal>b</literal> will run at most once. However, program
       termination will not cause all the finalizers to be run before the
       runtime exits.
     </para>
@@ -27792,200 +27811,10 @@ open Core.Std
   </sect1>
 </appendix><appendix id="packaging">
   <title>Packaging</title>
-  <para>
-    The OCaml toolchain is structured much like a C compiler, with
-    several tools that generate intermediate files and finally link
-    against a runtime. The final outputs don't have to be just
-    executables. Many people embed OCaml code as object files that are
-    called from other applications, or even compile it to Javascript and
-    other esoteric targets. Let's start by covering some of the standard
-    OCaml tools, and then move on to some of the higher level methods
-    for packaging and publishing your code online.
-  </para>
-  <sect1 id="the-ocaml-toolchain">
-    <title>The OCaml toolchain</title>
-    <para>
-      There are two distinct compilers for OCaml code included in the
-      standard distribution. The first outputs bytecode that is
-      interpreted at runtime, and the second generates fast, efficient
-      native code directly. Both of these share the front-end
-      type-checking logic, and only diverge when it comes to code
-      generation.
-    </para>
-    <sect2 id="the-ocamlc-bytecode-compiler">
-      <title>The <literal>ocamlc</literal> bytecode compiler</title>
-      <para>
-        The simplest code generator is the <literal>ocamlc</literal>
-        compiler, which outputs bytecode that is interpreted via the
-        <literal>ocamlrun</literal> runtime. The OCaml bytecode virtual
-        machine is a stack machine (much like the Java Virtual Machine),
-        with the exception of a single register that stores the most
-        recent result. This provides a simple runtime model that is easy
-        to implement or embed within other systems, but executes rather
-        slowly due to being interpreted.
-      </para>
-      <para>
-        Here are some of the intermediate files generated by
-        <literal>ocamlc</literal>:
-      </para>
-      <informaltable>
-        <tgroup cols="2">
-          <colspec align="left"/>
-          <colspec align="left"/>
-          <thead>
-            <row>
-              <entry>
-                Extension
-              </entry>
-              <entry>
-                Purpose
-              </entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>
-                .ml
-              </entry>
-              <entry>
-                Source files for compilation unit module
-                implementations.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .mli
-              </entry>
-              <entry>
-                Source files for compilation unit module interfaces. If
-                missing, generated from the <literal>.ml</literal> file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmi
-              </entry>
-              <entry>
-                Compiled module interface from a corresponding
-                <literal>.mli</literal> source file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmo
-              </entry>
-              <entry>
-                Compiled bytecode object file of the module
-                implementation.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cma
-              </entry>
-              <entry>
-                Library of bytecode object files packed into a single
-                file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .o
-              </entry>
-              <entry>
-                C source files are compiled into native object files by
-                the system <literal>cc</literal>.
-              </entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-      <para>
-        To obtain a bytecode executable, you need to compile a set of
-        <literal>cmo</literal> object files, and then link them into an
-        executable
-      </para>
-    </sect2>
-    <sect2 id="the-ocamlopt-native-code-compiler">
-      <title>The <literal>ocamlopt</literal> native code
-      compiler</title>
-      <informaltable>
-        <tgroup cols="2">
-          <colspec align="left"/>
-          <colspec align="left"/>
-          <thead>
-            <row>
-              <entry>
-                Extension
-              </entry>
-              <entry>
-                Purpose
-              </entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>
-                .cmi
-              </entry>
-              <entry>
-                Compiled module interface from a corresponding
-                <literal>.mli</literal> source file.
-                (<emphasis>avsm</emphasis>: this is not compatible with
-                the ocamlc version iirc)
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .o
-              </entry>
-              <entry>
-                Compiled native object file of the module
-                implementation.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmx
-              </entry>
-              <entry>
-                Contains extra information for linking and cross-module
-                optimization of the object file.
-              </entry>
-            </row>
-            <row>
-              <entry>
-                .cmxa/.a
-              </entry>
-              <entry>
-                Library of <literal>cmx</literal> and
-                <literal>o</literal> units, stored in the
-                <literal>cmxa</literal> and <literal>a</literal> files
-                respectively.
-              </entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-    </sect2>
-    <sect2 id="the-ocaml-toplevel-loop">
-      <title>The <literal>ocaml</literal> toplevel loop</title>
-      <para>
-      </para>
-    </sect2>
-  </sect1>
-  <sect1 id="the-findlib-compiler-frontend">
-    <title>The Findlib compiler frontend</title>
+  <sect1 id="the-ocamlfind-frontend">
+    <title>The OCamlfind frontend</title>
     <para>
     </para>
-  </sect1>
-  <sect1 id="packaging-applications-with-oasis">
-    <title>Packaging applications with OASIS</title>
-    <sect2 id="ocamlbuild">
-      <title>ocamlbuild</title>
-      <para>
-      </para>
-    </sect2>
   </sect1>
   <sect1 id="distributing-applications-with-opam">
     <title>Distributing applications with OPAM</title>
