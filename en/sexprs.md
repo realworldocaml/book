@@ -538,19 +538,31 @@ localhost.  The sexp-syntax allows this as follows.
      port: int with default(80);
      addr: string with default("localhost");
   } with sexp;;
+```
+
+The top-level will echo back the type you just defined as usual, but also
+generate some additional conversion functions.
+
+```ocaml
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp__ : Sexplib.Sexp.t -> http_server_config =
   <fun>
 val http_server_config_of_sexp : Sexplib.Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
+```
+
+These new functions let you convert to and from s-expressions.
+
+```ocaml
 # http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))";;
-# let cfg = http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
+# let cfg =
+  http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 ```
 
-When we convert that back out to an s-expression, you'll notice that
-no data is dropped.
+When we convert the configuration back out to an s-expression, you'll notice
+that no data is dropped.
 
 ```ocaml
 # sexp_of_http_server_config cfg;;
