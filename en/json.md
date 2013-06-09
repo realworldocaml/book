@@ -1,13 +1,12 @@
 # Handling JSON data
 
-Data serialization, _i.e._ converting data to and from a sequence of
-bytes that's suitable for writing to disk or sending across the
-network, is an important and common programming task.  Sometimes you
-need to match someone else's data format (such as XML), sometimes you
-need a highly efficient format, and sometimes you just want something
-that is easy for humans to read and edit.  To this end, OCaml comes
-with several techniques for data serialization depending on what your
-problem is.
+Data serialization, _i.e._ converting data to and from a sequence of bytes
+that's suitable for writing to disk or sending across the network, is an
+important and common programming task.  You often have to match someone else's
+data format (such as XML), sometimes you need a highly efficient format, and
+other times you want something that is easy for humans to edit.  To this end,
+OCaml comes with several techniques for data serialization depending on what
+your problem is.
 
 We'll start by using the popular and simple JSON data format, and then look at
 other serialization formats later in in the book.  This chapter introduces you
