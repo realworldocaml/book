@@ -609,5 +609,5 @@ s-expression.
 This can be very useful in designing config file formats that are both
 reasonably terse and easy to generate and maintain.  It can also be
 useful for backwards compatibility: if you add a new field to your
-config record, but you make that field optiona, then you should still
+config record, but you make that field optional, then you should still
 be able to parse older version of your config.
