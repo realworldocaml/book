@@ -5228,8 +5228,10 @@ let sessions_have_same_user s1 s2 =
   s1.user = s2.host
 </programlisting>
     <para>
-      The above code has a fairly obvious bug, and indeed, the compiler
-      will refuse to compile it, spitting out the following error.
+      The above code has a bug: it compares the username in one session
+      to the host in the other session, when it should be comparing the
+      usernames in both cases. Because of howe defined our types,
+      however, the compiler will flag this bug for us.
     </para>
     <programlisting>
 File &quot;buggy.ml&quot;, line 25, characters 12-19:
@@ -5238,11 +5240,11 @@ Error: This expression has type Hostname.t
 Command exited with code 2.
 </programlisting>
     <para>
-      We can also combine this with the use of the include statement to
-      add some extra functionality to such a module. Thus, we could have
-      rewritten the definition of <literal>Hostname</literal> above as
-      follows to add a function <literal>Hostname.mine</literal> that
-      returns the hostname of the present machine.
+      Using the <literal>include</literal> statement, we can build
+      abstract types that have extended functionality. Thus, we can
+      rewrite the definition of <literal>Hostname</literal> to add a
+      function <literal>Hostname.mine</literal> that returns the
+      hostname of the present machine.
     </para>
     <programlisting language="ocaml">
 module Hostname : sig
@@ -12100,13 +12102,15 @@ $ ./service_client.byte
     </para>
   </sect1>
 </chapter><chapter id="object-oriented-programming">
-  <title>Object Oriented Programming</title>
+  <title>Object-Oriented Programming</title>
   <para>
     We've already seen several tools that OCaml provides for organizing
-    programs, particularly first-class modules. In addition, OCaml also
-    supports object-oriented programming. There are objects, classes,
-    and their associated types. Objects are good for encapsulation and
-    abstraction, and classes are good for code re-use.
+    programs, particularly modules. In addition, OCaml also supports
+    object-oriented programming. There are objects, classes, and their
+    associated types. In this chapter, we'll introduce you to OCaml
+    objects and subtyping. In the next chapter
+    <xref linkend="classes"/>, we'll introduce you to classes
+    and inheritance.
   </para>
   <note>
   <title>
@@ -12124,7 +12128,7 @@ $ ./service_client.byte
     will use to build itself.
   </para>
   <para>
-    There are four fundamental properties that differentiate OOP from
+    There are five fundamental properties that differentiate OOP from
     other styles:
   </para>
   <itemizedlist>
@@ -12132,7 +12136,7 @@ $ ./service_client.byte
       <para>
         <emphasis>Abstraction</emphasis>: the details of the
         implementation are hidden in the object, and the external
-        interface is just the set of publically-accessible methods.
+        interface is just the set of publicly-accessible methods.
       </para>
     </listitem>
     <listitem>
@@ -12160,6 +12164,15 @@ $ ./service_client.byte
         its parent.
       </para>
     </listitem>
+    <listitem>
+      <para>
+        <emphasis>Open recursion</emphasis>: an object's methods can
+        invoke another method in the same object using a special
+        variable (often called self). These method calls use dynamic
+        lookup, allowing a method defined in one object to invoke
+        methods defined in another object that inherits from the first.
+      </para>
+    </listitem>
   </itemizedlist>
   <para>
     Almost every notable modern programming language has been influenced
@@ -12167,105 +12180,57 @@ $ ./service_client.byte
     C++, Java, C#, Ruby, Python or Javascript.
   </para>
   </note>
-  <sect1 id="when-to-use-objects">
-    <title>When to use objects</title>
-    <para>
-      You might wonder when to use objects in OCaml, which has a
-      multitude of alternative mechanisms to express the same concept.
-      First-class modules are more expressive (a module can include
-      types, while classes and objects cannot). Modules, functors, and
-      algebraic data types also offer a wide range of ways to express
-      program structure. In fact, many seasoned OCaml programmers rarely
-      use classes and objects, if at all.
-    </para>
-    <para>
-      Modules already provide these features in some form, but the main
-      focus of classes is on code re-use through inheritance and late
-      binding of methods. This is a critical property of classes: the
-      methods that implement an object are determined when the object is
-      instantiated, a form of <emphasis>dynamic</emphasis> binding. In
-      the meantime, while classes are being defined, it is possible (and
-      necessary) to refer to methods without knowing statically how they
-      will be implemented.
-    </para>
-    <para>
-      In contrast, modules use static (lexical) scoping. If you want to
-      parameterize your module code so that some part of it can be
-      implemented later, you would write a function or functor. This is
-      more explicit, but often more verbose than overriding a method in
-      a class.
-    </para>
-    <para>
-      In general, a rule of thumb is: use classes and objects in
-      situations where dynamic binding is a big win, for example if you
-      have many similar variations in the implementation of a concept.
-      Two good examples are Xavier Leroy's
-      <ulink url="http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</ulink>,
-      which provides a variety of cryptographic primitives that can be
-      combined in building-block style, and the
-      <ulink url="http://cristal.inria.fr/camlimages/">Camlimages</ulink>
-      library which manipulates various graphical file formats.
-    </para>
-    <para>
-      In this chapter, we'll introduce you to the basics of object
-      definition and use in OCaml, and then demonstrate their use with
-      an example using Cryptokit. We'll return to the more advanced
-      areas of object use later on in the book in
-      <xref linkend="object-subtyping-and-inheritance"/>.
-    </para>
-  </sect1>
   <sect1 id="ocaml-objects">
     <title>OCaml objects</title>
     <para>
       If you already know about object oriented programming in a
       language like Java or C++, the OCaml object system may come as a
-      surprise. Foremost is the complete separation of subtyping and
-      inheritance in OCaml. In a language like Java, a class name is
-      also used as the type of objects created by instantiating it, and
-      the subtyping rule corresponds to inheritance. For example, if we
-      implement a class <literal>Stack</literal> in Java by inheriting
-      from a class <literal>Deque</literal>, we would be allowed to pass
-      a stack anywhere a deque is expected (this is a silly example of
-      course, practitioners will point out that we shouldn't do it).
+      surprise. Foremost is the complete separation of objects, and
+      their types, from the class system in OCaml. In a language like
+      Java, a class name is also used as the type of objects created by
+      instantiating it, and the relationships between these object types
+      correspond to inheritance. For example, if we implement a class
+      <literal>Deque</literal> in Java by inheriting from a class
+      <literal>Stack</literal>, we would be allowed to pass a deque
+      anywhere a stack is expected.
     </para>
     <para>
       OCaml is entirely different. Classes are used to construct objects
-      and support inheritance, including non-subtyping inheritance.
-      Classes are not types. Instead, objects have <emphasis>object
-      types</emphasis>, and if you want to use objects, you aren't
-      required to use classes at all. Here's an example of a simple
-      object.
+      and support inheritance, but classes are not types. Instead,
+      objects have <emphasis>object types</emphasis>, and if you want to
+      use objects, you aren't required to use classes at all. Here's an
+      example of a simple object.
     </para>
     <programlisting language="ocaml">
-# let p =
+# let r =
   object
-    val mutable x = 0
-    method get = x
-    method set i = x &lt;- i
+    val mutable v = 0
+    method get = v
+    method set i = v &lt;- i
   end;;
-val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
+val r : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
 </programlisting>
     <para>
-      The object has an integer value <literal>x</literal>, a method
-      <literal>get</literal> that returns x, and a method
+      The object has an integer value <literal>v</literal>, a method
+      <literal>get</literal> that returns v, and a method
       <literal>set</literal> that updates the value of
-      <literal>x</literal>.
+      <literal>v</literal>.
     </para>
     <para>
       The object type is enclosed in angle brackets
       <literal>&lt; ... &gt;</literal>, containing just the types of the
-      methods. Fields, like <literal>x</literal>, are not part of the
+      methods. Fields, like <literal>v</literal>, are not part of the
       public interface of an object. All interaction with an object is
       through its methods. The syntax for a method invocation (also
       called &quot;sending a message&quot; to the object) uses the
       <literal>#</literal> character.
     </para>
     <programlisting language="ocaml">
-# p#get;
+# r#get;
 - : int = 0
-# p#set 17;;
+# r#set 17;;
 - : unit = ()
-# p#get;;
+# r#get;;
 - : int = 17
 </programlisting>
     <para>
@@ -12276,14 +12241,14 @@ val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
     <programlisting language="ocaml">
 # let make i =
   object
-    val mutable x = i
-    method get = x
-    method set y = x &lt;- y
+    val mutable v = i
+    method get = v
+    method set y = v &lt;- y
   end;;
 val make : 'a -&gt; &lt; get : 'a; set : 'a -&gt; unit &gt; = &lt;fun&gt;
-# let p = make 5;;
-val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
-# p#get;;
+# let r = make 5;;
+val r : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
+# r#get;;
 - : int = 5
 </programlisting>
     <para>
@@ -12297,121 +12262,667 @@ val p : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
   <sect1 id="object-polymorphism">
     <title>Object Polymorphism</title>
     <para>
-      Functions can also take object arguments. Let's construct a new
-      object <literal>average</literal> that returns the average of any
-      two objects with a <literal>get</literal> method.
+      Like polymorphic variants, methods can be used without an explicit
+      type declaration.
     </para>
     <programlisting language="ocaml">
-# let average p1 p2 =
-  object
-    method get = (p1#get + p2#get) / 2
+# let size p =
+    sqrt (p#x ** 2. +. p#y ** 2.);;
+val size : &lt; x : float; y : float; .. &gt; -&gt; float = &lt;fun&gt;
+# let reset p: unit = 
+    p#move 0. 0.;;
+val reset : &lt; move : float -&gt; float -&gt; unit; .. &gt; -&gt; unit = &lt;fun&gt;
+# let limit p =
+    if (size p) &gt; 10. then reset p;;
+val limit :
+  &lt; move : float -&gt; float -&gt; unit; x : float; y : float; .. &gt; -&gt; unit = &lt;fun&gt;
+</programlisting>
+    <para>
+      As you can see object types are inferred automatically from the
+      methods that are invoked on them.
+    </para>
+    <para>
+      The type system will complain if it sees incompatible uses of the
+      same method:
+    </para>
+    <programlisting language="ocaml">
+# let print_coord c = 
+    print_string (&quot;(&quot; ^ c#x ^ &quot;,&quot; ^ c#y ^ &quot;)&quot;);;
+val print_coord : &lt; x : string; y : string; .. &gt; -&gt; unit = &lt;fun&gt;
+# let print_limited c =
+    limit c;
+    print_coord c;;
+Characters 47-48:
+  print_coord c;;
+              ^
+Error: This expression has type
+         &lt; move : float -&gt; float -&gt; unit; x : float; y : float; .. &gt;
+       but an expression was expected of type 
+         &lt; x : string; y : string; .. &gt;
+       Types for method x are incompatible
+</programlisting>
+    <para>
+      The <literal>..</literal> in the inferred object types are
+      ellipsis, standing for any other methods. The type
+      <literal>&lt; x : float; .. &gt;</literal> specifies an object
+      that must have at least an <literal>x</literal> method, and
+      possibly some others as well. Such object types are said to be
+      <emphasis>open</emphasis>.
+    </para>
+    <para>
+      We can manually <emphasis>close</emphasis> an object type using a
+      type annotation:
+    </para>
+    <programlisting language="ocaml">
+# let size (p: &lt; x: float; y: float &gt;) =
+    sqrt (p#x ** 2. +. p#y ** 2.);;
+val size : &lt; x : float; y : float &gt; -&gt; float = &lt;fun&gt;
+# let p = object 
+    method x = 3. 
+    method y = 4. 
+    method name = &quot;p&quot; 
   end;;
-val average :
-  &lt; get : int; .. &gt; -&gt;
-  &lt; get : int; .. &gt; -&gt;
-  &lt; get : int &gt; = &lt;fun&gt;
-</programlisting>
-    <para>
-      There's some new syntax in the type that's been inferred for
-      <literal>average</literal> here. The parameters have the object
-      type <literal>&lt; get : int; .. &gt;</literal>. The
-      <literal>..</literal> are ellipsis, standing for any other
-      methods. The type <literal>&lt; get : int; .. &gt;</literal>
-      specifies an object that must have at least a
-      <literal>get</literal> method, and possibly some others as well.
-    </para>
-    <para>
-      We can use the <literal>average</literal> using the normal object
-      invocation syntax:
-    </para>
-    <programlisting language="ocaml">
-# let p1 = make 5;;
-# let p2 = make 15;;
-# let a = average p1 p2;;
-# a#get;;
-- : int = 10
-# p2#set 25;;
-# a#get;;
-- : int = 15
-</programlisting>
-    <para>
-      The potential extra parameters defined by the object are carefully
-      tracked by the OCaml type checker. If we manually try and
-      constrain the exact type <literal>&lt; get : int &gt;</literal>
-      for an object with more methods, type inference will fail.
-    </para>
-    <programlisting language="ocaml">
-# let (p : &lt; get : int &gt;) = make 5;;
-Error: This expression has type &lt; get : int; set : int -&gt; unit &gt;
-       but an expression was expected of type &lt; get : int &gt;
-       The second object type has no method set
+val p : &lt; name : string; x : float; y : float &gt; = &lt;obj&gt;
+# size p;;
+Characters 7-10:
+  size p;;
+       ^
+Error: This expression has type &lt; name : string; x : float; y : float &gt;
+       but an expression was expected of type &lt; x : float; y : float &gt;
+       The second object type has no method name
 </programlisting>
     <note>
     <title>
     Elisions are polymorphic
     </title>
     <para>
-      The <literal>..</literal> in an object type is an elision,
+      The <literal>..</literal> in an open object type is an elision,
       standing for &quot;possibly more methods.&quot; It may not be
       apparent from the syntax, but an elided object type is actually
       polymorphic. If we try to write a type definition, we get an
       obscure error.
     </para>
     <programlisting language="ocaml">
-# type point = &lt; get:int; .. &gt;;;
+# type point = &lt; x: float; y: float; .. &gt;;;
+Characters 5-39:
+  type point = &lt; x: float; y: float; .. &gt;;;
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: A type variable is unbound in this type declaration.
-In type &lt; get : int; .. &gt; as 'a the variable 'a is unbound
+In type &lt; x : float; y : float; .. &gt; as 'a the variable 'a is unbound
 </programlisting>
     <para>
       A <literal>..</literal> in an object type is called a
       <emphasis>row variable</emphasis> and this typing scheme is called
       <emphasis>row polymorphism</emphasis>. Even though
       <literal>..</literal> doesn't look like a type variable, it
-      actually is. The error message suggests a solution, which is to
-      add the <literal>as 'a</literal> type constraint.
-    </para>
-    <programlisting language="ocaml">
-# type 'a point = &lt; get:int; .. &gt; as 'a;;
-type 'a point = 'a constraint 'a = &lt; get : int; .. &gt;
-</programlisting>
-    <para>
-      In other words, the type <literal>'a point</literal> is equal to
-      <literal>'a</literal>, where
-      <literal>'a = &lt; get : int; .. &gt;</literal>. That may seem
-      like an odd way to say it, and in fact, this type definition is
-      not really an abbreviation because <literal>'a</literal> refers to
-      the entire type.
+      actually is. Row polymorphism is also used in polymorphic variant
+      types, and there is a close relationship between objects and
+      polymorphic variants: objects are to records what polymorphic
+      variants are to ordinary variants.
     </para>
     </note>
     <para>
       An object of type <literal>&lt; get:int; .. &gt;</literal> can be
       any object with a method <literal>get:int</literal>, it doesn't
-      matter how it is implemented. So far, we've constructed two
-      objects with that type; the function <literal>make</literal>
-      constructed one, and so did <literal>average</literal>. When the
-      method <literal>#get</literal> is invoked, the actual method that
-      is run is determined by the object.
+      matter how it is implemented. When the method
+      <literal>#get</literal> is invoked, the actual method that is run
+      is determined by the object.
     </para>
     <programlisting language="ocaml">
-# let print_point p = Printf.printf &quot;Point: %d\n&quot; p#get;;
-val print_point : &lt; get : int; .. &gt; -&gt; unit = &lt;fun&gt;
-# print_point (make 5);;
-Point: 5
-# print_point (average (make 5) (make 15));;
-Point: 10
+# let print_ival i = 
+    printf &quot;Int: %d\n&quot; i#get;;
+val print_ival : &lt; get : int; .. &gt; -&gt; unit = &lt;fun&gt;
+# print_ival (make 5);;
+Int: 5
+- : unit = ()
+# let t = object
+    method get = Float.to_int (Time.to_float (Time.now ()))
+  end;;
+val t : &lt; get : int &gt; = &lt;obj&gt;
+# print_ival t;;
+Int: 1370650589
+- : unit = ()
+# print_ival t;;
+Int: 1370650592
+- : unit = ()
 </programlisting>
   </sect1>
-  <sect1 id="classes">
-    <title>Classes</title>
+  <sect1 id="immutable-objects">
+    <title>Immutable objects</title>
     <para>
-      Programming with objects directly is great for encapsulation, but
-      one of the main goals of object-oriented programming is code
-      re-use through inheritance. For inheritance, we need to introduce
-      <emphasis>classes</emphasis>. In object-oriented programming, a
-      class is a &quot;recipe&quot; for creating objects. The recipe can
-      be changed by adding new methods and fields, or it can be changed
-      by modifying existing methods.
+      Many people consider object-oriented programming to be
+      intrinsically imperative, where an object is like a state machine.
+      Sending a message to an object causes it to change state, possibly
+      sending messages to other objects.
     </para>
+    <para>
+      Indeed, in many programs, this makes sense, but it is by no means
+      required. Let's define a function that creates immutable point
+      objects.
+    </para>
+    <programlisting language="ocaml">
+# let point (init_x: float) (init_y: float) = object
+    val x = init_x
+    val y = init_y
+    method x = x
+    method y = y
+    method move new_x new_y = {&lt; x = new_x; y = new_y &gt;}
+  end;;
+val point : float -&gt; float -&gt; 
+  (&lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a) = &lt;fun&gt;
+</programlisting>
+    <para>
+      A key part of the implementation is the definition of the method
+      <literal>move</literal>. The expression
+      <literal>{&lt; ... &gt;}</literal> produces a copy of the current
+      object, with the same type, and the specified fields updated. In
+      other words, the <literal>move new_x new_y</literal> method
+      produces a copy of the object, with <literal>x</literal> replaced
+      by <literal>new_x</literal> and <literal>y</literal> replaced by
+      <literal>new_y</literal>. The original object is not modified.
+    </para>
+    <programlisting language="ocaml">
+# let p = point 3. 4.;;
+val p : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a = &lt;obj&gt;
+# let q = p#move 3. 5.;;
+val q : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a = &lt;obj&gt;
+# p#y;;
+- : float = 4.
+# q#y;;
+- : float = 5.
+</programlisting>
+    <para>
+      There are some restriction on the use of the expression
+      <literal>{&lt; ... &gt;}</literal>. It can be used only within a
+      method body, and only the values of fields may be updated. Method
+      implementations are fixed at the time the object is created, they
+      cannot be changed dynamically.
+    </para>
+  </sect1>
+  <sect1 id="when-to-use-objects">
+    <title>When to use objects</title>
+    <para>
+      You might wonder when to use objects in OCaml, which has a
+      multitude of alternative mechanisms to express the similar
+      concepts. First-class modules are more expressive (a module can
+      include types, while classes and objects cannot). Modules,
+      functors, and algebraic data types also offer a wide range of ways
+      to express program structure. In fact, many seasoned OCaml
+      programmers rarely use classes and objects, if at all.
+    </para>
+    <para>
+      Objects have some advantages over records: they don't require type
+      definitions and their support for row polymorphism makes them more
+      flexible. However, the heavy syntax and additional run-time cost
+      means that objects are rarely used in place of records.
+    </para>
+    <para>
+      The real benefits of objects come from the class system. Classes
+      support inheritance and open recursion. Open recursion allows
+      parts of an object to be defined separately. This works because
+      calls between the methods of an object are determined when the
+      object is instantiated, a form of <emphasis>dynamic</emphasis>
+      binding. This makes it possible (and necessary) for one method to
+      refer to other methods in the object without knowing statically
+      how they will be implemented.
+    </para>
+    <para>
+      In contrast, modules use static binding. If you want to
+      parameterize your module code so that some part of it can be
+      implemented later, you would write a function or functor. This is
+      more explicit, but often more verbose than overriding a method in
+      a class.
+    </para>
+    <para>
+      In general, a rule of thumb is: use classes and objects in
+      situations where open recursion is a big win. Two good examples
+      are Xavier Leroy's
+      <ulink url="http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</ulink>,
+      which provides a variety of cryptographic primitives that can be
+      combined in building-block style, and the
+      <ulink url="http://cristal.inria.fr/camlimages/">Camlimages</ulink>
+      library which manipulates various graphical file formats.
+    </para>
+    <para>
+      We'll introduce you to classes, and examples using open recursion,
+      in <xref linkend="classes"/>.
+    </para>
+  </sect1>
+  <sect1 id="subtyping">
+    <title>Subtyping</title>
+    <para>
+      Subtyping is a central concept in object-oriented programming. It
+      governs when an object with one type <emphasis>A</emphasis> can be
+      used in an expression that expects an object of another type
+      <emphasis>B</emphasis>. When this is true, we say that
+      <emphasis>A</emphasis> is a <emphasis>subtype</emphasis> of
+      <emphasis>B</emphasis>. Actually, more concretely, subtyping
+      determines when the coercion operator <literal>e :&gt; t</literal>
+      can be applied. This coercion works only if the expression
+      <literal>e</literal> has some type <literal>s</literal> and
+      <literal>s</literal> is a subtype of <literal>t</literal>.
+    </para>
+    <sect2 id="width-subtyping">
+      <title>Width Subtyping</title>
+      <para>
+        To explore this, let's define some simple object types for
+        geometric shapes. The generic type <literal>shape</literal> has
+        a method to compute the area, and <literal>square</literal> and
+        <literal>circle</literal> are specific kinds of shape.
+      </para>
+      <programlisting language="ocaml">
+type shape = &lt; area : float &gt;;;
+
+type square = &lt; area : float; width : float &gt;;;
+
+let square w = object
+  method area = w *. w
+  method width = w
+end;;
+
+type circle = &lt; area : float; radius : float &gt;;;
+
+let circle r = object
+  method area = 3.14 *. r ** 2.0
+  method radius = r
+end;;
+</programlisting>
+      <para>
+        A <literal>square</literal> has a method <literal>area</literal>
+        just like a <literal>shape</literal>, and an additional method
+        <literal>width</literal>. Still, we expect a
+        <literal>square</literal> to be a <literal>shape</literal>, and
+        it is. The coercion <literal>:&gt;</literal> must be explicit.
+      </para>
+      <programlisting language="ocaml">
+# let shape w : shape = square w;;
+Characters 22-30:
+  let shape w : shape = square w;;
+                        ^^^^^^^^
+Error: This expression has type square but an expression was expected of type shape
+       The second object type has no method width
+# let shape w : shape = (square w :&gt; shape);;
+val shape : float -&gt; shape = &lt;fun&gt;
+</programlisting>
+      <para>
+        This form of object subtyping is called
+        <emphasis>width</emphasis> subtyping. Width subtyping means that
+        an object type <emphasis>A</emphasis> is a a subtype of
+        <emphasis>B</emphasis>, if <emphasis>A</emphasis> has all of the
+        methods of <emphasis>B</emphasis>, and possibly more. A
+        <literal>square</literal> is a subtype of
+        <literal>shape</literal> because it implements all of the
+        methods of <literal>shape</literal> (the <literal>area</literal>
+        method).
+      </para>
+    </sect2>
+    <sect2 id="variance">
+      <title>Variance</title>
+      <para>
+        What about types built from object types? If a
+        <literal>square</literal> is a <literal>shape</literal>, we
+        expect a <literal>square list</literal> to be a
+        <literal>shape list</literal>. OCaml does indeed allow such
+        coercions:
+      </para>
+      <programlisting language="ocaml">
+# let squares: square list = [ square 1.0; square 2.0 ];;
+val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]
+# let shapes: shape list = (squares :&gt; shape list);;
+val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]
+</programlisting>
+      <para>
+        This would not be safe for all types built from objects. For
+        instance, it is not safe to coerce a
+        <literal>square array</literal> into a
+        <literal>shape array</literal>.
+      </para>
+      <programlisting language="ocaml">
+# let square_array: square array = [| square 1.0; square 2.0 |];;
+val square_array : square array = [|&lt;obj&gt;; &lt;obj&gt;|]
+# let shape_array: shape array = (square_array :&gt; shape array);;
+Characters 31-60:
+  let shape_array: shape array = (square_array :&gt; shape array);;
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: Type square array is not a subtype of shape array 
+Type square = &lt; area : float; width : float &gt; is not compatible with type
+  shape = &lt; area : float &gt; 
+The second object type has no method width
+</programlisting>
+      <para>
+        This is disallowed because it would allow non-square shapes to
+        be inserted into <literal>square_array</literal>. We call such
+        types <emphasis>invariant</emphasis>, while types like
+        <literal>list</literal> are said to be
+        <emphasis>covariant</emphasis>.
+      </para>
+      <para>
+        For some types the type built from <literal>shape</literal> is a
+        subtype of the one built from <literal>square</literal>.
+      </para>
+      <programlisting language="ocaml">
+# type 'a to_string = 'a -&gt; string;;
+type 'a to_string = 'a -&gt; string
+# let shape_to_string: shape to_string = 
+    fun s -&gt; sprintf &quot;Shape(%F)&quot; s#area;;
+val shape_to_string : shape to_string = &lt;fun&gt;
+# let square_to_string: square to_string = 
+    (shape_to_string :&gt; square to_string);;
+val square_to_string : square to_string = &lt;fun&gt;
+</programlisting>
+      <para>
+        We call such types <emphasis>contravariant</emphasis>.
+      </para>
+    </sect2>
+    <sect2 id="depth-subtyping">
+      <title>Depth subtyping</title>
+      <para>
+        We can also extend subtyping to object types whose methods types
+        are subtypes. This is commonly called <emphasis>depth</emphasis>
+        subtyping, which, in its most general form, says that an object
+        type <literal>&lt; m: t1 &gt;</literal> is a subtype of
+        <literal>&lt; m: t2 &gt;</literal> iff <literal>t1</literal> is
+        a subtype of <literal>t2</literal>.
+      </para>
+      <para>
+        To explore this, let's start building objects containing shapes
+        by applying our <literal>make</literal> function to a square and
+        a circle.
+      </para>
+      <programlisting language="ocaml">
+# type square_val = &lt; get: square; set: square -&gt; unit &gt;;;
+type square_val = &lt; get : square; set : square -&gt; unit &gt;
+# let sq_val: square_val = make (square 3.0);;
+val sq_val : square_val = &lt;obj&gt;
+# type circle_val = &lt; get: circle; set: circle -&gt; unit &gt;;;
+type circle_val = &lt; get : circle; set : circle -&gt; unit &gt;
+# let circ_val: circle_val = make (circle 2.0);;
+val circ_val : circle_val = &lt;obj&gt;
+</programlisting>
+      <para>
+        If we wanted to write a function that took a list of such
+        objects and found the total area of their shapes, we might try:
+      </para>
+      <programlisting language="ocaml">
+# type shape_val = &lt; get: shape; set: shape -&gt; unit &gt;;;
+type shape_val = &lt; get : shape; set : shape -&gt; unit &gt;
+let total_area (shape_vals: shape_val list) =
+    List.fold ~init:0.0 ~f:(fun t s -&gt; t +. s#get#area) shape_vals;;
+val total_area : shape_val list -&gt; float = &lt;fun&gt;
+</programlisting>
+      <para>
+        However, when we try to apply this function to our objects we
+        get an error:
+      </para>
+      <programlisting language="ocaml">
+# total_area [ (sq_val :&gt; shape_val); (circ_val :&gt; shape_val) ];;
+Characters 13-34:
+  total_area [ (sq_val :&gt; shape_val); (circ_val :&gt; shape_val) ];;
+               ^^^^^^^^^^^^^^^^^^^^^
+Error: Type square_val = &lt; get : square; set : square -&gt; unit &gt;
+       is not a subtype of shape_val = &lt; get : shape; set : shape -&gt; unit &gt; 
+       Type shape = &lt; area : float &gt; is not a subtype of
+       square = &lt; area : float; width : float &gt; 
+</programlisting>
+      <para>
+        As you can see, <literal>square_val</literal> and
+        <literal>circle_val</literal> are not subtypes of
+        <literal>shape_val</literal>. The problem is with the
+        <literal>set</literal> method. For <literal>shape_val</literal>,
+        the <literal>set</literal> method takes an arbitrary
+        <literal>shape</literal>. So if we could coerce a
+        <literal>square_val</literal> to a <literal>shape_val</literal>,
+        then it would be possible to set sq_val to an arbitrary shape,
+        which would be an error.
+      </para>
+      <para>
+        Another way of looking at this is that
+        <literal>&lt; set: 'a -&gt; unit; .. &gt;</literal> is
+        contravariant in <literal>'a</literal>, so
+        <literal>&lt; set: square -&gt; unit; get: square &gt;</literal>
+        cannot be subtype of
+        <literal>&lt; set: shape -&gt; unit; get: shape &gt;</literal>.
+      </para>
+      <para>
+        Still, the <literal>total_area</literal> function should be
+        fine, in principle. It doesn't call <literal>set</literal>, so
+        it isn't making that error. To make it work, we need to use a
+        more precise type that indicates we are not going to be using
+        the set method. We define a type
+        <literal>readonly_shape_val</literal> and confirm that we can
+        coerce the list of shapes to it.
+      </para>
+      <programlisting language="ocaml">
+# type readonly_shape_val = &lt; get : shape &gt;;;
+type readonly_shape_val = &lt; get : shape &gt;
+# let total_area (shape_vals: readonly_shape_val list) =
+    List.fold_left (fun t s -&gt; t +. s#get#area) 0.0 shape_vals;;
+val total_area : readonly_shape_val list -&gt; float = &lt;fun&gt;
+# total_area [ (sq_val :&gt; readonly_shape_val); (circ_val :&gt; readonly_shape_val) ];;
+- : float = 21.5600000000000023
+</programlisting>
+      <para>
+        Aspects of this section may seem fairly complicated, but it
+        should be pointed out that this typing
+        <emphasis>works</emphasis>, and in the end the type annotations
+        are fairly minor. In most typed object-oriented languages, these
+        coercions would simply not be possible. For example, in C++, a
+        STL type <literal>list&lt;T&gt;</literal> is invariant in
+        <literal>T</literal>, it is simply not possible to use
+        <literal>list&lt;square&gt;</literal> where
+        <literal>list&lt;shape&gt;</literal> is expected (at least
+        safely). The situation is similar in Java, although Java
+        supports has an escape hatch that allows the program to fall
+        back to dynamic typing. The situation in OCaml is much better;
+        it works, it is statically checked, and the annotations are
+        pretty simple.
+      </para>
+    </sect2>
+    <sect2 id="narrowing">
+      <title>Narrowing</title>
+      <para>
+        Narrowing, also called <emphasis>down casting</emphasis>, is the
+        ability to coerce an object to one of its subtypes. For example,
+        if we have a list of shapes <literal>shape list</literal>, we
+        might know (for some reason) what the actual type of each shape
+        is. Perhaps we know that all objects in the list have type
+        <literal>square</literal>. In this case,
+        <emphasis>narrowing</emphasis> would allow the re-casting of the
+        object from type <literal>shape</literal> to type
+        <literal>square</literal>. Many languages support narrowing
+        through dynamic type checking. For example, in Java, a coercion
+        <literal>(Square) x</literal> is allowed if the value
+        <literal>x</literal> has type <literal>Square</literal> or one
+        of its subtypes; otherwise the coercion throws an exception.
+      </para>
+      <para>
+        Narrowing is <emphasis>not permitted</emphasis> in OCaml.
+        Period.
+      </para>
+      <para>
+        Why? There are two reasonable explanations, one based on a
+        design principle, and another technical (the technical reason is
+        simple: it is hard to implement).
+      </para>
+      <para>
+        The design argument is this: narrowing violates abstraction. In
+        fact, with a structural typing system like in OCaml, narrowing
+        would essentially provide the ability to enumerate the methods
+        in an object. To check whether an object <literal>obj</literal>
+        has some method <literal>foo : int</literal>, one would attempt
+        a coercion <literal>(obj :&gt; &lt; foo : int &gt;)</literal>.
+      </para>
+      <para>
+        More commonly, narrowing leads to poor object-oriented style.
+        Consider the following Java code, which returns the name of a
+        shape object.
+      </para>
+      <programlisting>
+String GetShapeName(Shape s) {
+  if (s instanceof Square) {
+    return &quot;Square&quot;;
+  } else if (s instanceof Circle) {
+    return &quot;Circle&quot;;
+  } else {
+    return &quot;Other&quot;;
+  }
+}
+</programlisting>
+      <para>
+        Most programmers would consider this code to be
+        &quot;wrong.&quot; Instead of performing a case analysis on the
+        type of object, it would be better to define a method to return
+        the name of the shape. Instead of calling
+        <literal>GetShapeName(s)</literal>, we should call
+        <literal>s.Name()</literal> instead.
+      </para>
+      <para>
+        However, the situation is not always so obvious. The following
+        code checks whether an array of shapes looks like a
+        &quot;barbell,&quot; composed to two <literal>Circle</literal>
+        objects separated by a <literal>Line</literal>, where the
+        circles have the same radius.
+      </para>
+      <programlisting>
+boolean IsBarBell(Shape[] s) {
+  return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
+    (s[1] instanceof Line) &amp;&amp; (s[2] instanceof Circle) &amp;&amp;
+    ((Circle) s[0]).radius() == ((Circle) s[2]).radius();
+}
+</programlisting>
+      <para>
+        In this case, it is much less clear how to augment the
+        <literal>Shape</literal> class to support this kind of pattern
+        analysis. It is also not obvious that object-oriented
+        programming is well-suited for this situation. Pattern matching
+        seems like a better fit.
+      </para>
+      <programlisting language="ocaml">
+let is_bar_bell = function
+ | [Circle r1; Line _; Circle r2] when r1 == r2 -&gt; true
+ | _ -&gt; false;;
+</programlisting>
+      <para>
+        Regardless, there is a solution if you find yourself in this
+        situation, which is to augment the classes with variants. You
+        can define a method <literal>variant</literal> that injects the
+        actual object into a variant type.
+      </para>
+      <programlisting language="ocaml">
+type shape = &lt; variant : repr; area : float&gt;
+and circle = &lt; variant : repr; area : float; radius : float &gt;
+and line = &lt; variant : repr; area : float; length : float &gt;
+and repr =
+ | Circle of circle
+ | Line of line;;
+ 
+let is_bar_bell = function
+ | [s1; s2; s3] -&gt;
+   (match s1#variant, s2#variant, s3#variant with
+     | Circle c1, Line _, Circle c2 when c1#radius == c2#radius -&gt; true
+     | _ -&gt; false)
+ | _ -&gt; false;;
+</programlisting>
+      <para>
+        This pattern works, but it has drawbacks. In particular, the
+        recursive type definition should make it clear that this pattern
+        is essentially equivalent to using variants, and that objects do
+        not provide much value here.
+      </para>
+    </sect2>
+    <sect2 id="subtyping-vs.-row-polymorphism">
+      <title>Subtyping vs. Row Polymorphism</title>
+      <para>
+        There is a great deal of overlap between subtyping and row
+        polymorphism. Row polymorphism is in general preferred over
+        subtyping because it does not require explicit coercions, and it
+        preserves more type information, allowing functions like the
+        following:
+      </para>
+      <programlisting language="ocaml">
+# let filter_large v =
+  if v#get &lt; 10.0 then Some v else None;;
+val filter_large : (&lt; get : float; .. &gt; as 'a) -&gt; 'a option = &lt;fun&gt;
+</programlisting>
+      <para>
+        The return type of this function is built from the open object
+        type of its argument, preserving any additional methods that it
+        may have.
+      </para>
+      <programlisting language="ocaml">
+# let v = make 5.0;;
+val v : &lt; get : float; set : float -&gt; unit &gt; = &lt;obj&gt;
+# filter_large v;;
+- : &lt; get : float; set : float -&gt; unit &gt; option = Some &lt;obj&gt;
+</programlisting>
+      <para>
+        Writing a similar function with a closed type and applying it
+        using subtyping does not preserve the methods of the argument:
+        the returned object is only known to have a
+        <literal>get</literal> method.
+      </para>
+      <programlisting language="ocaml">
+# let filter_large (v: &lt; get: float &gt;) =
+  if v#get &lt; 10.0 then Some v else None;;
+  val filter_large : &lt; get : float &gt; -&gt; &lt; get : float &gt; option = &lt;fun&gt;
+# filter_large (v :&gt; &lt; get: float &gt;);;
+- : &lt; get : float &gt; option = Some &lt;obj&gt;
+</programlisting>
+      <para>
+        However, there are some situations where we cannot use row
+        polymorphism. For example, lists of heterogeneous elements can
+        not be created using row polymorphism:
+      </para>
+      <programlisting language="ocaml">
+# let hlist: &lt; area: float; ..&gt; list = [square 1.0; circle 3.0];;
+Characters 50-60:
+  let hlist: &lt; area: float; ..&gt; list = [square 1.0; circle 3.0];;
+                                                    ^^^^^^^^^^
+Error: This expression has type &lt; area : float; radius : float &gt;
+       but an expression was expected of type &lt; area : float; width : float &gt;
+       The second object type has no method radius
+</programlisting>
+      <para>
+        Since row polymorphism is a form of polymorphism, it also does
+        not work well with references:
+      </para>
+      <programlisting language="ocaml">
+# let shape_ref: &lt; area: float; ..&gt; ref = ref (square 4.0);;
+val shape_ref : &lt; area : float; width : float &gt; ref = {contents = &lt;obj&gt;}
+# shape_ref := circle 2.0;;
+Characters 13-23:
+  shape_ref := circle 2.0;;
+               ^^^^^^^^^^
+Error: This expression has type &lt; area : float; radius : float &gt;
+       but an expression was expected of type &lt; area : float; width : float &gt;
+       The second object type has no method radius
+</programlisting>
+      <para>
+        In these cases we must use subtyping:
+      </para>
+      <programlisting language="ocaml">
+# let hlist: shape list = [(square 1.0 :&gt; shape); (circle 3.0 :&gt; shape)];;
+val hlist : shape list = [&lt;obj&gt;; &lt;obj&gt;]
+# let shape_ref: shape ref = ref (square 4.0 :&gt; shape);;
+val shape_ref : shape ref = {contents = &lt;obj&gt;}
+# shape_ref := (circle 2.0 :&gt; shape);;
+- : unit = ()
+</programlisting>
+    </sect2>
+  </sect1>
+</chapter><chapter id="classes">
+  <title>Classes</title>
+  <para>
+    Programming with objects directly is great for encapsulation, but
+    one of the main goals of object-oriented programming is code re-use
+    through inheritance. For inheritance, we need to introduce
+    <emphasis>classes</emphasis>. In object-oriented programming, a
+    class is a &quot;recipe&quot; for creating objects. The recipe can
+    be changed by adding new methods and fields, or it can be changed by
+    modifying existing methods.
+  </para>
+  <sect1 id="ocaml-classes">
+    <title>OCaml Classes</title>
     <para>
       In OCaml, class definitions must be defined as toplevel statements
       in a module. A class is not an object, and a class definition is
@@ -12933,79 +13444,6 @@ method fold : 'b. ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b =
          !y)
 </programlisting>
   </sect1>
-  <sect1 id="immutable-objects">
-    <title>Immutable objects</title>
-    <para>
-      Many people consider object-oriented programming to be
-      intrinsically imperative, where an object is like a state machine.
-      Sending a message to an object causes it to change state, possibly
-      sending messages to other objects.
-    </para>
-    <para>
-      Indeed, in many programs, this makes sense, but it is by no means
-      required. Let's define an object-oriented version of lists similar
-      to the imperative list above. We'll implement it with a regular
-      list type <literal>'a list</literal>, and insertion will be to the
-      beginning of the list instead of to the end.
-    </para>
-    <programlisting language="ocaml">
-class ['a] flist =
-object (self : 'self)
-   val elements : 'a list = []
-
-   method is_empty = elements = []
-
-   method insert x : 'self = {&lt; elements = x :: elements &gt;}
-
-   method iterator =
-      (new flist_iterator elements :&gt; 'a iterator)
-
-   method iter (f : 'a -&gt; unit) = List.iter f elements
-
-   method fold : 'b. ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b =
-      (fun f x -&gt; List.fold_left f x elements)
-end;;
-</programlisting>
-    <para>
-      A key part of the implementation is the definition of the method
-      <literal>insert</literal>. The expression
-      <literal>{&lt; ... &gt;}</literal> produces a copy of the current
-      object, with the same type, and the specified fields updated. In
-      other words, the <literal>new_fst new_x</literal> method produces
-      a copy of the object, with <literal>x</literal> replaced by
-      <literal>new_x</literal>. The original object is not modified, and
-      the value of <literal>y</literal> is also unaffected.
-    </para>
-    <para>
-      There are some restriction on the use of the expression
-      <literal>{&lt; ... &gt;}</literal>. It can be used only within a
-      method body, and only the values of fields may be updated. Method
-      implementations are fixed at the time the object is created, they
-      cannot be changed dynamically.
-    </para>
-    <para>
-      We use the same object type <literal>iterator</literal> for
-      iterators, but implement it differently.
-    </para>
-    <programlisting language="ocaml">
-class ['a] flist_iterator l =
-object
-   val mutable elements : 'a list = l
-
-   method has_value = l &lt;&gt; []
-
-   method get =
-      match l with
-         h :: _ -&gt; h
-       | [] -&gt; raise (Invalid_argument &quot;list is empty&quot;)
-
-   method next =
-      match l with
-         _ :: l -&gt; elements &lt;- l
-       | [] -&gt; raise (Invalid_argument &quot;list is empty&quot;)
-end;;
-</programlisting>
-  </sect1>
   <sect1 id="class-types">
     <title>Class types</title>
     <para>
@@ -13115,382 +13553,6 @@ end = SList
       this case, the type expression <literal>'a slist</literal> is
       exactly equivalent to <literal>'a t</literal>.
     </para>
-  </sect1>
-</chapter><chapter id="object-subtyping-and-inheritance">
-  <title>Object Subtyping and Inheritance</title>
-  <sect1 id="subtyping">
-    <title>Subtyping</title>
-    <para>
-      Subtyping is a central concept in object-oriented programming. It
-      governs when an object with one type <emphasis>A</emphasis> can be
-      used in an expression that expects an object of another type
-      <emphasis>B</emphasis>. When this is true, we say that
-      <emphasis>A</emphasis> is a <emphasis>subtype</emphasis> of
-      <emphasis>B</emphasis>. Actually, more concretely, subtyping
-      determines when the coercion operator <literal>e :&gt; t</literal>
-      can be applied. This coercion works only if the expression
-      <literal>e</literal> has some type <literal>s</literal> and
-      <literal>s</literal> is a subtype of <literal>t</literal>.
-    </para>
-    <para>
-      To explore this, let's define some simple classes for geometric
-      shapes. The generic type <literal>shape</literal> has a method to
-      compute the area, and a <literal>square</literal> is a specific
-      kind of shape.
-    </para>
-    <programlisting language="ocaml">
-type shape = &lt; area : float &gt;;;
-
-class square w =
-object (self : 'self)
-  method area = self#width *. self#width
-  method width = w
-end;;
-</programlisting>
-    <para>
-      A <literal>square</literal> has a method <literal>area</literal>
-      just like a <literal>shape</literal>, and an additional method
-      <literal>width</literal>. Still, we expect a
-      <literal>square</literal> to be a <literal>shape</literal>, and it
-      is. The coercion <literal>:&gt;</literal> must be explicit.
-    </para>
-    <programlisting language="ocaml">
-# let new_square x : shape = new square x;;
-Characters 27-39:
-  let new_square x : shape = new square x;;
-                             ^^^^^^^^^^^^
-Error: This expression has type square but an expression was expected of type shape
-The second object type has no method width
-# let new_square x : shape = (new square x :&gt; shape);;
-val new_square : float -&gt; shape = &lt;fun&gt;
-</programlisting>
-    <para>
-      What are the rules for subtyping? In general, object subtyping has
-      two general forms, called <emphasis>width</emphasis> and
-      <emphasis>depth</emphasis> subtyping. Width subtyping means that
-      an object type <emphasis>A</emphasis> is a a subtype of
-      <emphasis>B</emphasis>, if <emphasis>A</emphasis> has all of the
-      methods of <emphasis>B</emphasis>, and possibly more. A
-      <literal>square</literal> is a subtype of <literal>shape</literal>
-      because it implements all of the methods of
-      <literal>shape</literal> (the <literal>area</literal> method).
-    </para>
-    <para>
-      The subtyping rules are purely technical, they have no relation to
-      object semantics. We can define a class
-      <literal>rectangle</literal> that has all of the methods of a
-      <literal>square</literal>, so it is a subtype of square and can be
-      used wherever a <literal>square</literal> is expected.
-    </para>
-    <programlisting language="ocaml">
-# class rectangle h w =
-  object (self : 'self)
-     inherit square w
-     method area = self#width *. self#height
-     method height = h
-  end;;
-# let square_rectangle h w : square = (new rectangle h w :&gt; square);;
-val square_rectangle : float -&gt; float -&gt; square = &lt;fun&gt;
-</programlisting>
-    <para>
-      This may seem absurd, but this concept is expressible in all
-      object-oriented languages. The contradiction is semantic -- we
-      know that in the real world, not all rectangles are squares; but
-      in the programming world, rectangles have all of the features of
-      squares (according to our definition), so they can be used just
-      like squares. Suffice it to say that it is usually better to avoid
-      such apparent contradictions.
-    </para>
-    <para>
-      Next, let's take a seemingly tiny step forward, and start building
-      collections of shapes. It is easy enough to define a
-      <literal>slist</literal> of squares.
-    </para>
-    <programlisting language="ocaml">
-# let squares =
-     let l = SList.make () in
-     l#insert (new square 1.0);
-     l#insert (new square 2.0);
-     l;;
-val squares : square slist = &lt;obj&gt;
-</programlisting>
-    <para>
-      We can also define a function to calculate the total area of a
-      list of shapes. There is no reason to restrict this to squares, it
-      should work for any list of shapes with type
-      <literal>shape slist</literal>. The problem is that doing so
-      raises some serious typing questions -- can a
-      <literal>square slist</literal> be passed to a function that
-      expects a <literal>shape slist</literal>? If we try it, the
-      compiler produces a verbose error message.
-    </para>
-    <programlisting language="ocaml">
-# let total_area (l : shape slist) : float =
-     let total = ref 0.0 in
-     let it = l#iterator in
-     while it#has_value do
-        total := !total +. it#get#area;
-        it#next
-     done;
-     !total;;
-val total_area : shape slist -&gt; float = &lt;fun&gt;
-# total_area squares;;
-Characters 11-18:
-  total_area squares;;
-             ^^^^^^^
-Error: This expression has type
-         square slist =
-           &lt; insert : square -&gt; unit; is_empty : bool;
-             iterator : square iterator &gt;
-       but an expression was expected of type
-         shape slist =
-           &lt; insert : shape -&gt; unit; is_empty : bool;
-             iterator : shape iterator &gt;
-       Type square = &lt; area : float; width : float &gt;
-       is not compatible with type shape = &lt; area : float &gt; 
-       The second object type has no method width
-</programlisting>
-    <para>
-      It might seem tempting to give up at this point, especially
-      because the subtyping is not even true -- the type
-      <literal>square slist</literal> is not a subtype of
-      <literal>shape slist</literal>. The problem is with the
-      <literal>insert</literal> method. For
-      <literal>shape slist</literal>, the <literal>insert</literal>
-      method takes an arbitrary <literal>shape</literal> and inserts it
-      into the list. So if we could coerce a
-      <literal>square slist</literal> to a
-      <literal>shape slist</literal>, then it would be possible to
-      insert an arbitrary shape into the list, which would be an error.
-    </para>
-    <sect2 id="using-more-precise-types-to-address-subtyping-problems">
-      <title>Using more precise types to address subtyping
-      problems</title>
-      <para>
-        Still, the <literal>total_area</literal> function should be
-        fine, in principle. It doesn't call <literal>insert</literal>,
-        so it isn't making that error. To make it work, we need to use a
-        more precise type that indicates we are not going to be mutating
-        the list. We define a type
-        <literal>readonly_shape_slist</literal> and confirm that we can
-        coerce the list of squares.
-      </para>
-      <programlisting language="ocaml">
-# type readonly_shape_slist = &lt; iterator : shape iterator &gt;;;
-type readonly_shape_slist = &lt; iterator : shape iterator &gt;
-# (squares :&gt; readonly_shape_slist);;
-- : readonly_shape_slist = &lt;obj&gt;
-# let total_area (l : readonly_shape_slist) : float = ...;;
-val total_area : readonly_shape_slist -&gt; float = &lt;fun&gt;
-#   total_area (squares :&gt; readonly_shape_slist);;
-- : float = 5.
-</programlisting>
-      <para>
-        Why does this work, why is a <literal>square slist</literal> a
-        subtype of <literal>readonly_shape_slist</literal>. The
-        reasoning is in two steps. First, the easy part is width
-        subtyping: we can drop the other methods to see that
-        <literal>square slist</literal> is a subtype of
-        <literal>&lt; iterator : square iterator &gt;</literal>. The
-        next step is to use <emphasis>depth</emphasis> subtyping, which,
-        in its general form, says that an object type
-        <literal>&lt; m : t1 &gt;</literal> is a subtype of a type
-        <literal>&lt; m : t2&gt;</literal> iff <literal>t1</literal> is
-        a subtype of <literal>t2</literal>. In other words, instead of
-        reasoning about the number of methods in a type (the width), the
-        number of methods is fixed, and we look within the method types
-        themselves (the &quot;depth&quot;).
-      </para>
-      <para>
-        In this particular case, depth subtyping on the
-        <literal>iterator</literal> method requires that
-        <literal>square iterator</literal> be a subtype of
-        <literal>shape iterator</literal>. Expanding the type definition
-        for the type <literal>iterator</literal>, we again invoke depth
-        subtyping, and we need to show that the type
-        <literal>&lt; get : square &gt;</literal> is a subtype of
-        <literal>&lt;get : shape &gt;</literal>, which follows because
-        <literal>square</literal> is a subtype of
-        <literal>shape</literal>.
-      </para>
-      <para>
-        This reasoning may seem fairly long and complicated, but it
-        should be pointed out that this typing
-        <emphasis>works</emphasis>, and in the end the type annotations
-        are fairly minor. In most typed object-oriented languages, the
-        coercion would simply not be possible. For example, in C++, a
-        STL type <literal>slist&lt;T&gt;</literal> is invariant in
-        <literal>T</literal>, it is simply not possible to use
-        <literal>slist&lt;square&gt;</literal> where
-        <literal>slist&lt;shape&gt;</literal> is expected (at least
-        safely). The situation is similar in Java, although Java
-        supports has an escape hatch that allows the program to fall
-        back to dynamic typing. The situation in OCaml is much better;
-        it works, it is statically checked, and the annotations are
-        pretty simple.
-      </para>
-    </sect2>
-    <sect2 id="using-elided-types-to-address-subtyping-problems">
-      <title>Using elided types to address subtyping problems</title>
-      <para>
-        Before we move to the next topic, there is one more thing to
-        address. The typing we gave above, using
-        <literal>readonly_shape_slist</literal>, requires that the
-        caller perform an explicit coercion before calling the
-        <literal>total_area</literal> function. We would like to give a
-        better type that avoids the coercion.
-      </para>
-      <para>
-        A solution is to use an elided type. Instead of
-        <literal>shape</literal>, we can use the elided type
-        <literal>&lt; area : float; .. &gt;</literal>. In fact, once we
-        do this, it also becomes possible to use the
-        <literal>slist</literal> type.
-      </para>
-      <programlisting language="ocaml">
-# let total_area (l : &lt; area : float; .. &gt; slist) : float = ...;;
-val total_area : &lt; area : float; .. &gt; slist -&gt; float = &lt;fun&gt;
-# total_area squares;;
-- : float = 5.
-</programlisting>
-      <para>
-        This works, and it removes the need for explicit coercions. This
-        type is still fairly simple, but it does have the drawback that
-        the programmer needs to remember that the types
-        <literal>&lt; area : float; ..&gt;</literal> and
-        <literal>shape</literal> are related.
-      </para>
-      <para>
-        OCaml supports an abbreviation in this case, but it works only
-        for classes, not object types. The type expression
-        <literal># classname</literal> is an abbreviation for an elided
-        type containing all of the methods in the named class, and more.
-        Since <literal>shape</literal> is an object type, we can't write
-        <literal>#shape</literal>. However, if a class definition is
-        available, this abbreviation can be useful. The following
-        definition is exactly equivalent to the preceding one.
-      </para>
-      <programlisting language="ocaml">
-# class cshape = object method area = 0.0 end;;
-class cshape : object method area : float end
-# let total_area (l : #cshape list) : float = ...;;
-val total_area : #cshape slist -&gt; float = &lt;fun&gt;
-# total_area squares;;
-- : float = 5.
-</programlisting>
-    </sect2>
-    <sect2 id="narrowing">
-      <title>Narrowing</title>
-      <para>
-        Narrowing, also called <emphasis>down casting</emphasis>, is the
-        ability to coerce an object to one of its subtypes. For example,
-        if we have a list of shapes <literal>shape slist</literal>, we
-        might know (for some reason) what the actual type of each shape
-        is. Perhaps we know that all objects in the list have type
-        <literal>square</literal>. In this case,
-        <emphasis>narrowing</emphasis> would allow the re-casting of the
-        object from type <literal>shape</literal> to type
-        <literal>square</literal>. Many languages support narrowing
-        through dynamic type checking. For example, in Java, a coercion
-        <literal>(Square) x</literal> is allowed if the value
-        <literal>x</literal> has type <literal>Square</literal> or one
-        of its subtypes; otherwise the coercion throws an exception.
-      </para>
-      <para>
-        Narrowing is <emphasis>not permitted</emphasis> in OCaml.
-        Period.
-      </para>
-      <para>
-        Why? There are two reasonable explanations, one based on a
-        design principle, and another technical (the technical reason is
-        simple: it is hard to implement).
-      </para>
-      <para>
-        The design argument is this: narrowing violates abstraction. In
-        fact, with a structural typing system like in OCaml, narrowing
-        would essentially provide the ability to enumerate the methods
-        in an object. To check whether an object <literal>obj</literal>
-        has some method <literal>foo : int</literal>, one would attempt
-        a coercion <literal>(obj :&gt; &lt; foo : int &gt;)</literal>.
-      </para>
-      <para>
-        More commonly, narrowing leads to poor object-oriented style.
-        Consider the following Java code, which returns the name of a
-        shape object.
-      </para>
-      <programlisting>
-String GetShapeName(Shape s) {
-  if (s instanceof Square) {
-    return &quot;Square&quot;;
-  } else if (s instanceof Circle) {
-    return &quot;Circle&quot;;
-  } else {
-    return &quot;Other&quot;;
-  }
-}
-</programlisting>
-      <para>
-        Most programmers would consider this code to be
-        &quot;wrong.&quot; Instead of performing a case analysis on the
-        type of object, it would be better to define a method to return
-        the name of the shape. Instead of calling
-        <literal>GetShapeName(s)</literal>, we should call
-        <literal>s.Name()</literal> instead.
-      </para>
-      <para>
-        However, the situation is not always so obvious. The following
-        code checks whether an array of shapes looks like a
-        &quot;barbell,&quot; composed to two <literal>Circle</literal>
-        objects separated by a <literal>Line</literal>, where the
-        circles have the same radius.
-      </para>
-      <programlisting>
-boolean IsBarBell(Shape[] s) {
-  return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
-    (s[1] instanceof Line) &amp;&amp; (s[2] instanceof Circle) &amp;&amp;
-    ((Circle) s[0]).radius() == ((Circle) s[2]).radius();
-}
-</programlisting>
-      <para>
-        In this case, it is much less clear how to augment the
-        <literal>Shape</literal> class to support this kind of pattern
-        analysis. It is also not obvious that object-oriented
-        programming is well-suited for this situation. Pattern matching
-        seems like a better fit.
-      </para>
-      <programlisting language="ocaml">
-let is_bar_bell = function
- | [Circle r1; Line _; Circle r2] when r1 == r2 -&gt; true
- | _ -&gt; false;;
-</programlisting>
-      <para>
-        Regardless, there is a solution if you find yourself in this
-        situation, which is to augment the classes with variants. You
-        can define a method <literal>variant</literal> that injects the
-        actual object into a variant type.
-      </para>
-      <programlisting language="ocaml">
-type shape = &lt; variant : repr; area : float&gt;
-and circle = &lt; variant : repr; area : float; radius : float &gt;
-and line = &lt; variant : repr; area : float; length : float &gt;
-and repr =
- | Circle of circle
- | Line of line;;
- 
-let is_bar_bell = function
- | [s1; s2; s3] -&gt;
-   (match s1#variant, s2#variant, s3#variant with
-     | Circle c1, Line _, Circle c2 when c1#radius == c2#radius -&gt; true
-     | _ -&gt; false)
- | _ -&gt; false;;
-</programlisting>
-      <para>
-        This pattern works, but it has drawbacks. In particular, the
-        recursive type definition should make it clear that this pattern
-        is essentially equivalent to using variants, and that objects do
-        not provide much value here.
-      </para>
-    </sect2>
     <sect2 id="binary-methods">
       <title>Binary methods</title>
       <para>
@@ -15006,7 +15068,7 @@ Estimated testing time 20s (change using -quota SECS).
   <title>Command Line Parsing</title>
   <para>
     Many of the OCaml programs that you'll write will end up as binaries
-    that will be run directly from a command prompt. Any non-trivial
+    that need to be run from a command prompt. Any non-trivial
     command-line program needs a few features:
   </para>
   <itemizedlist>
@@ -15035,40 +15097,57 @@ Estimated testing time 20s (change using -quota SECS).
   </itemizedlist>
   <para>
     It's tedious and error-prone to code all this manually for every
-    program you write. Core simplifies this by letting you declare all
-    your command-line options in one place, using the
-    <literal>Command</literal> library. This then takes care of parsing
-    the arguments, generating help text and provides interactive
-    auto-completion to the user of the library.
+    program you write. Core provides the Command library that simplifies
+    all this by letting you declare all your command-line options in one
+    place. Command takes care of parsing the arguments, generating help
+    text and provides interactive auto-completion to the user of the
+    library.
   </para>
   <para>
-    The <literal>Command</literal> library also scales as you add more
-    features to your programs. It's simple to use for small
-    applications, but provides a sophisticated subcommand mode that
-    groups related commands together as the application grows more
-    options. You may also be familiar with this command-line style from
-    the Git or Mercurial version control systems.
+    Command also copes as you add more features to your programs. It's a
+    simple library to use for small applications, and provides a
+    sophisticated subcommand mode that grouping related commands
+    together as the number of options grow. You may already be familiar
+    with this command-line style from the Git or Mercurial version
+    control systems.
   </para>
   <para>
-    This chapter demonstrates how to use <literal>Command</literal> to
-    extend the cryptographic utility from
-    <xref linkend="object-oriented-programming"/> and builds a
-    simple equivalents to the <literal>md5</literal> and
-    <literal>shasum</literal> utilities. It also demonstrates how
-    <emphasis>functional combinators</emphasis> can be used to declare
-    complex data structures in a type-safe and elegant way.
+    In this chapter, we'll:
   </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        learn how to use Command to construct basic and grouped
+        command-line interfaces.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        read examples that extend the cryptographic utility from
+        <xref linkend="object-oriented-programming"/> and
+        builds a simple equivalents to the <literal>md5</literal> and
+        <literal>shasum</literal> utilities.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        demonstrate how <emphasis>functional combinators</emphasis> can
+        be used to declare complex data structures in a type-safe and
+        elegant way.
+      </para>
+    </listitem>
+  </itemizedlist>
   <sect1 id="basic-command-line-parsing">
-    <title>Basic command line parsing</title>
+    <title>Basic command-line parsing</title>
     <para>
-      We'll begin by cloning the <literal>md5</literal> binary that is
-      present on most Linux distributions and Mac OS X. It reads in the
-      contents of a file, applies the MD5 one-way hash function to the
-      data, and outputs an ASCII hex representation of the result.
+      Let's start by cloning the <literal>md5</literal> binary that is
+      present on most Linux and Mac OS X installations. It reads in the
+      contents of a file, applies the MD5 one-way cryptographic hash
+      function to the data, and outputs an ASCII hex representation of
+      the result.
     </para>
     <programlisting language="ocaml">
-(* md5.ml : calculate MD5 hash of input *)
-
+(* basic_md5.ml : calculate MD5 hash of input *)
 open Core.Std
 
 let do_hash file =
@@ -15086,28 +15165,36 @@ let command =
       empty
       +&gt; anon (&quot;filename&quot; %: string)
     )
-  (fun file () -&gt; do_hash file)
+  (fun filename () -&gt; do_hash filename)
 
 let () = Command.run ~version:&quot;1.0&quot; ~build_info:&quot;RWO&quot; command
 </programlisting>
     <para>
       You can compile this file the usual way with
-      <literal>ocamlfind</literal>, but passing an additional
-      <literal>cryptokit</literal> package. You may need to install
-      Cryptokit via OPAM if you didn't do so earlier.
+      <literal>ocamlfind</literal> by passing an additional
+      <literal>cryptokit</literal> package. Install Cryptokit via OPAM
+      if you didn't do so earlier.
     </para>
     <programlisting>
 $ opam install cryptokit
-$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg -o md5 basic.ml
+$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg \
+  -o md5 basic_md5.ml
 $ ./md5
 </programlisting>
     <para>
       The <literal>do_hash</literal> function accepts a filename
       parameter and prints the human-readable MD5 string to the console
-      standard output. The subsequent <literal>command</literal> value
-      declares how to invoke <literal>do_hash</literal> by parsing the
-      command-line arguments. When you compile this program and run it,
-      you can query the version information simply by:
+      standard output.
+    </para>
+    <para>
+      The subsequent <literal>command</literal> variable defines how to
+      invoke <literal>do_hash</literal> by parsing the command-line
+      arguments. When you compile and run this program, it already
+      defines a number of useful default command-line options.
+    </para>
+    <para>
+      For instance, query the version information for the binary you
+      just compiled.
     </para>
     <programlisting>
 $ ./md5 -version
@@ -15116,13 +15203,11 @@ $ ./md5 -build-info
 RWO
 </programlisting>
     <para>
-      The <literal>version</literal> and <literal>build_info</literal>
-      optional arguments to <literal>Command.run</literal> let you
-      specify versions in the command-line help. You can leave these
-      blank, or get your build system to generate them directly from
-      your version control system (e.g. by running
-      <literal>hg tip</literal> to generate a build revision number, in
-      the case of Mercurial).
+      The actual versions are defined via optional arguments to
+      <literal>Command.run</literal>. You can leave these blank or get
+      your build system to generate them directly from your version
+      control system (e.g. by running <literal>hg tip</literal> to
+      generate a build revision number, in the case of Mercurial).
     </para>
     <programlisting>
 $ ./md5
@@ -15142,53 +15227,111 @@ More detailed information
 missing anonymous argument: filename
 </programlisting>
     <para>
-      When we invoke this binary without any arguments, it outputs a
-      help screen that informs you that a required argument
-      <literal>filename</literal> is missing. Supplying the argument to
-      the command results in <literal>do_hash</literal> being called,
-      and the MD5 output being displayed to the standard output.
+      When we invoke this binary without any arguments, it helpfully
+      displays a help screen that informs you that a required argument
+      <literal>filename</literal> is missing.
+    </para>
+    <para>
+      If you do supply the filename argument, then
+      <literal>do_hash</literal> is called with the argument and the MD5
+      output is displayed to the standard output.
     </para>
     <programlisting>
 $ ./md5 ./md5
 59562f5e4f790d16f1b2a095cd5de844
 </programlisting>
+  </sect1>
+  <sect1 id="defining-parsing-specifications">
+    <title>Defining parsing specifications</title>
     <para>
       So how does all this work? Most of the interesting logic lies in
-      how the specifications are defined. The
-      <literal>Command.Spec</literal> module defines several combinators
-      that can be chained together to define flags and anonymous
-      arguments, what types they should map to, and whether to take
-      special actions (such as interactive input) if certain fields are
-      encountered.
+      how the specifications are constructed.
     </para>
     <para>
-      Let's build the specification for a single argument that is
-      specified directly on the command-line (this is known as an
-      <emphasis>anonymous</emphasis> argument).
+      The <literal>Command.Spec</literal> module defines several
+      combinators that can be chained together to define flags and
+      anonymous arguments, what types they should map to, and whether to
+      take special actions (such as interactive input) if certain fields
+      are encountered.
     </para>
-    <programlisting language="ocaml">
+    <sect2 id="anonymous-arguments">
+      <title>Anonymous arguments</title>
+      <para>
+        Let's build the specification for a single argument that is
+        specified directly on the command-line (this is known as an
+        <emphasis>anonymous</emphasis> argument).
+      </para>
+      <programlisting language="ocaml">
 Command.Spec.(
   empty
   +&gt; anon (&quot;filename&quot; %: string)
 )
 </programlisting>
-    <para>
-      The specification above begins with an <literal>empty</literal>
-      value, and then chains more parameters via the
-      <literal>+&gt;</literal> combinator. Our example uses the
-      <literal>anon</literal> function to define a single anonymous
-      parameter. Anonymous parameters are assigned a string name that is
-      used in help text, and an OCaml type that they are parsed into
-      from the raw command-line string. The example
-      <literal>filename</literal> argument above is extracted from the
-      command-line and kept as an OCaml <literal>string</literal>.
-    </para>
-    <para>
-      This specification is then bundled together with the callback
-      functions using <literal>Command.basic</literal>. For our
-      <literal>md5</literal> example, we have:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The specification above begins with an <literal>empty</literal>
+        value and then adds more parameters via the
+        <literal>+&gt;</literal> combinator. Our example uses the
+        <literal>anon</literal> function to define a single anonymous
+        parameter.
+      </para>
+      <para>
+        Anonymous parameters are created using the <literal>%:</literal>
+        operator, which binds a textual string name (used in help text)
+        to an OCaml conversion function. The conversion function is
+        responsible for parsing the command-line fragment into an OCaml
+        data type. In the example above, this is just a
+        <literal>string</literal>, but we'll see more complex conversion
+        options below
+      </para>
+    </sect2>
+    <sect2 id="callback-functions">
+      <title>Callback functions</title>
+      <para>
+        This specification is usually combined with a callback function
+        that accepts all the command-line parameters as its function
+        arguments. Multiple arguments are passed to the callback in the
+        same order as they appeared in the specification (using the
+        <literal>+&gt;</literal> operator).
+      </para>
+      <para>
+        The callback function is where all the actual work happens after
+        the command-line parsing is complete. This function is applied
+        with the arguments containing the parsed command-line arguments,
+        and takes over as the main thread of the application.
+      </para>
+      <para>
+        In our example, we had just one anonymous argument, so the
+        callback function just has a single <literal>string</literal>
+        parameter applied to it:
+      </para>
+      <programlisting language="ocaml">
+(fun file () -&gt; do_hash file)
+</programlisting>
+      <note>
+      <title>
+      The extra <literal>unit</literal> argument to callbacks
+      </title>
+      <para>
+        The callback above needs an extra <literal>unit</literal>
+        argument after <literal>file</literal>. This is to ensure that
+        specifications can work even when they are empty (i.e. the
+        <literal>Command.Spec.empty</literal> value).
+      </para>
+      <para>
+        Every OCaml function needs at least one argument, so the final
+        <literal>unit</literal> guarantees that it will not be evaluated
+        immediately as a value if there are no other arguments.
+      </para>
+      </note>
+    </sect2>
+    <sect2 id="creating-basic-commands">
+      <title>Creating basic commands</title>
+      <para>
+        The specification and the function callback are glued together
+        using the <literal>basic</literal> command. Let's see how this
+        looks in our <literal>md5</literal> command.
+      </para>
+      <programlisting language="ocaml">
 Command.basic
   ~summary:&quot;Generate an MD5 hash of the input data&quot;
   ~readme:(fun () -&gt; &quot;More detailed information&quot;)
@@ -15196,173 +15339,175 @@ Command.basic
     empty
     +&gt; anon (&quot;filename&quot; %: string)
   )
-  (fun file () -&gt; do_hash file)
+  (fun filename () -&gt; do_hash filename)
 </programlisting>
-    <para>
-      The <literal>basic</literal> function takes a few more arguments
-      in addition to the specification. The <literal>summary</literal>
-      is a one-line description to go at the top of the command help
-      screen, while <literal>readme</literal> is for longer help text
-      when the command is called with <literal>-help</literal>. The
-      <literal>readme</literal> argument is a function that is only
-      evaluated when the help text is actually needed.
-    </para>
-    <para>
-      The final argument is the callback function where all the actual
-      work happens after the command-line parsing is complete. This
-      function will be applied with the parsed command-line arguments,
-      and should perform the actual work. In our example, we had just
-      one anonymous argument, so the callback function just has a single
-      <literal>string</literal> parameter applied to it:
-    </para>
-    <programlisting language="ocaml">
-(fun file () -&gt; do_hash file)
-</programlisting>
-    <para>
-      The function also needs an extra <literal>unit</literal> argument
-      after <literal>file</literal>. This is simply so that the command
-      specifications can work even when they are empty
-      (<literal>Command.Spec.empty</literal>). Every OCaml function
-      needs at least one argument, so the final <literal>unit</literal>
-      guarantees that it will not be evaluated immediately as a value if
-      there are no other arguments.
-    </para>
-    <para>
-      You aren't just limited to parsing command lines as strings of
-      course. <literal>Command.Spec</literal> defines several other
-      conversion functions that validate and parse input into various
-      types:
-    </para>
-    <informaltable>
-      <tgroup cols="3">
-        <colspec align="left"/>
-        <colspec align="left"/>
-        <colspec align="left"/>
-        <thead>
-          <row>
-            <entry>
-              Argument type
-            </entry>
-            <entry>
-              OCaml type
-            </entry>
-            <entry>
-              Example
-            </entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>
-              <literal>string</literal>
-            </entry>
-            <entry>
-              <literal>string</literal>
-            </entry>
-            <entry>
-              <literal>foo</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>int</literal>
-            </entry>
-            <entry>
-              <literal>int</literal>
-            </entry>
-            <entry>
-              <literal>123</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>float</literal>
-            </entry>
-            <entry>
-              <literal>float</literal>
-            </entry>
-            <entry>
-              <literal>123.01</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>bool</literal>
-            </entry>
-            <entry>
-              <literal>bool</literal>
-            </entry>
-            <entry>
-              <literal>true</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>date</literal>
-            </entry>
-            <entry>
-              <literal>Date.t</literal>
-            </entry>
-            <entry>
-              <literal>2013-12-25</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>time_span</literal>
-            </entry>
-            <entry>
-              <literal>Span.t</literal>
-            </entry>
-            <entry>
-              <literal>5s</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <literal>file</literal>
-            </entry>
-            <entry>
-              <literal>string</literal>
-            </entry>
-            <entry>
-              <literal>/etc/passwd</literal>
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-    <para>
-      A more realistic <literal>md5</literal> function might also read
-      from the standard input if a filename isn't specified. We can
-      change our specification with a single line to reflect this by
-      writing:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The <literal>basic</literal> function takes the following
+        arguments:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>summary</literal> is a required one-line
+            description to go at the top of the command help screen.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>readme</literal> is for longer help text when the
+            command is called with <literal>-help</literal>. The
+            <literal>readme</literal> argument is a function that is
+            only evaluated when the help text is actually needed.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The specification and the callback function follow, with the
+            arguments to the callback matching the order in which the
+            specification binds arguments.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    <sect2 id="command-argument-types">
+      <title>Command argument types</title>
+      <para>
+        You aren't just limited to parsing command lines as strings, of
+        course. The <literal>Command.Spec</literal> module defines
+        several other conversion functions that validate and parse input
+        into various types:
+      </para>
+      <informaltable>
+        <tgroup cols="3">
+          <colspec align="left"/>
+          <colspec align="left"/>
+          <colspec align="left"/>
+          <thead>
+            <row>
+              <entry>
+                Argument type
+              </entry>
+              <entry>
+                OCaml type
+              </entry>
+              <entry>
+                Example
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                <literal>string</literal>
+              </entry>
+              <entry>
+                <literal>string</literal>
+              </entry>
+              <entry>
+                <literal>foo</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>int</literal>
+              </entry>
+              <entry>
+                <literal>int</literal>
+              </entry>
+              <entry>
+                <literal>123</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>float</literal>
+              </entry>
+              <entry>
+                <literal>float</literal>
+              </entry>
+              <entry>
+                <literal>123.01</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>bool</literal>
+              </entry>
+              <entry>
+                <literal>bool</literal>
+              </entry>
+              <entry>
+                <literal>true</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>date</literal>
+              </entry>
+              <entry>
+                <literal>Date.t</literal>
+              </entry>
+              <entry>
+                <literal>2013-12-25</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>time_span</literal>
+              </entry>
+              <entry>
+                <literal>Span.t</literal>
+              </entry>
+              <entry>
+                <literal>5s</literal>
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>file</literal>
+              </entry>
+              <entry>
+                <literal>string</literal>
+              </entry>
+              <entry>
+                <literal>/etc/passwd</literal>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <para>
+        A more realistic <literal>md5</literal> function might also read
+        from the standard input if a filename isn't specified. We can
+        change our specification with a single line to reflect this by
+        writing:
+      </para>
+      <programlisting language="ocaml">
 Command.Spec.(
   empty
   +&gt; anon (maybe (&quot;filename&quot; %: string))
 )
 </programlisting>
-    <para>
-      The anonymous parameter has been prefixed with a
-      <literal>maybe</literal> that indicates the value is now optional.
-      If you compile the example, you'll get a type error though:
-    </para>
-    <programlisting>
+      <para>
+        The anonymous parameter has been prefixed with a
+        <literal>maybe</literal> that indicates the value is now
+        optional. If you compile the example, you'll get a type error
+        though:
+      </para>
+      <programlisting>
 File &quot;md5_broken.ml&quot;, line 18, characters 26-30:
 Error: This expression has type string option
        but an expression was expected of type string
 Command exited with code 2.
 </programlisting>
-    <para>
-      This is because the type of the callback function has changed. It
-      now wants a <literal>string option</literal> instead of a
-      <literal>string</literal> since the value is optional. We can
-      quickly adapt our example to use the new information and read from
-      standard input if no file is specified.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        This is because the type of the callback function has changed.
+        It now wants a <literal>string option</literal> instead of a
+        <literal>string</literal> since the value is optional. We can
+        quickly adapt our example to use the new information and read
+        from standard input if no file is specified.
+      </para>
+      <programlisting language="ocaml">
 (* md5.ml : calculate md5 with an optional filename *)
 open Core.Std
 
@@ -15389,73 +15534,90 @@ let command =
 
 let () = Command.run command
 </programlisting>
-    <para>
-      There are several other transformations you can do on anonymous
-      arguments. We've shown you <literal>maybe</literal>, and you can
-      also obtain lists of arguments or supply default values. Try
-      altering the example above to take a list of files and output
-      checksums for all of them, just as the <literal>md5</literal>
-      command does.
-    </para>
-    <informaltable>
-      <tgroup cols="2">
-        <colspec align="left"/>
-        <colspec align="left"/>
-        <thead>
-          <row>
-            <entry>
-              Anonymous argument
-            </entry>
-            <entry>
-              OCaml type
-            </entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>
-              sequence
-            </entry>
-            <entry>
-              <literal>list</literal> of arguments
-            </entry>
-          </row>
-          <row>
-            <entry>
-              maybe
-            </entry>
-            <entry>
-              <literal>option</literal> argument
-            </entry>
-          </row>
-          <row>
-            <entry>
-              maybe_with_default
-            </entry>
-            <entry>
-              argument with a default value if argument is missing
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
+      <para>
+        There are several other transformations you can do on anonymous
+        arguments. We've shown you <literal>maybe</literal>, and you can
+        also obtain lists of arguments or supply default values. Try
+        altering the example above to take a list of files and output
+        checksums for all of them, just as the <literal>md5</literal>
+        command does.
+      </para>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left"/>
+          <colspec align="left"/>
+          <thead>
+            <row>
+              <entry>
+                Anonymous argument
+              </entry>
+              <entry>
+                OCaml type
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                sequence
+              </entry>
+              <entry>
+                <literal>list</literal> of arguments
+              </entry>
+            </row>
+            <row>
+              <entry>
+                maybe
+              </entry>
+              <entry>
+                <literal>option</literal> argument
+              </entry>
+            </row>
+            <row>
+              <entry>
+                maybe_with_default
+              </entry>
+              <entry>
+                argument with a default value if argument is missing
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <note>
+      <title>
+      Defining your own argument types
+      </title>
+      <para>
+        You can also define your own argument parsers by using the
+        <literal>Spec.Arg_type</literal> module directly. For instance,
+        the <literal>time_span</literal> converter is defined as
+        follows.
+      </para>
+      <programlisting language="ocaml">
+# open Command.Spec ;;
+# let time_span = Command.Spec.Arg_type.create Time.Span.of_string;;
+val time_span : Core.Span.t Command.Spec.Arg_type.t = &lt;abstr&gt;
+# Command.Spec.(empty +&gt; anon (&quot;span&quot; %: time_span));;
+- : (Core.Span.t -&gt; '_a, '_a) Command.Spec.t = &lt;abstr&gt;
+</programlisting>
+      </note>
+    </sect2>
   </sect1>
-  <sect1 id="using-flags-to-label-the-command-line">
-    <title>Using flags to label the command line</title>
+  <sect1 id="adding-flags-to-label-the-command-line">
+    <title>Adding flags to label the command line</title>
     <para>
       You aren't just limited to anonymous arguments on the
-      command-line, and you'll find that flags are useful once your
-      program has more options. A flag is a named field that can be
-      followed by an optional argument. These flags can appear in any
-      order on the command-line, or multiple times, depending on how
+      command-line. A <emphasis>flag</emphasis> is a named field that
+      can be followed by an optional argument. These flags can appear in
+      any order on the command-line, or multiple times, depending on how
       they're declared in the specification.
     </para>
     <para>
       Let's add two arguments to our <literal>md5</literal> command that
-      mimic the Linux version. A <literal>-s</literal> flag specifies
-      the string to be hashed directly on the command-line, and a
-      <literal>-t</literal> runs a benchmarking self-test. The complete
-      example is:
+      mimics the Linux version. A <literal>-s</literal> flag specifies
+      the string to be hashed directly on the command-line and a
+      <literal>-t</literal> runs a self-test. The complete example is:
     </para>
     <programlisting language="ocaml">
 (* mlmd5.ml : generate an MD5 hash of the input data *)
@@ -15492,12 +15654,15 @@ let command =
 let () = Command.run command
 </programlisting>
     <para>
-      The example specification uses the <literal>flag</literal> command
-      now. The first argument to <literal>flag</literal> is its name on
-      the command-line, and the <literal>doc</literal> argument supplies
-      the help text. The <literal>doc</literal> string is formatted so
-      that the first word is the short name that appears in the usage
-      text, with the remainder being the full help text. Notice that the
+      The specification now uses the <literal>flag</literal> command.
+      The first argument to <literal>flag</literal> is its name on the
+      command-line, and the <literal>doc</literal> argument supplies the
+      help text.
+    </para>
+    <para>
+      The <literal>doc</literal> string is formatted so that the first
+      word is the short name that appears in the usage text, with the
+      remainder being the full help text. Notice that the
       <literal>-t</literal> flag has no argument, and so we prepend its
       <literal>doc</literal> text with a blank space. The help text for
       the above code looks like this:
@@ -15516,7 +15681,6 @@ Generate an MD5 hash of the input data
   [-version]     print the version of this build and exit
   [-help]        print this help text and exit
                  (alias: -?)
-
 
 $ ./mlmd5 -s &quot;ocaml rocks&quot;
 5a118fe92ac3b6c7854c595ecf6419cb
@@ -16160,18 +16324,7 @@ let () = Command.run add
               <literal>apt</literal>
             </entry>
             <entry>
-              <literal>TODO</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              CentOS
-            </entry>
-            <entry>
-              <literal>yum</literal>
-            </entry>
-            <entry>
-              <literal>TODO</literal>
+              <literal>bash-completion</literal>
             </entry>
           </row>
           <row>
@@ -16187,48 +16340,27 @@ let () = Command.run add
           </row>
           <row>
             <entry>
-              Mac OS X
-            </entry>
-            <entry>
-              MacPorts
-            </entry>
-            <entry>
-              <literal>TODO</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
               FreeBSD
             </entry>
             <entry>
               Ports System
             </entry>
             <entry>
-              <literal>/usr/ports TODO</literal>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              OpenBSD
-            </entry>
-            <entry>
-              <literal>pkg_add</literal>
-            </entry>
-            <entry>
-              <literal>TODO</literal>
+              <literal>/usr/ports/shells/bash-completion</literal>
             </entry>
           </row>
         </tbody>
       </tgroup>
     </informaltable>
     <para>
-      Once you have bash completion installed and configured, check that
-      it works by typing the <literal>ssh</literal> command, and
-      pressing <literal>tab</literal>. This should show you the list of
+      Once bash completion is installed and configured, check that it
+      works by typing the <literal>ssh</literal> command, and pressing
+      <literal>&lt;tab&gt;</literal>. This should show you the list of
       known hosts from your <literal>~/.ssh/known_hosts</literal> file.
-      If it lists those, then you can continue on, but if it lists the
-      files in your current directory instead, then check your OS
-      documentation to configure completion correctly.
+      If it lists some hosts that you've recently connected to, you can
+      continue on. If it lists the files in your current directory
+      instead, then check your OS documentation to configure completion
+      correctly.
     </para>
     <para>
       One last bit of information you'll need to find is the location of
