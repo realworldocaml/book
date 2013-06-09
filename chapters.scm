@@ -159,5 +159,4 @@
  (name "packaging")
  (file "packaging-and-build-systems")
  (note "25% done, on Anil's stack")
- (public false)
  )

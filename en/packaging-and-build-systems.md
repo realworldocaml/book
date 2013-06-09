@@ -1,4 +1,4 @@
-# Packaging and Build Systems
+# Packaging
 
 ## The OCamlfind frontend
 
