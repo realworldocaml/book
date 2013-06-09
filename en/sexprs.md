@@ -423,10 +423,11 @@ The most commonly used directive is `sexp_opaque`, whose purpose is to
 mark a given component of a type as being unconvertible.  Anything
 marked with `sexp_opaque` will be presented as the atom `<opaque>` by
 the to-sexp converter, and will trigger an exception from the
-from-sexp converter.  Note that the type of a component marked as
-opaque doesn't need to have a sexp-converter defined.  Here, if we
-define a type without a sexp-converter, and then try to use it another
-type with a sexp-converter, we'll error out:
+from-sexp converter.
+
+Note that the type of a component marked as opaque doesn't need to have a
+sexp-converter defined.  Here, if we define a type without a sexp-converter,
+and then try to use another type with a sexp-converter, we'll error out:
 
 ```ocaml
 # type no_converter = int * int;;
