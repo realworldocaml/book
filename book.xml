@@ -12908,6 +12908,16 @@ val shape_ref : shape ref = {contents = &lt;obj&gt;}
 # shape_ref := (circle 2.0 :&gt; shape);;
 - : unit = ()
 </programlisting>
+      <note>
+      <title>
+      Production note
+      </title>
+      <para>
+        This chapter contains significant external contributions from
+        Leo White.
+      </para>
+      </note>
+
     </sect2>
   </sect1>
 </chapter><chapter id="classes">
@@ -14182,6 +14192,16 @@ object
    inherit ['a] fold_mixin
 end;;
 </programlisting>
+      <note>
+      <title>
+      Production note
+      </title>
+      <para>
+        This chapter contains significant external contributions from
+        Leo White.
+      </para>
+      </note>
+
     </sect2>
   </sect1>
 </chapter></part><part label="II"><title>Tools and Techniques</title><partintro><para>Part II builds on the basics by working through useful tools and techniques for using OCaml. 
