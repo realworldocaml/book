@@ -1,13 +1,12 @@
 # Handling JSON data
 
-Data serialization, _i.e._ converting data to and from a sequence of
-bytes that's suitable for writing to disk or sending across the
-network, is an important and common programming task.  Sometimes you
-need to match someone else's data format (such as XML), sometimes you
-need a highly efficient format, and sometimes you just want something
-that is easy for humans to read and edit.  To this end, OCaml comes
-with several techniques for data serialization depending on what your
-problem is.
+Data serialization, _i.e._ converting data to and from a sequence of bytes
+that's suitable for writing to disk or sending across the network, is an
+important and common programming task.  You often have to match someone else's
+data format (such as XML), sometimes you need a highly efficient format, and
+other times you want something that is easy for humans to edit.  To this end,
+OCaml comes with several techniques for data serialization depending on what
+your problem is.
 
 We'll start by using the popular and simple JSON data format, and then look at
 other serialization formats later in in the book.  This chapter introduces you
@@ -756,14 +755,15 @@ JSON are:
   unknown field encountered, instead of raising a parsing exception.
 * `-j-defaults`: always explicitly output a JSON value if possible. This requires the default value for that field to be defined in the ATD specification.
 
-The full ATD specification is quite sophisticated (and well documented
-online at its homepage).  The ATD compiler can also target formats
-other than JSON, and outputs code for other languages such as
-Java if you need more interoperability.  There are also several
-similar projects you can investigate which automate the code
-generation process: [Piqi](http://piqi.org) uses the Google protobuf
-format, and [Thrift](http://thrift.apache.org) supports many other
-programming languages and includes OCaml bindings.
+The full ATD specification is quite sophisticated (and well documented online
+at its homepage).  The ATD compiler can also target formats other than JSON,
+and outputs code for other languages such as Java if you need more
+interoperability.
+
+There are also several similar projects that automate the code generation
+process: [Piqi](http://piqi.org) uses the Google protobuf format, and
+[Thrift](http://thrift.apache.org) supports many other programming languages
+and includes OCaml bindings.
 
 ### Example: Querying Github organization information
 
@@ -812,7 +812,8 @@ let () =
   |> Command.run
 ```
 
-Finally, write a short shell script to generate the OCaml `Github_org` parsers via `atdgen`, and build the OCaml command-line interface.
+Finally, write a short shell script to generate the OCaml `Github_org` parsers
+via `atdgen`, and build the OCaml command-line interface.
 
 ```console
 $ cat _tags 
