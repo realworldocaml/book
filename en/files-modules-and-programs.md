@@ -335,21 +335,35 @@ definition is not.  Here's an abstract interface for `Counter`:
 
 ```ocaml
 (* counter.mli: abstract interface *)
-
 open Core.Std
 
+(** A collection of string frequency counts frequency counts *)
 type t
 
+(** The empty set of frequency counts  *)
 val empty : t
-val to_list : t -> (string * int) list
+
+(** Bump the frequency count for the given string. *)
 val touch : t -> string -> t
+
+(* Converts the set of frequency counts to an association list.  Every strings
+   in the list will show up at most once, and the integers will be at least
+   1. *)
+val to_list : t -> (string * int) list
 ```
 
 Note that we needed to add `empty` and `to_list` to `Counter`, since
 otherwise, there would be no way to create a `Counter.t` or get data
-out of one.
+out of one.  
 
-Here's a rewrite of `counter.ml` to match this interface.
+We also used this opportunity to document the module.  The `mli` file
+is the place where you specify your module's interface, and as such is
+is a natural place to document the module as well.  We also started
+our comments with a double asterisk to cause them to be picked up by
+the `ocamldoc` tool when generating API documentation.  We'll discuss
+`ocamldoc` more in [xref](generating-documentation-from-interfaces).
+
+Here's a rewrite of `counter.ml` to match the new `counter.mli`.
 
 ```ocaml
 (* counter.ml: implementation matching abstract interface *)
