@@ -9,8 +9,8 @@ applications.
 
 The simplest foreign function interface in OCaml doesn't even require you to
 write any C code at all!  The Ctypes library lets you define the C interface in
-pure OCaml, and the library takes care of dynamically loading the C symbols and
-invoking the function call with the appropriate arguments.
+pure OCaml, and the library then takes care of loading the C symbols and
+invoking the foreign function call.
 
 Let's dive straight into a realistic example to show you how the library looks.
 We'll create a binding to the Ncurses terminal toolkit, as it's widely
@@ -798,6 +798,32 @@ need to pass the pointer and size arguments separately to a C function.
 Unions in C are named structures that can be mapped onto the same underlying
 memory.  They are also fully supported in in Ctypes, but we won't go into more
 detail here.
+
+<note>
+<title>Lifetime of allocated Ctypes</title>
+
+Values allocated via Ctypes (i.e. using `allocate`, `Array.make` and so on)
+will not be garbage-collected as long as they are reachable from OCaml values.
+The system memory they occupy is freed when they do become unreachable, via a
+finalizer function registered with the GC.
+
+The definition of reachability for Ctypes values is a little different from
+conventional OCaml values though.  The allocation functions return an
+OCaml-managed pointer to the value, and as long as some derivative pointer is
+still reachable by the GC, the value won't be collected.
+
+"Derivative" means a pointer that's computed from the original pointer via
+arithmetic, so a reachable reference to an array element or a structure field
+protects the whole object from collection.
+
+A corollary of the above rule is that pointers written into the C heap don't
+have any effect on reachability.  For example, if you have a C-managed array of
+pointers to structs then you'll need some additional way of keeping the structs
+around to protect them from collection.  You could achieve this via a global array
+of values on the OCaml side that would keep them live until they're no longer
+needed.
+
+</note>
 
 ## Passing functions to C
 

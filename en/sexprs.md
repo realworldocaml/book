@@ -6,11 +6,13 @@ type to and from a human-readable and editable form in your own code, and not
 worry about interoperability.  Core's solution to this problem is to use
 s-expressions.
 
-S-expressions are nested paranthetical expressions whose atomic values
-are strings.  They were first popularized by the Lisp programming
-language in the 1960s, and have remained one of the simplest and most
-effective ways to encode structured data.  An example s-expression
-might look like this:
+S-expressions are nested parenthetical expressions whose atomic values are
+strings.  They were first popularized by the Lisp programming language in the
+1960s, and have remained one of the simplest and most effective ways to encode
+structured data.  There's a full definition of them available
+[online](http://people.csail.mit.edu/rivest/Sexp.txt).
+
+An example s-expression might look like this:
 
 ```scheme
 (this (is an) (s expression))
@@ -423,10 +425,11 @@ The most commonly used directive is `sexp_opaque`, whose purpose is to
 mark a given component of a type as being unconvertible.  Anything
 marked with `sexp_opaque` will be presented as the atom `<opaque>` by
 the to-sexp converter, and will trigger an exception from the
-from-sexp converter.  Note that the type of a component marked as
-opaque doesn't need to have a sexp-converter defined.  Here, if we
-define a type without a sexp-converter, and then try to use it another
-type with a sexp-converter, we'll error out:
+from-sexp converter.
+
+Note that the type of a component marked as opaque doesn't need to have a
+sexp-converter defined.  Here, if we define a type without a sexp-converter,
+and then try to use another type with a sexp-converter, we'll error out:
 
 ```ocaml
 # type no_converter = int * int;;
@@ -484,7 +487,7 @@ alternate syntax:
 ### `sexp_option`
 
 Another common directive is `sexp_option`, which is used to to make a
-record field optional in the s-expressoin.  Normally, optional values
+record field optional in the s-expression.  Normally, optional values
 are represented either as `()` for `None`, or as `(x)` for `Some x`,
 and a record field containing an option would be rendered accordingly.
 For example:
@@ -528,10 +531,9 @@ very simple web-server.
   } with sexp;;
 ```
 
-One could imagine making some of these paramters optional; in
-particular, by default, we might want the web server to bind to port
-80, and to listen as localhost.  The sexp-syntax allows this to do
-this, as follows.
+One could imagine making some of these parameters optional; in particular, by
+default, we might want the web server to bind to port 80, and to listen as
+localhost.  The sexp-syntax allows this as follows.
 
 ```ocaml
 # type http_server_config = {
@@ -539,19 +541,31 @@ this, as follows.
      port: int with default(80);
      addr: string with default("localhost");
   } with sexp;;
+```
+
+The top-level will echo back the type you just defined as usual, but also
+generate some additional conversion functions.
+
+```ocaml
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp__ : Sexplib.Sexp.t -> http_server_config =
   <fun>
 val http_server_config_of_sexp : Sexplib.Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
+```
+
+These new functions let you convert to and from s-expressions.
+
+```ocaml
 # http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))";;
-# let cfg = http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
+# let cfg =
+  http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 ```
 
-When we convert that back out to an s-expression, you'll notice that
-no data is dropped.
+When we convert the configuration back out to an s-expression, you'll notice
+that no data is dropped.
 
 ```ocaml
 # sexp_of_http_server_config cfg;;
@@ -595,5 +609,5 @@ s-expression.
 This can be very useful in designing config file formats that are both
 reasonably terse and easy to generate and maintain.  It can also be
 useful for backwards compatibility: if you add a new field to your
-config record, but you make that field optiona, then you should still
+config record, but you make that field optional, then you should still
 be able to parse older version of your config.
