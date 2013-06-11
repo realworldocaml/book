@@ -188,7 +188,8 @@ As a side note, the above is our first use of OCaml modules.  Here,
 `Float` module, and not, as you might expect from an object-oriented
 language, accessing a method of an object.  The `Float` module in
 particular contains `of_int` as well as many other useful functions
-for dealing with floats.
+for dealing with floats.  It's also worth noting that module names
+always start with a capital letter.
 
 The notation for the type-signature of a multi-argument function may
 be a little surprising at first, but we'll explain where it comes from
