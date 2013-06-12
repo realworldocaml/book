@@ -542,7 +542,7 @@ That covers the lexer.  Next, we need to combine the lexer with the parser to br
 
 ## Bringing it all together
 
-For the final part, we need to compose the lexer and parser.  As we saw the the type definition in `parser.mli`, the parsing function expects a lexer of type `Lexing.lexbuf -> token`, and it also expects a `lexbuf`.
+For the final part, we need to compose the lexer and parser.  As we saw in the type definition in `parser.mli`, the parsing function expects a lexer of type `Lexing.lexbuf -> token`, and it also expects a `lexbuf`.
 
 ```ocaml
 val prog: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Json.value option)

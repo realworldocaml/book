@@ -259,7 +259,7 @@ lightweight language construct to use in OCaml code.
 
 After the lambda form has been generated, we are very close to having
 executable code.  The OCaml tool-chain branches into two separate compilers at
-this point.  We'll describe the the bytecode compiler first, which
+this point.  We'll describe the bytecode compiler first, which
 consists of two pieces:
 
 * `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.

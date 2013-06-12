@@ -86,7 +86,7 @@ according to the generational hypothesis.
 
 The minor heap is a contiguous chunk of virtual memory that is usually a few
 megabytes in size so that it can be scanned quickly.  The runtime stores the
-the minor heap in two pointers (`caml_young_start` and `caml_young_end`) that
+minor heap in two pointers (`caml_young_start` and `caml_young_end`) that
 delimit the start and end of the heap region.
 
 ```
