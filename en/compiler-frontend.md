@@ -729,10 +729,10 @@ type checker -- but once the code does compile, it works correctly the first
 time! 
 
 There are a couple of tricks to make it easier to quickly locate type errors in
-your code.  The first is to introduce manual type annotations to narrow down
-the source of your error more accurately.  These annotations shouldn't actually
-change your types and can removed once your code is correct, but act as anchors
-to locate errors while you're still writing your code.
+your code. The first is to introduce manual type annotations to narrow down the
+source of your error more accurately.  These annotations shouldn't actually
+change your types and can be removed once your code is correct. However, they
+act as anchors to locate errors while you're still writing your code.
 
 Manual type annotations are particulary useful if you use lots of
 polymorphic variants or objects.  Type inference with row polymorphism can
