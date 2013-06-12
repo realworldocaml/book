@@ -425,7 +425,7 @@ val t_ptr : time_t ptr = <abstr>
 
 The `allocate` function takes the type of the memory to be allocated and the
 initial value, and it returns a suitably-typed pointer.  We can now call
-`ctime` using passing the pointer as an argument:
+`ctime` passing the pointer as an argument:
 
 ```ocaml
 # ctime t_ptr;;
