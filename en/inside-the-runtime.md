@@ -360,7 +360,9 @@ the remembered set is consistent.  Although the write barrier is reasonably
 efficient, it can sometimes be slower than simply allocating a fresh value on
 the fast minor heap and doing some extra minor collections.
 
-Let's see this for ourselves with a simple test program.
+Let's see this for ourselves with a simple test program.  You'll need
+to install the Core benchmarking suite via `opam install core_bench` before
+you compile this code.
 
 ```ocaml
 (* barrier_bench.ml: benchmark mutable vs immutable writes *)
