@@ -548,7 +548,7 @@ too.  Copy the earlier type definition into a `comparelib_test.mli` and rerun
 the Camlp4 dumper script.
 
 ```console
-$ ./camlp4_dump.sh test_comparelib.mli 
+$ sh camlp4_dump comparelib_test.mli 
 type t = { foo : string; bar : t }
 
 val compare : t -> t -> int
