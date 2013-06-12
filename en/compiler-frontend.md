@@ -717,7 +717,7 @@ most general choice from the possible inferences.  Manual type annotations can
 specialize the type explicitly, but the automatic inference selects the most
 general type unless told otherwise.
 
-OCaml does has some language extensions which strain the limits of principal
+OCaml does have some language extensions which strain the limits of principal
 type inference, but by and large most programs you write will never *require*
 annotations (although they sometimes help the compiler produce better error
 messages).
