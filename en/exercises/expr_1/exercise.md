@@ -1,9 +1,5 @@
-  %
-  %
-  %
-  \exercises
-  
-  \begin{exercise}{arith1}
+## Exercise
+
   For each of the following expressions, is the expression well-typed?  If it is well-typed, does it
   evaluate to a value?  If so, what is the value?
   
@@ -92,15 +88,3 @@
   
   
 1. `((*((()*))`
-  
-  \end{exercise}
-  
-  % -*-
-  % Local Variables:
-  % Mode: LaTeX
-  % fill-column: 100
-  % TeX-master: "paper"
-  % TeX-command-default: "LaTeX/dvips Interactive"
-  % End:
-  % -*-
-  % vim:tw=100:fo=tcq:
