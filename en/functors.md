@@ -39,7 +39,7 @@ mechanics of functors.
 ```ocaml
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
-# module Increment (M:X_int) : X_int = struct
+# module Increment (M : X_int) : X_int = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -> X_int
@@ -57,7 +57,7 @@ The following shows what happens when we omit the module type for the
 output of the functor.
 
 ```ocaml
-# module Increment (M:X_int) = struct
+# module Increment (M : X_int) = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -> sig val x : int end
@@ -96,17 +96,29 @@ module Three_and_more : sig val x : int val y : string end
 module Four : sig val x : int end
 ```
 
+The rules for determining whether a module matches a given signature
+are similar in spirit to the rules in an object-oriented language that
+determine whether an object satisfies a given interface.
+
 ## A bigger example: computing with intervals
 
 Let's consider a more realistic example of how to use functors: a
-library for computing with intervals.  This library will be
+library for computing with intervals.  Intervals are a common
+computational object, and they come up in different contexts.  You
+might need to work with intervals of floating point values, or
+strings, or times.  In all of these cases, the basic mechanics are the
+same: as long as you have an underlying type for the endpoints with a
+well-defined total order, you can use the same basic logic for working
+with intervals.
+
+We'll show you how to build a general purpose interval library that is
 functorized over the type of the endpoints of the intervals and the
 ordering of those endpoints.
 
 First we'll define a module type that captures the information we'll
-need about the endpoints.  This interface, which we'll call
-`Comparable`, contains just two things: a comparison function, and the
-type of the values to be compared.
+need about the endpoints of the intervals.  This interface, which
+we'll call `Comparable`, contains just two things: a comparison
+function, and the type of the values to be compared.
 
 ```ocaml
 # module type Comparable = sig
@@ -132,6 +144,11 @@ compare x y > 0     (* x > y *)
 The functor for creating the interval module is shown below.  We
 represent an interval with a variant type, which is either `Empty` or
 `Interval (x,y)`, where `x` and `y` are the bounds of the interval.
+In the following, we only implement a handful of the functions that
+one might want for a full-featured interval library.  Core contains a
+module in this style called `Interval` which has a more complete
+interface.
+
 
 ```ocaml
 # module Make_interval(Endpoint : Comparable) = struct
@@ -175,7 +192,8 @@ module Make_interval :
 
 We can instantiate the functor by applying it to a module with the
 right signature.  In the following, we provide the functor input as an
-anonymous module.
+anonymous module.  The module is anonymous because the module isn't
+named, even though the values inside it are.
 
 ```ocaml
 # module Int_interval =
