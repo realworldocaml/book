@@ -69,8 +69,8 @@ void    mvwaddstr (WINDOW *, int, int, char *);
 The Ncurses functions either operate on the current pseudo-terminal or on a
 window that has been created via `newwin`.  The `WINDOW` structure holds the
 internal library state and is considered abstract outside of Ncurses.  Ncurses
-clients just needs to store the pointer somewhere and pass it back to Ncurses
-library calls, which can then dereference its contents.
+clients just need to store the pointer somewhere and pass it back to Ncurses
+library calls, which in turn dereference its contents.
 
 Note that there are over 200 library calls in Ncurses, so we're only binding a
 select few for this example. The `initscr` and `newwin` create `WINDOW`
