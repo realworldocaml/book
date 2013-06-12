@@ -1,7 +1,7 @@
 # Classes
 
 Programming with objects directly is great for encapsulation, but one
-of the main goals of object-oriented programming is code re-use
+of the main goals of object-oriented programming is code reuse
 through inheritance.  For inheritance, we need to introduce _classes_.
 In object-oriented programming, a class is a "recipe" for creating
 objects.  The recipe can be changed by adding new methods and fields,
@@ -1050,7 +1050,7 @@ class ['a, 'b] map : object ... method iterator : 'b iterator end;;
 ```
 
 The collections are different is some ways, but they share a common
-pattern for iteration that we can re-use.  For a simple example, let's
+pattern for iteration that we can reuse.  For a simple example, let's
 define a mixin that implements an arithmetic sum for a collection of
 integers.
 

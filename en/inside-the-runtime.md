@@ -20,7 +20,7 @@ the pool of allocated heap blocks, the runtime system invokes the *garbage
 collector* (or GC). An OCaml program can't explicitly free a value when it is
 done with it. Instead, the GC regularly determines which values are *live* and
 which values are *dead*, i.e. no longer in use. Dead values are collected and
-their memory made available for re-use by the application.
+their memory made available for reuse by the application.
 
 The garbage collector doesn't keep constant track of values as they are
 allocated and used. Instead, it regularly scans them by starting from a set of
@@ -234,7 +234,7 @@ searches from the next block until the end of the free list, and then from the b
 of the free list up to that block.
 
 Next-fit allocation is the default allocation strategy.  It's quite a cheap
-allocation mechanism since the same heap chunk can be re-used across allocation
+allocation mechanism since the same heap chunk can be reused across allocation
 requests until it runs out.  This in turn means that there is good memory
 locality to use CPU caches better.
 
@@ -247,7 +247,7 @@ the chunks alone are big enough to satisfy the request.
 
 First-fit allocation focusses on reducing memory fragmentation, but at the
 expense of slower block allocation.  Every allocation scans the free list from
-the beginning for a suitable free chunk, instead of re-using the most recent
+the beginning for a suitable free chunk, instead of reusing the most recent
 heap chunk as the next-fit allocator does.
 
 For some workloads, the reduction in the frequency in heap compaction will

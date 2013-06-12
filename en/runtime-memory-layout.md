@@ -384,7 +384,7 @@ Another inefficiency over normal variants is when a polymorphic variant
 constructor has more than one parameter.  Normal variants hold parameters as a
 single flat block with multiple fields for each entry, but polymorphic variants
 must adopt a more flexible uniform memory representation since they may be
-re-used in a different context across compilation units. They allocate a tuple
+reused in a different context across compilation units. They allocate a tuple
 block for the parameters that is pointed to from the argument field of the
 variant. There are thus three additional words for such variants, along with
 an extra memory indirection due to the tuple.

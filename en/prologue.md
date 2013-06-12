@@ -152,7 +152,7 @@ functional programming_.  The world of dynamic scripting languages such as
 Javascript, Ruby and Python have all adopted healthy elements of functional
 programming, but not all of it.  Real World OCaml takes you through the full
 lifecycle of how to construct software with static typing, including the
-powerful module system that makes code re-use so much more robust.
+powerful module system that makes code reuse so much more robust.
 
 At the same time, OCaml is not Haskell.  It takes a much more pragmatic
 approach by being strictly evaluated by default and permitting arbitrary

@@ -28,7 +28,7 @@ There are five fundamental properties that differentiate OOP from other styles:
   objects may react to the same message in different ways.
 * _Subtyping_: if an object `a` has all the functionality of an object
   `b`, then we may use `a` in any context where `b` is expected.
-* _Inheritance_: the definition of one kind of object can be re-used
+* _Inheritance_: the definition of one kind of object can be reused
   to produce a new kind of object.  This new definition can override
   some behaviour, but also share code with its parent.
 * _Open recursion_: an object's methods can invoke another method in the same

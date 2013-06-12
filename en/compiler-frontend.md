@@ -41,7 +41,7 @@ Each source file represents a *compilation unit* that is built separately.  The
 compiler generates intermediate files with different filename extensions to use
 as it advances through the compilation stages.  The linker takes a collection
 of compiled units and produces a standalone executable or library archive that
-can be re-used by other applications.
+can be reused by other applications.
 
 The overall compilation pipeline looks like this:
 
@@ -78,7 +78,7 @@ The overall compilation pipeline looks like this:
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
-frontends that re-use the early stages of compilation, but produce very
+frontends that reuse the early stages of compilation, but produce very
 different final outputs. The *bytecode interpreter* is portable and can even be
 transformed into Javascript. The *native code compiler* generates specialized
 executable binaries suitable for high-performance applications.
