@@ -52,7 +52,7 @@
 1. Is there any reason to prefer one version over the other?
 1.
   In the second version, what would happen if we defined
-  the \lstinline+rev+ function as a partial application?
+  the `rev` function as a partial application?
 ```ocaml
   (* let rev l = rev_loop [] l *)
   let rev = rev_loop []

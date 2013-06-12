@@ -1,6 +1,6 @@
   
 ## Exercise
-  The input functions raise the \lstinline+End_of_file+ exception
+  The input functions raise the `End_of_file` exception
   when the end of file is reached, which dictates a style where input
   functions are always enclosed in exception handlers.  The following
   function is not tail-recursive (see

@@ -1,7 +1,7 @@
 1.
-  The lines that begin with the digit \lstinline+1+ can be
+  The lines that begin with the digit `1` can be
   printed immediately, so we need only buffer the lines beginning with
-  the digit \lstinline+2+.
+  the digit `2`.
   
 ```ocaml
   let deinterleave () =
@@ -24,5 +24,5 @@
 ```
   This code is a bit sloppy.  It doesn't deal gracefully with blank
   lines, and it assumes that any line not beginning with the
-  digit \lstinline+1+ must begin with a \lstinline+2+.
+  digit `1` must begin with a `2`.
 

@@ -8,12 +8,12 @@
   \begin{center}
   \includegraphics{network_stack}
   \end{center}
-  With this design, the \lstinline+Network+ component
-  calls \lstinline+Protocol.net_recv+ when a message arrives, and
-  the \lstinline+Protocol+ component
-  calls \lstinline+Network.net_send+ to send a message.  However,
+  With this design, the `Network` component
+  calls `Protocol.net_recv` when a message arrives, and
+  the `Protocol` component
+  calls `Network.net_send` to send a message.  However,
   this is not possible if the implementations are in separate
-  files \lstinline+protocol.ml+ and \lstinline+network.ml+
+  files `protocol.ml` and `network.ml`
   because that would introduce a cyclic dependency.
   
   Describe a method to circumvent this problem, without placing the code

@@ -1,5 +1,5 @@
 1.
-  The main problem with writing the \lstinline+input_lines+ function is in catching the \lstinline+End_of_file+ exception.
+  The main problem with writing the `input_lines` function is in catching the `End_of_file` exception.
   The following program is inefficient, because the exception stack is linear in the length of the input file.
   For large files, the stack will likely overflow.
   
@@ -11,7 +11,7 @@
             []
 ```
   \end{center}
-  The way to code this efficiently is to wrap the \lstinline+input_line+ function to catch the exception.
+  The way to code this efficiently is to wrap the `input_line` function to catch the exception.
   
   \begin{center}
 ```ocaml

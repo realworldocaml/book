@@ -1,14 +1,14 @@
   
 ## Exercise
-  You are given an input file \lstinline+data.txt+ containing
-  lines that begin with a single digit \lstinline+1+
-  or \lstinline+2+.  Write a function using
-  the \lstinline+Buffer+ module to print the file, without
+  You are given an input file `data.txt` containing
+  lines that begin with a single digit `1`
+  or `2`.  Write a function using
+  the `Buffer` module to print the file, without
   leading digits, in de-interleaved form.
   
   \begin{center}
   \begin{tabular}{lcl}
-  \lstinline+data.txt+ & $\longrightarrow$ & output\\
+  `data.txt` & $\longrightarrow$ & output\\
   \hline\\
   \begin{minipage}{2in}
 ```ocaml

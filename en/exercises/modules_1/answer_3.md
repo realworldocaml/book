@@ -3,7 +3,7 @@
   
   One solution is to add explicit type constraints to the source
   program.  For example, if we revise the definition
-  for \lstinline+add+ as follows, the correct type for it will be
+  for `add` as follows, the correct type for it will be
   inferred.
 ```ocaml
   let add x (s : 'a set) : 'a set = x :: s
@@ -17,7 +17,7 @@
   val pop : unit -> '_a
 ```
   Syntactically, the problem with this signature is the type
-  variable \lstinline+'_a+, which is not allowed in an interface
+  variable `'_a`, which is not allowed in an interface
   file.  The real problem is that the type of the reference cell is
   unspecified, but it can only be used with one type.  To fix the
   signature, we must choose a specific type for the stack.  For example,

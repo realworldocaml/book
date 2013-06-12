@@ -1,19 +1,19 @@
   
 ## Exercise
   Suppose you are given three values
-  \lstinline+(x, y, z) : string * int * string+.
-  Using \lstinline+printf+, print a single line in the following
+  `(x, y, z) : string * int * string`.
+  Using `printf`, print a single line in the following
   format.
   
   \begin{itemize}
 1.
   
-  The string \lstinline+x+ should be printed left-justified, with
+  The string `x` should be printed left-justified, with
   a minimum column width of 5 characters.
 1.
   
-  The integer \lstinline+y+ should be printed in hex with the
-  prefix \lstinline+0x+, followed by 8 hexadecimal digits,
+  The integer `y` should be printed in hex with the
+  prefix `0x`, followed by 8 hexadecimal digits,
   followed by a single space.
 1.
   
@@ -21,6 +21,6 @@
   column width of 3 characters.
 1.
   
-  The line should be terminated with a newline \lstinline+\n+.
+  The line should be terminated with a newline `\n`.
   \end{itemize}
   

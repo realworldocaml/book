@@ -16,7 +16,7 @@
   Write an OCaml function
   `%%`
   that computes the GCD using Euclid's algorithm (so 
-  \hbox{`n %% m`}
+  `n %% m`
   is the GCD of the integers `n` and `m`).  You should define it without
   assignment, as a recursive function.  [Note, this is Euclid's original definition of the
     algorithm.  More modern versions usually use a modulus operation instead of subtraction.]

@@ -60,7 +60,7 @@
 1.
   
   Yet another option is to define a third file,
-  say \lstinline+link.ml+ that builds the recursive definition in
+  say `link.ml` that builds the recursive definition in
   a single file.  Each of the layer functions would take as arguments
   the functions that it expects to call.
   

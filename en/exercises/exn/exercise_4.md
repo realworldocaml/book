@@ -1,8 +1,8 @@
   
 ## Exercise
-  Suppose we are given a \lstinline+table+ as in the last exercise, and we wish to call some function
-  \lstinline+f+ on one of the entries, or returning 0 if the entry is not found.  That is, we are given the
-  function \lstinline+f+, and a name, and we wish to evaluate \lstinline+f (List.assoc table name)+.  What is
+  Suppose we are given a `table` as in the last exercise, and we wish to call some function
+  `f` on one of the entries, or returning 0 if the entry is not found.  That is, we are given the
+  function `f`, and a name, and we wish to evaluate `f (List.assoc table name)`.  What is
   the difference between the following functions?
   
 1. 

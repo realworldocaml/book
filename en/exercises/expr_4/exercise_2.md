@@ -10,8 +10,8 @@
 1. \lstinline$[|[]|]$
   
   
-1. \lstinline+{ fst = []; snd = [] }+
+1. `{ fst = []; snd = [] }`
   
   
-1. \lstinline+{ { fst = (); snd = 2 } with fst = 1 }+
+1. `{ { fst = (); snd = 2 } with fst = 1 }`
   

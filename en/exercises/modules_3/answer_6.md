@@ -94,7 +94,7 @@
    (P3 : Pipeline with type t = $t_3$) = F1 (F2 (P3))
 ```
   The proper types are then as follows $t_3
-  = \hbox{`P3.t`}$, $t_2
+  = `P3.t`$, $t_2
   = \lstinline{F2(P3).t}$, and $t_1
   = \lstinline{F1(F2(P3)).t}$.  However, using these definitions
   directly is not possible because it would create forward references in

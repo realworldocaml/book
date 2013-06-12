@@ -1,8 +1,8 @@
 1.
   This seems like it would be straightforward
-  with \lstinline+printf+, we would just calculate the width of
+  with `printf`, we would just calculate the width of
   the first column, and produce the right format string.  For example,
-  if the variable \lstinline+words+ contains the word list, and
+  if the variable `words` contains the word list, and
   the width of the first column is computed to be 20 characters, we
   would use the following printer.
   
@@ -11,7 +11,7 @@
      printf "%-20s %s\n" w1 w2) words
 ```
   However, this doesn't work in general because the format string must
-  be computed, and \lstinline+printf+ requires a literal string.
+  be computed, and `printf` requires a literal string.
   
 ```ocaml
   # let fmt = sprintf "%%-%ds %%s\n" 20;;
@@ -32,7 +32,7 @@
   @
 ```
   Instead, we can define a ``padding'' function,
-  and use it to justify the output, using the \lstinline+%a+
+  and use it to justify the output, using the `%a`
   format specifier.
   
 ```ocaml
@@ -51,8 +51,8 @@
               print_pad (width - String.length s1) s2) l
 ```
   As it turns out, there \emph{is} a way to
-  use \lstinline+printf+ directly.  If the width specifier is the
-  character \lstinline+*+, then \lstinline+printf+ expects
+  use `printf` directly.  If the width specifier is the
+  character `*`, then `printf` expects
   the width specifier to be passed as an argument.
   
 ```ocaml

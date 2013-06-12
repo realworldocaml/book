@@ -1,5 +1,5 @@
 1.
-  The \lstinline+output_string+ function can be used to print the
+  The `output_string` function can be used to print the
   line.
   
 ```ocaml

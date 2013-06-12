@@ -1,10 +1,10 @@
   
 ## Exercise
-  In the following program, the function \lstinline+sum_entries+ sums up the integer values associated with
-  each name in the list \lstinline+names+.  The \lstinline+List.assoc+ function finds the value associated with
-  the name, raising the \lstinline+Not_found+ exception if the entry is not found.  For example, the
-  expression \lstinline+sum_entries 0 ["a"; "c"]+ would evaluate to \lstinline+35+, and the expression
-  \lstinline+sum_entries 0 ["a"; "d"]+ would raise the \lstinline+Not_found+ exception.
+  In the following program, the function `sum_entries` sums up the integer values associated with
+  each name in the list `names`.  The `List.assoc` function finds the value associated with
+  the name, raising the `Not_found` exception if the entry is not found.  For example, the
+  expression `sum_entries 0 ["a"; "c"]` would evaluate to `35`, and the expression
+  `sum_entries 0 ["a"; "d"]` would raise the `Not_found` exception.
   
   \begin{center}
 ```ocaml
