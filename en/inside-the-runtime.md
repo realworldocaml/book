@@ -274,13 +274,13 @@ incrementally by marking the heap in *slices*.  Each value in the heap has a
 whether the value has been marked, so that the GC can resume easily between
 slices.
 
-Tag Color   Block Status
----------   ------------
-blue        on the free list and not currently in use
-white       not reached yet, but possibly reachable
-gray        reachable, but its fields have not been scanned
-black       reachable, and its fields have been scanned
-
+Tag Color                   Block Status
+---------                   ------------
+blue                        on the free list and not currently in use
+white (during marking)      not reached yet, but possibly reachable 
+white (during sweeping)     unreachable and can be freed
+gray                        reachable, but its fields have not been scanned
+black                       reachable, and its fields have been scanned
 
 The marking process starts with a set of *root* values that are always live
 (such as the application stack).  All values on the heap are initially marked
