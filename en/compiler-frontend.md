@@ -2,9 +2,9 @@
 
 Compiling source code into executable programs is a fairly complex process that
 involves quite a few tools -- preprocessors, compilers, runtime libraries,
-linkers and assemblers.  It's important how to understand how these fit
-together to help with your day-to-day workflow of developing, debugging and
-deploying applications.
+linkers and assemblers.  It's important to understand how these fit together to
+help with your day-to-day workflow of developing, debugging and deploying
+applications.
 
 OCaml has a strong emphasis on static type safety and rejects source code that
 doesn't meet its requirements as early as possible.  The compiler does this by
