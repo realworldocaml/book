@@ -106,6 +106,8 @@ the terminal.
 
 ```ocaml
 (* ncurses.ml 2/3 *)
+open Foreign
+
 let initscr =
   foreign "initscr" (void @-> (returning window))
 ```
@@ -162,7 +164,7 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running:
 
 ```console
-$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.mli 
+$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.ml
 ```
 
 The OCaml signature can be customized to improve its safety for external
