@@ -146,7 +146,7 @@ requests for OCaml blocks.
 
 The major heap is typically much larger than the minor heap and can scale to
 gigabytes in size. It is cleaned via a mark-and-sweep garbage collection
-algorithm that operates in several phases:
+algorithm that operates in several phases.
 
 * The *mark* phase scans the block graph and marks all live blocks by setting
   a bit in the tag of the block header (known as the *color* tag).
@@ -154,7 +154,8 @@ algorithm that operates in several phases:
   that weren't marked earlier.
 * The *compact* phase relocates live blocks into a freshly allocated heap to 
   eliminate gaps in the free list. This prevents the fragmentation of heap blocks
-  in long-running programs.
+  in long-running programs, and normally occurs much less frequently than the mark
+  and sweep phases. 
 
 A major garbage collection must *stop the world* (that is, halt the
 application) to ensure that blocks can be moved around without this being
