@@ -27,16 +27,14 @@ let get_definition_from_json json =
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
-    Cohttp_async.Client.call `GET (query_uri ~server word)
-    >>= function
-    | None | Some (_, None) -> return (word, None)
-    | Some (_, Some body) ->
-      Pipe.to_list body >>| fun strings ->
-      (word, get_definition_from_json (String.concat strings)))
+    Cohttp_async.Client.get (query_uri ~server word)
+    >>= fun  (_, body) ->
+    Pipe.to_list body
+    >>| fun strings ->
+    (word, get_definition_from_json (String.concat strings)))
   >>| function
   | Ok (word,result) -> (word, Ok result)
-  | Error exn        -> (word, Error exn)
-
+  | Error _          -> (word, Error "Unexpected failure")
 
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
@@ -44,7 +42,7 @@ let print_result (word,definition) =
     word
     (String.init (String.length word) ~f:(fun _ -> '-'))
     (match definition with
-     | Error _ -> "DuckDuckGo query failed unexpectedly"
+     | Error s -> "DuckDuckGo query failed: " ^ s
      | Ok None -> "No definition found"
      | Ok (Some def) ->
        String.concat ~sep:"\n"
@@ -52,8 +50,11 @@ let print_result (word,definition) =
 
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
-let search_and_print ~server words =
-  Deferred.List.map words ~f:(get_definition ~server) ~how:`Parallel
+let search_and_print ~servers words =
+  let servers = Array.of_list servers in
+  Deferred.all (List.mapi words ~f:(fun i word ->
+    let server = servers.(i mod Array.length servers) in
+    get_definition ~server word))
   >>| fun results ->
   List.iter results ~f:print_result
 
@@ -61,10 +62,12 @@ let () =
   Command.async_basic
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
+      let string_list = Arg_type.create (String.split ~on:',') in
       empty
       +> anon (sequence ("word" %: string))
-      +> flag "-server" (optional_with_default "api.duckduckgo.com" string)
+      +> flag "-servers"
+           (optional_with_default ["api.duckduckgo.com"] string_list)
            ~doc:" Specify server to connect to"
     )
-    (fun words server () -> search_and_print ~server words)
+    (fun words servers () -> search_and_print ~servers words)
   |> Command.run

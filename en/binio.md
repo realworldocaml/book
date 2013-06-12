@@ -1,29 +1,194 @@
+# Fast Binary Serialization
+
+Now that we've learned the basics of working with Async, let's walk
+through a small but non-trivial application: a message broker which
+provides clients with a simple pub/sub API that lets them publish and
+subscribe to streams of values associated with a given topic.
+
+All of this will require a serialization format for the messages
+themselves.  S-expressions, which we encountered in
+[xref](#data-serialization-with-s-expressions), are a good
+serialization format when you need something machine-parseable as well
+as human readable and editable.  But Sexplib's s-expressions are not
+particularly performant for a couple of reasons:
+
+* s-expression serialization goes through an intermediate type,
+  `Sexp.t`, which must be allocated and is then typically thrown away,
+  putting non-trivial pressure on the garbage collector.
+* parsing and printing to strings in an ASCII format can be expensive
+  for types like `int`s, `float`s and `Time.t`s where some real
+  computation needs to be done to produce or parse the ASCII
+  representation.
+
+Bin-prot is a library and syntax extension that addresses these issues
+by providing efficient serialization in a compact binary format.  You
+can enable Bin-prot in your top-level by typing the following:
+
+```ocaml
+# #require "bin_prot.syntax";;
+```
+
+The syntax extension is triggered on a given type by writing `with
+bin_io` to the end of the type definition.  Thus, we can write:
+
+```ocaml
+# module M = struct
+    type t = { number: int;
+               text: string;
+               variant : [`Whatever of float | `Nothing ];
+             }
+    with bin_io
+  end;;
+module M :
+  sig
+    type t = {
+      number : int;
+      text : string;
+      variant : [ `Nothing | `Whatever of float ];
+    }
+    val bin_size_t : t -> int
+    val bin_write_t_ :
+      Bin_prot.Unsafe_common.sptr ->
+      Bin_prot.Unsafe_common.eptr -> t -> Bin_prot.Unsafe_common.sptr
+    val bin_write_t : Bin_prot.Common.buf -> pos:int -> t -> int
+    val bin_writer_t : t Bin_prot.Type_class.writer0
+    val bin_read_t__ : 'a -> 'b -> 'c -> 'd
+    val bin_read_t_ :
+      Bin_prot.Unsafe_common.sptr_ptr -> Bin_prot.Unsafe_common.eptr -> t
+    val bin_read_t : Bin_prot.Common.buf -> pos_ref:int ref -> t
+    val bin_reader_t : t Bin_prot.Type_class.reader0
+    val bin_t : t Bin_prot.Type_class.t0
+  end
+```
+
+The details of the generated values are not particularly important,
+but they give you the functionality needed to serialize and
+deserialize binary messages efficiently.
+
+Clients can either publish values under a topic, or subscribe to
+the stream of values associated with a given topic.  The server will
+maintain a cache of the last value published under any given topic, so
+that a subscriber immediately receives the most recently published
+value under said topic.  To make it easier to see what's going on,
+we'll also implement a query for dumping the current state of the
+server.
+
+We'll use Async's `Rpc` module for implementing that client/server
+protocol.  The following module specifies the specific message types
+we'll use, as well as the RPCs that will be used for communicating
+with the server.
+
+First, we'll start with the basic types.
+
+```ocaml
+(* file: protocol.ml *)
+open Core.Std
+open Async.Std
+
+module Username : Identifiable = String
+module Topic    : Identifiable = String
+
+module Message = struct
+  type t = { text: string;
+             topic: Topic.t;
+             from: Username.t;
+             time: Time.t;
+           }
+  with sexp, bin_io
+end
+```
+
+`Username.t` and `Topic.t` are just abstract types that are
+implemented as strings.  The `Message.t` type contains the basic
+information associated with a message, including the text of the
+message, who it's from, the topic, and the time it was sent.
+
+Note that the declaration of `Message.t` is followed by the annotation
+`with sexp, bin_io`.  We've seen `with sexp` before in
+[xref](#data-serialization-with-s-expressions), but `bin_io` is new.
+S-expressions are a convenient serialization format, but like any
+human-readable serialization format, 
+
+Now we can move on to declaring the `Rpc` protocol we'll use.  The
+`Rpc` module actually supports two different kinds of RPC protocols:
+an ordinary RPC, represented by an `Rpc.Rpc.t`, is a simple
+back-and-forth style of communication: the client sends a message, and
+the server sends a response.  In the following, we use
+`Rpc.Rpc.create` to declare the `Rpc` interface.
+
+```ocaml
+let publish_rpc = Rpc.Rpc.create
+  ~name:"publish"
+  ~version:0
+  ~bin_query:Message.bin_t
+  ~bin_response:Unit.bin_t
+```
+
+Note that we declare a name for the RPC and a version number.  The
+name and the version number are used together to identify which RPC is
+being sent, with the version number allowing the minting of multiple
+revisions of the RPC, potentially with different types and behavior.
+
+The argument `bin_query` and `bin_response` are used
+
+
+```ocaml
+let subscribe_rpc = Rpc.Pipe_rpc.create
+  ~name:"subscribe"
+  ~version:0
+  ~bin_query:Topic.bin_t
+  ~bin_response:Message.bin_t
+  ~bin_error:String.bin_t
+
+module Dump = struct
+  type single = { topic : Topic.t;
+                  message : Message.t;
+                  num_subscribers: int; }
+  with sexp,bin_io
+  type t = single list with sexp,bin_io
+end
+
+let dump_rpc = Rpc.Rpc.create
+  ~name:"dump"
+  ~version:0
+  ~bin_query:Unit.bin_t
+  ~bin_response:Dump.bin_t
+```
 # Fast Binary Serialization with bin_prot
 
 S-expressions are a good serialization format when you need something
 machine-parseable as well as human readable and editable.  But Sexplib's
 s-expressions are not particularly performant for a couple of reasons:
 
-* s-expression serialization goes through an intermediate type, `Sexp.t`, which must be allocated and is then typically thrown away, putting non-trivial pressure on the garbage collector.
-* parsing and printing to strings in an ASCII format can be expensive for types like `int`s, `float`s and `Time.t`s where some real computation needs to be done to produce or parse the ASCII representation.
+* s-expression serialization goes through an intermediate type,
+  `Sexp.t`, which must be allocated and is then typically thrown away,
+  putting non-trivial pressure on the garbage collector.
+* parsing and printing to strings in an ASCII format can be expensive
+  for types like `int`s, `float`s and `Time.t`s where some real
+  computation needs to be done to produce or parse the ASCII
+  representation.
 
-`Bin_prot` is a library that addresses these issues by providing fast serialization in a compact binary format.  We'll also introduce the Core `Bigstring` library for handling large binary strings efficiently during this chapter.
+`Bin_prot` is a library that addresses these issues by providing fast
+serialization in a compact binary format.  We'll also introduce the
+Core `Bigstring` library for handling large binary strings efficiently
+during this chapter.
 
 <note>
 <title>Using `bin_prot` in the toplevel</title>
 
-The `bin_prot` syntax extension isn't activated by default in the toplevel, but is easily available
-if you add this to your `~/.ocamlinit` file.
-You can also just type this in directly into `utop` (with `;;` to finish the line) instead.
+The `bin_prot` syntax extension isn't activated by default in the
+toplevel, but is easily available if you add this to your
+`~/.ocamlinit` file.  You can also just type this in directly into
+`utop` (with `;;` to finish the line) instead.
 
 ```
 #require "bin_prot.syntax"
 ```
 
-The extension is activated by putting `with bin_io` after the type declaration.
-This looks a bit unsightly in the toplevel because of all the definitions that
-are generated.  We'll elide those definitions in the book, but you can see them
-for yourself in the toplevel.
+The extension is activated by putting `with bin_io` after the type
+declaration.  This looks a bit unsightly in the toplevel because of
+all the definitions that are generated.  We'll elide those definitions
+in the book, but you can see them for yourself in the toplevel.
 
 </note>
 
@@ -211,7 +376,6 @@ module Fields :
   end
 ```
 
-
 There are several syntax extensions distributed with Core, including:
 
 - **Sexplib**: provides serialization for s-expressions.
@@ -231,4 +395,3 @@ There are several syntax extensions distributed with Core, including:
 
 We'll discuss each of these syntax extensions in detail, starting with
 Sexplib.
-

@@ -41,12 +41,12 @@ C++, Java, C#, Ruby, Python or Javascript.
 
 ## When to use objects ##
 
-You might wonder when to use objects in OCaml, which has a multitude
-of alternative mechanisms to express the same concept.
-First-class modules are more expressive (a module can include types, while classes and objects cannot).
-Modules, functors, and algebraic data types also offer a wide range of
-ways to express program structure.  In fact, many seasoned OCaml
-programmers rarely use classes and objects, if at all.
+You might wonder when to use objects in OCaml, which has a multitude of
+alternative mechanisms to express the same concept.  First-class modules are
+more expressive (a module can include types, while classes and objects cannot).
+Modules, functors, and algebraic data types also offer a wide range of ways to
+express program structure.  In fact, many seasoned OCaml programmers rarely use
+classes and objects, if at all.
 
 Modules already provide these features in some form, but the main
 focus of classes is on code re-use through inheritance and late
@@ -61,13 +61,16 @@ parameterize your module code so that some part of it can be
 implemented later, you would write a function or functor.  This is more
 explicit, but often more verbose than overriding a method in a class.
 
-In general, a rule of thumb is: use classes and objects in situations
-where dynamic binding is a big win, for example if you have many similar
-variations in the implementation of a concept.  Two good examples are Xavier
-Leroy's [Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit),
-which provides a variety of cryptographic primitives that can be combined in
-building-block style, and the [Camlimages](http://cristal.inria.fr/camlimages/) library which
-manipulates various graphical file formats.
+In general, a rule of thumb is: use classes and objects in situations where
+dynamic binding is a big win, for example if you have many similar variations in
+the implementation of a concept.  Two good examples are Xavier Leroy's
+[Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit), which
+provides a variety of cryptographic primitives that can be combined in
+building-block style, and the [Camlimages](http://cristal.inria.fr/camlimages/)
+library which manipulates various graphical file formats.  And, of course, the
+use of objects isn't just a programming choice -- it might be driven by design
+choices, or because of the need to interact with existing components that are
+already object oriented.
 
 In this chapter, we'll introduce you to the basics of object definition and use
 in OCaml, and then demonstrate their use with an example using Cryptokit.
@@ -522,8 +525,8 @@ in all three places, but the extra text may not help clarity.  A
 convenient middle ground is to annotate the fields and/or class
 parameters, and add constraints to methods only if necessary.
 
-Next, we can define the list itself.  We'll keep a field `head` the
-refers to the first element in the list, and `last` refers to the
+Next, we can define the list itself.  We'll keep a field `head` that
+refers to the first element in the list, and `last` that refers to the
 final element in the list.  The method `insert` adds an element to the
 end of the list.
 
@@ -585,7 +588,7 @@ class Iterator {
 
 OCaml support both styles.  In fact, OCaml is more flexible than these
 approaches because an object type can be implemented by any object
-with the appropriate methods, it does not have to be specified by the
+with the appropriate methods; it does not have to be specified by the
 object's class _a priori_.  We'll leave abstract classes for later.
 Let's demonstrate the technique using object types.
 
@@ -593,7 +596,7 @@ First, we'll define an object type `iterator` that specifies the
 methods in an iterator.
 
 ```ocaml
-type 'a iterator = < get : 'a; has_value : bool; next : unit >;;`
+type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
 ```
 
 Next, we'll define an actual iterator for the class `slist`.  We can
@@ -656,7 +659,7 @@ method iter f =
   while it#has_value do
     f it#get
     it#next
-  end
+  done
 ```
 
 What about functional operations similar to `List.map` or `List.fold`?
@@ -835,7 +838,7 @@ end = SList
 
 In this signature, we've chosen to make nearly everything visible.
 The class type for `slist` specifies the types of the fields `first`
-and `last`, as well ad the types of each of the methods.  We've also
+and `last`, as well as the types of each of the methods.  We've also
 included a class type for `slist_iterator`, which is of somewhat more
 questionable value, since the type doesn't appear in the type for
 `slist` at all.

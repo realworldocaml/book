@@ -142,7 +142,7 @@ Compile this file with `menhir`.  It will issue multiple warnings about unused
 tokens because we haven't actually defined a grammar yet.  It is ok to ignore
 the warnings for now.
 
-```
+```console
 $ menhir parser.mly
 Warning: the token COLON is unused.
 ...
@@ -153,7 +153,7 @@ perform parsing from the `parser.mly` description.  The `parser.ml` contains an
 automaton implementation, and is generally difficult to read.  However, the
 `parser.mli` contains declarations that we need to build a lexer.
 
-```
+```console
 $ cat parser.mli
 exception Error
 

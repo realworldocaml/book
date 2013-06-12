@@ -40,10 +40,3 @@ let dump_rpc = Rpc.Rpc.create
   ~bin_query:Unit.bin_t
   ~bin_response:Dump.bin_t
 
-
-let shutdown_rpc = Rpc.Rpc.create
-  ~name:"shutdown"
-  ~version:0
-  ~bin_query:Unit.bin_t
-  ~bin_response:Unit.bin_t
-
