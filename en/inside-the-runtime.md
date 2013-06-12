@@ -420,7 +420,7 @@ significantly longer to complete than the immutable one, but allocates many
 fewer minor heap words than the immutable version.  Minor allocation in OCaml
 is very fast and so it is often better to use immutable data structures in
 preference to the more conventional mutable versions.  On the other hand, if
-you only rarely mutable a value, it can be faster to take the write barrier hit
+you only rarely mutate a value, it can be faster to take the write barrier hit
 and not allocate at all.
 
 The only way to know for sure is to benchmark your program under real-world
