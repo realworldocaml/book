@@ -1236,7 +1236,7 @@ The typed AST that is normally output as a compiled `cmt` file can be displayed
 in a more developer-readable form via the `-dtypedtree` option.
 
 ```console
-$ ocamlc -dtypedtree typedef.m
+$ ocamlc -dtypedtree typedef.ml
 [
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Pstr_type [
