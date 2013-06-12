@@ -298,13 +298,13 @@ them while it follows their fields.  If this happens, the heap is marked as
 *impure* and a more expensive check is initiated once the existing gray values
 have been processed.
 
-To mark an impure heap. the GC first marks it as pure and walks through the
+To mark an impure heap, the GC first marks it as pure and walks through the
 entire heap block-by-block in increasing order of memory address. If it finds a
 gray block, it adds it to the gray list and recursively marks it using the
 usual strategy for a pure heap.  Once the scan of the complete heap is
 finished, the mark phase checks again whether the heap has again become impure,
-and repeats the scan if it is . These full-heap scans will continue until a
-successful scan completes without overflowing the gray list.
+and repeats the scan until if it is. These full-heap scans will continue until
+a successful scan completes without overflowing the gray list.
 
 <note>
 <title>Controlling major heap collections</title>
