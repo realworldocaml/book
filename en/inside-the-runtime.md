@@ -170,7 +170,7 @@ sorted in increasing order of virtual address.  Each chunk is a single memory
 region allocated via *malloc(3)* and consists of a header and data area which
 contains OCaml heap chunks.  A heap chunk header contains:
 
-* the *malloc*'ed virtual address of the memory region containing the hunk.
+* the *malloc*'ed virtual address of the memory region containing the chunk.
 * the size in bytes of the data area.
 * an allocation size in bytes used during heap compaction to merge small blocks to defragment the heap.
 * a link to the next heap chunk in the list.
