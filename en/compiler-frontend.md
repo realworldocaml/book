@@ -341,7 +341,8 @@ detailed output.
 * [ocamldoc-generators](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
   support for Bibtex references within comments and generating literate
   documentation that embeds the code alongside the comments.
-* JSON output is available via `odoc_json` (TODO: pull out of Xen).
+* JSON output is available via a custom [generator](https://github.com/xen-org/ocamldoc-json)
+  in Xen.
 
 </tip>
 
