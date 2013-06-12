@@ -149,10 +149,10 @@ parameters via the `+>` combinator.  Our example uses the `anon` function to
 define a single anonymous parameter.
 
 Anonymous parameters are created using the `%:` operator, which binds a textual
-string name (used in help text) to an OCaml conversion function.  The
+string name (used in the help text) to an OCaml conversion function.  The
 conversion function is responsible for parsing the command-line fragment into
 an OCaml data type.  In the example above, this is just a `string`, but we'll
-see more complex conversion options below
+see more complex conversion options below.
 
 ### Callback functions
 
