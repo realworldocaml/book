@@ -882,7 +882,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996."
 
 When programming with external resources, errors are everywhere:
 everything from a flaky server to a network outage to exhausting of
-local resources can lead to a run-time error.  When programming in
+local resources can lead to a runtime error.  When programming in
 OCaml, some of these errors will show up explicitly in a function's
 return type, and some of them will show up as exceptions.  We covered
 exception handling in OCaml in [xref](#exceptions), but as we'll see,

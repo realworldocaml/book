@@ -277,7 +277,7 @@ rarely use classes and objects, if at all.
 
 Objects have some advantages over records: they don't require type definitions
 and their support for row polymorphism makes them more flexible. However, the
-heavy syntax and additional run-time cost means that objects are rarely used in
+heavy syntax and additional runtime cost means that objects are rarely used in
 place of records.
 
 The real benefits of objects come from the class system. Classes support
