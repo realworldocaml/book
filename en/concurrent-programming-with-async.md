@@ -3,10 +3,10 @@
 The logic of building programs that interact with the outside world is
 often dominated by waiting: waiting for the click of a mouse, or for
 data to be fetched from disk, or for space to be available on an
-outgoing network buffer.  Even mildly sophisticated sophisticated
-interactive applications are typically _concurrent_, needing to wait
-for multiple different events at the same time, responding immediately
-to whatever event happens first.
+outgoing network buffer.  Even mildly sophisticated interactive
+applications are typically _concurrent_, needing to wait for multiple
+different events at the same time, responding immediately to whatever
+event happens first.
 
 A common approach to concurrency is to use preemptive system threads,
 which is the most common solution in languages like Java or C#.  In
@@ -89,7 +89,7 @@ val contents : string Deferred.t = <abstr>
 The value in `contents` isn't yet determined in part because there's
 nothing running that could do the necessary I/O.  When using Async,
 processing of I/O and other events is handled by the Async scheduler.
-When writing a stand-along program, you need to start the scheduler
+When writing a stand-alone program, you need to start the scheduler
 explicitly, but utop knows about Async, and can start the scheduler
 automatically.  More than that, utop knows about deferred values, and
 when you type in an expression of type `Deferred.t`, it will make sure
@@ -113,9 +113,9 @@ let's consider the type-signature of bind.
 ```
 
 Thus, `Deferred.bind d f` takes a deferred value `d` and a function f
-that is to be run with value of `d` once it's determined.  The call to
-`Deferred.bind` returns a new deferred that becomes determined when
-the deferred returned by `f` is determined.  It also implicitly
+that is to be run with the value of `d` once it's determined.  The
+call to `Deferred.bind` returns a new deferred that becomes determined
+when the deferred returned by `f` is determined.  It also implicitly
 registers with the scheduler an _Async job_ that is responsible for
 running `f` once `d` is determined.
 
@@ -141,24 +141,26 @@ operator, we can rewrite `uppercase_file` as follows.
 
 ```ocaml
 # let uppercase_file filename =
-    Reader.file_contents filename >>= fun text ->
+    Reader.file_contents filename
+    >>= fun text ->
     Writer.save filename ~contents:(String.uppercase text)
   ;;
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
 In the above we've dropped the parenthesis around the function on the
-right-hand side of the bind, and we've didn't add a level of
-indentation for the contents of that function.  This is standard
-practice for using the bind operator.
+right-hand side of the bind, and we didn't add a level of indentation
+for the contents of that function.  This is standard practice for
+using the bind operator.
 
 Now let's look at another potential use of bind.  In this case, we'll
 write a function that counts the number of lines in a file.
 
 ```ocaml
 # let count_lines filename =
-    Reader.file_contents filename >>= fun text ->
-    List.length (String.split text ~on:'\n');;
+    Reader.file_contents filename
+    >>= fun text ->
+    List.length (String.split text ~on:'\n')
   ;;
 ```
 
@@ -189,8 +191,9 @@ Using `return`, we can make `count_lines` compile.
 
 ```ocaml
 # let count_lines filename =
-    Reader.file_contents filename >>= fun text ->
-    return (List.length (String.split text ~on:'\n'));;
+    Reader.file_contents filename
+    >>= fun text ->
+    return (List.length (String.split text ~on:'\n'))
   ;;
 val count_lines : string -> int Deferred.t = <fun>
 ```
@@ -214,8 +217,9 @@ rewrite `count_lines` again a bit more succinctly:
 
 ```ocaml
 # let count_lines filename =
-    Reader.file_contents filename >>| fun text ->
-    List.length (String.split text ~on:'\n');;
+    Reader.file_contents filename
+    >>| fun text ->
+    List.length (String.split text ~on:'\n')
   ;;
 val count_lines : string -> int Deferred.t = <fun>
 ```
@@ -270,7 +274,7 @@ An action is handed to `schedule` in the form of a deferred-returning
 thunk (a thunk is a function whose argument is of type `unit`).  A
 deferred is handed back to the caller of `schedule` that will
 eventually be filled with the contents of the deferred value returned
-by the thunk to be scheduled.  We can implement this using an `ivar`
+by the thunk to be scheduled.  We can implement this using an ivar
 which we fill after the thunk is called and the deferred it returns
 becomes determined.  Instead of using `bind` or `map` for scheduling
 these events, we'll use a different operator called `upon`.  Here's
@@ -290,7 +294,7 @@ where every call to `schedule` adds a thunk to the queue, and also
 schedules a job in the future to grab a thunk off the queue and run
 it.  The waiting will be done using the function `after` which takes a
 time span and returns a deferred which becomes determined after that
-time span elapses.  The role of the `ivar` here is to take the value
+time span elapses.  The role of the ivar here is to take the value
 returned by the thunk and use it to fill the deferred returned by the
 provided thunk.
 
@@ -351,13 +355,13 @@ let rec copy_blocks buffer r w =
 ```
 
 Bind is used in the above code to sequence the operations: first, we
-call `Reader.read` to get a block of input, then, when that's complete
-and if a new block was returned, we write that block to the writer.
-Finally, we wait until the writer's buffers are flushed, waiting on
-the deferred returned by `Writer.flushed`, at which point we recur.
-If we hit an end-of-file condition, the loop is ended.  The deferred
-returned by a call to `copy_blocks` becomes determined only once the
-end-of-file condition is hit.
+call `Reader.read` to get a block of input.  Then, when that's
+complete and if a new block was returned, we write that block to the
+writer.  Finally, we wait until the writer's buffers are flushed,
+waiting on the deferred returned by `Writer.flushed`, at which point
+we recur.  If we hit an end-of-file condition, the loop is ended.  The
+deferred returned by a call to `copy_blocks` becomes determined only
+once the end-of-file condition is hit.
 
 One important aspect of how this is written is that it uses
 _pushback_, which is to say that if the writer can't make progress
@@ -365,6 +369,16 @@ writing, the reader will stop reading.  If you don't implement
 pushback in your servers, then a stopped client can cause your program
 to leak memory, since you'll need to allocate space for the data
 that's been read in but not yet written out.
+
+Another memory leak you might be concerned with is the chain of
+deferreds that is built up as you go through the loop.  After all,
+this code constructs an ever-growing chain of binds, each of which
+creates a deferred.  In this case, however, all of the deferreds
+should become determined precisely when the final deferred in the
+chain is determined, in this case, when the `Eof` condition is hit.
+Because of this, we could safely replace all of these deferreds with a
+single deferred.  Async has logic to do just this, which is
+essentially a form of tail-call optimization.
 
 `copy_blocks` provides the logic for handling a client connection, but
 we still need to set up a server to receive such connections and
@@ -374,14 +388,15 @@ and servers.
 
 ```ocaml
 (** Starts a TCP server, which listens on the specified port, invoking
-    copy_lines every time a client connects. *)
+    copy_blocks every time a client connects. *)
 let run () =
-  let buffer = String.create (16 * 1024) in
   let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
       (Tcp.on_port 8765)
-      (fun _addr r w -> copy_blocks buffer r w)
+      (fun _addr r w ->
+         let buffer = String.create (16 * 1024) in
+         copy_blocks buffer r w)
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 ```
@@ -647,7 +662,7 @@ need.
 - `uri`, a library for handling URI's, or "Uniform Resource
   Identifiers", of which HTTP URL's are an example.
 - `yojson`, a JSON parsing library that was described in
-  [xref](#parsing-json-with-yojson)
+  [xref](#handling-json-data)
 - `cohttp`, a library for creating HTTP clients and servers.  We need
   Async support, which comes with the `cohttp.async` package.
 
@@ -688,7 +703,7 @@ The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
 [RFC4627](http://www.ietf.org/rfc/rfc4627.txt).  We'll parse the JSON
 data using the Yojson library, which we already introduced in
-[xref](handling-json-data).
+[xref](#handling-json-data).
 
 We expect the response from DuckDuckGo to come across as a JSON
 record, which is represented by the `Assoc` tag in Yojson's JSON
@@ -743,9 +758,9 @@ for `Cohttp_async.Client.get`, which we can do in utop.
 ```
 
 The `get` call takes as a required argument a URI, and returns a
-deferred value is returned, containing a `Cohttp.Response.t` (which we
-ignore) and a pipe reader to which the body of the request will be
-written to as it is received.
+deferred value containing a `Cohttp.Response.t` (which we ignore) and
+a pipe reader to which the body of the request will be written to as
+it is received.
 
 In this case, the HTTP body probably isn't very large, so we call
 `Pipe.to_list` to collect the strings from the pipe as a single
@@ -775,7 +790,7 @@ line-wrapping.  It may not be obvious that this routine is using
 Async, but it does: the version of `printf` that's called here is
 actually Async's specialized `printf` that goes through the Async
 scheduler rather than printing directly.  The original definition of
-`printf` is shadowed by this ne one when you open `Async.Std`.  An
+`printf` is shadowed by this new one when you open `Async.Std`.  An
 important side effect of this is that if you write an Async program
 and forget to start the scheduler, calls like `printf` won't actually
 generate any output!
@@ -803,7 +818,7 @@ We used `List.map` to call `get_definition` on each word, and
 
 Note that the list returned by `Deferred.all` reflects the order of
 the deferreds passed to it.  As such, the definitions will be printed
-out in the same order that the search wrods are passed in, no matter
+out in the same order that the search words are passed in, no matter
 what orders the queries return in.  We could rewrite this code to
 print out the results as they're received (and thus potentially out of
 order) as follows.
@@ -869,7 +884,7 @@ When programming with external resources, errors are everywhere:
 everything from a flaky server to a network outage to exhausting of
 local resources can lead to a run-time error.  When programming in
 OCaml, some of these errors will show up explicitly in a function's
-return type, and of them will show up as exceptions.  We covered
+return type, and some of them will show up as exceptions.  We covered
 exception handling in OCaml in [xref](#exceptions), but as we'll see,
 exception handling in a concurrent program presents some new
 challenges.
@@ -1094,7 +1109,7 @@ of monitors.  One example of a library that uses monitors directly is
 that handles the network connection and by the callback for responding
 to an individual request, in either case responding to an exception by
 closing the connection.  It is for building this kind of custom error
-handling that monitors can be helpful.n
+handling that monitors can be helpful.
 
 ### Example: Handling exceptions with DuckDuckGo
 
@@ -1103,10 +1118,11 @@ client.  In particular, we'll change it so that any individual queries
 that fail are reported as such, without preventing other queries from
 succeeding.
 
-The search code as it is fails rarely, so let's make make a change
-that can cause it to fail more predictably, by making it possible to
-distribute the requests over multiple servers.  Then, we'll handle the
-errors that occur when one of those servers is mis-specified.
+The search code as it is fails rarely, so let's make a change that
+allows us to trigger failures more predictably.  We'll do this by
+making it possible to distribute the requests over multiple servers.
+Then, we'll handle the errors that occur when one of those servers is
+misspecified.
 
 First we'll need to change `query_uri` to take an argument specifying
 the server to connect to, as follows.

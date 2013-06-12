@@ -1,8 +1,9 @@
-open Ffi.C
-open Type
+open Ctypes
 
 type window = unit ptr
-let window : window t = ptr void
+let window : window typ = ptr void
+
+open Foreign
 
 let initscr =
   foreign "initscr" (void @-> (returning window))

@@ -42,8 +42,8 @@ the box containing `3`) points to the empty list.
 +---+---+   +---+---+   +---+---+
 ```
 
-The `::` operator essentially adds a new block to the picture above.
-Such a block contains two things: a reference to the data in that list
+Each `::` essentially adds a new block to the picture above.  Such a
+block contains two things: a reference to the data in that list
 element, and a reference to the remainder of the list.  This is why
 `::` can extend a list without modifying it; extension allocates a new
 list element but doesn't need to change any of the existing ones, as
@@ -86,7 +86,7 @@ acting as a case-analysis tool, breaking down the possibilities into a
 pattern-indexed list of cases.  Second, it lets you name
 sub-structures within the data-structure being matched.  In this case,
 the variables `hd` and `tl` are bound by the pattern that defines the
-first case of the match statment.  Variables that are bound in this
+first case of the match statement.  Variables that are bound in this
 way can be used in the expression to the right of the arrow for the
 pattern in question.
 
@@ -105,9 +105,7 @@ particular value.  You might be tempted to write that code as follows.
 ```
 
 But when we type this in, the compiler will immediately warn us that
-something is wrong.  Moreover, the function clearly does the wrong
-thing, filtering out all elements of the list rather than just those
-equal to the provided value.
+something is wrong.  
 
 ```
 Characters 114-122:
@@ -115,6 +113,13 @@ Characters 114-122:
         ^^^^^^^^
 Warning 11: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
+```
+
+Moreover, the function clearly does the wrong thing, filtering out all
+elements of the list rather than just those equal to the provided
+value, as you can see below.
+
+```ocaml
 # drop_value [1;2;3] 2;;
 - : int list = []
 ```
@@ -193,23 +198,49 @@ incrementing an integer by one.  The first is implemented with a match
 statement, and the second with a sequence of if statements.
 
 ```ocaml
-let plus_one x =
-  match x with
-  | 0 -> 1
-  | 1 -> 2
-  | 2 -> 3
-  | _ -> x + 1
+# let plus_one_match x =
+    match x with
+    | 0 -> 1
+    | 1 -> 2
+    | 2 -> 3
+    | _ -> x + 1
 
-let plus_one_slow x =
-  if      x = 0 then 1
-  else if x = 1 then 2
-  else if x = 2 then 3
-  else x + 1
+  let plus_one_if x =
+    if      x = 0 then 1
+    else if x = 1 then 2
+    else if x = 2 then 3
+    else x + 1
+  ;;
+val plus_one_match : int -> int = <fun>
+val plus_one_if : int -> int = <fun>
 ```
 
-If you benchmark these, you'll see that `plus_one_slow` is about 35%
-slower than `plus_one`, and the advantage gets larger as the number of
-cases increases.
+Note the use of `_` in the above match.  This is a wild-card pattern
+that matches any value, but without binding a variable name to the
+value in question.
+
+If you benchmark these functions, you'll see that `plus_one_if` is
+considerably slower than `plus_one_match`, and the advantage gets
+larger as the number of cases increases.  Here, we'll benchmark these
+functions using the `core_bench` library.
+
+```ocaml
+# #require "core_bench";;
+# open Core_bench.Std;;
+# [ Bench.Test.create ~name:"plus_one_match" (fun () ->
+      ignore (plus_one_match 10))
+  ; Bench.Test.create ~name:"plus_one_if" (fun () ->
+      ignore (plus_one_if 10)) ]
+  |> Bench.bench
+  ;;
+Estimated testing time 20s (change using -quota SECS).
+┌────────────────┬───────────┬──────────┐
+│ Name           │ Time (ns) │ % of max │
+├────────────────┼───────────┼──────────┤
+│ plus_one_match │    369.38 │    83.40 │
+│ plus_one_if    │    442.88 │   100.00 │
+└────────────────┴───────────┴──────────┘
+```              
 
 Here's another less artificial example.  We can rewrite the `sum`
 function we described earlier in the chapter using an `if` statement
@@ -217,24 +248,44 @@ rather than a match.  We can then use the functions `is_empty`,
 `hd_exn` and `tl_exn` from the `List` module to deconstruct the list,
 allowing us to implement the entire function without pattern matching.
 
-```
-let rec sum_slow l =
-  if List.is_empty l then 0
-  else List.hd_exn l + sum_slow (List.tl_exn l)
-;;
+```ocaml
+# let rec sum_if l =
+    if List.is_empty l then 0
+    else List.hd_exn l + sum_if (List.tl_exn l)
+  ;;
+val sum_if : int list -> int = <fun>
 ```
 
-In this case, the match-based implementation is 70% faster than the
-one using if.  The difference comes because we need to effectively do
-the same work multiple times, since each function we call has to
-re-examine the first element of the list to determine whether or not
-it's the empty cell.  With a match statement, this work happens
-exactly once per list element.
+Again, we can benchmark these to see the difference.
 
-Generally, pattern matching is typically more efficient than the
-alternatives you might code by hand.  One notable exception is matches
-over strings, which are in fact tested sequentially.  But most of the
-time, using pattern matching is a clear performance win.
+```ocaml
+# let numbers = List.range 0 1000 in
+  [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
+  ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
+  |> Bench.bench
+  ;;
+Estimated testing time 20s (change using -quota SECS).
+┌────────┬───────────┬──────────┐
+│ Name   │ Time (ns) │ % of max │
+├────────┼───────────┼──────────┤
+│ sum_if │   650_463 │   100.00 │
+│ sum    │   177_740 │    27.32 │
+└────────┴───────────┴──────────┘
+- : unit = ()
+```
+
+In this case, the match-based implementation is more than three times
+faster than the one using if.  The difference comes because we need to
+effectively do the same work multiple times, since each function we
+call has to re-examine the first element of the list to determine
+whether or not it's the empty cell.  With a match statement, this work
+happens exactly once per list element.
+
+Generally, pattern matching is more efficient than the alternatives
+you might code by hand.  One notable exception is matches over
+strings, which are in fact tested sequentially, and which for long
+lists can be outperformed by a hashtable.  But most of the time,
+pattern matching is a clear performance win.
 
 ### Detecting errors
 
@@ -344,7 +395,7 @@ lists are of mismatched length.
 Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 <> 4 ").
 ```
 
-`List.fold` is the most complicated of the three, takin three
+`List.fold` is the most complicated of the three, taking three
 arguments: a list to process, an initial accumulator value, and a
 function for updating the accumulator with the information from a list
 element.  `List.fold` walks over the list from left to right, updating
@@ -502,12 +553,15 @@ just a subset of values.  The `List.filter` function does just that.
 
 Sometimes, you want to both transform and filter as part of the same
 computation.  `List.filter_map` allows you to do just that.  The
-following expression uses `List.filter_map` to produce the list of
-file extensions in the current directory, piping the results through
+function passed to `List.filter_map` returns an optional value, and
+`List.filter_map` drops all elements for which `None` is returned.
+
+Here's an example.  The following expression computes the list of file
+extensions in the current directory, piping the results through
 `List.dedup` to remove duplicates.  Note that this example also uses
 some functions from other modules, including `Sys.ls_dir` to get a
 directory listing, and `String.rsplit2` to split a string on the
-rightmost appearance ofa  given character.
+rightmost appearance of a given character.
 
 ```ocaml
 # List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
@@ -520,17 +574,11 @@ rightmost appearance ofa  given character.
 - : string list = ["byte"; "ml"; "mli"; "native"; "txt"]
 ```
 
-In the match statement above, you may notice that we for the first
-time used an underscore in a pattern match.  You use an underscore
-when you want to indicate that the pattern doesn't depend on some
-sub-component of the data structure, but that you don't want to name
-it is an explicit variable.
-
-Another feature of OCaml's pattern language that we encounter here is
-_or-patterns_, which allow you to have multiple sub-patterns within a
-larger pattern.  In this case, `None | Some ("",_)` is an or-pattern.
-As we'll see later, or-patterns can be nested anywhere within larger
-patterns.
+One feature of OCaml's pattern language that we've encountered here
+for the first time is _or-patterns_, which allow you to have multiple
+sub-patterns within a larger pattern.  In this case, `None | Some
+("",_)` is an or-pattern.  As we'll see later, or-patterns can be
+nested anywhere within larger patterns.
 
 Another function that is similar to `filter` is `partition_tf`, which
 takes a list and partitions it into a pair of lists based on a boolean
@@ -555,22 +603,28 @@ Note the use of a nested or-pattern in `is_ocaml_source`.
 
 Another very common operation on lists is concatenation.  The list
 module actually comes with a few different ways of doing this.  First,
-there's`List.append`, for concatenating a pair of lists.
+there's `List.append`, for concatenating a pair of lists.
 
 ```ocaml
 # List.append [1;2;3] [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
+```
+
+There's also `@`, an operator equivalent of `List.append`.
+
+```ocaml
 # [1;2;3] @ [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
 
-`@` is just a synonym for `List.append`.  In addition, there is
-`List.concat`, for concatenating a list of lists.
+In addition, there is `List.concat`, for concatenating a list of
+lists.
 
 ```ocaml
 # List.concat [[1;2];[3;4;5];[6];[]];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
+
 Here's an example of using `List.concat` along with `List.map` to
 compute a recursive listing of a directory tree.
 
@@ -661,7 +715,7 @@ alternative implementation.
 val length_plus_n : 'a list -> int -> int = <fun>
 # let length l = length_plus_n l 0 ;;
 val length : 'a list -> int = <fun>
-utop[41]> length [1;2;3;4];;
+# length [1;2;3;4];;
 - : int = 4
 ```
 
@@ -670,7 +724,7 @@ that computes the length of a given list plus a given `n`.  In
 practice, `n` acts as an accumulator in which the answer is built up,
 step by step.  As a result, we can do the additions along the way
 rather than doing them as we unwind the nested sequence of function
-calls, as we did in our first implemenation of `length`.
+calls, as we did in our first implementation of `length`.
 
 The advantage of this approach is that the recursive call in
 `length_plus_n` is a _tail call_.  We'll explain more precisely what
@@ -693,10 +747,10 @@ anything with the value returned by the callee except to return it.
 The tail-call optimization makes sense because, when a caller makes a
 tail call, the caller's stack frame need never be used again, and so
 you don't need to keep it around.  Thus, instead of allocating a new
-stack frame for the callee, the compiler is free to resuse the
+stack frame for the callee, the compiler is free to reuse the
 caller's stack frame.
 
-Tail recursion are important for more than just lists.  Ordinary
+Tail recursion is important for more than just lists.  Ordinary
 (non-tail) recursive calls are reasonable when the dealing with
 data-structures like binary trees where the depth of the tree is
 logarithmic in the size of your data.  But when dealing with
@@ -708,7 +762,7 @@ approach.
 
 Now that we know more about how lists and patterns work, let's
 consider how we can improve on an example from
-(xref)(#recursive-list-functions): the function `destutter`, which
+[xref](#recursive-list-functions): the function `destutter`, which
 removes sequential duplicates from a list.  Here's the implementation
 that was described earlier.
 
@@ -716,11 +770,12 @@ that was described earlier.
 # let rec destutter list =
     match list with
     | [] -> []
-    | hd :: [] -> hd :: []
+    | [hd] -> [hd]
     | hd :: hd' :: tl ->
       if hd = hd' then destutter (hd' :: tl)
       else hd :: destutter (hd' :: tl)
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
 
 We'll consider some ways of making this code more concise and more
@@ -729,7 +784,7 @@ efficient.
 First, let's consider efficiency.  One problem with the `destutter`
 code above is that it in some cases recreates on the right-hand side
 of the arrow a value that already existed on the left hand side.
-Thus, the pattern `hd :: [] -> hd :: []` actually allocates a new list
+Thus, the pattern `[hd] -> [hd]` actually allocates a new list
 element, which really, it should be able to just return the list being
 matched.  We can reduce allocation here by using an `as` pattern,
 which allows us to declare a name for the thing matched by a pattern
@@ -739,25 +794,25 @@ to eliminate the need for an explicit match.
 ```ocaml
 # let rec destutter = function
     | [] as l -> l
-    | _ :: [] as l -> l
+    | [_] as l -> l
     | hd :: (hd' :: _ as tl) ->
       if hd = hd' then destutter tl
       else hd :: destutter tl
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
 
 We can further collapse this by combining the first two cases into
-one, using an or-pattern.  At the same time, we'll use the more
-concise `[_]` pattern to match a list with a single element, rather
-than `_ :: []`.
+one, using an or-pattern.
 
 ```ocaml
 # let rec destutter = function
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) when hd1 = ->
-      if hd1 = hd2 then destutter tl
-      else hd1 :: destutter tl
+    | hd :: (hd' :: _ as tl) ->
+      if hd = hd' then destutter tl
+      else hd :: destutter tl
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
 
 We can make the code slightly terser now by using a `when` clause.  A
@@ -765,14 +820,78 @@ We can make the code slightly terser now by using a `when` clause.  A
 the form of an arbitrary OCaml expression.  In this case, we can use
 it to include the check on whether the first two elements are equal.
 
-
 ```ocaml
 # let rec destutter = function
     | [] | [_] as l -> l
     | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
     | hd :: tl -> hd :: destutter tl
   ;;
+val destutter : 'a list -> 'a list = <fun>
 ```
+
+<note> <title> Polymorphic compare </title>
+
+In the `destutter` example above, we made use of the fact that OCaml
+lets us test equality between values of any type, using the `=`
+operator.  Thus, we can write:
+
+```ocaml
+# 3 = 4;;
+- : bool = false
+# [3;4;5] = [3;4;5];;
+- : bool = true
+# [Some 3; None] = [None; Some 3];;
+- : bool = false
+```
+
+Indeed, if we look at the type of the equality operator, we'll see
+that it is polymorphic:
+
+```ocaml
+# (=);;
+- : 'a -> 'a -> bool = <fun>
+```
+
+OCaml actually comes with a whole family of polymorphic comparison
+operators, including the standard infix comparators, `<`, `>=`,
+_etc._, as well as the function `compare` that returns `-1`, `0` or
+`1` to flag whether the first operator is smaller than, equal to, or
+greater than the second, respectively.
+
+You might wonder how you could build function like these yourself if
+OCaml didn't come with them built-in.  It turns out that you _can't_
+build these functions on your own.  OCaml's polymorphic comparison
+functions are actually built-in to the runtime to a low level.  These
+comparisons are polymorphic on the basis of ignoring almost everything
+about the types of the values that are being compared, paying
+attention only to the structure of the values as they're laid out in
+memory.
+
+Polymorphic compare does have some limitations.  For example, they
+will fail at runtime if they encounter functions:
+
+```ocaml
+# (fun x -> x + 1) = (fun x -> x + 1);;
+Exception: (Invalid_argument "equal: functional value").
+```
+
+Similarly, it will fail on values that come from outside the OCaml
+heap, like values from C-bindings.  But they will work in a reasonable
+way for other kinds of values.
+
+For simple atomic types, polymorphic compare has the semantics you
+would expect: for floating point numbers and integer, polymorphic
+compare corresponds to the expected numerical comparison functions.
+For strings, it's a lexicographic comparison.
+
+Sometimes, however, the type-ignoring nature of polymorphic compare is
+a problem, particularly when you have your own notion of equality and
+ordering that you want to impose.  We'll discuss this issue more, as
+well as some of the other downsides of polymorphic compare, in
+[xref](#maps-and-hashtables).
+
+</note>
+
 
 Note that `when` clauses have some downsides.  As we noted earlier,
 the static checks associated with pattern matches rely on the fact
@@ -854,9 +973,8 @@ The takeaway from all of this is that, while `when` clauses can be
 useful, one should prefer patterns wherever they are sufficient.
 
 As a side note, the above implementation of `count_some` is longer
-than necessary, and to boot is not tail recursive.  For real work, you
-should probably just use the`List.count` function from `Core` as
-follows:
+than necessary, and even worse is not tail recursive.  In real life,
+you would probably just use the `List.count` function from `Core`:
 
 ```ocaml
 # let count_some l = List.count ~f:Option.is_some l;;

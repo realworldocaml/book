@@ -227,7 +227,7 @@ but `;` is more concise and idiomatic.  More generally,
 <exprN>
 ```
 
-is eqivalent to
+is equivalent to
 
 ```ocaml
 let () = <expr1> in
@@ -300,15 +300,13 @@ Strings also come with their own syntax for getting and setting
 values: `string.[index]` and `string.[index] <- expr` respectively,
 and string literals are bounded by quotes.  There's also a module
 `String` where you'll find useful functions for working with strings.
-We'll talk more about the `String` module in
-[xref](#text-processing-and-unicode).
 
 #### Bigarrays
 
 A `Bigarray.t` is a handle to a block of memory stored outside of the
 OCaml heap.  These are mostly useful for interacting with C or Fortran
 libraries, and are discussed in
-[xref](#managing-external-memory-with-bigarrays).  Bigarrays too have
+[xref](#memory-representation-of-values).  Bigarrays too have
 their own getting and setting syntax: `bigarray.{index}` and
 `bigarray.{index} <- expr`.  There is no literal syntax for bigarrays.
 
@@ -759,7 +757,7 @@ performing lazy computation
 - : float = 4.
 ```
 
-The main user-visisble difference between our implementation of
+The main user-visible difference between our implementation of
 laziness and the built-in version is syntax.  Rather than writing
 `create_lazy (fun () -> sqrt 16.)`, we can with the built-in `lazy`
 just write `lazy (sqrt 16.)`.

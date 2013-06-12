@@ -17,4 +17,4 @@ let command =
     )
   (fun file () -> do_hash file)
 
-let () = Command.run command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command

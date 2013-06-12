@@ -1,10 +1,9 @@
-# Parsing with OCamllex and OCamlyacc
+# Parsing with OCamllex and Menhir
 
 OCaml provides lexer and parser generators modeled on lex and yacc.  Similar
 tools are available in a variety of languages, and with them you can parse a
 variety of kinds of input, including web formats or full blown programming
-languages (for example, OCaml programs use an _ocamlyacc_ parser and _ocamllex_
-for lexical analysis).
+languages.
 
 Let's be more precise about these terms.  By _parsing_, we mean reading a
 textual input into a form that is easier for a program to manipulate.  For
@@ -106,7 +105,7 @@ A token is declared using the syntax `%token <`_type_`>` _uid_, where the
 `<type>` is optional, and _uid_ is an capitalized identifier.  For JSON, we need
 tokens for numbers, strings, identifiers, and punctuation.  To start, let's
 define just the tokens in the `parser.mly` file.  For technical reasons, we need
-to include a `%start` declaration.  For now, we'll include just a dummy grammer
+to include a `%start` declaration.  For now, we'll include just a dummy grammar
 specification `exp: { () }` (we'll replace this when we implement the grammar
 below).
 
@@ -135,7 +134,7 @@ exp: { () }
 
 The `<`_type_`>` specifications mean that a token carries a value.  The `INT`
 token carries an integer value with it, `FLOAT` has a `float` value, etc.  Most
-of the remaning tokens, like `TRUE`, `FALSE`, the punctuation, aren't associated
+of the remaining tokens, like `TRUE`, `FALSE`, the punctuation, aren't associated
 with any value, so we omit the `<`_type_`>` specification.
 
 Compile this file with `menhir`.  It will issue multiple warnings about unused
@@ -408,7 +407,7 @@ The `digits` expression has a `+` symbol, meaning that `digits` has one or more
 occurrences of digits in the range 0-9.  A fractional part `frac` has a decimal
 point followed by some digits; an exponent `exp` begins with an `e` followed by
 some digits; and a `float` has an integer part, and one or both of a `frac` and
-`exp` part.  The vetical bar is a choice; the expression `(frac | exp | frac
+`exp` part.  The vertical bar is a choice; the expression `(frac | exp | frac
 exp)` is either a `frac`, or an `exp`, or a `frac` followed by an `exp`.
 
 Finally, let's define identifiers and whitespace.  An identifier (label), is an
@@ -493,7 +492,7 @@ Some of these patterns overlap.  For example, the regular expression `"true"` is
   
 ### Recursive rules
 
-Unlike many other lexer generators, `ocamllex` allows the definion of multiple lexer in the same file, and the definitions can be recursive.  In this case, we use recursion to match string literals, using the following rule definition.
+Unlike many other lexer generators, `ocamllex` allows the definition of multiple lexer in the same file, and the definitions can be recursive.  In this case, we use recursion to match string literals, using the following rule definition.
 
 ```
 and read_string buf = parse

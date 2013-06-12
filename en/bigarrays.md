@@ -1,4 +1,4 @@
-# Managing external memory with Bigarrays
+# Parsing Binary Protocols with Bigarray
 
 ## Bigarrays for external memory blocks
 

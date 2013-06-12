@@ -1,0 +1,822 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 7. Error Handling / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha5',
+                        page: 'error\u002Dhandling.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html" class="here">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="object-oriented-programming.html">10. Object Oriented Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="object-subtyping-and-inheritance.html">11. Object Subtyping and Inheritance</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 7. Error Handling</h1>
+                
+                
+
+    <p id="idp8307424">
+    Nobody likes dealing with errors. It's tedious, it's easy to get
+    wrong, and it's usually just not as fun as planning out how your
+    program is going to succeed. But error handling is important, and
+    however much you don't like thinking about it, having your software
+    fail due to poor error handling code is worse.
+  </p><p id="idp8308160">
+    Thankfully, OCaml has powerful tools for handling errors reliably
+    and with a minimum of pain. In this chapter we'll discuss some of
+    the different approaches in OCaml to handling errors, and give some
+    advice on how to design interfaces that make error handling easier.
+  </p><p id="idp8308848">
+    We'll start by describing the two basic approaches for reporting
+    errors in OCaml: error-aware return types and exceptions.
+  </p><section><h1 id="error-aware-return-types">Error-aware return types</h1><p id="idp8310256">
+      The best way in OCaml to signal an error is to include that error
+      in your return value. Consider the type of the
+      <code>find</code> function in the <code>List</code>
+      module.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">find</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span>
+</pre></div><p id="idp8312976">
+      The option in the return type indicates that the function may not
+      succeed in finding a suitable element, as you can see below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">find</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">)</span> <span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">2</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">find</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="o">)</span> <span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">None</span>
+</pre></div><p id="idp8314656">
+      Having errors be explicit in the return values of your functions
+      tells the caller that there is an error that needs to be handled.
+      The caller can then handle the error explicitly, either recovering
+      from the error or propagating it onward.
+    </p><p id="idp8315328">
+      Consider the <code>compute_bounds</code> function defined
+      below. The function takes a list and a comparison function, and
+      returns upper and lower bounds for the list by finding the
+      smallest and largest element on the list.
+      <code>List.hd</code> and <code>List.last</code>, which
+      return <code>None</code> when they encounter an empty list,
+      are used to extract the largest and smallest element of the list.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">compute_bounds</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">sorted</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="k">in</span>
+    <span class="k">match</span> <span class="nn">List</span><span class="p">.</span><span class="n">hd</span> <span class="n">sorted</span><span class="o">,</span> <span class="nn">List</span><span class="p">.</span><span class="n">last</span> <span class="n">sorted</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">None</span><span class="o">,_</span> <span class="o">|</span> <span class="o">_,</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="nc">None</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">y</span> <span class="o">-&gt;</span> <span class="nc">Some</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">compute_bounds</span> <span class="o">:</span>
+  <span class="n">cmp</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8319728">
+      The match statement is used to handle the error cases, propagating
+      a None in <code>hd</code> or <code>last</code> into
+      the return value of <code>compute_bounds</code>.
+    </p><p id="idp8322096">
+      On the other hand, in <code>find_mismatches</code> below,
+      errors encountered during the computation do not propagate to the
+      return value of the function. <code>find_mismatches</code>
+      takes two hash tables as arguments, and searches for keys that
+      have different data in one table than in the other. As such, the
+      failure to find a key in one table isn't a failure of any sort.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">find_mismatches</span> <span class="n">table1</span> <span class="n">table2</span> <span class="o">=</span>
+     <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">fold</span> <span class="n">table1</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="bp">[]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="o">~</span><span class="n">key</span> <span class="o">~</span><span class="n">data</span> <span class="n">mismatches</span> <span class="o">-&gt;</span>
+        <span class="k">match</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">find</span> <span class="n">table2</span> <span class="n">key</span> <span class="k">with</span>
+        <span class="o">|</span> <span class="nc">Some</span> <span class="n">data'</span> <span class="k">when</span> <span class="n">data'</span> <span class="o">&lt;&gt;</span> <span class="n">data</span> <span class="o">-&gt;</span> <span class="n">key</span> <span class="o">::</span> <span class="n">mismatches</span>
+        <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">mismatches</span>
+     <span class="o">)</span>
+ <span class="o">;;</span>
+<span class="k">val</span> <span class="n">find_mismatches</span> <span class="o">:</span>
+  <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8325440">
+      The use of options to encode errors underlines the fact that it's
+      not clear whether a particular outcome, like not finding something
+      on a list, is an error or is just another valid outcome. This
+      depends on the larger context of your program, and thus is not
+      something that a general purpose library can know in advance. One
+      of the advantages of error-aware return types is that they work
+      well in both situations.
+    </p><section><h1 id="encoding-errors-with-result">Encoding errors with <code>Result</code></h1><p id="idp8327680">
+        Options aren't always a sufficiently expressive way to report
+        errors. Specifically, when you encode an error as
+        <code>None</code>, there's nowhere to say anything about
+        the nature of the error.
+      </p><p id="idp8328944">
+<code>Result.t</code> is meant to address this deficiency.
+        The type is defined as follows.
+      </p><div class="highlight"><pre><span class="k">module</span> <span class="nc">Result</span> <span class="o">:</span> <span class="k">sig</span>
+   <span class="k">type</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span><span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="n">t</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Ok</span> <span class="k">of</span> <span class="k">'</span><span class="n">a</span>
+                    <span class="o">|</span> <span class="nc">Error</span> <span class="k">of</span> <span class="k">'</span><span class="n">b</span>
+<span class="k">end</span>
+</pre></div><p id="idp8331024">
+        A <code>Result.t</code> is essentially an option augmented
+        with the ability to store other information in the error case.
+        Like <code>Some</code> and <code>None</code> for
+        options, the constructors <code>Ok</code> and
+        <code>Error</code> are promoted to the toplevel by
+        <code>Core.Std</code>. As such, we can write:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="o">[</span> <span class="nc">Ok</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">Error</span> <span class="s2">&quot;abject failure&quot;</span><span class="o">;</span> <span class="nc">Ok</span> <span class="mi">4</span> <span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Result</span><span class="p">.</span><span class="n">t</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="nc">Ok</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">Error</span> <span class="s2">&quot;abject failure&quot;</span><span class="o">;</span> <span class="nc">Ok</span> <span class="mi">4</span><span class="o">]</span>
+</pre></div><p id="idp8336384">
+        without first opening the <code>Result</code> module.
+      </p></section><section><h1 id="error-and-or_error"><code>Error</code> and
+      <code>Or_error</code></h1><p id="idp8339392">
+<code>Result.t</code> gives you complete freedom to choose
+        the type of value you use to represent errors, but it's often
+        useful to standardize on an error type. Among other things, this
+        makes it easier to write utility functions to automate common
+        error handling patterns.
+      </p><p id="idp8340704">
+        But which type to choose? Is it better to represent errors as
+        strings? Some more structured representation like XML? Or
+        something else entirely?
+      </p><p id="idp8341280">
+        Core's answer to this question is the <code>Error.t</code>
+        type, which tries to forge a good compromise between efficiency,
+        convenience, and control over the presentation of errors.
+      </p><p id="idp8342448">
+        It might not be obvious at first why efficiency is an issue at
+        all. But generating error messages is an expensive business. An
+        ASCII representation of a value can be quite time-consuming to
+        construct, particularly if it includes expensive-to-convert
+        numerical data.
+      </p><p id="idp8343168">
+<code>Error</code> gets around this issue through
+        laziness. In particular, an <code>Error.t</code> allows
+        you to put off generation of the error string until and unless
+        you need it, which means a lot of the time you never have to
+        construct it at all. You can of course construct an error
+        directly from a string:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Error</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;something went wrong&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Error</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;something went wrong&quot;</span>
+</pre></div><p id="idp8346160">
+        But you can also construct an <code>Error.t</code> from a
+        <span><em>thunk</em></span>, <span><em>i.e.</em></span>, a
+        function that takes a single argument of type
+        <code>unit</code>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Error</span><span class="p">.</span><span class="n">of_thunk</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+    <span class="n">sprintf</span> <span class="s2">&quot;something went wrong: %f&quot;</span> <span class="mi">32</span><span class="o">.</span><span class="mi">3343</span><span class="o">);;</span>
+  <span class="o">-</span> <span class="o">:</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Error</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;something went wrong: 32.334300&quot;</span>
+</pre></div><p id="idp8349680">
+        In this case, we can benefit from the laziness of
+        <code>Error</code>, since the thunk won't be called unless
+        the <code>Error.t</code> is converted to a string.
+      </p><p id="idp8351392">
+        The most common way to create <code>Error.t</code>s is
+        using <span><em>s-expressions</em></span>. An s-expression is a
+        balanced parenthetical expression where the leaves of the
+        expressions are strings. Thus, the following is a simple
+        s-expression:
+      </p><pre id="idp8352976">
+(This (is an) (s expression))
+</pre><p id="idp8353600">
+        S-expressions are supported by the Sexplib library that is
+        distributed with Core, and is the most common serialization
+        format used in Core. Indeed, most types in Core come with
+        built-in s-expression converters. Here's an example of creating
+        an error using the sexp converter for times,
+        <code>Time.sexp_of_t</code>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Error</span><span class="p">.</span><span class="n">create</span> <span class="s2">&quot;Something failed a long time ago&quot;</span> <span class="nn">Time</span><span class="p">.</span><span class="n">epoch</span> <span class="nn">Time</span><span class="p">.</span><span class="n">sexp_of_t</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Error</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span>
+<span class="s2">&quot;Something failed a long time ago: (1969-12-31 19:00:00.000000)&quot;</span>
+</pre></div><p id="idp8356240">
+        Note that the time isn't actually serialized into an
+        s-expression until the error is printed out. We're not
+        restricted to doing this kind of error reporting with built-in
+        types. This will be discussed in more detail in
+        <a href="data-serialization-with-s-expressions" target="_top">xref</a>,
+        but Sexplib comes with a language extension that can
+        auto-generate sexp-converters for newly generated types, as
+        shown below.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">custom_to_sexp</span> <span class="o">=</span> <span class="o">&lt;:</span><span class="n">sexp_of</span><span class="o">&lt;</span><span class="kt">float</span> <span class="o">*</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">*</span> <span class="kt">int</span><span class="o">&gt;&gt;;;</span>
+<span class="k">val</span> <span class="n">custom_to_sexp</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">custom_to_sexp</span> <span class="o">(</span><span class="mi">3</span><span class="o">.</span><span class="mi">5</span><span class="o">,</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">;</span><span class="s2">&quot;b&quot;</span><span class="o">;</span><span class="s2">&quot;c&quot;</span><span class="o">],</span> <span class="mi">6034</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="mi">3</span><span class="o">.</span><span class="mi">5</span> <span class="o">(</span><span class="n">a</span> <span class="n">b</span> <span class="n">c</span><span class="o">)</span> <span class="mi">6034</span><span class="o">)</span>
+</pre></div><p id="idp8358880">
+        We can use this same idiom for generating an error.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Error</span><span class="p">.</span><span class="n">create</span> <span class="s2">&quot;Something went terribly wrong&quot;</span>
+    <span class="o">(</span><span class="mi">3</span><span class="o">.</span><span class="mi">5</span><span class="o">,</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">;</span><span class="s2">&quot;b&quot;</span><span class="o">;</span><span class="s2">&quot;c&quot;</span><span class="o">],</span> <span class="mi">6034</span><span class="o">)</span>
+    <span class="o">&lt;:</span><span class="n">sexp_of</span><span class="o">&lt;</span><span class="kt">float</span> <span class="o">*</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">*</span> <span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Error</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nc">Something</span> <span class="n">went</span> <span class="n">terribly</span> <span class="n">wrong</span><span class="o">:</span> <span class="o">(</span><span class="mi">3</span><span class="o">.</span><span class="mi">5</span><span class="o">(</span><span class="n">a</span> <span class="n">b</span> <span class="n">c</span><span class="o">)</span><span class="mi">6034</span><span class="o">)</span>
+</pre></div><p id="idp8360608">
+<code>Error</code> also supports operations for
+        transforming errors. For example, it's often useful to augment
+        an error with some extra information about the context of the
+        error or to combine multiple errors together.
+        <code>Error.tag</code> and
+        <code>Error.of_list</code> fulfill these roles, as you can
+        see below.
+      </p><p id="idp8363200">
+        The type <code>'a Or_error.t</code> is just a shorthand
+        for <code>('a,Error.t) Result.t</code>, and it is, after
+        <code>option</code>, the most common way of returning
+        errors in Core.
+      </p></section><section><h1 id="bind-and-other-error-handling-idioms"><code>bind</code> and other error-handling
+      idioms</h1><p id="idp8367040">
+        As you write more error handling code in OCaml, you'll discover
+        that certain patterns start to emerge. A number of these common
+        patterns have been codified by functions in modules like
+        <code>Option</code> and <code>Result</code>. One
+        particularly useful pattern is built around the function
+        <code>bind</code>, which is both an ordinary function and
+        an infix operator <code>&gt;&gt;=</code>. Here's the
+        definition of <code>bind</code> for options.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">bind</span> <span class="n">option</span> <span class="n">f</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">option</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="nc">None</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">x</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">bind</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="n">option</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8372080">
+        As you can see, <code>bind None f</code> returns
+        <code>None</code> without calling <code>f</code>,
+        and <code>bind (Some x) f</code> returns
+        <code>f x</code>. Perhaps surprisingly,
+        <code>bind</code> can be used as a way of sequencing
+        together error-producing functions so that the first one to
+        produce an error terminates the computation. Here's a rewrite of
+        <code>compute_bounds</code> to use a nested series of
+        <code>bind</code>s.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">compute_bounds</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">sorted</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="k">in</span>
+    <span class="nn">Option</span><span class="p">.</span><span class="n">bind</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">hd</span> <span class="n">sorted</span><span class="o">)</span> <span class="o">(</span><span class="k">fun</span> <span class="n">first</span> <span class="o">-&gt;</span>
+      <span class="nn">Option</span><span class="p">.</span><span class="n">bind</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">last</span> <span class="n">sorted</span><span class="o">)</span> <span class="o">(</span><span class="k">fun</span> <span class="n">last</span> <span class="o">-&gt;</span>
+        <span class="nc">Some</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">last</span><span class="o">)))</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">compute_bounds</span> <span class="o">:</span> <span class="n">cmp</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="n">option</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8379040">
+        The above code is a little bit hard to swallow, however, on a
+        syntactic level. We can make it easier to read, and drop some of
+        the parenthesis, by using the infix operator form of bind, which
+        we get access to by locally opening
+        <code>Option.Monad_infix</code>. The module is called
+        <code>Monad_infix</code> because the bind operator is part
+        of a sub-interface called <code>Monad</code>, which we'll
+        talk about more in
+        <a href="concurrent-programming-with-async.html">Chapter 17, <i>Concurrent Programming with Async</i></a>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">compute_bounds</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="k">open</span> <span class="nn">Option</span><span class="p">.</span><span class="nc">Monad_infix</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">sorted</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="k">in</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">hd</span> <span class="n">sorted</span>   <span class="o">&gt;&gt;=</span> <span class="k">fun</span> <span class="n">first</span> <span class="o">-&gt;</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">last</span> <span class="n">sorted</span> <span class="o">&gt;&gt;=</span> <span class="k">fun</span> <span class="n">last</span>  <span class="o">-&gt;</span>
+    <span class="nc">Some</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">last</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">compute_bounds</span> <span class="o">:</span> <span class="n">cmp</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="n">option</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8383584">
+        This use of <code>bind</code> isn't really materially
+        better than the one we started with, and indeed, for small
+        examples like this, direct matching of options is generally
+        better than using <code>bind</code>. But for large complex
+        examples with many stages of error-handling, the bind idiom
+        becomes clearer and easier to manage.
+      </p><p id="idp8385584">
+        There are other useful idioms encoded in the functions in
+        <code>Option</code>. One example is
+        <code>Option.both</code>, which takes two optional values
+        and produces a new optional pair that is <code>None</code>
+        if either of its arguments are <code>None</code>. Using
+        <code>Option.both</code>, we can make
+        <code>compute_bounds</code> even shorter.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">compute_bounds</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">sorted</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">~</span><span class="n">cmp</span> <span class="kt">list</span> <span class="k">in</span>
+    <span class="nn">Option</span><span class="p">.</span><span class="n">both</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">hd</span> <span class="n">sorted</span><span class="o">)</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">last</span> <span class="n">sorted</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">compute_bounds</span> <span class="o">:</span> <span class="n">cmp</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="n">option</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8391104">
+        These error-handling functions are valuable because they let you
+        express your error handling both explicitly and concisely. We've
+        only discussed these functions in the context of the
+        <code>Option</code> module, but similar functionality is
+        available in both <code>Result</code> and
+        <code>Or_error</code>.
+      </p></section></section><section><h1 id="exceptions">Exceptions</h1><p id="idp8394816">
+      Exceptions in OCaml are not that different from exceptions in many
+      other languages, like Java, C# and Python. Exceptions are a way to
+      terminate a computation and report an error, while providing a
+      mechanism to catch and handle (and possibly recover from)
+      exceptions that are triggered by sub-computations.
+    </p><p id="idp8395552">
+      You can trigger an exception by, for example, dividing an integer
+      by zero:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">0</span><span class="o">;;</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="nn">Division_by_zero</span><span class="p">.</span>
+</pre></div><p id="idp8396912">
+      And an exception can terminate a computation even if it happens
+      nested somewhere deep within it.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="mi">100</span> <span class="o">/</span> <span class="n">x</span><span class="o">)</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">0</span><span class="o">;</span><span class="mi">4</span><span class="o">];;</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="nn">Division_by_zero</span><span class="p">.</span>
+</pre></div><p id="idp8398512">
+      If we put a <code>printf</code> in the middle of the
+      computation, we can see that <code>List.map</code> is
+      interrupted part way through it's execution, never getting to the
+      end of the list.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">printf</span> <span class="s2">&quot;%d</span><span class="se">\n</span><span class="s2">%!&quot;</span> <span class="n">x</span><span class="o">;</span> <span class="mi">100</span> <span class="o">/</span> <span class="n">x</span><span class="o">)</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">0</span><span class="o">;</span><span class="mi">4</span><span class="o">];;</span>
+<span class="mi">1</span>
+<span class="mi">3</span>
+<span class="mi">0</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="nn">Division_by_zero</span><span class="p">.</span>
+</pre></div><p id="idp8401440">
+      In addition to built-in exceptions like
+      <code>Divide_by_zero</code>, OCaml lets you define your own.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">exception</span> <span class="nc">Key_not_found</span> <span class="k">of</span> <span class="kt">string</span><span class="o">;;</span>
+<span class="k">exception</span> <span class="nc">Key_not_found</span> <span class="k">of</span> <span class="kt">string</span>
+<span class="o">#</span> <span class="k">raise</span> <span class="o">(</span><span class="nc">Key_not_found</span> <span class="s2">&quot;a&quot;</span><span class="o">);;</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="nc">Key_not_found</span><span class="o">(</span><span class="s2">&quot;a&quot;</span><span class="o">).</span>
+</pre></div><p id="idp8403520">
+      Here's an example of a function for looking up a key in an
+      <span><em>association list</em></span>, <span><em>i.e.</em></span> a
+      list of key/value pairs which uses this newly-defined exception:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">find_exn</span> <span class="n">alist</span> <span class="n">key</span> <span class="o">=</span> <span class="k">match</span> <span class="n">alist</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="o">(</span><span class="nc">Key_not_found</span> <span class="n">key</span><span class="o">)</span>
+    <span class="o">|</span> <span class="o">(</span><span class="n">key'</span><span class="o">,</span><span class="n">data</span><span class="o">)</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="n">key</span> <span class="o">=</span> <span class="n">key'</span> <span class="k">then</span> <span class="n">data</span> <span class="k">else</span> <span class="n">find_exn</span> <span class="n">tl</span> <span class="n">key</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">find_exn</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">alist</span> <span class="o">=</span> <span class="o">[(</span><span class="s2">&quot;a&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;b&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">)];;</span>
+<span class="k">val</span> <span class="n">alist</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[(</span><span class="s2">&quot;a&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;b&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">)]</span>
+<span class="o">#</span> <span class="n">find_exn</span> <span class="n">alist</span> <span class="s2">&quot;a&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="o">#</span> <span class="n">find_exn</span> <span class="n">alist</span> <span class="s2">&quot;c&quot;</span><span class="o">;;</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="nc">Key_not_found</span><span class="o">(</span><span class="s2">&quot;c&quot;</span><span class="o">).</span>
+</pre></div><p id="idp8406160">
+      Note that we named the function <code>find_exn</code> to
+      warn the user that the function routinely throws exceptions, a
+      convention that is used heavily in Core.
+    </p><p id="idp8407312">
+      In the above example, <code>raise</code> throws the
+      exception, thus terminating the computation. The type of raise is
+      a bit surprising when you first see it:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">raise</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="n">exn</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8409328">
+      The return type of <code>'a</code> suggests that
+      <code>raise</code> could return a value of any type. That
+      seems impossible, and it is. Really, <code>raise</code> has
+      this type because it never returns at all. This behavior isn't
+      restricted to functions like <code>raise</code> that
+      terminate by throwing exceptions. Here's another example of a
+      function that doesn't return a value.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">forever</span> <span class="bp">()</span> <span class="o">=</span> <span class="n">forever</span> <span class="bp">()</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">forever</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8413568">
+<code>forever</code> doesn't return a value for a different
+      reason: it is an infinite loop.
+    </p><p id="idp8414672">
+      This all matters because it means that the return type of
+      <code>raise</code> can be whatever it needs to be to fit in
+      to the context it is called in. Thus, the type system will let us
+      throw an exception anywhere in a program.
+    </p><aside class="note"><h1>
+    Declaring exceptions with with sexp
+</h1><p id="idp8417200">
+      OCaml can't always generate a useful textual representation of an
+      exception. For example:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">exception</span> <span class="nc">Wrong_date</span> <span class="k">of</span> <span class="nn">Date</span><span class="p">.</span><span class="n">t</span><span class="o">;;</span>
+<span class="k">exception</span> <span class="nc">Wrong_date</span> <span class="k">of</span> <span class="nn">Date</span><span class="p">.</span><span class="n">t</span>
+<span class="o">#</span> <span class="nc">Wrong_date</span> <span class="o">(</span><span class="nn">Date</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;2011-02-23&quot;</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="n">exn</span> <span class="o">=</span> <span class="nc">Wrong_date</span><span class="o">(_)</span>
+</pre></div><p id="idp8418784">
+      But if we declare the exception using <code>with sexp</code>
+      (and the constituent types have sexp converters), we'll get
+      something with more information.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">exception</span> <span class="nc">Wrong_date</span> <span class="k">of</span> <span class="nn">Date</span><span class="p">.</span><span class="n">t</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="k">exception</span> <span class="nc">Wrong_date</span> <span class="k">of</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Date</span><span class="p">.</span><span class="n">t</span>
+<span class="o">#</span> <span class="nc">Wrong_date</span> <span class="o">(</span><span class="nn">Date</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;2011-02-23&quot;</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="n">exn</span> <span class="o">=</span> <span class="o">(.</span><span class="nc">Wrong_date</span> <span class="mi">2011</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">23</span><span class="o">)</span>
+</pre></div><p id="idp8421040">
+      The period in front of <code>Wrong_date</code> is there
+      because the representation generated by
+      <code>with sexp</code> includes the full module path of the
+      module where the exception in question is defined. In this case,
+      since we've declared the exception at the toplevel, that module
+      path is trivial.
+    </p><p id="idp8422976">
+      This is all part of the support for s-expressions provided by the
+      Sexplib library and syntax-extension, which is described in more
+      detail in
+      <a href="data-serialization-with-s-expressions" target="_top">xref</a>.
+    </p></aside><section><h1 id="helper-functions-for-throwing-exceptions">Helper functions for throwing exceptions</h1><p id="idp8425168">
+        OCaml and Core provide a number of helper functions to simplify
+        the task of throwing exceptions. The simplest one is
+        <code>failwith</code>, which could be defined as follows:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">failwith</span> <span class="n">msg</span> <span class="o">=</span> <span class="k">raise</span> <span class="o">(</span><span class="nc">Failure</span> <span class="n">msg</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">failwith</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8427360">
+        There are several other useful functions for raising exceptions,
+        which can be found in the API documentation for the
+        <code>Common</code> and <code>Exn</code> modules in
+        Core.
+      </p><p id="idp8429152">
+        Another important way of throwing an exception is the
+        <code>assert</code> directive. <code>assert</code>
+        is used for situations where a violation of the condition in
+        question indicates a bug. Consider the following piece of code
+        for zipping together two lists.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">merge_lists</span> <span class="n">xs</span> <span class="n">ys</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="n">xs</span> <span class="o">&lt;&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="n">ys</span> <span class="k">then</span> <span class="nc">None</span>
+    <span class="k">else</span>
+      <span class="k">let</span> <span class="k">rec</span> <span class="n">loop</span> <span class="n">xs</span> <span class="n">ys</span> <span class="o">=</span>
+        <span class="k">match</span> <span class="n">xs</span><span class="o">,</span><span class="n">ys</span> <span class="k">with</span>
+        <span class="o">|</span> <span class="bp">[]</span><span class="o">,</span><span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+        <span class="o">|</span> <span class="n">x</span><span class="o">::</span><span class="n">xs</span><span class="o">,</span> <span class="n">y</span><span class="o">::</span><span class="n">ys</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">::</span> <span class="n">loop</span> <span class="n">xs</span> <span class="n">ys</span>
+        <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="k">assert</span> <span class="bp">false</span>
+      <span class="k">in</span>
+      <span class="nc">Some</span> <span class="o">(</span><span class="n">loop</span> <span class="n">xs</span> <span class="n">ys</span><span class="o">)</span>
+   <span class="o">;;</span>
+ <span class="k">val</span> <span class="n">merge_lists</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="kt">list</span> <span class="n">option</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">merge_lists</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">[-</span><span class="mi">1</span><span class="o">;</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(+);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="o">[</span><span class="mi">0</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">5</span><span class="o">]</span>
+<span class="o">#</span> <span class="n">merge_lists</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">[-</span><span class="mi">1</span><span class="o">;</span><span class="mi">1</span><span class="o">]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(+);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">None</span>
+</pre></div><p id="idp8433088">
+        Here we use <code>assert false</code>, which means that
+        the assert is guaranteed to trigger. In general, one can put an
+        arbitrary condition in the assertion.
+      </p><p id="idp8434256">
+        In this case, the assert can never be triggered because we have
+        a check that makes sure that the lists are of the same length
+        before we call <code>loop</code>. If we change the code so
+        that we drop this test, then we can trigger the assert.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">merge_lists</span> <span class="n">xs</span> <span class="n">ys</span> <span class="o">~</span><span class="n">f</span> <span class="o">=</span>
+      <span class="k">let</span> <span class="k">rec</span> <span class="n">loop</span> <span class="n">xs</span> <span class="n">ys</span> <span class="o">=</span>
+        <span class="k">match</span> <span class="n">xs</span><span class="o">,</span><span class="n">ys</span> <span class="k">with</span>
+        <span class="o">|</span> <span class="bp">[]</span><span class="o">,</span><span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+        <span class="o">|</span> <span class="n">x</span><span class="o">::</span><span class="n">xs</span><span class="o">,</span> <span class="n">y</span><span class="o">::</span><span class="n">ys</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">::</span> <span class="n">loop</span> <span class="n">xs</span> <span class="n">ys</span>
+        <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="k">assert</span> <span class="bp">false</span>
+      <span class="k">in</span>
+      <span class="n">loop</span> <span class="n">xs</span> <span class="n">ys</span>
+   <span class="o">;;</span>
+<span class="k">val</span> <span class="n">merge_lists</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">merge_lists</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">[-</span><span class="mi">1</span><span class="o">]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(+);;</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="o">(</span><span class="nc">Assert_failure</span> <span class="o">//</span><span class="n">toplevel</span><span class="o">//</span> <span class="mi">6</span> <span class="mi">15</span><span class="o">).</span>
+</pre></div><p id="idp8436976">
+        This shows what's special about <code>assert</code>, which
+        is that it captures the line number and character offset of the
+        source location from which the assertion was made.
+      </p></section><section><h1 id="exception-handlers">Exception handlers</h1><p id="idp8439152">
+        So far, we've only seen exceptions fully terminate the execution
+        of a computation. But often, we want a program to be able to
+        respond to and recover from an exception. This is achieved
+        through the use of <span><em>exception handlers</em></span>.
+      </p><p id="idp8440176">
+        In OCaml, an exception handler is declared using a
+        <code>try</code>/<code>with</code> statement. Here's
+        the basic syntax.
+      </p><div class="highlight"><pre><span class="k">try</span> <span class="o">&lt;</span><span class="n">expr</span><span class="o">&gt;</span> <span class="k">with</span>
+<span class="o">|</span> <span class="o">&lt;</span><span class="n">pat1</span><span class="o">&gt;</span> <span class="o">-&gt;</span> <span class="o">&lt;</span><span class="n">expr1</span><span class="o">&gt;</span>
+<span class="o">|</span> <span class="o">&lt;</span><span class="n">pat2</span><span class="o">&gt;</span> <span class="o">-&gt;</span> <span class="o">&lt;</span><span class="n">expr2</span><span class="o">&gt;</span>
+<span class="o">...</span>
+</pre></div><p id="idp8442864">
+        A <code>try/with</code> clause first evaluates its body,
+        <code>&lt;expr&gt;</code>. If no exception is thrown, then
+        the result of evaluating the body is what the entire
+        <code>try/with</code> clause evaluates to.
+      </p><p id="idp8445232">
+        But if the evaluation of the body throws an exception, then the
+        exception will be fed to the pattern match statements following
+        the <code>with</code>. If the exception matches a pattern,
+        then we consider the exception caught, and the
+        <code>try/with</code> clause evaluates to the expression
+        on the right-hand side of the matching pattern.
+      </p><p id="idp8447264">
+        Otherwise, the original exception continues up the stack of
+        function calls, to be handled by the next outer exception
+        handler. If the exception is never caught, it terminates the
+        program.
+      </p></section><section><h1 id="cleaning-up-in-the-presence-of-exceptions">Cleaning up in the presence of exceptions</h1><p id="idp8448896">
+        One headache with exceptions is that they can terminate your
+        execution at unexpected places, leaving your program in an
+        awkward state. Consider the following code snippet:
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">load_config</span> <span class="n">filename</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">inc</span> <span class="o">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">create</span> <span class="n">filename</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">config</span> <span class="o">=</span> <span class="nn">Config</span><span class="p">.</span><span class="n">t_of_sexp</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">input_sexp</span> <span class="n">inc</span><span class="o">)</span> <span class="k">in</span>
+  <span class="nn">In_channel</span><span class="p">.</span><span class="n">close</span> <span class="n">inc</span><span class="o">;</span>
+  <span class="n">config</span>
+</pre></div><p id="idp8450544">
+        The problem with this code is that the function that loads the
+        s-expression and parses it into a <code>Config.t</code>
+        might throw an exception if the config file in question is
+        malformed. Unfortunately, that means that the
+        <code>In_channel.t</code> that was opened will never be
+        closed, leading to a file-descriptor leak.
+      </p><p id="idp8452560">
+        We can fix this using Core's <code>protect</code>
+        function. The purpose of <code>protect</code> is to ensure
+        that the <code>finally</code> thunk will be called when
+        <code>f</code> exits, whether it exits normally or with an
+        exception. This is similar to the <code>try/finally</code>
+        construct available in many programming languages, but it is
+        implemented in a library, rather than being a built-in
+        primitive. Here's how it could be used to fix
+        <code>load_config</code>.
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">load_config</span> <span class="n">filename</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">inc</span> <span class="o">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">create</span> <span class="n">filename</span> <span class="k">in</span>
+  <span class="n">protect</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="nn">Config</span><span class="p">.</span><span class="n">t_of_sexp</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">input_sexp</span> <span class="n">inc</span><span class="o">))</span>
+    <span class="o">~</span><span class="n">finally</span><span class="o">:(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">close</span> <span class="n">inc</span><span class="o">)</span>
+</pre></div><p id="idp8458064">
+        This is a common enough problem that
+        <code>In_channel</code> has a function called
+        <code>with_file</code> that automates this pattern.
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">load_config</span> <span class="n">filename</span> <span class="o">=</span>
+  <span class="nn">In_channel</span><span class="p">.</span><span class="n">with_file</span> <span class="n">filename</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">inc</span> <span class="o">-&gt;</span>
+    <span class="nn">Config</span><span class="p">.</span><span class="n">t_of_sexp</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">input_sexp</span> <span class="n">inc</span><span class="o">))</span>
+</pre></div><p id="idp8460720">
+<code>In_channel.with_file</code> is actually built on top
+        of <code>protect</code> so that it can clean up after
+        itself in the presence of exceptions.
+      </p></section><section><h1 id="catching-specific-exceptions">Catching specific exceptions</h1><p id="idp8463456">
+        OCaml's exception-handling system allows you to tune your
+        error-recovery logic to the particular error that was thrown.
+        For example, <code>List.find_exn</code> throws
+        <code>Not_found</code> when the element in question
+        can'tbe found. You can take advantage of this in your code, for
+        example, let's define a function called
+        <code>lookup_weight</code>, with the following signature.
+      </p><div class="highlight"><pre><span class="k">val</span> <span class="n">lookup_weight</span> <span class="o">:</span>
+  <span class="n">compute_weight</span><span class="o">:(</span><span class="k">'</span><span class="n">data</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">key</span> <span class="o">*</span> <span class="k">'</span><span class="n">data</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">key</span> <span class="o">-&gt;</span> <span class="kt">float</span>
+</pre></div><p id="idp8467040">
+<code>lookup_weight ~compute_weight alist key</code>
+        should return a floating-point weight by applying
+        <code>compute_weight</code> to the data associated with
+        <code>key</code> by <code>alist</code>. If
+        <code>key</code> is not found, then it shoudl return 0.
+      </p><p id="idp8470624">
+        We can implement <code>lookup_weight</code> as follows.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">lookup_weight</span> <span class="o">~</span><span class="n">compute_weight</span> <span class="n">alist</span> <span class="n">key</span> <span class="o">=</span>
+    <span class="k">try</span>
+      <span class="k">let</span> <span class="n">data</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find_exn</span> <span class="n">alist</span> <span class="n">key</span> <span class="k">in</span>
+      <span class="n">compute_weight</span> <span class="n">data</span>
+    <span class="k">with</span>
+      <span class="nc">Not_found</span> <span class="o">-&gt;</span> <span class="mi">0</span><span class="o">.</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">lookup_weight</span> <span class="o">:</span>
+  <span class="n">compute_weight</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">b</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8472832">
+        Let's think about the behavior of this code in the presence of
+        exceptions. In particular, what happens if
+        <code>compute_weight</code> throws an exception? Ideally,
+        <code>lookup_weight</code> should propagate that exception
+        on, but if the exception happens to be
+        <code>Not_found</code>, then that's not what will happen:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="n">lookup_weight</span> <span class="o">~</span><span class="n">compute_weight</span><span class="o">:(</span><span class="k">fun</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="nc">Not_found</span><span class="o">)</span>
+    <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span><span class="mi">3</span><span class="o">;</span> <span class="s2">&quot;b&quot;</span><span class="o">,</span><span class="mi">4</span><span class="o">]</span> <span class="s2">&quot;a&quot;</span> <span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span>
+</pre></div><p id="idp8476432">
+        This kind of problem is hard to detect in advance, because the
+        type system doesn't tell you what exceptions a given function
+        might throw. For this reason, it's generally better to avoid
+        relying on the identity of the exception to determine the nature
+        of a failure. A better approach is to narrow the scope of the
+        exception handler, so that when it fires it's very clear what
+        part of the code failed.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">lookup_weight</span> <span class="o">~</span><span class="n">compute_weight</span> <span class="n">alist</span> <span class="n">key</span> <span class="o">=</span>
+    <span class="k">match</span>
+      <span class="k">try</span> <span class="nc">Some</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find_exn</span> <span class="n">alist</span> <span class="n">key</span><span class="o">)</span>
+      <span class="k">with</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="nc">None</span>
+    <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span><span class="o">.</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">data</span> <span class="o">-&gt;</span> <span class="n">compute_weight</span> <span class="n">data</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">lookup_weight</span> <span class="o">:</span>
+  <span class="n">compute_weight</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span>
+  <span class="o">(</span><span class="k">'</span><span class="n">b</span><span class="o">,</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8478688">
+        At which point, it makes sense to simply use the non-exception
+        throwing function, <code>List.Assoc.find</code>, instead.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">lookup_weight</span> <span class="o">~</span><span class="n">compute_weight</span> <span class="n">alist</span> <span class="n">key</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find</span> <span class="n">alist</span> <span class="n">key</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span><span class="o">.</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">data</span> <span class="o">-&gt;</span> <span class="n">compute_weight</span> <span class="n">data</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">lookup_weight</span> <span class="o">:</span>
+  <span class="n">compute_weight</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span>
+  <span class="o">(</span><span class="k">'</span><span class="n">b</span><span class="o">,</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div></section><section><h1 id="backtraces">Backtraces</h1><p id="idp8482176">
+        A big part of the point of exceptions is to give useful
+        debugging information. But at first glance, OCaml's exceptions
+        can be less than informative. Consider the following simple
+        program.
+      </p><div class="highlight"><pre><span class="c">(* exn.ml *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">exception</span> <span class="nc">Empty_list</span>
+
+<span class="k">let</span> <span class="n">list_max</span> <span class="o">=</span> <span class="k">function</span>
+  <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="nc">Empty_list</span>
+  <span class="o">|</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">tl</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="n">hd</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="nn">Int</span><span class="p">.</span><span class="n">max</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">printf</span> <span class="s2">&quot;%d</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">list_max</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]);</span>
+  <span class="n">printf</span> <span class="s2">&quot;%d</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">list_max</span> <span class="bp">[]</span><span class="o">)</span>
+</pre></div><p id="idp8484128">
+        If we build and run this program, we'll get a pretty
+        uninformative error:
+      </p><div class="highlight"><pre><span class="nv">$ </span>./exn
+3
+Fatal error: exception Exn.Empty_list
+</pre></div><p id="idp8485488">
+        The example in question is short enough that it's quite easy to
+        see where the error came from. But in a complex program, simply
+        knowing which exception was thrown is usually not enough
+        information to figure out what went wrong.
+      </p><p id="idp8486160">
+        We can get more information from OCaml if we turn on stack
+        backtraces. A backtrace is essentially a summary of the stack of
+        calls that were executed to get to the point where the exception
+        was thrown. Backtraces can be enabled by setting the
+        <code>OCAMLRUNPARAM</code> environment variable as shown.
+      </p><div class="highlight"><pre>exn <span class="nv">$ </span><span class="nb">export </span><span class="nv">OCAMLRUNPARAM</span><span class="o">=</span><span class="nv">b</span><span class="o">=</span>1
+exn <span class="nv">$ </span>./exn
+3
+Fatal error: exception Exn.Empty_list
+Raised at file <span class="s2">&quot;exn.ml&quot;</span>, line 7, characters 16-26
+Called from file <span class="s2">&quot;exn.ml&quot;</span>, line 12, characters 17-28
+</pre></div><p id="idp8488560">
+        You can also capture a backtrace within your program by calling
+        <code>Exn.backtrace</code>, which returns the backtrace of
+        the most recently thrown exception. This is useful for reporting
+        detailed information on errors that did not cause your program
+        to fail.
+      </p></section><section><h1 id="from-exceptions-to-error-aware-types-and-back-again">From exceptions to error-aware types and back again</h1><p id="idp8490896">
+        Both exceptions and error-aware types are necessary parts of
+        programming in OCaml. As such, you often need to move between
+        these two worlds. Happily, Core comes with some useful helper
+        functions to help you do just that. For example, given a piece
+        of code that can throw an exception, you can capture that
+        exception into an option as follows:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">find</span> <span class="n">alist</span> <span class="n">key</span> <span class="o">=</span>
+    <span class="nn">Option</span><span class="p">.</span><span class="n">try_with</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">find_exn</span> <span class="n">alist</span> <span class="n">key</span><span class="o">)</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">find</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">find</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">;</span> <span class="s2">&quot;b&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">]</span> <span class="s2">&quot;c&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Option</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nc">None</span>
+<span class="o">#</span> <span class="n">find</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">;</span> <span class="s2">&quot;b&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">]</span> <span class="s2">&quot;b&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Option</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">2</span>
+</pre></div><p id="idp8493024">
+        And <code>Result</code> and <code>Or_error</code>
+        have similar <code>try_with</code> functions. So, we could
+        write:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">find</span> <span class="n">alist</span> <span class="n">key</span> <span class="o">=</span>
+    <span class="nn">Result</span><span class="p">.</span><span class="n">try_with</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">find_exn</span> <span class="n">alist</span> <span class="n">key</span><span class="o">)</span> <span class="o">;;</span>
+<span class="k">val</span> <span class="n">find</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="n">exn</span><span class="o">)</span> <span class="nn">Result</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">find</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">;</span> <span class="s2">&quot;b&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">]</span> <span class="s2">&quot;c&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="n">exn</span><span class="o">)</span> <span class="nn">Result</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nn">Result</span><span class="p">.</span><span class="nc">Error</span> <span class="nc">Key_not_found</span><span class="o">(</span><span class="s2">&quot;c&quot;</span><span class="o">)</span>
+</pre></div><p id="idp8496720">
+        And then we can re-raise that exception:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Result</span><span class="p">.</span><span class="n">ok_exn</span> <span class="o">(</span><span class="n">find</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">;</span> <span class="s2">&quot;b&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">]</span> <span class="s2">&quot;b&quot;</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="o">#</span> <span class="nn">Result</span><span class="p">.</span><span class="n">ok_exn</span> <span class="o">(</span><span class="n">find</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">;</span> <span class="s2">&quot;b&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">]</span> <span class="s2">&quot;c&quot;</span><span class="o">);;</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="nc">Key_not_found</span><span class="o">(</span><span class="s2">&quot;c&quot;</span><span class="o">).</span>
+</pre></div></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="variants.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="imperative-programming-1.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

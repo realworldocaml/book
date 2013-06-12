@@ -182,7 +182,7 @@ times, `Time.sexp_of_t`.
 Note that the time isn't actually serialized into an s-expression
 until the error is printed out.  We're not restricted to doing this
 kind of error reporting with built-in types.  This will be discussed
-in more detail in [xref](data-serialization-with-s-expressions), but
+in more detail in [xref](#data-serialization-with-s-expressions), but
 Sexplib comes with a language extension that can auto-generate
 sexp-converters for newly generated types, as shown below.
 
@@ -422,7 +422,7 @@ path is trivial.
 
 This is all part of the support for s-expressions provided by the
 Sexplib library and syntax-extension, which is described in more
-detail in [xref](data-serialization-with-s-expressions).
+detail in [xref](#data-serialization-with-s-expressions).
 
 </note>
 
@@ -577,7 +577,7 @@ it can clean up after itself in the presence of exceptions.
 OCaml's exception-handling system allows you to tune your
 error-recovery logic to the particular error that was thrown.  For
 example, `List.find_exn` throws `Not_found` when the element in
-question can'tbe found.  You can take advantage of this in your code,
+question can't be found.  You can take advantage of this in your code,
 for example, let's define a function called `lookup_weight`, with the
 following signature.
 
@@ -589,7 +589,7 @@ val lookup_weight :
 `lookup_weight ~compute_weight alist key` should return a
 floating-point weight by applying `compute_weight` to the data
 associated with `key` by `alist`.  If `key` is not found, then it
-shoudl return 0.
+should return 0.
 
 We can implement `lookup_weight` as follows.
 

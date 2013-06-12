@@ -1,9 +1,13 @@
 open Core.Std
 
-module Harness = Mlearn.Make_harness
-  (Linreg.Model)
-  (Linreg.Predictive_model)
-  (Reports.Single_responder_sq_error)
+module Harness =
+  Mlearn.Make_harness
+    (Linreg.Predictor)
+    (Linreg.Responder)
+    (Linreg.Config)
+    (Linreg.Model)
+    (Linreg.Predictive_model)
+    (Reports.Single_responder_sq_error)
 
 let train_and_evaluate
     (config : Linreg.Config.t)
