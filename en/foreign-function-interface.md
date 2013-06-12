@@ -796,7 +796,7 @@ an array into a `ptr` pointer to the head of buffer, which can be useful if you
 need to pass the pointer and size arguments separately to a C function.
 
 Unions in C are named structures that can be mapped onto the same underlying
-memory.  They are also fully supported in in Ctypes, but we won't go into more
+memory.  They are also fully supported in Ctypes, but we won't go into more
 detail here.
 
 <note>
