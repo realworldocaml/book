@@ -76,11 +76,11 @@ let js_interns =
   ; "ranchen"                (* ranchen@seas.upenn.edu   *)
   ; "apribadi"               (* aaron.pribadi@gmail.com  *)
   ; "nicolasavru"            (* nicolasavru@gmail.com    *)
-  ; "m-alvarez"              (* TODO mario.alvarezp@estudiante.uam.es *)
-  ; "polasek"                (* TODO Jan Polášek <jp581@cam.ac.uk> *)
-  ; "mkandalf"               (* TODO nmeyer@janestreet.com *)
-  ; "denyphi"                (* TODO pdenys@janestreet.com *)
-  ; "dhouck"                 (* TODO dhouck@janestreet.com *)
+  ; "m-alvarez"              (* mario.alvarezp@estudiante.uam.es *)
+  ; "polasek"                (* Jan Polášek <jp581@cam.ac.uk> *)
+  ; "mkandalf"               (* nmeyer@janestreet.com *)
+  ; "denyphi"                (* pdenys@janestreet.com *)
+  ; "dhouck"                 (* dhouck@janestreet.com *)
   ]
 
 let from_email =
@@ -126,8 +126,13 @@ let from_email =
   ; "quarkcool"               (* Martin Cavaillès <quarkcool@gmail.com>*)
   ; "cstrahan"                (* Charles Strahan <charles.strahan@livingsocial.com> *)
   ; "joshmaxsilverman"        (* Josh Max Silverman <josh.silverman@gmail.com> *)
-  ; "andreas"                 (* TODO Andreas Garnæs <andreas.garnaes@gmail.com> *)
-  ; "darioteixeira"           (* TODO Dario Teixeira <dario.teixeira@yahoo.com> *)
+  ; "andreas"                 (* Andreas Garnæs <andreas.garnaes@gmail.com> *)
+  ; "darioteixeira"           (* Dario Teixeira <dario.teixeira@yahoo.com> *)
+  ; "fishman"                 (* Reza Jelveh <reza.jelveh@gmail.com> *)
+  ; "bvaugon"                 (* Benoit Vaugon <benoit.vaugon@gmail.com>  *)
+  ; "bonipart"                (* Brandon Bonipart <bonipart@gmail.com> *)
+  ; "wdan"                    (* Yanhong Wu <wdan1990@gmail.com> *)
+  ; "zmagg"                   (* Maggie Zhou <emmbeezee@gmail.com> *)
 
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
@@ -167,5 +172,6 @@ let allowed_users = function
   | "alpha3" -> internal_reviewers
   | "alpha4" -> internal_reviewers
   | "alpha5" -> external_reviewers
+  | "alpha6" -> internal_reviewers
   | "trunk"  -> internal_reviewers
   |_ -> internal_reviewers
