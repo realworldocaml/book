@@ -33,7 +33,7 @@ let float_time () = printf "%f%!\n" (gettimeofday' ())
 
 let ascii_time () =
   let t_ptr = allocate time_t (time' ()) in
-  printf "%s%!\n" (ctime t_ptr)
+  printf "%s%!" (ctime t_ptr)
 
 let () =
   let open Command in
