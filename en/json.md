@@ -401,43 +401,46 @@ pretty-printing functions in the `Yojson.Basic` module to lay the
 output out in the JSON format.
 
 ```ocaml
-# let x = `Assoc [ ("key", `String "value") ] ;;
+# let person = `Assoc [ ("name", `String "Anil") ] ;;
 val x : [> `Assoc of (string * [> `String of string ]) list ] =
-  `Assoc [("key", `String "value")]
+  `Assoc [("name", `String "Anil")]
 ```
 
-In the example above, we've constructed a value `x` that represents a simple
-JSON object.  We haven't actually defined the type of `x` explicitly here, as
-we're relying on the magic of polymorphic variants to make this all work.
-The OCaml type system infers a type for `x` based on how you construct the value.
-In this case only the `Assoc` and `String` variants are used, and the
-inferred type only contains these fields without knowledge of the other possible
-variants that you haven't used yet.
+In the example above, we've constructed a simple JSON object that represents
+a single person.  We haven't actually defined the type of `person` explicitly,
+as we're relying on the magic of polymorphic variants to make this all work.
+
+The OCaml type system infers a type for `person` based on how you construct its
+value.  In this case, only the `Assoc` and `String` variants are used to define
+the record, and so the inferred type only contains these fields without
+knowledge of the other possible allowed variants in JSON records that you
+haven't used yet (e.g. `Int` or `Null`).
 
 ```ocaml
 # Yojson.Basic.pretty_to_string ;;
 - : ?std:bool -> Yojson.Basic.json -> string = <fun>  
 ```
 
-`pretty_to_string` has a more explicit signature that wants an argument of type
-`Yojson.Basic.json`.  When `x` is applied to `pretty_to_string`, the inferred
-type of `x` is statically checked against the structure of the `json` type to
-ensure that they're compatible.
+The `pretty_to_string` function has a more explicit signature that requires an
+argument of type `Yojson.Basic.json`.  When `person` is applied to
+`pretty_to_string`, the inferred type of `person` is statically checked against
+the structure of the `json` type to ensure that they're compatible.
 
 ```ocaml
-# Yojson.Basic.pretty_to_string x ;;
-- : string = "{ \"key\": \"value\" }"
+# Yojson.Basic.pretty_to_string person ;;
+- : string = "{ \"name\": \"Anil\" }"
 
-# Yojson.Basic.pretty_to_channel stdout x ;;
-{ "key": "value" }
+# Yojson.Basic.pretty_to_channel stdout person ;;
+{ "name": "Anil" }
 - : unit = ()
 ```
 
-In this case, there are no problems.  Our `x` value has an inferred type that
-is a valid sub-type of `json`, and the function application just works without
-us ever having to explicitly specify a type for `x`.  Type inference lets you
-write more succinct code without sacrificing runtime reliability, as all the
-uses of polymorphic variants are still checked at compile-time.
+In this case, there are no problems.  Our `person` value has an inferred type
+that is a valid sub-type of `json`, and so the conversion to a string just
+works without us ever having to explicitly specify a type for `person`.  Type
+inference lets you write more succinct code without sacrificing runtime
+reliability, as all the uses of polymorphic variants are still checked at
+compile-time.
 
 <sidebar>
 <title>Polymorphic variants and easier type checking</title>
@@ -448,11 +451,11 @@ your code.  For example, suppose you build an `Assoc` and mistakenly
 include a single value instead of a list of keys:
 
 ```ocaml
-# let x = `Assoc ("key", `String "value");;
-val x : [> `Assoc of string * [> `String of string ] ] =
-  `Assoc ("key", `String "value")
+# let person = `Assoc ("name", `String "Anil");;
+val person : [> `Assoc of string * [> `String of string ] ] =
+  `Assoc ("name", `String "Anil")
 
-# Yojson.Basic.pretty_to_string x;;
+# Yojson.Basic.pretty_to_string person ;;
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
@@ -465,18 +468,18 @@ narrow down this error to a shorter form by adding explicit type annotations as
 a hint about your intentions.
 
 ```ocaml
-# let (x:Yojson.Basic.json) = `Assoc ("key", `String "value");;
+# let (person:Yojson.Basic.json) = `Assoc ("name", `String "Anil");;
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
 ```
 
-In this case, we've marked the `x` as being of type `Yojson.Basic.json`, and
-the compiler immediately spots that the argument to the `Assoc` variant has the
-incorrect type.  This illustrates the strengths and weaknesses of polymorphic
-variants: they make it possible to easily subtype across module boundaries, but
-the error messages can be more confusing.  However, a bit of careful manual
-type annotation is all it takes to make tracking down such issues much easier.
+We've annotated `person` as being of type `Yojson.Basic.json`, and as a result
+the compiler spots that the argument to the `Assoc` variant has the incorrect
+type.  This illustrates the strengths and weaknesses of polymorphic variants:
+they make it possible to easily subtype across module boundaries, but the error
+messages can be more confusing.  However, a bit of careful manual type
+annotation is all it takes to make tracking down such issues much easier.
 
 We'll discuss more techniques like this that help you interpret type errors
 more easily in [xref](#the-compiler-frontend-parsing-and-type-checking).
