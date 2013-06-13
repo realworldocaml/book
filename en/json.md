@@ -293,18 +293,17 @@ as changing a mutable record field or printing to the standard output.
 
 </sidebar>
 
-`Yojson` provides several combinators in the `Yojson.Basic.Util` module,
-such as the ones below.
+`Yojson` provides several combinators in the `Yojson.Basic.Util` module.
 
-```ocaml
-val member : string -> json -> json
-val to_string : json -> string
-val to_int : json -> int
-val filter_string : json list -> string list
-```
+Function         Type                         Purpose
+--------         ----                         -------
+member           `string -> json -> json`     Select a named field from a JSON record.
+to_string        `json -> string`             Convert a JSON value into an OCaml `string`, and raise exception if this impossible.
+to_int           `json -> int`                Convert a JSON value into an OCaml `int`, and raise exception if this is impossible.
+filter_string    `json list -> string list`   Filter valid strings from a list of JSON fields, and return them as OCaml strings.
 
-We'll go through each of these uses one-by-one.  The examples below also use
-the `|>` pipe-forward operator that we explained earlier in
+We'll go through each of these uses one-by-one now.  The examples below also
+use the `|>` pipe-forward operator that we explained earlier in
 [xref](#variables-and-functions).  This lets us chain together multiple JSON
 selection functions and feed the output from one into the next one, without
 having to create separate `let` bindings for each one.
