@@ -246,13 +246,13 @@ that your free list becomes fragmented.  In this situation, the GC is forced to
 perform an expensive compaction despite there being free chunks, since none of
 the chunks alone are big enough to satisfy the request.
 
-First-fit allocation focusses on reducing memory fragmentation, but at the
-expense of slower block allocation.  Every allocation scans the free list from
-the beginning for a suitable free chunk, instead of reusing the most recent
-heap chunk as the next-fit allocator does.
+First-fit allocation focusses on reducing memory fragmentation (and hence the
+number of compactions), but at the expense of slower memory allocation.  Every
+allocation scans the free list from the beginning for a suitable free chunk,
+instead of reusing the most recent heap chunk as the next-fit allocator does.
 
-For some workloads, the reduction in the frequency in heap compaction will
-outweigh the extra allocation cost.
+For some workloads that need more real-time behaviour under load, the reduction
+in the frequency in heap compaction will outweigh the extra allocation cost.
 
 <note>
 <title>Controlling the heap allocation policy</title>
@@ -330,6 +330,39 @@ unreachable blocks.  Core defaults this to `100` to reflect a typical system
 that isn't overly memory-constrained. Set this even higher if you have lots of
 memory, or lower to cause the GC to work harder and collect blocks faster at
 the expense of using more CPU time.
+
+</note>
+
+### Heap Compaction
+
+After a certain number of major GC cycles have completed, the heap may begin
+to be fragmented due to values being deallocated out of order from how they
+were allocated.  This makes it harder for the GC to find a contiguous block
+of memory for fresh allocations, which in turn would require the heap to be
+grown unnecessarily.
+
+The heap compaction cycle avoids this by relocating all the values in the
+major heap into a fresh heap that places them all contiguously in memory
+again.  A naive implementation of the algorithm would require extra
+memory to store the new heap, but OCaml performs the compaction in-place
+within the existing heap.
+
+<note>
+<title>Controlling frequency of compactions</title>
+
+The `max_overhead` setting in the `Gc` module defines the connection between
+free memory and allocated memory after which compaction is activated.
+
+A value of `0` triggers a compaction after every major garbage collection
+cycle, whereas the maximum value of `1000000` disables heap compaction
+completely.  The default settings should be fine unless you have unusual
+allocation patterns that are causing a higher-than-usual rate of compactions.
+
+```ocaml
+# open Core.Std;;
+# Gc.tune ~max_overhead:0 ();;
+- : unit = () 
+```
 
 </note>
 
