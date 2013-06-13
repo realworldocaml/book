@@ -66,13 +66,13 @@ words of available space. One word holds the `foo` field and the second word
 holds the `bar` field.  The OCaml compiler translates such an expression into
 an explicit allocation for the block from OCaml's runtime system.
 
-OCaml uses a uniform memory representation for every OCaml variable known as a
-`value`. An OCaml value is a single memory word that is either an immediate
-integer or a pointer to some other memory.  The OCaml runtime tracks all values
-so that it can free them when they are no longer needed. It thus needs to
-understand the difference an integer and a pointer since it scans pointers to
-find further values, but doesn't follow integers that don't point to anything
-meaningful beyond their immediate value.
+OCaml uses a uniform memory representation in which every OCaml variable is
+stored as a *value*.  An OCaml value is a single memory word that is either an
+immediate integer or a pointer to some other memory.  The OCaml runtime tracks
+all values so that it can free them when they are no longer needed. It thus
+needs to be able to distinguish between integer and pointer values, since it
+scans pointers to find further values but doesn't follow integers that don't
+point to anything meaningful beyond their immediate value.
 
 ### Distinguishing integer and pointers at runtime
 
