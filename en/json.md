@@ -136,10 +136,6 @@ val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> js
              have to be a real file. 
    [lnum]  : number of the first line of input. Default is 1.
 
-val from_channel : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> in_channel -> json
-(* Read a JSON value from a channel. See [from_string] for the meaning of the
-   optional arguments. *)
-
 val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 (* Read a JSON value from a file. See [from_string] for the meaning of the optional
    arguments. *)
@@ -152,21 +148,35 @@ above signature, the optional arguments offer finer control over the
 memory buffer allocation and error messages from parsing incorrect
 JSON.
 
-The type signature for these functions with the optional elements
-removed makes their purpose much clearer:
+The type signature for these functions with the optional elements removed makes
+their purpose much clearer.  The two ways of parsing the JSON are either
+directly from a string or from a file on a filesystem.
 
 ```ocaml
 val from_string : string -> json
 val from_file : string -> json
-val from_channel : in_channel -> json
 ```
 
-The `in_channel` constructor is from the original OCaml standard
-library, and its use is considered deprecated when using the Core
-standard library.  This leaves us with two ways of parsing the JSON:
-either from a string or from a file on a filesystem.  The next example
-shows both in action, assuming the JSON record is stored in a file
-called `book.json`.
+<note>
+<title>The standard OCaml `in_channel` and `out_channel`</title>
+
+You'll notice when reading the Yojson interface that we've left out the
+`from_channel` function, which uses a `in_channel` type provided by the OCaml
+standard library.  These OCaml channels are considered deprecated in Core, as
+they're primarily used by the compiler itself, but don't always play well with
+threading and asynchronous programming.
+
+The Core equivalent are the `In_channel` and `Out_channel` modules instead, but
+you will still see the standard OCaml channel types being used in third-party
+libraries such as Yojson which weren't specifically designed to be used with
+Core.  They won't do any harm if you don't use them in your code, so just
+ignore them and use strings or files instead.
+
+</note>
+
+
+The next example shows both the string and file functions in action, assuming
+the JSON record is stored in a file called `book.json`.
 
 ```ocaml
 (* read_json.ml *)
