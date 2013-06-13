@@ -76,7 +76,7 @@ meaningful beyond their immediate value.
 
 ### Distinguishing integer and pointers at runtime
 
-Values use a single tag bit the word to distinguish integers and pointers at
+Values use a single tag bit per word to distinguish integers and pointers at
 runtime. The value is an integer if the lowest bit of the block word is
 non-zero.  Several OCaml types map onto this integer representation, including
 `bool`, `int`, the empty list, `unit`, and variants without constructors.
