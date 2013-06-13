@@ -23089,7 +23089,7 @@ val sort_stdin : unit -&gt; unit
         track of the heap blocks it has allocated for OCaml values. If
         the pointer is inside a heap chunk that is marked as being
         managed by the OCaml runtime, it is assumed to point to an OCaml
-        value. If it points outside the OCaml runtime area, it is is
+        value. If it points outside the OCaml runtime area, it is
         treated as an opaque C pointer to some other system resource.
       </para>
       <note>
@@ -23133,10 +23133,11 @@ val sort_stdin : unit -&gt; unit
     <para>
       An OCaml <emphasis>block</emphasis> is the basic unit of
       allocation on the heap. A block consists of a one-word header
-      (either 32- or 64-bits) followed by variable-length data that is
-      either opaque bytes or an array of <emphasis>fields</emphasis>.
-      The header has a multi-purpose tag byte that defines whether to
-      interprete the subsequent data as opaque bytes or OCaml fields.
+      (either 32- or 64-bits depending on the CPU architecture) followed
+      by variable-length data that is either opaque bytes or an array of
+      <emphasis>fields</emphasis>. The header has a multi-purpose tag
+      byte that defines whether to interpret the subsequent data as
+      opaque bytes or OCaml fields.
     </para>
     <para>
       The garbage collector never inspects opaque bytes. If the tag
@@ -23146,10 +23147,10 @@ val sort_stdin : unit -&gt; unit
       process described earlier.
     </para>
     <programlisting>
-+------------------------+-------+----------+----------+----------+----
-| size of block in words |  col  | tag byte | value[0] | value[1] | ...
-+------------------------+-------+----------+----------+----------+----
- &lt;-either 22 or 54 bits-&gt; &lt;2 bit&gt; &lt;--8 bit--&gt;
++------------------------+---------+----------+----------+----------+----
+| size of block in words |  color  | tag byte | value[0] | value[1] | ...
++------------------------+---------+----------+----------+----------+----
+ &lt;-either 22 or 54 bits-&gt; &lt;-2 bit-&gt; &lt;--8 bit--&gt;
 </programlisting>
     <para>
       The <literal>size</literal> field records the length of the block
@@ -23171,7 +23172,8 @@ val sort_stdin : unit -&gt; unit
       greater than or equal to <literal>No_scan_tag</literal> (251),
       then the block's data are all opaque bytes, and are not scanned by
       the collector. The most common such block is the
-      <literal>string</literal> type, which we describe more below.
+      <literal>string</literal> type, which we describe in more detail
+      later in this chapter.
     </para>
     <para>
       The exact representation of values inside a block depends on their
@@ -24386,11 +24388,11 @@ val c : Gc.control =
           The OCaml compiler keeps track of any mutable types and adds a
           call to the runtime <literal>caml_modify</literal> function
           before making the change. This checks the location of target
-          write and the value its being changed to, and ensures that the
-          remembered set is consistent. Although the write barrier is
-          reasonably efficient, it can sometimes be slower than simply
-          allocating a fresh value on the fast minor heap and doing some
-          extra minor collections.
+          write and the value it's being changed to, and ensures that
+          the remembered set is consistent. Although the write barrier
+          is reasonably efficient, it can sometimes be slower than
+          simply allocating a fresh value on the fast minor heap and
+          doing some extra minor collections.
         </para>
         <para>
           Let's see this for ourselves with a simple test program.
