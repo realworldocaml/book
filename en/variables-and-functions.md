@@ -1194,3 +1194,105 @@ argument is not erased, instead returning a function that expects the
 # concat "a" "b";;
 - : ?sep:string -> string = <fun>
 ```
+
+## Exercises
+
+### Typing
+
+For each of the following expressions, is the expression well-typed?  If it is well-typed, does it
+evaluate to a value?  If so, what is the value?
+
+- `1 - 2`
+
+  Well typed.  The value is \hbox{\lstinline/-1/}.
+
+- `1 - 2 - 3`
+
+  Well typed.  Subtraction is left-associative, so the value is `-4`.
+
+- `1 - - 2`
+
+  Well typed.  The value is `3`.
+
+
+- `0b101 + 0x10`
+
+  Well typed.  The value is `0x15` (`21` in decimal).
+
+- `1073741823 + 1`
+
+  Well typed.  On a 32-bit platform, `1073741823` is the maximum
+  integer, so the value is `-1073741824`.  On a 64-bit machine, the addition does not
+  overflow, so the result is `1073741824`.
+
+- `1073741823.0 + 1e2`
+
+  Ill typed.  The operator `+` is for integer addition only.
+
+- `1 ^ 1`
+
+  Ill typed.  The operator `^` is string concatenation.
+
+- `if true then 1`
+
+  Ill typed.  The missing `else` branch has type
+  `unit`, which is not compatible with `1`.
+
+- `if false then ()`
+
+  Well typed.  The result is `()`.
+
+- `if 0.3 -. 0.2 = 0.1 then 'a' else 'b'`
+
+  Well-typed.  On most platforms, `0.3 -. 0.2` is very close to, but different from,
+  `0.1`, so the result is `'b'`.
+
+- `true || (1 / 0 >= 0)`
+
+  Well-typed.  The value is `true` (since disjunction
+  `||` is a short-circuit operator).
+
+- `1 > 2 - 1`
+
+  Well typed, because `-` has higher precedence than `>`.
+  The result is `false`.
+
+- `"Hello world".[6]`
+
+  Well typed.  The value is `'w'`.
+
+- `"Hello world".[11] <- 's'`
+
+  Well typed, but the index `11` is out of bounds,
+  so the expression does not evaluate to a value.
+
+- `String.lowercase "A" < "B"`
+
+  Well typed.  The value is `false`.
+
+
+- `Char.code 'a'`
+
+  Well typed.  The ASCII character code for `'a'` is `97`.
+
+- `(((())))`
+
+  Well typed.  The value is the unit `()`.
+
+- `((((*1*))))`
+
+  Well typed.  The value is `()`.
+
+- `((*((()*))`
+
+  Well typed.  The value is `()`.
+
+% -*-
+% Local Variables:
+% Mode: LaTeX
+% fill-column: 100
+% TeX-master: "paper"
+% TeX-command-default: "LaTeX/dvips Interactive"
+% End:
+% -*-
+% vim:tw=100:fo=tcq:
