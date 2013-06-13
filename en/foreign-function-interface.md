@@ -180,7 +180,6 @@ val endwin    : unit   -> unit
 val refresh   : unit   -> unit
 val wrefresh  : window -> unit
 val newwin    : int    -> int -> int -> int -> window
-val addch     : char   -> unit
 val mvwaddch  : window -> int -> int -> char -> unit
 val addstr    : string -> unit
 val mvwaddstr : window -> int -> int -> string -> unit
