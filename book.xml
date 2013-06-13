@@ -17193,21 +17193,90 @@ val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit
     </sidebar>
     <para>
       <literal>Yojson</literal> provides several combinators in the
-      <literal>Yojson.Basic.Util</literal> module, such as:
+      <literal>Yojson.Basic.Util</literal> module.
     </para>
-    <programlisting language="ocaml">
-val member : string -&gt; json -&gt; json
-val index : int -&gt; json -&gt; json
-val to_string : json -&gt; string
-val to_int : json -&gt; int
-val filter_string : json list -&gt; string list
-</programlisting>
+    <informaltable>
+      <tgroup cols="3">
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <colspec align="left"/>
+        <thead>
+          <row>
+            <entry>
+              Function
+            </entry>
+            <entry>
+              Type
+            </entry>
+            <entry>
+              Purpose
+            </entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>
+              member
+            </entry>
+            <entry>
+              <literal>string -&gt; json -&gt; json</literal>
+            </entry>
+            <entry>
+              Select a named field from a JSON record.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              to_string
+            </entry>
+            <entry>
+              <literal>json -&gt; string</literal>
+            </entry>
+            <entry>
+              Convert a JSON value into an OCaml
+              <literal>string</literal>, and raise exception if this
+              impossible.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              to_int
+            </entry>
+            <entry>
+              <literal>json -&gt; int</literal>
+            </entry>
+            <entry>
+              Convert a JSON value into an OCaml <literal>int</literal>,
+              and raise exception if this is impossible.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              filter_string
+            </entry>
+            <entry>
+              <literal>json list -&gt; string list</literal>
+            </entry>
+            <entry>
+              Filter valid strings from a list of JSON fields, and
+              return them as OCaml strings.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
     <para>
-      We'll go through each of these uses one-by-one. Core provides the
-      <literal>|&gt;</literal> pipe-forward which can chain combinators
-      together, and the example code uses this to select and convert
-      values out of the JSON structure. Let's examine some of them in
-      more detail:
+      We'll go through each of these uses one-by-one now. The examples
+      below also use the <literal>|&gt;</literal> pipe-forward operator
+      that we explained earlier in
+      <xref linkend="variables-and-functions"/>. This lets us
+      chain together multiple JSON selection functions and feed the
+      output from one into the next one, without having to create
+      separate <literal>let</literal> bindings for each one.
+    </para>
+    <para>
+      Let's start with selecting a single <literal>title</literal> field
+      from the record.
     </para>
     <programlisting language="ocaml">
   let open Yojson.Basic.Util in
@@ -17275,12 +17344,12 @@ let names =
 </programlisting>
     <para>
       This style of programming which omits variable names and chains
-      functions together is known as &quot;point-free programming&quot;.
-      It's a succinct style, but shouldn't be overused due to the
-      increased difficulty of debugging intermediate values. If an
-      explicit name is assigned to each stage of the transformations,
-      debuggers in particular have an easier time making the program
-      flow easier to represent to the programmer.
+      functions together is known as <emphasis>point-free
+      programming</emphasis>. It's a succinct style, but shouldn't be
+      overused due to the increased difficulty of debugging intermediate
+      values. If an explicit name is assigned to each stage of the
+      transformations, debuggers in particular have an easier time
+      making the program flow easier to represent to the programmer.
     </para>
     <para>
       This technique of using chained parsing functions is very powerful
@@ -17314,51 +17383,55 @@ type json = [
       module to lay the output out in the JSON format.
     </para>
     <programlisting language="ocaml">
-# let x = `Assoc [ (&quot;key&quot;, `String &quot;value&quot;) ] ;;
+# let person = `Assoc [ (&quot;name&quot;, `String &quot;Anil&quot;) ] ;;
 val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
-  `Assoc [(&quot;key&quot;, `String &quot;value&quot;)]
+  `Assoc [(&quot;name&quot;, `String &quot;Anil&quot;)]
 </programlisting>
     <para>
-      In the example above, we've constructed a value
-      <literal>x</literal> that represents a simple JSON object. We
-      haven't actually defined the type of <literal>x</literal>
-      explicitly here, as we're relying on the magic of polymorphic
-      variants to make this all work. The OCaml type system infers a
-      type for <literal>x</literal> based on how you construct the
-      value. In this case only the <literal>Assoc</literal> and
-      <literal>String</literal> variants are used, and the inferred type
-      only contains these fields without knowledge of the other possible
-      variants that you haven't used yet.
+      In the example above, we've constructed a simple JSON object that
+      represents a single person. We haven't actually defined the type
+      of <literal>person</literal> explicitly, as we're relying on the
+      magic of polymorphic variants to make this all work.
+    </para>
+    <para>
+      The OCaml type system infers a type for <literal>person</literal>
+      based on how you construct its value. In this case, only the
+      <literal>Assoc</literal> and <literal>String</literal> variants
+      are used to define the record, and so the inferred type only
+      contains these fields without knowledge of the other possible
+      allowed variants in JSON records that you haven't used yet (e.g.
+      <literal>Int</literal> or <literal>Null</literal>).
     </para>
     <programlisting language="ocaml">
 # Yojson.Basic.pretty_to_string ;;
 - : ?std:bool -&gt; Yojson.Basic.json -&gt; string = &lt;fun&gt;  
 </programlisting>
     <para>
-      <literal>pretty_to_string</literal> has a more explicit signature
-      that wants an argument of type
-      <literal>Yojson.Basic.json</literal>. When <literal>x</literal> is
-      applied to <literal>pretty_to_string</literal>, the inferred type
-      of <literal>x</literal> is statically checked against the
+      The <literal>pretty_to_string</literal> function has a more
+      explicit signature that requires an argument of type
+      <literal>Yojson.Basic.json</literal>. When
+      <literal>person</literal> is applied to
+      <literal>pretty_to_string</literal>, the inferred type of
+      <literal>person</literal> is statically checked against the
       structure of the <literal>json</literal> type to ensure that
       they're compatible.
     </para>
     <programlisting language="ocaml">
-# Yojson.Basic.pretty_to_string x ;;
-- : string = &quot;{ \&quot;key\&quot;: \&quot;value\&quot; }&quot;
+# Yojson.Basic.pretty_to_string person ;;
+- : string = &quot;{ \&quot;name\&quot;: \&quot;Anil\&quot; }&quot;
 
-# Yojson.Basic.pretty_to_channel stdout x ;;
-{ &quot;key&quot;: &quot;value&quot; }
+# Yojson.Basic.pretty_to_channel stdout person ;;
+{ &quot;name&quot;: &quot;Anil&quot; }
 - : unit = ()
 </programlisting>
     <para>
-      In this case, there are no problems. Our <literal>x</literal>
+      In this case, there are no problems. Our <literal>person</literal>
       value has an inferred type that is a valid sub-type of
-      <literal>json</literal>, and the function application just works
-      without us ever having to explicitly specify a type for
-      <literal>x</literal>. Type inference lets you write more succinct
-      code without sacrificing runtime reliability, as all the uses of
-      polymorphic variants are still checked at compile-time.
+      <literal>json</literal>, and so the conversion to a string just
+      works without us ever having to explicitly specify a type for
+      <literal>person</literal>. Type inference lets you write more
+      succinct code without sacrificing runtime reliability, as all the
+      uses of polymorphic variants are still checked at compile-time.
     </para>
     <sidebar>
     <title>
@@ -17372,11 +17445,11 @@ val x : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
       instead of a list of keys:
     </para>
     <programlisting language="ocaml">
-# let x = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
-val x : [&gt; `Assoc of string * [&gt; `String of string ] ] =
-  `Assoc (&quot;key&quot;, `String &quot;value&quot;)
+# let person = `Assoc (&quot;name&quot;, `String &quot;Anil&quot;);;
+val person : [&gt; `Assoc of string * [&gt; `String of string ] ] =
+  `Assoc (&quot;name&quot;, `String &quot;Anil&quot;)
 
-# Yojson.Basic.pretty_to_string x;;
+# Yojson.Basic.pretty_to_string person ;;
 Error: This expression has type
          [&gt; `Assoc of string * [&gt; `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
@@ -17389,21 +17462,21 @@ Error: This expression has type
       adding explicit type annotations as a hint about your intentions.
     </para>
     <programlisting language="ocaml">
-# let (x:Yojson.Basic.json) = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
+# let (person:Yojson.Basic.json) = `Assoc (&quot;name&quot;, `String &quot;Anil&quot;);;
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
 </programlisting>
     <para>
-      In this case, we've marked the <literal>x</literal> as being of
-      type <literal>Yojson.Basic.json</literal>, and the compiler
-      immediately spots that the argument to the
-      <literal>Assoc</literal> variant has the incorrect type. This
-      illustrates the strengths and weaknesses of polymorphic variants:
-      they make it possible to easily subtype across module boundaries,
-      but the error messages can be more confusing. However, a bit of
-      careful manual type annotation is all it takes to make tracking
-      down such issues much easier.
+      We've annotated <literal>person</literal> as being of type
+      <literal>Yojson.Basic.json</literal>, and as a result the compiler
+      spots that the argument to the <literal>Assoc</literal> variant
+      has the incorrect type. This illustrates the strengths and
+      weaknesses of polymorphic variants: they make it possible to
+      easily subtype across module boundaries, but the error messages
+      can be more confusing. However, a bit of careful manual type
+      annotation is all it takes to make tracking down such issues much
+      easier.
     </para>
     <para>
       We'll discuss more techniques like this that help you interpret
