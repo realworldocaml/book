@@ -433,7 +433,11 @@ ensure that they're compatible.
 - : unit = ()
 ```
 
-In this case, there are no problems.  Our `x` value has an inferred type that is a valid sub-type of `json`, and the function application just works without us ever having to explicitly specify a type for `x`.  Type inference lets you write more succinct code without sacrificing runtime reliability, as all the uses of polymorphic variants are still checked at compile-time.
+In this case, there are no problems.  Our `x` value has an inferred type that
+is a valid sub-type of `json`, and the function application just works without
+us ever having to explicitly specify a type for `x`.  Type inference lets you
+write more succinct code without sacrificing runtime reliability, as all the
+uses of polymorphic variants are still checked at compile-time.
 
 <sidebar>
 <title>Polymorphic variants and easier type checking</title>
@@ -520,10 +524,13 @@ Yojson supports the following JSON extensions:
 * The `Variant` type encodes OCaml variants more explicitly, as
   `<"Foo">` or `<"Bar":123>` for a variant with parameters.
 
-The only purpose of these extensions is to make the data
-representation more expressive without having to refer to the original
-OCaml types.  You can always cast a `Safe.json` to a `Basic.json` type
-by using the `to_basic` function as follows:
+The only purpose of these extensions is to have greater control over how OCaml
+values are represented in JSON (for instance, storing a floating pointer number
+as a JSON string).  The output still obeys the same standard format that can be
+easily exchanged with other languages.
+
+You can convert a `Safe.json` to a `Basic.json` type by using the `to_basic`
+function as follows.
 
 ```ocaml
 val to_basic : json -> Yojson.Basic.json
