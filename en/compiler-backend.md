@@ -911,8 +911,8 @@ take during the program execution.
 Getting precise information out of Gprof requires passing the `-p` flag to the
 native code compiler when compiling *and* linking the binary.  This generates
 extra code that records profile information to a file called `gmon.out` when
-the program is executed.  This profile information then can then be examined
-using Gprof.
+the program is executed.  This profile information can then be examined using
+Gprof.
 
 #### Perf
 
