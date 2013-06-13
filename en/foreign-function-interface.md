@@ -187,7 +187,7 @@ val box       : window -> int -> int -> unit
 val cbreak    : unit   -> unit
 ```
 
-The `window` type is left abstract in the signature, ensure that window
+The `window` type is left abstract in the signature to ensure that window
 pointers can only be constructed via the `Ncurses.initscr` function.  This
 prevents void pointers obtained from other sources from being mistakenly passed
 to an Ncurses library call.
