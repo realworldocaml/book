@@ -194,18 +194,18 @@
         frustration for those learning OCaml is that the standard
         library that ships with the compiler doesn't provide a lot of
         features. This standard library was actually developed for use
-        within the compiler itself, and by design covers only a small
-        subset of the functionality you expect for more general-purpose
-        use.
+        within the compiler itself, and therefore by design covers only
+        a small subset of the functionality you expect for more
+        general-purpose use.
       </para>
       <para>
-        In the world of open-source software, nothing stops alternative
-        libraries from being written to supplement the compiler standard
-        library, and this exactly what the Core distribution is. Jane
-        Street, a company that has been using OCaml for more than a
-        decade, developed Core for its own internal use, but it was
-        designed from the start with an eye towards being a
-        general-purpose standard library, and has very broad
+        Happily, in the world of open-source software nothing stops
+        alternative libraries from being written to supplement the
+        compiler-supplied standard library, and this exactly what the
+        Core distribution is. Jane Street, a company that has been using
+        OCaml for more than a decade, developed Core for its own
+        internal use, but designed it from the start with an eye towards
+        being a general-purpose standard library with very broad
         applicability. Like the OCaml language itself, Core is also
         engineered with correctness, reliability and performance in
         mind.
@@ -218,20 +218,6 @@
         these libraries are distributed under a liberal Apache 2 license
         to permit free use in hobby, academic and commercial settings.
       </para>
-      <para>
-        If you've learnt some OCaml before, this book may surprise you
-        with some differences from your past experience. Core redefines
-        most of the standard modules to be much more consistent, and so
-        you'll need to adapt older code. We believe the Core model is
-        worth learning; it's been successfully used on large,
-        million-line codebases and removes a big barrier to more
-        widespread OCaml adoption. There will always exist code that
-        uses only the compiler standard library of course, but there are
-        other online resources available to learn that. Real World OCaml
-        focuses on the techniques the authors have used in their
-        personal experience to construct scalable, robust computer
-        systems.
-      </para>
     </sect2>
     <sect2 id="the-ocaml-platform">
       <title>The OCaml Platform</title>
@@ -239,8 +225,10 @@
         Core is a comprehensive and effective standard library, but
         there's a lot more out software out there. A large community of
         programmers have been using OCaml since its first release in
-        1996 and have generated a lot of useful libraries and tools. In
-        Real World OCaml, we'll introduce some of these libraries for
+        1996 and have generated a lot of useful libraries and tools.
+      </para>
+      <para>
+        In Real World OCaml, we'll introduce some of these libraries for
         you to experiment with realistic examples. The installation and
         management of these third-party libraries is made much easier
         via a package management tool known as OPAM. We'll explain more
@@ -286,6 +274,19 @@
       little compiler magic involved. We'll explain some of these tricks
       to you as we go through the book and gradually introduce more
       complex concepts.
+    </para>
+    <para>
+      If you've learnt some OCaml before, this book may surprise you
+      with some differences from your past experience. Core redefines
+      most of the standard modules to be much more consistent, and so
+      you'll need to adapt older code. We believe the Core model is
+      worth learning; it's been successfully used on large, million-line
+      codebases and removes a big barrier to more widespread OCaml
+      adoption. There will always exist code that uses only the compiler
+      standard library of course, but there are other online resources
+      available to learn that. Real World OCaml focuses on the
+      techniques the authors have used in their personal experience to
+      construct scalable, robust computer systems.
     </para>
     <sect2 id="what-to-expect">
       <title>What to expect</title>
