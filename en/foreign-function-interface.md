@@ -811,7 +811,7 @@ Unions in C are named structures that can be mapped onto the same underlying
 memory.  They are also fully supported in Ctypes, but we won't go into more
 detail here.
 
-<note>
+<sidebar>
 <title>Pointer operators for dereferencing and arithmetic</title>
 
 Ctypes defines a number of operators that let you manipulate pointers and arrays
@@ -828,7 +828,7 @@ Operator    Purpose
 There are also other useful non-operator functions available (see the Ctypes
 documentation), for example for pointer differencing and comparison.
 
-</note>
+</sidebar>
 
 ## Passing functions to C
 
