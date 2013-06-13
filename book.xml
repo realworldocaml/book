@@ -70,7 +70,7 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis>Static type-checking</emphasis> to reduce run-time
+          <emphasis>Static type-checking</emphasis> to reduce runtime
           errors, such as Java or Scala interfaces or variable type
           declarations in C#, Ada and Pascal.
         </para>
@@ -183,7 +183,7 @@
         flexibility of the language, and there is fast native code
         support for x86_64, ARM, PowerPC and Sparc64, making OCaml a
         good choice for systems where resource usage, predictability and
-        performance matters.
+        performance all matter.
       </para>
     </sect2>
     <sect2 id="the-core-standard-library">
@@ -272,8 +272,8 @@
       Python have all adopted healthy elements of functional
       programming, but not all of it. Real World OCaml takes you through
       the full lifecycle of how to construct software with static
-      typing, including the powerful module system that makes code
-      re-use so much more robust.
+      typing, including the powerful module system that makes code reuse
+      so much more robust.
     </para>
     <para>
       At the same time, OCaml is not Haskell. It takes a much more
@@ -672,7 +672,8 @@ val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
       an object-oriented language, accessing a method of an object. The
       <literal>Float</literal> module in particular contains
       <literal>of_int</literal> as well as many other useful functions
-      for dealing with floats.
+      for dealing with floats. It's also worth noting that module names
+      always start with a capital letter.
     </para>
     <para>
       The notation for the type-signature of a multi-argument function
@@ -900,13 +901,13 @@ Error: This expression has type string but
       <para>
         There's a big difference in OCaml (and really in any compiled
         language) between errors that are caught at compile time and
-        those that are caught at run-time. It's better to catch errors
+        those that are caught at run time. It's better to catch errors
         as early as possible in the development process, and compilation
         time is best of all.
       </para>
       <para>
         Working in the toplevel somewhat obscures the difference between
-        run-time and compile time errors, but that difference is still
+        run time and compile time errors, but that difference is still
         there. Generally, type errors, like this one:
       </para>
       <programlisting language="ocaml">
@@ -3488,6 +3489,230 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
       </sect3>
     </sect2>
   </sect1>
+  <sect1 id="exercises">
+    <title>Exercises</title>
+    <sect2 id="typing">
+      <title>Typing</title>
+      <para>
+        For each of the following expressions, is the expression
+        well-typed? If it is well-typed, does it evaluate to a value? If
+        so, what is the value?
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>1 - 2</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is .
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>1 - 2 - 3</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. Subtraction is left-associative, so the value is
+        <literal>-4</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>1 - - 2</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is <literal>3</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>0b101 + 0x10</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is <literal>0x15</literal>
+        (<literal>21</literal> in decimal).
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>1073741823 + 1</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. On a 32-bit platform, <literal>1073741823</literal>
+        is the maximum integer, so the value is
+        <literal>-1073741824</literal>. On a 64-bit machine, the
+        addition does not overflow, so the result is
+        <literal>1073741824</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>1073741823.0 + 1e2</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Ill typed. The operator <literal>+</literal> is for integer
+        addition only.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>1 ^ 1</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Ill typed. The operator <literal>^</literal> is string
+        concatenation.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>if true then 1</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Ill typed. The missing <literal>else</literal> branch has type
+        <literal>unit</literal>, which is not compatible with
+        <literal>1</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>if false then ()</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The result is <literal>()</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>if 0.3 -. 0.2 = 0.1 then 'a' else 'b'</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well-typed. On most platforms, <literal>0.3 -. 0.2</literal> is
+        very close to, but different from, <literal>0.1</literal>, so
+        the result is <literal>'b'</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>true || (1 / 0 &gt;= 0)</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well-typed. The value is <literal>true</literal> (since
+        disjunction <literal>||</literal> is a short-circuit operator).
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>1 &gt; 2 - 1</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed, because <literal>-</literal> has higher precedence
+        than <literal>&gt;</literal>. The result is
+        <literal>false</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>&quot;Hello world&quot;.[6]</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is <literal>'w'</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>&quot;Hello world&quot;.[11] &lt;- 's'</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed, but the index <literal>11</literal> is out of
+        bounds, so the expression does not evaluate to a value.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>String.lowercase &quot;A&quot; &lt; &quot;B&quot;</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is <literal>false</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>Char.code 'a'</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The ASCII character code for <literal>'a'</literal>
+        is <literal>97</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>(((())))</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is the unit <literal>()</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>((((*1*))))</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is <literal>()</literal>.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>((*((()*))</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Well typed. The value is <literal>()</literal>.
+      </para>
+      <para>
+        % -<emphasis>- % Local Variables: % Mode: LaTeX % fill-column:
+        100 % TeX-master: &quot;paper&quot; % TeX-command-default:
+        &quot;LaTeX/dvips Interactive&quot; % End: % -</emphasis>- %
+        vim:tw=100:fo=tcq:
+      </para>
+    </sect2>
+  </sect1>
 </chapter><chapter id="lists-and-patterns">
   <title>Lists and Patterns</title>
   <para>
@@ -3703,7 +3928,7 @@ val drop_zero : int list -&gt; int list = &lt;fun&gt;
         out which one fires. If the cases of a match were guarded by
         arbitrary code, that would be the case. But OCaml is often able
         to generate machine code that jumps directly to the matched case
-        based on an efficiently chosen set of run-time checks.
+        based on an efficiently chosen set of runtime checks.
       </para>
       <para>
         As an example, consider the following rather silly functions for
@@ -4623,6 +4848,7 @@ val assoc : (string * int) list = [(&quot;one&quot;, 1); (&quot;two&quot;, 2); (
 # List.Assoc.find assoc &quot;two&quot;;;
 - : int option = Some 2
 # List.Assoc.add assoc &quot;four&quot; 4;; (* add a new key *)
+- : (string, int) List.Assoc.t =
 [(&quot;four&quot;, 4); (&quot;one&quot;, 1); (&quot;two&quot;, 2); (&quot;three&quot;, 3)]
 # List.Assoc.add assoc &quot;two&quot; 4;; (* overwrite an existing key *)
 - : (string, int) List.Assoc.t = [(&quot;two&quot;, 4); (&quot;one&quot;, 1); (&quot;three&quot;, 3)]
@@ -4652,7 +4878,7 @@ let build_counts () =
 
 let () =
   build_counts ()
-  |&gt; List.sort ~cmp:(fun (_,x) (_,y) -&gt; compare y x)
+  |&gt; List.sort ~cmp:(fun (_,x) (_,y) -&gt; Int.descending x y)
   |&gt; (fun l -&gt; List.take l 10)
   |&gt; List.iter ~f:(fun (line,count) -&gt; printf &quot;%3d: %s\n&quot; count line)
 </programlisting>
@@ -4683,13 +4909,14 @@ let () =
       Unlike C, programs in OCaml do not have a unique
       <literal>main</literal> function. When an OCaml program is
       evaluated, all the statements in the implementation files are
-      evaluated in order. These implementation files can contain
-      arbitrary expressions, not just function definitions. In this
-      example, the declaration starting with <literal>let () =</literal>
-      plays the role of the <literal>main</literal> declaration, kicking
-      off the processing. But really the entire file is evaluated at
-      startup, and so in some sense the full codebase is one big
-      <literal>main</literal> function.
+      evaluated in the order in which they were linked together. These
+      implementation files can contain arbitrary expressions, not just
+      function definitions. In this example, the declaration starting
+      with <literal>let () =</literal> plays the role of the
+      <literal>main</literal> declaration, kicking off the processing.
+      But really the entire file is evaluated at startup, and so in some
+      sense the full codebase is one big <literal>main</literal>
+      function.
     </para>
     </note>
     <para>
@@ -4709,7 +4936,7 @@ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
 </programlisting>
     <para>
       Here we're using <literal>ocamlfind</literal>, a tool which itself
-      invokes other parts of the ocaml toolchain (in this case,
+      invokes other parts of the OCaml toolchain (in this case,
       <literal>ocamlc</literal>) with the appropriate flags to link in
       particular libraries and packages. Here,
       <literal>-package core</literal> is asking
@@ -4738,9 +4965,11 @@ true:package(core),thread,annot,debugging
       which compilation options are required for which files. In this
       case, we're telling <literal>ocamlbuild</literal> to link in the
       <literal>core</literal> package and to turn on threading,
-      generation of annotation files, and debugging support for all
-      files (since the condition <literal>true</literal> evaluates to
-      <literal>true</literal> on all files).
+      generation of annotation files, which are used by various editor
+      modes for providing interactive inspection of the types inferred
+      by the compiler, and debugging support. This is applied to all
+      files, since the condition <literal>true</literal> evaluates to
+      <literal>true</literal> on all files.
     </para>
     <para>
       We can then invoke <literal>ocamlbuild</literal> to build the
@@ -4756,10 +4985,10 @@ $ ocamlbuild -use-ocamlfind freq.byte
       instead.
     </para>
     <para>
-      We can now run the our program from the command-line. The
+      We can run the resulting executable from the command-line. The
       following line extracts strings from the
       <literal>ocamlopt</literal> binary, reporting the most frequently
-      occurring ones. Note that the specific results will very from
+      occurring ones. Note that the specific results will vary from
       platform to platform, since the binary itself will differ between
       platforms.
     </para>
@@ -4793,14 +5022,13 @@ $ strings `which ocamlopt` | ./freq.byte
       of. First, the bytecode compiler can be used on more
       architectures, and has some tools that are not available for
       native code. For example, the OCaml debugger only works with
-      bytecode (although the <literal>gdb</literal>, the Gnu Debugger,
-      works with OCaml native-code applications). The bytecode compiler
-      is also quicker than the native-code compiler. In addition, in
-      order to run a bytecode executable you typically need to have
-      OCaml installed on the system in question. That's not strictly
-      required, though, since you can build a bytecode executable with
-      an embedded runtime, using the <literal>-custom</literal> compiler
-      flag.
+      bytecode (although <literal>gdb</literal>, the Gnu Debugger, works
+      with OCaml native-code applications). The bytecode compiler is
+      also quicker than the native-code compiler. In addition, in order
+      to run a bytecode executable you typically need to have OCaml
+      installed on the system in question. That's not strictly required,
+      though, since you can build a bytecode executable with an embedded
+      runtime, using the <literal>-custom</literal> compiler flag.
     </para>
     <para>
       As a general matter, production executables should usually be
@@ -4820,8 +5048,8 @@ $ strings `which ocamlopt` | ./freq.byte
       name of the file. We've encountered modules before, for example,
       when we used functions like <literal>find</literal> and
       <literal>add</literal> from the <literal>List.Assoc</literal>
-      module. At it's simplest, you can think of a module as a
-      collection of definitions that are stored within a namespace.
+      module. At its simplest, you can think of a module as a collection
+      of definitions that are stored within a namespace.
     </para>
     <para>
       Let's consider how we can use modules to refactor the
@@ -4863,8 +5091,9 @@ let touch t s =
     <para>
       The file <literal>counter.ml</literal> will be compiled into a
       module named <literal>Counter</literal>. The name of the module is
-      derived automatically from the filename. Note that the module name
-      is capitalized even if the file is not.
+      derived automatically from the filename. The module name is
+      capitalized even if the file is not, and more generally module
+      names must be capitalized.
     </para>
     <para>
       We can now rewrite <literal>freq.ml</literal> to use
@@ -4982,14 +5211,21 @@ val touch :
     </para>
     <programlisting language="ocaml">
 (* counter.mli: abstract interface *)
-
 open Core.Std
 
+(** A collection of string frequency counts frequency counts *)
 type t
 
+(** The empty set of frequency counts  *)
 val empty : t
-val to_list : t -&gt; (string * int) list
+
+(** Bump the frequency count for the given string. *)
 val touch : t -&gt; string -&gt; t
+
+(* Converts the set of frequency counts to an association list.  Every strings
+   in the list will show up at most once, and the integers will be at least
+   1. *)
+val to_list : t -&gt; (string * int) list
 </programlisting>
     <para>
       Note that we needed to add <literal>empty</literal> and
@@ -4998,8 +5234,18 @@ val touch : t -&gt; string -&gt; t
       <literal>Counter.t</literal> or get data out of one.
     </para>
     <para>
-      Here's a rewrite of <literal>counter.ml</literal> to match this
-      interface.
+      We also used this opportunity to document the module. The
+      <literal>mli</literal> file is the place where you specify your
+      module's interface, and as such is is a natural place to document
+      the module as well. We also started our comments with a double
+      asterisk to cause them to be picked up by the
+      <literal>ocamldoc</literal> tool when generating API
+      documentation. We'll discuss <literal>ocamldoc</literal> more in
+      <ulink url="generating-documentation-from-interfaces">xref</ulink>.
+    </para>
+    <para>
+      Here's a rewrite of <literal>counter.ml</literal> to match the new
+      <literal>counter.mli</literal>.
     </para>
     <programlisting language="ocaml">
 (* counter.ml: implementation matching abstract interface *)
@@ -5153,7 +5399,7 @@ val median : t -&gt; median
       files, like <literal>counter.ml</literal>. But modules (and module
       signatures) can be nested inside other modules. As a simple
       example, consider a program that needs to deal with multiple
-      identifier like usernames and hostnames. If you just represent
+      identifiers like usernames and hostnames. If you just represent
       these as strings, then it becomes easy to confuse one with the
       other.
     </para>
@@ -5259,31 +5505,22 @@ end
   <sect1 id="opening-modules">
     <title>Opening modules</title>
     <para>
-      One useful primitive in OCaml's module language is the
-      <literal>open</literal> statement. We've seen that already in the
-      <literal>open Core.Std</literal> that has been at the top of our
-      source files.
+      Most of the time, you refer to values and types within a module by
+      using the module name as an explicit qualifier.
+      <emphasis>e.g.</emphasis>, you write <literal>List.map</literal>
+      to refer to the <literal>map</literal> function in the
+      <literal>List</literal> module. Sometimes, though, you want to be
+      able to refer to the contents of a module without this explicit
+      qualification. That's what the <literal>open</literal> statement
+      is for.
     </para>
     <para>
-      We've used OCaml's <literal>open</literal> statement many times
-      already in the `open
-    </para>
-    <para>
-      So far, we've been referring to values and types within a module
-      by using the module name as an explicit qualifier.
-      <emphasis>e.g.</emphasis>, we write <literal>List.map</literal> to
-      refer to the <literal>map</literal> function in the
-      <literal>List</literal> module Sometimes, though, you want to be
-      able to refer to the contents of a module without that kind of
-      explicit qualification. This is what the <literal>open</literal>
-      statement is for.
-    </para>
-    <para>
-      We've already seen the <literal>open</literal> statement in use in
-      the <literal>open Core.Std</literal> statements at the top of each
-      source file. Opening a module adds its contents to the environment
-      that the compiler looks in for finding identifiers. Here's a
-      trivial example that gives you a sense of how this works.
+      We've encountered <literal>open</literal> already, specifically
+      where we've written <literal>open Core.Std</literal> to get access
+      to the standard definitions in the Core library. In general,
+      opening a module adds the contents of that module to the
+      environment that the compiler looks at to find the definition of
+      various identifiers. Here's an example.
     </para>
     <programlisting language="ocaml">
 # module M = struct let foo = 3 end;;
@@ -5299,8 +5536,9 @@ Error: Unbound value foo
       environment for a standard library like Core, but it's generally
       good style to keep opening of modules to a minimum. Opening a
       module is basically a tradeoff between terseness and explicitness
-      --- the more modules you open, the harder it is to look at an
-      identifier and figure out where it's defined.
+      --- the more modules you open, the fewer module qualifications you
+      need, and the harder it is to look at an identifier and figure out
+      where it comes from.
     </para>
     <para>
       Here's some general advice on how to deal with opens.
@@ -5349,7 +5587,7 @@ let average x y =
 let print_median m =
    match m with
    | Counter.Median string -&gt; printf &quot;True median:\n   %s\n&quot;
-   | Counter.Before_and_after of before * after -&gt;
+   | Counter.Before_and_after (before, after) -&gt;
      printf &quot;Before and after median:\n   %s\n   %s\n&quot; before after
 </programlisting>
         <para>
@@ -5360,7 +5598,7 @@ let print_median m =
    let module C = Counter in
    match m with
    | C.Median string -&gt; printf &quot;True median:\n   %s\n&quot;
-   | C.Before_and_after of before * after -&gt;
+   | C.Before_and_after (before, after) -&gt;
      printf &quot;Before and after median:\n   %s\n   %s\n&quot; before after
 </programlisting>
         <para>
@@ -10847,7 +11085,7 @@ val list_init_10 : f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;
     <programlisting language="ocaml">
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
-# module Increment (M:X_int) : X_int = struct
+# module Increment (M : X_int) : X_int = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -&gt; X_int
@@ -10867,7 +11105,7 @@ module Increment : functor (M : X_int) -&gt; X_int
       the output of the functor.
     </para>
     <programlisting language="ocaml">
-# module Increment (M:X_int) = struct
+# module Increment (M : X_int) = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -&gt; sig val x : int end
@@ -10908,20 +11146,36 @@ module Three_and_more : sig val x : int val y : string end
 # module Four = Increment(Three_and_more);;
 module Four : sig val x : int end
 </programlisting>
+    <para>
+      The rules for determining whether a module matches a given
+      signature are similar in spirit to the rules in an object-oriented
+      language that determine whether an object satisfies a given
+      interface.
+    </para>
   </sect1>
   <sect1 id="a-bigger-example-computing-with-intervals">
     <title>A bigger example: computing with intervals</title>
     <para>
       Let's consider a more realistic example of how to use functors: a
-      library for computing with intervals. This library will be
-      functorized over the type of the endpoints of the intervals and
-      the ordering of those endpoints.
+      library for computing with intervals. Intervals are a common
+      computational object, and they come up in different contexts. You
+      might need to work with intervals of floating point values, or
+      strings, or times. In all of these cases, the basic mechanics are
+      the same: as long as you have an underlying type for the endpoints
+      with a well-defined total order, you can use the same basic logic
+      for working with intervals.
+    </para>
+    <para>
+      We'll show you how to build a general purpose interval library
+      that is functorized over the type of the endpoints of the
+      intervals and the ordering of those endpoints.
     </para>
     <para>
       First we'll define a module type that captures the information
-      we'll need about the endpoints. This interface, which we'll call
-      <literal>Comparable</literal>, contains just two things: a
-      comparison function, and the type of the values to be compared.
+      we'll need about the endpoints of the intervals. This interface,
+      which we'll call <literal>Comparable</literal>, contains just two
+      things: a comparison function, and the type of the values to be
+      compared.
     </para>
     <programlisting language="ocaml">
 # module type Comparable = sig
@@ -10948,7 +11202,10 @@ compare x y &gt; 0     (* x &gt; y *)
       represent an interval with a variant type, which is either
       <literal>Empty</literal> or <literal>Interval (x,y)</literal>,
       where <literal>x</literal> and <literal>y</literal> are the bounds
-      of the interval.
+      of the interval. In the following, we only implement a handful of
+      the functions that one might want for a full-featured interval
+      library. Core contains a module in this style called
+      <literal>Interval</literal> which has a more complete interface.
     </para>
     <programlisting language="ocaml">
 # module Make_interval(Endpoint : Comparable) = struct
@@ -10992,7 +11249,8 @@ module Make_interval :
     <para>
       We can instantiate the functor by applying it to a module with the
       right signature. In the following, we provide the functor input as
-      an anonymous module.
+      an anonymous module. The module is anonymous because the module
+      isn't named, even though the values inside it are.
     </para>
     <programlisting language="ocaml">
 # module Int_interval =
@@ -11816,7 +12074,7 @@ val six : (module X_int) = &lt;module&gt;
       portability trade-offs. You could support all of these in one
       application by defining a single module, let's call it
       <literal>Mutliplexer</literal>, whose implementation is chosen at
-      run-time based on an environment variable.
+      runtime based on an environment variable.
     </para>
     <para>
       To do this, you'd first need an interface <literal>S</literal>
@@ -12159,7 +12417,7 @@ $ ./service_client.byte
     <listitem>
       <para>
         <emphasis>Inheritance</emphasis>: the definition of one kind of
-        object can be re-used to produce a new kind of object. This new
+        object can be reused to produce a new kind of object. This new
         definition can override some behaviour, but also share code with
         its parent.
       </para>
@@ -12180,6 +12438,57 @@ $ ./service_client.byte
     C++, Java, C#, Ruby, Python or Javascript.
   </para>
   </note>
+  <sect1 id="when-to-use-objects">
+    <title>When to use objects</title>
+    <para>
+      You might wonder when to use objects in OCaml, which has a
+      multitude of alternative mechanisms to express the same concept.
+      First-class modules are more expressive (a module can include
+      types, while classes and objects cannot). Modules, functors, and
+      algebraic data types also offer a wide range of ways to express
+      program structure. In fact, many seasoned OCaml programmers rarely
+      use classes and objects, if at all.
+    </para>
+    <para>
+      Modules already provide these features in some form, but the main
+      focus of classes is on code re-use through inheritance and late
+      binding of methods. This is a critical property of classes: the
+      methods that implement an object are determined when the object is
+      instantiated, a form of <emphasis>dynamic</emphasis> binding. In
+      the meantime, while classes are being defined, it is possible (and
+      necessary) to refer to methods without knowing statically how they
+      will be implemented.
+    </para>
+    <para>
+      In contrast, modules use static (lexical) scoping. If you want to
+      parameterize your module code so that some part of it can be
+      implemented later, you would write a function or functor. This is
+      more explicit, but often more verbose than overriding a method in
+      a class.
+    </para>
+    <para>
+      In general, a rule of thumb is: use classes and objects in
+      situations where dynamic binding is a big win, for example if you
+      have many similar variations in the implementation of a concept.
+      Two good examples are Xavier Leroy's
+      <ulink url="http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</ulink>,
+      which provides a variety of cryptographic primitives that can be
+      combined in building-block style, and the
+      <ulink url="http://cristal.inria.fr/camlimages/">Camlimages</ulink>
+      library which manipulates various graphical file formats. And, of
+      course, the use of objects isn't just a programming choice -- it
+      might be driven by design choices, or because of the need to
+      interact with existing components that are already object
+      oriented.
+    </para>
+    <para>
+      In this chapter, we'll introduce you to the basics of object
+      definition and use in OCaml, and then demonstrate their use with
+      an example using Cryptokit. We'll return to the more advanced
+      areas of object use later on in the book in
+      <xref linkend="object-subtyping-and-inheritance"/>.
+    </para>
+  </sect1>
   <sect1 id="ocaml-objects">
     <title>OCaml objects</title>
     <para>
@@ -12439,7 +12748,7 @@ val q : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a 
       cannot be changed dynamically.
     </para>
   </sect1>
-  <sect1 id="when-to-use-objects">
+  <sect1 id="when-to-use-objects-1">
     <title>When to use objects</title>
     <para>
       You might wonder when to use objects in OCaml, which has a
@@ -12453,7 +12762,7 @@ val q : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a 
     <para>
       Objects have some advantages over records: they don't require type
       definitions and their support for row polymorphism makes them more
-      flexible. However, the heavy syntax and additional run-time cost
+      flexible. However, the heavy syntax and additional runtime cost
       means that objects are rarely used in place of records.
     </para>
     <para>
@@ -12924,7 +13233,7 @@ val shape_ref : shape ref = {contents = &lt;obj&gt;}
   <title>Classes</title>
   <para>
     Programming with objects directly is great for encapsulation, but
-    one of the main goals of object-oriented programming is code re-use
+    one of the main goals of object-oriented programming is code reuse
     through inheritance. For inheritance, we need to introduce
     <emphasis>classes</emphasis>. In object-oriented programming, a
     class is a &quot;recipe&quot; for creating objects. The recipe can
@@ -13071,7 +13380,7 @@ val hash_string : hash -&gt; string -&gt; string
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   In_channel.(input_all stdin)
   |&gt; hash_string (Hash.md5 ())
   |&gt; transform_string (Hexa.encode ())
@@ -13098,7 +13407,7 @@ let _ =
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   let hash_fn =
     match Filename.basename Sys.argv.(0) with
     |&quot;md5&quot; -&gt; Hash.md5 ()
@@ -13146,7 +13455,7 @@ let evp_byte_to_key password tlen =
   done;
   String.uppercase o#get_string
 
-let _ =
+let () =
   let secret = &quot;ocaml&quot; in
   let key_len = 16 * 2 in
   let iv_len = 16 * 2 in
@@ -14123,7 +14432,7 @@ class ['a, 'b] map : object ... method iterator : 'b iterator end;;
 </programlisting>
       <para>
         The collections are different is some ways, but they share a
-        common pattern for iteration that we can re-use. For a simple
+        common pattern for iteration that we can reuse. For a simple
         example, let's define a mixin that implements an arithmetic sum
         for a collection of integers.
       </para>
@@ -15296,12 +15605,12 @@ Command.Spec.(
       </para>
       <para>
         Anonymous parameters are created using the <literal>%:</literal>
-        operator, which binds a textual string name (used in help text)
-        to an OCaml conversion function. The conversion function is
-        responsible for parsing the command-line fragment into an OCaml
-        data type. In the example above, this is just a
+        operator, which binds a textual string name (used in the help
+        text) to an OCaml conversion function. The conversion function
+        is responsible for parsing the command-line fragment into an
+        OCaml data type. In the example above, this is just a
         <literal>string</literal>, but we'll see more complex conversion
-        options below
+        options below.
       </para>
     </sect2>
     <sect2 id="callback-functions">
@@ -17534,9 +17843,9 @@ $ ./github_org_info.native janestreet
     form that is easier for a program to manipulate. For example,
     suppose we want to read a file containing a value in JSON format.
     JSON has a variety of values, including numbers, strings, arrays,
-    and objects, and each of these has a precise textual representation.
-    For example, the following text represents an object containing a
-    string labeled <literal>title</literal>, and an array containing two
+    and objects, and each of these has a textual representation. For
+    example, the following text represents an object containing a string
+    labeled <literal>title</literal>, and an array containing two
     objects, each with a name and array of zip codes.
   </para>
   <programlisting language="json">
@@ -17554,13 +17863,12 @@ $ ./github_org_info.native janestreet
   </para>
   <programlisting language="ocaml">
 type value = [
-| `Object of (string * value) list
-| `Array of value array
-| `String of string
-| `Int of int
+| `Assoc of (string * value) list
+| `Bool of bool
 | `Float of float
-| `True
-| `False
+| `Int of int
+| `List of value list
+| `String of string
 | `Null ]
 </programlisting>
   <para>
@@ -17583,11 +17891,11 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
     <emphasis>parsing</emphasis>.
   </para>
   <programlisting>
-`Object
+`Assoc
   [&quot;title&quot;, `String &quot;Cities&quot;;
-   &quot;cities&quot;, `Array
-     [|`Object [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `Array [|Int 60601|]];
-       `Object [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `Array [|Int 10004|]]|]]
+   &quot;cities&quot;, `List
+     [`Assoc [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `List [Int 60601]];
+       `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [Int 10004]]]]
 </programlisting>
   <para>
     There are many techniques for lexing and parsing. In the lex/yacc
@@ -17756,9 +18064,9 @@ symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
       </para>
       <programlisting>
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
-  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
+    { `Assoc obj }
+  | LEFT_BRACK; vl = list_values; RIGHT_BRACK
+    { `List vl }
   | s = STRING
     { `String s }
   | i = INT
@@ -17766,31 +18074,31 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | x = FLOAT
     { `Float x }
   | TRUE
-    { `True }
+    { `Bool true }
   | FALSE
-    { `False }
+    { `Bool false }
   | NULL
     { `Null }
   ;
 </programlisting>
       <para>
-        We can read it like this, &quot;A JSON <literal>value</literal>
-        is either an object bracketed with curly braces, or an array
-        bracketed with square braces. or a string, integer, float, etc.
-        In each of the productions, the right hand side specifies the
+        We can read it like this: a JSON <literal>value</literal> is
+        either an object bracketed by curly braces, or an array
+        bracketed by square braces. or a string, integer, float, etc. In
+        each of the productions, the right hand side specfies the
         expected sequence. For example, the object is specified with the
         curly-bracket production.
       </para>
       <programlisting>
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
+    { `Assoc obj }
 </programlisting>
       <para>
         That is, an object value starts with a
         <literal>LEFT_BRACE</literal>, contains some optional object
         field values (to be defined), and end with a
         <literal>RIGHT_BRACE</literal>. The returned value is
-        <literal>Object obj</literal>, where <literal>obj</literal> is
+        <literal>Assoc obj</literal>, where <literal>obj</literal> is
         the sequence of object fields. Note that we've left out bindings
         for <literal>LEFT_BRACE</literal> and
         <literal>RIGHT_BRACE</literal>, because their tokens don't have
@@ -17800,8 +18108,8 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
         Next, let's define the object fields. In the following rules,
         the <literal>opt_object_fields</literal> are either empty, or a
         non-empty sequence of fields in reverse order. Note that if you
-        wish to have comments in the rule definitions, you will have to
-        use C comment delimiters. By convention, the C comment
+        wish to have comments in the rule definitions, you have to use C
+        comment delimiters. By convention, the C comment
         <literal>/* empty */</literal> is used to point out that a
         production has an empty right hand side.
       </para>
@@ -17892,9 +18200,9 @@ prog: v = value
   ;
 
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
-  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
+    { `Assoc obj }
+  | LEFT_BRACK; vl = list_values; RIGHT_BRACK
+    { `List vl }
   | s = STRING
     { `String s }
   | i = INT
@@ -17902,9 +18210,9 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | x = FLOAT
     { `Float x }
   | TRUE
-    { `True }
+    { `Bool true }
   | FALSE
-    { `False }
+    { `Bool false }
   | NULL
     { `Null }
   ;
@@ -17922,10 +18230,10 @@ rev_object_fields: k = ID; COLON; v = value
     { (k, v) :: obj }
   ;
 
-array_values: /* empty */
-    { [||] }
+list_values: /* empty */
+    { [] }
   | vl = rev_values
-    { Array.of_list (List.rev vl) }
+    { List.rev vl }
   ;
 
 rev_values: v = value
@@ -18108,7 +18416,7 @@ let next_line lexbuf =
             <literal>&quot;true&quot;</literal> for 4 characters, and it
             matches <literal>id</literal> for 5 characters. The longer
             match wins, and the return value is
-            <literal>ID &quot;trueX&quot;</literal>.
+            <literal>ID   &quot;trueX&quot;</literal>.
           </para>
         </listitem>
         <listitem>
@@ -18198,7 +18506,7 @@ let add_utf8 buf code =
     <title>Bringing it all together</title>
     <para>
       For the final part, we need to compose the lexer and parser. As we
-      saw the the type definition in <literal>parser.mli</literal>, the
+      saw in the type definition in <literal>parser.mli</literal>, the
       parsing function expects a lexer of type
       <literal>Lexing.lexbuf -&gt; token</literal>, and it also expects
       a <literal>lexbuf</literal>.
@@ -19705,8 +20013,8 @@ val write_complete : unit Deferred.t = &lt;abstr&gt;
         <literal>Reader.pipe</literal> and
         <literal>Writer.pipe</literal> call respectively. Note that
         pushback is preserved throughout the process, so that if the
-        writer gets blocked, the the writer's pipe will stop pulling
-        data from the reader's pipe, which will prevent the reader from
+        writer gets blocked, the writer's pipe will stop pulling data
+        from the reader's pipe, which will prevent the reader from
         reading in more data.
       </para>
       <para>
@@ -20026,7 +20334,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
     <para>
       When programming with external resources, errors are everywhere:
       everything from a flaky server to a network outage to exhausting
-      of local resources can lead to a run-time error. When programming
+      of local resources can lead to a runtime error. When programming
       in OCaml, some of these errors will show up explicitly in a
       function's return type, and some of them will show up as
       exceptions. We covered exception handling in OCaml in
@@ -21176,9 +21484,9 @@ void    mvwaddstr (WINDOW *, int, int, char *);
       pseudo-terminal or on a window that has been created via
       <literal>newwin</literal>. The <literal>WINDOW</literal> structure
       holds the internal library state and is considered abstract
-      outside of Ncurses. Ncurses clients just needs to store the
-      pointer somewhere and pass it back to Ncurses library calls, which
-      can then dereference its contents.
+      outside of Ncurses. Ncurses clients just need to store the pointer
+      somewhere and pass it back to Ncurses library calls, which in turn
+      dereference its contents.
     </para>
     <para>
       Note that there are over 200 library calls in Ncurses, so we're
@@ -21223,8 +21531,10 @@ let window : window typ = ptr void
     </para>
     <programlisting language="ocaml">
 (* ncurses.ml 2/3 *)
+open Foreign
+
 let initscr =
-  foreign &quot;initscr&quot; (void @-&gt; (returning window))
+  foreign &quot;initscr&quot; (void @-&gt; returning window)
 </programlisting>
     <para>
       The <literal>foreign</literal> function accepts two parameters:
@@ -21253,34 +21563,31 @@ let initscr =
     <programlisting language="ocaml">
 (* ncurses.ml 3/3 *)
 let endwin =
-  foreign &quot;endwin&quot; (void @-&gt; (returning void))
+  foreign &quot;endwin&quot; (void @-&gt; returning void)
 
 let refresh =
-  foreign &quot;refresh&quot; (void @-&gt; (returning void))
+  foreign &quot;refresh&quot; (void @-&gt; returning void)
 
 let wrefresh =
-  foreign &quot;wrefresh&quot; (window @-&gt; (returning void))
+  foreign &quot;wrefresh&quot; (window @-&gt; returning void)
 
 let newwin =
-  foreign &quot;newwin&quot; 
-    (int @-&gt; int @-&gt; int @-&gt; int @-&gt; (returning window))
+  foreign &quot;newwin&quot; (int @-&gt; int @-&gt; int @-&gt; int @-&gt; returning window)
 
 let mvwaddch =
-  foreign &quot;mvwaddch&quot; 
-    (window @-&gt; int @-&gt; int @-&gt; char @-&gt; (returning void))
+  foreign &quot;mvwaddch&quot; (window @-&gt; int @-&gt; int @-&gt; char @-&gt; returning void)
 
 let addstr =
-  foreign &quot;addstr&quot; (string @-&gt; (returning void))
+  foreign &quot;addstr&quot; (string @-&gt; returning void)
 
 let mvwaddstr =
-  foreign &quot;mvwaddstr&quot;
-    (window @-&gt; int @-&gt; int @-&gt; string @-&gt; (returning void))
+  foreign &quot;mvwaddstr&quot; (window @-&gt; int @-&gt; int @-&gt; string @-&gt; returning void)
 
 let box =
-  foreign &quot;box&quot; (window @-&gt; int @-&gt; int @-&gt; (returning void))
+  foreign &quot;box&quot; (window @-&gt; int @-&gt; int @-&gt; returning void)
 
 let cbreak =
-  foreign &quot;cbreak&quot; (void @-&gt; (returning void))
+  foreign &quot;cbreak&quot; (void @-&gt; returning void)
 </programlisting>
     <para>
       These definitions are all straightforward mappings from the C
@@ -21288,7 +21595,8 @@ let cbreak =
       as <literal>int</literal> come pre-defined in Ctypes. The
       <literal>string</literal> in these definitions maps from OCaml
       strings (which have a specific length) onto C character buffers
-      (whose length is defined by a null characters).
+      (whose length is defined by a terminating null character that
+      immediately follows the string data).
     </para>
     <para>
       The module signature for <literal>ncurses.mli</literal> looks much
@@ -21296,7 +21604,7 @@ let cbreak =
       <literal>ncurses.ml</literal> by running:
     </para>
     <programlisting>
-$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.mli 
+$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.ml
 </programlisting>
     <para>
       The OCaml signature can be customized to improve its safety for
@@ -21312,7 +21620,6 @@ val endwin    : unit   -&gt; unit
 val refresh   : unit   -&gt; unit
 val wrefresh  : window -&gt; unit
 val newwin    : int    -&gt; int -&gt; int -&gt; int -&gt; window
-val addch     : char   -&gt; unit
 val mvwaddch  : window -&gt; int -&gt; int -&gt; char -&gt; unit
 val addstr    : string -&gt; unit
 val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
@@ -21321,8 +21628,8 @@ val cbreak    : unit   -&gt; unit
 </programlisting>
     <para>
       The <literal>window</literal> type is left abstract in the
-      signature, ensure that window pointers can only be constructed via
-      the <literal>Ncurses.initscr</literal> function. This prevents
+      signature to ensure that window pointers can only be constructed
+      via the <literal>Ncurses.initscr</literal> function. This prevents
       void pointers obtained from other sources from being mistakenly
       passed to an Ncurses library call.
     </para>
@@ -21476,10 +21783,10 @@ val double : float typ
 </programlisting>
     <para>
       These values are all of type <literal>'a typ</literal>, where the
-      function name tells you the C type, and the <literal>'a</literal>
-      component is the OCaml representation of that C type. Most of the
-      mappings are straightforward, but some of them need a bit more
-      explanation.
+      value name (e.g. <literal>void</literal>) tells you the C type and
+      the <literal>'a</literal> component (e.g. <literal>unit</literal>)
+      is the OCaml representation of that C type. Most of the mappings
+      are straightforward, but some of them need a bit more explanation.
     </para>
     <itemizedlist>
       <listitem>
@@ -21496,7 +21803,7 @@ val double : float typ
         <para>
           The C <literal>size_t</literal> type is an alias for one of
           the unsigned integer types. The actual size and alignment
-          requirements for <literal>size_t</literal> varys between
+          requirements for <literal>size_t</literal> varies between
           platforms. Ctypes provides an OCaml <literal>size_t</literal>
           type that is aliased to the appropriate integer type.
         </para>
@@ -21525,9 +21832,11 @@ val double : float typ
       functions. The <literal>time</literal> function returns the
       current calendar time, and has the following C signature:
     </para>
+    <programlisting language="c">
+time_t time(time_t *);
+</programlisting>
     <para>
-      <literal>c time_t time(time_t *);</literal> The first step is to
-      open some of the Ctypes modules.
+      The first step is to open some of the Ctypes modules.
     </para>
     <itemizedlist>
       <listitem>
@@ -21657,7 +21966,7 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
         The <literal>allocate</literal> function takes the type of the
         memory to be allocated and the initial value, and it returns a
         suitably-typed pointer. We can now call <literal>ctime</literal>
-        using passing the pointer as an argument:
+        passing the pointer as an argument:
       </para>
       <programlisting language="ocaml">
 # ctime t_ptr;;
@@ -21680,6 +21989,41 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
         C and OCaml string representations each time the value is
         written or read.
       </para>
+      <para>
+        Here is the type signature of the <literal>view</literal>
+        function.
+      </para>
+      <programlisting language="ocaml">
+(* Ctypes *)
+val view : read:('a -&gt; 'b) -&gt; write:('b -&gt; 'a) -&gt; 'a typ -&gt; 'b typ
+</programlisting>
+      <para>
+        Next, we have the conversion functions to convert between an
+        OCaml <literal>string</literal> and a C character buffer.
+      </para>
+      <programlisting language="ocaml">
+val string_of_char_ptr : char ptr -&gt; string
+val char_ptr_of_string : string -&gt; char ptr
+</programlisting>
+      <para>
+        The definition of <literal>string</literal> that uses views is
+        quite simple and is written using these conversion functions.
+      </para>
+      <programlisting language="ocaml">
+let string = 
+  view 
+    ~read:string_of_char_ptr 
+    ~write:char_ptr_of_string 
+    (char ptr)
+</programlisting>
+      <para>
+        The type of this <literal>string</literal> function is a normal
+        <literal>typ</literal>, with no external sign of the use of the
+        view function.
+      </para>
+      <programlisting language="ocaml">
+val string : string typ
+</programlisting>
       <note>
       <title>
       OCaml strings versus C character buffers
@@ -21691,39 +22035,18 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
       </para>
       <para>
         OCaml strings are stored in the OCaml heap with a header that
-        explicitly defines its length. C buffers are also fixed-length,
-        but by convention a C string is terminated by a null (a
-        <literal>0</literal> byte) character. The C string functions
-        calculate their length by scanning the buffer until the first
-        null character is encountered.
+        explicitly defines their length. C buffers are also
+        fixed-length, but by convention a C string is terminated by a
+        null (a <literal>0</literal> byte) character. The C string
+        functions calculate their length by scanning the buffer until
+        the first null character is encountered.
       </para>
       <para>
         This means you need to be careful when passing OCaml strings to
-        C buffers that they don't contain any null values within the
-        OCaml string, or else the C string will be rudely truncated.
+        C buffers that don't contain any null values within the OCaml
+        string, or else the C string will be rudely truncated.
       </para>
       </note>
-      <para>
-        Here are the type signatures of the view functions in Ctypes.
-      </para>
-      <programlisting language="ocaml">
-(* Ctypes *)
-val view : read:('a -&gt; 'b) -&gt; write:('b -&gt; 'a) -&gt; 'a typ -&gt; 'b typ
-val string_of_char_ptr : char ptr -&gt; string
-val char_ptr_of_string : string -&gt; char ptr
-val string : string typ
-</programlisting>
-      <para>
-        The actual definition of <literal>string</literal> that uses
-        views is quite simple and is written using these functions.
-      </para>
-      <programlisting language="ocaml">
-let string = 
-  view 
-    ~read:string_of_char_ptr 
-    ~write:char_ptr_of_string 
-    (char ptr)
-</programlisting>
     </sect2>
     <sect2 id="abstract-pointers">
       <title>Abstract pointers</title>
@@ -21797,7 +22120,7 @@ val timeval : timeval structure typ = &lt;abstr&gt;
 </programlisting>
       <para>
         The first command defines a new OCaml type
-        <literal>typeval</literal> that we'll use to instantiate the
+        <literal>timeval</literal> that we'll use to instantiate the
         OCaml version of the <literal>struct</literal>. Creating a new
         OCaml type to reflect the underlying C type in this way means
         that the structure we define will be distinct from other
@@ -21807,8 +22130,8 @@ val timeval : timeval structure typ = &lt;abstr&gt;
       <para>
         The second command calls <literal>structure</literal> to create
         a fresh structure type. At this point the structure type is
-        incomplete, so we can add fields, but cannot yet use it in
-        <literal>foreign</literal> calls.
+        incomplete: we can add fields but cannot yet use it in
+        <literal>foreign</literal> calls or use it to create values.
       </para>
     </sect2>
     <sect2 id="adding-fields-to-structures">
@@ -21839,8 +22162,8 @@ val tv_usec : (Signed.long, timeval structure) field = &lt;abstr&gt;
         Every field addition mutates the structure variable and records
         a new size (the exact value of which depends on the type of the
         field that was just added). Once we <literal>seal</literal> the
-        structure the situation is reversed: we will be able to create
-        values, but adding fields to a sealed structure is an error.
+        structure we will be able to create values using it, but adding
+        fields to a sealed structure is an error.
       </para>
     </sect2>
     <sect2 id="incomplete-structure-definitions">
@@ -21876,8 +22199,9 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
         <literal>returning_checking_errno</literal> function behaves
         like <literal>returning</literal>, except that it checks whether
         the bound C function modifies the C error flag. Changes to
-        <literal>errno</literal> are mapped into OCaml exceptions by the
-        <literal>PosixTypes</literal> module. .
+        <literal>errno</literal> are mapped into OCaml exceptions and
+        raise a <literal>Unix.Unix_error</literal> exception just as the
+        standard library functions do.
       </para>
       <para>
         As before we can create a wrapper to make
@@ -21890,7 +22214,7 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
       <programlisting language="ocaml">
 # let gettimeofday' () =
   let tv = make timeval in
-  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1000000.0) ;;
@@ -21941,7 +22265,7 @@ let time' () = time (from_voidp time_t null)
 
 let gettimeofday' () =
   let tv = make timeval in
-  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1_000_000.)
@@ -21950,13 +22274,13 @@ let float_time () = printf &quot;%f%!\n&quot; (gettimeofday' ())
 
 let ascii_time () =
   let t_ptr = allocate time_t (time' ()) in
-  printf &quot;%s%!\n&quot; (ctime t_ptr)
+  printf &quot;%s%!&quot; (ctime t_ptr)
 
 let () =
   let open Command in
   basic ~summary:&quot;Display the current time in various formats&quot;
     Spec.(empty +&gt; flag &quot;-a&quot; no_arg ~doc:&quot; Human-readable output format&quot;)
-    (fun human () -&gt; if human then ascii_time () else float_time ())
+    (fun human -&gt; if human then ascii_time else float_time)
   |&gt; Command.run 
 </programlisting>
         <para>
@@ -22096,44 +22420,80 @@ end
       </para>
       <para>
         Unions in C are named structures that can be mapped onto the
-        same underlying memory. They are also fully supported in in
-        Ctypes, but we won't go into more detail here.
+        same underlying memory. They are also fully supported in Ctypes,
+        but we won't go into more detail here.
       </para>
-      <note>
+      <sidebar>
       <title>
-      Lifetime of allocated Ctypes
+      Pointer operators for dereferencing and arithmetic
       </title>
       <para>
-        Values allocated via Ctypes (i.e. using
-        <literal>allocate</literal>, <literal>Array.make</literal> and
-        so on) will not be garbage-collected as long as they are
-        reachable from OCaml values. The system memory they occupy is
-        freed when they do become unreachable, via a finalizer function
-        registered with the GC.
+        Ctypes defines a number of operators that let you manipulate
+        pointers and arrays just as you would in C. The Ctypes
+        equivalents do have the benefit of being more strongly typed, of
+        course.
       </para>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left"/>
+          <colspec align="left"/>
+          <thead>
+            <row>
+              <entry>
+                Operator
+              </entry>
+              <entry>
+                Purpose
+              </entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                <literal>!@ p</literal>
+              </entry>
+              <entry>
+                Dereference the pointer <literal>p</literal>.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>p &lt;-@ v</literal>
+              </entry>
+              <entry>
+                Write the value <literal>v</literal> to the address
+                <literal>p</literal>.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>p +@ n</literal>
+              </entry>
+              <entry>
+                If <literal>p</literal> points to an array element, then
+                compute the address of the <literal>n</literal>th next
+                element.
+              </entry>
+            </row>
+            <row>
+              <entry>
+                <literal>p -@ n</literal>
+              </entry>
+              <entry>
+                If <literal>p</literal> points to an array element, then
+                compute the address of the <literal>n</literal>th
+                previous element.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
       <para>
-        The definition of reachability for Ctypes values is a little
-        different from conventional OCaml values though. The allocation
-        functions return an OCaml-managed pointer to the value, and as
-        long as some derivative pointer is still reachable by the GC,
-        the value won't be collected.
+        There are also other useful non-operator functions available
+        (see the Ctypes documentation), for example for pointer
+        differencing and comparison.
       </para>
-      <para>
-        &quot;Derivative&quot; means a pointer that's computed from the
-        original pointer via arithmetic, so a reachable reference to an
-        array element or a structure field protects the whole object
-        from collection.
-      </para>
-      <para>
-        A corollary of the above rule is that pointers written into the
-        C heap don't have any effect on reachability. For example, if
-        you have a C-managed array of pointers to structs then you'll
-        need some additional way of keeping the structs around to
-        protect them from collection. You could achieve this via a
-        global array of values on the OCaml side that would keep them
-        live until they're no longer needed.
-      </para>
-      </note>
+      </sidebar>
     </sect2>
   </sect1>
   <sect1 id="passing-functions-to-c">
@@ -22161,8 +22521,8 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);
       This also happens to be a close mapping to the corresponding
       Ctypes definition. Since type descriptions are regular values, we
       can just use <literal>let</literal> in place of
-      <literal>typedef</literal>. The type of <literal>qsort</literal>
-      is defined as follows.
+      <literal>typedef</literal> and end up with working OCaml bindings
+      to <literal>qsort</literal>.
     </para>
     <programlisting language="ocaml">
 let compare_t = ptr void @-&gt; ptr void @-&gt; returning int
@@ -22171,8 +22531,11 @@ let qsort = foreign &quot;qsort&quot;
    (ptr void @-&gt; size_t @-&gt; size_t @-&gt; funptr compare_t @-&gt; returning void)
 </programlisting>
     <para>
-      The resulting value is a higher-order function, as shown by its
-      type.
+      We only use <literal>compare_t</literal> once (in the
+      <literal>qsort</literal> definition), so you can choose to inline
+      it in the OCaml code if you prefer. The resulting
+      <literal>qsort</literal> value is a higher-order function, as
+      shown by its type.
     </para>
     <programlisting language="ocaml">
 val qsort: void ptr -&gt; size_t -&gt; size_t -&gt;
@@ -22278,6 +22641,41 @@ val sort_stdin : unit -&gt; unit
         since we opened <literal>Ctypes</literal> at the start of the
         file.
       </para>
+      <note>
+      <title>
+      Lifetime of allocated Ctypes
+      </title>
+      <para>
+        Values allocated via Ctypes (i.e. using
+        <literal>allocate</literal>, <literal>Array.make</literal> and
+        so on) will not be garbage-collected as long as they are
+        reachable from OCaml values. The system memory they occupy is
+        freed when they do become unreachable, via a finalizer function
+        registered with the GC.
+      </para>
+      <para>
+        The definition of reachability for Ctypes values is a little
+        different from conventional OCaml values though. The allocation
+        functions return an OCaml-managed pointer to the value, and as
+        long as some derivative pointer is still reachable by the GC,
+        the value won't be collected.
+      </para>
+      <para>
+        &quot;Derivative&quot; means a pointer that's computed from the
+        original pointer via arithmetic, so a reachable reference to an
+        array element or a structure field protects the whole object
+        from collection.
+      </para>
+      <para>
+        A corollary of the above rule is that pointers written into the
+        C heap don't have any effect on reachability. For example, if
+        you have a C-managed array of pointers to structs then you'll
+        need some additional way of keeping the structs around to
+        protect them from collection. You could achieve this via a
+        global array of values on the OCaml side that would keep them
+        live until they're no longer needed.
+      </para>
+      </note>
     </sect2>
   </sect1>
   <sect1 id="learning-more-about-c-bindings">
@@ -22915,7 +23313,7 @@ type t = Apple | Orange of int | Pear of string | Kiwi
       variant constructor has more than one parameter. Normal variants
       hold parameters as a single flat block with multiple fields for
       each entry, but polymorphic variants must adopt a more flexible
-      uniform memory representation since they may be re-used in a
+      uniform memory representation since they may be reused in a
       different context across compilation units. They allocate a tuple
       block for the parameters that is pointed to from the argument
       field of the variant. There are thus three additional words for
@@ -23149,7 +23547,7 @@ struct custom_operations {
       it. Instead, the GC regularly determines which values are
       <emphasis>live</emphasis> and which values are
       <emphasis>dead</emphasis>, i.e. no longer in use. Dead values are
-      collected and their memory made available for re-use by the
+      collected and their memory made available for reuse by the
       application.
     </para>
     <para>
@@ -23162,9 +23560,12 @@ struct custom_operations {
       block <literal>b2</literal> if some field of <literal>b1</literal>
       points to <literal>b2</literal>. All blocks reachable from the
       roots by following edges in the graph must be retained, and
-      unreachable blocks can be reused by the application. This strategy
-      is commonly known as <emphasis>mark and sweep</emphasis> garbage
-      collection.
+      unreachable blocks can be reused by the application.
+    </para>
+    <para>
+      The algorithm used by OCaml to perform this heap traversal is
+      commonly known as <emphasis>mark and sweep</emphasis> garbage
+      collection, and we'll explain it further now.
     </para>
   </sect1>
   <sect1 id="generational-garbage-collection">
@@ -23254,7 +23655,7 @@ struct custom_operations {
       <para>
         The minor heap is a contiguous chunk of virtual memory that is
         usually a few megabytes in size so that it can be scanned
-        quickly. The runtime stores the the minor heap in two pointers
+        quickly. The runtime stores the minor heap in two pointers
         (<literal>caml_young_start</literal> and
         <literal>caml_young_end</literal>) that delimit the start and
         end of the heap region.
@@ -23332,7 +23733,7 @@ val c : Gc.control =
     <para>
       The major heap is typically much larger than the minor heap and
       can scale to gigabytes in size. It is cleaned via a mark-and-sweep
-      garbage collection algorithm that operates in several phases:
+      garbage collection algorithm that operates in several phases.
     </para>
     <itemizedlist>
       <listitem>
@@ -23354,7 +23755,8 @@ val c : Gc.control =
           The <emphasis>compact</emphasis> phase relocates live blocks
           into a freshly allocated heap to eliminate gaps in the free
           list. This prevents the fragmentation of heap blocks in
-          long-running programs.
+          long-running programs, and normally occurs much less
+          frequently than the mark and sweep phases.
         </para>
       </listitem>
     </itemizedlist>
@@ -23381,7 +23783,7 @@ val c : Gc.control =
         <listitem>
           <para>
             the <emphasis>malloc</emphasis>'ed virtual address of the
-            memory region containing the hunk.
+            memory region containing the chunk.
           </para>
         </listitem>
         <listitem>
@@ -23480,7 +23882,7 @@ val c : Gc.control =
         <para>
           Next-fit allocation is the default allocation strategy. It's
           quite a cheap allocation mechanism since the same heap chunk
-          can be re-used across allocation requests until it runs out.
+          can be reused across allocation requests until it runs out.
           This in turn means that there is good memory locality to use
           CPU caches better.
         </para>
@@ -23495,15 +23897,17 @@ val c : Gc.control =
           chunks alone are big enough to satisfy the request.
         </para>
         <para>
-          First-fit allocation focusses on reducing memory
-          fragmentation, but at the expense of slower block allocation.
-          Every allocation scans the free list from the beginning for a
-          suitable free chunk, instead of re-using the most recent heap
-          chunk as the next-fit allocator does.
+          First-fit allocation focusses on reducing memory fragmentation
+          (and hence the number of compactions), but at the expense of
+          slower memory allocation. Every allocation scans the free list
+          from the beginning for a suitable free chunk, instead of
+          reusing the most recent heap chunk as the next-fit allocator
+          does.
         </para>
         <para>
-          For some workloads, the reduction in the frequency in heap
-          compaction will outweigh the extra allocation cost.
+          For some workloads that need more real-time behaviour under
+          load, the reduction in the frequency in heap compaction will
+          outweigh the extra allocation cost.
         </para>
         <note>
         <title>
@@ -23559,10 +23963,18 @@ val c : Gc.control =
             </row>
             <row>
               <entry>
-                white
+                white (during marking)
               </entry>
               <entry>
                 not reached yet, but possibly reachable
+              </entry>
+            </row>
+            <row>
+              <entry>
+                white (during sweeping)
+              </entry>
+              <entry>
+                unreachable and can be freed
               </entry>
             </row>
             <row>
@@ -23607,14 +24019,14 @@ val c : Gc.control =
         initiated once the existing gray values have been processed.
       </para>
       <para>
-        To mark an impure heap. the GC first marks it as pure and walks
+        To mark an impure heap, the GC first marks it as pure and walks
         through the entire heap block-by-block in increasing order of
         memory address. If it finds a gray block, it adds it to the gray
         list and recursively marks it using the usual strategy for a
         pure heap. Once the scan of the complete heap is finished, the
         mark phase checks again whether the heap has again become
-        impure, and repeats the scan if it is . These full-heap scans
-        will continue until a successful scan completes without
+        impure, and repeats the scan until if it is. These full-heap
+        scans will continue until a successful scan completes without
         overflowing the gray list.
       </para>
       <note>
@@ -23647,6 +24059,47 @@ val c : Gc.control =
         of memory, or lower to cause the GC to work harder and collect
         blocks faster at the expense of using more CPU time.
       </para>
+      </note>
+    </sect2>
+    <sect2 id="heap-compaction">
+      <title>Heap Compaction</title>
+      <para>
+        After a certain number of major GC cycles have completed, the
+        heap may begin to be fragmented due to values being deallocated
+        out of order from how they were allocated. This makes it harder
+        for the GC to find a contiguous block of memory for fresh
+        allocations, which in turn would require the heap to be grown
+        unnecessarily.
+      </para>
+      <para>
+        The heap compaction cycle avoids this by relocating all the
+        values in the major heap into a fresh heap that places them all
+        contiguously in memory again. A naive implementation of the
+        algorithm would require extra memory to store the new heap, but
+        OCaml performs the compaction in-place within the existing heap.
+      </para>
+      <note>
+      <title>
+      Controlling frequency of compactions
+      </title>
+      <para>
+        The <literal>max_overhead</literal> setting in the
+        <literal>Gc</literal> module defines the connection between free
+        memory and allocated memory after which compaction is activated.
+      </para>
+      <para>
+        A value of <literal>0</literal> triggers a compaction after
+        every major garbage collection cycle, whereas the maximum value
+        of <literal>1000000</literal> disables heap compaction
+        completely. The default settings should be fine unless you have
+        unusual allocation patterns that are causing a higher-than-usual
+        rate of compactions.
+      </para>
+      <programlisting language="ocaml">
+# open Core.Std;;
+# Gc.tune ~max_overhead:0 ();;
+- : unit = () 
+</programlisting>
       </note>
     </sect2>
     <sect2 id="inter-generational-pointers">
@@ -23689,6 +24142,9 @@ val c : Gc.control =
         </para>
         <para>
           Let's see this for ourselves with a simple test program.
+          You'll need to install the Core benchmarking suite via
+          <literal>opam install core_bench</literal> before you compile
+          this code.
         </para>
         <programlisting language="ocaml">
 (* barrier_bench.ml: benchmark mutable vs immutable writes *)
@@ -23749,7 +24205,7 @@ Estimated testing time 20s (change using -quota SECS).
           version. Minor allocation in OCaml is very fast and so it is
           often better to use immutable data structures in preference to
           the more conventional mutable versions. On the other hand, if
-          you only rarely mutable a value, it can be faster to take the
+          you only rarely mutate a value, it can be faster to take the
           write barrier hit and not allocate at all.
         </para>
         <para>
@@ -23961,7 +24417,7 @@ $ ./finalizer
   <para>
     Compiling source code into executable programs is a fairly complex
     process that involves quite a few tools -- preprocessors, compilers,
-    runtime libraries, linkers and assemblers. It's important how to
+    runtime libraries, linkers and assemblers. It's important to
     understand how these fit together to help with your day-to-day
     workflow of developing, debugging and deploying applications.
   </para>
@@ -24026,7 +24482,7 @@ $ ./finalizer
       intermediate files with different filename extensions to use as it
       advances through the compilation stages. The linker takes a
       collection of compiled units and produces a standalone executable
-      or library archive that can be re-used by other applications.
+      or library archive that can be reused by other applications.
     </para>
     <para>
       The overall compilation pipeline looks like this:
@@ -24064,7 +24520,7 @@ $ ./finalizer
 </programlisting>
     <para>
       Notice that the pipeline branches towards the end. OCaml has
-      multiple compiler frontends that re-use the early stages of
+      multiple compiler frontends that reuse the early stages of
       compilation, but produce very different final outputs. The
       <emphasis>bytecode interpreter</emphasis> is portable and can even
       be transformed into Javascript. The <emphasis>native code
@@ -24243,7 +24699,7 @@ $ ./finalizer
       </para>
       <programlisting language="ocaml">
 (* broken_module.ml *)
-let _ =
+let () =
   module MyString = String;
   ()
 </programlisting>
@@ -24262,7 +24718,7 @@ Error: Syntax error
       </para>
       <programlisting language="ocaml">
 (* fixed_module.ml *)
-let _ =
+let () =
   let module MyString = String in
   ()
 </programlisting>
@@ -24292,9 +24748,9 @@ let add_and_print x y =
   print_endline (string_of_int v);
   v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print &quot;a&quot; &quot;b&quot; in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print &quot;a&quot; &quot;b&quot; in
   ()
 </programlisting>
       <para>
@@ -24341,9 +24797,9 @@ let concat_and_print x y =
     print_endline (string_of_int v);
     v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print &quot;a&quot; &quot;b&quot; in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print &quot;a&quot; &quot;b&quot; in
   ()
 </programlisting>
       <para>
@@ -24367,9 +24823,9 @@ let add_and_print x y =
   print_endline (string_of_int v);
   v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print &quot;a&quot; &quot;b&quot; in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print &quot;a&quot; &quot;b&quot; in
   ()
 
 $ ocamlc -i follow_on_function_fixed.ml 
@@ -24430,7 +24886,7 @@ let what_is_the_weather_in location =
 </programlisting>
       <para>
         The OCamldoc comments are distinguished by beginning with the
-        double asterix. There are formatting conventions for the
+        double asterisk. There are formatting conventions for the
         contents of the comment to mark metadata. For instance, the
         <literal>@tag</literal> fields mark specific properties such as
         the author of that section of code.
@@ -24482,8 +24938,9 @@ $ man -M man Example
         </listitem>
         <listitem>
           <para>
-            JSON output is available via <literal>odoc_json</literal>
-            (TODO: pull out of Xen).
+            JSON output is available via a custom
+            <ulink url="https://github.com/xen-org/ocamldoc-json">generator</ulink>
+            in Xen.
           </para>
         </listitem>
       </itemizedlist>
@@ -24746,55 +25203,112 @@ let _ = compare_t
         generated code is then compiled as if you had typed it in
         yourself.
       </para>
+      <note>
+      <title>
+      A style note: wildcards in <literal>let</literal> bindings
+      </title>
       <para>
-        Another useful feature of <literal>type_conv</literal> is that
-        it can generate module signatures too. Copy the earlier type
-        definition into a <literal>comparelib_test.mli</literal> and
-        rerun the Camlp4 dumper script.
+        You may have noticed the <literal>let _ = fun</literal>
+        construct in the auto-generated code above. The underscore in a
+        <literal>let</literal> binding is just the same as a wildcard
+        underscore in a pattern match, and tells the compiler to accept
+        any return value and discard it immediately.
       </para>
-      <programlisting>
-$ ./camlp4_dump.sh test_comparelib.mli 
+      <para>
+        This is fine for mechanically generated code from Type_conv, but
+        should be avoided in code that you write by hand. If it's a
+        unit-returning expression, then write a <literal>unit</literal>
+        binding explicitly instead. This will cause a type error if the
+        expression changes type in the future (e.g. due to code
+        refactoring).
+      </para>
+      <programlisting language="ocaml">
+let () = &lt;expr&gt;
+</programlisting>
+      <para>
+        If the expression has a different type, then write it
+        explicitly.
+      </para>
+      <programlisting language="ocaml">
+let (_:some_type) = &lt;expr&gt;
+let () = ignore (&lt;expr&gt; : some_type)
+let () = don't_wait_for (&lt;expr&gt;)  (* if the expression returns a unit Deferred.t *)
+</programlisting>
+      <para>
+        The last one is used to ignore Async expressions that should run
+        in the background rather than blocking in the current thread.
+      </para>
+      <para>
+        One other important reason for using wildcard matches is to bind
+        a variable name to something that you want to use in future
+        code, but don't want to use right away. This would normally
+        generate an &quot;unused value&quot; compiler warning. These
+        warnings are suppressed for any variable name that's prepended
+        with an underscore.
+      </para>
+      <programlisting language="ocaml">
+let fn x y =
+  let _z = x + y in
+  ()
+</programlisting>
+      <para>
+        Although you don't use <literal>_z</literal> in your code, this
+        will never generate an unused variable warning.
+      </para>
+      </note>
+      <sect3 id="preprocessing-module-signatures">
+        <title>Preprocessing module signatures</title>
+        <para>
+          Another useful feature of <literal>type_conv</literal> is that
+          it can generate module signatures too. Copy the earlier type
+          definition into a <literal>comparelib_test.mli</literal> and
+          rerun the Camlp4 dumper script.
+        </para>
+        <programlisting>
+$ sh camlp4_dump comparelib_test.mli 
 type t = { foo : string; bar : t }
 
 val compare : t -&gt; t -&gt; int
 </programlisting>
-      <para>
-        The external signature generated by
-        <literal>comparelib</literal> is much simpler than the actual
-        code. Running Camlp4 directly on the original source code lets
-        you see these all these transformations precisely.
-      </para>
-      <caution>
-      <title>
-      Don't overdo the syntax extensions
-      </title>
-      <para>
-        Syntax extensions are a powerful extension mechanism that can
-        completely alter your source code's layout and style. Core
-        includes a very conservative set of extensions that take care to
-        minimise the syntax changes. There are a number of third-party
-        libraries that are much more ambitious -- some introduce
-        whitespace-sensitive indentation while others build entirely new
-        embedded languages using OCaml as a host language.
-      </para>
-      <para>
-        While it's tempting to compress all your boiler-plate code into
-        Camlp4 extensions, it can make your source code much harder for
-        other people to quickly read and understand. Core mainly focuses
-        on type-driven code generation using the
-        <literal>type_conv</literal> extension and doesn't fundamentally
-        change the OCaml syntax.
-      </para>
-      <para>
-        Another thing to consider before deploying your own syntax
-        extension is compatibility with other extensions. Two separate
-        extensions can create a grammar clash that leads to odd syntax
-        errors and hard-to-reproduce bugs. That's why most of Core's
-        syntax extensions go through <literal>type_conv</literal>, which
-        acts as a single point for extending the grammar via the
-        <literal>with</literal> keyword.
-      </para>
-      </caution>
+        <para>
+          The external signature generated by
+          <literal>comparelib</literal> is much simpler than the actual
+          code. Running Camlp4 directly on the original source code lets
+          you see these all these transformations precisely.
+        </para>
+        <caution>
+        <title>
+        Don't overdo the syntax extensions
+        </title>
+        <para>
+          Syntax extensions are a powerful extension mechanism that can
+          completely alter your source code's layout and style. Core
+          includes a very conservative set of extensions that take care
+          to minimise the syntax changes. There are a number of
+          third-party libraries that are much more ambitious -- some
+          introduce whitespace-sensitive indentation while others build
+          entirely new embedded languages using OCaml as a host
+          language.
+        </para>
+        <para>
+          While it's tempting to compress all your boiler-plate code
+          into Camlp4 extensions, it can make your source code much
+          harder for other people to quickly read and understand. Core
+          mainly focuses on type-driven code generation using the
+          <literal>type_conv</literal> extension and doesn't
+          fundamentally change the OCaml syntax.
+        </para>
+        <para>
+          Another thing to consider before deploying your own syntax
+          extension is compatibility with other extensions. Two separate
+          extensions can create a grammar clash that leads to odd syntax
+          errors and hard-to-reproduce bugs. That's why most of Core's
+          syntax extensions go through <literal>type_conv</literal>,
+          which acts as a single point for extending the grammar via the
+          <literal>with</literal> keyword.
+        </para>
+        </caution>
+      </sect3>
     </sect2>
     <sect2 id="further-reading-on-camlp4">
       <title>Further reading on Camlp4</title>
@@ -25003,7 +25517,7 @@ Error: The implementation test.ml does not match the interface test.cmi:
         general type unless told otherwise.
       </para>
       <para>
-        OCaml does has some language extensions which strain the limits
+        OCaml does have some language extensions which strain the limits
         of principal type inference, but by and large most programs you
         write will never <emphasis>require</emphasis> annotations
         (although they sometimes help the compiler produce better error
@@ -25021,9 +25535,9 @@ Error: The implementation test.ml does not match the interface test.cmi:
           locate type errors in your code. The first is to introduce
           manual type annotations to narrow down the source of your
           error more accurately. These annotations shouldn't actually
-          change your types and can removed once your code is correct,
-          but act as anchors to locate errors while you're still writing
-          your code.
+          change your types and can be removed once your code is
+          correct. However, they act as anchors to locate errors while
+          you're still writing your code.
         </para>
         <para>
           Manual type annotations are particulary useful if you use lots
@@ -25666,7 +26180,7 @@ $ ocamlc -dparsetree typedef.ml
         option.
       </para>
       <programlisting>
-$ ocamlc -dtypedtree typedef.m
+$ ocamlc -dtypedtree typedef.ml
 [
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Pstr_type [
@@ -26046,7 +26560,7 @@ Estimated testing time 30s (change using -quota SECS).
     <para>
       After the lambda form has been generated, we are very close to
       having executable code. The OCaml tool-chain branches into two
-      separate compilers at this point. We'll describe the the bytecode
+      separate compilers at this point. We'll describe the bytecode
       compiler first, which consists of two pieces:
     </para>
     <itemizedlist>
@@ -26173,8 +26687,8 @@ L2: closure L1, 0
         which <literal>.cmo</literal> arguments are presented on the
         command line defines the order in which compilation units are
         initialized at runtime. Remember that OCaml has no single
-        <literal>main</literal> function like C, so this link is order
-        is more important than in C.
+        <literal>main</literal> function like C, so this link order is
+        more important than in C programs.
       </para>
     </sect2>
     <sect2 id="executing-bytecode">
@@ -26186,10 +26700,10 @@ L2: closure L1, 0
         instructions to call these C functions when required.
       </para>
       <para>
-        The OCaml linker produces bytecode targeted the standard OCaml
-        runtime by default, and so needs to know about any C functions
-        that are referenced from other libraries that aren't loaded by
-        default.
+        The OCaml linker produces bytecode that targets the standard
+        OCaml runtime by default, and so needs to know about any C
+        functions that are referenced from other libraries that aren't
+        loaded by default.
       </para>
       <para>
         Information about these extra libraries can be specified while
