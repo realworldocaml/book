@@ -333,10 +333,11 @@ have a `cmo` extension.  The compiled bytecode files are matched with the
 associated `cmi` interface which contains the type signature exported to
 other compilation units.
 
-A typical OCaml library consists of multiple source files and hence multiple
-`cmo` files that all need to passed on the command line to use the library.
-The compiler can combine these into a more convenient archive file by using the
-`-a` flag.  Bytecode archives are denoted by the `cma` extension.
+A typical OCaml library consists of multiple source files, and hence multiple
+`cmo` files that all need to be passed as command-line arguments to use the
+library from other code.  The compiler can combine these multiple files into a
+more convenient single archive file by using the `-a` flag.  Bytecode archives
+are denoted by the `cma` extension.
 
 The individual objects in the library are linked as regular `cmo` files in the
 order specified when the library file was built.  If an object file within the
