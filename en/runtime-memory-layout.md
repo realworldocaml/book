@@ -41,7 +41,9 @@ the runtime must look up the concrete instance of the object and dispatch the
 method call.  Those languages amortize some of the cost via "Just-in-Time"
 dynamic patching, but OCaml prefers runtime simplicity instead.
 
-TODO xref to pipeline chapter.
+We'll explain this compilation pipeline in more detail in
+[xref](#the-compiler-frontend-parsing-and-type-checking) and
+[xref](#the-compiler-backend-byte-code-and-native-code).
 
 </note>
 
