@@ -316,9 +316,8 @@ As we've seen, records are immutable by default, but individual record
 fields can be declared as mutable.  These mutable fields can be set
 using the `<-` operator, _i.e._, `record.field <- expr`.
 
-As we'll see in [xref](#object-oriented-programming), fields of an
-object can similarly be declared as mutable, and can then be modified
-in much the same way as record fields.
+As we'll see in [xref](#objects), fields of an object can similarly be declared
+as mutable, and can then be modified in much the same way as record fields.
 
 #### Ref Cells
 
@@ -1878,9 +1877,8 @@ data-type.  We can resolve this in one of two ways: either by making
 the type concrete (_i.e._, exposing the implementation in the `mli`),
 which is often not desirable; or by marking the type variable in
 question as _covariant_.  We'll learn more about variance and
-covariance in [xref](#object-oriented-programming), but for now, you
-can think of it as an annotation which can be put in the interface of
-a pure data structure.
+covariance in [xref](#objects), but for now, you can think of it as an
+annotation which can be put in the interface of a pure data structure.
 
 Thus, if we replace `type 'a t` in the interface with `type +'a t`,
 that will make it explicit in the interface that the data-structure

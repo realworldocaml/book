@@ -1,4 +1,4 @@
-# Object-Oriented Programming
+# Objects
 
 We've already seen several tools that OCaml provides for organizing programs,
 particularly modules.  In addition, OCaml also supports object-oriented
@@ -78,7 +78,7 @@ already object oriented.
 In this chapter, we'll introduce you to the basics of object definition and use
 in OCaml, and then demonstrate their use with an example using Cryptokit.
 We'll return to the more advanced areas of object use later on in the book in
-[xref](#object-subtyping-and-inheritance).
+[xref](#classes).
 
 ## OCaml objects ##
 

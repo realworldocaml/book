@@ -26,8 +26,7 @@ Mercurial version control systems.
 In this chapter, we'll:
 
 * learn how to use Command to construct basic and grouped command-line interfaces.
-* read examples that extend the cryptographic utility from [xref](#object-oriented-programming) and builds a simple
-equivalents to the `md5` and `shasum` utilities.
+* read examples that extend the cryptographic utility from [xref](#classes) and build a simple equivalent to the `md5` and `shasum` utilities.
 * demonstrate how _functional combinators_ can be used to declare complex data structures in a type-safe and elegant way.
 
 ## Basic command-line parsing
