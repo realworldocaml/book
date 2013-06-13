@@ -39,5 +39,5 @@ let () =
   let open Command in
   basic ~summary:"Display the current time in various formats"
     Spec.(empty +> flag "-a" no_arg ~doc:" Human-readable output format")
-    (fun human () -> if human then ascii_time () else float_time ())
+    (fun human -> if human then ascii_time else float_time)
   |> Command.run 
