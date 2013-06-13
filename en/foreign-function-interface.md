@@ -815,7 +815,7 @@ memory.  They are also fully supported in Ctypes, but we won't go into more
 detail here.
 
 <note>
-<title>Pointer operators for dereferencing and arithmeic</title>
+<title>Pointer operators for dereferencing and arithmetic</title>
 
 Ctypes defines a number of operators that let you manipulate pointers and arrays
 just as you would in C.  The Ctypes equivalents do have the benefit of being
@@ -827,6 +827,9 @@ Operator    Purpose
 `p <-@ v`   Write the value `v` to the address `p`.
 `p +@ n`    If `p` points to an array element, then compute the address of the `n`th next element.
 `p -@ n`    If `p` points to an array element, then compute the address of the `n`th previous element.
+
+There are also other useful non-operator functions available (see the Ctypes
+documentation), for example for pointer differencing and comparison.
 
 </note>
 
