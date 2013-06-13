@@ -540,7 +540,7 @@ type timeval
 val timeval : timeval structure typ = <abstr>
 ```
 
-The first command defines a new OCaml type `typeval` that we'll use to
+The first command defines a new OCaml type `timeval` that we'll use to
 instantiate the OCaml version of the `struct`. Creating a new OCaml type to
 reflect the underlying C type in this way means that the structure we define
 will be distinct from other structures we define elsewhere, which helps to
