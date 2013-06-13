@@ -303,10 +303,13 @@ val to_int : json -> int
 val filter_string : json list -> string list
 ```
 
-We'll go through each of these uses one-by-one.  Core provides the
-`|>` pipe-forward which can chain combinators together, and the
-example code uses this to select and convert values out of the JSON
-structure.  Let's examine some of them in more detail:
+We'll go through each of these uses one-by-one.  The examples below also use
+the `|>` pipe-forward operator that we explained earlier in
+[xref](#variables-and-functions).  This lets us chain together multiple JSON
+selection functions and feed the output from one into the next one, without
+having to create separate `let` bindings for each one.
+
+Let's start with selecting a single `title` field from the record.
 
 ```ocaml
   let open Yojson.Basic.Util in
