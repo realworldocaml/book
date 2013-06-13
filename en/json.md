@@ -294,11 +294,10 @@ as changing a mutable record field or printing to the standard output.
 </sidebar>
 
 `Yojson` provides several combinators in the `Yojson.Basic.Util` module,
-such as:
+such as the ones below.
 
 ```ocaml
 val member : string -> json -> json
-val index : int -> json -> json
 val to_string : json -> string
 val to_int : json -> int
 val filter_string : json list -> string list
@@ -366,7 +365,7 @@ let names =
 ```
 
 This style of programming which omits variable names and chains
-functions together is known as "point-free programming".  It's a
+functions together is known as *point-free programming*.  It's a
 succinct style, but shouldn't be overused due to the increased
 difficulty of debugging intermediate values.  If an explicit name is
 assigned to each stage of the transformations, debuggers in particular
