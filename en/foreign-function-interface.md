@@ -157,8 +157,8 @@ let cbreak =
 These definitions are all straightforward mappings from the C declarations in
 the Ncurses header file.  The scalar C types such as `int` come pre-defined in
 Ctypes. The `string` in these definitions maps from OCaml strings (which have a
-specific length) onto C character buffers (whose length is defined by a null
-characters).
+specific length) onto C character buffers (whose length is defined by a
+terminating null character that immediately follows the string data).
 
 The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running:
