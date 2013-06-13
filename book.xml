@@ -17383,10 +17383,10 @@ Error: This expression has type
        Types for tag `Assoc are incompatible
 </programlisting>
     <para>
-      The type error above isn't <emphasis>wrong</emphasis> as such, but
-      can be inconvenient to wade through for larger values. An easy way
-      to narrow down this sort of type error is to add explicit type
-      annotations as a compiler hint about your intentions:
+      The type error above is more verbose than it needs to be, which
+      can be inconvenient to wade through for larger values. You can
+      help the compiler to narrow down this error to a shorter form by
+      adding explicit type annotations as a hint about your intentions.
     </para>
     <programlisting language="ocaml">
 # let (x:Yojson.Basic.json) = `Assoc (&quot;key&quot;, `String &quot;value&quot;);;
@@ -17404,6 +17404,11 @@ Error: This expression has type 'a * 'b
       but the error messages can be more confusing. However, a bit of
       careful manual type annotation is all it takes to make tracking
       down such issues much easier.
+    </para>
+    <para>
+      We'll discuss more techniques like this that help you interpret
+      type errors more easily in
+      <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>.
     </para>
     </sidebar>
   </sect1>
