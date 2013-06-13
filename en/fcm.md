@@ -43,11 +43,47 @@ the `module` keyword.
 val three : (module X_int) = <module>
 ```
 
-Note that the type of the first-class module, `(module X_int)`, is
-based on the name of the signature that we used in constructing it.
+If the module type can be inferred, than you can even omit the
+signature.  Thus, we can write:
 
-To get at the contents of `three`, we need to unpack it into a module
-again, which we can do using the `val` keyword.
+```ocaml
+# module Four = struct let x = 4 end;;
+module Four : sig val x : int end
+# let numbers = [ three; (module Four) ];;
+val numbers : (module X_int) list = [<module>; <module>]
+```
+
+And we can even create a first-class module from an anonymous module:
+
+```ocaml
+# let numbers = [three; (module struct let x = 4 end)];;
+val numbers : (module X_int) list = [<module>; <module>]
+```
+
+Note that the type of the first-class module, `(module X_int)`, is
+based on the name of the signature that we used in constructing it.  A
+first class module based on a signature with a different name, even if
+it is substantively the same signature, will result in a distinct
+type, as is shown below.
+
+```ocaml
+# module type Y_int = X_int;;
+module type Y_int = X_int
+# let five = (module struct let x = 5 end : Y_int);;
+val five : (module Y_int) = <module>
+# [three; five];;
+Error: This expression has type (module Y_int)
+       but an expression was expected of type (module X_int)
+```
+
+This constraint can occasionally be confusing.  The most common source
+of confusion is if someone creates a module type aas a local alias to
+a module type defined elsewhere, the two module types will lead to
+distinct first class module types.
+
+In order to access the contents of a first-class module, you need to
+unpack it into an ordinary module.  This can be done using the `val`
+keyword, as shown below.
 
 ```ocaml
 # module New_three = (val three : X_int) ;;
@@ -88,22 +124,7 @@ val six : (module X_int) = <module>
 
 Of course, all we've really done with this example is come up with a
 more cumbersome way of working with integers.  In the following, we'll
-look at a more realistic example.
-
-## Example: A log processor
-
-
-
-
-
-
-
-
-
-
-
-
-
+look at more realistic examples.
 
 ## Dynamically choosing a module
 
