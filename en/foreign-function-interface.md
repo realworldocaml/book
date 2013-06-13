@@ -101,9 +101,6 @@ good enough for now.  The second statement defines an OCaml value that
 represents the `WINDOW` C pointer.  This value is used later in the Ctypes
 function definitions.
 
-That's all we need to invoke our first function call to `initscr` to initalize
-the terminal.
-
 ```ocaml
 (* ncurses.ml 2/3 *)
 open Foreign
@@ -112,7 +109,8 @@ let initscr =
   foreign "initscr" (void @-> returning window)
 ```
 
-The `foreign` function accepts two parameters:
+That's all we need to invoke our first function call to `initscr` to initalize
+the terminal.  The `foreign` function accepts two parameters:
 
 - the C function call name, which is looked up using *dlsym(3)*.
 - a value that defines the complete set of C function arguments and its return type.
