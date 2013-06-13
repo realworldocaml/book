@@ -134,7 +134,7 @@ val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> js
              creating a new one. 
    [fname] : data file name to be used in error messages. It does not 
              have to be a real file. 
-   [lnum]  : number of the first line of input. Default is 1.
+   [lnum]  : number of the first line of input. Default is 1. *)
 
 val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 (* Read a JSON value from a file. See [from_string] for the meaning of the optional
