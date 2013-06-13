@@ -552,8 +552,10 @@ The combinators described earlier make it easy to write functions that extract
 fields from JSON records, but the process is still pretty manual.  When you
 implement larger specifications, it's much easier to generate the mappings from
 JSON schemas to OCaml values more mechanically than writing conversion
-functions individually.  We'll cover an alternative JSON processing method that
-is better for larger-scale JSON handling now, using the
+functions individually.
+
+We'll cover an alternative JSON processing method that is better for
+larger-scale JSON handling now, using the
 [ATD](http://mjambon.com/atd-biniou-intro.html) tool.  This will introduce our
 first _Domain Specific Language_ that compiles JSON specifications into OCaml
 modules, which are then used throughout your application.
@@ -577,6 +579,7 @@ and will already be on your `PATH` from running `opam config env`.  See
 
 </note>
 
+### ATD basics
 
 The idea behind ATD is to specify the format of the JSON in a separate
 file, and then run a compiler (`atdgen`) that outputs OCaml code to
@@ -584,15 +587,14 @@ construct and parse JSON values.  This means that you don't need to
 write any OCaml parsing code at all, as it will all be auto-generated
 for you.
 
-Let's go straight into looking at an example of how this works, by
-using a small portion of the GitHub API.  GitHub is a popular code
-hosting and sharing website that provides a JSON-based web
-[API](http://developer.github.com).  The ATD code fragment below
-describes the GitHub authorization API.  It is based on a
-pseudo-standard web protocol known as OAuth, and is used to authorize
-users for GitHub services.
+Let's go straight into looking at an example of how this works, by using a
+small portion of the GitHub API.  GitHub is a popular code hosting and sharing
+website that provides a JSON-based web [API](http://developer.github.com).  The
+ATD code fragment below describes the GitHub authorization API (which is based
+on a pseudo-standard web protocol known as OAuth).
 
-```ocaml
+```
+(* github.atd *)
 type scope = [
     User <json name="user">
   | Public_repo <json name="public_repo">
@@ -623,15 +625,34 @@ type authorization_response = {
 }
 ```
 
-ATD specifications are deliberately similar to OCaml type definitions.  Each
-field can include extra annotations to customise the parsing code for a
-particular backend. For example, the GitHub `scope` field above is defined as a
-variant type, but with the actual JSON values being defined explicitly (as
-lower-case versions).
+The ATD specification syntax is deliberately quite similar to OCaml type
+definitions.  Every JSON record is assigned a type name (e.g. `app` in the
+example above).  You can also define variants that are similar to OCaml's
+variant types (e.g. `scope` in the example).
 
-The ATD spec can be compiled to a number of OCaml targets. Let's run
-the compiler twice, to generate some OCaml type definitions, and a
-JSON serializer.
+### ATD annotations
+
+ATD deviates significantly from OCaml syntax due to its support for annotations
+within the specification.  The annotations can customise the code that is
+generated for a particular target (of which the OCaml backend is of most
+interest to us).
+
+For example, the GitHub `scope` field above is defined as a variant type with
+each option starting with an uppercase letter as is conventional for OCaml
+variants. However, the the JSON values that come back from Github are actually
+lowercase, and so aren't exactly the same as the option name.
+
+The annotation `<json name="user">` signals that the JSON value of the field
+should be treated as `name`, but the value of the parsed variant in OCaml
+should be `User`.  These annotations are also useful to map JSON values to
+reserved keywords in OCaml (e.g. `type`).
+
+### Compiling ATD specifications to OCaml
+
+The ATD specification we defined above can be compiled to OCaml code using the
+`atdgen` command-line tool. Let's run the compiler twice, to generate some
+OCaml type definitions and also a JSON serializing module that converts between
+input data and those type definitions.
 
 ```bash
 $ atdgen -t github.atd
@@ -641,7 +662,7 @@ $ atdgen -j github.atd
 This will generate some new files in your current
 directory. `Github_t.ml` and `Github_t.mli` will contain an OCaml
 module with types defines that correspond to the ATD file.  The
-signature looks like this:
+signature is as follows.
 
 ```ocaml
 type scope = [
@@ -696,20 +717,21 @@ val authorization_response_of_string :
   string -> authorization_response
 ```
 
-This is pretty convenient! We've written a single ATD file, and all
-the OCaml boilerplate to convert between JSON and a strongly typed
-record has been generated for us.  You can control various aspects of
-the serializer by passing flags to `atdgen`. The important ones for
-JSON are:
+This is pretty convenient! We've now written a single ATD file, and all the
+OCaml boilerplate to convert between JSON and a strongly typed record has been
+generated for us.  You can control various aspects of the serializer by passing
+flags to `atdgen`. The important ones for JSON are:
 
-* `-j-std`: work in standard JSON mode, and never print non-standard
-  JSON extensions.
+* `-j-std`: Convert tuples and variants into standard JSON and
+  refuses to print NaN and infinities.  You should specify this if
+  you intend to interoperate with services that aren't using ATD.
 * `-j-custom-fields FUNCTION`: call a custom function for every
   unknown field encountered, instead of raising a parsing exception.
-* `-j-defaults`: always explicitly output a JSON value if possible. This requires the default value for that field to be defined in the ATD specification.
+* `-j-defaults`: always explicitly output a JSON value if possible.
+  This requires the default value for that field to be defined in the ATD specification.
 
-The full ATD specification is quite sophisticated (and well documented online
-at its homepage).  The ATD compiler can also target formats other than JSON,
+The full ATD specification is quite sophisticated and well documented online
+at its homepage.  The ATD compiler can also target formats other than JSON,
 and outputs code for other languages such as Java if you need more
 interoperability.
 
@@ -721,11 +743,15 @@ and includes OCaml bindings.
 ### Example: Querying Github organization information
 
 Let's finish up with an example of some live JSON parsing from Github, and
-build a tool to query organization information via their API.  Look at
-the online [API documentation](http://developer.github.com/v3/orgs/) for Github
-to see what the JSON schema looks like retrieving the organization information. 
-Then create an ATD file that covers the fields we need.  Any extra fields
-present in the response will be ignored by the ATD parser.
+build a tool to query organization information via their API.  Start by looking
+at the online [API documentation](http://developer.github.com/v3/orgs/) for
+Github to see what the JSON schema for retrieving the organization information
+looks like. 
+
+Now create an ATD file that covers the fields we need.  Any extra fields
+present in the response will be ignored by the ATD parser, so we don't need
+a completely exhaustive specification of every field that Github might send
+back.
 
 ```
 (* github_org.atd *)
@@ -740,9 +766,79 @@ type org = {
 }
 ```
 
-The OCaml program that uses this will fetch the JSON and output a one-line summary.
-You'll also need the `curl` tool installed on your system to fetch the HTTP web pages, as
-our example below calls `curl` via the `Core_extended.Shell` interface.
+Let's build the OCaml type declaration first by calling `atdgen -t` on the
+specification file.
+
+```console
+$ atdgen -t github_org.atd
+$ cat github_org_t.mli
+(* Auto-generated from "github_org.atd" *)
+type org = {
+  login: string;
+  id: int;
+  url: string;
+  name: string option;
+  blog: string option;
+  email: string option;
+  public_repos: int
+}
+```
+
+The OCaml type has an obvious mapping to the ATD spec, but we still need the logic
+to convert JSON buffers to and from this type.  Calling `atdgen -j` will generate
+this serialization code for us in a new file called `github_org_j.ml`.
+
+```console
+$ atdgen -j github_org.atd
+$ cat github_org_j.mli
+(* Auto-generated from "github_org.atd" *)
+
+type org = Github_org_t.org = {
+  login: string;
+  id: int;
+  url: string;
+  name: string option;
+  blog: string option;
+  email: string option;
+  public_repos: int
+}
+
+val write_org :
+  Bi_outbuf.t -> org -> unit
+  (** Output a JSON value of type {!org}. *)
+
+val string_of_org :
+  ?len:int -> org -> string
+  (** Serialize a value of type {!org}
+      into a JSON string.
+      @param len specifies the initial length
+                 of the buffer used internally.
+                 Default: 1024. *)
+
+val read_org :
+  Yojson.Safe.lexer_state -> Lexing.lexbuf -> org
+  (** Input JSON data of type {!org}. *)
+
+val org_of_string :
+  string -> org
+  (** Deserialize JSON data of type {!org}. *)
+```
+
+The `Github_org_j` serializer interface contains everything we need to map
+to-and-from the OCaml types and JSON.  The easiest way to use this interface is
+by using the `string_of_org` and `org_of_string` functions, but there are also
+more advanced low-level buffer functions available if you need higher
+performance (but we won't go into that in this tutorial).
+
+All we need to complete our example is an OCaml program that fetches the JSON
+and uses these modules to output a one-line summary.  Our example below does
+just that.
+
+The code below calls the cURL command-line utility by using the
+`Core_extended.Shell` interface to run an external command and capture its
+output.  You'll need to ensure that you have cURL installed on your system
+before running the example.  You might also need to `opam install
+core_extended` if you haven't installed it previously.
 
 ```ocaml
 (* github_org_info.ml *)
@@ -765,8 +861,8 @@ let () =
   |> Command.run
 ```
 
-Finally, write a short shell script to generate the OCaml `Github_org` parsers
-via `atdgen`, and build the OCaml command-line interface.
+Below is a short shell script that generates all of the OCaml code and also
+builds the final executable.
 
 ```console
 $ cat _tags 
@@ -783,7 +879,9 @@ ocamlbuild -use-ocamlfind github_org_info.native
 $ ./buildgh.sh
 ```
 
-You can now run the command-line tool with a single argument to specify the name of the organization, and it will dynamically fetch the JSON from the web, parse it, and render the summary to your console.
+You can now run the command-line tool with a single argument to specify the
+name of the organization, and it will dynamically fetch the JSON from the web,
+parse it, and render the summary to your console.
 
 ```
 $ curl https://api.github.com/orgs/janestreet 
