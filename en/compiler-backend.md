@@ -357,13 +357,12 @@ The bytecode runtime comprises three parts: the bytecode interpreter, garbage
 collector, and a set of C functions that implement the primitive operations.
 The bytecode contains instructions to call these C functions when required.
 
-The OCaml linker produces bytecode targeted the standard OCaml runtime by
+The OCaml linker produces bytecode that targets the standard OCaml runtime by
 default, and so needs to know about any C functions that are referenced from
 other libraries that aren't loaded by default.
 
 Information about these extra libraries can be specified while linking a
 bytecode archive.
-
 
 ```console
 $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
