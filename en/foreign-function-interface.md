@@ -546,8 +546,8 @@ will be distinct from other structures we define elsewhere, which helps to
 avoid getting them mixed up.
 
 The second command calls `structure` to create a fresh structure type.  At this
-point the structure type is incomplete, so we can add fields, but cannot yet
-use it in `foreign` calls.
+point the structure type is incomplete: we can add fields but cannot yet use it
+in `foreign` calls or use it to create values.
 
 ### Adding fields to structures
 
@@ -572,8 +572,8 @@ confusion.
 
 Every field addition mutates the structure variable and records a new size (the
 exact value of which depends on the type of the field that was just added).
-Once we `seal` the structure the situation is reversed: we will be able to
-create values, but adding fields to a sealed structure is an error.
+Once we `seal` the structure we will be able to create values using it, but
+adding fields to a sealed structure is an error.
 
 ### Incomplete structure definitions
 
