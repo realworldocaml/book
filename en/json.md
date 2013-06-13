@@ -209,60 +209,6 @@ come in via a network connection (we'll see more of this in
 the example checks that the two input mechanisms actually resulted in
 the same OCaml data structure.
 
-<sidebar>
-<title>The difference between `=` and `==`, and `phys_equal` in Core</title>
-
-If you come from a C/C++ background, you will probably reflexively use
-`==` to test two values for equality. In OCaml, `==` tests for
-*physical* equality, and `=` tests for *structural* equality.
-
-The `==` physical equality test will match if two data structures have
-precisely the same pointer in memory.  Two data structures that have
-identical contents, but are constructed separately, will not match
-using this operator.  In the JSON example, the `json1` and `json2`
-values are not identical and so would fail the physical equality test.
-
-The `=` structural equality operator recursively inspects each field
-in the two values and tests them individually for equality. In the
-JSON parsing example, every field will be traversed and checked, and
-they will check out as equal.  Crucially, if your data structure is
-cyclical (that is, a value recursively points back to another field
-within the same structure), the `=` operator will never terminate, and
-your program will hang!  In this situation, you must use the physical
-equality operator, or write a custom comparison function that breaks
-the recursion.
-
-It's quite easy to mix up the use of `=` and `==`, so Core disables
-the `==` operator and provides the more explicit `phys_equal` function
-instead.  You'll see a type error if you use `==` anywhere:
-
-```ocaml
-# 1 == 2;;
-Error: This expression has type int but an expression was expected of type
-         [ `Consider_using_phys_equal ]
-# phys_equal 1 2;;
-- : bool = false
-```
-
-If you feel like hanging your OCaml interpreter, you can verify what
-happens with recursive values and structural equality for yourself:
-
-```ocaml
-# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
-type t1 = { foo1 : int; bar1 : t2; }
-and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
-<lots of text>
-# v1 == v1;;
-- : bool = true
-# phys_equal v1 v1;;
-- : bool = true
-# v1 = v1 ;;
-<press ^Z and kill the process now>
-```
-
-</sidebar>
-
 ## Selecting values from JSON structures
 
 Now that we've figured out how to parse the example JSON into an OCaml
