@@ -455,25 +455,10 @@ hello embedded world 2
 After calling OCaml
 ```
 
-One inconvenience with GCC is that you need to specify the location of the
-OCaml library directory.  The OCaml compiler can actually handle C object and
-sources directly.  It passes these through to the system C compiler but adds
-its standard directory and runtime on the way.  You can thus compile the
-previous object file much more simply with `ocamlc`.
-
-```console
-$ ocamlc -o final_out2 embed_out.o main.c
-$ ./final_out2
-Before calling OCaml
-hello embedded world 1
-hello embedded world 2
-After calling OCaml
-```
-
 You can inspect the commands that `ocamlc` is invoking by adding `-verbose` to
-the command line.  You can even obtain the C source code to the `-output-obj`
-result by specifying a `.c` output file extension instead of the `.o` we used
-earlier.
+the command line to help figure out the GCC command-line if you get stuck.  You
+can even obtain the C source code to the `-output-obj` result by specifying a
+`.c` output file extension instead of the `.o` we used earlier.
 
 ```console
 $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
