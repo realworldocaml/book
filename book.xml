@@ -25311,60 +25311,54 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
       dynamic behaviour. Instead, all code is simply generated at
       compile-time via Camlp4.
     </para>
+    <para>
+      The syntax extensions accept an input AST and output a modified
+      one. If you're not familiar with the Camlp4 module in question,
+      how do you figure out what changes it's made to your code? The
+      obvious way is to read the documentation that accompanies the
+      extension. Another approach is to use the top-level to explore the
+      extension's behaviour or run Camlp4 manually yourself to see the
+      transformation in action. We'll show you how to do both of these
+      now.
+    </para>
     <sect2 id="using-camlp4-interactively">
       <title>Using Camlp4 interactively</title>
       <para>
-        The syntax extensions accept an input AST and output a modified
-        one. If you're not familiar with the Camlp4 module in question,
-        how do you figure out what changes it's made to your code? The
-        obvious way is to read the documentation that accompanies the
-        extension.
+        The <literal>utop</literal> top-level can run the phrases that
+        you type through <literal>camlp4</literal> automatically. You
+        should have at least these lines in your
+        <literal>~/.ocamlinit</literal> file in your home directory (see
+        <xref linkend="installation"/> for more information).
       </para>
-      <para>
-        Another approach is to use the top-level to explore the
-        extension's behaviour or run Camlp4 manually yourself to see the
-        transformation in action. We'll show you how to do both of these
-        now.
-      </para>
-      <sect3 id="using-camlp4-from-the-interactive-top-level">
-        <title>Using Camlp4 from the interactive top-level</title>
-        <para>
-          The <literal>utop</literal> top-level can run the phrases that
-          you type through <literal>camlp4</literal> automatically. You
-          should have at least these lines in your
-          <literal>~/.ocamlinit</literal> file in your home directory
-          (see <xref linkend="installation"/> for more
-          information).
-        </para>
-        <programlisting>
+      <programlisting>
 #use &quot;topfind&quot;
 #camlp4o
 </programlisting>
-        <para>
-          The first directive loads the <literal>ocamlfind</literal>
-          top-level interface that lets you require
-          <literal>ocamlfind</literal> packages (including all their
-          dependent packages). The second directive instructs the
-          top-level to filter all phrases via Camlp4. You can now run
-          <literal>utop</literal> and load the syntax extensions in.
-          We'll use the <literal>comparelib</literal> syntax extension
-          for our experiments.
-        </para>
-        <para>
-          OCaml provides a built-in polymorphic comparison operator that
-          inspects the runtime representation of two values to see if
-          they're equal. As we noted in
-          <xref linkend="maps-and-hashtables"/>, the
-          polymorphic comparison is less efficient than defining
-          explicit comparison functions between values. However, it
-          quickly become tedious to manually define comparison functions
-          for complex type definitions.
-        </para>
-        <para>
-          Let's see how <literal>comparelib</literal> solves this
-          problem by running it in <literal>utop</literal>.
-        </para>
-        <programlisting language="ocaml">
+      <para>
+        The first directive loads the <literal>ocamlfind</literal>
+        top-level interface that lets you require
+        <literal>ocamlfind</literal> packages (including all their
+        dependent packages). The second directive instructs the
+        top-level to filter all phrases via Camlp4. You can now run
+        <literal>utop</literal> and load the syntax extensions in. We'll
+        use the <literal>comparelib</literal> syntax extension for our
+        experiments.
+      </para>
+      <para>
+        OCaml provides a built-in polymorphic comparison operator that
+        inspects the runtime representation of two values to see if
+        they're equal. As we noted in
+        <xref linkend="maps-and-hashtables"/>, the polymorphic
+        comparison is less efficient than defining explicit comparison
+        functions between values. However, it quickly become tedious to
+        manually define comparison functions for complex type
+        definitions.
+      </para>
+      <para>
+        Let's see how <literal>comparelib</literal> solves this problem
+        by running it in <literal>utop</literal>.
+      </para>
+      <programlisting language="ocaml">
 # #require &quot;comparelib.syntax&quot; ;;
 
 # type t = { foo: string; bar : t } ;;
@@ -25375,18 +25369,17 @@ type t = { foo : string; bar : t; }
 val compare : t -&gt; t -&gt; int = &lt;fun&gt;
 val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;
 </programlisting>
-        <para>
-          The first definition of <literal>t</literal> is a standard
-          OCaml phrase and results in the expected output. The second
-          one includes the <literal>with compare</literal> directive.
-          This is intercepted by <literal>comparelib</literal> and
-          transformed into the original type definition with two new
-          functions also incuded.
-        </para>
-      </sect3>
+      <para>
+        The first definition of <literal>t</literal> is a standard OCaml
+        phrase and results in the expected output. The second one
+        includes the <literal>with compare</literal> directive. This is
+        intercepted by <literal>comparelib</literal> and transformed
+        into the original type definition with two new functions also
+        incuded.
+      </para>
     </sect2>
     <sect2 id="running-camlp4-from-the-command-line">
-      <title>Running Camlp4 from the command-line</title>
+      <title>Running Camlp4 from the command line</title>
       <para>
         The top-level is a quick way to examine the signatures generated
         from the extensions, but how can we see what these new functions
@@ -25511,59 +25504,58 @@ let fn x y =
         will never generate an unused variable warning.
       </para>
       </note>
-      <sect3 id="preprocessing-module-signatures">
-        <title>Preprocessing module signatures</title>
-        <para>
-          Another useful feature of <literal>type_conv</literal> is that
-          it can generate module signatures too. Copy the earlier type
-          definition into a <literal>comparelib_test.mli</literal> and
-          rerun the Camlp4 dumper script.
-        </para>
-        <programlisting>
+    </sect2>
+    <sect2 id="preprocessing-module-signatures">
+      <title>Preprocessing module signatures</title>
+      <para>
+        Another useful feature of <literal>type_conv</literal> is that
+        it can generate module signatures too. Copy the earlier type
+        definition into a <literal>comparelib_test.mli</literal> and
+        rerun the Camlp4 dumper script.
+      </para>
+      <programlisting>
 $ sh camlp4_dump comparelib_test.mli 
 type t = { foo : string; bar : t }
 
 val compare : t -&gt; t -&gt; int
 </programlisting>
-        <para>
-          The external signature generated by
-          <literal>comparelib</literal> is much simpler than the actual
-          code. Running Camlp4 directly on the original source code lets
-          you see these all these transformations precisely.
-        </para>
-        <caution>
-        <title>
-        Don't overdo the syntax extensions
-        </title>
-        <para>
-          Syntax extensions are a powerful extension mechanism that can
-          completely alter your source code's layout and style. Core
-          includes a very conservative set of extensions that take care
-          to minimise the syntax changes. There are a number of
-          third-party libraries that are much more ambitious -- some
-          introduce whitespace-sensitive indentation while others build
-          entirely new embedded languages using OCaml as a host
-          language.
-        </para>
-        <para>
-          While it's tempting to compress all your boiler-plate code
-          into Camlp4 extensions, it can make your source code much
-          harder for other people to quickly read and understand. Core
-          mainly focuses on type-driven code generation using the
-          <literal>type_conv</literal> extension and doesn't
-          fundamentally change the OCaml syntax.
-        </para>
-        <para>
-          Another thing to consider before deploying your own syntax
-          extension is compatibility with other extensions. Two separate
-          extensions can create a grammar clash that leads to odd syntax
-          errors and hard-to-reproduce bugs. That's why most of Core's
-          syntax extensions go through <literal>type_conv</literal>,
-          which acts as a single point for extending the grammar via the
-          <literal>with</literal> keyword.
-        </para>
-        </caution>
-      </sect3>
+      <para>
+        The external signature generated by
+        <literal>comparelib</literal> is much simpler than the actual
+        code. Running Camlp4 directly on the original source code lets
+        you see these all these transformations precisely.
+      </para>
+      <caution>
+      <title>
+      Don't overdo the syntax extensions
+      </title>
+      <para>
+        Syntax extensions are a powerful extension mechanism that can
+        completely alter your source code's layout and style. Core
+        includes a very conservative set of extensions that take care to
+        minimise the syntax changes. There are a number of third-party
+        libraries that are much more ambitious -- some introduce
+        whitespace-sensitive indentation while others build entirely new
+        embedded languages using OCaml as a host language.
+      </para>
+      <para>
+        While it's tempting to compress all your boiler-plate code into
+        Camlp4 extensions, it can make your source code much harder for
+        other people to quickly read and understand. Core mainly focuses
+        on type-driven code generation using the
+        <literal>type_conv</literal> extension and doesn't fundamentally
+        change the OCaml syntax.
+      </para>
+      <para>
+        Another thing to consider before deploying your own syntax
+        extension is compatibility with other extensions. Two separate
+        extensions can create a grammar clash that leads to odd syntax
+        errors and hard-to-reproduce bugs. That's why most of Core's
+        syntax extensions go through <literal>type_conv</literal>, which
+        acts as a single point for extending the grammar via the
+        <literal>with</literal> keyword.
+      </para>
+      </caution>
     </sect2>
     <sect2 id="further-reading-on-camlp4">
       <title>Further reading on Camlp4</title>
@@ -27703,7 +27695,7 @@ $ perf report -g
           can read more on the
           <ulink url="http://perf.wiki.kernel.org">homepage</ulink>.
         </para>
-        <tip>
+        <sidebar>
         <title>
         Using the frame-pointer to get more accurate traces
         </title>
@@ -27741,7 +27733,7 @@ $ opam switch 4.01.0dev+fp
           new interface. You can read more about this on the OCamlPro
           <ulink url="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">blog</ulink>.
         </para>
-        </tip>
+        </sidebar>
       </sect3>
     </sect2>
     <sect2 id="embedding-native-code-in-c">
