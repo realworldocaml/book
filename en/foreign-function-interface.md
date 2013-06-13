@@ -838,7 +838,7 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);
 
 This also happens to be a close mapping to the corresponding Ctypes definition.
 Since type descriptions are regular values, we can just use `let` in place of
-`typedef`. The type of `qsort` is defined as follows.
+`typedef` and end up with working OCaml bindings to `qsort`.
 
 ```ocaml
 let compare_t = ptr void @-> ptr void @-> returning int
@@ -847,7 +847,9 @@ let qsort = foreign "qsort"
    (ptr void @-> size_t @-> size_t @-> funptr compare_t @-> returning void)
 ```
 
-The resulting value is a higher-order function, as shown by its type.
+We only use `compare_t` once (in the `qsort` definition), so you can choose to
+inline it in the OCaml code if you prefer. The resulting `qsort` value is a
+higher-order function, as shown by its type.
 
 ```ocaml
 val qsort: void ptr -> size_t -> size_t ->
