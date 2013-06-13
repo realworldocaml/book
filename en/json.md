@@ -184,7 +184,6 @@ let () =
 
   (* Test that the two values are the same *)
   print_endline (if json1 = json2 then "OK" else "FAIL")
-  print_endline (if phys_equal json1 json2 then "FAIL" else "OK")
 ```
 
 You can build this by writing a `_tags` file to define the package
@@ -197,7 +196,6 @@ true: thread, debug, annot
 
 $ ocamlbuild -use-ocamlfind read_json.native
 $ ./read_json.native
-OK
 OK
 ```
 
