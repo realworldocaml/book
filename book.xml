@@ -12450,7 +12450,7 @@ $ ./service_client.byte
     </para>
     <para>
       Modules already provide these features in some form, but the main
-      focus of classes is on code re-use through inheritance and late
+      focus of classes is on code reuse through inheritance and late
       binding of methods. This is a critical property of classes: the
       methods that implement an object are determined when the object is
       instantiated, a form of <emphasis>dynamic</emphasis> binding. In
@@ -25622,8 +25622,8 @@ val compare : t -&gt; t -&gt; int
       </listitem>
       <listitem>
         <para>
-          performing <emphasis>explicit subtyping</emphasis> checks for
-          objects and polymorphic variants.
+          <emphasis>explicit subtyping</emphasis> checks for objects and
+          polymorphic variants.
         </para>
       </listitem>
     </itemizedlist>
@@ -26025,7 +26025,7 @@ val f : s -&gt; int
           As a result, the suggested approach is to only compile with
           <literal>-principal</literal> occasionally to check if your
           code is compliant. If compiling in principal mode works, it is
-          guaranteed that the program will passing type checking in
+          guaranteed that the program will pass type checking in
           non-principal mode too.
         </para>
         <para>
