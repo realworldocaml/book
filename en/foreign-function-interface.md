@@ -602,8 +602,9 @@ val gettimeofday : timeval structure ptr -> timezone structure ptr -> int = <fun
 
 There's one other new feature here: the `returning_checking_errno` function
 behaves like `returning`, except that it checks whether the bound C function
-modifies the C error flag.  Changes to `errno` are mapped into OCaml
-exceptions by the `PosixTypes` module.
+modifies the C error flag.  Changes to `errno` are mapped into OCaml exceptions
+and raise a `Unix.Unix_error` exception just as the standard library functions
+do.
 
 As before we can create a wrapper to make `gettimeofday` easier to use.  The
 functions `make`, `addr` and `getf` create a structure value, retrieve the
