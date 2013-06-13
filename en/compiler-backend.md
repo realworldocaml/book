@@ -454,7 +454,7 @@ hello embedded world 2
 After calling OCaml
 ```
 
-Once inconvenience with `gcc` is that you need to specify the location of the
+One inconvenience with GCC is that you need to specify the location of the
 OCaml library directory.  The OCaml compiler can actually handle C object and
 sources directly.  It passes these through to the system C compiler but adds
 its standard directory and runtime on the way.  You can thus compile the
