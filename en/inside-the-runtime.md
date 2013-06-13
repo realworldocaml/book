@@ -28,8 +28,10 @@ allocated and used. Instead, it regularly scans them by starting from a set of
 The GC maintains a directed graph in which heap blocks are nodes, and there is
 an edge from heap block `b1` to heap block `b2` if some field of `b1` points to
 `b2`.  All blocks reachable from the roots by following edges in the graph must
-be retained, and unreachable blocks can be reused by the application.  This
-strategy is commonly known as *mark and sweep* garbage collection.
+be retained, and unreachable blocks can be reused by the application.
+
+The algorithm used by OCaml to perform this heap traversal is commonly known as
+*mark and sweep* garbage collection, and we'll explain it further now.
 
 ## Generational garbage collection
 
