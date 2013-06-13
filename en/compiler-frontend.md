@@ -651,7 +651,7 @@ of three distinct steps that happen simultaneously:
   for a module without requiring manual type annotations.
 * a *module system* that combines software components with explicit
   knowledge of their type signatures.
-* performing *explicit subtyping* checks for objects and polymorphic variants.
+* *explicit subtyping* checks for objects and polymorphic variants.
 
 Automatic type inference lets you write succinct code for a particular task and
 have the compiler ensure that your use of variables is locally consistent.
@@ -965,7 +965,7 @@ methods.
 
 As a result, the suggested approach is to only compile with `-principal`
 occasionally to check if your code is compliant.  If compiling in principal
-mode works, it is guaranteed that the program will passing type checking in
+mode works, it is guaranteed that the program will pass type checking in
 non-principal mode too.
 
 Bear in mind that the `cmi` files generated in principal mode differ from the
