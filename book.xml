@@ -7876,9 +7876,9 @@ let extended_color_to_int : extended_color -&gt; int = function
         of the ability of polymorphic variant types to overlap in the
         tags they support. This ties into OCaml's support for subtyping.
         As we'll discuss further when we cover objects in
-        <xref linkend="object-oriented-programming"/>,
-        subtyping brings in a lot of complexity, and most of the time,
-        that's complexity you want to avoid.
+        <xref linkend="objects"/>, subtyping brings in a lot
+        of complexity, and most of the time, that's complexity you want
+        to avoid.
       </para>
     </sect2>
   </sect1>
@@ -9136,10 +9136,9 @@ array.(index) &lt;- expr
         <literal>record.field &lt;- expr</literal>.
       </para>
       <para>
-        As we'll see in
-        <xref linkend="object-oriented-programming"/>, fields
-        of an object can similarly be declared as mutable, and can then
-        be modified in much the same way as record fields.
+        As we'll see in <xref linkend="objects"/>, fields of
+        an object can similarly be declared as mutable, and can then be
+        modified in much the same way as record fields.
       </para>
       <sect3 id="ref-cells">
         <title>Ref Cells</title>
@@ -11005,10 +11004,9 @@ val list_init_10 : f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;
         the implementation in the <literal>mli</literal>), which is
         often not desirable; or by marking the type variable in question
         as <emphasis>covariant</emphasis>. We'll learn more about
-        variance and covariance in
-        <xref linkend="object-oriented-programming"/>, but for
-        now, you can think of it as an annotation which can be put in
-        the interface of a pure data structure.
+        variance and covariance in <xref linkend="objects"/>,
+        but for now, you can think of it as an annotation which can be
+        put in the interface of a pure data structure.
       </para>
       <para>
         Thus, if we replace <literal>type 'a t</literal> in the
@@ -12359,8 +12357,8 @@ $ ./service_client.byte
       changed dynamically, rather than just added at creation time.
     </para>
   </sect1>
-</chapter><chapter id="object-oriented-programming">
-  <title>Object-Oriented Programming</title>
+</chapter><chapter id="objects">
+  <title>Objects</title>
   <para>
     We've already seen several tools that OCaml provides for organizing
     programs, particularly modules. In addition, OCaml also supports
@@ -12486,7 +12484,7 @@ $ ./service_client.byte
       definition and use in OCaml, and then demonstrate their use with
       an example using Cryptokit. We'll return to the more advanced
       areas of object use later on in the book in
-      <xref linkend="object-subtyping-and-inheritance"/>.
+      <xref linkend="classes"/>.
     </para>
   </sect1>
   <sect1 id="ocaml-objects">
@@ -15453,8 +15451,8 @@ Estimated testing time 20s (change using -quota SECS).
     <listitem>
       <para>
         read examples that extend the cryptographic utility from
-        <xref linkend="object-oriented-programming"/> and
-        builds a simple equivalents to the <literal>md5</literal> and
+        <xref linkend="classes"/> and build a simple
+        equivalent to the <literal>md5</literal> and
         <literal>shasum</literal> utilities.
       </para>
     </listitem>
