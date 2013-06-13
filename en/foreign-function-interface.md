@@ -445,6 +445,39 @@ view wraps the C type `char *` (written in OCaml as `ptr char`), and converts
 between the C and OCaml string representations each time the value is written
 or read.
 
+Here is the type signature of the `view` function.
+
+```ocaml
+(* Ctypes *)
+val view : read:('a -> 'b) -> write:('b -> 'a) -> 'a typ -> 'b typ
+```
+
+Next, we have the conversion functions to convert between an OCaml `string` and
+a C character buffer.
+
+```ocaml
+val string_of_char_ptr : char ptr -> string
+val char_ptr_of_string : string -> char ptr
+```
+
+The definition of `string` that uses views is quite simple and is written using
+these conversion functions.
+
+```ocaml
+let string = 
+  view 
+    ~read:string_of_char_ptr 
+    ~write:char_ptr_of_string 
+    (char ptr)
+```
+
+The type of this `string` function is a normal `typ`, with no external sign of
+the use of the view function.
+
+```ocaml
+val string : string typ
+```
+
 <note>
 <title>OCaml strings versus C character buffers</title>
 
@@ -462,27 +495,6 @@ don't contain any null values within the OCaml string, or else the C
 string will be rudely truncated.
 
 </note>
-
-Here are the type signatures of the view functions in Ctypes.
-
-```ocaml
-(* Ctypes *)
-val view : read:('a -> 'b) -> write:('b -> 'a) -> 'a typ -> 'b typ
-val string_of_char_ptr : char ptr -> string
-val char_ptr_of_string : string -> char ptr
-val string : string typ
-```
-
-The actual definition of `string` that uses views is quite simple and is
-written using these functions.
-
-```ocaml
-let string = 
-  view 
-    ~read:string_of_char_ptr 
-    ~write:char_ptr_of_string 
-    (char ptr)
-```
 
 ### Abstract pointers
 
