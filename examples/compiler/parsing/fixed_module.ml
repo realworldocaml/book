@@ -1,4 +1,4 @@
 (* fixed_module.ml *)
-let _ =
+let () =
   let module MyString = String in
   ()

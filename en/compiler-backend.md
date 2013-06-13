@@ -259,7 +259,7 @@ lightweight language construct to use in OCaml code.
 
 After the lambda form has been generated, we are very close to having
 executable code.  The OCaml tool-chain branches into two separate compilers at
-this point.  We'll describe the the bytecode compiler first, which
+this point.  We'll describe the bytecode compiler first, which
 consists of two pieces:
 
 * `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.
@@ -333,10 +333,11 @@ have a `cmo` extension.  The compiled bytecode files are matched with the
 associated `cmi` interface which contains the type signature exported to
 other compilation units.
 
-A typical OCaml library consists of multiple source files and hence multiple
-`cmo` files that all need to passed on the command line to use the library.
-The compiler can combine these into a more convenient archive file by using the
-`-a` flag.  Bytecode archives are denoted by the `cma` extension.
+A typical OCaml library consists of multiple source files, and hence multiple
+`cmo` files that all need to be passed as command-line arguments to use the
+library from other code.  The compiler can combine these multiple files into a
+more convenient single archive file by using the `-a` flag.  Bytecode archives
+are denoted by the `cma` extension.
 
 The individual objects in the library are linked as regular `cmo` files in the
 order specified when the library file was built.  If an object file within the
@@ -349,7 +350,7 @@ The bytecode files are then linked together with the OCaml standard library to
 produce an executable program.  The order in which `.cmo` arguments are
 presented on the command line defines the order in which compilation units are
 initialized at runtime.  Remember that OCaml has no single `main` function like
-C, so this link is order is more important than in C.
+C, so this link order is more important than in C programs.
 
 ### Executing bytecode
 
@@ -357,13 +358,12 @@ The bytecode runtime comprises three parts: the bytecode interpreter, garbage
 collector, and a set of C functions that implement the primitive operations.
 The bytecode contains instructions to call these C functions when required.
 
-The OCaml linker produces bytecode targeted the standard OCaml runtime by
+The OCaml linker produces bytecode that targets the standard OCaml runtime by
 default, and so needs to know about any C functions that are referenced from
 other libraries that aren't loaded by default.
 
 Information about these extra libraries can be specified while linking a
 bytecode archive.
-
 
 ```console
 $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
@@ -455,25 +455,10 @@ hello embedded world 2
 After calling OCaml
 ```
 
-Once inconvenience with `gcc` is that you need to specify the location of the
-OCaml library directory.  The OCaml compiler can actually handle C object and
-sources directly.  It passes these through to the system C compiler but adds
-its standard directory and runtime on the way.  You can thus compile the
-previous object file much more simply with `ocamlc`.
-
-```console
-$ ocamlc -o final_out2 embed_out.o main.c
-$ ./final_out2
-Before calling OCaml
-hello embedded world 1
-hello embedded world 2
-After calling OCaml
-```
-
 You can inspect the commands that `ocamlc` is invoking by adding `-verbose` to
-the command line.  You can even obtain the C source code to the `-output-obj`
-result by specifying a `.c` output file extension instead of the `.o` we used
-earlier.
+the command line to help figure out the GCC command-line if you get stuck.  You
+can even obtain the C source code to the `-output-obj` result by specifying a
+`.c` output file extension instead of the `.o` we used earlier.
 
 ```console
 $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
@@ -731,7 +716,7 @@ symbols; a procedure generally called *name mangling*.
 Each OCaml source file is compiled into a native object file that must export a
 unique set of symbols to comply with the C binary interface.  This means that
 any OCaml values that may be used by another compilation unit need to be mapped
-into a symbol name.  This mapping fhas to account for OCaml language features
+into a symbol name.  This mapping has to account for OCaml language features
 such as nested modules, anonymous functions and variable names that shadow each
 other.
 
@@ -912,8 +897,8 @@ take during the program execution.
 Getting precise information out of Gprof requires passing the `-p` flag to the
 native code compiler when compiling *and* linking the binary.  This generates
 extra code that records profile information to a file called `gmon.out` when
-the program is executed.  This profile information then can then be examined
-using Gprof.
+the program is executed.  This profile information can then be examined using
+Gprof.
 
 #### Perf
 

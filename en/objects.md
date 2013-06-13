@@ -1,4 +1,4 @@
-# Object-Oriented Programming
+# Objects
 
 We've already seen several tools that OCaml provides for organizing programs,
 particularly modules.  In addition, OCaml also supports object-oriented
@@ -28,7 +28,7 @@ There are five fundamental properties that differentiate OOP from other styles:
   objects may react to the same message in different ways.
 * _Subtyping_: if an object `a` has all the functionality of an object
   `b`, then we may use `a` in any context where `b` is expected.
-* _Inheritance_: the definition of one kind of object can be re-used
+* _Inheritance_: the definition of one kind of object can be reused
   to produce a new kind of object.  This new definition can override
   some behaviour, but also share code with its parent.
 * _Open recursion_: an object's methods can invoke another method in the same
@@ -41,6 +41,44 @@ by OOP, and you'll have run across these terms if you've ever used
 C++, Java, C#, Ruby, Python or Javascript.
 
 </note>
+
+## When to use objects ##
+
+You might wonder when to use objects in OCaml, which has a multitude of
+alternative mechanisms to express the same concept.  First-class modules are
+more expressive (a module can include types, while classes and objects cannot).
+Modules, functors, and algebraic data types also offer a wide range of ways to
+express program structure.  In fact, many seasoned OCaml programmers rarely use
+classes and objects, if at all.
+
+Modules already provide these features in some form, but the main
+focus of classes is on code re-use through inheritance and late
+binding of methods.  This is a critical property of classes: the
+methods that implement an object are determined when the object is
+instantiated, a form of _dynamic_ binding.  In the meantime, while
+classes are being defined, it is possible (and necessary) to refer to
+methods without knowing statically how they will be implemented.
+
+In contrast, modules use static (lexical) scoping.  If you want to
+parameterize your module code so that some part of it can be
+implemented later, you would write a function or functor.  This is more
+explicit, but often more verbose than overriding a method in a class.
+
+In general, a rule of thumb is: use classes and objects in situations where
+dynamic binding is a big win, for example if you have many similar variations in
+the implementation of a concept.  Two good examples are Xavier Leroy's
+[Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit), which
+provides a variety of cryptographic primitives that can be combined in
+building-block style, and the [Camlimages](http://cristal.inria.fr/camlimages/)
+library which manipulates various graphical file formats.  And, of course, the
+use of objects isn't just a programming choice -- it might be driven by design
+choices, or because of the need to interact with existing components that are
+already object oriented.
+
+In this chapter, we'll introduce you to the basics of object definition and use
+in OCaml, and then demonstrate their use with an example using Cryptokit.
+We'll return to the more advanced areas of object use later on in the book in
+[xref](#classes).
 
 ## OCaml objects ##
 
@@ -277,7 +315,7 @@ rarely use classes and objects, if at all.
 
 Objects have some advantages over records: they don't require type definitions
 and their support for row polymorphism makes them more flexible. However, the
-heavy syntax and additional run-time cost means that objects are rarely used in
+heavy syntax and additional runtime cost means that objects are rarely used in
 place of records.
 
 The real benefits of objects come from the class system. Classes support

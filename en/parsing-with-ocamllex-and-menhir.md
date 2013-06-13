@@ -9,7 +9,7 @@ Let's be more precise about these terms.  By _parsing_, we mean reading a
 textual input into a form that is easier for a program to manipulate.  For
 example, suppose we want to read a file containing a value in JSON format.  JSON
 has a variety of values, including numbers, strings, arrays, and objects, and
-each of these has a precise textual representation.  For example, the following
+each of these has a textual representation.  For example, the following
 text represents an object containing a string labeled `title`, and an array
 containing two objects, each with a name and array of zip codes.
 
@@ -27,13 +27,12 @@ following type to represent JSON _abstract syntax_.
 
 ```ocaml
 type value = [
-| `Object of (string * value) list
-| `Array of value array
-| `String of string
-| `Int of int
+| `Assoc of (string * value) list
+| `Bool of bool
 | `Float of float
-| `True
-| `False
+| `Int of int
+| `List of value list
+| `String of string
 | `Null ]
 ```
 
@@ -53,11 +52,11 @@ represents the abstract syntax tree, like the type `value` above.  This is
 called _parsing_.
 
 ```
-`Object
+`Assoc
   ["title", `String "Cities";
-   "cities", `Array
-     [|`Object ["name", `String "Chicago"; "zips", `Array [|Int 60601|]];
-	   `Object ["name", `String "New York"; "zips", `Array [|Int 10004|]]|]]
+   "cities", `List
+     [`Assoc ["name", `String "Chicago"; "zips", `List [Int 60601]];
+	   `Assoc ["name", `String "New York"; "zips", `List [Int 10004]]]]
 ```
 
 There are many techniques for lexing and parsing.  In the lex/yacc world, lexing
@@ -193,9 +192,9 @@ productions for parsing JSON.  Here is the main production for a JSON value.
 
 ```
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
-  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
+    { `Assoc obj }
+  | LEFT_BRACK; vl = list_values; RIGHT_BRACK
+    { `List vl }
   | s = STRING
     { `String s }
   | i = INT
@@ -203,28 +202,36 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | x = FLOAT
     { `Float x }
   | TRUE
-    { `True }
+    { `Bool true }
   | FALSE
-    { `False }
+    { `Bool false }
   | NULL
     { `Null }
   ;
 ```
 
-We can read it like this, "A JSON `value` is either an object bracketed with curly braces, or an array bracketed with square braces. or a string, integer, float, etc.  In each of the productions, the right hand side specifies the expected sequence.  For example, the object is specified with the curly-bracket production.
+We can read it like this: a JSON `value` is either an object bracketed by curly
+braces, or an array bracketed by square braces. or a string, integer, float,
+etc.  In each of the productions, the right hand side specfies the expected
+sequence.  For example, the object is specified with the curly-bracket
+production.
 
 ```
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
+    { `Assoc obj }
 ```
 
 That is, an object value starts with a `LEFT_BRACE`, contains some optional
 object field values (to be defined), and end with a `RIGHT_BRACE`.  The returned
-value is `Object obj`, where `obj` is the sequence of object fields.  Note that
+value is `Assoc obj`, where `obj` is the sequence of object fields.  Note that
 we've left out bindings for `LEFT_BRACE` and `RIGHT_BRACE`, because their tokens
 don't have values.
 
-Next, let's define the object fields.  In the following rules, the `opt_object_fields` are either empty, or a non-empty sequence of fields in reverse order.  Note that if you wish to have comments in the rule definitions, you will have to use C comment delimiters.  By convention, the C comment `/* empty */` is used to point out that a production has an empty right hand side.
+Next, let's define the object fields.  In the following rules, the
+`opt_object_fields` are either empty, or a non-empty sequence of fields in
+reverse order.  Note that if you wish to have comments in the rule definitions,
+you have to use C comment delimiters.  By convention, the C comment `/*
+empty */` is used to point out that a production has an empty right hand side.
 
 ```
 opt_object_fields: /* empty */
@@ -305,9 +312,9 @@ prog: v = value
   ;
 
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
-  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
+    { `Assoc obj }
+  | LEFT_BRACK; vl = list_values; RIGHT_BRACK
+    { `List vl }
   | s = STRING
     { `String s }
   | i = INT
@@ -315,9 +322,9 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | x = FLOAT
     { `Float x }
   | TRUE
-    { `True }
+    { `Bool true }
   | FALSE
-    { `False }
+    { `Bool false }
   | NULL
     { `Null }
   ;
@@ -335,10 +342,10 @@ rev_object_fields: k = ID; COLON; v = value
     { (k, v) :: obj }
   ;
 
-array_values: /* empty */
-    { [||] }
+list_values: /* empty */
+    { [] }
   | vl = rev_values
-    { Array.of_list (List.rev vl) }
+    { List.rev vl }
   ;
 
 rev_values: v = value
@@ -356,7 +363,8 @@ about unused symbols.
 For the next part, we need to define a lexer to tokenize the input text, meaning
 that we break the input into a sequence of words or tokens.  For this, we'll
 define a lexer using `ocamllex`.  In this case, the specification is placed in a
-file with a `.mll` suffix (we'll use the name `lexer.mll`).  A lexer file has several parts in the following sequence.
+file with a `.mll` suffix (we'll use the name `lexer.mll`).  A lexer file has
+several parts in the following sequence.
 
 ```
 { OCaml code }
@@ -474,9 +482,14 @@ There are actions for each different kind of token.  The string expressions like
 `"true" { TRUE }` are used for keywords, and the special characters have actions
 too, like `'{' { LEFT_BRACE }`.
 
-Some of these patterns overlap.  For example, the regular expression `"true"` is also matched by the `id` pattern.  `ocamllex` used the following disambiguation when a prefix of the input is matched by more than one pattern.
+Some of these patterns overlap.  For example, the regular expression `"true"` is
+also matched by the `id` pattern.  `ocamllex` used the following disambiguation
+when a prefix of the input is matched by more than one pattern.
 
-* The longest match always wins.  For example, the first input `trueX: 167` matches the regular expression `"true"` for 4 characters, and it matches `id` for 5 characters.  The longer match wins, and the return value is `ID "trueX"`.
+* The longest match always wins.  For example, the first input `trueX: 167`
+  matches the regular expression `"true"` for 4 characters, and it matches `id`
+  for 5 characters.  The longer match wins, and the return value is `ID
+  "trueX"`.
 
 * If all matches have the same length, then the first action wins.  If the input
   were `true: 167`, then both `"true"` and `id` match the first 4 characters;
@@ -484,7 +497,9 @@ Some of these patterns overlap.  For example, the regular expression `"true"` is
   
 ### Recursive rules
 
-Unlike many other lexer generators, `ocamllex` allows the definition of multiple lexer in the same file, and the definitions can be recursive.  In this case, we use recursion to match string literals, using the following rule definition.
+Unlike many other lexer generators, `ocamllex` allows the definition of multiple
+lexer in the same file, and the definitions can be recursive.  In this case, we
+use recursion to match string literals, using the following rule definition.
 
 ```
 and read_string buf = parse
@@ -510,7 +525,8 @@ and read_string buf = parse
 | eof { raise (SyntaxError ("String is not terminated")) }
 ```
 
-This rule takes a `buf : Buffer.t` as an argument.  If we reach the terminating double quote `"`, then we return the contents of the buffer as a `STRING`.
+This rule takes a `buf : Buffer.t` as an argument.  If we reach the terminating
+double quote `"`, then we return the contents of the buffer as a `STRING`.
 
 
 The other cases are for handling the string contents.  The action `[^ '"' '\\']+
@@ -538,11 +554,14 @@ let add_utf8 buf code =
   end
 ```
 
-That covers the lexer.  Next, we need to combine the lexer with the parser to bring it all together.
+That covers the lexer.  Next, we need to combine the lexer with the parser to
+bring it all together.
 
 ## Bringing it all together
 
-For the final part, we need to compose the lexer and parser.  As we saw the the type definition in `parser.mli`, the parsing function expects a lexer of type `Lexing.lexbuf -> token`, and it also expects a `lexbuf`.
+For the final part, we need to compose the lexer and parser.  As we saw in the
+type definition in `parser.mli`, the parsing function expects a lexer of type
+`Lexing.lexbuf -> token`, and it also expects a `lexbuf`.
 
 ```ocaml
 val prog: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Json.value option)

@@ -20,7 +20,7 @@ the pool of allocated heap blocks, the runtime system invokes the *garbage
 collector* (or GC). An OCaml program can't explicitly free a value when it is
 done with it. Instead, the GC regularly determines which values are *live* and
 which values are *dead*, i.e. no longer in use. Dead values are collected and
-their memory made available for re-use by the application.
+their memory made available for reuse by the application.
 
 The garbage collector doesn't keep constant track of values as they are
 allocated and used. Instead, it regularly scans them by starting from a set of
@@ -28,8 +28,10 @@ allocated and used. Instead, it regularly scans them by starting from a set of
 The GC maintains a directed graph in which heap blocks are nodes, and there is
 an edge from heap block `b1` to heap block `b2` if some field of `b1` points to
 `b2`.  All blocks reachable from the roots by following edges in the graph must
-be retained, and unreachable blocks can be reused by the application.  This
-strategy is commonly known as *mark and sweep* garbage collection.
+be retained, and unreachable blocks can be reused by the application.
+
+The algorithm used by OCaml to perform this heap traversal is commonly known as
+*mark and sweep* garbage collection, and we'll explain it further now.
 
 ## Generational garbage collection
 
@@ -86,7 +88,7 @@ according to the generational hypothesis.
 
 The minor heap is a contiguous chunk of virtual memory that is usually a few
 megabytes in size so that it can be scanned quickly.  The runtime stores the
-the minor heap in two pointers (`caml_young_start` and `caml_young_end`) that
+minor heap in two pointers (`caml_young_start` and `caml_young_end`) that
 delimit the start and end of the heap region.
 
 ```
@@ -146,7 +148,7 @@ requests for OCaml blocks.
 
 The major heap is typically much larger than the minor heap and can scale to
 gigabytes in size. It is cleaned via a mark-and-sweep garbage collection
-algorithm that operates in several phases:
+algorithm that operates in several phases.
 
 * The *mark* phase scans the block graph and marks all live blocks by setting
   a bit in the tag of the block header (known as the *color* tag).
@@ -154,7 +156,8 @@ algorithm that operates in several phases:
   that weren't marked earlier.
 * The *compact* phase relocates live blocks into a freshly allocated heap to 
   eliminate gaps in the free list. This prevents the fragmentation of heap blocks
-  in long-running programs.
+  in long-running programs, and normally occurs much less frequently than the mark
+  and sweep phases. 
 
 A major garbage collection must *stop the world* (that is, halt the
 application) to ensure that blocks can be moved around without this being
@@ -170,7 +173,7 @@ sorted in increasing order of virtual address.  Each chunk is a single memory
 region allocated via *malloc(3)* and consists of a header and data area which
 contains OCaml heap chunks.  A heap chunk header contains:
 
-* the *malloc*'ed virtual address of the memory region containing the hunk.
+* the *malloc*'ed virtual address of the memory region containing the chunk.
 * the size in bytes of the data area.
 * an allocation size in bytes used during heap compaction to merge small blocks to defragment the heap.
 * a link to the next heap chunk in the list.
@@ -234,7 +237,7 @@ searches from the next block until the end of the free list, and then from the b
 of the free list up to that block.
 
 Next-fit allocation is the default allocation strategy.  It's quite a cheap
-allocation mechanism since the same heap chunk can be re-used across allocation
+allocation mechanism since the same heap chunk can be reused across allocation
 requests until it runs out.  This in turn means that there is good memory
 locality to use CPU caches better.
 
@@ -245,13 +248,13 @@ that your free list becomes fragmented.  In this situation, the GC is forced to
 perform an expensive compaction despite there being free chunks, since none of
 the chunks alone are big enough to satisfy the request.
 
-First-fit allocation focusses on reducing memory fragmentation, but at the
-expense of slower block allocation.  Every allocation scans the free list from
-the beginning for a suitable free chunk, instead of re-using the most recent
-heap chunk as the next-fit allocator does.
+First-fit allocation focusses on reducing memory fragmentation (and hence the
+number of compactions), but at the expense of slower memory allocation.  Every
+allocation scans the free list from the beginning for a suitable free chunk,
+instead of reusing the most recent heap chunk as the next-fit allocator does.
 
-For some workloads, the reduction in the frequency in heap compaction will
-outweigh the extra allocation cost.
+For some workloads that need more real-time behaviour under load, the reduction
+in the frequency in heap compaction will outweigh the extra allocation cost.
 
 <note>
 <title>Controlling the heap allocation policy</title>
@@ -274,13 +277,13 @@ incrementally by marking the heap in *slices*.  Each value in the heap has a
 whether the value has been marked, so that the GC can resume easily between
 slices.
 
-Tag Color   Block Status
----------   ------------
-blue        on the free list and not currently in use
-white       not reached yet, but possibly reachable
-gray        reachable, but its fields have not been scanned
-black       reachable, and its fields have been scanned
-
+Tag Color                   Block Status
+---------                   ------------
+blue                        on the free list and not currently in use
+white (during marking)      not reached yet, but possibly reachable 
+white (during sweeping)     unreachable and can be freed
+gray                        reachable, but its fields have not been scanned
+black                       reachable, and its fields have been scanned
 
 The marking process starts with a set of *root* values that are always live
 (such as the application stack).  All values on the heap are initially marked
@@ -298,13 +301,13 @@ them while it follows their fields.  If this happens, the heap is marked as
 *impure* and a more expensive check is initiated once the existing gray values
 have been processed.
 
-To mark an impure heap. the GC first marks it as pure and walks through the
+To mark an impure heap, the GC first marks it as pure and walks through the
 entire heap block-by-block in increasing order of memory address. If it finds a
 gray block, it adds it to the gray list and recursively marks it using the
 usual strategy for a pure heap.  Once the scan of the complete heap is
 finished, the mark phase checks again whether the heap has again become impure,
-and repeats the scan if it is . These full-heap scans will continue until a
-successful scan completes without overflowing the gray list.
+and repeats the scan until if it is. These full-heap scans will continue until
+a successful scan completes without overflowing the gray list.
 
 <note>
 <title>Controlling major heap collections</title>
@@ -332,6 +335,39 @@ the expense of using more CPU time.
 
 </note>
 
+### Heap Compaction
+
+After a certain number of major GC cycles have completed, the heap may begin
+to be fragmented due to values being deallocated out of order from how they
+were allocated.  This makes it harder for the GC to find a contiguous block
+of memory for fresh allocations, which in turn would require the heap to be
+grown unnecessarily.
+
+The heap compaction cycle avoids this by relocating all the values in the
+major heap into a fresh heap that places them all contiguously in memory
+again.  A naive implementation of the algorithm would require extra
+memory to store the new heap, but OCaml performs the compaction in-place
+within the existing heap.
+
+<note>
+<title>Controlling frequency of compactions</title>
+
+The `max_overhead` setting in the `Gc` module defines the connection between
+free memory and allocated memory after which compaction is activated.
+
+A value of `0` triggers a compaction after every major garbage collection
+cycle, whereas the maximum value of `1000000` disables heap compaction
+completely.  The default settings should be fine unless you have unusual
+allocation patterns that are causing a higher-than-usual rate of compactions.
+
+```ocaml
+# open Core.Std;;
+# Gc.tune ~max_overhead:0 ();;
+- : unit = () 
+```
+
+</note>
+
 ### Inter-generational pointers
 
 One complexity of generational collection arises from the fact that minor heap
@@ -355,12 +391,14 @@ record in-place.
 
 The OCaml compiler keeps track of any mutable types and adds a call to the
 runtime `caml_modify` function before making the change.  This checks the
-location of target write and the value its being changed to, and ensures that
+location of target write and the value it's being changed to, and ensures that
 the remembered set is consistent.  Although the write barrier is reasonably
 efficient, it can sometimes be slower than simply allocating a fresh value on
 the fast minor heap and doing some extra minor collections.
 
-Let's see this for ourselves with a simple test program.
+Let's see this for ourselves with a simple test program.  You'll need
+to install the Core benchmarking suite via `opam install core_bench` before
+you compile this code.
 
 ```ocaml
 (* barrier_bench.ml: benchmark mutable vs immutable writes *)
@@ -420,7 +458,7 @@ significantly longer to complete than the immutable one, but allocates many
 fewer minor heap words than the immutable version.  Minor allocation in OCaml
 is very fast and so it is often better to use immutable data structures in
 preference to the more conventional mutable versions.  On the other hand, if
-you only rarely mutable a value, it can be faster to take the write barrier hit
+you only rarely mutate a value, it can be faster to take the write barrier hit
 and not allocate at all.
 
 The only way to know for sure is to benchmark your program under real-world

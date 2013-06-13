@@ -41,7 +41,9 @@ the runtime must look up the concrete instance of the object and dispatch the
 method call.  Those languages amortize some of the cost via "Just-in-Time"
 dynamic patching, but OCaml prefers runtime simplicity instead.
 
-TODO xref to pipeline chapter.
+We'll explain this compilation pipeline in more detail in
+[xref](#the-compiler-frontend-parsing-and-type-checking) and
+[xref](#the-compiler-backend-byte-code-and-native-code).
 
 </note>
 
@@ -66,17 +68,17 @@ words of available space. One word holds the `foo` field and the second word
 holds the `bar` field.  The OCaml compiler translates such an expression into
 an explicit allocation for the block from OCaml's runtime system.
 
-OCaml uses a uniform memory representation for every OCaml variable known as a
-`value`. An OCaml value is a single memory word that is either an immediate
-integer or a pointer to some other memory.  The OCaml runtime tracks all values
-so that it can free them when they are no longer needed. It thus needs to
-understand the difference an integer and a pointer since it scans pointers to
-find further values, but doesn't follow integers that don't point to anything
-meaningful beyond their immediate value.
+OCaml uses a uniform memory representation in which every OCaml variable is
+stored as a *value*.  An OCaml value is a single memory word that is either an
+immediate integer or a pointer to some other memory.  The OCaml runtime tracks
+all values so that it can free them when they are no longer needed. It thus
+needs to be able to distinguish between integer and pointer values, since it
+scans pointers to find further values but doesn't follow integers that don't
+point to anything meaningful beyond their immediate value.
 
 ### Distinguishing integer and pointers at runtime
 
-Values use a single tag bit the word to distinguish integers and pointers at
+Values use a single tag bit per word to distinguish integers and pointers at
 runtime. The value is an integer if the lowest bit of the block word is
 non-zero.  Several OCaml types map onto this integer representation, including
 `bool`, `int`, the empty list, `unit`, and variants without constructors.
@@ -96,7 +98,7 @@ shouldn't be followed).
 The mechanism for this is simple since the runtime system keeps track of the
 heap blocks it has allocated for OCaml values. If the pointer is inside a heap
 chunk that is marked as being managed by the OCaml runtime, it is assumed to
-point to an OCaml value. If it points outside the OCaml runtime area, it is is
+point to an OCaml value. If it points outside the OCaml runtime area, it is 
 treated as an opaque C pointer to some other system resource.
 
 <note>
@@ -129,10 +131,10 @@ substraction are a single instruction, and multiplication is only a few more.
 ## Blocks and values
 
 An OCaml *block* is the basic unit of allocation on the heap.  A block consists
-of a one-word header (either 32- or 64-bits) followed by variable-length data
-that is either opaque bytes or an array of *fields*.  The header has a
-multi-purpose tag byte that defines whether to interprete the subsequent data
-as opaque bytes or OCaml fields.
+of a one-word header (either 32- or 64-bits depending on the CPU architecture)
+followed by variable-length data that is either opaque bytes or an array of
+*fields*.  The header has a multi-purpose tag byte that defines whether to
+interpret the subsequent data as opaque bytes or OCaml fields.
 
 The garbage collector never inspects opaque bytes. If the tag indicates an
 array of OCaml fields are present, their contents are all treated as more valid
@@ -140,10 +142,10 @@ OCaml values. The garbage collector always inspects fields and follows them as
 part of the collection process described earlier.
 
 ```
-+------------------------+-------+----------+----------+----------+----
-| size of block in words |  col  | tag byte | value[0] | value[1] | ...
-+------------------------+-------+----------+----------+----------+----
- <-either 22 or 54 bits-> <2 bit> <--8 bit-->
++------------------------+---------+----------+----------+----------+----
+| size of block in words |  color  | tag byte | value[0] | value[1] | ...
++------------------------+---------+----------+----------+----------+----
+ <-either 22 or 54 bits-> <-2 bit-> <--8 bit-->
 ```
 
 The `size` field records the length of the block in memory words.  This is 22
@@ -160,7 +162,7 @@ A block's tag byte is multi-purpose, and indicates whether the data array
 represents opaque bytes or fields.  If a block's tag is greater than or equal
 to `No_scan_tag` (251), then the block's data are all opaque bytes, and are not
 scanned by the collector. The most common such block is the `string` type,
-which we describe more below.
+which we describe in more detail later in this chapter.
 
 The exact representation of values inside a block depends on their static OCaml
 type.  All OCaml types are distilled down into `values`, and summarised in the
@@ -191,7 +193,7 @@ and `1` for `true` and `false` respectively.
 These basic types such as empty lists and `unit` are very efficient to use
 since integers are never allocated on the heap.  They can be passed directly in
 registers and not appear on the stack if you don't have too many parameters to
-your functions.  Modern architectures as as `x86_64` have a lot of spare
+your functions.  Modern architectures such as `x86_64` have a lot of spare
 registers to further improve the efficiency of using unboxed integers.
 
 ## Tuples, records and arrays
@@ -231,7 +233,7 @@ field that contains the number.  This block has the `Double_tag` set which
 signals to the collector that the floating point value is not to be scanned.
 
 ```ocaml
-# Obj.tag (Obj.repr 1.0) = Obj.double_tag ;;
+# Obj.tag (Obj.repr 1.0) ;;
 - : int = 253
 # Obj.double_tag ;;
 - : int = 253
@@ -250,9 +252,20 @@ that the contents are not OCaml values.
 +---------+----------+----------+- - - - -
 ```
 
-You can test this for yourself using the `Obj.tag` function to check that the
-allocated block has the expected runtime tag, and `Obj.double_field` to
-retrieve a float from within the block.
+First, let's check that float arrays do in fact have a different tag number
+from normal floating point values.
+
+```ocaml
+# Obj.double_tag;;
+- : int = 253
+# Obj.double_array_tag;;
+- : int = 254
+```
+
+This tells us that float arrays have a tag value of 254.  Now let's test some
+sample values using the `Obj.tag` function to check that the allocated block
+has the expected runtime tag, and also use `Obj.double_field` to retrieve a
+float from within the block.
 
 ```ocaml
 # open Obj ;;
@@ -262,14 +275,17 @@ retrieve a float from within the block.
 - : int = 0 
 # double_field (repr [| 1.1; 2.2; 3.3 |] ) 1 ;;
 - : float = 2.2
-# Obj.double_field (Obj.repr 1.234) 0;;
+# double_field (repr 1.234) 0;;
 - : float = 1.234
-```ocaml
+```
 
-Notice that float tuples are *not* optimized in the same way as float records
-or arrays, and so they have the usual tuple tag value of `0`. Only records
-and arrays can have the array optimization, and only if every single field is
-a float.
+The first thing we tested above was that a float array has the correct unboxed
+float array tag value (254).  However, the next line tests a tuple of floating
+point values instead, which are *not* optimized in the same way and have the
+normal tuple tag value (0).
+
+Only records and arrays can have the float array optimization, and for records
+every single field must be a float.
 
 ## Variants and lists
 
@@ -384,7 +400,7 @@ Another inefficiency over normal variants is when a polymorphic variant
 constructor has more than one parameter.  Normal variants hold parameters as a
 single flat block with multiple fields for each entry, but polymorphic variants
 must adopt a more flexible uniform memory representation since they may be
-re-used in a different context across compilation units. They allocate a tuple
+reused in a different context across compilation units. They allocate a tuple
 block for the parameters that is pointed to from the argument field of the
 variant. There are thus three additional words for such variants, along with
 an extra memory indirection due to the tuple.

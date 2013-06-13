@@ -309,6 +309,57 @@ This is rejected for good reason: there's no guarantee that the
 comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
+<sidebar>
+<title>The difference between `=` and `==`, and `phys_equal` in Core</title>
+
+If you come from a C/C++ background, you'll probably reflexively use `==` to
+test two values for equality.  In OCaml, the `==` operator tests for *physical*
+equality while the `=` operator tests for *structural* equality.
+
+The physical equality test will match if two data structures have precisely the
+same pointer in memory.  Two data structures that have identical contents but
+are constructed separately will not match using `==`.
+
+The `=` structural equality operator recursively inspects each field in the two
+values and tests them individually for equality.  Crucially, if your data
+structure is cyclical (that is, a value recursively points back to another
+field within the same structure), the `=` operator will never terminate, and
+your program will hang!  You therefore must use the physical equality operator
+or write a custom comparison function when comparing recursive values.
+
+It's quite easy to mix up the use of `=` and `==`, so Core disables the `==`
+operator and provides the more explicit `phys_equal` function instead.  You'll
+see a type error if you use `==` anywhere in code that uses opens the Core
+standard module.
+
+```ocaml
+# open Core.Std;;
+# 1 == 2;;
+Error: This expression has type int but an expression was expected of type
+         [ `Consider_using_phys_equal ]
+# phys_equal 1 2;;
+- : bool = false
+```
+
+If you feel like hanging your OCaml interpreter, you can verify what
+happens with recursive values and structural equality for yourself:
+
+```ocaml
+# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
+type t1 = { foo1 : int; bar1 : t2; }
+and t2 = { foo2 : int; bar2 : t1; }
+# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
+<lots of text>
+# v1 == v1;;
+- : bool = true
+# phys_equal v1 v1;;
+- : bool = true
+# v1 = v1 ;;
+<press ^Z and kill the process now>
+```
+
+</sidebar>
+
 ### Sets
 
 Sometimes, instead of keeping track of a set of key/value pairs, you

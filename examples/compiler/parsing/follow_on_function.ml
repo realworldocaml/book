@@ -9,7 +9,7 @@ let add_and_print x y =
   print_endline (string_of_int v);
   v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print "a" "b" in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print "a" "b" in
   ()

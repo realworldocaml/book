@@ -134,11 +134,7 @@ val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> js
              creating a new one. 
    [fname] : data file name to be used in error messages. It does not 
              have to be a real file. 
-   [lnum]  : number of the first line of input. Default is 1.
-
-val from_channel : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> in_channel -> json
-(* Read a JSON value from a channel. See [from_string] for the meaning of the
-   optional arguments. *)
+   [lnum]  : number of the first line of input. Default is 1. *)
 
 val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 (* Read a JSON value from a file. See [from_string] for the meaning of the optional
@@ -152,21 +148,35 @@ above signature, the optional arguments offer finer control over the
 memory buffer allocation and error messages from parsing incorrect
 JSON.
 
-The type signature for these functions with the optional elements
-removed makes their purpose much clearer:
+The type signature for these functions with the optional elements removed makes
+their purpose much clearer.  The two ways of parsing the JSON are either
+directly from a string or from a file on a filesystem.
 
 ```ocaml
 val from_string : string -> json
 val from_file : string -> json
-val from_channel : in_channel -> json
 ```
 
-The `in_channel` constructor is from the original OCaml standard
-library, and its use is considered deprecated when using the Core
-standard library.  This leaves us with two ways of parsing the JSON:
-either from a string or from a file on a filesystem.  The next example
-shows both in action, assuming the JSON record is stored in a file
-called `book.json`.
+<note>
+<title>The standard OCaml `in_channel` and `out_channel`</title>
+
+You'll notice when reading the Yojson interface that we've left out the
+`from_channel` function, which uses a `in_channel` type provided by the OCaml
+standard library.  These OCaml channels are considered deprecated in Core, as
+they're primarily used by the compiler itself, but don't always play well with
+threading and asynchronous programming.
+
+The Core equivalent are the `In_channel` and `Out_channel` modules instead, but
+you will still see the standard OCaml channel types being used in third-party
+libraries such as Yojson which weren't specifically designed to be used with
+Core.  They won't do any harm if you don't use them in your code, so just
+ignore them and use strings or files instead.
+
+</note>
+
+
+The next example shows both the string and file functions in action, assuming
+the JSON record is stored in a file called `book.json`.
 
 ```ocaml
 (* read_json.ml *)
@@ -184,7 +194,6 @@ let () =
 
   (* Test that the two values are the same *)
   print_endline (if json1 = json2 then "OK" else "FAIL")
-  print_endline (if phys_equal json1 json2 then "FAIL" else "OK")
 ```
 
 You can build this by writing a `_tags` file to define the package
@@ -198,7 +207,6 @@ true: thread, debug, annot
 $ ocamlbuild -use-ocamlfind read_json.native
 $ ./read_json.native
 OK
-OK
 ```
 
 The `from_file` function accepts an input filename and takes care of
@@ -208,60 +216,6 @@ come in via a network connection (we'll see more of this in
 [xref](#concurrent-programming-with-async)) or a database. Finally,
 the example checks that the two input mechanisms actually resulted in
 the same OCaml data structure.
-
-<sidebar>
-<title>The difference between `=` and `==`, and `phys_equal` in Core</title>
-
-If you come from a C/C++ background, you will probably reflexively use
-`==` to test two values for equality. In OCaml, `==` tests for
-*physical* equality, and `=` tests for *structural* equality.
-
-The `==` physical equality test will match if two data structures have
-precisely the same pointer in memory.  Two data structures that have
-identical contents, but are constructed separately, will not match
-using this operator.  In the JSON example, the `json1` and `json2`
-values are not identical and so would fail the physical equality test.
-
-The `=` structural equality operator recursively inspects each field
-in the two values and tests them individually for equality. In the
-JSON parsing example, every field will be traversed and checked, and
-they will check out as equal.  Crucially, if your data structure is
-cyclical (that is, a value recursively points back to another field
-within the same structure), the `=` operator will never terminate, and
-your program will hang!  In this situation, you must use the physical
-equality operator, or write a custom comparison function that breaks
-the recursion.
-
-It's quite easy to mix up the use of `=` and `==`, so Core disables
-the `==` operator and provides the more explicit `phys_equal` function
-instead.  You'll see a type error if you use `==` anywhere:
-
-```ocaml
-# 1 == 2;;
-Error: This expression has type int but an expression was expected of type
-         [ `Consider_using_phys_equal ]
-# phys_equal 1 2;;
-- : bool = false
-```
-
-If you feel like hanging your OCaml interpreter, you can verify what
-happens with recursive values and structural equality for yourself:
-
-```ocaml
-# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
-type t1 = { foo1 : int; bar1 : t2; }
-and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
-<lots of text>
-# v1 == v1;;
-- : bool = true
-# phys_equal v1 v1;;
-- : bool = true
-# v1 = v1 ;;
-<press ^Z and kill the process now>
-```
-
-</sidebar>
 
 ## Selecting values from JSON structures
 
@@ -349,21 +303,22 @@ as changing a mutable record field or printing to the standard output.
 
 </sidebar>
 
-`Yojson` provides several combinators in the `Yojson.Basic.Util` module,
-such as:
+`Yojson` provides several combinators in the `Yojson.Basic.Util` module.
 
-```ocaml
-val member : string -> json -> json
-val index : int -> json -> json
-val to_string : json -> string
-val to_int : json -> int
-val filter_string : json list -> string list
-```
+Function         Type                         Purpose
+--------         ----                         -------
+member           `string -> json -> json`     Select a named field from a JSON record.
+to_string        `json -> string`             Convert a JSON value into an OCaml `string`, and raise exception if this impossible.
+to_int           `json -> int`                Convert a JSON value into an OCaml `int`, and raise exception if this is impossible.
+filter_string    `json list -> string list`   Filter valid strings from a list of JSON fields, and return them as OCaml strings.
 
-We'll go through each of these uses one-by-one.  Core provides the
-`|>` pipe-forward which can chain combinators together, and the
-example code uses this to select and convert values out of the JSON
-structure.  Let's examine some of them in more detail:
+We'll go through each of these uses one-by-one now.  The examples below also
+use the `|>` pipe-forward operator that we explained earlier in
+[xref](#variables-and-functions).  This lets us chain together multiple JSON
+selection functions and feed the output from one into the next one, without
+having to create separate `let` bindings for each one.
+
+Let's start with selecting a single `title` field from the record.
 
 ```ocaml
   let open Yojson.Basic.Util in
@@ -422,7 +377,7 @@ let names =
 ```
 
 This style of programming which omits variable names and chains
-functions together is known as "point-free programming".  It's a
+functions together is known as *point-free programming*.  It's a
 succinct style, but shouldn't be overused due to the increased
 difficulty of debugging intermediate values.  If an explicit name is
 assigned to each stage of the transformations, debuggers in particular
@@ -457,39 +412,46 @@ pretty-printing functions in the `Yojson.Basic` module to lay the
 output out in the JSON format.
 
 ```ocaml
-# let x = `Assoc [ ("key", `String "value") ] ;;
+# let person = `Assoc [ ("name", `String "Anil") ] ;;
 val x : [> `Assoc of (string * [> `String of string ]) list ] =
-  `Assoc [("key", `String "value")]
+  `Assoc [("name", `String "Anil")]
 ```
 
-In the example above, we've constructed a value `x` that represents a simple
-JSON object.  We haven't actually defined the type of `x` explicitly here, as
-we're relying on the magic of polymorphic variants to make this all work.
-The OCaml type system infers a type for `x` based on how you construct the value.
-In this case only the `Assoc` and `String` variants are used, and the
-inferred type only contains these fields without knowledge of the other possible
-variants that you haven't used yet.
+In the example above, we've constructed a simple JSON object that represents
+a single person.  We haven't actually defined the type of `person` explicitly,
+as we're relying on the magic of polymorphic variants to make this all work.
+
+The OCaml type system infers a type for `person` based on how you construct its
+value.  In this case, only the `Assoc` and `String` variants are used to define
+the record, and so the inferred type only contains these fields without
+knowledge of the other possible allowed variants in JSON records that you
+haven't used yet (e.g. `Int` or `Null`).
 
 ```ocaml
 # Yojson.Basic.pretty_to_string ;;
 - : ?std:bool -> Yojson.Basic.json -> string = <fun>  
 ```
 
-`pretty_to_string` has a more explicit signature that wants an argument of type
-`Yojson.Basic.json`.  When `x` is applied to `pretty_to_string`, the inferred
-type of `x` is statically checked against the structure of the `json` type to
-ensure that they're compatible.
+The `pretty_to_string` function has a more explicit signature that requires an
+argument of type `Yojson.Basic.json`.  When `person` is applied to
+`pretty_to_string`, the inferred type of `person` is statically checked against
+the structure of the `json` type to ensure that they're compatible.
 
 ```ocaml
-# Yojson.Basic.pretty_to_string x ;;
-- : string = "{ \"key\": \"value\" }"
+# Yojson.Basic.pretty_to_string person ;;
+- : string = "{ \"name\": \"Anil\" }"
 
-# Yojson.Basic.pretty_to_channel stdout x ;;
-{ "key": "value" }
+# Yojson.Basic.pretty_to_channel stdout person ;;
+{ "name": "Anil" }
 - : unit = ()
 ```
 
-In this case, there are no problems.  Our `x` value has an inferred type that is a valid sub-type of `json`, and the function application just works without us ever having to explicitly specify a type for `x`.  Type inference lets you write more succinct code without sacrificing runtime reliability, as all the uses of polymorphic variants are still checked at compile-time.
+In this case, there are no problems.  Our `person` value has an inferred type
+that is a valid sub-type of `json`, and so the conversion to a string just
+works without us ever having to explicitly specify a type for `person`.  Type
+inference lets you write more succinct code without sacrificing runtime
+reliability, as all the uses of polymorphic variants are still checked at
+compile-time.
 
 <sidebar>
 <title>Polymorphic variants and easier type checking</title>
@@ -500,36 +462,38 @@ your code.  For example, suppose you build an `Assoc` and mistakenly
 include a single value instead of a list of keys:
 
 ```ocaml
-# let x = `Assoc ("key", `String "value");;
-val x : [> `Assoc of string * [> `String of string ] ] =
-  `Assoc ("key", `String "value")
+# let person = `Assoc ("name", `String "Anil");;
+val person : [> `Assoc of string * [> `String of string ] ] =
+  `Assoc ("name", `String "Anil")
 
-# Yojson.Basic.pretty_to_string x;;
+# Yojson.Basic.pretty_to_string person ;;
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
        Types for tag `Assoc are incompatible
 ```
 
-The type error above isn't *wrong* as such, but can be inconvenient to
-wade through for larger values.  An easy way to narrow down this sort
-of type error is to add explicit type annotations as a compiler hint
-about your intentions:
+The type error above is more verbose than it needs to be, which can be
+inconvenient to wade through for larger values.  You can help the compiler to
+narrow down this error to a shorter form by adding explicit type annotations as
+a hint about your intentions.
 
 ```ocaml
-# let (x:Yojson.Basic.json) = `Assoc ("key", `String "value");;
+# let (person:Yojson.Basic.json) = `Assoc ("name", `String "Anil");;
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
 ```
 
-In this case, we've marked the `x` as being of type
-`Yojson.Basic.json`, and the compiler immediately spots that the
-argument to the `Assoc` variant has the incorrect type.  This
-illustrates the strengths and weaknesses of polymorphic variants: they make it
-possible to easily subtype across module boundaries, but the error messages can
-be more confusing.  However, a bit of careful manual type annotation is all it
-takes to make tracking down such issues much easier.
+We've annotated `person` as being of type `Yojson.Basic.json`, and as a result
+the compiler spots that the argument to the `Assoc` variant has the incorrect
+type.  This illustrates the strengths and weaknesses of polymorphic variants:
+they make it possible to easily subtype across module boundaries, but the error
+messages can be more confusing.  However, a bit of careful manual type
+annotation is all it takes to make tracking down such issues much easier.
+
+We'll discuss more techniques like this that help you interpret type errors
+more easily in [xref](#the-compiler-frontend-parsing-and-type-checking).
 
 </sidebar>
 
@@ -574,10 +538,13 @@ Yojson supports the following JSON extensions:
 * The `Variant` type encodes OCaml variants more explicitly, as
   `<"Foo">` or `<"Bar":123>` for a variant with parameters.
 
-The only purpose of these extensions is to make the data
-representation more expressive without having to refer to the original
-OCaml types.  You can always cast a `Safe.json` to a `Basic.json` type
-by using the `to_basic` function as follows:
+The only purpose of these extensions is to have greater control over how OCaml
+values are represented in JSON (for instance, storing a floating pointer number
+as a JSON string).  The output still obeys the same standard format that can be
+easily exchanged with other languages.
+
+You can convert a `Safe.json` to a `Basic.json` type by using the `to_basic`
+function as follows.
 
 ```ocaml
 val to_basic : json -> Yojson.Basic.json
@@ -599,8 +566,10 @@ The combinators described earlier make it easy to write functions that extract
 fields from JSON records, but the process is still pretty manual.  When you
 implement larger specifications, it's much easier to generate the mappings from
 JSON schemas to OCaml values more mechanically than writing conversion
-functions individually.  We'll cover an alternative JSON processing method that
-is better for larger-scale JSON handling now, using the
+functions individually.
+
+We'll cover an alternative JSON processing method that is better for
+larger-scale JSON handling now, using the
 [ATD](http://mjambon.com/atd-biniou-intro.html) tool.  This will introduce our
 first _Domain Specific Language_ that compiles JSON specifications into OCaml
 modules, which are then used throughout your application.
@@ -624,6 +593,7 @@ and will already be on your `PATH` from running `opam config env`.  See
 
 </note>
 
+### ATD basics
 
 The idea behind ATD is to specify the format of the JSON in a separate
 file, and then run a compiler (`atdgen`) that outputs OCaml code to
@@ -631,15 +601,14 @@ construct and parse JSON values.  This means that you don't need to
 write any OCaml parsing code at all, as it will all be auto-generated
 for you.
 
-Let's go straight into looking at an example of how this works, by
-using a small portion of the GitHub API.  GitHub is a popular code
-hosting and sharing website that provides a JSON-based web
-[API](http://developer.github.com).  The ATD code fragment below
-describes the GitHub authorization API.  It is based on a
-pseudo-standard web protocol known as OAuth, and is used to authorize
-users for GitHub services.
+Let's go straight into looking at an example of how this works, by using a
+small portion of the GitHub API.  GitHub is a popular code hosting and sharing
+website that provides a JSON-based web [API](http://developer.github.com).  The
+ATD code fragment below describes the GitHub authorization API (which is based
+on a pseudo-standard web protocol known as OAuth).
 
-```ocaml
+```
+(* github.atd *)
 type scope = [
     User <json name="user">
   | Public_repo <json name="public_repo">
@@ -670,15 +639,34 @@ type authorization_response = {
 }
 ```
 
-ATD specifications are deliberately similar to OCaml type definitions.  Each
-field can include extra annotations to customise the parsing code for a
-particular backend. For example, the GitHub `scope` field above is defined as a
-variant type, but with the actual JSON values being defined explicitly (as
-lower-case versions).
+The ATD specification syntax is deliberately quite similar to OCaml type
+definitions.  Every JSON record is assigned a type name (e.g. `app` in the
+example above).  You can also define variants that are similar to OCaml's
+variant types (e.g. `scope` in the example).
 
-The ATD spec can be compiled to a number of OCaml targets. Let's run
-the compiler twice, to generate some OCaml type definitions, and a
-JSON serializer.
+### ATD annotations
+
+ATD deviates significantly from OCaml syntax due to its support for annotations
+within the specification.  The annotations can customise the code that is
+generated for a particular target (of which the OCaml backend is of most
+interest to us).
+
+For example, the GitHub `scope` field above is defined as a variant type with
+each option starting with an uppercase letter as is conventional for OCaml
+variants. However, the the JSON values that come back from Github are actually
+lowercase, and so aren't exactly the same as the option name.
+
+The annotation `<json name="user">` signals that the JSON value of the field
+should be treated as `name`, but the value of the parsed variant in OCaml
+should be `User`.  These annotations are also useful to map JSON values to
+reserved keywords in OCaml (e.g. `type`).
+
+### Compiling ATD specifications to OCaml
+
+The ATD specification we defined above can be compiled to OCaml code using the
+`atdgen` command-line tool. Let's run the compiler twice, to generate some
+OCaml type definitions and also a JSON serializing module that converts between
+input data and those type definitions.
 
 ```bash
 $ atdgen -t github.atd
@@ -688,7 +676,7 @@ $ atdgen -j github.atd
 This will generate some new files in your current
 directory. `Github_t.ml` and `Github_t.mli` will contain an OCaml
 module with types defines that correspond to the ATD file.  The
-signature looks like this:
+signature is as follows.
 
 ```ocaml
 type scope = [
@@ -743,20 +731,21 @@ val authorization_response_of_string :
   string -> authorization_response
 ```
 
-This is pretty convenient! We've written a single ATD file, and all
-the OCaml boilerplate to convert between JSON and a strongly typed
-record has been generated for us.  You can control various aspects of
-the serializer by passing flags to `atdgen`. The important ones for
-JSON are:
+This is pretty convenient! We've now written a single ATD file, and all the
+OCaml boilerplate to convert between JSON and a strongly typed record has been
+generated for us.  You can control various aspects of the serializer by passing
+flags to `atdgen`. The important ones for JSON are:
 
-* `-j-std`: work in standard JSON mode, and never print non-standard
-  JSON extensions.
+* `-j-std`: Convert tuples and variants into standard JSON and
+  refuses to print NaN and infinities.  You should specify this if
+  you intend to interoperate with services that aren't using ATD.
 * `-j-custom-fields FUNCTION`: call a custom function for every
   unknown field encountered, instead of raising a parsing exception.
-* `-j-defaults`: always explicitly output a JSON value if possible. This requires the default value for that field to be defined in the ATD specification.
+* `-j-defaults`: always explicitly output a JSON value if possible.
+  This requires the default value for that field to be defined in the ATD specification.
 
-The full ATD specification is quite sophisticated (and well documented online
-at its homepage).  The ATD compiler can also target formats other than JSON,
+The full ATD specification is quite sophisticated and well documented online
+at its homepage.  The ATD compiler can also target formats other than JSON,
 and outputs code for other languages such as Java if you need more
 interoperability.
 
@@ -768,11 +757,15 @@ and includes OCaml bindings.
 ### Example: Querying Github organization information
 
 Let's finish up with an example of some live JSON parsing from Github, and
-build a tool to query organization information via their API.  Look at
-the online [API documentation](http://developer.github.com/v3/orgs/) for Github
-to see what the JSON schema looks like retrieving the organization information. 
-Then create an ATD file that covers the fields we need.  Any extra fields
-present in the response will be ignored by the ATD parser.
+build a tool to query organization information via their API.  Start by looking
+at the online [API documentation](http://developer.github.com/v3/orgs/) for
+Github to see what the JSON schema for retrieving the organization information
+looks like. 
+
+Now create an ATD file that covers the fields we need.  Any extra fields
+present in the response will be ignored by the ATD parser, so we don't need
+a completely exhaustive specification of every field that Github might send
+back.
 
 ```
 (* github_org.atd *)
@@ -787,9 +780,79 @@ type org = {
 }
 ```
 
-The OCaml program that uses this will fetch the JSON and output a one-line summary.
-You'll also need the `curl` tool installed on your system to fetch the HTTP web pages, as
-our example below calls `curl` via the `Core_extended.Shell` interface.
+Let's build the OCaml type declaration first by calling `atdgen -t` on the
+specification file.
+
+```console
+$ atdgen -t github_org.atd
+$ cat github_org_t.mli
+(* Auto-generated from "github_org.atd" *)
+type org = {
+  login: string;
+  id: int;
+  url: string;
+  name: string option;
+  blog: string option;
+  email: string option;
+  public_repos: int
+}
+```
+
+The OCaml type has an obvious mapping to the ATD spec, but we still need the logic
+to convert JSON buffers to and from this type.  Calling `atdgen -j` will generate
+this serialization code for us in a new file called `github_org_j.ml`.
+
+```console
+$ atdgen -j github_org.atd
+$ cat github_org_j.mli
+(* Auto-generated from "github_org.atd" *)
+
+type org = Github_org_t.org = {
+  login: string;
+  id: int;
+  url: string;
+  name: string option;
+  blog: string option;
+  email: string option;
+  public_repos: int
+}
+
+val write_org :
+  Bi_outbuf.t -> org -> unit
+  (** Output a JSON value of type {!org}. *)
+
+val string_of_org :
+  ?len:int -> org -> string
+  (** Serialize a value of type {!org}
+      into a JSON string.
+      @param len specifies the initial length
+                 of the buffer used internally.
+                 Default: 1024. *)
+
+val read_org :
+  Yojson.Safe.lexer_state -> Lexing.lexbuf -> org
+  (** Input JSON data of type {!org}. *)
+
+val org_of_string :
+  string -> org
+  (** Deserialize JSON data of type {!org}. *)
+```
+
+The `Github_org_j` serializer interface contains everything we need to map
+to-and-from the OCaml types and JSON.  The easiest way to use this interface is
+by using the `string_of_org` and `org_of_string` functions, but there are also
+more advanced low-level buffer functions available if you need higher
+performance (but we won't go into that in this tutorial).
+
+All we need to complete our example is an OCaml program that fetches the JSON
+and uses these modules to output a one-line summary.  Our example below does
+just that.
+
+The code below calls the cURL command-line utility by using the
+`Core_extended.Shell` interface to run an external command and capture its
+output.  You'll need to ensure that you have cURL installed on your system
+before running the example.  You might also need to `opam install
+core_extended` if you haven't installed it previously.
 
 ```ocaml
 (* github_org_info.ml *)
@@ -812,8 +875,8 @@ let () =
   |> Command.run
 ```
 
-Finally, write a short shell script to generate the OCaml `Github_org` parsers
-via `atdgen`, and build the OCaml command-line interface.
+Below is a short shell script that generates all of the OCaml code and also
+builds the final executable.
 
 ```console
 $ cat _tags 
@@ -830,7 +893,9 @@ ocamlbuild -use-ocamlfind github_org_info.native
 $ ./buildgh.sh
 ```
 
-You can now run the command-line tool with a single argument to specify the name of the organization, and it will dynamically fetch the JSON from the web, parse it, and render the summary to your console.
+You can now run the command-line tool with a single argument to specify the
+name of the organization, and it will dynamically fetch the JSON from the web,
+parse it, and render the summary to your console.
 
 ```
 $ curl https://api.github.com/orgs/janestreet 

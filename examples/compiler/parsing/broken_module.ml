@@ -1,4 +1,4 @@
 (* broken_module.ml *)
-let _ =
+let () =
   module MyString = String;
   ()
