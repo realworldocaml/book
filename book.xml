@@ -14857,6 +14857,70 @@ Error: This expression has type 'a Int.Map.t = (int, 'a, Int.comparator) Map.t
         comparator associated with a given type will order things in the
         same way that polymorphic compare does.
       </para>
+      <sidebar>
+      <title>
+      The difference between <literal>=</literal> and
+      <literal>==</literal>, and <literal>phys_equal</literal> in Core
+      </title>
+      <para>
+        If you come from a C/C++ background, you'll probably reflexively
+        use <literal>==</literal> to test two values for equality. In
+        OCaml, the <literal>==</literal> operator tests for
+        <emphasis>physical</emphasis> equality while the
+        <literal>=</literal> operator tests for
+        <emphasis>structural</emphasis> equality.
+      </para>
+      <para>
+        The physical equality test will match if two data structures
+        have precisely the same pointer in memory. Two data structures
+        that have identical contents but are constructed separately will
+        not match using <literal>==</literal>.
+      </para>
+      <para>
+        The <literal>=</literal> structural equality operator
+        recursively inspects each field in the two values and tests them
+        individually for equality. Crucially, if your data structure is
+        cyclical (that is, a value recursively points back to another
+        field within the same structure), the <literal>=</literal>
+        operator will never terminate, and your program will hang! You
+        therefore must use the physical equality operator or write a
+        custom comparison function when comparing recursive values.
+      </para>
+      <para>
+        It's quite easy to mix up the use of <literal>=</literal> and
+        <literal>==</literal>, so Core disables the
+        <literal>==</literal> operator and provides the more explicit
+        <literal>phys_equal</literal> function instead. You'll see a
+        type error if you use <literal>==</literal> anywhere in code
+        that uses opens the Core standard module.
+      </para>
+      <programlisting language="ocaml">
+# open Core.Std;;
+# 1 == 2;;
+Error: This expression has type int but an expression was expected of type
+         [ `Consider_using_phys_equal ]
+# phys_equal 1 2;;
+- : bool = false
+</programlisting>
+      <para>
+        If you feel like hanging your OCaml interpreter, you can verify
+        what happens with recursive values and structural equality for
+        yourself:
+      </para>
+      <programlisting language="ocaml">
+# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
+type t1 = { foo1 : int; bar1 : t2; }
+and t2 = { foo2 : int; bar2 : t1; }
+# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
+&lt;lots of text&gt;
+# v1 == v1;;
+- : bool = true
+# phys_equal v1 v1;;
+- : bool = true
+# v1 = v1 ;;
+&lt;press ^Z and kill the process now&gt;
+</programlisting>
+      </sidebar>
     </sect2>
     <sect2 id="sets">
       <title>Sets</title>
@@ -17004,7 +17068,6 @@ let () =
 
   (* Test that the two values are the same *)
   print_endline (if json1 = json2 then &quot;OK&quot; else &quot;FAIL&quot;)
-  print_endline (if phys_equal json1 json2 then &quot;FAIL&quot; else &quot;OK&quot;)
 </programlisting>
     <para>
       You can build this by writing a <literal>_tags</literal> file to
@@ -17019,7 +17082,6 @@ true: thread, debug, annot
 $ ocamlbuild -use-ocamlfind read_json.native
 $ ./read_json.native
 OK
-OK
 </programlisting>
     <para>
       The <literal>from_file</literal> function accepts an input
@@ -17031,72 +17093,6 @@ OK
       a database. Finally, the example checks that the two input
       mechanisms actually resulted in the same OCaml data structure.
     </para>
-    <sidebar>
-    <title>
-    The difference between <literal>=</literal> and
-    <literal>==</literal>, and <literal>phys_equal</literal> in Core
-    </title>
-    <para>
-      If you come from a C/C++ background, you will probably reflexively
-      use <literal>==</literal> to test two values for equality. In
-      OCaml, <literal>==</literal> tests for
-      <emphasis>physical</emphasis> equality, and <literal>=</literal>
-      tests for <emphasis>structural</emphasis> equality.
-    </para>
-    <para>
-      The <literal>==</literal> physical equality test will match if two
-      data structures have precisely the same pointer in memory. Two
-      data structures that have identical contents, but are constructed
-      separately, will not match using this operator. In the JSON
-      example, the <literal>json1</literal> and <literal>json2</literal>
-      values are not identical and so would fail the physical equality
-      test.
-    </para>
-    <para>
-      The <literal>=</literal> structural equality operator recursively
-      inspects each field in the two values and tests them individually
-      for equality. In the JSON parsing example, every field will be
-      traversed and checked, and they will check out as equal.
-      Crucially, if your data structure is cyclical (that is, a value
-      recursively points back to another field within the same
-      structure), the <literal>=</literal> operator will never
-      terminate, and your program will hang! In this situation, you must
-      use the physical equality operator, or write a custom comparison
-      function that breaks the recursion.
-    </para>
-    <para>
-      It's quite easy to mix up the use of <literal>=</literal> and
-      <literal>==</literal>, so Core disables the <literal>==</literal>
-      operator and provides the more explicit
-      <literal>phys_equal</literal> function instead. You'll see a type
-      error if you use <literal>==</literal> anywhere:
-    </para>
-    <programlisting language="ocaml">
-# 1 == 2;;
-Error: This expression has type int but an expression was expected of type
-         [ `Consider_using_phys_equal ]
-# phys_equal 1 2;;
-- : bool = false
-</programlisting>
-    <para>
-      If you feel like hanging your OCaml interpreter, you can verify
-      what happens with recursive values and structural equality for
-      yourself:
-    </para>
-    <programlisting language="ocaml">
-# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
-type t1 = { foo1 : int; bar1 : t2; }
-and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
-&lt;lots of text&gt;
-# v1 == v1;;
-- : bool = true
-# phys_equal v1 v1;;
-- : bool = true
-# v1 = v1 ;;
-&lt;press ^Z and kill the process now&gt;
-</programlisting>
-    </sidebar>
   </sect1>
   <sect1 id="selecting-values-from-json-structures">
     <title>Selecting values from JSON structures</title>
