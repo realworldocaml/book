@@ -134,7 +134,7 @@ An OCaml *block* is the basic unit of allocation on the heap.  A block consists
 of a one-word header (either 32- or 64-bits depending on the CPU architecture)
 followed by variable-length data that is either opaque bytes or an array of
 *fields*.  The header has a multi-purpose tag byte that defines whether to
-interprete the subsequent data as opaque bytes or OCaml fields.
+interpret the subsequent data as opaque bytes or OCaml fields.
 
 The garbage collector never inspects opaque bytes. If the tag indicates an
 array of OCaml fields are present, their contents are all treated as more valid
