@@ -559,7 +559,7 @@ bring it all together.
 
 ## Bringing it all together
 
-For the final part, we need to compose the lexer and parser.  As we saw the the
+For the final part, we need to compose the lexer and parser.  As we saw in the
 type definition in `parser.mli`, the parsing function expects a lexer of type
 `Lexing.lexbuf -> token`, and it also expects a `lexbuf`.
 

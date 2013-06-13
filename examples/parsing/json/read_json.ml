@@ -10,5 +10,4 @@ let _ =
   (* Use the file JSON constructor *)
   let json2 = Yojson.Basic.from_file "book.json" in
 
-  print_endline (if json1 = json2 then "OK" else "FAIL");
-  print_endline (if phys_equal json1 json2 then "FAIL" else "OK")
+  print_endline (if json1 = json2 then "OK" else "FAIL")

@@ -5,6 +5,14 @@ compiler can link to external system libraries via C code, and also produce
 standalone native object files that can be embedded within other non-OCaml
 applications. 
 
+The mechanism by which code in one programming language can invoke routines in
+another different programming language is called a *foreign function
+interface*.  This chapter will teach you:
+
+* how to call routines in C libraries directly from your OCaml code.
+* build higher-level abstractions in OCaml from the low-level C bindings.
+* work through some full examples for binding a terminal interface and UNIX date/time functions.
+
 ## The Ctypes library
 
 The simplest foreign function interface in OCaml doesn't even require you to
@@ -69,8 +77,8 @@ void    mvwaddstr (WINDOW *, int, int, char *);
 The Ncurses functions either operate on the current pseudo-terminal or on a
 window that has been created via `newwin`.  The `WINDOW` structure holds the
 internal library state and is considered abstract outside of Ncurses.  Ncurses
-clients just needs to store the pointer somewhere and pass it back to Ncurses
-library calls, which can then dereference its contents.
+clients just need to store the pointer somewhere and pass it back to Ncurses
+library calls, which in turn dereference its contents.
 
 Note that there are over 200 library calls in Ncurses, so we're only binding a
 select few for this example. The `initscr` and `newwin` create `WINDOW`
@@ -101,18 +109,18 @@ good enough for now.  The second statement defines an OCaml value that
 represents the `WINDOW` C pointer.  This value is used later in the Ctypes
 function definitions.
 
-That's all we need to invoke our first function call to `initscr` to initalize
-the terminal.
-
 ```ocaml
 (* ncurses.ml 2/3 *)
+open Foreign
+
 let initscr =
-  foreign "initscr" (void @-> (returning window))
+  foreign "initscr" (void @-> returning window)
 ```
 
-The `foreign` function accepts two parameters:
+That's all we need to invoke our first function call to `initscr` to initalize
+the terminal.  The `foreign` function accepts two parameters:
 
-- the C function call name, which is looked up using *dlsym(3)*.
+- the C function call name, which is looked up using the `dlsym` C standard library function.
 - a value that defines the complete set of C function arguments and its return type.
   The `@->` operator adds an argument to the C parameter list and `returning`
   terminates the parameter list with the return type.
@@ -122,47 +130,44 @@ The remainder of the Ncurses binding simply expands on these definitions.
 ```ocaml
 (* ncurses.ml 3/3 *)
 let endwin =
-  foreign "endwin" (void @-> (returning void))
+  foreign "endwin" (void @-> returning void)
 
 let refresh =
-  foreign "refresh" (void @-> (returning void))
+  foreign "refresh" (void @-> returning void)
 
 let wrefresh =
-  foreign "wrefresh" (window @-> (returning void))
+  foreign "wrefresh" (window @-> returning void)
 
 let newwin =
-  foreign "newwin" 
-    (int @-> int @-> int @-> int @-> (returning window))
+  foreign "newwin" (int @-> int @-> int @-> int @-> returning window)
 
 let mvwaddch =
-  foreign "mvwaddch" 
-    (window @-> int @-> int @-> char @-> (returning void))
+  foreign "mvwaddch" (window @-> int @-> int @-> char @-> returning void)
 
 let addstr =
-  foreign "addstr" (string @-> (returning void))
+  foreign "addstr" (string @-> returning void)
 
 let mvwaddstr =
-  foreign "mvwaddstr"
-    (window @-> int @-> int @-> string @-> (returning void))
+  foreign "mvwaddstr" (window @-> int @-> int @-> string @-> returning void)
 
 let box =
-  foreign "box" (window @-> int @-> int @-> (returning void))
+  foreign "box" (window @-> int @-> int @-> returning void)
 
 let cbreak =
-  foreign "cbreak" (void @-> (returning void))
+  foreign "cbreak" (void @-> returning void)
 ```
 
 These definitions are all straightforward mappings from the C declarations in
 the Ncurses header file.  The scalar C types such as `int` come pre-defined in
 Ctypes. The `string` in these definitions maps from OCaml strings (which have a
-specific length) onto C character buffers (whose length is defined by a null
-characters).
+specific length) onto C character buffers (whose length is defined by a
+terminating null character that immediately follows the string data).
 
 The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running:
 
 ```console
-$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.mli 
+$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.ml
 ```
 
 The OCaml signature can be customized to improve its safety for external
@@ -178,7 +183,6 @@ val endwin    : unit   -> unit
 val refresh   : unit   -> unit
 val wrefresh  : window -> unit
 val newwin    : int    -> int -> int -> int -> window
-val addch     : char   -> unit
 val mvwaddch  : window -> int -> int -> char -> unit
 val addstr    : string -> unit
 val mvwaddstr : window -> int -> int -> string -> unit
@@ -186,7 +190,7 @@ val box       : window -> int -> int -> unit
 val cbreak    : unit   -> unit
 ```
 
-The `window` type is left abstract in the signature, ensure that window
+The `window` type is left abstract in the signature to ensure that window
 pointers can only be constructed via the `Ncurses.initscr` function.  This
 prevents void pointers obtained from other sources from being mistakenly passed
 to an Ncurses library call.
@@ -298,16 +302,16 @@ val float : float typ
 val double : float typ
 ```
 
-These values are all of type `'a typ`, where the function name tells you the C
-type, and the `'a` component is the OCaml representation of that C type.  Most
-of the mappings are straightforward, but some of them need a bit more
-explanation.
+These values are all of type `'a typ`, where the value name (e.g. `void`) tells
+you the C type and the `'a` component (e.g. `unit`) is the OCaml
+representation of that C type.  Most of the mappings are straightforward, but
+some of them need a bit more explanation.
 
 * Void values appear in OCaml as the `unit` type. Using `void` in an
   argument or result type specification produces an OCaml function which accepts or returns unit.
   Dereferencing a pointer to `void` is an error, as in C, and will raise the `IncompleteType` exception.
 * The C `size_t` type is an alias for one of the unsigned integer types.  The actual 
-  size and alignment requirements for `size_t` varys between platforms. Ctypes provides
+  size and alignment requirements for `size_t` varies between platforms. Ctypes provides
   an OCaml `size_t` type that is aliased to the appropriate integer type.
 * OCaml only supports double-precision floating point numbers, and so the C `float` and
   `double` functions both map onto the OCaml `float` type.
@@ -326,6 +330,7 @@ returns the current calendar time, and has the following C signature:
 ```c
 time_t time(time_t *);
 ```
+
 The first step is to open some of the Ctypes modules.
 
 * The `Ctypes` module provides functions for describing C types in OCaml.
@@ -425,7 +430,7 @@ val t_ptr : time_t ptr = <abstr>
 
 The `allocate` function takes the type of the memory to be allocated and the
 initial value, and it returns a suitably-typed pointer.  We can now call
-`ctime` using passing the pointer as an argument:
+`ctime` passing the pointer as an argument:
 
 ```ocaml
 # ctime t_ptr;;
@@ -443,36 +448,23 @@ view wraps the C type `char *` (written in OCaml as `ptr char`), and converts
 between the C and OCaml string representations each time the value is written
 or read.
 
-<note>
-<title>OCaml strings versus C character buffers</title>
-
-Although OCaml strings may look like C character buffers from an interface
-perspective, they're very different in terms of their memory representations.
-
-OCaml strings are stored in the OCaml heap with a header that explicitly
-defines its length.  C buffers are also fixed-length, but by convention a C
-string is terminated by a null (a `0` byte) character.  The C string functions
-calculate their length by scanning the buffer until the first null character is
-encountered.
-
-This means you need to be careful when passing OCaml strings to C buffers that
-they don't contain any null values within the OCaml string, or else the C
-string will be rudely truncated.
-
-</note>
-
-Here are the type signatures of the view functions in Ctypes.
+Here is the type signature of the `view` function.
 
 ```ocaml
 (* Ctypes *)
 val view : read:('a -> 'b) -> write:('b -> 'a) -> 'a typ -> 'b typ
-val string_of_char_ptr : char ptr -> string
-val char_ptr_of_string : string -> char ptr
-val string : string typ
 ```
 
-The actual definition of `string` that uses views is quite simple and is
-written using these functions.
+Next, we have the conversion functions to convert between an OCaml `string` and
+a C character buffer.
+
+```ocaml
+val string_of_char_ptr : char ptr -> string
+val char_ptr_of_string : string -> char ptr
+```
+
+The definition of `string` that uses views is quite simple and is written using
+these conversion functions.
 
 ```ocaml
 let string = 
@@ -481,6 +473,31 @@ let string =
     ~write:char_ptr_of_string 
     (char ptr)
 ```
+
+The type of this `string` function is a normal `typ`, with no external sign of
+the use of the view function.
+
+```ocaml
+val string : string typ
+```
+
+<note>
+<title>OCaml strings versus C character buffers</title>
+
+Although OCaml strings may look like C character buffers from an interface
+perspective, they're very different in terms of their memory representations.
+
+OCaml strings are stored in the OCaml heap with a header that explicitly
+defines their length.  C buffers are also fixed-length, but by convention a C
+string is terminated by a null (a `0` byte) character.  The C string functions
+calculate their length by scanning the buffer until the first null character is
+encountered.
+
+This means you need to be careful when passing OCaml strings to C buffers that
+don't contain any null values within the OCaml string, or else the C
+string will be rudely truncated.
+
+</note>
 
 ### Abstract pointers
 
@@ -538,15 +555,15 @@ type timeval
 val timeval : timeval structure typ = <abstr>
 ```
 
-The first command defines a new OCaml type `typeval` that we'll use to
+The first command defines a new OCaml type `timeval` that we'll use to
 instantiate the OCaml version of the `struct`. Creating a new OCaml type to
 reflect the underlying C type in this way means that the structure we define
 will be distinct from other structures we define elsewhere, which helps to
 avoid getting them mixed up.
 
 The second command calls `structure` to create a fresh structure type.  At this
-point the structure type is incomplete, so we can add fields, but cannot yet
-use it in `foreign` calls.
+point the structure type is incomplete: we can add fields but cannot yet use it
+in `foreign` calls or use it to create values.
 
 ### Adding fields to structures
 
@@ -571,8 +588,8 @@ confusion.
 
 Every field addition mutates the structure variable and records a new size (the
 exact value of which depends on the type of the field that was just added).
-Once we `seal` the structure the situation is reversed: we will be able to
-create values, but adding fields to a sealed structure is an error.
+Once we `seal` the structure we will be able to create values using it, but
+adding fields to a sealed structure is an error.
 
 ### Incomplete structure definitions
 
@@ -601,8 +618,9 @@ val gettimeofday : timeval structure ptr -> timezone structure ptr -> int = <fun
 
 There's one other new feature here: the `returning_checking_errno` function
 behaves like `returning`, except that it checks whether the bound C function
-modifies the C error flag.  Changes to `errno` are mapped into OCaml
-exceptions by the `PosixTypes` module.  .
+modifies the C error flag.  Changes to `errno` are mapped into OCaml exceptions
+and raise a `Unix.Unix_error` exception just as the standard library functions
+do.
 
 As before we can create a wrapper to make `gettimeofday` easier to use.  The
 functions `make`, `addr` and `getf` create a structure value, retrieve the
@@ -612,7 +630,7 @@ structure.
 ``` ocaml
 # let gettimeofday' () =
   let tv = make timeval in
-  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1000000.0) ;;
@@ -660,7 +678,7 @@ let time' () = time (from_voidp time_t null)
 
 let gettimeofday' () =
   let tv = make timeval in
-  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1_000_000.)
@@ -669,13 +687,13 @@ let float_time () = printf "%f%!\n" (gettimeofday' ())
 
 let ascii_time () =
   let t_ptr = allocate time_t (time' ()) in
-  printf "%s%!\n" (ctime t_ptr)
+  printf "%s%!" (ctime t_ptr)
 
 let () =
   let open Command in
   basic ~summary:"Display the current time in various formats"
     Spec.(empty +> flag "-a" no_arg ~doc:" Human-readable output format")
-    (fun human () -> if human then ascii_time () else float_time ())
+    (fun human -> if human then ascii_time else float_time)
   |> Command.run 
 ```
 
@@ -796,34 +814,27 @@ an array into a `ptr` pointer to the head of buffer, which can be useful if you
 need to pass the pointer and size arguments separately to a C function.
 
 Unions in C are named structures that can be mapped onto the same underlying
-memory.  They are also fully supported in in Ctypes, but we won't go into more
+memory.  They are also fully supported in Ctypes, but we won't go into more
 detail here.
 
-<note>
-<title>Lifetime of allocated Ctypes</title>
+<sidebar>
+<title>Pointer operators for dereferencing and arithmetic</title>
 
-Values allocated via Ctypes (i.e. using `allocate`, `Array.make` and so on)
-will not be garbage-collected as long as they are reachable from OCaml values.
-The system memory they occupy is freed when they do become unreachable, via a
-finalizer function registered with the GC.
+Ctypes defines a number of operators that let you manipulate pointers and arrays
+just as you would in C.  The Ctypes equivalents do have the benefit of being
+more strongly typed, of course.
 
-The definition of reachability for Ctypes values is a little different from
-conventional OCaml values though.  The allocation functions return an
-OCaml-managed pointer to the value, and as long as some derivative pointer is
-still reachable by the GC, the value won't be collected.
+Operator    Purpose      
+--------    -------
+`!@ p`      Dereference the pointer `p`.
+`p <-@ v`   Write the value `v` to the address `p`.
+`p +@ n`    If `p` points to an array element, then compute the address of the `n`th next element.
+`p -@ n`    If `p` points to an array element, then compute the address of the `n`th previous element.
 
-"Derivative" means a pointer that's computed from the original pointer via
-arithmetic, so a reachable reference to an array element or a structure field
-protects the whole object from collection.
+There are also other useful non-operator functions available (see the Ctypes
+documentation), for example for pointer differencing and comparison.
 
-A corollary of the above rule is that pointers written into the C heap don't
-have any effect on reachability.  For example, if you have a C-managed array of
-pointers to structs then you'll need some additional way of keeping the structs
-around to protect them from collection.  You could achieve this via a global array
-of values on the OCaml side that would keep them live until they're no longer
-needed.
-
-</note>
+</sidebar>
 
 ## Passing functions to C
 
@@ -847,7 +858,7 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);
 
 This also happens to be a close mapping to the corresponding Ctypes definition.
 Since type descriptions are regular values, we can just use `let` in place of
-`typedef`. The type of `qsort` is defined as follows.
+`typedef` and end up with working OCaml bindings to `qsort`.
 
 ```ocaml
 let compare_t = ptr void @-> ptr void @-> returning int
@@ -856,7 +867,9 @@ let qsort = foreign "qsort"
    (ptr void @-> size_t @-> size_t @-> funptr compare_t @-> returning void)
 ```
 
-The resulting value is a higher-order function, as shown by its type.
+We only use `compare_t` once (in the `qsort` definition), so you can choose to
+inline it in the OCaml code if you prefer. The resulting `qsort` value is a
+higher-order function, as shown by its type.
 
 ```ocaml
 val qsort: void ptr -> size_t -> size_t ->
@@ -950,6 +963,32 @@ standard input as a list, converts it to a C array, passes it through qsort,
 and outputs the result to the standard output.  Again, remember to not confuse
 the `Ctypes.Array` module with the `Core.Std.Array` module: the former is in
 scope since we opened `Ctypes` at the start of the file.
+
+<note>
+<title>Lifetime of allocated Ctypes</title>
+
+Values allocated via Ctypes (i.e. using `allocate`, `Array.make` and so on)
+will not be garbage-collected as long as they are reachable from OCaml values.
+The system memory they occupy is freed when they do become unreachable, via a
+finalizer function registered with the GC.
+
+The definition of reachability for Ctypes values is a little different from
+conventional OCaml values though.  The allocation functions return an
+OCaml-managed pointer to the value, and as long as some derivative pointer is
+still reachable by the GC, the value won't be collected.
+
+"Derivative" means a pointer that's computed from the original pointer via
+arithmetic, so a reachable reference to an array element or a structure field
+protects the whole object from collection.
+
+A corollary of the above rule is that pointers written into the C heap don't
+have any effect on reachability.  For example, if you have a C-managed array of
+pointers to structs then you'll need some additional way of keeping the structs
+around to protect them from collection.  You could achieve this via a global array
+of values on the OCaml side that would keep them live until they're no longer
+needed.
+
+</note>
 
 ## Learning more about C bindings
 

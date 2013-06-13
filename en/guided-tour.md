@@ -360,12 +360,12 @@ time.
 
 There's a big difference in OCaml (and really in any compiled
 language) between errors that are caught at compile time and those
-that are caught at run-time.  It's better to catch errors as early as
+that are caught at run time.  It's better to catch errors as early as
 possible in the development process, and compilation time is best of
 all.
 
 Working in the toplevel somewhat obscures the difference between
-run-time and compile time errors, but that difference is still there.
+run time and compile time errors, but that difference is still there.
 Generally, type errors, like this one:
 
 ```ocaml

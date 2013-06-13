@@ -17,7 +17,7 @@ design.  These features include:
   of almost every modern high-level language.
 * _Higher-order functions_ that can be passed around as first-class
   values, as seen in Javascript or Scala.
-* _Static type-checking_ to reduce run-time errors, such as Java or Scala
+* _Static type-checking_ to reduce runtime errors, such as Java or Scala
   interfaces or variable type declarations in C#, Ada and Pascal.
 * _Generics_ to enable abstractions to be constructed across different
   datatypes, available as C++ templates or in Java or C#.
@@ -87,7 +87,7 @@ the language both commercially and for academic use.  First-class modules,
 Generalized Algebraic Data Types (GADTs) and dynamic linking have improved the
 flexibility of the language, and there is fast native code support for x86_64,
 ARM, PowerPC and Sparc64, making OCaml a good choice for systems where resource
-usage, predictability and performance matters.  
+usage, predictability and performance all matter.  
 
 ### The Core Standard Library
 
@@ -152,7 +152,7 @@ functional programming_.  The world of dynamic scripting languages such as
 Javascript, Ruby and Python have all adopted healthy elements of functional
 programming, but not all of it.  Real World OCaml takes you through the full
 lifecycle of how to construct software with static typing, including the
-powerful module system that makes code re-use so much more robust.
+powerful module system that makes code reuse so much more robust.
 
 At the same time, OCaml is not Haskell.  It takes a much more pragmatic
 approach by being strictly evaluated by default and permitting arbitrary

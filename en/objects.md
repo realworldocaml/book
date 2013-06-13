@@ -1,4 +1,4 @@
-# Object-Oriented Programming
+# Objects
 
 We've already seen several tools that OCaml provides for organizing programs,
 particularly modules.  In addition, OCaml also supports object-oriented
@@ -28,7 +28,7 @@ There are five fundamental properties that differentiate OOP from other styles:
   objects may react to the same message in different ways.
 * _Subtyping_: if an object `a` has all the functionality of an object
   `b`, then we may use `a` in any context where `b` is expected.
-* _Inheritance_: the definition of one kind of object can be re-used
+* _Inheritance_: the definition of one kind of object can be reused
   to produce a new kind of object.  This new definition can override
   some behaviour, but also share code with its parent.
 * _Open recursion_: an object's methods can invoke another method in the same
@@ -78,7 +78,7 @@ already object oriented.
 In this chapter, we'll introduce you to the basics of object definition and use
 in OCaml, and then demonstrate their use with an example using Cryptokit.
 We'll return to the more advanced areas of object use later on in the book in
-[xref](#object-subtyping-and-inheritance).
+[xref](#classes).
 
 ## OCaml objects ##
 
@@ -315,7 +315,7 @@ rarely use classes and objects, if at all.
 
 Objects have some advantages over records: they don't require type definitions
 and their support for row polymorphism makes them more flexible. However, the
-heavy syntax and additional run-time cost means that objects are rarely used in
+heavy syntax and additional runtime cost means that objects are rarely used in
 place of records.
 
 The real benefits of objects come from the class system. Classes support

@@ -26,8 +26,7 @@ Mercurial version control systems.
 In this chapter, we'll:
 
 * learn how to use Command to construct basic and grouped command-line interfaces.
-* read examples that extend the cryptographic utility from [xref](#object-oriented-programming) and builds a simple
-equivalents to the `md5` and `shasum` utilities.
+* read examples that extend the cryptographic utility from [xref](#classes) and build a simple equivalent to the `md5` and `shasum` utilities.
 * demonstrate how _functional combinators_ can be used to declare complex data structures in a type-safe and elegant way.
 
 ## Basic command-line parsing
@@ -149,10 +148,10 @@ parameters via the `+>` combinator.  Our example uses the `anon` function to
 define a single anonymous parameter.
 
 Anonymous parameters are created using the `%:` operator, which binds a textual
-string name (used in help text) to an OCaml conversion function.  The
+string name (used in the help text) to an OCaml conversion function.  The
 conversion function is responsible for parsing the command-line fragment into
 an OCaml data type.  In the example above, this is just a `string`, but we'll
-see more complex conversion options below
+see more complex conversion options below.
 
 ### Callback functions
 

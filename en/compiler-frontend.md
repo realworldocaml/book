@@ -2,9 +2,9 @@
 
 Compiling source code into executable programs is a fairly complex process that
 involves quite a few tools -- preprocessors, compilers, runtime libraries,
-linkers and assemblers.  It's important how to understand how these fit
-together to help with your day-to-day workflow of developing, debugging and
-deploying applications.
+linkers and assemblers.  It's important to understand how these fit together to
+help with your day-to-day workflow of developing, debugging and deploying
+applications.
 
 OCaml has a strong emphasis on static type safety and rejects source code that
 doesn't meet its requirements as early as possible.  The compiler does this by
@@ -41,7 +41,7 @@ Each source file represents a *compilation unit* that is built separately.  The
 compiler generates intermediate files with different filename extensions to use
 as it advances through the compilation stages.  The linker takes a collection
 of compiled units and produces a standalone executable or library archive that
-can be re-used by other applications.
+can be reused by other applications.
 
 The overall compilation pipeline looks like this:
 
@@ -78,7 +78,7 @@ The overall compilation pipeline looks like this:
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
-frontends that re-use the early stages of compilation, but produce very
+frontends that reuse the early stages of compilation, but produce very
 different final outputs. The *bytecode interpreter* is portable and can even be
 transformed into Javascript. The *native code compiler* generates specialized
 executable binaries suitable for high-performance applications.
@@ -141,7 +141,7 @@ as a statement instead of as a let-binding.
 
 ```ocaml
 (* broken_module.ml *)
-let _ =
+let () =
   module MyString = String;
   ()
 ```
@@ -159,7 +159,7 @@ via a local open, and compiles successfully.
 
 ```ocaml
 (* fixed_module.ml *)
-let _ =
+let () =
   let module MyString = String in
   ()
 ```
@@ -187,9 +187,9 @@ let add_and_print x y =
   print_endline (string_of_int v);
   v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print "a" "b" in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print "a" "b" in
   ()
 ```
 
@@ -229,9 +229,9 @@ let concat_and_print x y =
     print_endline (string_of_int v);
     v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print "a" "b" in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print "a" "b" in
   ()
 ```
 
@@ -253,9 +253,9 @@ let add_and_print x y =
   print_endline (string_of_int v);
   v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print "a" "b" in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print "a" "b" in
   ()
 
 $ ocamlc -i follow_on_function_fixed.ml 
@@ -341,7 +341,8 @@ detailed output.
 * [ocamldoc-generators](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
   support for Bibtex references within comments and generating literate
   documentation that embeds the code alongside the comments.
-* JSON output is available via `odoc_json` (TODO: pull out of Xen).
+* JSON output is available via a custom [generator](https://github.com/xen-org/ocamldoc-json)
+  in Xen.
 
 </tip>
 
@@ -542,12 +543,59 @@ for each field in the record.  If you're using the extension in your compiler
 command-line, this generated code is then compiled as if you had typed it in
 yourself.
 
+<note>
+<title>A style note: wildcards in `let` bindings</title>
+
+You may have noticed the `let _ = fun` construct in the auto-generated code above.
+The underscore in a `let` binding is just the same as a wildcard underscore in
+a pattern match, and tells the compiler to accept any return value and discard it
+immediately.
+
+This is fine for mechanically generated code from Type_conv, but should be
+avoided in code that you write by hand.  If it's a unit-returning expression,
+then write a `unit` binding explicitly instead.  This will cause a type error
+if the expression changes type in the future (e.g. due to code refactoring).
+
+```ocaml
+let () = <expr>
+```
+
+If the expression has a different type, then write it explicitly.
+
+```ocaml
+let (_:some_type) = <expr>
+let () = ignore (<expr> : some_type)
+let () = don't_wait_for (<expr>)  (* if the expression returns a unit Deferred.t *)
+```
+
+The last one is used to ignore Async expressions that should run in the background
+rather than blocking in the current thread.
+
+One other important reason for using wildcard matches is to bind a variable
+name to something that you want to use in future code, but don't want to use
+right away.  This would normally generate an "unused value" compiler warning.
+These warnings are suppressed for any variable name that's prepended with an
+underscore.
+
+```ocaml
+let fn x y =
+  let _z = x + y in
+  ()
+```
+
+Although you don't use `_z` in your code, this will never generate an unused
+variable warning.
+
+</note>
+
+#### Preprocessing module signatures
+
 Another useful feature of `type_conv` is that it can generate module signatures
 too.  Copy the earlier type definition into a `comparelib_test.mli` and rerun
 the Camlp4 dumper script.
 
 ```console
-$ ./camlp4_dump.sh test_comparelib.mli 
+$ sh camlp4_dump comparelib_test.mli 
 type t = { foo : string; bar : t }
 
 val compare : t -> t -> int
@@ -716,7 +764,7 @@ most general choice from the possible inferences.  Manual type annotations can
 specialize the type explicitly, but the automatic inference selects the most
 general type unless told otherwise.
 
-OCaml does has some language extensions which strain the limits of principal
+OCaml does have some language extensions which strain the limits of principal
 type inference, but by and large most programs you write will never *require*
 annotations (although they sometimes help the compiler produce better error
 messages).
@@ -728,10 +776,10 @@ type checker -- but once the code does compile, it works correctly the first
 time! 
 
 There are a couple of tricks to make it easier to quickly locate type errors in
-your code.  The first is to introduce manual type annotations to narrow down
-the source of your error more accurately.  These annotations shouldn't actually
-change your types and can removed once your code is correct, but act as anchors
-to locate errors while you're still writing your code.
+your code. The first is to introduce manual type annotations to narrow down the
+source of your error more accurately.  These annotations shouldn't actually
+change your types and can be removed once your code is correct. However, they
+act as anchors to locate errors while you're still writing your code.
 
 Manual type annotations are particulary useful if you use lots of
 polymorphic variants or objects.  Type inference with row polymorphism can
@@ -1235,7 +1283,7 @@ The typed AST that is normally output as a compiled `cmt` file can be displayed
 in a more developer-readable form via the `-dtypedtree` option.
 
 ```console
-$ ocamlc -dtypedtree typedef.m
+$ ocamlc -dtypedtree typedef.ml
 [
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Pstr_type [

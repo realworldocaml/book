@@ -1,7 +1,7 @@
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   let hash_fn =
     match Filename.basename Sys.argv.(0) with
     |"md5" -> Hash.md5 ()

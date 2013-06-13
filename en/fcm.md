@@ -118,7 +118,7 @@ There are in fact multiple APIs you might want to use, including
 make somewhat different performance and portability trade-offs.  You
 could support all of these in one application by defining a single
 module, let's call it `Mutliplexer`, whose implementation is chosen at
-run-time based on an environment variable.
+runtime based on an environment variable.
 
 To do this, you'd first need an interface `S` that all of the
 different multiplexer implementations would need to match, and then an

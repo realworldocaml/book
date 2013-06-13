@@ -190,7 +190,7 @@ Naively, you might think that it would be necessary to check each case
 in a `match` in sequence to figure out which one fires.  If the cases
 of a match were guarded by arbitrary code, that would be the case.
 But OCaml is often able to generate machine code that jumps directly
-to the matched case based on an efficiently chosen set of run-time
+to the matched case based on an efficiently chosen set of runtime
 checks.
 
 As an example, consider the following rather silly functions for

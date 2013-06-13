@@ -971,8 +971,7 @@ these to have explicit, exact types, this tends to work well.
 Variants are most problematic exactly where you take full advantage of
 their power; in particular, when you take advantage of the ability of
 polymorphic variant types to overlap in the tags they support.  This
-ties into OCaml's support for subtyping.  As we'll discuss further
-when we cover objects in [xref](#object-oriented-programming),
-subtyping brings in a lot of complexity, and most of the time, that's
-complexity you want to avoid.
+ties into OCaml's support for subtyping.  As we'll discuss further when we
+cover objects in [xref](#objects), subtyping brings in a lot of complexity, and
+most of the time, that's complexity you want to avoid.
 

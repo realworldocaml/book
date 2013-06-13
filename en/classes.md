@@ -1,7 +1,7 @@
 # Classes
 
 Programming with objects directly is great for encapsulation, but one
-of the main goals of object-oriented programming is code re-use
+of the main goals of object-oriented programming is code reuse
 through inheritance.  For inheritance, we need to introduce _classes_.
 In object-oriented programming, a class is a "recipe" for creating
 objects.  The recipe can be changed by adding new methods and fields,
@@ -126,7 +126,7 @@ The `md5` command is quite straight-forward now:
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   In_channel.(input_all stdin)
   |> hash_string (Hash.md5 ())
   |> transform_string (Hexa.encode ())
@@ -144,7 +144,7 @@ We can extend this simple example by selecting either the `md5` or `sha1` hash f
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   let hash_fn =
     match Filename.basename Sys.argv.(0) with
     |"md5" -> Hash.md5 ()
@@ -181,7 +181,7 @@ let evp_byte_to_key password tlen =
   done;
   String.uppercase o#get_string
 
-let _ =
+let () =
   let secret = "ocaml" in
   let key_len = 16 * 2 in
   let iv_len = 16 * 2 in
@@ -1050,7 +1050,7 @@ class ['a, 'b] map : object ... method iterator : 'b iterator end;;
 ```
 
 The collections are different is some ways, but they share a common
-pattern for iteration that we can re-use.  For a simple example, let's
+pattern for iteration that we can reuse.  For a simple example, let's
 define a mixin that implements an arithmetic sum for a collection of
 integers.
 

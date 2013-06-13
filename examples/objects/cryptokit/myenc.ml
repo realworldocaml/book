@@ -26,7 +26,7 @@ let evp_byte_to_key password tlen =
   done;
   String.uppercase o#get_string
  
-let _ =
+let () =
   let secret = "ocaml" in
   let key_len = 16 * 2 in
   let iv_len = 16 * 2 in

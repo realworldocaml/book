@@ -62,7 +62,7 @@
  (public false)
  )
 ((part Basic)
- (name "object-oriented-programming")
+ (name "objects")
  (file "objects")
  (note "Largely complete")
  )
