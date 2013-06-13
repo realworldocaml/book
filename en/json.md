@@ -455,10 +455,10 @@ Error: This expression has type
        Types for tag `Assoc are incompatible
 ```
 
-The type error above isn't *wrong* as such, but can be inconvenient to
-wade through for larger values.  An easy way to narrow down this sort
-of type error is to add explicit type annotations as a compiler hint
-about your intentions:
+The type error above is more verbose than it needs to be, which can be
+inconvenient to wade through for larger values.  You can help the compiler to
+narrow down this error to a shorter form by adding explicit type annotations as
+a hint about your intentions.
 
 ```ocaml
 # let (x:Yojson.Basic.json) = `Assoc ("key", `String "value");;
@@ -467,13 +467,15 @@ Error: This expression has type 'a * 'b
          (string * Yojson.Basic.json) list
 ```
 
-In this case, we've marked the `x` as being of type
-`Yojson.Basic.json`, and the compiler immediately spots that the
-argument to the `Assoc` variant has the incorrect type.  This
-illustrates the strengths and weaknesses of polymorphic variants: they make it
-possible to easily subtype across module boundaries, but the error messages can
-be more confusing.  However, a bit of careful manual type annotation is all it
-takes to make tracking down such issues much easier.
+In this case, we've marked the `x` as being of type `Yojson.Basic.json`, and
+the compiler immediately spots that the argument to the `Assoc` variant has the
+incorrect type.  This illustrates the strengths and weaknesses of polymorphic
+variants: they make it possible to easily subtype across module boundaries, but
+the error messages can be more confusing.  However, a bit of careful manual
+type annotation is all it takes to make tracking down such issues much easier.
+
+We'll discuss more techniques like this that help you interpret type errors
+more easily in [xref](#the-compiler-frontend-parsing-and-type-checking).
 
 </sidebar>
 
