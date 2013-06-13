@@ -162,7 +162,7 @@ A block's tag byte is multi-purpose, and indicates whether the data array
 represents opaque bytes or fields.  If a block's tag is greater than or equal
 to `No_scan_tag` (251), then the block's data are all opaque bytes, and are not
 scanned by the collector. The most common such block is the `string` type,
-which we describe more below.
+which we describe in more detail later in this chapter.
 
 The exact representation of values inside a block depends on their static OCaml
 type.  All OCaml types are distilled down into `values`, and summarised in the
