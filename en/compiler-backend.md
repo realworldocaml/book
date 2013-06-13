@@ -940,7 +940,7 @@ over half the execution time of the application.
 Perf has a growing collection of other commands that let you archive these
 runs and compare them against each other.  You can read more on the [homepage](http://perf.wiki.kernel.org).
 
-<tip>
+<sidebar>
 <title>Using the frame-pointer to get more accurate traces</title>
 
 Although Perf doesn't require adding in explicit probes to the binary,
@@ -969,7 +969,7 @@ care of recompiling all your libraries with the new interface.  You can read
 more about this on the OCamlPro
 [blog](http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html).
 
-</tip>
+</sidebar>
 
 ### Embedding native code in C
 
