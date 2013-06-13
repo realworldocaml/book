@@ -233,7 +233,7 @@ field that contains the number.  This block has the `Double_tag` set which
 signals to the collector that the floating point value is not to be scanned.
 
 ```ocaml
-# Obj.tag (Obj.repr 1.0) = Obj.double_tag ;;
+# Obj.tag (Obj.repr 1.0) ;;
 - : int = 253
 # Obj.double_tag ;;
 - : int = 253
