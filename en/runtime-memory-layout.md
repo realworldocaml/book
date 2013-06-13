@@ -98,7 +98,7 @@ shouldn't be followed).
 The mechanism for this is simple since the runtime system keeps track of the
 heap blocks it has allocated for OCaml values. If the pointer is inside a heap
 chunk that is marked as being managed by the OCaml runtime, it is assumed to
-point to an OCaml value. If it points outside the OCaml runtime area, it is is
+point to an OCaml value. If it points outside the OCaml runtime area, it is 
 treated as an opaque C pointer to some other system resource.
 
 <note>
