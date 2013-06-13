@@ -5241,7 +5241,7 @@ val to_list : t -&gt; (string * int) list
       asterisk to cause them to be picked up by the
       <literal>ocamldoc</literal> tool when generating API
       documentation. We'll discuss <literal>ocamldoc</literal> more in
-      <ulink url="generating-documentation-from-interfaces">xref</ulink>.
+      <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>.
     </para>
     <para>
       Here's a rewrite of <literal>counter.ml</literal> to match the new
@@ -17016,11 +17016,7 @@ val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; str
              creating a new one. 
    [fname] : data file name to be used in error messages. It does not 
              have to be a real file. 
-   [lnum]  : number of the first line of input. Default is 1.
-
-val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; in_channel -&gt; json
-(* Read a JSON value from a channel. See [from_string] for the meaning of the
-   optional arguments. *)
+   [lnum]  : number of the first line of input. Default is 1. *)
 
 val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
 (* Read a JSON value from a file. See [from_string] for the meaning of the optional
@@ -17036,20 +17032,40 @@ val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; strin
     </para>
     <para>
       The type signature for these functions with the optional elements
-      removed makes their purpose much clearer:
+      removed makes their purpose much clearer. The two ways of parsing
+      the JSON are either directly from a string or from a file on a
+      filesystem.
     </para>
     <programlisting language="ocaml">
 val from_string : string -&gt; json
 val from_file : string -&gt; json
-val from_channel : in_channel -&gt; json
 </programlisting>
+    <note>
+    <title>
+    The standard OCaml <literal>in_channel</literal> and
+    <literal>out_channel</literal>
+    </title>
     <para>
-      The <literal>in_channel</literal> constructor is from the original
-      OCaml standard library, and its use is considered deprecated when
-      using the Core standard library. This leaves us with two ways of
-      parsing the JSON: either from a string or from a file on a
-      filesystem. The next example shows both in action, assuming the
-      JSON record is stored in a file called
+      You'll notice when reading the Yojson interface that we've left
+      out the <literal>from_channel</literal> function, which uses a
+      <literal>in_channel</literal> type provided by the OCaml standard
+      library. These OCaml channels are considered deprecated in Core,
+      as they're primarily used by the compiler itself, but don't always
+      play well with threading and asynchronous programming.
+    </para>
+    <para>
+      The Core equivalent are the <literal>In_channel</literal> and
+      <literal>Out_channel</literal> modules instead, but you will still
+      see the standard OCaml channel types being used in third-party
+      libraries such as Yojson which weren't specifically designed to be
+      used with Core. They won't do any harm if you don't use them in
+      your code, so just ignore them and use strings or files instead.
+    </para>
+    </note>
+
+    <para>
+      The next example shows both the string and file functions in
+      action, assuming the JSON record is stored in a file called
       <literal>book.json</literal>.
     </para>
     <programlisting language="ocaml">
@@ -23000,7 +23016,10 @@ val sort_stdin : unit -&gt; unit
     prefers runtime simplicity instead.
   </para>
   <para>
-    TODO xref to pipeline chapter.
+    We'll explain this compilation pipeline in more detail in
+    <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>
+    and
+    <xref linkend="the-compiler-backend-byte-code-and-native-code"/>.
   </para>
   </note>
   <para>
@@ -23029,20 +23048,20 @@ val sort_stdin : unit -&gt; unit
       OCaml's runtime system.
     </para>
     <para>
-      OCaml uses a uniform memory representation for every OCaml
-      variable known as a <literal>value</literal>. An OCaml value is a
-      single memory word that is either an immediate integer or a
+      OCaml uses a uniform memory representation in which every OCaml
+      variable is stored as a <emphasis>value</emphasis>. An OCaml value
+      is a single memory word that is either an immediate integer or a
       pointer to some other memory. The OCaml runtime tracks all values
       so that it can free them when they are no longer needed. It thus
-      needs to understand the difference an integer and a pointer since
-      it scans pointers to find further values, but doesn't follow
-      integers that don't point to anything meaningful beyond their
-      immediate value.
+      needs to be able to distinguish between integer and pointer
+      values, since it scans pointers to find further values but doesn't
+      follow integers that don't point to anything meaningful beyond
+      their immediate value.
     </para>
     <sect2 id="distinguishing-integer-and-pointers-at-runtime">
       <title>Distinguishing integer and pointers at runtime</title>
       <para>
-        Values use a single tag bit the word to distinguish integers and
+        Values use a single tag bit per word to distinguish integers and
         pointers at runtime. The value is an integer if the lowest bit
         of the block word is non-zero. Several OCaml types map onto this
         integer representation, including <literal>bool</literal>,
@@ -23294,7 +23313,7 @@ val sort_stdin : unit -&gt; unit
         <literal>unit</literal> are very efficient to use since integers
         are never allocated on the heap. They can be passed directly in
         registers and not appear on the stack if you don't have too many
-        parameters to your functions. Modern architectures as as
+        parameters to your functions. Modern architectures such as
         <literal>x86_64</literal> have a lot of spare registers to
         further improve the efficiency of using unboxed integers.
       </para>
@@ -23343,7 +23362,7 @@ val sort_stdin : unit -&gt; unit
         be scanned.
       </para>
       <programlisting language="ocaml">
-# Obj.tag (Obj.repr 1.0) = Obj.double_tag ;;
+# Obj.tag (Obj.repr 1.0) ;;
 - : int = 253
 # Obj.double_tag ;;
 - : int = 253
@@ -23364,9 +23383,20 @@ val sort_stdin : unit -&gt; unit
 +---------+----------+----------+- - - - -
 </programlisting>
       <para>
-        You can test this for yourself using the
+        First, let's check that float arrays do in fact have a different
+        tag number from normal floating point values.
+      </para>
+      <programlisting language="ocaml">
+# Obj.double_tag;;
+- : int = 253
+# Obj.double_array_tag;;
+- : int = 254
+</programlisting>
+      <para>
+        This tells us that float arrays have a tag value of 254. Now
+        let's test some sample values using the
         <literal>Obj.tag</literal> function to check that the allocated
-        block has the expected runtime tag, and
+        block has the expected runtime tag, and also use
         <literal>Obj.double_field</literal> to retrieve a float from
         within the block.
       </para>
@@ -23378,15 +23408,19 @@ val sort_stdin : unit -&gt; unit
 - : int = 0 
 # double_field (repr [| 1.1; 2.2; 3.3 |] ) 1 ;;
 - : float = 2.2
-# Obj.double_field (Obj.repr 1.234) 0;;
+# double_field (repr 1.234) 0;;
 - : float = 1.234
 </programlisting>
       <para>
-        Notice that float tuples are <emphasis>not</emphasis> optimized
-        in the same way as float records or arrays, and so they have the
-        usual tuple tag value of <literal>0</literal>. Only records and
-        arrays can have the array optimization, and only if every single
-        field is a float.
+        The first thing we tested above was that a float array has the
+        correct unboxed float array tag value (254). However, the next
+        line tests a tuple of floating point values instead, which are
+        <emphasis>not</emphasis> optimized in the same way and have the
+        normal tuple tag value (0).
+      </para>
+      <para>
+        Only records and arrays can have the float array optimization,
+        and for records every single field must be a float.
       </para>
     </sect2>
   </sect1>
@@ -26438,7 +26472,7 @@ $ ocamlc -dtypedtree typedef.ml
         the core compiler itself. However, it's useful to know that this
         intermediate form exists before we delve further into the code
         generation process next in
-        <ulink url="the-compiler-backend-byte-code-and-native-code">xref</ulink>.
+        <xref linkend="the-compiler-backend-byte-code-and-native-code"/>.
       </para>
     </sect2>
   </sect1>
@@ -26881,10 +26915,11 @@ L2: closure L1, 0
         units.
       </para>
       <para>
-        A typical OCaml library consists of multiple source files and
-        hence multiple <literal>cmo</literal> files that all need to
-        passed on the command line to use the library. The compiler can
-        combine these into a more convenient archive file by using the
+        A typical OCaml library consists of multiple source files, and
+        hence multiple <literal>cmo</literal> files that all need to be
+        passed as command-line arguments to use the library from other
+        code. The compiler can combine these multiple files into a more
+        convenient single archive file by using the
         <literal>-a</literal> flag. Bytecode archives are denoted by the
         <literal>cma</literal> extension.
       </para>
@@ -27030,26 +27065,10 @@ hello embedded world 2
 After calling OCaml
 </programlisting>
       <para>
-        Once inconvenience with <literal>gcc</literal> is that you need
-        to specify the location of the OCaml library directory. The
-        OCaml compiler can actually handle C object and sources
-        directly. It passes these through to the system C compiler but
-        adds its standard directory and runtime on the way. You can thus
-        compile the previous object file much more simply with
-        <literal>ocamlc</literal>.
-      </para>
-      <programlisting>
-$ ocamlc -o final_out2 embed_out.o main.c
-$ ./final_out2
-Before calling OCaml
-hello embedded world 1
-hello embedded world 2
-After calling OCaml
-</programlisting>
-      <para>
         You can inspect the commands that <literal>ocamlc</literal> is
         invoking by adding <literal>-verbose</literal> to the command
-        line. You can even obtain the C source code to the
+        line to help figure out the GCC command-line if you get stuck.
+        You can even obtain the C source code to the
         <literal>-output-obj</literal> result by specifying a
         <literal>.c</literal> output file extension instead of the
         <literal>.o</literal> we used earlier.
@@ -27388,7 +27407,7 @@ Estimated testing time 20s (change using -quota SECS).
           that must export a unique set of symbols to comply with the C
           binary interface. This means that any OCaml values that may be
           used by another compilation unit need to be mapped into a
-          symbol name. This mapping fhas to account for OCaml language
+          symbol name. This mapping has to account for OCaml language
           features such as nested modules, anonymous functions and
           variable names that shadow each other.
         </para>
@@ -27628,8 +27647,8 @@ Continuing.
           compiling <emphasis>and</emphasis> linking the binary. This
           generates extra code that records profile information to a
           file called <literal>gmon.out</literal> when the program is
-          executed. This profile information then can then be examined
-          using Gprof.
+          executed. This profile information can then be examined using
+          Gprof.
         </para>
       </sect3>
       <sect3 id="perf">
