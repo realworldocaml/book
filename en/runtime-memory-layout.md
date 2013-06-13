@@ -142,10 +142,10 @@ OCaml values. The garbage collector always inspects fields and follows them as
 part of the collection process described earlier.
 
 ```
-+------------------------+-------+----------+----------+----------+----
-| size of block in words |  col  | tag byte | value[0] | value[1] | ...
-+------------------------+-------+----------+----------+----------+----
- <-either 22 or 54 bits-> <2 bit> <--8 bit-->
++------------------------+---------+----------+----------+----------+----
+| size of block in words |  color  | tag byte | value[0] | value[1] | ...
++------------------------+---------+----------+----------+----------+----
+ <-either 22 or 54 bits-> <-2 bit-> <--8 bit-->
 ```
 
 The `size` field records the length of the block in memory words.  This is 22
