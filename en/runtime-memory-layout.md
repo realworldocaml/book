@@ -191,7 +191,7 @@ and `1` for `true` and `false` respectively.
 These basic types such as empty lists and `unit` are very efficient to use
 since integers are never allocated on the heap.  They can be passed directly in
 registers and not appear on the stack if you don't have too many parameters to
-your functions.  Modern architectures as as `x86_64` have a lot of spare
+your functions.  Modern architectures such as `x86_64` have a lot of spare
 registers to further improve the efficiency of using unboxed integers.
 
 ## Tuples, records and arrays
