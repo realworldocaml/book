@@ -52,7 +52,7 @@ express program structure.  In fact, many seasoned OCaml programmers rarely use
 classes and objects, if at all.
 
 Modules already provide these features in some form, but the main
-focus of classes is on code re-use through inheritance and late
+focus of classes is on code reuse through inheritance and late
 binding of methods.  This is a critical property of classes: the
 methods that implement an object are determined when the object is
 instantiated, a form of _dynamic_ binding.  In the meantime, while
