@@ -262,9 +262,9 @@ retrieve a float from within the block.
 - : int = 0 
 # double_field (repr [| 1.1; 2.2; 3.3 |] ) 1 ;;
 - : float = 2.2
-# Obj.double_field (Obj.repr 1.234) 0;;
+# double_field (repr 1.234) 0;;
 - : float = 1.234
-```ocaml
+```
 
 Notice that float tuples are *not* optimized in the same way as float records
 or arrays, and so they have the usual tuple tag value of `0`. Only records
