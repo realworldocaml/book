@@ -730,7 +730,7 @@ symbols; a procedure generally called *name mangling*.
 Each OCaml source file is compiled into a native object file that must export a
 unique set of symbols to comply with the C binary interface.  This means that
 any OCaml values that may be used by another compilation unit need to be mapped
-into a symbol name.  This mapping fhas to account for OCaml language features
+into a symbol name.  This mapping has to account for OCaml language features
 such as nested modules, anonymous functions and variable names that shadow each
 other.
 
