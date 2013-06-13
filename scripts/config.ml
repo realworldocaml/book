@@ -133,6 +133,7 @@ let from_email =
   ; "bonipart"                (* Brandon Bonipart <bonipart@gmail.com> *)
   ; "wdan"                    (* Yanhong Wu <wdan1990@gmail.com> *)
   ; "zmagg"                   (* Maggie Zhou <emmbeezee@gmail.com> *)
+  ; "so"                      (* TODO Shawn O'Connor <shawn@pathbreaker.com> *)
 
   (* Facebook people *)
   ; "pikatchu"                (* julien verlaguet <julien.verlaguet@gmail.com> *)
@@ -171,7 +172,7 @@ let allowed_users = function
   | "alpha2" -> internal_reviewers
   | "alpha3" -> internal_reviewers
   | "alpha4" -> internal_reviewers
-  | "alpha5" -> external_reviewers
-  | "alpha6" -> internal_reviewers
+  | "alpha5" -> internal_reviewers
+  | "alpha6" -> external_reviewers
   | "trunk"  -> internal_reviewers
   |_ -> internal_reviewers
