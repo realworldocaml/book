@@ -327,6 +327,7 @@ returns the current calendar time, and has the following C signature:
 ```c
 time_t time(time_t *);
 ```
+
 The first step is to open some of the Ctypes modules.
 
 * The `Ctypes` module provides functions for describing C types in OCaml.
