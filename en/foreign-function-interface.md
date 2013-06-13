@@ -615,7 +615,7 @@ structure.
 ``` ocaml
 # let gettimeofday' () =
   let tv = make timeval in
-  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1000000.0) ;;
@@ -663,7 +663,7 @@ let time' () = time (from_voidp time_t null)
 
 let gettimeofday' () =
   let tv = make timeval in
-  let _ = gettimeofday (addr tv) (from_voidp timezone null) in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1_000_000.)

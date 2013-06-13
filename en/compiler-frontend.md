@@ -141,7 +141,7 @@ as a statement instead of as a let-binding.
 
 ```ocaml
 (* broken_module.ml *)
-let _ =
+let () =
   module MyString = String;
   ()
 ```
@@ -159,7 +159,7 @@ via a local open, and compiles successfully.
 
 ```ocaml
 (* fixed_module.ml *)
-let _ =
+let () =
   let module MyString = String in
   ()
 ```
@@ -187,9 +187,9 @@ let add_and_print x y =
   print_endline (string_of_int v);
   v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print "a" "b" in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print "a" "b" in
   ()
 ```
 
@@ -229,9 +229,9 @@ let concat_and_print x y =
     print_endline (string_of_int v);
     v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print "a" "b" in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print "a" "b" in
   ()
 ```
 
@@ -253,9 +253,9 @@ let add_and_print x y =
   print_endline (string_of_int v);
   v
 
-let _ =
-  let _ = add_and_print 1 2 in
-  let _ = concat_and_print "a" "b" in
+let () =
+  let _x = add_and_print 1 2 in
+  let _y = concat_and_print "a" "b" in
   ()
 
 $ ocamlc -i follow_on_function_fixed.ml 
@@ -542,6 +542,53 @@ automatically generated code that implements an explicit comparison function
 for each field in the record.  If you're using the extension in your compiler
 command-line, this generated code is then compiled as if you had typed it in
 yourself.
+
+<note>
+<title>A style note: wildcards in `let` bindings</title>
+
+You may have noticed the `let _ = fun` construct in the auto-generated code above.
+The underscore in a `let` binding is just the same as a wildcard underscore in
+a pattern match, and tells the compiler to accept any return value and discard it
+immediately.
+
+This is fine for mechanically generated code from Type_conv, but should be
+avoided in code that you write by hand.  If it's a unit-returning expression,
+then write a `unit` binding explicitly instead.  This will cause a type error
+if the expression changes type in the future (e.g. due to code refactoring).
+
+```ocaml
+let () = <expr>
+```
+
+If the expression has a different type, then write it explicitly.
+
+```ocaml
+let (_:some_type) = <expr>
+let () = ignore (<expr> : some_type)
+let () = don't_wait_for (<expr>)  (* if the expression returns a unit Deferred.t *)
+```
+
+The last one is used to ignore Async expressions that should run in the background
+rather than blocking in the current thread.
+
+One other important reason for using wildcard matches is to bind a variable
+name to something that you want to use in future code, but don't want to use
+right away.  This would normally generate an "unused value" compiler warning.
+These warnings are suppressed for any variable name that's prepended with an
+underscore.
+
+```ocaml
+let fn x y =
+  let _z = x + y in
+  ()
+```
+
+Although you don't use `_z` in your code, this will never generate an unused
+variable warning.
+
+</note>
+
+#### Preprocessing module signatures
 
 Another useful feature of `type_conv` is that it can generate module signatures
 too.  Copy the earlier type definition into a `comparelib_test.mli` and rerun

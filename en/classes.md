@@ -126,7 +126,7 @@ The `md5` command is quite straight-forward now:
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   In_channel.(input_all stdin)
   |> hash_string (Hash.md5 ())
   |> transform_string (Hexa.encode ())
@@ -144,7 +144,7 @@ We can extend this simple example by selecting either the `md5` or `sha1` hash f
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   let hash_fn =
     match Filename.basename Sys.argv.(0) with
     |"md5" -> Hash.md5 ()
@@ -181,7 +181,7 @@ let evp_byte_to_key password tlen =
   done;
   String.uppercase o#get_string
 
-let _ =
+let () =
   let secret = "ocaml" in
   let key_len = 16 * 2 in
   let iv_len = 16 * 2 in

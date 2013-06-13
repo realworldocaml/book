@@ -1,7 +1,7 @@
 open Core.Std
 open Cryptokit
 
-let _ =
+let () =
   In_channel.(input_all stdin) |!
   hash_string (Hash.md5 ()) |!
   transform_string (Hexa.encode ()) |!
