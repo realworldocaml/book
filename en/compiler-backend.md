@@ -349,7 +349,7 @@ The bytecode files are then linked together with the OCaml standard library to
 produce an executable program.  The order in which `.cmo` arguments are
 presented on the command line defines the order in which compilation units are
 initialized at runtime.  Remember that OCaml has no single `main` function like
-C, so this link is order is more important than in C.
+C, so this link order is more important than in C programs.
 
 ### Executing bytecode
 
