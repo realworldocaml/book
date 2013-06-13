@@ -391,7 +391,7 @@ record in-place.
 
 The OCaml compiler keeps track of any mutable types and adds a call to the
 runtime `caml_modify` function before making the change.  This checks the
-location of target write and the value its being changed to, and ensures that
+location of target write and the value it's being changed to, and ensures that
 the remembered set is consistent.  Although the write barrier is reasonably
 efficient, it can sometimes be slower than simply allocating a fresh value on
 the fast minor heap and doing some extra minor collections.
