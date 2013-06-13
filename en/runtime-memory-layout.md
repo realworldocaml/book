@@ -252,9 +252,20 @@ that the contents are not OCaml values.
 +---------+----------+----------+- - - - -
 ```
 
-You can test this for yourself using the `Obj.tag` function to check that the
-allocated block has the expected runtime tag, and `Obj.double_field` to
-retrieve a float from within the block.
+First, let's check that float arrays do in fact have a different tag number
+from normal floating point values.
+
+```ocaml
+# Obj.double_tag;;
+- : int = 253
+# Obj.double_array_tag;;
+- : int = 254
+```
+
+This tells us that float arrays have a tag value of 254.  Now let's test some
+sample values using the `Obj.tag` function to check that the allocated block
+has the expected runtime tag, and also use `Obj.double_field` to retrieve a
+float from within the block.
 
 ```ocaml
 # open Obj ;;
@@ -268,10 +279,13 @@ retrieve a float from within the block.
 - : float = 1.234
 ```
 
-Notice that float tuples are *not* optimized in the same way as float records
-or arrays, and so they have the usual tuple tag value of `0`. Only records
-and arrays can have the array optimization, and only if every single field is
-a float.
+The first thing we tested above was that a float array has the correct unboxed
+float array tag value (254).  However, the next line tests a tuple of floating
+point values instead, which are *not* optimized in the same way and have the
+normal tuple tag value (0).
+
+Only records and arrays can have the float array optimization, and for records
+every single field must be a float.
 
 ## Variants and lists
 
