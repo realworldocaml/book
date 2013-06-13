@@ -1,5 +1,7 @@
 <!DOCTYPE bookinfo PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN' 'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'><bookinfo>
 
+  <subtitle>Functional Programming for the Masses</subtitle>
+
   <othercredit role='proofreader'>
     <firstname>FIX</firstname>
     <surname>ME!</surname>
