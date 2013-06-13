@@ -21405,6 +21405,32 @@ module Fields :
     also produce standalone native object files that can be embedded
     within other non-OCaml applications.
   </para>
+  <para>
+    The mechanism by which code in one programming language can invoke
+    routines in another different programming language is called a
+    <emphasis>foreign function interface</emphasis>. This chapter will
+    teach you:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        how to call routines in C libraries directly from your OCaml
+        code.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        build higher-level abstractions in OCaml from the low-level C
+        bindings.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        work through some full examples for binding a terminal interface
+        and UNIX date/time functions.
+      </para>
+    </listitem>
+  </itemizedlist>
   <sect1 id="the-ctypes-library">
     <title>The Ctypes library</title>
     <para>
@@ -21525,10 +21551,6 @@ let window : window typ = ptr void
       <literal>WINDOW</literal> C pointer. This value is used later in
       the Ctypes function definitions.
     </para>
-    <para>
-      That's all we need to invoke our first function call to
-      <literal>initscr</literal> to initalize the terminal.
-    </para>
     <programlisting language="ocaml">
 (* ncurses.ml 2/3 *)
 open Foreign
@@ -21537,13 +21559,15 @@ let initscr =
   foreign &quot;initscr&quot; (void @-&gt; returning window)
 </programlisting>
     <para>
-      The <literal>foreign</literal> function accepts two parameters:
+      That's all we need to invoke our first function call to
+      <literal>initscr</literal> to initalize the terminal. The
+      <literal>foreign</literal> function accepts two parameters:
     </para>
     <itemizedlist>
       <listitem>
         <para>
-          the C function call name, which is looked up using
-          <emphasis>dlsym(3)</emphasis>.
+          the C function call name, which is looked up using the
+          <literal>dlsym</literal> C standard library function.
         </para>
       </listitem>
       <listitem>
