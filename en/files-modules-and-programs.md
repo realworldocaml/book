@@ -366,7 +366,7 @@ is the place where you specify your module's interface, and as such is
 is a natural place to document the module as well.  We also started
 our comments with a double asterisk to cause them to be picked up by
 the `ocamldoc` tool when generating API documentation.  We'll discuss
-`ocamldoc` more in [xref](generating-documentation-from-interfaces).
+`ocamldoc` more in [xref](#the-compiler-frontend-parsing-and-type-checking).
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`.
 
