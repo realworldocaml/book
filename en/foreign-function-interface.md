@@ -300,10 +300,10 @@ val float : float typ
 val double : float typ
 ```
 
-These values are all of type `'a typ`, where the function name tells you the C
-type, and the `'a` component is the OCaml representation of that C type.  Most
-of the mappings are straightforward, but some of them need a bit more
-explanation.
+These values are all of type `'a typ`, where the value name (e.g. `void`) tells
+you the C type and the `'a` component (e.g. `unit`) is the OCaml
+representation of that C type.  Most of the mappings are straightforward, but
+some of them need a bit more explanation.
 
 * Void values appear in OCaml as the `unit` type. Using `void` in an
   argument or result type specification produces an OCaml function which accepts or returns unit.
