@@ -802,28 +802,18 @@ memory.  They are also fully supported in Ctypes, but we won't go into more
 detail here.
 
 <note>
-<title>Lifetime of allocated Ctypes</title>
+<title>Pointer operators for dereferencing and arithmeic</title>
 
-Values allocated via Ctypes (i.e. using `allocate`, `Array.make` and so on)
-will not be garbage-collected as long as they are reachable from OCaml values.
-The system memory they occupy is freed when they do become unreachable, via a
-finalizer function registered with the GC.
+Ctypes defines a number of operators that let you manipulate pointers and arrays
+just as you would in C.  The Ctypes equivalents do have the benefit of being
+more strongly typed, of course.
 
-The definition of reachability for Ctypes values is a little different from
-conventional OCaml values though.  The allocation functions return an
-OCaml-managed pointer to the value, and as long as some derivative pointer is
-still reachable by the GC, the value won't be collected.
-
-"Derivative" means a pointer that's computed from the original pointer via
-arithmetic, so a reachable reference to an array element or a structure field
-protects the whole object from collection.
-
-A corollary of the above rule is that pointers written into the C heap don't
-have any effect on reachability.  For example, if you have a C-managed array of
-pointers to structs then you'll need some additional way of keeping the structs
-around to protect them from collection.  You could achieve this via a global array
-of values on the OCaml side that would keep them live until they're no longer
-needed.
+Operator    Purpose      
+--------    -------
+`!@ p`      Dereference the pointer `p`.
+`p <-@ v`   Write the value `v` to the address `p`.
+`p +@ n`    If `p` points to an array element, then compute the address of the `n`th next element.
+`p -@ n`    If `p` points to an array element, then compute the address of the `n`th previous element.
 
 </note>
 
@@ -952,6 +942,32 @@ standard input as a list, converts it to a C array, passes it through qsort,
 and outputs the result to the standard output.  Again, remember to not confuse
 the `Ctypes.Array` module with the `Core.Std.Array` module: the former is in
 scope since we opened `Ctypes` at the start of the file.
+
+<note>
+<title>Lifetime of allocated Ctypes</title>
+
+Values allocated via Ctypes (i.e. using `allocate`, `Array.make` and so on)
+will not be garbage-collected as long as they are reachable from OCaml values.
+The system memory they occupy is freed when they do become unreachable, via a
+finalizer function registered with the GC.
+
+The definition of reachability for Ctypes values is a little different from
+conventional OCaml values though.  The allocation functions return an
+OCaml-managed pointer to the value, and as long as some derivative pointer is
+still reachable by the GC, the value won't be collected.
+
+"Derivative" means a pointer that's computed from the original pointer via
+arithmetic, so a reachable reference to an array element or a structure field
+protects the whole object from collection.
+
+A corollary of the above rule is that pointers written into the C heap don't
+have any effect on reachability.  For example, if you have a C-managed array of
+pointers to structs then you'll need some additional way of keeping the structs
+around to protect them from collection.  You could achieve this via a global array
+of values on the OCaml side that would keep them live until they're no longer
+needed.
+
+</note>
 
 ## Learning more about C bindings
 
