@@ -309,7 +309,7 @@ explanation.
   argument or result type specification produces an OCaml function which accepts or returns unit.
   Dereferencing a pointer to `void` is an error, as in C, and will raise the `IncompleteType` exception.
 * The C `size_t` type is an alias for one of the unsigned integer types.  The actual 
-  size and alignment requirements for `size_t` varys between platforms. Ctypes provides
+  size and alignment requirements for `size_t` varies between platforms. Ctypes provides
   an OCaml `size_t` type that is aliased to the appropriate integer type.
 * OCaml only supports double-precision floating point numbers, and so the C `float` and
   `double` functions both map onto the OCaml `float` type.
