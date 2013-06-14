@@ -285,6 +285,13 @@ white (during sweeping)     unreachable and can be freed
 gray                        reachable, but its fields have not been scanned
 black                       reachable, and its fields have been scanned
 
+The color tags in the value headers store most of the state of the marking
+process, allowing it to be paused and resumed later.  The GC and application
+alternate between marking a slice of the major heap and actually getting on
+with executing the program logic.  The OCaml runtime calculates a sensible
+value for the size of each major heap slice based on the rate of allocation and
+available memory (see below).
+
 The marking process starts with a set of *root* values that are always live
 (such as the application stack).  All values on the heap are initially marked
 as white values that are possibly reachable, but haven't been scanned yet.  It
