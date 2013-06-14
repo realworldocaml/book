@@ -87,9 +87,7 @@ according to the generational hypothesis.
 ### Allocating on the minor heap
 
 The minor heap is a contiguous chunk of virtual memory that is usually a few
-megabytes in size so that it can be scanned quickly.  The runtime stores the
-minor heap in two pointers (`caml_young_start` and `caml_young_end`) that
-delimit the start and end of the heap region.
+megabytes in size so that it can be scanned quickly.
 
 ```
                 <---- size ---->
@@ -98,13 +96,21 @@ delimit the start and end of the heap region.
                           blocks
 ```
 
+The runtime stores the minor heap in two pointers (`caml_young_start` and
+`caml_young_end`, but we will drop the `caml_young` prefix for brevity) that
+delimit the start and end of the heap region.  The `base` is the memory address
+returned by the system `malloc`, and `start` is aligned against the next
+nearest word boundary from `base` to make it easier to store OCaml values.
+
 In a fresh minor heap, the `limit` equals the `start` and the current `ptr`
 will equal the `end`.  `ptr` decreases as blocks are allocated until it reaches
-`limit`, at which point a minor garbage collection is triggered.  To allocate a
-block in the minor heap, `ptr` is decremented by the size of the block
-(including the header) and the header area is immediately set to a valid value.
-If there isn't enough space left for the block without decrementing past the
-`limit`, a minor garbage collection is triggered.
+`limit`, at which point a minor garbage collection is triggered.
+
+Allocating a block in the minor heap just requires `ptr` to be decremented by
+the size of the block (including the header) and checking that it's not less
+than `limit`.  If there isn't enough space left for the block without
+decrementing past the `limit`, a minor garbage collection is triggered.  This
+is a very fast check (with no branching) on most CPU architectures.
 
 You may wonder why `limit` is required at all, since it always seems to equal
 `start`.  It's because the easiest way for the runtime to schedule a minor heap
