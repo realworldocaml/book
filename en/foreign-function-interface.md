@@ -499,33 +499,6 @@ string will be rudely truncated.
 
 </note>
 
-### Abstract pointers
-
-Abstract types are typically used to interface with platform-dependent
-definitions often found in system headers.  For example, the type `pthread_t`
-is a pointer on some platforms, an integer on other platforms, and a `struct`
-on a third set of platforms.  One way to deal with this is to have build-time
-code which interrogates the C type in some way to determine an appropriate
-representation.  Another way is to use `abstract` and leave the representation
-opaque.
-
-<caution>
-<title>Abstract values can't be passed by value</title>
-
-Although `pthread_t` is a convenient example since the type used to implement
-it varies significantly across platforms, it's not actually a good match for
-`abstract` since values of type `pthread_t` are passed and returned by value
-and so can't be fully abstract.
-
-</caution>
-
-```ocaml   
-val abstract : size:int -> alignment:int -> 'a abstract typ
-```
-
-The `abstract` function accepts size and alignment requirements and ensures
-that these are satisfied when this type is used in a function call.
-
 ## Structs and unions
 
 The C constructs `struct` and `union` make it possible to build new types from
