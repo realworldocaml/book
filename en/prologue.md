@@ -150,11 +150,10 @@ powerful module system that makes code reuse so much more robust.
 At the same time, OCaml is not Haskell.  It takes a much more pragmatic
 approach by being strictly evaluated by default and permitting arbitrary
 side-effects.  In fact, you can write OCaml code that looks very similar to
-imperative C but remains completely type-safe. One of the major strengths of
-OCaml for systems programming is that, with some experience, you can predict
-the runtime behaviour of a block of code very easily, with very little compiler
-magic involved.  We'll explain some of these tricks to you as we go through the
-book and gradually introduce more complex concepts.
+imperative C, but that remains perfectly type-safe. One of the major strengths
+of OCaml for systems programming is that, with some experience, you can predict
+the runtime behaviour of a block of code very easily.  We'll explain some of
+these tricks to you as we go through the book.
 
 If you've learnt some OCaml before, this book may surprise you with some
 differences from your past experience.  Core redefines most of the standard
