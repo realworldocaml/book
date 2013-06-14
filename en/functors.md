@@ -29,29 +29,37 @@ including:
 
 ## A trivial example
 
-We'll start by considering the simplest possible example: a functor
-for incrementing an integer.  More precisely, we'll create a functor
-that takes a module containing a single integer variable `x`, and
-returns a new module with `x` incremented by one.  This is in no way a
-useful example, but it's a useful way to walk through the basic
-mechanics of functors.
+Let's create a functor that takes a module containing a single integer
+variable `x`, and returns a new module with `x` incremented by one.
+This is not actually a useful example, but it's a good way to walk
+through the basic mechanics of functors.
+
+First, let's define a signature for a module that contains a single
+value of type `int`.
 
 ```ocaml
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
+```
+
+Now we can define our functor.  We'll use `X_int` both to constrain
+the argument to the functor, as well as to constraint module returned
+by the functor.
+
+```ocaml
 # module Increment (M : X_int) : X_int = struct
     let x = M.x + 1
   end;;
 module Increment : functor (M : X_int) -> X_int
 ```
 
-One thing that immediately jumps out about functors is that they're
-considerably more heavyweight syntactically than ordinary functions.
-For one thing, functors require explicit (module) type annotations,
-which ordinary functions do not.  Here, we've specified the module
-type `X_int` for both the input and output of the functor.
-Technically, only the type on the input is mandatory, although in
-practice, one often specifies both.
+One thing that immediately jumps out is that functors are more
+syntactically heavyweight than ordinary functions.  For one thing,
+functors require explicit (module) type annotations, which ordinary
+functions do not.  Technically, only the type on the input is
+mandatory, although in practice, it's good practice to constrain the
+module returned by the functor, just as one typically uses an `mli`,
+even though it's not mandatory.
 
 The following shows what happens when we omit the module type for the
 output of the functor.
@@ -98,22 +106,24 @@ module Four : sig val x : int end
 
 The rules for determining whether a module matches a given signature
 are similar in spirit to the rules in an object-oriented language that
-determine whether an object satisfies a given interface.
+determine whether an object satisfies a given interface.  As in an
+object-oriented context, the extra information that doesn't match the
+signature you're looking for (in this case, the variable `y`), is
+simply ignored.
 
 ## A bigger example: computing with intervals
 
 Let's consider a more realistic example of how to use functors: a
 library for computing with intervals.  Intervals are a common
-computational object, and they come up in different contexts.  You
-might need to work with intervals of floating point values, or
-strings, or times.  In all of these cases, the basic mechanics are the
-same: as long as you have an underlying type for the endpoints with a
-well-defined total order, you can use the same basic logic for working
-with intervals.
+computational object, and they come up in different contexts and for
+different types.  You might need to work with intervals of floating
+point values, or strings, or times, and in each of these cases, you
+want similar operations: testing for emptiness, checking for
+containment, intersecting intervals, and so on.  
 
-We'll show you how to build a general purpose interval library that is
-functorized over the type of the endpoints of the intervals and the
-ordering of those endpoints.
+Let's see how to use functors to build a generic interval library that
+can be used with any type that supports a total ordering on the
+underlying set over which you want to build intervals.
 
 First we'll define a module type that captures the information we'll
 need about the endpoints of the intervals.  This interface, which
@@ -144,10 +154,8 @@ compare x y > 0     (* x > y *)
 The functor for creating the interval module is shown below.  We
 represent an interval with a variant type, which is either `Empty` or
 `Interval (x,y)`, where `x` and `y` are the bounds of the interval.
-In the following, we only implement a handful of the functions that
-one might want for a full-featured interval library.  Core contains a
-module in this style called `Interval` which has a more complete
-interface.
+In addition to the type, the functor contains implementations of a
+number of useful primitives for interacting with intervals.
 
 
 ```ocaml
@@ -156,20 +164,27 @@ interface.
     type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
 
+    (** [create low high] creates a new interval from [low] to
+        [high].  If [low > high], then the interval is empty *)
     let create low high =
       if Endpoint.compare low high > 0 then Empty
       else Interval (low,high)
 
+    (** Returns true iff the interval is empty *)
     let is_empty = function
       | Empty -> true
       | Interval _ -> false
 
+    (** [contains t x] returns true iff [x] is contained in the
+        interval [t] *)
     let contains t x =
       match t with
       | Empty -> false
       | Interval (l,h) ->
         Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
 
+    (** [intersect t1 t2] returns the intersection of the two input
+        intervals *)
     let intersect t1 t2 =
       let min x y = if Endpoint.compare x y <= 0 then x else y in
       let max x y = if Endpoint.compare x y >= 0 then x else y in
@@ -191,9 +206,9 @@ module Make_interval :
 ```
 
 We can instantiate the functor by applying it to a module with the
-right signature.  In the following, we provide the functor input as an
-anonymous module.  The module is anonymous because the module isn't
-named, even though the values inside it are.
+right signature.  In the following, rather than name the module first
+and then call the functor, we provide the functor input as an
+anonymous module.
 
 ```ocaml
 # module Int_interval =
@@ -241,7 +256,7 @@ val i2 : Int_interval.t = Int_interval.Interval (4, 10)
 
 This design gives us the freedom to use any comparison function we
 want for comparing the endpoints.  We could, for example, create a
-type of int interval with the order of the comparison reversed, as
+type of integer interval with the order of the comparison reversed, as
 follows:
 
 ```ocaml
@@ -295,9 +310,9 @@ abstract, we can bypass the `create` function.
 - : Int_interval.t = Int_interval.Interval (4, 3)
 ```
 
-To make `Int_interval.t` abstract, we need to apply an interface to
-the output of the `Make_interval`.  Here's an explicit interface that
-we can use for that purpose.
+To make `Int_interval.t` abstract, we need to restrict it the output
+of the `Make_interval` with an interface.  Here's an explicit
+interface that we can use for that purpose.
 
 ```ocaml
 # module type Interval_intf = sig
@@ -317,7 +332,8 @@ definition of `Make_interval`.  Notice that we added the type
 `Interval_intf`.
 
 ```ocaml
-# module Make_interval(Endpoint : Comparable) : Interval_intf = struct
+# module Make_interval(Endpoint : Comparable) : Interval_intf
+  = struct
 
     type endpoint = Endpoint.t
     type t = | Interval of Endpoint.t * Endpoint.t
@@ -360,7 +376,14 @@ S with type s = t
 where `S` is a module type, `s` is a type inside of `S`, and `t` is a
 type defined outside of `S`.  The result of this expression is a new
 signature that's been modified so that it exposes the fact that `s` is
-equal to `t`.  We can use a sharing constraint to create a specialized
+equal to `t`.  One can also apply multiple sharing constraints to the
+same signature.
+
+```ocaml
+S with type s = t and s' = t'
+```
+
+We can use a sharing constraint to create a specialized
 version of `Interval_intf` for integer intervals.
 
 ```ocaml
@@ -377,15 +400,20 @@ module type Int_interval_intf =
   end
 ```
 
-And we can also use it in the context of a functor, where the
-right-hand side of the sharing constraint is an element of the functor
-argument.  Thus, we expose an equality between a type in the output of
-the functor (in this case, the type `endpoint`) and a type in its
-input (`Endpoint.t`).
+We can also use sharing constraints in the context of a functor.  The
+most common use case is where you want to expose that some of the
+types of the module being generated by the functor are related to the
+types in the module fed to the functor.
+
+In this case, we'd like to expose an equality between the type
+`endpoint` in the new module and the type `Endpoint.t`, from the
+module `Endpoint` that is the functor argument.  We can do this as
+follows.
 
 ```ocaml
 # module Make_interval(Endpoint : Comparable)
-      : Interval_intf with type endpoint = Endpoint.t = struct
+      : (Interval_intf with type endpoint = Endpoint.t)
+  = struct
 
     type endpoint = Endpoint.t
     type t = | Interval of Endpoint.t * Endpoint.t
@@ -408,7 +436,8 @@ module Make_interval :
 
 So now, the interface is as it was, except that `endpoint` is now
 known to be equal to `Endpoint.t`.  As a result of that type equality,
-we can now do things like construct intervals again.
+we can again do things that require that `endpoint` be exposed, like
+constructing intervals.
 
 ```ocaml
 # let i = Int_interval.create 3 4;;
@@ -473,12 +502,11 @@ module Make_interval :
     end
 ```
 
-The interface is precisely what we want, and we no longer need to
-define the `endpoint` type alias in the body of the module.  If we
-instantiate this module, we'll see that it works properly: we can
-construct new intervals, but `t` is abstract, and so we can't directly
-access the constructors and violate the invariants of the data
-structure.
+The interface is precisely what we want: the type `t` is abstract, the
+type of the endpoint is exposed, so we can create values of type
+`Int_interval.t` using the creation function, but not directly using
+the constructors and thereby violating the invariants of the module,
+as you can see below.
 
 ```ocaml
 # module Int_interval = Make_interval(Int);;
@@ -490,6 +518,15 @@ Characters 0-27:
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: Unbound constructor Int_interval.Interval
 ```
+
+In addition, the `endpoint` type is gone from the interface, meaning
+we no longer need to define the `endpoint` type alias in the body of
+the module.
+
+It's worth noting that the name is somewhat misleading, in that
+there's nothing destructive about destructive substitution; it's
+really just a way of creating a new signature by transforming an
+existing one.
 
 ### Using multiple interfaces
 
@@ -529,7 +566,7 @@ of `t` within the functor.
 
 ```ocaml
 # module Make_interval(Endpoint : Comparable)
-    : Interval_intf with type endpoint := Endpoint.t = struct
+    : (Interval_intf with type endpoint := Endpoint.t) = struct
 
     type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
@@ -562,20 +599,17 @@ end
 ```
 
 We can modify `Make_interval` to use the `Sexpable` interface, for
-both its input and its output.  Note the use of destructive
-substitution to combine multiple signatures together.  This is
-important because it stops the `type t`'s from the different
-signatures from shadowing each other.
+both its input and its output.  First, let's create an extended
+version of the `Interval_intf` interface that includes the functions
+from the Sexpable interface.  We can do this using destructive
+substitution on the `Sexpable` interface, to avoid having multiple
+distinct type `t`'s  clashing with each other.
 
-Also note that we have been careful to override the sexp-converter
-here to ensure that the data structures invariants are still maintained
-when reading in from an s-expression.
 
 ```ocaml
 # module type Interval_intf_with_sexp = sig
-   type t
-   include Interval_intf with type t := t
-   include Sexpable      with type t := t
+   include Interval_intf
+   include Sexpable with type t := t
   end;;
 module type Interval_intf_with_sexp =
   sig
@@ -588,57 +622,102 @@ module type Interval_intf_with_sexp =
     val t_of_sexp : Sexp.t -> t
     val sexp_of_t : t -> Sexp.t
   end
+```
+
+Equivalently, we can define a type `t` within our new module, and
+apply destructive substitutions to all of the included interfaces,
+`Interval_intf` included, as shown below.  This is somewaht cleaner
+when combining multiple interfaces, since it correctly reflects that
+all of the signatures are being handled equivalently.
+
+```ocaml
+# module type Interval_intf_with_sexp = sig
+   type t
+   include Interval_intf with type t := t
+   include Sexpable      with type t := t
+  end;;
+```
+
+Now we can write the functor itself.  We have been careful to override
+the sexp-converter here to ensure that the data structure's invariants
+are still maintained when reading in from an s-expression.
+
+```ocaml
 # module Make_interval(Endpoint : sig
-    type t
-    include Comparable with type t := t
-    include Sexpable   with type t := t
-  end) : Interval_intf_with_sexp with type endpoint := Endpoint.t =
-  struct
+                         type t
+                         include Comparable with type t := t
+                         include Sexpable   with type t := t
+                       end)
+    : (Interval_intf_with_sexp with type endpoint := Endpoint.t)
+  = struct
 
-      type t = | Interval of Endpoint.t * Endpoint.t
-               | Empty
-      with sexp
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+    with sexp
 
-      let create low high =
-         ...
+    (** [create low high] creates a new interval from [low] to
+        [high].  If [low > high], then the interval is empty *)
+    let create low high =
+      if Endpoint.compare low high > 0 then Empty
+      else Interval (low,high)
 
-      (* put a wrapper round the auto-generated sexp_of_t to enforce
-         the invariants of the data structure *)
-      let t_of_sexp sexp =
-        match t_of_sexp sexp with
-        | Empty -> Empty
-        | Interval (x,y) -> create x y
+    (* put a wrapper round the auto-generated sexp_of_t to enforce
+       the invariants of the data structure *)
+    let t_of_sexp sexp =
+      match t_of_sexp sexp with
+      | Empty -> Empty
+      | Interval (x,y) -> create x y
 
-      ....
+    (** Returns true iff the interval is empty *)
+    let is_empty = function
+      | Empty -> true
+      | Interval _ -> false
 
-     end ;;
+    (** [contains t x] returns true iff [x] is contained in the
+        interval [t] *)
+    let contains t x =
+      match t with
+      | Empty -> false
+      | Interval (l,h) ->
+        Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
+
+    (** [intersect t1 t2] returns the intersection of the two input
+        intervals *)
+    let intersect t1 t2 =
+      let min x y = if Endpoint.compare x y <= 0 then x else y in
+      let max x y = if Endpoint.compare x y >= 0 then x else y in
+      match t1,t2 with
+      | Empty, _ | _, Empty -> Empty
+      | Interval (l1,h1), Interval (l2,h2) ->
+        create (max l1 l2) (min h1 h2)
+  end;;
 module Make_interval :
   functor
     (Endpoint : sig
-           type t
-           val compare : t -> t -> int
-           val sexp_of_t : t -> Sexplib.Sexp.t
-           val t_of_sexp : Sexplib.Sexp.t -> t
-         end) ->
+                  type t
+                  val compare : t -> t -> int
+                  val t_of_sexp : Sexp.t -> t
+                  val sexp_of_t : t -> Sexp.t
+                end) ->
     sig
       type t
       val create : Endpoint.t -> Endpoint.t -> t
       val is_empty : t -> bool
       val contains : t -> Endpoint.t -> bool
       val intersect : t -> t -> t
-      val sexp_of_t : t -> Sexplib.Sexp.t
-      val t_of_sexp : Sexplib.Sexp.t -> t
+      val t_of_sexp : Sexp.t -> t
+      val sexp_of_t : t -> Sexp.t
     end
 ```
 
 And now, we can use that sexp-converter in the ordinary way:
 
 ```ocaml
-# module Int = Make_interval(Int) ;;
+# module Int_interval = Make_interval(Int) ;;
 # Int_interval.sexp_of_t (Int_interval.create 3 4);;
-- : Sexplib.Sexp.t = (Interval 3 4)
+- : Sexp.t = (Interval 3 4)
 # Int_interval.sexp_of_t (Int_interval.create 4 3);;
-- : Sexplib.Sexp.t = Empty
+- : Sexp.t = Empty
 ```
 
 ## Extending modules
@@ -659,13 +738,25 @@ type 'a t
 
 val empty : 'a t
 
+(** [enqueue el q] adds [el] to the back of [q] *)
 val enqueue : 'a t -> 'a -> 'a t
 
-(** [dequeue q] returns None if the [q] is empty *)
+(** [dequeue q] returns None if the [q] is empty, otherwise returns
+    the first element of the queue and the remainder of the queue *)
 val dequeue : 'a t -> ('a * 'a t) option
 
+(** Folds over the queue, from front to back *)
 val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
 ```
+
+The `Fqueue.fold` function above requires some explanation.  It
+follows the same pattern as the `List.fold` function we described in
+[xref](using-the-list-module-effectively).  Essentially, `Fqueue.fold
+~q ~init ~f` walks over the elements of `q` from front to back,
+starting with an accumulator of `init` and using `f` to update the
+accumulator value as it walks over the queue, returning the final
+value of the accumulator at the end of the computation.  Fold is a
+quite powerful operation, as we'll see.
 
 Now let's implement `Fqueue`.  A standard trick is for the `Fqueue` to
 maintain an input and an output list, so that one can efficiently
@@ -682,22 +773,23 @@ type 'a t = 'a list * 'a list
 
 let empty = ([],[])
 
-let enqueue (l1,l2) x = (x :: l1,l2)
+let enqueue (in_list, out_list) x =
+  (x :: in_list,out_list)
 
-let dequeue (in_list,out_list) =
+let dequeue (in_list, out_list) =
   match out_list with
-  | hd :: tl -> Some (hd, (in_list,tl))
+  | hd :: tl -> Some (hd, (in_list, tl))
   | [] ->
     match List.rev in_list with
     | [] -> None
     | hd :: tl -> Some (hd, ([], tl))
 
-let fold (in_list,out_list) ~init ~f =
+let fold (in_list, out_list) ~init ~f =
   let after_out = List.fold ~init ~f out_list in
   List.fold_right ~init:after_out ~f in_list
 ```
 
-One problem with our `Fqueue` is that the interface is quite skeletal.
+One problem with `Fqueue` is that the interface is quite skeletal.
 There are lots of useful helper functions that one might want that
 aren't there.  The list module, by way of contrast, has functions like
 `List.iter`, which runs a function on each element; and
@@ -739,7 +831,7 @@ end
 
 (* For extending a Foldable module *)
 module Extend(Arg : S)
-  : Extension with type 'a t := 'a Arg.t =
+  : (Extension with type 'a t := 'a Arg.t) =
 struct
   open Arg
 
@@ -784,6 +876,8 @@ In order to apply the functor, we'll put the definition of `Fqueue` in
 a sub-module called `T`, and then call `Foldable.Extend` on `T`.
 
 ```ocaml
+(* file: fqueue.ml *)
+
 open Core.Std
 
 module T = struct
@@ -791,34 +885,39 @@ module T = struct
 
   let empty = [],[]
 
-  let enqueue (l1,l2) x =
-    (x :: l1,l2)
+  let enqueue (in_list,out_list) x =
+    (x :: in_list,out_list)
 
-  let rec dequeue (in_list,out_list) =
+  let dequeue (in_list, out_list) =
     match out_list with
-    | hd :: tl -> Some (hd, (in_list,tl))
-    | [] -> dequeue ([], List.rev in_list)
+    | hd :: tl -> Some (hd, (in_list, tl))
+    | [] ->
+      match List.rev in_list with
+      | [] -> None
+      | hd :: tl -> Some (hd, ([], tl))
 
-let fold (in_list,out_list) ~init ~f =
-  let after_out = List.fold ~init ~f out_list in
-  List.fold_right ~init:after_out ~f in_list
+  let fold (in_list,out_list) ~init ~f =
+    let after_out = List.fold ~init ~f out_list in
+    List.fold_right ~init:after_out ~f in_list
 end
 
 include T
 include Foldable.Extend(T)
 ```
 
-This is a sufficiently useful pattern that it is implemented in Core,
-under the name `Container.Make`.
+Core comes with a number of functors for extending modules that follow
+this same basic pattern, including:
 
-This pattern comes up quite a bit in Core, and is used to for a
-variety of purposes.
-
-- Adding comparison-based data structures like maps and sets, based on
-  the `Comparable` interface.
-- Adding hash-based data structures like hash sets and hash heaps.
-- Support for so-called monadic libraries, like the ones discussed in
+- `Container.Make`,  which is very similar to `Foldable.Extend`.
+- `Comparable.Make`, which adds a variety of helper functions and
+  types for types that have a comparison function.
+- `Hashable.Make` for adding hash-based data structures like hash sets
+  and hash heaps for types that have hash functions.
+- `Monad.Make` for so-called monadic libraries, like the ones discussed in
   [xref](#error-handling) and
   [xref](#concurrent-programming-with-async).  Here, the functor is
   used to provide a collection of standard helper functions based on
-  the core `bind` and `return` operators.
+  the `bind` and `return` operators.
+
+These functors come in handy when you want to add the same kind of
+functionality that is commonly available in Core to your own types.
