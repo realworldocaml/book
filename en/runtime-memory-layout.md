@@ -78,27 +78,37 @@ point to anything meaningful beyond their immediate value.
 
 ### Distinguishing integer and pointers at runtime
 
-Values use a single tag bit per word to distinguish integers and pointers at
-runtime. The value is an integer if the lowest bit of the block word is
-non-zero.  Several OCaml types map onto this integer representation, including
-`bool`, `int`, the empty list, `unit`, and variants without constructors.
+Wrapping primitives types (such as integers) inside another data structure that
+records extra metadata about the value is known as *boxing*.  Values are boxed
+in order to make it easier for the garbage collector to do its job, but at the
+expense of an extra level of indirection to access the data within the boxed
+value.
 
-Integers are unboxed runtime values in OCaml, which means that they can be
-stored directly without having to allocate a wrapper block that will take up
-more memory. They can also be passed directly to other function calls in
-registers, and are generally the cheapest and fastest values to use in OCaml.
+OCaml values don't all have to be boxed at runtime.  Instead, values use a
+single tag bit per word to distinguish integers and pointers at runtime. The
+value is an integer if the lowest bit of the block word is non-zero, and a
+pointer if the lowest bit of the block word is zero.  Several OCaml types map
+onto this integer representation, including `bool`, `int`, the empty list,
+`unit`, and variants without constructors.
 
-The value is treated as a memory pointer if the lowest bit of the `value` is
-zero. A pointer value is stored unmodified since pointers are guaranteed to be
-word-aligned with the bottom bits always being zero.  The next problem is
-distinguishing between pointers to OCaml values (which should be followed by
-the garbage collector) and pointers into the system heap to C values (which
-shouldn't be followed).
+This representations means that integers are unboxed runtime values in OCaml so
+that they can be stored directly without having to allocate a wrapper block.
+They can be passed directly to other function calls in registers and are
+generally the cheapest and fastest values to use in OCaml.
 
-The mechanism for this is simple since the runtime system keeps track of the
+A value is treated as a memory pointer if its lowest bit is zero. A pointer
+value can still be stored unmodified despite this, since pointers are
+guaranteed to be word-aligned (with the bottom bits always being zero).
+
+The only problem that remains with this memory representation is distinguishing
+between pointers to OCaml values (which should be followed by the garbage
+collector) and pointers into the system heap to C values (which shouldn't be
+followed).
+
+The mechanism for this is simple, since the runtime system keeps track of the
 heap blocks it has allocated for OCaml values. If the pointer is inside a heap
 chunk that is marked as being managed by the OCaml runtime, it is assumed to
-point to an OCaml value. If it points outside the OCaml runtime area, it is 
+point to an OCaml value. If it points outside the OCaml runtime area, it is
 treated as an opaque C pointer to some other system resource.
 
 <note>
