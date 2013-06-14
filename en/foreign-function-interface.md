@@ -225,6 +225,9 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
 
 Running `./hello` should now display a Hello World in your terminal!
 
+<note>
+<title>Reliable dynamic linking of external libraries</title>
+
 The command-line above includes `-cclib -lncurses` to make the OCaml compiler
 link the executable to the `ncurses` C library, which in turns makes the C
 symbols available to the program when it starts.  You'll get an error when you
@@ -236,6 +239,26 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
 $ ./hello_broken 
 Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not found")
 ```
+
+There's one additional twist on modern versions of GCC (as included in recent
+Ubuntus).  The `--as-needed` flag is passed to the linker by default, which
+instructs it to only link libraries that actually contain symbols used by the
+program at build time.  This must be disabled when using Ctypes 0.1, as it will
+drop any libraries that might be opened at runtime by the `foreign` function.
+
+So on Ubuntu, you'll need to compile with this option disabled to ensure that
+the Ncurses library dependency isn't dropped at compile time.
+
+```console
+$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign \
+    -cclib '-Wl,--no-as-needed -lncurses' \
+    ncurses.mli ncurses.ml hello.ml -o hello
+```
+
+*Note to reviewers*: this will be fixed in a future Ctypes release, so is
+only needed when using Ctypes 0.1.
+
+</note>
 
 Ctypes wouldn't be very useful if it were limited to only defining simple C
 types of course. It provides full support for C pointer arithmetic, pointer
