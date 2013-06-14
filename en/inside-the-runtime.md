@@ -220,10 +220,10 @@ immediate collection and copy it to the major heap anyway.
 
 ### Memory allocation strategies
 
-The major heap does its best to manage memory allocation as efficiently as possible,
-and relies on heap compaction ot ensure that memory stays contiguous and unfragmented.
-The default allocation policy normally works fine for most applications, but
-it's worth bearing in mind that there are other options too.
+The major heap does its best to manage memory allocation as efficiently as
+possible, and relies on heap compaction to ensure that memory stays contiguous
+and unfragmented.  The default allocation policy normally works fine for most
+applications, but it's worth bearing in mind that there are other options too.
 
 The free list of blocks is always checked first when allocating a new block in
 the major heap.  The default free list search is called *next-fit allocation*,
