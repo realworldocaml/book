@@ -466,7 +466,8 @@ scenarios using `Core_bench`, and experiment with the tradeoffs.  The
 command-line benchmark binaries have a number of useful options that affect
 garbage collection behaviour.
 
-```
+```console
+$ ./barrier_bench.native -help
 Benchmark for mutable, immutable
 
   barrier_bench.native [COLUMN ...]
@@ -474,19 +475,27 @@ Benchmark for mutable, immutable
 Columns that can be specified are:
 	name       - Name of the test.
 	cycles     - Number of CPU cycles (RDTSC) taken.
-	cycles95ci - 95% confidence interval and error for cycles.
+	cycles-err - 95% confidence interval and R^2 error for cycles.
 	~cycles    - Cycles taken excluding major GC costs.
 	time       - Number of nano secs taken.
-	time95ci   - 95% confidence interval and error for time (ns).
+	time-err   - 95% confidence interval and R^2 error for time.
 	~time      - Time (ns) taken excluding major GC costs.
-	allocated  - Allocation of major, minor and promoted words.
+	alloc      - Allocation of major, minor and promoted words.
+	gc         - Show major and minor collections per 1000 runs.
 	percentage - Relative execution time as a percentage.
-	gc         - Show major and minor collections.
 	speedup    - Relative execution cost as a speedup.
 	samples    - Number of samples collected for profiling.
 
+R^2 error indicates how noisy the benchmark data is. A value of
+1.0 means the amortized cost of benchmark is almost exactly predicated
+and 0.0 means the reported values are not reliable at all.
+Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination
+
+Major and Minor GC stats indicate how many collections happen per 1000
+runs of the benchmarked function.
+
 The following columns will be displayed by default:
-	+name time time95ci percentage
+	+name time percentage
 
 To specify that a column should be displayed only if it has a non-trivial value,
 prefix the column name with a '+'.
@@ -508,7 +517,6 @@ prefix the column name with a '+'.
   [-version]           print the version of this build and exit
   [-help]              print this help text and exit
                        (alias: -?)
-
 ```
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
