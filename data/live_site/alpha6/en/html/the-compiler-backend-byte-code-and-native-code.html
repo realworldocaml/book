@@ -1,0 +1,1292 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 24. The Compiler Backend: Byte-code and Native-code / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha6',
+                        page: 'the\u002Dcompiler\u002Dbackend\u002Dbyte\u002Dcode\u002Dand\u002Dnative\u002Dcode.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="foreign-function-interface.html">20. Foreign Function Interface</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="memory-representation-of-values.html">21. Memory Representation of Values</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="understanding-the-garbage-collector.html">22. Understanding the Garbage Collector</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="the-compiler-frontend-parsing-and-type-checking.html">23. The Compiler Frontend: Parsing and Type Checking</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="the-compiler-backend-byte-code-and-native-code.html" class="here">24. The Compiler Backend: Byte-code and Native-code</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 24. The Compiler Backend: Byte-code and Native-code</h1>
+                
+                
+
+    <p id="idp11796608">
+    Once OCaml has passed the type checking stage, it can stop emitting
+    syntax and type errors and begin the process of compiling the
+    well-formed modules into executable code.
+  </p><p id="idp11797200">
+    It's even possible to compile OCaml to run efficiently on foreign
+    environments such as Javascript or the Java Virtual Machine. These
+    aren't supported by the core OCaml distribution, but are available
+    on OPAM. We'll mention these as we go through the chapter so you can
+    experiment with them too.
+  </p><p id="idp11797920">
+    In this chapter, we'll cover the following topics:
+  </p><ul><li><p id="idp11798896">
+        the untyped intermediate lambda code where pattern matching is
+        optimized.
+      </p></li><li><p id="idp11799776">
+        the bytecode <code>ocamlc</code> compiler and
+        <code>ocamlrun</code> interpreter.
+      </p></li><li><p id="idp11802016">
+        the native code <code>ocamlopt</code> code generator, and
+        debugging and profiling native code.
+      </p></li></ul><section><h1 id="the-untyped-lambda-form">The untyped lambda form</h1><p id="idp11804576">
+      The first code generation phase eliminates all the static type
+      information into a simpler intermediate <span><em>lambda
+      form</em></span>. The lambda form discards higher-level constructs
+      such as modules and objects and replaces them with simpler values
+      such as records and function pointers. Pattern matches are also
+      analyzed and compiled into highly optimized automata.
+    </p><p id="idp11805776">
+      The lambda form is the key stage that discards the OCaml type
+      information and maps the source code to the runtime memory model
+      described in
+      <a href="memory-representation-of-values.html">Chapter 21, <i>Memory Representation of Values</i></a>. This
+      stage also performs some optimizations, most notably converting
+      pattern match statements into more optimized but low-level
+      statements.
+    </p><section><h1 id="pattern-matching-optimization">Pattern matching optimization</h1><p id="idp11808272">
+        The compiler dumps the lambda form in an s-expression syntax if
+        you add the <code>-dlambda</code> directive to the
+        command-line. Let's use this to learn more about how the OCaml
+        pattern matching engine works by building three different
+        pattern matches and comparing their lambda forms.
+      </p><p id="idp11809696">
+        Let's start by creating a straightforward exhaustive pattern
+        match using normal variants.
+      </p><div class="highlight"><pre><span class="c">(* pattern_monomorphic_exhaustive.ml *)</span>
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Alice</span> <span class="o">|</span> <span class="nc">Bob</span> <span class="o">|</span> <span class="nc">Charlie</span> <span class="o">|</span> <span class="nc">David</span>
+
+<span class="k">let</span> <span class="n">test</span> <span class="n">v</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="n">v</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="nc">Alice</span>   <span class="o">-&gt;</span> <span class="mi">100</span>
+  <span class="o">|</span> <span class="nc">Bob</span>     <span class="o">-&gt;</span> <span class="mi">101</span>
+  <span class="o">|</span> <span class="nc">Charlie</span> <span class="o">-&gt;</span> <span class="mi">102</span>
+  <span class="o">|</span> <span class="nc">David</span>   <span class="o">-&gt;</span> <span class="mi">103</span>
+</pre></div><p id="idp11811408">
+        The lambda output for this code looks like this.
+      </p><pre id="idp11811872">
+$ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
+(setglobal Pattern_monomorphic_exhaustive!
+  (let
+    (test/1013
+       (function v/1014
+         (switch* v/1014
+          case int 0: 100
+          case int 1: 101
+          case int 2: 102
+          case int 3: 103)))
+    (makeblock 0 test/1013)))
+</pre><p id="idp11812848">
+        It's not important to understand every detail of this internal
+        form, but some interesting points emerge from reading it.
+      </p><ul><li><p id="idp11813904">
+            There are no mention of modules or types any more. Global
+            values are created via <code>setglobal</code> and
+            OCaml values are constructed by
+            <code>makeblock</code>. The blocks are the runtime
+            values you should remember from
+            <a href="memory-representation-of-values.html">Chapter 21, <i>Memory Representation of Values</i></a>.
+          </p></li><li><p id="idp11817104">
+            The pattern match has turned into a switch case that jumps
+            to the right case depending on the header tag of
+            <code>v</code>. Recall that variants without
+            parameters are stored in memory as integers in the order
+            which they appear. The pattern matching engine knows this
+            and has transformed the pattern into an efficient jump
+            table.
+          </p></li><li><p id="idp11818976">
+            Values are addressed by a unique name that distinguished
+            shadowed values by appending a number (e.g.
+            <code>v/1014</code>). The type safety checks in the
+            earlier phase ensure that these low-level accesses never
+            violate runtime memory safety, so this layer doesn't do any
+            dynamic checks. Unwise use of unsafe features such as the
+            <code>Obj.magic</code> module can still easily induce
+            crashes at this level.
+          </p></li></ul><p id="idp11821520">
+        The first pattern match is <span><em>exhaustive</em></span>, so
+        there are no unknown match cases that the compiler needs to
+        check for (e.g. a value greater than 3). What happens if we
+        modify the code to use an incomplete pattern match instead?
+      </p><div class="highlight"><pre><span class="c">(* pattern_monomorphic_incomplete.ml *)</span>
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Alice</span> <span class="o">|</span> <span class="nc">Bob</span> <span class="o">|</span> <span class="nc">Charlie</span> <span class="o">|</span> <span class="nc">David</span>
+
+<span class="k">let</span> <span class="n">test</span> <span class="n">v</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="n">v</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="nc">Alice</span>   <span class="o">-&gt;</span> <span class="mi">100</span>
+  <span class="o">|</span> <span class="nc">Bob</span>     <span class="o">-&gt;</span> <span class="mi">101</span>
+  <span class="o">|</span> <span class="o">_</span>       <span class="o">-&gt;</span> <span class="mi">102</span>
+</pre></div><p id="idp11823744">
+        The lambda output for this code is now quite different.
+      </p><pre id="idp11824208">
+$ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml 
+(setglobal Pattern_monomorphic_incomplete!
+  (let
+    (test/1013
+       (function v/1014 (if (!= v/1014 1) (if (!= v/1014 0) 102 100) 101)))
+    (makeblock 0 test/1013)))
+</pre><p id="idp11825104">
+        The compiler has reverted to testing the value as a set of
+        nested conditionals. The lambda code above first checks to see
+        if the value is <code>Alice</code>, then if it's
+        <code>Bob</code> and finally falls back to the default
+        <code>102</code> return value for everything else.
+      </p><p id="idp11827872">
+        Exhaustive pattern matching is thus a better coding style at
+        several levels. It rewards you with more useful compile-time
+        warnings when you modify type definitions
+        <span><em>and</em></span> generates more efficient runtime code
+        too.
+      </p><p id="idp11828928">
+        Finally, let's look at the same code, but with polymorphic
+        variants instead of normal variants.
+      </p><div class="highlight"><pre><span class="c">(* pattern_polymorphic.ml *)</span>
+<span class="k">let</span> <span class="n">test</span> <span class="n">v</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="n">v</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Alice</span>   <span class="o">-&gt;</span> <span class="mi">100</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Bob</span>     <span class="o">-&gt;</span> <span class="mi">101</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">Charlie</span> <span class="o">-&gt;</span> <span class="mi">102</span>
+  <span class="o">|</span> <span class="o">`</span><span class="nc">David</span>   <span class="o">-&gt;</span> <span class="mi">103</span>
+</pre></div><p id="idp11830528">
+        The lambda form for this reveals the most inefficient result
+        yet.
+      </p><pre id="idp11831024">
+$ ocamlc -dlambda -c pattern_polymorphic.ml 
+(setglobal Pattern_polymorphic!
+  (let
+    (test/1008
+       (function v/1009
+         (if (&gt;= v/1009 482771474) (if (&gt;= v/1009 884917024) 100 102)
+           (if (&gt;= v/1009 3306965) 101 103))))
+    (makeblock 0 test/1008)))
+</pre><p id="idp11831968">
+        We mentioned earlier in <a href="variants.html">Chapter 6, <i>Variants</i></a>
+        that pattern matching over polymorphic variants is slightly less
+        efficient, and it should be clearer why this is the case now.
+        Polymorphic variants have a runtime value that's calculated by
+        hashing the variant name, and so the compiler has to test each
+        of these possible hash values in sequence.
+      </p></section><section><h1 id="benchmarking-pattern-matching">Benchmarking pattern matching</h1><p id="idp11834752">
+        Let's benchmark these three pattern matching techniques to
+        quantify their runtime costs more accurately. The
+        <code>Core_bench</code> module runs the tests thousands of
+        times and also calculates statistical variance of the results.
+        You'll need to <code>opam install core_bench</code> to get
+        the library.
+      </p><div class="highlight"><pre><span class="c">(* pattern.ml: benchmark different pattern matching styles *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">open</span> <span class="nn">Core_bench</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Alice</span> <span class="o">|</span> <span class="nc">Bob</span> <span class="o">|</span> <span class="nc">Charlie</span> <span class="o">|</span> <span class="nc">David</span>
+
+<span class="k">let</span> <span class="n">polymorphic_pattern</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">test</span> <span class="n">v</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">v</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">Alice</span>   <span class="o">-&gt;</span> <span class="mi">100</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">Bob</span>     <span class="o">-&gt;</span> <span class="mi">101</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">Charlie</span> <span class="o">-&gt;</span> <span class="mi">102</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">David</span>   <span class="o">-&gt;</span> <span class="mi">103</span>
+  <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">v</span> <span class="o">-&gt;</span> <span class="n">ignore</span><span class="o">(</span><span class="n">test</span> <span class="n">v</span><span class="o">))</span>
+    <span class="o">[`</span><span class="nc">Alice</span><span class="o">;</span> <span class="o">`</span><span class="nc">Bob</span><span class="o">;</span> <span class="o">`</span><span class="nc">Charlie</span><span class="o">;</span> <span class="o">`</span><span class="nc">David</span><span class="o">]</span>
+ 
+<span class="k">let</span> <span class="n">monomorphic_pattern_exhaustive</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">test</span> <span class="n">v</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">v</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">Alice</span>   <span class="o">-&gt;</span> <span class="mi">100</span>
+    <span class="o">|</span> <span class="nc">Bob</span>     <span class="o">-&gt;</span> <span class="mi">101</span>
+    <span class="o">|</span> <span class="nc">Charlie</span> <span class="o">-&gt;</span> <span class="mi">102</span>
+    <span class="o">|</span> <span class="nc">David</span>   <span class="o">-&gt;</span> <span class="mi">103</span>
+  <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">v</span> <span class="o">-&gt;</span> <span class="n">ignore</span><span class="o">(</span><span class="n">test</span> <span class="n">v</span><span class="o">))</span>
+    <span class="o">[</span> <span class="nc">Alice</span><span class="o">;</span> <span class="nc">Bob</span><span class="o">;</span> <span class="nc">Charlie</span><span class="o">;</span> <span class="nc">David</span> <span class="o">]</span>
+
+ <span class="k">let</span> <span class="n">monomorphic_pattern_incomplete</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">test</span> <span class="n">v</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">v</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">Alice</span>   <span class="o">-&gt;</span> <span class="mi">100</span>
+    <span class="o">|</span> <span class="nc">Bob</span>     <span class="o">-&gt;</span> <span class="mi">101</span>
+    <span class="o">|</span> <span class="o">_</span>       <span class="o">-&gt;</span> <span class="mi">102</span>
+  <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">v</span> <span class="o">-&gt;</span> <span class="n">ignore</span><span class="o">(</span><span class="n">test</span> <span class="n">v</span><span class="o">))</span>
+    <span class="o">[</span> <span class="nc">Alice</span><span class="o">;</span> <span class="nc">Bob</span><span class="o">;</span> <span class="nc">Charlie</span><span class="o">;</span> <span class="nc">David</span> <span class="o">]</span>
+ 
+<span class="k">let</span> <span class="n">tests</span> <span class="o">=</span> <span class="o">[</span>
+    <span class="s2">&quot;Polymorphic pattern&quot;</span><span class="o">,</span> <span class="n">polymorphic_pattern</span><span class="o">;</span>
+    <span class="s2">&quot;Monomorphic incomplete pattern&quot;</span><span class="o">,</span> <span class="n">monomorphic_pattern_incomplete</span><span class="o">;</span>
+    <span class="s2">&quot;Monomorphic exhaustive pattern&quot;</span><span class="o">,</span> <span class="n">monomorphic_pattern_exhaustive</span>
+<span class="o">]</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">tests</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(</span><span class="n">name</span><span class="o">,</span><span class="n">test</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nn">Bench</span><span class="p">.</span><span class="nn">Test</span><span class="p">.</span><span class="n">create</span> <span class="o">~</span><span class="n">name</span> <span class="n">test</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="nn">Bench</span><span class="p">.</span><span class="n">make_command</span>
+  <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
+</pre></div><p id="idp11838928">
+        Building and executing this example will run for around 30
+        seconds by default, and you'll see the results summarised in a
+        neat table.
+      </p><pre id="idp11839488">
+$ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
+Estimated testing time 30s (change using -quota SECS).
++────────────────────────────────+───────────+─────────────+────────────+
+│ Name                           │ Time (ns) │   Time 95ci │ Percentage │
++────────────────────────────────+───────────+─────────────+────────────+
+│ Polymorphic pattern            │     22.38 │ 22.34-22.43 │     100.00 │
+│ Monomorphic incomplete pattern │     20.98 │ 20.95-21.02 │      93.77 │
+│ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
++────────────────────────────────+───────────┴─────────────+────────────+
+</pre><p id="idp11842544">
+        These results confirm our earlier performance hypothesis
+        obtained from inspecting the lambda code. The shortest running
+        time comes from the exhaustive pattern match and polymorphic
+        variant pattern matching is the slowest. There isn't a hugely
+        significant difference in these examples, but you can use the
+        same techniques to peer into the innards of your own source code
+        and narrow down any performance hotspots.
+      </p><p id="idp11843424">
+        The lambda form is primarily a stepping stone to the bytecode
+        executable format that we'll cover next. It's often easier to
+        look at the textual output from this stage than to wade through
+        the native assembly code from compiled executables.
+      </p><aside class="note"><h1>
+      Learning more about pattern matching compilation
+      </h1><p id="idp11844816">
+        Pattern matching is an important part of OCaml programming.
+        You'll often encounter deeply nested pattern matches over
+        complex data structures in real code. A good paper that
+        describes the fundamental algorithms implemented in OCaml is
+        <a href="http://dl.acm.org/citation.cfm?id=507641" target="_top">&quot;Optimizing
+        pattern matching&quot;</a> by Fabrice Le Fessant and Luc
+        Maranget.
+      </p><p id="idp11846336">
+        The paper describes the backtracking algorithm used in classical
+        pattern matching compilation, and also several OCaml-specific
+        optimizations such as the use of exhaustiveness information and
+        control flow optimizations via static exceptions.
+      </p><p id="idp11847024">
+        It's not essential that you understand all of this just to use
+        pattern matching of course, but it'll give you insight as to why
+        pattern matching is such a lightweight language construct to use
+        in OCaml code.
+      </p></aside></section></section><section><h1 id="generating-portable-bytecode">Generating portable bytecode</h1><p id="idp11849136">
+      After the lambda form has been generated, we are very close to
+      having executable code. The OCaml tool-chain branches into two
+      separate compilers at this point. We'll describe the the bytecode
+      compiler first, which consists of two pieces:
+    </p><ul><li><p id="idp11850320">
+<code>ocamlc</code> compiles files into a bytecode that
+          is a close mapping to the lambda form.
+        </p></li><li><p id="idp11851888">
+<code>ocamlrun</code> is a portable interpreter that
+          executes the bytecode.
+        </p></li></ul><p id="idp11853312">
+      The big advantage of using bytecode is simplicity, portability and
+      compilation speed. The mapping from the lambda form to bytecode is
+      straightforward, and this results in predictable (but slow)
+      execution speed.
+    </p><p id="idp11853952">
+      The interpreter uses the OCaml stack and an accumulator to store
+      values. It only has seven registers in total: the program counter,
+      stack pointer, accumulator, exception and argument pointers, and
+      environment and global data.
+    </p><p id="idp11854608">
+      You can display the bytecode instructions in textual form via
+      <code>-dinstr</code>. Try this on one of our earlier pattern
+      matching examples.
+    </p><pre id="idp11855856">
+$ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
+    branch L2
+L1: acc 0
+    switch 6 5 4 3/
+L6: const 100
+    return 1
+L5: const 101
+    return 1
+L4: const 102
+    return 1
+L3: const 103
+    return 1
+L2: closure L1, 0
+    push
+    acc 0
+    makeblock 1, 0
+    pop 1
+    setglobal Pattern_monomorphic_exhaustive!
+</pre><p id="idp11856848">
+      The bytecode above has been simplified from the lambda form into a
+      set of simple instructions that are executed in serial by the
+      interpreter.
+    </p><p id="idp11857408">
+      There are around 140 instructions in total, but most are just
+      minor variants of commonly encountered operations (e.g. function
+      application at a specific arity). You can find full details
+      <a href="http://cadmium.x9c.fr/distrib/caml-instructions.pdf" target="_top">online</a>.
+    </p><aside class="note"><h1>
+    Where did the bytecode instruction set come from?
+    </h1><p id="idp11859488">
+      The bytecode interpreter is much slower than compiled native code,
+      but is still remarkably performant for an interpreter without a
+      JIT compiler. Its efficiency can be traced back to Xavier Leroy's
+      ground-breaking work in 1990 on
+      <a href="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps" target="_top">&quot;The
+      ZINC experiment: An Economical Implementation of the ML
+      Language&quot;</a>.
+    </p><p id="idp11861040">
+      This paper laid the theoretical basis for the implementation of an
+      instruction set for a strictly evaluated functional language such
+      as OCaml. The bytecode interpreter in modern OCaml is still based
+      on the ZINC model. The native code compiler uses a different model
+      since it uses CPU registers for function calls instead of always
+      passing arguments on the stack as the bytecode interpreter does.
+    </p><p id="idp11861872">
+      Understanding the reasoning behind the different implementations
+      of the bytecode interpreter and the native compiler is a very
+      useful exercise for any budding language hacker.
+    </p></aside><section><h1 id="compiling-and-linking-bytecode">Compiling and linking bytecode</h1><p id="idp11863744">
+        The <code>ocamlc</code> command compiles individual
+        <code>ml</code> files into bytecode files that have a
+        <code>cmo</code> extension. The compiled bytecode files
+        are matched with the associated <code>cmi</code> interface
+        which contains the type signature exported to other compilation
+        units.
+      </p><p id="idp11867152">
+        A typical OCaml library consists of multiple source files and
+        hence multiple <code>cmo</code> files that all need to
+        passed on the command line to use the library. The compiler can
+        combine these into a more convenient archive file by using the
+        <code>-a</code> flag. Bytecode archives are denoted by the
+        <code>cma</code> extension.
+      </p><p id="idp11869952">
+        The individual objects in the library are linked as regular
+        <code>cmo</code> files in the order specified when the
+        library file was built. If an object file within the library
+        isn't referenced elsewhere in the program, then it isn't
+        included in the final binary unless the
+        <code>-linkall</code> flag forces its inclusion. This
+        behaviour is analogous to how C handles object files and
+        archives (<code>.o</code> and <code>.a</code>
+        respectively).
+      </p><p id="idp11873632">
+        The bytecode files are then linked together with the OCaml
+        standard library to produce an executable program. The order in
+        which <code>.cmo</code> arguments are presented on the
+        command line defines the order in which compilation units are
+        initialized at runtime. Remember that OCaml has no single
+        <code>main</code> function like C, so this link is order
+        is more important than in C.
+      </p></section><section><h1 id="executing-bytecode">Executing bytecode</h1><p id="idp11877072">
+        The bytecode runtime comprises three parts: the bytecode
+        interpreter, garbage collector, and a set of C functions that
+        implement the primitive operations. The bytecode contains
+        instructions to call these C functions when required.
+      </p><p id="idp11877744">
+        The OCaml linker produces bytecode targeted the standard OCaml
+        runtime by default, and so needs to know about any C functions
+        that are referenced from other libraries that aren't loaded by
+        default.
+      </p><p id="idp11878384">
+        Information about these extra libraries can be specified while
+        linking a bytecode archive.
+      </p><pre id="idp11878896">
+$ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
+</pre><p id="idp11879616">
+        The <code>dllib</code> flag embeds the arguments in the
+        archive file. Any subsequent packages linking this archive will
+        also include the extra C linking directive. This in turn lets
+        the interpreter dynamically load the external library symbols
+        when it executes the bytecode.
+      </p><p id="idp11881024">
+        You can also generate a complete standalone executable that
+        bundles the <code>ocamlrun</code> interpreter with the
+        bytecode in a single binary. This is known as a <span><em>custom
+        runtime</em></span> mode and is built as follows.
+      </p><pre id="idp11882768">
+$ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
+</pre><p id="idp11883504">
+        The custom mode is the most similar mode to native code
+        compilation, as both generate standalone executables. There are
+        quite a few other options available for compiling bytecode
+        (notably with shared libraries or building custom runtimes).
+        Full details can be found in the
+        <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html" target="_top">manual</a>.
+      </p></section><section><h1 id="embedding-ocaml-bytecode-in-c">Embedding OCaml bytecode in C</h1><p id="idp11886272">
+        A consequence of using the bytecode compiler is that the final
+        link phase must be performed by <code>ocamlc</code>.
+        However, you might sometimes want to embed your OCaml code
+        inside an existing C application. OCaml also supports this mode
+        of operation via the <code>-output-obj</code> directive.
+      </p><p id="idp11888384">
+        This mode causes <code>ocamlc</code> to output a C object
+        file that containing the bytecode for the OCaml part of the
+        program, as well as a <code>caml_startup</code> function.
+        All of the OCaml modules are linked into this object file as
+        bytecode, just as they would be for an executable.
+      </p><p id="idp11890496">
+        This object file can then be linked with C code using the
+        standard C compiler, and only needs the bytecode runtime library
+        (which is installed as <code>libcamlrun.a</code>).
+        Creating an executable just requires you to link the runtime
+        library with the bytecode object file. Here's an example to show
+        how it all fits together.
+      </p><p id="idp11891968">
+        Create two OCaml source files that contain a single print line.
+      </p><pre id="idp11892448">
+$ cat embed_me1.ml 
+let () = print_endline &quot;hello embedded world 1&quot;
+$ cat embed_me2.ml 
+let () = print_endline &quot;hello embedded world 2&quot;
+</pre><p id="idp11893392">
+        Next, create a C file which will be your main entry point.
+      </p><div class="highlight"><pre><span class="cm">/* main.c */</span>
+<span class="cp">#include &lt;stdio.h&gt;</span>
+<span class="cp">#include &lt;caml/alloc.h&gt;</span>
+<span class="cp">#include &lt;caml/mlvalues.h&gt;</span>
+<span class="cp">#include &lt;caml/memory.h&gt;</span>
+<span class="cp">#include &lt;caml/callback.h&gt;</span>
+
+<span class="kt">int</span> 
+<span class="nf">main</span> <span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">puts</span><span class="p">(</span><span class="s">&quot;Before calling OCaml&quot;</span><span class="p">);</span>
+  <span class="n">caml_startup</span> <span class="p">(</span><span class="n">argv</span><span class="p">);</span>
+  <span class="n">puts</span><span class="p">(</span><span class="s">&quot;After calling OCaml&quot;</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div><p id="idp11895056">
+        Now compile the OCaml files into a standalone object file.
+      </p><pre id="idp11895536">
+$ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
+</pre><p id="idp11896272">
+        After this point, you no longer need the OCaml compiler, as
+        <code>embed_out.o</code> has all of the OCaml code
+        compiled and linked into a single object file. Compile an output
+        binary using gcc to test this out.
+      </p><pre id="idp11897600">
+$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lcamlrun -ltermcap \
+  -o final_out embed_out.o main.c
+$ ./final_out 
+Before calling OCaml
+hello embedded world 1
+hello embedded world 2
+After calling OCaml
+</pre><p id="idp11898480">
+        Once inconvenience with <code>gcc</code> is that you need
+        to specify the location of the OCaml library directory. The
+        OCaml compiler can actually handle C object and sources
+        directly. It passes these through to the system C compiler but
+        adds its standard directory and runtime on the way. You can thus
+        compile the previous object file much more simply with
+        <code>ocamlc</code>.
+      </p><pre id="idp11900720">
+$ ocamlc -o final_out2 embed_out.o main.c
+$ ./final_out2
+Before calling OCaml
+hello embedded world 1
+hello embedded world 2
+After calling OCaml
+</pre><p id="idp11901536">
+        You can inspect the commands that <code>ocamlc</code> is
+        invoking by adding <code>-verbose</code> to the command
+        line. You can even obtain the C source code to the
+        <code>-output-obj</code> result by specifying a
+        <code>.c</code> output file extension instead of the
+        <code>.o</code> we used earlier.
+      </p><pre id="idp11905712">
+$ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
+$ cat embed_out.c
+</pre><p id="idp11906464">
+        Embedding OCaml code like this lets you write OCaml that
+        interfaces with any environment that works with a C compiler.
+        You can even cross back from the C code into OCaml by using the
+        <code>Callback</code> module to register named entry
+        points in the OCaml code. This is explained in detail in the
+        <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149" target="_top">interfacing
+        with C</a> section of the OCaml manual.
+      </p></section></section><section><h1 id="compiling-fast-native-code">Compiling fast native code</h1><p id="idp11910048">
+      The native code compiler is ultimately the tool that most
+      production OCaml code goes through. It compiles the lambda form
+      into fast native code executables, with cross-module inlining and
+      additional optimization passes that the bytecode interpreter
+      doesn't perform. Care is taken to ensure compatibility with the
+      bytecode runtime, so the same code should run identically when
+      compiled with either toolchain.
+    </p><p id="idp11910896">
+      The <code>ocamlopt</code> command is the frontend to the
+      native code compiler, and has a very similar interface to
+      <code>ocamlc</code>. It also accepts <code>ml</code>
+      and <code>mli</code> files, but compiles them to:
+    </p><ul><li><p id="idp11914736">
+          A <code>.o</code> file containing native object code.
+        </p></li><li><p id="idp11916256">
+          A <code>.cmx</code> file containing extra information
+          for linking and cross-module optimization.
+        </p></li><li><p id="idp11917856">
+          A <code>.cmi</code> compiled interface file that is the
+          same as the bytecode compiler.
+        </p></li></ul><p id="idp11919312">
+      When the compiler links modules together into an executable, it
+      uses the contents of the <code>cmx</code> files to perform
+      cross-module inlining across compilation units. This can be a
+      significant speedup for standard library functions that are
+      frequently used outside of their module.
+    </p><p id="idp11920736">
+      Collections of <code>.cmx</code> and <code>.o</code>
+      files can also be be linked into a <code>.cmxa</code>
+      archive by passing the <code>-a</code> flag to the compiler.
+      However, unlike the bytecode version, you must keep the individual
+      <code>cmx</code> files in the compiler search path so that
+      they are available for cross-module inlining. If you don't do
+      this, the compilation will still succeed, but you will have missed
+      out on an important optimization and have slower binaries.
+    </p><section><h1 id="inspecting-assembly-output">Inspecting assembly output</h1><p id="idp11926112">
+        The native code compiler generates assembly language that is
+        then passed to the system assembler for compiling into object
+        files. You can get <code>ocamlopt</code> to output the
+        assembly by passing the <code>-S</code> flag to the
+        compiler command-line.
+      </p><p id="idp11928192">
+        The assembly code is highly architecture specific, so the
+        discussion below assumes an Intel or AMD 64-bit platform. We've
+        generated the example code using <code>-inline 20</code>
+        and <code>-nodynlink</code> since it's best to generate
+        assembly code with the full optimizations that the compiler
+        supports. Even though these optimizations make the code a bit
+        harder to read, it will give you a more accurate picture of what
+        executes on the CPU. Don't forget that you can use the lambda
+        code from earlier to get a slightly higher level picture of the
+        code if you get lost in the more verbose assembly.
+      </p><section><h1 id="the-impact-of-polymorphic-comparison">The impact of polymorphic comparison</h1><p id="idp11931728">
+          We warned you earlier in
+          <a href="maps-and-hashtables.html">Chapter 13, <i>Maps and Hashtables</i></a> that using
+          polymorphic comparison is both convenient and perilous. Let's
+          look at precisely what the difference is at the assembly
+          language level now.
+        </p><p id="idp11933056">
+          First create a comparison function where we've explicitly
+          annotated the types, so the compiler knows that only integers
+          are being compared.
+        </p><div class="highlight"><pre><span class="c">(* compare_mono.ml *)</span>
+<span class="k">let</span> <span class="n">cmp</span> <span class="o">(</span><span class="n">a</span><span class="o">:</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">b</span><span class="o">:</span><span class="kt">int</span><span class="o">)</span> <span class="o">=</span>
+  <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="k">then</span> <span class="n">a</span> <span class="k">else</span> <span class="n">b</span>
+</pre></div><p id="idp11934656">
+          Now compile this into assembly and read the resulting
+          <code>compare_mono.S</code> file.
+        </p><pre id="idp11935856">
+$ ocamlopt -inline 20 -nodynlink -S compare_mono.ml
+$ cat compare_mono.S
+</pre><p id="idp11936608">
+          If you've never seen assembly language before then the
+          contents may be rather scary. While you'll need to learn x86
+          assembly to fully understand it, we'll try to give you some
+          basic instructions to spot patterns in this section. The
+          excerpt of the implementation of the <code>cmp</code>
+          function can be found below.
+        </p><pre id="idp11938096">
+_camlCompare_mono__cmp_1008:
+    .cfi_startproc
+.L101:
+    cmpq    %rbx, %rax
+    jle .L100
+    ret
+    .align  2
+.L100:
+    movq    %rbx, %rax
+    ret
+    .cfi_endproc
+</pre><p id="idp11938944">
+          The <code>_camlCompare_mono__cmp_1008</code> is an
+          assembly label that has been computed from the module name
+          (<code>Compare_mono</code>) and the function name
+          (<code>cmp_1008</code>). The numeric suffix for the
+          function name comes straight from the lambda form (which you
+          can inspect using <code>-dlambda</code>, but in this
+          case isn't necessary).
+        </p><p id="idp11942480">
+          The arguments to <code>cmp</code> are passed in the
+          <code>%rbx</code> and <code>%rax</code> registers,
+          and compared using the <code>jle</code> &quot;jump if
+          less than or equal&quot; instruction. This requires both the
+          arguments to be immediate integers to work. Now let's see what
+          happens if our OCaml code omits the type annotations and is a
+          polymorphic comparison instead.
+        </p><div class="highlight"><pre><span class="c">(* compare_poly.ml *)</span>
+<span class="k">let</span> <span class="n">cmp</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span>
+  <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="k">then</span> <span class="n">a</span> <span class="k">else</span> <span class="n">b</span>
+</pre></div><p id="idp11947472">
+          Compiling this code with <code>-S</code> results in a
+          significantly more complex assembly output for the same
+          function.
+        </p><pre id="idp11948688">
+_camlCompare_poly__cmp_1008:
+        .cfi_startproc
+        subq    $24, %rsp
+        .cfi_adjust_cfa_offset  24
+.L101:
+        movq    %rax, 8(%rsp)
+        movq    %rbx, 0(%rsp)
+        movq    %rax, %rdi
+        movq    %rbx, %rsi
+        leaq    _caml_greaterthan(%rip), %rax
+        call    _caml_c_call
+.L102:
+        leaq    _caml_young_ptr(%rip), %r11
+        movq    (%r11), %r15
+        cmpq    $1, %rax
+        je      .L100
+        movq    8(%rsp), %rax
+        addq    $24, %rsp
+        .cfi_adjust_cfa_offset  -24
+        ret
+        .cfi_adjust_cfa_offset  24
+        .align  2
+.L100:
+        movq    0(%rsp), %rax
+        addq    $24, %rsp
+        .cfi_adjust_cfa_offset  -24
+        ret
+        .cfi_adjust_cfa_offset  24
+        .cfi_endproc
+</pre><p id="idp11950128">
+          The <code>.cfi</code> directives are assembler hints
+          that contain Call Frame Information that lets the GNU debugger
+          provide more sensible backtraces, and have no effect on
+          runtime performance. Notice that the rest of the
+          implementation is no longer a simple register comparison.
+          Instead, the arguments are pushed on the stack (the
+          <code>%rsp</code> register) and a C function call is
+          invoked by placing a pointer to
+          <code>caml_greaterthan</code> in <code>%rax</code>
+          and jumping to <code>caml_c_call</code>.
+        </p><p id="idp11954592">
+          OCaml on 64-bit Intel architectures caches the location of the
+          minor heap in the <code>%r11</code> register since it's
+          so frequently referenced in OCaml functions. This register
+          isn't guaranteed to be preserved when calling into C code
+          (which can clobber <code>%r11</code> for its own
+          purposes), and so <code>%r11</code> is restored after
+          returning from the <code>caml_greaterthan</code> call.
+          Finally the return value of the comparison is popped from the
+          stack and returned.
+        </p><aside class="tip"><h1>
+        Reading the implementation of the C primitives
+        </h1><p id="idp11959024">
+          If you have a copy of the OCaml source tree handy, it's worth
+          reading through the definition of
+          <code>caml_greaterthan()</code>. The built-in primitives
+          for polymorphic comparison can be found in
+          <code>caml/byterun/compare.c</code>.
+        </p><p id="idp11961072">
+          The key function is <code>compare_val()</code>, which
+          directly examines the runtime representation of two OCaml
+          values to decide which is greater. This requires the header
+          tag to be examined, and recursive structures must be tested
+          step-by-step.
+        </p><p id="idp11962464">
+          Avoiding running all of this code is why you should try to
+          write explicit comparison functions in OCaml instead.
+        </p></aside></section><section><h1 id="benchmarking-polymorphic-comparison">Benchmarking polymorphic comparison</h1><p id="idp11964464">
+          You don't have to fully understand the intricacies of assembly
+          language to see that this polymorphic comparison is much
+          heavier than the simple monomorphic integer comparison from
+          earlier. Let's confirm this hypothesis again by writing a
+          quick <code>Core_bench</code> test with both functions.
+        </p><div class="highlight"><pre><span class="o">$</span> <span class="n">cat</span> <span class="n">bench_poly_and_mono</span><span class="o">.</span><span class="n">ml</span> 
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">open</span> <span class="nn">Core_bench</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">polymorphic_compare</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">cmp</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="k">then</span> <span class="n">a</span> <span class="k">else</span> <span class="n">b</span> <span class="k">in</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">to</span> <span class="mi">1000</span> <span class="k">do</span>
+    <span class="n">ignore</span><span class="o">(</span><span class="n">cmp</span> <span class="mi">0</span> <span class="n">i</span><span class="o">)</span>
+  <span class="k">done</span>
+
+<span class="k">let</span> <span class="n">monomorphic_compare</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">cmp</span> <span class="o">(</span><span class="n">a</span><span class="o">:</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">b</span><span class="o">:</span><span class="kt">int</span><span class="o">)</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="k">then</span> <span class="n">a</span> <span class="k">else</span> <span class="n">b</span> <span class="k">in</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">to</span> <span class="mi">1000</span> <span class="k">do</span>
+    <span class="n">ignore</span><span class="o">(</span><span class="n">cmp</span> <span class="mi">0</span> <span class="n">i</span><span class="o">)</span>
+  <span class="k">done</span>
+
+<span class="k">let</span> <span class="n">tests</span> <span class="o">=</span> <span class="o">[</span>
+    <span class="s2">&quot;Polymorphic comparison&quot;</span><span class="o">,</span> <span class="n">polymorphic_compare</span><span class="o">;</span>
+    <span class="s2">&quot;Monomorphic comparison&quot;</span><span class="o">,</span> <span class="n">monomorphic_compare</span> <span class="o">]</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">tests</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(</span><span class="n">name</span><span class="o">,</span><span class="n">test</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nn">Bench</span><span class="p">.</span><span class="nn">Test</span><span class="p">.</span><span class="n">create</span> <span class="o">~</span><span class="n">name</span> <span class="n">test</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="nn">Bench</span><span class="p">.</span><span class="n">make_command</span>
+  <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
+</pre></div><p id="idp11967584">
+          Running this shows quite a significant runtime difference
+          between the two.
+        </p><pre id="idp11968096">
+$ ./bench_poly_and_mono.native 
+Estimated testing time 20s (change using -quota SECS).
+┌────────────────────────┬───────────┬───────────────┬────────────┐
+│ Name                   │ Time (ns) │     Time 95ci │ Percentage │
+├────────────────────────┼───────────┼───────────────┼────────────┤
+│ Polymorphic comparison │    10_087 │ 10_080-10_096 │     100.00 │
+│ Monomorphic comparison │    585.51 │ 584.60-586.57 │       5.80 │
+└────────────────────────┴───────────┴───────────────┴────────────┘
+</pre><p id="idp11970800">
+          We see that the polymorphic comparison is close to 20 times
+          slower! These results shouldn't be taken too seriously as this
+          is a very narrow test, which like all such microbenchmarks
+          aren't representative of more complex codebases. However, if
+          you're building numerical code that runs many iterations in a
+          tight inner loop, it's worth manually peering at the produced
+          assembly code to see if you can hand-optimize it.
+        </p></section></section><section><h1 id="debugging-native-code-binaries">Debugging native code binaries</h1><p id="idp11973152">
+        The native code compiler builds executables that can be debugged
+        using conventional system debuggers such as GNU
+        <code>gdb</code>. You need to compile your libraries with
+        the <code>-g</code> option to add the debug information to
+        the output, just as you need to with C compilers.
+      </p><p id="idp11975248">
+        Extra debugging information is inserted into the output assembly
+        when the library is compiled in debug mode. These include the
+        CFI stubs you will have noticed in the profiling output earlier
+        (<code>.cfi_start_proc</code> and
+        <code>.cfi_end_proc</code> to delimit an OCaml function
+        call, for example).
+      </p><section><h1 id="understanding-name-mangling">Understanding name mangling</h1><p id="idp11978560">
+          So how do you refer to OCaml functions into an interactive
+          debugger like <code>gdb</code>? The first thing you need
+          to know is how function names compile down into C symbols; a
+          procedure generally called <span><em>name mangling</em></span>.
+        </p><p id="idp11980304">
+          Each OCaml source file is compiled into a native object file
+          that must export a unique set of symbols to comply with the C
+          binary interface. This means that any OCaml values that may be
+          used by another compilation unit need to be mapped into a
+          symbol name. This mapping fhas to account for OCaml language
+          features such as nested modules, anonymous functions and
+          variable names that shadow each other.
+        </p><p id="idp11981184">
+          The conversion follows some straightforward rules for named
+          variables and functions:
+        </p><ul><li><p id="idp11982208">
+              The symbol is prefixed by <code>caml</code> and the
+              local module name, with dots replaced by underscores.
+            </p></li><li><p id="idp11983840">
+              This is followed by a double <code>__</code> suffix
+              and the variable name.
+            </p></li><li><p id="idp11985456">
+              The variable name is also suffixed by a
+              <code>_</code> and a number. This is the result of
+              the lambda compilation that replaces each variable name
+              with a unique value within the module. You can determine
+              this number by examining the <code>-dlambda</code>
+              output from <code>ocamlopt</code>.
+            </p></li></ul><p id="idp11988528">
+          Anonymous functions are hard to predict without inspecting
+          intermediate compiler output. If you need to debug them it's
+          usually easier to modify the source code to let-bind the
+          anonymous function to a variable name.
+        </p></section><section><h1 id="interactive-breakpoints-with-the-gnu-debugger">Interactive breakpoints with the GNU debugger</h1><p id="idp11990576">
+          Let's see name mangling in action with some interactive
+          debugging in the GNU <code>gdb</code> debugger.
+        </p><div><table summary="Caution: Beware gdb on MacOS X"><tr><td rowspan="2" width="25"><img alt="[Caution]" src="support/figs/caution.png"/></td><th>
+        Beware <code>gdb</code> on MacOS X
+        </th></tr><tr><td><p id="idp11993120">
+          The examples here assume that you are running
+          <code>gdb</code> on either Linux or FreeBSD. MacOS X
+          does have <code>gdb</code> installed, but it's a rather
+          quirky experience that doesn't reliably interpret the
+          debugging information contained in the native binaries. This
+          can result in function names showing up as raw symbols such as
+          <code>.L101</code> instead of their more human-readable
+          form.
+        </p><p id="idp11996016">
+          For OCaml 4.1, we'd recommend you do native code debugging on
+          an alternate platform such as Linux, or manually look at the
+          assembly code output to map the symbol names onto their
+          precise OCaml functions.
+        </p></td></tr></table></div><p id="idp11996800">
+          Let's write a mutually recursive function that selects
+          alternating values from a list. This isn't tail recursive and
+          so our stack size will grow as we single-step through the
+          execution.
+        </p><div class="highlight"><pre><span class="c">(* alternate_list.ml : select every other value from an input list *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="k">rec</span> <span class="n">take</span> <span class="o">=</span>
+  <span class="k">function</span>
+  <span class="o">|</span><span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+  <span class="o">|</span><span class="n">hd</span><span class="o">::</span><span class="n">tl</span> <span class="o">-&gt;</span> <span class="n">hd</span> <span class="o">::</span> <span class="o">(</span><span class="n">skip</span> <span class="n">tl</span><span class="o">)</span>
+<span class="ow">and</span> <span class="n">skip</span> <span class="o">=</span>
+  <span class="k">function</span>
+  <span class="o">|</span><span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
+  <span class="o">|</span><span class="n">hd</span><span class="o">::</span><span class="n">tl</span> <span class="o">-&gt;</span> <span class="n">take</span> <span class="n">tl</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">take</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">;</span><span class="mi">6</span><span class="o">;</span><span class="mi">7</span><span class="o">;</span><span class="mi">8</span><span class="o">;</span><span class="mi">9</span><span class="o">]</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">string_of_int</span>
+  <span class="o">|&gt;</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;,&quot;</span>
+  <span class="o">|&gt;</span> <span class="n">print_endline</span>
+</pre></div><p id="idp11998960">
+          Compile and run this with debugging symbols. You should see
+          the following output:
+        </p><pre id="idp11999472">
+$ ocamlfind ocamlopt -g -package core -thread -linkpkg -o alternate alternate_list.ml
+$ ./alternate
+1,3,5,7,9
+</pre><p id="idp12000256">
+          Now we can run this interactively within
+          <code>gdb</code>.
+        </p><pre id="idp12001408">
+$ gdb ./alternate
+GNU gdb (GDB) 7.4.1-debian
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-linux-gnu&quot;.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;...
+Reading symbols from /home/avsm/alternate...done.
+(gdb)
+</pre><p id="idp12002896">
+          The <code>gdb</code> prompt lets you enter debug
+          directives. Let's set the program to break just before the
+          first call to <code>take</code>.
+        </p><pre id="idp12004832">
+(gdb) break camlAlternate_list__take_69242 
+Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.
+</pre><p id="idp12005600">
+          We used the C symbol name by following the name mangling rules
+          defined earlier. A convenient way to figure out the full name
+          is by tab-completion. Just type in a portion of the name and
+          press the <code>&lt;tab&gt;</code> key to see a list of
+          possible completions.
+        </p><p id="idp12007008">
+          Once you've set the breakpoint, start the program executing.
+        </p><pre id="idp12007488">
+(gdb) run
+Starting program: /home/avsm/alternate
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library &quot;/lib/x86_64-linux-gnu/libthread_db.so.1&quot;.
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4     function
+</pre><p id="idp12008416">
+          The binary has run until the first take invocation and
+          stopped, waiting for further instructions. GDB has lots of
+          features, so let's continue the program and check the
+          stacktrace after a couple of recursions.
+        </p><pre id="idp12009072">
+(gdb) cont
+Continuing.
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4     function
+(gdb) cont
+Continuing.
+
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4     function
+(gdb) bt
+#0  camlAlternate_list__take_69242 () at alternate_list.ml:4
+#1  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#2  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#3  0x00000000005659f7 in camlAlternate_list__entry () at alternate_list.ml:14
+#4  0x0000000000560029 in caml_program ()
+#5  0x000000000080984a in caml_start_program ()
+#6  0x00000000008099a0 in ?? ()
+#7  0x0000000000000000 in ?? ()
+(gdb) clear camlAlternate_list__take_69242
+Deleted breakpoint 1 
+(gdb) cont
+Continuing.
+1,3,5,7,9
+[Inferior 1 (process 3546) exited normally]
+</pre><p id="idp12010576">
+          The <code>cont</code> command resumes execution after a
+          breakpoint has paused it, <code>bt</code> displays a
+          stack backtrace, and <code>clear</code> deletes the
+          breakpoint so that the application can execute until
+          completion. GDB has a host of other features we won't cover
+          here, but you view more guidelines via Mark Shinwell's talk on
+          <a href="http://www.youtube.com/watch?v=NF2WpWnB-nk&lt;" target="_top">&quot;Real-world
+          debugging in OCaml&quot;</a>.
+        </p><p id="idp12014336">
+          One very useful feature of OCaml native code is that C and
+          OCaml both share the same stack. This means that GDB
+          backtraces can give you a combined view of what's going on in
+          your program <span><em>and</em></span> runtime library. This
+          includes any calls to C libraries or even callbacks into OCaml
+          from the C layer if you're in an embedded environment.
+        </p></section></section><section><h1 id="profiling-native-code">Profiling native code</h1><p id="idp12016832">
+        The recording and analysis of where your application spends its
+        execution time is known as <span><em>performance
+        profiling</em></span>. OCaml native code binaries can be profiled
+        just like any other C binary, by using the name mangling
+        described earlier to map between OCaml variable names and the
+        profiler output.
+      </p><p id="idp12018000">
+        Most profiling tools benefit from having some instrumentation
+        included in the binary. OCaml supports two such tools:
+      </p><ul><li><p id="idp12019056">
+            GNU Gprof to measure execution time and call graphs.
+          </p></li><li><p id="idp12019920">
+            The <a href="https://perf.wiki.kernel.org/" target="_top">Perf</a>
+            profiling framework in modern versions of Linux.
+          </p></li></ul><section><h1 id="gprof">Gprof</h1><p id="idp12022480">
+          Gprof produces an execution profile of an OCaml program by
+          recording a call graph of which functions call each other, and
+          recording the time these calls take during the program
+          execution.
+        </p><p id="idp12023120">
+          Getting precise information out of Gprof requires passing the
+          <code>-p</code> flag to the native code compiler when
+          compiling <span><em>and</em></span> linking the binary. This
+          generates extra code that records profile information to a
+          file called <code>gmon.out</code> when the program is
+          executed. This profile information then can then be examined
+          using Gprof.
+        </p></section><section><h1 id="perf">Perf</h1><p id="idp12026960">
+          Perf is a more modern alternative to Gprof that doesn't
+          require you to instrument the binary. Instead, it uses
+          hardware counters and debug information within the binary to
+          record information accurately.
+        </p><p id="idp12027616">
+          Run Perf on a compiled binary to record information first.
+          We'll use our write barrier benchmark from earlier which
+          measures memory allocation versus in-place modification.
+        </p><pre id="idp12028224">
+$ perf record -g ./barrier.native 
+Estimated testing time 20s (change using -quota SECS).
+┌───────────┬───────────┬─────────────────────┬────────────┐
+│ Name      │ Time (ns) │           Time 95ci │ Percentage │
+├───────────┼───────────┼─────────────────────┼────────────┤
+│ mutable   │ 7_306_219 │ 7_250_234-7_372_469 │      96.83 │
+│ immutable │ 7_545_126 │ 7_537_837-7_551_193 │     100.00 │
+└───────────┴───────────┴─────────────────────┴────────────┘
+[ perf record: Woken up 11 times to write data ]
+[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
+</pre><p id="idp12031008">
+          When this completes, you can interactively explore the
+          results.
+        </p><pre id="idp12031504">
+$ perf report -g
++  48.86%  barrier.native  barrier.native     [.] camlBarrier__test_immutable_69282
++  30.22%  barrier.native  barrier.native     [.] camlBarrier__test_mutable_69279
++  20.22%  barrier.native  barrier.native     [.] caml_modify
+</pre><p id="idp12032416">
+          This trace broadly reflects the results of the benchmark
+          itself. The mutable benchmark consists of the combination of
+          the call to <code>test_mutable</code> and the
+          <code>caml_modify</code> write barrier function in the
+          runtime. This adds up to slightly over half the execution time
+          of the application.
+        </p><p id="idp12034544">
+          Perf has a growing collection of other commands that let you
+          archive these runs and compare them against each other. You
+          can read more on the
+          <a href="http://perf.wiki.kernel.org" target="_top">homepage</a>.
+        </p><aside class="tip"><h1>
+        Using the frame-pointer to get more accurate traces
+        </h1><p id="idp12036576">
+          Although Perf doesn't require adding in explicit probes to the
+          binary, it does need to understand how to unwind function
+          calls so that the kernel can accurately record the function
+          backtrace for every event.
+        </p><p id="idp12037232">
+          OCaml stack frames are too complex for Perf to understand
+          directly, and so it needs the compiler to fall back to using
+          the same conventions as C for function calls. On 64-bit Intel
+          systems, this means that a special register known as the
+          <span><em>frame pointer</em></span> is used to record function
+          call history.
+        </p><p id="idp12038416">
+          Using the frame pointer in this fashion means a slowdown
+          (typically around 3-5%) since it's no longer available for
+          general-purpose use. OCaml 4.1 thus makes the frame pointer an
+          optional feature that can be used to improve the resolution of
+          Perf traces.
+        </p><p id="idp12039136">
+          OPAM provides a compiler switch that compiles OCaml with the
+          frame pointer activated.
+        </p><pre id="idp12039648">
+$ opam switch 4.01.0dev+fp
+</pre><p id="idp12040352">
+          Using the frame pointer changes the OCaml calling convention,
+          but OPAM takes care of recompiling all your libraries with the
+          new interface. You can read more about this on the OCamlPro
+          <a href="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html" target="_top">blog</a>.
+        </p></aside></section></section><section><h1 id="embedding-native-code-in-c">Embedding native code in C</h1><p id="idp12043264">
+        The native code compiler normally links a complete executable,
+        but can also output a standalone native object file just as the
+        bytecode compiler can. This object file has no further
+        dependencies on OCaml except for the runtime library.
+      </p><p id="idp12043936">
+        The native code runtime is a different library from the bytecode
+        one and is installed as <code>libasmrun.a</code> in the
+        OCaml standard library directory.
+      </p><p id="idp12045216">
+        Try this custom linking by using the same source files from the
+        bytecode embedding example earlier in this chapter.
+      </p><pre id="idp12045760">
+$ ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml
+$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lasmrun -ltermcap \
+  -o final_out_native embed_native.o main.c
+./final_out_native
+Before calling OCaml
+hello embedded world 1
+hello embedded world 2
+After calling OCaml
+</pre><p id="idp12046720">
+        The <code>embed_native.o</code> is a standalone object
+        file that has no further references to OCaml code beyond the
+        runtime library, just as with the bytecode runtime.
+      </p><aside class="tip"><h1>
+      Activating the debug runtime
+      </h1><p id="idp12048704">
+        Despite your best efforts, it is easy to introduce a bug into
+        some components such as C bindings that cause heap invariants to
+        be violated. OCaml includes a <code>libasmrund.a</code>
+        variant of the runtime library that is compiled with extra
+        debugging checks that perform extra memory integrity checks
+        during every garbage collection cycle. Running these extra
+        checks will abort the program nearer the point of corruption and
+        help isolate the bug in the C code.
+      </p><p id="idp12050304">
+        To use the debug library, just link your program with the
+        <code>-runtime-variant d</code> flag.
+      </p><pre id="idp12051504">
+$ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
+$ ./hello 
+### OCaml runtime: debug mode ###
+Initial minor heap size: 2048k bytes
+Initial major heap size: 992k bytes
+Initial space overhead: 80%
+Initial max overhead: 500%
+Initial heap increment: 992k bytes
+Initial allocation policy: 0
+Hello OCaml World!
+</pre><p id="idp12052512">
+        If you get an error that <code>libasmrund.a</code> is not
+        found, then this is probably because you're using OCaml 4.00 and
+        not 4.01. It's only installed by default in the very latest
+        version, which you should be using via the
+        <code>4.01.0dev+trunk</code> OPAM switch.
+      </p></aside></section></section><section><h1 id="summarising-the-file-extensions">Summarising the file extensions</h1><p id="idp12056160">
+      We've seen how the compiler uses intermediate files to store
+      various stages of the compilation toolchain. Here's a cheat sheet
+      of all them in one place.
+    </p><p id="idp12056736">
+      Here are the intermediate files generated by
+      <code>ocamlc</code>:
+    </p><table><thead><tr><th>
+              Extension
+            </th><th>
+              Purpose
+            </th></tr></thead><tbody><tr><td>
+              .ml
+            </td><td>
+              Source files for compilation unit module implementations.
+            </td></tr><tr><td>
+              .mli
+            </td><td>
+              Source files for compilation unit module interfaces. If
+              missing, generated from the <code>.ml</code> file.
+            </td></tr><tr><td>
+              .cmi
+            </td><td>
+              Compiled module interface from a corresponding
+              <code>.mli</code> source file.
+            </td></tr><tr><td>
+              .cmo
+            </td><td>
+              Compiled bytecode object file of the module
+              implementation.
+            </td></tr><tr><td>
+              .cma
+            </td><td>
+              Library of bytecode object files packed into a single
+              file.
+            </td></tr><tr><td>
+              .o
+            </td><td>
+              C source files are compiled into native object files by
+              the system <code>cc</code>.
+            </td></tr><tr><td>
+              .cmt
+            </td><td>
+              Typed abstract syntax tree for module implementations.
+            </td></tr><tr><td>
+              .cmi
+            </td><td>
+              Typed abstract syntax tree for module interfaces.
+            </td></tr><tr><td>
+              .annot
+            </td><td>
+              Old-style annotation file for displaying typed, superseded
+              by <code>cmt</code> files.
+            </td></tr></tbody></table><p id="idp12076560">
+      The native code compiler generates some additional files.
+    </p><table><thead><tr><th>
+              Extension
+            </th><th>
+              Purpose
+            </th></tr></thead><tbody><tr><td>
+              .o
+            </td><td>
+              Compiled native object file of the module implementation.
+            </td></tr><tr><td>
+              .cmx
+            </td><td>
+              Contains extra information for linking and cross-module
+              optimization of the object file.
+            </td></tr><tr><td>
+              .cmxa and .a
+            </td><td>
+              Library of <code>cmx</code> and <code>o</code>
+              units, stored in the <code>cmxa</code> and
+              <code>a</code> files respectively. These files are
+              always needed together.
+            </td></tr><tr><td>
+              .S
+            </td><td>
+              Assembly language output if <code>-S</code> is
+              specified.
+            </td></tr></tbody></table></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="the-compiler-frontend-parsing-and-type-checking.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="installation.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
