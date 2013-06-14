@@ -443,7 +443,7 @@ garbage collection occurring.
 
 ```console
 $ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread barrier_bench.native
-$ ./barrier_bench.native name allocated
+$ ./barrier_bench.native name alloc
 Estimated testing time 20s (change using -quota SECS).
 ┌───────────┬───────────┬─────────────────────┬───────────┬────────┬──────────┬────────────┐
 │ Name      │ Time (ns) │           Time 95ci │     Minor │  Major │ Promoted │ Percentage │
