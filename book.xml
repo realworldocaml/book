@@ -12082,6 +12082,16 @@ include Foldable.Extend(T)
     regular modules. As we'll see, letting modules into the core
     language makes it possible build more modular programs.
   </para>
+  <note>
+  <title>
+  Note to reviewers
+  </title>
+  <para>
+    This chapter is still incomplete, but the contents here are still
+    instructive enough that we decided to include it in the public beta
+    release.
+  </para>
+  </note>
   <sect1 id="a-trivial-example-1">
     <title>A trivial example</title>
     <para>
@@ -28777,6 +28787,16 @@ open Core.Std
   </sect1>
 </appendix><appendix id="packaging">
   <title>Packaging</title>
+  <note>
+  <title>
+  Note to reviewers
+  </title>
+  <para>
+    This chapter hasn't been completed yet. Since this content can
+    change rather fast, we may place this information online rather than
+    directly in the final book.
+  </para>
+  </note>
   <sect1 id="the-ocamlfind-frontend">
     <title>The OCamlfind frontend</title>
     <para>
