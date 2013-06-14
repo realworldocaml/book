@@ -886,16 +886,16 @@ module T = struct
   let empty = [],[]
 
   let enqueue (in_list,out_list) x =
-    (x :: l1,l2)
+    (x :: in_list,out_list)
 
   let rec dequeue (in_list,out_list) =
     match out_list with
     | hd :: tl -> Some (hd, (in_list,tl))
     | [] -> dequeue ([], List.rev in_list)
 
-let fold (in_list,out_list) ~init ~f =
-  let after_out = List.fold ~init ~f out_list in
-  List.fold_right ~init:after_out ~f in_list
+  let fold (in_list,out_list) ~init ~f =
+    let after_out = List.fold ~init ~f out_list in
+    List.fold_right ~init:after_out ~f in_list
 end
 
 include T
