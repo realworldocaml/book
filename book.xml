@@ -22048,6 +22048,10 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
       Running <literal>./hello</literal> should now display a Hello
       World in your terminal!
     </para>
+    <note>
+    <title>
+    Reliable dynamic linking of external libraries
+    </title>
     <para>
       The command-line above includes
       <literal>-cclib -lncurses</literal> to make the OCaml compiler
@@ -22062,6 +22066,30 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
 $ ./hello_broken 
 Fatal error: exception Dl.DL_error(&quot;dlsym(RTLD_DEFAULT, initscr): symbol not found&quot;)
 </programlisting>
+    <para>
+      There's one additional twist on modern versions of GCC (as
+      included in recent Ubuntus). The <literal>--as-needed</literal>
+      flag is passed to the linker by default, which instructs it to
+      only link libraries that actually contain symbols used by the
+      program at build time. This must be disabled when using Ctypes
+      0.1, as it will drop any libraries that might be opened at runtime
+      by the <literal>foreign</literal> function.
+    </para>
+    <para>
+      So on Ubuntu, you'll need to compile with this option disabled to
+      ensure that the Ncurses library dependency isn't dropped at
+      compile time.
+    </para>
+    <programlisting>
+$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign \
+    -cclib '-Wl,--no-as-needed -lncurses' \
+    ncurses.mli ncurses.ml hello.ml -o hello
+</programlisting>
+    <para>
+      <emphasis>Note to reviewers</emphasis>: this will be fixed in a
+      future Ctypes release, so is only needed when using Ctypes 0.1.
+    </para>
+    </note>
     <para>
       Ctypes wouldn't be very useful if it were limited to only defining
       simple C types of course. It provides full support for C pointer
@@ -23797,10 +23825,18 @@ number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
       The guaranteed <literal>NULL</literal>-termination comes in handy
       when passing a string to C, but is not relied upon to compute the
       length from OCaml code. OCaml strings can thus contain
-      <literal>NULL</literal> bytes at any point within the string. Care
-      should be taken that any C library functions that receive these
-      buffers can cope with arbitrary <literal>NULL</literal> values
-      within the buffer contents.
+      <literal>NULL</literal> bytes at any point within the string.
+    </para>
+    <para>
+      Care should be taken that any C library functions that receive
+      these buffers can also cope with arbitrary bytes within the buffer
+      contents and are not expecting C strings. For instance, the C
+      <literal>memcopy</literal> or <literal>memmove</literal> standard
+      library functions can operate on arbitrary data, but
+      <literal>strlen</literal> or <literal>strcpy</literal> both
+      require a <literal>NULL</literal> terminated buffer and has no
+      mechanism for encoding a <literal>NULL</literal> value within its
+      contents.
     </para>
   </sect1>
   <sect1 id="custom-heap-blocks">
@@ -24035,10 +24071,7 @@ struct custom_operations {
       <para>
         The minor heap is a contiguous chunk of virtual memory that is
         usually a few megabytes in size so that it can be scanned
-        quickly. The runtime stores the minor heap in two pointers
-        (<literal>caml_young_start</literal> and
-        <literal>caml_young_end</literal>) that delimit the start and
-        end of the heap region.
+        quickly.
       </para>
       <programlisting>
                 &lt;---- size ----&gt;
@@ -24047,17 +24080,33 @@ struct custom_operations {
                           blocks
 </programlisting>
       <para>
+        The runtime stores the minor heap in two pointers
+        (<literal>caml_young_start</literal> and
+        <literal>caml_young_end</literal>, but we will drop the
+        <literal>caml_young</literal> prefix for brevity) that delimit
+        the start and end of the heap region. The
+        <literal>base</literal> is the memory address returned by the
+        system <literal>malloc</literal>, and <literal>start</literal>
+        is aligned against the next nearest word boundary from
+        <literal>base</literal> to make it easier to store OCaml values.
+      </para>
+      <para>
         In a fresh minor heap, the <literal>limit</literal> equals the
         <literal>start</literal> and the current <literal>ptr</literal>
         will equal the <literal>end</literal>. <literal>ptr</literal>
         decreases as blocks are allocated until it reaches
         <literal>limit</literal>, at which point a minor garbage
-        collection is triggered. To allocate a block in the minor heap,
-        <literal>ptr</literal> is decremented by the size of the block
-        (including the header) and the header area is immediately set to
-        a valid value. If there isn't enough space left for the block
-        without decrementing past the <literal>limit</literal>, a minor
-        garbage collection is triggered.
+        collection is triggered.
+      </para>
+      <para>
+        Allocating a block in the minor heap just requires
+        <literal>ptr</literal> to be decremented by the size of the
+        block (including the header) and checking that it's not less
+        than <literal>limit</literal>. If there isn't enough space left
+        for the block without decrementing past the
+        <literal>limit</literal>, a minor garbage collection is
+        triggered. This is a very fast check (with no branching) on most
+        CPU architectures.
       </para>
       <para>
         You may wonder why <literal>limit</literal> is required at all,
@@ -24238,7 +24287,7 @@ val c : Gc.control =
       <title>Memory allocation strategies</title>
       <para>
         The major heap does its best to manage memory allocation as
-        efficiently as possible, and relies on heap compaction ot ensure
+        efficiently as possible, and relies on heap compaction to ensure
         that memory stays contiguous and unfragmented. The default
         allocation policy normally works fine for most applications, but
         it's worth bearing in mind that there are other options too.
@@ -24376,6 +24425,15 @@ val c : Gc.control =
           </tbody>
         </tgroup>
       </informaltable>
+      <para>
+        The color tags in the value headers store most of the state of
+        the marking process, allowing it to be paused and resumed later.
+        The GC and application alternate between marking a slice of the
+        major heap and actually getting on with executing the program
+        logic. The OCaml runtime calculates a sensible value for the
+        size of each major heap slice based on the rate of allocation
+        and available memory (see below).
+      </para>
       <para>
         The marking process starts with a set of
         <emphasis>root</emphasis> values that are always live (such as
@@ -26611,13 +26669,6 @@ $ ocamlc -dtypedtree typedef.ml
     Once OCaml has passed the type checking stage, it can stop emitting
     syntax and type errors and begin the process of compiling the
     well-formed modules into executable code.
-  </para>
-  <para>
-    It's even possible to compile OCaml to run efficiently on foreign
-    environments such as Javascript or the Java Virtual Machine. These
-    aren't supported by the core OCaml distribution, but are available
-    on OPAM. We'll mention these as we go through the chapter so you can
-    experiment with them too.
   </para>
   <para>
     In this chapter, we'll cover the following topics:
