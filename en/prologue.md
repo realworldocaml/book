@@ -100,12 +100,13 @@ functionality you expect for more general-purpose use.
 
 Happily, in the world of open-source software nothing stops alternative
 libraries from being written to supplement the compiler-supplied standard
-library, and this exactly what the Core distribution is.  Jane Street, a
-company that has been using OCaml for more than a decade, developed Core for
-its own internal use, but designed it from the start with an eye towards being
-a general-purpose standard library with very broad applicability.  Like the
-OCaml language itself, Core is also engineered with correctness, reliability
-and performance in mind.
+library, and this is exactly what the Core distribution is.
+
+Jane Street, a company that has been using OCaml for more than a decade,
+developed Core for its own internal use, but designed it from the start with an
+eye towards being a general-purpose standard library with very broad
+applicability.  Like the OCaml language itself, Core is engineered with
+correctness, reliability and performance in mind.
 
 Core is distributed with syntax extensions which provide useful new
 functionality to OCaml, and there are additional libraries such as the Async
