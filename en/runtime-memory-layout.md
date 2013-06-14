@@ -459,9 +459,14 @@ number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
 
 The guaranteed `NULL`-termination comes in handy when passing a string to C,
 but is not relied upon to compute the length from OCaml code. OCaml strings can
-thus contain `NULL` bytes at any point within the string. Care should be taken
-that any C library functions that receive these buffers can cope with arbitrary
-`NULL` values within the buffer contents.
+thus contain `NULL` bytes at any point within the string.
+
+Care should be taken that any C library functions that receive these buffers
+can also cope with arbitrary bytes within the buffer contents and are not
+expecting C strings.  For instance, the C `memcopy` or `memmove` standard
+library functions can operate on arbitrary data, but `strlen` or `strcpy` both
+require a `NULL` terminated buffer and has no mechanism for encoding a `NULL`
+value within its contents.
 
 ## Custom heap blocks
 
