@@ -234,12 +234,12 @@ functions using the `core_bench` library.
   |> Bench.bench
   ;;
 Estimated testing time 20s (change using -quota SECS).
-┌────────────────┬───────────┬──────────┐
-│ Name           │ Time (ns) │ % of max │
-├────────────────┼───────────┼──────────┤
-│ plus_one_match │    369.38 │    83.40 │
-│ plus_one_if    │    442.88 │   100.00 │
-└────────────────┴───────────┴──────────┘
++----------------+-----------+----------+
+| Name           | Time (ns) | % of max |
+|----------------+-----------+----------|
+| plus_one_match |    369.38 |    83.40 |
+| plus_one_if    |    442.88 |   100.00 |
++----------------+-----------+----------+
 ```              
 
 Here's another less artificial example.  We can rewrite the `sum`
@@ -265,12 +265,12 @@ Again, we can benchmark these to see the difference.
   |> Bench.bench
   ;;
 Estimated testing time 20s (change using -quota SECS).
-┌────────┬───────────┬──────────┐
-│ Name   │ Time (ns) │ % of max │
-├────────┼───────────┼──────────┤
-│ sum_if │   650_463 │   100.00 │
-│ sum    │   177_740 │    27.32 │
-└────────┴───────────┴──────────┘
++--------+-----------+----------+
+| Name   | Time (ns) | % of max |
+|--------+-----------+----------|
+| sum_if |   650_463 |   100.00 |
+| sum    |   177_740 |    27.32 |
++--------+-----------+----------+
 - : unit = ()
 ```
 
