@@ -981,7 +981,7 @@ not the whole story.  All of Async's exception-handling mechanisms,
 `try_with` included, are built on top of Async's system of _monitors_,
 which are inspired by the error-handling mechanism in Erlang of the
 same name.  Monitors are fairly low-level and are only occasionally
-used directly, but it's nontheless worth understanding how they work.
+used directly, but it's nonetheless worth understanding how they work.
 
 In Async, a monitor is a context that determines what to do when there
 is an unhandled exception.  Every Async job runs within the context of

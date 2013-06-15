@@ -1,0 +1,523 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Part II. Tools and Techniques / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha6',
+                        page: 'pt02.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html" class="here">II. Tools and Techniques</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="maps-and-hashtables.html">13. Maps and Hashtables</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="command-line-parsing.html">14. Command Line Parsing</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="handling-json-data.html">15. Handling JSON data</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-with-ocamllex-and-menhir.html">16. Parsing with OCamllex and Menhir</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="data-serialization-with-s-expressions.html">17. Data Serialization with S-Expressions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="concurrent-programming-with-async.html">18. Concurrent Programming with Async</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="fast-binary-serialization.html">19. Fast Binary Serialization</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Part II. Tools and Techniques</h1>
+                
+                
+
+    <section class="index">
+        
+    <ul>
+        
+            <li>
+                <a href="maps-and-hashtables.html">13. Maps and Hashtables</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html">14. Command Line Parsing</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#basic-command-line-parsing">Basic command-line parsing</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#defining-parsing-specifications">Defining parsing specifications</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#anonymous-arguments">Anonymous arguments</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#callback-functions">Callback functions</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#creating-basic-commands">Creating basic commands</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#command-argument-types">Command argument types</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#adding-flags-to-label-the-command-line">Adding flags to label the command line</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#grouping-sub-commands-together">Grouping sub-commands together</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#advanced-control-over-parsing">Advanced control over parsing</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#composing-specification-fragments-together">Composing specification fragments together</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#prompting-for-interactive-input">Prompting for interactive input</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#adding-labelled-arguments-to-callbacks">Adding labelled arguments to callbacks</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#command-line-auto-completion-with-bash">Command-line auto-completion with
+    bash</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#generating-completion-fragments-from-command">Generating completion fragments from Command</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#installing-the-completion-fragment">Installing the completion fragment</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html">15. Handling JSON data</a>
+                
+    <ul>
+        
+            <li>
+                <a href="handling-json-data.html#json-basics">JSON Basics</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#parsing-json-with-yojson">Parsing JSON with Yojson</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#selecting-values-from-json-structures">Selecting values from JSON structures</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#constructing-json-values">Constructing JSON values</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#using-non-standard-json-extensions">Using non-standard JSON extensions</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#automatically-mapping-json-to-ocaml-types">Automatically mapping JSON to OCaml types</a>
+                
+    <ul>
+        
+            <li>
+                <a href="handling-json-data.html#example-querying-github-organization-information">Example: Querying Github organization information</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html">16. Parsing with OCamllex and Menhir</a>
+                
+    <ul>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#defining-a-json-parser-with-menhir">Defining a JSON parser with menhir</a>
+                
+    <ul>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#token-declarations">Token declarations</a>
+                
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#specifying-the-grammar-rules">Specifying the grammar rules</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#defining-a-lexer-with-ocamllex">Defining a lexer with ocamllex</a>
+                
+    <ul>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#let-definitions-for-regular-expressions">Let-definitions for regular expressions</a>
+                
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#lexing-rules">Lexing rules</a>
+                
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#recursive-rules">Recursive rules</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#bringing-it-all-together">Bringing it all together</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html">17. Data Serialization with S-Expressions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#the-sexp-format">The Sexp format</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp-converters">Sexp converters</a>
+                
+    <ul>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#preserving-invariants">Preserving invariants</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#getting-good-error-messages">Getting good error messages</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp-conversion-directives">Sexp-conversion directives</a>
+                
+    <ul>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp_opaque">sexp_opaque</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp_list">sexp_list</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp_option">sexp_option</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#specifying-defaults">Specifying defaults</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html">18. Concurrent Programming with Async</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#async-basics">Async basics</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#ivars-and-upon">Ivars and upon</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#examples-an-echo-server">Examples: an echo server</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#improving-the-echo-server">Improving the echo server</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#example-searching-definitions-with-duckduckgo">Example: searching definitions with DuckDuckGo</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#uri-handling">URI handling</a>
+                
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#parsing-json-strings">Parsing JSON strings</a>
+                
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#executing-an-http-client-query">Executing an HTTP client query</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#exception-handling">Exception handling</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#monitors">Monitors</a>
+                
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#example-handling-exceptions-with-duckduckgo">Example: Handling exceptions with DuckDuckGo</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#timeouts-cancellation-and-choices">Timeouts, Cancellation and Choices</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="fast-binary-serialization.html">19. Fast Binary Serialization</a>
+                
+            </li>
+        
+    </ul>
+
+    </section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="classes.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="maps-and-hashtables.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

@@ -423,18 +423,14 @@ generation dynamically. It also doesn't require a Just-In-Time (JIT) runtime
 that can be a source of unpredictable dynamic behaviour.  Instead, all code is
 simply generated at compile-time via Camlp4.
 
-### Using Camlp4 interactively
-
 The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
 changes it's made to your code?  The obvious way is to read the documentation
-that accompanies the extension.
+that accompanies the extension.  Another approach is to use the top-level to
+explore the extension's behaviour or run Camlp4 manually yourself to see the
+transformation in action.  We'll show you how to do both of these now.
 
-Another approach is to use the top-level to explore the extension's behaviour
-or run Camlp4 manually yourself to see the transformation in action.  We'll
-show you how to do both of these now.
-
-#### Using Camlp4 from the interactive top-level
+### Using Camlp4 interactively
 
 The `utop` top-level can run the phrases that you type through `camlp4`
 automatically. You should have at least these lines in your `~/.ocamlinit` file
@@ -477,7 +473,7 @@ expected output.  The second one includes the `with compare` directive.  This
 is intercepted by `comparelib` and transformed into the original type
 definition with two new functions also incuded.
 
-### Running Camlp4 from the command-line
+### Running Camlp4 from the command line
 
 The top-level is a quick way to examine the signatures generated from the
 extensions, but how can we see what these new functions actually do?  You can't
@@ -588,7 +584,7 @@ variable warning.
 
 </note>
 
-#### Preprocessing module signatures
+### Preprocessing module signatures
 
 Another useful feature of `type_conv` is that it can generate module signatures
 too.  Copy the earlier type definition into a `comparelib_test.mli` and rerun
@@ -655,7 +651,7 @@ of three distinct steps that happen simultaneously:
   for a module without requiring manual type annotations.
 * a *module system* that combines software components with explicit
   knowledge of their type signatures.
-* performing *explicit subtyping* checks for objects and polymorphic variants.
+* *explicit subtyping* checks for objects and polymorphic variants.
 
 Automatic type inference lets you write succinct code for a particular task and
 have the compiler ensure that your use of variables is locally consistent.
@@ -969,7 +965,7 @@ methods.
 
 As a result, the suggested approach is to only compile with `-principal`
 occasionally to check if your code is compliant.  If compiling in principal
-mode works, it is guaranteed that the program will passing type checking in
+mode works, it is guaranteed that the program will pass type checking in
 non-principal mode too.
 
 Bear in mind that the `cmi` files generated in principal mode differ from the

@@ -4,11 +4,6 @@ Once OCaml has passed the type checking stage, it can stop emitting syntax and
 type errors and begin the process of compiling the well-formed modules into
 executable code.
 
-It's even possible to compile OCaml to run efficiently on foreign environments
-such as Javascript or the Java Virtual Machine.  These aren't supported by the
-core OCaml distribution, but are available on OPAM.  We'll mention these as we
-go through the chapter so you can experiment with them too.
-
 In this chapter, we'll cover the following topics:
 
 * the untyped intermediate lambda code where pattern matching is optimized.
@@ -940,7 +935,7 @@ over half the execution time of the application.
 Perf has a growing collection of other commands that let you archive these
 runs and compare them against each other.  You can read more on the [homepage](http://perf.wiki.kernel.org).
 
-<tip>
+<sidebar>
 <title>Using the frame-pointer to get more accurate traces</title>
 
 Although Perf doesn't require adding in explicit probes to the binary,
@@ -969,7 +964,7 @@ care of recompiling all your libraries with the new interface.  You can read
 more about this on the OCamlPro
 [blog](http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html).
 
-</tip>
+</sidebar>
 
 ### Embedding native code in C
 

@@ -225,6 +225,9 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
 
 Running `./hello` should now display a Hello World in your terminal!
 
+<note>
+<title>Reliable dynamic linking of external libraries</title>
+
 The command-line above includes `-cclib -lncurses` to make the OCaml compiler
 link the executable to the `ncurses` C library, which in turns makes the C
 symbols available to the program when it starts.  You'll get an error when you
@@ -236,6 +239,26 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
 $ ./hello_broken 
 Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not found")
 ```
+
+There's one additional twist on modern versions of GCC (as included in recent
+Ubuntus).  The `--as-needed` flag is passed to the linker by default, which
+instructs it to only link libraries that actually contain symbols used by the
+program at build time.  This must be disabled when using Ctypes 0.1, as it will
+drop any libraries that might be opened at runtime by the `foreign` function.
+
+So on Ubuntu, you'll need to compile with this option disabled to ensure that
+the Ncurses library dependency isn't dropped at compile time.
+
+```console
+$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign \
+    -cclib '-Wl,--no-as-needed -lncurses' \
+    ncurses.mli ncurses.ml hello.ml -o hello
+```
+
+*Note to reviewers*: this will be fixed in a future Ctypes release, so is
+only needed when using Ctypes 0.1.
+
+</note>
 
 Ctypes wouldn't be very useful if it were limited to only defining simple C
 types of course. It provides full support for C pointer arithmetic, pointer
@@ -498,33 +521,6 @@ don't contain any null values within the OCaml string, or else the C
 string will be rudely truncated.
 
 </note>
-
-### Abstract pointers
-
-Abstract types are typically used to interface with platform-dependent
-definitions often found in system headers.  For example, the type `pthread_t`
-is a pointer on some platforms, an integer on other platforms, and a `struct`
-on a third set of platforms.  One way to deal with this is to have build-time
-code which interrogates the C type in some way to determine an appropriate
-representation.  Another way is to use `abstract` and leave the representation
-opaque.
-
-<caution>
-<title>Abstract values can't be passed by value</title>
-
-Although `pthread_t` is a convenient example since the type used to implement
-it varies significantly across platforms, it's not actually a good match for
-`abstract` since values of type `pthread_t` are passed and returned by value
-and so can't be fully abstract.
-
-</caution>
-
-```ocaml   
-val abstract : size:int -> alignment:int -> 'a abstract typ
-```
-
-The `abstract` function accepts size and alignment requirements and ensures
-that these are satisfied when this type is used in a function call.
 
 ## Structs and unions
 

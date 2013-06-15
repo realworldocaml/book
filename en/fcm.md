@@ -20,6 +20,15 @@ can be created from and converted back to regular modules.  As we'll
 see, letting modules into the core language makes it possible build
 more modular programs.
 
+<note>
+<title>Note to reviewers</title>
+
+This chapter is still incomplete, but the contents here are still
+instructive enough that we decided to include it in the public
+beta release.
+
+</note>
+
 ### A trivial example
 
 As we did with functors, we'll start out by considering a trivial
