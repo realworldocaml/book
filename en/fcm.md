@@ -1,5 +1,11 @@
 # First class modules
 
+<note><title> A note to reviewers</title>
+
+This chapter is highly incomplete.  Proceed with caution...
+
+</note>
+
 You can think of OCaml as being broken up into two parts: a core
 language that is concerned with values and types, and a module
 language that is concerned with modules and module signatures.  These
@@ -120,9 +126,9 @@ val to_int : (module X_int) -> int = <fun>
 val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
 ```
 
-With these functions in hand, we can now work with `(module X_int)`'s
-in a more natural style, taking full advantage of the concision and
-simplicity of the core language.
+With these functions in hand, we can now work with values of type
+`(module X_int)` in a more natural style, taking full advantage of the
+concision and simplicity of the core language.
 
 ```ocaml
 # let six = plus three three;;
@@ -132,8 +138,8 @@ val six : (module X_int) = <module>
 ```
 
 Of course, all we've really done with this example is come up with a
-more cumbersome way of working with integers.  In the following, we'll
-look at more realistic examples.
+more cumbersome way of working with integers.  Now let's consider some
+more realistic examples.
 
 ## Dynamically choosing a module
 
@@ -191,10 +197,10 @@ include (val multiplexer : S)
 ## Example: A service bundle
 
 This section describes the design of a library for bundling together
-multiple services, where a service is a piece of code that exports a
-query interface.  A service bundle combines together multiple
-individual services under a single query interface that works by
-dispatching incoming queries to the appropriate underlying service.
+multiple services, where a service is a component that exports a query
+interface.  A service bundle combines together multiple individual
+services under a single query interface that works by dispatching
+incoming queries to the appropriate underlying service.
 
 The following is a first attempt at an interface for our `Service`
 module, which contains both a module type `S`, which is the interface
@@ -227,8 +233,14 @@ Here, a service has a state, represented by the type `t`, a name by
 which the service can be referenced, a function `create` for
 instantiating a service, and a function by which a service can
 actually handle a request.  Here, requests and responses are delivered
-as s-expressions.  At the `Bundle` level, the s-expression of a
-request is expected to be formatted as follows:
+as s-expressions, which are a very simple serialization format
+commonly used in Core.  We'll cover s-expressions in more detail in
+[xref](#data-serialization-with-s-expressions), but for now, it's
+enough to think of them as balanced parenthetical expressions whose
+atomic values are strings.
+
+At the `Bundle` level, the s-expression of a request is expected to be
+formatted as follows:
 
 ```
 (<service-name> <body>)
@@ -237,16 +249,13 @@ request is expected to be formatted as follows:
 where `<service_name>` is the service that should handle the request,
 and `<body>` is the body of the request.
 
-Now let's look at how to implement `Service`.  The core datastructure
-of `Bundle` is a hashtable of request handlers, one per service.
-Each request handler is a function of type `(Sexp.t -> Sexp.t
-Or_error.t)`.  These request handlers really stand in for the
-underlying service, with the particular state of the service in
-question being hidden inside of the request handler.
-
-The first part of `service.ml` is just the preliminaries: the
-definition of the module type `S`, and the definition of the type
-`Bundle.t`.
+Now let's look at how to implement `service.ml`.  We'll start with the
+definition of the module type `S` and the definition of the type
+`Bundle.t`.  A `Bundle.t` is implemented as a hashtable of request
+handlers, one per service.  Each request handler is a function of type
+`(Sexp.t -> Sexp.t Or_error.t)`.  These request handlers really stand
+in for the underlying service, with the particular state of the
+service in question being hidden behind the function.
 
 ```ocaml
 (* file: service.ml *)
@@ -289,10 +298,10 @@ Note that the `Service.t` that is created is referenced by the
 corresponding request handler, so that it is effectively hidden behind
 the function in the `handlers` table.
 
-Now we can write the function for the bundle to handle requests.  The
-handler will examine the s-expression to determine the body of the
-query and the name of the service to dispatch to.  It then looks up
-the handler calls it to generate the response.
+Now we can write the function to handle requests.  The handler will
+examine the s-expression to determine the body of the query and the
+name of the service to dispatch to.  It then looks up the handler
+calls it to generate the response.
 
 ```ocaml
   let handle_request t sexp =
@@ -414,13 +423,6 @@ config type to each service, and change the interface of `Bundle` so
 that services can be registered along with their configs.  At the same
 time, we'll change the `Bundle` API to allow services to be changed
 dynamically, rather than just added at creation time.
-
-
-
-
-
-
-
 
 
 

@@ -15,14 +15,14 @@ module Bundle = struct
   type 'a service = 'a t
   type t = { handlers: (Sexp.t -> Sexp.t Or_error.t) String.Table.t; }
 
-  let create services =
+  let create _services =
     { handlers = String.Table.create () }
 
   let register (type config) t service config  =
     let module Service = (val service : S with type config = config) in
     if Hashtbl.mem t.handlers Service.name then
       Or_error.error_string
-        ("Attempt to register duplicate handler for "^Service.name)
+        ("Attempt to register duplicate handler for " ^ Service.name)
     else
       let service = Service.create config in
       Hashtbl.replace t.handlers ~key:Service.name

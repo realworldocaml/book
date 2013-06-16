@@ -10,7 +10,7 @@ module type S = sig
   val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
 end
 
-type 'config t = (module S with type config = 'config)
+type 'a t = (module S with type config = 'a)
 
 (** Bundles multiple services together *)
 module Bundle : sig
