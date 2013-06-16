@@ -59,7 +59,6 @@
  (file "fcm")
  (note "mostly incomplete")
  (title "First-class Modules")
- (public false)
  )
 ((part Basic)
  (name "objects")
@@ -111,7 +110,6 @@
  (file "binio")
  (note "50% done (Yaron)")
  (title "Fast Binary Serialization")
- (public false)
  )
 ;; PART 3: ADVANCED TOPICS
 ((part Advanced)
