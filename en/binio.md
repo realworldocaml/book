@@ -185,13 +185,13 @@ during this chapter.
 <note>
 <title>Using `bin_prot` in the toplevel</title>
 
-The `bin_prot` syntax extension isn't activated by default in the
-toplevel, but is easily available if you add this to your
-`~/.ocamlinit` file.  You can also just type this in directly into
-`utop` (with `;;` to finish the line) instead.
+The `bin_prot` syntax extension is part of the `core.syntax` bundle, and so
+should be available in the toplevel if you've loaded that in via your
+`~/.ocamlinit` file.  You can also just type this in directly into `utop`
+instead to load just this extension.
 
 ```
-#require "bin_prot.syntax"
+#require "bin_prot.syntax" ;;
 ```
 
 The extension is activated by putting `with bin_io` after the type
