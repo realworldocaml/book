@@ -144,6 +144,7 @@ int
 # let x-plus-y = x + y;;
 Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
 ```
+
 ## Functions and type Inference
 
 The `let` syntax can also be used for creating functions.
