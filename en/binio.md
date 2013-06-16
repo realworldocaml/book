@@ -1,5 +1,14 @@
 # Fast Binary Serialization
 
+<note>
+<title>Note to reviewers</title>
+
+This chapter is still incomplete, but the contents here are still
+instructive enough that we decided to include it in the public
+beta release.
+
+</note>
+
 Now that we've learned the basics of working with Async, let's walk
 through a small but non-trivial application: a message broker which
 provides clients with a simple pub/sub API that lets them publish and
@@ -314,84 +323,3 @@ let () =
   write_messages (); read_messages ()
 ```
 
-## Bigstring
-
-We earlier mentioned that `bigstring` is a more efficient version of `string`.  Understanding the difference requires some understanding of how OCaml allocates values.
-TODO.
-
-## Fieldslib
-TODO: out of place
-
-One common idiom when using records is to provide field accessor
-functions for a particular record.
-
-```ocaml
-type t = { topic: string;
-           content: string;
-           source: Source.t;
-         }
-
-let topic   t = t.topic
-let content t = t.content
-let source  t = t.source
-```
-
-Similarly, sometimes you simultaneously want an accessor to a field of
-a record and a textual representation of the name of that field.  This
-might come up if you were validating a field and needed the string
-representation to generate an error message, or if you wanted to
-scaffold a form in a GUI automatically based on the fields of a
-record.  Fieldslib provides a module `Field` for this purpose.  Here's
-some code for creating `Field.t`'s for all the fields of our type `t`.
-
-```ocaml
-# module Fields = struct
-    let topic =
-      { Field.
-        name   = "topic";
-        setter = None;
-        getter = (fun t -> t.topic);
-        fset   = (fun t topic -> { t with topic });
-      }
-    let content =
-      { Field.
-        name   = "content";
-        setter = None;
-        getter = (fun t -> t.content);
-        fset   = (fun t content -> { t with content });
-      }
-    let source =
-      { Field.
-        name   = "source";
-        setter = None;
-        getter = (fun t -> t.source);
-        fset   = (fun t source -> { t with source });
-      }
-  end ;;
-module Fields :
-  sig
-    val topic : (t, string list) Core.Std.Field.t
-    val content : (t, string) Core.Std.Field.t
-    val source : (t, Source.t) Core.Std.Field.t
-  end
-```
-
-There are several syntax extensions distributed with Core, including:
-
-- **Sexplib**: provides serialization for s-expressions.
-- **Bin_prot**: provides serialization to an efficient binary
-  format.
-- **Fieldslib**: generates first-class values that represent fields of
-  a record, as well as accessor functions and setters for mutable
-  record fields.
-- **Variantslib**: like Fieldslib for variants, producing first-class
-  variants and other helper functions for interacting with variant
-  types.
-- **Pa_compare**: generates efficient, type-specialized comparison
-  functions.
-- **Pa_typehash**: generates a hash value for a type definition,
-  _i.e._, an integer that is highly unlikely to be the same for two
-  distinct types.
-
-We'll discuss each of these syntax extensions in detail, starting with
-Sexplib.
