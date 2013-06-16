@@ -174,5 +174,6 @@ let allowed_users = function
   | "alpha4" -> internal_reviewers
   | "alpha5" -> internal_reviewers
   | "alpha6" -> external_reviewers
+  | "beta1"  -> internal_reviewers
   | "trunk"  -> internal_reviewers
   |_ -> internal_reviewers
