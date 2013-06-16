@@ -3976,12 +3976,12 @@ val plus_one_if : int -&gt; int = &lt;fun&gt;
   |&gt; Bench.bench
   ;;
 Estimated testing time 20s (change using -quota SECS).
-┌────────────────┬───────────┬──────────┐
-│ Name           │ Time (ns) │ % of max │
-├────────────────┼───────────┼──────────┤
-│ plus_one_match │    369.38 │    83.40 │
-│ plus_one_if    │    442.88 │   100.00 │
-└────────────────┴───────────┴──────────┘
++----------------+-----------+----------+
+| Name           | Time (ns) | % of max |
+|----------------+-----------+----------|
+| plus_one_match |    369.38 |    83.40 |
+| plus_one_if    |    442.88 |   100.00 |
++----------------+-----------+----------+
 </programlisting>
       <para>
         Here's another less artificial example. We can rewrite the
@@ -4010,12 +4010,12 @@ val sum_if : int list -&gt; int = &lt;fun&gt;
   |&gt; Bench.bench
   ;;
 Estimated testing time 20s (change using -quota SECS).
-┌────────┬───────────┬──────────┐
-│ Name   │ Time (ns) │ % of max │
-├────────┼───────────┼──────────┤
-│ sum_if │   650_463 │   100.00 │
-│ sum    │   177_740 │    27.32 │
-└────────┴───────────┴──────────┘
++--------+-----------+----------+
+| Name   | Time (ns) | % of max |
+|--------+-----------+----------|
+| sum_if |   650_463 |   100.00 |
+| sum    |   177_740 |    27.32 |
++--------+-----------+----------+
 - : unit = ()
 </programlisting>
       <para>
@@ -12066,6 +12066,13 @@ include Foldable.Extend(T)
   </sect1>
 </chapter><chapter id="first-class-modules">
   <title>First class modules</title>
+  <note><title> 
+  A note to reviewers
+  </title>
+  <para>
+    This chapter is highly incomplete. Proceed with caution...
+  </para>
+  </note>
   <para>
     You can think of OCaml as being broken up into two parts: a core
     language that is concerned with values and types, and a module
@@ -12196,9 +12203,9 @@ val to_int : (module X_int) -&gt; int = &lt;fun&gt;
 val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;
 </programlisting>
     <para>
-      With these functions in hand, we can now work with
-      <literal>(module X_int)</literal>'s in a more natural style,
-      taking full advantage of the concision and simplicity of the core
+      With these functions in hand, we can now work with values of type
+      <literal>(module X_int)</literal> in a more natural style, taking
+      full advantage of the concision and simplicity of the core
       language.
     </para>
     <programlisting language="ocaml">
@@ -12209,8 +12216,8 @@ val six : (module X_int) = &lt;module&gt;
 </programlisting>
     <para>
       Of course, all we've really done with this example is come up with
-      a more cumbersome way of working with integers. In the following,
-      we'll look at more realistic examples.
+      a more cumbersome way of working with integers. Now let's consider
+      some more realistic examples.
     </para>
   </sect1>
   <sect1 id="dynamically-choosing-a-module">
@@ -12275,8 +12282,8 @@ include (val multiplexer : S)
     <title>Example: A service bundle</title>
     <para>
       This section describes the design of a library for bundling
-      together multiple services, where a service is a piece of code
-      that exports a query interface. A service bundle combines together
+      together multiple services, where a service is a component that
+      exports a query interface. A service bundle combines together
       multiple individual services under a single query interface that
       works by dispatching incoming queries to the appropriate
       underlying service.
@@ -12315,8 +12322,15 @@ end
       referenced, a function <literal>create</literal> for instantiating
       a service, and a function by which a service can actually handle a
       request. Here, requests and responses are delivered as
-      s-expressions. At the <literal>Bundle</literal> level, the
-      s-expression of a request is expected to be formatted as follows:
+      s-expressions, which are a very simple serialization format
+      commonly used in Core. We'll cover s-expressions in more detail in
+      <xref linkend="data-serialization-with-s-expressions"/>,
+      but for now, it's enough to think of them as balanced
+      parenthetical expressions whose atomic values are strings.
+    </para>
+    <para>
+      At the <literal>Bundle</literal> level, the s-expression of a
+      request is expected to be formatted as follows:
     </para>
     <programlisting>
 (&lt;service-name&gt; &lt;body&gt;)
@@ -12327,20 +12341,16 @@ end
       the body of the request.
     </para>
     <para>
-      Now let's look at how to implement <literal>Service</literal>. The
-      core datastructure of <literal>Bundle</literal> is a hashtable of
-      request handlers, one per service. Each request handler is a
-      function of type
+      Now let's look at how to implement <literal>service.ml</literal>.
+      We'll start with the definition of the module type
+      <literal>S</literal> and the definition of the type
+      <literal>Bundle.t</literal>. A <literal>Bundle.t</literal> is
+      implemented as a hashtable of request handlers, one per service.
+      Each request handler is a function of type
       <literal>(Sexp.t -&gt; Sexp.t Or_error.t)</literal>. These request
       handlers really stand in for the underlying service, with the
-      particular state of the service in question being hidden inside of
-      the request handler.
-    </para>
-    <para>
-      The first part of <literal>service.ml</literal> is just the
-      preliminaries: the definition of the module type
-      <literal>S</literal>, and the definition of the type
-      <literal>Bundle.t</literal>.
+      particular state of the service in question being hidden behind
+      the function.
     </para>
     <programlisting language="ocaml">
 (* file: service.ml *)
@@ -12386,10 +12396,10 @@ module Bundle = struct
       <literal>handlers</literal> table.
     </para>
     <para>
-      Now we can write the function for the bundle to handle requests.
-      The handler will examine the s-expression to determine the body of
-      the query and the name of the service to dispatch to. It then
-      looks up the handler calls it to generate the response.
+      Now we can write the function to handle requests. The handler will
+      examine the s-expression to determine the body of the query and
+      the name of the service to dispatch to. It then looks up the
+      handler calls it to generate the response.
     </para>
     <programlisting language="ocaml">
   let handle_request t sexp =
@@ -20813,7 +20823,7 @@ Exception:
         Async's system of <emphasis>monitors</emphasis>, which are
         inspired by the error-handling mechanism in Erlang of the same
         name. Monitors are fairly low-level and are only occasionally
-        used directly, but it's nontheless worth understanding how they
+        used directly, but it's nonetheless worth understanding how they
         work.
       </para>
       <para>
@@ -21285,6 +21295,16 @@ Damien Doligez, Didier Rémy and others in 1996.&quot;
   </sect1>
 </chapter><chapter id="fast-binary-serialization">
   <title>Fast Binary Serialization</title>
+  <note>
+  <title>
+  Note to reviewers
+  </title>
+  <para>
+    This chapter is still incomplete, but the contents here are still
+    instructive enough that we decided to include it in the public beta
+    release.
+  </para>
+  </note>
   <para>
     Now that we've learned the basics of working with Async, let's walk
     through a small but non-trivial application: a message broker which
@@ -21496,14 +21516,15 @@ let publish_rpc = Rpc.Rpc.create
   Using <literal>bin_prot</literal> in the toplevel
   </title>
   <para>
-    The <literal>bin_prot</literal> syntax extension isn't activated by
-    default in the toplevel, but is easily available if you add this to
-    your <literal>~/.ocamlinit</literal> file. You can also just type
-    this in directly into <literal>utop</literal> (with
-    <literal>;;</literal> to finish the line) instead.
+    The <literal>bin_prot</literal> syntax extension is part of the
+    <literal>core.syntax</literal> bundle, and so should be available in
+    the toplevel if you've loaded that in via your
+    <literal>~/.ocamlinit</literal> file. You can also just type this in
+    directly into <literal>utop</literal> instead to load just this
+    extension.
   </para>
   <programlisting>
-#require &quot;bin_prot.syntax&quot;
+#require &quot;bin_prot.syntax&quot; ;;
 </programlisting>
   <para>
     The extension is activated by putting <literal>with bin_io</literal>
@@ -21639,127 +21660,6 @@ let read_messages () =
 let () =
   write_messages (); read_messages ()
 </programlisting>
-  </sect1>
-  <sect1 id="bigstring">
-    <title>Bigstring</title>
-    <para>
-      We earlier mentioned that <literal>bigstring</literal> is a more
-      efficient version of <literal>string</literal>. Understanding the
-      difference requires some understanding of how OCaml allocates
-      values. TODO.
-    </para>
-  </sect1>
-  <sect1 id="fieldslib">
-    <title>Fieldslib</title>
-    <para>
-      TODO: out of place
-    </para>
-    <para>
-      One common idiom when using records is to provide field accessor
-      functions for a particular record.
-    </para>
-    <programlisting language="ocaml">
-type t = { topic: string;
-           content: string;
-           source: Source.t;
-         }
-
-let topic   t = t.topic
-let content t = t.content
-let source  t = t.source
-</programlisting>
-    <para>
-      Similarly, sometimes you simultaneously want an accessor to a
-      field of a record and a textual representation of the name of that
-      field. This might come up if you were validating a field and
-      needed the string representation to generate an error message, or
-      if you wanted to scaffold a form in a GUI automatically based on
-      the fields of a record. Fieldslib provides a module
-      <literal>Field</literal> for this purpose. Here's some code for
-      creating <literal>Field.t</literal>'s for all the fields of our
-      type <literal>t</literal>.
-    </para>
-    <programlisting language="ocaml">
-# module Fields = struct
-    let topic =
-      { Field.
-        name   = &quot;topic&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.topic);
-        fset   = (fun t topic -&gt; { t with topic });
-      }
-    let content =
-      { Field.
-        name   = &quot;content&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.content);
-        fset   = (fun t content -&gt; { t with content });
-      }
-    let source =
-      { Field.
-        name   = &quot;source&quot;;
-        setter = None;
-        getter = (fun t -&gt; t.source);
-        fset   = (fun t source -&gt; { t with source });
-      }
-  end ;;
-module Fields :
-  sig
-    val topic : (t, string list) Core.Std.Field.t
-    val content : (t, string) Core.Std.Field.t
-    val source : (t, Source.t) Core.Std.Field.t
-  end
-</programlisting>
-    <para>
-      There are several syntax extensions distributed with Core,
-      including:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <emphasis role="strong">Sexplib</emphasis>: provides
-          serialization for s-expressions.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Bin_prot</emphasis>: provides
-          serialization to an efficient binary format.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Fieldslib</emphasis>: generates
-          first-class values that represent fields of a record, as well
-          as accessor functions and setters for mutable record fields.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Variantslib</emphasis>: like Fieldslib
-          for variants, producing first-class variants and other helper
-          functions for interacting with variant types.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Pa_compare</emphasis>: generates
-          efficient, type-specialized comparison functions.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="strong">Pa_typehash</emphasis>: generates a
-          hash value for a type definition, <emphasis>i.e.</emphasis>,
-          an integer that is highly unlikely to be the same for two
-          distinct types.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      We'll discuss each of these syntax extensions in detail, starting
-      with Sexplib.
-    </para>
   </sect1>
 </chapter></part><part label="III"><title>The Runtime System</title><partintro><para>Part III is all about understanding the compiler toolchain and runtime system in OCaml.  
      It's a remarkably simple system in comparison to other language runtimes (such as Java or 
