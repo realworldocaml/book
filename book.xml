@@ -484,13 +484,14 @@ $ eval `opam config -env`
     Note that the above commands will take some time to run. When
     they're done, you should have a file called
     <literal>~/.ocamlinit</literal> in your home directory, to which you
-    should add the following.
+    should add at least the following.
   </para>
   <programlisting language="ocaml">
 #use &quot;topfind&quot;
 #camlp4o
 #thread
 #require &quot;core.top&quot;
+#require &quot;core.syntax&quot;
 </programlisting>
   <para>
     Then type in <literal>utop</literal>, and you'll be in an
@@ -619,10 +620,18 @@ val x' : int = 8
     <para>
       But these are not:
     </para>
-    <para>
-      <literal>ocaml # let Seven = 3 + 4;; Error: Unbound constructor Seven # let 7x = 7;; Error: This expression should not be a function, the expected type is int # let x-plus-y = x + y;; Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</literal>
-      ## Functions and type Inference
-    </para>
+    <programlisting language="ocaml">
+# let Seven = 3 + 4;;
+Error: Unbound constructor Seven
+# let 7x = 7;;
+Error: This expression should not be a function, the expected type is
+int
+# let x-plus-y = x + y;;
+Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
+</programlisting>
+  </sect1>
+  <sect1 id="functions-and-type-inference">
+    <title>Functions and type Inference</title>
     <para>
       The <literal>let</literal> syntax can also be used for creating
       functions.
@@ -1803,8 +1812,8 @@ val x : int ref = {contents = 0}
 </programlisting>
       <para>
         There's nothing magical with these operators either. You can
-        complete reimplement the <literal>ref</literal> type and all of
-        these operators in just a few lines of code.
+        completely reimplement the <literal>ref</literal> type and all
+        of these operators in just a few lines of code.
       </para>
       <programlisting language="ocaml">
 type 'a ref = { mutable contents : 'a }
@@ -28300,24 +28309,27 @@ $ sudo port install opam
     <sect2 id="debian-linux-1">
       <title>Debian Linux</title>
       <para>
-        There are experimental binary packages available for Debian
-        Wheezy/amd64. You should be able to use these on 64-bit Ubuntu
-        and other derivative distributions such as Linux Mint also. Just
-        add the following line to your
-        <literal>/etc/apt/sources.list</literal>:
-      </para>
-      <programlisting>
-deb http://www.recoil.org/~avsm/ wheezy main
-</programlisting>
-      <para>
-        When this is done, update your packages and install OPAM. You
-        can ignore the warning about unsigned packages, which will
-        disappear when OPAM is upstreamed into Debian mainline.
+        OPAM has recently been packaged for Debian and will soon be part
+        of the unstable distribution. If you're on an earlier stable
+        distribution such as <literal>wheezy</literal>, you can either
+        compile from source, or cherry-pick just the OPAM binary package
+        from <literal>unstable</literal> by:
       </para>
       <programlisting>
 # apt-get update
-# apt-get install opam
+# apt-get -t unstable install opam
 </programlisting>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        The binary packages for OPAM are not yet available as of the
+        17th June 2013, but the package is in the <literal>NEW</literal>
+        queue. It should be available by the the time the book is
+        released, and these instructions will be updated accordingly.
+      </para>
+      </note>
     </sect2>
     <sect2 id="fedora-and-red-hat-1">
       <title>Fedora and Red Hat</title>
@@ -28617,17 +28629,38 @@ $ opam install utop
 #camlp4o
 #require &quot;core.top&quot;
 #require &quot;core.syntax&quot;
+</programlisting>
+      <para>
+        You can also optionally add some more useful libraries that are
+        used in the book, such as <literal>Core_extended</literal> and
+        <literal>Async</literal>. You can also open the Core module by
+        default if that's all you ever use the top-level for. Just
+        append these lines to the <literal>.ocamlinit</literal> file if
+        that's what you prefer.
+      </para>
+      <programlisting>
 #require &quot;core_extended&quot;
 #require &quot;async&quot;
 open Core.Std
 </programlisting>
       <para>
-        When you run <literal>utop</literal> with this initialization
-        file, it should start up with Core opened and ready to use.
+        When you run <literal>utop</literal> with these initialization
+        rules, it should start up with Core opened and ready to use.
       </para>
     </sect2>
     <sect2 id="editors">
       <title>Editors</title>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        The instructions for editor setup are still being compiled. If
+        you have a relevant tip or HOWTO, then we'd
+        <emphasis>really</emphasis> appreciate you leaving a note here
+        with a pointer or direct instructions.
+      </para>
+      </note>
       <sect3 id="emacs">
         <title>Emacs</title>
         <para>
