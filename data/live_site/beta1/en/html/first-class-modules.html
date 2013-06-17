@@ -1,0 +1,551 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 10. First class modules / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta1',
+                        page: 'first\u002Dclass\u002Dmodules.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html" class="here">10. First class modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 10. First class modules</h1>
+                
+                
+
+    <aside class="note"><h1> 
+  A note to reviewers
+  </h1><p id="idp9300752">
+    This chapter is highly incomplete. Proceed with caution...
+  </p></aside><p id="idp9301344">
+    You can think of OCaml as being broken up into two parts: a core
+    language that is concerned with values and types, and a module
+    language that is concerned with modules and module signatures. These
+    sub-languages are stratified, in that modules can contain types and
+    values, but ordinary values can't contain modules or module types.
+    That means you can't do things like define a variable whose value is
+    a module, or a function that takes a module as an argument.
+  </p><p id="idp9302736">
+    OCaml provides a way around this stratification in the form of
+    <span><em>first-class modules</em></span>. First-class modules are
+    ordinary values that can be created from and converted back to
+    regular modules. As we'll see, letting modules into the core
+    language makes it possible build more modular programs.
+  </p><aside class="note"><h1>
+  Note to reviewers
+  </h1><p id="idp9304544">
+    This chapter is still incomplete, but the contents here are still
+    instructive enough that we decided to include it in the public beta
+    release.
+  </p></aside><section><h1 id="a-trivial-example-1">A trivial example</h1><p id="idp9306320">
+      As we did with functors, we'll start out by considering a trivial
+      example so we can cover the basic mechanics of first class modules
+      with a minimum of fuss. We'll actually use essentially the same
+      example we used with functors: a module containing a single
+      integer variable.
+    </p><p id="idp9307024">
+      A first-class module is created by packaging up a module with a
+      signature that it satisfies. The following defines a simple
+      signature and a module that matches it.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="k">type</span> <span class="nc">X_int</span> <span class="o">=</span> <span class="k">sig</span> <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="k">type</span> <span class="nc">X_int</span> <span class="o">=</span> <span class="k">sig</span> <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">end</span>
+<span class="o">#</span> <span class="k">module</span> <span class="nc">Three</span> <span class="o">:</span> <span class="nc">X_int</span> <span class="o">=</span> <span class="k">struct</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="nc">Three</span> <span class="o">:</span> <span class="nc">X_int</span>
+<span class="o">#</span> <span class="nn">Three</span><span class="p">.</span><span class="n">x</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div><p id="idp9308736">
+      We can convert this ordinary module into a first-class module
+      using the <code>module</code> keyword.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">three</span> <span class="o">=</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Three</span> <span class="o">:</span> <span class="nc">X_int</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">three</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">module</span><span class="o">&gt;</span>
+</pre></div><p id="idp9311024">
+      If the module type can be inferred, than you can even omit the
+      signature. Thus, we can write:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Four</span> <span class="o">=</span> <span class="k">struct</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="nc">Four</span> <span class="o">:</span> <span class="k">sig</span> <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">end</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">numbers</span> <span class="o">=</span> <span class="o">[</span> <span class="n">three</span><span class="o">;</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Four</span><span class="o">)</span> <span class="o">];;</span>
+<span class="k">val</span> <span class="n">numbers</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="k">module</span><span class="o">&gt;;</span> <span class="o">&lt;</span><span class="k">module</span><span class="o">&gt;]</span>
+</pre></div><p id="idp9312784">
+      And we can even create a first-class module from an anonymous
+      module:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">numbers</span> <span class="o">=</span> <span class="o">[</span><span class="n">three</span><span class="o">;</span> <span class="o">(</span><span class="k">module</span> <span class="k">struct</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">end</span><span class="o">)];;</span>
+<span class="k">val</span> <span class="n">numbers</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="k">module</span><span class="o">&gt;;</span> <span class="o">&lt;</span><span class="k">module</span><span class="o">&gt;]</span>
+</pre></div><p id="idp9314400">
+      Note that the type of the first-class module,
+      <code>(module X_int)</code>, is based on the name of the
+      signature that we used in constructing it. A first class module
+      based on a signature with a different name, even if it is
+      substantively the same signature, will result in a distinct type,
+      as is shown below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="k">type</span> <span class="nc">Y_int</span> <span class="o">=</span> <span class="nc">X_int</span><span class="o">;;</span>
+<span class="k">module</span> <span class="k">type</span> <span class="nc">Y_int</span> <span class="o">=</span> <span class="nc">X_int</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">five</span> <span class="o">=</span> <span class="o">(</span><span class="k">module</span> <span class="k">struct</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">end</span> <span class="o">:</span> <span class="nc">Y_int</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">five</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Y_int</span><span class="o">)</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">module</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="o">[</span><span class="n">three</span><span class="o">;</span> <span class="n">five</span><span class="o">];;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Y_int</span><span class="o">)</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span>
+</pre></div><p id="idp9317056">
+      This constraint can occasionally be confusing. The most common
+      source of confusion is if someone creates a module type aas a
+      local alias to a module type defined elsewhere, the two module
+      types will lead to distinct first class module types.
+    </p><p id="idp9317728">
+      In order to access the contents of a first-class module, you need
+      to unpack it into an ordinary module. This can be done using the
+      <code>val</code> keyword, as shown below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">New_three</span> <span class="o">=</span> <span class="o">(</span><span class="k">val</span> <span class="n">three</span> <span class="o">:</span> <span class="nc">X_int</span><span class="o">)</span> <span class="o">;;</span>
+<span class="k">module</span> <span class="nc">New_three</span> <span class="o">:</span> <span class="nc">X_int</span>
+<span class="o">#</span> <span class="nn">New_three</span><span class="p">.</span><span class="n">x</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div><p id="idp9320016">
+      We can also write ordinary functions which consume and create
+      first class modules. The following shows the definition of two
+      function, <code>to_int</code>, which converts a
+      <code>(module X_int)</code> into an <code>int</code>.
+      And <code>plus</code>, which adds two
+      <code>(module X_int)</code>s.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">to_int</span> <span class="n">m</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="k">module</span> <span class="nc">M</span> <span class="o">=</span> <span class="o">(</span><span class="k">val</span> <span class="n">m</span> <span class="o">:</span> <span class="nc">X_int</span><span class="o">)</span> <span class="k">in</span>
+    <span class="nn">M</span><span class="p">.</span><span class="n">x</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">to_int</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">plus</span> <span class="n">m1</span> <span class="n">m2</span> <span class="o">=</span>
+    <span class="o">(</span><span class="k">module</span> <span class="k">struct</span>
+       <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">to_int</span> <span class="n">m1</span> <span class="o">+</span> <span class="n">to_int</span> <span class="n">m2</span>
+     <span class="k">end</span> <span class="o">:</span> <span class="nc">X_int</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">plus</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp9325760">
+      With these functions in hand, we can now work with values of type
+      <code>(module X_int)</code> in a more natural style, taking
+      full advantage of the concision and simplicity of the core
+      language.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">six</span> <span class="o">=</span> <span class="n">plus</span> <span class="n">three</span> <span class="n">three</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">six</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">X_int</span><span class="o">)</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">module</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">to_int</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="n">six</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">plus</span> <span class="o">[</span><span class="n">three</span><span class="o">;</span><span class="n">three</span><span class="o">]);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">12</span>
+</pre></div><p id="idp9328384">
+      Of course, all we've really done with this example is come up with
+      a more cumbersome way of working with integers. Now let's consider
+      some more realistic examples.
+    </p></section><section><h1 id="dynamically-choosing-a-module">Dynamically choosing a module</h1><p id="idp9330240">
+      Perhaps the simplest thing you can do with first-class modules
+      that you can't do without them is to pick the implementation of a
+      module at runtime.
+    </p><p id="idp9330816">
+      Consider an application that does I/O multiplexing using a system
+      call like <code>select</code> to determine which file
+      descriptors are ready to use. There are in fact multiple APIs you
+      might want to use, including <code>select</code> itself,
+      <code>epoll</code>, and <code>libev</code>, where
+      different multiplexers make somewhat different performance and
+      portability trade-offs. You could support all of these in one
+      application by defining a single module, let's call it
+      <code>Mutliplexer</code>, whose implementation is chosen at
+      runtime based on an environment variable.
+    </p><p id="idp9335296">
+      To do this, you'd first need an interface <code>S</code>
+      that all of the different multiplexer implementations would need
+      to match, and then an implementation of each multiplexer.
+    </p><div class="highlight"><pre><span class="c">(* file: multiplexer.ml *)</span>
+
+<span class="c">(* An interface the OS-specific functionality *)</span>
+<span class="k">module</span> <span class="k">type</span> <span class="nc">S</span> <span class="o">=</span> <span class="k">sig</span> <span class="o">...</span> <span class="k">end</span>
+
+<span class="c">(* The implementations of each individual multiplexer *)</span>
+<span class="k">module</span> <span class="nc">Select</span> <span class="o">:</span> <span class="nc">S</span> <span class="o">=</span> <span class="k">struct</span> <span class="o">...</span> <span class="k">end</span>
+<span class="k">module</span> <span class="nc">Epoll</span>  <span class="o">:</span> <span class="nc">S</span> <span class="o">=</span> <span class="k">struct</span> <span class="o">...</span> <span class="k">end</span>
+<span class="k">module</span> <span class="nc">Libev</span>  <span class="o">:</span> <span class="nc">S</span> <span class="o">=</span> <span class="k">struct</span> <span class="o">...</span> <span class="k">end</span>
+</pre></div><p id="idp9337776">
+      We can choose the first-class module that we want based on looking
+      up an environment variable.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">multiplexer</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="nn">Sys</span><span class="p">.</span><span class="n">getenv</span> <span class="s2">&quot;MULTIPLEXER&quot;</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="nc">None</span>
+  <span class="o">|</span> <span class="nc">Some</span> <span class="s2">&quot;select&quot;</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Select</span> <span class="o">:</span> <span class="nc">S</span><span class="o">)</span>
+  <span class="o">|</span> <span class="nc">Some</span> <span class="s2">&quot;epoll&quot;</span>  <span class="o">-&gt;</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Epoll</span> <span class="o">:</span> <span class="nc">S</span><span class="o">)</span>
+  <span class="o">|</span> <span class="nc">Some</span> <span class="s2">&quot;libev&quot;</span>  <span class="o">-&gt;</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Libev</span> <span class="o">:</span> <span class="nc">S</span><span class="o">)</span>
+  <span class="o">|</span> <span class="nc">Some</span> <span class="n">other</span> <span class="o">-&gt;</span> <span class="n">failwithf</span> <span class="s2">&quot;Unknown multiplexer: %s&quot;</span> <span class="n">other</span> <span class="bp">()</span>
+</pre></div><p id="idp9339648">
+      Finally, we can convert the resulting first-class module back to
+      an ordinary module, and then include that so it becomes part of
+      the body of our module.
+    </p><div class="highlight"><pre><span class="c">(* The final, dynamically chosen, implementation *)</span>
+<span class="k">include</span> <span class="o">(</span><span class="k">val</span> <span class="n">multiplexer</span> <span class="o">:</span> <span class="nc">S</span><span class="o">)</span>
+</pre></div></section><section><h1 id="example-a-service-bundle">Example: A service bundle</h1><p id="idp9342528">
+      This section describes the design of a library for bundling
+      together multiple services, where a service is a component that
+      exports a query interface. A service bundle combines together
+      multiple individual services under a single query interface that
+      works by dispatching incoming queries to the appropriate
+      underlying service.
+    </p><p id="idp9343664">
+      The following is a first attempt at an interface for our
+      <code>Service</code> module, which contains both a module
+      type <code>S</code>, which is the interface that a service
+      should meet, as well as a <code>Bundle</code> module which
+      is for combining multiple services.
+    </p><div class="highlight"><pre><span class="c">(* file: service.mli *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="c">(** The module type for a service. *)</span>
+<span class="k">module</span> <span class="k">type</span> <span class="nc">S</span> <span class="o">=</span> <span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">name</span>           <span class="o">:</span> <span class="kt">string</span>
+  <span class="k">val</span> <span class="n">create</span>         <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">handle_request</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">t</span>
+<span class="k">end</span>
+
+<span class="c">(** Bundles multiple services together *)</span>
+<span class="k">module</span> <span class="nc">Bundle</span> <span class="o">:</span> <span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">create</span> <span class="o">:</span> <span class="o">(</span><span class="k">module</span> <span class="nc">S</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">handle_request</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">t</span>
+  <span class="k">val</span> <span class="n">service_names</span>  <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span>
+<span class="k">end</span>
+</pre></div><p id="idp9348080">
+      Here, a service has a state, represented by the type
+      <code>t</code>, a name by which the service can be
+      referenced, a function <code>create</code> for instantiating
+      a service, and a function by which a service can actually handle a
+      request. Here, requests and responses are delivered as
+      s-expressions, which are a very simple serialization format
+      commonly used in Core. We'll cover s-expressions in more detail in
+      <a href="data-serialization-with-s-expressions.html">Chapter 17, <i>Data Serialization with S-Expressions</i></a>,
+      but for now, it's enough to think of them as balanced
+      parenthetical expressions whose atomic values are strings.
+    </p><p id="idp9351152">
+      At the <code>Bundle</code> level, the s-expression of a
+      request is expected to be formatted as follows:
+    </p><pre id="idp9352368">
+(&lt;service-name&gt; &lt;body&gt;)
+</pre><p id="idp9353072">
+      where <code>&lt;service_name&gt;</code> is the service that
+      should handle the request, and <code>&lt;body&gt;</code> is
+      the body of the request.
+    </p><p id="idp9354960">
+      Now let's look at how to implement <code>service.ml</code>.
+      We'll start with the definition of the module type
+      <code>S</code> and the definition of the type
+      <code>Bundle.t</code>. A <code>Bundle.t</code> is
+      implemented as a hashtable of request handlers, one per service.
+      Each request handler is a function of type
+      <code>(Sexp.t -&gt; Sexp.t Or_error.t)</code>. These request
+      handlers really stand in for the underlying service, with the
+      particular state of the service in question being hidden behind
+      the function.
+    </p><div class="highlight"><pre><span class="c">(* file: service.ml *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">module</span> <span class="k">type</span> <span class="nc">S</span> <span class="o">=</span> <span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">name</span>           <span class="o">:</span> <span class="kt">string</span>
+  <span class="k">val</span> <span class="n">create</span>         <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">handle_request</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">t</span>
+<span class="k">end</span>
+
+<span class="k">module</span> <span class="nc">Bundle</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">handlers</span><span class="o">:</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">t</span><span class="o">)</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Table</span><span class="p">.</span><span class="n">t</span><span class="o">;</span> <span class="o">}</span>
+</pre></div><p id="idp9360912">
+      The next thing we need is a function for creating a
+      <code>Bundle.t</code>. This <code>create</code>
+      function builds a table to hold the request handlers, and then
+      iterates through the services, unpacking each module, constructing
+      the request handler, and then putting that request handler in the
+      table.
+    </p><div class="highlight"><pre>  <span class="c">(** Creates a handler given a list of services *)</span>
+  <span class="k">let</span> <span class="n">create</span> <span class="n">services</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">handlers</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Table</span><span class="p">.</span><span class="n">create</span> <span class="bp">()</span> <span class="k">in</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="n">services</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">service_m</span> <span class="o">-&gt;</span>
+      <span class="k">let</span> <span class="k">module</span> <span class="nc">Service</span> <span class="o">=</span> <span class="o">(</span><span class="k">val</span> <span class="n">service_m</span> <span class="o">:</span> <span class="nc">S</span><span class="o">)</span> <span class="k">in</span>
+      <span class="k">let</span> <span class="n">service</span> <span class="o">=</span> <span class="nn">Service</span><span class="p">.</span><span class="n">create</span> <span class="bp">()</span> <span class="k">in</span>
+      <span class="k">if</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">mem</span> <span class="n">handlers</span> <span class="nn">Service</span><span class="p">.</span><span class="n">name</span> <span class="k">then</span>
+        <span class="n">failwith</span> <span class="o">(</span><span class="s2">&quot;Attempt to register duplicate handler for &quot;</span><span class="o">^</span><span class="nn">Service</span><span class="p">.</span><span class="n">name</span><span class="o">);</span>
+      <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">replace</span> <span class="n">handlers</span> <span class="o">~</span><span class="n">key</span><span class="o">:</span><span class="nn">Service</span><span class="p">.</span><span class="n">name</span>
+        <span class="o">~</span><span class="n">data</span><span class="o">:(</span><span class="k">fun</span> <span class="n">sexp</span> <span class="o">-&gt;</span> <span class="nn">Service</span><span class="p">.</span><span class="n">handle_request</span> <span class="n">service</span> <span class="n">sexp</span><span class="o">)</span>
+    <span class="o">);</span>
+    <span class="o">{</span><span class="n">handlers</span><span class="o">}</span>
+</pre></div><p id="idp9364736">
+      Note that the <code>Service.t</code> that is created is
+      referenced by the corresponding request handler, so that it is
+      effectively hidden behind the function in the
+      <code>handlers</code> table.
+    </p><p id="idp9366720">
+      Now we can write the function to handle requests. The handler will
+      examine the s-expression to determine the body of the query and
+      the name of the service to dispatch to. It then looks up the
+      handler calls it to generate the response.
+    </p><div class="highlight"><pre>  <span class="k">let</span> <span class="n">handle_request</span> <span class="n">t</span> <span class="n">sexp</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">sexp</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nn">Sexp</span><span class="p">.</span><span class="nc">List</span> <span class="o">[</span><span class="nn">Sexp</span><span class="p">.</span><span class="nc">Atom</span> <span class="n">name</span><span class="o">;</span><span class="n">query</span><span class="o">]</span> <span class="o">-&gt;</span>
+      <span class="k">begin</span> <span class="k">match</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">find</span> <span class="n">t</span><span class="o">.</span><span class="n">handlers</span> <span class="n">name</span> <span class="k">with</span>
+      <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">error_string</span> <span class="o">(</span><span class="s2">&quot;Unknown service: &quot;</span><span class="o">^</span><span class="n">name</span><span class="o">)</span>
+      <span class="o">|</span> <span class="nc">Some</span> <span class="n">handler</span> <span class="o">-&gt;</span>
+        <span class="k">try</span> <span class="n">handler</span> <span class="n">query</span>
+        <span class="k">with</span> <span class="n">exn</span> <span class="o">-&gt;</span> <span class="nc">Error</span> <span class="o">(</span><span class="nn">Error</span><span class="p">.</span><span class="n">of_exn</span> <span class="n">exn</span><span class="o">)</span>
+      <span class="k">end</span>
+    <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">error_string</span> <span class="s2">&quot;Malformed query&quot;</span>
+</pre></div><p id="idp9368736">
+      Last of all, we define a function for looking up the names of the
+      available services.
+    </p><div class="highlight"><pre>  <span class="k">let</span> <span class="n">service_names</span> <span class="n">t</span> <span class="o">=</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">keys</span> <span class="n">t</span><span class="o">.</span><span class="n">handlers</span>
+
+<span class="k">end</span>
+</pre></div><p id="idp9370224">
+      To see this system in action, we need to define some services,
+      create the corresponding bundle, and then hook that bundle up to
+      some kind of client. For simplicity, we'll build a simple
+      command-line interface. There are two functions below:
+      <code>handle_one</code>, which handles a single interaction;
+      and <code>handle_loop</code>, which creates the bundle and
+      then runs <code>handle_one</code> in a loop.
+    </p><div class="highlight"><pre><span class="c">(* file: service_client.ml *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="c">(** Handles a single request coming from stdin *)</span>
+<span class="k">let</span> <span class="n">handle_one</span> <span class="n">bundle</span> <span class="o">=</span>
+  <span class="n">printf</span> <span class="s2">&quot;&gt;&gt;&gt; %!&quot;</span><span class="o">;</span> <span class="c">(* prompt *)</span>
+  <span class="k">match</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">input_line</span> <span class="n">stdin</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="o">`</span><span class="nc">Stop</span> <span class="c">(* terminate on end-of-stream, so Ctrl-D will exit *)</span>
+  <span class="o">|</span> <span class="nc">Some</span> <span class="n">line</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">line</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">strip</span> <span class="n">line</span> <span class="k">in</span> <span class="c">(* drop leading and trailing whitespace *)</span>
+    <span class="k">if</span> <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">then</span> <span class="o">`</span><span class="nc">Continue</span>
+    <span class="k">else</span> <span class="k">match</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">try_with</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">of_string</span> <span class="n">line</span><span class="o">)</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">Error</span> <span class="n">err</span> <span class="o">-&gt;</span>
+      <span class="n">eprintf</span> <span class="s2">&quot;Couldn't parse query: %s</span><span class="se">\n</span><span class="s2">%!&quot;</span> <span class="o">(</span><span class="nn">Error</span><span class="p">.</span><span class="n">to_string_hum</span> <span class="n">err</span><span class="o">);</span>
+      <span class="o">`</span><span class="nc">Continue</span>
+    <span class="o">|</span> <span class="nc">Ok</span> <span class="n">query_sexp</span> <span class="o">-&gt;</span>
+      <span class="k">let</span> <span class="n">resp</span> <span class="o">=</span> <span class="nn">Service</span><span class="p">.</span><span class="nn">Bundle</span><span class="p">.</span><span class="n">handle_request</span> <span class="n">bundle</span> <span class="n">query_sexp</span> <span class="k">in</span>
+      <span class="nn">Sexp</span><span class="p">.</span><span class="n">output_hum</span> <span class="n">stdout</span> <span class="o">(&lt;:</span><span class="n">sexp_of</span><span class="o">&lt;</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">t</span><span class="o">&gt;&gt;</span> <span class="n">resp</span><span class="o">);</span>
+      <span class="nn">Out_channel</span><span class="p">.</span><span class="n">newline</span> <span class="n">stdout</span><span class="o">;</span>
+      <span class="o">`</span><span class="nc">Continue</span>
+
+<span class="k">let</span> <span class="n">handle_loop</span> <span class="n">services</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">bundle</span> <span class="o">=</span> <span class="nn">Service</span><span class="p">.</span><span class="nn">Bundle</span><span class="p">.</span><span class="n">create</span> <span class="n">services</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">loop</span> <span class="bp">()</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="n">handle_one</span> <span class="n">bundle</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">Stop</span> <span class="o">-&gt;</span> <span class="bp">()</span>
+    <span class="o">|</span> <span class="o">`</span><span class="nc">Continue</span> <span class="o">-&gt;</span> <span class="n">loop</span> <span class="bp">()</span>
+  <span class="k">in</span>
+  <span class="n">loop</span> <span class="bp">()</span>
+</pre></div><p id="idp9375616">
+      Now we'll create a couple of toy services. One service is a
+      counter that can be updated by query; and the other service lists
+      a directory. The last line then kicks off the shell with the
+      services we've defined.
+    </p><div class="highlight"><pre><span class="k">module</span> <span class="nc">Counter</span> <span class="o">:</span> <span class="nn">Service</span><span class="p">.</span><span class="nc">S</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">int</span> <span class="n">ref</span>
+
+  <span class="k">let</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;update-counter&quot;</span>
+  <span class="k">let</span> <span class="n">create</span> <span class="bp">()</span> <span class="o">=</span> <span class="n">ref</span> <span class="mi">0</span>
+
+  <span class="k">let</span> <span class="n">handle_request</span> <span class="n">t</span> <span class="n">sexp</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">try_with</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">int_of_sexp</span> <span class="n">sexp</span><span class="o">)</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">Error</span> <span class="o">_</span> <span class="k">as</span> <span class="n">err</span> <span class="o">-&gt;</span> <span class="n">err</span>
+    <span class="o">|</span> <span class="nc">Ok</span> <span class="n">x</span> <span class="o">-&gt;</span>
+      <span class="n">t</span> <span class="o">:=</span> <span class="o">!</span><span class="n">t</span> <span class="o">+</span> <span class="n">x</span><span class="o">;</span>
+      <span class="nc">Ok</span> <span class="o">(</span><span class="n">sexp_of_int</span> <span class="o">!</span><span class="n">t</span><span class="o">)</span>
+<span class="k">end</span>
+
+<span class="k">module</span> <span class="nc">List_dir</span> <span class="o">:</span> <span class="nn">Service</span><span class="p">.</span><span class="nc">S</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">unit</span>
+
+  <span class="k">let</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;ls&quot;</span>
+  <span class="k">let</span> <span class="n">create</span> <span class="bp">()</span> <span class="o">=</span> <span class="bp">()</span>
+
+  <span class="k">let</span> <span class="n">handle_request</span> <span class="bp">()</span> <span class="n">sexp</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="nn">Or_error</span><span class="p">.</span><span class="n">try_with</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">string_of_sexp</span> <span class="n">sexp</span><span class="o">)</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">Error</span> <span class="o">_</span> <span class="k">as</span> <span class="n">err</span> <span class="o">-&gt;</span> <span class="n">err</span>
+    <span class="o">|</span> <span class="nc">Ok</span> <span class="n">dir</span> <span class="o">-&gt;</span> <span class="nc">Ok</span> <span class="o">(</span><span class="nn">Array</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="nn">String</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="o">(</span><span class="nn">Sys</span><span class="p">.</span><span class="n">readdir</span> <span class="n">dir</span><span class="o">))</span>
+<span class="k">end</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">handle_loop</span> <span class="o">[(</span><span class="k">module</span> <span class="nc">List_dir</span> <span class="o">:</span> <span class="nn">Service</span><span class="p">.</span><span class="nc">S</span><span class="o">);</span> <span class="o">(</span><span class="k">module</span> <span class="nc">Counter</span> <span class="o">:</span> <span class="nn">Service</span><span class="p">.</span><span class="nc">S</span><span class="o">)]</span>
+</pre></div><p id="idp9378240">
+      And now we can go ahead and start up the client.
+    </p><pre id="idp9378752">
+$ ./service_client.byte
+&gt;&gt;&gt; (update-counter 1)
+(Ok 1)
+&gt;&gt;&gt; (update-counter 10)
+(Ok 11)
+&gt;&gt;&gt; (ls .)
+(Ok
+ (_build _tags service.ml service.mli service.mli~ service.ml~
+  service_client.byte service_client.ml service_client.ml~))
+&gt;&gt;&gt;
+</pre><p id="idp9380016">
+      Now, let's consider what happens to the design when we want to
+      make the interface of a service a bit more realistic. In
+      particular, right now services are created without any
+      configuration. Let's add a config type to each service, and change
+      the interface of <code>Bundle</code> so that services can be
+      registered along with their configs. At the same time, we'll
+      change the <code>Bundle</code> API to allow services to be
+      changed dynamically, rather than just added at creation time.
+    </p></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="functors.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="objects.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

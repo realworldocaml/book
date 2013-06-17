@@ -1,0 +1,854 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 5. Records / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta1',
+                        page: 'records.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html" class="here">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. First class modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 5. Records</h1>
+                
+                
+
+    <aside class="note"><h1>
+  A note to reviewers
+  </h1><p id="idp7999424">
+<span><strong>IMPORTANT</strong></span>: This section is going
+    to describe how records and variants will behave in OCaml 4.01. If
+    you want to follow along fully with the examples here, you'll need
+    to make sure you install a bleeding-edge release, which you can do
+    as follows:
+  </p><pre id="idp8000704">
+opam switch 4.01.0dev+trunk
+</pre><p id="idp8001328">
+    Once you make the switch, you'll need to install the packages you
+    need. Note that switching back and forth between different compilers
+    and their packages is a fast operation after the initial build.
+  </p></aside><p id="idp8002064">
+    One of OCaml's best features is its concise and expressive system
+    for declaring new datatypes. Two key elements of that system are
+    <span><em>records</em></span> and <span><em>variants</em></span>, both
+    of which we discussed briefly in
+    <a href="a-guided-tour.html">Chapter 1, <i>A Guided Tour</i></a>. In this chapter we'll
+    cover records in more depth, covering more of the details of how
+    they work, as well as advice on how to use them effectively in your
+    software designs. Variants will be covered in more depth in
+    <a href="variants.html">Chapter 6, <i>Variants</i></a>.
+  </p><p id="idp8004624">
+    A record represents a collection of values stored together as one,
+    where each component is identified by a different field name. The
+    basic syntax for a record type declaration is as follows.
+  </p><div class="highlight"><pre><span class="k">type</span> <span class="o">&lt;</span><span class="n">record</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">=</span>
+  <span class="o">{</span> <span class="o">&lt;</span><span class="n">field</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">:</span> <span class="o">&lt;</span><span class="k">type</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">;</span>
+    <span class="o">&lt;</span><span class="n">field</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">:</span> <span class="o">&lt;</span><span class="k">type</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">;</span>
+    <span class="o">...</span>
+  <span class="o">}</span>
+</pre></div><p id="idp8006240">
+    Note that record field names must start with a lower-case letter.
+  </p><p id="idp8006720">
+    Here's a simple example, a <code>host_info</code> record that
+    summarizes information about a given computer.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">host_info</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">hostname</span>   <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">os_name</span>    <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">os_release</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">cpu_arch</span>   <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">timestamp</span>  <span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+    <span class="o">};;</span>
+</pre></div><p id="idp8008848">
+    We can construct a <code>host_info</code> just as easily. The
+    following code uses the <code>Shell</code> module from
+    <code>Core_extended</code> to dispatch commands to the shell
+    to extract the information we need about the computer we're running
+    on, and the <code>Time.now</code> call from Core's
+    <code>Time</code> module.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="o">#</span><span class="n">require</span> <span class="s2">&quot;core_extended&quot;</span><span class="o">;;</span>
+<span class="o">#</span> <span class="k">open</span> <span class="nn">Core_extended</span><span class="p">.</span><span class="nc">Std</span><span class="o">;;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">my_host</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">sh</span> <span class="o">=</span> <span class="nn">Shell</span><span class="p">.</span><span class="n">sh_one_exn</span> <span class="k">in</span>
+    <span class="o">{</span> <span class="n">hostname</span>   <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;hostname&quot;</span><span class="o">;</span>
+      <span class="n">os_name</span>    <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;uname -s&quot;</span><span class="o">;</span>
+      <span class="n">os_release</span> <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;uname -r&quot;</span><span class="o">;</span>
+      <span class="n">cpu_arch</span>   <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;uname -p&quot;</span><span class="o">;</span>
+      <span class="n">timestamp</span>  <span class="o">=</span> <span class="nn">Time</span><span class="p">.</span><span class="n">now</span> <span class="bp">()</span><span class="o">;</span>
+    <span class="o">};;</span>
+<span class="k">val</span> <span class="n">my_host</span> <span class="o">:</span> <span class="n">host_info</span> <span class="o">=</span>
+  <span class="o">{</span><span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;yevaud.local&quot;</span><span class="o">;</span> <span class="n">os_name</span> <span class="o">=</span> <span class="s2">&quot;Darwin&quot;</span><span class="o">;</span> <span class="n">os_release</span> <span class="o">=</span> <span class="s2">&quot;12.3.0&quot;</span><span class="o">;</span>
+   <span class="n">cpu_arch</span> <span class="o">=</span> <span class="s2">&quot;i386&quot;</span><span class="o">;</span> <span class="n">timestamp</span> <span class="o">=</span> <span class="mi">2013</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">13</span> <span class="mi">06</span><span class="o">:</span><span class="mi">39</span><span class="o">:</span><span class="mi">17</span><span class="o">.</span><span class="mi">806527</span><span class="o">}</span>
+</pre></div><p id="idp8014048">
+    You might wonder how the compiler inferred that
+    <code>my_host</code> is of type <code>host_info</code>.
+    The hook that the compiler uses in this case to figure out the type
+    is the record field name. Later in the chapter, we'll talk about
+    what happens when there is more than one record type in scope with
+    the same field name.
+  </p><p id="idp8016016">
+    Once we have a record value in hand, we can extract elements from
+    the record field using dot-notation.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="n">my_host</span><span class="o">.</span><span class="n">cpu_arch</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;i386&quot;</span>
+</pre></div><p id="idp8017488">
+    When declaring an OCaml type, you always have the option of
+    parameterizing it by a polymorphic type. Records are no different in
+    this regard. So, for example, here's a type one might to timestamp
+    arbitrary items.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">timestamped</span> <span class="o">=</span> <span class="o">{</span> <span class="n">item</span><span class="o">:</span> <span class="k">'</span><span class="n">a</span><span class="o">;</span> <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span> <span class="o">};;</span>
+<span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">timestamped</span> <span class="o">=</span> <span class="o">{</span> <span class="n">item</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span><span class="o">;</span> <span class="n">time</span> <span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span> <span class="o">}</span>
+</pre></div><p id="idp8019120">
+    We can then write polymorphic functions that operate over this
+    parameterized type.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">first_timestamped</span> <span class="kt">list</span> <span class="o">=</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">reduce</span> <span class="kt">list</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">a</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">b</span><span class="o">.</span><span class="n">time</span> <span class="k">then</span> <span class="n">a</span> <span class="k">else</span> <span class="n">b</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">first_timestamped</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">timestamped</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">timestamped</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><section><h1 id="patterns-and-exhaustiveness">Patterns and exhaustiveness</h1><p id="idp8021792">
+      Another way of getting information out of a record is by using a
+      pattern match, as in the definition of
+      <code>host_info_to_string</code> below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">host_info_to_string</span> <span class="o">{</span> <span class="n">hostname</span> <span class="o">=</span> <span class="n">h</span><span class="o">;</span> <span class="n">os_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">;</span>
+                            <span class="n">os_release</span> <span class="o">=</span> <span class="n">r</span><span class="o">;</span> <span class="n">cpu_arch</span> <span class="o">=</span> <span class="n">c</span><span class="o">;</span>
+                            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">ts</span><span class="o">;</span>
+                          <span class="o">}</span> <span class="o">=</span>
+       <span class="n">sprintf</span> <span class="s2">&quot;%s (%s %s / %s, on %s)&quot;</span> <span class="n">h</span> <span class="n">os</span> <span class="n">r</span> <span class="n">c</span> <span class="o">(</span><span class="nn">Time</span><span class="p">.</span><span class="n">to_sec_string</span> <span class="n">ts</span><span class="o">);;</span>
+    <span class="k">val</span> <span class="n">host_info_to_string</span> <span class="o">:</span> <span class="n">host_info</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">host_info_to_string</span> <span class="n">my_host</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;yevaud.local (Darwin 12.3.0 / i386, on 2013-04-13 06:39:17)&quot;</span>
+</pre></div><p id="idp8024768">
+      Note that the pattern that we used had only a single case, rather
+      than using several cases separated by <code>|</code>s. We
+      needed only one pattern because record patterns are
+      <span><em>irrefutable</em></span>, meaning that a record pattern
+      match will never fail at runtime. This makes sense, because the
+      set of fields available in a record is always the same. In
+      general, patterns for types with a fixed structure, like records
+      and tuples, are irrefutable, unlike types with variable structure
+      like lists and variants.
+    </p><p id="idp8026736">
+      Another important characteristic of record patterns is that they
+      don't need to be complete; a pattern can mention only a subset of
+      the fields in the record. This can be convenient, but it can also
+      be error prone. In particular, this means that when new fields are
+      added to the record, code that should be updated to react to the
+      presence of those new fields will not be flagged by the compiler.
+    </p><p id="idp8027568">
+      As an example, imagine that we wanted to add a new field to our
+      <code>host_info</code> record called
+      <code>os_version</code>, as shown below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">host_info</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">hostname</span>   <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">os_name</span>    <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">os_release</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">cpu_arch</span>   <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">os_version</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">timestamp</span>  <span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+    <span class="o">}</span> <span class="o">;;</span>
+</pre></div><p id="idp8030368">
+      The code for <code>host_info_to_string</code> would continue
+      to compile without change. In this particular case, it's pretty
+      clear that you might want to update
+      <code>host_info_to_string</code> in order to include
+      <code>os_version</code>, and it would be nice if the type
+      system would give you a warning about the change.
+    </p><p id="idp8032880">
+      Happily, OCaml does offer an optional warning for missing fields
+      in a record pattern. With that warning turned on (which you can do
+      in the toplevel by typing
+      <code>#warnings &quot;+9&quot;</code>), the compiler will
+      warn about the missing field.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="o">#</span><span class="n">warnings</span> <span class="s2">&quot;+9&quot;</span><span class="o">;;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">host_info_to_string</span> <span class="o">{</span> <span class="n">hostname</span> <span class="o">=</span> <span class="n">h</span><span class="o">;</span> <span class="n">os_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">;</span>
+                            <span class="n">os_release</span> <span class="o">=</span> <span class="n">r</span><span class="o">;</span> <span class="n">cpu_arch</span> <span class="o">=</span> <span class="n">c</span><span class="o">;</span>
+                            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">ts</span><span class="o">;</span>
+                          <span class="o">}</span> <span class="o">=</span>
+    <span class="n">sprintf</span> <span class="s2">&quot;%s (%s %s / %s, on %s)&quot;</span> <span class="n">h</span> <span class="n">os</span> <span class="n">r</span> <span class="n">c</span> <span class="o">(</span><span class="nn">Time</span><span class="p">.</span><span class="n">to_sec_string</span> <span class="n">ts</span><span class="o">);;</span>
+<span class="nc">Characters</span> <span class="mi">24</span><span class="o">-</span><span class="mi">183</span><span class="o">:</span>
+<span class="k">val</span> <span class="n">host_info_to_string</span> <span class="o">:</span> <span class="n">host_info</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="nc">Warning</span> <span class="mi">9</span><span class="o">:</span> <span class="n">the</span> <span class="n">following</span> <span class="n">labels</span> <span class="n">are</span> <span class="n">not</span> <span class="n">bound</span> <span class="k">in</span> <span class="n">this</span> <span class="n">record</span> <span class="n">pattern</span><span class="o">:</span>
+<span class="n">os_version</span>
+<span class="nc">Either</span> <span class="n">bind</span> <span class="n">these</span> <span class="n">labels</span> <span class="n">explicitly</span> <span class="ow">or</span> <span class="n">add</span> <span class="k">'</span><span class="o">;</span> <span class="o">_</span><span class="k">'</span> <span class="k">to</span> <span class="n">the</span> <span class="n">pattern</span><span class="o">.</span>
+</pre></div><p id="idp8036272">
+      We can disable the warning for a given pattern by explicitly
+      acknowledging that we are ignoring extra fields. This is done by
+      adding an underscore to the pattern, as shown below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">host_info_to_string</span> <span class="o">{</span> <span class="n">hostname</span> <span class="o">=</span> <span class="n">h</span><span class="o">;</span> <span class="n">os_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">;</span>
+                            <span class="n">os_release</span> <span class="o">=</span> <span class="n">r</span><span class="o">;</span> <span class="n">cpu_arch</span> <span class="o">=</span> <span class="n">c</span><span class="o">;</span>
+                            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">ts</span><span class="o">;</span> <span class="o">_</span>
+                          <span class="o">}</span> <span class="o">=</span>
+    <span class="n">sprintf</span> <span class="s2">&quot;%s (%s %s / %s, on %s)&quot;</span> <span class="n">h</span> <span class="n">os</span> <span class="n">r</span> <span class="n">c</span> <span class="o">(</span><span class="nn">Time</span><span class="p">.</span><span class="n">to_sec_string</span> <span class="n">ts</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">host_info_to_string</span> <span class="o">:</span> <span class="n">host_info</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8038176">
+      It's a good idea to enable the warning for incomplete record
+      matches, and to explicitly disable it with an <code>_</code>
+      where necessary.
+    </p></section><section><h1 id="field-punning">Field punning</h1><p id="idp8040336">
+      When the name of a variable coincides with the name of a record
+      field, OCaml provides some handy syntactic shortcuts. For example,
+      the pattern in the following function binds all of the fields in
+      question to variables of the same name. This is called
+      <span><em>field punning</em></span>.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">host_info_to_string</span> <span class="o">{</span> <span class="n">hostname</span><span class="o">;</span> <span class="n">os_name</span><span class="o">;</span> <span class="n">os_release</span><span class="o">;</span> <span class="n">cpu_arch</span> <span class="o">}</span> <span class="o">=</span>
+     <span class="n">sprintf</span> <span class="s2">&quot;%s (%s %s / %s)&quot;</span> <span class="n">hostname</span> <span class="n">os_name</span> <span class="n">os_release</span> <span class="n">cpu_arch</span><span class="o">;;</span>
+  <span class="k">val</span> <span class="n">host_info_to_string</span> <span class="o">:</span> <span class="n">host_info</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8042800">
+      Field punning can also be used to construct a record. Consider the
+      following code for generating a <code>host_info</code>
+      record.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">my_host</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">sh</span> <span class="n">cmd</span> <span class="o">=</span> <span class="nn">Shell</span><span class="p">.</span><span class="n">sh_one_exn</span> <span class="n">cmd</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">hostname</span>   <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;hostname&quot;</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">os_name</span>    <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;uname -s&quot;</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">os_release</span> <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;uname -r&quot;</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">cpu_arch</span>   <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;uname -p&quot;</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">os_version</span> <span class="o">=</span> <span class="n">sh</span> <span class="s2">&quot;Uname -v&quot;</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">timestamp</span>  <span class="o">=</span> <span class="nn">Time</span><span class="p">.</span><span class="n">now</span> <span class="bp">()</span> <span class="k">in</span>
+    <span class="o">{</span> <span class="n">hostname</span><span class="o">;</span> <span class="n">os_name</span><span class="o">;</span> <span class="n">os_release</span><span class="o">;</span> <span class="n">cpu_arch</span><span class="o">;</span> <span class="n">os_version</span><span class="o">;</span> <span class="n">timestamp</span> <span class="o">};;</span>
+<span class="k">val</span> <span class="n">my_host</span> <span class="o">:</span> <span class="n">host_info</span> <span class="o">=</span>
+  <span class="o">{</span><span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;yevaud.local&quot;</span><span class="o">;</span> <span class="n">os_name</span> <span class="o">=</span> <span class="s2">&quot;Darwin&quot;</span><span class="o">;</span> <span class="n">os_release</span> <span class="o">=</span> <span class="s2">&quot;12.3.0&quot;</span><span class="o">;</span>
+   <span class="n">cpu_arch</span> <span class="o">=</span> <span class="s2">&quot;i386&quot;</span><span class="o">;</span>
+   <span class="n">os_version</span> <span class="o">=</span>
+    <span class="s2">&quot;Darwin Kernel Version 12.3.0: Sun Jan  6 22:37:10 PST 2013; root:xnu-2050.22.13~1/RELEASE_X86_64&quot;</span><span class="o">;</span>
+   <span class="n">timestamp</span> <span class="o">=</span> <span class="mi">2013</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">13</span> <span class="mi">06</span><span class="o">:</span><span class="mi">49</span><span class="o">:</span><span class="mi">57</span><span class="o">.</span><span class="mi">771755</span><span class="o">}</span>
+</pre></div><p id="idp8045792">
+      In the above code, we defined variables corresponding to the
+      record fields first, and then the record declaration itself simply
+      listed the fields that needed to be included.
+    </p><p id="idp8046384">
+      You can take advantage of both field punning and label punning
+      when writing a function for constructing a record from labeled
+      arguments, as shown below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">create_host_info</span> <span class="o">~</span><span class="n">hostname</span> <span class="o">~</span><span class="n">os_name</span> <span class="o">~</span><span class="n">os_release</span> <span class="o">~</span><span class="n">cpu_arch</span> <span class="o">~</span><span class="n">os_version</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">os_name</span><span class="o">;</span> <span class="n">os_release</span><span class="o">;</span> <span class="n">cpu_arch</span><span class="o">;</span> <span class="n">os_version</span><span class="o">;</span>
+      <span class="n">hostname</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">lowercase</span> <span class="n">hostname</span><span class="o">;</span>
+      <span class="n">timestamp</span> <span class="o">=</span> <span class="nn">Time</span><span class="p">.</span><span class="n">now</span> <span class="bp">()</span> <span class="o">};;</span>
+<span class="k">val</span> <span class="n">create_host_info</span> <span class="o">:</span>
+  <span class="n">hostname</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span>
+  <span class="n">os_name</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span>
+  <span class="n">os_release</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span>
+  <span class="n">cpu_arch</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">os_version</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">timestamp</span><span class="o">:</span><span class="nn">Time</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">host_info</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8048336">
+      This is considerably more concise than what you would get without
+      punning at all.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">create_host_info</span>
+    <span class="o">~</span><span class="n">hostname</span><span class="o">:</span><span class="n">hostname</span> <span class="o">~</span><span class="n">os_name</span><span class="o">:</span><span class="n">os_name</span> <span class="o">~</span><span class="n">os_release</span><span class="o">:</span><span class="n">os_release</span>
+    <span class="o">~</span><span class="n">cpu_arch</span><span class="o">:</span><span class="n">cpu_arch</span> <span class="o">~</span><span class="n">os_version</span><span class="o">:</span><span class="n">os_version</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">os_name</span> <span class="o">=</span> <span class="n">os_name</span><span class="o">;</span> <span class="n">os_release</span> <span class="o">=</span> <span class="n">os_release</span><span class="o">;</span>
+     <span class="n">cpu_arch</span> <span class="o">=</span> <span class="n">cpu_arch</span><span class="o">;</span> <span class="n">os_version</span> <span class="o">=</span> <span class="n">os_version</span><span class="o">;</span>
+      <span class="n">hostname</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">lowercase</span> <span class="n">hostname</span><span class="o">;</span>
+      <span class="n">timestamp</span> <span class="o">=</span> <span class="nn">Time</span><span class="p">.</span><span class="n">now</span> <span class="bp">()</span> <span class="o">};;</span>
+<span class="k">val</span> <span class="n">create_host_info</span> <span class="o">:</span>
+  <span class="n">hostname</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span>
+  <span class="n">os_name</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span>
+  <span class="n">os_release</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span>
+  <span class="n">cpu_arch</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">os_version</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">timestamp</span><span class="o">:</span><span class="nn">Time</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">host_info</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8050432">
+      Together, labeled arguments, field names, and field and label
+      punning, encourage a style where you propagate the same names
+      throughout your code-base. This is generally good practice, since
+      it encourages consistent naming, which makes it easier to navigate
+      the source.
+    </p></section><section><h1 id="reusing-field-names">Reusing field names</h1><p id="idp8052144">
+      Defining records with the same field names can be problematic.
+      Let's consider a simple example: building types to represent the
+      protocol used for a logging server.
+    </p><p id="idp8052736">
+      We'll describe three message types: <code>log_entry</code>,
+      <code>heartbeat</code> and <code>logon</code>. The
+      <code>log_entry</code> message is used to deliver a log
+      entry to the server; the <code>logon</code> message is sent
+      to initiate a connection, and includes the identity of the user
+      connecting and credentials used for authentication; and the
+      <code>heartbeat</code> message is periodically sent by the
+      client to demonstrate to the server that the client is alive and
+      connected. All of these messages include a session id and the time
+      the message was generated.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">log_entry</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">session_id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+      <span class="n">important</span><span class="o">:</span> <span class="kt">bool</span><span class="o">;</span>
+      <span class="n">message</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+    <span class="o">}</span>
+  <span class="k">type</span> <span class="n">heartbeat</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">session_id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+      <span class="n">status_message</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+    <span class="o">}</span>
+  <span class="k">type</span> <span class="n">logon</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">session_id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+      <span class="n">user</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">credentials</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">;;</span>
+</pre></div><p id="idp8058576">
+      Reusing field names can lead to some ambiguity. For example, if we
+      want to write a function to grab the session_id from a record,
+      what type will it have?
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">get_session_id</span> <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">session_id</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">get_session_id</span> <span class="o">:</span> <span class="n">logon</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8060176">
+      In this case, OCaml just picks the most recent definition of that
+      record field. We can force OCaml to assume we're dealing with a
+      different type (say, a <code>heartbeat</code>) using a type
+      annotation.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">get_heatbeat_session_id</span> <span class="o">(</span><span class="n">t</span><span class="o">:</span><span class="n">heartbeat</span><span class="o">)</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">session_id</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">get_heatbeat_session_id</span> <span class="o">:</span> <span class="n">heartbeat</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">funambulate</span><span class="o">&gt;</span>
+</pre></div><p id="idp8062464">
+      While it's possible to resolve ambiguous field names using type
+      annotations, the ambiguity can be a bit confusing. Consider the
+      following functions for grabbing the session id and status from a
+      heartbeat.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">status_and_session</span> <span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="n">t</span><span class="o">.</span><span class="n">status_message</span><span class="o">,</span> <span class="n">t</span><span class="o">.</span><span class="n">session_id</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">status_and_session</span> <span class="o">:</span> <span class="n">heartbeat</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">*</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">session_and_status</span> <span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="n">t</span><span class="o">.</span><span class="n">session_id</span><span class="o">,</span> <span class="n">t</span><span class="o">.</span><span class="n">status_message</span><span class="o">);;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">The</span> <span class="n">record</span> <span class="k">type</span> <span class="n">logon</span> <span class="n">has</span> <span class="n">no</span> <span class="n">field</span> <span class="n">status_message</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">session_and_status</span> <span class="o">(</span><span class="n">t</span><span class="o">:</span><span class="n">heartbeat</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="n">t</span><span class="o">.</span><span class="n">session_id</span><span class="o">,</span> <span class="n">t</span><span class="o">.</span><span class="n">status_message</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">session_and_status</span> <span class="o">:</span> <span class="n">heartbeat</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">*</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8064864">
+      Why did the first definition succeed without a type annotation and
+      the second one fail? The difference is that in the first case, the
+      type-checker considered the <code>status_message</code>
+      field first and thus concluded that the record was a
+      <code>heartbeat</code>. When the order was switched, the
+      <code>session_id</code> field was considered first, and so
+      that drove the type to be considered to be a
+      <code>logon</code>, at which point
+      <code>t.status_message</code> no longer made sense.
+    </p><p id="idp8068752">
+      We can avoid this ambiguity altogether, either by using
+      non-overlapping field names or, more generally, by minting a
+      module for each type. Packing types into modules is a broadly
+      useful idiom (and one used quite extensively by Core), providing
+      for each type a name-space within which to put related values.
+      When using this style, it is standard practice to name the type
+      associated with the module <code>t</code>. Using this style
+      we would write:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Log_entry</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span>
+      <span class="o">{</span> <span class="n">session_id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+        <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+        <span class="n">important</span><span class="o">:</span> <span class="kt">bool</span><span class="o">;</span>
+        <span class="n">message</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="o">}</span>
+  <span class="k">end</span>
+  <span class="k">module</span> <span class="nc">Heartbeat</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span>
+      <span class="o">{</span> <span class="n">session_id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+        <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+        <span class="n">status_message</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="o">}</span>
+  <span class="k">end</span>
+  <span class="k">module</span> <span class="nc">Logon</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span>
+      <span class="o">{</span> <span class="n">session_id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+        <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+        <span class="n">user</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+        <span class="n">credentials</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="o">}</span>
+  <span class="k">end</span><span class="o">;;</span>
+</pre></div><p id="idp8071552">
+      Now, our heartbeat-creation function can be rendered as follows.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">create_log_entry</span> <span class="o">~</span><span class="n">session_id</span> <span class="o">~</span><span class="n">important</span> <span class="n">message</span> <span class="o">=</span>
+     <span class="o">{</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">time</span> <span class="o">=</span> <span class="nn">Time</span><span class="p">.</span><span class="n">now</span> <span class="bp">()</span><span class="o">;</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">session_id</span><span class="o">;</span>
+       <span class="nn">Log_entry</span><span class="p">.</span><span class="n">important</span><span class="o">;</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">message</span> <span class="o">}</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">create_log_entry</span> <span class="o">:</span>
+  <span class="n">session_id</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">important</span><span class="o">:</span><span class="kt">bool</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8073344">
+      The module name <code>Log_entry</code> is required to
+      qualify the fields, because this function is outside of the
+      <code>Log_entry</code> module where the record was defined.
+      OCaml only requires the module qualification for one record field,
+      however, so we can write this more concisely. Note that we are
+      allowed to insert whitespace between the module-path and the field
+      name.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">create_log_entry</span> <span class="o">~</span><span class="n">session_id</span> <span class="o">~</span><span class="n">important</span> <span class="n">message</span> <span class="o">=</span>
+     <span class="o">{</span> <span class="nn">Log_entry</span><span class="p">.</span>
+       <span class="n">time</span> <span class="o">=</span> <span class="nn">Time</span><span class="p">.</span><span class="n">now</span> <span class="bp">()</span><span class="o">;</span> <span class="n">session_id</span><span class="o">;</span> <span class="n">important</span><span class="o">;</span> <span class="n">message</span> <span class="o">}</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">create_log_entry</span> <span class="o">:</span>
+  <span class="n">session_id</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">important</span><span class="o">:</span><span class="kt">bool</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8076624">
+      This is not restricted to constructing a record; we can use the
+      same trick when pattern matching.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">message_to_string</span> <span class="o">{</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">important</span><span class="o">;</span> <span class="n">message</span><span class="o">;</span> <span class="o">_</span> <span class="o">}</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">important</span> <span class="k">then</span> <span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">message</span> <span class="k">else</span> <span class="n">message</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">message_to_string</span> <span class="o">:</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8078352">
+      When using dot-notation for accessing record fields, we can
+      qualify the field by the module directly.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">is_important</span> <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="nn">Log_entry</span><span class="p">.</span><span class="n">important</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">is_important</span> <span class="o">:</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8079904">
+      The syntax here is a little surprising when you first encounter
+      it. The thing to keep in mind is that the dot is being used in two
+      ways: the first dot is a record field access, with everything to
+      the right of the dot being interpreted as a field name; the second
+      dot is accessing the contents of a module, referring to the record
+      field <code>important</code> from within the module
+      <code>Log_entry</code>. The fact that
+      <code>Log_entry</code> is capitalized and so can't be a
+      field name is what disambiguates the two uses.
+    </p><p id="idp8082656">
+      For functions defined within the module where a given record is
+      defined, the module qualification goes away entirely.
+    </p></section><section><h1 id="functional-updates">Functional updates</h1><p id="idp8084192">
+      Fairly often, you will find yourself wanting to create a new
+      record that differs from an existing record in only a subset of
+      the fields. For example, imagine our logging server had a record
+      type for representing the state of a given client, including when
+      the last heartbeat was received from that client. The following
+      defines a type for representing this information, as well as a
+      function for updating the client information when a new heartbeat
+      arrives.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">client_info</span> <span class="o">=</span>
+   <span class="o">{</span> <span class="n">addr</span><span class="o">:</span> <span class="nn">Unix</span><span class="p">.</span><span class="nn">Inet_addr</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+     <span class="n">port</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+     <span class="n">user</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">credentials</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">last_heartbeat_time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+   <span class="o">};;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">register_heartbeat</span> <span class="n">t</span> <span class="n">hb</span> <span class="o">=</span>
+      <span class="o">{</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">addr</span><span class="o">;</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">port</span><span class="o">;</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">user</span><span class="o">;</span>
+        <span class="n">credentials</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">credentials</span><span class="o">;</span>
+        <span class="n">last_heartbeat_time</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="nn">Heartbeat</span><span class="p">.</span><span class="n">time</span><span class="o">;</span>
+      <span class="o">};;</span>
+<span class="k">val</span> <span class="n">register_heartbeat</span> <span class="o">:</span> <span class="n">client_info</span> <span class="o">-&gt;</span> <span class="nn">Heartbeat</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">client_info</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8086768">
+      This is fairly verbose, given that there's only one field that we
+      actually want to change, and all the others are just being copied
+      over from <code>t</code>. We can use OCaml's
+      <span><em>functional update</em></span> syntax to do this more
+      tersely. The syntax of a functional update is as follows.
+    </p><div class="highlight"><pre><span class="o">{</span> <span class="o">&lt;</span><span class="n">record</span><span class="o">&gt;</span> <span class="k">with</span> <span class="o">&lt;</span><span class="n">field</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;;</span>
+                <span class="o">&lt;</span><span class="n">field</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;;</span>
+                <span class="o">...</span>
+<span class="o">}</span>
+</pre></div><p id="idp8089520">
+      The purpose of the functional update is to create a new record
+      based on an existing one, with a set of field changes layered on
+      top.
+    </p><p id="idp8090080">
+      Given this, we can rewrite <code>register_heartbeat</code>
+      more concisely.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">register_heartbeat</span> <span class="n">t</span> <span class="n">hb</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">t</span> <span class="k">with</span> <span class="n">last_heartbeat_time</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="nn">Heartbeat</span><span class="p">.</span><span class="n">time</span> <span class="o">};;</span>
+<span class="k">val</span> <span class="n">register_heartbeat</span> <span class="o">:</span> <span class="n">client_info</span> <span class="o">-&gt;</span> <span class="nn">Heartbeat</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">client_info</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8092224">
+      Functional updates make your code independent of the identity of
+      the fields in the record that are not changing. This is often what
+      you want, but it has downsides as well. In particular, if you
+      change the definition of your record to have more fields, the type
+      system will not prompt you to reconsider whether your update code
+      should affect those fields. Consider what happens if we decided to
+      add a field for the status message received on the last heartbeat.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">client_info</span> <span class="o">=</span>
+   <span class="o">{</span> <span class="n">addr</span><span class="o">:</span> <span class="nn">Unix</span><span class="p">.</span><span class="nn">Inet_addr</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+     <span class="n">port</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+     <span class="n">user</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">credentials</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">last_heartbeat_time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+     <span class="n">last_heartbeat_status</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+   <span class="o">};;</span>
+</pre></div><p id="idp8094208">
+      The original implementation of
+      <code>register_heartbeat</code> would now be invalid, and
+      thus the compiler would warn us to think about how to handle this
+      new field. But the version using a functional update continues to
+      compile as is, even though it incorrectly ignores the new field.
+      The correct thing to do would be to update the code as follows.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">register_heartbeat</span> <span class="n">t</span> <span class="n">hb</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">t</span> <span class="k">with</span> <span class="n">last_heartbeat_time</span>   <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="nn">Heartbeat</span><span class="p">.</span><span class="n">time</span><span class="o">;</span>
+             <span class="n">last_heartbeat_status</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="nn">Heartbeat</span><span class="p">.</span><span class="n">status_message</span><span class="o">;</span>
+    <span class="o">};;</span>
+<span class="k">val</span> <span class="n">register_heartbeat</span> <span class="o">:</span> <span class="n">client_info</span> <span class="o">-&gt;</span> <span class="nn">Heartbeat</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">client_info</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div></section><section><h1 id="mutable-fields">Mutable fields</h1><p id="idp8097840">
+      Like most OCaml values, records are immutable by default. You can,
+      however, declare individual record fields as mutable. For example,
+      we could take the <code>client_info</code> type and make the
+      fields that may need to change over time mutable, as follows.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">client_info</span> <span class="o">=</span>
+   <span class="o">{</span> <span class="n">addr</span><span class="o">:</span> <span class="nn">Unix</span><span class="p">.</span><span class="nn">Inet_addr</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+     <span class="n">port</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+     <span class="n">user</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">credentials</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="k">mutable</span> <span class="n">last_heartbeat_time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+     <span class="k">mutable</span> <span class="n">last_heartbeat_status</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+   <span class="o">};;</span>
+</pre></div><p id="idp8100240">
+      We then use the <code>&lt;-</code> operator for actually
+      changing the state. The side-effecting version of
+      <code>register_heartbeat</code> would be written as follows.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">register_heartbeat</span> <span class="n">t</span> <span class="n">hb</span> <span class="o">=</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">last_heartbeat_time</span>   <span class="o">&lt;-</span> <span class="n">hb</span><span class="o">.</span><span class="nn">Heartbeat</span><span class="p">.</span><span class="n">time</span><span class="o">;</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">last_heartbeat_status</span> <span class="o">&lt;-</span> <span class="n">hb</span><span class="o">.</span><span class="nn">Heartbeat</span><span class="p">.</span><span class="n">status_message</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">register_heartbeat</span> <span class="o">:</span> <span class="n">client_info</span> <span class="o">-&gt;</span> <span class="nn">Heartbeat</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8103248">
+      Note that mutable assignment, and thus the
+      <code>&lt;-</code> operator, is not needed for
+      initialization, because all fields of a record, including mutable
+      ones, are specified when the record is created.
+    </p><p id="idp8104512">
+      OCaml's policy of immutable-by-default is a good one, but
+      imperative programming does have its place. We'll discuss more
+      about how (and when) to use OCaml's imperative features in
+      <a href="a-guided-tour.html#imperative-programming">the section called “Imperative programming”</a>.
+    </p></section><section><h1 id="first-class-fields">First-class fields</h1><p id="idp8106624">
+      Consider the following function for extracting the usernames from
+      a list of <code>Logon</code> messages.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">get_users</span> <span class="n">logons</span> <span class="o">=</span>
+     <span class="nn">List</span><span class="p">.</span><span class="n">dedup</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">logons</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span><span class="o">.</span><span class="nn">Logon</span><span class="p">.</span><span class="n">user</span><span class="o">));;</span>
+<span class="k">val</span> <span class="n">get_users</span> <span class="o">:</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8108768">
+      Here, we wrote a small function
+      <code>(fun x -&gt; x.Logon.user)</code> to access the
+      <code>user</code> field. This kind of accessor function is a
+      common enough pattern that that it would be convenient to generate
+      them automatically. The <code>fieldslib</code> syntax
+      extension that ships with <code>Core</code> does just that.
+    </p><p id="idp8111888">
+      You can enable the syntax extension by typing
+      <code>#require &quot;fieldslib.syntax&quot;</code> into the
+      top-level, at which point the <code>with fields</code>
+      annotation at the end of the declaration of a record type will
+      cause the extension to be applied to a given type declaration. So,
+      for example, we could have defined <code>Logon</code> as
+      follows.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="o">#</span><span class="n">require</span> <span class="s2">&quot;fieldslib.syntax&quot;</span><span class="o">;;</span>
+<span class="o">#</span> <span class="k">module</span> <span class="nc">Logon</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span>
+      <span class="o">{</span> <span class="n">session_id</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+        <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+        <span class="n">user</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+        <span class="n">credentials</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="o">}</span>
+    <span class="k">with</span> <span class="n">fields</span>
+  <span class="k">end</span><span class="o">;;</span>
+</pre></div><p id="idp8115936">
+      Note that this will generate a <span><em>lot</em></span> of output,
+      because <code>fieldslib</code> generates a large collection
+      of helper functions for working with record fields. We'll only
+      discuss a few of these; you can learn about the remainder from the
+      documentation that comes with <code>fieldslib</code>.
+    </p><p id="idp8118176">
+      One of the functions we obtain is <code>Logon.user</code>,
+      which we can use to extract the user field from a logon message.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">get_users</span> <span class="n">logons</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">dedup</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">logons</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Logon</span><span class="p">.</span><span class="n">user</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">get_users</span> <span class="o">:</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8120368">
+      In addition to generating field accessor functions,
+      <code>fieldslib</code> also creates a sub-module called
+      <code>Fields</code> that contains a first class
+      representative of each field, in the form of a value of type
+      <code>Field.t</code>. The <code>Field</code> module
+      provides the following functions:
+    </p><ul><li><p id="idp8123952">
+<code>Field.name</code>, which returns the name of a
+          field
+        </p></li><li><p id="idp8125344">
+<code>Field.get</code>, which returns the content of a
+          field
+        </p></li><li><p id="idp8126816">
+<code>Field.fset</code>, which does a functional update
+          of a field
+        </p></li><li><p id="idp8128288">
+<code>Field.setter</code>, which returns
+          <code>None</code> if the field is not mutable or
+          <code>Some f</code> if it is, where <code>f</code>
+          is a function for mutating that field.
+        </p></li></ul><p id="idp8131504">
+      A <code>Field.t</code> has two type parameters: the first
+      for the type of the record, and the second for the type of the
+      field in question. Thus, the type of
+      <code>Logon.Fields.session_id</code> is
+      <code>(Logon.t, string) Field.t</code>, whereas the type of
+      <code>Logon.Fields.time</code> is
+      <code>(Logon.t, Time.t) Field.t</code>. Thus, if you call
+      <code>Field.get</code> on
+      <code>Logon.Fields.user</code>, you'll get a function for
+      extracting the <code>user</code> field from a
+      <code>Logon.t</code>.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Field</span><span class="p">.</span><span class="n">get</span> <span class="nn">Logon</span><span class="p">.</span><span class="nn">Fields</span><span class="p">.</span><span class="n">user</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8138656">
+      Thus, first parameter of the <code>Field.t</code>
+      corresponds to the record you pass to <code>get</code>, and
+      the second argument corresponds to the value contained in the
+      field, which is also the return type of <code>get</code>.
+    </p><p id="idp8141056">
+      The type of <code>Field.get</code> is a little more
+      complicated than you might naively expect from the above, as you
+      can see below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Field</span><span class="p">.</span><span class="n">get</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="k">'</span><span class="n">b</span><span class="o">,</span> <span class="k">'</span><span class="n">r</span><span class="o">,</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="nn">Field</span><span class="p">.</span><span class="n">t_with_perm</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">r</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8143184">
+      The type is <code>Field.t_with_perm</code> rather than a
+      simple <code>Field.t</code> because fields have a notion of
+      access control associated with them because there are some special
+      cases where we may expose a field but not expose the ability to
+      read a field but not the ability to do a functional update.
+    </p><p id="idp8145072">
+      We can use first class fields to do things like write a generic
+      function for displaying a record field.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">show_field</span> <span class="n">field</span> <span class="n">to_string</span> <span class="n">record</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">name</span> <span class="o">=</span> <span class="nn">Field</span><span class="p">.</span><span class="n">name</span> <span class="n">field</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">field_string</span> <span class="o">=</span> <span class="n">to_string</span> <span class="o">(</span><span class="nn">Field</span><span class="p">.</span><span class="n">get</span> <span class="n">field</span> <span class="n">record</span><span class="o">)</span> <span class="k">in</span>
+    <span class="n">name</span> <span class="o">^</span> <span class="s2">&quot;: &quot;</span> <span class="o">^</span> <span class="n">field_string</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">show_field</span> <span class="o">:</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Field</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="kt">string</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8146784">
+      This takes three arguments: the <code>Field.t</code>, a
+      function for converting the contents of the field in question to a
+      string, and a record from which the field can be grabbed.
+    </p><p id="idp8147952">
+      Here's an example of <code>show_field</code> in action.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">logon</span> <span class="o">=</span> <span class="o">{</span> <span class="nn">Logon</span><span class="p">.</span>
+                <span class="n">session_id</span> <span class="o">=</span> <span class="s2">&quot;26685&quot;</span><span class="o">;</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="nn">Time</span><span class="p">.</span><span class="n">now</span> <span class="bp">()</span><span class="o">;</span>
+                <span class="n">user</span> <span class="o">=</span> <span class="s2">&quot;yminsky&quot;</span><span class="o">;</span>
+                <span class="n">credentials</span> <span class="o">=</span> <span class="s2">&quot;Xy2d9W&quot;</span><span class="o">;</span> <span class="o">}</span>
+  <span class="o">;;</span>
+<span class="o">#</span> <span class="n">show_field</span> <span class="nn">Logon</span><span class="p">.</span><span class="nn">Fields</span><span class="p">.</span><span class="n">user</span> <span class="nn">Fn</span><span class="p">.</span><span class="n">id</span> <span class="n">logon</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;user: yminsky&quot;</span>
+<span class="o">#</span> <span class="n">show_field</span> <span class="nn">Logon</span><span class="p">.</span><span class="nn">Fields</span><span class="p">.</span><span class="n">time</span> <span class="nn">Time</span><span class="p">.</span><span class="n">to_string</span> <span class="n">logon</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;time: 2012-06-26 18:44:13.807826&quot;</span>
+</pre></div><p id="idp8150592">
+      As a side note, the above is our first use of the
+      <code>Fn</code> module (short for &quot;function&quot;)
+      which provides a collection of useful primitives for dealing with
+      functions. <code>Fn.id</code> is the identity function.
+    </p><p id="idp8152592">
+<code>fieldslib</code> also provides higher-level operators,
+      like <code>Fields.fold</code> and
+      <code>Fields.iter</code>, which let you iterate over all the
+      fields of a record. So, for example, in the case of
+      <code>Logon.t</code>, the field iterator has the following
+      type.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Logon</span><span class="p">.</span><span class="nn">Fields</span><span class="p">.</span><span class="n">iter</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="n">session_id</span><span class="o">:(([&lt;</span> <span class="o">`</span><span class="nc">Read</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Set_and_create</span> <span class="o">],</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span>
+                <span class="nn">Field</span><span class="p">.</span><span class="n">t_with_perm</span> <span class="o">-&gt;</span> <span class="kt">unit</span><span class="o">)</span> <span class="o">-&gt;</span>
+    <span class="n">time</span><span class="o">:(([&lt;</span> <span class="o">`</span><span class="nc">Read</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Set_and_create</span> <span class="o">],</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span><span class="o">,</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">)</span> <span class="nn">Field</span><span class="p">.</span><span class="n">t_with_perm</span> <span class="o">-&gt;</span>
+          <span class="kt">unit</span><span class="o">)</span> <span class="o">-&gt;</span>
+    <span class="n">user</span><span class="o">:(([&lt;</span> <span class="o">`</span><span class="nc">Read</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Set_and_create</span> <span class="o">],</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span> <span class="nn">Field</span><span class="p">.</span><span class="n">t_with_perm</span> <span class="o">-&gt;</span>
+          <span class="kt">unit</span><span class="o">)</span> <span class="o">-&gt;</span>
+    <span class="n">credentials</span><span class="o">:(([&lt;</span> <span class="o">`</span><span class="nc">Read</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Set_and_create</span> <span class="o">],</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span>
+                 <span class="nn">Field</span><span class="p">.</span><span class="n">t_with_perm</span> <span class="o">-&gt;</span> <span class="kt">unit</span><span class="o">)</span> <span class="o">-&gt;</span>
+    <span class="kt">unit</span>
+<span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp8157168">
+      This is a bit daunting to look at, largely because of the access
+      control markers, but the structure is actually pretty simple. Each
+      labeled argument is a function that takes a first-class field of
+      the necessary type as an argument. Note that
+      <code>iter</code> passes each of these callbacks the
+      <code>Field.t</code>, not the contents of the specific
+      record field. The contents of the field, though, can be looked up
+      using the combination of the record and the
+      <code>Field.t</code>.
+    </p><p id="idp8159888">
+      Now, let's use <code>Logon.Fields.iter</code> and
+      <code>show_field</code> to print out all the fields of a
+      <code>Logon</code> record.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">print_logon</span> <span class="n">logon</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">print</span> <span class="n">to_string</span> <span class="n">field</span> <span class="o">=</span>
+      <span class="n">printf</span> <span class="s2">&quot;%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">show_field</span> <span class="n">field</span> <span class="n">to_string</span> <span class="n">logon</span><span class="o">)</span>
+    <span class="k">in</span>
+    <span class="nn">Logon</span><span class="p">.</span><span class="nn">Fields</span><span class="p">.</span><span class="n">iter</span>
+      <span class="o">~</span><span class="n">session_id</span><span class="o">:(</span><span class="n">print</span> <span class="nn">Fn</span><span class="p">.</span><span class="n">id</span><span class="o">)</span>
+      <span class="o">~</span><span class="n">time</span><span class="o">:(</span><span class="n">print</span> <span class="nn">Time</span><span class="p">.</span><span class="n">to_string</span><span class="o">)</span>
+      <span class="o">~</span><span class="n">user</span><span class="o">:(</span><span class="n">print</span> <span class="nn">Fn</span><span class="p">.</span><span class="n">id</span><span class="o">)</span>
+      <span class="o">~</span><span class="n">credentials</span><span class="o">:(</span><span class="n">print</span> <span class="nn">Fn</span><span class="p">.</span><span class="n">id</span><span class="o">)</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">print_logon</span> <span class="o">:</span> <span class="nn">Logon</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">print_logon</span> <span class="n">logon</span><span class="o">;;</span>
+<span class="n">session_id</span><span class="o">:</span> <span class="mi">26685</span>
+<span class="n">time</span><span class="o">:</span> <span class="mi">2012</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">26</span> <span class="mi">18</span><span class="o">:</span><span class="mi">44</span><span class="o">:</span><span class="mi">13</span><span class="o">.</span><span class="mi">807826</span>
+<span class="n">user</span><span class="o">:</span> <span class="n">yminsky</span>
+<span class="n">credentials</span><span class="o">:</span> <span class="nc">Xy2d9W</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
+</pre></div><p id="idp8163760">
+      One nice side effect of this approach is that it helps you adapt
+      your code when the fields of a record change. If you were to add a
+      field to <code>Logon.t</code>, the type of
+      <code>Logon.Fields.iter</code> would change along with it,
+      acquiring a new argument. Any code using
+      <code>Logon.Fields.iter</code> won't compile until it's
+      fixed to take this new argument into account.
+    </p><p id="idp8166384">
+      This exhaustion guarantee is a valuable one. Field iterators are
+      useful for a variety of record-related tasks, from building record
+      validation functions to scaffolding the definition of a web-form
+      from a record type, and such applications can benefit from the
+      guarantee that all fields of the record type in question have been
+      considered.
+    </p></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="files-modules-and-programs.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="variants.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

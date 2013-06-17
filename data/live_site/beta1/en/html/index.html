@@ -1,0 +1,2253 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Table of Contents / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta1',
+                        page: 'index.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html" class="here">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Table of Contents</h1>
+                
+                
+
+    <section class="index">
+        
+    <ul>
+        
+            <li>
+                <a href="prologue.html">Prologue</a>
+                
+    <ul>
+        
+            <li>
+                <a href="prologue.html#why-ocaml">Why OCaml?</a>
+                
+    <ul>
+        
+            <li>
+                <a href="prologue.html#a-brief-history-from-the-1960s">A brief history from the 1960s</a>
+                
+            </li>
+        
+            <li>
+                <a href="prologue.html#the-core-standard-library">The Core Standard Library</a>
+                
+            </li>
+        
+            <li>
+                <a href="prologue.html#the-ocaml-platform">The OCaml Platform</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="prologue.html#about-this-book">About this book</a>
+                
+    <ul>
+        
+            <li>
+                <a href="prologue.html#what-to-expect">What to expect</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="prologue.html#about-the-authors">About the Authors</a>
+                
+    <ul>
+        
+            <li>
+                <a href="prologue.html#jason-hickey">Jason Hickey</a>
+                
+            </li>
+        
+            <li>
+                <a href="prologue.html#anil-madhavapeddy">Anil Madhavapeddy</a>
+                
+            </li>
+        
+            <li>
+                <a href="prologue.html#yaron-minsky">Yaron Minsky</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="pt01.html">I. Language Concepts</a>
+                
+    <ul>
+        
+            <li>
+                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                
+    <ul>
+        
+            <li>
+                <a href="a-guided-tour.html#ocaml-as-a-calculator">OCaml as a calculator</a>
+                
+    <ul>
+        
+            <li>
+                <a href="a-guided-tour.html#type-inference">Type inference</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#inferring-generic-types">Inferring generic types</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#tuples-lists-options-and-pattern-matching">Tuples, Lists, Options and Pattern Matching</a>
+                
+    <ul>
+        
+            <li>
+                <a href="a-guided-tour.html#tuples">Tuples</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#lists">Lists</a>
+                
+    <ul>
+        
+            <li>
+                <a href="a-guided-tour.html#the-list-module">The List module</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#constructing-lists-with">Constructing lists with ::</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#list-patterns-using-match">List patterns using match</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#recursive-list-functions">Recursive list functions</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#options">Options</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#records-and-variants">Records and Variants</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#imperative-programming">Imperative programming</a>
+                
+    <ul>
+        
+            <li>
+                <a href="a-guided-tour.html#arrays">Arrays</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#mutable-record-fields">Mutable record fields</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#refs">Refs</a>
+                
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#for-and-while-loops">For and while loops</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#a-complete-program">A complete program</a>
+                
+    <ul>
+        
+            <li>
+                <a href="a-guided-tour.html#compiling-and-running">Compiling and running</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="a-guided-tour.html#where-to-go-from-here">Where to go from here</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variables-and-functions.html#variables">Variables</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variables-and-functions.html#pattern-matching-and-let">Pattern matching and let</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#functions">Functions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variables-and-functions.html#anonymous-functions">Anonymous Functions</a>
+                
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#multi-argument-functions">Multi-argument functions</a>
+                
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#recursive-functions">Recursive functions</a>
+                
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#prefix-and-infix-operators">Prefix and Infix operators</a>
+                
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#declaring-functions-with-function">Declaring functions with
+      function</a>
+                
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#labeled-arguments">Labeled Arguments</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variables-and-functions.html#higher-order-functions-and-labels">Higher-order functions and labels</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#optional-arguments">Optional arguments</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variables-and-functions.html#explicit-passing-of-an-optional-argument">Explicit passing of an optional argument</a>
+                
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#inference-of-labeled-and-optional-arguments">Inference of labeled and optional arguments</a>
+                
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#optional-arguments-and-partial-application">Optional arguments and partial application</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="variables-and-functions.html#exercises">Exercises</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variables-and-functions.html#typing">Typing</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                
+    <ul>
+        
+            <li>
+                <a href="lists-and-patterns.html#list-basics">List Basics</a>
+                
+            </li>
+        
+            <li>
+                <a href="lists-and-patterns.html#using-patterns-to-extract-data-from-a-list">Using patterns to extract data from a list</a>
+                
+            </li>
+        
+            <li>
+                <a href="lists-and-patterns.html#limitations-and-blessings-of-pattern-matching">Limitations (and blessings) of pattern matching</a>
+                
+    <ul>
+        
+            <li>
+                <a href="lists-and-patterns.html#performance">Performance</a>
+                
+            </li>
+        
+            <li>
+                <a href="lists-and-patterns.html#detecting-errors">Detecting errors</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="lists-and-patterns.html#using-the-list-module-effectively">Using the List module effectively</a>
+                
+    <ul>
+        
+            <li>
+                <a href="lists-and-patterns.html#more-useful-list-functions">More useful list functions</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="lists-and-patterns.html#tail-recursion">Tail recursion</a>
+                
+            </li>
+        
+            <li>
+                <a href="lists-and-patterns.html#more-concise-and-faster-patterns">More concise and faster patterns</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html">4. Files, Modules and Programs</a>
+                
+    <ul>
+        
+            <li>
+                <a href="files-modules-and-programs.html#single-file-programs">Single File Programs</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#multi-file-programs-and-modules">Multi-file programs and modules</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#signatures-and-abstract-types">Signatures and Abstract Types</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#concrete-types-in-signatures">Concrete types in signatures</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#nested-modules">Nested modules</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#opening-modules">Opening modules</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#including-modules">Including modules</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#common-errors-with-modules">Common errors with modules</a>
+                
+    <ul>
+        
+            <li>
+                <a href="files-modules-and-programs.html#type-mismatches">Type mismatches</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#missing-definitions">Missing definitions</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#type-definition-mismatches">Type definition mismatches</a>
+                
+            </li>
+        
+            <li>
+                <a href="files-modules-and-programs.html#cyclic-dependencies">Cyclic dependencies</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="records.html">5. Records</a>
+                
+    <ul>
+        
+            <li>
+                <a href="records.html#patterns-and-exhaustiveness">Patterns and exhaustiveness</a>
+                
+            </li>
+        
+            <li>
+                <a href="records.html#field-punning">Field punning</a>
+                
+            </li>
+        
+            <li>
+                <a href="records.html#reusing-field-names">Reusing field names</a>
+                
+            </li>
+        
+            <li>
+                <a href="records.html#functional-updates">Functional updates</a>
+                
+            </li>
+        
+            <li>
+                <a href="records.html#mutable-fields">Mutable fields</a>
+                
+            </li>
+        
+            <li>
+                <a href="records.html#first-class-fields">First-class fields</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="variants.html">6. Variants</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variants.html#combining-records-and-variants">Combining records and variants</a>
+                
+            </li>
+        
+            <li>
+                <a href="variants.html#variants-and-recursive-data-structures">Variants and recursive data structures</a>
+                
+            </li>
+        
+            <li>
+                <a href="variants.html#polymorphic-variants">Polymorphic variants</a>
+                
+    <ul>
+        
+            <li>
+                <a href="variants.html#example-terminal-colors-redux">Example: Terminal colors redux</a>
+                
+            </li>
+        
+            <li>
+                <a href="variants.html#when-to-use-polymorphic-variants">When to use polymorphic variants</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="error-handling.html">7. Error Handling</a>
+                
+    <ul>
+        
+            <li>
+                <a href="error-handling.html#error-aware-return-types">Error-aware return types</a>
+                
+    <ul>
+        
+            <li>
+                <a href="error-handling.html#encoding-errors-with-result">Encoding errors with Result</a>
+                
+            </li>
+        
+            <li>
+                <a href="error-handling.html#error-and-or_error">Error and
+      Or_error</a>
+                
+            </li>
+        
+            <li>
+                <a href="error-handling.html#bind-and-other-error-handling-idioms">bind and other error-handling
+      idioms</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="error-handling.html#exceptions">Exceptions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="error-handling.html#helper-functions-for-throwing-exceptions">Helper functions for throwing exceptions</a>
+                
+            </li>
+        
+            <li>
+                <a href="error-handling.html#exception-handlers">Exception handlers</a>
+                
+            </li>
+        
+            <li>
+                <a href="error-handling.html#cleaning-up-in-the-presence-of-exceptions">Cleaning up in the presence of exceptions</a>
+                
+            </li>
+        
+            <li>
+                <a href="error-handling.html#catching-specific-exceptions">Catching specific exceptions</a>
+                
+            </li>
+        
+            <li>
+                <a href="error-handling.html#backtraces">Backtraces</a>
+                
+            </li>
+        
+            <li>
+                <a href="error-handling.html#from-exceptions-to-error-aware-types-and-back-again">From exceptions to error-aware types and back again</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#example-imperative-dictionaries">Example: Imperative dictionaries</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#primitive-mutable-data">Primitive mutable data</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#array-like-data">Array-like data</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#ordinary-arrays">Ordinary arrays</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#strings">Strings</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#bigarrays">Bigarrays</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#mutable-record-and-object-fields-and-ref-cells">Mutable record and object fields and ref cells</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#ref-cells">Ref Cells</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#foreign-functions">Foreign functions</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#for-and-while-loops-1">for and while
+    loops</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#example-doubly-linked-lists">Example: Doubly-linked lists</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#modifying-the-list">Modifying the list</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#iteration-functions">Iteration functions</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#laziness-and-other-benign-effects">Laziness and other benign effects</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#memoization-and-dynamic-programming">Memoization and dynamic programming</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#input-and-output">Input and Output</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#terminal-io">Terminal I/O</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#formatted-output-with-printf">Formatted output with printf</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#file-io">File I/O</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#order-of-evaluation">Order of evaluation</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#side-effects-and-weak-polymorphism">Side-effects and weak polymorphism</a>
+                
+    <ul>
+        
+            <li>
+                <a href="imperative-programming-1.html#the-value-restriction">The Value Restriction</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#partial-application-and-the-value-restriction">Partial application and the value restriction</a>
+                
+            </li>
+        
+            <li>
+                <a href="imperative-programming-1.html#relaxing-the-value-restriction">Relaxing the value restriction</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="functors.html">9. Functors</a>
+                
+    <ul>
+        
+            <li>
+                <a href="functors.html#a-trivial-example">A trivial example</a>
+                
+            </li>
+        
+            <li>
+                <a href="functors.html#a-bigger-example-computing-with-intervals">A bigger example: computing with intervals</a>
+                
+    <ul>
+        
+            <li>
+                <a href="functors.html#making-the-functor-abstract">Making the functor abstract</a>
+                
+            </li>
+        
+            <li>
+                <a href="functors.html#sharing-constraints">Sharing constraints</a>
+                
+            </li>
+        
+            <li>
+                <a href="functors.html#destructive-substitution">Destructive substitution</a>
+                
+            </li>
+        
+            <li>
+                <a href="functors.html#using-multiple-interfaces">Using multiple interfaces</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="functors.html#extending-modules">Extending modules</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="first-class-modules.html">10. First class modules</a>
+                
+    <ul>
+        
+            <li>
+                <a href="first-class-modules.html#a-trivial-example-1">A trivial example</a>
+                
+            </li>
+        
+            <li>
+                <a href="first-class-modules.html#dynamically-choosing-a-module">Dynamically choosing a module</a>
+                
+            </li>
+        
+            <li>
+                <a href="first-class-modules.html#example-a-service-bundle">Example: A service bundle</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="objects.html">11. Objects</a>
+                
+    <ul>
+        
+            <li>
+                <a href="objects.html#when-to-use-objects">When to use objects</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#ocaml-objects">OCaml objects</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#object-polymorphism">Object Polymorphism</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#immutable-objects">Immutable objects</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#when-to-use-objects-1">When to use objects</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#subtyping">Subtyping</a>
+                
+    <ul>
+        
+            <li>
+                <a href="objects.html#width-subtyping">Width Subtyping</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#variance">Variance</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#depth-subtyping">Depth subtyping</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#narrowing">Narrowing</a>
+                
+            </li>
+        
+            <li>
+                <a href="objects.html#subtyping-vs.-row-polymorphism">Subtyping vs. Row Polymorphism</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="classes.html">12. Classes</a>
+                
+    <ul>
+        
+            <li>
+                <a href="classes.html#ocaml-classes">OCaml Classes</a>
+                
+            </li>
+        
+            <li>
+                <a href="classes.html#an-example-cryptokit">An Example: Cryptokit</a>
+                
+            </li>
+        
+            <li>
+                <a href="classes.html#class-parameters-and-polymorphism">Class parameters and polymorphism</a>
+                
+            </li>
+        
+            <li>
+                <a href="classes.html#object-types">Object types</a>
+                
+            </li>
+        
+            <li>
+                <a href="classes.html#class-types">Class types</a>
+                
+    <ul>
+        
+            <li>
+                <a href="classes.html#binary-methods">Binary methods</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="classes.html#private-methods">Private methods</a>
+                
+            </li>
+        
+            <li>
+                <a href="classes.html#virtual-classes-and-methods">Virtual classes and methods</a>
+                
+            </li>
+        
+            <li>
+                <a href="classes.html#multiple-inheritance">Multiple inheritance</a>
+                
+    <ul>
+        
+            <li>
+                <a href="classes.html#how-names-are-resolved">How names are resolved</a>
+                
+            </li>
+        
+            <li>
+                <a href="classes.html#mixins">Mixins</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="pt02.html">II. Tools and Techniques</a>
+                
+    <ul>
+        
+            <li>
+                <a href="maps-and-hashtables.html">13. Maps and Hashtables</a>
+                
+    <ul>
+        
+            <li>
+                <a href="maps-and-hashtables.html#maps">Maps</a>
+                
+    <ul>
+        
+            <li>
+                <a href="maps-and-hashtables.html#creating-maps-with-comparators">Creating maps with comparators</a>
+                
+            </li>
+        
+            <li>
+                <a href="maps-and-hashtables.html#trees">Trees</a>
+                
+            </li>
+        
+            <li>
+                <a href="maps-and-hashtables.html#the-polymorphic-comparator">The polymorphic comparator</a>
+                
+            </li>
+        
+            <li>
+                <a href="maps-and-hashtables.html#sets">Sets</a>
+                
+            </li>
+        
+            <li>
+                <a href="maps-and-hashtables.html#satisfying-the-comparable.s-interface">Satisfying the Comparable.S
+      interface</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="maps-and-hashtables.html#hashtables">Hashtables</a>
+                
+    <ul>
+        
+            <li>
+                <a href="maps-and-hashtables.html#satisfying-the-hashable.s-interface">Satisfying the Hashable.S
+      interface</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="maps-and-hashtables.html#choosing-between-maps-and-hashtables">Choosing between maps and hashtables</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html">14. Command Line Parsing</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#basic-command-line-parsing">Basic command-line parsing</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#defining-parsing-specifications">Defining parsing specifications</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#anonymous-arguments">Anonymous arguments</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#callback-functions">Callback functions</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#creating-basic-commands">Creating basic commands</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#command-argument-types">Command argument types</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#adding-flags-to-label-the-command-line">Adding flags to label the command line</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#grouping-sub-commands-together">Grouping sub-commands together</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#advanced-control-over-parsing">Advanced control over parsing</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#composing-specification-fragments-together">Composing specification fragments together</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#prompting-for-interactive-input">Prompting for interactive input</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#adding-labelled-arguments-to-callbacks">Adding labelled arguments to callbacks</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#command-line-auto-completion-with-bash">Command-line auto-completion with
+    bash</a>
+                
+    <ul>
+        
+            <li>
+                <a href="command-line-parsing.html#generating-completion-fragments-from-command">Generating completion fragments from Command</a>
+                
+            </li>
+        
+            <li>
+                <a href="command-line-parsing.html#installing-the-completion-fragment">Installing the completion fragment</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html">15. Handling JSON data</a>
+                
+    <ul>
+        
+            <li>
+                <a href="handling-json-data.html#json-basics">JSON Basics</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#parsing-json-with-yojson">Parsing JSON with Yojson</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#selecting-values-from-json-structures">Selecting values from JSON structures</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#constructing-json-values">Constructing JSON values</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#using-non-standard-json-extensions">Using non-standard JSON extensions</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#automatically-mapping-json-to-ocaml-types">Automatically mapping JSON to OCaml types</a>
+                
+    <ul>
+        
+            <li>
+                <a href="handling-json-data.html#atd-basics">ATD basics</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#atd-annotations">ATD annotations</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#compiling-atd-specifications-to-ocaml">Compiling ATD specifications to OCaml</a>
+                
+            </li>
+        
+            <li>
+                <a href="handling-json-data.html#example-querying-github-organization-information">Example: Querying Github organization information</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html">16. Parsing with OCamllex and Menhir</a>
+                
+    <ul>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#defining-a-json-parser-with-menhir">Defining a JSON parser with menhir</a>
+                
+    <ul>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#token-declarations">Token declarations</a>
+                
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#specifying-the-grammar-rules">Specifying the grammar rules</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#defining-a-lexer-with-ocamllex">Defining a lexer with ocamllex</a>
+                
+    <ul>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#let-definitions-for-regular-expressions">Let-definitions for regular expressions</a>
+                
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#lexing-rules">Lexing rules</a>
+                
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#recursive-rules">Recursive rules</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="parsing-with-ocamllex-and-menhir.html#bringing-it-all-together">Bringing it all together</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html">17. Data Serialization with S-Expressions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#the-sexp-format">The Sexp format</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp-converters">Sexp converters</a>
+                
+    <ul>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#preserving-invariants">Preserving invariants</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#getting-good-error-messages">Getting good error messages</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp-conversion-directives">Sexp-conversion directives</a>
+                
+    <ul>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp_opaque">sexp_opaque</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp_list">sexp_list</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#sexp_option">sexp_option</a>
+                
+            </li>
+        
+            <li>
+                <a href="data-serialization-with-s-expressions.html#specifying-defaults">Specifying defaults</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html">18. Concurrent Programming with Async</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#async-basics">Async basics</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#ivars-and-upon">Ivars and upon</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#examples-an-echo-server">Examples: an echo server</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#improving-the-echo-server">Improving the echo server</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#example-searching-definitions-with-duckduckgo">Example: searching definitions with DuckDuckGo</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#uri-handling">URI handling</a>
+                
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#parsing-json-strings">Parsing JSON strings</a>
+                
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#executing-an-http-client-query">Executing an HTTP client query</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#exception-handling">Exception handling</a>
+                
+    <ul>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#monitors">Monitors</a>
+                
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#example-handling-exceptions-with-duckduckgo">Example: Handling exceptions with DuckDuckGo</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="concurrent-programming-with-async.html#timeouts-cancellation-and-choices">Timeouts, Cancellation and Choices</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="fast-binary-serialization.html">19. Fast Binary Serialization</a>
+                
+    <ul>
+        
+            <li>
+                <a href="fast-binary-serialization.html#defining-a-message-broker">Defining a message broker</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="pt03.html">III. The Runtime System</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html">20. Foreign Function Interface</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#the-ctypes-library">The Ctypes library</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#example-a-terminal-interface">Example: a terminal interface</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#basic-scalar-c-types">Basic scalar C types</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#pointers-and-arrays">Pointers and arrays</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#allocating-typed-memory-for-pointers">Allocating typed memory for pointers</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#using-views-to-map-complex-values">Using views to map complex values</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#structs-and-unions">Structs and unions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#defining-a-structure">Defining a structure</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#adding-fields-to-structures">Adding fields to structures</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#incomplete-structure-definitions">Incomplete structure definitions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#recap-a-time-printing-command">Recap: a time-printing command</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#defining-arrays">Defining arrays</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#passing-functions-to-c">Passing functions to C</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#example-a-command-line-quicksort">Example: a command-line quicksort</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#learning-more-about-c-bindings">Learning more about C bindings</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html">21. Memory Representation of Values</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#ocaml-blocks-and-values">OCaml blocks and values</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#distinguishing-integer-and-pointers-at-runtime">Distinguishing integer and pointers at runtime</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#blocks-and-values">Blocks and values</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#integers-characters-and-other-basic-types">Integers, characters and other basic types</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#tuples-records-and-arrays">Tuples, records and arrays</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#floating-point-numbers-and-arrays">Floating point numbers and arrays</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#variants-and-lists">Variants and lists</a>
+                
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#polymorphic-variants-1">Polymorphic variants</a>
+                
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#string-values">String values</a>
+                
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#custom-heap-blocks">Custom heap blocks</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#managing-external-memory-with-bigarray">Managing external memory with Bigarray</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html">22. Understanding the Garbage Collector</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#mark-and-sweep-garbage-collection">Mark and sweep garbage collection</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#generational-garbage-collection">Generational garbage collection</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#the-fast-minor-heap">The fast minor heap</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#allocating-on-the-minor-heap">Allocating on the minor heap</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#the-long-lived-major-heap">The long-lived major heap</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#allocating-on-the-major-heap">Allocating on the major heap</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#memory-allocation-strategies">Memory allocation strategies</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#next-fit-allocation">Next-fit allocation</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#first-fit-allocation">First-fit allocation</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#marking-and-scanning-the-heap">Marking and scanning the heap</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#heap-compaction">Heap Compaction</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#inter-generational-pointers">Inter-generational pointers</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#the-mutable-write-barrier">The mutable write barrier</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#attaching-finalizer-functions-to-values">Attaching finalizer functions to values</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html">23. The Compiler Frontend: Parsing and Type Checking</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#an-overview-of-the-toolchain">An overview of the toolchain</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#parsing-source-code">Parsing source code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#syntax-errors">Syntax errors</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#automatically-indenting-source-code">Automatically indenting source code</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#generating-documentation-from-interfaces">Generating documentation from interfaces</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#preprocessing-source-code">Preprocessing source code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#using-camlp4-interactively">Using Camlp4 interactively</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#running-camlp4-from-the-command-line">Running Camlp4 from the command line</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#preprocessing-module-signatures">Preprocessing module signatures</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#further-reading-on-camlp4">Further reading on Camlp4</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#static-type-checking">Static type checking</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#displaying-inferred-types-from-the-compiler">Displaying inferred types from the compiler</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#type-inference-1">Type inference</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#adding-type-annotations-to-find-errors">Adding type annotations to find errors</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#enforcing-principal-typing">Enforcing principal typing</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#modules-and-separate-compilation">Modules and separate compilation</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#the-mapping-between-files-and-modules">The mapping between files and modules</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#defining-a-module-search-path">Defining a module search path</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#shorter-module-paths-in-type-errors">Shorter module paths in type errors</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#the-typed-syntax-tree">The typed syntax tree</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#using-ocp-index-for-auto-completion">Using ocp-index for auto-completion</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#examining-the-typed-syntax-tree-directly">Examining the typed syntax tree directly</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html">24. The Compiler Backend: Byte-code and Native-code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#the-untyped-lambda-form">The untyped lambda form</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#pattern-matching-optimization">Pattern matching optimization</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#benchmarking-pattern-matching">Benchmarking pattern matching</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#generating-portable-bytecode">Generating portable bytecode</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#compiling-and-linking-bytecode">Compiling and linking bytecode</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#executing-bytecode">Executing bytecode</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#embedding-ocaml-bytecode-in-c">Embedding OCaml bytecode in C</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#compiling-fast-native-code">Compiling fast native code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#inspecting-assembly-output">Inspecting assembly output</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#the-impact-of-polymorphic-comparison">The impact of polymorphic comparison</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#benchmarking-polymorphic-comparison">Benchmarking polymorphic comparison</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#debugging-native-code-binaries">Debugging native code binaries</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#understanding-name-mangling">Understanding name mangling</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#interactive-breakpoints-with-the-gnu-debugger">Interactive breakpoints with the GNU debugger</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#profiling-native-code">Profiling native code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#gprof">Gprof</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#perf">Perf</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#embedding-native-code-in-c">Embedding native code in C</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#summarising-the-file-extensions">Summarising the file extensions</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="installation.html">A. Installation</a>
+                
+    <ul>
+        
+            <li>
+                <a href="installation.html#getting-ocaml">Getting OCaml</a>
+                
+    <ul>
+        
+            <li>
+                <a href="installation.html#mac-os-x">Mac OS X</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#debian-linux">Debian Linux</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#fedora-and-red-hat">Fedora and Red Hat</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#arch-linux">Arch Linux</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#windows">Windows</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#building-from-source">Building from source</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="installation.html#getting-opam">Getting OPAM</a>
+                
+    <ul>
+        
+            <li>
+                <a href="installation.html#mac-os-x-1">Mac OS X</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#debian-linux-1">Debian Linux</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#fedora-and-red-hat-1">Fedora and Red Hat</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#arch-linux-1">Arch Linux</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#source-installation">Source Installation</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="installation.html#configuring-the-opam-package-manager">Configuring the OPAM package manager</a>
+                
+    <ul>
+        
+            <li>
+                <a href="installation.html#editing-environment">Editing Environment</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#command-line">Command Line</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#editors">Editors</a>
+                
+    <ul>
+        
+            <li>
+                <a href="installation.html#emacs">Emacs</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#vim">Vim</a>
+                
+            </li>
+        
+            <li>
+                <a href="installation.html#eclipse">Eclipse</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="packaging.html">B. Packaging</a>
+                
+    <ul>
+        
+            <li>
+                <a href="packaging.html#the-ocamlfind-frontend">The OCamlfind frontend</a>
+                
+            </li>
+        
+            <li>
+                <a href="packaging.html#distributing-applications-with-opam">Distributing applications with OPAM</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+    </section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                    
+                        <a rel="next" href="prologue.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
