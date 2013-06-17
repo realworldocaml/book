@@ -48,12 +48,15 @@ module Auth = struct
       return login
 
   let check ~milestone ~login =
-    let _,allowed_users = Config.allowed_users milestone in
-    List.mem login allowed_users
+    match Config.is_public milestone with
+    |true -> true
+    |false -> List.mem login (Config.internal_reviewers) 
 
   let who_has_access ~milestone = 
-    let who,_ = Config.allowed_users milestone in
-    who
+    if Config.is_public milestone then
+      "Public"
+    else
+      "Authors"
 
   let denied =
     let tmpl = Core.Std.In_channel.read_all "forbidden.html.in" in
